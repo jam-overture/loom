@@ -128,6 +128,34 @@ describe("policyProvenanceOf", () => {
     ])
   })
 
+  /**
+   * The bound on the match list, driven past. It cannot change the verdict —
+   * two or more matches is `ambiguous` either way — which is the argument both
+   * implementations' comments make for being allowed to truncate at all. This
+   * holds them to actually truncating, so a log toggled back and forth for years
+   * cannot hand a screen an unbounded array.
+   */
+  it("caps the revisions it names for an ambiguous digest", async () => {
+    const log = memoryPolicyLog()
+    const open = policyNamed("house")
+    const other = policyNamed("house", { breadthThreshold: 20 })
+
+    for (let n = 0; n < MAX_POLICY_REVISION_LIMIT * 2 + 2; n += 1) {
+      await log.record({
+        policy: n % 2 === 0 ? open : other,
+        actor: "dana",
+        recordedAt: "2026-10-08T09:00:00.000Z",
+      })
+    }
+
+    const found = await log.judgedUnder("house", policyFingerprintOf(open))
+
+    expect(found.ok && found.value.outcome).toBe("ambiguous")
+    expect(
+      found.ok && found.value.outcome === "ambiguous" && found.value.revisions.length
+    ).toBe(MAX_POLICY_REVISION_LIMIT)
+  })
+
   it("deduplicates and sorts the shapes it reports for a miss", () => {
     const found = policyProvenanceOf("house", "aaaaaaaa:bb", [], ["cccccccc", "aaaaaaaa", "cccccccc"])
 

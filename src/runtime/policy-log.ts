@@ -549,8 +549,18 @@ export const memoryPolicyLog = (): PolicyLog => {
           policyProvenanceOf(
             policyId,
             fingerprint,
-            entries.filter((entry) => entry.fingerprint === fingerprint),
-            entries.map((entry) => policyShapeOf(entry.fingerprint))
+            /**
+             * Bounded like the Postgres implementation, and the bound cannot
+             * change the answer: two or more matches is `ambiguous` whether or
+             * not the list is complete, because the verdict is *nothing can say
+             * which* either way.
+             */
+            entries
+              .filter((entry) => entry.fingerprint === fingerprint)
+              .slice(0, MAX_POLICY_REVISION_LIMIT),
+            entries
+              .slice(0, MAX_POLICY_REVISION_LIMIT)
+              .map((entry) => policyShapeOf(entry.fingerprint))
           )
         )
       )

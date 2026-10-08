@@ -169,6 +169,24 @@ would have hidden the one half that is knowable.
   signature. Regenerated after, in the right order (`pnpm build` then
   `docs:api`), and the gate re-run from a deleted `dist` and `.next`.
 
+- **Three things my own adversarial re-read of the diff found, after the first
+  gate run had already started.** None was a test failure, which is the point:
+  `judgedUnder` read every matching row and every distinct fingerprint
+  **unbounded**, against the rule that every read in Loom is bounded — bounded
+  now at `MAX_POLICY_REVISION_LIMIT` in both implementations, with the argument
+  for why truncating is safe (two matches is `ambiguous` whether or not the list
+  is complete) and a test that drives past it. The lost-race error reported
+  `expected: 0` for a caller that passed no `expectedRevision`, which reads as
+  *the caller believed the log was empty*; it now reports the head the call
+  actually proceeded from. And the Postgres `record` needed a `let` to carry that
+  head into the `catch`, which the house style forbids — so `newest` became total
+  instead, which also narrowed each `try` to the one statement that can fail.
+
+- **Two non-null assertions, which no other non-test module in `src/` uses.** The
+  fold is now a reduce whose identity is `incomparable`, and `removalThresholds`
+  folds its own pair through the same function rather than through a `Set` and an
+  assertion. Found by grepping my own diff against the rest of the directory.
+
 - **The gate-reading trap, caught by having followed the rule.** The harness
   reported the verify command's exit code as **0** while the file it wrote said
   `EXIT=1`, because the status of a compound line is the last command's and the
@@ -177,13 +195,14 @@ would have hidden the one half that is knowable.
   the status went into a file as the last thing on the line and was read in a
   separate command, so the notification and the file disagreed and the file won.
 
-- **One planted defect was not caught, and the test was the weak one.** Removing
+- **A planted defect was not caught, and the test was the weak one.** Removing
   the clamp from the paged read stayed green, because the contract suite's log
   holds twelve revisions and a ceiling of a hundred is invisible below it. The
   contract test now asserts a limit is *honoured* at all, and the ceiling is driven
   past in `policy-log.test.ts`, which records a hundred and one — a thing the
   contract suite cannot do, because it also runs against Postgres where that is a
-  minute of test time.
+  minute of test time. The bound added in review had the same hole and got the
+  same treatment.
 
 ## This branch now carries two units, deliberately
 
@@ -197,6 +216,26 @@ three of which that document already names as non-conflicts.
 Saying it plainly because it makes the pull request bigger than one subject: the
 alternative was a second open branch from one lane, which is the thing the rule
 exists to prevent.
+
+## The brief, for the third consecutive run
+
+Not re-filed, because #547's own comment on this pull request asked yesterday
+for it to be cut rather than reported a third time, and that ask is still open on
+the same thread. Recorded here only so the gap between the brief and the work is
+not a thing a reader has to reconstruct:
+
+- **The brief still leads with the one-application migration as this lane's next
+  unit.** It has been done since 19 August. `apps/loom` holds the four route
+  groups, `apps/portal` and `apps/docs` are retired, sign-in is at the `(portal)`
+  boundary, and the brief's claim that three routines are blocked on it is not
+  true of any of them. So I went to the findings queue, which is what the
+  procedure says to do once the plan is spent.
+
+- **The brief says the demo is this lane's.** `docs/routines.md` gives
+  `apps/loom/app/(demo)/` to `Loom demo`, which has an open pull request today
+  (#545). Read literally, the governance rule that a brief beats that file puts
+  two routines in one directory, which is the failure the lane split exists to
+  prevent. **I left `(demo)` alone**, as yesterday's run did.
 
 ## Records
 
@@ -240,13 +279,16 @@ read in a separate command.
 
 | | base (`b4592c7`) | this branch |
 | --- | --- | --- |
-| package (`src/`, `tools/`) | PACKAGE_BASE | 193 files / **4,270** |
+| package (`src/`, `tools/`) | 189 files / 4,154 | 193 files / **4,271** |
 | application (`apps/loom`) | 407 / 7,221 | 407 / **7,221** |
 | findings ledger | 1,056 | **1,058**, 0 malformed |
-| prerender | — | PRERENDER |
+| prerender | — | 126 pages, 1,586 junctions, 0 run together |
 
-**+116 tests in four new files**, none of them weakened, skipped or deleted, and
-no existing test rewritten. Three doc comments changed wording and one count of
+**+117 tests in four new files**, none of them weakened, skipped or deleted, and
+no existing test rewritten. The four files were run on their own and hold exactly
+that, which is how the base figure above is arrived at as well as quoted — it is
+also what the gate on this branch's previous commit reported for `b4592c7` last
+night, and the two agree. Three doc comments changed wording and one count of
 exports in the generated reference moved; no assertion anywhere was relaxed.
 
 The application total is unchanged because this branch does not open a route
@@ -255,20 +297,20 @@ group. The one application file that moved is
 own failure message names — the diff is the new exports, and `docs/routines.md`
 already names that file as one every lane writes to.
 
-**Seventeen planted defects, seventeen red** — sixteen on the first pass and the
-seventeenth after the clamp test was strengthened, which is recorded above rather
-than quietly fixed.
+**Eighteen planted defects, eighteen red**, and two of the eighteen were green
+on the first pass. Both are recorded here rather than quietly fixed, because in
+both cases the defect was real and the *test* was the weak thing.
 
 | | defect | caught by |
 | --- | --- | --- |
-| 1 | a rename folded into the edit's direction | 2 tests |
+| 1 | a field with no order poisoning the edit's direction | 3 tests |
 | 2 | a registered list arriving read the ordinary way round | 1 |
 | 3 | the refusal floor's direction inverted | 1 |
 | 4 | an absent ceiling read as something other than `low` | 1 |
 | 5 | an interactive type read off `Object.prototype` | 1 |
 | 6 | `mixed` collapsed to one side | 3 |
 | 7 | a set compared without sorting or deduplicating | 2 |
-| 8 | `unchanged` compared against the whole history, losing a revert | 2 |
+| 8 | `unchanged` compared against the whole history, losing a revert | 3 |
 | 9 | a rename swallowed as `unchanged` | 1 |
 | 10 | the staleness check dropped | 2 |
 | 11 | ambiguity resolved to the newest match | 1 |
@@ -278,8 +320,17 @@ than quietly fixed.
 | 15 | a page handed back descending | 2 |
 | 16 | the paged limit not clamped | **green at first** — now 1 |
 | 17 | a history not sorted before folding | 1 |
+| 18 | the ambiguous match list unbounded | **green at first** — now 1 |
 
-Rows 8, 11 and 16 are the three that work on the happy path and lie quietly.
+Rows 8, 11, 16 and 18 are the four that work on the happy path and lie quietly.
+
+**Row 1 is worth a sentence on its own, because the first plant for it was
+wrong.** I replaced the fold's skip of an unordered field with a no-op and the
+suite stayed green — correctly, as it turned out: `incomparable` is the identity
+of that fold in *both* directions, so dropping the skip changes nothing. The
+defect the row is actually about is an unordered field **poisoning** the fold, and
+planted that way it takes three tests down. A plant that is not the defect is a
+green row that proves nothing, which is the failure mode of a defect matrix.
 
 ## Open questions
 

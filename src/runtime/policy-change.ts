@@ -121,6 +121,12 @@ const directionOf = (
   gaining: PolicyDirection
 ): PolicyDirection => {
   if (gained && lost) return "mixed"
+  /**
+   * Total on purpose, as `policyShapeOf` is. No caller reaches it — each returns
+   * early when nothing moved — and a helper that answered `undefined` for the
+   * one case it cannot order would push the question to three call sites that
+   * have already decided it.
+   */
   if (!gained && !lost) return "incomparable"
 
   const losing = gaining === "stricter" ? "looser" : "stricter"
@@ -307,6 +313,27 @@ const floorChange = (was: StakeLevel, now: StakeLevel): PolicyFieldChange | unde
 }
 
 /**
+ * The direction of a run of field changes, folded over the ones that have a
+ * direction at all.
+ *
+ * `incomparable` is the identity: an edit with nothing ordered in it is
+ * incomparable, and a field with no order never drags an ordered one toward
+ * `mixed`. That is what makes a rename beside a raised threshold read as strict
+ * as the threshold made it.
+ *
+ * Used twice — over a whole edit, and over the two halves of
+ * `removalThresholds`, which is a pair of orderings under one field name.
+ */
+const foldDirection = (changes: readonly PolicyFieldChange[]): PolicyDirection =>
+  changes.reduce<PolicyDirection>((folded, change) => {
+    if (change.direction === "incomparable") return folded
+    if (folded === "incomparable") return change.direction
+    if (folded === "mixed" || change.direction === "mixed") return "mixed"
+
+    return folded === change.direction ? folded : "mixed"
+  }, "incomparable")
+
+/**
  * Every field of a policy, with how each one is compared.
  *
  * The mapped type is the same guard rail `policy-fingerprint.ts` uses, and for
@@ -407,20 +434,17 @@ const COMPARISON: PolicyComparison = {
       "looser"
     )
 
-    if (medium === undefined && high === undefined) return undefined
+    const moved = [medium, high].flatMap((change) => (change === undefined ? [] : [change]))
+    if (moved.length === 0) return undefined
 
     const parts = [
-      ...(medium ? [`medium ${medium.detail}`] : []),
-      ...(high ? [`high ${high.detail}`] : []),
+      ...(medium === undefined ? [] : [`medium ${medium.detail}`]),
+      ...(high === undefined ? [] : [`high ${high.detail}`]),
     ]
-
-    const directions = new Set(
-      [medium?.direction, high?.direction].filter((it) => it !== undefined)
-    )
 
     return {
       field: "removalThresholds",
-      direction: directions.size === 1 ? [...directions][0]! : "mixed",
+      direction: foldDirection(moved),
       detail: list(parts),
     }
   },
@@ -472,24 +496,6 @@ const COMPARISON: PolicyComparison = {
  * side by side.
  */
 const FIELDS = Object.keys(COMPARISON) as readonly (keyof GatePolicy)[]
-
-/**
- * The direction of a whole edit, folded over the fields that have one.
- *
- * `incomparable` is both the identity of this fold and its answer for an edit
- * with nothing ordered in it, which is why it cannot be written as a reduce over
- * a default: a rename alone is incomparable, and a rename beside a raised
- * threshold is as strict as the threshold made it.
- */
-const foldDirection = (fields: readonly PolicyFieldChange[]): PolicyDirection => {
-  const ordered = fields.filter((change) => change.direction !== "incomparable")
-  if (ordered.length === 0) return "incomparable"
-  if (ordered.some((change) => change.direction === "mixed")) return "mixed"
-
-  const distinct = new Set(ordered.map((change) => change.direction))
-
-  return distinct.size === 1 ? [...distinct][0]! : "mixed"
-}
 
 /**
  * What changed between two policies, and which way it moved the Gate.

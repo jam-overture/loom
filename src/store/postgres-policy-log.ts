@@ -5,6 +5,7 @@ import { err, ok, type Result } from "../result.js"
 import { policyShapeOf } from "../runtime/policy-fingerprint.js"
 import {
   clampPolicyRevisionLimit,
+  MAX_POLICY_REVISION_LIMIT,
   parsePolicyRevision,
   policyProvenanceOf,
   recordOutcomeOf,
@@ -70,32 +71,42 @@ const newest = async (
   db: LoomDatabase,
   policyId: string
 ): Promise<Result<PolicyRevision | undefined, PolicyLogError>> => {
-  const rows = await db
-    .select()
-    .from(loomPolicyRevisions)
-    .where(eq(loomPolicyRevisions.policyId, policyId))
-    .orderBy(desc(loomPolicyRevisions.revision))
-    .limit(1)
+  try {
+    const rows = await db
+      .select()
+      .from(loomPolicyRevisions)
+      .where(eq(loomPolicyRevisions.policyId, policyId))
+      .orderBy(desc(loomPolicyRevisions.revision))
+      .limit(1)
 
-  const row = rows[0]
-  if (row === undefined) return ok(undefined)
+    const row = rows[0]
 
-  return toRevision(row)
+    return row === undefined ? ok(undefined) : toRevision(row)
+  } catch (cause) {
+    return err(unavailable(cause, `could not read the policy ${policyId}`))
+  }
 }
 
 export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
   record: async (request) => {
     const policyId = request.policy.policyId
 
+    /**
+     * Outside the `try`, because `newest` is total: the only statement here that
+     * can collide is the insert, and a narrow `try` is what lets the `catch`
+     * below say *a unique violation on this insert means somebody else recorded*
+     * rather than guessing which of two statements threw.
+     */
+    const head = await newest(db, policyId)
+    if (!head.ok) return head
+
+    const racedAgainst = head.value?.revision ?? 0
+    const outcome = recordOutcomeOf(request, head.value)
+    if (!outcome.ok || outcome.value.outcome === "unchanged") return outcome
+
+    const revision = outcome.value.revision
+
     try {
-      const head = await newest(db, policyId)
-      if (!head.ok) return head
-
-      const outcome = recordOutcomeOf(request, head.value)
-      if (!outcome.ok || outcome.value.outcome === "unchanged") return outcome
-
-      const revision = outcome.value.revision
-
       await db.insert(loomPolicyRevisions).values({
         policyId: revision.policyId,
         revision: revision.revision,
@@ -109,22 +120,26 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
       return ok<PolicyRecorded>(outcome.value)
     } catch (cause) {
       /**
-       * Somebody else recorded between the read and the insert. The caller is
-       * told the revision that is current now rather than the one it computed,
-       * because re-reading is what it has to do next and the number it raced
-       * against is of no use to it.
+       * Somebody else recorded between the read and the insert, so this is the
+       * staleness `recordOutcomeOf` could not see: the head was right when it was
+       * read and wrong by the time the row was written.
+       *
+       * `expected` is the head this call actually proceeded from rather than
+       * whatever the caller named — a caller that passed no `expectedRevision`
+       * still raced against a revision, and reporting `0` for it would say the
+       * caller believed the log was empty. `current` is re-read, because
+       * re-reading is what the caller has to do next and the number it lost to is
+       * of no use to it.
        */
       if (isUniqueViolation(cause)) {
-        const current = await newest(db, policyId).catch(() => undefined)
+        const current = await newest(db, policyId)
 
         return err<PolicyLogError>({
           code: "out-of-date",
           policyId,
-          expected: request.expectedRevision ?? 0,
+          expected: racedAgainst,
           current:
-            current !== undefined && current.ok && current.value !== undefined
-              ? current.value.revision
-              : 0,
+            current.ok && current.value !== undefined ? current.value.revision : racedAgainst,
         })
       }
 
@@ -133,16 +148,12 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
   },
 
   current: async (policyId) => {
-    try {
-      const head = await newest(db, policyId)
-      if (!head.ok) return head
+    const head = await newest(db, policyId)
+    if (!head.ok) return head
 
-      return head.value === undefined
-        ? err<PolicyLogError>({ code: "no-such-policy", policyId })
-        : ok(head.value)
-    } catch (cause) {
-      return err(unavailable(cause, `could not read the policy ${policyId}`))
-    }
+    return head.value === undefined
+      ? err<PolicyLogError>({ code: "no-such-policy", policyId })
+      : ok(head.value)
   },
 
   revisions: async (policyId, request) => {
@@ -150,16 +161,16 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
     const limit = clampPolicyRevisionLimit(request?.limit)
     const from = cursorPosition(request?.cursor)
 
-    try {
-      /**
-       * "No policy" and "a policy at some revision" are different answers, and
-       * the head read is what separates them — a page that came back empty
-       * because the cursor was at the end is not a name nobody has recorded.
-       */
-      const head = await newest(db, policyId)
-      if (!head.ok) return head
-      if (head.value === undefined) return err<PolicyLogError>({ code: "no-such-policy", policyId })
+    /**
+     * "No policy" and "a policy at some revision" are different answers, and
+     * the head read is what separates them — a page that came back empty because
+     * the cursor was at the end is not a name nobody has recorded.
+     */
+    const head = await newest(db, policyId)
+    if (!head.ok) return head
+    if (head.value === undefined) return err<PolicyLogError>({ code: "no-such-policy", policyId })
 
+    try {
       /**
        * `older` scans descending so the newest page costs one seek on the
        * primary key rather than a walk from the start, then the rows are put
@@ -228,6 +239,14 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
           )
         )
         .orderBy(asc(loomPolicyRevisions.revision))
+        /**
+         * Bounded like every read in Loom, and the bound cannot change the
+         * answer: one match is `recorded`, and two or more is `ambiguous`
+         * whether or not the list is complete, because the verdict is *nothing
+         * can say which* either way. Oldest first, so a truncated list is the
+         * beginning of the range rather than an arbitrary slice of it.
+         */
+        .limit(MAX_POLICY_REVISION_LIMIT)
 
       const matches: PolicyRevision[] = []
 
@@ -244,6 +263,13 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
         .selectDistinct({ fingerprint: loomPolicyRevisions.fingerprint })
         .from(loomPolicyRevisions)
         .where(eq(loomPolicyRevisions.policyId, policyId))
+        /**
+         * Bounded for the same reason, and again without cost to the answer:
+         * `heldShapes` only has to separate *nothing was recorded under this
+         * name* from *everything recorded here came from another build*, and one
+         * row settles that.
+         */
+        .limit(MAX_POLICY_REVISION_LIMIT)
 
       return ok<PolicyProvenance>(
         policyProvenanceOf(
