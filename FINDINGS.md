@@ -8,6 +8,91 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-07 — the honest figure and the figure it replaces shipped side by side in one card, and only a photograph could have caught it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-54-how-many-people-were-there`** — recorded because the *class*
+outlives this instance, and because every green test in this lane passed while
+it was true.
+
+The reader card now divides by the exact number of people who arrived rather
+than by the largest visit count any single row of the window reports. The first
+draft put that section third, under the card's own highlights, and left the
+highlights alone. The photograph:
+
+> Of the parts people reported on, fewest got as far as the prose "Nothing here
+> was written as markup. A pr…" — **96 of the 384 visits**.
+>
+> *(three lines down)*
+>
+> Of those 320, **about 80 readers** got as far as the prose "Nothing here was
+> written as markup. A pr…"
+
+**One card, one part, two numbers, no sentence joining them.** Both are true.
+The second is better. Together they are worse than either alone, because a
+reader's first question stops being *what does this page do to people* and
+becomes *which of these two do I believe*.
+
+**Why nothing failed.** Every test in this lane is scoped to a component or a
+module. `arrivals.test.ts` asserted the new sentence, `page-reading.test.tsx`
+asserted the old one, and both were right about the thing they could see. The
+property that was broken is **between** them — one card, one denominator — and
+nothing in this repository was in a position to state it. The fix was to move
+the section above the list and make the list's own oldest sentence use the
+honest figure, so there is one of each; `page-reading.test.tsx` now holds that
+as a rule rather than as two separate assertions that happen to agree.
+
+**The class, which is what this entry is for.** *A lane adding a better figure
+beside a worse one ships both unless something makes it choose.* The worse one
+is not wrong, so no test catches it; it is in another component, so no review of
+the diff shows the pair; and the new section reads beautifully on its own. The
+only instrument that sees it is a picture of the whole screen, which is what the
+maintainer judges this surface by and is the reason the rule exists.
+
+Worth knowing for the next one: the lane's own guard against this is the card's
+reading-order test, and it is the test that has to be written **about the card
+rather than about the section being added** — which is the one nobody thinks to
+open when adding a section.
+
+---
+## 2026-10-07 — how many people arrived is answerable on a version gap, and it is withheld with the three readings that are not
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is wrong and nothing on screen is false**; this is a sentence the card
+could say for the hour after every change and does not.
+
+Four readings on the reader card come off one `pageReadingOf`, and all four are
+withheld when the counted version is not the one being served — which is the
+right call for three of them, because laying one version's counters over
+another version's page makes most parts read *nobody got to it* with every
+number intact.
+
+**The fourth is not like the other three.** *How many people arrived* is a
+single door row: `treeId`, `revision`, `opened`, `appearances`. It needs no
+page, no parts and no names, and the row for the counted version is already in
+hand — `pageViewReadingOf(openings).revisions` on
+`app/(portal)/portal/readers/page.tsx` computes it two dozen lines above the
+guard that drops it.
+
+So on a card with a version gap — the state of every page for as long as an hour
+after every change — the screen could say *320 readers arrived at version 3 of
+this page* beside the notice explaining why the rest is missing, and instead
+says nothing about readers at all.
+
+**Why it was not taken here.** It needs a second shape of `PageArrivals`: one
+with the arrivals and the straddle and no parts, no `fewestGotTo` and no floor
+(the floor comes off the join). Two shapes of one reading is two ways for one
+card to disagree with itself, which is the failure the entry above this one is
+about and the failure this whole branch exists to end — so it is worth a run
+that can think about the shape rather than a branch adding it at the end.
+
+The honest version is probably not a second shape at all but a narrower first
+one: `PageArrivals` with `parts` empty and `floor` absent, and the sentences
+that need either already returning `undefined` for their own reasons. That is a
+small change to `_lib/arrivals.ts` and a branch on the card, and it wants its
+own tests.
+
+---
 ## 2026-10-07 — the sentence a reader screen can lead with after a change lands, and the two figures on it that must never be added
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
@@ -608,8 +693,16 @@ Nothing on this site has met it.
 ## 2026-10-04 — every rate on the reader screen now has an exact denominator, and the figure to show is not the one that looks exact
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
-(`app/(portal)/readers/`) · **Status:** open — **the call is `pageReachOf` and it
-needs nothing from you first.** On `main` after the pull request for
+(`app/(portal)/readers/`) · **Status:** **closed by
+`portal-54-how-many-people-were-there`** — `pageReachOf` is the fourth reading
+off the join this screen already makes, and every rate a reader meets on that
+card now divides by the arrivals. Your register was taken as written: `share` is
+what the figures are built on, `readers` is what the sentences say, `atMost` is
+nowhere on the surface, `unreconciled` shows the count and refuses the share, and
+the three nothings have three sentences. Original status below.
+
+**Status (original):** open — **the call is `pageReachOf` and it needs nothing
+from you first.** On `main` after the pull request for
 `signals-08-a-share-of-the-readers-there-were` lands.
 
 **You were right, and the register you reached for on #513 is the one this
