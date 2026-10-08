@@ -5,10 +5,10 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
-      "files": 93,
+      "files": 95,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -1897,6 +1897,41 @@
           ]
         },
         {
+          "module": "runtime/policy-change",
+          "title": "Policy change",
+          "summary": "What one policy edit did, field by field.",
+          "symbols": [
+            {
+              "name": "PolicyDirection",
+              "kind": "type",
+              "signature": "type PolicyDirection = \"stricter\" | \"looser\" | \"mixed\" | \"incomparable\";",
+              "truncated": false,
+              "summary": "Which way an edit moved the Gate."
+            },
+            {
+              "name": "PolicyFieldChange",
+              "kind": "type",
+              "signature": "type PolicyFieldChange = {\n    readonly field: keyof GatePolicy;\n    readonly direction: PolicyDirection;\n    /**\n     * What moved, in that field's own terms, for a reader.\n     *\n     * Prose, and documented as prose: a consumer that needs the values reads them\n     * off the two policies it already has. The same rule `Disposition.reason`\n     * keeps — a sentence is for a screen and never for a parser.\n     */\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": "One field of `GatePolicy` that is not what it was, and what it is now."
+            },
+            {
+              "name": "PolicyChange",
+              "kind": "type",
+              "signature": "type PolicyChange = {\n    /** False when the two policies differ in nothing the Gate consults. */\n    readonly changed: boolean;\n    /**\n     * True when the two have different names, which a host editing a policy's\n     * contents is under contract to produce.\n     */\n    readonly renamed: boolean;\n    readonly fields: readonly PolicyFieldChange[];\n    /**\n     * The direction of the whole edit, folded over the fields that have one.\n     *\n     * `incomparable` fields are skipped rather than counted: an edit that tightened\n     * a threshold and rewrote a host vocabulary list is *stricter* in the only\n     * respect anything can be ordered by, and calling the pair `mixed` would hide\n     * the one half that is knowable. An edit whose every field is incomparable is\n     * itself `incomparable`, which is the honest answer and not a fallback.\n     */\n    readonly direction: PolicyDirection;\n    readonly fingerprints: {\n        readonly was: string;\n        readonly now: string;\n    };\n};",
+              "truncated": false,
+              "summary": "What an edit did, and whether it is an edit at all."
+            },
+            {
+              "name": "policyChangeOf",
+              "kind": "function",
+              "signature": "const policyChangeOf: (was: GatePolicy, now: GatePolicy) => PolicyChange",
+              "truncated": false,
+              "summary": "What changed between two policies, and which way it moved the Gate."
+            }
+          ]
+        },
+        {
           "module": "runtime/policy-fingerprint",
           "title": "Policy fingerprint",
           "summary": "What a policy contains, as one comparable string.",
@@ -1928,6 +1963,153 @@
               "signature": "const rulesetContinuityOf: (fingerprints: readonly string[]) => RulesetContinuity",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "runtime/policy-log",
+          "title": "Policy log",
+          "summary": "The policy's own log.",
+          "symbols": [
+            {
+              "name": "PolicyRevision",
+              "kind": "type",
+              "signature": "type PolicyRevision = {\n    readonly policyId: string;\n    readonly revision: number;\n    readonly fingerprint: string;\n    readonly policy: GatePolicy;\n    /**\n     * Who made this the policy. Host-declared, like `policyId` itself and like\n     * `Provenance.interpreter`: the runtime cannot know what names a person in a\n     * host's own directory, and a name the host chose is one it can look up.\n     */\n    readonly actor: string;\n    readonly recordedAt: string;\n    /** Why, when somebody said. Prose for a reader, and never read by anything. */\n    readonly note?: string;\n};",
+              "truncated": false,
+              "summary": "One policy, as it was, with who made it that and when."
+            },
+            {
+              "name": "policyRevisionSchema",
+              "kind": "schema",
+              "signature": "const policyRevisionSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": "The same shape, as something a stored row can be checked against."
+            },
+            {
+              "name": "PolicyLogError",
+              "kind": "type",
+              "signature": "type PolicyLogError = \n/** Nothing has ever been recorded under this name. */\n{\n    readonly code: \"no-such-policy\";\n    readonly policyId: string;\n}\n/**\n * The revision the caller expected to be current is not the one that is, so\n * somebody else recorded in between. The write is refused rather than applied\n * on top, because the caller's edit was made against rules that have moved.\n */\n | {\n    readonly code: \"out-of-date\";\n    readonly policyId: string;\n    readonly expected: number;\n    readonly current: number;\n}\n/** The log did not answer. Nothing is known, and a moment later may succeed. */\n | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n}\n/**\n * The log answered, and something it returned is not a revision this build can\n * read. Separate from `unavailable` for the reason `HoldError` separates them:\n * a store that did not answer is waited out, and a row that did not parse is\n * gone and looked at.\n */\n | {\n    readonly code: \"unreadable\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describePolicyLogError",
+              "kind": "function",
+              "signature": "const describePolicyLogError: (error: PolicyLogError) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "parsePolicyRevision",
+              "kind": "function",
+              "signature": "const parsePolicyRevision: (row: unknown) => Result<PolicyRevision, PolicyLogError>",
+              "truncated": false,
+              "summary": "Reads a revision back out of storage, or says why it could not."
+            },
+            {
+              "name": "RecordPolicyRequest",
+              "kind": "type",
+              "signature": "type RecordPolicyRequest = {\n    readonly policy: GatePolicy;\n    readonly actor: string;\n    readonly recordedAt: string;\n    readonly note?: string;\n    /**\n     * The revision the caller believes is current, or `0` for *nothing is*.\n     *\n     * Optional, and the difference is which failure the caller is protected from.\n     * Omitted, a concurrent recorder wins and this one appends after it. Named, a\n     * recorder that lost the race is told so and nothing is written — which is\n     * what a screen editing a policy wants, because the person was editing the\n     * text of a revision that is no longer the head.\n     */\n    readonly expectedRevision?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PolicyRecorded",
+              "kind": "type",
+              "signature": "type PolicyRecorded = \n/** Nothing was recorded under this name before. There is no change to describe. */\n{\n    readonly outcome: \"first\";\n    readonly revision: PolicyRevision;\n}\n/**\n * An edit. `from` is the revision it replaced and `change` is what moved,\n * derived here rather than stored — the view, over a log that is the truth.\n */\n | {\n    readonly outcome: \"changed\";\n    readonly revision: PolicyRevision;\n    readonly from: PolicyRevision;\n    readonly change: PolicyChange;\n}\n/**\n * The head already says this, so nothing was appended and the revision\n * returned is the one that was already there.\n *\n * Compared against the head alone, never against the whole log: a policy\n * edited to B and then back to A **is** a change somebody made at a time, and\n * recording it has to append. Idempotence against the head is what stops a\n * boot from writing; idempotence against history would lose a revert.\n */\n | {\n    readonly outcome: \"unchanged\";\n    readonly revision: PolicyRevision;\n};",
+              "truncated": false,
+              "summary": "What recording did, which is not always *appended*."
+            },
+            {
+              "name": "PolicyProvenance",
+              "kind": "type",
+              "signature": "type PolicyProvenance = {\n    readonly outcome: \"recorded\";\n    readonly revision: PolicyRevision;\n}\n/**\n * Several revisions carry this fingerprint, so the judgment ran under one of\n * them and nothing can say which.\n *\n * A policy edited to B and back to A has two revisions with one fingerprint,\n * which is correct — they are the same rules — and a reader asking *when* has\n * no answer. Returning the oldest, or the newest, would be a confident wrong\n * one. Oldest first, so a caller showing a range shows it in order.\n */\n | {\n    readonly outcome: \"ambiguous\";\n    readonly revisions: readonly PolicyRevision[];\n}\n/**\n * No recorded revision carries it. `heldShapes` is what the log does hold, so\n * a reader can tell *nothing was ever recorded under this name* from *every\n * revision recorded here came from a different build of Loom* — which\n * `policyShapeOf` makes a fact rather than a guess, and which is the difference\n * between a gap in the log and a gap in the comparison.\n */\n | {\n    readonly outcome: \"unrecorded\";\n    readonly policyId: string;\n    readonly fingerprint: string;\n    readonly heldShapes: readonly string[];\n};",
+              "truncated": false,
+              "summary": "Which recorded revision a judgment ran under."
+            },
+            {
+              "name": "DEFAULT_POLICY_REVISION_LIMIT",
+              "kind": "value",
+              "signature": "const DEFAULT_POLICY_REVISION_LIMIT = 25",
+              "truncated": false,
+              "summary": "Smaller than a tree revision page. A policy has tens of revisions over a deployment's life rather than thousands, and each one carries a whole policy; a page is sized for a screen showing a history, which is what reads this."
+            },
+            {
+              "name": "MAX_POLICY_REVISION_LIMIT",
+              "kind": "value",
+              "signature": "const MAX_POLICY_REVISION_LIMIT = 100",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "clampPolicyRevisionLimit",
+              "kind": "function",
+              "signature": "const clampPolicyRevisionLimit: (limit: number | undefined) => number",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PolicyRevisionReadRequest",
+              "kind": "type",
+              "signature": "type PolicyRevisionReadRequest = {\n    /** A cursor from a previous page's `older`/`newer`, passed back unread. */\n    readonly cursor?: string;\n    /**\n     * Default `newer`, which with no cursor is the oldest page — the read\n     * `policyHistoryOf` wants, because a history is folded in the order the edits\n     * were made. `older` with no cursor is the newest page, which is what a screen\n     * showing *what changed recently* asks for.\n     */\n    readonly direction?: PageDirection;\n    readonly limit?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PolicyRevisionPage",
+              "kind": "type",
+              "signature": "type PolicyRevisionPage = PageEnds & {\n    /**\n     * Always ascending by `revision`, whichever end the page was taken from — the\n     * rule `RevisionPage` keeps, and for the same reason: a page that sometimes\n     * came back reversed would make every consumer responsible for knowing which,\n     * and silently wrong when it guessed.\n     */\n    readonly revisions: readonly PolicyRevision[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PolicyLog",
+              "kind": "interface",
+              "signature": "interface PolicyLog {\n    readonly record: (request: RecordPolicyRequest) => Promise<Result<PolicyRecorded, PolicyLogError>>;\n    readonly current: (policyId: string) => Promise<Result<PolicyRevision, PolicyLogError>>;\n    readonly revisions: (policyId: string, request?: PolicyRevisionReadRequest) => Promise<Result<PolicyRevisionPage, PolicyLogError>>;\n    readonly judgedUnder: (policyId: string, fingerprint: string) => Promise<Result<PolicyProvenance, PolicyLogError>>;\n}",
+              "truncated": false,
+              "summary": "One write and three reads."
+            },
+            {
+              "name": "PolicyLogReader",
+              "kind": "type",
+              "signature": "type PolicyLogReader = Pick<PolicyLog, \"current\" | \"revisions\" | \"judgedUnder\">;",
+              "truncated": false,
+              "summary": "The read half, for consumers that never record."
+            },
+            {
+              "name": "PolicyEdit",
+              "kind": "type",
+              "signature": "type PolicyEdit = {\n    readonly from: PolicyRevision;\n    readonly to: PolicyRevision;\n    readonly change: PolicyChange;\n};",
+              "truncated": false,
+              "summary": "One edit, as a reader of a history sees it."
+            },
+            {
+              "name": "policyHistoryOf",
+              "kind": "function",
+              "signature": "const policyHistoryOf: (revisions: readonly PolicyRevision[]) => readonly PolicyEdit[]",
+              "truncated": false,
+              "summary": "A run of revisions, folded into the edits between them."
+            },
+            {
+              "name": "policyProvenanceOf",
+              "kind": "function",
+              "signature": "const policyProvenanceOf: (policyId: string, fingerprint: string, matches: readonly PolicyRevision[], heldShapes: readonly string[]) => PolicyProvenance",
+              "truncated": false,
+              "summary": "The revisions a digest names, as a `PolicyProvenance`."
+            },
+            {
+              "name": "recordOutcomeOf",
+              "kind": "function",
+              "signature": "const recordOutcomeOf: (request: RecordPolicyRequest, head: PolicyRevision | undefined) => Result<PolicyRecorded, PolicyLogError>",
+              "truncated": false,
+              "summary": "What a `record` call should do, given the head it is appending after."
+            },
+            {
+              "name": "memoryPolicyLog",
+              "kind": "function",
+              "signature": "const memoryPolicyLog: () => PolicyLog",
+              "truncated": false,
+              "summary": "The reference implementation, and the one a host's tests run against."
             }
           ]
         },
@@ -4475,7 +4657,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4703,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5476,7 +5658,7 @@
       "files": 206,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5941,7 +6123,7 @@
       "files": 69,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6903,7 +7085,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7494,7 +7676,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7722,7 +7904,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8181,7 +8363,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8532,10 +8714,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 28,
+      "files": 34,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8577,6 +8759,13 @@
               "summary": "The hold store's schema, as statements a host can run."
             },
             {
+              "name": "POLICY_LOG_DDL",
+              "kind": "value",
+              "signature": "const POLICY_LOG_DDL: readonly string[]",
+              "truncated": false,
+              "summary": "The policy log's schema, as statements a host can run."
+            },
+            {
               "name": "ensureTreeStoreSchema",
               "kind": "function",
               "signature": "const ensureTreeStoreSchema: (db: LoomDatabase) => Promise<void>",
@@ -8589,6 +8778,13 @@
               "signature": "const ensureHoldStoreSchema: (db: LoomDatabase) => Promise<void>",
               "truncated": false,
               "summary": "Creates the hold table if it is absent. Idempotent on the same terms."
+            },
+            {
+              "name": "ensurePolicyLogSchema",
+              "kind": "function",
+              "signature": "const ensurePolicyLogSchema: (db: LoomDatabase) => Promise<void>",
+              "truncated": false,
+              "summary": "Creates the policy log's table if it is absent. Idempotent on the same terms, and separate for the same reason: a deployment that wants a record of who changed its acceptance policy gets it by adding this call on purpose."
             }
           ]
         },
@@ -8621,6 +8817,20 @@
           ]
         },
         {
+          "module": "store/postgres-policy-log",
+          "title": "Postgres policy log",
+          "summary": "The policy's own log, backed by Postgres.",
+          "symbols": [
+            {
+              "name": "postgresPolicyLog",
+              "kind": "function",
+              "signature": "const postgresPolicyLog: (db: LoomDatabase) => PolicyLog",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "store/schema",
           "title": "Schema",
           "summary": "Two tables: the log, and the snapshot it produces.",
@@ -8645,6 +8855,13 @@
               "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The custody of what the Gate held back."
+            },
+            {
+              "name": "loomPolicyRevisions",
+              "kind": "value",
+              "signature": "const loomPolicyRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_policy_revisions\";\n    schema: undefined;\n    columns: {\n        policyId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        fingerprint: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"fingerprint\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        note: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"note\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "truncated": false,
+              "summary": "The policy's own log."
             }
           ]
         }
@@ -8655,7 +8872,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 43,
+      "files": 44,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8668,7 +8885,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10234,6 +10451,146 @@
           ]
         },
         {
+          "module": "signals/silences",
+          "title": "Silences",
+          "summary": "What two readings mean when they both say nothing, and whether they mean the same thing.",
+          "symbols": [
+            {
+              "name": "SilenceSubject",
+              "kind": "type",
+              "signature": "type SilenceSubject = \n/** One revision of one page, and the window of counters read against it. */\n\"page\"\n/** One part of one revision. */\n | \"part\"\n/**\n * The two readings held against each other, naming neither side.\n *\n * The distinction that makes this worth having: *one of the two windows held\n * no page views* does not say which, so a card cannot draw it over the page\n * somebody is looking at. A reading of one page that says the same thing is\n * about the page on the screen.\n */\n | \"comparison\";",
+              "truncated": false,
+              "summary": "What a silence is a fact about."
+            },
+            {
+              "name": "SILENCE_SUBJECTS",
+              "kind": "value",
+              "signature": "const SILENCE_SUBJECTS: readonly SilenceSubject[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeSilenceSubject",
+              "kind": "function",
+              "signature": "const describeSilenceSubject: (subject: SilenceSubject) => string",
+              "truncated": false,
+              "summary": "One line per subject, for a surface naming what a reason is about."
+            },
+            {
+              "name": "SilenceVocabulary",
+              "kind": "type",
+              "signature": "type SilenceVocabulary = \"change\" | \"copy\" | \"copy-change\" | \"pace\" | \"reach\";",
+              "truncated": false,
+              "summary": "Which reading published a silence."
+            },
+            {
+              "name": "SILENCE_VOCABULARIES",
+              "kind": "value",
+              "signature": "const SILENCE_VOCABULARIES: readonly SilenceVocabulary[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "SUBJECT_OF_VOCABULARY",
+              "kind": "value",
+              "signature": "const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSubject>>",
+              "truncated": false,
+              "summary": "What each reading's reasons are about."
+            },
+            {
+              "name": "SilenceCondition",
+              "kind": "type",
+              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\";",
+              "truncated": false,
+              "summary": "The state of the world a silence reports, named once for the whole subsystem."
+            },
+            {
+              "name": "SILENCE_CONDITIONS",
+              "kind": "value",
+              "signature": "const SILENCE_CONDITIONS: readonly SilenceCondition[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeSilenceCondition",
+              "kind": "function",
+              "signature": "const describeSilenceCondition: (condition: SilenceCondition) => string",
+              "truncated": false,
+              "summary": "One line per condition, written so that it reads after the subject it is about rather than naming one itself."
+            },
+            {
+              "name": "SilenceMeaning",
+              "kind": "type",
+              "signature": "type SilenceMeaning = {\n    readonly condition: SilenceCondition;\n    readonly subject: SilenceSubject;\n    /** The reading that published it, kept so that its own sentence can still be printed. */\n    readonly vocabulary: SilenceVocabulary;\n};",
+              "truncated": false,
+              "summary": "What one reading's silence reports, and what it reports it of."
+            },
+            {
+              "name": "meaningOfChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfChangeSilence: (silence: ChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a before-and-after reading's silence reports."
+            },
+            {
+              "name": "meaningOfCopySilence",
+              "kind": "function",
+              "signature": "const meaningOfCopySilence: (silence: CopySilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a copy reading's silence reports."
+            },
+            {
+              "name": "meaningOfCopyChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfCopyChangeSilence: (silence: CopyChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two windows' words reports."
+            },
+            {
+              "name": "meaningOfPaceSilence",
+              "kind": "function",
+              "signature": "const meaningOfPaceSilence: (silence: PaceSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a pace reading's silence reports, of one part."
+            },
+            {
+              "name": "meaningOfReachSilence",
+              "kind": "function",
+              "signature": "const meaningOfReachSilence: (silence: ReachSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a share-of-readers silence reports, which is also a funnel's."
+            },
+            {
+              "name": "SilenceRelation",
+              "kind": "type",
+              "signature": "type SilenceRelation = \n/**\n * One condition about one subject: the two readings are silent for the same\n * reason about the same thing, and one sentence serves both.\n */\n\"one-state\"\n/**\n * One condition about two subjects.\n *\n * The same thing is true of a page and of one of its parts, or of a pair of\n * readings and of one side of it. Worth two sentences and never one: the\n * narrower is not evidence for the wider, and the wider does not say which\n * side it is about.\n */\n | \"one-reason\"\n/** Two conditions, which a surface has to print separately or choose between. */\n | \"unrelated\";",
+              "truncated": false,
+              "summary": "How two readings' reasons for saying nothing stand to each other."
+            },
+            {
+              "name": "SILENCE_RELATIONS",
+              "kind": "value",
+              "signature": "const SILENCE_RELATIONS: readonly SilenceRelation[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "relateSilences",
+              "kind": "function",
+              "signature": "const relateSilences: (one: SilenceMeaning, other: SilenceMeaning) => SilenceRelation",
+              "truncated": false,
+              "summary": "Hold two readings' reasons against each other."
+            },
+            {
+              "name": "distinctSilences",
+              "kind": "function",
+              "signature": "const distinctSilences: (meanings: readonly (SilenceMeaning | null)[]) => readonly SilenceMeaning[]",
+              "truncated": false,
+              "summary": "The states a card is actually in, out of the readings on it."
+            }
+          ]
+        },
+        {
           "module": "signals/tally",
           "title": "Tally",
           "summary": "Where the counters live once the batches they came from are gone.",
@@ -10327,7 +10684,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10470,7 +10827,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10534,10 +10891,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 60,
+      "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11134,7 +11491,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11208,7 +11565,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11663,10 +12020,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 73,
+      "files": 76,
       "narrower": [],
       "standing": {
-        "packageNames": 1324,
+        "packageNames": 1374,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11774,6 +12131,34 @@
               "name": "describeModelClientContract",
               "kind": "function",
               "signature": "const describeModelClientContract: (name: string, contract: ModelClientContract) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/policy-log-contract",
+          "title": "Policy log contract",
+          "summary": "One suite, run against every `PolicyLog`.",
+          "symbols": [
+            {
+              "name": "policyNamed",
+              "kind": "function",
+              "signature": "const policyNamed: (policyId: string, overrides?: Record<string, unknown>) => GatePolicy",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "recordingOf",
+              "kind": "function",
+              "signature": "const recordingOf: (policy: GatePolicy, overrides?: Partial<RecordPolicyRequest>) => RecordPolicyRequest",
+              "truncated": false,
+              "summary": "A recording, with the two fields a caller always has to supply already filled in. `actor` is required by the type and is spelled out in every fixture rather than defaulted somewhere a test could forget it."
+            },
+            {
+              "name": "describePolicyLogContract",
+              "kind": "function",
+              "signature": "const describePolicyLogContract: (name: string, build: () => PolicyLog | Promise<PolicyLog>) => void",
               "truncated": false,
               "summary": ""
             }
