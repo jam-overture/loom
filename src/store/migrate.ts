@@ -102,6 +102,36 @@ export const HOLD_STORE_DDL: readonly string[] = [
   `ALTER TABLE loom_holds ENABLE ROW LEVEL SECURITY`,
 ]
 
+
+/**
+ * The policy log's schema, as statements a host can run.
+ *
+ * Its own list for the reason the hold store's is: the three are separately
+ * useful. A deployment that judges with one policy it has never edited has no
+ * reason to carry this table, and one that records policy changes may well keep
+ * them beside its trees or somewhere else entirely.
+ *
+ * The index is not decoration. `judgedUnder` resolves the fingerprint on a
+ * disposition into the policy text it was judged under, and a screen showing a
+ * page of records asks it once per record; without the index each of those is a
+ * scan of every policy revision the deployment has recorded.
+ */
+export const POLICY_LOG_DDL: readonly string[] = [
+  `CREATE TABLE IF NOT EXISTS loom_policy_revisions (
+    policy_id text NOT NULL,
+    revision integer NOT NULL,
+    fingerprint text NOT NULL,
+    policy jsonb NOT NULL,
+    actor text NOT NULL,
+    recorded_at text NOT NULL,
+    note text,
+    PRIMARY KEY (policy_id, revision)
+  )`,
+  `CREATE INDEX IF NOT EXISTS loom_policy_revisions_fingerprint_idx ON loom_policy_revisions (policy_id, fingerprint)`,
+  /** Locked on creation for the reason the tree store's tables are — see above. */
+  `ALTER TABLE loom_policy_revisions ENABLE ROW LEVEL SECURITY`,
+]
+
 /**
  * Creates the tables if they are absent. Every statement is `IF NOT EXISTS`, so
  * running it against a populated database is a no-op rather than a hazard.
@@ -120,6 +150,15 @@ export const ensureTreeStoreSchema = async (db: LoomDatabase): Promise<void> => 
  */
 export const ensureHoldStoreSchema = async (db: LoomDatabase): Promise<void> => {
   await runStatements(db, HOLD_STORE_DDL)
+}
+
+/**
+ * Creates the policy log's table if it is absent. Idempotent on the same terms,
+ * and separate for the same reason: a deployment that wants a record of who
+ * changed its acceptance policy gets it by adding this call on purpose.
+ */
+export const ensurePolicyLogSchema = async (db: LoomDatabase): Promise<void> => {
+  await runStatements(db, POLICY_LOG_DDL)
 }
 
 const runStatements = async (db: LoomDatabase, statements: readonly string[]): Promise<void> => {

@@ -8,6 +8,94 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-08 — the policy log exists and nothing writes to it, which is the half 0200 gives you
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— **nothing is blocked and nothing is broken**; the seam is shipped, tested
+against two implementations, and the writer is the control your own record
+authorises
+
+The 27 September finding — *a policy can be changed and there is nowhere for that
+change to be recorded* — is closed below.
+[0241](decisions/0241-a-policy-is-a-logged-object-and-what-changed-is-a-view-over-the-log.md)
+records what landed: `PolicyLog` in `src/runtime/policy-log.ts`,
+`policyChangeOf` in `src/runtime/policy-change.ts`, `memoryPolicyLog` and
+`postgresPolicyLog`, and `describePolicyLogContract` published from
+`@jam-overture/loom/testing/contracts`.
+
+**Nothing in the runtime calls `record`, and nothing in the runtime should.** A
+policy is edited by a person, and
+[0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
+puts that person's control on your surface. The seam is the half 0018 leaves to
+the framework; the writer is the half it leaves to you.
+
+**Four things to know before you build the screen**, because each is a shape
+choice you would otherwise have to reverse.
+
+**`actor` is required and there is no default.** A revision nobody can be named
+for is not a record of a decision, so the type has no way to express one. Whatever
+your sign-in already knows is the value.
+
+**Pass `expectedRevision` from the screen.** Omitted, a concurrent recorder wins
+and yours appends after it; named, a recorder that lost the race is refused with
+the revision that is current now. A person editing policy text is editing *a
+revision*, so the second is what a form wants — and `out-of-date` carries the
+number to re-read from.
+
+**Recording the same policy twice is `unchanged`, not a revision.** Three
+outcomes: `first`, `changed` (which carries `from` and the whole
+`policyChangeOf` reading, so a confirmation screen needs no second call), and
+`unchanged`. A button pressed twice is not two edits.
+
+**A digest can name two revisions, and this is the one the filing did not
+anticipate.** `judgedUnder` resolves a `Disposition`'s `policyFingerprint` to the
+policy text it ran under, and a policy taken to B and back to A has **one
+fingerprint on two revisions** — correctly, they are the same rules. So the answer
+is `recorded`, `ambiguous` (both, oldest first) or `unrecorded`. A card that
+rendered `ambiguous` as one revision would print an actor and an instant that are
+wrong and look authoritative. `unrecorded` carries `heldShapes`, which separates
+*nothing was logged under this name* from *everything logged here came from
+another build of Loom*.
+
+The reading `/portal/trust` wants is `policyHistoryOf(page.revisions)`: adjacent
+pairs folded into edits, each with the actor, the instant and a `direction` of
+`stricter` / `looser` / `mixed` / `incomparable`. That is the sentence a window
+straddling a policy change has never been able to say — `rulesetContinuityOf`
+could report `changed` and never what changed.
+
+One table to create: `ensurePolicyLogSchema`, separate from the tree store's and
+the hold store's on purpose, so a deployment adds it when it wants it.
+
+---
+## 2026-10-08 — two open pull requests claim record 0240, and 0097 says a clash is fatal
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:** open —
+**nothing on `main` is wrong**; this is a collision between two unmerged branches,
+and the lane that renumbers is yours
+
+`main` at `bd0af3d` has records up to **0239**. Two branches opened within fifteen
+minutes of each other on 7 October then both took **0240**:
+
+- **#546** (`Loom signals`) — *what a reading means when it says nothing*
+- **#547** (`Loom daily build`) — *the pair either side*, on this branch
+
+Each was correct by the rule it followed — *take the next free number after
+re-reading `main`* — and the rule cannot prevent this, because both lanes read the
+same `main` before either had pushed.
+
+This branch's second record is **0241**, which **#548** (`Loom primitives`) also
+claims for *a page read rather than scanned*. So the two numbers either side of
+`main`'s head are each claimed twice, by four branches, from four lanes.
+
+Nothing here is a disagreement about anything:
+[0097](decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)
+makes a clash fatal rather than ambiguous, and `docs/routines.md` already names
+renumbering with a dated note as mechanical work this lane does. Filed so the
+collision is visible before the merge rather than discovered during it, and so
+whichever of the four merges second is not read as a lane that failed to re-read
+`main`.
+
+---
 ## 2026-10-07 — the sentence a reader screen can lead with after a change lands, and the two figures on it that must never be added
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
@@ -3484,8 +3572,16 @@ branch is about what a reader is shown, and a staging harness is not.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Raised by:**
 [0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
-(`Proposed`) and `docs/portal.md` phase 7 · **Status:** open — **not blocking
-phases 1–4**, and blocking phase 7 entirely
+(`Proposed`) and `docs/portal.md` phase 7 · **Status:** closed by
+`framework-58-the-pair-either-side` — `PolicyLog` in
+`src/runtime/policy-log.ts`, `policyChangeOf` in `src/runtime/policy-change.ts`,
+two implementations and a contract suite, recorded as
+[0241](decisions/0241-a-policy-is-a-logged-object-and-what-changed-is-a-view-over-the-log.md).
+The shape is the one offered, with one thing the filing did not have: a digest
+may name **two** revisions, because a policy taken to B and back to A has one
+fingerprint on both, so `judgedUnder` answers `ambiguous` rather than choosing.
+Nothing calls `record` — the writer is the policy control 0200 authorises, which
+is yours
 
 0200 decides that the portal may put a policy control next to the measurement
 arguing for it, and that **a change to policy is a change a person made, recorded
