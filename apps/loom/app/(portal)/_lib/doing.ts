@@ -358,8 +358,10 @@ export const didAnything = (doing: PageDoing, arrivals?: PageArrivals): string =
  *
  * The half no analytics product can produce, because no analytics product knows
  * a page is made of parts — and the sentence this card has carried since the
- * region counter was first read. What changes is the denominator under it: the
- * part's own reach in people, rather than the page's view floor.
+ * region counter was first read. What changes is which region it names: the
+ * most-used part **below the root**, where it used to be the most-used part
+ * distinguishable from a maximum. The denominator is unchanged and is the
+ * region's own reach in visits; {@link usedIt} says why it is not in people.
  *
  * `undefined` where nothing below the page as a whole was acted inside, which
  * the sentence above has already accounted for.
