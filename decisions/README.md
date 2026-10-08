@@ -323,3 +323,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0237](0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md) | A presentation returns the reader to its trigger, and only from inside the region it closed | Accepted | §4h — the behaviour seam |
 | [0238](0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md) | A funnel end the revision no longer has is a standing, and what is withheld is per figure | Accepted | §4c (reader signals) |
 | [0239](0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md) | A change is read against the words both revisions say, and a floor costs the page total and not the passage | Accepted | §4c (reader signals) |
+| 0240 | *No record on this branch* | — | — |
+| 0241 | *No record on this branch* | — | — |
+| [0242](0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md) | What readers did is a share off one row, and a leaf has no inside | Accepted | §4c (reader signals) |

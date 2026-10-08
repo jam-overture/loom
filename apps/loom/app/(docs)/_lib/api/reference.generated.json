@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5476,7 +5476,7 @@
       "files": 206,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5941,7 +5941,7 @@
       "files": 69,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6903,7 +6903,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7494,7 +7494,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7722,7 +7722,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8181,7 +8181,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8535,7 +8535,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8655,7 +8655,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 42,
+      "files": 43,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8668,7 +8668,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8693,6 +8693,55 @@
         ]
       },
       "groups": [
+        {
+          "module": "signals/action",
+          "title": "Action",
+          "summary": "What readers *did* on a page, rather than what they saw.",
+          "symbols": [
+            {
+              "name": "ActionStanding",
+              "kind": "type",
+              "signature": "type ActionStanding =\n/** A row credits it with readers who acted inside it, or with uses of its own. */\n\"acted\"\n/**\n * Readers reached it, it has an inside, and nothing happened in or on it.\n *\n * The only claim this module makes about an absence, and the sentence worth\n * acting on.\n */\n | \"untouched\"\n/**\n * Nothing can be said.\n *\n * A part with no row at all, a part whose `reached` is 0 while the window held\n * views — the unanchorable case, where it reported something other than coming\n * into view), or **a leaf**, whose nought is a filing rule rather than a\n * measurement.\n */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What a window can say about whether readers acted on one part."
+            },
+            {
+              "name": "ACTION_STANDINGS",
+              "kind": "value",
+              "signature": "const ACTION_STANDINGS: readonly ActionStanding[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeActionStanding",
+              "kind": "function",
+              "signature": "const describeActionStanding: (standing: ActionStanding) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PartAction",
+              "kind": "type",
+              "signature": "type PartAction = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    readonly standing: ActionStanding;\n    /**\n     * Whether any element part of this revision names it as a parent.\n     *\n     * The structural fact that decides whether a share is a measurement. Taken\n     * off the tree the reading was built from, so it is a property of the page\n     * and not of the window — a part with children keeps them in a window nobody\n     * read.\n     */\n    readonly bearsParts: boolean;\n    /** Distinct page views that reported it coming into view, or `undefined` where no row named it. */\n    readonly reached: number | undefined;\n    /**\n     * Distinct page views in which a reader used something strictly inside it\n     *, or `undefined` where no row named it.\n     *\n     * `0` on a leaf is a filing rule and not a measurement; {@link share} is what\n     * is withheld on account of it, and this number is passed through unaltered\n     * because a caller looking at one part's row should see what the store holds.\n     */\n    readonly within: number | undefined;\n    /**\n     * `within ÷ reached`, in `[0, 1]`, or `undefined`.\n     *\n     * Withheld where the part bears no element parts, where no row named it, and\n     * where its `reached` is 0 — which are the three states the standing of\n     * `unknown` covers, so a withheld share and an unknown standing are the same\n     * fact said twice and never disagree.\n     *\n     * Both terms are distinct view counts off the same row, which is why this is\n     * the figure on a card that can be trusted while the counts beside it are\n     * generous by the straddle, measured since the door counted openings\n     *. It is deliberately\n     * **not** divided by the page views counted at the door: `opened` and\n     * `engaged` are written in different places and their ratio can honestly\n     * exceed 1, which is a refusal made once already and it still stands.\n     */\n    readonly share: number | undefined;\n    /**\n     * Presses, opens, closes and submissions filed against this part itself,\n     * added.\n     *\n     * **Occurrences, never readers.** Four counters go in because they are four\n     * ways of using a thing and a caller asking *was this used* wants one number;\n     * the four are on {@link PartAction.counts} apart for a caller that wants to\n     * tell a press from a dismissal. `0` where no row named it, because *nothing\n     * happened* and *nothing was reported* are told apart by the standing rather\n     * than by making every arithmetic consumer handle an absence.\n     */\n    readonly uses: number;\n    /** The four occurrence counters, kept apart. `0` each where no row named it. */\n    readonly counts: {\n        readonly activations: number;\n        readonly opens: number;\n        readonly closes: number;\n        readonly completions: number;\n    };\n    /**\n     * `uses ÷ reached`, or `undefined` where nothing was used or nobody reached\n     * it.\n     *\n     * **An intensity and not a rate.** It may exceed 1, and above 1 it says\n     * readers used this part more than once each rather than that more readers\n     * used it than reached it. Withheld at `uses` of 0 rather than published as a\n     * nought, because a nought here is the ordinary state of every heading on the\n     * page and {@link uses} already says it.\n     */\n    readonly usesPerReader: number | undefined;\n    /**\n     * `closes ÷ opens`, or `undefined` where nothing was opened.\n     *\n     * *Readers open this ask and shut it again nine times in ten* — two\n     * occurrence counts off one row, so the straddle divides out of it the way it\n     * does out of {@link share}.\n     *\n     * **Uncapped on purpose.** Above 1 means closes the page's own opens cannot\n     * account for, which is a disclosure a revision renders already open: the\n     * reader shuts something they never opened. Capping it would hide the one\n     * state it can diagnose, and a clause nothing can falsify is not a safeguard\n     *.\n     */\n    readonly shutAgain: number | undefined;\n};",
+              "truncated": false,
+              "summary": "One element node of one revision, and what readers did with it."
+            },
+            {
+              "name": "PageAction",
+              "kind": "type",
+              "signature": "type PageAction = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The page's view floor, carried through from the reading unchanged.\n     *\n     * Zero makes every standing `unknown`: nothing was measured, so nothing was\n     * left untouched.\n     */\n    readonly views: number;\n    /** Every element part of the revision, in reading order. */\n    readonly parts: readonly PartAction[];\n    readonly standings: Readonly<Record<ActionStanding, number>>;\n    /**\n     * The root, which is the one page-wide headcount this subsystem has.\n     *\n     * Every action anywhere on the page is strictly inside the root, and the root\n     * is an addressed node reached by every view that renders — so its `within` is\n     * **the distinct page views in which a reader did anything at all**, counted\n     * once, off one row. *Three in ten readers did something on this page* is one\n     * division and is the sentence a reader screen opens with.\n     *\n     * It is the only page-level total here and it is not an addition. Summing\n     * `within` across parts would charge one reader once per level of the tree\n     * they acted inside, so there is no page total of readers who\n     * acted and this is what stands in for one.\n     *\n     * Kept out of {@link mostIgnored}, because the page contains every part it\n     * would outrank, which is how the pace reading treats it and for the\n     * same reason.\n     *\n     * `null` where the revision's root is not an element.\n     */\n    readonly whole: PartAction | null;\n    /**\n     * The part the most readers reached and did nothing in: most reached, then\n     * first in reading order.\n     *\n     * By headcount rather than by share, which is the ranking rule spelled\n     * once: a band two readers out of three ignored is a worse ratio and a smaller\n     * problem than one four hundred of them did.\n     *\n     * `null` where nothing is `untouched`.\n     */\n    readonly mostIgnored: PartAction | null;\n    /**\n     * Parts with no element parts under them, whose share is withheld for the\n     * structural reason.\n     *\n     * Published so a reading accounts for every part rather than leaving a caller\n     * to wonder where the shares went. What is withheld is still reported as a\n     * total. On an ordinary page it is most of the page.\n     */\n    readonly leaves: number;\n    /**\n     * Whether the window holds uses and credits them to nobody.\n     *\n     * True where some part reports an occurrence and **no** part reports a reader\n     * inside it. A press is filed against the control and credited to its\n     * addressed ancestors from the ancestry the signal carries, so a batch whose\n     * delegated signals have no `within` adds occurrences and no `engaged` at all\n     * — a sender synthesising batches on a server, replaying a fixture, or with\n     * the walk turned off.\n     *\n     * It matters because the symptom is otherwise *a page readers act on and\n     * nothing can say where*: every {@link share} on the page is a nought, every\n     * band reads `untouched`, and the counters look healthy. §11's `unopened`\n     * diagnosis one counter across, and nothing else here would say so.\n     */\n    readonly unwalked: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "pageActionOf",
+              "kind": "function",
+              "signature": "const pageActionOf: (reading: PageReading) => PageAction",
+              "truncated": false,
+              "summary": "What readers did on one revision of one page, off the reading of [`parts.ts`](parts.ts) and nothing else."
+            }
+          ]
+        },
         {
           "module": "signals/broadcast",
           "title": "Broadcast",
@@ -10278,7 +10327,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10421,7 +10470,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10488,7 +10537,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11085,7 +11134,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11159,7 +11208,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11617,7 +11666,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1324,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
