@@ -524,7 +524,8 @@ export * from "./layout.js"
  * and adds no type: everything it builds is in `STARTER_PRIMITIVES` above, and
  * `compositions.test.ts` fails if that stops being true.
  */
-export type { Composition, CompositionPart, CompositionPlan, CompositionTarget } from "./compositions/index.js"
+export type { Band, Composition, CompositionPart, CompositionPlan, CompositionTarget } from "./compositions/index.js"
+export type { DocumentComposition, DocumentPart } from "./compositions/index.js"
 export {
   CATALOGUE_TYPES,
   COMPOSITION_INTERPRETER,
@@ -535,6 +536,18 @@ export {
   PAGE_SEQUENCE,
   planComposition,
   STARTER_COMPOSITIONS,
+} from "./compositions/index.js"
+/**
+ * The second page sequence, beside the first rather than replacing it
+ * ([0241](../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md),
+ * `Proposed`). Nothing above this line changed meaning when these arrived.
+ */
+export {
+  DOCUMENT_COMPOSITIONS,
+  DOCUMENT_DESIGNS,
+  DOCUMENT_PARTS,
+  DOCUMENT_SEQUENCE,
+  DOCUMENT_TYPES,
 } from "./compositions/index.js"
 export {
 }

@@ -364,7 +364,7 @@ describe("spelling a number the way prose spells it", () => {
       "starter-palettes: twenty-one",
       "policy-settings: fourteen",
       "pricing-band-nodes: forty-four",
-      "starter-bands: fifty-nine",
+      "starter-bands: sixty",
     ])
   })
 

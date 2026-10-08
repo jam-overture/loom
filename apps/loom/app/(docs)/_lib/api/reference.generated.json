@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5473,10 +5473,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 206,
+      "files": 211,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5484,7 +5484,7 @@
           {
             "specifier": "@jam-overture/loom-primitives/compositions",
             "slug": "primitives-compositions",
-            "names": 13
+            "names": 21
           }
         ],
         "collisions": []
@@ -5550,6 +5550,34 @@
               "signature": "const PAGE_SEQUENCE: readonly Composition[]",
               "truncated": false,
               "summary": "One design of each band, in the order a page uses them."
+            },
+            {
+              "name": "DOCUMENT_COMPOSITIONS",
+              "kind": "value",
+              "signature": "const DOCUMENT_COMPOSITIONS: readonly DocumentComposition[]",
+              "truncated": false,
+              "summary": "Every design of every region of an interior document."
+            },
+            {
+              "name": "DOCUMENT_DESIGNS",
+              "kind": "value",
+              "signature": "const DOCUMENT_DESIGNS: Readonly<Record<DocumentPart, string>>",
+              "truncated": false,
+              "summary": "Which design each region of a document takes."
+            },
+            {
+              "name": "DOCUMENT_SEQUENCE",
+              "kind": "value",
+              "signature": "const DOCUMENT_SEQUENCE: readonly (Composition | DocumentComposition)[]",
+              "truncated": false,
+              "summary": "One design of each region of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DOCUMENT_TYPES",
+              "kind": "value",
+              "signature": "const DOCUMENT_TYPES: readonly string[]",
+              "truncated": false,
+              "summary": "The primitive types the document sequence needs, which is the second half of the registry a host building both kinds of page registers:"
             }
           ]
         },
@@ -5580,6 +5608,13 @@
               "summary": "A band of a page, dropped in whole as one operation."
             },
             {
+              "name": "Band",
+              "kind": "type",
+              "signature": "type Band = Omit<Composition, \"part\"> & {\n    readonly part: string;\n};",
+              "truncated": false,
+              "summary": "A band of some page kind, which is all that planning one needs to know."
+            },
+            {
               "name": "COMPOSITION_INTERPRETER",
               "kind": "value",
               "signature": "const COMPOSITION_INTERPRETER = \"loom/composition\"",
@@ -5603,16 +5638,44 @@
             {
               "name": "planComposition",
               "kind": "function",
-              "signature": "const planComposition: (composition: Composition, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
+              "signature": "const planComposition: (composition: Band, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
               "truncated": false,
               "summary": "One `insert`, computed against the tree as it stands."
             },
             {
               "name": "compositionInterpreter",
               "kind": "function",
-              "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
+              "signature": "const compositionInterpreter: (composition: Band, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
               "truncated": false,
               "summary": "A composition as an ordinary `ChangeInterpreter`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/document",
+          "title": "Document",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "DOCUMENT_PARTS",
+              "kind": "value",
+              "signature": "const DOCUMENT_PARTS: readonly [\"nav\", \"trail\", \"document\", \"onward\", \"footer\"]",
+              "truncated": false,
+              "summary": "The regions of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DocumentPart",
+              "kind": "type",
+              "signature": "type DocumentPart = (typeof DOCUMENT_PARTS)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DocumentComposition",
+              "kind": "type",
+              "signature": "type DocumentComposition = Omit<Composition, \"part\"> & {\n    readonly part: DocumentPart;\n};",
+              "truncated": false,
+              "summary": "A band of an interior document."
             }
           ]
         },
@@ -5938,10 +6001,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 69,
+      "files": 74,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5949,7 +6012,7 @@
           {
             "specifier": "@jam-overture/loom-primitives",
             "slug": "primitives",
-            "names": 13
+            "names": 21
           }
         ],
         "collisions": []
@@ -5994,6 +6057,34 @@
               "signature": "const PAGE_SEQUENCE: readonly Composition[]",
               "truncated": false,
               "summary": "One design of each band, in the order a page uses them."
+            },
+            {
+              "name": "DOCUMENT_COMPOSITIONS",
+              "kind": "value",
+              "signature": "const DOCUMENT_COMPOSITIONS: readonly DocumentComposition[]",
+              "truncated": false,
+              "summary": "Every design of every region of an interior document."
+            },
+            {
+              "name": "DOCUMENT_DESIGNS",
+              "kind": "value",
+              "signature": "const DOCUMENT_DESIGNS: Readonly<Record<DocumentPart, string>>",
+              "truncated": false,
+              "summary": "Which design each region of a document takes."
+            },
+            {
+              "name": "DOCUMENT_SEQUENCE",
+              "kind": "value",
+              "signature": "const DOCUMENT_SEQUENCE: readonly (Composition | DocumentComposition)[]",
+              "truncated": false,
+              "summary": "One design of each region of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DOCUMENT_TYPES",
+              "kind": "value",
+              "signature": "const DOCUMENT_TYPES: readonly string[]",
+              "truncated": false,
+              "summary": "The primitive types the document sequence needs, which is the second half of the registry a host building both kinds of page registers:"
             }
           ]
         },
@@ -6206,6 +6297,13 @@
               "summary": "A band of a page, dropped in whole as one operation."
             },
             {
+              "name": "Band",
+              "kind": "type",
+              "signature": "type Band = Omit<Composition, \"part\"> & {\n    readonly part: string;\n};",
+              "truncated": false,
+              "summary": "A band of some page kind, which is all that planning one needs to know."
+            },
+            {
               "name": "COMPOSITION_INTERPRETER",
               "kind": "value",
               "signature": "const COMPOSITION_INTERPRETER = \"loom/composition\"",
@@ -6229,14 +6327,14 @@
             {
               "name": "planComposition",
               "kind": "function",
-              "signature": "const planComposition: (composition: Composition, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
+              "signature": "const planComposition: (composition: Band, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
               "truncated": false,
               "summary": "One `insert`, computed against the tree as it stands."
             },
             {
               "name": "compositionInterpreter",
               "kind": "function",
-              "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
+              "signature": "const compositionInterpreter: (composition: Band, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
               "truncated": false,
               "summary": "A composition as an ordinary `ChangeInterpreter`."
             }
@@ -6349,6 +6447,48 @@
               "name": "ctaSignupBand",
               "kind": "value",
               "signature": "const ctaSignupBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/document",
+          "title": "Document",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "DOCUMENT_PARTS",
+              "kind": "value",
+              "signature": "const DOCUMENT_PARTS: readonly [\"nav\", \"trail\", \"document\", \"onward\", \"footer\"]",
+              "truncated": false,
+              "summary": "The regions of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DocumentPart",
+              "kind": "type",
+              "signature": "type DocumentPart = (typeof DOCUMENT_PARTS)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DocumentComposition",
+              "kind": "type",
+              "signature": "type DocumentComposition = Omit<Composition, \"part\"> & {\n    readonly part: DocumentPart;\n};",
+              "truncated": false,
+              "summary": "A band of an interior document."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/document-band",
+          "title": "Document band",
+          "summary": "The text itself — one continuous document, with the way around it beside it.",
+          "symbols": [
+            {
+              "name": "documentBand",
+              "kind": "value",
+              "signature": "const documentBand: DocumentComposition",
               "truncated": false,
               "summary": ""
             }
@@ -6635,6 +6775,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/nav-docs-band",
+          "title": "Nav docs band",
+          "summary": "The bar above a document: the way home, the sections of the site, what you are reading, and a way to search it.",
+          "symbols": [
+            {
+              "name": "navDocsBand",
+              "kind": "value",
+              "signature": "const navDocsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/nav-menus-band",
           "title": "Nav menus band",
           "summary": "",
@@ -6657,6 +6811,20 @@
               "name": "offeringsBand",
               "kind": "value",
               "signature": "const offeringsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/onward-band",
+          "title": "Onward band",
+          "summary": "Where this page sits in the run the reader is walking — back one, on one, and the way up.",
+          "symbols": [
+            {
+              "name": "onwardBand",
+              "kind": "value",
+              "signature": "const onwardBand: DocumentComposition",
               "truncated": false,
               "summary": ""
             }
@@ -6873,6 +7041,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/trail-band",
+          "title": "Trail band",
+          "summary": "Where the reader is, under the header and above the text.",
+          "symbols": [
+            {
+              "name": "trailBand",
+              "kind": "value",
+              "signature": "const trailBand: DocumentComposition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/whats-on-band",
           "title": "Whats on band",
           "summary": "",
@@ -6903,7 +7085,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7494,7 +7676,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7722,7 +7904,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8181,7 +8363,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8535,7 +8717,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8668,7 +8850,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10278,7 +10460,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10421,7 +10603,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10488,7 +10670,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11085,7 +11267,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11159,7 +11341,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11617,7 +11799,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1318,
+        "packageNames": 1330,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

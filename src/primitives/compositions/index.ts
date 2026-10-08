@@ -42,6 +42,7 @@ import { metricsTrendBand } from "./metrics-trend-band.js"
 import { navBand } from "./nav-band.js"
 import { navCentredBand } from "./nav-centred-band.js"
 import { navMenusBand } from "./nav-menus-band.js"
+import { navDocsBand } from "./nav-docs-band.js"
 import { offeringsBand } from "./offerings-band.js"
 import { pricingBand } from "./pricing-band.js"
 import { pricingMatrixBand } from "./pricing-matrix-band.js"
@@ -59,8 +60,13 @@ import { testimonialsBand } from "./testimonials-band.js"
 import { testimonialsCollectedBand } from "./testimonials-collected-band.js"
 import { testimonialsWallBand } from "./testimonials-wall-band.js"
 import { whatsOnBand } from "./whats-on-band.js"
+import { trailBand } from "./trail-band.js"
+import { documentBand } from "./document-band.js"
+import { onwardBand } from "./onward-band.js"
+import { DOCUMENT_PARTS, type DocumentComposition, type DocumentPart } from "./document.js"
 
-export type { Composition, CompositionPart, CompositionPlan, CompositionTarget } from "./composition.js"
+export type { Band, Composition, CompositionPart, CompositionPlan, CompositionTarget } from "./composition.js"
+export type { DocumentComposition, DocumentPart } from "./document.js"
 export {
   COMPOSITION_INTERPRETER,
   COMPOSITION_PARTS,
@@ -110,6 +116,7 @@ export {
   metricsTrendBand,
   navBand,
   navCentredBand,
+  navDocsBand,
   navMenusBand,
   offeringsBand,
   pricingBand,
@@ -128,6 +135,9 @@ export {
   testimonialsCollectedBand,
   testimonialsWallBand,
   whatsOnBand,
+  trailBand,
+  documentBand,
+  onwardBand,
 }
 
 /**
@@ -179,6 +189,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   navBand,
   navCentredBand,
   navMenusBand,
+  navDocsBand,
   heroBand,
   heroSplitBand,
   heroShotBand,
@@ -338,3 +349,114 @@ export const PAGE_SEQUENCE: readonly Composition[] = COMPOSITION_PARTS.flatMap((
 
   return canonical === undefined ? [] : [canonical]
 })
+
+/**
+ * Every design of every region of an interior document.
+ *
+ * **A second list rather than an addition to {@link STARTER_COMPOSITIONS}**, and
+ * that is deliberate while
+ * [0241](../../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+ * is `Proposed`. `compositions.test.ts` asserts that **every band declares a
+ * part the page sequence knows**, which is the guard whose class caught the
+ * duplicate-anchor defect; appending document bands to the landing phrasebook
+ * would have meant weakening it, and a routine does not weaken a test to make
+ * room for its own work.
+ *
+ * What review has to settle is whether the phrasebook is one list or one per
+ * page kind. From here both answers cost a rename: this becomes the union, or
+ * it stays the second of two. The record argues the first is the more natural
+ * reading of 0162 and declines to take it, because it changes a published
+ * export that two other lanes read.
+ *
+ * `nav` and `footer` are **not** here. They are regions of the site rather than
+ * of the page, so {@link DOCUMENT_SEQUENCE} resolves them out of the landing
+ * catalogue and a deployment that changes its header changes it once.
+ */
+export const DOCUMENT_COMPOSITIONS: readonly DocumentComposition[] = [trailBand, documentBand, onwardBand]
+
+/**
+ * Which design each region of a document takes.
+ *
+ * **A page kind is a tuple of regions plus, for each, which design fills it** —
+ * and the second half is not ceremony. `PAGE_SEQUENCE` can derive its designs
+ * from the part names alone because a landing page takes every canonical; a
+ * document does not, and the reason is a rule nobody had had to scope until a
+ * test refused the simpler shape.
+ *
+ * [0168](../../../decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md)
+ * says a band links into the page it is assembled into, and `navBand` honours
+ * it: its menu is four fragments of `PAGE_SEQUENCE` and its wordmark points at
+ * the hero's `#top`. Shared onto a document those are five links into bands
+ * that are not there. So **`footer` is shared and `nav` is not** — the footer's
+ * nineteen links are all routes, and `nav-docs` is the design of the same
+ * region whose links are too.
+ *
+ * Held as a mapping rather than by the id convention so that the choice is
+ * *written down* where a reader can see which design a document takes and why
+ * it is not always the canonical. `documents.test.ts` holds every entry against
+ * a band that exists and is a design of that region, which is exactly the
+ * strength the name convention had.
+ */
+export const DOCUMENT_DESIGNS: Readonly<Record<DocumentPart, string>> = {
+  nav: "nav-docs",
+  trail: "trail",
+  document: "document",
+  onward: "onward",
+  footer: "footer",
+}
+
+/**
+ * The band with this id from either catalogue, document first.
+ *
+ * A region whose design is this sequence's own finds it in
+ * {@link DOCUMENT_COMPOSITIONS}; a region that takes a design of a landing part
+ * — `nav-docs`, `footer` — falls through to the landing phrasebook and gets the
+ * **same band** rather than a copy of it.
+ */
+const bandWithId = (id: string): Composition | DocumentComposition | undefined =>
+  DOCUMENT_COMPOSITIONS.find((composition) => composition.id === id) ?? compositionById(id)
+
+/**
+ * One design of each region of an interior document, in the order a reader
+ * meets them.
+ *
+ * Derived from {@link DOCUMENT_PARTS} exactly as {@link PAGE_SEQUENCE} is
+ * derived from `COMPOSITION_PARTS`, and for the same reason: nothing has to keep
+ * a second list in step with the first, a band added to the catalogue cannot
+ * silently change the page, and a part left with no canonical design is a red
+ * test rather than a page with a hole in it.
+ *
+ * **Taken in sequence these are one complete document** — a header, the reader's
+ * position, the text with its contents beside it, the way on, and the footer.
+ * There is no hero, which is the thing that makes it a second sequence rather
+ * than a path through the first.
+ */
+export const DOCUMENT_SEQUENCE: readonly (Composition | DocumentComposition)[] = DOCUMENT_PARTS.flatMap((part) => {
+  const chosen = bandWithId(DOCUMENT_DESIGNS[part])
+
+  return chosen === undefined ? [] : [chosen]
+})
+
+/**
+ * The primitive types the document sequence needs, which is the second half of
+ * the registry a host building both kinds of page registers:
+ *
+ * ```ts
+ * selectPrimitives(STARTER_PRIMITIVES, [...CATALOGUE_TYPES, ...DOCUMENT_TYPES])
+ * ```
+ *
+ * Kept separate from {@link CATALOGUE_TYPES} for the reason
+ * {@link DOCUMENT_COMPOSITIONS} is kept separate — that export is counted by a
+ * surface in another lane, and widening what it means is the record's question
+ * rather than this module's. The union is the honest reach measurement and
+ * `documents.test.ts` is where it is taken.
+ *
+ * It is the union of the sequence's `uses` rather than a walk of its subtrees,
+ * because `uses` is held against the subtree in both directions by
+ * `documents.test.ts`.
+ */
+export const DOCUMENT_TYPES: readonly string[] = [
+  ...new Set(DOCUMENT_SEQUENCE.flatMap((composition) => composition.uses)),
+].sort()
+
+export { DOCUMENT_PARTS } from "./document.js"

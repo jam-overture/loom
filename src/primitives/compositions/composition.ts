@@ -195,6 +195,22 @@ export type Composition = {
   readonly build: (ids: IdFactory) => ElementNode
 }
 
+/**
+ * A band of some page kind, which is all that planning one needs to know.
+ *
+ * {@link planComposition} and {@link compositionInterpreter} read `build` and an
+ * insertion point and have never read `part` — where a band goes *in a page* is
+ * a fact about a catalogue, not about the one `insert` that lands it. So both
+ * take this rather than {@link Composition}, and a band of the document sequence
+ * ([0241](../../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md))
+ * goes through the same Gate, the same policy and the same log as every other
+ * without a cast and without a second channel into the tree.
+ *
+ * `Composition` is assignable to it, so the widening is invisible to every
+ * existing caller.
+ */
+export type Band = Omit<Composition, "part"> & { readonly part: string }
+
 /** What produced the delta, for `Provenance.interpreter`. Not a model. */
 export const COMPOSITION_INTERPRETER = "loom/composition"
 
@@ -234,7 +250,7 @@ const childrenOf = (node: LoomNode): readonly LoomNode[] => (node.kind === "text
  * — the caller named a place that no longer exists — so it refuses.
  */
 export const planComposition = (
-  composition: Composition,
+  composition: Band,
   tree: LoomTree,
   ids: IdFactory,
   target: CompositionTarget = {}
@@ -272,7 +288,7 @@ export const planComposition = (
  * record to a perfect score it never earned.
  */
 export const compositionInterpreter = (
-  composition: Composition,
+  composition: Band,
   idFactory: IdFactory,
   clock: Clock,
   target: CompositionTarget = {}

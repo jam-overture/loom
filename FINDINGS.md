@@ -46559,3 +46559,152 @@ sentence in a header naming a known gap is not a guard, and nothing in the
 repository would have said so. The 1 October entry on a finding that said a
 remedy was already built is the same class — a true sentence written in the
 right place, which nobody had a reason to go and check.
+
+---
+## 2026-10-08 — a band that links into the page it is assembled into cannot be shared across page kinds, and 0168 had no reason to say so
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/compositions/`) · **Status:** **closed on this branch** by
+`nav-docs`; filed because the *rule* is general and the next second sequence
+will meet it before it has a test to catch it
+
+[0241](decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+was drafted saying the header and the footer belong to the **site** rather than
+to the page, so both page kinds would name the same bands and a deployment
+editing its header would edit it once. That is a good rule, it is right about
+the footer, and it is **wrong about the header** — which a test said and no
+amount of reading the two bands would have.
+
+```
+#top is linked and no band declares it: expected [ 'starting-from-a-band', …(5) ] to include 'top'
+```
+
+[0168](decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md) is
+what makes it wrong, by doing its job. `navBand`'s four menu links were
+deliberately changed from routes of a site that does not exist to **fragments of
+`PAGE_SEQUENCE`**, and its wordmark points at the hero's `#top`. On a landing
+page that is the better design and the record argues it well. Shared onto an
+interior document it is **five links into bands that are not there**: no error,
+no diagnostic, no failing test anywhere, and five presses that do not move the
+page.
+
+**So 0168 has a scope nobody had had to state**, because until this branch there
+was one page: *a band that links into the page it is assembled into is a band of
+that page kind.* The footer is shareable and is shared — all nineteen of its
+links are routes. The header is not.
+
+**What closed it** is a fourth design of the `nav` part rather than a new part,
+because 0171's test is about the region and it is the same strip. The thing
+worth knowing for the next one is that **a routes-instead-of-fragments nav is
+not a second design and `compositions.test.ts` refuses it correctly** — two
+designs whose node types read the same in the same order fail by name, and a bar
+with different `href`s is a `configure` of the canonical (0162). `nav-docs`
+earns its place on a search field and a version badge, which are nodes a
+marketing header has no use for. A run that only needed the links changed would
+have had to `configure`, and that is the right answer.
+
+**The general shape, and why it is worth the entry.** A catalogue whose bands
+link into the page they are assembled into cannot have a *shared chrome* layer
+in the way a template engine does. Nothing in the repository says so, and the
+cheapest guard is the one this branch wrote: assert over an assembled page that
+every in-page `href` resolves to an anchor the page declares. `compositions.test.ts`
+has the duplicate-anchor half of that and not this half, which means **the
+landing page is currently unguarded against the same defect** — a band whose
+anchor is renamed leaves `navBand` pointing at nothing and nothing fires. That
+is the one piece of work this entry leaves open and it is four lines in a file
+that already has the helpers.
+
+---
+## 2026-10-08 — `loom.nav`'s regions have no floor, so a control with an intrinsic width makes the bar wider than the phone
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.nav.ts`) · **Status:** open — **worked around** in
+`nav-docs` by moving the control out of the region; nothing is blocked and the
+workaround is also the better design, which is why this is filed rather than
+fixed
+
+A documentation bar wants a search field. Put a `loom.field` in `loom.nav`'s
+`actions` region beside the call to action and the bar measures **454 against a
+390-pixel phone** on both palettes.
+
+**It is not `loom.field`'s fault and the field is the thing that proves it.** The
+field already sets `minWidth: "0"` on its own wrapper, with a comment naming the
+neighbouring case — *"without this a long placeholder makes a grid column refuse
+to shrink"* — and its control is `width: 100%`. What has no floor is the region
+it was put in: `loom.nav` lays `brand` and `actions` out as flex items sized by
+their content, an `<input>` carries an intrinsic width from its `size`
+attribute, and `width: 100%` against a parent that is itself as wide as the
+input wants resolves to exactly that. Nothing in the chain can shrink.
+
+Until now the only thing anybody had put in `actions` was a `loom.action`, which
+is a link whose width is its words, so the floor was never needed.
+
+**The workaround, and why it is not a fix.** The field is an ordinary child
+rather than a region's content, so it sits in the menu flow, which wraps — 390
+on both palettes. That is also the better reading of what a search box is: a way
+of getting *around* a site belongs with the other ways of getting around it, and
+`actions` is the one thing to **do**. So `nav-docs` is right as it stands and the
+gap is still there for the next band that genuinely needs a control at the end
+of a bar — a sign-in field, a locale picker, an organisation switcher.
+
+**What would close it:** `minWidth: 0` on the two region wrappers in
+`loom.nav`. It is one declaration, it changes nothing that renders today
+(no current band puts anything shrinkable in either region), and the reason it
+is not on this branch is scope: `loom.nav` is on every page the catalogue
+assembles, and a change to it belongs in a run whose screenshots are of the
+header rather than one whose screenshots are of a document.
+
+---
+## 2026-10-08 — `loom.split` has three ratios and none of them is a sidebar
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.split.ts`) · **Status:** open — **nothing is broken**; the
+document page ships at the widest ratio available and reads correctly, and this
+is the entry that says why its contents rail is roomier than a reader would draw
+it
+
+`RATIOS` is `even` 50/50, `start-wide` 62/38, `end-wide` 38/62. A document's
+*On this page* rail is the first thing in this library to want the fourth shape
+— roughly **75/25** — and `start-wide` is as close as it gets, so the rail on
+`documentBand` is 38% of the band and about two thirds of it is air.
+
+It is not a defect and the picture is the evidence: the prose keeps a good
+measure, the rail is legible, nothing overflows at either width, and plenty of
+real reference sites run a rail that wide. It is simply not the proportion
+anybody would choose, and the reason is that the enum has no member for it.
+
+**Why it was not added in passing.** A closed enum on a primitive this widely
+used is a vocabulary a model authors against, and widening one is 0052's
+territory rather than a convenience — the honest question is whether the fourth
+member is `sidebar` (a named role) or `three-quarters` (a proportion), and those
+two answers generalise very differently as a fifth is asked for. The near-miss
+is worth naming too: `ratio` is a **rendering** and not a structure — it changes
+no node, so it is correctly a prop under 0052 and widening it is not smuggling
+a delta into a prop bag. It is only the naming that needs deciding.
+
+Recorded so the run that wants `end-wide` at a quarter does not re-derive the
+question.
+
+---
+## 2026-10-08 — `FIELD_TYPES` has no `search`, so the one control a reference site is built around cannot say what it is
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.field.ts`) · **Status:** open — **small**, and it sits
+beside the `checkbox` label note the same enum already carries
+
+`loom.field` takes `text email tel url number date textarea select checkbox`.
+A documentation bar's search box is therefore `type: "text"`, which renders a
+correct and usable control and is not the element it is.
+
+What is lost is small and real: `<input type="search">` gets the clear
+affordance browsers already draw, announces itself as a search control, and is
+what a form landing in a host's page is expected to be. `loom.field` falls
+through to `<input type={type}>`, so like `checkbox` before it this is **two
+characters of enum** — and like `checkbox` it probably wants a rendering note
+with it, because a search field in a bar wants its label beside or above it
+depending on where it sits, which is the same unfinished question `checkbox`'s
+entry raised on 14 September.
+
+Not taken on this branch because widening a closed vocabulary a model authors
+against is not a thing to do in passing, and because the two entries should be
+answered together by a run looking at `loom.field` rather than at a document.
