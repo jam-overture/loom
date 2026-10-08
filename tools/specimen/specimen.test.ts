@@ -1915,6 +1915,38 @@ describe("the command line", () => {
     const empty = parseSpecimenArgs([])
     expect(!empty.ok && describeArgsError(empty.error)).toContain("usage: pnpm specimen")
   })
+
+  it("takes a revision to photograph the same sheet against", () => {
+    const parsed = parseSpecimenArgs(["a.ts", "--against", "origin/main"])
+
+    expect(parsed.ok && parsed.value.against).toBe("origin/main")
+  })
+
+  /**
+   * Absent rather than empty when nobody asked, because the comparison is a
+   * question one run asks and the next does not — and an empty string is a ref
+   * `git rev-parse` would be asked to resolve.
+   */
+  it("asks for no comparison unless one was named", () => {
+    const parsed = parseSpecimenArgs(["a.ts"])
+
+    expect(parsed.ok && parsed.value.against).toBeUndefined()
+  })
+
+  it("refuses --against with the next flag as its value, naming the flag that was wrong", () => {
+    const parsed = parseSpecimenArgs(["a.ts", "--against", "--out", "reports"])
+
+    expect(!parsed.ok && parsed.error.code).toBe("missing-value")
+    expect(!parsed.ok && describeArgsError(parsed.error)).toContain("--against")
+  })
+
+  it("takes both options together, in either order", () => {
+    const first = parseSpecimenArgs(["a.ts", "--out", "x", "--against", "HEAD~1"])
+    const second = parseSpecimenArgs(["a.ts", "--against", "HEAD~1", "--out", "x"])
+
+    expect(first.ok && first.value).toEqual({ module: "a.ts", outDir: "x", against: "HEAD~1" })
+    expect(second.ok && second.value).toEqual(first.ok && first.value)
+  })
 })
 
 describe("rendering a specimen", () => {

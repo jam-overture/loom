@@ -8,6 +8,155 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-08 — the policy log exists and nothing writes to it, which is the half 0200 gives you
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— **nothing is blocked and nothing is broken**; the seam is shipped, tested
+against two implementations, and the writer is the control your own record
+authorises
+
+The 27 September finding — *a policy can be changed and there is nowhere for that
+change to be recorded* — is closed below.
+[0241](decisions/0241-a-policy-is-a-logged-object-and-what-changed-is-a-view-over-the-log.md)
+records what landed: `PolicyLog` in `src/runtime/policy-log.ts`,
+`policyChangeOf` in `src/runtime/policy-change.ts`, `memoryPolicyLog` and
+`postgresPolicyLog`, and `describePolicyLogContract` published from
+`@jam-overture/loom/testing/contracts`.
+
+**Nothing in the runtime calls `record`, and nothing in the runtime should.** A
+policy is edited by a person, and
+[0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
+puts that person's control on your surface. The seam is the half 0018 leaves to
+the framework; the writer is the half it leaves to you.
+
+**Four things to know before you build the screen**, because each is a shape
+choice you would otherwise have to reverse.
+
+**`actor` is required and there is no default.** A revision nobody can be named
+for is not a record of a decision, so the type has no way to express one. Whatever
+your sign-in already knows is the value.
+
+**Pass `expectedRevision` from the screen.** Omitted, a concurrent recorder wins
+and yours appends after it; named, a recorder that lost the race is refused with
+the revision that is current now. A person editing policy text is editing *a
+revision*, so the second is what a form wants — and `out-of-date` carries the
+number to re-read from.
+
+**Recording the same policy twice is `unchanged`, not a revision.** Three
+outcomes: `first`, `changed` (which carries `from` and the whole
+`policyChangeOf` reading, so a confirmation screen needs no second call), and
+`unchanged`. A button pressed twice is not two edits.
+
+**A digest can name two revisions, and this is the one the filing did not
+anticipate.** `judgedUnder` resolves a `Disposition`'s `policyFingerprint` to the
+policy text it ran under, and a policy taken to B and back to A has **one
+fingerprint on two revisions** — correctly, they are the same rules. So the answer
+is `recorded`, `ambiguous` (both, oldest first) or `unrecorded`. A card that
+rendered `ambiguous` as one revision would print an actor and an instant that are
+wrong and look authoritative. `unrecorded` carries `heldShapes`, which separates
+*nothing was logged under this name* from *everything logged here came from
+another build of Loom*.
+
+The reading `/portal/trust` wants is `policyHistoryOf(page.revisions)`: adjacent
+pairs folded into edits, each with the actor, the instant and a `direction` of
+`stricter` / `looser` / `mixed` / `incomparable`. That is the sentence a window
+straddling a policy change has never been able to say — `rulesetContinuityOf`
+could report `changed` and never what changed.
+
+One table to create: `ensurePolicyLogSchema`, separate from the tree store's and
+the hold store's on purpose, so a deployment adds it when it wants it.
+
+---
+## 2026-10-08 — two open pull requests claim record 0240, and 0097 says a clash is fatal
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` ·
+**Status:** **closed by `framework-58-the-pair-either-side`** (0243) — the dated
+note at the end of this entry says what each of the four numbers did. Original
+status below.
+
+**Status:** open —
+**nothing on `main` is wrong**; this is a collision between two unmerged branches,
+and the lane that renumbers is yours
+
+`main` at `bd0af3d` has records up to **0239**. Two branches opened within fifteen
+minutes of each other on 7 October then both took **0240**:
+
+- **#546** (`Loom signals`) — *what a reading means when it says nothing*
+- **#547** (`Loom daily build`) — *the pair either side*, on this branch
+
+Each was correct by the rule it followed — *take the next free number after
+re-reading `main`* — and the rule cannot prevent this, because both lanes read the
+same `main` before either had pushed.
+
+This branch's second record is **0241**, which **#548** (`Loom primitives`) also
+claims for *a page read rather than scanned*. So the two numbers either side of
+`main`'s head are each claimed twice, by four branches, from four lanes.
+
+Nothing here is a disagreement about anything:
+[0097](decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)
+makes a clash fatal rather than ambiguous, and `docs/routines.md` already names
+renumbering with a dated note as mechanical work this lane does. Filed so the
+collision is visible before the merge rather than discovered during it, and so
+whichever of the four merges second is not read as a lane that failed to re-read
+`main`.
+
+### 8 October, `Loom merge` — **both collisions resolved, and only one of the four needed a rename**
+
+Merging oldest first: **#546** landed first and its 0240 keeps the number.
+**#547**'s record was renumbered to **0243** — the next number free on `main`
+once 0241 (#547's own second record) and 0242 (#549) were counted — with a dated
+note under its header and its seven citations updated with it: `docs/routines.md`,
+`tools/specimen/README.md`, two reports, two entries in this file and the index.
+
+**0241 needed nothing.** #548 is held back for review on its own terms (its
+record is `Proposed — ARCHITECTURAL, needs review`), so #547's 0241 was the only
+claimant to land and it kept its number. That half of the clash is still live on
+#548's branch and will be resolved the day that pull request is cleared to merge.
+**#549**'s 0242 was free and stayed free.
+
+So: four branches, two numbers claimed twice, **one rename**. The cost of a
+collision is paid by whichever branch merges second, and only if it merges.
+
+---
+## 2026-10-08 — a gate table shipped two unsubstituted placeholders, and a gate table is the one part of a report read as measured fact
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/findings/`, or wherever the sweep lands) · **Status:** open — **the two
+cells are filled and both numbers are measured**; this is here for the class,
+which nothing in the repository can currently see
+
+`reports/2026-10-08-framework-the-policy-that-could-change-silently.md` committed
+its gate table with `PACKAGE_BASE` in the base column and `PRERENDER` in the
+prerender row — template tokens that were never substituted. Everything around
+them was real: the gate was green, the exit code was 0, the other four cells were
+right.
+
+**Why it matters more than a typo.** A report's prose is argument and a reader
+weighs it. A gate table is the one part that is read as *measured*, and it is what
+`Loom merge` and the maintainer skim to decide whether a branch is safe. A missing
+number is the benign version; the same mistake with a *stale* number left in place
+reads as a measurement and is not one, and nothing would say so.
+
+**Closed on the instance, by the evening run of this same lane.** The base is
+first-hand — that run took `b4592c7`'s own gate the night before, so
+`189 files / 4,154` is what it printed rather than a reconstruction — and the
+prerender row is `pnpm prerender:check` re-run against the `.next` the morning
+gate had already built. A dated note in the report says so, because an edit to
+another run's committed numbers must never be silent.
+
+**What would close the class.** `pnpm findings:check` already walks the repository
+for malformed entries and is the natural home: a sweep over `reports/*.md` for a
+bare `[A-Z][A-Z_]{3,}` token inside a table cell, refusing it. The cost is one
+function and the false-positive risk is real but small — a gate table holds
+numbers, units and check names, not shouting. **Worth doing only when a second
+instance arrives**, which is this lane's own standing rule about reactive
+refinement; recorded now so that the second instance is recognised as the second
+rather than investigated as the first.
+
+**Not proposed: a template.** The placeholder exists because a report is written
+by hand from a shape the lane carries in its head, and that is the right way
+round — a committed template would make every report the same report. The defect
+is not that a shape was used; it is that nothing read the output.
 ## 2026-10-07 — after a one-press change the demo's panel says the arrival screen's sentence word for word, and one of the five it counts is now the way back
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
@@ -311,9 +460,9 @@ surviving pages are in, and why they are in that order, is still worth saying.
 ## 2026-10-07 — proving a picture moved means building the tree twice by hand, and two runs in a row have done it with `cmp`
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
-(`tools/specimen/`) · **Status:** open — **nothing is broken and no picture in
-any report is wrong**; this is a cost that has now been paid twice in two days
-with the same six shell commands, written down before it is paid a third time
+(`tools/specimen/`) · **Status:** **closed by `framework-58-the-pair-either-side`**
+(0243) — the dated note at the end of this entry says what shipped and the one
+way it differs from what was asked here
 
 A screenshot proves a change only against a photograph of the tree **without**
 it. Nothing in either harness takes that pair, so a run that wants one does this:
@@ -353,6 +502,37 @@ obvious cheaper answer and it is worse here — every sheet in `reports/` is
 already a dated artefact nobody updates, so a baseline would be a second copy of
 every picture, going stale silently, and the first lane to change a palette would
 be asked to re-bless forty files.
+
+### 7 October, `Loom daily build` — **closed by `framework-58-the-pair-either-side`**, and the flag is the shape named above
+
+`pnpm specimen <sheet> --against <ref>`, recorded as
+[0243](decisions/0243-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md).
+It prints `identical` or `differs` per shot and never changes the exit code, which
+is the condition this entry set.
+
+**One thing it does differently from what was asked, and it is the load-bearing
+part.** This entry said *"it builds the tree from another ref"*, and it does not
+build the whole tree: `src/` comes from the revision, and **the harness and the
+specimen sheet are copied in from the working tree**. The asymmetry is what makes
+the flag usable at all. The sheet is the question — a sheet taken from the ref
+would be a different question, or, for the sheet this entry was filed by, no
+question at all. And the instrument is routinely newer than the change: the
+`{ key }` step that made that keyboard journey photographable did not exist at
+the revision it needed to be photographed against.
+
+So the second install this entry worried about is not paid either. `node_modules`
+is symlinked; the dependencies are the instrument's, and the instrument is the
+working tree's by construction.
+
+**It was checked against this entry's own two examples.** Run on the focus-return
+change against the commit before it, both pictures it produced are
+**byte-identical to the two that run committed by hand** — so the automated pair
+is the hand-made pair.
+
+**Still true, and now written down in two recipes:** a session clone is fifty
+commits deep, so `--against` cannot reach a revision older than that and says
+*no such revision*, which is true of the clone and misleading about the
+repository.
 ## 2026-10-06 — three of the four bands this surface draws rely on `pointer-events: none`, which is a rule about a mouse
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
@@ -3607,8 +3787,16 @@ branch is about what a reader is shown, and a staging harness is not.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Raised by:**
 [0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
-(`Proposed`) and `docs/portal.md` phase 7 · **Status:** open — **not blocking
-phases 1–4**, and blocking phase 7 entirely
+(`Proposed`) and `docs/portal.md` phase 7 · **Status:** closed by
+`framework-58-the-pair-either-side` — `PolicyLog` in
+`src/runtime/policy-log.ts`, `policyChangeOf` in `src/runtime/policy-change.ts`,
+two implementations and a contract suite, recorded as
+[0241](decisions/0241-a-policy-is-a-logged-object-and-what-changed-is-a-view-over-the-log.md).
+The shape is the one offered, with one thing the filing did not have: a digest
+may name **two** revisions, because a policy taken to B and back to A has one
+fingerprint on both, so `judgedUnder` answers `ambiguous` rather than choosing.
+Nothing calls `record` — the writer is the policy control 0200 authorises, which
+is yours
 
 0200 decides that the portal may put a policy control next to the measurement
 arguing for it, and that **a change to policy is a change a person made, recorded
