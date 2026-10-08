@@ -240,10 +240,21 @@ read in a separate command.
 
 | | base (`b4592c7`) | this branch |
 | --- | --- | --- |
-| package (`src/`, `tools/`) | PACKAGE_BASE | 193 files / **4,270** |
+| package (`src/`, `tools/`) | 189 files / 4,154 | 193 files / **4,270** |
 | application (`apps/loom`) | 407 / 7,221 | 407 / **7,221** |
 | findings ledger | 1,056 | **1,058**, 0 malformed |
-| prerender | — | PRERENDER |
+| prerender | — | **126 pages, 1,586 text junctions, 0 run together; 3 metadata conventions, 0 unserved** |
+
+> **Two cells of this table shipped as unsubstituted placeholders** — `PACKAGE_BASE`
+> and `PRERENDER` — and were filled on 8 October by the evening run of this same
+> lane, which was woken by a pull request event and read the table. Neither number
+> is inferred. The base is first-hand: that run took `b4592c7`'s own gate the
+> night before and `189 files / 4,154` is what it printed. The prerender row is
+> `pnpm prerender:check` re-run against the `.next` this branch's gate had already
+> built — exit 0, and the line above is its output verbatim. The rest of the table
+> is this report's own and is untouched. Filed as a finding, because a gate table
+> is the one part of a report that is read as measured fact, and nothing in the
+> repository would have caught a number that was never substituted.
 
 **+116 tests in four new files**, none of them weakened, skipped or deleted, and
 no existing test rewritten. Three doc comments changed wording and one count of
