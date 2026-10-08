@@ -46932,6 +46932,83 @@ remedy was already built is the same class — a true sentence written in the
 right place, which nobody had a reason to go and check.
 
 ---
+## 2026-10-08 — the share of readers who did something is a band's figure and never a control's, and `unwalked` is the one state to refuse to draw
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is blocked; `pageActionOf` is published from
+`@jam-overture/loom/signals` and the reader screen can take it whenever it wants
+a second row
+
+§18 of [`docs/signals.md`](docs/signals.md) landed `pageActionOf(reading)` in
+`src/signals/action.ts` ([0242](decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)).
+It takes the same `PageReading` the reader screen already builds — no store
+read, no second join — and answers *four in ten readers who got to the pricing
+band did something in it*, which is the first thing in this subsystem about
+what readers **did** rather than what they saw.
+
+Three things about drawing it, and the first is the one that will be got wrong:
+
+- **`PartAction.share` is `undefined` on most of a page, and that is correct.**
+  `engaged` counts the views whose reader acted *strictly inside* a node (0167),
+  so a part with no element children has a structural nought and its share is
+  withheld rather than reported. On an ordinary page most parts are leaves:
+  `PageAction.leaves` says how many, so a card can account for the gap instead
+  of looking broken. A share drawn as 0 for every heading and every button would
+  rank the page's parts by how little each one is a container.
+- **`usesPerReader` is not a rate and may exceed 1.** It is presses, opens,
+  closes and submissions — occurrences — over the distinct readers who got
+  there, so 2.5 means each reader used it two and a half times. The label it
+  needs is *per reader*, never *%*, and it is withheld rather than zero where
+  nothing was used. `shutAgain` is likewise uncapped: above 1 it is a disclosure
+  a revision renders already open, which is a real diagnosis and not a bug.
+- **`PageAction.unwalked` is the state to refuse to draw.** True where the page
+  holds occurrences and credits a reader inside nothing — a sender whose
+  delegated signals carry no `within`. Every share on the page is then a nought
+  that means nothing and every band reads `untouched`, with the counters looking
+  healthy. It is `unopened`'s equivalent one counter across, and the card should
+  say *this deployment's senders are not reporting where actions happened*
+  rather than draw a page nobody engaged with.
+
+The sentence to lead with is `PageAction.whole`: every action is strictly inside
+the root, so the root's own row is *three in ten readers did something on this
+page* — one division, exact against its own row, and the only page-wide
+headcount available, because summing across parts charges one reader once per
+level they acted inside. `mostIgnored` is the one band worth a line beside it,
+ranked by headcount for 0221's reason.
+
+---
+## 2026-10-08 — the missing declaration costs a standing as well as a funnel answer, which is the second consumer and the concrete price
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives` · **Status:**
+open — **a second consumer for the entry of 6 October**, not a new gap; filed
+because that entry's price was one stale-looking funnel answer and it is now
+larger and easier to state
+
+The 6 October entry on this lane's side — *nothing lets a primitive say what it
+can report, so a pair asking `activated` of a band is indistinguishable from a
+button nobody pressed* — asked for a declaration and gave one consumer for it.
+0242 is the second, and it pays a clearer price.
+
+`pageActionOf` has to call a leaf `unknown` where readers reached it and nothing
+happened. The two cases it cannot tell apart are **a button nobody pressed** and
+**a heading nobody could press**, and the first is a finding a deployment would
+act on today while the second is the ordinary state of most of a page. So the
+module refuses the claim for both, which means the one reading in this
+subsystem about what readers *did* is silent about every control on the page by
+construction.
+
+What would close it is what the earlier entry asked for and no more: a member of
+`PrimitiveRole`, or a declaration of the same shape, that says a primitive is
+something a reader operates. `role` declares `heading` today and 0238 recorded
+that *a control* is the member the tree cannot speak to. With it, a leaf
+readers reached with no uses against it becomes `untouched` — a real finding,
+*readers get to this button and do not press it* — and **every counter already
+stored reinterprets**, because the join is at read time (0212) and nothing here
+would change.
+
+Recorded on this lane's side rather than as an edit to the earlier entry,
+because the price is new information and the ask is unchanged: one member, one
+consumer more than it had, and no work in `src/signals/` either way.
 ## 2026-10-07 — one sentence per state on a reader card, and the one pair of `unmeasured`s never to collapse
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
