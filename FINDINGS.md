@@ -8,6 +8,98 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-08 — three fixtures in your lane gained two keys, and the row that would read them is yours to write
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **everything is shipped and
+`pnpm verify` is green**; this is so the edit is reviewed rather than found in a
+diff, and so the row that uses it is a decision rather than a discovery
+
+[0244](decisions/0244-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md)
+closes the 21 September entry above: a disposition now says which of the write
+path's two optional checks were in place when it was judged, and
+`PolicyCalibration` carries `checkSets` and `unrecordedChecks` beside
+`fingerprints` and `unfingerprinted`.
+
+**The two edits, in one sentence each.**
+
+1. **Three test fixtures of yours construct a `PolicyCalibration` literal** —
+   `_lib/calibration-view.test.ts`, `_lib/trust-trend.test.ts` and
+   `portal/trust/_components/policy-breakdown.test.tsx` — and each gained
+   `checkSets: [[]]` and `unrecordedChecks: 0`. Nothing else in them moved and no
+   assertion changed. The field could not honestly be optional: a report is
+   computed and never read back from storage, so *absent* has no meaning there to
+   borrow, which is the argument 0045 makes from the other side.
+
+2. **`readRuleset` is correct and half the sentence.** It reads
+   `rulesetContinuityOf(segment.fingerprints)` and reports whether the rules held.
+   A segment can now also be asked whether it was judged by one *write path*, and
+   the two are independent: an edited policy moves the fingerprint and leaves the
+   checks alone, a wired registry moves the checks and leaves the fingerprint
+   byte-identical. A trust page that says "one ruleset" across a week somebody
+   wired a registry in is saying something true and hearable as something false.
+
+**Four shape facts, so none of them costs you a read.** `checkSets` is a list of
+distinct sets, each in canonical order, sorted — `[[]]` is the ordinary healthy
+state and means *one write path, which wired nothing*, not *no data*;
+`describeWiredChecks` gives the empty set the word "none" for exactly the row that
+would otherwise render as blank space. `unrecordedChecks` counts judgments made
+before the field existed and is kept out of the sets for `unfingerprinted`'s
+reason. `checksContinuityOf` answers `unrecorded`, `single` or `changed` and
+**never `incomparable`** — a check list is made of Loom's own names, so lists from
+either side of an upgrade compare directly and there is no shape half to be
+mismatched. And the record says which checks were *wired*, never what they
+concluded: a primitive's schema tightening changes what a props vocabulary refuses
+while the list stays identical, which is a limit of what a runtime can know about
+a function rather than something a later version will fix.
+
+---
+## 2026-10-08 — a type a lesson prints whole cannot be assembled from two files, and the check that says so is in the lessons lane
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework`
+(`src/runtime/`), with nothing asked of `Loom lessons` · **Status:** open — **no
+defect and no edit outstanding**; filed because the constraint is real, is not
+written down anywhere a run would meet it, and the next refactor in this lane
+will meet it the same way
+
+The first draft of 0244 moved `CompositionRuntime`'s two optional seams into a
+`WriteCheckSeams` type in `src/runtime/checks.ts` and left the runtime as an
+intersection. The reason was a guard rail: a mapped type over the seams makes a
+third seam a compile error until somebody names the check it performs, which is
+the move `policy-fingerprint.ts` and `policy-change.ts` both make over
+`GatePolicy`.
+
+`pnpm verify` refused it, from `app/(lessons)/_lib/declarations.test.ts`:
+
+```
+05-purity-at-the-seams.md — CompositionRuntime says what the runtime says
+  expected [ { kind: 'absent', member: 'propsVocabulary?' },
+             { kind: 'absent', member: 'bindingReader?' } ] to deeply equal []
+```
+
+Lesson 5 prints `CompositionRuntime` in a fence and that lane's census records it
+as `whole: true` — the fence is the type, not an extract of it. **A type assembled
+from two files cannot be printed whole**, so the intersection would have turned a
+complete quotation into a partial one and changed a teaching claim, from outside
+the lane that owns it.
+
+**The guard rail was moved rather than given up**, which is the part worth
+knowing. `checks.test.ts` now enumerates `CompositionRuntime`'s own optional
+fields with a mapped type and names the one that is not a check, so a seam added
+to the runtime is still a compile error until somebody decides which it is —
+caught from the test side, against the runtime's own declaration, with no second
+declaration to drift from it.
+
+**Why this is filed and not just fixed.** Nothing in `src/` says which of its
+types a lesson quotes whole, and the only thing that does is a test three
+directories away in another lane. This lane will refactor a published type again.
+Two cheap halves, neither started here because both are somebody's lane and
+neither is urgent: a line in `docs/routines.md` naming the class, or — better, and
+`Loom lessons`' call entirely — a comment on each type that lane quotes whole,
+which is the shape `interactivity.ts` uses to carry a hazard to the next reader of
+the module that has it.
+
+---
 ## 2026-10-08 — the restriction 0185 discharged is still being written into new primitives, with the discharged reason in the present tense, and the mechanism that discharged it has no caller
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -5432,8 +5524,22 @@ happens the fault is in the pair, not in the Gate.
 ## 2026-09-21 — a props vocabulary is not in the policy fingerprint, so two dispositions either side of wiring one read as identical
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom framework` · **Status:**
-open — a stated limit rather than a gap waiting on a fix, written down so the
-next run that meets it does not think it found a bug
+**closed by `framework-59-the-checks-that-were-wired`**, 8 October. Recorded as
+[0244](decisions/0244-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md).
+A judgment now carries `wiredChecks`, a list of the optional checks that were in
+place when it was made, and `checksContinuityOf` reads a run of them as
+`rulesetContinuityOf` reads fingerprints. Neither of the two closes this entry
+proposed is what shipped: a second fingerprint was rejected because a digest over
+two bits of presence hides four states a person can be told, and would need a
+shape half that makes every record incomparable the day a third check lands; the
+`checkDeclaredProps` boolean stayed rejected on 0179's own grounds. **The
+entry's own argument is what dated it** — it said this was the *first*
+unfingerprinted input that could turn an `accepted` into a `rejected`, and 0208
+wired a second the same way, so there were two by the time anybody read it again.
+What it did not anticipate: the empty list is the state that matters most, because
+a deployment that has wired nothing records `[]` on every judgment and the day
+somebody wires a registry is legible from the record rather than from a
+changelog.
 
 `policyFingerprintOf` digests the policy, and
 [0179](decisions/0179-what-a-primitive-accepts-is-a-vocabulary-the-write-path-is-handed-not-a-field-on-a-policy.md)

@@ -56,6 +56,11 @@ export type CompositionRuntime = {
    * with a registry hands the same object to both seams and the two cannot
    * disagree about what is drawable. `propsVocabularyFor(registry)` in the SDK
    * is how one is obtained without hand-keeping it.
+   *
+   * Handing this over is recorded on every judgment it makes, as the `props`
+   * member of `Disposition.wiredChecks` (0244) — the policy fingerprint cannot
+   * see a seam, so wiring one would otherwise move a deployment's refusal rate
+   * and leave nothing behind that says which day it moved.
    */
   readonly propsVocabulary?: PropsVocabulary
   /**
@@ -71,6 +76,9 @@ export type CompositionRuntime = {
    * `bindingReaderFor(registry)` beside `propsVocabularyFor`: the registry **is**
    * one, and a helper that wrapped it would only be a place for the two to
    * disagree.
+   *
+   * Recorded as the `bindings` member of `Disposition.wiredChecks`, for the
+   * reason above.
    */
   readonly bindingReader?: BindingReader
 }

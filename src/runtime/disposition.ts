@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { writeCheckSchema, type WriteCheck } from "./checks.js"
 import { irreversibilityReasonSchema, type IrreversibilityReason } from "./irreversibility.js"
 import { stakeLevelSchema, type StakeLevel } from "./stake-level.js"
 
@@ -71,6 +72,26 @@ export const dispositionSchema = z.object({
    */
   policyFingerprint: z.string().min(1).optional(),
   /**
+   * And which of the write path's optional checks were in place, beside what the
+   * rules were.
+   *
+   * A fingerprint proves the rules held; it says nothing about the two seams a
+   * composition root hands over separately, either of which can turn an
+   * `accepted` into a `rejected` (0179, 0208). Without this, a deployment that
+   * wired a registry into the write path on Tuesday produced Wednesday's
+   * judgments under a byte-identical fingerprint, and a reader comparing the two
+   * weeks was told nothing had changed.
+   *
+   * **The empty list is written rather than omitted**, which is the opposite of
+   * `irreversibilityReasons` below, and the difference is that nothing else here
+   * disambiguates the absence. `reversible` says whether any reason could have
+   * fired; no field says whether this runtime was asked about its seams. So an
+   * empty array is *asked, and none were wired*, and the field being absent is
+   * *judged before the Gate recorded this* — the same two states `policyId` and
+   * `policyFingerprint` keep apart, by the same means.
+   */
+  wiredChecks: z.array(writeCheckSchema).optional(),
+  /**
    * Why it cannot be taken back, for the one screen that has to ask somebody.
    *
    * `reversible` above says *whether*, and `reason.detail` says why in a
@@ -105,6 +126,12 @@ export type Disposition = {
   readonly policyId: string
   /** Absent on a judgment recorded before the Gate fingerprinted policies. */
   readonly policyFingerprint?: string
+  /**
+   * Absent on a judgment recorded before the Gate wrote down which checks were
+   * wired. Empty means it was asked and none were; the schema above says why the
+   * two are kept apart here and folded together elsewhere.
+   */
+  readonly wiredChecks?: readonly WriteCheck[]
   /**
    * Absent when nothing fired, and on a judgment recorded before the field
    * existed. The schema above says which absence is which.
