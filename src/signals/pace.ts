@@ -388,8 +388,15 @@ const subtreesOf = (parts: readonly PartReading[]): readonly Subtree[] => {
  * `skimmed` is reached before the floor is consulted, because words nobody
  * counted can only make a part more skimmed than it already reads. Everything
  * after that point is a claim the floor could overturn.
+ *
+ * **Published** because a comparison of two windows asks it of a pace neither
+ * window reported — the pace a part would have had if the change had not
+ * touched its words ([`pace-change.ts`](pace-change.ts)) — and a second
+ * spelling of this rule is the thing this subsystem has already been bitten by
+ * twice: two counter keys that agreed until they did not, and two word counts
+ * that agreed until one of them learned about slots.
  */
-const standingOf = (pace: number | null, floored: boolean): PaceStanding => {
+export const paceStandingOf = (pace: number | null, floored: boolean): PaceStanding => {
   if (pace === null) return "unknown"
   if (pace < SKIMMED_BELOW) return "skimmed"
   if (floored) return "unknown"
@@ -427,7 +434,7 @@ const pacedPart = (
    */
   const spentMs = readers === 0 ? null : (dwellMs * (1 + inflation)) / readers
   const pace = spentMs === null || needMs === 0 ? null : spentMs / needMs
-  const standing = standingOf(pace, subtree.floored)
+  const standing = paceStandingOf(pace, subtree.floored)
 
   return {
     nodeId: part.nodeId,
