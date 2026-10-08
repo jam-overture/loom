@@ -199,8 +199,17 @@ read in a separate command, per `docs/routines.md`.
 | both packages | 409 files / 7,302 tests |
 | `@jam-overture/loom` | unchanged — `src/` was not opened |
 | the lessons suite | 402 tests across 19 files, all green |
-| findings ledger | 1,059 entries, 0 malformed — one new |
+| findings ledger | 1,062 entries, 0 malformed — one new |
 | `prerender:check` | 128 pages, 1,584 text junctions, 0 run together |
+
+Run twice. The first was the branch as first pushed; `main` then moved three
+pull requests (#544–#546) and left this one un-mergeable, so the base was merged
+in at `de7def3` and the gate re-run. **The figures above are the second run**,
+which is the one that counts, and the findings ledger reads 1,062 rather than the
+1,059 of the first because two other lanes filed while this branch was open.
+Exercise E's transcript is unchanged across the merge, which is the one figure in
+this lesson a base merge could have moved — nothing in #544–#546 registers a
+primitive.
 
 **No test weakened, skipped or deleted, and no assertion changed except the six
 pins above.** One test added — the registered claim for exercise E. The marked
