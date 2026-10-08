@@ -8,6 +8,50 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-07 — after a one-press change the demo's panel says the arrival screen's sentence word for word, and one of the five it counts is now the way back
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/_lib/how-many-wait-for-you.ts`) · **Status:** open — **the half of
+today's defect that was not taken**, and it is a copy question rather than a
+reading one.
+
+`demo-41-the-way-back-is-not-a-way-on` fixed the row and the ending: a press
+that would only put the visitor's last change back now says so, and the
+caption under the record stops counting it as a change still to ask for. What
+it did not touch is the sentence **above** the list. Measured on a production
+build of this branch at 1280 × 900, after one press of *Re-theme the whole
+page*:
+
+> You can ask for 5 changes here. Loom will make 2 on its own and ask you first
+> about 3.
+
+That is the arrival screen's sentence, character for character, over a list
+whose first row now reads *Puts the page back to how it looked before your last
+change*. Nothing in it is false — putting the page back **is** a change, Loom
+does make it on its own, and `howManyWaitForYou` is counting verdicts, which is
+all it claims to count. The problem is what a stranger does with it: they have
+just made one of five changes and are told, in the same words as before they
+pressed anything, that there are five.
+
+**Why it was left.** The row is the sentence's own evidence — *the rows under it
+visibly do not all read the same* is `ask-panel.tsx`'s stated reason for the
+chips — and the row now carries the direction, so the contradiction is visible
+on the screen rather than hidden. Fixing the sentence means deciding what it
+counts, and the three answers are not equivalent:
+
+1. **Leave it.** It counts verdicts and says so. The row below disambiguates.
+   Cheapest, and it is what `demo-41` did.
+2. **Say both.** *"You can ask for 4 more changes here, and put the last one
+   back."* Truest, and it is a fourth clause on a sentence `how-many-wait-for-you.ts`
+   already composes from three.
+3. **Count forward only**, as the ending now does — *"You can ask for 4 changes
+   here. Loom will make 1 on its own and ask you first about 3."* Consistent
+   with the caption, and it hides a press that is on the screen, which is the
+   one thing this surface does not do.
+
+**Recommendation: 2**, and only if a run has nothing better. The sentence is
+read once, on arrival, where it is exactly right; this is a screen a visitor
+reaches after the claim has already done its work.
 ## 2026-10-07 — the honest figure and the figure it replaces shipped side by side in one card, and only a photograph could have caught it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
@@ -7611,6 +7655,35 @@ The fix is one line in the procedure or one line in the session's setup:
 instruction that produces the bug. Filed rather than fixed because
 `docs/routines.md` is governance and a routine cannot write the governance it is
 bound by.
+
+**Appended 7 October by `Loom demo`, with a quieter spelling of the same bug
+and the one that would have put false numbers in a report.** This session's
+container again started on a detached `HEAD` at the real tip, with the local
+`main` **four days and seventeen merges behind** it:
+
+```
+HEAD (detached)   bd0af3d    7 October
+main              6686895    3 October
+origin/main       6686895    3 October   — until fetched
+```
+
+The branch was *correct* — `git checkout -b` off the detached HEAD takes the
+real tip, so step 3 did not bite this time. What bit was step 7. This lane's
+reports are built on a **before/after measured against `main`**, and
+`git checkout main` to take the before pictures silently produced a
+four-day-old tree in which `app/(demo)/_lib/what-else.ts` **did not exist** —
+so the demo's ending caption was missing from every before shot, and the
+report would have claimed this run added it.
+
+It was caught by the one thing that could catch it: the numbers disagreed with
+a measurement taken earlier in the same session, on the same code, through the
+same harness. `git diff main..<branch>` then said `new file mode` for a file
+nobody had created in this run, which is the symptom worth writing down.
+
+*A routine that measures against `main` reaches for it at least twice — once to
+branch, once to photograph — and the fetch has to happen before both.* The
+remedy is unchanged and now covers both: **`git fetch origin main` first, and
+use `origin/main` for the branch point and for the before build.**
 
 ---
 

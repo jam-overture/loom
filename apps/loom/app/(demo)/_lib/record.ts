@@ -461,8 +461,15 @@ const failureOf = (event: RuntimeEvent): string | undefined => {
  * from hiding the change that really came before. The first applied record in a
  * newest-first list is that change; what it moved, if anything, is the whole of
  * what `reversesTheLastChange` is allowed to look at.
+ *
+ * **Exported because the ask list now needs the same answer one step earlier.**
+ * `what-it-will-say.ts` asks whether a press *would* put the last change back,
+ * and the history it is allowed to look at has to be the same history a landed
+ * card was measured against — the first record that reached the page, and what
+ * that change moved. A second reading of the log for the same fact is a second
+ * opinion free to disagree with the card sitting under the row.
  */
-const lastMovesIn = (earlier: readonly ChangeRecord[]): readonly SettingMove[] | undefined =>
+export const lastMovesIn = (earlier: readonly ChangeRecord[]): readonly SettingMove[] | undefined =>
   earlier.find((record) => record.revision !== undefined)?.settingsMoved
 
 const movesOf = (
