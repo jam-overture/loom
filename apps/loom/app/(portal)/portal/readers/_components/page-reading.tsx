@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { PageName } from "@/app/(portal)/_components/page-name"
 import { PartName } from "@/app/(portal)/_components/part-name"
+import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import type { PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 import {
   comparisonOf,
@@ -16,12 +17,14 @@ import {
   type PageReading,
 } from "@/app/(portal)/_lib/reading-view"
 
+import { gotThisFar, type PageArrivals } from "@/app/(portal)/_lib/arrivals"
 import type { PagePacing } from "@/app/(portal)/_lib/pacing"
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
 import type { PageStopping } from "@/app/(portal)/_lib/stopping"
 
 import { CountedAgainst } from "./counted-against"
 import { HadTimeToRead } from "./had-time-to-read"
+import { HowManyWereThere } from "./how-many-were-there"
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
 import { SkippingUnavailable, WhatWasSkipped } from "./what-was-skipped"
@@ -82,6 +85,7 @@ export const PageReadingCard = ({
   skipping,
   stopping,
   pacing,
+  arrivals,
 }: {
   readonly reading: PageReading
   readonly page: PageNameValue
@@ -105,6 +109,17 @@ export const PageReadingCard = ({
    * in the same cases as the two above and from the same join.
    */
   readonly pacing: PagePacing | undefined
+  /**
+   * How many people were actually there, and how many of them got to each part
+   * — or `undefined` in the same cases as the three above and off the same
+   * join.
+   *
+   * It is the denominator the other three are divided by, so when it is here it
+   * is drawn **first**: a reader who has already met *9 of the 36 visits* has
+   * read a figure against a floor and taken it for a census, and a correction
+   * met afterwards is a correction that arrives too late.
+   */
+  readonly arrivals: PageArrivals | undefined
 }) => {
   const newest = reading.revisions[0]!
   const highlights = highlightsOf(newest)
@@ -121,6 +136,24 @@ export const PageReadingCard = ({
   const use = pageUse(newest)
   const unplaced = unplacedUse(newest)
 
+  /*
+   * The card's oldest sentence, in people rather than in visits.
+   *
+   * It has named the part fewest people got to since this card was written, and
+   * it named it against the largest visit count any single row of the window
+   * reported — a floor, carrying the over-count of every visit still being read
+   * when a counting window closed. `gotThisFar` is the same claim divided by
+   * the exact number of readers who arrived.
+   *
+   * It replaces the line rather than joining it, and that is the whole lesson
+   * of this branch's first photograph: one card saying *96 of the 384 visits*
+   * and *about 80 of the 320 readers* about one part, three lines apart, is
+   * worse than either sentence alone. `undefined` falls back to the figure this
+   * line has always carried, which the section above says it is falling back
+   * to.
+   */
+  const fewest = arrivals === undefined ? undefined : gotThisFar(arrivals)
+
   return (
     <section className="border-edge-subtle flex flex-col gap-4 rounded-md border p-4">
       <header className="flex flex-col gap-1">
@@ -131,6 +164,27 @@ export const PageReadingCard = ({
       </header>
 
       <CountedAgainst reading={newest} standing={standing} />
+
+      {/*
+       * **Above everything it is the denominator of, which is everything.**
+       *
+       * Every figure on this card used to be divided by the largest visit count
+       * any single row of the window reported — a floor, inflated by every visit
+       * still being read when a counting window closed, with nothing on the
+       * screen able to say by how much. *9 of the 36 visits* read as a census
+       * and was not one.
+       *
+       * It sits here rather than beside the readings below it because a
+       * correction a reader reaches after the conclusion is a correction that
+       * arrives too late. The first draft of this branch put it third, and the
+       * photograph showed the card saying *96 of the 384 visits* and *about 80
+       * of the 320 readers* about the same part, three lines apart.
+       *
+       * Absent on a version gap along with the other three readings, which
+       * `SkippingUnavailable` below already accounts for in one notice rather
+       * than four.
+       */}
+      {arrivals !== undefined && <HowManyWereThere arrivals={arrivals} />}
 
       <ul className="flex flex-col gap-2 text-xs">
         {/*
@@ -146,7 +200,11 @@ export const PageReadingCard = ({
          * sentence now says which parts it compared, which is what it always
          * meant.
          */}
-        {highlights.fewestSaw === undefined ? (
+        {fewest !== undefined ? (
+          <li className="text-ink">
+            <PlainSentence line={fewest} />
+          </li>
+        ) : highlights.fewestSaw === undefined ? (
           <li className="text-ink-muted">
             Every part people reported on was seen by about as many of them as every other.
           </li>
@@ -178,7 +236,7 @@ export const PageReadingCard = ({
           <li className="text-ink">
             People stayed longest on <PartName part={highlights.longest.name} /> —{" "}
             {plainDuration(dwellEach(highlights.longest))} each, for the{" "}
-            {highlights.longest.reached} who got there.
+            {highlights.longest.reached} visits that got there.
           </li>
         )}
 
@@ -223,7 +281,7 @@ export const PageReadingCard = ({
       {skipping === undefined ? (
         <SkippingUnavailable counted={newest.revision} live={live} />
       ) : (
-        <WhatWasSkipped skipping={skipping} />
+        <WhatWasSkipped skipping={skipping} arrivals={arrivals} />
       )}
 
       {/*
