@@ -227,6 +227,55 @@ describe("a preset asked for through the demo's write path", () => {
   })
 
   /**
+   * **And the same sentence one press later, which is where it stopped being
+   * about the screen it was on.**
+   *
+   * `palette` is a toggle: it is applied unattended, and `availablePresets`
+   * finds it applicable again in the other direction, so the panel after the
+   * press is the same five rows it was on arrival. Counted flat, the sentence
+   * said *you can ask for 5 changes here* to a visitor who had just made one
+   * of the five, in the words they had already read before pressing anything.
+   *
+   * Run over the real write path rather than over a fixture, because the fact
+   * the first clause divides on is the Gate's own assessed delta compared
+   * against what the press really moved (`put-back.ts`) — three readings that
+   * can each be right while the sentence over them is wrong.
+   *
+   * **The second clause is asserted to be unchanged in the same test**, and
+   * that is the restraint rather than an extra assertion: the five chips under
+   * the sentence are what make a count of verdicts checkable, and the way back
+   * wears one like every other row.
+   */
+  it("stops offering the way back as a change still to ask for", async () => {
+    const session = await sessionFor("split-after-a-toggle")
+    const landed = await ask(session, "palette")
+    const moved = await headOf(session)
+
+    expect(landed.outcome).toBe("applied")
+    expect(moved.revision).toBeGreaterThan(0)
+
+    const available = DEMO_PRESETS.filter(
+      (preset) => preset.plan(moved, randomIdFactory) !== undefined
+    ).map((preset) => preset.id)
+    const says = await whatEachWillSay(moved, available, randomIdFactory, systemClock, [landed])
+    const split = howManyWaitForYou(Object.values(says))
+
+    expect(available).toContain("palette")
+    expect(says.palette?.putsBack).toBe(true)
+    expect(split?.putsBack).toBe(1)
+    expect(split?.sentence).toContain(
+      `You can ask for ${available.length - 1} more changes here, and put the last one back.`
+    )
+    expect(split?.sentence).not.toContain(`ask for ${available.length} changes here`)
+
+    /* The verdicts still count every row, the way back among them. */
+    expect(split?.total).toBe(available.length)
+    expect((split?.onItsOwn ?? 0) + (split?.asksYou ?? 0) + (split?.refuses ?? 0)).toBe(
+      available.length
+    )
+  })
+
+  /**
    * And the sentence is about the page as it stands, not as it started.
    *
    * The verdict is reached on every render against the tree in hand, so an ask
