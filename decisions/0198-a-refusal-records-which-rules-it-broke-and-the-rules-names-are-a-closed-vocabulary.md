@@ -9,6 +9,12 @@
 > added `unread-binding`. Maintained rather than superseded: nothing this record
 > decides has changed, and `src/record-claims.test.ts` exists to fail until the
 > arithmetic in the prose agrees with the list in `src/`.
+>
+> **9 October 2026.** The same two counts moved again, to *fifteen*, when
+> [0250](0250-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)
+> added `unplaced-slot`. Maintained for the reason above, and the note is kept
+> rather than replaced: the second instance of a forced edit is evidence that the
+> consequence below predicted the right thing.
 
 ## Context
 
@@ -67,9 +73,9 @@ raised nothing.
 
 | | crosses | why |
 | --- | --- | --- |
-| `code` | **yes** | one of fourteen fixed strings, naming a rule and nothing about the change |
+| `code` | **yes** | one of fifteen fixed strings, naming a rule and nothing about the change |
 | `detail` | no | a sentence naming nodes, types and endpoints. It is content, and content is what 0023 keeps out |
-| `level` | no | recoverable. Thirteen of the fourteen are fixed at their code; `large-removal` is decided by `removedNodeCount`, which the summary already carries, against the `removalThresholds` of the policy `policyFingerprint` already names |
+| `level` | no | recoverable. Fourteen of the fifteen are fixed at their code; `large-removal` is decided by `removedNodeCount`, which the summary already carries, against the `removalThresholds` of the policy `policyFingerprint` already names |
 
 **And `StakeFactorCode` becomes a schema**, because the codes now leave the
 process and anything crossing that boundary is parsed on the way back in.

@@ -5,6 +5,7 @@ import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
 import { unreadBindings, type BindingReader } from "../render/reads.js"
+import { unplacedSlots, type SlotPlacer } from "../render/slots.js"
 import { partitionReservedProps } from "../reserved-props.js"
 import { walkTree } from "../tree/navigation.js"
 import type { LoomNode } from "../tree/node.js"
@@ -292,3 +293,91 @@ export const unreadBindingsIn = (
 
 export const describeUnreadBinding = (unread: UnreadBinding): string =>
   `${unread.nodeId} asks under "${unread.name}", which ${unread.type} does not read`
+
+/**
+ * What a deployment's primitives *place*, as far as the write path is concerned.
+ *
+ * The fourth question in this module, and the one under the other three. The
+ * type is registered, its props are accepted, something will read the answer it
+ * asks for — and **is there anywhere for the content this node carries to go?**
+ *
+ * A `slot` child is a named region of authored content and the name is how the
+ * primitive receiving it decides where it goes (0051). A name the primitive
+ * places nowhere is the quietest way to lose authored content in a Loom page:
+ * the node draws, its own children draw, and the region's content and
+ * everything under it is dropped. 0249 made that a render diagnostic; this is
+ * the half that refuses to write one, the same pairing `BindingReader` already
+ * has on both sides of the seam.
+ *
+ * `SlotPlacer`, the renderer's own seam, rather than a vocabulary shaped for
+ * this side — the move `PropsVocabulary` and `BindingReader` both make, for
+ * their reason: what the renderer reports as `slot-unplaced` is then, by
+ * construction, what the write path declines to write, and an SDK registry
+ * satisfies it structurally, so a host hands one object to both seams and
+ * there is nothing here that can drift.
+ */
+
+/**
+ * What a host that has handed no placer gets, which is today's behaviour.
+ *
+ * `undefined` for every type, which is `unplacedSlots`' own bargain rather than
+ * a second judgement: a resolver that cannot say what a primitive places is not
+ * a resolver claiming every primitive places nothing, and a sentinel answering
+ * `[]` would refuse every slot child on every deployment that has not opted in.
+ *
+ * Note where this stops being symmetrical with `NOTHING_DECLARED`. For a *type
+ * a registry holds*, absence and emptiness are the same claim and a primitive
+ * that declared no regions places none (0249). The sentinel is the other
+ * question — whether anything has a registry at all — and the two answers are
+ * only spelled the same way.
+ */
+export const NOTHING_PLACED: SlotPlacer = { slotsPlacedBy: () => undefined }
+
+/** A region a change would fill on a primitive that places no region of that name. */
+export type UnplacedSlot = {
+  readonly nodeId: NodeId
+  readonly type: PrimitiveType
+  /** The name the tree filled, which is the half the primitive does not hold. */
+  readonly name: string
+}
+
+/**
+ * Every region filled in a subtree whose own primitive places it nowhere, in
+ * document order and name-sorted within a node.
+ *
+ * Read off each element's **direct** `slot` children, which is the same list
+ * `reportUnplacedSlots` reads in the renderer and for its reason: only direct
+ * slot children are routed to a primitive (0051), so a slot nested inside
+ * another slot's fallback renders where it sits and is nobody's region to
+ * place. `walkTree` reaches it anyway, and reading children rather than
+ * positions is what keeps this walk from reporting it.
+ *
+ * `unplacedSlots` is the comparison, shared with the renderer rather than
+ * repeated: it deduplicates, because two slot children sharing a name are both
+ * placed and so both lost by one mistake, and it sorts, because a list whose
+ * order depends on child order is one a test can only assert loosely.
+ *
+ * The whole subtree rather than its root, for the reason `unknownPrimitivesIn`
+ * gives: an inserted band carries its own children, and a paragraph dropped
+ * three levels down is the same dropped paragraph.
+ */
+export const unplacedSlotsIn = (
+  node: LoomNode,
+  places: SlotPlacer
+): readonly UnplacedSlot[] =>
+  Array.from(walkTree(node)).flatMap((current) => {
+    if (current.kind !== "element") return []
+
+    const filled: string[] = []
+    for (const child of current.children) if (child.kind === "slot") filled.push(child.name)
+    if (filled.length === 0) return []
+
+    return unplacedSlots(filled, places.slotsPlacedBy(current.type)).map((name) => ({
+      nodeId: current.id,
+      type: current.type,
+      name,
+    }))
+  })
+
+export const describeUnplacedSlot = (unplaced: UnplacedSlot): string =>
+  `${unplaced.nodeId} fills "${unplaced.name}", which ${unplaced.type} places nowhere`

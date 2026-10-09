@@ -900,7 +900,9 @@ describe("G", () => {
         baseRevision: 0,
         operations,
       }
-      const analysis = analyzeDelta(tree, delta, interactivePredicateFor(policy.interactiveTypes))
+      const analysis = analyzeDelta(tree, delta, {
+        isInteractive: interactivePredicateFor(policy.interactiveTypes),
+      })
       if (!analysis.ok) throw new Error(JSON.stringify(analysis.error))
 
       const proposal: ProposedChange = {

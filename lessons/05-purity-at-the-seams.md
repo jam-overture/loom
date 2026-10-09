@@ -153,6 +153,7 @@ export type CompositionRuntime = {
   readonly repairer?: ChangeRepairer
   readonly propsVocabulary?: PropsVocabulary
   readonly bindingReader?: BindingReader
+  readonly slotPlacer?: SlotPlacer
 }
 ```
 

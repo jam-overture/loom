@@ -90,10 +90,11 @@ bookkeeping detail and is the design.
    `assessStakes` on it — the Gate's real function, not a copy — against the
    policy it is considering.
 
-   An analysis also carries six lists of *specifics*: the unreachable targets,
+   An analysis also carries seven lists of *specifics*: the unreachable targets,
    the unregistered types, the nodes whose props their own primitive refuses, the
-   questions nothing reads, the redirected forms, the repointed regions. None of
-   those is on the record, so the caller passes six empty arrays.
+   questions nothing reads, the content put where nothing places it, the
+   redirected forms, the repointed regions. None of those is on the record, so the
+   caller passes seven empty arrays.
 
    Write down what that simulation answers for a change the Gate **refused**.
    Then write down what it answers for an ordinary large redesign the Gate merely
@@ -164,10 +165,10 @@ Here is the shape of the thing, and it is worth being exact because every wrong
 answer in this lesson comes from being vague about it.
 
 `assessStakes` is handed a `ChangeAnalysis`. That record holds counts, it holds
-four lists of type and prop names — and it holds **six lists of specifics**: which
-targets this change leaves unreachable, which node asked a question nothing reads,
-which form now posts somewhere else, and so on. Each entry in each of those six
-names a part of a particular page: a node id, a prop path, an endpoint name, and a
+four lists of type and prop names — and it holds **seven lists of specifics**:
+which targets this change leaves unreachable, which node asked a question nothing
+reads, which form now posts somewhere else, and so on. Each entry in each of those
+seven names a part of a particular page: a node id, a prop path, an endpoint name, and a
 sentence a factor wrote about it.
 
 None of that crosses into telemetry, and the reason is lesson 17's rather than an
@@ -191,9 +192,9 @@ The finding that opened this asked for exactly two optional fields —
 `StakeInput` from a record and call `assessStakes` itself. The Gate's own
 function. No copy, no second implementation, five lines of glue.
 
-A caller doing that has to supply the six lists of specifics, and it has none of
-them, so it passes six empty arrays. Empty is what a rule has to be handed to stay
-silent. And **five of those six lists are the inputs to `critical` rules.**
+A caller doing that has to supply the seven lists of specifics, and it has none of
+them, so it passes seven empty arrays. Empty is what a rule has to be handed to
+stay silent. And **five of those seven lists are the inputs to `critical` rules.**
 
 Work out what follows before you read it. Exercise B runs it.
 
@@ -203,7 +204,7 @@ Work out what follows before you read it. Exercise B runs it.
 
 ### Two kinds of rule were in one list and nothing named the difference
 
-The Gate's stakes vocabulary has fourteen rules, and they have always answered two
+The Gate's stakes vocabulary has fifteen rules, and they have always answered two
 different questions.
 
 Seven of them ask *how much of this deployment's page does this touch.* How many
@@ -212,15 +213,15 @@ it cares about were destroyed, rewritten, moved. Every one of those reads a fiel
 of a `GatePolicy`, so the same change under two policies is two answers — which is
 the whole premise of a counterfactual.
 
-The other seven ask *is this change coherent at all.* A target nobody can reach. A
+The other eight ask *is this change coherent at all.* A target nobody can reach. A
 type nothing is registered for. Props the declaring primitive refuses. A question
-no primitive reads. A form or a region pointed somewhere else. Work written over.
-No field of a policy moves any of them. A host that wants them silent declares no
+no primitive reads. Content put in a region nothing places. A form or a region
+pointed somewhere else. Work written over. No field of a policy moves any of them. A host that wants them silent declares no
 vocabulary (0002), and that is the only knob there is.
 
 So, as the partition is published:
 **seven of those rules read a field of the policy**, and
-**seven are fixed at their code.**
+**eight are fixed at their code.**
 The first kind is *measured*; the second is *fixed*. Before 0215 both kinds sat in
 one array and the difference had no name, which is why a simulation built on that
 array could not tell which of its answers it was entitled to.
@@ -233,7 +234,7 @@ A measured rule can be asked again because its inputs are the kind of fact a
 record is allowed to carry: counts, and names the host itself registered. Run the
 rule over the record, against the new policy, and you have a real answer.
 
-A fixed rule cannot be asked again at all — its input is one of those six lists,
+A fixed rule cannot be asked again at all — its input is one of those seven lists,
 and the list is gone. But there is nothing to ask. No policy field moves it, so the
 level it raised is a property of the rule itself. The record carries the rule's
 **code**, and for a fixed rule the code is the whole of the answer.
@@ -416,7 +417,7 @@ the row can tell them.
 | the measurable half of an analysis | `stakeMeasurementOf`, same file |
 | the seven that can be run twice | `measureStakes`, same file |
 | the whole judgment, as the Gate makes it | `assessStakes`, same file |
-| the six lists that do not cross | `nestedTargets` and five beside it in `src/runtime/analysis.ts` |
+| the seven lists that do not cross | `nestedTargets` and six beside it in `src/runtime/analysis.ts` |
 | what a record keeps | `assessmentSummarySchema` in `src/telemetry/event.ts` |
 | asking a record what it would have been | `remeasureStakes` in `src/telemetry/remeasure.ts` |
 | the record as a measurement | `measurementFrom`, same file |
@@ -488,6 +489,7 @@ const EMPTY_ANALYSIS: ChangeAnalysis = {
   unknownPrimitives: [],
   invalidProps: [],
   unreadBindings: [],
+  unplacedSlots: [],
   redirectedSubmissions: [],
   repointedBindings: [],
   shallowestAffectedDepth: 0,
@@ -595,14 +597,14 @@ describe("A", () => {
     )
     console.log(`  ${Object.keys(stakeMeasurementOf(EMPTY_ANALYSIS)).join(", ")}`)
     console.log(`lists on a ChangeAnalysis that name parts of a page: ${
-      ["nestedTargets", "unknownPrimitives", "invalidProps", "unreadBindings", "redirectedSubmissions", "repointedBindings"].length
+      ["nestedTargets", "unknownPrimitives", "invalidProps", "unreadBindings", "unplacedSlots", "redirectedSubmissions", "repointedBindings"].length
     }`)
   })
 })
 ```
 
 ```
-rules in the Gate's stakes vocabulary: 14
+rules in the Gate's stakes vocabulary: 15
   measured  —        protected-type-removed
   measured  —        protected-type-touched
   measured  —        protected-type-relocated
@@ -615,17 +617,18 @@ rules in the Gate's stakes vocabulary: 14
   fixed     critical unknown-primitive
   fixed     critical invalid-props
   fixed     critical unread-binding
+  fixed     critical unplaced-slot
   fixed     high     redirected-submission
   fixed     high     repointed-binding
-  fixed 7, measured 7, and the two lists are filtered from the one above
+  fixed 8, measured 7, and the two lists are filtered from the one above
 fields on a GatePolicy: 14
 facts a StakeMeasurement carries: 9
   insertedNodeCount, removedNodeCount, movedNodeCount, affectedNodeCount, shallowestAffectedDepth, touchedPrimitiveTypes, removedPrimitiveTypes, relocatedPrimitiveTypes, configuredPropKeys
-lists on a ChangeAnalysis that name parts of a page: 6
+lists on a ChangeAnalysis that name parts of a page: 7
 ```
 
 Four of these numbers are worth sitting with for a moment, and the interesting one
-is not the seven and seven.
+is not the eight and seven.
 
 The vocabulary comes out in the order the Gate raises its rules, and the partition
 falls as a clean cut rather than interleaved — which is not a coincidence and is
@@ -634,15 +637,15 @@ not arithmetic either. The two lists were one list, cut where the kinds change a
 factors came out and a reordering would have changed what every existing record
 means. The order is part of the data.
 
-Then the last two lines together. Nine facts a measurement may carry; six lists it
-may not. The six are not the smaller half of the analysis — they are the half that
-names things, and a glance at the four `critical` rows above shows where they go.
-Four of the five rules that can refuse a change outright read one of those six
-lists.
+Then the last two lines together. Nine facts a measurement may carry; seven lists
+it may not. The seven are not the smaller half of the analysis — they are the half
+that names things, and a glance at the five `critical` rows above shows where they
+go. Five of the six rules that can refuse a change outright read one of those
+seven lists.
 
 ### Exercise B — rebuild the analysis and re-run the real Gate on it
 
-Predict 2. The claim under test is that passing six empty lists is a detail.
+Predict 2. The claim under test is that passing seven empty lists is a detail.
 
 ```ts
 describe("B", () => {
@@ -947,12 +950,13 @@ describe("G", () => {
 recorded stakes:  critical
 remeasured:       low  <- a floor
 factors:          0
-unreadable:       7
+unreadable:       8
   discards-later-work
   nested-target
   unknown-primitive
   invalid-props
   unread-binding
+  unplaced-slot
   redirected-submission
   repointed-binding
 ```
@@ -964,7 +968,7 @@ vocabulary comes back in one list.
 
 Set this transcript beside exercise B's, because they are the same two numbers with
 one difference. Both say `low` for a change that was refused as `critical`. B says
-it as a result. This says it as a floor, with seven named reasons and a count of
+it as a result. This says it as a floor, with eight named reasons and a count of
 zero factors, and a caller that reads `level` without reading `unreadable` turns
 this back into B.
 
@@ -976,7 +980,7 @@ already had the right habit got it from the ladder, where it had learned to set
 aside every row it could not reproduce.
 
 Exercise E's record is one field short and tells you so. This one is six months
-older and tells you so in seven places. Neither is a defect in the journal. Both
+older and tells you so in eight places. Neither is a defect in the journal. Both
 are the journal being asked a question it was not written to answer, and saying
 which part it cannot reach.
 
@@ -986,12 +990,12 @@ which part it cannot reach.
 
 **Two optional fields and nothing else**, exactly as the gap was filed. Rejected
 because it does not reach the stated goal, and exercise B is the measurement: a
-caller still cannot build a `ChangeAnalysis` without fabricating ids and six empty
-lists, and five of those lists are `critical` inputs, so the answer it computes is
-wrong downward on refusals. The filing was right about the gap and wrong about the
+caller still cannot build a `ChangeAnalysis` without fabricating ids and seven
+empty lists, and six of those lists are `critical` inputs, so the answer it
+computes is wrong downward on refusals. The filing was right about the gap and wrong about the
 remedy, which is the usual shape of a good finding.
 
-**Journal the six lists of specifics**, so the whole analysis can be rebuilt and
+**Journal the seven lists of specifics**, so the whole analysis can be rebuilt and
 nothing has to be partitioned. Rejected: that is content — node ids, prop paths,
 endpoint names, the sentences a factor wrote — and 0023 keeps it out. It would
 also grow every record by an unbounded amount to answer a question the codes
@@ -1019,13 +1023,13 @@ types.
 **Reproduce the measurement in the portal and guard it with a build-time check**,
 which is what that screen already does for the ladder's rungs. Rejected on cost
 rather than on principle, and the line is worth seeing: the ladder comparison is
-eight comparisons against fields that are on the record, where this is fourteen
+eight comparisons against fields that are on the record, where this is fifteen
 rules with thresholds, a severity ordering and a host vocabulary. The existing
 guard is affordable because what it guards is small.
 
 **Keep one list of rules and let each one decide for itself whether it can be
 re-run.** The shape that sounds most flexible. Rejected because it puts the
-partition back into fourteen places after taking it out of none, and because the
+partition back into fifteen places after taking it out of none, and because the
 thing a caller needs is not per-rule cleverness but a *published* answer to *which
 of these can your question move*. Two exported lists, derived, are that answer.
 
@@ -1081,11 +1085,11 @@ answer, then check.**
    policies, levels or records in it — it should be about what you owe a question
    you have decided in advance not to be able to answer. Then give one example from
    outside software entirely.
-2. The Gate's stakes vocabulary has fourteen rules and they are cut into two
+2. The Gate's stakes vocabulary has fifteen rules and they are cut into two
    kinds. Give the question each kind answers, and then say which of the two could
    be re-run from a record and why — making your answer about *what the rule reads*
    rather than about what the record holds.
-3. A caller rebuilds an analysis from a record, passes six empty lists, and re-runs
+3. A caller rebuilds an analysis from a record, passes seven empty lists, and re-runs
    the Gate's own `assessStakes`. Say what it gets right and what it gets wrong, and
    then say what is dangerous about *which* of the two it gets wrong. Your last
    sentence should be about populations.

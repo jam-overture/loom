@@ -437,6 +437,44 @@ describe("assessStakes on a question nothing reads", () => {
   })
 })
 
+describe("assessStakes on content put where nothing places it", () => {
+  const unplaced = (count: number) =>
+    Array.from({ length: count }, (_unused, index) => ({
+      nodeId: nodeIdSchema.parse(`n_fill${index}`),
+      type: primitiveTypeSchema.parse("loom.dialog"),
+      name: `body${index}`,
+    }))
+
+  /**
+   * `unread-binding`'s level, and the argument for it is that one with a word
+   * changed: the page draws, the declaration holds the correct name, and a
+   * refusal is the one disposition that can say what to write instead. What
+   * makes it the stronger case rather than the weaker is what is lost — a
+   * question nothing reads costs a round trip, and a region nothing places
+   * costs the author's paragraph and everything under it.
+   */
+  it("is critical, which under the default floor is a refusal rather than a question", () => {
+    const assessment = stakesOf(analysisOf({ unplacedSlots: unplaced(1) }), defaultGatePolicy)
+
+    expect(assessment.level).toBe("critical")
+    expect(stakeFactor(assessment, "unplaced-slot")?.detail).toBe(
+      'fills a region no primitive places, so the content and everything under it is dropped: n_fill0 fills "body0", which loom.dialog places nowhere'
+    )
+  })
+
+  it("names every node and the region it filled, because that is the string a repairer rewrites", () => {
+    const assessment = stakesOf(analysisOf({ unplacedSlots: unplaced(2) }), defaultGatePolicy)
+
+    expect(stakeFactor(assessment, "unplaced-slot")?.detail).toBe(
+      'fills 2 regions no primitive places, so the contents and everything under them are dropped: n_fill0 fills "body0", which loom.dialog places nowhere; n_fill1 fills "body1", which loom.dialog places nowhere'
+    )
+  })
+
+  it("says nothing about a change that leaves none", () => {
+    expect(stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "unplaced-slot")).toBeUndefined()
+  })
+})
+
 describe("assessStakes on a redirected submission", () => {
   const redirected = (count: number) =>
     Array.from({ length: count }, (_unused, index) => ({
@@ -581,7 +619,7 @@ describe("assessStakes on a repointed binding", () => {
 /**
  * The list exists so that something can walk the rules — a table of
  * plain-language sentences, a telemetry corpus grouping refusals by cause, a
- * dashboard that needs thirteen buckets before the first request arrives. A
+ * dashboard that needs fifteen buckets before the first request arrives. A
  * list that names a rule nothing can raise costs a row that is permanently
  * zero with no explanation, and a rule missing from the list costs a bucket
  * that silently never appears. Neither is visible from a `switch`.
@@ -624,6 +662,13 @@ describe("STAKE_FACTOR_CODES", () => {
         name: bindingNameSchema.parse("rows"),
       },
     ],
+    unplacedSlots: [
+      {
+        nodeId: nodeIdSchema.parse("n_fill"),
+        type: primitiveTypeSchema.parse("loom.dialog"),
+        name: "body",
+      },
+    ],
     redirectedSubmissions: [
       {
         nodeId: nodeIdSchema.parse("n_form"),
@@ -661,7 +706,7 @@ describe("STAKE_FACTOR_CODES", () => {
   })
 
   /**
-   * The partition, held against the one case that raises all fourteen.
+   * The partition, held against the one case that raises all fifteen.
    *
    * Two readers depend on it being exactly a partition. The Gate runs the
    * measuring half against a measurement and the fixed half against the delta,

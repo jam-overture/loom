@@ -3,78 +3,75 @@ import { z } from "zod"
 
 import { sequentialIdFactory } from "../../src/ids.js"
 import { colour, family, monospace, size, space } from "../../src/primitives/tokens.js"
+import { slotNameSchema } from "../../src/primitive-type.js"
 import type { LoomPrimitiveProps } from "../../src/render/primitive.js"
-import type { BindingReader } from "../../src/render/reads.js"
-import { DATA_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
+import type { SlotPlacer } from "../../src/render/slots.js"
+import { THEME_PROP_KEY } from "../../src/reserved-props.js"
 import { assessChange } from "../../src/runtime/assessment.js"
 import { gate } from "../../src/runtime/gate.js"
 import { defaultGatePolicy } from "../../src/runtime/policy.js"
 import { definePrimitive } from "../../src/sdk/definition.js"
 import { buildIntent, buildProposal } from "../../src/testing/doubles.js"
 import { themeSelectionSchema, type ThemeSelection } from "../../src/theme/theme.js"
-import { buildElement, buildText } from "../../src/tree/builders.js"
+import { buildElement, buildSlot, buildText } from "../../src/tree/builders.js"
 import type { TreeDelta } from "../../src/tree/delta.js"
 import { createTree } from "../../src/tree/tree.js"
 
 import { defineSpecimen, WIDE } from "./specimen.js"
 
 /**
- * The same delta, twice — the picture of what 0208 adds.
+ * The same delta, twice — the picture of what 0250 adds, and the sibling of the
+ * `unread-binding` sheet beside it.
  *
- * A model is asked to put the services list on a card. It writes the binding
- * correctly in every way the seams could already check: `catalogue.services` is
- * registered, the params are fine, the JSON parses. It asks under `rows`, and
- * `spec.listing` reads `entries`.
+ * A model is asked to put a paragraph in a panel. It writes a region correctly in
+ * every way the seams could already check: the type is registered, the props are
+ * valid, the content is well-formed. It fills `body`, and `spec.panel` places
+ * `header`.
  *
  * On the left is what every deployment did until this run and what every
- * deployment that hands no reader still does: the change is judged `low`, applied,
- * appended to the log, and served. The page draws. The region is empty and the
- * host pays for an answer nothing opens, on every request, until somebody reads
- * render diagnostics.
+ * deployment that hands no placer still does: the change is judged `low`,
+ * applied, appended to the log, and served. The page draws. The paragraph and
+ * everything under it is dropped on the floor, on every request, until somebody
+ * reads render diagnostics.
  *
- * On the right is the same delta against the same policy, with the registry handed
- * to the write path. Nothing else differs — not the tree, not the proposal, not
- * the confidence, not the policy.
+ * On the right is the same delta against the same policy, with the registry
+ * handed to the write path. Nothing else differs — not the tree, not the
+ * proposal, not the confidence, not the policy.
  *
  * **Nothing in either column is typed into this file.** Both call `assessChange`
- * and `gate`, the two functions the composition runtime calls, and draw what comes
- * back: the disposition's kind, the rule that fired, and the factor's own detail
- * line. The `rows` in the right-hand column is the runtime saying it, which is the
- * whole claim — the refusal carries the string a repairer rewrites.
+ * and `gate`, the two functions the composition runtime calls, and draw what
+ * comes back: the disposition's kind, the rule that fired, and the factor's own
+ * detail line. The `body` in the right-hand column is the runtime saying it,
+ * which is the whole claim — the refusal carries the string a repairer rewrites.
  */
 
-const LISTING = "spec.listing"
+const PANEL = "spec.panel"
 
-const listing = definePrimitive({
-  type: LISTING,
-  description: "A run of services, read under the one name it declares.",
+const panel = definePrimitive({
+  type: PANEL,
+  description: "A panel with one region, which is the only region it places.",
   props: z.object({}),
-  reads: ["entries"],
-  component: ({ loom }: LoomPrimitiveProps) => {
-    const outcome = loom.data["entries"]
-
-    return createElement(
-      "p",
-      null,
-      outcome?.status === "ready" ? "the services" : "nothing to show yet"
-    )
-  },
+  slots: ["header"],
+  component: ({ loom }: LoomPrimitiveProps) =>
+    createElement("section", null, loom.slots["header"] ?? null),
 })
 
 /**
- * The registry's half, as a reader over one type.
+ * The registry's half, as a placer over one type.
  *
- * A real host hands its registry, which satisfies `BindingReader` already. A
+ * A real host hands its registry, which satisfies `SlotPlacer` already. A
  * specimen cannot: `createPrimitiveRegistry` would want every type on the page
  * registered, and the page is a `loom.section` full of house primitives. So this
- * answers for `spec.listing` and `undefined` for everything else, which is
- * exactly what a registry holding only that type would answer.
+ * answers for `spec.panel` and `undefined` for everything else, which is exactly
+ * what a registry holding only that type would answer.
+ *
+ * It reads the declaration rather than repeating it, so the sheet cannot end up
+ * arguing against a list the primitive above does not have.
  */
-const readsEntries: BindingReader = {
-  bindingsReadBy: (type) => (type === LISTING ? ["entries"] : undefined),
+const placesHeader: SlotPlacer = {
+  slotsPlacedBy: (type) =>
+    type === PANEL ? panel.slots.map((name) => slotNameSchema.parse(name)) : undefined,
 }
-
-const ASKS_UNDER_ROWS = { rows: { source: "catalogue.services", params: {} } }
 
 type Verdict = {
   readonly kind: string
@@ -85,17 +82,17 @@ type Verdict = {
 /**
  * One judgement, run for real.
  *
- * The tree is rebuilt per column rather than shared, because `assessChange` needs
- * the revision the delta names and two judgements of one tree would have to agree
- * about which one moved it. Neither applies anything here — the point of the
- * picture is the verdict, and a verdict is what the Gate returns before anybody
- * writes.
+ * The tree is rebuilt per column rather than shared, for the reason the sheet
+ * beside this one gives: `assessChange` needs the revision the delta names, and
+ * two judgements of one tree would have to agree about which of them moved it.
+ * Neither applies anything — the point of the picture is the verdict, and a
+ * verdict is what the Gate returns before anybody writes.
  */
-const judge = (reads: BindingReader | undefined): Verdict => {
+const judge = (places: SlotPlacer | undefined): Verdict => {
   const idFactory = sequentialIdFactory("spec")
 
-  const card = buildElement(idFactory, { type: "loom.card", props: { tone: "surface" } })
-  const page = buildElement(idFactory, { type: "loom.page", children: [card] })
+  const subject = buildElement(idFactory, { type: PANEL })
+  const page = buildElement(idFactory, { type: "loom.page", children: [subject] })
   const tree = createTree(page, idFactory)
 
   const delta: TreeDelta = {
@@ -105,12 +102,11 @@ const judge = (reads: BindingReader | undefined): Verdict => {
     operations: [
       {
         op: "insert",
-        parentId: card.id,
+        parentId: subject.id,
         index: 0,
-        node: buildElement(idFactory, {
-          type: LISTING,
-          props: { [DATA_PROP_KEY]: ASKS_UNDER_ROWS } as never,
-        }),
+        node: buildSlot(idFactory, "body", [
+          buildText(idFactory, "Book a call and we will come to you."),
+        ]),
       },
     ],
   }
@@ -118,13 +114,9 @@ const judge = (reads: BindingReader | undefined): Verdict => {
   const intent = buildIntent(idFactory, { treeId: tree.treeId, baseRevision: tree.revision })
   const proposal = buildProposal(idFactory, { intentId: intent.intentId, delta })
 
-  const assessed = assessChange(
-    tree,
-    proposal,
-    defaultGatePolicy,
-    idFactory.deltaId(),
-    { bindingReader: reads }
-  )
+  const assessed = assessChange(tree, proposal, defaultGatePolicy, idFactory.deltaId(), {
+    slotPlacer: places,
+  })
 
   if (!assessed.ok) return { kind: "not applicable", rule: assessed.error.code, detail: "" }
 
@@ -168,10 +160,10 @@ const line = (label: string, value: string, key: string): ReactNode =>
 
 const verdictPanel = definePrimitive({
   type: "spec.verdict",
-  description: "What the Gate answered, for a write path handed a reader or handed none.",
+  description: "What the Gate answered, for a write path handed a placer or handed none.",
   props: z.object({ wired: z.boolean() }),
   component: ({ props }: LoomPrimitiveProps<{ wired: boolean }>) => {
-    const verdict = judge(props.wired ? readsEntries : undefined)
+    const verdict = judge(props.wired ? placesHeader : undefined)
 
     return createElement(
       "div",
@@ -227,7 +219,7 @@ const build = (theme: ThemeSelection) => {
         children: [
           buildText(
             idFactory,
-            "A model puts the services list on a card and asks for it under rows. The source is registered, the params are fine, the JSON parses — and the primitive drawing it reads entries. Both columns judge that same delta against the same policy. Only the right-hand one was handed the registry.",
+            "A model puts a paragraph in a panel and fills the region called body. The type is registered, the props are valid, the content is well-formed — and the panel places one region, called header. Both columns judge that same delta against the same policy. Only the right-hand one was handed the registry.",
           ),
         ],
       }),
@@ -237,14 +229,14 @@ const build = (theme: ThemeSelection) => {
         children: [
           column(
             idFactory,
-            "Handed no reader",
-            "Every deployment until this run, and every deployment that does not opt in. Applied, appended, served — and the region is empty.",
+            "Handed no placer",
+            "Every deployment until this run, and every deployment that does not opt in. Applied, appended, served — and the paragraph is nowhere on the page.",
             false
           ),
           column(
             idFactory,
             "Handed the registry",
-            "The same change, refused at the ordinary floor, carrying the name it asked under and the type that does not read it.",
+            "The same change, refused at the ordinary floor, carrying the region it filled and the type that places no region of that name.",
             true
           ),
         ],
@@ -263,10 +255,10 @@ const build = (theme: ThemeSelection) => {
 }
 
 export default defineSpecimen({
-  name: "unread-binding",
+  name: "unplaced-slot",
   title: "One delta, one policy, and the only difference is who was asked",
   build,
-  primitives: [listing, verdictPanel],
+  primitives: [panel, verdictPanel],
   viewports: [WIDE],
   themes: [
     {
