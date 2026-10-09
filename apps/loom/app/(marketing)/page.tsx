@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { askById, readAskId } from "@/app/(marketing)/_lib/adapt/asks"
+import { askedFor } from "@/app/(marketing)/_lib/addressed"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, pageMetadata } from "@/app/(marketing)/_lib/share"
@@ -40,36 +41,27 @@ export const generateMetadata = async ({
 /**
  * The landing page: one tree, rendered.
  *
- * Everything a visitor can do to this page is in its address. The palette comes
- * off the query string, which is what makes the footer's re-theme link an
- * ordinary navigation rather than client state — and what the visitor has asked
- * the page for arrives the same way, so a rearranged page can be copied,
- * bookmarked and shared, and two people reading the site cannot move it under
- * each other.
+ * Everything a visitor can do to this site is in the address, which is what
+ * makes the footer's re-theme link an ordinary navigation rather than client
+ * state, and what lets a rearranged page be copied, bookmarked and shared
+ * without two readers moving the site under each other. It is read here through
+ * `askedFor`, the one reader, and read whole.
  *
- * An unrecognised value in either is the default rather than an error. A
- * landing page reached with a mangled address should be a page, not a 400.
+ * **The palette is the only part of it this page is a function of**, and that is
+ * a change of 1 October rather than a property: the band a request rearranges
+ * moved to `/how-it-works`, and `pageTreeFor` runs a request for that page and
+ * for no other. `addressed.test.ts` measures it — this page serves the same
+ * markup asked or not — and it reads the rest of the address anyway, because the
+ * last time a page here decided for itself which half of an address was worth
+ * reading, the half it dropped was the half the band needed.
+ *
+ * The card is the one thing still drawn from the request: `generateMetadata`
+ * above announces a rearranged address as the request that made it.
  */
 const HomePage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
-  const params = await searchParams
-  const ask = readAskId(params["ask"])
   const rendered = await renderSitePage(HOME, {
     origin: await servedOrigin(),
-    theme: readThemeName(params["theme"]),
-    ...(ask === undefined
-      ? {}
-      : {
-          ask,
-          approve: params["approve"] === "1",
-          /**
-           * Putting it back is the visitor's second decision, so it is the
-           * address's second pair of answers. Both are ignored without an `ask`,
-           * because there is nothing to reverse — a mangled address should be a
-           * page rather than a 400, here as everywhere else on this site.
-           */
-          back: params["back"] === "1",
-          backApprove: params["back-yes"] === "1",
-        }),
+    ...askedFor(await searchParams),
   })
 
   /**
