@@ -38,7 +38,7 @@ type OptionalKeysOf<T> = {
  * and it has to be written down for the mapped type below to mean anything.
  *
  * A repairer is the field a reader most expects to find on the other list, and
- * 0244 says why it is here: wiring one moves a deployment's refusal rate
+ * 0248 says why it is here: wiring one moves a deployment's refusal rate
  * considerably and changes no single judgment, because it adds an attempt rather
  * than deciding one. A disposition naming an input that did not take part in it
  * would be recording the wrong thing.

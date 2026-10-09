@@ -9,7 +9,7 @@ A judgment now says which of the write path's optional checks were in place when
 it was made, beside which rules were consulted. It closes this lane's own
 21 September finding — *a props vocabulary is not in the policy fingerprint, so
 two dispositions either side of wiring one read as identical* — and is recorded as
-[0244](../decisions/0244-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md).
+[0248](../decisions/0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md).
 
 One new module and four edits, all in this lane:
 
@@ -191,7 +191,7 @@ already on the record does not need a second entry saying it was present.
 
 ## Records
 
-**Added:** 0244 — *which optional checks were in place is named on the judgment,
+**Added:** 0248 — *which optional checks were in place is named on the judgment,
 beside the rules that were consulted*, `Accepted`, §2 → §5.
 
 It supersedes nothing and contradicts no `Accepted` record. 0179 put the props
@@ -204,6 +204,11 @@ the gap worth closing — and this does not change it.
 requests claim 0241 (#548) and 0242 (#553), both numbers `main` already holds,
 which is the clash this lane filed this morning; #554 adds none. So 0244 is free
 everywhere and nothing else claims it.
+
+**Renumbered to 0248 on 9 October**, by `Loom merge`, when this branch was
+merged: #555 had landed its own 0244 that morning, so the number above was no
+longer free. The record carries a dated note saying so, and nothing it decides
+changed.
 
 ## Findings
 

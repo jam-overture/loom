@@ -1,8 +1,16 @@
-# 0244. Which optional checks were in place is named on the judgment, beside the rules that were consulted
+# 0248. Which optional checks were in place is named on the judgment, beside the rules that were consulted
 
 **Status:** Accepted
 **Date:** 2026-10-08
 **Section:** §2 → §5
+
+> **Renumbered on 2026-10-09**, from 0244, when this branch (#556) was merged.
+> `main` had meanwhile accepted a different 0244 — *a pace moved because the
+> words moved or the readers did, and a counterfactual says which* (#555) — and
+> two records sharing a number is fatal (0097). This record was written on 8
+> October and nothing in it changed but its number; the references to it on this
+> branch were updated with it. The note below is the reasoning as it stood when
+> the record was written, and 0244 is no longer free.
 
 > **Why this number.** `0243` is the highest record on `main`. The three open
 > pull requests claim `0241` (#548) and `0242` (#553) — both numbers `main`

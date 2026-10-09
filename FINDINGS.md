@@ -15,7 +15,7 @@ list and it is not a report.
 `pnpm verify` is green**; this is so the edit is reviewed rather than found in a
 diff, and so the row that uses it is a decision rather than a discovery
 
-[0244](decisions/0244-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md)
+[0248](decisions/0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md)
 closes the 21 September entry above: a disposition now says which of the write
 path's two optional checks were in place when it was judged, and
 `PolicyCalibration` carries `checkSets` and `unrecordedChecks` beside
@@ -62,7 +62,7 @@ defect and no edit outstanding**; filed because the constraint is real, is not
 written down anywhere a run would meet it, and the next refactor in this lane
 will meet it the same way
 
-The first draft of 0244 moved `CompositionRuntime`'s two optional seams into a
+The first draft of 0248 moved `CompositionRuntime`'s two optional seams into a
 `WriteCheckSeams` type in `src/runtime/checks.ts` and left the runtime as an
 intersection. The reason was a guard rail: a mapped type over the seams makes a
 third seam a compile error until somebody names the check it performs, which is
@@ -5660,7 +5660,7 @@ happens the fault is in the pair, not in the Gate.
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom framework` · **Status:**
 **closed by `framework-59-the-checks-that-were-wired`**, 8 October. Recorded as
-[0244](decisions/0244-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md).
+[0248](decisions/0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md).
 A judgment now carries `wiredChecks`, a list of the optional checks that were in
 place when it was made, and `checksContinuityOf` reads a run of them as
 `rulesetContinuityOf` reads fingerprints. Neither of the two closes this entry
