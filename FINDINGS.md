@@ -47485,3 +47485,101 @@ could read the record and assert the counts itself, and that would be two
 spellings of one rule — the mistake this repository has now written down three
 times, most recently as the reason the word-counting rule moved into
 `words.ts`. One registry or none.
+
+---
+## 2026-10-09 — a before-and-after card now has a sentence that belongs above it rather than on it, and two numbers that must be drawn together or not at all
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+what §20 of [`docs/signals.md`](docs/signals.md) makes drawable, with the four
+shape choices that would otherwise have to be reversed
+
+`readershipChangeOf(was, now)` is on this branch and compares two windows'
+readerships off the region maps §7 has been writing since 2 October. It exists
+for one reason: every before-and-after reading this lane has built attributes
+what moved to the change, and none of them can see that the readers were not the
+same people. So this is **not another row on the reader card** — it is the
+sentence that belongs *above* a comparison, qualifying it.
+
+Four things, each of which is cheaper to know now than to reverse later.
+
+1. **`comparability` is what a card leads with, and `moved` and `movedAtMost`
+   are drawn together or not at all.** `moved` is a floor — the regions one map
+   names and the other withholds contribute a term nobody can evaluate —
+   and `movedAtMost` adds the whole unaccounted share of both sides. Drawing the
+   floor alone understates a quiet deployment's movement by however much its
+   floor is holding; drawing the ceiling alone makes every quiet page look like
+   a different audience. `unsettled` is the standing for the gap and is the
+   ordinary state of a page with modest traffic.
+2. **`unplaced` is never an audience shift.** It means the bucket that names
+   nowhere is what moved most, which is a proxy changed, a header dropped or a
+   CDN rerouted. A card that drew it as *your readership moved* would send
+   somebody to look at the wrong thing; the sentence is about the deployment's
+   own measurement.
+3. **`arrivals` is a weight and never a trend, and there is deliberately no
+   growth ratio to draw.** A region counter has no window — it is a running
+   total per revision — so the larger of two numbers is mostly the longer
+   exposure. *This moved among six hundred readers rather than six* is the
+   sentence the two totals are for.
+4. **A `thinned` region is not a region whose readers left.** It stopped
+   clearing the floor, which includes emptying and includes nearly not emptying,
+   and the two cannot be told apart without disclosing a bucket smaller than the
+   floor. Wording it as a departure would make the screen say something the
+   subsystem refuses to know.
+
+Nothing is blocked: the module is published from `@jam-overture/loom/signals`
+with `regionReadingFor` beside it, so the two maps a card needs are two reads
+and no arithmetic. The record is
+[0247](decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md).
+
+---
+## 2026-10-09 — a readership cannot be asked *this week against last week*, and it is the first question in this subsystem that the other comparisons answer and one cannot
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **a question before it is a unit of work**, and nothing is blocked while
+it stays open
+
+Every comparison this lane has built takes two readings and does not care what
+makes them two: hand it two revisions and it answers *what the change did*, hand
+it two windows of one revision and the same function answers *this week against
+last week*. 0224 states that property and §16 and §19 inherit it.
+
+**A readership comparison does not have it.** A region bucket is stamped at the
+door, once, when a page view began (0214), and the row it lands on is a running
+total per tree, revision and region with nothing on it but an `updatedAt`. There
+is no window, so the only pair of readerships that can be compared is two
+revisions — and even then the two numbers are a revision that has been live for
+a month against one live for a day.
+
+What is salvaged, and the reason §20 was worth building anyway: **the mix
+survives the missing window and a count does not.** A composition is roughly the
+same over a day and over a month of one audience, so the share movement is
+answerable and the growth is not. §20 therefore publishes both arrival totals as
+the weight behind the mix and refuses the ratio between them outright.
+
+**Why this is a question and not a unit.** Closing it means region counts kept
+per period rather than per revision — a column, a key change on
+`loom_reader_signal_regions`, and a migration of live counters. That is
+architectural by the lane's own rule, and it is not obviously worth it: nobody
+has asked for a calendar view of where readers are, and the thing a deployment
+actually wants from a region map is almost certainly *who read this revision*,
+which works today.
+
+Three things worth weighing if it is ever wanted:
+
+- **The floor would bite harder, not less.** A per-week bucket is smaller than a
+  per-revision one, so more of a deployment's map would be withheld than is
+  withheld now. A windowed region counter makes a quieter map, which is the
+  opposite of what somebody asking for it would expect.
+- **It is the one place a retention argument touches a region.** Rule 5 makes
+  raw batches expire and aggregates durable; per-period region rows are the
+  first aggregate in this subsystem that would grow without bound in time rather
+  than in the size of a deployment's trees.
+- **Exposure is the thing actually missing, and it is smaller.** A revision's
+  first and last arrival would let the arrivals be read *per day live*, which is
+  most of what a trend was wanted for, and it is two timestamps on a row that
+  already exists rather than a new key.
+
+**Recommendation: leave it open.** I would not spend a migration on a calendar
+readership before a deployment asks for one, and if the trend is what is
+wanted, the two timestamps are the cheaper half of it. Say which and this lane
+builds whichever.
