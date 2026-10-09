@@ -155,29 +155,46 @@ describe("the reader screen's reading order", () => {
   })
 
   /**
-   * **One join, four readings.**
+   * **One join, five readings.**
    *
    * Every section is a window laid over the page it was filed against. Joining
    * twice is two chances to hand one of them a different window or a different
    * set of pieces, and a card whose sections disagreed about how many visits
    * there were would be wrong in the way nobody checks — so the join happens
-   * once and `skippingFrom`, `stoppingOf`, `readingPaceOf` and `pageReachOf`
-   * are all handed its result.
+   * once and `skippingFrom`, `stoppingOf`, `readingPaceOf`, `pageReachOf` and
+   * `pageActionOf` are all handed its result.
    *
-   * It was two readings until 5 October and three until today. The count in the
-   * assertion is the point rather than the names: a fifth reading taken off a
-   * second join would pass every other test on this screen — and the fourth is
-   * the one that would make that failure visible, because it is the section
-   * whose whole subject is *which denominator these figures are against*.
+   * It was two readings until 5 October, three until 7 October and four until
+   * today. The count in the assertion is the point rather than the names: a
+   * sixth reading taken off a second join would pass every other test on this
+   * screen — and the fifth is the one that makes a second join cheap to reach
+   * for, because what readers *did* feels like a different subject from what
+   * they saw and comes off the same window.
    */
-  it("joins the counters to the page once and takes all four readings off it", () => {
+  it("joins the counters to the page once and takes all five readings off it", () => {
     expect(source.match(/pageReadingOf\(/gu)).toHaveLength(1)
     expect(source).toContain("skippingFrom(joined")
     expect(source).toContain("readingProgressOf(joined)")
     expect(source).toContain("readingPaceOf(joined")
     expect(source).toContain("pageReachOf(")
+    expect(source).toContain("pageActionOf(joined)")
     expect(source).toContain("joined,")
     expect(source).not.toContain("skippingOf(")
+  })
+
+  /**
+   * And that the fifth reading is handed the denominator the fourth produced,
+   * rather than working one out for itself.
+   *
+   * A share of readers applied back to the exact arrival count is a figure two
+   * sections of this card now draw, and the gate deciding when it may be drawn
+   * at all lives with the count. Two spellings of that rule is how a card comes
+   * to put a number of people on one section while another withholds it, both
+   * right about what they could see.
+   */
+  it("hands what readers did the arrival count rather than a second denominator", () => {
+    expect(source).toContain("doingOf(pageActionOf(joined), names, arrived.get(reading.treeId))")
+    expect(source).toContain("doing={doing.get(")
   })
 
   /**
