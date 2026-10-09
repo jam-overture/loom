@@ -312,7 +312,7 @@ Exercise C runs it over the whole starter library. Beside it, for contrast, the
 three things the audit already checks:
 
 ```text
-  declared slots no component placed:      0
+  declared slots no component placed:      4
   declared behaviours no component placed: 0
   components that threw under their own schema: 0
   primitives with a declared prop nothing read: 10
@@ -328,8 +328,26 @@ three things the audit already checks:
     loom.embed       src
 ```
 
-Every promise the audit can observe is kept, everywhere, by every primitive. The
-first promise it cannot observe has eighteen exceptions.
+Every promise the audit can observe is kept — with one line's worth of
+asterisk, added on 9 October and explained below. The first promise it cannot
+observe has eighteen exceptions.
+
+> **Why the first line is 4 and not 0, since 9 October.** It is not four broken
+> primitives. `loom.feed`, `loom.trend`, `loom.voices` and `loom.plate` each
+> declare a region they draw **only when their source did not answer**
+> ([0246](../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md)),
+> and the audit above is called the way this exercise calls it — with no
+> answers. So the probe never puts them in the state that renders the region,
+> and reports a declaration it did not see rendered. The report is true about
+> the states it tried and wrong about the primitives, which is the distinction
+> the whole of this lesson is about, arriving in the one list that had been the
+> control. Hand `auditRegistry` the `answers` 0185 added and the line is 0
+> again; `src/primitives/library.test.ts` does exactly that, and asserts both
+> the 0 and this 4.
+>
+> *This note was written by `Loom primitives` to keep the transcript true, not
+> by this lesson's author. The teaching above it is unrevised and the move
+> deserves better than a footnote — filed.*
 
 If you are holding a number from Predict 3, this is the moment to compare it. But
 the number is the least interesting thing here, and the rows are why. **Read them
@@ -824,7 +842,7 @@ describe("C", () => {
      fourth line". -->
 
 ```
-  declared slots no component placed:      0
+  declared slots no component placed:      4
   declared behaviours no component placed: 0
   components that threw under their own schema: 0
   primitives with a declared prop nothing read: 10
@@ -840,10 +858,12 @@ describe("C", () => {
     loom.embed       src
 ```
 
-The three zeros are the control and they are the reason the fourth line is worth
+The two zeros are the control and they are the reason the fourth line is worth
 anything. It is not that this library is sloppy about its declarations — every
-promise anything has ever looked at is kept by every primitive. The fourth line is
-the first promise nothing had looked at.
+promise anything has ever looked at is kept by every primitive, the first line's
+four included: those are four regions the audit was not put in a position to
+see, not four regions nobody draws (the note under the first transcript has the
+detail). The fourth line is the first promise nothing had looked at.
 
 **This transcript is a second copy of a fact about `src/primitives/`, and it will
 go red when that fact changes.** That is deliberate here and it is the only place

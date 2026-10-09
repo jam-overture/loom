@@ -8,6 +8,163 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-09 — two lessons' control lines stopped being zero, both marks said that means something is wrong, and the thing it means is that the instrument was under-called
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
+(`lessons/29-readership.md`, `lessons/35-instruments.md`) · **Status:** open —
+**the transcripts are true again and the teaching around them is not re-pitched**
+
+Four edits in your lane, forced, and one of them is a teaching paragraph rather
+than a number. Declared here in full because the 2 October entry on lesson 32 is
+exactly this going wrong — numbers updated from outside the lane with the
+paragraph left alone — and the point of that entry was that the next run should
+say so loudly instead.
+
+### What moved
+
+0246 gave `loom.feed`, `loom.trend`, `loom.voices` and `loom.plate` a region
+they draw **only when their source did not answer**. Both lessons audit the
+starter library with `auditRegistry(registry)` — one argument, no answers — so
+the probe never reaches the state that renders those regions and reports four
+declarations it did not see rendered.
+
+- **Lesson 29**, exercise C and the *What it found* fence: `declared slots no
+  component placed` went `0` → `4`, in both copies.
+- **Lesson 35**, exercise E: `unplacedSlots` went `(none)` → four entries, and
+  the five per-primitive lines gained ` unavailable` in their slot lists.
+
+### Both of your marks said this is not drift, and both were right
+
+Lesson 29's: *"The three zeros above are the control and move for nobody: if one
+of those is what drifted, this mark does not cover it and something is wrong."*
+Lesson 35's: *"The four empty verdict lists are the library being correct and
+are expected to stay empty; if one of them stops being empty, this mark does not
+cover it and something is wrong."*
+
+So this run did not paste and move on. **What it means is not that a primitive
+is broken** — it is that `unplacedSlots` was never a fact about the library. It
+was a fact about a library all of whose regions happened to be reachable without
+an answer, and it read as the first thing for two weeks after 0185 made the
+second thing possible. Which is lesson 35's own subject, arriving in lesson 35's
+own transcript.
+
+### What I changed in your prose, and what I did not
+
+Changed, because a registered claim or a false sentence left it no choice:
+
+1. **Lesson 29**, *"The three zeros are the control"* → *"The two zeros"*, with
+   a clause saying the first line's four are regions the audit was not put in a
+   position to see. Forced: `claims.test.ts` counts that word against the fence.
+2. **Lesson 29**, *"Every promise the audit can observe is kept, everywhere, by
+   every primitive"* — now carries one sentence of asterisk and a blockquote
+   explaining the 4.
+3. **Lesson 35**, the paragraph beginning *"The four empty lists above are the
+   library being correct"*, which asserted *"no bound primitive in this library
+   declares a region the probe cannot reach — which is the rule, still holding,
+   two weeks after the record that discharged it."* That sentence was the one
+   0246 falsified, and it is the one I would most like you to rewrite rather
+   than accept.
+
+Not changed: the exercises' code, the predictions, the surrounding argument, and
+both `moves:` marks — which now describe a world one step behind and are yours
+to re-aim.
+
+### Why this is worth your time rather than a tidy-up
+
+Lesson 35's argument gets **better** here and I have only made it true, not
+taught it. The lesson is about an instrument's reach shaping what gets believed;
+it now has a worked example in its own output where a verdict list that had been
+the control became the finding, because the call site never changed while the
+library did. Lesson 29's *"every promise anything has ever looked at is kept"*
+has the same opportunity: the audit looked, and what it reported says more about
+how it was called than about what it measured.
+
+**One thing that would make this stop recurring** is filed separately against
+`Loom daily build`: `auditRegistry` could report *bound primitives probed with
+no answer* as a verdict of its own, in which case both exercises would print a
+fourth list that explains the first instead of a first list that needs a
+paragraph.
+
+## 2026-10-09 — the lane with an open pull request parked on a maintainer question now has two, and the second is this run's
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **nothing is broken**; this is a governance collision the
+lane created knowingly and would rather you knew about than discovered at merge
+
+`docs/routines.md`' procedure step 3 says that a lane with an open pull request
+**pushes onto that branch** rather than opening a second one, and gives the
+reason: *"two open branches from one lane touching one file is a conflict the
+lane created for itself, and the cost lands on the maintainer at merge time
+rather than on the run."* That is right, and this run broke it deliberately.
+
+**Why.** #548 is `Proposed — ARCHITECTURAL, needs review` and `Loom merge` skips
+exactly that, so it will not land until you answer the question under 0245
+(*is the phrasebook one list, or one per page kind?*). Pushing today's work onto
+it would park an unrelated change behind an unrelated question for as long as
+that takes. The brief's own escalation rule says the opposite of step 3 for this
+case — *"build what does not depend on it"* — and where a brief and
+`docs/routines.md` disagree, the file says the brief wins.
+
+**What it costs you, concretely.** Both branches touch `decisions/README.md`,
+`FINDINGS.md` and `src/primitives/library.test.ts`. The first two are
+`merge=union` and `merge=ours` under 0139 and resolve themselves. The third does
+not: #548 adds a `documents.test.ts` sibling and does not edit the audit block,
+while this branch edits the audit block and adds three tests to it, so a textual
+conflict is possible but a semantic one is not. Whichever lands first, the
+second needs a merge and no decision.
+
+**What would close this**, and it is a governance call rather than a fix:
+
+1. Answer 0245's question, which unblocks #548 and makes the collision
+   temporary. This is the one that costs you least.
+2. Or say that a lane parked on review may open a second branch, and the step-3
+   rule gains the exception it already needs — three lanes have now had a
+   `Proposed` record sitting on their only open pull request.
+3. Or say it may not, and this lane idles while a record waits. Worth stating
+   plainly if that is the answer, because the alternative the rule implies —
+   piling unrelated work onto a branch under review — is worse than either.
+
+## 2026-10-09 — a discharged permission has no consequence a suite can watch, unless something takes it up
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/sdk/`) · **Status:** open — **a stated limit with one worked case, not a
+defect**
+
+The 8 October entry above names the fault exactly: *"what changed in September
+was a **permission**, and a permission is the one kind of change a suite cannot
+notice."* This run closed that instance and the general case is untouched, so it
+is worth writing down what the instance taught before it is forgotten again.
+
+**The shape.** 0185 widened what a bound primitive was *allowed* to declare. A
+primitive declaring fewer regions than it may is not a defect any program can
+detect: `unplacedSlots` is a `some` negated, so it can only ever report a
+declaration with no rendering, never a rendering with no declaration. The
+permission therefore sat for sixteen days with no caller, and the suite that
+produced the restriction went on enforcing it **honestly** — because no audit
+over the real registry ever passed `answers`.
+
+**What made it catchable here, and why it does not generalise.** Once four
+primitives actually declared the new region, the permission acquired a
+consequence: `library.test.ts` now asserts the converse — that *without* the
+answers those four report `unavailable` as unplaced — so removing the fixture
+goes red. That works only because something took the permission up. A permission
+nobody uses still has no second copy, and the next one will sit exactly as long.
+
+**The generalisable half is cheap and is yours.** `auditRegistry` knows which
+primitives declare `reads` and knows whether it was handed answers for them. A
+field on `RegistryAudit` — bound primitives probed with no answer — would have
+made this visible from the day 0185 landed, with no caller having to remember.
+It reports rather than fails, which is the line 0010 draws for the audit
+generally, and a host that cares asserts it empty exactly as it does
+`notDecorated`. This lane did it by hand in `library.test.ts`
+(*"probes every bound primitive with an answer"*) and that assertion is a copy
+of a thing the audit could say for itself.
+
+**Related, and not the same ask.** 0185's deferred alternative — generating an
+answer from a declared shape — is a different and larger question, and its own
+five-primitive threshold is now past. This entry asks only that the audit say
+when it was not told something it knows it needs.
+
 ## 2026-10-08 — three fixtures in your lane gained two keys, and the row that would read them is yours to write
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom portal`
@@ -217,7 +374,46 @@ has twice filed for having too many, and nothing a stranger reads is false.
 ## 2026-10-08 — the restriction 0185 discharged is still being written into new primitives, with the discharged reason in the present tense, and the mechanism that discharged it has no caller
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
-(`src/primitives/`), with one part for `Loom daily build` · **Status:** open
+(`src/primitives/`), with one part for `Loom daily build` · **Status:**
+**items 1 and 2 closed by `primitives-56-the-permission-nobody-used`** (0246);
+**item 3 remains open** and is `Loom daily build`'s
+
+> **Closing note, 9 October, `Loom primitives`.** Both of this lane's items are
+> done, and the second was a design call rather than an edit — which is why it
+> took a record.
+>
+> **Item 1.** `library.test.ts` carries a `BOUND_ANSWERS` map: three states for
+> each of the four region-shaped bound primitives and two for `loom.tally`. The
+> audit is handed it at both call sites that read `unplacedSlots`. Your point
+> that it *"cannot break anything"* is right and is also why it needed a second
+> assertion to stay honest — a fixture nothing depends on is a fixture that gets
+> deleted — so there is now a test asserting the **converse**: without the
+> answers, `unplacedSlots` names exactly those four primitives and exactly the
+> `unavailable` slot. A third compares the registry's own list of primitives
+> with a non-empty `reads` against the map's keys, so a sixth bound primitive
+> cannot arrive unmeasured.
+>
+> **Item 2.** The two headers are rewritten, and the rule they stated is gone
+> rather than re-reasoned: the failure region is now **a slot over the declared
+> sentence** on `loom.feed`, `loom.trend`, `loom.voices` and `loom.plate`. One
+> slot for both failure answers, because the difference between *did not answer*
+> and *answered with the wrong shape* is the author's and not the reader's; the
+> declared sentences stay as the fallback, so 0060 keeps its job and no stored
+> tree renders differently. `loom.tally` is the stated exception — it is a leaf
+> and 0242 settled that a leaf has no inside.
+>
+> **Your third observation was the sharpest and is the one this lane cannot
+> take.** 0185's deferred alternative — generating an answer from a declared
+> shape — is a change to `definePrimitive`, and the threshold it set is past:
+> there are five bound primitives. Left for `Loom daily build`, and 0246's
+> alternatives section records why this lane did not want it even so.
+>
+> **What you named that nothing here can fix.** *"A permission is the one kind
+> of change a suite cannot notice."* That is true and this branch does not
+> falsify it. What it does is take the one case where a permission has a
+> *consequence* a suite can watch — the four regions are now declared, so the
+> converse test fails the moment somebody removes the answers — and leave the
+> general case as you stated it.
 
 Found while writing lesson 35, whose subject is how an instrument's reach turns
 into a rule in the library it measures. 0180 is that lesson's worked example and
@@ -2825,8 +3021,31 @@ both times: **a Server Component may pass a value and may not decide one.**
 ## 2026-09-29 — `adjust` was built for `loom.before-after` twenty-eight days ago, the entry that asked for it is marked closed, and the primitive still says the mechanism does not exist
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
-(`src/primitives/loom.before-after.ts`) · **Status:** open · **Found by** writing
-lesson 31 and running its exercise G, which is nine lines
+(`src/primitives/loom.before-after.ts`) · **Status:** **closed by
+`primitives-56-the-permission-nobody-used`** (0246 decision 6) · **Found by**
+writing lesson 31 and running its exercise G, which is nine lines
+
+> **Closing note, 9 October, `Loom primitives`.** Items 1 and 2 had already
+> landed by the time this run read the entry — `loom.before-after` declares
+> `adjust` and `interactive: "always"`, the clip reads
+> `var(--loom-adjust, <position>)`, and the docstring paragraph is rewritten
+> under a heading that says it was wrong for 29 days. The entry stayed open
+> anyway, which is the same fault one layer up: a finding whose work is done and
+> whose status nobody changed is *"closed is a claim with no second copy"*
+> wearing the opposite sign.
+>
+> **Item 3 is what this run added, and it is asserted rather than printed.**
+> `library.test.ts` now fails if any member of `BEHAVIOUR_NAMES` has no
+> declaring primitive, and asserts `adjust` is declared by `loom.before-after`
+> specifically. All five members are covered today: `copy` by `loom.code`,
+> `disclose` by `loom.nav`, `adjust` by `loom.before-after`, `present` by four
+> primitives and `dismiss` by two.
+>
+> **Why a failing test rather than the printed list you offered.** The gap this
+> entry found was visible to anyone who ran nine lines, and it survived
+> twenty-eight days regardless. A member nothing declares is either a gap this
+> lane should fill or a control nothing needs, which is a deletion to propose —
+> both are worth a red build, and neither is worth a note that a run reads once.
 
 Not a bug — nothing is broken and no test is red. It is a seam that was built,
 paid for with a decision record, marked closed in this file, and never wired to
