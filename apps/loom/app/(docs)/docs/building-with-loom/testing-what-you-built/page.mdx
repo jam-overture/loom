@@ -1,0 +1,327 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { ContractSuites } from "@/app/(docs)/_components/contract-suites"
+
+export const metadata = pageMetadata("building-with-loom", "testing-what-you-built")
+
+# Testing what you built
+
+By now you have written three things of your own: primitives, a registry that
+allows them, and a policy saying which of them matter. This page is how you find
+out whether any of it does what you think.
+
+The part that makes it easy is worth saying first. **The piece of Loom that
+makes decisions is a pure function.** Give it the same change, the same tree and
+the same rules and it gives the same answer, every time. It reads no clock,
+calls nothing over the network, and asks no model anything. So the test that
+proves your rules work is an ordinary unit test that finishes in milliseconds,
+with no API key and no database.
+
+The pieces that are *not* pure are the model, the clock, and whatever you keep
+your pages in. Loom publishes a stand-in for each of those, so you do not have
+to write one.
+
+## Three questions worth a test
+
+- **Can a person edit what I built?** A primitive can render perfectly and still
+  be unreachable in the portal. Nothing reports it.
+- **Does my policy hold what I meant to hold?** You wrote down which props
+  matter. Nothing has asked the Gate whether it agrees.
+- **Does my own store keep its promises?** If you wrote your own place to keep
+  trees, the type told you the method names and nothing told you the rules.
+
+The first is answered by a file the scaffolder already wrote for you, and
+[Scaffolding a project](/docs/getting-started/scaffolding-a-project) is where
+that is explained. The other two are this page.
+
+## The fixtures are published
+
+A test needs a tree. Building one by hand takes most of a screen before the test
+says anything, and a tree you typed out is one more thing in the test that can
+be wrong.
+
+[`@jam-overture/loom/testing`](/docs/api-reference/testing) is a published
+entry point holding the trees, clocks and stand-ins Loom tests itself with:
+
+```ts
+import { sampleTree } from "@jam-overture/loom/testing"
+
+const { tree, ids } = sampleTree()
+```
+
+That is a page with a header, a footer, and a card inside a slot called `main`,
+with text in two of them. It is small and it is deep enough to be worth
+asserting about. `ids` names every node in it, so a test says `ids.card` rather
+than hunting through children for the one it meant.
+
+The rest of the door is stand-ins for the things that are not pure:
+
+| | |
+| --- | --- |
+| `fixedClock` | a clock that always says the same instant |
+| `collectingEventSink` | keeps every event the runtime emitted, so a test can read them back |
+| `scriptedInterpreter` | returns the proposal you wrote, in place of a model |
+| `scriptedModelClient` | returns a reply body you wrote, in place of a model's HTTP call |
+| `hangingModelClient` | never answers, for testing what your app does about that |
+| `buildIntent`, `buildProposal` | an ask and a proposed change, with the boilerplate filled in |
+| `testRegistry` | a registry holding the primitives `sampleTree` is built from |
+
+<Callout kind="note">
+  These are API rather than internals. The shape of `sampleTree` is something
+  you may depend on and this package may not change quietly. Nothing reachable
+  from this door imports a test runner either, so you can load the fixtures
+  anywhere the runtime loads, including a browser.
+</Callout>
+
+### The fixture tree and the fixture registry are a pair
+
+`sampleTree` is built from the primitives `testRegistry` registers, and those
+are the fixture's own. Render the one with the other and you get a page with
+nothing to report about it.
+
+```ts
+import { createThemeRegistry } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
+import { testRegistry } from "@jam-overture/loom/testing"
+
+const registry = testRegistry()
+
+const rendered = renderLoomTree(tree, {
+  resolver: registry,
+  validator: registry,
+  themes: createThemeRegistry(),
+})
+```
+
+So use the pair when the thing you are testing is the **runtime**: a policy, a
+store, a held proposal. Use your own tree and your own registry when the thing
+you are testing is **your primitive**, and do not borrow the fixture for it.
+Most of the names in it also exist in the starter library with different
+schemas behind them, so rendering it against a registry of your own gives you
+neither a clean page nor an obviously broken one.
+
+**Then assert on `rendered.diagnostics`, which is the line most worth writing.**
+A Loom page renders even when something was wrong with it. An unknown primitive,
+props that failed their own schema, a theme id nobody registered: each of those
+comes back as a diagnostic beside a page that still rendered, rather than as an
+exception. That is deliberate, because one bad node is not a reason to serve a
+blank screen. It also means a render test that only checks the markup can pass
+on a page that is quietly broken.
+
+**Read the diagnostics as the render's first complaint rather than its whole
+list.** A node whose props fail their own schema never gets called, so nothing
+underneath it is reached and nothing underneath it is reported. A page with a
+bad root comes back with exactly one diagnostic on it, however much else is
+wrong further down. That is why the assertion worth writing is `toEqual([])`
+rather than a count: empty is the only length that means what you want it to
+mean.
+
+```ts
+import { expect, it } from "vitest"
+
+it("renders the sample page with nothing to report", () => {
+  expect(rendered.diagnostics).toEqual([])
+})
+```
+
+## Does your policy hold what you meant to hold?
+
+This is the test almost nobody writes, and it is the one that proves the thing
+Loom is for.
+
+Your policy is a list of what you decided matters. Say a plan's `price` is on
+it. Nothing so far has checked that the Gate agrees, and the way to check is to
+ask it: build the change you are afraid of, hand it to the runtime, and look at
+what came back.
+
+Start with a tree that has a price in it:
+
+```ts
+import { buildElement, buildText, createTree, sequentialIdFactory } from "@jam-overture/loom"
+import type { LoomTree, NodeId } from "@jam-overture/loom"
+
+const pricingPage = (): { readonly tree: LoomTree; readonly planId: NodeId } => {
+  const ids = sequentialIdFactory("shop")
+
+  const label = buildText(ids, "Starter")
+  const plan = buildElement(ids, { type: "shop.plan", props: { price: "£9" }, children: [label] })
+  const page = buildElement(ids, { type: "loom.page", props: { title: "Pricing" }, children: [plan] })
+
+  return { tree: createTree(page, ids), planId: plan.id }
+}
+```
+
+Then write the ask, and the change a model might come back with. `buildIntent`
+is somebody asking for something in words. `buildProposal` is the written change
+that came back, and `configure` is the one operation that sets props on a node
+that already exists:
+
+```ts
+import { fixedPolicy, ok } from "@jam-overture/loom"
+import type { GatePolicy } from "@jam-overture/loom"
+import { memoryTreeStore } from "@jam-overture/loom/store"
+import { commitIntent, memoryHoldStore } from "@jam-overture/loom/write"
+import type { WritePath } from "@jam-overture/loom/write"
+import { buildIntent, buildProposal, collectingEventSink, fixedClock, scriptedInterpreter } from "@jam-overture/loom/testing"
+
+const askToRaiseThePrice = async (policy: GatePolicy) => {
+  const { tree, planId } = pricingPage()
+  const ids = sequentialIdFactory("ask")
+
+  const intent = buildIntent(ids, {
+    treeId: tree.treeId,
+    baseRevision: tree.revision,
+    utterance: "Put the starter plan up to £12",
+  })
+
+  const proposal = buildProposal(ids, {
+    intentId: intent.intentId,
+    delta: {
+      deltaId: ids.deltaId(),
+      treeId: tree.treeId,
+      baseRevision: tree.revision,
+      operations: [{ op: "configure", nodeId: planId, set: { price: "£12" }, unset: [] }],
+    },
+  })
+
+  const store = memoryTreeStore()
+  await store.create(tree)
+
+  const path: WritePath = {
+    store,
+    holds: memoryHoldStore(),
+    runtime: {
+      interpreter: scriptedInterpreter(ok(proposal)),
+      policySource: fixedPolicy(policy),
+      events: collectingEventSink(),
+      clock: fixedClock(),
+      idFactory: ids,
+    },
+  }
+
+  return commitIntent(path, intent)
+}
+```
+
+That is the whole of the setup, and it is the same write path
+[What your app has to do](/docs/the-runtime/what-your-app-has-to-do) wires to a
+database. Here the store and the hold store are in memory, the clock is fixed,
+and `scriptedInterpreter` hands back the proposal you wrote. **No model ran.**
+What the test exercises is the Gate, the stakes and your policy, which is the
+part you wrote.
+
+Now ask the same question twice, under two policies:
+
+```ts
+import { describe } from "vitest"
+import { gatePolicySchema } from "@jam-overture/loom"
+
+describe("the price on a plan", () => {
+  it("cannot be changed without a person saying yes", async () => {
+    const outcome = await askToRaiseThePrice(
+      gatePolicySchema.parse({ policyId: "shop", protectedPropKeys: ["price"] })
+    )
+
+    expect(outcome.kind).toBe("held")
+  })
+
+  it("is only held because the policy says so", async () => {
+    const outcome = await askToRaiseThePrice(gatePolicySchema.parse({ policyId: "shop" }))
+
+    expect(outcome.kind).toBe("committed")
+  })
+})
+```
+
+**The second test is the half that proves anything.** A test that only checks
+the protected case passes just as well against a policy that holds everything,
+which is not a policy. Writing the pair is what establishes that the line you
+added to `protectedPropKeys` is the thing doing the work.
+
+`held` and `committed` are two of the seven ways a write can end, and the
+held one carries the Gate's own account of why:
+
+```ts
+it("says why it was held", async () => {
+  const outcome = await askToRaiseThePrice(
+    gatePolicySchema.parse({ policyId: "shop", protectedPropKeys: ["price"] })
+  )
+
+  if (outcome.kind !== "held") throw new Error("expected a held proposal")
+
+  expect(outcome.held.disposition.reason.detail).toBe("configures protected price")
+})
+```
+
+A **disposition** is the Gate's answer, with its reasons attached. Asserting on
+the sentence rather than only on `kind` is worth the extra line: it is the
+difference between knowing the change was held and knowing it was held for the
+reason you intended, instead of because something else in your policy happened
+to catch it.
+
+<Callout kind="note">
+  The same shape tests the rest of your policy. Lower `minimumConfidence` and a
+  proposal under it is held; set `protectedPrimitiveTypes` and a change that
+  touches one is held. [What AI may change](/docs/building-with-loom/what-ai-may-change)
+  is the list of settings, and every one of them is reachable from this one test.
+</Callout>
+
+## Does your own store keep its promises?
+
+Loom ships two of everything it keeps things in: one in memory and one on
+Postgres. If you write a third, the type tells you the method names and nothing
+tells you the promises. An append is ordered. A hold is exclusive, so two
+reviewers cannot answer the same proposal. A journal only ever grows.
+
+A host finding each of those out from a production incident is the seam being
+offered without the thing that makes it safe to take. So the suite Loom runs
+against its own implementations is published for you to run against yours:
+
+```ts
+import { describeTreeStoreContract } from "@jam-overture/loom/testing/contracts"
+
+describeTreeStoreContract("memoryTreeStore", () => memoryTreeStore())
+```
+
+That is Loom's own in-memory store under test, and putting yours in its place is
+the whole of the change. One line in a test file of your own, and your store is
+held to exactly what Loom's two are held to. It is the same code rather than a
+description of it, which is the point: a promise checked two different ways is a
+promise one of them will stop checking.
+
+The second argument is a factory rather than a store, and it is called for every
+test. It has to hand back something **empty**, so no test depends on what the
+one before it left behind.
+
+There is one of these for each seam you can implement yourself:
+
+<ContractSuites />
+
+<Callout kind="warning">
+  Importing this door loads `vitest` and `drizzle-orm`, both optional peer
+  dependencies: the first is what the suites are written in, and the second
+  arrives with `rowSecurityOn`, which asks a live Postgres whether a table is
+  protected. Install what you do not already have, or the import fails.
+  [The reference page for this door](/docs/api-reference/testing-contracts)
+  lists what it loads, read off the built package rather than off anybody's
+  prose.
+
+  It is also why the fixtures and the suites are two doors rather than one: a
+  test runner in the fixtures' import graph would have reached every caller
+  they have.
+</Callout>
+
+## What you do not have to test
+
+The tree's own rules, the Gate's ladder of decisions, how a delta is applied and
+inverted, and what each of Loom's own stores promises. Those are tested in the
+framework, against the same code you import, and a second copy of those
+assertions in your project is a second copy to keep true.
+
+Test the part you wrote. That is your primitives, your policy, and any seam you
+implemented yourself, and the three tests above are one of each.
+
+There is a reason the line falls where it does. Behaviour lives in the
+registered component rather than in the tree, and a tree can only say what your
+vocabulary allows. That bargain is what makes a change reviewable in the first
+place, and it is the same thing that splits your tests cleanly in two: your
+component is an ordinary component test, and everything around it is data.
