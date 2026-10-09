@@ -3,6 +3,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
+import type { DeploymentSilence } from "./deployment.js"
 import type { PaceChangeSilence } from "./pace-change.js"
 import type { PaceSilence } from "./pace.js"
 import type { ReachSilence } from "./reach.js"
@@ -12,7 +13,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are six of them. Each set's names are right in its own
+ * absent, and there are seven of them. Each set's names are right in its own
  * sentence, and across the six they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -59,6 +60,14 @@ import type { ReachSilence } from "./reach.js"
  * vocabularies rather than as a field on nine conditions, and it is the
  * strongest form the answer has — a surface that knows which reading it is
  * drawing already knows what its silences are about.
+ *
+ * **It is not the reading's own scope, which the seventh set is the first to
+ * show.** An order over a deployment's pages is silent about one of its
+ * members: the order stands and one page is not in it, so every reason it gives
+ * is about a page while the reading is of something larger. The claim above
+ * holds — the subject is uniform across the set and is a property of the
+ * reading — and the thing it was easy to read into it, that a reading's
+ * silences are about the reading, was never true of anything but the first six.
  *
  * Pure, and the arithmetic is a comparison of two string pairs. It reaches no
  * store, no clock and no DOM, and it adds nothing to the broadcaster's import
@@ -112,6 +121,7 @@ export type SilenceVocabulary =
   | "change"
   | "copy"
   | "copy-change"
+  | "deployment"
   | "pace"
   | "pace-change"
   | "reach"
@@ -121,6 +131,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "change",
     "copy",
     "copy-change",
+    "deployment",
     "pace",
     "pace-change",
     "reach",
@@ -139,6 +150,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     change: "comparison",
     copy: "page",
     "copy-change": "comparison",
+    deployment: "page",
     pace: "part",
     "pace-change": "comparison",
     reach: "page",
@@ -147,15 +159,19 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Nine of them against twenty-two members across the six sets, which is the
+ * Nine of them against twenty-six members across the seven sets, which is the
  * overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
  *
- * **The sixth set needed no tenth condition**
- * ([0244](../../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)),
- * which is the first evidence that these are the states of the world rather
- * than a list of the names the modules before it happened to use.
+ * **Neither the sixth set nor the seventh needed a tenth condition**
+ * ([0244](../../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md),
+ * [0250](../../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)),
+ * which is the evidence that these are the states of the world rather than a
+ * list of the names the modules before them happened to use. The seventh is the
+ * stronger of the two: it is the first reading whose subject is not a page, a
+ * part or a pair, and its reasons still landed on conditions that were already
+ * here.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -309,6 +325,34 @@ export const meaningOfCopyChangeSilence = (silence: CopyChangeSilence): SilenceM
       return meaning("copy-change", "nothing-carried")
     case "floored":
       return meaning("copy-change", "words-a-floor")
+  }
+}
+
+/**
+ * What an order over a deployment's pages reports, of one of them (0250).
+ *
+ * Every reason here is a fact about one revision of one page, so the subject is
+ * the page — which is the one case this table did not have, and the only thing
+ * about it that is new. A reading of a deployment is silent about its **members**
+ * rather than about itself: the order stands, and one page is not in it.
+ *
+ * `unscaled` is the second name in this subsystem for the state a share-of-readers
+ * reading calls `unmeasured`, and the two are deliberately not spelled alike. A
+ * reach reading has nothing to say at all without a row at the door; an order has
+ * a complete reading of that page and is missing only what would make it
+ * comparable with another, which is a different sentence to print even though it
+ * is one state of the world.
+ */
+export const meaningOfDeploymentSilence = (silence: DeploymentSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("deployment", "no-view-reported")
+    case "unscaled":
+      return meaning("deployment", "no-arrivals-counted")
+    case "unopened":
+      return meaning("deployment", "no-openings-marked")
+    case "inconsistent":
+      return meaning("deployment", "readers-above-views")
   }
 }
 

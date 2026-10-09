@@ -11,12 +11,14 @@ import {
   COPY_SILENCES,
   copyChangeOf,
   copyReadingOf,
+  DEPLOYMENT_SILENCES,
   describeSilenceCondition,
   describeSilenceSubject,
   distinctSilences,
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
+  meaningOfDeploymentSilence,
   meaningOfPaceChangeSilence,
   meaningOfPaceSilence,
   meaningOfReachSilence,
@@ -36,6 +38,7 @@ import {
   type ReaderTally,
   type SilenceCondition,
   type SilenceMeaning,
+  type SilenceVocabulary,
   type StoredPageViews,
 } from "./index.js"
 
@@ -127,6 +130,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...CHANGE_SILENCES.map(meaningOfChangeSilence),
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
+  ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
@@ -138,6 +142,7 @@ describe("what a reading means when it says nothing", () => {
       CHANGE_SILENCES.length +
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
+        DEPLOYMENT_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
@@ -151,21 +156,28 @@ describe("what a reading means when it says nothing", () => {
   })
 
   /**
-   * The other side of the same guard, from the direction a sixth set arrives
-   * from. 0244 added one and mapped it onto conditions that were already
-   * published, which is the evidence that these are states of the world rather
-   * than a list of the names five modules happened to use — and a seventh set
-   * adding conditions nobody else reports is the thing worth noticing.
+   * The other side of the same guard, from the direction a new set arrives
+   * from. The sixth and the seventh each mapped onto conditions that were
+   * already published, which is the evidence that these are states of the world
+   * rather than a list of the names five modules happened to use — and a set
+   * that arrives with a condition nobody else reports is the thing worth
+   * noticing. The seventh is the stronger case: its reading is of a deployment
+   * and not of a page, a part or a pair.
    */
-  it("maps the sixth set onto conditions the first five already reported", () => {
-    const others = new Set<SilenceCondition>(
-      EVERY_MEANING.filter((meaning) => meaning.vocabulary !== "pace-change").map(
-        (meaning) => meaning.condition
-      )
-    )
+  it("maps each set added after the fifth onto conditions the earlier ones already reported", () => {
+    const later: readonly [SilenceVocabulary, readonly SilenceCondition[]][] = [
+      ["pace-change", PACE_CHANGE_SILENCES.map((of) => meaningOfPaceChangeSilence(of).condition)],
+      ["deployment", DEPLOYMENT_SILENCES.map((of) => meaningOfDeploymentSilence(of).condition)],
+    ]
 
-    for (const silence of PACE_CHANGE_SILENCES) {
-      expect(others).toContain(meaningOfPaceChangeSilence(silence).condition)
+    for (const [vocabulary, conditions] of later) {
+      const others = new Set<SilenceCondition>(
+        EVERY_MEANING.filter((meaning) => meaning.vocabulary !== vocabulary).map(
+          (meaning) => meaning.condition
+        )
+      )
+
+      for (const condition of conditions) expect(others).toContain(condition)
     }
   })
 
@@ -189,6 +201,7 @@ describe("what a reading means when it says nothing", () => {
       "comparison",
       "page",
       "comparison",
+      "page",
       "part",
       "comparison",
       "page",

@@ -48606,3 +48606,80 @@ and it needs a floor under `opens` that nothing here has chosen yet. Until
 somebody chooses it, the figure is one click down for every part of the page,
 which is where the governing principle puts a technical record and not where it
 puts a finding.
+
+---
+## 2026-10-09 — the reader surfaces have never had a landing screen, and now there is an order to draw one from
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is blocked and nothing is wrong; this is what §21 makes drawable
+
+`deploymentReadingOf(pages, rows)` is on this branch, published from
+`@jam-overture/loom/signals`, recorded in `decisions/0250-….md`. It takes each
+page's `ReadingProgress` and the window of door rows and gives back the
+deployment's pages in one order, worst first, each with the two bands it loses
+its readers between.
+
+Every reader screen until now answers *here is a page, and here is what is wrong
+with it* — which needs somebody to already know which page to open. This is the
+screen above those: **your pages, worst first.**
+
+Four things about drawing it, and three of them are refusals.
+
+- **`readers` is the figure to rank on and `lost` is the figure to print**, or
+  the other way round, but not both in one sentence. `readers` is a loss restated
+  at the door's scale and is deliberately not rounded into people; `lost` is what
+  the counters say. The pair is the straddle made visible, and it is the
+  two-figure failure the 7 and 8 October entries have now made twice if they land
+  three lines apart in different units.
+- **`opened` is the weight and it is exact.** *Three hundred and forty of twelve
+  hundred readers* is sayable here in a way it is not anywhere else in this
+  subsystem, because the second number was counted once at the door. It is also
+  the only honest way to stop a page with nine views from reading like a page
+  with nine thousand.
+- **The unranked pages are a diagnosis and never a second league table.** An
+  `unscaled` page is measured and not comparable; ranking those among themselves
+  by share is the ranking 0250 refused, for the reason 0221 refused it inside one
+  page. A line saying how many pages are out of the order, with
+  `describeRankStanding` for why, is the whole of it.
+- **`trees` against the length of the order is the sentence that stops a reader
+  double-counting.** Two revisions of one tree are two rows on purpose. A screen
+  that draws them as two pages is wrong about how many pages a deployment has,
+  and one that collapses them hides whichever revision the readers were actually
+  on.
+
+The one thing it is worth knowing before building it: there is **no
+deployment-wide loss** and there will not be one. The artefact is an order, and
+its published shape is pinned by a test.
+
+---
+## 2026-10-09 — a reading's silences are about its members and not about itself, which the seventh vocabulary is the first to show
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**a limit found in an accepted record, written down with nothing asked of
+anybody**; the record is not superseded and nothing about it is wrong
+
+0240 publishes the subject of a silence as a table over the vocabularies,
+arguing that the subject is a property of the **reading** and uniform across its
+whole set. That claim is exactly true and is still true with a seventh set in the
+table.
+
+What is easy to read into it, and what the first six sets could not distinguish,
+is the stronger claim: that a reading's silences are about *the reading*. A copy
+reading's are about its page, a pace reading's about one of its parts, a
+comparison's about the pair — in every one of the six, the subject is the
+reading's own scope or one level inside it.
+
+**An order over a deployment's pages breaks that.** The order itself stands; one
+page is not in it. So every reason it gives is about a page while the reading is
+of something larger, and the subject published for it is `page` rather than a
+fourth member of `SilenceSubject`. A `deployment` subject would have been the
+wrong answer: nothing here is silent about the deployment.
+
+**Nothing is asked and nothing needs changing.** The paragraph is in 0240's own
+module and in 0250, and the mapping test now walks every set added after the
+fifth rather than naming the sixth. It is filed because the next reading whose
+scope is new will reach for a new subject first, and the thing to check is
+whether the silences are about the reading or about its members. A fourth subject
+is justified the day something is silent about a **collection** — *this
+deployment holds no pages at all* is a sentence, and today it is reported as an
+empty order rather than as a silence.

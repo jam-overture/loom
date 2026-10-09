@@ -34,6 +34,7 @@ the portal every day.
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
 | How much of what it says gets read | words readers reached against the words the page says ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)), with the passages nobody saw |
+| Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
@@ -1131,6 +1132,76 @@ is §18's shape and is why §17 has sets to map rather than one more.
 sentence to put *above* a before-and-after card rather than one more row on it,
 the pair of numbers that must be drawn together or not at all, and `unplaced` as
 the one standing that is about the deployment rather than its readers.
+
+### 21. Which page to fix first · `Loom signals` · **done, 9 October**
+
+Everything above answers about **one revision of one page**. A deployment has
+forty, and nothing could put them in an order — so the first question anybody
+opening a portal asks, *where is the problem*, was the one question the counters
+could not be asked. Every answer available was *here is a page, and here is what
+is wrong with it*, which needs you to already know which page to look at.
+
+**Done.** `deploymentReadingOf(pages, rows)` in
+[`src/signals/deployment.ts`](../src/signals/deployment.ts) takes each page's
+`ReadingProgress` and the window of door rows and gives back the pages in one
+order, worst first, with the two bands each loses its readers between. It is the
+**twelfth** thing taken out of what this subsystem already knows rather than
+collected: **nothing was added to a payload, a browser, a column, a store or the
+vocabulary**, and the broadcaster was not touched.
+
+It is also the first thing here that can tell a **model** where to act without
+being told which page to look at. §9 named the band; this names the page, and
+the two together are an address a proposal can be written against.
+
+Three things decide the shape
+([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)):
+
+- **The over-count divides out inside a page and does not divide out across
+  two.** §9 rests on a fall being a ratio of two counts off the same rows, since
+  a reader who straddled a rollup window straddled it for the whole page. But
+  the straddle rate is each page's **own**: a page readers linger on for twenty
+  minutes, against a window of five, has every distinct count against it
+  inflated roughly fourfold, and a page read in ninety seconds does not. So an
+  order over the raw losses is partly an order over how long readers stay — and
+  it fails in the direction nobody checks, because the pages it floats to the
+  top are the ones readers spend the most time on, which reads as plausible. The
+  key is therefore the loss **scaled to the door**, `lost ÷ (1 + inflation)`,
+  off that page's own row by §11's published matching rule rather than another
+  hand-written copy of it. The figure is not a count of people and is not
+  rounded into one; `lost` is published beside it unscaled.
+- **A page the door cannot scale is reported out of the order, not placed in
+  it.** A page can be perfectly well measured and have no row at the door — one
+  whose rows expired, or a deployment that upgraded mid-window — and there is no
+  safe height to put it at: a long-dwell page would be over-ranked and a quick
+  one under-ranked. Four standings say why a page is out (nothing read it, no
+  row, the row has opened nothing, or it loses more readers at one fall than have
+  ever appeared) and two say where it stands when it is in or has no fall at all.
+  This is §7's refusal in another costume: the figure a surface could misread is
+  one the function never offers.
+- **No deployment-wide loss.** The artefact is an **order** and not a sum, which
+  is also what makes the double count structurally unavailable: nothing is added,
+  so the only error an order can make is one page standing in it twice. A
+  repeated reading is dropped and counted; a repeated door row neither doubles a
+  page's arrivals nor halves its scaled loss. The one figure that *is* added is
+  `arrivals`, addable for the reason no other counter here is — a page view began
+  on one revision of one tree and was counted once at the door (§8). The published
+  shape is pinned by a test, so a total added later has to argue with it first.
+
+Two more settled in the building. **Both revisions of one tree stay in the
+order**, because a revision shipped an hour ago with four readers does not
+supersede the one nine thousand people read — `trees` says the two rows are one
+page so a surface can group them. And §17's table gains a **seventh
+vocabulary**, with it the first reading whose silences are about something
+*smaller than itself*: an order is silent about one of its **members**. §17's
+claim holds — the subject is uniform across a set and is a property of the
+reading — and the thing it was easy to read into it, that a reading's silences
+are about the reading, was never true of anything but the first six. Nothing is
+superseded and the paragraph is written down.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+landing screen, which is the one screen the reader surfaces have never had — your
+pages, worst first, each with the band it loses readers at — and the rule that the
+unscaled pages are a diagnosis beside it rather than a second league table.
 
 ## Still not in scope
 
