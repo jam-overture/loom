@@ -272,6 +272,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "The second list you write: which of your primitives matter, how much latitude each kind of asker gets, and the settings that decide it.",
       },
+      {
+        slug: "testing-what-you-built",
+        title: "Testing what you built",
+        summary:
+          "The decisions are pure functions, so proving your policy holds what you meant is an ordinary unit test. The fixtures, the stand-ins and the ready-made suites are all published.",
+      },
     ],
   },
   {

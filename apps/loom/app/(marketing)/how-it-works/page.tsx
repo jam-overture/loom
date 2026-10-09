@@ -1,8 +1,8 @@
-import { readAskId } from "@/app/(marketing)/_lib/adapt/asks"
+import { askedFor } from "@/app/(marketing)/_lib/addressed"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
-import { HOW_IT_WORKS, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
+import { HOW_IT_WORKS, siteOrigin } from "@/app/(marketing)/_lib/site"
 import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
@@ -11,19 +11,17 @@ export const generateMetadata = routeMetadata(HOW_IT_WORKS)
 /**
  * The mechanism page, and which request it prints the record of.
  *
- * Read exactly as the front door reads them, off the same two parameters, so a
- * visitor who followed the panel's link is shown the record of the change they
- * just watched rather than of the one this page was written around. An
- * unrecognised value is the default rather than an error, for the same reason it
- * is on the front door: a page reached with a mangled address should be a page.
+ * Read through `askedFor`, which is the one reader of an address on this site,
+ * so a visitor who followed the panel's link is shown the record of the change
+ * they just watched rather than of the one this page was written around. Until
+ * 9 October this page read the address itself and read two of its four
+ * parameters, so *Put it back* on the band below did nothing; `_lib/addressed.ts`
+ * is that eight days, written down.
  */
 const HowItWorksPage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
-  const params = await searchParams
-  const ask = readAskId(params["ask"])
   const rendered = await renderSitePage(HOW_IT_WORKS, {
     origin: await servedOrigin(),
-    theme: readThemeName(params["theme"]),
-    ...(ask === undefined ? {} : { ask, approve: params["approve"] === "1" }),
+    ...askedFor(await searchParams),
   })
 
   /**

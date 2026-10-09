@@ -1,0 +1,54 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/how-it-works?ask=shorter&approve=1#see-it-happen",
+      "out": "2026-10-09-marketing-undo-before-wide",
+      "viewport": {
+        "width": 1280,
+        "height": 2200
+      },
+      "waitFor": "#see-it-happen",
+      "measure": [
+        "#see-it-happen",
+        "text=Put it back",
+        "text=What the page wrote down",
+        "text=This takes away all four short answers at once"
+      ]
+    },
+    {
+      "path": "/how-it-works?ask=shorter&approve=1&back=1#see-it-happen",
+      "out": "2026-10-09-marketing-undo-after-wide",
+      "viewport": {
+        "width": 1280,
+        "height": 2200
+      },
+      "waitFor": "#see-it-happen",
+      "measure": [
+        "#see-it-happen",
+        "text=And what it wrote down when you put it back",
+        "text=Nothing here was rebuilt",
+        "text=This takes away all four short answers at once"
+      ]
+    },
+    {
+      "path": "/how-it-works?ask=shorter&approve=1&back=1#see-it-happen",
+      "out": "2026-10-09-marketing-undo-after-phone",
+      "viewport": "phone",
+      "waitFor": "#see-it-happen",
+      "measure": [
+        "text=This takes away all four short answers at once"
+      ]
+    },
+    {
+      "path": "/how-it-works?theme=bold&ask=shorter&approve=1&back=1#see-it-happen",
+      "out": "2026-10-09-marketing-undo-after-bold-wide",
+      "viewport": "wide",
+      "waitFor": "#see-it-happen",
+      "measure": [
+        "text=This takes away all four short answers at once"
+      ]
+    }
+  ]
+}

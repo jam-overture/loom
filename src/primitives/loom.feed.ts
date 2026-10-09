@@ -79,17 +79,38 @@ import { linkUrlSchema } from "./url.js"
  * | --- | --- |
  * | rows | the rows |
  * | `ready`, and empty | the `empty` region the tree placed |
- * | `unavailable`, or a shape this cannot draw | a declared line, announced |
+ * | `unavailable`, or a shape this cannot draw | the `unavailable` region, or a declared line |
  *
- * **Only `empty` is a slot, and that is a limit rather than a preference.**
- * `auditRegistry` probes a primitive across its closed prop choices and reports
- * a slot nothing ever places; it cannot supply an answer, so a region this
- * places only when a source failed is a region the audit reads as dropped
- * content. A bound primitive may therefore declare only the regions it places
- * *without* an answer, and the failure line is declared text
+ * **Both regions are slots, and the failure one took sixteen days to become
+ * one.** This file used to say the opposite, and the paragraph is worth keeping
+ * the shape of because the fault is a repeating one:
+ *
+ * > *"Only `empty` is a slot, and that is a limit rather than a preference.
+ * > `auditRegistry` … cannot supply an answer, so a region this places only
+ * > when a source failed is a region the audit reads as dropped content."*
+ *
+ * Every clause was true when it was written, and it was a statement about an
+ * **instrument** wearing the grammar of a statement about design.
+ * [0185](../../decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)
+ * discharged it on 23 September — a probe takes `{ props, data }`, so the
+ * failure state is reachable and a region placed in it is seen — and said in as
+ * many words that whether the failure region becomes a slot is this lane's call
+ * *"made on the design rather than on what the instrument permits"*. Nobody
+ * made it.
+ * [0246](../../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md)
+ * makes it: the region is a slot **over** the declared sentence, not instead of
+ * it. A tree that has something better to say says it; a tree that says nothing
+ * still gets the line, so 0060's two sentences keep their job and every stored
+ * tree renders exactly as it did.
+ *
+ * **One slot for both failure answers, not two.** The distinction between *the
+ * source did not answer* and *it answered with a shape this cannot draw* is
+ * real and is the author's — the reader cannot observe it, and asking a tree
+ * for two sets of words for one experience is asking for copy nobody can tell
+ * apart. The two declared sentences
  * ([0060](../../decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md))
- * instead. Filed, because the audit is the framework's and this is the first
- * primitive to hit it.
+ * keep the distinction where it belongs: in what the primitive says when the
+ * tree says nothing.
  *
  * ## A row it cannot read is skipped, not fatal
  *
@@ -349,12 +370,13 @@ const noticeOf = (words: string): ReactNode =>
 export const loomFeed = definePrimitive({
   type: "loom.feed",
   description:
-    "A list of entries read from a data binding — the latest posts, releases or services, drawn from a registered source rather than authored. Region: empty.",
+    "A list of entries read from a data binding — the latest posts, releases or services, drawn from a registered source rather than authored. Regions: empty, unavailable.",
   props,
-  slots: ["empty"],
+  slots: ["empty", "unavailable"],
   /**
    * Every word in a feed is in the rows an answer brings or in the children of its
-   * `empty` slot. `binding` is the name the answer arrives under.
+   * `empty` and `unavailable` slots. `binding` is the name the answer arrives
+   * under.
    */
   copy: [],
   /**
@@ -434,9 +456,9 @@ export const loomFeed = definePrimitive({
 
     const body =
       reading.kind === "unavailable"
-        ? noticeOf(loom.text.unavailable)
+        ? (loom.slots["unavailable"] ?? noticeOf(loom.text.unavailable))
         : reading.kind === "mismatched"
-          ? noticeOf(loom.text.mismatched)
+          ? (loom.slots["unavailable"] ?? noticeOf(loom.text.mismatched))
           : reading.kind === "empty"
             ? (loom.slots["empty"] ?? null)
             : createElement(

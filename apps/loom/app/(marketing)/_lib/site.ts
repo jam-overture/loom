@@ -635,11 +635,46 @@ export const internalHref = (origin: string, path: string, theme?: SiteThemeName
   const url = new URL(path, `${origin}/`)
 
   if (theme !== undefined) {
-    url.searchParams.set("theme", theme)
+    url.searchParams.set(ADDRESS_PARAMS.theme, theme)
   }
 
   return url.toString()
 }
+
+/**
+ * The five words an address of this site is made of.
+ *
+ * `askedHref` writes them and `askedFor` reads them, and both take the spelling
+ * from here, because a page that writes `back` and reads `back-yes` is a control
+ * that does nothing and a build that is green. Four of the five are ours to
+ * choose; `back-yes` is the spelling the record page's own sequence already
+ * uses, so the two pages name approval the same way.
+ *
+ * The names are written out literally in `addressed.test.ts` rather than
+ * compared against this record, which is the 8 October entry of this lane's own
+ * findings applied to itself: a test that interpolates the constant it is
+ * meant to pin is green on any misspelling.
+ */
+export const ADDRESS_PARAMS = {
+  theme: "theme",
+  ask: "ask",
+  approve: "approve",
+  back: "back",
+  backApprove: "back-yes",
+} as const
+
+/**
+ * What a yes looks like in an address, read the way every other parameter of
+ * this site is read.
+ *
+ * `1` rather than `yes` or `true`, and the first value rather than the last,
+ * which is `readThemeName`'s rule and `readAskId`'s. A query string may carry a
+ * parameter twice — a link built from a link built from a link — and the three
+ * answers disagreeing about which one counts is the kind of difference nobody
+ * finds by reading.
+ */
+export const readYes = (given: string | readonly string[] | undefined): boolean =>
+  (typeof given === "string" ? given : given?.[0]) === "1"
 
 /**
  * The front door, with what the visitor has asked of it written into the address.
@@ -673,9 +708,9 @@ export type AskedFor = {
 const askedHref = (origin: string, path: string, options: AskedFor): string => {
   const url = new URL(path, `${origin}/`)
 
-  if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
-  if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
-  if (options.approve === true) url.searchParams.set("approve", "1")
+  if (options.theme !== undefined) url.searchParams.set(ADDRESS_PARAMS.theme, options.theme)
+  if (options.ask !== undefined) url.searchParams.set(ADDRESS_PARAMS.ask, options.ask)
+  if (options.approve === true) url.searchParams.set(ADDRESS_PARAMS.approve, "1")
   /**
    * Two parameters rather than one with three values, because they answer two
    * questions a visitor asks at two different moments — *put it back*, and then
@@ -685,8 +720,8 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
    * `-yes` is the suffix the record page's sequence already uses for exactly
    * this, so the two pages name approval the same way.
    */
-  if (options.back === true) url.searchParams.set("back", "1")
-  if (options.backApprove === true) url.searchParams.set("back-yes", "1")
+  if (options.back === true) url.searchParams.set(ADDRESS_PARAMS.back, "1")
+  if (options.backApprove === true) url.searchParams.set(ADDRESS_PARAMS.backApprove, "1")
 
   return url.toString()
 }

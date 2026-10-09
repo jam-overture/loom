@@ -1,0 +1,10 @@
+a resolver that cannot say what a primitive places — a plain map, and yesterday's answer for every host
+  markup      <main><dialog><header>Book a call<button>×</button></header><div></div></dialog></main>
+  diagnostics []
+
+the same tree, resolved against a registry
+  markup      <main><dialog><header>Book a call<button>×</button></header><div></div></dialog></main>
+  diagnostics 
+              slot-unplaced
+              node n_3 fills the region "body" and "loom.dialog" places no region of that name, so the content and everything under it was dropped
+

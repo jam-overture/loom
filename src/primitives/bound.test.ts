@@ -94,7 +94,14 @@ const boundTree = (
   type: string,
   props: JsonObject,
   declared: unknown,
-  theme: Record<string, string> = EDITORIAL
+  theme: Record<string, string> = EDITORIAL,
+  /**
+   * Whether the tree also places the region a bound primitive draws when its
+   * source did not answer (0246). Off by default, because the default is the
+   * page every existing tree is — one that places `empty` and lets the
+   * primitive's own sentence stand for the failure.
+   */
+  failureRegion = false
 ): LoomTree => {
   const ids: IdFactory = sequentialIdFactory()
   const text = (value: string) => buildText(ids, value)
@@ -124,10 +131,46 @@ const boundTree = (
    */
   const PLACES_A_REGION: readonly string[] = ["loom.feed", "loom.trend", "loom.voices", "loom.plate"]
 
+  /**
+   * What a page says for itself when its data is down: a heading, a sentence
+   * and a way out. The point of the region is that none of this was sayable
+   * before — the primitive's own line is one sentence of muted body text, and a
+   * page that wanted to send a reader somewhere had nowhere to put the link.
+   */
+  const unavailable = buildSlot(ids, "unavailable", [
+    buildElement(ids, {
+      type: "loom.empty-state",
+      props: { outline: "solid", align: "center", cause: "unavailable" },
+      children: [
+        buildSlot(ids, "heading", [
+          buildElement(ids, {
+            type: "loom.heading",
+            props: { level: 3 },
+            children: [text("We cannot reach this right now")],
+          }),
+        ]),
+        text("Our status page has the latest."),
+        buildSlot(ids, "actions", [
+          buildElement(ids, {
+            type: "loom.action",
+            props: { href: "https://example.com/status", variant: "secondary", scale: "small" },
+            children: [text("Check status")],
+          }),
+        ]),
+      ],
+    }),
+  ])
+
+  const regions = PLACES_A_REGION.includes(type)
+    ? failureRegion
+      ? [empty, unavailable]
+      : [empty]
+    : []
+
   const node = buildElement(ids, {
     type,
     props: (declared === undefined ? props : { ...props, [DATA_PROP_KEY]: declared }) as JsonObject,
-    children: PLACES_A_REGION.includes(type) ? [empty] : [],
+    children: regions,
   })
 
   return createTree(
@@ -951,4 +994,110 @@ describe("what the three new twins look like under a second palette", () => {
       }
     })
   }
+})
+
+/**
+ * The region a bound primitive draws when its source did not answer — the one
+ * state of a bound band that no tree could reach until
+ * [0246](../../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md).
+ *
+ * Asserted from both sides, and the second side is the one that matters. A slot
+ * that *replaces* the declared sentence would be a breaking change to every
+ * stored tree that binds anything; a slot *over* it is additive, and the only
+ * way to know which one shipped is to render the same node with the region and
+ * without it.
+ */
+describe("the region a bound primitive draws when its source did not answer", () => {
+  const BOUND: readonly (readonly [string, JsonObject, unknown, string])[] = [
+    ["loom.feed", {}, { entries: { source: "catalogue.posts" } }, "This list could not be loaded."],
+    ["loom.trend", { max: 100 }, { series: { source: "catalogue.posts" } }, "This chart could not be loaded."],
+    ["loom.voices", {}, { voices: { source: "catalogue.posts" } }, "These testimonials could not be loaded."],
+    ["loom.plate", {}, { image: { source: "catalogue.posts" } }, "This picture could not be loaded."],
+  ]
+
+  for (const [type, props, declared, sentence] of BOUND) {
+    describe(type, () => {
+      it("places the words the tree gave it instead of the declared sentence", async () => {
+        const { markup } = await renderWith(
+          boundTree(type, props, declared, EDITORIAL, true),
+          sourceDown()
+        )
+
+        expect(markup).toContain("We cannot reach this right now")
+        expect(markup).toContain("Our status page has the latest.")
+        expect(markup).toContain("Check status")
+
+        /** The whole of why this is additive: the fallback steps aside, it does not stack. */
+        expect(markup).not.toContain(sentence)
+
+        /** And it is still not the empty state, which is 0058's distinction. */
+        expect(markup).not.toContain("Nothing published yet")
+      })
+
+      it("keeps the declared sentence for a tree that placed no region", async () => {
+        const { markup } = await renderWith(boundTree(type, props, declared), sourceDown())
+
+        expect(markup).toContain(sentence)
+        expect(markup).not.toContain("We cannot reach this right now")
+      })
+
+      /**
+       * One slot, both failure answers (0246 decision 3). A reader cannot
+       * observe the difference between a source that did not answer and one
+       * that answered with a shape the primitive cannot draw, so asking a tree
+       * for two regions would be asking for the same copy twice.
+       */
+      it("draws the same region for an answer it could not read", async () => {
+        const { markup } = await renderWith(
+          boundTree(type, props, declared, EDITORIAL, true),
+          sourceAnswering({ unexpected: "shape" })
+        )
+
+        expect(markup).toContain("We cannot reach this right now")
+        expect(markup).not.toContain("Nothing published yet")
+      })
+
+      it("renders it the same way under both palettes, with no colour of its own", async () => {
+        const editorial = await renderWith(
+          boundTree(type, props, declared, EDITORIAL, true),
+          sourceDown()
+        )
+        const bold = await renderWith(boundTree(type, props, declared, BOLD, true), sourceDown())
+
+        expect(bodyOnly(bold.markup)).toBe(bodyOnly(editorial.markup))
+        expect(bodyOnly(bold.markup)).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+        expect(bodyOnly(bold.markup)).not.toMatch(/\b(rgba?|hsla?)\(/)
+      })
+    })
+  }
+
+  /**
+   * The stated exception, asserted so that it is a decision rather than an
+   * omission. `loom.tally` is a leaf and 0242 settled that a leaf has no
+   * inside — there is no rectangle in an inline figure to put a heading and a
+   * link in, and a slot here would be an interior the primitive does not have.
+   */
+  it("gives loom.tally no such region, because a leaf has no inside", () => {
+    const tally = primitives.primitives.find((primitive) => primitive.type === "loom.tally")
+
+    expect(tally?.slots).toEqual([])
+  })
+
+  /**
+   * Derived rather than listed, so that a sixth bound primitive cannot arrive
+   * with a failure region nobody placed — or without one nobody noticed was
+   * missing.
+   */
+  it("is declared by every bound primitive that places a region at all", () => {
+    const declaring = primitives.primitives
+      .filter((primitive) => (primitive.reads ?? []).length > 0 && (primitive.slots ?? []).length > 0)
+      .map((primitive) => [primitive.type, [...(primitive.slots ?? [])].sort()])
+
+    expect(declaring).toEqual([
+      ["loom.trend", ["empty", "unavailable"]],
+      ["loom.voices", ["empty", "unavailable"]],
+      ["loom.feed", ["empty", "unavailable"]],
+      ["loom.plate", ["empty", "unavailable"]],
+    ])
+  })
 })
