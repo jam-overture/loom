@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { RECALL_PARTS, lessonSlug, lessonSlugParts } from "./slugs"
+import { RECALL_PARTS, lessonSlug, lessonSlugParts, questionLabel } from "./slugs"
 
 /**
  * The keys in the reader's record, read back.
@@ -35,5 +35,30 @@ describe("a slug", () => {
     expect(lessonSlugParts("lesson-4-predict")).toBeUndefined()
     expect(lessonSlugParts("lesson-04-")).toBeUndefined()
     expect(lessonSlugParts("")).toBeUndefined()
+  })
+})
+
+describe("what to call a question", () => {
+  it("names a review set the way the schedule names it", () => {
+    expect(questionLabel("set-d", 7)).toBe("Set D q7")
+    expect(questionLabel("set-an", 2)).toBe("Set AN q2")
+  })
+
+  /**
+   * The case the one-liner this replaced got wrong, in every panel that printed
+   * one: `LESSON-04-SELF-CHECK q2`.
+   */
+  it("names a lesson's own section the way the lesson does", () => {
+    for (const [part, expected] of [
+      ["warm-up", "Warm-up"],
+      ["predict", "Predict"],
+      ["self-check", "Self-check"],
+    ] as const) {
+      expect(questionLabel(lessonSlug(4, part), 2)).toBe(`Lesson 04 ${expected} q2`)
+    }
+  })
+
+  it("hands back a key it does not recognise rather than guessing at it", () => {
+    expect(questionLabel("something-older", 1)).toBe("something-older q1")
   })
 })

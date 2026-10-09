@@ -1,4 +1,4 @@
-import { calibrationOf } from "./calibration"
+import { calibrationOf, secondLookOf } from "./calibration"
 import {
   EMPTY_SET_PROGRESS,
   readProgress,
@@ -336,6 +336,13 @@ export type RecordSummary = {
   readonly corrections: number
   /** Never goes down, and is why the file is worth keeping. */
   readonly confidentAndWrong: number
+  /**
+   * The rarer half of the same thing: sure, wrong, looked it up, came back sure,
+   * and wrong again. Counted here because it is the one figure in the record
+   * that takes a month to produce and cannot be reconstructed from anything
+   * else in the file.
+   */
+  readonly sureAgainAndWrong: number
   readonly firstDay: string | undefined
   readonly lastDay: string | undefined
   /** Distinct days on which anything was recorded — the size of what is at stake. */
@@ -375,6 +382,7 @@ export const summariseRecord = (progress: Progress): RecordSummary => {
     explanations: explanations.length,
     corrections: progress.corrections.length,
     confidentAndWrong: calibrationOf(progress).confidentAndWrong.length,
+    sureAgainAndWrong: secondLookOf(progress).sureAndWrong.length,
     firstDay: days[0],
     lastDay: days[days.length - 1],
     days: new Set(days).size,

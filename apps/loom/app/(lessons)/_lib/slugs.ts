@@ -10,9 +10,9 @@
  * *both* — because it read them by iterating the map, which means it had been
  * reading them all along without knowing which was which.
  *
- * So the shape lives here, once, and the two things worth asking about a slug
- * are the two functions below: how to make one, and what one you have been
- * handed is.
+ * So the shape lives here, once, and the three things worth asking about a slug
+ * are the functions below: how to make one, what one you have been handed is,
+ * and what to call it in front of the reader.
  */
 
 /** What a review set is called, where the reader's record and the URL are concerned. */
@@ -95,4 +95,40 @@ export const lessonSlugParts = (
   if (!isRecallPart(found[2])) return undefined
 
   return { lesson: Number(found[1]), part: found[2] }
+}
+
+const PART_NAMES: Readonly<Record<RecallPart, string>> = {
+  "warm-up": "Warm-up",
+  predict: "Predict",
+  "self-check": "Self-check",
+}
+
+/**
+ * What to call a question in front of the reader, from its slug and number.
+ *
+ * Two panels print a question's address — the calibration list and the second
+ * look — and both run in the browser, so neither can reach the labels the
+ * corrections sitting uses, which are read off the lesson files on the server.
+ * The calibration list had its own one-liner,
+ * `set.replace("set-", "set ").toUpperCase()`, written when a review set was the
+ * only kind of slug there was. It renders a lesson's own question as
+ * `LESSON-04-SELF-CHECK`, and has been able to receive one since the lessons'
+ * own sections started being graded.
+ *
+ * Naming the source is safe **here and nowhere else on this surface**: these are
+ * questions the reader has already answered and graded, so there is nothing left
+ * to give away. A sitting still refuses to say where a question is from until it
+ * has been attempted, which is the rule this is deliberately not an exception to
+ * — it is a different moment.
+ */
+export const questionLabel = (slug: string, question: number): string => {
+  const parts = lessonSlugParts(slug)
+
+  if (parts !== undefined) {
+    return `Lesson ${String(parts.lesson).padStart(2, "0")} ${PART_NAMES[parts.part]} q${question}`
+  }
+
+  return slug.startsWith("set-")
+    ? `Set ${slug.slice("set-".length).toUpperCase()} q${question}`
+    : `${slug} q${question}`
 }

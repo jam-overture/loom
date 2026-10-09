@@ -227,6 +227,21 @@ what it adds is only the part paper cannot do:
   back beside one from Set D and does not announce which is which — and a
   prediction you were **sure** about and wrong about comes back too, because
   that is a belief rather than a gap.
+- **And how the ones that came back went**, counted separately from the ones you
+  were asked once. Every re-answer carries a rating given before the reveal, the
+  same as every other answer here — and reading them together with the rest
+  would be the kindest arithmetic in the course: the schedule has you look the
+  specific point up *before* you come back, so those are the easier questions by
+  construction, and one figure spanning both would improve the more corrections
+  you did. So there are two tables, and the second is not measuring whether you
+  knew it. You had just read it. It is measuring whether the reading took, and
+  whether you could tell — which is the question that has a name on the review
+  queue: **sure again and wrong.** Rated 4 or 5 on the way back and missed
+  anyway, and separately, the ones that were rated 4 or 5 the *first* time too.
+  That last pair is the rarest thing your record will ever hold. It is not a gap
+  — a gap gets fixed on contact and this one has had contact — it is a belief
+  about how the system works that survived being contradicted, and nothing on
+  paper could ever have told you that you had one.
 
 The lessons themselves run there too, at `/lessons/04` and so on, and reading
 one there differs from reading the file in exactly five ways — all of them
