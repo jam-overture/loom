@@ -1,0 +1,81 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-08-demo-four-more-panel-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask ul li:nth-child(1) form button" },
+        { "waitFor": "aside li[id]" },
+        { "scrollTo": "#ask" }
+      ],
+      "measure": [
+        "#ask",
+        "#ask > div:nth-child(1) > p",
+        "#ask ul li",
+        "text=You can ask for 4 more changes here, and put the last one back. Loom will make 2 on its own and ask you first about 3."
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-08-demo-four-more-panel-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask ul li:nth-child(1) form button" },
+        { "waitFor": "aside li[id]" },
+        { "scrollTo": "#ask" }
+      ],
+      "measure": ["#ask", "#ask > div:nth-child(1) > p", "#ask ul li"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-08-demo-four-more-arrival-wide-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask", "#ask > div:nth-child(1) > p", "#ask ul li", "aside footer"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-08-demo-four-more-arrival-phone-unchanged",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask > div:nth-child(1) > p", "#ask ul li"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-08-demo-four-more-removal-wide-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "li button.bg-refuse" },
+        { "click": "li form button.bg-affirm" },
+        { "waitFor": "li button.bg-neutral" },
+        { "scrollTo": "#ask" }
+      ],
+      "measure": [
+        "#ask > div:nth-child(1) > p",
+        "#ask ul li",
+        "text=You can ask for 4 changes here. Loom will make 2 on its own and ask you first about 2."
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-08-demo-four-more-held-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "li button.bg-refuse" }],
+      "measure": ["aside", "aside li[id]", "#ask > div:nth-child(1) > p"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-08-demo-four-more-embed-unchanged",
+      "viewport": { "width": 348, "height": 465, "label": "embed" },
+      "waitFor": "#ask"
+    }
+  ]
+}

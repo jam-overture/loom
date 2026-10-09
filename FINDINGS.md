@@ -8,6 +8,58 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-08 — the demo's panel says *more* on one path through a change and not on the other, and the difference is which preset the visitor spent
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/_lib/how-many-wait-for-you.ts`) · **Status:** open — the half of
+this run's defect that was not taken, and it is smaller than the half that was.
+
+`demo-42-four-more-and-the-way-back` closed the 7 October entry: after a toggle
+press the sentence over the list reads *You can ask for 4 more changes here, and
+put the last one back*, where it used to read the arrival screen's *5 changes*.
+
+**The other path through a change does not get the word.** Press *Take the
+numbers off*, answer the question, and the preset is spent — `availablePresets`
+can find nothing left for it to plan, so it leaves the list and nothing on the
+panel would put anything back. Measured on a production build of this branch,
+1280 × 900, after that sequence:
+
+> You can ask for 4 changes here. Loom will make 2 on its own and ask you first
+> about 2.
+
+Nothing in it is false and the count did come down from five, which is most of
+what *more* would have said. What is missing is the acknowledgement: the same
+visitor on the other path is told there are *4 more*, and this one is told there
+are *4*, and the difference is invisible to them and arbitrary.
+
+**Why it was not taken.** The clause is `putsBack`-shaped, and `putsBack` is
+exactly the wrong question here: nothing on this path puts anything back, so the
+module has no way to know a change has landed. The fact it would need is
+`rail.landing` — whether the revision the page is at was produced by this
+visitor's own press (`landed.ts`) — and that is computed in `page.tsx`, the one
+file in this lane no `vitest` run can mount. Threading it down would be a
+seventh prop arriving at `ask-panel.tsx` one at a time, which is what the 29
+September entry this lane owns is about.
+
+**Three shapes:**
+
+1. **Leave it.** The number coming down does the work, and the sentence is read
+   closely exactly once, on arrival, where it is right. Cheapest.
+2. **Hand the panel the landing.** `ask-panel.tsx` already takes `waiting` and
+   `leading` from the page; a third would say *a change of yours is on the
+   page*, and the clause becomes *more* whenever it is true. Truest, and it is
+   the prop count the open entry is about.
+3. **Read it off the revision the panel already has.** `revision > 0` is on this
+   panel today and is nearly the fact — but only nearly: it is the tree's
+   revision and not a claim about who moved it, which is the distinction
+   `landed.ts` exists for, and a surface that guessed it would be wrong the
+   first time anything else wrote to the tree.
+
+**Recommendation: (1)**, and (2) only if a run is already in `page.tsx`'s props
+for another reason. The gap is a word, the fix is a prop on the file this lane
+has twice filed for having too many, and nothing a stranger reads is false.
+
+---
 ## 2026-10-08 — the restriction 0185 discharged is still being written into new primitives, with the discharged reason in the present tense, and the mechanism that discharged it has no caller
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -242,9 +294,30 @@ is not that a shape was used; it is that nothing read the output.
 ## 2026-10-07 — after a one-press change the demo's panel says the arrival screen's sentence word for word, and one of the five it counts is now the way back
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
-(`app/(demo)/_lib/how-many-wait-for-you.ts`) · **Status:** open — **the half of
-today's defect that was not taken**, and it is a copy question rather than a
-reading one.
+(`app/(demo)/_lib/how-many-wait-for-you.ts`) · **Status:** **closed by
+`demo-42-four-more-and-the-way-back`**, by the shape this entry recommended.
+
+*(Closed 8 October by `Loom demo`, the lane that owns it. The entry is left
+whole below because the three shapes and the reason two of them were refused
+are the argument for the one that was built.)*
+
+**What was built: (2), and only the first clause moved.** The sentence over the
+list now divides the asks by **direction** — *You can ask for 4 more changes
+here, and put the last one back* — and the clause that counts verdicts is
+untouched, so *Loom will make 2 on its own and ask you first about 3* is still
+exactly the five chips a stranger finds under it. Two partitions of one list,
+which is the pair every row already carries: the chip is the Gate's answer and
+the promise is what the press does to the page.
+
+**(3) was refused for the reason this entry gives**, and refusing it is what
+kept the second clause still: counting forward only would have put *make 1 on
+its own* over two rows reading `GOES AHEAD`, which hides a press that is on the
+screen and breaks the one property the chips exist for.
+
+Measured on production builds of `main` at `19e0f16` and of the branch, 1280 ×
+900, after one press of *Re-theme the whole page*: the sentence is at `y 202` in
+both and the four rows at `442 / 509 / 576 / 643` in both. One sentence changed
+and nothing moved.
 
 `demo-41-the-way-back-is-not-a-way-on` fixed the row and the ending: a press
 that would only put the visitor's last change back now says so, and the
