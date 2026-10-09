@@ -1,5 +1,14 @@
 # 2026-10-08 — a page read rather than scanned
 
+> **The record this report calls `0241` is `0245`.** It was renumbered on
+> 9 October, after everything this branch had been waiting behind landed: #547
+> took `0241` on `main`, so the original number named a different decision
+> there — fatal under
+> [0097](../decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md).
+> Nothing it decides changed and it is still `Proposed`. The references below
+> are corrected in place rather than left to send a reader to a record about
+> policies; the renumber's own account is in the record's opening note.
+
 The catalogue could build one kind of page. It can now build two, and the second
 one cost **no new primitive at all** — which is the most useful thing this run
 has to report against a breadth mandate.
@@ -17,7 +26,7 @@ has to report against a breadth mandate.
 | **`nav-docs`** | a fourth design of the `nav` region. **It exists because a test refused the simpler thing** |
 | `DOCUMENT_DESIGNS` · `DOCUMENT_TYPES` · `Band` | the mapping, the reach measurement, and the structural supertype that lets a document band through the ordinary seam |
 | `documents.test.ts` | 23 tests, both palettes |
-| **0241**, `Proposed` | `ARCHITECTURAL` — see *What I left out* |
+| **0245**, `Proposed` | `ARCHITECTURAL` — see *What I left out* |
 | 4 findings | three against this lane's own primitives, one general |
 
 `pnpm verify` is green from a deleted `dist` and `.next`: **exit 0**.
@@ -132,7 +141,7 @@ part of this run worth generalising.
 
 ### A test: the header cannot be shared, and 0168 is why
 
-0241 was drafted with a clean two-clause decision — *a second sequence is earned
+0245 was drafted with a clean two-clause decision — *a second sequence is earned
 by regions in a different order, and the regions that belong to the **site**
 rather than the **page** are shared between sequences.* The document sequence
 would name the landing `nav` and `footer`, and a deployment editing its header
@@ -203,7 +212,7 @@ afford.
 
 ## What I left out, and why
 
-**0241 is `Proposed` and that is the whole of what review has to settle.** It
+**0245 is `Proposed` and that is the whole of what review has to settle.** It
 does not contradict an `Accepted` record and supersedes nothing, but it widens
 the model two of them state: 0162 says *the page is one path through it*, and
 0171 reasons about *a page* throughout. This makes that two paths.
@@ -231,7 +240,7 @@ build go away.
 
 **Also left:** a second design of each new part. A sequence with one design per
 region is a sequence where a deployment has no choice — the same debt the
-landing page paid down 9 → 5 → 1 → 0 over four runs. Recorded in 0241 rather
+landing page paid down 9 → 5 → 1 → 0 over four runs. Recorded in 0245 rather
 than discovered in a month.
 
 ### Two files outside this lane
