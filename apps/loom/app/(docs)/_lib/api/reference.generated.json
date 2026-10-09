@@ -8,7 +8,7 @@
       "files": 95,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4657,7 +4657,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4703,7 +4703,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5658,7 +5658,7 @@
       "files": 206,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6123,7 +6123,7 @@
       "files": 69,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7085,7 +7085,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7676,7 +7676,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7904,7 +7904,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8363,7 +8363,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8717,7 +8717,7 @@
       "files": 34,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8872,7 +8872,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 44,
+      "files": 45,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8885,7 +8885,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9910,11 +9910,130 @@
               "summary": ""
             },
             {
+              "name": "paceStandingOf",
+              "kind": "function",
+              "signature": "const paceStandingOf: (pace: number | null, floored: boolean) => PaceStanding",
+              "truncated": false,
+              "summary": "The verdict, which is the asymmetry of the module documentation written once."
+            },
+            {
               "name": "readingPaceOf",
               "kind": "function",
               "signature": "const readingPaceOf: (reading: PageReading, options?: PaceOptions) => PagePace",
               "truncated": false,
               "summary": "Whether readers had time to read what each part of a page says."
+            }
+          ]
+        },
+        {
+          "module": "signals/pace-change",
+          "title": "Pace change",
+          "summary": "What a change did to whether readers had time to read what a page says.",
+          "symbols": [
+            {
+              "name": "PaceChangeSilence",
+              "kind": "type",
+              "signature": "type PaceChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Nothing is comparable and nothing is countable. Spelled as `ChangeSilence`\n * and `CopyChangeSilence` spell it, because a surface drawing three\n * comparisons of one change should not meet three names for one state\n *.\n */\n\"different-trees\"\n/**\n * Neither revision says anything that takes time to read.\n *\n * No words on either side and nothing undeclared either, so there is no\n * `needMs` to divide by anywhere on the page.\n */\n | \"wordless\"\n/**\n * One of the two windows held no page views.\n *\n * Every part on that side is `unreached` (`pace.ts`), so there is no time to\n * compare. **The word side still answers**: what the change did to the time\n * the page asks for is a fact about the two trees, and *this band asks for\n * two hundred words less than it did, and nothing has been measured since* is\n * true and worth saying.\n */\n | \"nothing-measured\"\n/**\n * No part of the page is in both revisions, so there is nothing to compare.\n *\n * The same state `CopyChangeSilence.dissolved` reports of words, said of\n * parts: a page that carries no part carries no word either, so this is that\n * condition and not a neighbouring one. The census of what was added\n * and removed answers in full and is the whole of what can be said.\n */\n | \"dissolved\";",
+              "truncated": false,
+              "summary": "Why a comparison of two windows' pace answered nothing."
+            },
+            {
+              "name": "PACE_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const PACE_CHANGE_SILENCES: readonly PaceChangeSilence[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface that has to account for every absent figure."
+            },
+            {
+              "name": "describePaceChangeSilence",
+              "kind": "function",
+              "signature": "const describePaceChangeSilence: (silence: PaceChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a figure is not there."
+            },
+            {
+              "name": "PaceMovement",
+              "kind": "type",
+              "signature": "type PaceMovement =\n/**\n * Skimmed before, and not now — the sentence a rewrite is made for.\n *\n * Check {@link ComparedPace.cause} before reading it as readers having\n * slowed: a band cut in half eases with nobody having given it a moment more.\n */\n\"eased\"\n/** Read before, and skimmed now. */\n | \"rushed\"\n/**\n * Skimmed before and skimmed now — the parts a change did not fix.\n *\n * Kept apart from `held` because the two are opposite findings about a page\n * and both are *the verdict did not move*.\n */\n | \"still-skimmed\"\n/** Read on both sides, whether paced or lingered. */\n | \"held\"\n/**\n * One side has no verdict, so there is nothing to compare.\n *\n * Nobody reached it in that window, or its words are a floor and the verdict\n * the floor would support is not the safe one. Which it is, is on that\n * side's own `silence`.\n */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to the verdict on one part between two windows."
+            },
+            {
+              "name": "PACE_MOVEMENTS",
+              "kind": "value",
+              "signature": "const PACE_MOVEMENTS: readonly PaceMovement[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface accounting for every part it was handed."
+            },
+            {
+              "name": "describePaceMovement",
+              "kind": "function",
+              "signature": "const describePaceMovement: (movement: PaceMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a part in front of a person."
+            },
+            {
+              "name": "PaceCause",
+              "kind": "type",
+              "signature": "type PaceCause =\n/**\n * The change alone was enough: the words the later revision asks for would\n * have produced today's verdict at the earlier window's reading time.\n *\n * The attribution worth leading with, and the one a single pace figure hides.\n * *This band is paced because it is shorter, and not because anybody is\n * reading it.*\n */\n\"words\"\n/**\n * The readers alone were enough: the later window's time would have produced\n * today's verdict against the words the page used to say.\n */\n | \"time\"\n/** Either alone would have been enough, so the move is over-determined. */\n | \"either\"\n/** Neither alone would have been enough and the two together were. */\n | \"together\"\n/**\n * A counterfactual has no verdict, so neither question can be answered.\n *\n * One side's words are a floor, which the mixed pace of a counterfactual\n * inherits from both sides: the words it divides by are the ones nobody\n * counted.\n */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "Which side of the division the verdict moved with."
+            },
+            {
+              "name": "PACE_CAUSES",
+              "kind": "value",
+              "signature": "const PACE_CAUSES: readonly PaceCause[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface accounting for every verdict that moved."
+            },
+            {
+              "name": "describePaceCause",
+              "kind": "function",
+              "signature": "const describePaceCause: (cause: PaceCause) => string",
+              "truncated": false,
+              "summary": "One line per cause, for a surface saying what moved a verdict."
+            },
+            {
+              "name": "PaceHeld",
+              "kind": "type",
+              "signature": "type PaceHeld = {\n    /** `null` where there is nothing to divide: no reader on the side the time came from, or no words on the side the words came from. */\n    readonly pace: number | null;\n    /**\n     * The verdict that pace carries, under **either** side's floor.\n     *\n     * A floor is taken from both sides because a counterfactual's two terms come\n     * from two revisions, and words nobody counted on either one are words\n     * missing from this ratio. The conservative reading, which leaves it\n     * `unknown` rather than claiming the weaker verdicts.\n     */\n    readonly standing: PaceStanding;\n};",
+              "truncated": false,
+              "summary": "A pace neither window reported, and the verdict it would have carried."
+            },
+            {
+              "name": "ComparedPace",
+              "kind": "type",
+              "signature": "type ComparedPace = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PacedPart;\n    /** The whole of what the later window said about it. */\n    readonly now: PacedPart;\n    readonly movement: PaceMovement;\n    /**\n     * `now.pace ÷ was.pace`, and `null` where either side has none or the earlier\n     * one is nought.\n     *\n     * Exactly {@link timeRatio} ÷ {@link needRatio}, which is the identity this\n     * module is built on: a pace moves because readers' time moved, because the\n     * words moved, or both.\n     */\n    readonly paceRatio: number | null;\n    /**\n     * `now.spentMs ÷ was.spentMs` — the readers' side of the division.\n     *\n     * Each term is a mean off one side's own row, so each side's straddle has\n     * very nearly divided out before they meet. `null` where either side had no\n     * reader, or the earlier one no time at all.\n     */\n    readonly timeRatio: number | null;\n    /**\n     * `now.needMs ÷ was.needMs` — the page's side of the division.\n     *\n     * Exact and reader-free: it is what the change did to the time this part's\n     * words ask for. Below 1 is a part the change shortened. `null` where the\n     * earlier revision's part said nothing.\n     */\n    readonly needRatio: number | null;\n    /** The later window's time against the earlier revision's words — the readers alone. */\n    readonly ifWordsHeld: PaceHeld;\n    /** The earlier window's time against the later revision's words — the change alone. */\n    readonly ifTimeHeld: PaceHeld;\n    /** Which side the verdict moved with, and `null` where it did not move. */\n    readonly cause: PaceCause | null;\n};",
+              "truncated": false,
+              "summary": "One part both revisions have, as two windows paced it."
+            },
+            {
+              "name": "TimeCount",
+              "kind": "type",
+              "signature": "type TimeCount = {\n    readonly was: number;\n    readonly now: number;\n    readonly change: number;\n};",
+              "truncated": false,
+              "summary": "A time total, before and after, with the subtraction done once."
+            },
+            {
+              "name": "PaceChange",
+              "kind": "type",
+              "signature": "type PaceChange = {\n    /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */\n    readonly treeId: TreeId;\n    readonly revisions: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /** The two pace readings this comparison is made of. */\n    readonly readings: {\n        readonly was: PagePace;\n        readonly now: PagePace;\n    };\n    /**\n     * Every part both revisions have that says something on either side, in the\n     * **later** reading order.\n     *\n     * The later order because that is the page somebody is looking at. A part\n     * whose subtree says nothing on both sides and hides nothing on either is\n     * left out altogether: it has no pace in any window, so a row for it would\n     * only ever read `unknown` and would make {@link movements} a count of\n     * spacers.\n     */\n    readonly compared: readonly ComparedPace[];\n    /**\n     * Parts only the later revision has, as it paced them, in its reading order.\n     *\n     * A census with readers in it rather than an exact one, unlike the census of\n     * the words a change wrote: a part nobody could have read before still\n     * has to be read now for anything to be said about it. *The change added a\n     * band and readers are skimming it* is the row worth looking at.\n     */\n    readonly added: readonly PacedPart[];\n    /** Parts only the earlier revision had, as it paced them, in its reading order. */\n    readonly removed: readonly PacedPart[];\n    /** Compared parts by what happened to the verdict. The five add to {@link compared}'s length. */\n    readonly movements: Readonly<Record<PaceMovement, number>>;\n    /**\n     * The parts whose verdict moved, by what moved it. The five add to\n     * `movements.eased + movements.rushed`.\n     */\n    readonly causes: Readonly<Record<PaceCause, number>>;\n    /**\n     * The root, compared against itself across the two revisions.\n     *\n     * *Readers had a third of the time this page's words take and now they have\n     * half* — the page's one figure, and a row rather than an addition for the\n     * reason the module documentation gives. Kept out of the rankings below,\n     * because its subtree is every part it would outrank.\n     *\n     * `null` where either revision's root is not an element, or where the root\n     * says nothing on both sides.\n     */\n    readonly whole: ComparedPace | null;\n    /**\n     * The part the change made most room to read: `eased`, most words passed\n     * now, then first in the later reading order.\n     *\n     * By words passed — readers times the words they were shown — rather than by\n     * the change in pace, which is the ranking rule a fall between two siblings\n     * and a skimmed part already use: a caption two readers now have\n     * time for is a better ratio and a smaller gain than a band four hundred of\n     * them do.\n     */\n    readonly mostEased: ComparedPace | null;\n    /** The part it cost most, on the same terms. */\n    readonly mostRushed: ComparedPace | null;\n    /**\n     * The parts readers skimmed before and skim now, most words passed first,\n     * then in the later reading order.\n     *\n     * The list a person can act on without reading anything else, and the one\n     * ranking here that is about where a change did **not** land. The root is\n     * left out, as it is left out of every ranking here, because its subtree is\n     * every part it would outrank; {@link whole} carries it. `still-skimmed`\n     * only: a part whose verdict is `unknown` on either side is in\n     * {@link movements} where it can be seen and not acted on, because putting it\n     * here would turn *nothing can be said* into *readers are not reading this*.\n     */\n    readonly stillSkimmed: readonly ComparedPace[];\n    /**\n     * What the two revisions ask of a reader who reads every word of them, before\n     * and after.\n     *\n     * The root's `needMs` on each side, which is the page's whole text costed\n     * once — not a sum over the parts, which would charge a reader once per level\n     *. `null` where there is no {@link whole} to read it off.\n     */\n    readonly need: TimeCount | null;\n    /** Why there is no comparison of the reading, or `null` where there is one. */\n    readonly silence: PaceChangeSilence | null;\n    /** The costing rate both sides were read at, which is the published default unless one was given. */\n    readonly wordsPerMinute: number;\n    /** The straddle correction applied to each side; `0` where none was given. */\n    readonly inflation: {\n        readonly was: number;\n        readonly now: number;\n    };\n};",
+              "truncated": false,
+              "summary": "What a change did to the time a page's words ask of its readers, and to whether they had it."
+            },
+            {
+              "name": "PaceChangeOptions",
+              "kind": "type",
+              "signature": "type PaceChangeOptions = {\n    readonly inflation?: {\n        readonly was?: number;\n        readonly now?: number;\n    };\n    readonly wordsPerMinute?: number;\n};",
+              "truncated": false,
+              "summary": "How the two sides were read."
+            },
+            {
+              "name": "paceChangeOf",
+              "kind": "function",
+              "signature": "const paceChangeOf: (was: PageReading, now: PageReading, options?: PaceChangeOptions) => PaceChange",
+              "truncated": false,
+              "summary": "What a change did to whether readers had time for what a page says."
             }
           ]
         },
@@ -10479,7 +10598,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"change\" | \"copy\" | \"copy-change\" | \"pace\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"change\" | \"copy\" | \"copy-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -10552,6 +10671,13 @@
               "signature": "const meaningOfPaceSilence: (silence: PaceSilence) => SilenceMeaning",
               "truncated": false,
               "summary": "What a pace reading's silence reports, of one part."
+            },
+            {
+              "name": "meaningOfPaceChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfPaceChangeSilence: (silence: PaceChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two windows' pace reports."
             },
             {
               "name": "meaningOfReachSilence",
@@ -10684,7 +10810,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10827,7 +10953,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10894,7 +11020,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11491,7 +11617,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11565,7 +11691,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12023,7 +12149,7 @@
       "files": 76,
       "narrower": [],
       "standing": {
-        "packageNames": 1374,
+        "packageNames": 1391,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

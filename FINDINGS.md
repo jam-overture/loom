@@ -8,6 +8,70 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-08 — a band that stopped being skimmed because it got shorter looks exactly like one readers slowed down for, and the reader screen now has the figure that tells them apart
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is blocked and
+nothing is wrong on the screen today**; the reading is new and this is what it
+makes drawable, with the one sentence on it that must not be drawn
+
+`paceChangeOf(was, now, options)` is on this branch, published from
+`@jam-overture/loom/signals` with
+[0244](decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md).
+It is two windows' pace readings held against each other: *the band readers
+skimmed is read now*, which is the sentence a rewrite is judged by and the one
+nothing here could say.
+
+**The figure to lead with, and the reason it is not the pace.** A pace is
+`spentMs ÷ needMs`, so a part that stops being skimmed has moved because readers
+stayed longer **or because the page asks for less** — and a change that halves a
+band produces the second with nobody having given it a second more attention. A
+single before-and-after pace reports the two identically and flatters the one
+that means least. So every compared part carries `timeRatio` and `needRatio`,
+and `cause` says which side would have moved the verdict **on its own**:
+`words`, `time`, `either`, `together`, or `unknown` where a floor leaves the
+question unanswerable.
+
+*The pricing band readers used to skim is paced now — and it is the trim that
+did it, not the readers* is one row, and `cause: "words"` on a `rushed` part is
+the sharpest thing this subsystem can say against a change.
+
+**Four things to know before the card is drawn**, each a shape choice that would
+otherwise have to be reversed.
+
+**`eased` is not an improvement and the type will not let you call it one.** A
+verdict is about the mean reader of its own window, so a quiet window and a busy
+one judge the same part on different evidence — `PaceMovement` is named for a
+movement throughout, and `describePaceMovement` is written so a card can print
+the state without asserting a cause.
+
+**There is no page-wide total of time or words, and asking for one is the double
+count.** The figures nest, because a part is judged against its subtree's words
+(0230): one reader who raced past a band raced past everything in it. The page's
+own figure is `whole` — the root compared against itself — and `need` is the
+subtraction of its two costings. The root is kept out of `mostEased`,
+`mostRushed` and `stillSkimmed` for the same reason, so a card ranking parts
+never meets the page among them.
+
+**`stillSkimmed` is the list a person can act on**, and it is `still-skimmed`
+only: a part `unknown` on either side is in `movements` where it can be counted
+and not acted on, because drawing it would turn *nothing can be said* into
+*readers are not reading this*.
+
+**`nothing-measured` still answers half.** One window with no page views leaves
+every verdict `unknown` and leaves `need` and `needRatio` standing, because the
+word side of the division has no reader in it — so *this band asks for two
+hundred words less than it did, and nothing has been measured since* is drawable
+on a page nobody has opened since the change. `PaceChangeSilence` is mapped in
+`silences.ts` like the other five sets, so a card drawing this beside §16's
+comparison meets one state and not two spellings of it.
+
+**One judgement left for whoever draws it**, and it is a ranking rather than a
+figure: `mostEased` is ranked by **words passed now** — readers times the words
+they were shown — rather than by how far the pace moved, which is 0221's rule.
+A card that wants *the biggest improvement* instead will get a caption two
+readers now have time for. If that is the wrong call for a screen, it is a sort
+on `compared` and not a change here.
 ## 2026-10-08 — the demo's panel says *more* on one path through a change and not on the other, and the difference is which preset the visitor spent
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
