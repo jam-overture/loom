@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { treeIdSchema, type LoomTree, type TreeId } from "@jam-overture/loom"
 import {
   describeReaderSignalStoreError,
+  pageActionOf,
   pageReachOf,
   pageReadingOf,
   pageViewReadingOf,
@@ -18,6 +19,7 @@ import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { arrivalsOf, type PageArrivals } from "@/app/(portal)/_lib/arrivals"
+import { doingOf, type PageDoing } from "@/app/(portal)/_lib/doing"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { pageNameOf, unnamed, type PageName } from "@/app/(portal)/_lib/page-name"
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
@@ -230,6 +232,25 @@ const ReadersPage = async ({
    */
   const arrived = new Map<string, PageArrivals>()
 
+  /*
+   * And what they *did* once they were there, which is the fifth reading off
+   * the same join and the only one on this card whose subject is not attention.
+   *
+   * Every other section answers what readers saw — how far down, for how long,
+   * which parts, how many of them. This answers whether anybody pressed,
+   * followed or opened anything, and it carries the one sentence this screen
+   * could not say at all: a region readers reach in numbers and never touch.
+   * Two readings this lane computed for itself off the raw rows are gone with
+   * it, because the framework now answers both exactly (0242) and a lane that
+   * adds a better figure beside a worse one ships both.
+   *
+   * It is handed the arrivals as well as its own reading, for the units rather
+   * than for the arithmetic: a share over this window applied back to the exact
+   * count of people is *about 95 of the 320 readers*, and `arrivals.ts` holds
+   * the one gate that decides when that may be said.
+   */
+  const doing = new Map<string, PageDoing>()
+
   for (const reading of readings) {
     const newest = reading.revisions[0]!.revision
     const tree = served.trees.get(reading.treeId)
@@ -295,6 +316,14 @@ const ReadersPage = async ({
         names
       )
     )
+
+    /*
+     * Last, because it is handed the arrivals: the people-figures in it are a
+     * share of this window applied back to the exact count of readers, and the
+     * decision about whether that may be said at all belongs to the reading
+     * that owns the count.
+     */
+    doing.set(reading.treeId, doingOf(pageActionOf(joined), names, arrived.get(reading.treeId)))
   }
 
   /*
@@ -427,6 +456,15 @@ const ReadersPage = async ({
                * than built.
                */
               arrivals={arrived.get(reading.treeId)}
+              /*
+               * Absent in the same cases as the four above and off the same
+               * join. It needs the page only to name the parts it is about, so
+               * it is the reading whose absence costs the least — and it is
+               * withheld all the same, because *readers ignore the second band*
+               * about a version nobody is being served is a finding somebody
+               * would act on and should not.
+               */
+              doing={doing.get(reading.treeId)}
             />
           ))}
         </>

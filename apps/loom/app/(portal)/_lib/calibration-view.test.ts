@@ -100,6 +100,8 @@ const segmentWith = (
   buckets: [],
   fingerprints,
   unfingerprinted,
+  checkSets: [[]],
+  unrecordedChecks: 0,
 })
 
 const ONE = "aaaaaaaa:1111111111111111"

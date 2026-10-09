@@ -75,6 +75,17 @@ const decide = (
    */
   policyFingerprint: policyFingerprintOf(policy),
   /**
+   * And which optional checks were in place while it was judged, read off the
+   * assessment rather than taken from a caller — the assessment is what was
+   * handed the seams, so it is the only thing here that can say.
+   *
+   * Stamped on every disposition, including the accepted ones, and that is the
+   * point rather than an oversight. A check that fires leaves a refusal a reader
+   * can see; a check that was *never wired* leaves nothing at all, and the whole
+   * gap this closes is the silent case.
+   */
+  wiredChecks: assessment.wiredChecks,
+  /**
    * Stamped on every disposition rather than only on the one
    * `confirmIrreversible` produced. Which rung fired and why a change cannot be
    * taken back are separate facts: a change can be held for discarding later

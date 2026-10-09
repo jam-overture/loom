@@ -10,14 +10,13 @@ import {
   dwellEach,
   highlightsOf,
   outOfVisits,
-  pageUse,
   plainDuration,
-  unplacedUse,
   visitsHeard,
   type PageReading,
 } from "@/app/(portal)/_lib/reading-view"
 
 import { gotThisFar, type PageArrivals } from "@/app/(portal)/_lib/arrivals"
+import type { PageDoing } from "@/app/(portal)/_lib/doing"
 import type { PagePacing } from "@/app/(portal)/_lib/pacing"
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
 import type { PageStopping } from "@/app/(portal)/_lib/stopping"
@@ -28,7 +27,7 @@ import { HowManyWereThere } from "./how-many-were-there"
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
 import { SkippingUnavailable, WhatWasSkipped } from "./what-was-skipped"
-import { UnplacedUseNote, WhatWasUsed } from "./what-was-used"
+import { WhatReadersDid } from "./what-readers-did"
 import { WhereTheyStop } from "./where-they-stop"
 
 /**
@@ -53,7 +52,8 @@ import { WhereTheyStop } from "./where-they-stop"
  * on this afternoon; *twelve of the forty visits used something in the pricing
  * band* is the same kind of fact about a **region**, which is the half this
  * card could not say at all until the counter that is about a region was read.
- * `WhatWasUsed` carries that argument.
+ * `WhatReadersDid` carries that argument, along with the one this card
+ * could not make at all: a region readers reach in numbers and never touch.
  *
  * ## Why a sentence can be absent
  *
@@ -86,6 +86,7 @@ export const PageReadingCard = ({
   stopping,
   pacing,
   arrivals,
+  doing,
 }: {
   readonly reading: PageReading
   readonly page: PageNameValue
@@ -120,21 +121,22 @@ export const PageReadingCard = ({
    * met afterwards is a correction that arrives too late.
    */
   readonly arrivals: PageArrivals | undefined
+  /**
+   * What readers did, or `undefined` in the same cases as the four above and
+   * off the same join.
+   *
+   * The fifth reading, and the one whose absence costs the least: it needs the
+   * page only to name the parts it is about. It is withheld on a version gap
+   * with the rest all the same, because a section that answered while the four
+   * around it could not would be a card saying *readers ignore the second band*
+   * about a version of the page that no longer exists.
+   */
+  readonly doing: PageDoing | undefined
 }) => {
   const newest = reading.revisions[0]!
   const highlights = highlightsOf(newest)
   const standing = countingStanding(reading, live)
   const comparison = comparisonOf(reading)
-
-  /*
-   * Read here rather than inside the list, so the card holds one answer to
-   * "did anybody use this page" and cannot draw the sentence and its caveat at
-   * the same time. `unplacedUse` is undefined whenever `pageUse` is not, and
-   * the pair is the only reason a reader can tell an unused page from an
-   * unreported one.
-   */
-  const use = pageUse(newest)
-  const unplaced = unplacedUse(newest)
 
   /*
    * The card's oldest sentence, in people rather than in visits.
@@ -240,36 +242,25 @@ export const PageReadingCard = ({
           </li>
         )}
 
-        {use !== undefined && <WhatWasUsed use={use} views={newest.views} />}
-
-        {highlights.mostClicked === undefined && highlights.mostOpened === undefined ? (
-          <li className="text-ink-muted">
-            Nobody clicked or opened anything. Readers are looking at this page rather than
-            using it.
-          </li>
-        ) : (
-          <>
-            {highlights.mostClicked !== undefined && (
-              <li className="text-ink">
-                <PartName part={highlights.mostClicked.name} /> was clicked{" "}
-                {highlights.mostClicked.activations}{" "}
-                {highlights.mostClicked.activations === 1 ? "time" : "times"} — more than
-                anything else here.
-              </li>
-            )}
-            {highlights.mostOpened !== undefined && (
-              <li className="text-ink">
-                <PartName part={highlights.mostOpened.name} /> was opened{" "}
-                {highlights.mostOpened.opens}{" "}
-                {highlights.mostOpened.opens === 1 ? "time" : "times"}. Something people want is
-                tucked away in there.
-              </li>
-            )}
-          </>
-        )}
-
-        {unplaced !== undefined && <UnplacedUseNote unplaced={unplaced} />}
       </ul>
+
+      {/*
+       * **After attention and before the comparison, because it is a different
+       * question about the same version.**
+       *
+       * The list above is what readers *saw*: how far down they got, what was on
+       * screen, where they stayed. This is what they *did*, and it used to be
+       * three of that list's lines with *people stayed longest on the
+       * introduction* sitting between two of them. A reader working out whether
+       * anybody uses their page had to assemble the answer out of a list sorted
+       * by nothing.
+       *
+       * It is drawn unconditionally, like `SinceTheChange` and for the same
+       * reason: *nobody did anything* is a real answer about a page meant to be
+       * read rather than used, and a section that vanished on it would leave a
+       * reader unable to tell that from a page nothing looked at.
+       */}
+      {doing !== undefined && <WhatReadersDid doing={doing} arrivals={arrivals} />}
 
       {/*
        * Before the comparison and after the highlights, which is reading order

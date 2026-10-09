@@ -65,6 +65,8 @@ describe("spanOf", () => {
         buckets: [],
         fingerprints: [RULES],
         unfingerprinted: 2,
+        checkSets: [[]],
+        unrecordedChecks: 0,
       },
     ],
     unjudged: { "awaiting-answer": 1, failed: 0, unsettled: 0 },
