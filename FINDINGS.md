@@ -2817,7 +2817,7 @@ quotes only a binding name, which is a name in the tree and never content.
 ## 2026-09-30 — `analyzeDelta` is at the end of its parameter shape, and collecting them means editing two lesson transcripts
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-**closed** by #PRNUM (0250) — the four vocabularies are one optional record,
+**closed** by #566 (0250) — the four vocabularies are one optional record,
 `ChangeVocabulary`, and `assessChange` takes `WriteCheckSeams`. The run that
 collected them was the run that rewrote the transcripts, exactly as this entry
 set out: lessons 22 and 23 for `analyzeDelta`, 30 and 31 for `assessChange`, 05
@@ -48311,7 +48311,7 @@ It is the recommended next unit for this lane.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
 (`src/runtime/vocabulary.ts`, `src/runtime/analysis.ts`), with the blocking half
-for `Loom lessons` (`lessons/`) · **Status:** **closed** by #PRNUM (0250) —
+for `Loom lessons` (`lessons/`) · **Status:** **closed** by #566 (0250) —
 `unplacedSlotsIn` is the walk, `ChangeAnalysis.unplacedSlots` the fact,
 `unplaced-slot` the stake factor at `critical`, and `regions` the third
 `WriteCheck`. The blocker above was closed in the same unit, so the ask to

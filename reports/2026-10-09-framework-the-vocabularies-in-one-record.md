@@ -1,7 +1,7 @@
 # The vocabularies in one record, and the region the write path now refuses
 
 **Routine:** `Loom daily build` · **Date:** 2026-10-09 · **Section:** §2, the
-write path · **Branch:** `framework-61-the-vocabularies-in-one-record`
+write path · **Branch:** `framework-61-the-vocabularies-in-one-record` · **PR:** [#566](https://github.com/jam-overture/loom/pull/566)
 
 ![One delta, one policy, and the only difference is who was asked](2026-10-09-framework-unplaced-slot-wide.png)
 
