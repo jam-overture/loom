@@ -80,9 +80,16 @@ import { DEMO_ACTOR } from "./visitor"
 export type WillSay = {
   /**
    * What the press does, which is the thing a stranger has to know before
-   * making it. Held first: the demo's leading ask is one the Gate stops
-   * (`DEMO_LEADING_PRESET`), so the first press moves nothing, and a visitor
-   * who was not told that has watched a button do nothing.
+   * making it.
+   *
+   * Held is written first because it is the sentence this surface most needs
+   * to be able to say — a press the Gate stops moves nothing, and a visitor
+   * who was not told that has watched a button do nothing. It is no longer the
+   * sentence on the arrival screen: the demo opens with `DEMO_OPENING_PRESET`,
+   * which the Gate applies, and hands the green button to
+   * `DEMO_LEADING_PRESET` once a change of the visitor's own is on the page.
+   * Which of the three is printed is the Gate's answer either way, so nothing
+   * here has to know the order.
    */
   readonly lead: string
   /** Why, in the level's own word and the shared table's. */

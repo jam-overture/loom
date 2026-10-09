@@ -8,6 +8,96 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-09 — the demo's social card still pictures the ask the arrival screen no longer leads with
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/_lib/share.ts`, `app/(demo)/demo/opengraph-image.tsx`) ·
+**Status:** open — **deliberately not taken in the run that caused it**, with a
+recommendation to leave it.
+
+`demo-43` made `DEMO_OPENING_PRESET` the green button on arrival: the demo now
+opens with the re-theme, which the Gate applies, and hands the primary slot to
+the removal the Gate holds once a change of the visitor's own is on the page.
+
+**The share card was not moved with it.** `demoShareCard` reads
+`DEMO_LEADING_PRESET` for its `ask`, quotes the stat grid's three figures, and
+draws a `Waiting on you` badge with the held verdict under it — so the picture
+an unfurler shows is the demo's *second* beat, and a visitor who follows the
+link meets a green button saying something else.
+
+**Why it was left.** Nothing on the card is false: the removal is still offered
+on arrival, still one row down, still the ask this product is actually about,
+and the card's subject is the Gate rather than the button. It is also the
+better card for the audience `docs/rollout.md` names — *audit stories sell to
+people with something to lose* — and the only picture of this surface that
+makes the Gate its subject. A card showing a re-theme is a card showing an AI
+changing a page, which is the thing everybody else's card already shows.
+
+**Three shapes:**
+
+1. **Leave it.** The card argues the differentiator; the page argues the
+   sequence. Cheapest, and the card is the better artefact as it stands.
+2. **Move the card to the opening press** so the picture and the first screen
+   are the same moment. Truest to *what you will see when you click*, and it
+   costs the card its only Gate-shaped content.
+3. **Say both on the card** — the applied change and the held one, two rows.
+   Argued against before it is reached for: the card is 1200 × 630 with a
+   headline, a figure list and a badge already on it, and a second verdict
+   would be the record dumped on a thumbnail, which is the trap this whole
+   surface is named for.
+
+**Recommendation: (1)**, and the thing that would change it is a measurement
+nobody here can make — whether people who arrive from the card feel the first
+screen contradicts it.
+
+---
+## 2026-10-09 — the demo's one teaching device is absent from the press every visitor now makes first
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/_lib/spotlight.ts`, `app/(demo)/_lib/marked.ts`) · **Status:**
+open — **a consequence, not a defect**, and the code it is about is right.
+
+This surface teaches one visual rule and teaches it four times over: a dot on
+the bar, a ring on the band, a badge on the card and a pill in the rail, all one
+colour, all about one change. `spotFor` refuses to draw it for a change to the
+root, and the reason it gives is correct:
+
+> The root is never marked. A change to the page node is a change to everything
+> on the page — the re-theme is exactly this — and a ring around the whole stage
+> points at nothing. What answers "did anything happen?" for that change is the
+> page itself turning over.
+
+**What changed on 9 October is which press that applies to.** The re-theme is
+now `DEMO_OPENING_PRESET`, so the first press every visitor makes draws no mark
+at all, and the mark vocabulary is first met on the *second* press — the held
+one — where it arrives in amber as a question rather than in green as a receipt.
+Photographed: `2026-10-09-demo-press-one-press-wide.png` has a complete record
+card and no chip anywhere on the stage.
+
+**Why this is filed rather than fixed, and why the fix is not obvious.** The
+argument above is right and a ring around the stage is worse than nothing. What
+is lost is not a mark, it is the *teaching*: a visitor who meets amber first
+meets the device in its louder register, with no green one to contrast it
+against. Against that, the thing the device teaches — *the record points at the
+page* — is arguably better taught by a page that visibly turned over than by a
+chip.
+
+**Two shapes, neither recommended yet:**
+
+1. **Leave it.** The whole page turning over is the mark, and the device is met
+   on the second press in the state that needs it most.
+2. **Let the stage say so once**, in the demo's own chrome rather than the
+   tree's — a line in `DemoBar` for a change whose subject is the page itself.
+   `rail.ts` already knows (`marked`'s `words` map is empty exactly here), and
+   it would be this lane's chrome rather than a ring the tree cannot carry.
+   Costs the arrival screen nothing and the first press one more thing to read.
+
+**What would settle it is the measurement this lane cannot make**, so it is
+filed with the pictures rather than taken on a guess — which is the pattern the
+entry closed above says should not become another six-run hold. If a run reaches
+this with nothing better to do, take (2) and measure the first screen it costs.
+
+---
 ## 2026-10-09 — two lessons' control lines stopped being zero, both marks said that means something is wrong, and the thing it means is that the instrument was under-called
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
@@ -1756,9 +1846,10 @@ that changes and the `npm install` is the instruction that always works.
 ---
 ## 2026-10-03 — the demo's one invited press still does not move the page, and for the first time the press that does is on the arrival screen
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
-**next run's candidate unless the maintainer points elsewhere**, and it is a
-design question rather than a defect.
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed 9
+October by `demo-43-the-press-that-moves-the-page`, by shape (2)** — against
+this entry's own standing recommendation, which is the part of the closure that
+deserves the maintainer's eye rather than mine. The closing note is at the end.
 
 The demo invites exactly one press. `DEMO_LEADING_PRESET` is *Take the numbers
 off*, and it is the lead **because the Gate holds it** — that is the whole
@@ -1815,6 +1906,60 @@ rather than half of one. The recommendation is still **1 and measure before
 moving**, for the reason that has not changed — nobody has watched a stranger
 use this surface — but the argument against (2) was partly that it led with the
 weaker frame, and that part of it is spent.
+
+> **Closed 9 October by the lane that owns it, and it took shape (2) against
+> this entry's own recommendation. The override is the thing to read.**
+>
+> **What this entry asked for and could not have.** *Measure before moving* —
+> and the measurement it named is *watching a stranger use this surface*, which
+> this lane cannot do from a sandbox and has not been able to for six runs.
+> A recommendation whose precondition is permanently unavailable is not a
+> recommendation to wait; it is a decision not to decide, and it had been taken
+> six times.
+>
+> **What could be measured, and was.** Not a stranger, but what each first
+> press *delivers*, photographed on production builds of `main` at `e8047d0`
+> and of this branch at 1280 × 900 and 390 × 844. The two paths are not close:
+>
+> | | the invited press, before | the invited press, after |
+> | --- | --- | --- |
+> | presses before the page moves | **two** | **one** |
+> | what the first press does to the stage | nothing | every colour and typeface, in view |
+> | where the change lands | a band below the fold at 1280 × 900, ~4,000px down at 390 × 844 | the hero the visitor is looking at |
+> | what the change *is* | a deletion of content never seen | the page they are looking at, transformed |
+> | the record, after one press | — | weighing, rule, **Put it back**, *That is the whole loop*, all above the fold |
+>
+> The second column is one press. The first column's second press lands the
+> same completeness, which is why this was a design question and not a defect.
+>
+> **What the argument for the removal turned out to rest on.** `presets.ts`
+> made the case that leading with the re-theme left a stranger having seen *an
+> AI changed a page* — `docs/rollout.md`'s least novel thing. That was true of
+> the card as it stood when it was written. It is not true of the card now:
+> **Put it back**, the weighing panel, the rule sentence and the ending all
+> landed after that decision, and the applied card is a complete record. The
+> clause that expired is *"read a card saying it was done"*, and the record it
+> stands over is the whole of this product's differentiator.
+>
+> **The Gate is sequenced rather than traded.** `leadingAsk` takes a second
+> argument — whether a change of the visitor's own is on the page — and hands
+> the green button to the held ask the moment one is. So the demo is two
+> beats: press one, the page turns over and the record lands; press two, the
+> same green button says *Pressing this raises a question, not a change*. The
+> division is also **claimed on arrival** (*Loom will make 2 on its own and ask
+> you first about 3*, with five chips as the evidence), which it was not when
+> the order was first chosen.
+>
+> **What would reverse it, and it is one line.** Set `DEMO_OPENING_PRESET` to
+> `DEMO_LEADING_PRESET` and the nomination answers the same preset before and
+> after, which is exactly the behaviour this replaced. `presets.test.ts`
+> asserts the two are different, so a run that takes that option fails loudly
+> rather than leaving two records arguing for an order the code no longer has.
+>
+> **If the maintainer's judgement is that the hold should still open the
+> demo**, that one line is the whole of the revert and this lane will take it
+> without argument. What it will not do again is carry the question a seventh
+> run on a measurement it cannot make.
 
 ---
 ## 2026-10-03 — the same disclosure chevron is now drawn in three components of one directory, and the third copy is this run's
