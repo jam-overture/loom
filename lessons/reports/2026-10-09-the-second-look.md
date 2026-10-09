@@ -154,18 +154,32 @@ alphabet and cannot go stale.
 `.next`, with the status written to a file as the last thing on its own line and
 read in a separate command, per `docs/routines.md`.
 
+Run twice. The first was the branch as written; `main` then moved four pull
+requests (#553–#556) ahead of it, so the base was merged in and the gate re-run.
+**The figures below are the second run**, which is the one that counts.
+
 | | this branch |
 | --- | --- |
-| `@jam-overture/loom` | 195 files / 4,334 tests — unchanged, `src/` was not opened |
-| `@loom/app` | 413 files / 7,404 tests |
-| findings ledger | 1,074 entries, 0 malformed — unchanged |
+| `@jam-overture/loom` | 197 files / 4,396 tests — `src/` was not opened on this branch; the change is #553–#556 |
+| `@loom/app` | 415 files / 7,442 tests |
+| findings ledger | 1,080 entries, 0 malformed — none of them this lane's |
 | `prerender:check` | 128 pages, 1,586 text junctions, 0 run together; 3 metadata conventions, 0 unserved |
+
+**Nothing of this lane's moved across that merge, and one of the four had a real
+chance of moving it.** #556 added `src/runtime/checks.ts` and changed
+`gate.ts`, `assessment.ts`, `disposition.ts` and `pipeline.ts` — which is the
+code lessons 07 to 10 are about, and lesson 09's registered claim counts the
+Gate's rules. `transcripts.test.ts`, `claims.test.ts` and `declarations.test.ts`
+are all green on the merged tree, so no exercise, count or printed type drifted.
+That is the merge being checked rather than my having read the diff.
 
 **No test weakened, skipped or deleted, and no pin moved** — no lesson landed, so
 `RECOGNISED_TRANSCRIPTS`, the marked-fence census, `REVIEW_SETS` and the
 unscheduled queue are all where lesson 35 left them, and there is no new review
 set. Nineteen tests added across three files — eight on the fold, eight on the
-panel, three on the label — against 7,385 on the tree #552 merged.
+panel, three on the label. Before the base merge the app suite read 413 files
+and 7,404 tests against the 412 and 7,385 of the tree #552 merged, which is
+where those nineteen are.
 
 Two existing assertions changed, both of them an expected string rather than a
 threshold: `queue.test.tsx` expects `Set A q1` where it expected `SET A q1`, and
