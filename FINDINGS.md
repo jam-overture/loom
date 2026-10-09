@@ -48018,6 +48018,172 @@ times, most recently as the reason the word-counting rule moved into
 `words.ts`. One registry or none.
 
 ---
+## 2026-10-09 — the control the whole band argues towards did nothing for eight days, because the band moved pages and two of its four parameters did not
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/`), with the shape worth a look from
+`Loom portal` · **Status:** **closed** for this lane by
+`marketing-64-the-control-that-does-nothing`; filed because the shape is not
+this lane's alone
+
+Everything a visitor can do to this site is in the address, and `askedHref` is
+the one function that writes one. Its own header says why it is one function:
+
+> *"Two pages read those parameters and they have to read the same ones the same
+> way, because one links to the other carrying them. Written twice they would be
+> two spellings of one convention."*
+
+**The writing was unified. The reading was not**, and it was copied into each
+route by hand. On 1 October the maintainer moved the demonstration from the
+front door to `/how-it-works`, and the copy that moved with it carried `ask` and
+`approve` and left `back` and `back-yes` behind.
+
+| | the route that reads `back` | the route that needs it |
+| --- | --- | --- |
+| before 1 October | `/` | `/` |
+| after | `/` | **`/how-it-works`** |
+
+Measured on a production build of `main`, served over HTTP, before anything was
+changed. The framework's own flight payload echoes the query string, so it is
+stripped and what is hashed is the document a reader is sent:
+
+```
+/how-it-works?ask=shorter&approve=1                   b013a23ca488   97,596 bytes
+/how-it-works?ask=shorter&approve=1&back=1            b013a23ca488   97,596
+/how-it-works?ask=shorter&approve=1&back=1&back-yes=1 b013a23ca488   97,596
+/how-it-works?ask=problem                             be521df904c9  104,263
+/how-it-works?ask=problem&back=1                      be521df904c9  104,263
+```
+
+So *Put it back* — the second half of the one claim on this site a competitor
+cannot copy — was a link that reloaded the page it was on. The record never grew
+its second entry, and two sentences written for the states behind it could not
+be reached by any address at all: `RESTORED` (*"Nothing here was rebuilt. The
+pieces came back carried by the undo itself"*) and `STILL_THERE`, which is the
+one the band's own comment introduces with *"what the same slot says when the
+rules stopped the undo, which they do"*.
+
+**Nothing was red, and that is the part worth keeping.** Every test of the undo
+builds a `SitePageContext` itself and asserts against the tree that comes back.
+That is the right test of the machinery and it cannot see the step in front of
+it. `served.ts` sweeps `back` and `backApprove` across every state the site can
+be served in, and sweeps them into a context it fills in itself. So the
+parameter was asserted about by name, in this route group, on the day it stopped
+working.
+
+It is the same shape as the five pages that stopped unfurling a card in
+September, recorded in `share.ts`: *what was tested was the machinery rather
+than the pages.* The answer then was one factory plus `announced.test.ts`, which
+imports the route modules and calls them, because *"the only thing that can
+catch a page not calling the library is a test that goes and looks at the
+page."* That answer was applied to `generateMetadata` and not to the other
+export.
+
+**What this branch did.** One reader, `_lib/addressed.ts`, beside the one
+writer, called by all three routes, reading the whole address rather than the
+parameters a page happens to use — because *which half of an address is worth
+reading* is exactly the judgement that went stale when the band moved.
+`addressed.test.ts` holds it two ways: the address round-trips through the writer
+and the reader, and **for every state the site can be served in, the markup each
+route sends is the markup this lane's own library produces for that address**,
+byte for byte, with the route modules imported and called.
+
+**For `Loom portal`, and this is why it is filed rather than only reported.**
+Eleven `page.tsx` files under `(portal)` read `searchParams`; the other three
+surfaces read none. This entry is not a claim about any of the eleven — that
+would be this lane reading another lane's code — but the question is cheap and
+has a bad answer here: *is there an address your own screens link to whose
+parameters the route that answers it does not read, and what in your suite would
+say so?* The instrument is three lines — import the route module, call its
+default export with the parameters, compare the markup against the one your
+library produces for the same address — and it needs `next/headers` stubbed
+empty and nothing else.
+
+---
+## 2026-10-09 — the card for a rearranged address is drawn by the page that no longer rearranges, and the page that does unfurls as a brochure
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — the second half of the same 1 October move, measured today and not taken,
+because it changes what every shared link of this site says
+
+The entry above is the move's effect on the page body. This is its effect on the
+card, and it is the mirror image. Measured through the route modules:
+
+| address | the title it unfurls as |
+| --- | --- |
+| `/?ask=shorter&approve=1` | *"I am in a hurry. Cut this down to the essentials."* |
+| `/how-it-works?ask=shorter&approve=1` | *"How it works — Loom"* |
+
+The front door reads the request and announces it. `/how-it-works` takes the
+shared `routeMetadata(HOW_IT_WORKS)` factory, which reads the palette and
+nothing else — so **the one page on this site that rearranges in front of a
+visitor unfurls as a plain page**, and the one that does not unfurls as a
+request it will not act on. Both halves were correct on 30 September.
+
+`announced.test.ts` holds the front door's behaviour in as many words, under the
+heading *"the front door, which is asked for things"*, with a comment saying a
+card that showed the published page for both *"would be silent at the exact
+moment this site is making the claim nothing else can make."* The reasoning is
+right and the page it names has moved.
+
+**Why it was not taken on this branch.** It is a change to what every link to
+this site unfurls as, including links already sent, and the mechanism page's
+card has a second decision in it that the front door's never had: a `drop-pitch`
+address unfurls as a refusal, which is the most interesting card this site could
+draw and also the one a stranger meets with no context. That is a judgement
+about what the site says rather than about whether a parameter is read, and it
+wants its own run and its own screenshot.
+
+**Nothing is broken today.** Every address unfurls as a card with a picture of
+the right page; what is lost is the one card that would carry a verdict, on the
+one page that reaches one.
+
+---
+## 2026-10-09 — no undo on this site is held, and the shape that would hold one is a setting rather than a move
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — **re-measures the 1 October entry of this lane**, which stands, and names
+a shape that entry ruled out for the wrong reason
+
+The 1 October entry measured all five choices with and without the visitor's yes
+and found that no undo on `/how-it-works` is held by the rules. That is still
+true, and as of this branch it is true of something a visitor can actually
+reach: until today the undo could not be run from an address at all, so the
+measurement was taken through a context and is now taken through the page.
+
+What that entry got wrong is the remedy. It says:
+
+> *"the shape that works is a request that **moves** something protected rather
+> than removing something large, because the inverse of a move is another move
+> and inherits the same weight. `/how-it-works` has two protected nodes, the
+> menu and the footer, and moving either is a worse demonstration than the one
+> it would replace."*
+
+Both sentences are right and the conclusion does not follow, because a move is
+not the only operation whose inverse is itself. **`configure` is the other one**,
+and `analysis.ts` is explicit about which types a `configure` reports:
+`tally.types.add(target.type)`, the configured node's own. So configuring a
+protected node raises `protected-type-touched` at `high`, the ceiling for
+`user-instruction` is `medium`, and the change is held — and the inverse of a
+`configure` is a `configure` on the same node, so **the undo is held on exactly
+the same grounds**. That is the symmetric case the entry was looking for, and it
+needs no new protected type and no second named policy.
+
+The request that fits it is already sitting in the library. `loom.nav` takes
+`position: "static" | "sticky"` and this site's bar is `sticky`:
+
+> *"The menu follows me down the page and I find it distracting. Stop it sticking
+> to the top."*
+
+Held, because the rules protect the menu. Say yes and it lands. Press *Put it
+back* and **that is held too**, which is the sentence `STILL_THERE` was written
+for and which no address can reach today. It also pairs with `drop-pitch`, which
+asks to remove the same node and is refused outright: one node, two requests,
+two different answers, which is the Gate's gradation on one screen.
+
+**Not built on this branch**, which fixed the reading of the address and would
+otherwise have been a sixth choice and a copy change in the same pull request.
+It is the recommended next unit for this lane.
 ## 2026-10-09 — a region nobody places is now reported at render and still written without complaint, and the twin is blocked on a parameter list rather than on anything it needs
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
