@@ -11,6 +11,7 @@ import {
   type NodeKind,
   type StakeFactorCode,
 } from "@jam-overture/loom"
+import { WRITE_CHECKS } from "@jam-overture/loom"
 import { EPISODE_RESOLUTION_KINDS, type FailureStage } from "@jam-overture/loom/telemetry"
 import {
   describeAddressing,
@@ -35,6 +36,9 @@ import {
   STAKE_FACTORS,
   STAKES,
   WEIGHING,
+  WRITE_CHECKS_PLAIN,
+  plainWriteCheck,
+  plainWriteChecks,
   confidenceWord,
   namedList,
   partPhrase,
@@ -788,5 +792,74 @@ describe("partPhrase", () => {
       })).toBe(
       "the body space"
     )
+  })
+})
+
+/*
+ * The one part of *what judged a change* that the rules cannot account for, and
+ * the newest entry in this table. The record spells these `props` and
+ * `bindings`; `props` is on the plain-language list, which is that rule catching
+ * exactly the shortcut this table exists to refuse.
+ */
+describe("WRITE_CHECKS_PLAIN", () => {
+  it("has an entry for every check this version of Loom has a seam for", () => {
+    for (const check of WRITE_CHECKS) {
+      expect(plainWriteCheck(check).label, check).not.toBe("")
+      expect(plainWriteCheck(check).meaning, check).not.toBe("")
+    }
+
+    expect(Object.keys(WRITE_CHECKS_PLAIN).sort()).toEqual([...WRITE_CHECKS].sort())
+  })
+
+  it("keeps the record's own name beside the plain one rather than instead of it", () => {
+    for (const check of WRITE_CHECKS) {
+      expect(plainWriteCheck(check).technical, check).toBe(check)
+    }
+  })
+
+  it("says none of them in the runtime's vocabulary, which rules out the record's own key", () => {
+    for (const check of WRITE_CHECKS) {
+      const plain = plainWriteCheck(check)
+
+      expect(runtimeWordsIn(plain.label), check).toEqual([])
+      expect(runtimeWordsIn(plain.meaning), check).toEqual([])
+    }
+  })
+
+  /**
+   * A noun phrase rather than a heading, because every one of these is read in
+   * the middle of a sentence — *"judged by the settings check and the data
+   * check"*. A capital or a full stop would show up there.
+   */
+  it("is written as a phrase, so a list of them reads as one sentence", () => {
+    for (const check of WRITE_CHECKS) {
+      expect(plainWriteCheck(check).label, check).toMatch(/^[a-z]/u)
+      expect(plainWriteCheck(check).label, check).not.toMatch(/[.]$/u)
+    }
+  })
+})
+
+describe("plainWriteChecks", () => {
+  /**
+   * The entry this function exists for. A deployment that has wired neither
+   * seam is judged by its rules alone — the ordinary state of most of them —
+   * and `describeWiredChecks` gives that the word "none", which is right on a
+   * record and reads on a screen as data somebody failed to collect.
+   */
+  it("says what an empty set means rather than that it is empty", () => {
+    expect(plainWriteChecks([])).toBe("nothing beyond your rules")
+  })
+
+  it("reads a set the way somebody says it aloud", () => {
+    expect(plainWriteChecks(["props"])).toBe("the settings check")
+    expect(plainWriteChecks(["props", "bindings"])).toBe("the settings check and the data check")
+  })
+
+  /**
+   * Membership and not order: a set spelled two ways is one write path, and two
+   * rows that printed it in two orders would read as two.
+   */
+  it("reads the same set the same way however the caller held it", () => {
+    expect(plainWriteChecks(["bindings", "props"])).toBe(plainWriteChecks(["props", "bindings"]))
   })
 })
