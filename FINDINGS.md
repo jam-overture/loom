@@ -47087,7 +47087,7 @@ writing down is that it grows with every surface that converts.
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
 (`src/render/`) · **Status:** **closed by `framework-60-the-region-nobody-places`**
-(0247) — the render seam now reports `slot-unplaced`, carrying the node, the
+(0249) — the render seam now reports `slot-unplaced`, carrying the node, the
 type and the name, for every region a tree fills that its primitive places
 nowhere. The dated note at the end of this entry says what was built, what was
 decided rather than assumed, and the one half that is deferred and why.
@@ -47145,7 +47145,7 @@ defect and the test does not assert it as correct.
 > declaring it empty are the *same* claim: `definePrimitive` has normalised
 > `slots ?? []` since §4, the catalogue publishes the list as what a model may
 > compose into, and your own probe reads it as complete. `copy` and `reads`
-> differ from it because they arrived after the library was written. 0247
+> differ from it because they arrived after the library was written. 0249
 > records this and says where to change it if you disagree.
 >
 > **The seam is `SlotPlacer`**, detected structurally the way `BindingReader`
@@ -48027,7 +48027,7 @@ render seam now catches it**; this is the second half of today's work, deferred
 deliberately so a one-seam change did not pull two published transcripts in
 with it
 
-`slot-unplaced` landed today (0247): a tree that fills a region its primitive
+`slot-unplaced` landed today (0249): a tree that fills a region its primitive
 places nowhere is now a render diagnostic instead of silence. The write path
 still accepts the delta that creates one.
 
@@ -48057,7 +48057,7 @@ build one coherent unit; a render diagnostic plus a parameter collection plus
 two transcript rewrites is three. The 30 September entry above
 (*`analyzeDelta` is at the end of its parameter shape*) is the same blocker and
 this is its second consumer, which is the fact worth recording: the next
-vocabulary is no longer hypothetical, it is written down in 0247's consequences,
+vocabulary is no longer hypothetical, it is written down in 0249's consequences,
 and the collection now unblocks two things rather than one.
 
 **For `Loom lessons`, when that run comes:** the ask is not a lesson change for
@@ -48087,7 +48087,7 @@ days and the mechanism that produces it has not changed: `main` ends at 0243,
 every lane that ran on 8 October read 0243 and took 0244, and nothing between a
 lane and the number tells it somebody else is holding it.
 
-**This run took 0247 rather than 0244**, by listing the record numbers on every
+**This run took 0247 rather than 0244** (renumbered to 0249 by `Loom merge`, #558 having taken 0247 too), by listing the record numbers on every
 open branch and taking the first number no branch holds — 0244, 0245 (#548) and
 0246 (#557) are all claimed. That is the workaround and it is three commands:
 
@@ -48117,9 +48117,9 @@ run.
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
 (`src/sdk/conformance.ts` is the framework's file, the judgement is the
 library's) · **Status:** open — **nothing in the library does this**, measured
-today: the whole suite was green on 0247 with no test edited
+today: the whole suite was green on 0249 with no test edited
 
-0247 made a primitive's declared `slots` the complete list of what it places,
+0249 made a primitive's declared `slots` the complete list of what it places,
 which is what the catalogue and your own probe have always assumed. The render
 seam now reports a region a tree fills that the declaration does not name.
 

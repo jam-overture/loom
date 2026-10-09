@@ -1,8 +1,17 @@
-# 0247 — A region the primitive does not place is a diagnostic, and the declaration is the promise
+# 0249 — A region the primitive does not place is a diagnostic, and the declaration is the promise
 
 **Status:** Accepted
 **Date:** 2026-10-09
 **Section:** §3 (render seam)
+
+> **Renumbered on 2026-10-09**, from 0247, when this branch (#559) was merged.
+> `main` had meanwhile accepted a different 0247 — *a readership comparison is
+> built from two floored maps, and the mix is the only figure that survives
+> having no window* (#558, opened six minutes before this one) — and two records
+> sharing a number is fatal (0097). This record was written on 9 October and
+> nothing in it changed but its number; the references to it on this branch were
+> updated with it. Taking 0247 over 0244 was still the right call: it turned a
+> three-way clash into a two-way one.
 
 ## Context
 

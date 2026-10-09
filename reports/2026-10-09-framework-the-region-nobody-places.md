@@ -53,7 +53,7 @@ The pieces:
 ## Decisions that were not specified, and why
 
 **A primitive that declares no regions says it places none, and the region a
-tree fills on it is reported.** This is the judgement in the unit and 0247
+tree fills on it is reported.** This is the judgement in the unit and 0249
 records it. The conservative reading — treat an empty `slots` as *nobody has
 said*, the way `reads` and `copy` are treated — would have excused almost every
 case the finding is about: the primitives that lose content this way are exactly
@@ -96,13 +96,13 @@ doc comments say which is which and name the other.
 
 ## Records
 
-**0247 — A region the primitive does not place is a diagnostic, and the
+**0249 — A region the primitive does not place is a diagnostic, and the
 declaration is the promise.** Accepted. §3. It records the empty-declaration
 judgement above, the four alternatives rejected (stay silent; report from the
 primitive; render the content into `children` instead of dropping it; refuse the
 node), and the deferred write-path half. Nothing superseded.
 
-**It took 0247 and not 0244.** `main` ends at 0243, and 0244, 0245 and 0246 are
+**It took 0247 and not 0244, and was renumbered to 0249 on merge.** `main` ends at 0243, and 0244, 0245 and 0246 are
 each claimed by an open branch — 0244 by two of them. The number was chosen by
 listing the record numbers on every open branch and taking the first one free.
 Filed as a finding, below.
@@ -197,7 +197,7 @@ other diagnostic of this shape has both halves, and the asymmetry is the kind
 that gets explained once and then forgotten.
 
 **Should `definition.ts` distinguish an absent `slots` from an empty one?** I
-think not, and 0247 says why — but it is a question about the declaration rather
+think not, and 0249 says why — but it is a question about the declaration rather
 than about this seam, and if the answer ever becomes yes, this diagnostic is one
 of the two things that would have to change with it.
 
