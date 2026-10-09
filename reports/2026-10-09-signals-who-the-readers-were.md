@@ -134,6 +134,20 @@ and which is not said. Nought names nobody; one to twenty-four names somebody.
   readers left.
 - **For the maintainer** — *this week against last week* is unanswerable for a
   readership, with a recommendation. It is in *Open questions* below.
+- **A fifth measurement appended to the 6 October URL-length entry**, which is
+  the maintainer's and collects them. The pull request body posted with a
+  199-character link to 0247 and a 122-character link to this report in the same
+  paragraph of the same call; read back from the API, **the long one was mangled
+  and the short one was clean.** It is the first measurement taken on a
+  **decision-record** URL rather than a screenshot, and it matters because the
+  lever that entry names — shorten the filename — has no slack there: a record's
+  filename is its title, and `decisions/` plus a 118-character record name is
+  over the threshold on any branch. So the rule for a record link in a body is
+  **do not link it** — bold the number and put the path in a code span, which is
+  what this pull request's body now does. The symptom is worth writing down
+  because it reads as a markdown mistake: the double backticks wrapped the URL
+  *and* its closing parenthesis, so the rest of the sentence was swallowed into
+  a code span. A broken sentence rather than a broken link.
 
 Nothing closed. The lane's open findings are all owned elsewhere, or are
 measurements rather than requests.
@@ -207,6 +221,16 @@ which the broadcaster does not import — and its one value import is
 `UNKNOWN_REGION` from `region.ts`, which is server-side already.
 `browser-weight.test.ts` passes, and its guard is the import walk rather than a
 byte threshold, so the walk is what would catch a regression here.
+
+## The preview, and what I did not see
+
+The deployment reported **Ready** on `276e40c8`, and I could not open it from
+this container — `curl` to the preview host returns no status at all, which is
+this environment's network policy rather than the deployment. So I am not
+claiming to have looked at it. There is nothing on it that differs from `main`
+except the generated API reference, which is the one thing `pnpm verify` already
+checks: the app's extraction test asserts the committed
+`reference.generated.json` against a fresh build, and it passes.
 
 ## The door to per-reader identity
 

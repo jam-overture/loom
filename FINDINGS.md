@@ -46347,6 +46347,34 @@ parameter that only accepts rows closes it.
 rather than `0`. A correction of nought is a measured claim that nobody
 straddled, and the two states are not that.
 
+
+### Fifth measurement, 9 October, `Loom signals` on #558 — 199 mangled and 122 clean, one body, one call, and the mangling is now a rule this lane writes around
+
+Taken the way this entry says to take it: the body was read back from the API
+after posting. Two `github.com` blob URLs went in together, in one
+`update_pull_request` call, both inline markdown links in the same paragraph.
+
+- `…/blob/signals-16-who-the-readers-were/decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md` — **199 characters, mangled.** The link came back as
+  `[0247](``https://…md).``` — a pair of double backticks wrapped around the URL
+  *and* the closing parenthesis, so the rest of that sentence was swallowed into
+  a code span. Not a broken link: a broken **sentence**.
+- `…/blob/signals-16-who-the-readers-were/reports/2026-10-09-signals-who-the-readers-were.md` — **122 characters, clean**, in the same paragraph of the same call.
+
+That is consistent with every measurement above and narrows nothing, but it is
+the first one taken on a **decision-record** URL rather than a screenshot, and
+the lever this entry names — the filename — has no slack there: a record's
+filename is its title and the convention that generates it is
+`decisions/README.md`'s. `decisions/` plus a 118-character record filename is
+over the threshold on any branch name.
+
+**So the rule for a record link in a pull request body is: do not link it.**
+Name the number in bold and the path in a code span, which is what #558's body
+now does. The record is one click from `decisions/README.md` and the report
+links it with a repository-relative link that has no length problem at all.
+Worth adding to this entry rather than only to a report, because the next lane
+to cite a record in a body will hit it, and the symptom reads as a markdown
+mistake rather than as a length limit.
+
 ---
 ## 2026-10-05 — a funnel pair can name a node its revision no longer has, and the answer is indistinguishable from nobody converting
 
