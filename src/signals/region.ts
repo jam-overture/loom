@@ -4,7 +4,7 @@ import type { TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
 import type { ReaderSignalStoreError } from "./journal.js"
-import type { RevisionViews } from "./page-views.js"
+import type { RevisionOf, RevisionViews } from "./page-views.js"
 import type { TallyReadRequest } from "./tally.js"
 
 /**
@@ -255,5 +255,76 @@ export const regionReadingOf = (
       views: small.reduce((total, bucket) => total + bucket.views, 0),
     },
     views: buckets.reduce((total, bucket) => total + bucket.views, 0),
+  }
+}
+
+/**
+ * One revision's region rows, read as a map, without the caller writing the
+ * filter.
+ *
+ * The same shape and the same reason as `pageViewsFor` in
+ * [`page-views.ts`](page-views.ts): the matching is the part of every join in
+ * this subsystem that fails quietly when it is got wrong, and a comparison of
+ * two revisions' readerships is the first thing here that has to do it twice in
+ * one call. Reading one revision's map against another revision's rows would
+ * answer confidently and be about nothing.
+ *
+ * **Filtered before it is floored, which is the half that is not obvious.**
+ * {@link regionReadingOf} groups across whatever it is handed, because thirty
+ * views of one country spread over two revisions are a readership and
+ * suppressing each revision first would withhold both. A caller asking about
+ * one revision is asking a narrower question and gets a narrower answer: the
+ * floor bites harder per revision than it does across a deployment, so a quiet
+ * page reports more of itself as withheld. That is the floor working rather
+ * than a fault, and it is why a readership comparison is answerable on a page
+ * with traffic and says so on a page without.
+ */
+export type RegionReadingFor = {
+  /** The revision's own map, floored. */
+  readonly reading: RegionReading
+  /**
+   * Rows for another tree or another revision, and ignored.
+   *
+   * Counting another revision's arrivals into this one's map is the mistake
+   * that would make a readership comparison compare a revision with itself.
+   */
+  readonly foreign: number
+  /**
+   * Rows naming a region this revision already had a row for, beyond the first,
+   * every one of which was ignored.
+   *
+   * A store keeps one row per tree, revision and region, so this cannot come
+   * out of one read — it happens when a caller concatenates two windows of
+   * rows, and the store's counts are already running totals rather than a
+   * window's. Adding them would double a bucket, which is the one error in this
+   * subsystem that cannot be undone afterwards (0158), so the first row stands
+   * and the fact is reported.
+   */
+  readonly duplicated: number
+}
+
+/**
+ * Pick one revision's region rows out of a set of them and read them.
+ *
+ * Linear in the rows, with one pass and one map.
+ */
+export const regionReadingFor = (
+  where: RevisionOf,
+  rows: readonly StoredRegionCount[],
+  options: RegionReadingOptions = {}
+): RegionReadingFor => {
+  const matching = rows.filter(
+    (row) => row.treeId === where.treeId && row.revision === where.revision
+  )
+  const first = new Map<ReaderRegion, StoredRegionCount>()
+
+  for (const row of matching) {
+    if (!first.has(row.region)) first.set(row.region, row)
+  }
+
+  return {
+    reading: regionReadingOf([...first.values()], options),
+    foreign: rows.length - matching.length,
+    duplicated: matching.length - first.size,
   }
 }
