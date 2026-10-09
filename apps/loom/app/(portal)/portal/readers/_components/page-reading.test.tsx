@@ -1,13 +1,21 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { nodeIdSchema, primitiveTypeSchema, treeIdSchema } from "@jam-overture/loom"
-import type { StoredTally } from "@jam-overture/loom/signals"
+import {
+  nodeIdSchema,
+  primitiveTypeSchema,
+  treeIdSchema,
+  type ElementNode,
+  type LoomNode,
+  type LoomTree,
+} from "@jam-overture/loom"
+import { pageActionOf, pageReadingOf, type StoredTally } from "@jam-overture/loom/signals"
 
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 import type { PartName } from "@/app/(portal)/_lib/part-name"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
 import type { PageArrivals } from "@/app/(portal)/_lib/arrivals"
+import { doingOf, type PageDoing } from "@/app/(portal)/_lib/doing"
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
 import type { PagePacing } from "@/app/(portal)/_lib/pacing"
 import type { PageStopping } from "@/app/(portal)/_lib/stopping"
@@ -96,9 +104,85 @@ const cardFor = (
        * card without the join has none of the four.
        */
       arrivals={arrivals}
+      /*
+       * And present on every card, because it is the one reading here that
+       * needs the page only to *name* what it is about. The others are
+       * withheld on a version gap; this is given, and the tests about the gap
+       * hand it nothing explicitly.
+       */
+      doing={doingFor(tallies)}
     />
   )
 }
+
+/**
+ * The page these counters were filed against, for the one reading that needs a
+ * page as well as a window.
+ *
+ * Every region here holds an element part, which is what makes a share of
+ * readers a measurement of it, and `n_buy` holds only words — so it is the one
+ * part on this page whose nought is a filing rule rather than a finding about
+ * anybody. The ids are the ones the names above are for, because a reading
+ * joined to a different page would name every part from its registered type and
+ * every assertion about a name below would be about the fallback.
+ */
+const node = (id: string): LoomNode => ({
+  kind: "text",
+  id: nodeIdSchema.parse(id),
+  value: "words",
+})
+
+const region = (
+  id: string,
+  primitive: string,
+  children: readonly LoomNode[]
+): ElementNode => ({
+  kind: "element",
+  id: nodeIdSchema.parse(id),
+  type: primitiveTypeSchema.parse(primitive),
+  props: {},
+  children,
+})
+
+const words = (id: string): ElementNode => region(id, "loom.prose", [node(`${id}text`)])
+
+/**
+ * At the version the counters were filed under, because a window laid over
+ * another version of the page is the one way this reading can be wrong and look
+ * right. The screen refuses the pair outright (`skippingComparable`); here the
+ * page is simply built at the revision the case is about.
+ */
+const pageAt = (revision: number): LoomTree => ({
+  schemaVersion: 1,
+  treeId,
+  revision,
+  root: region("n_page", "loom.page", [
+    region("n_hero", "loom.card", [words("n_herowords")]),
+    region("n_band", "loom.section", [
+      words("n_bandwords"),
+      region("n_buy", "acme.buy-button", [node("n_buytext")]),
+    ]),
+    region("n_terms", "loom.details", [words("n_termswords")]),
+    region("n_foot", "loom.footer", [words("n_footwords")]),
+  ]),
+})
+
+const DECLARED = { copyFor: () => undefined, typesWithRole: () => [] }
+
+/**
+ * What readers did, joined the way the screen joins it.
+ *
+ * Built from the real reading rather than written as a literal — unlike
+ * {@link ARRIVED} below, and the difference is what each one is pinning. The
+ * arrivals literal exists because the card's job with it is to choose a line;
+ * this reading's structural half, which part bears others, cannot be faked
+ * without faking the thing the section is about.
+ */
+const doingFor = (tallies: readonly StoredTally[]): PageDoing =>
+  doingOf(
+    pageActionOf(pageReadingOf(pageAt(tallies[0]?.revision ?? 1), tallies, DECLARED)),
+    names
+  )
 
 /**
  * The comparison block alone. Reading the whole card would find every part in
@@ -291,24 +375,24 @@ describe("PageReadingCard", () => {
     expect(container.textContent).toContain("about 5 seconds each")
   })
 
-  it("names what was clicked most and what was opened most", () => {
+  it("names what was pressed most and what was opened most", () => {
     const { container } = cardFor(BUSY)
 
-    expect(container.textContent).toContain("was clicked 14 times")
-    expect(container.textContent).toContain("was opened 9 times")
+    expect(container.textContent).toContain("was pressed 14 times")
+    expect(container.textContent).toContain("was opened out 9 times")
   })
 
   /**
    * A section that silently disappears leaves a reader unable to tell *Loom
    * looked and there was nothing* from *Loom did not look*.
    */
-  it("says so in words when nobody clicked or opened anything", () => {
+  it("says so in words when nobody pressed or opened anything", () => {
     const { container } = cardFor([
       tally("n_hero", 1, { views: 6, reached: 6 }),
       tally("n_foot", 1, { views: 6, reached: 2 }, "loom.footer"),
     ])
 
-    expect(container.textContent).toContain("Nobody clicked or opened anything")
+    expect(container.textContent).toContain("looking at this page rather than using it")
   })
 
   it("says so in words when every part was seen by as many people as every other", () => {
@@ -390,10 +474,10 @@ describe("PageReadingCard", () => {
    * reader — and *twenty of the forty visits did something* is the claim an
    * author is actually asking for.
    */
-  it("says how many visits did anything at all, against the visits it heard from", () => {
+  it("says how many visits did anything at all, against the visits that got there", () => {
     const { container } = cardFor(BUSY)
 
-    expect(container.textContent).toContain("20 of the 40 visits did something on this page")
+    expect(container.textContent).toContain("20 of the 40 visits that got here did something on this page")
   })
 
   /**
@@ -404,7 +488,7 @@ describe("PageReadingCard", () => {
   it("names the part that saw the most of it rather than naming the whole page", () => {
     const { container } = cardFor(BUSY)
 
-    expect(container.textContent).toContain("The part that saw the most of that was")
+    expect(container.textContent).toContain("The part of the page that saw the most of that was")
     expect(container.textContent).toContain("the section “Pick a plan”")
     expect(container.textContent).not.toContain("the page “Autumn arrivals” — 20")
   })
@@ -413,6 +497,52 @@ describe("PageReadingCard", () => {
     const { container } = cardFor(BUSY)
 
     expect(container.textContent).toContain("12 of the 18 visits that got that far")
+  })
+
+  /**
+   * **The sentence this card could not say at all.**
+   *
+   * Every usage figure on it was a presence — what was pressed, what was
+   * opened, which region saw the most of it — so a band readers reach in
+   * numbers and never touch looked exactly like the heading above it, because
+   * both reported nought. What tells them apart is structural: an action is
+   * credited to the regions it happened *inside*, so a part with nothing inside
+   * it has a nought that is a filing rule and not a finding about anybody.
+   */
+  it("names the region readers reach and never touch, and never a part with nothing inside it", () => {
+    const { container } = cardFor(BUSY)
+
+    expect(container.textContent).toContain("Readers get to the card “Autumn arrivals”")
+    expect(container.textContent).toContain("and do nothing in it — 40 visits got that far")
+    expect(container.textContent).toContain("not one of them pressed, followed or opened anything inside it")
+    expect(container.textContent).not.toContain("Readers get to the buy button")
+  })
+
+  /**
+   * Good news, said rather than shown as an absence — the reason the `settled`
+   * tone exists. It is the answer somebody who came here worried about a dead
+   * section wants, and it must not arrive as a missing line.
+   */
+  it("says so out loud when every region readers got to was used by somebody", () => {
+    const { container } = cardFor([
+      tally("n_page", 1, { views: 9, reached: 9, engaged: 5 }, "loom.page"),
+      tally("n_hero", 1, { views: 9, reached: 9, engaged: 4 }),
+    ])
+
+    expect(container.textContent).toContain("no section here that readers reach and never touch")
+  })
+
+  /**
+   * Where the withheld shares went, which on an ordinary page is most of it.
+   * What is withheld is still reported as a total: a reader who sees shares on
+   * four parts of a nine-part page is owed the sentence that accounts for the
+   * rest.
+   */
+  it("accounts for the parts whose share is withheld rather than leaving a gap", () => {
+    const { container } = cardFor(BUSY)
+
+    expect(container.textContent).toContain("nothing inside them")
+    expect(container.textContent).toContain("there is no inside to a word")
   })
 
   /**
@@ -428,8 +558,8 @@ describe("PageReadingCard", () => {
       tally("n_buy", 1, { views: 9, reached: 4, activations: 4 }, "acme.buy-button"),
     ])
 
-    expect(container.textContent).toContain("something in it was used on 4 visits")
-    expect(container.textContent).toContain("Nothing reported whether it was ever on screen")
+    expect(container.textContent).toContain("4 visits used something in it")
+    expect(container.textContent).toContain("nothing reported whether it was ever on screen")
     expect(container.textContent).not.toMatch(/4 of the 0 visits/u)
   })
 
@@ -445,17 +575,19 @@ describe("PageReadingCard", () => {
       tally("n_terms", 1, { views: 6, reached: 4, opens: 2, closes: 1 }, "loom.details"),
     ])
 
-    expect(container.textContent).toContain("10 clicks and openings were reported on this page")
+    expect(container.textContent).toContain(
+      "10 presses, openings and submissions were reported on this page"
+    )
     expect(container.textContent).toContain("not one of them said which part of the page")
     expect(container.textContent).toContain("That is the pages reporting back, not your readers")
   })
 
-  it("counts one unplaced press as a click rather than as 1 clicks", () => {
+  it("counts one unplaced press as a press rather than as 1 presses", () => {
     const { container } = cardFor([
       tally("n_buy", 1, { views: 2, reached: 2, activations: 1 }, "acme.buy-button"),
     ])
 
-    expect(container.textContent).toContain("1 click or opening was reported")
+    expect(container.textContent).toContain("1 press, opening or submission was reported")
   })
 
   it("does not say it when one press was placed, because one placed press means the walk works", () => {
@@ -464,8 +596,8 @@ describe("PageReadingCard", () => {
       tally("n_buy", 1, { views: 6, reached: 5, activations: 7 }, "acme.buy-button"),
     ])
 
-    expect(container.textContent).not.toContain("clicks and openings were reported on this page")
-    expect(container.textContent).toContain("1 of the 6 visits did something on this page")
+    expect(container.textContent).not.toContain("were reported on this page")
+    expect(container.textContent).toContain("1 of the 6 visits that got here did something on this page")
   })
 
   it("does not say it on a page nobody used, which already has its own sentence", () => {
@@ -474,7 +606,7 @@ describe("PageReadingCard", () => {
       tally("n_foot", 1, { views: 6, reached: 2 }, "loom.footer"),
     ])
 
-    expect(container.textContent).toContain("Nobody clicked or opened anything")
+    expect(container.textContent).toContain("looking at this page rather than using it")
     expect(container.textContent).not.toContain("reported on this page")
   })
 
@@ -496,9 +628,18 @@ describe("PageReadingCard", () => {
     expect(container.textContent).not.toContain("broadcastReaderSignals")
   })
 
+  /**
+   * The row-per-part record, and it is the **second** table on the card now: the
+   * section about what readers did keeps its own, so this looks the table up by
+   * what it is for rather than by being the first one in a disclosure. A
+   * selector that took the first `details table` was passing on the old card and
+   * would have asserted the wrong table on this one.
+   */
   it("keeps every part's own use one click down, beside the counters it belongs with", () => {
     const { container } = cardFor(BUSY)
-    const table = container.querySelector("details table")
+    const table = [...container.querySelectorAll("details table")].find((candidate) =>
+      candidate.textContent?.includes("used inside")
+    )
 
     expect(table?.textContent).toContain("used inside")
     expect([...(table?.querySelectorAll("tbody tr") ?? [])].map((row) => row.textContent)).toHaveLength(6)
