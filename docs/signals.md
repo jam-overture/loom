@@ -34,16 +34,18 @@ the portal every day.
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
 | How much of what it says gets read | words readers reached against the words the page says ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)), with the passages nobody saw |
+| Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Whether readers did anything, rather than saw it | `engaged` against `reached` off one row ([0242](../decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)), withheld on a leaf because a leaf has no inside |
+| Whether a change made room to read | two windows' pace compared, with the words and the readers separated by a counterfactual ([0244](../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)) |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
-| What a reading means when it says nothing | the condition and the subject behind all fifteen names ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
+| What a reading means when it says nothing | the condition and the subject behind all twenty-two names ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -851,13 +853,20 @@ half that matters
   drawing *nothing has been measured* over a page whose own window was busy.
   Two names are not synonyms when one of them is about twice as much.
 
-`src/signals/silences.ts` maps all fifteen members of the five sets onto **nine
+`src/signals/silences.ts` maps every member of every set onto **nine
 conditions** and **three subjects**, renames nothing and supersedes nothing.
 The subject turned out to be a property of the **reading** rather than of the
 silence — every reason a copy reading gives is about its page, every reason a
-pace reading gives is about one part, every reason either comparison gives is
-about the pair — so it is published as one table over the five vocabularies
-rather than as a field repeated nine times.
+pace reading gives is about one part, every reason a comparison gives is about
+the pair — so it is published as one table over the vocabularies rather than as
+a field repeated nine times.
+
+> **Two counts corrected, 8 October.** This step and 0240 both said *fifteen
+> members of five sets*. The five sets held **eighteen** members on the day it
+> landed — 2, 4, 6, 3 and 3 — and §19 brings it to six sets and twenty-two.
+> Neither number was load-bearing and 0240 is **not** edited for it; the module
+> carries the right figure and a test now holds the fact that was worth having
+> instead, which is that the sixth set needed no tenth condition.
 
 `relateSilences` answers in three: `one-state` (one sentence serves both),
 `one-reason` (one condition about two subjects, worth two sentences and never
@@ -975,6 +984,153 @@ already stored reinterprets.
 share that is a band's and never a control's, the figure that must never be
 drawn as a rate, and `unwalked` as the one state to refuse to draw a card
 under.
+
+### 19. The room a change made to read · `Loom signals` · **done, 8 October**
+
+§12 sets the time each reader had against the time a part's words take and calls
+a part `skimmed` where the time was short even after every doubt has been
+resolved in the page's favour. It reads **one window of one revision**.
+
+Three comparisons of two windows existed — §10 for where reading stops, §16 for
+how many of the page's words get reached, §13 against the readers who arrived —
+and **none of them asked whether readers had time.** That is the question a
+rewrite is aimed at, and the change that produces it is the commonest thing
+anybody does to a band nobody reads: cut it. *The band readers used to skim is
+read now* had no answer.
+
+**Done.** `paceChangeOf(was, now, options)` in
+[`src/signals/pace-change.ts`](../src/signals/pace-change.ts) answers it. It is
+the **eleventh** thing taken out of the server-side join rather than collected:
+**nothing was added to a payload, a browser, a column, a store or the
+vocabulary**, and the broadcaster was not touched, so its weight is unchanged.
+
+One fact decides the shape, and it is the reason a single before-and-after pace
+figure is worse than none
+([0244](../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)):
+
+- **A pace is a division and a change can move either side of it.** Readers
+  stayed longer, which is a fact about the readers, or the page asks for less,
+  which is a fact about the change — and they are opposite findings reported by
+  the same number. The one that reads best is the one that means least: a band
+  halved in length is `paced` with nobody having given it a second more
+  attention. So both factors are published, `timeRatio` and `needRatio`, whose
+  quotient is the movement in the pace.
+- **The attribution is a counterfactual and therefore needs no threshold.**
+  *Which moved more* would need a dial on what counts as a move, which §12
+  refused for the figures either side of it. *What would have happened if one
+  side had not moved* is in the rows already: the later window's time against
+  the **earlier** revision's words isolates the readers, the earlier window's
+  time against the later words isolates the change, and each is run through the
+  published verdict rule. `PaceCause` then answers by sufficiency — `words`,
+  `time`, `either`, `together`, and `unknown` where a floor leaves a
+  counterfactual with no verdict.
+
+Five more settled in the building. **A movement has five members and not nine**,
+because §12 makes `skimmed` the claim that survives every bias and the other two
+the weak ones, so a part moving between `paced` and `lingered` has not moved in
+a way worth a name — and `still-skimmed` is kept apart from `held` because both
+are *the verdict did not move* and they are opposite findings. **There is no
+page-wide total of time, words or readers**: the figures nest (§12), so the page's
+own figure is the **root** compared against itself and `need` is the subtraction
+of its two costings — a row rather than an addition, as §18 publishes the root's
+`engaged` apart. **One costing rate and two straddle inflations**, because a rate
+is a fact about the page's language and a straddle is a fact about one window
+(§8) — which is also why the function takes two readings rather than two finished
+pace readings, since nothing downstream could tell that two sides had been costed
+differently. **The census of what the change added and removed carries the window
+that saw it** and is honestly not exact, unlike §16's word census: *the change
+added a band and readers are skimming it* is the row worth having. And **the
+fourth silence set needed no tenth condition** — `dissolved` here is *no part is
+in both revisions*, which is the same state §16 reports of words, since a page
+that carries no part carries no word either.
+
+`paceStandingOf` is now published from `pace.ts`, because the verdict rule has a
+second caller and two spellings of one rule is the fault this subsystem has been
+bitten by twice.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the one
+sentence a reader screen can lead with after a rewrite, and the figure on it that
+must never be drawn as readers having slowed down.
+
+### 20. Who the readers were, before and after · `Loom signals` · **done, 9 October**
+
+> §19 is the room a change made to read, written on the branch of #555 and not
+> yet on `main` when this was built. The number was left for it rather than
+> taken, since that pull request was opened first and nothing here depends on
+> it; #555 landed on 9 October and §19 is above.
+
+§10, §16 and §19 compare two windows of a page, and every one of them attributes
+what moved to the change. Each is careful about which of its figures is
+comparable across two revisions, and none of them can see the one fact that
+would make the attribution wrong: **the readers were not the same people.** A
+page read by its home market in March and by a conference audience in April got
+better or worse for a reason no tree contains, and all three comparisons would
+report the difference as the change's work. It is the standing confounder of the
+entire before-and-after programme.
+
+§7 built the only thing Loom knows about who a reader was, and built it as a map
+rather than as an answer. **Nothing held two maps against each other.**
+
+**Done.** `readershipChangeOf(was, now)` in
+[`src/signals/readership.ts`](../src/signals/readership.ts) answers *the two
+windows were read by much the same mix of places, so the comparison beside this
+one is comparing like with like* — or the other sentence, which is the valuable
+one. `regionReadingFor` in [`region.ts`](../src/signals/region.ts) picks one
+revision's rows out of a window of them, so no caller writes the filter twice.
+It is the **eleventh** thing taken out of what this subsystem already knows
+rather than collected: **nothing was added to a payload, a browser, a column, a
+store or the vocabulary**, and the broadcaster was not touched, so its weight is
+unchanged.
+
+Three things decide the shape
+([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)):
+
+- **It takes two readings and never two sets of rows, and that is the whole
+  privacy design.** A comparison is a second place a small bucket could be given
+  away: *this country had forty readers and now has a figure we are
+  withholding* says there are between one and twenty-four people there, which is
+  narrower than the floor permits and is a disclosure the map it came from never
+  made. Taking two floored readings makes the leak structurally unavailable
+  rather than merely unwritten — a figure appears here only where the map it
+  came from already published it, which is a test and not an argument. The cost
+  is one conflation, accepted: a region named before and unnamed now has either
+  emptied or fallen under the floor, both are `thinned`, and which is not said.
+  Nought names nobody; one to twenty-four names somebody.
+- **The bucket that names nowhere is the one exception, because it is never
+  withheld.** A map without one placed every arrival it counted, so its absence
+  is exactly nought and it is compared like a published figure. Without that,
+  the commonest measurement fault this exists to catch would be reported as its
+  opposite — a proxy that stops writing the header fills a bucket that was not
+  there before, so the unplaced share would carry no movement of its own and the
+  whole shift would be charged to the countries it drained. `unplaced` is a
+  standing of its own so that a surface never calls it an audience shift.
+- **The counts are exact, and the mix is still the only figure worth having,
+  because a region counter has no window.** Every other counter here is written
+  by a rollup over a window; a region is stamped at the door, once, and the row
+  is a running total per revision. So *this week against last week* — which §10
+  and §16 both answer by handing the same function two windows of one revision —
+  **cannot be asked of a readership at all**, and the two numbers a comparison
+  does have are a revision live for a month against one live for a day.
+  `arrivals` carries both totals as the weight behind the mix and **no growth
+  ratio is published**, because the one anybody would quote would be a
+  measurement of exposure. A composition is roughly the same over a day and over
+  a month of one audience; a count is not.
+
+Four more settled in the building. **`moved` is a floor and `movedAtMost` a
+ceiling**, because the regions one map names and the other withholds contribute
+a term nobody can evaluate — so a quiet page reports `unsettled` rather than a
+verdict, which is the floor working and not a fault. **No threshold decides what
+a movement is**: the counter is exact, so one view of difference is one view of
+difference, and this is the only comparison in the subsystem with no threshold
+inside it. **`READERSHIP_SHIFTED_ABOVE` is published and not overridable**, for
+the reason the pace thresholds are not — a surface wanting a different line
+draws it on `moved`. And **six standings and no new silence vocabulary**, which
+is §18's shape and is why §17 has sets to map rather than one more.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+sentence to put *above* a before-and-after card rather than one more row on it,
+the pair of numbers that must be drawn together or not at all, and `unplaced` as
+the one standing that is about the deployment rather than its readers.
 
 ## Still not in scope
 

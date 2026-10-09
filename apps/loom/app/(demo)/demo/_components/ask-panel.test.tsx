@@ -793,6 +793,15 @@ describe("the ask panel, saying which way a press would go", () => {
     DEMO_PRESETS.map((preset) => [preset.id, goesAhead(false)])
   )
 
+  /**
+   * The same table with the verdicts the Gate actually reaches against the
+   * starting page — two unattended, three held — because the sentence over the
+   * list counts them and a table of five identical answers would make every
+   * count in it read the same.
+   */
+  const HELD = { ...goesAhead(false), standing: "asks-you" as const, moves: false }
+  const THE_SHIPPED_SPLIT = { ...NOTHING_GOES_BACK, band: HELD, trim: HELD, promote: HELD }
+
   it("replaces a row's promise once the press would only put the last change back", () => {
     render(
       <AskPanel
@@ -897,5 +906,78 @@ describe("the ask panel, saying which way a press would go", () => {
 
     expect(screen.queryByText(PUTS_IT_BACK)).toBeNull()
     for (const preset of DEMO_PRESETS) expect(screen.getByText(preset.promise)).toBeTruthy()
+  })
+
+  /**
+   * And the sentence over the list, which is the half 7 October left and the
+   * reason this suite gained three more.
+   *
+   * A visitor who pressed a toggle has made one of five changes and was told,
+   * in the arrival screen's words character for character, that there were
+   * five. The row under it now says which way it goes; the sentence above it
+   * said nothing, and *five more* over a list whose first row is the way back
+   * reads as *nothing I did counted*.
+   */
+  it("counts the way back out of the changes still to ask for", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={{ ...THE_SHIPPED_SPLIT, palette: goesAhead(true) }}
+      />
+    )
+
+    expect(
+      screen.getByText(
+        "You can ask for 4 more changes here, and put the last one back." +
+          " Loom will make 2 on its own and ask you first about 3."
+      )
+    ).toBeTruthy()
+    expect(screen.queryByText(/ask for 5 changes here/)).toBeNull()
+  })
+
+  /**
+   * The restraint, on the screen rather than in the reading: the way back is
+   * still one of the five the second clause divides by verdict, and the five
+   * chips under it are what make that clause checkable. Two partitions of one
+   * list, which is the same pair every row carries — the chip is the Gate's
+   * answer, the promise is what it does to the page.
+   */
+  it("still counts the way back among the verdicts the chips show", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={{ ...NOTHING_GOES_BACK, palette: goesAhead(true) }}
+      />
+    )
+
+    expect(screen.getByText(/Loom will make all 5 on its own\./)).toBeTruthy()
+  })
+
+  /**
+   * And the arrival screen's sentence is byte for byte what it was, asserted
+   * here as well as one level down, because this is the file that renders it.
+   */
+  it("leaves the sentence alone while nothing would put anything back", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={THE_SHIPPED_SPLIT}
+      />
+    )
+
+    expect(
+      screen.getByText(
+        "You can ask for 5 changes here. Loom will make 2 on its own and ask you first about 3."
+      )
+    ).toBeTruthy()
   })
 })

@@ -7,6 +7,7 @@ import {
   readerRegionOf,
   regionCountsOf,
   regionFloorOf,
+  regionReadingFor,
   regionReadingOf,
   UNKNOWN_REGION,
   type StoredRegionCount,
@@ -198,5 +199,67 @@ describe("regionReadingOf", () => {
 
   it("reads nothing as nothing rather than as a reading of nowhere", () => {
     expect(regionReadingOf([])).toMatchObject({ regions: [], withheld: { buckets: 0, views: 0 }, views: 0 })
+  })
+})
+
+describe("regionReadingFor", () => {
+  it("reads one revision's map and says how many rows were not its", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 2 }, [
+      row({ revision: 2, region: region("GB"), views: 60 }),
+      row({ revision: 1, region: region("GB"), views: 400 }),
+      row({ revision: 2, treeId: OTHER_TREE, region: region("GB"), views: 400 }),
+    ])
+
+    expect(read.reading.views).toBe(60)
+    expect(read.reading.regions).toEqual([{ region: "GB", views: 60 }])
+    expect(read.foreign).toBe(2)
+    expect(read.duplicated).toBe(0)
+  })
+
+  /**
+   * A store keeps one row per tree, revision and region, so two of them come
+   * out of a caller concatenating two reads — and the counts are already
+   * running totals rather than a window's. Adding them would double a bucket,
+   * which is the one error here that cannot be undone afterwards (0158).
+   */
+  it("counts a region once however many times it is handed in", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1 }, [
+      row({ views: 60 }),
+      row({ views: 60 }),
+      row({ views: 60 }),
+    ])
+
+    expect(read.reading.views).toBe(60)
+    expect(read.duplicated).toBe(2)
+  })
+
+  it("floors the revision it was asked about and not the deployment", () => {
+    const rows = [
+      row({ revision: 1, region: region("FR"), views: 20 }),
+      row({ revision: 2, region: region("FR"), views: 20 }),
+    ]
+
+    expect(regionReadingOf(rows).regions).toEqual([{ region: "FR", views: 40 }])
+    expect(regionReadingFor({ treeId: TREE, revision: 1 }, rows).reading.regions).toEqual([])
+    expect(regionReadingFor({ treeId: TREE, revision: 1 }, rows).reading.withheld).toEqual({
+      buckets: 1,
+      views: 20,
+    })
+  })
+
+  it("passes a raised floor through to the reading", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1 }, [row({ views: 60 })], {
+      floor: 100,
+    })
+
+    expect(read.reading.floor).toBe(100)
+    expect(read.reading.regions).toEqual([])
+  })
+
+  it("reads a revision nothing was counted for as nothing", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 9 }, [row({ views: 60 })])
+
+    expect(read.reading.views).toBe(0)
+    expect(read.foreign).toBe(1)
   })
 })

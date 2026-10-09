@@ -1169,3 +1169,94 @@ describe("confirmChange against a declared binding reader", () => {
     )
   })
 })
+
+describe("what a composition root's seams leave on the record", () => {
+  /**
+   * The gap this closes, driven end to end: the same tree, the same policy and
+   * the same change, judged by two runtimes that differ only in what their
+   * composition root handed the write path. The fingerprints agree, correctly,
+   * and until this field existed that agreement was the whole of what a reader
+   * holding the two judgments could learn.
+   */
+  it("records a wiring that the policy fingerprint cannot see", async () => {
+    const before = harnessFor({ build: tweak })
+    const after = harnessFor({ build: tweak, propsVocabulary: acceptsVariants })
+
+    const monday = await composeChange(before.runtime, before.tree, intentFor(before.tree))
+    const wednesday = await composeChange(after.runtime, after.tree, intentFor(after.tree))
+    if (monday.kind !== "applied" || wednesday.kind !== "applied") {
+      throw new Error(`unexpected ${monday.kind} / ${wednesday.kind}`)
+    }
+
+    expect(monday.disposition.policyFingerprint).toBe(wednesday.disposition.policyFingerprint)
+    expect(monday.disposition.wiredChecks).toEqual([])
+    expect(wednesday.disposition.wiredChecks).toEqual(["props"])
+  })
+
+  it("records both seams when both were handed over", async () => {
+    const { runtime, tree } = harnessFor({
+      build: tweak,
+      propsVocabulary: acceptsVariants,
+      bindingReader: readsItems,
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.wiredChecks).toEqual(["props", "bindings"])
+    expect(outcome.assessment.wiredChecks).toEqual(outcome.disposition.wiredChecks)
+  })
+
+  /**
+   * The confirmation path has to record the same thing, for the reason it
+   * recomputes the assessment at all: the second look is a look at things as
+   * they are now, and a held change that landed carrying no record of what
+   * checked it would be the one judgment in the corpus nothing could place.
+   */
+  it("records them on the confirmation path too", () => {
+    const { runtime, tree, proposal } = harnessFor({
+      build: tweak,
+      propsVocabulary: acceptsVariants,
+    })
+
+    const outcome = confirmChange(runtime, tree, proposal, intentFor(tree))
+    if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.wiredChecks).toEqual(["props"])
+  })
+
+  /**
+   * A repair is judged by the same policy as the proposal it replaces, and so by
+   * the same seams. A repaired proposal whose disposition named a different write
+   * path than the refusal it answers would make the pair unreadable, which is the
+   * one thing the record of a repair exists to keep legible.
+   */
+  it("records them identically on a refusal and on the repair that answers it", async () => {
+    const base = harnessFor({
+      build: tweak,
+      confidence: 0.05,
+      propsVocabulary: acceptsVariants,
+    })
+    const repair = buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: base.tree.treeId,
+        baseRevision: base.tree.revision,
+        operations: [{ op: "configure", nodeId: base.ids.body, set: { value: "Gentler" }, unset: [] }],
+      },
+      confidence: 0.95,
+    })
+    const runtime = { ...base.runtime, repairer: scriptedRepairer(ok(repair)) }
+
+    const outcome = await composeChange(runtime, base.tree, intentFor(base.tree))
+    if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
+
+    const decided = base.events.envelopes.flatMap((envelope) =>
+      envelope.event.type === "disposition-decided" ? [envelope.event.disposition] : []
+    )
+
+    expect(decided).toHaveLength(2)
+    expect(decided.map((disposition) => disposition.wiredChecks)).toEqual([["props"], ["props"]])
+  })
+})
