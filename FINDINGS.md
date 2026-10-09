@@ -47485,3 +47485,124 @@ could read the record and assert the counts itself, and that would be two
 spellings of one rule — the mistake this repository has now written down three
 times, most recently as the reason the word-counting rule moved into
 `words.ts`. One registry or none.
+
+---
+## 2026-10-09 — three of the sixteen doors are named on no written page, and the instrument that says which existed already
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` for the two testing doors,
+**closed** by `docs-50-testing-what-you-built`; `Loom signals`
+(`@jam-overture/loom/signals/postgres`) for the third ·
+**Status:** open as the third door, and as a **measurement offered to every
+lane** — nothing is asked about the one this lane closed
+
+`_lib/api/mentions.ts` derives which written page names a given export, by
+reading the pages. It was built so a reference page can link to the prose that
+explains a name. Asked the question the other way round — *which doors does no
+page name at all* — it answers in one pass, and nobody had asked it:
+
+| door | exports | named on some page |
+| --- | --- | --- |
+| `@jam-overture/loom/testing` | 54 | 1 |
+| `@jam-overture/loom/testing/contracts` | 20 | **0** |
+| `@jam-overture/loom/cli` | 25 | **0** |
+| `@jam-overture/loom/signals/postgres` | 5 | **0** |
+
+Over all sixteen doors it is 103 of 1,416 exports named on a written page, which
+is not the number to be alarmed by: the reference is generated precisely so that
+a thousand signatures do not have to be written out, and *named on* was never a
+claim about coverage (`mentions.ts` says so itself). **A door with zero is a
+different statement.** It means a reader who arrives at the site and does not
+already know the name exists has no path to it, because every path on this site
+runs through prose.
+
+The two testing doors were the interesting pair, and they are now
+*Testing what you built*. Before it, the only path to `describeTreeStoreContract`
+— a suite that holds a host's own store to the promises Loom's two keep — was a
+generated page a reader reaches by already knowing to look for it.
+
+`@jam-overture/loom/cli` is a **false positive worth leaving in the table**: the
+CLI is taught on *Scaffolding a project*, which names `loom init` and
+`loom add primitive`, and a reader of that page needs no export from it. The
+measurement is over exported names, so a door whose surface is commands rather
+than imports reads as unexplained. `signals/postgres` is the one left, and it
+belongs to its lane rather than to this one.
+
+**For any lane that wants the same answer about its own surface:** the index is
+`proseMentions` from `app/(docs)/_lib/api/mentions.ts`, keyed by export name,
+and a door's names are `apiEntries` from `../api/reference`. It takes six lines.
+It is an instrument for *what is published and never explained*, which is a
+question most of this repository's lanes can ask about their own work.
+
+---
+## 2026-10-09 — a node whose props are refused is never called, so the diagnostics are the render's first complaint rather than its list
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/render/`) ·
+**Status:** open — **not a defect and nothing is asked**; the behaviour is right
+and was stated nowhere, and it is now stated on a page with a test behind it
+
+Writing *Testing what you built* needed one sentence about what
+`renderLoomTree(...).diagnostics` is, and the sentence everybody would write is
+wrong. Measured against `testRegistry()`, with one unregistered primitive
+holding one text node, under two roots that differ only in their props:
+
+| the root | diagnostics |
+| --- | --- |
+| `loom.page` with the props its schema wants | `["unknown-primitive"]` |
+| `loom.page` with props it refuses | `["invalid-props"]` |
+
+The second tree has exactly the same unregistered node in it. **It is not
+reported, because the node above it was never called**, and a component that was
+not called renders no children for the walk to reach. So a page with a bad root
+comes back with one diagnostic on it however much else is wrong further down.
+
+This is the right behaviour — there is nothing else a renderer could do with the
+children of a node it refused to call — and it has a consequence for every test
+anybody writes about a render. `expect(diagnostics).toEqual([])` means *nothing
+was wrong and everything was reached*, and is the only assertion with that
+property. `expect(diagnostics).toHaveLength(1)` is a test that passes while a
+page is arbitrarily broken, and a reader who fixes the first diagnostic and
+re-runs is doing the right thing without being told why.
+
+Held by `_lib/proving/claims.test.ts` in this lane, as the measurement above.
+**What would be worth a line from the owner** is the same sentence on
+`RenderDiagnostic`'s own doc comment, which is where the generated reference
+reads from. Nothing is blocked either way; a reader of the reference gets a list
+of codes and no statement that the list is a frontier rather than a sweep.
+
+---
+## 2026-10-09 — the fixture tree's primitives share three names with the starter library and none of its schemas
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/testing/definitions.ts`) · **Status:** open — **a stated hazard rather
+than a defect**; the page now warns a reader off it and nothing needs changing
+unless the owner disagrees
+
+`sampleTree()` is built from the four primitives `testRegistry()` registers:
+`loom.page`, `loom.header`, `loom.card`, `loom.footer`. Three of those four names
+are also published by the starter library, which registers 107 primitives, and
+the schemas behind them are not the same.
+
+What that produces is the uncomfortable middle. A reader who takes the published
+fixture tree and renders it against `createStarterPrimitiveRegistry()` — which
+is what *Rendering a tree* teaches them to build — does not get a page of
+`unknown-primitive`, which would tell them plainly that the fixture is not
+theirs. They get **one** diagnostic, `invalid-props` on `loom.page`, and by the
+entry above that is also the last thing the render has to say. The remaining
+nodes are never reached, so the two registries' disagreement about `loom.card`
+is invisible, and so is the fact that `loom.header` is not in the starter
+library at all.
+
+`src/testing/index.ts` is clear that what it publishes is API and that
+`sampleTree`'s shape is now something a host may depend on. That makes the name
+collision a published-surface question rather than an internal one, which is why
+it is filed rather than noted in a report. **Nothing is asked for.** Renaming
+the fixture's types would be a breaking change to a door opened eight days ago,
+for a hazard a sentence closes, and the sentence is now on
+`/docs/building-with-loom/testing-what-you-built`: *use the pair together when
+the thing you are testing is the runtime; use your own tree and your own
+registry when the thing you are testing is your primitive.*
+
+Worth knowing for whoever writes the next fixture: a namespace of its own
+(`fixture.page`) would have made the mismatch loud at the first render, and the
+cost of that is a fixture tree that no host registry can render by accident —
+which is the property wanted here.
