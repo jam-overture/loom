@@ -65,6 +65,18 @@ import { mediaUrlSchema } from "./url.js"
  * initials — which is the fallback four primitives in this library already
  * share. A row with no quote or no author is a different matter and is skipped,
  * because there is nothing left to put on the page.
+ *
+ * ## The failure region is a slot too, over the sentence rather than instead of it
+ *
+ * `loom.feed` set this shape and carried the paragraph that said it could not
+ * be this way — a statement about `auditRegistry`'s reach, written in the
+ * grammar of a statement about design.
+ * [0185](../../decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)
+ * discharged the reach on 23 September and left the design call to this lane;
+ * [0246](../../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md) makes it. The region falls back to the declared
+ * sentence, so a tree that says nothing renders exactly what it rendered
+ * before, and one failure slot serves both failure answers because the
+ * difference between them is the author's and not the reader's.
  */
 
 /**
@@ -232,12 +244,12 @@ const noticeOf = (words: string): ReactNode =>
 export const loomVoices = definePrimitive({
   type: "loom.voices",
   description:
-    "A wall of testimonials read from a data binding — quotes a reviews table or a CRM collected, rather than praise somebody typed into the page. Use loom.quote-grid of loom.quote for testimonials the tree authors. Region: empty.",
+    "A wall of testimonials read from a data binding — quotes a reviews table or a CRM collected, rather than praise somebody typed into the page. Use loom.quote-grid of loom.quote for testimonials the tree authors. Regions: empty, unavailable.",
   props,
-  slots: ["empty"],
+  slots: ["empty", "unavailable"],
   /**
    * Every word a reader reads is in the answer's rows or in the children of the
-   * `empty` region. Declared empty rather than left out, which 0122 says are
+   * `empty` and `unavailable` regions. Declared empty rather than left out, which 0122 says are
    * different answers: this has been asked and the answer is *none*.
    */
   copy: [],
@@ -293,9 +305,9 @@ export const loomVoices = definePrimitive({
 
     const body =
       reading.kind === "unavailable"
-        ? noticeOf(loom.text.unavailable)
+        ? (loom.slots["unavailable"] ?? noticeOf(loom.text.unavailable))
         : reading.kind === "mismatched"
-          ? noticeOf(loom.text.mismatched)
+          ? (loom.slots["unavailable"] ?? noticeOf(loom.text.mismatched))
           : reading.kind === "empty"
             ? (loom.slots["empty"] ?? null)
             : createElement(

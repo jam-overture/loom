@@ -17,8 +17,10 @@ import {
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
+  meaningOfPaceChangeSilence,
   meaningOfPaceSilence,
   meaningOfReachSilence,
+  PACE_CHANGE_SILENCES,
   PACE_SILENCES,
   pageReachOf,
   pageReadingOf,
@@ -126,6 +128,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
+  ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
 ]
 
@@ -136,6 +139,7 @@ describe("what a reading means when it says nothing", () => {
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
         PACE_SILENCES.length +
+        PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
     )
 
@@ -143,6 +147,25 @@ describe("what a reading means when it says nothing", () => {
       expect(SILENCE_CONDITIONS).toContain(meaning.condition)
       expect(SILENCE_SUBJECTS).toContain(meaning.subject)
       expect(SILENCE_VOCABULARIES).toContain(meaning.vocabulary)
+    }
+  })
+
+  /**
+   * The other side of the same guard, from the direction a sixth set arrives
+   * from. 0244 added one and mapped it onto conditions that were already
+   * published, which is the evidence that these are states of the world rather
+   * than a list of the names five modules happened to use — and a seventh set
+   * adding conditions nobody else reports is the thing worth noticing.
+   */
+  it("maps the sixth set onto conditions the first five already reported", () => {
+    const others = new Set<SilenceCondition>(
+      EVERY_MEANING.filter((meaning) => meaning.vocabulary !== "pace-change").map(
+        (meaning) => meaning.condition
+      )
+    )
+
+    for (const silence of PACE_CHANGE_SILENCES) {
+      expect(others).toContain(meaningOfPaceChangeSilence(silence).condition)
     }
   })
 
@@ -167,6 +190,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "part",
+      "comparison",
       "page",
     ])
   })

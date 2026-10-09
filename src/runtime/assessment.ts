@@ -5,6 +5,7 @@ import type { TreeError } from "../tree/errors.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import { analyzeDelta, type ChangeAnalysis } from "./analysis.js"
+import { wiredChecksOf, type WriteCheck } from "./checks.js"
 import { interactivePredicateFor } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
@@ -26,6 +27,13 @@ import {
  * rather than a rejected one. That distinction matters downstream: an
  * inapplicable proposal is an interpreter bug, not a policy decision.
  *
+ * It is also where *which* of the write path's optional checks were in place is
+ * written down, because this is the last function that can know: a seam reaches
+ * the decision as an argument here and is a closure by the time anything else
+ * sees it. `wiredChecks` is a fact this function holds about its own call rather
+ * than a claim relayed from a caller, which is what lets the Gate stamp it on a
+ * disposition the same way it stamps the policy it consulted.
+ *
  * This is also where a proposal's own declaration about what it writes over is
  * folded into the damage estimate (0035), so the Gate keeps seeing two axes and
  * a policy rather than growing a third input. The policy's vocabulary — which
@@ -40,6 +48,16 @@ export type ChangeAssessment = {
   readonly analysis: ChangeAnalysis
   readonly stakes: StakeAssessment
   readonly reversibility: Reversibility
+  /**
+   * Which optional checks the caller handed this assessment, in canonical order.
+   *
+   * Always present and empty when none were, rather than omitted: a measurement
+   * is being recorded here, and an assessment that left the field out would be
+   * one a reader could not distinguish from a deployment that checks nothing.
+   * The disposition this ends up on is where absence means something else, and
+   * says so.
+   */
+  readonly wiredChecks: readonly WriteCheck[]
 }
 
 export const assessChange = (
@@ -47,8 +65,15 @@ export const assessChange = (
   proposal: ProposedChange,
   policy: GatePolicy,
   inverseDeltaId: DeltaId,
-  checkProps: PropsVocabulary = EVERY_TYPE_UNDECLARED,
-  reads: BindingReader = NOTHING_DECLARED
+  /**
+   * Absent rather than defaulted, so that *handed nothing* and *handed the
+   * sentinel* stay two different calls. The analysis below falls back to the
+   * same two no-ops a default would have supplied, so nothing about a decision
+   * changes; what changes is that `wiredChecks` can report what arrived instead
+   * of reporting what the signature filled in.
+   */
+  checkProps?: PropsVocabulary,
+  reads?: BindingReader
 ): Result<ChangeAssessment, TreeError> =>
   flatMapResult(
     analyzeDelta(
@@ -56,8 +81,8 @@ export const assessChange = (
       proposal.delta,
       interactivePredicateFor(policy.interactiveTypes),
       primitiveVocabularyFor(policy.registeredPrimitiveTypes),
-      checkProps,
-      reads
+      checkProps ?? EVERY_TYPE_UNDECLARED,
+      reads ?? NOTHING_DECLARED
     ),
     (analysis) =>
       mapResult(
@@ -67,6 +92,7 @@ export const assessChange = (
           analysis,
           stakes: assessStakes({ analysis, discards: proposal.discards ?? [] }, policy),
           reversibility,
+          wiredChecks: wiredChecksOf({ propsVocabulary: checkProps, bindingReader: reads }),
         })
       )
   )
