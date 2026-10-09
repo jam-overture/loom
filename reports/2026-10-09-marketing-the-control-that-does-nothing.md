@@ -3,6 +3,12 @@
 **Lane:** `Loom marketing` · `apps/loom/app/(marketing)/` · **Branch:**
 `marketing-64-the-control-that-does-nothing` · **Section:** §4d
 
+**Preview:** https://loom-git-marketing-64-the-co-d8cb97-jpizzolato36-6341s-projects.vercel.app
+— open `/how-it-works?ask=shorter&approve=1`, scroll to the record and press
+*Put it back*. Not opened from this run: `*.vercel.app` is denied by the
+environment's network policy, filed on 27 September. Everything measured below
+was measured on a production build served locally.
+
 ## What this run did
 
 Open `/how-it-works`, press **I don't have long**, say yes to the hold, then
