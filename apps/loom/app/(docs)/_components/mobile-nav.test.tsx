@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 
+import { railScrollerAttr, RAIL_SCROLLER_SELECTOR } from "@/app/(docs)/_lib/chrome"
 import { docsOrder } from "@/app/(docs)/_lib/nav"
 
 import { MobileNav } from "./mobile-nav"
@@ -206,5 +207,64 @@ describe("a navigation the menu had no part in", () => {
     const marked = linksIn().filter((link) => link.getAttribute("aria-current"))
 
     expect(marked.map((link) => link.getAttribute("href"))).toEqual([second?.href])
+  })
+})
+
+/**
+ * **The second defect, and the one a reader meets on the first page they open.**
+ *
+ * The panel had no height. Opened on *Decision records* it laid 1,712 pixels
+ * of links into a 844-pixel screen, with the mark saying *you are here* 938
+ * past the bottom of it — so a reader pressed *Browse the documentation*, saw
+ * *Getting started*, and had to scroll past 45 links to learn they were on the
+ * last one. Everything on the page they had been reading was that far down
+ * too. Measured with `pnpm shoot`'s `measure`, on the deployment, before any
+ * of this was written.
+ *
+ * Bounding it is what lets the rail do the rest: `Sidebar` brings the current
+ * page into view **in a scroller**, and does nothing where there is none, so
+ * on a phone the remedy was to give it one rather than to teach it to scroll
+ * the document. A version that scrolled the document would answer the same
+ * question by throwing a reader who had just pressed a button into the middle
+ * of a list with the button off-screen.
+ *
+ * The two assertions are a pair on purpose. The marker is what the rail looks
+ * for; the overflow is what makes the marker true. Either alone is a panel
+ * that reads as fixed and is not.
+ */
+describe("the panel the rail scrolls inside", () => {
+  const panelOf = () => rail()?.parentElement
+
+  it("says it is the scroller, so the rail knows what to move", () => {
+    menuAt(docsOrder[docsOrder.length - 1]?.href ?? "")
+    press(toggle())
+
+    const panel = panelOf()
+
+    expect(panel).not.toBeNull()
+
+    for (const name of Object.keys(railScrollerAttr)) {
+      expect(panel?.getAttribute(name), name).not.toBeNull()
+    }
+
+    expect(panel?.closest(RAIL_SCROLLER_SELECTOR)).toBe(panel)
+  })
+
+  it("is bounded and scrolls, rather than stretching the page", () => {
+    menuAt(docsOrder[docsOrder.length - 1]?.href ?? "")
+    press(toggle())
+
+    const panel = panelOf()
+
+    expect(panel?.className).toContain("overflow-y-auto")
+    expect(panel?.className).toMatch(/max-h-\[\d+vh\]/u)
+  })
+
+  it("takes the panel away again when the menu closes", () => {
+    menuAt(docsOrder[0]?.href ?? "")
+    press(toggle())
+    press(toggle())
+
+    expect(document.querySelectorAll(RAIL_SCROLLER_SELECTOR)).toHaveLength(0)
   })
 })

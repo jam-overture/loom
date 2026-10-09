@@ -19,6 +19,7 @@ import { spotlightsAcross, spotlitChanges, type Spotlight, type SpotlitChange } 
 import { thePageItself, type PageItself } from "./the-page-itself"
 import { putsSomethingBack } from "./undo"
 import { whatElseToAsk, type WhatElse } from "./what-else"
+import { asksThatPutItBack, type AskVerdicts } from "./what-it-will-say"
 
 /**
  * Everything the rail says about the page beside it, worked out in one place a
@@ -131,18 +132,6 @@ export type RailView<TPart> = {
   }
   /** Per record, the readings a card cannot work out for itself. */
   readonly readings: ReadonlyMap<string, RailReading<TPart>>
-  /**
-   * What the rail has left to say once a change the visitor pressed for is on
-   * the page — **the end of the sixty seconds**, and absent every other time.
-   *
-   * It is here rather than in the markup for the reason the other three
-   * readings are: the condition is three answers this file has already worked
-   * out (`landing`, `waiting`, `available`), and a condition written at the
-   * call site is a condition nothing can check, because `page.tsx` is an
-   * `async` Server Component no `vitest` run can mount. `what-else.ts` has the
-   * measurement of the screen it exists for.
-   */
-  readonly whatElse?: WhatElse
   /** The one change the page is currently about — the marks, the legend and the way back are all about this one. */
   readonly about?: SpotlitChange
   /**
@@ -421,17 +410,6 @@ export const whatTheRailShows = <TPart>({
   const askPart = nominated === undefined ? undefined : partTheAskWouldTouch(tree, ids, nominated)
 
   /**
-   * And the ending, from the three readings above rather than from the records
-   * a fourth time. `what-else.ts` argues each of its three silences and
-   * carries the measurement of the rail at the moment it speaks.
-   */
-  const whatElse = whatElseToAsk({
-    available,
-    ...(landing === undefined ? {} : { landing: landing.recordId }),
-    ...(waiting === undefined ? {} : { waiting }),
-  })
-
-  /**
    * And the window on the arrival screen, which is the only reading here taken
    * from the tree and the *absence* of everything else.
    *
@@ -458,7 +436,6 @@ export const whatTheRailShows = <TPart>({
           },
         }),
     readings,
-    ...(whatElse === undefined ? {} : { whatElse }),
     ...(itself === undefined ? {} : { pageItself: itself }),
     ...(about === undefined ? {} : { about }),
     /**
@@ -469,3 +446,35 @@ export const whatTheRailShows = <TPart>({
     spotlightToken: `${tree.revision}:${about?.record.recordId ?? ""}`,
   }
 }
+
+/**
+ * What the rail has left to say once a change the visitor pressed for is on the
+ * page — **the end of the sixty seconds**, and absent every other time.
+ *
+ * It is a reading of the view rather than a field on it, and that is this run's
+ * one structural change. The condition was three answers `whatTheRailShows`
+ * had already worked out (`landing`, `waiting`, `available`) and it is now
+ * four: an ask that would only put the visitor's last change back is not a
+ * change they can ask for next, and whether a press does that is read off the
+ * Gate's own answer to it (`what-it-will-say.ts`), which is computed from
+ * `available` and therefore cannot be computed before it.
+ *
+ * **Still in `_lib` and still not in the markup**, which is the property that
+ * mattered: `page.tsx` is an `async` Server Component no `vitest` run can
+ * mount, so a condition written at the call site is a condition nothing can
+ * check. What the call site does is hand this function two values it already
+ * holds, in the order it already computes them.
+ *
+ * `what-else.ts` argues each of its silences and carries the measurement of the
+ * rail at the moment it speaks.
+ */
+export const theEnding = <TPart,>(
+  view: Pick<RailView<TPart>, "available" | "landing" | "waiting">,
+  says: AskVerdicts
+): WhatElse | undefined =>
+  whatElseToAsk({
+    available: view.available,
+    ...(view.landing === undefined ? {} : { landing: view.landing }),
+    ...(view.waiting === undefined ? {} : { waiting: view.waiting }),
+    putsBack: asksThatPutItBack(says),
+  })

@@ -1762,6 +1762,59 @@ is why two rules at different levels sit on the same side of it.
 
 ---
 
+## Set AN — two days after lesson 35
+
+Interleaved with 15, 24, 25, 27, 28, 29 and 33. Heavy on 29, because this seam is
+that lesson's instrument asked a question it never had to ask; and on 28, because
+the rule at the centre of it is a second copy of a fact about an instrument,
+written down in another party's file.
+
+1. One probe reduces eight renders with `every` and another reduces the same eight
+   with `some`. Say which verdict each belongs to, and then justify the pair from
+   what each fact is *used for* rather than from how strict either is. *(29, 35)*
+2. A primitive places its declared region in exactly one of the eight
+   configurations. Say what the audit reports about the region and what it reports
+   about the portal's handle, and then say which of those two answers would change
+   if the probe learned to try a ninth configuration. *(35)*
+3. State the direction a growing population can move each of the two verdicts, and
+   derive both in one sentence each. Then say which of the two directions is the
+   reason a change to the harness in September did not oblige anybody to re-read a
+   hundred primitives. *(35)*
+4. `tone: z.enum([...])` and `label: z.string().optional()` are both props a schema
+   accepts. Say how many configurations each contributes to the probe, and then say
+   which of two silences the verdict about a `label`-conditional primitive is —
+   using the rule lesson 24 gives for how many ways an answer needs to be able to
+   say it cannot tell you. *(24, 35)*
+5. Name the one thing on a render context the probe refuses to invent, and give
+   both halves of why an invented one would be worthless. Then say why the
+   declaration that gives the probe the *name* an answer arrives under does not
+   help. *(18, 35)*
+6. 0180's clause reads as a design principle in the file where it binds. Say what
+   it actually was, and then say what property of it meant that no test anywhere
+   went red on the day its reason stopped being true. *(35)*
+7. A registration could declare that a region is placed on a condition the probe
+   cannot reach. Give the one-sentence reason that was rejected for, and then say
+   what an author does instead and what makes that strictly stronger rather than
+   merely different. *(35)*
+8. State the general failure in one sentence beginning *an instrument that cannot
+   reach a state*, and then name which of the three sources of a second copy
+   0180's clause is — and who got the bill. *(28, 35)*
+9. A primitive's registration is a promise with two halves checked by two
+   parties. Say which half the probe is, and then say what the probe can answer
+   about a component that the registry provably cannot, and why. *(15, 35)*
+10. Lesson 27 declines to compute a number the whole design was built to deliver,
+    and lesson 35 declines to report a proportion where a boolean is reported.
+    Give the reason both declinings share, in a sentence about denominators or
+    about who is making the claim. *(27, 35)*
+
+Question 1 is the point of the set and question 2 is where a confident wrong answer
+is most likely — the two halves look like one question about one primitive, and they
+are two questions about two different kinds of fact. Question 6 is the one to
+answer slowly: the property being asked about is not a property of the rule's
+content.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1815,3 +1868,4 @@ renders this file rather than restating it.
 | AK | 2 days after L32 | | |
 | AL | 2 days after L33 | | |
 | AM | 2 days after L34 | | |
+| AN | 2 days after L35 | | |

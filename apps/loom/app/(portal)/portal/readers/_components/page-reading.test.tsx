@@ -7,6 +7,7 @@ import type { StoredTally } from "@jam-overture/loom/signals"
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 import type { PartName } from "@/app/(portal)/_lib/part-name"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
+import type { PageArrivals } from "@/app/(portal)/_lib/arrivals"
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
 import type { PagePacing } from "@/app/(portal)/_lib/pacing"
 import type { PageStopping } from "@/app/(portal)/_lib/stopping"
@@ -62,7 +63,8 @@ const cardFor = (
   live?: number,
   skipping?: PageSkipping,
   stopping?: PageStopping,
-  pacing?: PagePacing
+  pacing?: PagePacing,
+  arrivals?: PageArrivals
 ) => {
   const reading = pageReadings(revisionReadings(tallies, names))[0]!
 
@@ -88,6 +90,12 @@ const cardFor = (
        * people who got to a part had time to read its words.
        */
       pacing={pacing}
+      /*
+       * And absent in the same cases again: how many people there were to have
+       * done any of it. It is the denominator the other three divide by, and a
+       * card without the join has none of the four.
+       */
+      arrivals={arrivals}
     />
   )
 }
@@ -122,6 +130,45 @@ const BUSY: readonly StoredTally[] = [
 ]
 
 /**
+ * How many people there were, as the card is handed it.
+ *
+ * Written as a literal rather than joined from a page, because what is being
+ * pinned here is what the **card** does with the reading — which line it draws
+ * and which it drops — and `_lib/arrivals.test.ts` is where the arithmetic
+ * that produces one is held. Thirty-two readers against forty counted visits
+ * is a deployment with a straddle in it, which is the ordinary case.
+ */
+const ARRIVED: PageArrivals = {
+  treeId,
+  revision: 2,
+  arrived: 32,
+  counted: 40,
+  pending: 0,
+  drift: 8,
+  inflation: 0.25,
+  exact: false,
+  floor: 40,
+  silence: undefined,
+  parts: [],
+  fewestGotTo: {
+    nodeId: nodeIdSchema.parse("n_foot"),
+    name: names.get("n_foot")!,
+    type: primitiveTypeSchema.parse("loom.footer"),
+    depth: 1,
+    reached: 3,
+    share: 3 / 40,
+    atMost: 3 / 32,
+    readers: (3 * 32) / 40,
+    atMostReaders: 3,
+    unreconciled: false,
+  },
+  unreconciled: [],
+  foreign: 0,
+  duplicated: 0,
+  countedAt: "2026-10-07T09:12:00.000Z",
+}
+
+/**
  * The rule the whole surface is built on, asserted rather than trusted: **plain
  * language is the default, the technical record is one click away, and nothing
  * is ever removed.** Every counter the rollup keeps is still rendered; the test
@@ -149,6 +196,44 @@ describe("PageReadingCard", () => {
     expect(container.textContent).toContain("fewest got as far as")
     expect(container.textContent).toContain("the footer “Built with Loom”")
     expect(container.textContent).toContain("3 of the 40 visits")
+  })
+
+  /**
+   * **One part, one figure, one denominator.**
+   *
+   * The same sentence in the same position, divided by the readers who arrived
+   * instead of by the largest visit count a single row of the window reports.
+   * The first photograph of this branch had the card saying both — *3 of the 40
+   * visits* in this line and *about 2 of the 32 readers* in a section three
+   * lines above it — and that is worse than either sentence on its own.
+   */
+  it("names the part fewest people got to in people, where it knows how many there were", () => {
+    const { container } = cardFor(BUSY, undefined, undefined, undefined, undefined, ARRIVED)
+
+    expect(container.textContent).toContain("Of those 32, about 2 readers got as far as")
+    expect(container.textContent).toContain("the footer “Built with Loom”")
+    expect(container.textContent).not.toContain("3 of the 40 visits")
+  })
+
+  /**
+   * And the section that establishes the denominator is **above** the line that
+   * uses it. A correction a reader reaches after the conclusion is a correction
+   * that arrives too late, which is the whole argument for this reading's
+   * position on the card.
+   */
+  it("says how many people there were before any figure drawn against them", () => {
+    const { container } = cardFor(BUSY, undefined, undefined, undefined, undefined, ARRIVED)
+    const said = container.textContent ?? ""
+
+    expect(said).toContain("32 readers arrived at version 2 of this page")
+    expect(said.indexOf("32 readers arrived")).toBeLessThan(said.indexOf("Of those 32, about 2"))
+  })
+
+  it("draws nothing of it on a card that was handed no arrival count", () => {
+    const said = cardFor(BUSY).container.textContent ?? ""
+
+    expect(said).not.toContain("How many people were there?")
+    expect(said).toContain("3 of the 40 visits")
   })
 
   /**

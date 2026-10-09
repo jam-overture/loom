@@ -5,6 +5,7 @@ import { SiteFooter } from "@/app/(docs)/_components/site-footer"
 import { ThemeScript } from "@/app/(docs)/_components/theme-script"
 import { ThemeToggle } from "@/app/(docs)/_components/theme-toggle"
 import { Wordmark } from "@/app/(docs)/_components/wordmark"
+import { ARTICLE_HREF } from "@/app/(docs)/_lib/chrome"
 import { REPOSITORY_URL } from "@/app/(docs)/_lib/surfaces"
 import { SITE_BAR, THEME_COLOR_NAME } from "@/app/(docs)/_lib/theme"
 
@@ -48,7 +49,7 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
        * a keyboard reader does on each navigation is tab past them again.
        */}
       <a
-        href="#article"
+        href={ARTICLE_HREF}
         className="bg-surface-page text-ink border-edge sr-only rounded-md border px-3 py-2 focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
       >
         skip to the page

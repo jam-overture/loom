@@ -17,6 +17,7 @@
  * as the store and the journal do it.
  */
 
+export * from "./action.js"
 export * from "./broadcast.js"
 export * from "./change.js"
 export * from "./collect.js"
@@ -38,5 +39,6 @@ export * from "./readable.js"
 export * from "./region.js"
 export * from "./rollup.js"
 export * from "./signal.js"
+export * from "./silences.js"
 export * from "./tally.js"
 export * from "./view.js"

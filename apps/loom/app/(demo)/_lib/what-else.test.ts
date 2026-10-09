@@ -86,3 +86,66 @@ describe("whatElseToAsk", () => {
     expect(WHAT_ELSE_SENTENCE).not.toMatch(/polic|revision|stakes|rule|proposal/i)
   })
 })
+
+/**
+ * The count, once *more changes to ask for* stopped meaning *every row left on
+ * the panel*.
+ *
+ * A toggle is applicable again the moment it has been applied, so the list
+ * after a one-press change is the same list it was on arrival. Counting it
+ * whole told a visitor who had just made one of five changes that there were
+ * five more — literally true of the panel, and read as *nothing I did counted*.
+ */
+describe("the way back is not a way on", () => {
+  it("leaves out an ask that would only put the last change back", () => {
+    const end = whatElseToAsk({
+      available: ASKS,
+      landing: "rec-1",
+      putsBack: new Set<DemoPresetId>(["palette"]),
+    })
+
+    expect(end?.count).toBe(3)
+    expect(end?.label).toBe("3 more changes to ask for")
+  })
+
+  /**
+   * And the sentence is untouched by the discount. It is a caption on the card
+   * above — *that is the whole loop* — rather than a claim about the list, so a
+   * row being discounted from the count must not take the claim with it.
+   */
+  it("still says what the loop proved", () => {
+    expect(
+      whatElseToAsk({
+        available: ASKS,
+        landing: "rec-1",
+        putsBack: new Set<DemoPresetId>(["palette"]),
+      })?.sentence
+    ).toBe(WHAT_ELSE_SENTENCE)
+  })
+
+  /**
+   * The silence, which is this module's own rule applied to the new reading
+   * rather than a new one: a link to an empty panel is the silently-dead
+   * control this whole demonstration argues against, and a panel offering
+   * nothing but the way back is empty of ways *on*. The visitor is not left
+   * without the press — **Put it back** is on the card this row captions, and
+   * the row itself is still in the panel saying what it does.
+   */
+  it("says nothing when the only ask left would put the last change back", () => {
+    expect(
+      whatElseToAsk({
+        available: ["palette"],
+        landing: "rec-1",
+        putsBack: new Set<DemoPresetId>(["palette"]),
+      })
+    ).toBeUndefined()
+  })
+
+  /**
+   * And no set at all is the arrival-screen answer rather than a missing check:
+   * nothing has happened, so nothing can be put back.
+   */
+  it("counts every ask when nothing has been put back", () => {
+    expect(whatElseToAsk({ available: ASKS, landing: "rec-1" })?.count).toBe(ASKS.length)
+  })
+})
