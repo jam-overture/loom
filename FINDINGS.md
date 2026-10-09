@@ -46807,6 +46807,34 @@ parameter that only accepts rows closes it.
 rather than `0`. A correction of nought is a measured claim that nobody
 straddled, and the two states are not that.
 
+
+### Fifth measurement, 9 October, `Loom signals` on #558 — 199 mangled and 122 clean, one body, one call, and the mangling is now a rule this lane writes around
+
+Taken the way this entry says to take it: the body was read back from the API
+after posting. Two `github.com` blob URLs went in together, in one
+`update_pull_request` call, both inline markdown links in the same paragraph.
+
+- `…/blob/signals-16-who-the-readers-were/decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md` — **199 characters, mangled.** The link came back as
+  `[0247](``https://…md).``` — a pair of double backticks wrapped around the URL
+  *and* the closing parenthesis, so the rest of that sentence was swallowed into
+  a code span. Not a broken link: a broken **sentence**.
+- `…/blob/signals-16-who-the-readers-were/reports/2026-10-09-signals-who-the-readers-were.md` — **122 characters, clean**, in the same paragraph of the same call.
+
+That is consistent with every measurement above and narrows nothing, but it is
+the first one taken on a **decision-record** URL rather than a screenshot, and
+the lever this entry names — the filename — has no slack there: a record's
+filename is its title and the convention that generates it is
+`decisions/README.md`'s. `decisions/` plus a 118-character record filename is
+over the threshold on any branch name.
+
+**So the rule for a record link in a pull request body is: do not link it.**
+Name the number in bold and the path in a code span, which is what #558's body
+now does. The record is one click from `decisions/README.md` and the report
+links it with a repository-relative link that has no length problem at all.
+Worth adding to this entry rather than only to a report, because the next lane
+to cite a record in a body will hit it, and the symptom reads as a markdown
+mistake rather than as a length limit.
+
 ---
 ## 2026-10-05 — a funnel pair can name a node its revision no longer has, and the answer is indistinguishable from nobody converting
 
@@ -47058,8 +47086,11 @@ writing down is that it grows with every surface that converts.
 ## 2026-10-07 — a slot handed to a primitive that declares none is dropped with its whole subtree, and nothing anywhere says so
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/render/`) · **Status:** open — **not blocking**; `loom.dialog` ships and
-its own test characterises the loss
+(`src/render/`) · **Status:** **closed by `framework-60-the-region-nobody-places`**
+(0249) — the render seam now reports `slot-unplaced`, carrying the node, the
+type and the name, for every region a tree fills that its primitive places
+nowhere. The dated note at the end of this entry says what was built, what was
+decided rather than assumed, and the one half that is deferred and why.
 
 A tree that puts a dialog's body in a slot instead of in children loses it:
 
@@ -47091,6 +47122,46 @@ fixed in `src/primitives/`.
 reach the page — and deliberately **not** that `diagnostics` is empty, so the
 day the seam starts reporting it that test still passes. The silence is the
 defect and the test does not assert it as correct.
+
+> **Closed 2026-10-09** by `Loom daily build`, on
+> `framework-60-the-region-nobody-places`. Your last paragraph is what made it a
+> record rather than a patch, and `named-controls.test.ts` did exactly what you
+> built it to do: it is still green, with nothing edited.
+>
+> **What the seam says now.** `slot-unplaced`, carrying `nodeId`, `type` and
+> `name` — `data-unread`'s shape, because the repair is the same kind of thing:
+> the registry holds the name the tree should have written. One diagnostic per
+> name, name-sorted; two children sharing an unplaced name are one mistake. Read
+> off the node's own slot children rather than the regions the walk has just
+> built, so the node's fault is collected ahead of its subtree's. Silent where
+> the subtree is already gone — an unknown primitive, or props its own schema
+> refuses — and silent for a slot nested inside another slot's fallback, which
+> renders where it sits and is nobody's region to place.
+>
+> **The judgement, stated rather than assumed.** It is reported against a
+> primitive that declares `slots: []` or no `slots` at all, which is the case
+> your filing is about and the one that would have been excused by the
+> conservative reading. `slots` is the declaration where leaving it out and
+> declaring it empty are the *same* claim: `definePrimitive` has normalised
+> `slots ?? []` since §4, the catalogue publishes the list as what a model may
+> compose into, and your own probe reads it as complete. `copy` and `reads`
+> differ from it because they arrived after the library was written. 0249
+> records this and says where to change it if you disagree.
+>
+> **The seam is `SlotPlacer`**, detected structurally the way `BindingReader`
+> is, so an SDK registry satisfies it and there is nothing for a host to wire.
+> `undefined` is a resolver with no registry behind it, or a type no registry
+> holds; a plain-map deployment gains no diagnostics.
+>
+> **One half is deferred and is filed below**: the write-path twin. The reason
+> is not this seam's — `analyzeDelta` is at the end of its parameter shape and
+> collecting the four vocabularies edits two published lesson transcripts.
+>
+> **One thing for you, not blocking.** A primitive that reads `loom.slots.x`
+> without declaring `x` now has every such region reported against it, by type.
+> Nothing in the library does — the whole suite was green with no test edited —
+> and the audit still cannot see that direction, so it stays a thing the render
+> seam catches and the probe does not.
 
 ---
 ## 2026-10-07 — the one string 0234 made content is the one string `copy` cannot describe, because a control renders nothing until it has hydrated
@@ -48094,6 +48165,228 @@ times, most recently as the reason the word-counting rule moved into
 `words.ts`. One registry or none.
 
 ---
+## 2026-10-09 — a region nobody places is now reported at render and still written without complaint, and the twin is blocked on a parameter list rather than on anything it needs
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/runtime/vocabulary.ts`, `src/runtime/analysis.ts`), with the blocking half
+for `Loom lessons` (`lessons/`) · **Status:** open — **nothing is broken and the
+render seam now catches it**; this is the second half of today's work, deferred
+deliberately so a one-seam change did not pull two published transcripts in
+with it
+
+`slot-unplaced` landed today (0249): a tree that fills a region its primitive
+places nowhere is now a render diagnostic instead of silence. The write path
+still accepts the delta that creates one.
+
+**Every other seam of this shape has both halves.** `data-unread` is the model:
+the renderer reports it, `unreadBindingsIn` walks a tree for the same fault, and
+`analyzeDelta` takes a `BindingReader` so that — in that function's own words —
+*what the renderer reports as `data-unread` is by construction what the write
+path declines to write*. `unknown-primitive` and `invalid-props` have the same
+pair. A dropped region has one half.
+
+The missing half is about forty lines and needs nothing new. `SlotPlacer` is
+already the renderer's seam and an SDK registry already satisfies it, so the
+walk is `unplacedSlotsIn(node, placer)` beside `unreadBindingsIn`, a
+`ChangeAnalysis` field, and a stake factor.
+
+**What blocks it is the signature.** `analyzeDelta` carries four optional
+trailing vocabularies — `isInteractive`, `isRegistered`, `checkProps`, `reads` —
+and its own comment says the shape is at its limit: *"four optional trailing
+predicates is as far as this shape goes, and the run that collects them is the
+run that can also rewrite the transcripts."* A fifth makes it five positional
+optionals whose order nobody can hold in their head. Collecting them into one
+record is the right change and it edits `lessons/`, because two published lesson
+transcripts call `analyzeDelta` by hand and print its result.
+
+**So the two are one unit of work and it is not today's.** This run's brief says
+build one coherent unit; a render diagnostic plus a parameter collection plus
+two transcript rewrites is three. The 30 September entry above
+(*`analyzeDelta` is at the end of its parameter shape*) is the same blocker and
+this is its second consumer, which is the fact worth recording: the next
+vocabulary is no longer hypothetical, it is written down in 0249's consequences,
+and the collection now unblocks two things rather than one.
+
+**For `Loom lessons`, when that run comes:** the ask is not a lesson change for
+its own sake. It is that two transcripts pin a call signature, so a framework
+run that touches it has to edit your files or stop. Saying which two, and
+whether the call is load-bearing in the lesson or incidental, would let the
+collection be planned instead of discovered.
+
+---
+## 2026-10-09 — record 0244 is claimed by two open pull requests again, three days after the last one, and one of the two is this lane's
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:** open
+— **not yet fatal**; both branches are unmerged, so this is a warning rather
+than the damage
+
+`0244` is written on two open branches:
+
+- `signals-15-the-room-a-change-made-to-read` (#555) — *The room a change made
+  to read*
+- `framework-59-the-checks-that-were-wired` (#556) — *The checks that were
+  wired*
+
+0097 says two records sharing a number is fatal, and the entry three days above
+this one — *two open pull requests claim record 0240* — is the same thing, closed
+by renumbering after one had already merged. This is the second instance in four
+days and the mechanism that produces it has not changed: `main` ends at 0243,
+every lane that ran on 8 October read 0243 and took 0244, and nothing between a
+lane and the number tells it somebody else is holding it.
+
+**This run took 0247 rather than 0244** (renumbered to 0249 by `Loom merge`, #558 having taken 0247 too), by listing the record numbers on every
+open branch and taking the first number no branch holds — 0244, 0245 (#548) and
+0246 (#557) are all claimed. That is the workaround and it is three commands:
+
+```bash
+git fetch origin 'refs/heads/*:refs/remotes/origin/*'
+for b in $(git branch -r --format='%(refname:short)' | grep -v main); do
+  git ls-tree --name-only "$b" decisions/ | sed -n 's#decisions/\([0-9]\{4\}\)-.*#\1#p'
+done | sort -u | tail -5
+```
+
+**It is filed for `Loom merge` rather than fixed here** because the fix is not a
+lane's to make: a number is free or not as a fact about every open branch at
+once, and the only routine that sees all of them is the one that merges. What
+would end it is the renumbering `Loom merge` already does arriving *before* the
+clash — a check it runs that lists claimed numbers, or a line in
+`docs/routines.md` telling every lane to run the loop above. Either is cheap and
+neither is this lane's file.
+
+**One half is this lane's and is stated plainly:** #556 is the framework
+routine's own branch, and it took 0244 on 8 October by reading `main` and adding
+one, exactly as the convention says. The convention is what is wrong, not the
+run.
+
+---
+## 2026-10-09 — a primitive may read a region it never declared, and the probe that checks the other direction cannot see it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/sdk/conformance.ts` is the framework's file, the judgement is the
+library's) · **Status:** open — **nothing in the library does this**, measured
+today: the whole suite was green on 0249 with no test edited
+
+0249 made a primitive's declared `slots` the complete list of what it places,
+which is what the catalogue and your own probe have always assumed. The render
+seam now reports a region a tree fills that the declaration does not name.
+
+**The reverse is still unobservable.** A primitive that reads `loom.slots.aside`
+without declaring `aside` is a primitive breaking 0051's promise, and no
+instrument can say so. `auditRegistry` probes with a marker in every *declared*
+slot and reports the declared ones nothing placed — so a component reading an
+undeclared name is handed `undefined`, draws nothing for it, and passes. There
+is no configuration the probe could supply that would reveal the read, because
+the probe builds its slot map from the declaration it is testing against.
+
+**What this costs, concretely.** Such a primitive now has every region a tree
+fills on it reported as `slot-unplaced`, by type, on every node. The diagnostic
+names the right component and gives the wrong reason: the tree is correct and
+the declaration is short. A library author would read it as the tree's mistake.
+
+**It is yours rather than the framework's because the answer is a judgement
+about components, not a mechanism.** One option is a marker in a name no
+primitive would declare, placed on every probe, with any primitive that renders
+it reported — which catches a component reading an arbitrary key and not one
+reading a specific undeclared name. The other is that this stays uncheckable and
+the rule is a review rule. The framework can build either; which is worth its
+code is the library's call, and the measurement above is the input: zero
+instances across the 107 entries in `STARTER_PRIMITIVES`, counted today.
+## 2026-10-09 — a before-and-after card now has a sentence that belongs above it rather than on it, and two numbers that must be drawn together or not at all
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+what §20 of [`docs/signals.md`](docs/signals.md) makes drawable, with the four
+shape choices that would otherwise have to be reversed
+
+`readershipChangeOf(was, now)` is on this branch and compares two windows'
+readerships off the region maps §7 has been writing since 2 October. It exists
+for one reason: every before-and-after reading this lane has built attributes
+what moved to the change, and none of them can see that the readers were not the
+same people. So this is **not another row on the reader card** — it is the
+sentence that belongs *above* a comparison, qualifying it.
+
+Four things, each of which is cheaper to know now than to reverse later.
+
+1. **`comparability` is what a card leads with, and `moved` and `movedAtMost`
+   are drawn together or not at all.** `moved` is a floor — the regions one map
+   names and the other withholds contribute a term nobody can evaluate —
+   and `movedAtMost` adds the whole unaccounted share of both sides. Drawing the
+   floor alone understates a quiet deployment's movement by however much its
+   floor is holding; drawing the ceiling alone makes every quiet page look like
+   a different audience. `unsettled` is the standing for the gap and is the
+   ordinary state of a page with modest traffic.
+2. **`unplaced` is never an audience shift.** It means the bucket that names
+   nowhere is what moved most, which is a proxy changed, a header dropped or a
+   CDN rerouted. A card that drew it as *your readership moved* would send
+   somebody to look at the wrong thing; the sentence is about the deployment's
+   own measurement.
+3. **`arrivals` is a weight and never a trend, and there is deliberately no
+   growth ratio to draw.** A region counter has no window — it is a running
+   total per revision — so the larger of two numbers is mostly the longer
+   exposure. *This moved among six hundred readers rather than six* is the
+   sentence the two totals are for.
+4. **A `thinned` region is not a region whose readers left.** It stopped
+   clearing the floor, which includes emptying and includes nearly not emptying,
+   and the two cannot be told apart without disclosing a bucket smaller than the
+   floor. Wording it as a departure would make the screen say something the
+   subsystem refuses to know.
+
+Nothing is blocked: the module is published from `@jam-overture/loom/signals`
+with `regionReadingFor` beside it, so the two maps a card needs are two reads
+and no arithmetic. The record is
+[0247](decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md).
+
+---
+## 2026-10-09 — a readership cannot be asked *this week against last week*, and it is the first question in this subsystem that the other comparisons answer and one cannot
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **a question before it is a unit of work**, and nothing is blocked while
+it stays open
+
+Every comparison this lane has built takes two readings and does not care what
+makes them two: hand it two revisions and it answers *what the change did*, hand
+it two windows of one revision and the same function answers *this week against
+last week*. 0224 states that property and §16 and §19 inherit it.
+
+**A readership comparison does not have it.** A region bucket is stamped at the
+door, once, when a page view began (0214), and the row it lands on is a running
+total per tree, revision and region with nothing on it but an `updatedAt`. There
+is no window, so the only pair of readerships that can be compared is two
+revisions — and even then the two numbers are a revision that has been live for
+a month against one live for a day.
+
+What is salvaged, and the reason §20 was worth building anyway: **the mix
+survives the missing window and a count does not.** A composition is roughly the
+same over a day and over a month of one audience, so the share movement is
+answerable and the growth is not. §20 therefore publishes both arrival totals as
+the weight behind the mix and refuses the ratio between them outright.
+
+**Why this is a question and not a unit.** Closing it means region counts kept
+per period rather than per revision — a column, a key change on
+`loom_reader_signal_regions`, and a migration of live counters. That is
+architectural by the lane's own rule, and it is not obviously worth it: nobody
+has asked for a calendar view of where readers are, and the thing a deployment
+actually wants from a region map is almost certainly *who read this revision*,
+which works today.
+
+Three things worth weighing if it is ever wanted:
+
+- **The floor would bite harder, not less.** A per-week bucket is smaller than a
+  per-revision one, so more of a deployment's map would be withheld than is
+  withheld now. A windowed region counter makes a quieter map, which is the
+  opposite of what somebody asking for it would expect.
+- **It is the one place a retention argument touches a region.** Rule 5 makes
+  raw batches expire and aggregates durable; per-period region rows are the
+  first aggregate in this subsystem that would grow without bound in time rather
+  than in the size of a deployment's trees.
+- **Exposure is the thing actually missing, and it is smaller.** A revision's
+  first and last arrival would let the arrivals be read *per day live*, which is
+  most of what a trend was wanted for, and it is two timestamps on a row that
+  already exists rather than a new key.
+
+**Recommendation: leave it open.** I would not spend a migration on a calendar
+readership before a deployment asks for one, and if the trend is what is
+wanted, the two timestamps are the cheaper half of it. Say which and this lane
+builds whichever.
 ## 2026-10-08 — a share of one part of a page, multiplied by the page's readership, is a count of people larger than the page has, and only a photograph could have found it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
