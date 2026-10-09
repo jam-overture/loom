@@ -864,13 +864,13 @@ describe("E", () => {
   primitives that read a binding: loom.trend, loom.tally, loom.voices, loom.feed, loom.plate
   notDecorated: (none)
   notProbeable: (none)
-  unplacedSlots: (none)
+  unplacedSlots: loom.trend: unavailable; loom.voices: unavailable; loom.feed: unavailable; loom.plate: unavailable
   unplacedBehaviours: (none)
-  loom.trend: slots empty, probed in 4 states, 0 of them answered
+  loom.trend: slots empty unavailable, probed in 4 states, 0 of them answered
   loom.tally: slots (none), probed in 1 state, 0 of them answered
-  loom.voices: slots empty, probed in 11 states, 0 of them answered
-  loom.feed: slots empty, probed in 7 states, 0 of them answered
-  loom.plate: slots empty, probed in 13 states, 0 of them answered
+  loom.voices: slots empty unavailable, probed in 11 states, 0 of them answered
+  loom.feed: slots empty unavailable, probed in 7 states, 0 of them answered
+  loom.plate: slots empty unavailable, probed in 13 states, 0 of them answered
 ```
 
 A binding is read by five of them, and the figure to stop on is the last one on
@@ -879,11 +879,34 @@ renders had an answer in it.** Every
 judgement the library's own suite makes about its bound primitives is a judgement
 about the state a page is in before anybody has connected a source.
 
-The four empty lists above are the library being correct, and the one that is
-empty *because of* this lesson's subject is `unplacedSlots`. It is empty partly
-because the components are right and partly because no bound primitive in this
-library declares a region the probe cannot reach — which is the rule, still
-holding, two weeks after the record that discharged it.
+Three of the four verdict lists above are the library being correct. The fourth
+is `unplacedSlots`, and **it stopped being empty on 9 October** — which is this
+lesson's subject arriving in its own transcript.
+
+It had been empty for two reasons, and the sentence that used to stand here
+named both: *"partly because the components are right and partly because no
+bound primitive in this library declares a region the probe cannot reach — which
+is the rule, still holding, two weeks after the record that discharged it."* The
+second half is what moved.
+[0246](../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md)
+gave `loom.feed`, `loom.trend`, `loom.voices` and `loom.plate` a region they
+draw only when their source did not answer. The components are still right. The
+audit above is still called the way E calls it — with one argument — so it never
+reaches the state that renders those regions, and it reports four declarations
+it did not see rendered.
+
+Which is the whole lesson, standing in its own output: **an instrument's reach
+is a property of how it was called, and a verdict is a claim about the states
+that were tried.** Zero was never a fact about the library; it was a fact about
+a library whose regions all happened to be reachable without an answer, and it
+read as a fact about the library for two weeks. Hand `auditRegistry` the
+`answers` 0185 built and the list is empty again —
+`src/primitives/library.test.ts` passes them, and asserts both this four and
+that nothing.
+
+> *The transcript and this passage were corrected by `Loom primitives` to keep
+> the exercise true. The lesson's own argument is better served than it was, and
+> re-teaching it around this is its author's — filed.*
 
 `loom.tally` is worth a glance: probed in **one** state, because its schema
 closes over nothing. One render, one claim, and the word *every* and the word
