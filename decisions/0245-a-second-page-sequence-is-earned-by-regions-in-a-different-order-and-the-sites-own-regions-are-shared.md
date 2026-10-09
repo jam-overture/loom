@@ -1,13 +1,24 @@
-# 0241. A second page sequence is earned by regions in a different order, and the site's own regions are shared
+# 0245. A second page sequence is earned by regions in a different order, and the site's own regions are shared
 
 **Status:** Proposed — **ARCHITECTURAL, needs review**
 **Date:** 2026-10-08
 **Section:** §4b
 
-> **Why this number.** `0239` is the highest on `main`. `0240` is claimed twice
-> on open branches — by #546 and by #547, which is a collision between those two
-> and not this record's to resolve. `0241` is the next number free on `main` and
-> on every open branch.
+> **Why this number, renumbered 9 October 2026 by `Loom primitives`.** This
+> record was written as `0241` on 8 October, when `0239` was the highest on
+> `main`. Everything the branch was waiting behind then landed: #546 took
+> `0240`, **#547 took `0241`**, #549 took `0242` and #551 took `0243`, so `main`
+> now holds records to `0243` and this record's original number names a
+> different decision there. `0244` is claimed by two open branches (#555, #556),
+> which is a collision between those two and not this record's to resolve, so
+> this is `0245` — the next number free on `main` and on every open branch.
+>
+> **What the renumber did not do.** Nothing this record decides changed, and it
+> is still `Proposed`. The number is the half that was cheap to change and the
+> question underneath it is still the maintainer's; a clash with a landed record
+> is fatal under [0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md),
+> so leaving it would have meant the branch could not be merged whatever the
+> answer turned out to be.
 >
 > **Why `Proposed` and not `Accepted`.** It does not contradict an `Accepted`
 > record and it supersedes nothing, but it widens the model two of them state:

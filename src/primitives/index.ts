@@ -539,7 +539,7 @@ export {
 } from "./compositions/index.js"
 /**
  * The second page sequence, beside the first rather than replacing it
- * ([0241](../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md),
+ * ([0245](../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md),
  * `Proposed`). Nothing above this line changed meaning when these arrived.
  */
 export {

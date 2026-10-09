@@ -202,7 +202,7 @@ export type Composition = {
  * insertion point and have never read `part` — where a band goes *in a page* is
  * a fact about a catalogue, not about the one `insert` that lands it. So both
  * take this rather than {@link Composition}, and a band of the document sequence
- * ([0241](../../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md))
+ * ([0245](../../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md))
  * goes through the same Gate, the same policy and the same log as every other
  * without a cast and without a second channel into the tree.
  *

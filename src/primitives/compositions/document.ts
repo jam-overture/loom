@@ -13,7 +13,7 @@ import type { Composition } from "./composition.js"
  * A reference page has **no hero**. It opens with where the reader is and goes
  * straight into the text, and three of its regions have nowhere to go on a
  * landing page — which is 0171's test passed rather than argued around.
- * [0241](../../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+ * [0245](../../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
  * works all three against the twenty-two and is `Proposed`: **what is on this
  * branch does not change the meaning of one existing export**, so review can
  * answer *one phrasebook or one per page kind* either way for the cost of a

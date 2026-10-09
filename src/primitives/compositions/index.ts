@@ -355,7 +355,7 @@ export const PAGE_SEQUENCE: readonly Composition[] = COMPOSITION_PARTS.flatMap((
  *
  * **A second list rather than an addition to {@link STARTER_COMPOSITIONS}**, and
  * that is deliberate while
- * [0241](../../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+ * [0245](../../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
  * is `Proposed`. `compositions.test.ts` asserts that **every band declares a
  * part the page sequence knows**, which is the guard whose class caught the
  * duplicate-anchor defect; appending document bands to the landing phrasebook

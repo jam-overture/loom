@@ -29,7 +29,7 @@ import type { DocumentComposition } from "./document.js"
  * this lane — the other nine are the framework's asset seam (seven), a state
  * this runtime is never in (`loom.waiting-state`) and the render root
  * (`loom.page`), and
- * [0241](../../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+ * [0245](../../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
  * tabulates all nine so a later run does not re-plan against the number.
  *
  * The gap inventory had it filed as *waiting on a second page sequence*, and

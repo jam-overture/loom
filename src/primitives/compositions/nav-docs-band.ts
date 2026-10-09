@@ -10,7 +10,7 @@ import type { Composition } from "./composition.js"
  *
  * ## This band exists because a test refused the obvious shape
  *
- * [0241](../../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+ * [0245](../../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
  * was drafted saying the header and the footer both belong to the *site* and
  * are therefore shared between page kinds — the document sequence would name
  * the landing canonical and a deployment editing its header would edit it once.

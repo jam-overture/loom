@@ -33,7 +33,7 @@ import {
 /**
  * What the second page sequence has to be true of.
  *
- * [0241](../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+ * [0245](../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
  * is `Proposed`, and the thing that makes it reviewable rather than a proposal
  * on paper is that the document it describes **renders**. So this file is
  * `compositions.test.ts`' invariants asked of `DOCUMENT_SEQUENCE` — the ones
@@ -214,7 +214,7 @@ describe("the document sequence", () => {
    * **The footer is shared and the header is not, and that asymmetry is the one
    * thing on this branch a test found rather than a person.**
    *
-   * 0241 was drafted saying both belong to the site. `documents.test.ts`'
+   * 0245 was drafted saying both belong to the site. `documents.test.ts`'
    * every-link-resolves assertion refused it with `#top is linked and no band
    * declares it`: `navBand` honours
    * [0168](../../decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md)
@@ -248,12 +248,12 @@ describe("the document sequence", () => {
 
   /**
    * The document bands are deliberately **not** in the landing phrasebook while
-   * 0241 is `Proposed`, so `compositions.test.ts`' *every band declares a part
+   * 0245 is `Proposed`, so `compositions.test.ts`' *every band declares a part
    * the page sequence knows* stays green unweakened. If a later run unifies the
    * two lists this test is the one to delete, and deleting it should be a
    * decision rather than a diff that made a red build go away.
    */
-  it("keeps the document bands out of the landing phrasebook, which is what leaves 0241 open", () => {
+  it("keeps the document bands out of the landing phrasebook, which is what leaves 0245 open", () => {
     expect(STARTER_COMPOSITIONS).toHaveLength(60)
 
     for (const composition of DOCUMENT_COMPOSITIONS) {
@@ -466,7 +466,7 @@ describe("the reach the second sequence moves", () => {
    * The other nine have reasons that are not *nobody wrote a band* — seven are
    * the framework's asset seam, `loom.waiting-state` is a state this runtime is
    * never in, and `loom.page` is the render root — so they are named here as a
-   * list a later run can read, and 0241 tabulates why each one is on it.
+   * list a later run can read, and 0245 tabulates why each one is on it.
    */
   it("brings loom.link-trail into reach, which no band could do before", () => {
     expect(CATALOGUE_TYPES).not.toContain("loom.link-trail")
@@ -509,7 +509,7 @@ describe("a document band through the ordinary seam", () => {
   })
 
   /**
-   * The widening 0241 describes, exercised rather than asserted about: a
+   * The widening 0245 describes, exercised rather than asserted about: a
    * `DocumentComposition` is not assignable to `Composition`, and it goes
    * through `planComposition` anyway because planning takes a `Band` — which it
    * always could have, since it reads `build` and an insertion point and has

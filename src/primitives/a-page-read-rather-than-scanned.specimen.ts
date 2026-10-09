@@ -17,7 +17,7 @@ import { DOCUMENT_SEQUENCE } from "./compositions/index.js"
  * overflow, and still be the first thing a person sees. The same argument
  * applies to a second kind of page the first time one exists, and this is the
  * subject —
- * [0241](../../decisions/0241-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
+ * [0245](../../decisions/0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md)
  * is `Proposed`, so the thing review most needs is to be able to look at it.
  *
  * It is {@link DOCUMENT_SEQUENCE} verbatim — the design each region actually
