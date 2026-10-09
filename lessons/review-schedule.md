@@ -51,6 +51,18 @@ you rated **4 or 5** and missed is not a gap — it is a belief about how the
 system works, held confidently, that turned out to be false. Those are the ones
 that survive being contradicted once, so those are the ones that come back.
 
+And the surface now says whether one did. A re-answer is rated before the reveal
+like everything else here, so **sure again and wrong** is a thing it can count:
+rated 4 or 5 on the way back, and still not got. Those figures are kept apart
+from the ones in the table below rather than added to them, and the reason is
+this section's own instruction — *look up only the specific point, then
+re-answer* — which means a correction is always rated after you have read the
+answer. That is the easier population. Pooling it with the cold ratings would
+make your calibration improve the more corrections you did, which is the one
+thing in this document that would be worth gaming. So the second table does not
+ask whether you knew it. It asks whether the reading took, and whether you could
+tell.
+
 ---
 
 ## Set A — two days after lesson 01
