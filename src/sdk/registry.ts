@@ -27,6 +27,7 @@ import type { UnshownDeclaration, UnshownReader } from "../render/unshown.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
+import type { SlotPlacer } from "../render/slots.js"
 import { isPrimitiveRole, PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
 import type { CopyDeclarations } from "./copy.js"
@@ -162,6 +163,7 @@ export type PrimitiveRegistry = PrimitiveResolver &
   BehaviourResolver &
   FrameResolver &
   BindingReader &
+  SlotPlacer &
   UnshownReader &
   CopyDeclarations & {
     /** In registration order, so a catalogue and an audit read predictably. */
@@ -608,6 +610,16 @@ export const createPrimitiveRegistry = (
      * the primitive has said so as `unknown-primitive` and rendered nothing, so
      * there is no node whose answers anybody could have a reading of.
      */
+    /**
+     * `undefined` only for a type nobody registered, and here that is the whole
+     * of the absence: `slots` is the declaration where leaving it out and
+     * declaring it empty are the same claim, so a registered primitive that
+     * said nothing answers `[]` — it places no regions, which is what a
+     * declared slot was given to mean (0051). A walk that could not find the
+     * primitive has already said so as `unknown-primitive`.
+     */
+    slotsPlacedBy: (type: PrimitiveType): readonly SlotName[] | undefined =>
+      byType.get(type)?.slots,
     unshownBy: (type: PrimitiveType): UnshownDeclaration | undefined =>
       byType.get(type)?.unshown,
     typesWithRole: (role: PrimitiveRole): readonly PrimitiveType[] =>

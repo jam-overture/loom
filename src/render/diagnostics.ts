@@ -96,6 +96,36 @@ export type RenderDiagnostic =
     }
   | {
       /**
+       * A region the node filled under a name this primitive says it places
+       * nowhere. The content was rendered and then mounted by nothing, and it
+       * took its whole subtree with it.
+       *
+       * The sibling of `data-unread`, one node over: there a resolved answer is
+       * dropped, and here it is authored content. It is the quieter of the two
+       * and the more expensive — a binding nobody reads costs a round trip and
+       * draws an empty state, and a region nobody places removes words somebody
+       * wrote from a page that still looks finished. The loss is stated where a
+       * slot was given its meaning (0051), and until now nothing reported it.
+       *
+       * Reported per name rather than per slot child: two children sharing a
+       * name are both placed, so they are dropped by one mistake.
+       *
+       * Only ever reported when the resolver can say what a primitive places,
+       * which a registry can and a plain map cannot. Not reported for an
+       * unknown primitive, whose whole subtree is already omitted and said so.
+       *
+       * **Not** the conformance probe's *unplaced* (`sdk/conformance.ts`),
+       * which is the opposite fault: a region the primitive *declared* and no
+       * probed configuration drew. That one is addressed to whoever wrote the
+       * component; this one is addressed to whoever wrote the tree.
+       */
+      readonly code: "slot-unplaced"
+      readonly nodeId: NodeId
+      readonly type: PrimitiveType
+      readonly name: string
+    }
+  | {
+      /**
        * `loom:data` that is not a map of binding names to registered sources.
        * The node renders — its props are its own and are still valid — with no
        * data at all, which is what a primitive's unavailable path is for.
@@ -351,6 +381,8 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} names a theme and is not the root, so it was ignored — a theme is mounted once, at the render root`
     case "reserved-prop-unrecognised":
       return `node ${diagnostic.nodeId} carries "${diagnostic.key}", which is in the runtime's reserved namespace and is read by nothing, so it was dropped`
+    case "slot-unplaced":
+      return `node ${diagnostic.nodeId} fills the region "${diagnostic.name}" and "${diagnostic.type}" places no region of that name, so the content and everything under it was dropped`
     case "data-misdeclared":
       return `node ${diagnostic.nodeId} declares data that is not a map of binding names to sources, so it rendered with none — ${describeBindingError(diagnostic.error)}`
     case "data-unavailable":
