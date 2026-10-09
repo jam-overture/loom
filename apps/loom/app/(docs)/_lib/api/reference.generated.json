@@ -8,7 +8,7 @@
       "files": 96,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4727,7 +4727,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4770,10 +4770,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 58,
+      "files": 59,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5124,7 +5124,7 @@
             {
               "name": "RenderDiagnostic",
               "kind": "type",
-              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A theme below the root, which is not mounted: the variables are\n     * mounted once, at the render root, so a nested selection would be read\n     * by nothing. Reported rather than dropped, because someone meant it.\n     */\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /**\n     * A node asks for data and this render has no answers for it — neither a\n     * value nor a named reason there is none.\n     *\n     * There are two ways to arrive here and they are fixed in the same place\n     * by the same person, which is why they are one code carrying which:\n     * `absent`, a render given no resolution at all, and `unrelated`, a render\n     * given one built from a different tree's plan. The second is the one that\n     * used to say nothing: `EMPTY_DATA_RESOLUTION` answers `NO_DATA` for every\n     * node, so a composition root that reached for it as a neutral \"no data\"\n     * value got a page whose every binding vanished in silence.\n     */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n    readonly resolution: UnresolvedResolution;\n} | {\n    /**\n     * A binding the node asked under a name this primitive says it does not\n     * read. The answer arrived and nothing will ever look at it.\n     *\n     * The quietest of the three ways a binding can be wrong, and until the\n     * primitive declared its names it was the only one nothing could see: an\n     * unregistered source is refused as `no-such-source`, params the source\n     * did not declare are refused by its own schema, and a name nothing reads\n     * resolves perfectly and is then dropped on the floor. The node renders —\n     * the binding cost it nothing but a round trip — and what is reported is\n     * that somebody asked a question whose answer has no reader.\n     *\n     * Only ever reported for a primitive whose author has declared `reads`.\n     * Absence is not emptiness, so a primitive that has said nothing\n     * says nothing about the names it is given.\n     */\n    readonly code: \"data-unread\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly name: string;\n} | {\n    /**\n     * An answer arrived, under a name the primitive reads, and the primitive\n     * placed some of its rows and not the rest.\n     *\n     * The one way a binding can be wrong that is invisible from outside the\n     * component: each row has a shape only the primitive knows, so only the\n     * primitive can say that eleven of twelve stopped reading. A listing skips\n     * the row it cannot read and names it to the reader without a count\n     *. There was nowhere else for it to say the count.\n     *\n     * Both counts rather than the difference, because the sentence the author\n     * needs is *eleven of twelve*. Never the rows: a diagnostic is logged and\n     * a row is the host's data, the same line `data-unavailable` holds.\n     *\n     * Reported only when `shown < given`. An answer read whole is the ordinary\n     * case and would be one line per bound region in every log.\n     */\n    readonly code: \"data-unshown\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly name: string;\n    readonly given: number;\n    readonly shown: number;\n} | {\n    /**\n     * A primitive declares what it could not show and its declaration could\n     * not be believed: it threw, or it returned a reading that cannot describe\n     * an answer.\n     *\n     * The node renders exactly as it would have. A declaration is bookkeeping\n     * about an answer, not part of drawing it, and a page lost to bookkeeping\n     * is the worst trade avail\n…",
+              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A theme below the root, which is not mounted: the variables are\n     * mounted once, at the render root, so a nested selection would be read\n     * by nothing. Reported rather than dropped, because someone meant it.\n     */\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * A region the node filled under a name this primitive says it places\n     * nowhere. The content was rendered and then mounted by nothing, and it\n     * took its whole subtree with it.\n     *\n     * The sibling of `data-unread`, one node over: there a resolved answer is\n     * dropped, and here it is authored content. It is the quieter of the two\n     * and the more expensive — a binding nobody reads costs a round trip and\n     * draws an empty state, and a region nobody places removes words somebody\n     * wrote from a page that still looks finished. The loss is stated where a\n     * slot was given its meaning, and until now nothing reported it.\n     *\n     * Reported per name rather than per slot child: two children sharing a\n     * name are both placed, so they are dropped by one mistake.\n     *\n     * Only ever reported when the resolver can say what a primitive places,\n     * which a registry can and a plain map cannot. Not reported for an\n     * unknown primitive, whose whole subtree is already omitted and said so.\n     *\n     * **Not** the conformance probe's *unplaced* (`sdk/conformance.ts`),\n     * which is the opposite fault: a region the primitive *declared* and no\n     * probed configuration drew. That one is addressed to whoever wrote the\n     * component; this one is addressed to whoever wrote the tree.\n     */\n    readonly code: \"slot-unplaced\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly name: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /**\n     * A node asks for data and this render has no answers for it — neither a\n     * value nor a named reason there is none.\n     *\n     * There are two ways to arrive here and they are fixed in the same place\n     * by the same person, which is why they are one code carrying which:\n     * `absent`, a render given no resolution at all, and `unrelated`, a render\n     * given one built from a different tree's plan. The second is the one that\n     * used to say nothing: `EMPTY_DATA_RESOLUTION` answers `NO_DATA` for every\n     * node, so a composition root that reached for it as a neutral \"no data\"\n     * value got a page whose every binding vanished in silence.\n     */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n    readonly resolution: UnresolvedResolution;\n} | {\n    /**\n     * A binding the node asked under a name this primitive says it does not\n     * read. The answer arrived and nothing will ever look at it.\n     *\n     * The quietest of the three ways a binding can be wrong, and until the\n     * primitive declared its names it was the only one nothing could see: an\n     * unregistered source is refused as `no-such-source`, params the source\n     * did not declare are refused by its own schema, and a name nothing reads\n     * resolves perfectly and is then dropped on the floor. The node renders —\n     * the binding cost it nothing but a round trip — and what is reported is\n     * that somebody asked a question whose answer has no reader.\n     *\n     * Only ever reported for a primitive whose author has declared `reads`.\n     * Absence is not emptiness, so a primitive that has said nothing\n     * says nothing about the names it is given.\n     */\n    readonly code: \"data-unread\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly nam\n…",
               "truncated": true,
               "summary": ""
             },
@@ -5523,6 +5523,34 @@
           ]
         },
         {
+          "module": "render/slots",
+          "title": "Slots",
+          "summary": "What a primitive says it places, and what a tree filled that it will not.",
+          "symbols": [
+            {
+              "name": "SlotPlacer",
+              "kind": "interface",
+              "signature": "interface SlotPlacer {\n    readonly slotsPlacedBy: (type: PrimitiveType) => readonly SlotName[] | undefined;\n}",
+              "truncated": false,
+              "summary": "Which regions a primitive says it places, asked per type."
+            },
+            {
+              "name": "isSlotPlacer",
+              "kind": "function",
+              "signature": "const isSlotPlacer: (value: object) => value is SlotPlacer",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "unplacedSlots",
+              "kind": "function",
+              "signature": "const unplacedSlots: (filled: Iterable<string>, placed: readonly SlotName[] | undefined) => readonly string[]",
+              "truncated": false,
+              "summary": "The regions this node filled that its primitive places nowhere."
+            }
+          ]
+        },
+        {
           "module": "render/text",
           "title": "Text",
           "summary": "The text seam: the strings a primitive owns, and the deployment's chance to translate them.",
@@ -5728,7 +5756,7 @@
       "files": 211,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6256,7 +6284,7 @@
       "files": 74,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7337,7 +7365,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7786,7 +7814,7 @@
             {
               "name": "PrimitiveRegistry",
               "kind": "type",
-              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & BindingReader & UnshownReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
+              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & BindingReader & SlotPlacer & UnshownReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -7928,7 +7956,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8156,7 +8184,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8615,7 +8643,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8969,7 +8997,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9124,7 +9152,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 45,
+      "files": 46,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9137,7 +9165,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10563,6 +10591,104 @@
           ]
         },
         {
+          "module": "signals/readership",
+          "title": "Readership",
+          "summary": "Whether two windows of a page were read by the same readership.",
+          "symbols": [
+            {
+              "name": "READERSHIP_SHIFTED_ABOVE",
+              "kind": "value",
+              "signature": "const READERSHIP_SHIFTED_ABOVE = 0.1",
+              "truncated": false,
+              "summary": "How much of a readership has to move before a comparison of two windows is not comparing like with like."
+            },
+            {
+              "name": "RegionMovement",
+              "kind": "type",
+              "signature": "type RegionMovement = \n/** Named in both windows, and more views in the later one. */\n\"grew\"\n/** Named in both windows, and fewer views in the later one. */\n | \"shrank\"\n/** Named in both windows, and exactly as many views. */\n | \"steady\"\n/**\n * Unnamed in the earlier window and named in the later one.\n *\n * Either it had nobody or it had too few to name, and which is not said.\n */\n | \"thickened\"\n/**\n * Named in the earlier window and unnamed in the later one.\n *\n * The same conflation the other way round, and the one worth being clear\n * about: this is **not** *the readers from this country stopped coming*. It\n * is *there are no longer enough of them to say*, which includes none of\n * them and includes nearly enough of them.\n */\n | \"thinned\";",
+              "truncated": false,
+              "summary": "What happened to one region between the two windows."
+            },
+            {
+              "name": "REGION_MOVEMENTS",
+              "kind": "value",
+              "signature": "const REGION_MOVEMENTS: readonly RegionMovement[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeRegionMovement",
+              "kind": "function",
+              "signature": "const describeRegionMovement: (movement: RegionMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting the comparison in front of a person."
+            },
+            {
+              "name": "RegionSide",
+              "kind": "type",
+              "signature": "type RegionSide = {\n    /** Page views that began here, or `undefined` where the floor withheld the bucket. */\n    readonly views: number | undefined;\n    /**\n     * {@link views} over every view in that window, named and withheld, or\n     * `undefined` with it.\n     *\n     * The denominator is the window's whole total rather than its named buckets,\n     * so the shares of a map sum to below 1 by exactly what the floor is holding\n     * back. Normalising over the named buckets would make a quiet window's shares\n     * add to 1 and read as a complete picture of nothing.\n     */\n    readonly share: number | undefined;\n};",
+              "truncated": false,
+              "summary": "What one window's map said about one region, where it said anything."
+            },
+            {
+              "name": "ComparedRegion",
+              "kind": "type",
+              "signature": "type ComparedRegion = {\n    readonly region: ReaderRegion;\n    readonly was: RegionSide;\n    readonly now: RegionSide;\n    readonly movement: RegionMovement;\n    /**\n     * `now.share − was.share`, or `undefined` where either window withheld the\n     * bucket.\n     *\n     * Signed, and the terms this is summed into are what\n     * {@link ReadershipChange.moved} is. A row with no shift is a row that is\n     * counted in the unaccounted share instead, which is the same fact said as a\n     * bound rather than as a figure.\n     */\n    readonly shift: number | undefined;\n    /**\n     * `now.views − was.views`, or `undefined` where either window withheld the\n     * bucket.\n     *\n     * Exact where it is published, and still not a trend: the two windows are two\n     * revisions' running totals and were not up for the same length of time.\n     */\n    readonly change: number | undefined;\n};",
+              "truncated": false,
+              "summary": "One region, as the two windows' maps have it."
+            },
+            {
+              "name": "ReadershipComparability",
+              "kind": "type",
+              "signature": "type ReadershipComparability =\n/**\n * The mix cannot have moved far enough to matter — `movedAtMost` is under the\n * line, so the withheld buckets cannot carry it over.\n */\n\"like-for-like\"\n/** The mix moved, and the region that moved most is a place. */\n | \"shifted\"\n/**\n * The mix moved, and the region that moved most is the bucket that names\n * nowhere.\n *\n * Worth its own member because it is almost never a fact about readers. The\n * unplaced bucket is what the platform in front of the application did not\n * say, so a swing in it is a proxy changed, a header dropped or a CDN\n * rerouted — a change in the measurement rather than in the readership, and a\n * surface that called it an audience shift would send somebody looking for\n * the wrong thing.\n */\n | \"unplaced\"\n/**\n * `moved` is under the line and `movedAtMost` is over it: the floor is\n * withholding enough that the question cannot be answered either way.\n *\n * The ordinary state of a quiet page, and a correct answer rather than a\n * fault. A deployment that wants it settled needs more readers, not a smaller\n * floor.\n */\n | \"unsettled\"\n/** One of the two windows counted no page views at all, so there is no mix to compare. */\n | \"unmeasured\"\n/**\n * The two maps were floored differently, so nothing was compared.\n *\n * A bucket named in one and withheld in the other would then be an artefact\n * of the two floors rather than a movement of readers, and every figure built\n * on it would inherit that. Read both sides at the same floor — the higher of\n * the two, since a floor is raise-only.\n */\n | \"incomparable\";",
+              "truncated": false,
+              "summary": "Whether the comparison beside this one is comparing like with like."
+            },
+            {
+              "name": "READERSHIP_COMPARABILITIES",
+              "kind": "value",
+              "signature": "const READERSHIP_COMPARABILITIES: readonly ReadershipComparability[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeReadershipComparability",
+              "kind": "function",
+              "signature": "const describeReadershipComparability: (comparability: ReadershipComparability) => string",
+              "truncated": false,
+              "summary": "One line per standing, for a surface putting the comparison in front of a person."
+            },
+            {
+              "name": "UnaccountedShares",
+              "kind": "type",
+              "signature": "type UnaccountedShares = {\n    readonly was: number;\n    readonly now: number;\n};",
+              "truncated": false,
+              "summary": "What the comparison could not account for, as a share of each window's views."
+            },
+            {
+              "name": "Arrivals",
+              "kind": "type",
+              "signature": "type Arrivals = {\n    readonly was: number;\n    readonly now: number;\n};",
+              "truncated": false,
+              "summary": "How many page views began in each window, which is the weight and never a trend."
+            },
+            {
+              "name": "ReadershipChange",
+              "kind": "type",
+              "signature": "type ReadershipChange = {\n    /**\n     * The floor both maps were read at, or `undefined` where they differ and\n     * nothing was compared.\n     */\n    readonly floor: number | undefined;\n    readonly comparability: ReadershipComparability;\n    /**\n     * Half the sum of the absolute share movements over the regions both maps\n     * name, in `[0, 1]`, or `undefined` where nothing was compared.\n     *\n     * A floor on how much the readership moved. The share of readers who would\n     * have to be somewhere else for the two windows to have the same mix.\n     */\n    readonly moved: number | undefined;\n    /**\n     * {@link moved} plus the whole unaccounted share of both windows, capped at\n     * 1, or `undefined` with it.\n     *\n     * A ceiling, and the two numbers together are the only honest statement this\n     * can make on a page whose buckets are mostly under the floor.\n     */\n    readonly movedAtMost: number | undefined;\n    /**\n     * Every region either map names, most-moved first.\n     *\n     * Ranked by views moved rather than by share moved, which is the ranking rule\n     * this subsystem uses everywhere: a country of forty readers that\n     * halved is a smaller fact than one of four hundred that moved a tenth. A\n     * `thinned` or `thickened` row is ranked by the one figure it has, which\n     * treats the withheld side as nought and therefore ranks such a row as high\n     * as it could possibly deserve.\n     */\n    readonly regions: readonly ComparedRegion[];\n    /**\n     * The region carrying the largest absolute {@link ComparedRegion.shift}, or\n     * `undefined` where no region is named in both maps.\n     *\n     * What `shifted` and `unplaced` are told apart by, and the first thing a\n     * person reading a shifted comparison wants.\n     */\n    readonly loudest: ReaderRegion | undefined;\n    /**\n     * The share of each window's views that is in no comparable row: its withheld\n     * buckets, and the buckets the other window withheld.\n     *\n     * The width of the bound on {@link moved}, and a measurement in its own\n     * right — a deployment reading two thirds of its arrivals as unaccounted is\n     * being told that its traffic is spread thinner than its floor, which no\n     * single window's map says.\n     */\n    readonly unaccounted: UnaccountedShares;\n    /**\n     * Page views that began in each window, named and withheld.\n     *\n     * Exact, and deliberately not divided one by the other: the two\n     * revisions were not up for the same length of time, and nothing in these\n     * rows says how long either was.\n     */\n    readonly arrivals: Arrivals;\n};",
+              "truncated": false,
+              "summary": "Two windows' readerships, held against each other."
+            },
+            {
+              "name": "readershipChangeOf",
+              "kind": "function",
+              "signature": "const readershipChangeOf: (was: RegionReading, now: RegionReading) => ReadershipChange",
+              "truncated": false,
+              "summary": "Two windows' region maps, compared."
+            }
+          ]
+        },
+        {
           "module": "signals/region",
           "title": "Region",
           "summary": "Where readers are, as a counter and nothing else.",
@@ -10671,6 +10797,20 @@
               "signature": "const regionReadingOf: (rows: readonly StoredRegionCount[], options?: RegionReadingOptions) => RegionReading",
               "truncated": false,
               "summary": "Rows from the store, read as something a screen may show."
+            },
+            {
+              "name": "RegionReadingFor",
+              "kind": "type",
+              "signature": "type RegionReadingFor = {\n    /** The revision's own map, floored. */\n    readonly reading: RegionReading;\n    /**\n     * Rows for another tree or another revision, and ignored.\n     *\n     * Counting another revision's arrivals into this one's map is the mistake\n     * that would make a readership comparison compare a revision with itself.\n     */\n    readonly foreign: number;\n    /**\n     * Rows naming a region this revision already had a row for, beyond the first,\n     * every one of which was ignored.\n     *\n     * A store keeps one row per tree, revision and region, so this cannot come\n     * out of one read — it happens when a caller concatenates two windows of\n     * rows, and the store's counts are already running totals rather than a\n     * window's. Adding them would double a bucket, which is the one error in this\n     * subsystem that cannot be undone afterwards, so the first row stands\n     * and the fact is reported.\n     */\n    readonly duplicated: number;\n};",
+              "truncated": false,
+              "summary": "One revision's region rows, read as a map, without the caller writing the filter."
+            },
+            {
+              "name": "regionReadingFor",
+              "kind": "function",
+              "signature": "const regionReadingFor: (where: RevisionOf, rows: readonly StoredRegionCount[], options?: RegionReadingOptions) => RegionReadingFor",
+              "truncated": false,
+              "summary": "Pick one revision's region rows out of a set of them and read them."
             }
           ]
         },
@@ -11062,7 +11202,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11205,7 +11345,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11272,7 +11412,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11869,7 +12009,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11943,7 +12083,7 @@
       "files": 90,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12401,7 +12541,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1412,
+        "packageNames": 1430,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
