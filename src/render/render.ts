@@ -46,6 +46,7 @@ import {
 } from "./primitive.js"
 import type { PropsValidator } from "./props.js"
 import { isBindingReader, unreadBindings, type BindingReader } from "./reads.js"
+import { isSlotPlacer, unplacedSlots, type SlotPlacer } from "./slots.js"
 import {
   isUnshownReader,
   readUnshown,
@@ -199,6 +200,13 @@ type RenderContext = {
    * nothing that could declare a reading. See `unshown.ts`.
    */
   readonly unshown: UnshownReader | undefined
+  /**
+   * Absent for the same reason `reads` is: a plain map declares no regions, so
+   * it has nothing to say about one a tree filled. Named `placer` rather than
+   * `slots`, which is the host's projection two fields up — this one answers
+   * what a *primitive* places. See `slots.ts`.
+   */
+  readonly placer: SlotPlacer | undefined
   readonly text: TextResolver | undefined
   /**
    * Absent when the resolver is not a registry, which is also the only way to
@@ -397,6 +405,33 @@ const nodeDataFor = (node: ElementNode, declared: unknown, context: RenderContex
   reportUnshownRows(node, data, context)
 
   return data
+}
+
+/**
+ * A diagnostic for every region this node filled that its primitive places
+ * nowhere.
+ *
+ * Measured on the node's own slot *children* rather than on `body.slots`, which
+ * is the same list by construction and is built by walking the subtree. Reading
+ * the children keeps this node's diagnostic ahead of its descendants' in the
+ * collected order, which is what every other report in this walk does.
+ *
+ * Silent unless the resolver can say what a primitive places, which is the same
+ * bargain `reads` makes: `undefined` is a resolver with no registry behind it,
+ * or a type no registry holds, and neither is a primitive claiming it places
+ * nothing. A primitive that declared no regions *is* one — `slots` is the one
+ * declaration where leaving it out and declaring it empty are the same claim
+ * (`sdk/definition.ts`), and 0051 made that claim operational.
+ */
+const reportUnplacedSlots = (node: ElementNode, context: RenderContext): void => {
+  const filled: string[] = []
+  for (const child of node.children) if (child.kind === "slot") filled.push(child.name)
+
+  if (filled.length === 0) return
+
+  for (const name of unplacedSlots(filled, context.placer?.slotsPlacedBy(node.type))) {
+    context.collect({ code: "slot-unplaced", nodeId: node.id, type: node.type, name })
+  }
 }
 
 /**
@@ -778,6 +813,9 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
 
   const text = context.text?.textFor(node.type) ?? NO_TEXT
   const behaviours = nodeBehavioursFor(node, props, text, context)
+
+  reportUnplacedSlots(node, context)
+
   const body = renderElementBody(node, context)
 
   const rendered = {
@@ -937,6 +975,7 @@ const renderFrom = (
     frames: isFrameResolver(options.resolver) ? options.resolver : undefined,
     reads: isBindingReader(options.resolver) ? options.resolver : undefined,
     unshown: isUnshownReader(options.resolver) ? options.resolver : undefined,
+    placer: isSlotPlacer(options.resolver) ? options.resolver : undefined,
     text: composeText(options.resolver, options.text),
     behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
     anchors: createAnchorLedger(),
