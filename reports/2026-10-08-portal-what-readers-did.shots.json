@@ -1,0 +1,55 @@
+{
+"outDir": "reports",
+"shots": [
+{
+"out": "2026-10-08-portal-what-readers-did-wide.png",
+"path": "/portal/readers",
+"viewport": { "width": 1680, "height": 1000, "label": "wide" },
+"fullPage": true,
+"waitFor": "text=What did readers do here?",
+"measure": ["text=What did readers do here?", "h3"],
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+{ "click": "button[type=submit]" },
+{ "waitFor": "text=What Loom has been doing" }
+]
+}
+},
+{
+"out": "2026-10-08-portal-what-readers-did-phone.png",
+"path": "/portal/readers",
+"viewport": "phone",
+"fullPage": true,
+"waitFor": "text=What did readers do here?",
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+{ "click": "button[type=submit]" },
+{ "waitFor": "text=What Loom has been doing" }
+]
+}
+},
+{
+"out": "2026-10-08-portal-what-readers-did-open.png",
+"path": "/portal/readers",
+"viewport": { "width": 1680, "height": 1000, "label": "wide" },
+"fullPage": true,
+"waitFor": "text=What did readers do here?",
+"do": [
+{ "click": "text=Every part, and what was counted against it >> nth=0" },
+{ "waitFor": "text=shut again" }
+],
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+{ "click": "button[type=submit]" },
+{ "waitFor": "text=What Loom has been doing" }
+]
+}
+}
+]
+}
