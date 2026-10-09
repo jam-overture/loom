@@ -42,6 +42,8 @@ const segment = (
   buckets: emptyBuckets,
   fingerprints: ONE_RULESET,
   unfingerprinted: 0,
+  checkSets: [[]],
+  unrecordedChecks: 0,
   ...rulesets,
 })
 

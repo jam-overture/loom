@@ -8,6 +8,7 @@
 
 export * from "./analysis.js"
 export * from "./assessment.js"
+export * from "./checks.js"
 export * from "./disposition.js"
 export * from "./events.js"
 export * from "./gate.js"

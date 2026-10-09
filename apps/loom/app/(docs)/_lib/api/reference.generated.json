@@ -5,10 +5,10 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
-      "files": 95,
+      "files": 96,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -1470,16 +1470,86 @@
             {
               "name": "ChangeAssessment",
               "kind": "type",
-              "signature": "type ChangeAssessment = {\n    readonly proposal: ProposedChange;\n    readonly analysis: ChangeAnalysis;\n    readonly stakes: StakeAssessment;\n    readonly reversibility: Reversibility;\n};",
+              "signature": "type ChangeAssessment = {\n    readonly proposal: ProposedChange;\n    readonly analysis: ChangeAnalysis;\n    readonly stakes: StakeAssessment;\n    readonly reversibility: Reversibility;\n    /**\n     * Which optional checks the caller handed this assessment, in canonical order.\n     *\n     * Always present and empty when none were, rather than omitted: a measurement\n     * is being recorded here, and an assessment that left the field out would be\n     * one a reader could not distinguish from a deployment that checks nothing.\n     * The disposition this ends up on is where absence means something else, and\n     * says so.\n     */\n    readonly wiredChecks: readonly WriteCheck[];\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "assessChange",
               "kind": "function",
-              "signature": "const assessChange: (tree: LoomTree, proposal: ProposedChange, policy: GatePolicy, inverseDeltaId: DeltaId, checkProps?: PropsVocabulary, reads?: BindingReader) => Result<ChangeAssessment, TreeError>",
+              "signature": "const assessChange: (tree: LoomTree, proposal: ProposedChange, policy: GatePolicy, inverseDeltaId: DeltaId, \n/**\n * Absent rather than defaulted, so that *handed nothing* and *handed the\n * sentinel* stay two different calls. The analysis below falls back to the\n * same two no-ops a default would have supplied, so nothing about a decision\n * changes; what changes is that `wiredChecks` can report what arrived instead\n * of reporting what the signature filled in.\n */\ncheckProps?: PropsVocabulary, reads?: BindingReader) => Result<ChangeAssessment, TreeError>",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "runtime/checks",
+          "title": "Checks",
+          "summary": "Which of the write path's optional checks a runtime was actually holding when it judged a change.",
+          "symbols": [
+            {
+              "name": "writeCheckSchema",
+              "kind": "schema",
+              "signature": "const writeCheckSchema: z.ZodEnum<…>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "WriteCheck",
+              "kind": "type",
+              "signature": "type WriteCheck = z.infer<typeof writeCheckSchema>;",
+              "truncated": false,
+              "summary": "One check the write path performs only when a composition root hands it the seam to perform it with."
+            },
+            {
+              "name": "WRITE_CHECKS",
+              "kind": "value",
+              "signature": "const WRITE_CHECKS: readonly WriteCheck[]",
+              "truncated": false,
+              "summary": "Every check this version of Loom has a seam for, in the order a composition root meets them — which is also the order `assessChange` takes them, and the canonical order `wiredChecksOf` writes a list in, so that two runtimes holding the same checks produce the same list rather than two spellings of it."
+            },
+            {
+              "name": "WriteCheckSeams",
+              "kind": "type",
+              "signature": "type WriteCheckSeams = {\n    readonly propsVocabulary?: PropsVocabulary | undefined;\n    readonly bindingReader?: BindingReader | undefined;\n};",
+              "truncated": false,
+              "summary": "The seams, as much of them as reading the record needs."
+            },
+            {
+              "name": "wiredChecksOf",
+              "kind": "function",
+              "signature": "const wiredChecksOf: (seams: WriteCheckSeams) => readonly WriteCheck[]",
+              "truncated": false,
+              "summary": "Which checks a composition root wired, in canonical order."
+            },
+            {
+              "name": "canonicalChecksOf",
+              "kind": "function",
+              "signature": "const canonicalChecksOf: (checks: readonly WriteCheck[]) => readonly WriteCheck[]",
+              "truncated": false,
+              "summary": "The same checks, in canonical order and without repetition."
+            },
+            {
+              "name": "ChecksContinuity",
+              "kind": "type",
+              "signature": "type ChecksContinuity = \"unrecorded\" | \"single\" | \"changed\";",
+              "truncated": false,
+              "summary": "What a set of recorded check lists says about a run of judgments."
+            },
+            {
+              "name": "checksContinuityOf",
+              "kind": "function",
+              "signature": "const checksContinuityOf: (wired: readonly (readonly WriteCheck[])[]) => ChecksContinuity",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeWiredChecks",
+              "kind": "function",
+              "signature": "const describeWiredChecks: (checks: readonly WriteCheck[]) => string",
+              "truncated": false,
+              "summary": "A check list for a reader, with a word for the empty one."
             }
           ]
         },
@@ -1547,7 +1617,7 @@
             {
               "name": "Disposition",
               "kind": "type",
-              "signature": "type Disposition = {\n    readonly kind: DispositionKind;\n    readonly reason: DispositionReason;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly confidence: number;\n    readonly policyId: string;\n    /** Absent on a judgment recorded before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n    /**\n     * Absent when nothing fired, and on a judgment recorded before the field\n     * existed. The schema above says which absence is which.\n     */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n};",
+              "signature": "type Disposition = {\n    readonly kind: DispositionKind;\n    readonly reason: DispositionReason;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly confidence: number;\n    readonly policyId: string;\n    /** Absent on a judgment recorded before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n    /**\n     * Absent on a judgment recorded before the Gate wrote down which checks were\n     * wired. Empty means it was asked and none were; the schema above says why the\n     * two are kept apart here and folded together elsewhere.\n     */\n    readonly wiredChecks?: readonly WriteCheck[];\n    /**\n     * Absent when nothing fired, and on a judgment recorded before the field\n     * existed. The schema above says which absence is which.\n     */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n};",
               "truncated": false,
               "summary": ""
             }
@@ -1813,7 +1883,7 @@
             {
               "name": "CompositionRuntime",
               "kind": "type",
-              "signature": "type CompositionRuntime = {\n    readonly interpreter: ChangeInterpreter;\n    /**\n     * Which policy judges a given change. A source rather than a policy, because\n     * one runtime may serve trees that do not deserve the same latitude; a host\n     * with one policy says so with `fixedPolicy`.\n     */\n    readonly policySource: PolicySource;\n    readonly events: EventSink;\n    readonly clock: Clock;\n    readonly idFactory: IdFactory;\n    /**\n     * Optional, and absent by default. With no repairer, a refusal is terminal.\n     * With one, a refused proposal gets exactly one more attempt — see\n     * `attemptRepair`, where the \"exactly one\" is structural rather than a\n     * counter that could drift.\n     */\n    readonly repairer?: ChangeRepairer;\n    /**\n     * What this deployment's primitives accept, checked before a delta is judged.\n     * Optional, and absent by default: a runtime handed none cannot check props,\n     * so \"this deployment refuses AI-authored props its own schemas reject\" is a\n     * visible choice at the composition root rather than a property of whichever\n     * interpreter happened to be wired in.\n     *\n     * Deliberately the same shape as the renderer's `PropsValidator`, so a host\n     * with a registry hands the same object to both seams and the two cannot\n     * disagree about what is drawable. `propsVocabularyFor(registry)` in the SDK\n     * is how one is obtained without hand-keeping it.\n     */\n    readonly propsVocabulary?: PropsVocabulary;\n    /**\n     * What this deployment's primitives read an answer under, checked before a\n     * delta is judged. Optional and absent by default, for every reason\n     * `propsVocabulary` above gives — a runtime handed none cannot tell a question\n     * nothing reads from one something does, and refusing on that ground is a\n     * choice made at the composition root rather than inherited.\n     *\n     * Deliberately the renderer's own `BindingReader` rather than a second shape,\n     * so what the walk reports as `data-unread` is what the write path refuses. An\n     * SDK registry satisfies it already, which is why there is no\n     * `bindingReaderFor(registry)` beside `propsVocabularyFor`: the registry **is**\n     * one, and a helper that wrapped it would only be a place for the two to\n     * disagree.\n     */\n    readonly bindingReader?: BindingReader;\n};",
+              "signature": "type CompositionRuntime = {\n    readonly interpreter: ChangeInterpreter;\n    /**\n     * Which policy judges a given change. A source rather than a policy, because\n     * one runtime may serve trees that do not deserve the same latitude; a host\n     * with one policy says so with `fixedPolicy`.\n     */\n    readonly policySource: PolicySource;\n    readonly events: EventSink;\n    readonly clock: Clock;\n    readonly idFactory: IdFactory;\n    /**\n     * Optional, and absent by default. With no repairer, a refusal is terminal.\n     * With one, a refused proposal gets exactly one more attempt — see\n     * `attemptRepair`, where the \"exactly one\" is structural rather than a\n     * counter that could drift.\n     */\n    readonly repairer?: ChangeRepairer;\n    /**\n     * What this deployment's primitives accept, checked before a delta is judged.\n     * Optional, and absent by default: a runtime handed none cannot check props,\n     * so \"this deployment refuses AI-authored props its own schemas reject\" is a\n     * visible choice at the composition root rather than a property of whichever\n     * interpreter happened to be wired in.\n     *\n     * Deliberately the same shape as the renderer's `PropsValidator`, so a host\n     * with a registry hands the same object to both seams and the two cannot\n     * disagree about what is drawable. `propsVocabularyFor(registry)` in the SDK\n     * is how one is obtained without hand-keeping it.\n     *\n     * Handing this over is recorded on every judgment it makes, as the `props`\n     * member of `Disposition.wiredChecks` — the policy fingerprint cannot\n     * see a seam, so wiring one would otherwise move a deployment's refusal rate\n     * and leave nothing behind that says which day it moved.\n     */\n    readonly propsVocabulary?: PropsVocabulary;\n    /**\n     * What this deployment's primitives read an answer under, checked before a\n     * delta is judged. Optional and absent by default, for every reason\n     * `propsVocabulary` above gives — a runtime handed none cannot tell a question\n     * nothing reads from one something does, and refusing on that ground is a\n     * choice made at the composition root rather than inherited.\n     *\n     * Deliberately the renderer's own `BindingReader` rather than a second shape,\n     * so what the walk reports as `data-unread` is what the write path refuses. An\n     * SDK registry satisfies it already, which is why there is no\n     * `bindingReaderFor(registry)` beside `propsVocabularyFor`: the registry **is**\n     * one, and a helper that wrapped it would only be a place for the two to\n     * disagree.\n     *\n     * Recorded as the `bindings` member of `Disposition.wiredChecks`, for the\n     * reason above.\n     */\n    readonly bindingReader?: BindingReader;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4657,7 +4727,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4703,7 +4773,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5658,7 +5728,7 @@
       "files": 206,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6123,7 +6193,7 @@
       "files": 69,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7085,7 +7155,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7676,7 +7746,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7904,7 +7974,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8360,10 +8430,10 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
-      "files": 54,
+      "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8714,10 +8784,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 34,
+      "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8885,7 +8955,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10810,7 +10880,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10953,7 +11023,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11017,10 +11087,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 62,
+      "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11097,7 +11167,7 @@
             {
               "name": "PolicyCalibration",
               "kind": "type",
-              "signature": "type PolicyCalibration = {\n    /**\n     * Which policy judged these claims, as its own dispositions named it.\n     *\n     * `null` means this window never saw the judgment — the page opened after the\n     * disposition and before the commit, say. Distinct from the recorded string\n     * `UNATTRIBUTED_POLICY_ID`, which is a judgment that really was made before the\n     * Gate wrote down which policy made it. One is a gap in the reader, the other\n     * is a gap in the record, and merging them would let a fixed record look like a\n     * short page.\n     */\n    readonly policyId: string | null;\n    readonly overall: CalibrationScore;\n    readonly buckets: readonly ConfidenceBucket[];\n    /**\n     * The distinct fingerprints the judgments in this segment named, sorted.\n     *\n     * A name is host-declared, and hosts are asked to rename a policy they edit.\n     * More than one fingerprint under one name means that did not happen, and this\n     * row is pooling gates that differ by more than what they are called — the same\n     * error the segments exist to correct, one level down. `rulesetContinuityOf`\n     * reads this list; the list itself is carried so a host can match a digest to\n     * the configuration it is looking at.\n     */\n    readonly fingerprints: readonly string[];\n    /**\n     * Judged claims in this segment whose disposition named no fingerprint. Kept\n     * beside the list rather than folded into it: one fingerprint plus twelve\n     * unfingerprinted judgments is not a segment shown to be constant, and a list\n     * of length one would say it was.\n     */\n    readonly unfingerprinted: number;\n};",
+              "signature": "type PolicyCalibration = {\n    /**\n     * Which policy judged these claims, as its own dispositions named it.\n     *\n     * `null` means this window never saw the judgment — the page opened after the\n     * disposition and before the commit, say. Distinct from the recorded string\n     * `UNATTRIBUTED_POLICY_ID`, which is a judgment that really was made before the\n     * Gate wrote down which policy made it. One is a gap in the reader, the other\n     * is a gap in the record, and merging them would let a fixed record look like a\n     * short page.\n     */\n    readonly policyId: string | null;\n    readonly overall: CalibrationScore;\n    readonly buckets: readonly ConfidenceBucket[];\n    /**\n     * The distinct fingerprints the judgments in this segment named, sorted.\n     *\n     * A name is host-declared, and hosts are asked to rename a policy they edit.\n     * More than one fingerprint under one name means that did not happen, and this\n     * row is pooling gates that differ by more than what they are called — the same\n     * error the segments exist to correct, one level down. `rulesetContinuityOf`\n     * reads this list; the list itself is carried so a host can match a digest to\n     * the configuration it is looking at.\n     */\n    readonly fingerprints: readonly string[];\n    /**\n     * Judged claims in this segment whose disposition named no fingerprint. Kept\n     * beside the list rather than folded into it: one fingerprint plus twelve\n     * unfingerprinted judgments is not a segment shown to be constant, and a list\n     * of length one would say it was.\n     */\n    readonly unfingerprinted: number;\n    /**\n     * The distinct sets of optional write-path checks the judgments in this\n     * segment were made under, each in canonical order.\n     *\n     * The fingerprint above proves which *rules* judged these claims and cannot\n     * reach the two seams a composition root hands over separately, either of\n     * which can turn an `accepted` into a `rejected`. So a segment\n     * whose `fingerprints` has one member is a segment that was judged under one\n     * set of rules, and this is the rest of the sentence: whether it was judged by\n     * one write path. More than one member here and a survival rate that moved is\n     * explained by the wiring rather than by the model.\n     *\n     * Sets rather than a verdict, for the reason `fingerprints` is a list rather\n     * than a `RulesetContinuity`: `checksContinuityOf` reads this, and the lists\n     * themselves are what a host matches against its own composition root.\n     */\n    readonly checkSets: readonly (readonly WriteCheck[])[];\n    /**\n     * Judged claims in this segment whose disposition named no check list. Kept\n     * beside the sets for the reason `unfingerprinted` is kept beside the\n     * fingerprints: one set plus twelve judgments that recorded none is not a\n     * segment shown to have been judged by one write path.\n     */\n    readonly unrecordedChecks: number;\n};",
               "truncated": false,
               "summary": "A calibration reading confined to the claims one policy judged."
             },
@@ -11614,10 +11684,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 38,
+      "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11688,10 +11758,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 89,
+      "files": 90,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11910,7 +11980,7 @@
             {
               "name": "AssessmentDraft",
               "kind": "type",
-              "signature": "type AssessmentDraft = {\n    /** The change being judged. Its delta decides what the inverse is written against. */\n    readonly proposal: ProposedChange;\n    /** What the delta does. The fields left out measure zero. */\n    readonly analysis?: Partial<ChangeAnalysis>;\n    /** The rules the Gate raised, in the order it raised them. */\n    readonly factors?: readonly StakeFactor[];\n    /** Why the change cannot be taken back. Empty means it can. */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n};",
+              "signature": "type AssessmentDraft = {\n    /** The change being judged. Its delta decides what the inverse is written against. */\n    readonly proposal: ProposedChange;\n    /** What the delta does. The fields left out measure zero. */\n    readonly analysis?: Partial<ChangeAnalysis>;\n    /** The rules the Gate raised, in the order it raised them. */\n    readonly factors?: readonly StakeFactor[];\n    /** Why the change cannot be taken back. Empty means it can. */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n    /**\n     * Which of the write path's optional checks were in place. Empty by default,\n     * which is what a double has wired: the real seams need a registry, and a\n     * fixture claiming a check it never performed would put a reader's confidence\n     * in the wrong place.\n     */\n    readonly wiredChecks?: readonly WriteCheck[];\n};",
               "truncated": false,
               "summary": "The facts a test wants to be true of a judged change. Everything else is absent, empty or zero."
             },
@@ -12146,10 +12216,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 76,
+      "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1391,
+        "packageNames": 1400,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

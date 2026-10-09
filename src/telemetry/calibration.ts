@@ -1,4 +1,5 @@
 import { everyMemberOf } from "../closed-set.js"
+import { canonicalChecksOf, type WriteCheck } from "../runtime/checks.js"
 
 import type { EpisodeFold, ProposalEpisode } from "./episode.js"
 
@@ -120,6 +121,30 @@ export type PolicyCalibration = {
    * of length one would say it was.
    */
   readonly unfingerprinted: number
+  /**
+   * The distinct sets of optional write-path checks the judgments in this
+   * segment were made under, each in canonical order.
+   *
+   * The fingerprint above proves which *rules* judged these claims and cannot
+   * reach the two seams a composition root hands over separately, either of
+   * which can turn an `accepted` into a `rejected` (0179, 0208). So a segment
+   * whose `fingerprints` has one member is a segment that was judged under one
+   * set of rules, and this is the rest of the sentence: whether it was judged by
+   * one write path. More than one member here and a survival rate that moved is
+   * explained by the wiring rather than by the model.
+   *
+   * Sets rather than a verdict, for the reason `fingerprints` is a list rather
+   * than a `RulesetContinuity`: `checksContinuityOf` reads this, and the lists
+   * themselves are what a host matches against its own composition root.
+   */
+  readonly checkSets: readonly (readonly WriteCheck[])[]
+  /**
+   * Judged claims in this segment whose disposition named no check list. Kept
+   * beside the sets for the reason `unfingerprinted` is kept beside the
+   * fingerprints: one set plus twelve judgments that recorded none is not a
+   * segment shown to have been judged by one write path.
+   */
+  readonly unrecordedChecks: number
 }
 
 export type CalibrationReport = {
@@ -250,6 +275,12 @@ type Segment = {
   readonly bands: Bands
   readonly fingerprints: Set<string>
   unfingerprinted: number
+  /**
+   * Keyed by the canonical list rather than holding the arrays, because two
+   * spellings of one set are one set and a `Set` of arrays would keep both.
+   */
+  readonly checkSets: Map<string, readonly WriteCheck[]>
+  unrecordedChecks: number
 }
 
 export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
@@ -261,7 +292,13 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
     const existing = byPolicy.get(policyId)
     if (existing) return existing
 
-    const fresh: Segment = { bands: emptyBands(), fingerprints: new Set(), unfingerprinted: 0 }
+    const fresh: Segment = {
+      bands: emptyBands(),
+      fingerprints: new Set(),
+      unfingerprinted: 0,
+      checkSets: new Map(),
+      unrecordedChecks: 0,
+    }
     byPolicy.set(policyId, fresh)
 
     return fresh
@@ -292,6 +329,13 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
       const fingerprint = proposal.disposition?.policyFingerprint
       if (fingerprint === undefined) segment.unfingerprinted += 1
       else segment.fingerprints.add(fingerprint)
+
+      const wired = proposal.disposition?.wiredChecks
+      if (wired === undefined) segment.unrecordedChecks += 1
+      else {
+        const canonical = canonicalChecksOf(wired)
+        segment.checkSets.set(canonical.join(","), canonical)
+      }
     }
   }
 
@@ -304,6 +348,19 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
       buckets: bucketsOf(segment.bands),
       fingerprints: Array.from(segment.fingerprints).sort(),
       unfingerprinted: segment.unfingerprinted,
+      /**
+       * Looked back up by key rather than carried out of the map's values, so
+       * the order is the canonical key's and a `flatMap` over arrays cannot
+       * quietly flatten the sets into one list.
+       */
+      checkSets: Array.from(segment.checkSets.keys())
+        .sort()
+        .flatMap((key) => {
+          const set = segment.checkSets.get(key)
+
+          return set === undefined ? [] : [set]
+        }),
+      unrecordedChecks: segment.unrecordedChecks,
     })).sort(byPolicyName),
     unjudged,
     unattributed: fold.unattributed.length,
