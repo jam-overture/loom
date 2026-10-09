@@ -13,16 +13,24 @@ import type { AskStanding, WillSay } from "./what-it-will-say"
  * nothing worth saying.
  */
 
-const said = (standing: AskStanding): WillSay => ({
+const said = (standing: AskStanding, putsBack = false): WillSay => ({
   lead: "…",
   detail: "…",
   moves: standing === "on-its-own",
   standing,
-  /** The split counts verdicts, and a direction is not one. */
-  putsBack: false,
+  putsBack,
 })
 
-const of = (...standings: readonly AskStanding[]) => howManyWaitForYou(standings.map(said))
+const of = (...standings: readonly AskStanding[]) =>
+  howManyWaitForYou(standings.map((standing) => said(standing)))
+
+/**
+ * The same list, with the first answer marked as the one that would only put
+ * the visitor's last change back — which is the screen one press of a toggle
+ * produces and the only screen where the two clauses say different things.
+ */
+const afterATogglePress = (...standings: readonly AskStanding[]) =>
+  howManyWaitForYou(standings.map((standing, i) => said(standing, i === 0)))
 
 describe("howManyWaitForYou", () => {
   it("counts the answers rather than describing them", () => {
@@ -98,5 +106,99 @@ describe("howManyWaitForYou", () => {
 
     expect(split?.total).toBe(2)
     expect(split?.sentence).toContain("ask for 2 changes here")
+  })
+
+  /**
+   * The screen this run exists for.
+   *
+   * A visitor who pressed *Re-theme the whole page* has made one of five
+   * changes, and both unattended presets are toggles, so the ask comes back
+   * onto the panel in the other direction. Counted flat, the sentence said
+   * **five** in the same words it used before the press.
+   */
+  it("stops counting the way back as a change still to ask for", () => {
+    const split = afterATogglePress(
+      "on-its-own",
+      "on-its-own",
+      "asks-you",
+      "asks-you",
+      "asks-you"
+    )
+
+    expect(split?.sentence).toBe(
+      "You can ask for 4 more changes here, and put the last one back." +
+        " Loom will make 2 on its own and ask you first about 3."
+    )
+  })
+
+  /**
+   * The restraint, and the reason the chip on the row did not move either
+   * (`what-each-row-says.ts`). The way back is weighed like any other ask, so
+   * it is still one of the five the second clause divides by verdict — two
+   * partitions of one list, which is the pair the row under it already
+   * carries.
+   */
+  it("still counts the way back in what Loom will do about it", () => {
+    const split = afterATogglePress(
+      "on-its-own",
+      "on-its-own",
+      "asks-you",
+      "asks-you",
+      "asks-you"
+    )
+
+    expect(split?.total).toBe(5)
+    expect(split?.onItsOwn).toBe(2)
+    expect(split?.asksYou).toBe(3)
+    expect(split?.putsBack).toBe(1)
+  })
+
+  /** One forward ask is *1 more change*, and the way back stays singular. */
+  it("says one more change in the singular", () => {
+    expect(afterATogglePress("on-its-own", "asks-you")?.sentence).toBe(
+      "You can ask for 1 more change here, and put the last one back." +
+        " Loom will make 1 on its own and ask you first about 1."
+    )
+  })
+
+  /**
+   * *The last one* names the visitor's last change, which there is exactly one
+   * of however many presses would reverse it — so the clause does not become
+   * plural, and only the count of forward asks comes down.
+   */
+  it("names one change however many asks would put it back", () => {
+    const split = howManyWaitForYou([
+      said("on-its-own", true),
+      said("on-its-own", true),
+      said("asks-you"),
+    ])
+
+    expect(split?.putsBack).toBe(2)
+    expect(split?.sentence).toContain("ask for 1 more change here, and put the last one back")
+  })
+
+  /**
+   * Unreachable on the shipped preset table and held anyway, for the reason
+   * the three-clause grammar above is: *you can ask for 0 more changes here*
+   * is the kind of defect nothing fails on.
+   */
+  it("names only the way back when nothing left would move the page on", () => {
+    const split = howManyWaitForYou([said("on-its-own", true), said("on-its-own", true)])
+
+    expect(split?.sentence).toBe(
+      "You can put your last change back here. Loom will make all 2 on its own."
+    )
+  })
+
+  /**
+   * The arrival screen, byte for byte. `putsBack` is `false` on every answer
+   * before anything has been pressed, because there is no last change to
+   * reverse.
+   */
+  it("says the arrival screen's sentence unchanged when nothing would put anything back", () => {
+    expect(of("on-its-own", "on-its-own", "asks-you", "asks-you", "asks-you")?.sentence).toBe(
+      "You can ask for 5 changes here. Loom will make 2 on its own and ask you first about 3."
+    )
+    expect(of("on-its-own", "on-its-own", "asks-you", "asks-you", "asks-you")?.putsBack).toBe(0)
   })
 })

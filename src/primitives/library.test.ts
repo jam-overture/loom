@@ -15,7 +15,11 @@ import {
 import { resolveTreeSubmissions } from "../submit/resolve.js"
 import { catalogueOf } from "../sdk/catalogue.js"
 import { auditRegistry } from "../sdk/audit.js"
+import type { ProbeAnswers } from "../sdk/conformance.js"
 import { describeRegistryError, type PrimitiveRegistry } from "../sdk/registry.js"
+import { nodeDataOf } from "../data/resolution.js"
+import { BEHAVIOUR_NAMES, type BehaviourName } from "../render/behaviour.js"
+import { primitiveTypeSchema, type PrimitiveType } from "../primitive-type.js"
 import { renderLoomTree } from "../render/render.js"
 import { THEME_PROP_KEY } from "../render/theme.js"
 import { createThemeRegistry } from "../theme/registry.js"
@@ -43,6 +47,126 @@ const registryOf = (): PrimitiveRegistry => {
 
 const registry = registryOf()
 const themes = createThemeRegistry()
+
+/**
+ * A source that did not answer, in the shape the walk hands one over.
+ *
+ * `not-resolved` rather than a transport failure, because it is the reason a
+ * real deployment meets most often: a tree binds a name, nothing registered a
+ * source for it, and the band has to draw something.
+ */
+const UNAVAILABLE = {
+  status: "unavailable",
+  unavailable: { reason: "not-resolved", detail: "nothing resolved it" },
+} as const
+
+/**
+ * What the five bound primitives are probed with (0185), and the reason this
+ * map has to exist by hand.
+ *
+ * `probeConfigurations` reads a primitive's prop choices off its registration
+ * and cannot be wrong about them. Nothing can do that for an **answer**: the
+ * row shape a primitive can draw is known to whoever registered it and to
+ * nobody else, which is why 0185 made the answers supplied rather than derived
+ * and why `reads` — which gives the *name* — cannot stand in for them.
+ *
+ * Three states each, and the third is the one this fixture exists for. Until it
+ * was written the audit probed every bound primitive with no answer at all, so
+ * each was measured in one of its four states while wearing the name of the
+ * primitive — and a region placed only when a source fails read as a region
+ * nothing places. That is the reach
+ * [0185](../../decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)
+ * built on 23 September and that nothing exercised until
+ * [0246](../../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md).
+ *
+ * Adding a state can only ever **clear** a report and never create one —
+ * `unplacedSlots` is `some` negated over the states — so this fixture cannot
+ * make the suite pass something it was failing. What it can do is let a
+ * primitive declare a region it draws only on a failure, which is what the four
+ * region-shaped bound primitives now do.
+ */
+const BOUND_ANSWERS: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]> = new Map(
+  (
+    [
+      [
+        "loom.feed",
+        [
+          {
+            data: nodeDataOf({
+              entries: {
+                status: "ready",
+                value: [{ title: "A release went out", detail: "Two fixes and a faster build", meta: "April" }],
+              },
+            }),
+          },
+          { data: nodeDataOf({ entries: { status: "ready", value: [] } }) },
+          { data: nodeDataOf({ entries: UNAVAILABLE }) },
+        ],
+      ],
+      [
+        "loom.trend",
+        [
+          {
+            data: nodeDataOf({
+              series: {
+                status: "ready",
+                value: [
+                  { label: "Jan", value: 24 },
+                  { label: "Feb", value: 31 },
+                ],
+              },
+            }),
+          },
+          { data: nodeDataOf({ series: { status: "ready", value: [] } }) },
+          { data: nodeDataOf({ series: UNAVAILABLE }) },
+        ],
+      ],
+      [
+        "loom.voices",
+        [
+          {
+            data: nodeDataOf({
+              voices: {
+                status: "ready",
+                value: [{ quote: "It reads like a product.", author: "A reader", role: "Head of Design, Acme" }],
+              },
+            }),
+          },
+          { data: nodeDataOf({ voices: { status: "ready", value: [] } }) },
+          { data: nodeDataOf({ voices: UNAVAILABLE }) },
+        ],
+      ],
+      [
+        "loom.plate",
+        [
+          {
+            data: nodeDataOf({
+              image: {
+                status: "ready",
+                value: { src: "https://example.com/a.png", alt: "A photograph", caption: "Taken in April" },
+              },
+            }),
+          },
+          { data: nodeDataOf({ image: { status: "ready", value: null } }) },
+          { data: nodeDataOf({ image: UNAVAILABLE }) },
+        ],
+      ],
+      [
+        /**
+         * A leaf, so it has no region to reach and is here for the other half
+         * of what the answers buy: a bound primitive probed only unanswered is
+         * probed in its failure state and nowhere else, and a throw on a real
+         * figure would not have been seen.
+         */
+        "loom.tally",
+        [
+          { data: nodeDataOf({ value: { status: "ready", value: 1284 } }) },
+          { data: nodeDataOf({ value: UNAVAILABLE }) },
+        ],
+      ],
+    ] as readonly (readonly [string, readonly ProbeAnswers[]])[]
+  ).map(([type, answers]) => [primitiveTypeSchema.parse(type), answers] as const)
+)
 
 const EDITORIAL = { palette: "editorial", fontPack: "editorial-serif", stylePreset: "comfortable" }
 const BOLD = { palette: "bold", fontPack: "bold-sans", stylePreset: "airy-modern" }
@@ -407,14 +531,98 @@ describe("the starter library", () => {
   })
 
   it("passes the edit-mode conformance audit, so the portal can address all of it", () => {
-    const audit = auditRegistry(registry)
+    const audit = auditRegistry(registry, { answers: BOUND_ANSWERS })
 
     expect(audit.notDecorated).toEqual([])
     expect(audit.notProbeable).toEqual([])
   })
 
   it("places every region it declares, so nothing a tree puts in one is dropped", () => {
-    expect(auditRegistry(registry).unplacedSlots).toEqual([])
+    expect(auditRegistry(registry, { answers: BOUND_ANSWERS }).unplacedSlots).toEqual([])
+  })
+
+  /**
+   * The assertion that makes the fixture load-bearing rather than decorative.
+   *
+   * A fixture a suite does not need is a fixture that rots: somebody removes a
+   * state, nothing goes red, and the audit quietly narrows back to what it
+   * measured before. So this asserts the *converse* — that without the answers
+   * the four region-shaped bound primitives report their failure region as one
+   * nothing places.
+   *
+   * It is the only test here that wants a red audit, and it is the one that
+   * would have caught the sixteen-day gap: on 23 September this would have
+   * failed, because there was no failure region to be unplaced.
+   */
+  it("needs the answers to see the failure regions, which is why the fixture is not decoration", () => {
+    const unanswered = auditRegistry(registry).unplacedSlots
+
+    expect(unanswered.map((entry) => entry.type).sort()).toEqual([
+      "loom.feed",
+      "loom.plate",
+      "loom.trend",
+      "loom.voices",
+    ])
+
+    for (const entry of unanswered) expect(entry.slots).toEqual(["unavailable"])
+  })
+
+  /**
+   * Every bound primitive is probed with an answer, so the fixture cannot fall
+   * behind the library.
+   *
+   * `reads` is the declaration that makes a primitive bound, and it is derived
+   * from the registration — so this compares a list the registry computes
+   * against a map a person wrote, which is the one comparison that catches a
+   * sixth bound primitive arriving with nobody noticing that the audit is
+   * measuring it in one state.
+   */
+  it("probes every bound primitive with an answer, so a new one cannot arrive unmeasured", () => {
+    const bound = registry.primitives
+      /**
+       * `reads` is `undefined` for a primitive that never said, and `[]` for
+       * one that said *none* — 0122's distinction, which is why this is a
+       * length check on a defined array rather than a truthiness test.
+       */
+      .filter((primitive) => (primitive.reads ?? []).length > 0)
+      .map((primitive) => primitive.type)
+      .sort()
+
+    expect(bound).toEqual([...BOUND_ANSWERS.keys()].sort())
+    expect(bound.length).toBe(5)
+  })
+
+  /**
+   * The second copy for a built mechanism nothing places (the 29 September
+   * finding's item 3, which is where the shape of this comes from).
+   *
+   * `adjust` was built for `loom.before-after` on 1 September, named for it in
+   * 0096's own Context, and sat undeclared for twenty-eight days — while this
+   * file, `FINDINGS.md` and the record all read as though it had shipped.
+   * Nothing compared the vocabulary against the library, because *"closed" is a
+   * claim with no second copy*. This is the second copy.
+   *
+   * Asserted as full coverage rather than as a printed list: a behaviour the
+   * runtime builds and no primitive places is either a gap in this library or a
+   * member nothing needs, and both are worth a red build over — the first is
+   * this lane's to fill and the second is a deletion to propose.
+   */
+  it("places every behaviour the runtime builds, so a built control cannot go unplaced", () => {
+    const declaredBy = new Map<BehaviourName, readonly PrimitiveType[]>(
+      BEHAVIOUR_NAMES.map((name) => [
+        name,
+        registry.primitives
+          .filter((primitive) => primitive.behaviours.includes(name))
+          .map((primitive) => primitive.type),
+      ])
+    )
+
+    const unplaced = [...declaredBy.entries()]
+      .filter(([, types]) => types.length === 0)
+      .map(([name]) => name)
+
+    expect(unplaced).toEqual([])
+    expect(declaredBy.get("adjust")).toEqual(["loom.before-after"])
   })
 
   it("agrees with itself about which primitives are leaves", () => {
