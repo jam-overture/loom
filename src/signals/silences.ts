@@ -3,6 +3,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
+import type { PaceChangeSilence } from "./pace-change.js"
 import type { PaceSilence } from "./pace.js"
 import type { ReachSilence } from "./reach.js"
 
@@ -11,8 +12,8 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are five of them. Each set's names are right in its own
- * sentence, and across the five they overlap in two ways that a surface drawing
+ * absent, and there are six of them. Each set's names are right in its own
+ * sentence, and across the six they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
  *
@@ -53,8 +54,8 @@ import type { ReachSilence } from "./reach.js"
  *
  * It is a property of the **reading** and not of the silence: every reason a
  * copy reading gives is about its page, every reason a pace reading gives is
- * about one part, and every reason either comparison gives is about the pair.
- * That is why the subjects are published as one table over the five
+ * about one part, and every reason any of the three comparisons gives is about
+ * the pair. That is why the subjects are published as one table over the
  * vocabularies rather than as a field on nine conditions, and it is the
  * strongest form the answer has — a surface that knows which reading it is
  * drawing already knows what its silences are about.
@@ -107,10 +108,23 @@ export const describeSilenceSubject = (subject: SilenceSubject): string => {
  * denominator are states of the deployment and not of the question asked, so
  * there is one vocabulary and not two.
  */
-export type SilenceVocabulary = "change" | "copy" | "copy-change" | "pace" | "reach"
+export type SilenceVocabulary =
+  | "change"
+  | "copy"
+  | "copy-change"
+  | "pace"
+  | "pace-change"
+  | "reach"
 
 export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
-  everyMemberOf<SilenceVocabulary>()(["change", "copy", "copy-change", "pace", "reach"])
+  everyMemberOf<SilenceVocabulary>()([
+    "change",
+    "copy",
+    "copy-change",
+    "pace",
+    "pace-change",
+    "reach",
+  ])
 
 /**
  * What each reading's reasons are about.
@@ -126,16 +140,22 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     copy: "page",
     "copy-change": "comparison",
     pace: "part",
+    "pace-change": "comparison",
     reach: "page",
   })
 
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Nine of them against fifteen members across the five sets, which is the
+ * Nine of them against twenty-two members across the six sets, which is the
  * overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
+ *
+ * **The sixth set needed no tenth condition**
+ * ([0244](../../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)),
+ * which is the first evidence that these are the states of the world rather
+ * than a list of the names the modules before it happened to use.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -301,6 +321,26 @@ export const meaningOfPaceSilence = (silence: PaceSilence): SilenceMeaning => {
       return meaning("pace", "words-a-floor")
     case "wordless":
       return meaning("pace", "says-nothing")
+  }
+}
+
+/**
+ * What a comparison of two windows' pace reports (0244).
+ *
+ * A comparison, so its subject is the pair and never the page on the screen —
+ * which is the distinction this module exists for: `nothing-measured` here does
+ * not say which of the two windows was empty.
+ */
+export const meaningOfPaceChangeSilence = (silence: PaceChangeSilence): SilenceMeaning => {
+  switch (silence) {
+    case "different-trees":
+      return meaning("pace-change", "two-pages")
+    case "wordless":
+      return meaning("pace-change", "says-nothing")
+    case "nothing-measured":
+      return meaning("pace-change", "no-view-reported")
+    case "dissolved":
+      return meaning("pace-change", "nothing-carried")
   }
 }
 

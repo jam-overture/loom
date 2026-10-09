@@ -13,7 +13,6 @@ import {
   outOfReaders,
   outOfVisits,
   pageReadings,
-  pageUse,
   plainDuration,
   plainShift,
   rateOf,
@@ -22,7 +21,6 @@ import {
   shiftOf,
   standingAdvice,
   standingNote,
-  unplacedUse,
   visitsHeard,
   type CountingStanding,
   type PageReading,
@@ -195,29 +193,38 @@ describe("the five things worth saying out loud", () => {
     expect(dwellEach(reading.parts[0]!)).toBe(1_000)
   })
 
-  it("names what was clicked most and what was opened most", () => {
-    const reading = readingOf([
-      tally("n_buy", { views: 30, reached: 20, activations: 14 }),
-      tally("n_details", { views: 30, reached: 18, opens: 9, closes: 4 }),
-    ])
+  /**
+   * **What was pressed most and what was opened most left this reading**, for
+   * `_lib/doing.ts`, and the two tests that pinned them went with them. The
+   * reason is the altitude rather than the arithmetic: everything else here is
+   * about what readers *saw*, those two are about what they *did*, and the card
+   * drew them three lines apart from the headcount they belong under with
+   * *people stayed longest on the introduction* sitting in between.
+   *
+   * What stays pinned here is that this reading says nothing about either, so a
+   * refactor that put them back would have to delete this test to do it.
+   */
+  it("says nothing about what was pressed or opened, which is another reading's", () => {
+    const highlights = highlightsOf(
+      readingOf([
+        tally("n_buy", { views: 30, reached: 20, dwellMs: 20_000, activations: 14 }),
+        tally("n_details", { views: 30, reached: 18, dwellMs: 1_000, opens: 9, closes: 4 }),
+      ])
+    )
 
-    const highlights = highlightsOf(reading)
-
-    expect(highlights.mostClicked?.nodeId).toBe("n_buy")
-    expect(highlights.mostOpened?.nodeId).toBe("n_details")
+    expect(Object.keys(highlights).sort()).toEqual(["fewestSaw", "longest"])
   })
 
   /**
-   * Nothing clicked is a real answer. It is absent here so the screen can say
-   * it in words rather than print a part with a zero beside it, which reads as
-   * a part that failed.
+   * Nothing seen for any longer than anything else is a real answer. It is
+   * absent here so the screen can say it in words rather than print a part with
+   * a zero beside it, which reads as a part that failed.
    */
-  it("names nothing when nobody clicked or opened anything", () => {
+  it("names nothing when every part was seen for as long as every other", () => {
     const highlights = highlightsOf(readingOf([tally("n_a", { views: 4, reached: 4 })]))
 
-    expect(highlights.mostClicked).toBeUndefined()
-    expect(highlights.mostOpened).toBeUndefined()
     expect(highlights.longest).toBeUndefined()
+    expect(highlights.fewestSaw).toBeUndefined()
   })
 
   it("has nothing to say about a revision with no parts", () => {
@@ -375,144 +382,24 @@ describe("what readers used, rather than what they saw", () => {
   it("never reports a page-view floor below the uses it is the denominator of", () => {
     const reading = readingOf([tally("n_page", { views: 0, reached: 0, engaged: 9 })])
 
-    expect(reading.views).toBeGreaterThanOrEqual(pageUse(reading)!.whole)
+    expect(reading.views).toBeGreaterThanOrEqual(reading.parts[0]!.engaged)
   })
 })
 
-describe("the page as a whole, and the part that saw the most of it", () => {
-  /**
-   * A delegated signal names every region it happened inside, up to and
-   * including the root — so the largest use on a revision is not an estimate of
-   * anything. It is the views in which somebody used something, anywhere.
-   */
-  it("reads the whole page's use off the largest one, which is the root's", () => {
-    const reading = readingOf([
-      tally("n_page", { views: 40, reached: 40, engaged: 20 }),
-      tally("n_band", { views: 40, reached: 18, engaged: 12 }),
-      tally("n_buy", { views: 40, reached: 18, activations: 14 }),
-    ])
-
-    expect(pageUse(reading)!.whole).toBe(20)
-  })
-
-  it("names the most-used part that is not simply the page itself", () => {
-    const reading = readingOf([
-      tally("n_page", { views: 40, reached: 40, engaged: 20 }),
-      tally("n_band", { views: 40, reached: 18, engaged: 12 }),
-      tally("n_foot", { views: 40, reached: 6, engaged: 2 }),
-    ])
-
-    expect(pageUse(reading)!.region!.part.nodeId).toBe("n_band")
-    expect(pageUse(reading)!.region!.used).toBe(12)
-    expect(pageUse(reading)!.region!.outOf).toBe(18)
-  })
-
-  /**
-   * A part whose use is indistinguishable from the whole page's is not news
-   * about a part. One band that everybody who did anything did it in is the
-   * page, said twice.
-   */
-  it("names no region when every part that was used was used by every view the page was", () => {
-    const reading = readingOf([
-      tally("n_page", { views: 9, reached: 9, engaged: 4 }),
-      tally("n_band", { views: 9, reached: 9, engaged: 4 }),
-    ])
-
-    expect(pageUse(reading)!.whole).toBe(4)
-    expect(pageUse(reading)!.region).toBeUndefined()
-  })
-
-  /**
-   * Ranked on the count rather than on the share. A share would put a band
-   * reached once and used once above everything else on the page, which is the
-   * small-sample confidence this module refuses everywhere else.
-   */
-  it("ranks a region on how many visits used it, not on the share of its own readers", () => {
-    const reading = readingOf([
-      tally("n_page", { views: 40, reached: 40, engaged: 20 }),
-      tally("n_tiny", { views: 40, reached: 1, engaged: 1 }),
-      tally("n_band", { views: 40, reached: 30, engaged: 12 }),
-    ])
-
-    expect(pageUse(reading)!.region!.part.nodeId).toBe("n_band")
-  })
-
-  it("breaks a tie on reach and then on id, so the same counters name the same part twice", () => {
-    const tallies = [
-      tally("n_page", { views: 9, reached: 9, engaged: 5 }),
-      tally("n_b", { views: 9, reached: 4, engaged: 3 }),
-      tally("n_a", { views: 9, reached: 4, engaged: 3 }),
-    ]
-
-    expect(pageUse(readingOf(tallies))!.region!.part.nodeId).toBe("n_a")
-    expect(pageUse(readingOf([...tallies].reverse()))!.region!.part.nodeId).toBe("n_a")
-  })
-
-  it("offers no denominator for a region nobody reported on screen", () => {
-    const reading = readingOf([
-      tally("n_page", { views: 9, reached: 9, engaged: 5 }),
-      tally("n_band", { engaged: 4 }),
-    ])
-
-    expect(pageUse(reading)!.region!.used).toBe(4)
-    expect(pageUse(reading)!.region!.outOf).toBeUndefined()
-  })
-
-  it("offers no denominator for a region used by more views than reported seeing it", () => {
-    const reading = readingOf([
-      tally("n_page", { views: 9, reached: 9, engaged: 5 }),
-      tally("n_band", { views: 9, reached: 2, engaged: 4 }),
-    ])
-
-    expect(pageUse(reading)!.region!.outOf).toBeUndefined()
-  })
-
-  it("has nothing to say about a page nobody used", () => {
-    const reading = readingOf([tally("n_hero", { views: 9, reached: 9, dwellMs: 900 })])
-
-    expect(pageUse(reading)).toBeUndefined()
-  })
-})
-
-describe("presses that arrived with nowhere to put them", () => {
-  it("adds up the clicks and openings no part heard about", () => {
-    const reading = readingOf([
-      tally("n_buy", { views: 6, reached: 5, activations: 7 }),
-      tally("n_terms", { views: 6, reached: 4, opens: 2, closes: 1 }),
-    ])
-
-    expect(unplacedUse(reading)).toEqual({ uses: 10 })
-  })
-
-  /**
-   * Every region up to the root is credited, so one placed press anywhere makes
-   * this impossible. A zero is then the readers rather than the sender.
-   */
-  it("says nothing when a single press was placed", () => {
-    const reading = readingOf([
-      tally("n_page", { engaged: 1 }),
-      tally("n_buy", { views: 6, reached: 5, activations: 7 }),
-    ])
-
-    expect(unplacedUse(reading)).toBeUndefined()
-  })
-
-  it("says nothing about a page nobody used, which is not the same news", () => {
-    const reading = readingOf([tally("n_hero", { views: 6, reached: 6, dwellMs: 600 })])
-
-    expect(unplacedUse(reading)).toBeUndefined()
-  })
-
-  it("is never both this and a use of the page, on any reading", () => {
-    for (const reading of [
-      readingOf([tally("n_buy", { views: 2, reached: 2, activations: 1 })]),
-      readingOf([tally("n_page", { views: 2, reached: 2, engaged: 1 })]),
-      readingOf([tally("n_hero", { views: 2, reached: 2 })]),
-    ]) {
-      expect([pageUse(reading), unplacedUse(reading)].filter(Boolean).length).toBeLessThan(2)
-    }
-  })
-})
+/*
+ * **`pageUse` and `unplacedUse` were tested here, in two describes of fourteen
+ * tests, and both readings have gone to `_lib/doing.ts`.**
+ *
+ * Every property they pinned is pinned there, off `pageActionOf`: the page-wide
+ * headcount, the region below it, the ranking by count rather than by share,
+ * the deterministic tie, the region with no denominator of its own, the page
+ * nobody used, the presses with nowhere to go, and the rule that a reading is
+ * never both at once. Three of them say something different now and each says
+ * so in its own comment — the headcount is the root's own row rather than a
+ * maximum over rows, the tie breaks on reading order rather than on an
+ * identifier, and a region whose engagement equals the whole page's is named
+ * rather than withheld.
+ */
 
 describe("a count against the visits that got that far", () => {
   it("names the population it is measured against", () => {

@@ -12,6 +12,7 @@ import type { IdFactory, IntentId, TreeId } from "../ids.js"
 import { ok, type Result } from "../result.js"
 import type { ChangeAnalysis } from "../runtime/analysis.js"
 import type { ChangeAssessment } from "../runtime/assessment.js"
+import { canonicalChecksOf, type WriteCheck } from "../runtime/checks.js"
 import type { Clock, EventSink, RuntimeEventEnvelope } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
 import type {
@@ -383,6 +384,13 @@ export type AssessmentDraft = {
   readonly factors?: readonly StakeFactor[]
   /** Why the change cannot be taken back. Empty means it can. */
   readonly irreversibilityReasons?: readonly IrreversibilityReason[]
+  /**
+   * Which of the write path's optional checks were in place. Empty by default,
+   * which is what a double has wired: the real seams need a registry, and a
+   * fixture claiming a check it never performed would put a reader's confidence
+   * in the wrong place.
+   */
+  readonly wiredChecks?: readonly WriteCheck[]
 }
 
 /**
@@ -425,5 +433,6 @@ export const buildAssessment = (
       retainedNodeCount: analysis.removedNodeCount,
       reasons,
     },
+    wiredChecks: canonicalChecksOf(draft.wiredChecks ?? []),
   }
 }

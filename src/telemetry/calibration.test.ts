@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { checksContinuityOf, type WriteCheck } from "../runtime/checks.js"
 import { UNATTRIBUTED_POLICY_ID } from "../runtime/disposition.js"
 import { rulesetContinuityOf } from "../runtime/policy-fingerprint.js"
 import { defaultGatePolicy, type GatePolicy } from "../runtime/policy.js"
@@ -96,6 +97,28 @@ const underPolicyShape = (shape: string) => (proposal: ProposalEpisode): Proposa
   const values = fingerprint.slice(fingerprint.indexOf(":"))
 
   return { ...proposal, disposition: { ...proposal.disposition, policyFingerprint: `${shape}${values}` } }
+}
+
+/**
+ * A judgment made by a runtime that had been handed the checks named here.
+ *
+ * Rewritten rather than driven, for the reason `underPolicyShape` is: the
+ * fixture's composition root wires neither seam, so the one state worth reading
+ * — a wiring that arrived part way through a window — is not reachable from it.
+ */
+const underWiredChecks =
+  (...wiredChecks: readonly WriteCheck[]) =>
+  (proposal: ProposalEpisode): ProposalEpisode =>
+    proposal.disposition === undefined
+      ? proposal
+      : { ...proposal, disposition: { ...proposal.disposition, wiredChecks } }
+
+const forgetWiredChecks = (proposal: ProposalEpisode): ProposalEpisode => {
+  if (proposal.disposition === undefined) return proposal
+
+  const { wiredChecks: _unrecorded, ...disposition } = proposal.disposition
+
+  return { ...proposal, disposition }
 }
 
 const segmentFor = (report: CalibrationReport, policyId: string | null) => {
@@ -515,5 +538,101 @@ describe("calibrationOf, by what the policy contained", () => {
     const { fingerprints } = segmentFor(report, "generous")
 
     expect(fingerprints).toEqual([...fingerprints].sort())
+  })
+})
+
+/**
+ * And the rest of the sentence `fingerprints` starts. A segment with one
+ * fingerprint was judged under one set of rules; whether it was judged by one
+ * *write path* is a second question, because the two seams a composition root
+ * hands over are deliberately not on the policy (0179, 0208).
+ */
+describe("calibrationOf, by which checks were in place", () => {
+  it("reports one write path when nothing about the wiring moved", async () => {
+    const report = calibrationOf(
+      merged(await runUnder(0.9, GENEROUS), await runUnder(0.2, GENEROUS))
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.checkSets).toEqual([[]])
+    expect(segment.unrecordedChecks).toBe(0)
+    expect(checksContinuityOf(segment.checkSets)).toBe("single")
+  })
+
+  /**
+   * The finding this closes, as a row of a real report: one name, one
+   * fingerprint, two write paths. Everything a reader had before this field said
+   * the gate held.
+   */
+  it("sees two write paths under one unchanged fingerprint", async () => {
+    const report = calibrationOf(
+      merged(
+        await runUnder(0.9, GENEROUS),
+        withDispositions(await runUnder(0.9, GENEROUS), underWiredChecks("props"))
+      )
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.fingerprints).toHaveLength(1)
+    expect(rulesetContinuityOf(segment.fingerprints)).toBe("single")
+
+    expect(segment.checkSets).toEqual([[], ["props"]])
+    expect(checksContinuityOf(segment.checkSets)).toBe("changed")
+  })
+
+  it("reads two spellings of one wiring as one write path", async () => {
+    const report = calibrationOf(
+      merged(
+        withDispositions(await runUnder(0.9, GENEROUS), underWiredChecks("props", "bindings")),
+        withDispositions(await runUnder(0.2, GENEROUS), underWiredChecks("bindings", "props"))
+      )
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.checkSets).toEqual([["props", "bindings"]])
+    expect(checksContinuityOf(segment.checkSets)).toBe("single")
+  })
+
+  /**
+   * The count beside the sets rather than in them, which is `unfingerprinted`'s
+   * bargain for its reason: one set and a judgment that recorded none is not a
+   * segment shown to have been judged by one write path.
+   */
+  it("counts a judgment that recorded no checks without letting it look like agreement", async () => {
+    const report = calibrationOf(
+      merged(
+        await runUnder(0.9, GENEROUS),
+        withDispositions(await runUnder(0.9, GENEROUS), forgetWiredChecks)
+      )
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.overall.judged).toBe(2)
+    expect(segment.checkSets).toEqual([[]])
+    expect(segment.unrecordedChecks).toBe(1)
+  })
+
+  it("reads a segment where nothing recorded its checks as unrecorded, not as agreement", async () => {
+    const report = calibrationOf(
+      withDispositions(await runUnder(0.9, GENEROUS), forgetWiredChecks)
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.checkSets).toEqual([])
+    expect(segment.unrecordedChecks).toBe(1)
+    expect(checksContinuityOf(segment.checkSets)).toBe("unrecorded")
+  })
+
+  it("sorts the write paths, so two readings of one window list them the same way", async () => {
+    const report = calibrationOf(
+      merged(
+        withDispositions(await runUnder(0.9, GENEROUS), underWiredChecks("props")),
+        await runUnder(0.9, GENEROUS),
+        withDispositions(await runUnder(0.2, GENEROUS), underWiredChecks("props", "bindings"))
+      )
+    )
+    const { checkSets } = segmentFor(report, "generous")
+
+    expect(checkSets).toEqual([[], ["props"], ["props", "bindings"]])
   })
 })

@@ -85,12 +85,35 @@ import { mediaUrlSchema } from "./url.js"
  *
  * ## It arrives unconnected, and that state is drawn rather than broken
  *
- * `loom.feed` settled the shape: a bound primitive declares only the regions it
- * places *without* an answer, because `auditRegistry` cannot supply one. With
- * no answer this draws the `empty` region inside a frame at the declared
+ * With no answer this draws the `empty` region inside a frame at the declared
  * aspect, which is what a page looks like before anybody connected their
  * pictures — a real state of a real page, and the one a catalogue band can
  * honestly photograph.
+ *
+ * **This paragraph used to carry a borrowed reason, and the borrowing is the
+ * lesson.** It read: *"`loom.feed` settled the shape: a bound primitive
+ * declares only the regions it places without an answer, because
+ * `auditRegistry` cannot supply one."* It can, and had been able to for
+ * thirteen days when this file landed on 6 October. The sentence was copied
+ * from `loom.feed`, where it was true on the day it was written, and copying it
+ * moved a limit that one primitive had hit into a **rule about the library** —
+ * stated in the present tense, with the instrument's name still in it. 0185's
+ * own alternatives section names this as the thing it was most worried about:
+ * *"an instrument that shapes the thing it measures, silently, is worse than
+ * one that reports a false positive a person can dismiss."* The shaping did not
+ * even need the instrument present; a sentence about it was enough.
+ *
+ * ## The failure region is a slot too, over the sentence rather than instead of it
+ *
+ * `loom.feed` set this shape and carried the paragraph that said it could not
+ * be this way — a statement about `auditRegistry`'s reach, written in the
+ * grammar of a statement about design.
+ * [0185](../../decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)
+ * discharged the reach on 23 September and left the design call to this lane;
+ * [0246](../../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md) makes it. The region falls back to the declared
+ * sentence, so a tree that says nothing renders exactly what it rendered
+ * before, and one failure slot serves both failure answers because the
+ * difference between them is the author's and not the reader's.
  */
 
 /**
@@ -255,13 +278,14 @@ const noticeOf = (words: string): ReactNode =>
 export const loomPlate = definePrimitive({
   type: "loom.plate",
   description:
-    "A picture read from a data binding, with the alt text the row carries — an image from a media library or a product table, rather than a URL somebody typed. Use loom.media for an image the tree authors. Region: empty.",
+    "A picture read from a data binding, with the alt text the row carries — an image from a media library or a product table, rather than a URL somebody typed. Use loom.media for an image the tree authors. Regions: empty, unavailable.",
   props,
-  slots: ["empty"],
+  slots: ["empty", "unavailable"],
   /**
    * Nothing a reader reads is in these props. The alt text and the caption are
    * the row's, which is this primitive's whole argument, and `binding` is a name
-   * an answer arrives under.
+   * an answer arrives under. What a tree may put words in is the `empty` and
+   * `unavailable` regions.
    *
    * Declared empty rather than left out, which 0122 says are different answers:
    * this one has been asked and the answer is *none*, where absence would say
@@ -336,9 +360,9 @@ export const loomPlate = definePrimitive({
             },
           })
         : reading.kind === "unavailable"
-          ? noticeOf(loom.text.unavailable)
+          ? (loom.slots["unavailable"] ?? noticeOf(loom.text.unavailable))
           : reading.kind === "mismatched"
-            ? noticeOf(loom.text.mismatched)
+            ? (loom.slots["unavailable"] ?? noticeOf(loom.text.mismatched))
             : (loom.slots["empty"] ?? null)
 
     const caption = reading.kind === "picture" ? reading.picture.caption : undefined

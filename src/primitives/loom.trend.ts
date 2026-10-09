@@ -97,6 +97,18 @@ import { colour, family, size, space, type RampStep } from "./tokens.js"
  * labels are short by nature and the band that needs `1,200,000` wants a
  * `loom.tally` beside the plot rather than inside it. Stated rather than
  * worked around.
+ *
+ * ## The failure region is a slot too, over the sentence rather than instead of it
+ *
+ * `loom.feed` set this shape and carried the paragraph that said it could not
+ * be this way — a statement about `auditRegistry`'s reach, written in the
+ * grammar of a statement about design.
+ * [0185](../../decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)
+ * discharged the reach on 23 September and left the design call to this lane;
+ * [0246](../../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md) makes it. The region falls back to the declared
+ * sentence, so a tree that says nothing renders exactly what it rendered
+ * before, and one failure slot serves both failure answers because the
+ * difference between them is the author's and not the reader's.
  */
 
 /**
@@ -269,12 +281,12 @@ const noticeOf = (words: string): ReactNode =>
 export const loomTrend = definePrimitive({
   type: "loom.trend",
   description:
-    "A series of figures read from a data binding and plotted as columns — a trend a registered source keeps current, rather than numbers somebody typed. Use loom.stat-chart for a plot the tree authors. Region: empty.",
+    "A series of figures read from a data binding and plotted as columns — a trend a registered source keeps current, rather than numbers somebody typed. Use loom.stat-chart for a plot the tree authors. Regions: empty, unavailable.",
   props,
-  slots: ["empty"],
+  slots: ["empty", "unavailable"],
   /**
    * Every word a reader reads is in the answer's rows or in the children of the
-   * `empty` region. `binding` is a name an answer arrives under, `prefix` and
+   * `empty` and `unavailable` regions. `binding` is a name an answer arrives under, `prefix` and
    * `suffix` are marks set against a figure rather than words — the same call
    * `loom.tally` makes, which keeps them as copy there because a currency mark
    * is a thing a translation changes. The same holds here.
@@ -338,9 +350,9 @@ export const loomTrend = definePrimitive({
 
     const body =
       reading.kind === "unavailable"
-        ? noticeOf(loom.text.unavailable)
+        ? (loom.slots["unavailable"] ?? noticeOf(loom.text.unavailable))
         : reading.kind === "mismatched"
-          ? noticeOf(loom.text.mismatched)
+          ? (loom.slots["unavailable"] ?? noticeOf(loom.text.mismatched))
           : reading.kind === "empty"
             ? (loom.slots["empty"] ?? null)
             : createElement(
