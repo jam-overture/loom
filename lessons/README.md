@@ -420,6 +420,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [33](33-shortfall.md) | Shortfall: the fact whose only witness runs too late to report it | Why the ways a binding can be wrong divide into the ones a walk sees from outside the primitive and the one it cannot; who the sentence on the page is for and who the count is for; the three reasons a component may not raise a diagnostic and which of them would hold in a system with no component model at all; why one declaration on a primitive is a function where eight are data; what a guard around another author's code owes the page it is inside — and the one thing this seam cannot catch, with the construction that makes it unlikely and the reason that construction cannot be enforced. |
 | [34](34-hindsight.md) | Hindsight: the fact a witness saw and may not write down | Why *would this policy have changed anything* is a question only a record can answer, and why rebuilding the page from a record is wrong in the one direction that reassures; the partition the Gate's stakes rules are cut along, which question each side of it answers, and why only one of them can be asked again; why a narrowed input is a contract rather than an abridgement, and why the simulation runs the Gate's own rules rather than a copy; what a level means when something that fed it was never written down, and why a floor that happens to be right is still a floor; when a missing field is provably harmless and what it takes to show it — and why the answer to this question is not allowed to be the type the Gate returns. |
 | [35](35-instruments.md) | Instruments: the rule a probe's reach wrote in the library's hand | Why one claim about a primitive made from eight renders needs a quantifier, and why the two probes in one file choose opposite ones without either being careless; which direction a larger population can move each kind of verdict, and why that is what made extending the probe a cheap change to a library nobody re-read; what a closed choice is to an instrument and why an open prop contributes not one sample but none; what cannot be invented for a probe, and the two halves of why an invented one would be worthless; how a rule about what a bound primitive may declare turns out to be an instrument's reach written in somebody else's file — and what it means that the limit was discharged two weeks ago, the mechanism that discharged it has no caller, and a primitive shipped since then restating the rule with the expired reason. |
+| [36](36-vantage.md) | Vantage: the fact a render cannot see and a document already holds | Why *nothing can compute this* is a claim about a moment rather than about a system, and which of three moments in Loom has no vantage on a plotted band's claim; why one of two sibling bands in the catalogue can be checked forever and the other never can, and why the thing that decides it is in neither band's type, props or schema; why a ceiling in a schema and a ceiling in a prop are different kinds of promise, and what authoring a scale costs under that difference; what the write path is handed, what it spends it on, and what forced the one pair-shaped walk it has; what is actually missing before a second one could exist, which is neither the walk nor the vantage — and what it means that two checks about one pair of nodes sit eleven lines apart and the one that exists is the one whose failure renders as a hole. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -795,6 +796,34 @@ ownership, timing nor what you kept: **what is this check's population, who chos
 it, and what has the system already changed about itself to stay inside it?** The
 last clause is the one with teeth, because the things that moved to fit a
 population will not be filed anywhere as having moved.
+
+Lesson 36 answers that in the way a question about populations was always going
+to be answered worst: **nobody chose, and what decided is a *when*.** Lesson 27
+said a chart's ceiling is a prop *because nothing can compute it — a render is a
+total pure projection of one node, so the container cannot read its children*,
+which is exact. Quoted without its second clause it becomes a claim about the
+system, and that is the version that reached two primitives' headers and a
+composition's. The two numbers are nine lines apart in one literal in the module
+that builds the band, and separately in a local variable inside the function that
+judges every change this system makes.
+
+So the nineteenth seam is the first where **nothing is out of reach, by anybody,
+at any moment** — and three things are stacked under it. A true sentence about a
+render got repeated as a sentence about a repository. Every seam the write path
+has is one node wide, because almost every question about a page is, and the one
+pair-shaped exception was built by somebody whose fault made a page *unusable*: a
+check's population is usually decided by the shape of the seam that was available
+and then mistaken for the shape of what is possible. And the third is not about
+Loom. Two checks about one pair of nodes, the same walk and the same two numbers,
+sit eleven lines apart in the same file, and the one that exists is the one whose
+failure renders as a **hole** rather than as a plausible chart.
+
+That last one is why the question to carry into a twentieth seam has stopped
+being about who can see a fact, which Part V has now asked nine ways: **of the
+facts this system is in a position to check and does not, which would announce
+themselves if they went wrong — and what is true of the rest?** The first half of
+that list is a backlog. The second half needs a method, because nothing in it is
+going to turn up by somebody noticing.
 
 ## Pacing
 

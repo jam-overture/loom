@@ -1825,6 +1825,53 @@ are two questions about two different kinds of fact. Question 6 is the one to
 answer slowly: the property being asked about is not a property of the rule's
 content.
 
+## Set AO — two days after lesson 36
+
+Interleaved with 14, 18, 22, 23, 26, 27 and 35. Heavy on 27, because this seam is
+one clause of that lesson read more carefully and is unreadable if the clause is
+fuzzy; and on 22, because the pair-shaped seam this one wants is the one that
+lesson already has.
+
+1. A chart's ceiling is a prop *because nothing can compute it*. Give the second
+   half of that sentence, name the moment it is a claim about, and then name two
+   moments it is not a claim about. *(27, 36)*
+2. Two bands in the starter catalogue state the same ceiling with the same prop,
+   and one of them can never be checked. Say which, say what decides it, and then
+   say where that thing appears in the primitive's type, props schema or
+   catalogue line. *(18, 36)*
+3. Name the first argument `analyzeDelta` takes, and then name the one check
+   already wired into it that is about a pair of nodes rather than one. Say what
+   discipline it applies to the two trees and why measuring the operations would
+   be wrong. *(22, 36)*
+4. A meter refuses a value of 140 and a stat accepts a magnitude of 24000.
+   Explain both as one rule about where a number lives, and then say what
+   authoring a scale costs under that rule. *(36)*
+5. A `configure` pulls a chart's ceiling from 24000 to 100. Give the Gate's
+   verdict and reason code, and then say what the analysis correctly measured and
+   what was not in the measurement. *(07, 36)*
+6. A render of that page emits zero diagnostics and is right to. Say which
+   discipline of the two lesson 14 separates makes that correct, and say what a
+   diagnostic is *for* in a way that excludes this. *(14, 36)*
+7. Two faults live in the same pair of nodes — a figure with no magnitude, and a
+   figure above the ceiling. One is checked over the whole catalogue and one is
+   checked nowhere. Give the property of the *failures* that decided which. *(36)*
+8. Say what is actually missing before a fit check could live in the write path,
+   being precise that it is neither the walk nor the vantage. Then name the two
+   earlier seams that were closed by the thing that is missing — one by a host's
+   policy and one by a rule a primitive states about itself. *(22, 30, 36)*
+9. A check over the catalogue would pass on the day it was written and go on
+   passing. Say why lesson 23 is the reason to be careful about calling that a
+   remedy, and then make the case for writing it anyway using something about the
+   population rather than about the fault. *(23, 36)*
+10. Both of exercise B's zeros are zero. Say what holds one of them there and
+    what holds the other, and then say which lesson's rule that difference is an
+    instance of. *(26, 36)*
+
+Question 1 is the point of the set. Question 7 is where a confident wrong answer
+is most likely, because the honest answer is about people and the question sounds
+like it is about code. Question 10 is the one to answer slowly: the two numbers
+are identical and the facts behind them are not the same kind of fact.
+
 ---
 
 ## Tracking
@@ -1881,3 +1928,4 @@ renders this file rather than restating it.
 | AL | 2 days after L33 | | |
 | AM | 2 days after L34 | | |
 | AN | 2 days after L35 | | |
+| AO | 2 days after L36 | | |

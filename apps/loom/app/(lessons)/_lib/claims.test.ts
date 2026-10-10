@@ -458,8 +458,10 @@ const TRANSCRIPT_CLAIMS: readonly TranscriptClaim[] = [
     fence: /^primitives with a declared prop nothing read:/,
     count: (lines) => rowsMatching(lines, /: 0$/),
     matters:
-      "the sentence the whole comparison rests on, and the one the mark on that fence " +
-      "explicitly declines to cover — a fourth control line is a change this prose is wrong about",
+      "the sentence the whole comparison rests on, and the one that says which of the " +
+      "fence's four lines are the control — the mark declines to cover the two it names, so " +
+      "a third line going to zero, or one of those two leaving it, is a change this prose " +
+      "is wrong about",
   },
   {
     lesson: 32,
@@ -511,6 +513,33 @@ const TRANSCRIPT_CLAIMS: readonly TranscriptClaim[] = [
       "the sentence under lesson 35's exercise E, whose subject is that the library's own " +
       "audit never answers a bound primitive — so how many of them there are to answer is " +
       "the figure the paragraph turns on. A sixth bound primitive makes it wrong",
+  },
+  {
+    lesson: 36,
+    file: "36-vantage.md",
+    what: "the figures the authored band plots",
+    phrase: /\*\*(\w+) figures and no binding\*\*/,
+    occurrences: 1,
+    fence: /^metrics-chart \/ loom\.stat-chart$/,
+    count: (lines) => namesOn(lines, /^figures in the subtree: ([\d,\s]+)$/),
+    matters:
+      "the sentence opening the paragraph under lesson 36's exercise A, which is the whole " +
+      "comparison the lesson rests on: the authored band's figures against the bound band's " +
+      "none. A seventh month in metrics-chart makes it wrong",
+  },
+  {
+    lesson: 36,
+    file: "36-vantage.md",
+    what: "the authored plots in the starter catalogue",
+    phrase: /\*\*(\w+) authored plot in the catalogue\*\*/,
+    occurrences: 1,
+    fence: /^authored plots in the catalogue:/,
+    count: (lines) => numberOn(lines, /^authored plots in the catalogue: (\d+)$/),
+    matters:
+      "the sentence under lesson 36's exercise B, whose argument is that a check over this " +
+      "population would pass today and that the population is the one that grows — so how " +
+      "big it is now is the figure the paragraph concedes. A second authored plot makes it " +
+      "wrong, and would also be the first chance the missing check had to find something",
   },
 ]
 
