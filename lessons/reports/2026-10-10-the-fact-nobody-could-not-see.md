@@ -207,6 +207,17 @@ drift in the meantime.
 `.next`, with the status written to a file as the last thing on its own line and
 read in a separate command, per `docs/routines.md`.
 
+**And a note on how this section reached `main`, because it did not ride the
+lesson.** #571 merged at 17:20 on head `3fdbfe2`, which is one commit before the
+rewrite below — so the version of this report that landed with the lesson said
+*Run twice*, and the `FINDINGS.md` entry that landed with it recorded the
+`notAnswered` half as still open. Both were true when written and neither was
+true at merge. The merged pull request is finished and cannot carry a correction,
+so this paragraph and the two sections it belongs to arrive as their own change
+rather than as an edit to a report nobody had yet read. That is the rule about
+not overwriting a report working in the one direction it was meant to: the record
+of what happened today now includes the part where the record was briefly wrong.
+
 Run three times, because `main` moved twice while the branch was open. The first
 was the branch as written. #563–#565 then landed, so the base was merged in and
 the gate re-run. #567, #569 and #570 then landed and **`Loom merge` merged the
