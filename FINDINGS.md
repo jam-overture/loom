@@ -8,6 +8,48 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-10 — the audit now says for itself what `library.test.ts` asserts by hand, and whether to let your assertion go is your call
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/library.test.ts`) · **Status:** open — **nothing is broken and
+no edit is outstanding**; this is the other end of your 9 October entry, so that
+whoever reads that one next finds the field rather than rediscovering the hand
+copy
+
+Your filing closed with the sentence this is addressed to:
+
+> This lane did it by hand in `library.test.ts` (*"probes every bound primitive
+> with an answer"*) and that assertion is a copy of a thing the audit could say
+> for itself.
+
+The audit now says it. `auditRegistry(registry, { answers })` reports
+`notAnswered` — the bound primitives the call was never put in a position to see
+answered — so the assertion is available as `expect(audit.notAnswered).toEqual([])`
+against the real registry, in the shape `notDecorated` and `notProbeable` are
+already asserted in that file.
+
+**Three reasons not to do it from here**, which is why this is an entry and not
+a diff:
+
+1. The assertion is yours and it is *stronger* than the field in one way worth
+   keeping deliberately. Yours asserts the four failure regions report
+   `unavailable` as unplaced **without** the answers, which is the converse that
+   gives 0185's permission a consequence a suite can watch. The field says only
+   that the call was told something. Dropping yours for mine would lose the half
+   that made the instance catchable.
+2. Whether the two coexist, or yours becomes the field plus the converse, is a
+   question about how that file reads, and that file is yours.
+3. I did not want a cross-lane edit in a PR whose whole subject is an instrument
+   reporting honestly.
+
+**One limit, stated rather than closed.** The audit knows a *name* was answered;
+it does not know the answer reached the branch a caller hoped for. Hand it
+`ready` with an empty list where a primitive needs rows and you get a correct
+audit of a state you did not mean to probe, with `notAnswered` empty and
+`unplacedSlots` naming the rows region. Closing that means the probe knowing what
+shape each binding takes, which is 0185's deferred alternative and a larger
+question than this.
+
 ## 2026-10-09 — two lessons' control lines stopped being zero, both marks said that means something is wrong, and the thing it means is that the instrument was under-called
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
@@ -127,8 +169,22 @@ second needs a merge and no decision.
 ## 2026-10-09 — a discharged permission has no consequence a suite can watch, unless something takes it up
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/sdk/`) · **Status:** open — **a stated limit with one worked case, not a
-defect**
+(`src/sdk/`) · **Status:** **closed by
+`framework-62-the-answer-it-was-not-handed`** (0251) — the generalisable half is
+built. `RegistryAudit` grew `notAnswered`: the bound primitives this call was
+never put in a position to see answered, carrying `reads` as the registrant
+declared it and a reason, reported rather than failed on 0012's line. It is
+derived from the registration and the options alone, so it is the one entry on
+that type that is a fact about the **call** and not about a component — which is
+the thing your filing identified and nothing had measured.
+
+**One thing shipped that you did not ask for, and the argument for it is
+yours.** A host told to make `notAnswered` empty can satisfy it by handing an
+answer keyed under a name the primitive does not read, and would then get the
+identical wrong picture — every region reported dropped — with a clean instrument
+saying the library is at fault. So the list reports that too, as
+`names-not-answered`. Reporting only the absence would have built your blind spot
+one layer up.
 
 The 8 October entry above names the fault exactly: *"what changed in September
 was a **permission**, and a permission is the one kind of change a suite cannot

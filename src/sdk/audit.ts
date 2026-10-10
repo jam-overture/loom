@@ -1,7 +1,9 @@
 import type { DecorationLookup } from "../render/addressing.js"
+import type { BindingName } from "../data/source.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
 import type { BehaviourName } from "../render/behaviour.js"
+import { namesRead, type BindingDeclaration } from "../render/reads.js"
 
 import {
   describeProbeFailures,
@@ -63,6 +65,52 @@ export type UnplacedBehaviours = {
   readonly behaviours: readonly BehaviourName[]
 }
 
+/**
+ * Why a bound primitive was never probed in a state where it had an answer.
+ *
+ * Two causes, one list, because what a reader of this does about either is the
+ * same — hand `auditRegistry` an answer for that type — and because the second
+ * is reachable only by trying the first. A host that satisfies `notAnswered` by
+ * handing an answer keyed under a name the primitive does not read would, with
+ * only the first cause reported, get an empty list and the same wrong picture it
+ * started with.
+ */
+export type UnansweredReason =
+  /** The audit was handed no answers for this type at all. */
+  | "no-answers"
+  /**
+   * It was handed some, and no state carried a name this primitive resolves to.
+   *
+   * *No* state rather than *some* state: a primitive reading two bindings and
+   * answered on one has been seen answered, and reporting it would make the list
+   * one a host cannot assert empty. This is the total miss only.
+   */
+  | "names-not-answered"
+
+/**
+ * A bound primitive the audit was not put in a position to see answered.
+ *
+ * The one entry here that is a fact about the **call** rather than about the
+ * component. Everything else this audit reports is something a probe observed;
+ * this says the probe was never told what it needed, which is why it is reported
+ * at all — a primitive that declares a region it places only for an answer reads
+ * as having dropped that region, and nothing in the output says the reader is
+ * looking at the audit's own blind spot rather than at a defect.
+ *
+ * 0185 gave the probe the seam and the permission that followed it sat for
+ * sixteen days with no caller, because a permission is the one kind of change no
+ * suite notices. This is the half that would have said so on the day.
+ */
+export type UnansweredReader = {
+  readonly type: PrimitiveType
+  /**
+   * What its registrant declared it reads, unchanged — either of the two forms
+   * a declaration may take (0184).
+   */
+  readonly reads: readonly BindingDeclaration<BindingName>[]
+  readonly reason: UnansweredReason
+}
+
 /** A primitive that threw under some configuration its own schema accepts. */
 export type ThrowingConfigurations = {
   readonly type: PrimitiveType
@@ -101,6 +149,18 @@ export type RegistryAudit = {
    * the content a behaviour acts on renders perfectly without it.
    */
   readonly unplacedBehaviours: readonly UnplacedBehaviours[]
+  /**
+   * Declared it reads a binding and was never probed in a state that answered
+   * one. Reported rather than failed, like `notDecorated` and for the same
+   * reason: whether it matters depends on the deployment (0012). A host
+   * auditing the library it ships asserts it empty, because an entry here means
+   * every other list on this audit is describing that primitive's unanswered
+   * branch and calling it the primitive.
+   *
+   * Unlike every other list, an entry is not a claim about the component. It is
+   * a claim about this call.
+   */
+  readonly notAnswered: readonly UnansweredReader[]
   /**
    * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and
    * label as props and has nowhere to put a text node. It is here because it is
@@ -216,6 +276,42 @@ export type RegistryAuditOptions = {
 
 const NO_ANSWERS: readonly ProbeAnswers[] = Object.freeze([])
 
+/**
+ * Whether one probed state answers something this primitive will look for.
+ *
+ * `Object.hasOwn` rather than a truthiness test on the read, because a name
+ * answered with a failure is still a name answered: the state reaches the
+ * primitive's did-not-answer branch *having been asked*, which is a state the
+ * probe was told about and is not what this list reports.
+ */
+const answersAName = (
+  answer: ProbeAnswers,
+  reads: readonly BindingDeclaration<BindingName>[]
+): boolean =>
+  namesRead(reads, answer.props ?? {}).some((name) => Object.hasOwn(answer.data, name))
+
+/**
+ * One registration and the answers this call held for it, as nought or one entry.
+ *
+ * Derived from the registration and the options alone — no probe outcome reaches
+ * here — because the claim is that the audit was not told something, and a probe
+ * result cannot make that true or false.
+ *
+ * An empty `reads` is not a bound primitive and reports nothing, the way an
+ * empty `frames` does: there is no answer anybody could have handed it.
+ */
+const unansweredReader = (
+  type: PrimitiveType,
+  reads: readonly BindingDeclaration<BindingName>[] | undefined,
+  answers: readonly ProbeAnswers[]
+): readonly UnansweredReader[] => {
+  if (reads === undefined || reads.length === 0) return []
+  if (answers.length === 0) return [{ type, reads, reason: "no-answers" }]
+  if (answers.some((answer) => answersAName(answer, reads))) return []
+
+  return [{ type, reads, reason: "names-not-answered" }]
+}
+
 export const auditRegistry = (
   registry: PrimitiveRegistry,
   options: RegistryAuditOptions = {}
@@ -279,6 +375,9 @@ export const auditRegistry = (
     unplacedBehaviours: audits
       .filter((audit) => unplacedBehavioursIn(audit.placement).length > 0)
       .map((audit) => ({ type: audit.type, behaviours: unplacedBehavioursIn(audit.placement) })),
+    notAnswered: registry.primitives.flatMap((primitive) =>
+      unansweredReader(primitive.type, primitive.reads, options.answers?.get(primitive.type) ?? NO_ANSWERS)
+    ),
     leaves: audits
       .filter((audit) => audit.placement.outcome === "probed" && !audit.placement.rendersChildren)
       .map((audit) => audit.type),
@@ -359,11 +458,37 @@ const describeSubmission = (entry: PrimitiveAudit): string => {
   return entry.declaresSubmits ? "; declares `submits` and places no address" : ""
 }
 
+const describeDeclaration = (declaration: BindingDeclaration): string =>
+  typeof declaration === "string"
+    ? `\`${declaration}\``
+    : `whatever its \`${declaration.fromProp}\` prop says, or \`${declaration.default}\` where it says nothing`
+
+/**
+ * Said only when there is something to say, like `describeSubmission`, and said
+ * last because it is the one clause that is not an observation. The clauses
+ * before it may be describing this primitive's unanswered branch, and a reader
+ * fixing something needs to know that before believing them.
+ */
+const describeAnswers = (unanswered: UnansweredReader | undefined): string => {
+  if (unanswered === undefined) return ""
+
+  const reads = unanswered.reads.map(describeDeclaration).join(", ")
+  const cause =
+    unanswered.reason === "no-answers"
+      ? "was probed with no answer"
+      : "was handed no answer under a name it reads"
+
+  return `; reads ${reads} and ${cause}, so what it draws only when answered was never probed`
+}
+
 /** One line per primitive, for a CLI or a failing test's message. */
-export const describeRegistryAudit = (audit: RegistryAudit): string =>
-  audit.audits
+export const describeRegistryAudit = (audit: RegistryAudit): string => {
+  const unanswered = new Map(audit.notAnswered.map((entry) => [entry.type, entry]))
+
+  return audit.audits
     .map(
       (entry) =>
-        `${entry.type}: ${describeVerdict(entry.verdict)}; ${describePlacement(entry.placement)}${describeSubmission(entry)}`
+        `${entry.type}: ${describeVerdict(entry.verdict)}; ${describePlacement(entry.placement)}${describeSubmission(entry)}${describeAnswers(unanswered.get(entry.type))}`
     )
     .join("\n")
+}

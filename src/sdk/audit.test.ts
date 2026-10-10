@@ -532,3 +532,186 @@ describe("auditRegistry, handed answers", () => {
     )
   })
 })
+
+/** The other of 0184's two forms: a primitive that always looks under one name. */
+const boundTally = definePrimitive({
+  type: "loom.bound-tally",
+  description: "draws a count, or a line saying it could not read one",
+  props: z.object({}),
+  slots: ["total"],
+  reads: ["counts"],
+  component: ({ loom }) => {
+    const answer = loom.data["counts"]
+
+    if (!answer || answer.status !== "ready") {
+      return createElement("p", { ...loom.editable }, "could not be read")
+    }
+
+    return createElement("div", { ...loom.editable }, loom.slots["total"])
+  },
+})
+
+/** Two declarations, so a partial answer is expressible. */
+const boundPair = definePrimitive({
+  type: "loom.bound-pair",
+  description: "reads a list and a count, and places a region for each",
+  props: z.object({}),
+  slots: ["rows"],
+  reads: ["entries", "counts"],
+  component: ({ loom }) =>
+    createElement("div", { ...loom.editable }, loom.slots["rows"]),
+})
+
+const answeringUnder = (name: string, value: JsonValue): ProbeAnswers => ({
+  data: nodeDataOf({ [name]: { status: "ready", value } }),
+})
+
+const unavailableUnder = (name: string): ProbeAnswers => ({
+  data: nodeDataOf({ [name]: { status: "unavailable", unavailable: { reason: "not-resolved", detail: "no adapter" } } }),
+})
+
+const BOUND_LISTING = primitiveTypeSchema.parse("loom.bound-listing")
+
+/**
+ * The half 0185's permission went sixteen days without (`FINDINGS.md`,
+ * 9 October). Every other list on this audit is an observation of a component;
+ * this one says the audit was never told what it needed, which is the fact that
+ * makes the others readable.
+ */
+describe("auditRegistry, on what it was not told", () => {
+  it("names a bound primitive it was handed no answers for, with what it reads", () => {
+    const audit = auditRegistry(registryOf([boundListing]))
+
+    expect(audit.notAnswered).toEqual([
+      {
+        type: "loom.bound-listing",
+        reads: [{ fromProp: "binding", default: "entries" }],
+        reason: "no-answers",
+      },
+    ])
+  })
+
+  /** The two forms are reported alike, and carried as declared. */
+  it("names one that reads a fixed name", () => {
+    const audit = auditRegistry(registryOf([boundTally]))
+
+    expect(audit.notAnswered).toEqual([
+      { type: "loom.bound-tally", reads: ["counts"], reason: "no-answers" },
+    ])
+  })
+
+  it("says nothing about a primitive that reads no binding", () => {
+    const audit = auditRegistry(registryOf([forgetful, leaf]))
+
+    expect(audit.notAnswered).toEqual([])
+  })
+
+  it("is empty once an answer under a name it reads is handed", () => {
+    const audit = auditRegistry(registryOf([boundListing]), {
+      answers: new Map([[BOUND_LISTING, [answering([{ title: "one" }])]]]),
+    })
+
+    expect(audit.notAnswered).toEqual([])
+  })
+
+  /**
+   * The cause the first half creates. A host that satisfies `notAnswered` by
+   * handing an answer keyed wrong gets the *same* picture it started with —
+   * every region reported dropped — and would, if this list only counted answers,
+   * have an empty one telling it the library is at fault.
+   */
+  it("names one handed answers under a name it does not read, and says which cause", () => {
+    const audit = auditRegistry(registryOf([boundListing]), {
+      answers: new Map([[BOUND_LISTING, [answeringUnder("rows", [{ title: "one" }])]]]),
+    })
+
+    expect(audit.notAnswered).toEqual([
+      {
+        type: "loom.bound-listing",
+        reads: [{ fromProp: "binding", default: "entries" }],
+        reason: "names-not-answered",
+      },
+    ])
+    expect(audit.unplacedSlots).toEqual([{ type: "loom.bound-listing", slots: ["rows", "empty"] }])
+  })
+
+  /**
+   * The resolution is the walk's own: a state carrying the prop that names the
+   * binding is answered under *that* name, not under the declaration's default.
+   */
+  it("resolves a prop-named declaration against the state's own props", () => {
+    const audit = auditRegistry(registryOf([boundListing]), {
+      answers: new Map([
+        [BOUND_LISTING, [{ props: { binding: "chosen" }, data: answeringUnder("chosen", []).data }]],
+      ]),
+    })
+
+    expect(audit.notAnswered).toEqual([])
+  })
+
+  /**
+   * A name answered with a failure is a name answered. The state reaches the
+   * did-not-answer branch *having been asked*, which is a state the probe was
+   * told about — and is the one branch 0185 says a bound primitive may place
+   * without an answer.
+   */
+  it("counts a name answered unavailable as answered", () => {
+    const audit = auditRegistry(registryOf([boundTally]), {
+      answers: new Map([[primitiveTypeSchema.parse("loom.bound-tally"), [unavailableUnder("counts")]]]),
+    })
+
+    expect(audit.notAnswered).toEqual([])
+  })
+
+  /**
+   * The quantifier, and it is the conservative one: a primitive answered on one
+   * of two bindings has been seen answered. Reporting a partial miss would make
+   * this a list a host cannot assert empty, which is the fault
+   * `ThrowingConfigurations.everyConfiguration` exists to undo elsewhere.
+   */
+  it("says nothing about a primitive answered on one of the two names it reads", () => {
+    const audit = auditRegistry(registryOf([boundPair]), {
+      answers: new Map([[primitiveTypeSchema.parse("loom.bound-pair"), [answeringUnder("entries", [])]]]),
+    })
+
+    expect(audit.notAnswered).toEqual([])
+  })
+
+  it("reaches each type only with the answers declared for it", () => {
+    const audit = auditRegistry(registryOf([boundListing, boundTally]), {
+      answers: new Map([[BOUND_LISTING, [answering([])]]]),
+    })
+
+    expect(audit.notAnswered).toEqual([
+      { type: "loom.bound-tally", reads: ["counts"], reason: "no-answers" },
+    ])
+  })
+
+  it("says so on the primitive's own line, naming both forms in words", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([boundListing, boundTally])))
+
+    expect(described).toContain(
+      "loom.bound-listing: spreads loom.editable; declares rows, empty and does not place them; reads whatever its `binding` prop says, or `entries` where it says nothing and was probed with no answer, so what it draws only when answered was never probed"
+    )
+    expect(described).toContain(
+      "loom.bound-tally: spreads loom.editable; declares total and does not place it; reads `counts` and was probed with no answer"
+    )
+  })
+
+  it("says which cause on the line too", () => {
+    const described = describeRegistryAudit(
+      auditRegistry(registryOf([boundListing]), {
+        answers: new Map([[BOUND_LISTING, [answeringUnder("rows", [])]]]),
+      })
+    )
+
+    expect(described).toContain("was handed no answer under a name it reads")
+  })
+
+  /** Nothing is said about the ninety-six, which is most of every line. */
+  it("adds no clause to a primitive that reads nothing", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([leaf])))
+
+    expect(described).toBe("loom.leaf: spreads loom.editable; renders no children (a leaf)")
+  })
+})

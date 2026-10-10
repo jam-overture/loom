@@ -81,6 +81,21 @@ const nameRead = (declaration: BindingDeclaration, props: JsonObject): string =>
 }
 
 /**
+ * Every name a node carrying these props reads, one per declaration.
+ *
+ * Exported because a second instrument asks the same question of a state it is
+ * about to probe in rather than of a node — whether an answer it was handed is
+ * keyed under a name this primitive will look for — and the resolution has to be
+ * the walk's own or the two disagree about one declaration. Unsorted and not
+ * deduplicated: it answers *per declaration*, and `unreadBindings` wants a set
+ * while a caller reporting what a primitive asked for wants the list as declared.
+ */
+export const namesRead = (
+  declared: readonly BindingDeclaration[],
+  props: JsonObject
+): readonly string[] => declared.map((declaration) => nameRead(declaration, props))
+
+/**
  * The names this node asked under that its primitive says it does not read.
  *
  * `undefined` from the reader means nobody has said, and nothing is reported:
@@ -104,7 +119,7 @@ export const unreadBindings = (
 ): readonly string[] => {
   if (declared === undefined) return []
 
-  const reads = new Set(declared.map((declaration) => nameRead(declaration, props)))
+  const reads = new Set(namesRead(declared, props))
   const unread: string[] = []
 
   for (const name of asked) if (!reads.has(name)) unread.push(name)
