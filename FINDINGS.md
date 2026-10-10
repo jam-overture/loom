@@ -98,6 +98,86 @@ entry closed above says should not become another six-run hold. If a run reaches
 this with nothing better to do, take (2) and measure the first screen it costs.
 
 ---
+## 2026-10-09 — a comparability condition that is a boolean over a record with an unrecorded state accuses somebody of a change they did not make
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-56-what-it-was-checking`** — recorded because the *shape* is general
+and the next screen in this portal to read a continuity will meet it
+
+`/portal/trust` compares two stretches of the record and refuses the comparison
+when the thing that judged them did not hold still. The condition was
+`judgedByTheSameRules`, a **boolean**, over `rulesetContinuityOf`, which has
+**four** answers. It was false for a stretch whose policy was edited, and
+equally false for a stretch some of whose judgments recorded no fingerprint at
+all — which is every journal written before that field existed. Both drew:
+
+> *Your rules changed in between, so this isn't about the AI … Compare them
+> again once a stretch of the record has run under the rules you have now.*
+
+For the second case every word of that is wrong in the way that costs somebody
+an afternoon. They go into a configuration that never moved, looking for an edit
+they never made, and nothing they do there clears it — **the record rolling
+forward clears it**, and the screen never said so.
+
+**Where the general shape is.** A record that distinguishes *shown to have
+changed* from *not shown to have held* is making a distinction a reader acts on,
+and a predicate over it keeps exactly one bit. The runtime carries this
+distinction deliberately and in at least four places: `rulesetContinuityOf`'s
+four answers, `checksContinuityOf`'s three, `unfingerprinted` kept beside the
+fingerprints rather than folded in, and `unrecordedChecks` kept beside the check
+sets for the same stated reason. Every one of those is a place a surface can
+collapse *cannot tell* into *did change* and print an accusation.
+
+**What it was replaced with**, in case a later screen wants the same shape
+rather than the same bug: one three-valued reading, `held | moved | unproven`,
+computed identically for both halves of *what judged these claims*, with
+`incomparable` landing in `unproven` rather than `moved` — two policies with
+different sets of knobs are two Loom versions, and an upgrade is not an
+incident. Each of the three has its own label, its own tone and its own next
+move, and `unproven`'s next move is *nothing to do, and nothing is wrong*.
+
+**Found by writing the same condition one field over.** The checks half has the
+identical trap sitting in `unrecordedChecks`, and the answer I was refusing to
+write about the checks turned out to be the answer the rules needed too. Worth
+saying because it is an argument for taking a framework finding *as written*:
+the entry that produced this branch asked for a row, and the defect was in the
+sentence the row was going to sit beside.
+
+---
+## 2026-10-09 — the tenth consecutive hand-written photograph preload, and the first that needed the journal rather than the store
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**extends the 27 September entry below**, whose count was eight and whose ask is
+unchanged; this adds the one fact that would change what the harness has to hold
+
+Every picture of this portal since 15 September has been taken against a state
+written by a module created for the run and deleted before the commit. This run
+wrote the tenth. The 27 September entry already asks for
+`app/(portal)/_test/staging/` with a small CLI, and it is still the right ask.
+
+**What this run adds to it.** The nine before this one staged a **store** — a
+tree, a proposal, a reader tally. `/portal/trust` reads neither: it reads the
+**journal**, and the state it needed could not be reached by writing a tree at
+all. What it took was seventy-two episodes' worth of telemetry events, built
+with `buildIntent`, `buildProposal` and `recordOf` from
+`@jam-overture/loom/testing`, carrying a policy fingerprint and a `wiredChecks`
+list each, with the wiring change placed so that it falls **inside the newest
+page of the journal** — the page boundary is 200 records and an episode is three
+or four of them, so where the change lands in the arithmetic decides which of
+four readings the screen draws. Two builds were spent discovering that.
+
+So the harness cannot be a seeded store with a flag. It needs **two subjects**,
+the store and the journal, and for the journal it needs the one thing a hand
+written preload keeps getting wrong: a way to say *put the change at episode N*
+and have the page arithmetic worked out for you rather than guessed at.
+
+The other half this run had to write by hand, and the next one will too: the
+journal is memoised on a `globalThis` symbol and is constructed before anything
+can seed it, so a preload has to wrap `read` and await its own staging. That is
+three lines, it is the same three lines every time, and it is the part most
+likely to be got subtly wrong — a page served before the seeding settles
+photographs an empty state and looks like a bug in the screen.
+
 ## 2026-10-09 — two lessons' control lines stopped being zero, both marks said that means something is wrong, and the thing it means is that the instrument was under-called
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
@@ -258,9 +338,43 @@ when it was not told something it knows it needs.
 ## 2026-10-08 — three fixtures in your lane gained two keys, and the row that would read them is yours to write
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom portal`
-(`apps/loom/app/(portal)/`) · **Status:** open — **everything is shipped and
-`pnpm verify` is green**; this is so the edit is reviewed rather than found in a
-diff, and so the row that uses it is a decision rather than a discovery
+(`apps/loom/app/(portal)/`) · **Status:** **closed by
+`portal-56-what-it-was-checking`** — the row is written, and so are two more
+places the same fact belongs
+
+> **Closing note, 9 October, `Loom portal`.** Taken as written, including the
+> sentence that turned out to be the brief: *"`readRuleset` is correct and half
+> the sentence."*
+>
+> **The row.** `readWritePath` is `readRuleset`'s sibling, silent on the same
+> terms — one set of checks, all of it recorded — and drawn as a second note on
+> the same policy row rather than a sixth column, because the two halves move
+> independently and either can honestly be the only one with something to say.
+> It names the sets with `describeWiredChecks`' own spelling, since the row only
+> ever appears inside the breakdown and a host matching it against its own
+> composition root wants the names it wrote there; a legend under the table
+> gives each check a plain name and a sentence, generated from `WRITE_CHECKS` so
+> a third arrives without anybody remembering.
+>
+> **Two places you did not ask for and the fourth shape fact made unavoidable.**
+> The breakdown now opens for a write path that moved under an unchanged policy
+> name, with its own summary line — a reader told their *rules* changed goes
+> looking through a configuration that never moved. And the trend's
+> comparability condition gained the checks half: your *"true and hearable as
+> something false"* is sharpest there, because that screen does not merely
+> report the week, it **attributes** what moved in it.
+>
+> **`[[]]` was the thing to get right and your note is why it is right.** *One
+> write path, which wired nothing* compares equal to itself, so an ordinary
+> deployment is not refused every comparison for ever; and it reads on the
+> surface as *nothing beyond your rules* rather than as "none", which on a
+> screen looks like data somebody failed to collect.
+>
+> **What the fixtures cost: nothing.** All three were already correct and no
+> assertion moved. The one that did move is in this lane's own code and is filed
+> separately — the ruleset condition was a boolean over your four-valued
+> `RulesetContinuity`, so it had been saying *your rules changed* at every
+> journal that merely predated the fingerprint field.
 
 [0248](decisions/0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md)
 closes the 21 September entry above: a disposition now says which of the write
