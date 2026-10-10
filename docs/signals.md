@@ -37,6 +37,7 @@ the portal every day.
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
+| Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0254](../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
@@ -1305,6 +1306,85 @@ sentence a reader screen can lead with the morning after a change ships, the
 member of `InsideMovement` that must be read before a share with no counterpart
 is drawn, and the one question to answer with a `FunnelPair` instead because this
 comparison cannot be made to answer it.
+
+### 23. Whether a kind of part gets read anywhere · `Loom signals` · **done, 10 October**
+
+Every one of the twenty-two steps above answers about **one page**, except §21,
+and §21 is an order *over* pages — the unit it ranks is a page and the sentence
+it gives is *fix this one next*.
+
+**Nothing could be asked about a kind of part.** A deployment builds forty pages
+out of the same two dozen primitives, and *do readers read the testimonial band
+anywhere* is a question about the **library** rather than about any one page. It
+is the first question this plan's own queue names — *which roles readers engage
+with and which they skip* — and it is the question a model proposing a change
+most wants answered before it proposes one. A type's placements were scattered
+across forty readings and nothing joined them.
+
+**Done.** `libraryReadingOf(readings)` in
+[`src/signals/library.ts`](../src/signals/library.ts) is the census, by primitive
+type and by role. It is the **fourteenth** thing taken out of what this subsystem
+already knows rather than collected: **nothing was added to a payload, a browser,
+a column, a store or the vocabulary**, and the broadcaster was not touched, so
+its weight is unchanged — measured both sides and byte-identical.
+
+Two things decide the shape, and the first is what makes the figure sound
+([0254](../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)):
+
+- **The unit is the placement, and a reader is never the unit.** `views`,
+  `reached` and `engaged` count distinct page views and are absent from every
+  row, which a `RoleReading` already refuses one level down (0212) — and across
+  pages the case is stronger, because each page's distinct counts are inflated by
+  *its own* straddle rate, which is the fact that forced every page's loss onto
+  the door's scale before it could be ranked (§21). So the headline is
+  `read ÷ (read + skipped)`: a ratio of two counts of **parts of trees**, with no
+  reader in either term and no rollup window in either term, which a deployment
+  that shortens its window cannot move. **What it costs is said on the reading
+  itself** — a placement on a page nine thousand people read counts the same as
+  one on a page three people read, so the share is about *places* and a surface
+  printing it as *readers skip this* is printing something it did not say. The
+  weighted figure everybody will ask for needs the door's correction and is a
+  second question; it is filed rather than shipped with a caveat.
+- **Words add, dwell adds within a kind, and there is no total of either across
+  kinds.** A part's words are its own and a page's words partition across its
+  parts exactly once (0212), so two placements' words are two sentences and
+  `wordsReached ÷ words` is honest. `dwellMs` is not: a part is on screen while
+  its children are, so a nested placement's seconds are its ancestors' too. It is
+  published per kind as a volume of attention with that said on the field, and
+  there is deliberately **no reading-wide dwell**.
+
+Three more settled in the building. `mostSkipped` is ranked by the **count** of
+places and not by the share, which is 0221's rule — a kind skipped in its one and
+only place is a perfect share and a smaller problem than one skipped in seven of
+nine — and it is a **type** and never a role, because a type is the thing an
+author can replace. A type whose readings **disagree about its role** is named
+rather than averaged: a type plays one part (0114), so a disagreement is two
+libraries read as one, and `roleDisagreed` is the alarm `PageReading.orphaned` is
+for the same class of caller error. And two revisions of one tree are two live
+versions of one page and stay two (§21), while the same revision handed in twice
+is the one lie a census can be told and is deduplicated.
+
+**A fourth subject in the silence table, and the first a set has ever added.**
+§17's table gains `library` as a ninth vocabulary, `kind` as a fourth subject and
+`nothing-of-the-kind` as an eleventh condition. The two arrived together for one
+reason worth keeping: a page, a part and a pair all exist because something was
+read, while a **kind comes from the vocabulary** — so this is the first reading
+that can be silent because there is none of the thing it is about, and a subject
+that comes from a vocabulary is exactly a subject that can be empty. 0240 is
+**not** superseded and not edited; its claim that the subject is uniform across a
+set and a property of the reading is exactly true of this set too.
+
+**The thinness is §6's, in a fourth place and for the first time as the whole of
+a figure.** Nothing in `src/primitives/` declares a role, so nearly every
+placement is in the `null` role row and the role census is a census of one row.
+The join is at read time (0212), so the day a role is declared every counter
+already stored reinterprets and these rows start answering with no migration.
+Filed again for `Loom primitives`, now with a fourth consumer.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the one
+screen in this subsystem that is about a deployment's **library** rather than its
+pages, the sentence to lead it with, and the one figure on it that must never be
+printed as a share of readers.
 
 ## Still not in scope
 

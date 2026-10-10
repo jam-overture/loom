@@ -5,6 +5,7 @@ import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
 import type { DeploymentSilence } from "./deployment.js"
+import type { KindSilence } from "./library.js"
 import type { PaceChangeSilence } from "./pace-change.js"
 import type { PaceSilence } from "./pace.js"
 import type { ReachSilence } from "./reach.js"
@@ -14,7 +15,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are eight of them. Each set's names are right in its own
+ * absent, and there are nine of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -56,8 +57,9 @@ import type { ReachSilence } from "./reach.js"
  *
  * It is a property of the **reading** and not of the silence: every reason a
  * copy reading gives is about its page, every reason a pace reading gives is
- * about one part, and every reason any of the three comparisons gives is about
- * the pair. That is why the subjects are published as one table over the
+ * about one part, every reason a census of the library gives is about one kind
+ * of part, and every reason any of the three comparisons gives is about the
+ * pair. That is why the subjects are published as one table over the
  * vocabularies rather than as a field on nine conditions, and it is the
  * strongest form the answer has — a surface that knows which reading it is
  * drawing already knows what its silences are about.
@@ -91,11 +93,22 @@ export type SilenceSubject =
    * about the page on the screen.
    */
   | "comparison"
+  /**
+   * One kind of part, everywhere it stands in the pages read.
+   *
+   * The fourth subject, and the first that is not a thing a deployment holds. A
+   * page, a part and a pair all exist because something was read; a kind comes
+   * from the **vocabulary** — a primitive type or a role — so a reading of one
+   * can be silent because there is none of it, which no reading whose rows come
+   * from the data could ever report.
+   */
+  | "kind"
 
 export const SILENCE_SUBJECTS: readonly SilenceSubject[] = everyMemberOf<SilenceSubject>()([
   "page",
   "part",
   "comparison",
+  "kind",
 ])
 
 /** One line per subject, for a surface naming what a reason is about. */
@@ -107,6 +120,8 @@ export const describeSilenceSubject = (subject: SilenceSubject): string => {
       return "one part of the page"
     case "comparison":
       return "the two readings together, neither side named"
+    case "kind":
+      return "one kind of part, everywhere it stands in the pages read"
   }
 }
 
@@ -124,6 +139,7 @@ export type SilenceVocabulary =
   | "copy"
   | "copy-change"
   | "deployment"
+  | "library"
   | "pace"
   | "pace-change"
   | "reach"
@@ -135,6 +151,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "copy",
     "copy-change",
     "deployment",
+    "library",
     "pace",
     "pace-change",
     "reach",
@@ -155,6 +172,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     copy: "page",
     "copy-change": "comparison",
     deployment: "page",
+    library: "kind",
     pace: "part",
     "pace-change": "comparison",
     reach: "page",
@@ -163,7 +181,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Ten of them against thirty members across the eight sets, which is the
+ * Eleven of them against thirty-two members across the nine sets, which is the
  * overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -185,6 +203,17 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * could be in that state, so the earlier evidence is narrowed and not
  * falsified — these are still the states of the world, and the way a new one
  * arrives is with a reading that can be in one nothing else could.
+ *
+ * **The ninth needed one as well, and it is the same rule holding rather than a
+ * second exception**
+ * ([0254](../../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)).
+ * A census of the library is the first reading whose rows are keyed by the
+ * **vocabulary** and not by what a deployment holds, so it is the first that can
+ * report `nothing-of-the-kind`: every earlier set's subject exists by
+ * construction wherever its row does. It also brought the fourth subject, which
+ * is the first time a set has added one — and the two arrived together for one
+ * reason, because a subject that comes from a vocabulary is exactly a subject
+ * that can be empty.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -255,6 +284,16 @@ export type SilenceCondition =
    * because they are filed against the part a reader used and need no ancestry.
    */
   | "no-action-credited"
+  /**
+   * There is none of it in the pages read.
+   *
+   * Not a measurement that is missing: the thing being asked about is absent
+   * from the library, which only a reading keyed by a vocabulary can say. A role
+   * no primitive declares and a type nothing places are both this, and the
+   * instruction it carries is the opposite of every other condition here —
+   * there is nothing to measure rather than nothing measured.
+   */
+  | "nothing-of-the-kind"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -267,6 +306,7 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "readers-above-views",
   "nothing-carried",
   "no-action-credited",
+  "nothing-of-the-kind",
 ])
 
 /**
@@ -299,6 +339,8 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "the change left no word of the page as it was"
     case "no-action-credited":
       return "it holds actions and credits none of them to a reader"
+    case "nothing-of-the-kind":
+      return "there is none of it in the pages that were read"
   }
 }
 
@@ -406,6 +448,25 @@ export const meaningOfDeploymentSilence = (silence: DeploymentSilence): SilenceM
       return meaning("deployment", "no-openings-marked")
     case "inconsistent":
       return meaning("deployment", "readers-above-views")
+  }
+}
+
+/**
+ * What a census of the library reports, of one kind of part (0254).
+ *
+ * Both reasons are about a kind and neither is about a page, so this is the set
+ * that put the fourth subject in the table above. `unplaced` is the one member
+ * in this subsystem whose condition is not an absence of measurement but an
+ * absence of the thing measured, and the distinction is worth a surface's
+ * attention: `unread` on a kind says point a reader at it, `unplaced` says
+ * nothing in this library is one.
+ */
+export const meaningOfKindSilence = (silence: KindSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("library", "no-view-reported")
+    case "unplaced":
+      return meaning("library", "nothing-of-the-kind")
   }
 }
 

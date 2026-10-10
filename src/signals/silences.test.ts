@@ -16,11 +16,14 @@ import {
   describeSilenceCondition,
   describeSilenceSubject,
   distinctSilences,
+  KIND_SILENCES,
+  libraryReadingOf,
   meaningOfActionChangeSilence,
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
   meaningOfDeploymentSilence,
+  meaningOfKindSilence,
   meaningOfPaceChangeSilence,
   meaningOfPaceSilence,
   meaningOfReachSilence,
@@ -134,6 +137,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
   ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
+  ...KIND_SILENCES.map(meaningOfKindSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
@@ -147,6 +151,7 @@ describe("what a reading means when it says nothing", () => {
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
         DEPLOYMENT_SILENCES.length +
+        KIND_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
@@ -189,6 +194,11 @@ describe("what a reading means when it says nothing", () => {
           ACTION_CHANGE_SILENCES.map((of) => meaningOfActionChangeSilence(of).condition),
           ["no-action-credited"],
         ],
+        [
+          "library",
+          KIND_SILENCES.map((of) => meaningOfKindSilence(of).condition),
+          ["nothing-of-the-kind"],
+        ],
       ]
 
     for (const [vocabulary, conditions, declared] of later) {
@@ -226,6 +236,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "kind",
       "part",
       "comparison",
       "page",
@@ -576,5 +587,56 @@ describe("the mapping, against what the readings actually say", () => {
 
     expect(reading.silence).toBe("floored")
     expect(meaningOfCopySilence("floored").condition).toBe("words-a-floor")
+  })
+
+  it("maps a kind of part no view reported to nothing having been seen, of that kind", () => {
+    const library = libraryReadingOf([readingOf(treeOf(PAGE), [])])
+    const section = library.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.silence).toBe("unread")
+    expect(meaningOfKindSilence("unread").condition).toBe("no-view-reported")
+    expect(meaningOfKindSilence("unread").subject).toBe("kind")
+  })
+
+  /**
+   * The condition the ninth set brought, and the reason it could: the row is
+   * there because the vocabulary has the member, not because the library has
+   * one of them.
+   */
+  it("maps a role nothing in the library plays to there being none of the kind", () => {
+    const library = libraryReadingOf([
+      readingOf(treeOf(PAGE), [tally("page", { views: 4, reached: 4 })]),
+    ])
+    const heading = library.byRole.find(
+      (row) => row.kind.by === "role" && row.kind.role === "heading"
+    )
+
+    expect(heading?.placements).toBe(0)
+    expect(heading?.silence).toBe("unplaced")
+    expect(meaningOfKindSilence("unplaced").condition).toBe("nothing-of-the-kind")
+  })
+
+  /**
+   * The pair this set exists to hold apart, and the one a surface would get
+   * wrong: both rows have no share, and the instructions they carry are
+   * opposite.
+   */
+  it("keeps a kind nobody read and a kind nothing is, as two states", () => {
+    const library = libraryReadingOf([readingOf(treeOf(PAGE), [])])
+    const section = library.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+    const heading = library.byRole.find(
+      (row) => row.kind.by === "role" && row.kind.role === "heading"
+    )
+
+    expect(
+      distinctSilences([
+        section?.silence ? meaningOfKindSilence(section.silence) : null,
+        heading?.silence ? meaningOfKindSilence(heading.silence) : null,
+      ])
+    ).toHaveLength(2)
   })
 })
