@@ -855,9 +855,21 @@ describe("E", () => {
      claim following the code rather than drift: re-run E and paste in what it
      prints. The sentence under it beginning "A binding is read by" counts the
      second line and is registered in claims.test.ts, so correcting the fence
-     means reading that sentence too. The four empty verdict lists are the
-     library being correct and are expected to stay empty; if one of them
-     stops being empty, this mark does not cover it and something is wrong. -->
+     means reading that sentence too.
+
+     The verdict lists were four empty lines when this was written and are
+     three. `unplacedSlots` stopped being empty on 9 October and the mark now
+     covers it: 0246 gave four primitives a region they draw only when their
+     source did not answer, this exercise calls `auditRegistry` with one
+     argument, and a region an unanswered probe cannot reach is a declaration it
+     did not see rendered. That is this lesson's own subject and not a defect, so
+     a further bound primitive declaring such a region moves the line — and
+     moves the paragraph under this fence beginning "Three of the four verdict
+     lists", which counts them.
+
+     `notDecorated`, `notProbeable` and `unplacedBehaviours` are the control and
+     are expected to stay empty; if one of those three stops being empty, this
+     mark does not cover it and something is wrong. -->
 
 ```
   primitives registered: 107
@@ -904,9 +916,21 @@ read as a fact about the library for two weeks. Hand `auditRegistry` the
 `src/primitives/library.test.ts` passes them, and asserts both this four and
 that nothing.
 
-> *The transcript and this passage were corrected by `Loom primitives` to keep
-> the exercise true. The lesson's own argument is better served than it was, and
-> re-teaching it around this is its author's — filed.*
+And the way this lesson came to say that is the part worth keeping, because it is
+the argument happening to the argument. The transcript and the paragraph above it
+were corrected on 9 October by `Loom primitives`, the lane that shipped 0246,
+which is what the convention asks of a lane that has just made somebody's suite
+red. They were right to, and they also filed the thing a correction cannot do:
+the fence was true again and the teaching around it was still pitched at a world
+where the fourth list was empty.
+
+So the limit the probe has is the limit this page had. A line was corrected by
+somebody holding a diff; the sentence that said *what the line means* was two
+screens away and belonged to whoever had read the lesson. Both of lesson 35's
+`moves:` marks exist because that gap was found twice in October, on lessons 32
+and 24 — and this is the third instance, in the lesson that is about it, with the
+mark already in place and doing exactly the job it was written for: it said *this
+would be news, not drift*, and the news got filed instead of pasted.
 
 `loom.tally` is worth a glance: probed in **one** state, because its schema
 closes over nothing. One render, one claim, and the word *every* and the word

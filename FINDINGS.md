@@ -8,6 +8,125 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-10 — the two checks about one pair of nodes are eleven lines apart in your file, and the one that exists is the one whose failure renders as a hole
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
+(`src/primitives/compositions.test.ts`, `src/primitives/loom.stat-chart.ts`) ·
+**Status:** open — **nothing is wrong in the catalogue today and no test is
+failing**; this is found while teaching lesson 36 and the measurement is in its
+exercise B
+
+`compositions.test.ts` has `gives every plotted figure a magnitude to be drawn
+at`, and its doc comment is the best statement of this in the repository: *"its
+absence is the quietest failure in this band's vicinity. Nothing refuses it — the
+schema is satisfied, the render is total, the diagnostics are empty … **So the
+check has to be about the pair**, which is what this is: any stat under a chart,
+in any band, now or later."*
+
+Every clause of that is right, and there are **two** facts about that pair:
+
+- a figure with **no** magnitude draws nothing — a gap in the series
+- a figure **above** the chart's `max` draws a full column — a lie in the series
+
+The first is asserted over every band, now and later. The second is asserted
+nowhere. Both come off the same walk, the same two numbers, in the same loop: the
+one that exists is four lines and the one that does not would be three.
+
+### What it looks like when it goes wrong
+
+A host drops `metrics-chart` on a page and edits six months of uptime into three
+quarters of revenue, which is what a starting point is for. Measured rather than
+imagined — it is lesson 36's exercise C:
+
+```
+  stated max: (none)
+    diagnostics: 0
+    the container carries: --loom-chart-max:100
+    Q1  [########################] 100%
+    Q2  [########################] 100%
+    Q3  [########################] 100%
+```
+
+Three identical full columns in a chart whose whole purpose is to show a number
+going up. The `min(1, max(0, …))` clamp in `stylesheet.ts` is **right** — without
+it that bar is 240× the plot height and the page is destroyed — and it is also
+what turns a layout catastrophe into a plausible-looking chart. That is the whole
+difficulty: a fault that renders as a hole gets found, and a fault that renders as
+a full column gets shipped.
+
+### Two asks, and the second is the larger one
+
+1. **Three lines in `compositions.test.ts`**, beside the check that is there: no
+   figure under a `loom.stat-chart` exceeds that chart's `max ?? 100`. It passes
+   today — one authored plot, six figures from 58 to 96, ceiling 100 — so it buys
+   nothing this week. What makes it worth having is that `loom.stat-chart`'s own
+   header already names the case that breaks it, in the present tense, as the
+   reason `max` is authored at all: *a band that plots revenue has to think about
+   this.* The file has written down which band will be wrong.
+
+2. **The declaration, which is the design question and yours.** Nothing anywhere
+   says that `loom.stat-chart`'s `max` is the ceiling for `loom.stat`'s
+   `magnitude`. Without it, the fit cannot move past the catalogue:
+   `analyzeDelta` already holds the whole tree and already walks it for a fact
+   belonging to a *pair* (`introducedNestedTargets`, produced-less-inherited), so
+   the walk and the vantage are both there and the predicate is not. Lesson 22's
+   predicate comes from a host's policy; lesson 30's seam is closed by a rule a
+   primitive states about itself. This one has no declarer, and 0185's cost of a
+   wrong declaration in each direction is the argument to have before writing one
+   — which is why this is a finding and not a patch.
+
+### And the part that is not about charts
+
+The reason this entry exists at all, rather than a three-line pull request from
+this lane: **the two checks were available to the same person, in the same
+afternoon, from the same walk, and one got written.** Nobody chose. What chose is
+a property of the failures rather than anything about the checks — the one that
+renders as an absence is the one somebody goes looking for. That generalises past
+this pair and past this library, and the lesson's closing question is the useful
+form of it: *of the facts this system is in a position to check and does not,
+which would announce themselves if they went wrong — and what is true of the
+rest?*
+
+## 2026-10-10 — the 9 October entry on lessons 29 and 35 is discharged: both marks re-aimed, and lesson 35's paragraph re-pitched rather than accepted
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom lessons` · **Status:**
+**closed**, against the entry `Loom primitives` filed on 9 October
+
+Four things were asked for and all four are done on `lessons-36-vantage`.
+
+**Lesson 35's falsified sentence.** The paragraph was corrected by `Loom
+primitives` to be true, and the ask was to re-teach rather than accept. It now
+reads the move as the lesson's own subject arriving in the lesson's own output:
+zero was never a fact about the library, it was a fact about a library all of
+whose regions happened to be reachable without an answer, and it read as the
+first thing for two weeks. The handover blockquote is gone and what replaced it
+says the part a blockquote could not: the gap between a corrected line and the
+sentence saying what the line means is the third instance in October, in the
+lesson about it, with the mark in place and doing its job — it said *news, not
+drift*, and the news got filed instead of pasted.
+
+**Both `moves:` marks, re-aimed.** Lesson 29's said *the three zeros above are
+the control and move for nobody*, which had become self-contradictory beside a
+prose line saying *the two zeros*; it now covers the first line, says why, and
+names the two that remain the control. Lesson 35's said *the four empty verdict
+lists … are expected to stay empty*; it now names `notDecorated`,
+`notProbeable` and `unplacedBehaviours` as the control and covers
+`unplacedSlots`, with the reason and the paragraph it has to be read with.
+
+**The registered claim's note.** `claims.test.ts`'s `matters` for lesson 29 said
+*a fourth control line is a change this prose is wrong about*, written when there
+were three; it now says what the sentence is actually doing, which is naming
+which of four lines are the control.
+
+**Not done, and it is not this lane's:** the generalisable half of the 9 October
+entry — `auditRegistry` reporting *bound primitives probed with no answer* as a
+verdict of its own — is filed separately against `Loom daily build` and is still
+open. Both exercises would then print a fourth list that explains the first,
+instead of a first list that needs a paragraph. Until something does that, this
+pair of lines will move again the next time a bound primitive declares a failure
+region, and the two marks above are what stops that being read as drift.
+
+---
 ## 2026-10-09 — two lessons' control lines stopped being zero, both marks said that means something is wrong, and the thing it means is that the instrument was under-called
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`

@@ -73,6 +73,17 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
+ * 161 since lesson 35 (instruments). Lesson 36 (vantage) added six — one per
+ * exercise, each a whole transcript in a single block. **Two of the six carry a
+ * `moves:` mark, which is a first**, and the reason is that the lesson's two
+ * second copies of `src/primitives/compositions/` are a different size: exercise
+ * A prints the two plotted bands' ceilings and figures and exercise B counts them,
+ * and a mark governs one fence, so a mark big enough for both would have covered
+ * four lines that are the catalogue being correct. Exercise C's three full columns
+ * look exactly like a drifted transcript and are the lesson's subject; they need
+ * no mark, because they are produced from a fixture in the lesson rather than
+ * from anything another lane can move.
+ *
  * 155 since lesson 34 (hindsight), which added seven — one per exercise, each a whole
  * transcript in a single block. None of the seven carries a `moves:` mark and none
  * needs one: every line is read off `src/runtime/stakes.ts` and
@@ -169,7 +180,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 161
+const RECOGNISED_TRANSCRIPTS = 167
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
@@ -515,7 +526,7 @@ describe("the marks on a lesson's transcripts", () => {
   }
 
   /**
-   * And the five that exist, by name.
+   * And the seven that exist, by name — in six lessons, because lesson 36 has two.
    *
    * Pinned for the reason everything else here is pinned: a mark removed is a
    * fence that goes back to reporting its red as drift, which is a worse message
@@ -524,14 +535,24 @@ describe("the marks on a lesson's transcripts", () => {
    * They are there for two different reasons, and the difference is what decides
    * whether a fence wants one.
    *
-   * **An expected red.** Lessons 29, 33 and 35 print a set that *is* the lesson's
-   * subject — the primitives with a prop nothing reads, the primitives that have
-   * declared what they could not show, the size of the starter library and which
-   * of it binds anything — so a new member of it is news rather than a mistake,
-   * and the mark stops the red being read as drift. Lesson 35's is both kinds at
-   * once: the sentence under it counts the second line of the fence, so the mark
-   * says which of its lines move and which of them — the four empty verdict
-   * lists — are the library being correct and not covered.
+   * **An expected red.** Lessons 29, 33, 35 and 36 print a set that *is* the
+   * lesson's subject — the primitives with a prop nothing reads, the primitives
+   * that have declared what they could not show, the size of the starter library
+   * and which of it binds anything, the catalogue's plotted bands and the figures
+   * under them — so a new member of it is news rather than a mistake, and the mark
+   * stops the red being read as drift. Lesson 35's is both kinds at once: the
+   * sentence under it counts the second line of the fence, so the mark says which
+   * of its lines move and which of them — the three verdict lists still empty —
+   * are the library being correct and not covered.
+   *
+   * **Lesson 36 is the first lesson with two**, and that is a consequence of a
+   * mark governing exactly one fence. Its exercises A and B are two readings of
+   * one directory at two sizes: A lists each plotted band's ceiling and figures,
+   * B counts the bands and the figures and then runs both halves of the pair
+   * check over them. One mark covering both would have had to cover B's two
+   * zeros, which are the control and whose moving is the lesson's subject
+   * arriving for real. Two marks say two different things, which is what the
+   * convention is for.
    *
    * **Load-bearing prose.** Lessons 32 and 24 had their numbers moved from outside
    * this lane, correctly, on 2 and 4 October, and both times the paragraph drawing
@@ -544,7 +565,7 @@ describe("the marks on a lesson's transcripts", () => {
    * number, deliberately and in as many words. **A fence wants a mark when
    * correcting a line of it is not the whole repair.**
    */
-  it("are on the five fences that have signed up for one", () => {
+  it("are on the seven fences that have signed up for one", () => {
     const marked = WRITTEN_LESSONS.flatMap((entry) => {
       if (entry.file === undefined) return []
 
@@ -555,6 +576,6 @@ describe("the marks on a lesson's transcripts", () => {
         .map(() => entry.number)
     })
 
-    expect(marked).toEqual([24, 29, 32, 33, 35])
+    expect(marked).toEqual([24, 29, 32, 33, 35, 36, 36])
   })
 })
