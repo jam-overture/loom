@@ -8,7 +8,7 @@
       "files": 96,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4727,7 +4727,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4773,7 +4773,7 @@
       "files": 59,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5756,7 +5756,7 @@
       "files": 210,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6221,7 +6221,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7239,7 +7239,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7830,7 +7830,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8058,7 +8058,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8517,7 +8517,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8871,7 +8871,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9026,7 +9026,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 46,
+      "files": 48,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9039,7 +9039,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9110,6 +9110,97 @@
               "signature": "const pageActionOf: (reading: PageReading) => PageAction",
               "truncated": false,
               "summary": "What readers did on one revision of one page, off the reading of [`parts.ts`](parts.ts) and nothing else."
+            }
+          ]
+        },
+        {
+          "module": "signals/action-change",
+          "title": "Action change",
+          "summary": "What a change made readers *do*, rather than what it made them see.",
+          "symbols": [
+            {
+              "name": "ActionChangeSilence",
+              "kind": "type",
+              "signature": "type ActionChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Spelled as `ChangeSilence`, `CopyChangeSilence` and `PaceChangeSilence`\n * spell it, because a surface drawing four comparisons of one change should\n * not meet four names for one state.\n */\n\"different-trees\"\n/**\n * One of the two windows holds uses and credits no reader with acting inside\n * anything.\n *\n * `PageAction.unwalked` on either side: a sender whose delegated signals carry\n * no `within`, a server synthesising batches, a fixture replayed. Every\n * share on that side is a nought that is a filing artefact, so every movement\n * across it is spurious and the page reads as abandoned.\n *\n * **The occurrence figures still stand**, because a press is filed against the\n * part it happened to and needs no ancestry. Which side it is, is on that\n * side's own reading, as `nothing-measured` leaves which window was empty to\n * the pair of readings rather than naming it here.\n *\n * Checked before `nothing-measured`, which it cannot ordinarily coincide with:\n * a window with no page views holds no uses either. A row carrying occurrences\n * with no views is a sender that is not one, and this is the sharper of the two\n * things to say about it.\n */\n | \"unwalked\"\n/**\n * One of the two windows held no page views.\n *\n * Every standing on that side is `unknown`, so there is no share to\n * compare. **The tree half still answers**: which parts the change added and\n * removed, and which of them gained or lost an inside, are facts about the two\n * revisions — and *the change added a band and nothing has been measured\n * since* is true and worth saying.\n */\n | \"nothing-measured\"\n/**\n * No part the two revisions share says anything on either side.\n *\n * The state `CopyChangeSilence.dissolved` reports of words and\n * `PaceChangeSilence.dissolved` of parts: a page that carries no part carries\n * no action either. The census of what was added and removed answers in\n * full and is the whole of what can be said.\n */\n | \"dissolved\";",
+              "truncated": false,
+              "summary": "Why a comparison of what readers did answered nothing."
+            },
+            {
+              "name": "ACTION_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const ACTION_CHANGE_SILENCES: readonly ActionChangeSilence[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface that has to account for every absent figure."
+            },
+            {
+              "name": "describeActionChangeSilence",
+              "kind": "function",
+              "signature": "const describeActionChangeSilence: (silence: ActionChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a figure is not there."
+            },
+            {
+              "name": "ActionMovement",
+              "kind": "type",
+              "signature": "type ActionMovement =\n/**\n * Readers reached it and did nothing in it, and now they do something — the\n * sentence a change to a band nobody uses is made for.\n *\n * **It cannot be the shape change in disguise.** `untouched` on the earlier\n * side requires that side to have borne element parts, so a part the change\n * gave an inside to is never reported here — the one combination to read\n * {@link ComparedAction.inside} for is `lost`, which is a band whose children\n * the change removed and which now reports presses of its own.\n */\n\"taken-up\"\n/** Readers did something in it and now they reach it and do nothing. */\n | \"abandoned\"\n/**\n * Reached and untouched before, reached and untouched now — the asks a change\n * did not fix.\n *\n * Kept apart from `held` because both are *the standing did not move* and they\n * are opposite findings about a page, which is how a pace comparison keeps\n * `still-skimmed` from `held`.\n */\n | \"still-untouched\"\n/** Readers did something in it before and after. */\n | \"held\"\n/**\n * One of the two windows cannot say whether readers acted on it.\n *\n * No row named it, its `reached` is nought while the window held views — the\n * unanchorable case — or it is a leaf on that side, whose nought is a\n * filing rule and not a measurement. Which it is, is on that side's own\n * standing, and {@link ComparedAction.inside} answers the last of the three\n * outright.\n *\n * **A control whose presses began is in here**, and that is the §6 thinness in\n * a third place rather than a choice made here: a leaf with no uses is\n * `unknown` because nothing in the tree says whether it could be pressed —\n * `role` declares one member and it is not *a control* — so the earlier\n * side has no verdict to move from. The two sides' `uses` travel on the rows,\n * and the day a primitive can declare what it can report, every counter\n * already stored reinterprets.\n */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to the verdict on one part between two windows."
+            },
+            {
+              "name": "ACTION_MOVEMENTS",
+              "kind": "value",
+              "signature": "const ACTION_MOVEMENTS: readonly ActionMovement[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface accounting for every part it was handed."
+            },
+            {
+              "name": "describeActionMovement",
+              "kind": "function",
+              "signature": "const describeActionMovement: (movement: ActionMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a part in front of a person."
+            },
+            {
+              "name": "InsideMovement",
+              "kind": "type",
+              "signature": "type InsideMovement = \n/** It bore element parts in both revisions, so its share means the same thing on both sides. */\n\"kept\"\n/**\n * It was a leaf and now bears element parts, so it has a share where its share\n * was withheld.\n *\n * **The one that reads like success and is not.** A button a change wrapped in\n * a band reports a share from the moment it has an inside, and the share it\n * had before was not a nought — it was not a measurement at all.\n *\n * The movement cannot be fooled by it: `taken-up` needs the earlier side to\n * have borne parts, so it is unreachable here. The **share** can be, which is\n * why {@link ComparedAction.shareRatio} is `null` on every part whose inside\n * moved, and why a surface drawing a bare `now.share` beside an absent\n * `was.share` needs this member to say what the absence was.\n */\n | \"gained\"\n/** It bore element parts and is now a leaf, so a share that was a measurement is withheld. */\n | \"lost\"\n/** A leaf in both revisions: its share is withheld on both sides and its standing is `unknown` on both. */\n | \"none\";",
+              "truncated": false,
+              "summary": "What the change did to whether a part has an inside for actions to be filed against."
+            },
+            {
+              "name": "INSIDE_MOVEMENTS",
+              "kind": "value",
+              "signature": "const INSIDE_MOVEMENTS: readonly InsideMovement[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface accounting for every compared part."
+            },
+            {
+              "name": "describeInsideMovement",
+              "kind": "function",
+              "signature": "const describeInsideMovement: (movement: InsideMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface saying what the change did to a part's shape."
+            },
+            {
+              "name": "ComparedAction",
+              "kind": "type",
+              "signature": "type ComparedAction = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PartAction;\n    /** The whole of what the later window said about it. */\n    readonly now: PartAction;\n    readonly movement: ActionMovement;\n    /** What the change did to whether a share of this part is measurable at all. */\n    readonly inside: InsideMovement;\n    /**\n     * `now.share ÷ was.share`, and `null` where either side withheld a share or\n     * the earlier one is nought.\n     *\n     * **The one ratio here that is sound across two windows.** Each side's share\n     * is two distinct view counts off one row, so each window's straddle\n     * has very nearly divided out before the two sides meet — the cancellation a\n     * fall between two siblings rests on, and the reason a ratio of the\n     * counts themselves is refused by this module and not published anywhere on\n     * this type.\n     *\n     * Nought on the earlier side is `null` rather than infinity: *nobody acted\n     * here and now somebody does* is {@link movement}'s answer, and a ratio is a\n     * figure a surface divides and ranks by.\n     *\n     * It is **non-null only where {@link inside} is `kept`**, which falls out of\n     * the two sides' shares being withheld on a leaf and is not a separate rule: a\n     * ratio across a part whose shape changed would be a ratio of two different\n     * measurements.\n     */\n    readonly shareRatio: number | null;\n    /**\n     * `now.usesPerReader ÷ was.usesPerReader`, and `null` where either side used\n     * nothing or reached nobody.\n     *\n     * Occurrences per reader on each side, so each term has its own window's\n     * straddle divided out of it and the ratio stands. **An intensity and not a\n     * rate** on both sides, so this is how much more each reader used a\n     * part and never how many more readers did.\n     *\n     * The one figure here that survives `unwalked`, because the four occurrence\n     * counters are filed against the part a reader used and need no ancestry.\n     */\n    readonly usesRatio: number | null;\n};",
+              "truncated": false,
+              "summary": "One part both revisions have, as two windows read what readers did with it."
+            },
+            {
+              "name": "ActionChange",
+              "kind": "type",
+              "signature": "type ActionChange = {\n    /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */\n    readonly treeId: TreeId;\n    readonly revisions: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /** The two readings of what readers did that this comparison is made of. */\n    readonly readings: {\n        readonly was: PageAction;\n        readonly now: PageAction;\n    };\n    /**\n     * Every part both revisions have that a row named on either side, in the\n     * **later** reading order.\n     *\n     * The later order because that is the page somebody is looking at. A part no\n     * row named on either side is left out: nothing in either window reported it,\n     * so a row for it could only ever read `unknown` and would make\n     * {@link movements} a count of parts nobody measured. {@link insides} is\n     * therefore a census of the compared parts and not of the tree.\n     */\n    readonly compared: readonly ComparedAction[];\n    /**\n     * Parts only the later revision has, as the later window read them, in its\n     * reading order.\n     *\n     * A census with readers in it rather than an exact one, unlike the census of\n     * the words a change wrote: a part that did not exist before has to be\n     * reached now for anything to be said about it. *The change added an ask and\n     * nobody has opened it* is the row worth looking at.\n     */\n    readonly added: readonly PartAction[];\n    /** Parts only the earlier revision had, as the earlier window read them, in its reading order. */\n    readonly removed: readonly PartAction[];\n    /** Compared parts by what happened to the standing. The five add to {@link compared}'s length. */\n    readonly movements: Readonly<Record<ActionMovement, number>>;\n    /** Compared parts by what the change did to their shape. The four add to {@link compared}'s length. */\n    readonly insides: Readonly<Record<InsideMovement, number>>;\n    /**\n     * The root, compared against itself across the two revisions.\n     *\n     * *Three in ten readers did something on this page and now four in ten do* —\n     * the page's one headcount figure, and a row rather than an addition: every\n     * action is strictly inside the root, so summing `within` across parts would\n     * charge one reader once per level they acted inside. That is why\n     * there is **no page-level total of readers who acted** here or anywhere, and\n     * this stands in for one.\n     *\n     * Kept out of the rankings below, because its subtree is every part it would\n     * outrank — the rule a pace comparison and a fall between two siblings both\n     * follow.\n     *\n     * `null` where either revision's root is not an element, or where no row named\n     * it on either side.\n     */\n    readonly whole: ComparedAction | null;\n    readonly mostTakenUp: ComparedAction | null;\n    /** The ask the change lost, on the same terms. */\n    readonly mostAbandoned: ComparedAction | null;\n    /**\n     * The parts readers reached and did nothing in, before and after — most\n     * reached now first, then in the later reading order.\n     *\n     * The list a person can act on without reading anything else, and the one\n     * ranking here about where a change did **not** land. The root is left out as\n     * it is left out of every ranking here; {@link whole} carries it.\n     * `still-untouched` only: a part whose standing is `unknown` on either side is\n     * in {@link movements} where it can be seen and not acted on, because putting\n     * it here would turn *nothing can be said* into *readers are ignoring this*.\n     */\n    readonly stillUntouched: readonly ComparedAction[];\n    /** Why there is no comparison of the reading, or `null` where there is one. */\n    readonly silence: ActionChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": "What a change did to what readers do on a page."
+            },
+            {
+              "name": "actionChangeOf",
+              "kind": "function",
+              "signature": "const actionChangeOf: (was: PageReading, now: PageReading) => ActionChange",
+              "truncated": false,
+              "summary": "What a change did to what readers do on a page, off two `PageReading`s and nothing else."
             }
           ]
         },
@@ -9579,6 +9670,69 @@
               "signature": "const deliverReaderSignals: (options?: DeliverOptions) => ((batch: ReaderSignalBatch) => void)",
               "truncated": false,
               "summary": "A `send` for `broadcastReaderSignals` that posts each batch."
+            }
+          ]
+        },
+        {
+          "module": "signals/deployment",
+          "title": "Deployment",
+          "summary": "Which of a deployment's pages to fix first.",
+          "symbols": [
+            {
+              "name": "DeploymentSilence",
+              "kind": "type",
+              "signature": "type DeploymentSilence = \n/**\n * The window's counters report no view of this revision.\n *\n * There is no fall to rank because there was no reading, and this is checked\n * before the door is, so a page nobody opened is not reported as a page the\n * door could not scale.\n */\n\"unread\"\n/**\n * There is no page-view row at the door for this revision, so its loss cannot\n * be put on the same scale as another page's.\n *\n * Not a page that was not measured. Its own reading is as good as any other's\n * and every figure inside it stands; what is missing is the one number that\n * makes two pages comparable.\n */\n | \"unscaled\"\n/**\n * The door row is there and nothing in it says a page view ever began.\n *\n * Either nobody has read this revision, or the senders are not marking their\n * openings — which the page-view reading publishes both numbers for, so the\n * diagnosis is a subtraction a surface can make.\n */\n | \"unopened\"\n/**\n * It reports more readers lost at one fall than the door has ever seen\n * appear, which no rollup produces.\n *\n * A reading assembled by hand or by a sender that is not one. The scaled\n * figure is withheld because it is the one the disagreement makes absurd, and\n * the fall it was taken from is published so the disagreement can be seen.\n */\n | \"inconsistent\";",
+              "truncated": false,
+              "summary": "A reason a page has no place in the order."
+            },
+            {
+              "name": "DEPLOYMENT_SILENCES",
+              "kind": "value",
+              "signature": "const DEPLOYMENT_SILENCES: readonly DeploymentSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "RankStanding",
+              "kind": "type",
+              "signature": "type RankStanding = \n/** In the order, with a fall and a scale for it. */\n\"ranked\"\n/**\n * Read, scalable, and losing nobody anywhere on the page.\n *\n * The cheerful answer, and a thin window can produce it as well: a revision\n * two readers saw through to the end has no fall in it either. `views` is what\n * tells the two apart and it travels with the row.\n */\n | \"unbroken\" | DeploymentSilence;",
+              "truncated": false,
+              "summary": "Where one page stands in the order, or why it is not in it."
+            },
+            {
+              "name": "RANK_STANDINGS",
+              "kind": "value",
+              "signature": "const RANK_STANDINGS: readonly RankStanding[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeRankStanding",
+              "kind": "function",
+              "signature": "const describeRankStanding: (standing: RankStanding) => string",
+              "truncated": false,
+              "summary": "One line per standing, for a surface naming why a page is where it is."
+            },
+            {
+              "name": "RankedPage",
+              "kind": "type",
+              "signature": "type RankedPage = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly standing: RankStanding;\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     *\n     * A floor and not a count, which is why it is never the denominator of\n     * anything here.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     *\n     * The weight behind the row: *three hundred and forty of twelve hundred\n     * readers*, where the second number is this and the first is scaled to it.\n     */\n    readonly opened: number | null;\n    /** This page's own straddle rate, which is what scales its loss. */\n    readonly inflation: number | null;\n    /** The sharpest fall on the page, where it has one. */\n    readonly at: ReadingStop | null;\n    /** Readers lost at that fall, as the window's counters have it. */\n    readonly lost: number | null;\n    /**\n     * The same loss on the door's scale, which is the key the order is on.\n     *\n     * Not a count of people and not rounded into one. Withheld where the page has\n     * no fall, no reading, or no row to scale it by.\n     */\n    readonly readers: number | null;\n    /**\n     * The fall as a share of the readers who reached the part before it, carried\n     * through unchanged.\n     *\n     * Sound without any correction, because both of its counts come off the same\n     * rows — so it is published even for a page whose scaled figure is withheld\n     * as inconsistent.\n     */\n    readonly share: number | null;\n};",
+              "truncated": false,
+              "summary": "One revision of one page, as the order has it."
+            },
+            {
+              "name": "DeploymentReading",
+              "kind": "type",
+              "signature": "type DeploymentReading = {\n    /**\n     * Every page with a fall and a scale for it, worst first.\n     *\n     * Most readers lost at the door's scale, then the larger share, then by tree\n     * id and newest revision first — so two pages that lose the same do not\n     * reorder on a refresh.\n     */\n    readonly ranked: readonly RankedPage[];\n    /** Every other page, by tree id and newest revision first. */\n    readonly unranked: readonly RankedPage[];\n    /** The head of the order, which is the page to fix first. */\n    readonly worst: RankedPage | null;\n    /** How many pages stand in each state, over the ranked and the unranked alike. */\n    readonly standings: Readonly<Record<RankStanding, number>>;\n    /**\n     * Distinct trees across every page read, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page, and both are\n     * in the order rather than one replacing the other: a revision shipped an\n     * hour ago with four readers on it does not supersede the one that nine\n     * thousand read.\n     */\n    readonly trees: number;\n    /**\n     * Page views counted at the door across the pages handed in, added.\n     *\n     * Exact and addable, for the reason no other figure here is: a page view began\n     * on one revision of one tree and was counted once. It is a weight rather than\n     * a deployment total — this sees the pages its caller read, not the\n     * deployment's.\n     */\n    readonly arrivals: number;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page twice, and a page twice\n     * in an order is the one way an order can lie about how much there is to fix.\n     */\n    readonly duplicated: number;\n    /**\n     * Door rows for one revision beyond the first, which were ignored.\n     *\n     * A store keeps one row per revision, so this is a caller's two reads again —\n     * and adding them would double a page's arrivals and halve its scaled loss.\n     */\n    readonly duplicatedRows: number;\n};",
+              "truncated": false,
+              "summary": "A deployment's pages, in the order they should be looked at."
+            },
+            {
+              "name": "deploymentReadingOf",
+              "kind": "function",
+              "signature": "const deploymentReadingOf: (pages: readonly ReadingProgress[], rows: readonly StoredPageViews[]) => DeploymentReading",
+              "truncated": false,
+              "summary": "A deployment's pages, in the order they should be looked at."
             }
           ]
         },
@@ -10864,7 +11018,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"change\" | \"copy\" | \"copy-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -10885,7 +11039,7 @@
             {
               "name": "SilenceCondition",
               "kind": "type",
-              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\";",
+              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no reader anywhere. The counters are present\n * and look healthy; what is wrong is that every share built on them is a\n * nought that is a filing rule rather than a measurement.\n *\n * The one condition here about a **nought that is not an absence**, which is\n * why no earlier set could report it. The occurrence counts survive it intact,\n * because they are filed against the part a reader used and need no ancestry.\n */\n | \"no-action-credited\";",
               "truncated": false,
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
@@ -10911,6 +11065,13 @@
               "summary": "What one reading's silence reports, and what it reports it of."
             },
             {
+              "name": "meaningOfActionChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfActionChangeSilence: (silence: ActionChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of what readers *did* reports."
+            },
+            {
               "name": "meaningOfChangeSilence",
               "kind": "function",
               "signature": "const meaningOfChangeSilence: (silence: ChangeSilence) => SilenceMeaning",
@@ -10930,6 +11091,13 @@
               "signature": "const meaningOfCopyChangeSilence: (silence: CopyChangeSilence) => SilenceMeaning",
               "truncated": false,
               "summary": "What a comparison of two windows' words reports."
+            },
+            {
+              "name": "meaningOfDeploymentSilence",
+              "kind": "function",
+              "signature": "const meaningOfDeploymentSilence: (silence: DeploymentSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What an order over a deployment's pages reports, of one of them."
             },
             {
               "name": "meaningOfPaceSilence",
@@ -11076,7 +11244,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11219,7 +11387,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11286,7 +11454,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11883,7 +12051,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11957,7 +12125,7 @@
       "files": 90,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12415,7 +12583,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1422,
+        "packageNames": 1444,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
