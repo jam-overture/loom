@@ -3,10 +3,14 @@
 **Lane:** `Loom marketing` · `apps/loom/app/(marketing)/` · **Branch:**
 `marketing-65-the-undo-the-rules-hold` · **Section:** §4d
 
-**Preview:** in the pull request body. Not opened from this run: `*.vercel.app`
-is denied by the environment's network policy, filed on 27 September.
-Everything measured below was measured on a production build served locally by
-`pnpm shoot --serve`, `built 2026-10-10T11:33:56.101Z`.
+**Preview:**
+https://loom-git-marketing-65-the-un-62ec43-jpizzolato36-6341s-projects.vercel.app
+— the one address worth opening on it is
+[`/how-it-works?ask=unstick-menu&approve=1&back=1`](https://loom-git-marketing-65-the-un-62ec43-jpizzolato36-6341s-projects.vercel.app/how-it-works?ask=unstick-menu&approve=1&back=1),
+which is the state no address on `main` can produce. Not opened from this run:
+`*.vercel.app` is denied by the environment's network policy, filed on
+27 September. Everything measured below was measured on a production build
+served locally by `pnpm shoot --serve`, `built 2026-10-10T11:33:56.101Z`.
 
 ## What this run did
 
