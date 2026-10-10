@@ -195,14 +195,27 @@ two marks are what stops that reading as drift.
 `.next`, with the status written to a file as the last thing on its own line and
 read in a separate command, per `docs/routines.md`.
 
+Run twice. The first was the branch as written; `main` then moved three pull
+requests (#563–#565) ahead of it, so the base was merged in and the gate re-run.
+**The figures below are the second run**, which is the one that counts.
+
 | | this branch |
 | --- | --- |
-| `@jam-overture/loom` | 199 files / 4,465 tests — `src/` was not opened on this branch |
-| `@loom/app` | 419 files / 7,642 tests |
-| findings ledger | 1,096 entries, 0 malformed — two of them this run's |
+| `@jam-overture/loom` | 201 files / 4,512 tests — `src/` was not opened on this branch; the change is #563–#565 |
+| `@loom/app` | 419 files / 7,699 tests |
+| findings ledger | 1,105 entries, 0 malformed — two of them this run's |
 | `prerender:check` | 131 pages, 1,644 text junctions, 0 run together; 3 metadata conventions, 0 unserved |
 
-Run once, on a base that had not moved since the branch was cut.
+**Nothing of this lane's moved across that merge, and nothing in it had a real
+chance of moving it.** #565 added `src/signals/action-change.ts` and
+`src/signals/deployment.ts` and widened `silences.ts`; #563 and #564 are the
+portal and demo route groups and their reports. None of that is `src/runtime/`,
+`src/primitives/` or `src/sdk/`, which is where every transcript, claim and
+printed type in this course reads from — and `transcripts.test.ts`,
+`claims.test.ts` and `declarations.test.ts` are green on the merged tree, so no
+exercise, count or declaration drifted. That is the merge being checked rather
+than my having read the diff. `FINDINGS.md` union-merged with no conflict, per
+0139, so none of the four entries now in that window was dropped.
 
 **No test weakened, skipped or deleted.** Pins moved, all of them upward and all
 of them because a lesson landed: `RECOGNISED_TRANSCRIPTS` 161 → 167 (six
