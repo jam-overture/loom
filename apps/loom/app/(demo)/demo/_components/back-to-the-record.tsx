@@ -35,6 +35,17 @@ import type { SpotTone } from "@/app/(demo)/_lib/spotlight"
  * went. The demo has one other opinion about scrolling per state
  * (`AnswerInView`, `SpotlightScroll`) and this is not a third — it moves nothing
  * on its own, and only offers.
+ *
+ * **And the arrow is observed rather than assumed, as of 9 October.** It was a
+ * literal `↑` and the comment under it said why: *"the card is above the
+ * visitor"*, which was true of every state that could reach this bar when it
+ * was written — all of them produced by a press that carried the visitor down
+ * the page to a mark. The demo now opens with a change to the page itself
+ * (`DEMO_OPENING_PRESET`): nothing scrolls, the visitor stays at the top of
+ * the rail, and the record lands **below** them — measured at 390 × 844, the
+ * card's top at y 981 of an 844px viewport. The bar was right to appear and
+ * pointing the wrong way. The same entry that says the card is gone says which
+ * side it went, so the direction is read off it.
  */
 export const BackToTheRecord = ({
   recordId,
@@ -45,6 +56,13 @@ export const BackToTheRecord = ({
   readonly tone: SpotTone
 }) => {
   const [away, setAway] = useState(false)
+  /**
+   * Which way the card went, which is only ever read while `away` is true.
+   * `above` is the opening value because it is the state the bar was built
+   * for, and because an observer that has not reported yet has not made the
+   * bar visible either.
+   */
+  const [side, setSide] = useState<"above" | "below">("above")
   const reach = reachFor(tone)
 
   useEffect(() => {
@@ -61,7 +79,18 @@ export const BackToTheRecord = ({
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries.at(-1)
-        if (entry) setAway(!entry.isIntersecting)
+        if (!entry) return
+
+        setAway(!entry.isIntersecting)
+        /*
+         * The card's own rectangle, in the viewport's coordinates: a top above
+         * zero is a card the visitor has scrolled past, and anything else is a
+         * card still to come. Read on every report rather than only on the one
+         * that hides the bar, so a visitor who scrolls the card from below
+         * them to above them — the stacked layout's whole shape — is offered
+         * the right direction without the observer having to fire twice.
+         */
+        setSide(entry.boundingClientRect.top < 0 ? "above" : "below")
       },
       /*
        * Against the viewport, and any sliver of the card counts as present. The
@@ -83,10 +112,11 @@ export const BackToTheRecord = ({
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
     /*
-     * `start` rather than `nearest`. The card is above the visitor and it is
-     * what they asked to see, so the top of it goes to the top of the screen —
-     * `nearest` would stop the moment its last line cleared the fold, which on
-     * the tallest card here is the undo and nothing above it.
+     * `start` rather than `nearest`. The card is what they asked to see, so the
+     * top of it goes to the top of the screen — `nearest` would stop the moment
+     * its last line cleared the fold, which on the tallest card here is the
+     * undo and nothing above it, and which does nothing at all for a card
+     * below the visitor that is already taller than the viewport.
      */
     card.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" })
   }
@@ -118,7 +148,14 @@ export const BackToTheRecord = ({
         <span className="min-w-0 flex-1 text-sm">{reach.said}</span>
         <span className="text-accent flex shrink-0 items-center gap-1 text-xs">
           {reach.action}
-          <span aria-hidden="true">↑</span>
+          {/*
+            * `aria-hidden`, because the words beside it already name the
+            * destination and a screen reader has no use for a direction it
+            * cannot see. What it is for is the visitor who reads the bar as a
+            * control: an arrow pointing away from the record is an instruction
+            * to scroll the wrong way.
+            */}
+          <span aria-hidden="true">{side === "above" ? "↑" : "↓"}</span>
         </span>
       </button>
     </div>

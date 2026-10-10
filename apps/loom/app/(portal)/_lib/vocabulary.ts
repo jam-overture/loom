@@ -1,4 +1,5 @@
 import type { HoldError, RevertOutcome, WriteOutcome } from "@jam-overture/loom/write"
+import { canonicalChecksOf } from "@jam-overture/loom"
 import type {
   DispositionKind,
   DispositionReasonCode,
@@ -8,6 +9,7 @@ import type {
   NodeKind,
   StakeFactorCode,
   StakeLevel,
+  WriteCheck,
 } from "@jam-overture/loom"
 import type {
   EpisodeAnswer,
@@ -1253,3 +1255,66 @@ export const PACE_SILENCES_PLAIN: Readonly<Record<PaceSilence, PlainWord>> = {
 }
 
 export const plainPaceSilence = (silence: PaceSilence): PlainWord => PACE_SILENCES_PLAIN[silence]
+
+/**
+ * What Loom was checking before it let a change on — the two checks a
+ * deployment hands over itself, in words that say what each one protects.
+ *
+ * These are the one part of *what judged a change* that the rules cannot
+ * account for. A props vocabulary and a binding reader are functions, and a
+ * policy is a serialisable value (0179, 0208), so a deployment that wires one
+ * on Tuesday produces judgments on Wednesday whose rules are byte-identical to
+ * Monday's — and either check can turn a change that would have gone on into
+ * one that was turned down. A screen comparing two stretches of the record
+ * without this would hand a reader a change in their own wiring and call it the
+ * AI getting worse.
+ *
+ * A `PlainWord` rather than a `PlainState`: a check that was in place is not an
+ * outcome and has no tone of its own. The reading that carries one is the
+ * verdict beside it.
+ *
+ * `label` is a noun phrase rather than a heading, because it is read in the
+ * middle of a sentence — *"judged with the settings check and the data check in
+ * place"*. And note what the labels may not say: `props` is on the
+ * plain-language list, which is that rule catching exactly the shortcut this
+ * table exists to refuse — printing a record's own key at a person.
+ */
+export const WRITE_CHECKS_PLAIN: Readonly<Record<WriteCheck, PlainWord>> = {
+  props: {
+    label: "the settings check",
+    meaning:
+      "Before a change goes on, Loom checks that every setting it would write is one the part receiving it actually accepts.",
+    technical: "props",
+  },
+  bindings: {
+    label: "the data check",
+    meaning:
+      "Before a change goes on, Loom checks that the data a part is pointed at is something this deployment can really read.",
+    technical: "bindings",
+  },
+}
+
+export const plainWriteCheck = (check: WriteCheck): PlainWord => WRITE_CHECKS_PLAIN[check]
+
+/**
+ * A set of checks as a reader meets it, with a phrase for the empty one.
+ *
+ * **The empty set is the ordinary healthy state, not missing data.** A
+ * deployment that has wired neither seam is a deployment Loom judges by the
+ * rules alone, and that is most of them. `describeWiredChecks` gives it the word
+ * "none", which is right for a record and wrong on a surface: a reader meeting
+ * *judged with none in place* has to work out what was missing. *Nothing beyond
+ * your rules* says the same thing as a fact about the deployment rather than as
+ * a hole in it, and the record's own word stays one click down.
+ *
+ * Canonical before it is read out, so that two rows holding the same two checks
+ * cannot print them in two orders. The record's own sets already arrive this
+ * way; a union taken across segments or across two stretches does not.
+ */
+export const plainWriteChecks = (checks: readonly WriteCheck[]): string => {
+  const canonical = canonicalChecksOf(checks)
+
+  return canonical.length === 0
+    ? "nothing beyond your rules"
+    : namedList(canonical.map((check) => WRITE_CHECKS_PLAIN[check].label))
+}

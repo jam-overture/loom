@@ -8,6 +8,7 @@ import {
   askedWith,
   availablePresets,
   DEMO_LEADING_PRESET,
+  DEMO_OPENING_PRESET,
   DEMO_PRESETS,
   leadingAsk,
   offeredPresets,
@@ -90,6 +91,38 @@ describe("the preset that leads", () => {
 
     expect(presetById(DEMO_LEADING_PRESET)).toBeDefined()
     expect(availablePresets(tree, ids)).toContain(DEMO_LEADING_PRESET)
+  })
+
+  /**
+   * And the same of the one the demo opens with, where the fallback would be
+   * even quieter: a `DEMO_OPENING_PRESET` the starting tree cannot honour
+   * promotes whatever is first in the table onto the green button of the one
+   * screen every visitor sees, with nothing failing.
+   */
+  it("opens with one this page can honour too", () => {
+    const tree = demoPageTree()
+
+    expect(presetById(DEMO_OPENING_PRESET)).toBeDefined()
+    expect(availablePresets(tree, ids)).toContain(DEMO_OPENING_PRESET)
+  })
+
+  /**
+   * **The opening press changes the page a visitor is looking at**, which is
+   * the property the order was chosen for and the one the id alone does not
+   * carry. Its single operation configures the root, so every primitive under
+   * it repaints at once and none of the change is below the fold — and it is
+   * also why `partTheAskWouldTouch` draws no excerpt under the green button on
+   * arrival (`before-the-press.ts` says so, and `before-the-press.test.ts`
+   * holds it).
+   */
+  it("opens with a change to the page itself rather than to a part of it", () => {
+    const tree = demoPageTree()
+    const operations = presetById(DEMO_OPENING_PRESET)?.plan(tree, ids)
+
+    expect(operations).toBeDefined()
+    for (const operation of operations ?? []) {
+      expect("nodeId" in operation ? operation.nodeId : undefined).toBe(tree.root.id)
+    }
   })
 })
 
@@ -283,8 +316,40 @@ describe("stamping a record with the suggestion it came from", () => {
 describe("the ask that leads", () => {
   const ALL = DEMO_PRESETS.map((preset) => preset.id)
 
-  it("is the one the table nominates, when the tree can still honour it", () => {
-    expect(leadingAsk(ALL)?.id).toBe(DEMO_LEADING_PRESET)
+  /**
+   * The arrival screen, which is the half of the nomination this run added.
+   *
+   * A stranger's first press has to move the page, because the claim this
+   * surface is making is that the page really changes and nothing on the
+   * screen has yet shown it. `presets.ts` carries the argument and the
+   * measurement it overturned.
+   */
+  it("opens with the ask that moves the page, before anything of the visitor's has", () => {
+    expect(leadingAsk(ALL, false)?.id).toBe(DEMO_OPENING_PRESET)
+  })
+
+  /**
+   * And the handover, which is the other half: once the visitor has watched a
+   * press turn the page over, the green button goes to the one the Gate holds
+   * — the claim the demo is actually about, read now as a refusal rather than
+   * as a button that did nothing.
+   */
+  it("hands the green button to the Gate's ask once a change of theirs has landed", () => {
+    expect(leadingAsk(ALL, true)?.id).toBe(DEMO_LEADING_PRESET)
+  })
+
+  /**
+   * The two nominations are different presets, and that is the whole of what
+   * makes the demo a sequence rather than one button pressed twice.
+   *
+   * Asserted rather than assumed because the collapse is deliberate and
+   * cheap: setting `DEMO_OPENING_PRESET` to `DEMO_LEADING_PRESET` restores
+   * exactly the single lead this replaced, and a run that takes that option
+   * should fail here and say so rather than leave two records arguing for an
+   * order the code no longer has.
+   */
+  it("nominates two different asks, which is what makes it a sequence", () => {
+    expect(DEMO_OPENING_PRESET).not.toBe(DEMO_LEADING_PRESET)
   })
 
   /**
@@ -296,17 +361,26 @@ describe("the ask that leads", () => {
   it("falls back to the first of the table rather than to nothing", () => {
     const without = ALL.filter((id) => id !== DEMO_LEADING_PRESET)
 
-    expect(leadingAsk(without)).toBeDefined()
-    expect(leadingAsk(without)?.id).toBe(offeredPresets(without)[0]?.id)
+    expect(leadingAsk(without, true)).toBeDefined()
+    expect(leadingAsk(without, true)?.id).toBe(offeredPresets(without)[0]?.id)
+  })
+
+  /** And the same fallback on the arrival screen, where the other one is spent. */
+  it("falls back on arrival too, rather than opening with nothing", () => {
+    const without = ALL.filter((id) => id !== DEMO_OPENING_PRESET)
+
+    expect(leadingAsk(without, false)?.id).toBe(offeredPresets(without)[0]?.id)
   })
 
   /** It is always one of the asks on offer, which is the join every caller makes. */
   it("never nominates an ask the tree cannot honour", () => {
     for (const id of ALL) {
-      expect(leadingAsk([id])?.id).toBe(id)
+      expect(leadingAsk([id], false)?.id).toBe(id)
+      expect(leadingAsk([id], true)?.id).toBe(id)
     }
 
-    expect(leadingAsk([])).toBeUndefined()
+    expect(leadingAsk([], false)).toBeUndefined()
+    expect(leadingAsk([], true)).toBeUndefined()
   })
 
   /** The order the panel lists them in is the table's, not `available`'s. */
