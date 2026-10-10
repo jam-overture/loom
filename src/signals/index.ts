@@ -17,6 +17,7 @@
  * as the store and the journal do it.
  */
 
+export * from "./action-change.js"
 export * from "./action.js"
 export * from "./broadcast.js"
 export * from "./change.js"

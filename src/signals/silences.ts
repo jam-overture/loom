@@ -1,5 +1,6 @@
 import { everyMemberOf } from "../closed-set.js"
 
+import type { ActionChangeSilence } from "./action-change.js"
 import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
@@ -13,8 +14,8 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are seven of them. Each set's names are right in its own
- * sentence, and across the six they overlap in two ways that a surface drawing
+ * absent, and there are eight of them. Each set's names are right in its own
+ * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
  *
@@ -118,6 +119,7 @@ export const describeSilenceSubject = (subject: SilenceSubject): string => {
  * there is one vocabulary and not two.
  */
 export type SilenceVocabulary =
+  | "action-change"
   | "change"
   | "copy"
   | "copy-change"
@@ -128,6 +130,7 @@ export type SilenceVocabulary =
 
 export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
   everyMemberOf<SilenceVocabulary>()([
+    "action-change",
     "change",
     "copy",
     "copy-change",
@@ -147,6 +150,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
  */
 export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSubject>> =
   Object.freeze({
+    "action-change": "comparison",
     change: "comparison",
     copy: "page",
     "copy-change": "comparison",
@@ -159,7 +163,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Nine of them against twenty-six members across the seven sets, which is the
+ * Ten of them against thirty members across the eight sets, which is the
  * overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -167,11 +171,20 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * **Neither the sixth set nor the seventh needed a tenth condition**
  * ([0244](../../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md),
  * [0250](../../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)),
- * which is the evidence that these are the states of the world rather than a
- * list of the names the modules before them happened to use. The seventh is the
- * stronger of the two: it is the first reading whose subject is not a page, a
- * part or a pair, and its reasons still landed on conditions that were already
- * here.
+ * which was the evidence that these are the states of the world rather than a
+ * list of the names the modules before them happened to use. The seventh was
+ * the stronger of the two: it is the first reading whose subject is not a page,
+ * a part or a pair, and its reasons still landed on conditions already here.
+ *
+ * **The eighth needed exactly one, and the reason is the thing worth writing
+ * down** ([0251](../../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)).
+ * `no-action-credited` is the first condition here that is not about a reader
+ * being absent, a row being absent or a word being undeclared: it is a window
+ * whose counters are present and whose **nought is a filing rule** rather than
+ * a measurement (0167, 0242). Nothing before a reading of what readers *did*
+ * could be in that state, so the earlier evidence is narrowed and not
+ * falsified — these are still the states of the world, and the way a new one
+ * arrives is with a reading that can be in one nothing else could.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -228,6 +241,20 @@ export type SilenceCondition =
   | "readers-above-views"
   /** The change left no word of the page as it was, so there is no carried text to read. */
   | "nothing-carried"
+  /**
+   * The window holds actions and credits none of them to a reader.
+   *
+   * A press is filed against the control and credited to the addressed ancestors
+   * the signal carries (0167), so a sender whose delegated signals have no
+   * `within` adds occurrences and no reader anywhere. The counters are present
+   * and look healthy; what is wrong is that every share built on them is a
+   * nought that is a filing rule rather than a measurement (0242).
+   *
+   * The one condition here about a **nought that is not an absence**, which is
+   * why no earlier set could report it. The occurrence counts survive it intact,
+   * because they are filed against the part a reader used and need no ancestry.
+   */
+  | "no-action-credited"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -239,6 +266,7 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "words-a-floor",
   "readers-above-views",
   "nothing-carried",
+  "no-action-credited",
 ])
 
 /**
@@ -269,6 +297,8 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "it reports more readers than views, which no rollup produces"
     case "nothing-carried":
       return "the change left no word of the page as it was"
+    case "no-action-credited":
+      return "it holds actions and credits none of them to a reader"
   }
 }
 
@@ -285,6 +315,29 @@ const meaning = (vocabulary: SilenceVocabulary, condition: SilenceCondition): Si
   subject: SUBJECT_OF_VOCABULARY[vocabulary],
   vocabulary,
 })
+
+/**
+ * What a comparison of what readers *did* reports (0251).
+ *
+ * A comparison, so its subject is the pair and never the page on the screen —
+ * and `unwalked` is the one member of any set that does not say which side it is
+ * true of while being the one a surface most wants to name. The two readings
+ * travel on the comparison, each with its own `unwalked`, which is where that is
+ * answered; the condition is what the two sides have in common and no more, as
+ * `no-openings-marked` is for a deployment.
+ */
+export const meaningOfActionChangeSilence = (silence: ActionChangeSilence): SilenceMeaning => {
+  switch (silence) {
+    case "different-trees":
+      return meaning("action-change", "two-pages")
+    case "unwalked":
+      return meaning("action-change", "no-action-credited")
+    case "nothing-measured":
+      return meaning("action-change", "no-view-reported")
+    case "dissolved":
+      return meaning("action-change", "nothing-carried")
+  }
+}
 
 /** What a before-and-after reading's silence reports (0224). */
 export const meaningOfChangeSilence = (silence: ChangeSilence): SilenceMeaning => {
