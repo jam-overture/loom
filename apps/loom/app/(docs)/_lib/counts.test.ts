@@ -18,6 +18,7 @@ import { COUNT_EXEMPTIONS, SITE_COUNTS, countPhrasePattern, siteCount, spellOut 
 import { outsideFences } from "./fences/spans"
 import { docsPagesIn, writtenDocsSections } from "./nav"
 import { KNOB_ORDER } from "./policy/knobs"
+import { renderDiagnosticCodes } from "./reporting/catalogue"
 import { readPageSource } from "./search/headings"
 
 /**
@@ -134,6 +135,8 @@ const SECOND_OPINION: Readonly<Record<string, number>> = {
   /** The order the page prints them in, which is a hand-written list. */
   "policy-settings": KNOB_ORDER.length,
   "starter-bands": bandCount,
+  /** The recipes, which the compiler holds against the union — not the list the page prints. */
+  "render-diagnostics": renderDiagnosticCodes().length,
   /** The example's caption counts the same subtree a second time. */
   "pricing-band-nodes": nodesIn(compositionById("pricing")?.build(sequentialIdFactory("second")) ?? buildText(sequentialIdFactory("empty"), "")),
 }
@@ -156,6 +159,7 @@ describe("the numbers this site states about Loom", () => {
     expect(siteCount("starter-palettes").value).toBe(21)
     expect(siteCount("policy-settings").value).toBe(Object.keys(gatePolicySchema.shape).length)
     expect(siteCount("starter-bands").value).toBe(STARTER_COMPOSITIONS.length)
+    expect(siteCount("render-diagnostics").value).toBe(24)
     expect(siteCount("pricing-band-nodes").value).toBeGreaterThan(STARTER_COMPOSITIONS.length / 2)
   })
 
@@ -364,6 +368,7 @@ describe("spelling a number the way prose spells it", () => {
       "starter-palettes: twenty-one",
       "policy-settings: fourteen",
       "pricing-band-nodes: forty-four",
+      "render-diagnostics: twenty-four",
       "starter-bands: fifty-nine",
     ])
   })

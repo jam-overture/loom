@@ -1,0 +1,34 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/what-a-render-reports",
+      "out": "2026-10-10-docs-render-reports-wide",
+      "viewport": "wide",
+      "waitFor": "[data-render-diagnostics]",
+      "measure": ["[data-render-diagnostics]", "[data-audience-group]", "[data-diagnostic]"]
+    },
+    {
+      "path": "/docs/the-runtime/what-a-render-reports",
+      "out": "2026-10-10-docs-render-reports-phone",
+      "viewport": "phone",
+      "waitFor": "[data-render-diagnostics]",
+      "measure": ["[data-diagnostic]", "[data-said]"]
+    },
+    {
+      "path": "/docs/the-runtime/what-a-render-reports",
+      "out": "2026-10-10-docs-render-reports-groups",
+      "viewport": "wide",
+      "waitFor": "[data-audience-group]",
+      "do": [{ "scrollTo": "[data-audience-group='component']" }]
+    },
+    {
+      "path": "/docs/getting-started/rendering-a-tree",
+      "out": "2026-10-10-docs-rendering-a-tree-wide",
+      "viewport": "wide",
+      "waitFor": "[data-named-diagnostics]",
+      "measure": ["[data-named-diagnostics]", "[data-named-diagnostics] [data-diagnostic]"]
+    }
+  ]
+}

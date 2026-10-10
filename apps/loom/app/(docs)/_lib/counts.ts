@@ -3,6 +3,7 @@ import { STARTER_COMPOSITIONS, STARTER_PRIMITIVES } from "@jam-overture/loom/pri
 
 import { bandNodesIn } from "./compositions"
 import { policyKnobs } from "./policy/knobs"
+import { RENDER_DIAGNOSTIC_ORDER } from "./reporting/codes"
 
 /**
  * Every number this site states about how big Loom is, read off Loom.
@@ -135,6 +136,18 @@ export const SITE_COUNTS = [
     of: "the nodes the library's pricing band builds",
     from: "bandNodesIn(\"pricing\"), which walks the built subtree",
     claimedOn: [{ section: "building-with-loom", page: "starting-from-a-band" }],
+  },
+  {
+    id: "render-diagnostics",
+    rendered: '<Count of="render-diagnostics"',
+    value: RENDER_DIAGNOSTIC_ORDER.length,
+    nouns: ["diagnostics"],
+    of: "the things a render can report that it could not honour",
+    from: "RENDER_DIAGNOSTIC_ORDER, which the compiler holds against RenderDiagnostic's own union",
+    claimedOn: [
+      { section: "the-runtime", page: "what-a-render-reports" },
+      { section: "getting-started", page: "rendering-a-tree" },
+    ],
   },
   {
     id: "starter-bands",
