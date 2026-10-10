@@ -5,7 +5,12 @@ import { randomIdFactory, type LoomTree } from "@jam-overture/loom"
 import { partTheAskWouldTouch } from "./before-the-press"
 import { partInQuestion } from "./in-question"
 import { demoPageTree } from "./page-tree"
-import { DEMO_LEADING_PRESET, presetById, type DemoPresetId } from "./presets"
+import {
+  DEMO_LEADING_PRESET,
+  DEMO_OPENING_PRESET,
+  presetById,
+  type DemoPresetId,
+} from "./presets"
 
 /**
  * What the one invited press is about, read before it is pressed.
@@ -43,6 +48,21 @@ describe("the part the ask would touch", () => {
     expect(part).toBeDefined()
     expect(part?.tree.root.type).toBe("loom.stat-grid")
     expect(part?.lead).toBe("This is what would come off the page.")
+  })
+
+  /**
+   * **And nothing under the ask the demo opens with**, which is the state the
+   * arrival screen is actually in as of this run.
+   *
+   * `DEMO_OPENING_PRESET` configures the root, and `partFromOperations`
+   * refuses the root by a rule it already had — a preview of the whole page
+   * beside the whole page. That refusal is load-bearing now rather than
+   * incidental: it is what keeps the arrival screen free of a 358px excerpt,
+   * and what makes the preview arrive exactly with the press that names
+   * something out of sight.
+   */
+  it("draws nothing for the ask the demo opens with, because its subject is the page", () => {
+    expect(askAbout(DEMO_OPENING_PRESET, tree())).toBeUndefined()
   })
 
   /**
