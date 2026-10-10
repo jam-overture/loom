@@ -171,11 +171,20 @@ already proved the point, so the loose assertion went.
 
 ## Test numbers
 
-GATE_NUMBERS
+`pnpm install && pnpm verify` green, status written to a file and read in a
+separate command.
+
+```
+Test Files  199 passed (199)      Tests  4482 passed (4482)    # root
+Test Files  419 passed (419)      Tests  7636 passed (7636)    # @loom/app
+EXIT=0
+```
+
+12,118 tests across 618 files.
 
 Nothing skipped, nothing weakened, no test deleted.
 
-The new tests are 15: 11 in `src/sdk/audit.test.ts` under *auditRegistry, on
+The new tests are 17: 12 in `src/sdk/audit.test.ts` under *auditRegistry, on
 what it was not told*, and 5 in `src/render/reads.test.ts` for the extracted
 `namesRead`. They cover both declaration forms, both causes, the total-miss
 quantifier, an `unavailable` answer, a prop-named declaration resolved against a
