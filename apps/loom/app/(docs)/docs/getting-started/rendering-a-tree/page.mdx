@@ -1,4 +1,6 @@
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { Count } from "@/app/(docs)/_components/count"
+import { NamedDiagnostics } from "@/app/(docs)/_components/render-diagnostics"
 
 export const metadata = pageMetadata("getting-started", "rendering-a-tree")
 
@@ -45,14 +47,16 @@ const { element, diagnostics, theme } = renderLoomTree(tree, options)
 ```
 
 `diagnostics` is a list, and it is empty on a healthy render. Each entry names
-the node it happened at:
+the node it happened at. Here are the four you are most likely to see while you
+are still building:
 
-| Code | What happened |
-| --- | --- |
-| `unknown-primitive` | the tree named a type the resolver does not have |
-| `invalid-props` | props failed the primitive's schema; the node rendered without them |
-| `props-undeclared` | the resolver knows the type and the validator does not — a wiring fault |
-| `theme-unresolved` | the root named a theme the registry refused |
+<NamedDiagnostics
+  codes={["unknown-primitive", "invalid-props", "props-undeclared", "theme-unresolved"]}
+/>
+
+There are <Count of="render-diagnostics" as="word" /> in total.
+[What a render reports](/docs/the-runtime/what-a-render-reports) is all of them,
+grouped by which of three people has to fix one.
 
 <Callout kind="warning">
   Diagnostics are not a debug channel to leave unread. They are the record that

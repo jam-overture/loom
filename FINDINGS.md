@@ -8,6 +8,106 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-10 — the sentence a render writes for an unresolved theme names every palette the deployment registered, and it is the only one in the union whose length is a deployment's to set
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/theme/registry.ts`) · **Status:** open — **nothing is broken and nothing
+is blocked**; it is a measurement that showed up the moment all twenty-four
+diagnostics were printed side by side
+
+`describeRenderDiagnostic` was called on a real instance of each of the
+twenty-four codes this week, for the new *What a render reports* page. Laid out
+together, one of the sentences is twice the length of the next and nearly twice the
+median, and almost all of the excess is one list:
+
+```
+the theme named by node n_badtheme3 could not be resolved, so the tree rendered
+unstyled — No palette "sunset". Registered: minimal, editorial, bold, paper,
+slate, sage, blush, harbour, citrus, lilac, graphite, clay, linen, midnight,
+carbon, plum, forest, ember, dusk, obsidian, tide.
+```
+
+**284 characters, of which 172 are the list.** The next longest in the union is
+226 and the median is 144. The list comes from `describeThemeError`, which names
+the registered ids so the reader of a log can see what they should have written,
+and that is a good instinct — it is the one error here where the right answer is
+almost always one of a short list.
+
+### Why it is filed rather than fixed on the page
+
+It grows with the deployment rather than with the runtime. Twenty-one palettes
+is this repository's starter library; a deployment with a palette per brand has
+as many as it has brands, and the sentence is then a paragraph in every log line
+and every diagnostic panel that prints it. **Nothing in the runtime bounds it**,
+and the two obvious bounds are both judgement calls that belong to whoever owns
+the seam:
+
+- **Cap the list** at some number and say *and nine others*, which keeps the
+  helpful half and loses the completeness.
+- **Name the nearest few** by edit distance, which is what a CLI does with a
+  mistyped flag and is more useful than the first twenty.
+
+A third answer is that it is correct as it stands and a log line is allowed to
+be long. That is a real position and it is why this is a finding and not a
+patch: three defensible answers, one of them the status quo.
+
+### What the documentation did about it in the meantime
+
+Nothing, which is the right thing. The page prints what the runtime says,
+including this one, because a page that trimmed the machine's wording to fit its
+own cards would be inventing a shorter runtime. The only accommodation is that
+the block is cards rather than a table — a table sized for this cell has one wide
+column and five thin ones on a 390px screen.
+
+---
+
+## 2026-10-10 — the one render diagnostic only a component can cause has no published way to cause it, so demonstrating it means writing a broken component
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/testing/primitives.ts`) · **Status:** open — **a gap rather than a
+defect**; the documentation shipped around it and says so on the page
+
+`unshown-unreadable` is raised when a primitive declares what it could not show
+and the declaration throws or returns a reading that cannot describe an answer.
+It is the only one of the twenty-four that neither a tree nor a composition root
+can cause: 0206 put the declaration inside the component, so only a component
+can break it.
+
+Every lane that wants to demonstrate it has the same problem. The five
+primitives in the starter library that declare `unshown` all compute the figure
+from the answer they were handed, correctly, which is the whole point of
+declaring the function the component already calls. So there is no registered
+primitive that produces this code, and there is no stand-in for one either:
+`src/testing/primitives.ts` publishes `testPrimitives` and
+`undecoratedPrimitive`, both of which behave.
+
+**This run wrote its own.** `(docs)/_lib/reporting/catalogue.ts` defines
+`bench.broken-reporter`, whose `unshown` throws, registers it into a registry of
+its own, and renders a tree with it. It is eleven lines, it is not registered
+anywhere a reader can reach, and the page carries a section saying what it is
+and why it exists — because the alternative was to describe this one row in
+prose and leave it the one unproved entry in a page whose claim is that every
+entry was produced.
+
+### What would be worth publishing, and what would not
+
+**Worth it:** one exported stand-in beside `undecoratedPrimitive` — a primitive
+that breaks the declaration it made, under whichever declaration the caller
+names. Every fault in the union addressed to a component's author becomes
+demonstrable by any lane, and today that is one code with more to come: the
+union has grown four members since 0176, and the `data-unshown` family is where
+the growth has been.
+
+**Not worth it:** anything larger. A catalogue of broken components in the
+testing door would be a second library to keep true, and the eleven lines this
+run wrote are the right size for the one case.
+
+Nothing is asked urgently. If the answer is that eleven lines per lane is
+cheaper than an export, that is a fine answer and this entry is the place it
+gets written down.
+
+---
+
 ## 2026-10-09 — two lessons' control lines stopped being zero, both marks said that means something is wrong, and the thing it means is that the instrument was under-called
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
@@ -14386,8 +14486,30 @@ something to explain each time.
 
 ## 2026-08-22 — the site's search finds its titles and its exports, and not a word of its prose
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
-stated limit of what shipped, recorded so it is revisited on purpose
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+#512** (`docs-47-the-undo-that-would-not-undo`), which added
+`(docs)/_lib/search/prose.ts` — and the status line said *open* for a fortnight
+after the work shipped, which is the thing worth recording here.
+
+> **Closed 10 October**, by a run that went looking for queued work in this
+> lane and found this entry describing a gap that no longer exists. The body
+> below is still a good statement of the problem and of the two properties that
+> made it cheap, both of which turned out to be exactly why it was cheap: the
+> index is one static route, and every heading already carried an `id`, so a
+> section's prose travels with the heading entry that points at it and the
+> results list did not change shape. The two rules the implementation added are
+> its own and are argued in that file — fenced code is not prose, and neither is
+> an inline-code span, because a name a reader typed letter-for-letter should
+> match the export rather than a page that mentions it.
+>
+> **What it says about this file rather than about search.** A finding whose
+> owner is the lane that will fix it has no second reader, so nothing fails when
+> the fix lands and the status line does not move. This is the second time this
+> lane has read its own open queue and found an entry that was done; the first
+> was the search ceiling, closed on 19 September in the same run that did the
+> work. The cheap habit is the one `Loom merge` already applies to records —
+> close it in the run that closes it — and the cheaper check is the one this run
+> actually used, which is to read the directory before trusting the entry.
 
 The index built by `app/(docs)/_lib/search/build.ts` holds **21 pages, 41
 headings and 751 exports**. That is the site's own table of contents plus the

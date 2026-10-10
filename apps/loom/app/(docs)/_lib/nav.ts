@@ -352,6 +352,12 @@ const orderedSections: readonly DocsSection[] = [
           "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
       },
       {
+        slug: "what-a-render-reports",
+        title: "What a render reports",
+        summary:
+          "Rendering never fails, so anything it could not honour comes back beside the page: every diagnostic a render can leave behind, what each one cost you, and which of three people has to fix it.",
+      },
+      {
         slug: "when-something-looks-wrong",
         title: "When something looks wrong",
         summary:
