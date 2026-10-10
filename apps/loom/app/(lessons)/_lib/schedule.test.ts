@@ -32,6 +32,7 @@ describe("the review schedule, read as a queue", () => {
       "AL",
       "AM",
       "AN",
+      "AO",
     ])
   })
 
@@ -54,7 +55,7 @@ describe("the review schedule, read as a queue", () => {
   it("stops at the tracking table rather than reading it as a set", () => {
     const last = REVIEW_SETS.at(-1)
 
-    expect(last?.letter).toBe("AN")
+    expect(last?.letter).toBe("AO")
     expect(last?.questions).toHaveLength(10)
     expect(last?.closing.join(" ")).not.toContain("Confident-and-wrong")
   })

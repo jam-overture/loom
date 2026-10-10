@@ -835,11 +835,22 @@ describe("C", () => {
      group below, so the lesson's argument is unchanged and only its arithmetic
      moves; a member of a *third* kind would be news the prose has to answer.
      This mark covers the fourth line and the rows under it, which are what the
-     lesson is about. Loom primitives owns the change that would do it. The
-     three zeros above are the control and move for nobody: if one of those is
-     what drifted, this mark does not cover it and something is wrong. They are
-     in the same fence because they are one comparison and the prose names "the
-     fourth line". -->
+     lesson is about. Loom primitives owns the change that would do it.
+
+     The first line is also covered, as of 9 October, and the reason is the
+     thing lesson 35 teaches rather than an exception. It read `0` for two
+     weeks and that was never a fact about the library: `auditRegistry(registry)`
+     is called here with one argument, so the probe never reaches the state a
+     bound primitive's failure region is drawn in, and 0246 gave four primitives
+     such a region. Nothing is broken. The number moves whenever a bound
+     primitive declares a region an unanswered probe cannot place — and if it
+     moves, the sentence under this fence beginning "The two zeros are the
+     control" has to move with it, because it says which lines are which.
+
+     The two zeros on the second and third lines are the control and move for
+     nobody: if one of those is what drifted, this mark does not cover it and
+     something is wrong. All four lines are in one fence because they are one
+     comparison and the prose names "the fourth line". -->
 
 ```
   declared slots no component placed:      4
