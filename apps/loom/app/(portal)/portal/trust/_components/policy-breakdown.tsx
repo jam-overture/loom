@@ -1,7 +1,12 @@
+import { WRITE_CHECKS } from "@jam-overture/loom"
 import type { CalibrationReport } from "@jam-overture/loom/telemetry"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
-import { poolsMoreThanOneGate } from "@/app/(portal)/_lib/calibration-view"
+import {
+  poolsMoreThanOneGate,
+  poolsMoreThanOneWritePath,
+} from "@/app/(portal)/_lib/calibration-view"
+import { plainWriteCheck } from "@/app/(portal)/_lib/vocabulary"
 
 import { PolicyRow } from "./policy-row"
 
@@ -31,16 +36,34 @@ const UNRECORDED_KEY = ""
  * exists to raise moved onto the summary line so a closed disclosure still warns
  * the reader. The warning is the part a person needs unasked; the table is the
  * part they need once they have decided to look.
+ *
+ * **A third reason it opens, since 0248: the write path moved.** A policy proves
+ * which rules were consulted and cannot reach the checks a deployment hands the
+ * write path separately, so a window can pool two write paths with one unchanged
+ * policy name and nothing above would have said so. That case gets its own
+ * summary line, because a reader told their *rules* changed would go looking
+ * through a configuration that never moved.
  */
 export const PolicyBreakdown = ({ report }: { readonly report: CalibrationReport }) => {
-  if (!poolsMoreThanOneGate(report)) return null
+  const pooledGates = poolsMoreThanOneGate(report)
+  const pooledWritePaths = poolsMoreThanOneWritePath(report)
+
+  if (!pooledGates && !pooledWritePaths) return null
 
   return (
-    <TechnicalDetail summary="Careful: your rules changed while these were judged">
+    <TechnicalDetail
+      summary={
+        pooledGates
+          ? "Careful: your rules changed while these were judged"
+          : "Careful: what Loom was checking changed while these were judged"
+      }
+    >
       <p className="text-ink-muted">
-        {report.byPolicy.length > 1
-          ? "More than one set of rules judged the changes on this page, so the verdict above pools gates that did not agree. Each row is the same measurement over one of them."
-          : "The rules on this page did not hold still, so the verdict above pools judgments made under different ones. Each row is the same measurement over one name."}
+        {!pooledGates
+          ? "Your rules held still on this page. What your deployment hands Loom to check before a change goes on did not, and either of those checks can turn a change that would have gone through into one that was turned down — so the verdict above pools two write paths. Each row is the same measurement over one name."
+          : report.byPolicy.length > 1
+            ? "More than one set of rules judged the changes on this page, so the verdict above pools gates that did not agree. Each row is the same measurement over one of them."
+            : "The rules on this page did not hold still, so the verdict above pools judgments made under different ones. Each row is the same measurement over one name."}
       </p>
 
       <table className="w-full border-collapse">
@@ -59,6 +82,48 @@ export const PolicyBreakdown = ({ report }: { readonly report: CalibrationReport
           ))}
         </tbody>
       </table>
+
+      {pooledWritePaths && <ChecksLegend />}
     </TechnicalDetail>
   )
 }
+
+/**
+ * What each of the checks a row names actually checks.
+ *
+ * The rows above name them with the record's own spelling, which is what a host
+ * matches against its own composition root — and which is a word nobody can act
+ * on without being told what it means. So the translation sits under the table
+ * it explains: plain name, one sentence, and the record's own word beside it so
+ * the row above and this line are visibly the same thing.
+ *
+ * Every check this version of Loom has, rather than only the ones this report
+ * mentions. A reader working out why two write paths differ is working out what
+ * is *missing* from one of them, and a legend listing only what is present
+ * cannot answer that. It is two lines today and it is generated from
+ * `WRITE_CHECKS`, so a third arrives here without anybody remembering to come
+ * back.
+ */
+const ChecksLegend = () => (
+  <dl className="flex flex-col gap-1">
+    {WRITE_CHECKS.map((check) => {
+      const plain = plainWriteCheck(check)
+
+      return (
+        <div key={check} className="flex flex-col gap-0.5">
+          {/*
+           * A separator between the two names, because the photograph of the
+           * first draft read "the settings check props" — the plain name and
+           * the record's own running together as one phrase, which is the one
+           * thing a legend must not do.
+           */}
+          <dt className="text-2xs">
+            {plain.label}{" "}
+            <span className="text-ink-muted font-mono">· {plain.technical}</span>
+          </dt>
+          <dd className="text-ink-muted text-2xs">{plain.meaning}</dd>
+        </div>
+      )
+    })}
+  </dl>
+)

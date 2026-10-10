@@ -6,7 +6,13 @@ import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@jam-ove
 import { answerNote } from "./answer"
 import { movedOn } from "./moved"
 import { settingsOf } from "./plain-change"
-import { DEMO_LEADING_PRESET, DEMO_PRESETS, presetById, presetInterpreter } from "./presets"
+import {
+  DEMO_LEADING_PRESET,
+  DEMO_OPENING_PRESET,
+  DEMO_PRESETS,
+  presetById,
+  presetInterpreter,
+} from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
@@ -138,6 +144,30 @@ describe("a preset asked for through the demo's write path", () => {
     expect(record.heldProposalId).toBeDefined()
     /** Held means held: the page a visitor is looking at has not moved. */
     expect((await headOf(session)).revision).toBe(0)
+  })
+
+  /**
+   * And the converse, which is the other half of the demo's order and rots the
+   * same way.
+   *
+   * `DEMO_OPENING_PRESET` is nominated on the arrival screen *because* the
+   * Gate applies it: a stranger's first press is where this surface has to
+   * show the page really changing, and the card it produces carries the
+   * weighing, the rule and the inverse with nothing below the fold. Lower
+   * `user-instruction`'s auto-apply ceiling and the demo opens with a press
+   * that moves nothing — which is exactly the state `DEMO_OPENING_PRESET`
+   * exists to leave — while every other test goes on passing.
+   *
+   * The revision is the assertion that matters. `outcome` says what the Gate
+   * decided; the revision says the visitor's eyes were not lied to.
+   */
+  it("applies the preset the demo opens with, which is why it opens with it", async () => {
+    const session = await sessionFor("opening")
+    const record = await ask(session, DEMO_OPENING_PRESET)
+
+    expect(record.outcome).toBe("applied")
+    expect(record.heldProposalId).toBeUndefined()
+    expect((await headOf(session)).revision).toBe(1)
   })
 
   /**
