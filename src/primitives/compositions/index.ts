@@ -16,11 +16,13 @@ import { comparisonWaysBand } from "./comparison-ways-band.js"
 import { conversationBand } from "./conversation-band.js"
 import { contactBand } from "./contact-band.js"
 import { contactDetailsBand } from "./contact-details-band.js"
+import { contactSplitBand } from "./contact-split-band.js"
 import { credentialsBand } from "./credentials-band.js"
 import { credentialsPostureBand } from "./credentials-posture-band.js"
 import { ctaBand } from "./cta-band.js"
 import { ctaBookingBand } from "./cta-booking-band.js"
 import { ctaSignupBand } from "./cta-signup-band.js"
+import { faqAsideBand } from "./faq-aside-band.js"
 import { faqBand } from "./faq-band.js"
 import { episodesBand } from "./episodes-band.js"
 import { faqGridBand } from "./faq-grid-band.js"
@@ -29,11 +31,13 @@ import { feedBand } from "./feed-band.js"
 import { featuresAlternatingBand } from "./features-alternating-band.js"
 import { footerBand } from "./footer-band.js"
 import { footerSignupBand } from "./footer-signup-band.js"
+import { footerStatusBand } from "./footer-status-band.js"
 import { heroBand } from "./hero-band.js"
 import { heroShotBand } from "./hero-shot-band.js"
 import { heroSplitBand } from "./hero-split-band.js"
 import { integrationsBand } from "./integrations-band.js"
 import { integrationsGridBand } from "./integrations-grid-band.js"
+import { integrationsMarqueeBand } from "./integrations-marquee-band.js"
 import { listingsBand } from "./listings-band.js"
 import { metricsBand } from "./metrics-band.js"
 import { metricsChartBand } from "./metrics-chart-band.js"
@@ -85,12 +89,14 @@ export {
   contactBand,
   conversationBand,
   contactDetailsBand,
+  contactSplitBand,
   credentialsBand,
   credentialsPostureBand,
   ctaBand,
   ctaBookingBand,
   ctaSignupBand,
   episodesBand,
+  faqAsideBand,
   faqBand,
   faqGridBand,
   featuresBand,
@@ -98,11 +104,13 @@ export {
   feedBand,
   footerBand,
   footerSignupBand,
+  footerStatusBand,
   heroBand,
   heroShotBand,
   heroSplitBand,
   integrationsBand,
   integrationsGridBand,
+  integrationsMarqueeBand,
   listingsBand,
   metricsBand,
   metricsChartBand,
@@ -199,6 +207,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   conversationBand,
   integrationsBand,
   integrationsGridBand,
+  integrationsMarqueeBand,
   metricsBand,
   metricsChartBand,
   metricsLiveBand,
@@ -226,13 +235,16 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   changelogNotesBand,
   faqBand,
   faqGridBand,
+  faqAsideBand,
   contactBand,
   contactDetailsBand,
+  contactSplitBand,
   ctaBand,
   ctaSignupBand,
   ctaBookingBand,
   footerBand,
   footerSignupBand,
+  footerStatusBand,
 ]
 
 /**

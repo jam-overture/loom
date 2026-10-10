@@ -18,9 +18,11 @@ import {
   NO_VALUE,
   plainScoreline,
   poolsMoreThanOneGate,
+  poolsMoreThanOneWritePath,
   readGap,
   readRuleset,
   readTrust,
+  readWritePath,
 } from "./calibration-view"
 
 const scoreWith = (gap: number | null): CalibrationScore => ({
@@ -93,7 +95,8 @@ describe("describePolicy", () => {
 
 const segmentWith = (
   fingerprints: readonly string[],
-  unfingerprinted = 0
+  unfingerprinted = 0,
+  checks: Partial<Pick<PolicyCalibration, "checkSets" | "unrecordedChecks">> = {}
 ): PolicyCalibration => ({
   policyId: "checkout",
   overall: scoreWith(0.1),
@@ -102,6 +105,7 @@ const segmentWith = (
   unfingerprinted,
   checkSets: [[]],
   unrecordedChecks: 0,
+  ...checks,
 })
 
 const ONE = "aaaaaaaa:1111111111111111"
@@ -137,6 +141,137 @@ describe("readRuleset", () => {
 
   it("carries the unrecorded count into a row that also changed", () => {
     expect(readRuleset(segmentWith([ONE, EDITED], 2))?.detail).toContain("2 of them")
+  })
+})
+
+/*
+ * The other half of *what judged these claims*. Every segment below is shown to
+ * be one ruleset, so a screen reading only the fingerprints calls all of them
+ * settled — which is the gap 0248 closed and the reason this reading exists.
+ */
+describe("readWritePath", () => {
+  it("says nothing about a deployment that wired nothing and kept wiring nothing", () => {
+    expect(readWritePath(segmentWith([ONE]))).toBeNull()
+  })
+
+  /**
+   * The empty set is a write path and not an absence: a deployment judging by
+   * its rules alone is the ordinary case, and a note on every one of those rows
+   * is a note nobody reads on the day one of them changes.
+   */
+  it("says nothing about a deployment that wired checks and kept them wired", () => {
+    expect(readWritePath(segmentWith([ONE], 0, { checkSets: [["props"]] }))).toBeNull()
+    expect(readWritePath(segmentWith([ONE], 0, { checkSets: [["props", "bindings"]] }))).toBeNull()
+  })
+
+  it("names the row when one name was judged by two write paths", () => {
+    const note = readWritePath(segmentWith([ONE], 0, { checkSets: [[], ["props"]] }))
+
+    expect(note?.tone).toBe("rejected")
+    expect(note?.label).toBe("what Loom was checking changed under this name")
+    expect(note?.detail).toContain("2 different sets of checks")
+  })
+
+  /**
+   * Named with the record's own spelling, because this reading is only ever
+   * drawn inside the breakdown and a host matching a row against its own
+   * composition root wants the words it wrote there. The legend beside the table
+   * is what translates them.
+   */
+  it("names the sets as the record spells them, the empty one included", () => {
+    const note = readWritePath(segmentWith([ONE], 0, { checkSets: [[], ["props", "bindings"]] }))
+
+    expect(note?.detail).toContain('“none”')
+    expect(note?.detail).toContain('“props, bindings”')
+  })
+
+  /**
+   * The distinction the trend screen was getting wrong one level up: a judgment
+   * that recorded no checks is not a judgment made with different ones.
+   */
+  it("tells a row that recorded nothing apart from one that changed", () => {
+    expect(readWritePath(segmentWith([ONE], 0, { checkSets: [], unrecordedChecks: 4 }))?.label).toBe(
+      "no checks recorded"
+    )
+    expect(
+      readWritePath(segmentWith([ONE], 0, { checkSets: [[]], unrecordedChecks: 4 }))?.label
+    ).toBe("checks partly recorded")
+  })
+
+  /**
+   * Both notes can be drawn on one row, stacked, and two badges reading
+   * "partly recorded" would leave a reader unable to tell which half each was
+   * about — as well as colliding as React keys.
+   */
+  it("does not share a label with the ruleset note", () => {
+    const row = segmentWith([ONE], 3, { checkSets: [[]], unrecordedChecks: 3 })
+    expect(readRuleset(row)?.label).toBe("partly recorded")
+    expect(readWritePath(row)?.label).toBe("checks partly recorded")
+    expect(readRuleset(row)?.label).not.toBe(readWritePath(row)?.label)
+  })
+
+  it("counts the judgments that recorded nothing into a row that also changed", () => {
+    const note = readWritePath(
+      segmentWith([ONE], 0, { checkSets: [[], ["props"]], unrecordedChecks: 2 })
+    )
+
+    expect(note?.detail).toContain("2 of them recorded no checks at all")
+  })
+})
+
+describe("poolsMoreThanOneWritePath", () => {
+  const reportOf = (byPolicy: readonly PolicyCalibration[]): CalibrationReport => ({
+    overall: scoreWith(0.1),
+    buckets: [],
+    byPolicy,
+    unjudged: { "awaiting-answer": 0, failed: 0, unsettled: 0 },
+    unattributed: 0,
+    runtimeAuthored: 0,
+  })
+
+  it("is false for a page whose write path held still, whatever it had wired", () => {
+    expect(poolsMoreThanOneWritePath(reportOf([segmentWith([ONE])]))).toBe(false)
+    expect(
+      poolsMoreThanOneWritePath(reportOf([segmentWith([ONE], 0, { checkSets: [["props"]] })]))
+    ).toBe(false)
+    expect(poolsMoreThanOneWritePath(reportOf([]))).toBe(false)
+  })
+
+  /** The case the fingerprint cannot see: one unchanged policy name, two write paths. */
+  it("is true for one row judged under two write paths", () => {
+    expect(
+      poolsMoreThanOneWritePath(reportOf([segmentWith([ONE], 0, { checkSets: [[], ["props"]] })]))
+    ).toBe(true)
+  })
+
+  /**
+   * A journal written before the field existed records nothing, on every row, for
+   * ever. A disclosure headed *careful* that opened for all of those would be a
+   * warning about the passage of time.
+   */
+  it("is not tripped by a row that is merely unrecorded", () => {
+    expect(
+      poolsMoreThanOneWritePath(
+        reportOf([segmentWith([ONE], 0, { checkSets: [], unrecordedChecks: 9 })])
+      )
+    ).toBe(false)
+  })
+
+  /**
+   * Per row and not across the page, which is not an oversight: two names are
+   * already two gates, so `poolsMoreThanOneGate` opens the breakdown and each
+   * row reports its own write path there. This reading exists for the case that
+   * one misses — one name, two write paths — and a second check for the case it
+   * catches would make the summary line say *rules* where it should say checks.
+   */
+  it("leaves two rows that each wired something different to the gate check", () => {
+    const twoNames = reportOf([
+      segmentWith([ONE], 0, { checkSets: [["props"]] }),
+      segmentWith([EDITED], 0, { checkSets: [["bindings"]] }),
+    ])
+
+    expect(poolsMoreThanOneWritePath(twoNames)).toBe(false)
+    expect(poolsMoreThanOneGate(twoNames)).toBe(true)
   })
 })
 

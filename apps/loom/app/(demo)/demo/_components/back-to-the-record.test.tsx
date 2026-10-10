@@ -24,8 +24,15 @@ import { BackToTheRecord } from "./back-to-the-record"
 const RECORD = "demo-record-1"
 
 type Watcher = {
-  /** Report what the browser's observer would have reported. */
-  readonly report: (intersecting: boolean) => void
+  /**
+   * Report what the browser's observer would have reported.
+   *
+   * `top` is the card's own `boundingClientRect.top`, in the viewport's
+   * coordinates, and it is a parameter rather than a constant because the
+   * component reads a direction off it. Negative is a card the visitor has
+   * scrolled past; the default is the state this bar was built for.
+   */
+  readonly report: (intersecting: boolean, top?: number) => void
   readonly observed: () => readonly Element[]
   readonly disconnected: () => number
   readonly scrollIntoView: ReturnType<typeof vi.fn>
@@ -43,13 +50,17 @@ const browser = ({
   const scrollIntoView = vi.fn()
   const observed: Element[] = []
   let disconnected = 0
-  let announce: ((entries: readonly { readonly isIntersecting: boolean }[]) => void) | undefined
+  type Entry = {
+    readonly isIntersecting: boolean
+    readonly boundingClientRect: { readonly top: number }
+  }
+  let announce: ((entries: readonly Entry[]) => void) | undefined
 
   vi.stubGlobal("matchMedia", (query: string) => ({ matches: still, media: query }))
   vi.stubGlobal(
     "IntersectionObserver",
     class {
-      constructor(callback: (entries: readonly { readonly isIntersecting: boolean }[]) => void) {
+      constructor(callback: (entries: readonly Entry[]) => void) {
         announce = callback
       }
       observe(element: Element) {
@@ -70,7 +81,8 @@ const browser = ({
   }
 
   return {
-    report: (intersecting) => act(() => announce?.([{ isIntersecting: intersecting }])),
+    report: (intersecting, top = -1) =>
+      act(() => announce?.([{ isIntersecting: intersecting, boundingClientRect: { top } }])),
     observed: () => observed,
     disconnected: () => disconnected,
     scrollIntoView,
@@ -115,6 +127,54 @@ describe("the way back to the record", () => {
     watcher.report(true)
 
     expect(bar().dataset["away"]).toBe("false")
+  })
+
+  /**
+   * **The arrow points at the record, which is not always upwards.**
+   *
+   * Every state that could reach this bar when it was written was produced by
+   * a press that carried the visitor *down* the page to a mark, so the arrow
+   * was a literal `↑`. The demo now opens with a change to the page itself:
+   * nothing scrolls, and the record lands below the visitor — measured at
+   * 390 × 844, the card's top at y 981 of an 844px viewport. An arrow pointing
+   * away from the thing the button goes to is an instruction to scroll the
+   * wrong way, and it is the one part of this bar a visitor reads as a
+   * direction rather than as words.
+   */
+  it("points up at a record the visitor has scrolled past", () => {
+    const watcher = browser()
+
+    render(<BackToTheRecord recordId={RECORD} tone="applied" />)
+    watcher.report(false, -4281)
+
+    expect(bar().textContent).toContain("↑")
+    expect(bar().textContent).not.toContain("↓")
+  })
+
+  it("points down at a record the visitor has not reached yet", () => {
+    const watcher = browser()
+
+    render(<BackToTheRecord recordId={RECORD} tone="applied" />)
+    watcher.report(false, 981)
+
+    expect(bar().textContent).toContain("↓")
+    expect(bar().textContent).not.toContain("↑")
+  })
+
+  /**
+   * And it turns round without the bar having to be hidden and shown again,
+   * which is the state a stacked layout spends most of its time in: one
+   * scroller, a card that passes the visitor, and an observer still reporting
+   * the same `false`.
+   */
+  it("turns round when the card passes the visitor", () => {
+    const watcher = browser()
+
+    render(<BackToTheRecord recordId={RECORD} tone="applied" />)
+    watcher.report(false, 981)
+    watcher.report(false, -120)
+
+    expect(bar().textContent).toContain("↑")
   })
 
   /** The card, and nothing else: the bar has one question and it is about that one. */

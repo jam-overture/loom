@@ -405,8 +405,17 @@ export const whatTheRailShows = <TPart>({
    * a visitor deciding about the fifth. `ask-panel.tsx` argues the green; this
    * is the same claim with the preview attached to it, so the two cannot come
    * apart.
+   *
+   * **And `landing` is what decides which of the two nominations answers.**
+   * The demo opens with a change that goes ahead on its own and hands the
+   * green button to the one the Gate holds from the moment a change of the
+   * visitor's own is on the page; `presets.ts` carries the argument for the
+   * order. It is `landing` rather than `records.length` because an ask that
+   * was raised and is still waiting has moved nothing — and in that state this
+   * nomination is `undefined` anyway, which is the same rule stated twice and
+   * is why the two are read off one line.
    */
-  const nominated = waiting === undefined ? leadingAsk(available) : undefined
+  const nominated = waiting === undefined ? leadingAsk(available, landing !== undefined) : undefined
   const askPart = nominated === undefined ? undefined : partTheAskWouldTouch(tree, ids, nominated)
 
   /**

@@ -17,6 +17,7 @@
  * as the store and the journal do it.
  */
 
+export * from "./action-change.js"
 export * from "./action.js"
 export * from "./broadcast.js"
 export * from "./change.js"
@@ -24,6 +25,7 @@ export * from "./collect.js"
 export * from "./copy-change.js"
 export * from "./copy.js"
 export * from "./deliver.js"
+export * from "./deployment.js"
 export * from "./fold.js"
 export * from "./funnel.js"
 export * from "./ingest.js"

@@ -231,30 +231,74 @@ const promote: DemoPreset = {
 export const DEMO_PRESETS: readonly DemoPreset[] = [palette, backdrop, band, trim, promote]
 
 /**
- * The one a stranger is meant to press first, and it is the removal.
+ * The one a stranger is meant to press first, and it is the re-theme.
  *
- * It used to be the re-theme, chosen because it is the change visible
- * everywhere at once — the answer to *did something happen?* from across a
- * room. That was the right question when the demo's problem was that nothing
- * obviously moved. It is the wrong one now, and the cost of it is the whole
- * surface:
+ * **It was the removal until this run, and the argument for the removal was
+ * right about everything except what the card had become.** That argument is
+ * worth restating rather than deleting, because half of it still holds:
  *
- * **The demo's policy is tuned so that a re-theme lands on its own.** That is
- * deliberate and `session.ts` says why — `user-instruction` may auto-apply
- * `low` here, so a restructure waits for the visitor and a re-paint does not.
- * Which means the single control this panel was designed to be pressed first
- * was the one preset the Gate is guaranteed to have nothing to say about. A
- * stranger with sixty seconds pressed it, watched the page turn over, read a
- * card saying it was done, and left having seen *an AI changed a page* — the
- * one claim `docs/rollout.md` names as the least novel thing here and the one
- * everybody else already shows.
+ * > The demo's policy is tuned so that a re-theme lands on its own … which
+ * > means the single control this panel was designed to be pressed first was
+ * > the one preset the Gate is guaranteed to have nothing to say about. A
+ * > stranger with sixty seconds pressed it, watched the page turn over, read a
+ * > card saying it was done, and left having seen *an AI changed a page* — the
+ * > one claim `docs/rollout.md` names as the least novel thing here.
  *
- * The removal is the opposite. It is held, so the first press produces the
- * sentence this surface exists for — *Loom will not make this change until you
- * say yes* — about a small business's proof that it can see you. And being
+ * The clause that has expired is **"read a card saying it was done"**. When
+ * that was written, a card for an applied change said little more than that.
+ * It now carries the weighing panel with both questions answered in plain
+ * words, the rule that read them (*"Nothing this project watches for was
+ * involved, so it went ahead on its own"*), **Put it back** with the sentence
+ * saying an undo is weighed like any other change, and the ending underneath
+ * it. One press of this preset puts the change, the reasoning, the rule, the
+ * inverse and the loop on one screen with nothing below the fold.
+ *
+ * **What the removal cost, measured rather than argued.** Its press moves
+ * nothing — that is why it leads from the second press on — and the change it
+ * eventually makes is a *deletion*, of a band that is below the fold at
+ * 1280 × 900 and about four thousand pixels down at 390 × 844. So a stranger
+ * on the invited path pressed twice, was carried to a part of the page they
+ * had never seen, and the thing they were shown was an absence. Three runs of
+ * copy have worked on making that first press read as the product working
+ * rather than as a broken button, and all three were the right work; none of
+ * them makes a press that moves nothing the better opening for a surface whose
+ * claim is *the page really changes*.
+ *
+ * **The Gate is not traded away, it is sequenced.** It is claimed on the
+ * arrival screen before any press — `how-many-wait-for-you.ts` counts it and
+ * five chips are the evidence — it is one row down the list, and `leadingAsk`
+ * hands it the green button the moment a change of the visitor's own is on the
+ * page. A contrast needs both of its terms, and a stranger who has not yet
+ * seen a press do anything cannot read the first one as a contrast.
+ *
+ * **Setting this to `DEMO_LEADING_PRESET` restores the old behaviour exactly**,
+ * which is the shape this was built in: the nomination then answers the same
+ * preset before and after the first change, and the sequence collapses to the
+ * single lead it was.
+ *
+ * `pipeline.test.ts` asserts the property this depends on, and it is the
+ * converse of the one `DEMO_LEADING_PRESET` depends on: that the demo's policy
+ * **applies** this preset on its own. A retune that started holding it would
+ * open the demo with a press that moves nothing, which is the state this run
+ * exists to leave, and every other test would still pass.
+ */
+export const DEMO_OPENING_PRESET: DemoPresetId = "palette"
+
+/**
+ * The ask that leads once the visitor has a change of their own on the page,
+ * and it is the one the Gate holds.
+ *
+ * **Being held is the whole of why it is here.** It is the change that produces
+ * the sentence this surface exists for — *Loom will not make this change until
+ * you say yes* — about a small business's proof that it can see you. And being
  * held is not the end of the sixty seconds, it is the middle: answering it
- * applies the change, moves the revision, and leaves an undo. One press to meet
- * the Gate, one to get past it, one to put it back.
+ * applies the change, moves the revision, and leaves an undo.
+ *
+ * It is the second beat rather than the first, and the second beat is where it
+ * is strongest: a visitor who has just watched one press turn the whole page
+ * over reads *pressing this raises a question, not a change* as Loom declining
+ * to do what it has visibly just done, rather than as a button that did
+ * nothing. `DEMO_OPENING_PRESET` carries the argument for the order.
  *
  * Named here rather than in the panel because it is a claim about the *table* —
  * which preset earns the primary slot — and because `pipeline.test.ts` asserts
@@ -271,9 +315,25 @@ export const offeredPresets = (available: readonly DemoPresetId[]): readonly Dem
 /**
  * Which ask gets the green button, out of the ones this tree can honour.
  *
- * `DEMO_LEADING_PRESET` when it is still on offer, and the first of the table
- * otherwise — because a tree that has already lost its stat grid still has four
- * asks and a stranger still needs one of them to be the obvious first move.
+ * **Two nominations rather than one, and which of them answers is a fact about
+ * the visitor rather than about the tree.** On a page nothing of theirs has
+ * moved yet it is `DEMO_OPENING_PRESET`, a change that goes ahead on its own,
+ * because the first press is where this surface has to prove the page really
+ * changes. From the moment one of their changes is on the page it is
+ * `DEMO_LEADING_PRESET`, the one the Gate holds, because that is the claim the
+ * demo is actually making and a visitor is now in a position to read it as a
+ * refusal rather than as a failure. Both records say why at length.
+ *
+ * Either falls through to the first of the table when the tree cannot honour
+ * it — a page that has already lost its stat grid still has four asks and a
+ * stranger still needs one of them to be the obvious first move.
+ *
+ * **`landed` is required and that is deliberate.** The one caller is
+ * `rail.ts`, which holds the answer two lines above the call
+ * (`landedOnYourPress`), and a defaulted parameter is a parameter a later run
+ * can stop answering with the whole suite green — which is exactly how
+ * `whatEachWillSay` lost its history for a commit. Required, the deletion is a
+ * type error.
  *
  * **It moved here from `ask-panel.tsx` and the move is the point of the
  * function.** The nomination is a reading — *given what is on offer, which one
@@ -285,10 +345,20 @@ export const offeredPresets = (available: readonly DemoPresetId[]): readonly Dem
  * the same question. Two copies of a nomination is how a panel comes to preview
  * one ask and offer another.
  */
-export const leadingAsk = (available: readonly DemoPresetId[]): DemoPreset | undefined => {
+export const leadingAsk = (
+  available: readonly DemoPresetId[],
+  /**
+   * Whether a change the visitor pressed for is on the page — `rail.ts`'s
+   * `landing`, as a boolean, and never a count of records: an ask that was
+   * raised and is still waiting on an answer has moved nothing, and a visitor
+   * looking at a page that has not moved is still on their first press.
+   */
+  landed: boolean
+): DemoPreset | undefined => {
   const offered = offeredPresets(available)
+  const wanted = landed ? DEMO_LEADING_PRESET : DEMO_OPENING_PRESET
 
-  return offered.find((preset) => preset.id === DEMO_LEADING_PRESET) ?? offered[0]
+  return offered.find((preset) => preset.id === wanted) ?? offered[0]
 }
 
 export const presetById = (id: string): DemoPreset | undefined =>

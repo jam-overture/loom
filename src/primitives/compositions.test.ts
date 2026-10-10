@@ -170,8 +170,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers fifty-nine bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(59)
+  it("offers sixty-three bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(63)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -1351,7 +1351,15 @@ describe("the parts that offered no choice", () => {
     expect(designsOf("nav")).toEqual(["nav", "nav-centred", "nav-menus"])
     expect(designsOf("bento")).toEqual(["bento", "bento-mixed"])
     expect(designsOf("comparison")).toEqual(["comparison", "comparison-ways"])
-    expect(designsOf("footer")).toEqual(["footer", "footer-signup"])
+    /**
+     * **And the footer has three as of 10 October**, for the reason the bar's
+     * third exists rather than as a taste: `footer-status` is the first design
+     * of this part that says anything about the state of the product *now*
+     * rather than about what the site contains, and the thing carrying that is
+     * a `loom.badge` and the `loom.link` that backs it — nodes, so an incident
+     * is a `configure` on a text child.
+     */
+    expect(designsOf("footer")).toEqual(["footer", "footer-signup", "footer-status"])
   })
 
   /**
@@ -2477,5 +2485,185 @@ describe("what the second designs claim", () => {
     const alone = COMPOSITION_PARTS.filter((part) => compositionsForPart(part).length === 1)
 
     expect(alone).toEqual([])
+  })
+})
+
+/**
+ * The four third designs, and the claim each of them rests on.
+ *
+ * Every part named here had exactly two designs on 9 October, and two designs
+ * is a choice between two drawings rather than a vocabulary — so what these
+ * four add is not a third taste but, in each case, a region the part could not
+ * occupy at all. That region is the claim, and in all four cases it is
+ * invisible to every structural test in this file: `faq-aside` with its aside
+ * emptied renders as a narrow `faq` and passes the shape check against its
+ * canonical; `contact-split` with the form's own reply promise copied into the
+ * aside renders beautifully and is the two-figure failure the portal lane has
+ * now recorded twice.
+ *
+ * They are asserted here rather than beside each band for the reason the second
+ * designs' block gives: what is held is the **design**, and a design is a
+ * statement about what the subtree is *for*, which no walk of the subtree's
+ * types can recover.
+ */
+describe("what the third designs claim", () => {
+  const bandOf = (id: string): ElementNode => {
+    const band = compositionById(id)
+
+    expect(band, `${id} is not in the phrasebook`).toBeDefined()
+    if (band === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return band.build(sequentialIdFactory())
+  }
+
+  const slotIn = (node: LoomNode, name: string): readonly LoomNode[] => {
+    if (node.kind === "text") return []
+    if (node.kind === "slot" && node.name === name) return node.children
+
+    return node.children.flatMap((child) => slotIn(child, name))
+  }
+
+  /**
+   * The questions band's aside has to offer a way *out*, not more questions.
+   *
+   * The band exists because `faq` and `faq-grid` both end on the last answer,
+   * so a reader whose question is not there reaches the closing call to action
+   * having just failed to get one. The remedy is a control, and the thing that
+   * would silently undo it is an aside holding a sixth `loom.faq` — which is
+   * the edit that suggests itself, renders perfectly, and leaves the band
+   * saying exactly what the canonical already said.
+   *
+   * So: every question in the `start` region, no question in the `end` region,
+   * and a control in the `end` region. The third clause is what the band is;
+   * the second is what it must not become.
+   */
+  it("puts every question on the wide side of the questions band and a way out on the other", () => {
+    const band = bandOf("faq-aside")
+    const start = slotIn(band, "start")
+    const end = slotIn(band, "end")
+
+    const questionsIn = (nodes: readonly LoomNode[]): number =>
+      nodes.reduce((count, node) => count + elementsOfType(node, "loom.faq").length, 0)
+
+    expect(questionsIn(start), "the wide side carries no questions").toBeGreaterThan(1)
+    expect(questionsIn(end), "the aside carries questions, which is what the wide side is for").toBe(0)
+
+    const actions = end.flatMap((node) => elementsOfType(node, "loom.action"))
+
+    expect(actions, "the aside offers no way out, which is the only reason it is there").toHaveLength(1)
+    expect(typeof actions[0]?.props["href"]).toBe("string")
+  })
+
+  /**
+   * One marquee row, and the fade that makes it mean *this continues*.
+   *
+   * Both halves are props-and-counts rather than types, so the shape check
+   * against the canonical cannot see either. A second row would make this
+   * `integrations-grid` with the explanations removed and the stillness taken
+   * away — the band's own note argues it at length — and `edges: "hard"` would
+   * tell a reader the list ends where the viewport does, which is the opposite
+   * of the claim the band is drawn to make.
+   *
+   * The logos are asserted to carry no image because that is how this one reads
+   * as a ribbon of wordmarks rather than as a row of broken pictures: the
+   * catalogue ships no image source at all (asserted page-wide above), and this
+   * band is the design most likely to tempt the first one.
+   */
+  it("runs the integrations ribbon as one faded row of wordmarks", () => {
+    const band = bandOf("integrations-marquee")
+    const rows = elementsOfType(band, "loom.marquee")
+
+    expect(rows, "a ribbon of integrations is one row; two is a moving grid").toHaveLength(1)
+    expect(rows[0]?.props["edges"], "hard edges say the list ends where the band does").toBe("faded")
+
+    const logos = elementsOfType(band, "loom.logo")
+
+    expect(logos.length, "a ribbon with nothing on it").toBeGreaterThan(6)
+    for (const logo of logos) {
+      expect(logo.props["image"], `${String(logo.props["name"])} ships an image source`).toBeUndefined()
+    }
+
+    expect(elementsOfType(band, "loom.action"), "the ribbon cannot answer *is mine in there*").toHaveLength(1)
+  })
+
+  /**
+   * The contact band serves both readers once each.
+   *
+   * It is the two halves of `contact` and `contact-details` on the page
+   * together, and the failure it has to be held against is that it becomes the
+   * two *bands* concatenated: two headings, two reply promises, two eyebrows,
+   * the page saying *contact us* twice with different furniture.
+   *
+   * One `loom.perk` is the whole assertion — the reply promise lives in the
+   * form's `note` region and nowhere else — plus one heading at level 2 for the
+   * band and the direct ways present as links rather than as a second form. The
+   * `loom.option` check is the other direction: the team-size select is
+   * deliberately *gone* from this design, which is a node difference and the
+   * reason the band is not `contact` in a narrower column.
+   */
+  it("gives the split contact band one reply promise, one form and the addresses beside it", () => {
+    const band = bandOf("contact-split")
+
+    expect(elementsOfType(band, "loom.form"), "two forms is the band saying contact us twice").toHaveLength(1)
+    expect(elementsOfType(band, "loom.perk"), "a second reply promise is the two-figure failure").toHaveLength(1)
+    expect(
+      elementsOfType(band, "loom.option"),
+      "the team-size select is the question a reader beside an email address will not answer"
+    ).toHaveLength(0)
+
+    const headings = elementsOfType(band, "loom.heading").filter((heading) => heading.props["level"] === 2)
+
+    expect(headings, "a band has one level-two heading, however many halves it has").toHaveLength(1)
+
+    const end = slotIn(band, "end")
+    const schemes = end
+      .flatMap((node) => elementsOfType(node, "loom.link"))
+      .map((link) => String(link.props["href"]).split(":")[0])
+
+    expect(schemes, "the direct ways in are what the aside is for").toContain("mailto")
+    expect(schemes).toContain("tel")
+  })
+
+  /**
+   * The footer's live claim is two nodes in the brand region, and a node is the
+   * point.
+   *
+   * `footer-status` is the first design of this part that says anything about
+   * the state of the product now rather than about what the site contains. The
+   * thing that carries it is a `loom.badge` — which has no `href` and must not
+   * get one, because a badge that navigated would be a control drawn as a label
+   * — beside the `loom.link` that backs it.
+   *
+   * Both in the brand region rather than among the groups, for the reason the
+   * footer's own capture test gives about `footer-signup`: the groups region is
+   * an `auto-fit` grid sized for columns of links, and a badge dropped into it
+   * becomes a column.
+   *
+   * The single group is asserted as **one** because that is what makes this a
+   * row rather than a sitemap, and it is a count — so the shape check against
+   * the canonical's four would pass a second and a third arriving.
+   */
+  it("keeps the compact footer's status claim in its brand region, over one row of links", () => {
+    const band = bandOf("footer-status")
+    const brand = slotIn(band, "brand")
+
+    const badges = brand.flatMap((node) => elementsOfType(node, "loom.badge"))
+
+    expect(badges, "the live claim is not in the brand region").toHaveLength(1)
+    expect(badges[0]?.props["href"], "a badge that navigates is a control drawn as a label").toBeUndefined()
+
+    const backing = brand
+      .flatMap((node) => elementsOfType(node, "loom.link"))
+      .map((link) => String(link.props["href"]))
+
+    expect(backing, "the status claim is not backed by anywhere a reader can check it").toContain("/status")
+
+    expect(elementsOfType(band, "loom.badge"), "a badge among the groups becomes a column").toHaveLength(1)
+
+    const groups = band.children.filter((child): child is ElementNode => child.kind === "element")
+
+    expect(groups.map((group) => group.type), "a compact footer is one row of links, not a sitemap").toEqual([
+      "loom.link-list",
+    ])
   })
 })
