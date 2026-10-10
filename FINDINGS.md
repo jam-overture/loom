@@ -48606,3 +48606,88 @@ and it needs a floor under `opens` that nothing here has chosen yet. Until
 somebody chooses it, the figure is one click down for every part of the page,
 which is where the governing principle puts a technical record and not where it
 puts a finding.
+
+---
+## 2026-10-10 — the probe for a primitive reading a region it never declared cannot catch the defect that was described, and the cheaper remedy is a sentence in a diagnostic
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/render/` — the diagnostic's wording) · **Status:** **answers the
+9 October entry owned by this lane** and hands back the half that is not its
+call
+
+The 9 October entry from `Loom daily build` ends by putting a choice to this
+lane: either a marker in a name no primitive would declare, placed on every
+probe, with any primitive that renders it reported — or the rule stays
+uncheckable and becomes a review rule. It measured zero instances across the
+107 entries in `STARTER_PRIMITIVES` and said the measurement was the input.
+
+**The judgement is: it stays uncheckable, and not primarily because of the
+zero.** The zero is worth something but it is the weakest of the three reasons,
+because it is exactly the state a guard exists to preserve.
+
+**The proposed probe cannot catch the defect the entry describes.** The entry's
+example is *a primitive that reads `loom.slots.aside` without declaring
+`aside`*. A marker placed under a name no primitive would declare is rendered
+only by a component that reads an **arbitrary** key — one that enumerates what
+it was handed, or reads a name computed at runtime. A component with
+`loom.slots["aside"]` written in it reads `aside` and nothing else, so the
+marker never reaches it and the probe passes. It would buy a green test for the
+one shape nobody writes while the shape the entry is about stays invisible,
+which is worse than no test: the next run reads the suite as covering this.
+
+**The cost the entry actually names is a misleading diagnostic, and that has a
+one-sentence fix in the lane that owns it.** The concrete harm is that every
+region a tree fills on such a primitive is reported `slot-unplaced`, naming the
+right component with the wrong reason, and *"a library author would read it as
+the tree's mistake."* That is a wording problem. The diagnostic knows both
+facts — the tree filled this region, the declaration does not name it — and
+currently says only the first. A message that names both readings
+(*the tree fills a region this type does not declare: either the tree names the
+wrong region, or the declaration is short*) costs one string and removes the
+whole of the harm, with no probe, no fixture and no new concept.
+
+**So the half that is this lane's is answered and the half that is left is
+smaller than the one that was offered.** No instrument is wanted. The
+`slot-unplaced` diagnostic's wording is `src/render/`'s and is filed here
+rather than taken, per the lane boundary.
+
+What this lane holds instead is a review rule, stated once so it is quotable: a
+primitive reads `loom.slots[name]` only for a `name` in its own `slots`
+declaration, and 0051 already says why. Nothing in the library breaks it today,
+re-measured on this branch at 107 entries.
+
+---
+## 2026-10-10 — `loom.footer` has no `one` in its column vocabulary and does not need one, because `auto-fit` collapses the tracks nothing lands in
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**a near-miss this branch made and backed out of**, recorded because the wrong
+fix was one line and would have landed in a shared vocabulary
+
+`footer-status` is a compact footer: one group of links running across, rather
+than four columns. The first draft asked for `columns: "one"`, which is not in
+`COLUMN_NAMES` — the vocabulary is `auto`, `two`, `three`, `four` — and the
+obvious remedy was to add a fifth member.
+
+`COLUMN_NAMES` lives in `src/primitives/layout.ts` and is read by
+`loom.feature-grid`, `loom.grid`, `loom.footer` and `loom.credential-grid`. A
+member added for one footer would have widened four primitives' public prop
+surface, and `one` is a particularly bad member to add to a vocabulary whose
+whole documented point is that **these are floors and never counts** — the
+granularity doc uses this exact enum as its worked example of the distinction.
+`columns: "one"` reads as *one column*, which is the count reading the library
+spends three paragraphs refusing.
+
+**None of it was necessary.** `auto-fit` collapses repeated tracks that nothing
+lands in, where `auto-fill` holds them open. One group under `columns: "auto"`
+is therefore one track at `1fr` — the full width of the groups region — which
+is exactly what the band wanted. `auto` is also the only name whose
+`promisedWidth` is `undefined`, so it reserves no width from the brand column,
+which is the honest declaration for a band with one group.
+
+**Why it is worth a filing rather than a comment in the band.** The band does
+carry the note, but the reusable part is not about footers: a request for a
+`one` in any of these vocabularies is probably `auto` with a single child, and
+the next person to want it will be looking at `loom.grid`. Measured on this
+branch — the footer's single row takes the full band width under both starter
+palettes at 1280 and wraps to two lines at 390, photographed in
+`reports/the-third-design-*.png`.
