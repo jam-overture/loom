@@ -12,7 +12,7 @@ import {
 import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
 import { demoPageTree } from "./page-tree"
-import { DEMO_LEADING_PRESET, DEMO_PRESETS, presetById } from "./presets"
+import { DEMO_LEADING_PRESET, DEMO_OPENING_PRESET, DEMO_PRESETS, presetById } from "./presets"
 import { settingsMoved } from "./put-back"
 import type { ChangeRecord } from "./record"
 import {
@@ -165,6 +165,27 @@ describe("whatItWillSay", () => {
 
     expect(said?.moves).toBe(false)
     expect(said?.lead).toBe("Pressing this raises a question, not a change.")
+  })
+
+  /**
+   * **And the sentence the arrival screen actually ships**, which is the other
+   * one now that the demo opens with a change the Gate applies.
+   *
+   * It is asserted through the same real pipeline for the same reason: the
+   * line under the green button is not a string this surface chose, it is
+   * `composeChange`'s answer about the button above it, and the whole of the
+   * order in `presets.ts` rests on that answer being *applied*.
+   */
+  it("tells a visitor the page moves at once, on the ask the demo opens with", async () => {
+    const said = await whatItWillSay(
+      demoPageTree(),
+      DEMO_OPENING_PRESET,
+      randomIdFactory,
+      systemClock
+    )
+
+    expect(said?.moves).toBe(true)
+    expect(said?.lead).toBe("Pressing this changes the page straight away.")
   })
 
   /** Every preset the table offers reaches a verdict against the starting tree. */

@@ -53,20 +53,27 @@ const labelOf = (id: DemoPresetId): string => DEMO_PRESETS.find((preset) => pres
  * half that is still the panel's — that it gives the green button to the ask it
  * is handed, and lays everything else out around it.
  *
+ * `landed` defaults to the arrival screen, because that is the state almost
+ * every test below is about. The two that are about the second beat pass
+ * `true` and get the ask the Gate holds, exactly as the rail would hand it
+ * over.
+ *
  * No `part`, because a preview is an element the server rendered through the
  * registry and this is a render test of the panel. `part-in-question.test.tsx`
  * holds the excerpt; the one assertion here is that whatever it is handed is
  * put on the page.
  */
-const led = (available: readonly DemoPresetId[]) => {
-  const preset = leadingAsk(available)
+const led = (available: readonly DemoPresetId[], landed = false) => {
+  const preset = leadingAsk(available, landed)
 
   return preset === undefined ? {} : { leading: { preset: preset.id } }
 }
 
 describe("the ask panel", () => {
   it("gives the primary slot to the preset the table nominates", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
+    render(
+      <AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL, true)} />
+    )
 
     const buttons = screen.getAllByRole("button")
 
@@ -137,7 +144,7 @@ describe("the ask panel", () => {
    * under the button it is about at both widths.
    */
   it("keeps each button's promise welded to the button", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL, true)} />)
 
     const lead = DEMO_PRESETS.find((preset) => preset.id === DEMO_LEADING_PRESET)!
     const promise = screen.getByText(lead.promise)
@@ -206,7 +213,7 @@ describe("the ask panel", () => {
    * does open it needs the field named, not the section.
    */
   it("keeps free text behind a disclosure, closed until it is asked for", () => {
-    const { container } = render(<AskPanel revision={0} available={ALL} modelConfigured={true} {...led(ALL)} />)
+    const { container } = render(<AskPanel revision={0} available={ALL} modelConfigured={true} {...led(ALL, true)} />)
 
     const disclosure = container.querySelector("details")
     if (!disclosure) throw new Error("free text is not behind a disclosure")
@@ -307,7 +314,7 @@ describe("the ask panel", () => {
         revision={0}
         available={ALL}
         modelConfigured={false}
-        {...led(ALL)}
+        {...led(ALL, true)}
         willSay={ONLY_THE_LEAD}
       />
     )
@@ -328,7 +335,7 @@ describe("the ask panel", () => {
         revision={0}
         available={ALL}
         modelConfigured={false}
-        {...led(ALL)}
+        {...led(ALL, true)}
         willSay={ONLY_THE_LEAD}
       />
     )
@@ -352,12 +359,12 @@ describe("the ask panel", () => {
         revision={0}
         available={ALL}
         modelConfigured={false}
-        {...led(ALL)}
+        {...led(ALL, true)}
         willSay={ONLY_THE_LEAD}
       />
     )
 
-    const promise = screen.getByText(leadingAsk(ALL)!.promise)
+    const promise = screen.getByText(leadingAsk(ALL, true)!.promise)
     const verdict = screen.getByText(WILL_HOLD.lead)
 
     expect(
@@ -379,7 +386,7 @@ describe("the ask panel", () => {
         revision={0}
         available={ALL}
         modelConfigured={false}
-        {...led(ALL)}
+        {...led(ALL, true)}
         willSay={ONLY_THE_LEAD}
       />
     )
@@ -503,7 +510,7 @@ describe("the ask panel, telling a stranger what Loom will do about each ask", (
         revision={0}
         available={ALL}
         modelConfigured={false}
-        {...led(ALL)}
+        {...led(ALL, true)}
         willSay={AS_SHIPPED}
       />
     )
@@ -523,7 +530,7 @@ describe("the ask panel, telling a stranger what Loom will do about each ask", (
         revision={0}
         available={ALL}
         modelConfigured={false}
-        {...led(ALL)}
+        {...led(ALL, true)}
         willSay={AS_SHIPPED}
       />
     )
@@ -831,7 +838,7 @@ describe("the ask panel, saying which way a press would go", () => {
         revision={0}
         available={ALL}
         modelConfigured={false}
-        {...led(ALL)}
+        {...led(ALL, true)}
         willSay={{ palette: goesAhead(true) }}
       />
     )
@@ -849,7 +856,7 @@ describe("the ask panel, saying which way a press would go", () => {
    */
   it("replaces the lead's promise too, at the size the lead carries it", () => {
     const left: readonly DemoPresetId[] = ["palette", "backdrop"]
-    const lead = leadingAsk(left)!
+    const lead = leadingAsk(left, true)!
 
     render(
       <AskPanel
