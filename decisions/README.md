@@ -328,7 +328,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0242](0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md) | What readers did is a share off one row, and a leaf has no inside | Accepted | §4c (reader signals) |
 | [0243](0243-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md) | A picture is proved against an older library, photographed with this harness | Accepted | §1 (process) |
 | [0244](0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md) | A pace moved because the words moved or the readers did, and a counterfactual says which | Accepted | §4c (reader signals) |
-| 0245 | *No record on this branch* | — | — |
+| [0245](0245-a-second-page-sequence-is-earned-by-regions-in-a-different-order-and-the-sites-own-regions-are-shared.md) | A second page sequence is earned by regions in a different order, and the site's own regions are shared | Proposed — **ARCHITECTURAL, needs review** | §4b |
 | [0246](0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md) | A bound primitive's failure region is a slot over its declared sentence, and one slot serves both failure answers | Accepted | §4b |
 | [0247](0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md) | A readership comparison is built from two floored maps, and the mix is the only figure that survives having no window | Accepted | §4c (reader signals) |
 | [0248](0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md) | Which optional checks were in place is named on the judgment, beside the rules that were consulted | Accepted | §2 → §5 |
