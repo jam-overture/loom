@@ -1,6 +1,7 @@
 import type { NodeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { BindingReader } from "../render/reads.js"
+import type { SlotPlacer } from "../render/slots.js"
 import { assertNever, err, ok, type Result } from "../result.js"
 import { applyOperation } from "../tree/apply.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
@@ -22,12 +23,15 @@ import {
   EVERY_TYPE_UNDECLARED,
   invalidPropsIn,
   NOTHING_DECLARED,
+  NOTHING_PLACED,
   unknownPrimitivesIn,
+  unplacedSlotsIn,
   unreadBindingsIn,
   type InvalidProps,
   type PrimitiveVocabulary,
   type PropsVocabulary,
   type UnknownPrimitive,
+  type UnplacedSlot,
   type UnreadBinding,
 } from "./vocabulary.js"
 
@@ -153,6 +157,31 @@ export type ChangeAnalysis = {
    * Empty for every host that hands no reader, which is the default.
    */
   readonly unreadBindings: readonly UnreadBinding[]
+  /**
+   * Content this change would put in a region of a primitive that places no
+   * region of that name, so the content and everything under it is dropped.
+   *
+   * The second fact in this record about a change that *works*, beside
+   * `unreadBindings` and quieter than it. The page draws, every node is
+   * registered, every schema is satisfied, nothing is fetched and wasted — and
+   * a paragraph the author wrote is not on the page, with nothing anywhere
+   * saying so until the render seam gained a diagnostic for it (0249).
+   *
+   * Measured on both trees, like `unreadBindings` and unlike
+   * `unknownPrimitives`, and for the reason that factor's comment gives twice
+   * over. A `move` can carry a slot child under a new parent that places no
+   * such region, which is the case `unknownPrimitives` has no analogue of: a
+   * type cannot be changed, and a region's fate depends on the parent it ends
+   * up under rather than on the node itself.
+   *
+   * Keyed by node **and name** where `invalidProps` is keyed by node alone, for
+   * `unreadBindings`' reason: a node that drops two regions has dropped two
+   * pieces of content, and a change that adds the second is answerable for the
+   * second.
+   *
+   * Empty for every host that hands no placer, which is the default.
+   */
+  readonly unplacedSlots: readonly UnplacedSlot[]
   /**
    * Forms this change points somewhere else — a node that posted to one
    * registered endpoint before and posts to another after.
@@ -391,31 +420,96 @@ const introducedUnreadBindings = (
   return produced.filter((unread) => !inherited.has(unreadKey(unread)))
 }
 
+/** Node and name together, for the reason `unreadKey` gives one module over. */
+const unplacedKey = (unplaced: UnplacedSlot): string => `${unplaced.nodeId} ${unplaced.name}`
+
+/**
+ * The dropped content this delta is answerable for: the regions unplaced in the
+ * tree it produces, less the ones already unplaced in the tree it started from.
+ *
+ * Keyed on both halves, like `introducedUnreadBindings` and unlike
+ * `introducedInvalidProps`: a node filling two regions nothing places loses two
+ * pieces of content, so a change that adds the second inherits the first and
+ * answers for the second.
+ *
+ * The before-walk is skipped when the result has none, which is the ordinary
+ * case and — with `NOTHING_PLACED` — the only case on a deployment that has
+ * handed no placer.
+ */
+const introducedUnplacedSlots = (
+  before: LoomNode,
+  after: LoomNode,
+  places: SlotPlacer
+): readonly UnplacedSlot[] => {
+  const produced = unplacedSlotsIn(after, places)
+  if (produced.length === 0) return produced
+
+  const inherited = new Set(unplacedSlotsIn(before, places).map(unplacedKey))
+
+  return produced.filter((unplaced) => !inherited.has(unplacedKey(unplaced)))
+}
+
+/**
+ * What a host's primitives are, in the five senses the write path can ask about.
+ *
+ * Every member is optional and every default is the no-op a deployment that has
+ * wired nothing already got, so `analyzeDelta(tree, delta)` measures exactly
+ * what it measured before this record existed.
+ *
+ * **A record rather than trailing parameters, which is a change of shape and
+ * not of behaviour.** Until 0250 these were four positional optionals, and the
+ * function's own comment had predicted each of the last three arriving to find
+ * the shape at its limit. The argument for leaving them positional was that
+ * collecting them is a breaking change to a published function; the argument
+ * that won is `StakeInput`'s, one module over — *an input that can be left off
+ * the end is one that will be* — and a fifth made the order something no caller
+ * could hold in their head. There is no middle shape: four positional optionals
+ * and a record of the fifth would be the worst of both.
+ *
+ * The names are the parameters' own, so a caller that passed them positionally
+ * reaches the same answers by writing down which one it meant.
+ *
+ * `| undefined` on each member rather than optionality alone, for
+ * `WriteCheckSeams`' reason: a caller holding an `X | undefined` at an optional
+ * seam is the ordinary case — `assessChange` is one — and making it rebuild the
+ * record to say so would put the presence test in two places.
+ */
+export type ChangeVocabulary = {
+  /** Which primitives render a target, so a target inside one is reachable (0068). */
+  readonly isInteractive?: InteractivePredicate | undefined
+  /** Which primitive types this deployment can draw at all (0173). */
+  readonly isRegistered?: PrimitiveVocabulary | undefined
+  /** What each primitive accepts, as its own schema's verdict (0179). */
+  readonly checkProps?: PropsVocabulary | undefined
+  /** What each primitive reads an answer under (0208). */
+  readonly reads?: BindingReader | undefined
+  /** What each primitive places a named region for (0250). */
+  readonly places?: SlotPlacer | undefined
+}
+
 /**
  * Walks the delta forward so each operation is measured against the tree it
  * actually observes — an operation may target a node an earlier operation in
  * the same delta inserted.
  *
- * The four vocabularies are separate trailing parameters rather than one record,
- * which is not the shape `StakeInput` argues for, and this is the third time a
- * new one has arrived to find it. It stays positional here and the reason is
- * unchanged: this function is published and two lesson transcripts call it by
- * hand, so collecting them is a breaking change that teaches nothing and edits
- * files this lane does not own. It is at its limit — four optional trailing
- * predicates is as far as this shape goes, and the run that collects them is the
- * run that can also rewrite the transcripts. Filed rather than left implicit.
- *
- * What keeps them from being forgotten is that `assessChange` is the only caller
- * that assembles them, and it passes all four in one expression.
+ * The vocabularies arrive as one optional record (`ChangeVocabulary`, above).
+ * What keeps any of them from being forgotten is unchanged by that: `assessChange`
+ * is still the only caller that assembles them, and it still does it in one
+ * expression.
  */
 export const analyzeDelta = (
   tree: LoomTree,
   delta: TreeDelta,
-  isInteractive: InteractivePredicate = NOTHING_INTERACTIVE,
-  isRegistered: PrimitiveVocabulary = EVERY_TYPE_REGISTERED,
-  checkProps: PropsVocabulary = EVERY_TYPE_UNDECLARED,
-  reads: BindingReader = NOTHING_DECLARED
+  vocabulary: ChangeVocabulary = {}
 ): Result<ChangeAnalysis, TreeError> => {
+  const {
+    isInteractive = NOTHING_INTERACTIVE,
+    isRegistered = EVERY_TYPE_REGISTERED,
+    checkProps = EVERY_TYPE_UNDECLARED,
+    reads = NOTHING_DECLARED,
+    places = NOTHING_PLACED,
+  } = vocabulary
+
   const tally = emptyTally()
   let state: LoomNode = tree.root
 
@@ -445,6 +539,7 @@ export const analyzeDelta = (
     unknownPrimitives: tally.unknown,
     invalidProps: introducedInvalidProps(tree.root, state, checkProps),
     unreadBindings: introducedUnreadBindings(tree.root, state, reads),
+    unplacedSlots: introducedUnplacedSlots(tree.root, state, places),
     redirectedSubmissions: redirectedSubmissionsBetween(tree.root, state),
     repointedBindings: repointedBindingsBetween(tree.root, state),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,

@@ -1,22 +1,16 @@
 import type { DeltaId } from "../ids.js"
-import type { BindingReader } from "../render/reads.js"
 import { flatMapResult, mapResult, type Result } from "../result.js"
 import type { TreeError } from "../tree/errors.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import { analyzeDelta, type ChangeAnalysis } from "./analysis.js"
-import { wiredChecksOf, type WriteCheck } from "./checks.js"
+import { wiredChecksOf, type WriteCheck, type WriteCheckSeams } from "./checks.js"
 import { interactivePredicateFor } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 import { assessReversibility, type Reversibility } from "./reversibility.js"
 import { assessStakes, type StakeAssessment } from "./stakes.js"
-import {
-  EVERY_TYPE_UNDECLARED,
-  NOTHING_DECLARED,
-  primitiveVocabularyFor,
-  type PropsVocabulary,
-} from "./vocabulary.js"
+import { primitiveVocabularyFor } from "./vocabulary.js"
 
 /**
  * Everything the Gate is allowed to look at, gathered in one pass. Assembling
@@ -66,24 +60,31 @@ export const assessChange = (
   policy: GatePolicy,
   inverseDeltaId: DeltaId,
   /**
-   * Absent rather than defaulted, so that *handed nothing* and *handed the
-   * sentinel* stay two different calls. The analysis below falls back to the
-   * same two no-ops a default would have supplied, so nothing about a decision
-   * changes; what changes is that `wiredChecks` can report what arrived instead
-   * of reporting what the signature filled in.
+   * The optional seams, as one record and with each member absent rather than
+   * defaulted, so that *handed nothing* and *handed the sentinel* stay two
+   * different calls. The analysis below falls back to the same no-ops a default
+   * would have supplied, so nothing about a decision changes; what changes is
+   * that `wiredChecks` can report what arrived instead of reporting what the
+   * signature filled in.
+   *
+   * `WriteCheckSeams` itself rather than a shape of this function's own, which
+   * is what makes the two uses below one fact read twice: what is passed to the
+   * analysis is, by construction, what is recorded as having been wired. These
+   * were two trailing parameters until the collection (0250), and the third
+   * would have been the one nobody could order — the same pressure that
+   * collected `analyzeDelta`'s vocabularies, arriving at the caller that
+   * assembles them.
    */
-  checkProps?: PropsVocabulary,
-  reads?: BindingReader
+  seams: WriteCheckSeams = {}
 ): Result<ChangeAssessment, TreeError> =>
   flatMapResult(
-    analyzeDelta(
-      tree,
-      proposal.delta,
-      interactivePredicateFor(policy.interactiveTypes),
-      primitiveVocabularyFor(policy.registeredPrimitiveTypes),
-      checkProps ?? EVERY_TYPE_UNDECLARED,
-      reads ?? NOTHING_DECLARED
-    ),
+    analyzeDelta(tree, proposal.delta, {
+      isInteractive: interactivePredicateFor(policy.interactiveTypes),
+      isRegistered: primitiveVocabularyFor(policy.registeredPrimitiveTypes),
+      checkProps: seams.propsVocabulary,
+      reads: seams.bindingReader,
+      places: seams.slotPlacer,
+    }),
     (analysis) =>
       mapResult(
         assessReversibility(tree, proposal.delta, analysis, policy, inverseDeltaId),
@@ -92,7 +93,7 @@ export const assessChange = (
           analysis,
           stakes: assessStakes({ analysis, discards: proposal.discards ?? [] }, policy),
           reversibility,
-          wiredChecks: wiredChecksOf({ propsVocabulary: checkProps, bindingReader: reads }),
+          wiredChecks: wiredChecksOf(seams),
         })
       )
   )

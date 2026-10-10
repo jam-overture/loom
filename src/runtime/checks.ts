@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import type { BindingReader } from "../render/reads.js"
+import type { SlotPlacer } from "../render/slots.js"
 
 import type { PropsVocabulary } from "./vocabulary.js"
 
@@ -17,14 +18,15 @@ import type { PropsVocabulary } from "./vocabulary.js"
  *
  * That gap was filed on 21 September as a stated limit, and the thing that made
  * it worth closing arrived afterwards: 0208 wired a second seam the same way, so
- * there are now two inputs that can turn an `accepted` into a `rejected` and
- * leave no trace of having been consulted. A refusal rate that moved in the week
- * somebody wired a registry into the write path is either explained by that
- * wiring or is a fault, and nothing in this repository could tell those apart.
+ * there were two inputs that could turn an `accepted` into a `rejected` and
+ * leave no trace of having been consulted — three since 0250. A refusal rate
+ * that moved in the week somebody wired a registry into the write path is
+ * either explained by that wiring or is a fault, and nothing in this repository
+ * could tell those apart.
  *
  * **These are named rather than digested, and that is the design.** A policy has
  * fourteen knobs of host data, so what it contains can only be compared as a
- * hash; the seams are two, their names are Loom's own, and a list of them is
+ * hash; the seams are three, their names are Loom's own, and a list of them is
  * something a person can read against their own composition root. The
  * fingerprint's own doc comment makes the argument for the other side of this
  * trade — *a digest is not something a person can look up in their own
@@ -48,7 +50,7 @@ import type { PropsVocabulary } from "./vocabulary.js"
  * nothing about what they concluded.
  */
 
-export const writeCheckSchema = z.enum(["props", "bindings"])
+export const writeCheckSchema = z.enum(["props", "bindings", "regions"])
 
 /**
  * One check the write path performs only when a composition root hands it the
@@ -56,6 +58,7 @@ export const writeCheckSchema = z.enum(["props", "bindings"])
  *
  * - `props` — the node's own primitive accepts the props it would carry (0179).
  * - `bindings` — something will read the answer a bound node asks for (0208).
+ * - `regions` — the primitive places the named region a node fills (0250).
  *
  * The type-name vocabulary is deliberately not here. *Which primitives exist at
  * all* is `registeredPrimitiveTypes`, a policy field, so it is already inside the
@@ -96,6 +99,7 @@ export const WRITE_CHECKS: readonly WriteCheck[] = writeCheckSchema.options
 export type WriteCheckSeams = {
   readonly propsVocabulary?: PropsVocabulary | undefined
   readonly bindingReader?: BindingReader | undefined
+  readonly slotPlacer?: SlotPlacer | undefined
 }
 
 /**
@@ -115,6 +119,7 @@ export type WriteCheckSeams = {
 const SEAM_OF: { readonly [C in WriteCheck]: (seams: WriteCheckSeams) => unknown } = {
   props: (seams) => seams.propsVocabulary,
   bindings: (seams) => seams.bindingReader,
+  regions: (seams) => seams.slotPlacer,
 }
 
 /**

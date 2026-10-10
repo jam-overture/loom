@@ -72,8 +72,7 @@ describe("registeredTypesFor", () => {
         baseRevision: tree.revision,
         operations: [{ op: "insert", parentId: page.id, index: 0, node: invented }],
       },
-      undefined,
-      primitiveVocabularyFor(policy.registeredPrimitiveTypes)
+      { isRegistered: primitiveVocabularyFor(policy.registeredPrimitiveTypes) }
     )
     if (!analysis.ok) throw new Error(analysis.error.code)
 
@@ -158,9 +157,7 @@ describe("propsVocabularyFor", () => {
         baseRevision: tree.revision,
         operations: [{ op: "insert", parentId: page.id, index: 0, node: added }],
       },
-      undefined,
-      undefined,
-      checkProps
+      { checkProps }
     )
 
     expect(analysis.ok && analysis.value.invalidProps.map((invalid) => invalid.nodeId)).toEqual([
@@ -219,9 +216,7 @@ describe("propsVocabularyFor, on the runtime's own keys", () => {
     const analysis = analyzeDelta(
       tree,
       { deltaId: ids.deltaId(), treeId: tree.treeId, baseRevision: tree.revision, operations },
-      undefined,
-      undefined,
-      checkProps
+      { checkProps }
     )
     if (!analysis.ok) throw new Error(analysis.error.code)
 

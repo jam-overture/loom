@@ -164,6 +164,8 @@ export const RAISED_BY = {
   "invalid-props": "it sets a piece up in a way that piece does not accept, so it would not draw",
   /* Added by `Loom daily build` with 0208 and filed for review. */
   "unread-binding": "it asks your data for something no piece on the page reads",
+  /* Added by `Loom daily build` with 0250 and filed for review. */
+  "unplaced-slot": "it puts words in a part of a piece that has no place to show them",
   "redirected-submission": "it changes where the page sends what people type",
   "repointed-binding": "it changes which of your data the page shows",
 } satisfies Record<StakeFactorCode, string>

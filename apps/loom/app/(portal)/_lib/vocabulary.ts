@@ -409,7 +409,7 @@ export const STAKES: Readonly<Record<StakeLevel, PlainState>> = {
  * "it would write over work already accepted" is true of an accepted change and
  * "it wrote over" would be a claim about an outcome this table cannot see.
  *
- * ## Two of the thirteen are the reason this table exists today
+ * ## Two of the fifteen are the reason this table exists today
  *
  * `unknown-primitive` and `invalid-props` are the two floors `policy.ts` and
  * `write.ts` wired on this run, and they are the first two factors on this
@@ -456,6 +456,17 @@ export const STAKE_FACTORS: Readonly<Record<StakeFactorCode, string>> = {
    */
   "unread-binding":
     "it would ask your data for something the part in question never looks at, so the answer is fetched and thrown away",
+  /*
+   * The page would draw, and something an author meant people to read would not
+   * be on it. Added by `Loom daily build` with 0250, in this table's voice and
+   * filed for review — the second clause here about a change that *works*, and
+   * the one with the most at stake: what is missing is content rather than a
+   * setting, so "nowhere on the page" is the fact a reader has to take away.
+   * Written in the conditional like the rest, which also keeps it clear of the
+   * past-tense words this table is held to.
+   */
+  "unplaced-slot":
+    "it would put something an author meant people to read into a place the part in question has nowhere to put it, so none of it appears on the page",
   "redirected-submission": "it would send what people type into a form somewhere other than before",
   "repointed-binding": "it would put different data of yours on the page than before",
 }

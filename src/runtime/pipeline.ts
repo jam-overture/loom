@@ -1,5 +1,6 @@
 import type { IdFactory } from "../ids.js"
 import type { BindingReader } from "../render/reads.js"
+import type { SlotPlacer } from "../render/slots.js"
 import { applyDelta } from "../tree/apply.js"
 import type { TreeDelta } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
@@ -81,6 +82,24 @@ export type CompositionRuntime = {
    * reason above.
    */
   readonly bindingReader?: BindingReader
+  /**
+   * What this deployment's primitives place a named region for, checked before
+   * a delta is judged. Optional and absent by default, for every reason
+   * `propsVocabulary` and `bindingReader` above give: a runtime handed none
+   * cannot tell a region a primitive places from one it drops on the floor
+   * (0051, 0249), and refusing on that ground is a choice made at the
+   * composition root rather than inherited (0179, 0250).
+   *
+   * Deliberately the renderer's own `SlotPlacer` rather than a second shape, so
+   * what the walk reports as `slot-unplaced` is what the write path refuses. An
+   * SDK registry satisfies it already, which is why there is no
+   * `slotPlacerFor(registry)` beside `propsVocabularyFor` — the registry **is**
+   * one, which is the arrangement `bindingReader` already has and for its
+   * reason.
+   *
+   * Recorded as the `regions` member of `Disposition.wiredChecks` (0248).
+   */
+  readonly slotPlacer?: SlotPlacer
 }
 
 export type CompositionOutcome =
@@ -232,8 +251,11 @@ const judgeProposal = (
     proposal,
     policy,
     runtime.idFactory.deltaId(),
-    runtime.propsVocabulary,
-    runtime.bindingReader
+    {
+      propsVocabulary: runtime.propsVocabulary,
+      bindingReader: runtime.bindingReader,
+      slotPlacer: runtime.slotPlacer,
+    }
   )
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })
@@ -383,8 +405,11 @@ export const confirmChange = (
     proposal,
     policy,
     runtime.idFactory.deltaId(),
-    runtime.propsVocabulary,
-    runtime.bindingReader
+    {
+      propsVocabulary: runtime.propsVocabulary,
+      bindingReader: runtime.bindingReader,
+      slotPlacer: runtime.slotPlacer,
+    }
   )
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })

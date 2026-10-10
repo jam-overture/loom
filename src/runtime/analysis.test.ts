@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest"
 import { bindingNameSchema } from "../data/source.js"
 import { sequentialIdFactory, type TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
-import { primitiveTypeSchema } from "../primitive-type.js"
+import { primitiveTypeSchema, slotNameSchema } from "../primitive-type.js"
 import type { BindingReader } from "../render/reads.js"
+import type { SlotPlacer } from "../render/slots.js"
 import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import {
   boundTree,
@@ -14,7 +15,7 @@ import {
   type FormTree,
   type SampleTree,
 } from "../testing/fixtures.js"
-import { buildElement, buildText } from "../tree/builders.js"
+import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { createTree } from "../tree/tree.js"
 
@@ -24,6 +25,7 @@ import {
   primitiveVocabularyFor,
   type PrimitiveVocabulary,
   type PropsVocabulary,
+  type UnplacedSlot,
   type UnreadBinding,
 } from "./vocabulary.js"
 
@@ -234,7 +236,7 @@ const isTarget = interactivePredicateFor({
 
 const analyzeWithTargets = (build: (ids: SampleTree["ids"]) => TreeOperation[]) => {
   const { tree, ids } = sampleTree()
-  const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)), isTarget)
+  const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)), { isInteractive: isTarget })
   if (!result.ok) throw new Error(result.error.code)
 
   return { analysis: result.value, ids }
@@ -313,7 +315,7 @@ describe("analyzeDelta nested targets", () => {
       deltaOf(alreadyBroken.treeId, [
         { op: "configure", nodeId: page.id, set: { title: "Pricing" }, unset: [] },
       ]),
-      isTarget
+      { isInteractive: isTarget }
     )
     if (!result.ok) throw new Error(result.error.code)
 
@@ -566,7 +568,7 @@ const drawable: PrimitiveVocabulary = primitiveVocabularyFor(
 
 const analyzeAgainstLibrary = (build: (ids: SampleTree["ids"]) => TreeOperation[]) => {
   const { tree, ids } = sampleTree()
-  const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)), undefined, drawable)
+  const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)), { isRegistered: drawable })
   if (!result.ok) throw new Error(result.error.code)
 
   return { analysis: result.value, ids }
@@ -630,8 +632,7 @@ describe("analyzeDelta unknown primitives", () => {
         { op: "configure", nodeId: ids.card, set: { variant: "filled" }, unset: [] },
         { op: "remove", nodeId: ids.footer },
       ]),
-      undefined,
-      primitiveVocabularyFor([primitiveTypeSchema.parse("loom.nothing-here")])
+      { isRegistered: primitiveVocabularyFor([primitiveTypeSchema.parse("loom.nothing-here")]) }
     )
     if (!moved.ok) throw new Error(moved.error.code)
 
@@ -694,9 +695,7 @@ const analyzeProps = (
   const result = analyzeDelta(
     start.tree,
     deltaOf(start.tree.treeId, operations),
-    undefined,
-    undefined,
-    checkProps
+    { checkProps }
   )
   if (!result.ok) throw new Error(result.error.code)
 
@@ -860,10 +859,7 @@ const analyzeReads = (
   const result = analyzeDelta(
     start.tree,
     deltaOf(start.tree.treeId, operations),
-    undefined,
-    undefined,
-    undefined,
-    reads
+    { reads }
   )
   if (!result.ok) throw new Error(result.error.code)
 
@@ -1018,5 +1014,261 @@ describe("analyzeDelta unread bindings", () => {
     const analysis = analyzeReads(start, [{ op: "remove", nodeId: start.card }])
 
     expect(analysis.unreadBindings).toEqual([])
+  })
+})
+
+/** A page holding one dialog whose content is in named regions. */
+const fillingPage = (...names: readonly string[]) => {
+  const factory = sequentialIdFactory("unplaced")
+  const dialog = buildElement(factory, {
+    type: "loom.dialog",
+    children: names.map((name) => buildSlot(factory, name, [buildText(factory, name)])),
+  })
+  const page = buildElement(factory, { type: "loom.page", children: [dialog] })
+
+  return { tree: createTree(page, factory), dialog: dialog.id, page: page.id }
+}
+
+/**
+ * One primitive that places `header`, one that declares no regions at all, and
+ * `undefined` for everything else — the three answers this seam has (0249).
+ */
+const placesHeader: SlotPlacer = {
+  slotsPlacedBy: (type) => {
+    if (type === primitiveTypeSchema.parse("loom.dialog")) return [slotNameSchema.parse("header")]
+
+    return type === primitiveTypeSchema.parse("loom.plate") ? [] : undefined
+  },
+}
+
+const analyzePlaces = (
+  start: ReturnType<typeof fillingPage>,
+  operations: TreeOperation[],
+  places: SlotPlacer = placesHeader
+) => {
+  const result = analyzeDelta(start.tree, deltaOf(start.tree.treeId, operations), { places })
+  if (!result.ok) throw new Error(result.error.code)
+
+  return result.value
+}
+
+const dropped = (analysis: { readonly unplacedSlots: readonly UnplacedSlot[] }) =>
+  analysis.unplacedSlots.map((unplaced) => `${unplaced.nodeId} ${unplaced.name}`)
+
+describe("analyzeDelta unplaced slots", () => {
+  it("reports none when the host hands no placer", () => {
+    const start = fillingPage("body")
+    const added = buildElement(spare, {
+      type: "loom.dialog",
+      children: [buildSlot(spare, "footer", [buildText(spare, "Close")])],
+    })
+
+    const analysis = analyzeDelta(
+      start.tree,
+      deltaOf(start.tree.treeId, [{ op: "insert", parentId: start.page, index: 1, node: added }])
+    )
+
+    expect(analysis.ok && analysis.value.unplacedSlots).toEqual([])
+  })
+
+  it("names an inserted node filling a region its primitive places nowhere", () => {
+    const start = fillingPage("header")
+    const added = buildElement(spare, {
+      type: "loom.dialog",
+      children: [buildSlot(spare, "body", [buildText(spare, "Book a call")])],
+    })
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+    ])
+
+    expect(analysis.unplacedSlots).toEqual([
+      {
+        nodeId: added.id,
+        type: primitiveTypeSchema.parse("loom.dialog"),
+        name: "body",
+      },
+    ])
+  })
+
+  /**
+   * The case that has no analogue in `unknownPrimitives` and is the reason this
+   * fact is measured on the two trees rather than on the operations. A type is
+   * fixed when a node is inserted; a region's fate is the parent's, so a `move`
+   * can drop content that was being placed a moment ago without touching the
+   * node that carries it.
+   */
+  it("names a region a move carried under a parent that does not place it", () => {
+    const start = fillingPage("header")
+    const other = buildElement(spare, { type: "loom.plate" })
+    const region = buildSlot(spare, "header", [buildText(spare, "Book a call")])
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.page, index: 1, node: other },
+      { op: "insert", parentId: start.dialog, index: 1, node: region },
+      { op: "move", nodeId: region.id, parentId: other.id, index: 0 },
+    ])
+
+    expect(dropped(analysis)).toEqual([`${other.id} header`])
+  })
+
+  it("says nothing about a change that leaves every region placed", () => {
+    const start = fillingPage("header")
+
+    const analysis = analyzePlaces(start, [
+      { op: "configure", nodeId: start.page, set: { title: "Pricing" }, unset: [] },
+    ])
+
+    expect(analysis.unplacedSlots).toEqual([])
+  })
+
+  /**
+   * The inherited case. A page may already be dropping a region — a primitive
+   * that was rewritten, or a tree authored before the declaration — and an edit
+   * elsewhere is not the change that lost the paragraph.
+   */
+  it("does not answer for a region that was already unplaced and was left alone", () => {
+    const start = fillingPage("body")
+
+    const analysis = analyzePlaces(start, [
+      { op: "configure", nodeId: start.page, set: { title: "Pricing" }, unset: [] },
+    ])
+
+    expect(analysis.unplacedSlots).toEqual([])
+  })
+
+  /**
+   * Where this parts company with `invalidProps`, which keys by node alone. Two
+   * unplaced regions on one node are two pieces of content on the floor, so the
+   * change that adds the second answers for the second and inherits the first.
+   */
+  it("answers for a second unplaced region on a node that already had one", () => {
+    const start = fillingPage("body")
+    const added = buildSlot(spare, "aside", [buildText(spare, "Nearby")])
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.dialog, index: 1, node: added },
+    ])
+
+    expect(dropped(analysis)).toEqual([`${start.dialog} aside`])
+  })
+
+  /** Broken and then fixed inside one delta is not broken, as with props. */
+  it("says nothing about a delta that fills wrongly and then takes it back", () => {
+    const start = fillingPage("header")
+    const added = buildSlot(spare, "body", [buildText(spare, "Book a call")])
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.dialog, index: 1, node: added },
+      { op: "remove", nodeId: added.id },
+    ])
+
+    expect(analysis.unplacedSlots).toEqual([])
+  })
+
+  it("says nothing about a region a remove took off the page", () => {
+    const start = fillingPage("body")
+
+    const analysis = analyzePlaces(start, [{ op: "remove", nodeId: start.dialog }])
+
+    expect(analysis.unplacedSlots).toEqual([])
+  })
+
+  /**
+   * Deduplicated, because two slot children sharing a name are both placed
+   * (0051) and so both lost by one mistake — a count that rose with how many
+   * times the tree spelled the name would be a count of the spelling.
+   */
+  it("reports one region however many children filled it", () => {
+    const start = fillingPage("header")
+    const added = buildElement(spare, {
+      type: "loom.dialog",
+      children: [
+        buildSlot(spare, "body", [buildText(spare, "First")]),
+        buildSlot(spare, "body", [buildText(spare, "Second")]),
+      ],
+    })
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+    ])
+
+    expect(dropped(analysis)).toEqual([`${added.id} body`])
+  })
+
+  it("reaches a node buried inside an inserted subtree", () => {
+    const start = fillingPage("header")
+    const buried = buildElement(spare, {
+      type: "loom.dialog",
+      children: [buildSlot(spare, "body", [buildText(spare, "Buried")])],
+    })
+    const banner = buildElement(spare, { type: "loom.banner", children: [buried] })
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.page, index: 1, node: banner },
+    ])
+
+    expect(dropped(analysis)).toEqual([`${buried.id} body`])
+  })
+
+  /**
+   * Only direct slot children are routed to a primitive (0051), so a slot
+   * inside another slot's fallback renders where it sits and is nobody's region
+   * to place. The walk reaches it and must stay silent about it.
+   */
+  it("says nothing about a slot nested inside another slot's fallback", () => {
+    const start = fillingPage("header")
+    const added = buildElement(spare, {
+      type: "loom.dialog",
+      children: [
+        buildSlot(spare, "header", [buildSlot(spare, "body", [buildText(spare, "Inside")])]),
+      ],
+    })
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+    ])
+
+    expect(analysis.unplacedSlots).toEqual([])
+  })
+
+  /**
+   * A type the resolver cannot speak for is not a primitive claiming it places
+   * nothing, which is `undefined`'s whole meaning at this seam.
+   */
+  it("says nothing about a type the placer does not hold", () => {
+    const start = fillingPage("header")
+    const added = buildElement(spare, {
+      type: "loom.popover",
+      children: [buildSlot(spare, "body", [buildText(spare, "Elsewhere")])],
+    })
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+    ])
+
+    expect(analysis.unplacedSlots).toEqual([])
+  })
+
+  /**
+   * 0249's judgement, at the write path. A primitive that declared no regions
+   * has said it places none — the one declaration where leaving it out and
+   * declaring it empty are the same claim — so every region a tree fills on it
+   * is content on the floor. This is the case the diagnostic exists for, since
+   * the primitives that lose content this way are exactly the ones declaring
+   * nothing.
+   */
+  it("names a region filled on a primitive that declares none", () => {
+    const start = fillingPage("header")
+    const added = buildElement(spare, {
+      type: "loom.plate",
+      children: [buildSlot(spare, "body", [buildText(spare, "Book a call")])],
+    })
+
+    const analysis = analyzePlaces(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+    ])
+
+    expect(dropped(analysis)).toEqual([`${added.id} body`])
   })
 })

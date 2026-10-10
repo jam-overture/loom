@@ -431,7 +431,9 @@ const weigh = (
   applied: GatePolicy = policy
 ) => {
   const delta = deltaOf(tree, operations)
-  const analysis = analyzeDelta(tree, delta, interactivePredicateFor(applied.interactiveTypes))
+  const analysis = analyzeDelta(tree, delta, {
+    isInteractive: interactivePredicateFor(applied.interactiveTypes),
+  })
   if (!analysis.ok) throw new Error(JSON.stringify(analysis.error))
 
   const assessed = assessChange(tree, proposalOf(delta), applied, spare.deltaId())

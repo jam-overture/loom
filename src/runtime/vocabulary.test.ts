@@ -3,21 +3,25 @@ import { describe, expect, it } from "vitest"
 import { bindingNameSchema } from "../data/source.js"
 import { sequentialIdFactory } from "../ids.js"
 import type { JsonObject } from "../json.js"
-import { primitiveTypeSchema } from "../primitive-type.js"
+import { primitiveTypeSchema, slotNameSchema } from "../primitive-type.js"
 import type { BindingDeclaration, BindingReader } from "../render/reads.js"
+import type { SlotPlacer } from "../render/slots.js"
 import * as reservedProps from "../reserved-props.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 
 import {
   describeInvalidProps,
   describeUnknownPrimitive,
+  describeUnplacedSlot,
   describeUnreadBinding,
   EVERY_TYPE_REGISTERED,
   EVERY_TYPE_UNDECLARED,
   invalidPropsIn,
   NOTHING_DECLARED,
+  NOTHING_PLACED,
   primitiveVocabularyFor,
   unknownPrimitivesIn,
+  unplacedSlotsIn,
   unreadBindingsIn,
   type PropsVocabulary,
 } from "./vocabulary.js"
@@ -454,5 +458,123 @@ describe("unreadBindingsIn", () => {
     expect(
       describeUnreadBinding({ nodeId: node.id, type: typed("loom.feed"), name: named("rows") })
     ).toBe(`${node.id} asks under "rows", which loom.feed does not read`)
+  })
+})
+
+/** A placer over a plain table, which is what an SDK registry answers from. */
+const placerOf = (table: Readonly<Record<string, readonly string[]>>): SlotPlacer => ({
+  slotsPlacedBy: (type) => table[type]?.map((name) => slotNameSchema.parse(name)),
+})
+
+const placesHeader = placerOf({ "loom.dialog": ["header"], "loom.plate": [] })
+
+/** A dialog filling the regions named, each with something in it to lose. */
+const dialogFilling = (...names: readonly string[]) =>
+  buildElement(ids, {
+    type: "loom.dialog",
+    children: names.map((name) => buildSlot(ids, name, [buildText(ids, name)])),
+  })
+
+describe("NOTHING_PLACED", () => {
+  /**
+   * The default has to be silent, and for the same reason `NOTHING_DECLARED`
+   * is: a resolver with no registry behind it cannot say what any primitive
+   * places, which is not every primitive claiming it places nothing. A
+   * sentinel answering `[]` would refuse every slot child on every deployment
+   * that has not opted in.
+   */
+  it("answers undefined for every type, so nothing is reported", () => {
+    expect(NOTHING_PLACED.slotsPlacedBy(typed("loom.dialog"))).toBeUndefined()
+    expect(unplacedSlotsIn(dialogFilling("body"), NOTHING_PLACED)).toEqual([])
+  })
+})
+
+describe("unplacedSlotsIn", () => {
+  it("reports a region the primitive places nowhere", () => {
+    const node = dialogFilling("body")
+
+    expect(unplacedSlotsIn(node, placesHeader)).toEqual([
+      { nodeId: node.id, type: typed("loom.dialog"), name: "body" },
+    ])
+  })
+
+  it("says nothing about a region the primitive places", () => {
+    expect(unplacedSlotsIn(dialogFilling("header"), placesHeader)).toEqual([])
+  })
+
+  /**
+   * Where this parts company with `unreadBindingsIn`, and the asymmetry is
+   * 0249's decision rather than an oversight: `slots` is the one declaration
+   * where leaving it out and declaring it empty are the same claim, so a
+   * primitive the registry holds and that declared no regions places none.
+   */
+  it("reports a region filled on a primitive that declares none", () => {
+    const node = buildElement(ids, {
+      type: "loom.plate",
+      children: [buildSlot(ids, "body", [buildText(ids, "Book a call")])],
+    })
+
+    expect(unplacedSlotsIn(node, placesHeader)).toEqual([
+      { nodeId: node.id, type: typed("loom.plate"), name: "body" },
+    ])
+  })
+
+  /** A type no registry holds is *this resolver cannot say*, which reports nothing. */
+  it("says nothing about a type the placer has no declaration for", () => {
+    const node = buildElement(ids, {
+      type: "loom.popover",
+      children: [buildSlot(ids, "body", [buildText(ids, "Elsewhere")])],
+    })
+
+    expect(unplacedSlotsIn(node, placesHeader)).toEqual([])
+  })
+
+  it("names one region however many children filled it, name-sorted", () => {
+    const node = buildElement(ids, {
+      type: "loom.dialog",
+      children: [
+        buildSlot(ids, "footer", [buildText(ids, "Close")]),
+        buildSlot(ids, "body", [buildText(ids, "First")]),
+        buildSlot(ids, "body", [buildText(ids, "Second")]),
+      ],
+    })
+
+    expect(unplacedSlotsIn(node, placesHeader).map((unplaced) => unplaced.name)).toEqual([
+      "body",
+      "footer",
+    ])
+  })
+
+  /** The whole subtree, for `unknownPrimitivesIn`'s reason. */
+  it("reaches a node below the root", () => {
+    const buried = dialogFilling("body")
+    const banner = buildElement(ids, { type: "loom.banner", children: [buried] })
+
+    expect(unplacedSlotsIn(banner, placesHeader).map((unplaced) => unplaced.nodeId)).toEqual([
+      buried.id,
+    ])
+  })
+
+  /**
+   * Only direct slot children are routed (0051), so a slot inside another
+   * slot's fallback renders where it sits and is nobody's region to place.
+   * `walkTree` reaches it; reading children rather than positions is what keeps
+   * this walk from reporting it.
+   */
+  it("says nothing about a slot nested inside another slot's fallback", () => {
+    const node = buildElement(ids, {
+      type: "loom.dialog",
+      children: [buildSlot(ids, "header", [buildSlot(ids, "body", [buildText(ids, "Inside")])])],
+    })
+
+    expect(unplacedSlotsIn(node, placesHeader)).toEqual([])
+  })
+
+  it("names the node, the region it filled, and the type that places nowhere", () => {
+    const node = dialogFilling("body")
+
+    expect(
+      describeUnplacedSlot({ nodeId: node.id, type: typed("loom.dialog"), name: "body" })
+    ).toBe(`${node.id} fills "body", which loom.dialog places nowhere`)
   })
 })
