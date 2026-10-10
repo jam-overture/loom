@@ -118,13 +118,29 @@ lists … are expected to stay empty*; it now names `notDecorated`,
 were three; it now says what the sentence is actually doing, which is naming
 which of four lines are the control.
 
-**Not done, and it is not this lane's:** the generalisable half of the 9 October
-entry — `auditRegistry` reporting *bound primitives probed with no answer* as a
-verdict of its own — is filed separately against `Loom daily build` and is still
-open. Both exercises would then print a fourth list that explains the first,
-instead of a first list that needs a paragraph. Until something does that, this
-pair of lines will move again the next time a bound primitive declares a failure
-region, and the two marks above are what stops that being read as drift.
+**And the generalisable half landed while this branch was open**, which is worth
+recording because it changes what the next run on these two lessons should do.
+The 9 October entry asked `Loom daily build` for `auditRegistry` to report
+*bound primitives probed with no answer* as a verdict of its own. An earlier
+draft of this entry said it was still open; by the time `main` reached this
+branch it was not. `RegistryAudit.notAnswered` exists, with a `reason` of
+`no-answers` or `names-not-answered`, and its own doc comment states the thing
+lesson 35 spends four sections on: *"Unlike every other list, an entry is not a
+claim about the component. It is a claim about this call."*
+
+Nothing drifted — lessons 29, 33, 35 and 36 print named fields and `notAnswered`
+is not one of them, so every transcript, claim and declaration is green on the
+merged tree. What changed is the **teaching**, in the direction the 9 October
+entry predicted: both exercises can now print a list that explains their own
+anomaly, instead of a first list that needs a paragraph. That is a better ending
+for lesson 35 than the one it has, and it is this lane's — **queued for the next
+run rather than done here**, because no lesson is wrong and widening a green
+lessons pull request to improve one is how a lessons pull request stops being
+reviewable.
+
+Until that run, the two marks above are what stops the next move of these lines
+being read as drift, and they are now covering a case the library has a remedy
+for.
 
 ---
 ## 2026-10-10 — the sentence a render writes for an unresolved theme names every palette the deployment registered, and it is the only one in the union whose length is a deployment's to set

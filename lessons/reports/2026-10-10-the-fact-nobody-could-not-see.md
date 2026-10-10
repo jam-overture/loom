@@ -183,11 +183,23 @@ line is a change this prose is wrong about*, written when there were three of
 them. It now says what the sentence is doing rather than how many lines there
 were the day it was written.
 
-Left open, and filed elsewhere: the generalisable half — `auditRegistry`
-reporting *bound primitives probed with no answer* as a verdict of its own. It is
-`Loom daily build`'s and still open. Until something does it, this pair of lines
-moves again the next time a bound primitive declares a failure region, and the
-two marks are what stops that reading as drift.
+**And the half I filed as still open closed under me, two hours later.** The
+9 October entry asked `Loom daily build` for `auditRegistry` to report *bound
+primitives probed with no answer* as a verdict of its own. It landed in the
+second base merge described under Gate below: `RegistryAudit.notAnswered`, with a
+`reason` of `no-answers` or `names-not-answered`, and a doc comment that makes
+lesson 35's argument better than lesson 35 does — *"Unlike every other list, an
+entry is not a claim about the component. It is a claim about this call."*
+
+So the 9 October prediction has come true and the lessons have not taken it up.
+Both exercises can now print a list that explains their own anomaly rather than a
+first list that needs a paragraph, which is a better ending for lesson 35 than
+the one it has. It is **queued for the next run and deliberately not done here**:
+no lesson is wrong, the suite is green on the merged tree, and widening a green
+lessons pull request to improve a lesson it was not about is how a lessons pull
+request stops being reviewable. `FINDINGS.md` records it as queued rather than
+open, and the two marks are what stops the next move of these lines reading as
+drift in the meantime.
 
 ## Gate
 
@@ -195,27 +207,40 @@ two marks are what stops that reading as drift.
 `.next`, with the status written to a file as the last thing on its own line and
 read in a separate command, per `docs/routines.md`.
 
-Run twice. The first was the branch as written; `main` then moved three pull
-requests (#563–#565) ahead of it, so the base was merged in and the gate re-run.
-**The figures below are the second run**, which is the one that counts.
+Run three times, because `main` moved twice while the branch was open. The first
+was the branch as written. #563–#565 then landed, so the base was merged in and
+the gate re-run. #567, #569 and #570 then landed and **`Loom merge` merged the
+base in again** — onto this branch, not by me — so the gate ran a third time, on
+head `3fdbfe2`. **The figures below are the third run**, which is the one that
+counts.
 
 | | this branch |
 | --- | --- |
-| `@jam-overture/loom` | 201 files / 4,512 tests — `src/` was not opened on this branch; the change is #563–#565 |
-| `@loom/app` | 419 files / 7,699 tests |
-| findings ledger | 1,105 entries, 0 malformed — two of them this run's |
-| `prerender:check` | 131 pages, 1,644 text junctions, 0 run together; 3 metadata conventions, 0 unserved |
+| `@jam-overture/loom` | 201 files / 4,537 tests — `src/` was not opened by this lane; the change is #563–#570 |
+| `@loom/app` | 421 files / 7,812 tests |
+| findings ledger | 1,112 entries, 0 malformed — two of them this run's |
+| `prerender:check` | 132 pages, 1,755 text junctions, 0 run together; 3 metadata conventions, 0 unserved |
 
-**Nothing of this lane's moved across that merge, and nothing in it had a real
-chance of moving it.** #565 added `src/signals/action-change.ts` and
-`src/signals/deployment.ts` and widened `silences.ts`; #563 and #564 are the
-portal and demo route groups and their reports. None of that is `src/runtime/`,
-`src/primitives/` or `src/sdk/`, which is where every transcript, claim and
-printed type in this course reads from — and `transcripts.test.ts`,
-`claims.test.ts` and `declarations.test.ts` are green on the merged tree, so no
-exercise, count or declaration drifted. That is the merge being checked rather
-than my having read the diff. `FINDINGS.md` union-merged with no conflict, per
-0139, so none of the four entries now in that window was dropped.
+**Nothing of this lane's moved across either merge, and the second one had a real
+chance of moving it.** The first did not: #565 is `src/signals/`, #563 and #564
+are the portal and demo route groups, and none of that is a directory this course
+reads.
+
+The second is a different matter. It brought four new compositions into
+`src/primitives/compositions/` — the directory lesson 36's exercises A and B both
+read — 194 lines into `compositions.test.ts`, a change to `src/render/reads.ts`,
+and **131 lines into `src/sdk/audit.ts`**, which is the function lessons 29, 33
+and 35 all print the output of.
+
+All green. The four new bands plot nothing, so exercise B's count of authored
+plots holds; and `notAnswered`, the new `RegistryAudit` field discussed above, is
+not a field any of these exercises names, so no transcript moved. That is the
+merge being checked rather than my having read the diff, and it is the whole
+argument for these checks existing: a lane that did not write this branch pushed
+onto it, and what tells me the course survived is a suite rather than my
+attention.
+
+`FINDINGS.md` union-merged both times with no conflict, per 0139.
 
 **No test weakened, skipped or deleted.** Pins moved, all of them upward and all
 of them because a lesson landed: `RECOGNISED_TRANSCRIPTS` 161 → 167 (six
@@ -279,8 +304,25 @@ subject arriving in this lane's directory one day later.
 
 ## What is next
 
-**Machinery, by the alternation.** Two candidates and the first is now the one I
-would take.
+**Lessons 29, 33 and 35 taking up `notAnswered`, and it outranks the
+alternation.** This changed in the hour the branch was open and it is the clearest
+thing on the queue. The audit now has a field whose entry *is not a claim about
+the component — it is a claim about this call*, which is the sentence lesson 35
+spends four sections arriving at, now available as one line of its own output.
+Exercise E prints four verdict lists and a paragraph explaining why one of them
+is not empty; it can print five and have the fifth do the explaining. Lesson 29's
+exercise C is the same shape one size down, and lesson 33's exercise G prints the
+bound primitives.
+
+None of those lessons is *wrong*, so this is not rule 5 and I am not claiming it
+is. What makes it first anyway is that it is the cheapest teaching improvement
+available to this lane — the argument is already written, the mechanism now
+exists, and the exercises need a line each — and that it retires a paragraph
+three lessons currently need because the library could not speak for itself. The
+9 October entry predicted exactly this and said what it would buy.
+
+**Machinery after that, by the alternation.** Two candidates and the first is the
+one I would take.
 
 The second look has no `Quiet`. A reader with no re-answers gets no panel, which
 is right on the review queue and wrong on the **corrections page**, where
