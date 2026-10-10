@@ -152,7 +152,24 @@ export const NOT_A_RULE: DispositionReasonCode = "within-policy"
  */
 export const RAISED_BY = {
   "protected-type-removed": "it destroys something you marked as protected",
-  "protected-type-touched": "it rewrites something you marked as protected",
+  /**
+   * **It said "rewrites" until a request reached it by changing a setting.**
+   *
+   * This factor covers every way of touching a protected piece except taking it
+   * away or moving it, which is two things rather than one: rewriting what is
+   * inside it, and changing how it is set. No request on this site could reach
+   * it by the second until `unstick-menu` existed, so "rewrites" was accurate
+   * for every record a visitor could actually draw.
+   *
+   * It stopped being accurate the moment one could. That request changes one
+   * setting on the menu and nothing else, and its own line two rungs above says
+   * *"no word of the page is rewritten"* — so the panel contradicted itself
+   * across three inches of one card, in the two sentences a reader is most
+   * likely to read together. "Changes" is true of both operations and gives up
+   * nothing: what the piece was is in the line above, and how much of it moved
+   * is in the line above that.
+   */
+  "protected-type-touched": "it changes something you marked as protected",
   "protected-type-relocated": "it moves something you marked as protected",
   "protected-prop-configured": "it changes a setting you marked as protected",
   "large-removal": "it takes a lot off the page at once",
