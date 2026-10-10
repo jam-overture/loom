@@ -118,6 +118,25 @@ export const worthWatching = (asks: readonly Ask[] = ASKS): string => {
 }
 
 /**
+ * Why they are buttons rather than a text box, with the count read off the list.
+ *
+ * **This is the third sentence on this site to count the choices, and the only
+ * one that was still typing the number.** The two above it were derived on
+ * 1 October after the band spent sixteen runs telling a visitor that four of
+ * the five requests went through on their own when three of them did. The note
+ * at the top of this file ends *"a run that adds a sixth choice used to get a
+ * page still calling the exception singular. Neither can happen now"* — and a
+ * run adding a sixth choice got a page opening the next paragraph with *"These
+ * five are prepared."*
+ *
+ * So it moved here, beside the other two, and the rule is the one the first fix
+ * stated: **the number a page can count should be counted.** What the sentence
+ * says is unchanged.
+ */
+export const whyTheyArePrepared = (asks: readonly Ask[] = ASKS): string =>
+  `These ${spell(asks.length)} are prepared, so the whole sequence runs here without calling an AI model. To ask for something in your own words, try the demo. It is a page you can type into.`
+
+/**
  * How many run into the rules, for the page that says so in the middle of a
  * sentence rather than at the end of one.
  *

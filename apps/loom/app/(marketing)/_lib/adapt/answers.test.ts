@@ -11,6 +11,7 @@ import {
   answerTallyOf,
   exceptionsIn,
   whatTheChoicesDo,
+  whyTheyArePrepared,
   worthWatching,
 } from "./answers"
 import { ASKS, type Ask, type AskAnswer } from "./asks"
@@ -65,9 +66,9 @@ describe("what this site's rules actually do with each choice", () => {
 })
 
 describe("the sentence the count is spelled into", () => {
-  it("says what today's five do", () => {
+  it("says what today's six do", () => {
     expect(whatTheChoicesDo()).toBe(
-      "Of the five above, three go through on their own, one stops and asks you first, and one is refused outright."
+      "Of the six above, three go through on their own, two stop and ask you first, and one is refused outright."
     )
   })
 
@@ -104,9 +105,9 @@ describe("the sentence the count is spelled into", () => {
     expect(whatTheChoicesDo(shaped(["landed", "landed"]))).not.toContain("refused")
   })
 
-  it("points at both exceptions rather than only the refusal", () => {
+  it("points at both kinds of exception rather than only the refusal", () => {
     expect(worthWatching()).toBe(
-      "The two that do not just go through are the ones worth watching."
+      "The three that do not just go through are the ones worth watching."
     )
     expect(worthWatching(shaped(["landed", "refused"]))).toBe(
       "The one that does not just go through is the one worth watching."
@@ -142,6 +143,21 @@ describe("every page that counts the choices", () => {
     expect(wordsOn(HOW_IT_WORKS)).toContain(worthWatching())
   })
 
+  /**
+   * The third sentence that counts them, and the one that was still typing the
+   * number while the two above it were derived.
+   *
+   * Both halves are needed and the second is the one with teeth: the page has to
+   * carry the sentence, and the sentence has to name the count that comes off
+   * the list. Without the second, a run that re-typed a number into
+   * `whyTheyArePrepared` would be green here while the band told a visitor there
+   * were five buttons under a row of six.
+   */
+  it("the front door says why they are buttons, counting them off the list", () => {
+    expect(wordsOn(HOW_IT_WORKS)).toContain(whyTheyArePrepared())
+    expect(whyTheyArePrepared()).toContain(spell(ASKS.length))
+  })
+
 
   /**
    * The negative assertion, deliberately wider than the answer.
@@ -171,8 +187,17 @@ describe("every page that counts the choices", () => {
    * This is the assertion the whole unit exists for. A front door that lists
    * every answer except *it stops and asks you* is describing a product with two
    * outcomes, which is the product everybody else has.
+   *
+   * **It read `toContain("stops and asks you first")` until a second choice was
+   * held**, which spelled the clause in the plural and took this red. The
+   * singular was never the property: it is that the clause is on the page in
+   * whichever number the list makes true, so the pattern is matched and the
+   * count comes off the tally beside it.
    */
-  it("says on the front door that one of them stops and asks", () => {
-    expect(wordsOn(HOW_IT_WORKS)).toContain("stops and asks you first")
+  it("says on the front door that a request can stop and ask", () => {
+    const tally = answerTallyOf()
+
+    expect(tally.held).toBeGreaterThan(0)
+    expect(wordsOn(HOW_IT_WORKS)).toMatch(/stops? and asks? you first/)
   })
 })

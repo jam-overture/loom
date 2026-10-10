@@ -1,6 +1,6 @@
 import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
-import { whatTheChoicesDo, worthWatching } from "../adapt/answers"
+import { whatTheChoicesDo, whyTheyArePrepared, worthWatching } from "../adapt/answers"
 import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
@@ -443,11 +443,11 @@ const protectionNotice = (): string => {
 /**
  * The band's own limit, said out loud, with the way past it attached.
  *
- * Five prepared choices are the only affordable shape for this surface — a text
- * box on the most-loaded page the project has is a model call for every visitor
- * and a dead button for every deployment without a key — and that leaves a real
+ * Prepared choices are the only affordable shape for this surface — a text box
+ * on the most-loaded page the project has is a model call for every visitor and
+ * a dead button for every deployment without a key — and that leaves a real
  * gap: the hero two bands above promises *ask for a change in your own words*,
- * and this band offers five buttons.
+ * and this band offers a row of buttons.
  *
  * The gap has been the standing open question on this lane since 20 August, and
  * the recommendation each time was the same: send people somewhere built for
@@ -476,11 +476,7 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
      * of its own. The band is `wide`, and an unmeasured small line crosses all
      * of it.
      */
-    prose(
-      ids,
-      "These five are prepared, so the whole sequence runs here without calling an AI model. To ask for something in your own words, try the demo. It is a page you can type into.",
-      { tone: "muted", size: "small", measured: true }
-    ),
+    prose(ids, whyTheyArePrepared(), { tone: "muted", size: "small", measured: true }),
     buildElement(ids, {
       type: "loom.action",
       props: {

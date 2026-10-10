@@ -48261,8 +48261,9 @@ one page that reaches one.
 ## 2026-10-09 — no undo on this site is held, and the shape that would hold one is a setting rather than a move
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — **re-measures the 1 October entry of this lane**, which stands, and names
-a shape that entry ruled out for the wrong reason
+closed in this lane by `marketing-65-the-undo-the-rules-hold`, which built the
+request named below and measured both halves of it: held on the way out, held on
+the way back, and the weighing sentence byte-identical both times
 
 The 1 October entry measured all five choices with and without the visitor's yes
 and found that no undo on `/how-it-works` is held by the rules. That is still
@@ -48606,3 +48607,77 @@ and it needs a floor under `opens` that nothing here has chosen yet. Until
 somebody chooses it, the figure is one click down for every part of the page,
 which is where the governing principle puts a technical record and not where it
 puts a finding.
+
+---
+## 2026-10-10 — a plain-words clause was true of the one cause that could reach it, and the sixth request reached it the other way
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed in this lane by `marketing-65-the-undo-the-rules-hold` — filed anyway
+because the **shape** is not this clause's, and thirteen more sit beside it
+
+`RAISED_BY` in `_lib/adapt/record.ts` turns a stake factor's code into the clause
+a visitor reads under *The change was measured*. `protected-type-touched` is the
+factor for touching a protected piece by any means except taking it away or
+moving it, and its clause said *"it rewrites something you marked as
+protected."*
+
+That was accurate for every record this site could draw, because the factor has
+**two** causes and only one of them was reachable: rewriting what is inside a
+protected piece, and changing how one is set. No request on this page could
+raise it by a setting until `unstick-menu` existed, and `unstick-menu` raises it
+by a setting and nothing else.
+
+So the panel contradicted itself across three inches of one card. The second
+rung carried the request's own line, *"no word of the page is rewritten"*, and
+the third carried *"it rewrites something you marked as protected"* — the two
+sentences a reader is likeliest to read together, on the card whose only job is
+to be believed. It now says *changes*, which is true of both causes and gives up
+nothing: what the piece was is in the line above it and how much of it moved is
+in the line above that.
+
+**The shape is what generalises.** A translation table written while only some
+of a code's causes were reachable has that fact encoded in its wording and says
+so nowhere, so the clause goes wrong on the day a lane makes the other cause
+reachable — which is a day that looks like an ordinary feature. The guard added
+here covers one class of it (a request whose plan is only settings may not be
+reported as having rewritten anything) and leaves the other thirteen clauses
+unchecked. `(portal)` prints its own translation of the same codes and was not
+read by this run.
+
+---
+## 2026-10-10 — three comments in this lane argue from a file that is not in the tree, and the abstraction one of them justifies has a single caller
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — **nothing is wrong and nothing is blocked.** It is dead generality and
+three explanations pointing at something a reader cannot go and look at
+
+`PlannedChange` and `plannedInterpreter` in `_lib/adapt/asks.ts` were extracted
+out of `askInterpreter` on 23 September, and the header says why in as many
+words:
+
+> *"when `floors.ts` needed the same machinery for a request that is **not** one
+> of the five buttons: a floor probe has no `AskId`, no label and no place in
+> the band, and the alternative to a shared shape was a second copy of the block
+> below."*
+
+**There is no `floors.ts`.** Nothing in the repository imports one, no band
+prints a floor probe, and `askInterpreter` is `plannedInterpreter`'s only caller
+— so the shared shape carries one implementation and the `interpreter`
+parameter, which exists so that two kinds of request can stamp a record
+differently, has one value. This session's clone holds fifty commits and cannot
+see whether that file was deleted or never landed, so the entry says what is
+true now rather than guessing at a history.
+
+Two more comments argue from it as current: `run.ts`'s account of the two floors
+under the policy (*"`floors.ts` puts two of those and prints what came back"*),
+and `record.ts`'s reason for exporting `RAISED_BY`. That export has no consumer
+outside its own module, which is the same absence seen from the other end.
+
+**Left out of the branch that found it, deliberately.** Collapsing an
+abstraction and rewriting three explanations is a second subject in a pull
+request about a sixth choice, and which fix is right is a real question rather
+than a tidy-up: the parameter is worth keeping the moment this site puts a
+second kind of request through the sequence, in which case only the comments are
+wrong. What is indefensible on either answer is a comment that sends the next
+run looking for a file — this lane filed the same shape on 26 September about a
+comment stating a library limit that had outlived the limit by a fortnight.
