@@ -28,6 +28,7 @@ import { theEnding, whatTheRailShows } from "./rail"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoSession, rememberRecord, type DemoSession } from "./session"
+import { THE_TOP_OF_IT_NOW } from "./the-page-itself"
 import { whatEachWillSay } from "./what-it-will-say"
 
 /**
@@ -1079,23 +1080,77 @@ describe("the page on the first screen", () => {
   })
 
   /**
-   * And after a change that went ahead on its own, where the page moving is its
-   * own announcement and the record card is at the top of the rail.
+   * **And stays through the press the demo opens with, which is the behaviour
+   * this run reverses.**
    *
-   * The two cases are one condition — a record is what an ask produces — and
-   * they are asserted separately because the two outcomes reach it by different
-   * routes: this one has no hold anywhere, and the one above has nothing
-   * applied.
+   * It used to go quiet here too, on the premise that *the page moving is its
+   * own announcement*. That is true of the stage and false of the screen the
+   * announcement has to reach: the re-theme is applied rather than held, so no
+   * card renders a band; it configures the root, so `spotFor` draws no mark;
+   * and it removes nothing, so no card is holding content. Measured on `main`
+   * at `39c6ef3`, 390 × 844, the press took this window away at `y 325` and put
+   * the nearest pixel of the page at `y 1,998`.
+   *
+   * Three assertions rather than one, because the window surviving is only
+   * worth having if it is the page *now*: the revision it is of is the one the
+   * press produced, and the caption says so.
    */
-  it("says nothing once a change has landed", async () => {
+  it("stays through a change whose subject is the page itself", async () => {
     const session = await sessionFor("itself-after-landing")
-    const landed = await ask(session, "palette")
+    const landed = await ask(session, DEMO_OPENING_PRESET)
+
+    const { tree, view } = await railOf(landed.session)
+
+    expect(landed.record.outcome).toBe("applied")
+    expect(view.landing).toBeDefined()
+    expect(view.spots).toHaveLength(0)
+    expect(view.pageItself?.tree.revision).toBe(tree.revision)
+    expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT_NOW)
+  })
+
+  /**
+   * And goes quiet for the other change this demo applies on its own, which is
+   * the half that proves the condition is about the screen rather than about
+   * the press.
+   *
+   * *Repaint the top band* lands exactly as the re-theme does — one press, no
+   * question, a record at the top of the rail — and the page carries a green
+   * ring around the band it repainted, which `SpotlightScroll` carries a phone
+   * down to. The page is in front of the visitor, so the window has nothing to
+   * add and costs the asks under it 262 pixels.
+   */
+  it("says nothing when the change it landed is marked on the page", async () => {
+    const session = await sessionFor("itself-after-marked")
+    const landed = await ask(session, "backdrop")
 
     const { view } = await railOf(landed.session)
 
     expect(landed.record.outcome).toBe("applied")
     expect(view.landing).toBeDefined()
+    expect(view.spots.length).toBeGreaterThan(0)
     expect(view.pageItself).toBeUndefined()
+  })
+
+  /**
+   * And comes back saying what it said on arrival once the visitor puts the
+   * re-theme back, because an undo of a root configure is a root configure: the
+   * page returns to the palette it started on, in the window, in place.
+   *
+   * The caption still reads *now*, and that is `landing`'s doing rather than a
+   * special case: `landedOnYourPress` is about the change that produced the
+   * revision on the stage, and an undo is one — the visitor pressed for this
+   * state as much as they pressed for the last one.
+   */
+  it("shows the page going back, in the same window it came forward in", async () => {
+    const session = await sessionFor("itself-undone")
+    const landed = await ask(session, DEMO_OPENING_PRESET)
+    const undone = await ask(landed.session, DEMO_OPENING_PRESET)
+
+    const { tree, view } = await railOf(undone.session)
+
+    expect(undone.record.outcome).toBe("applied")
+    expect(view.pageItself?.tree.revision).toBe(tree.revision)
+    expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT_NOW)
   })
 
   /**
