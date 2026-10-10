@@ -333,3 +333,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0247](0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md) | A readership comparison is built from two floored maps, and the mix is the only figure that survives having no window | Accepted | §4c (reader signals) |
 | [0248](0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md) | Which optional checks were in place is named on the judgment, beside the rules that were consulted | Accepted | §2 → §5 |
 | [0249](0249-a-region-the-primitive-does-not-place-is-a-diagnostic.md) | A region the primitive does not place is a diagnostic, and the declaration is the promise | Accepted | §3 (render seam) |
+| 0250 | *No record on this branch* | — | — |
+| [0251](0251-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md) | The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report | Accepted | §4, not the library |
