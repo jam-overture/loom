@@ -49320,8 +49320,33 @@ palettes at 1280 and wraps to two lines at 390, photographed in
 `reports/the-third-design-*.png`.
 ## 2026-10-09 — the reader surfaces have never had a landing screen, and now there is an order to draw one from
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
-nothing is blocked and nothing is wrong; this is what §21 makes drawable
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-57-which-page-to-fix-first`** — taken as written, all four refusals
+included
+
+> **Closing note, 10 October, `Loom portal`.** The four points below are the
+> brief of that branch and each is held somewhere a test can see it.
+> `readers` is on the surface against `opened` and `lost` is in the disclosure
+> beside the straddle rate, never in one sentence with the other — the entry's
+> first point, and the 7 and 8 October two-figure failures are what it is
+> guarding against. The unranked pages are a count, a sentence and a legend
+> keyed by standing, in the order the runtime handed them over, with a test
+> asserting that this screen never re-sorts them. **The screen is drawn above
+> the existing list rather than beside it**, and the list itself is now in that
+> order: the landing screen and the cards are one screen, because a league
+> table a reader has to leave to act on is a tenth thing to read.
+>
+> **One point was not taken as written, and the reason is this screen rather
+> than the reading.** *`trees` against the length of the order* is the sentence
+> that stops a reader double-counting two live versions of one page — and this
+> screen can only ever hand the order **one row per page**, because a fall is a
+> comparison between two parts of a page and only one version of a page can be
+> read from the store. So the sentence it says instead is *each page is in this
+> order once, at the newest version its counters have finished*, and the pages
+> whose counted window has not caught up are a count and a line of their own
+> (`FixFirst.unjoined`). Saying *two versions of a page are two rows* on a
+> surface that cannot show two would be the portal describing a reading rather
+> than a deployment.
 
 `deploymentReadingOf(pages, rows)` is on this branch, published from
 `@jam-overture/loom/signals`, recorded in `decisions/0250-….md`. It takes each
@@ -49541,3 +49566,139 @@ adding a condition silently is still exactly what it catches. 0240 is **not**
 edited and not superseded; the module carries the corrected counts (ten
 conditions, thirty members, eight sets) and the paragraph says which claim was
 narrowed and why.
+
+---
+## 2026-10-10 — a JSX space survives the test transform and not the build, so a rendered test is green on a junction the browser runs together
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** **closed in the instance by
+`portal-57-which-page-to-fix-first`** — recorded because the *shape* is general,
+nothing in the repository can catch it, and the next lane to write a technical
+disclosure will meet it
+
+A paragraph in the new order's disclosure read, in the source:
+
+```tsx
+<span className="font-mono">drift ÷ opened</span> off its own page-view row.
+```
+
+A real space, mid-line, between an element and the word after it. The browser
+rendered:
+
+> *that page’s own `drift ÷ opened`off its own page-view row*
+
+**The space is in the DOM under the transform the tests run through and is not
+in the built page.** That was checked rather than assumed: the same markup
+rendered through `@testing-library/react` gives `textContent` of
+`"… drift ÷ opened off its own page-view row …"`, with the space, so every
+rendered assertion in `which-page-first.test.tsx` passed over a browser that
+printed the two words as one. Vitest transforms with esbuild; `next build`
+transforms with SWC; the two disagree about the leading whitespace of a JSXText
+node that begins mid-line after an element.
+
+**`prerender:check` is the tool that exists for this and it cannot see this
+screen.** It walks 132 prerendered pages for text junctions and reported *0 run
+together* on the run that shipped this one — `/portal/readers` is `ƒ`, server-rendered
+on demand behind a session, so it is not in the set and neither is any other
+screen in this portal.
+
+So the three things that could have caught it are: a photograph, a photograph,
+and a photograph. It was the fourth consecutive run where a full-page photograph
+found something every test passed through, and the first where the test was
+*right about its own render* and still wrong about the page.
+
+**The remedy taken, which is the cheap one.** `{" "}` wherever a word follows an
+element on the same line, and a source guard in this component's own test
+asserting that no `</span>` is followed by whitespace and a letter. Punctuation
+is exempt and needs no space, which is why the guard is on `[A-Za-z]` rather
+than on anything.
+
+**What is not taken, and is the open half.** The guard is one component's. The
+general form — *no surface file in this lane puts a bare space between an
+element and a word* — is a one-regex sweep over `(portal)` and would have found
+this before the photograph did. It is not in this branch because it would touch
+every component in the lane on a branch about an order, and a sweep that lands
+with forty incidental edits is unreviewable. It is a half-hour of somebody's
+next run.
+
+**For `Loom daily build`, one line that is not this lane's to write:** if the
+junction checker could be pointed at an authenticated route — a shot list it
+already knows how to drive, rather than a prerender manifest — it would cover
+all sixteen screens in this portal rather than none of them. Filed as an
+observation, not an ask; the portal has a photograph and the photograph works.
+
+---
+## 2026-10-10 — `/portal/readers` was alphabetical because the module that ordered it had written down that there was no rung, and the rung arrived three weeks later
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-57-which-page-to-fix-first` — recorded because the **shape** is the
+general one and this lane will meet it again
+
+`_lib/page-order.ts` carried, in `ORDER_LEAD`, a comment arguing that
+`/portal/readers` had nothing to lead with:
+
+> *There is no rung to lead with there: a page's readers are not more or less
+> urgent than another page's, and the honest answer to why is this one at the
+> top is that it is called About.*
+
+It was **true when it was written and false when it was read**. The premise is
+right — one page's readers are not more urgent than another's — and the
+conclusion does not follow, because the question was never *whose readers* but
+*whose readers are leaving*. What was actually missing was a sound comparison:
+a raw loss is inflated by each page's own straddle rate, so ranking on it ranks
+partly by how long readers stay.
+[0250](decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)
+supplied it on 9 October and the screen was still alphabetical on the 10th.
+
+**The shape worth keeping.** A comment explaining why a screen cannot do
+something is a **dated claim about the runtime**, and nothing in this repository
+re-reads one when the runtime changes. It is the most convincing kind of stale
+comment, because it is well argued and was correct — the run that wrote it did
+the thinking, and the run that reads it inherits a conclusion without the date.
+
+Four more of these are in this lane today, each saying some version of *this
+cannot be known yet*: the `completed` signal kind, the policy history
+`/portal/trust` wants, personas on the app screen, and conversion on this one.
+Three of the four are a framework's to supply and all four will be read by a
+future run as settled. Nothing is asked for here; the cheap habit is that a
+comment of this kind names **what would have to exist** for it to stop being
+true, which is what makes it checkable rather than persuasive. The replacement
+comment in `page-order.ts` does.
+
+---
+## 2026-10-10 — the eleventh consecutive hand-written photograph preload, and the first that had to invent four pages to have an order at all
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed against the 27 September entry, which is unchanged and still right**
+
+The 27 September entry asked for a staging harness under
+`app/(portal)/_test/staging/` with a small CLI. It was the eighth preload then.
+This is the eleventh, and the number is the finding.
+
+What this one needed, which sharpens the ask a third time:
+
+- **Four pages, built through the published builders and written through the
+  published store.** Every earlier preload staged counters or a journal against
+  the one page the portal seeds. An *order* cannot be photographed with one
+  page in it, so this preload had to create a deployment, which is the first
+  time the staging has had to produce the subject rather than the measurements.
+- **Two stores at once** — the tree store for the pages and the tally store for
+  what readers did, with the door rows written through a second method
+  (`opened`) from the counters (`apply`), because the straddle rate the whole
+  order turns on is the difference between them.
+- **A deliberate hole.** One of the four has no door row, so that the *out of
+  the order* line and its standing have something to describe. A harness that
+  only produces healthy deployments cannot photograph the half of this surface
+  that is about pages it cannot measure.
+
+**What it cost, beyond writing it: two wasted shoots.** `pnpm shoot --serve`
+does not build — it serves whatever `.next` holds and prints that build's
+timestamp — so the first two runs photographed a build that predated the
+staging and reported *No page has reported anything yet*. The timestamp was on
+screen both times and was read past both times. Worth a sentence in
+`docs/routines.md`' screenshot section, which is `Loom daily build`'s file:
+**`--serve` serves a build, so build first, and the `built …Z` line is the one
+to check when a photograph shows the wrong page.**
+
+The staging module was deleted before committing, as the eight before it were,
+and the shot list is beside the report.
