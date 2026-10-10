@@ -212,6 +212,16 @@ unscheduled queue 40 → 41, the last three set letters from `AL, AM, AN` to `AM
 and `REVIEW_SETS` gaining `AO` with ten questions. Two claims added to
 `TRANSCRIPT_CLAIMS`; one existing `matters` string reworded, named above.
 
+**Preview**, on the pull request:
+`https://loom-git-lessons-36-vantage-jpizzolato36-6341s-projects.vercel.app`
+— the lesson at `/lessons/36`, the new set at `/lessons/review/set-ao`. I could
+not open either from this container: the environment's network policy denies
+that host, so the evidence that it renders is Vercel's own check plus
+`prerender:check`'s 131 pages locally, which include both routes. The same note
+is on lesson 35's report from 8 October — it is a setting on the environment
+rather than anything in this branch, and it is worth whoever next wants to look
+at a page rather than a test knowing that it has now cost two runs.
+
 No decision record: a lesson is not a decision, and nothing about the runtime,
 the tree schema or an `Accepted` record is touched.
 
