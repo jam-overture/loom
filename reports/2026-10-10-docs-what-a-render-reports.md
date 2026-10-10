@@ -190,6 +190,29 @@ existed — one row in `SECOND_OPINION`, one line in the spelled-out list, one
 `pnpm findings:check` reads 1,096 findings, 0 malformed. `pnpm prerender:check`
 reads 130 prerendered pages and 1,749 text junctions, 0 run together.
 
+## The preview, and a branch name that hid it
+
+https://loom-git-docs-51-what-a-rend-713bd6-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-a-render-reports
+
+Deployed `Ready` about ninety seconds after the push. It was **not** opened from
+this container: `*.vercel.app` is denied by the environment's egress policy, as
+every lane's report has said for weeks.
+
+One thing worth the next run's minute. The pull request went up with a guessed
+preview URL in it, and the guess was wrong — not because the pattern has
+changed, but because **this branch name is long enough to break it**.
+`loom-git-<branch>-jpizzolato36-6341s-projects` has to fit in 63 characters, and
+`docs-51-what-a-render-reports` is three over, so Vercel truncates the branch to
+nineteen characters and appends a six-character hash nothing in this container
+can derive. The alias is readable in one place: the `vercel[bot]` comment on the
+pull request, once the deployment reports. Both the body and the comment were
+corrected from it within two minutes.
+
+The rule that falls out is one line: **a branch name over twenty-six characters
+makes its own preview URL underivable**, so the URL is read from the bot's
+comment rather than composed. Shorter branch names are the other half of the
+answer and are cheaper.
+
 ## What the pictures say
 
 Four shots, `pnpm shoot --serve apps/loom`, build stamped
