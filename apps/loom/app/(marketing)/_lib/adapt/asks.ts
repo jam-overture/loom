@@ -39,14 +39,18 @@ import type { Verdict } from "./record"
  * remove something, move something, change a setting — and that this is the
  * whole list. Those four are that list, performed on the page making the claim.
  *
- * The fifth is the one this site refuses, and it is the most important button on
- * the band. See `dropPrices`.
+ * The last two are about the menu, and they are a pair rather than two more
+ * buttons. One asks for the menu to stop following the reader down the page and
+ * is held; one asks for it to be taken away and is refused outright. The same
+ * piece, two requests, two different answers — which is the gradation the rest
+ * of the band argues for in words. The first of the pair is also the only
+ * request here whose *undo* the rules hold. See `unstickMenu` and `dropPitch`.
  */
 
 /** What the record says worked the change out. It is not a model, and it says so. */
 export const FRONT_DOOR_INTERPRETER = "loom/front-door-ask"
 
-export type AskId = "problem" | "shorter" | "proof" | "calmer" | "drop-pitch"
+export type AskId = "problem" | "shorter" | "proof" | "calmer" | "unstick-menu" | "drop-pitch"
 
 /**
  * The three answers a set of rules can give, before the visitor has said
@@ -121,6 +125,25 @@ const openingBand = (
 }
 
 /**
+ * The menu, which two of the six requests are about.
+ *
+ * `dropPitch` found it inline while it was the only request that needed it.
+ * `unstickMenu` would have been the second copy of that lookup, and two copies
+ * is how two requests about one node end up disagreeing about which node that
+ * is. The pair is the whole point of them — one asks for the menu to be taken
+ * away and is refused, one asks for it to stop following the reader and is
+ * held — so the only honest way to say *the same node, two answers* is for both
+ * plans to read it from the same place.
+ */
+const menuBar = (page: LoomTree): ElementNode | undefined => {
+  const menu = page.root.children.find(
+    (child) => child.kind === "element" && child.type === "loom.nav"
+  )
+
+  return menu !== undefined && menu.kind === "element" ? menu : undefined
+}
+
+/**
  * A move, not a removal and an insertion.
  *
  * The band keeps the identity it had, so what arrives under the headline is the
@@ -131,10 +154,15 @@ const openingBand = (
 const problem: Ask = {
   id: "problem",
   /**
-   * Held, and it is the most instructive of the five. It moves a band the rules
-   * protect rather than destroying it — not damage, and not something the rules
-   * let a request through on its own either — so it stops and asks the visitor,
-   * which is the middle answer and the one no competitor has.
+   * Lands on its own, and it is the move: a band changes place and nothing the
+   * rules protect is touched by it.
+   *
+   * **It was the held one until 1 October**, and the note here said so for nine
+   * days after it stopped being true. While the five choices sat on the front
+   * door, the band this lifted to the top was the one saying what the product is
+   * for, and the rules protect that — so the same request stopped and asked.
+   * This page has no such band, and `shorter` is the request that is held here.
+   * Which one of them it is was never a property of the request.
    */
   answer: "landed",
   utterance: "Skip ahead. Can I undo a change the AI makes?",
@@ -262,16 +290,21 @@ const calmer: Ask = {
  * are asked for — so the band offers a request that is refused, in front of the
  * visitor, with the reason attached.
  *
- * It is refused because **what this site says it is for** is one of the two
- * things its rules protect, and taking a protected piece away is the one weight
- * that sits at the refusal floor rather than under it. There is no button to
- * override it. That is the difference between a rule and a suggestion.
+ * It is refused because **the menu is one of the things its rules protect**, and
+ * taking a protected piece away is the one weight that sits at the refusal floor
+ * rather than under it. There is no button to override it. That is the
+ * difference between a rule and a suggestion.
  *
- * It was the pricing band until 21 August, when the maintainer took pricing off
- * the front door. The choice of what to protect got better for it: a business
- * protecting its price list is ordinary, and a business refusing to let a
- * machine delete the statement of what it does for people is the same instinct
- * pointed at the thing that actually matters.
+ * It has asked for two different things. It was the pricing table until
+ * 21 August, when the maintainer took pricing off the front door, and the band
+ * saying what the site is for until 1 October, when the five choices moved onto
+ * a page that has no such band. What it asks for now is the piece that needs a
+ * stranger no explaining at all: everybody understands why you would not let a
+ * machine delete your navigation.
+ *
+ * `unstickMenu` is the other half of it, and the reason this one is worth more
+ * than a refusal on its own: the same piece, asked about twice, answered
+ * differently both times.
  */
 const dropPitch: Ask = {
   id: "drop-pitch",
@@ -282,18 +315,64 @@ const dropPitch: Ask = {
   rationale:
     "This would remove the menu at the top of the page. The way out of a page is one of the things this site's rules protect, so the answer is no. That is a fact about the change, not about who asked for it, and there is no button that overrides it.",
   plan: (page) => {
-    const menu = page.root.children.find(
-      (child) => child.kind === "element" && child.type === "loom.nav"
-    )
+    const menu = menuBar(page)
 
-    return menu === undefined || menu.kind !== "element"
-      ? undefined
-      : [{ op: "remove", nodeId: menu.id }]
+    return menu === undefined ? undefined : [{ op: "remove", nodeId: menu.id }]
+  },
+}
+
+/**
+ * The second setting change, and the only request on this site whose **undo is
+ * held too**.
+ *
+ * That is the whole reason it exists, and it is worth being exact about what
+ * was missing without it. The band's fifth rung promises that putting a change
+ * back is weighed by the same rules as the change, and the panel carries a
+ * sentence for the state where the rules stop one. Measured across the other
+ * five requests, **no undo on this page was ever held**: the held one removes
+ * four bands, and putting four bands back is an addition, which the rules let
+ * through on their own. So the sentence existed and no address could reach it,
+ * and the site demonstrated reversibility only under terms easier than the
+ * thing being reversed.
+ *
+ * **A setting is the shape that fixes it, and the symmetry is arithmetic rather
+ * than arrangement.** The rules protect the menu, and a setting change on a
+ * protected piece weighs more than a request is let through on by itself, so
+ * this is held. The change that reverses a setting change is another setting
+ * change on the same piece, which the rules weigh exactly the same way. One
+ * request, held on the way out and held on the way back, with nothing anywhere
+ * exempting either half.
+ *
+ * It also pairs with `dropPitch`, which asks for the same piece to be taken
+ * away and is refused outright. **One piece, two requests, two different
+ * answers** is the gradation the rest of the band argues for in words, on one
+ * screen, with the reader able to press both.
+ *
+ * The earlier reading of this, on 1 October, was that only a *move* has an
+ * inverse of its own weight, and that the two things this page protects are
+ * both worse to move than what was already being demonstrated. The first half
+ * is what was wrong: a setting change is the other operation whose inverse is
+ * itself.
+ */
+const unstickMenu: Ask = {
+  id: "unstick-menu",
+  answer: "held",
+  utterance: "The menu follows me down the page and I find it distracting. Stop it sticking to the top.",
+  label: "Stop the menu following me",
+  rationale:
+    "This changes one setting on the menu at the top of the page: it stops following you down the page and stays where it is. Nothing is added, nothing is taken away, and no word of the page is rewritten.",
+  plan: (page) => {
+    const menu = menuBar(page)
+
+    if (menu === undefined) return undefined
+    if (menu.props["position"] === "static") return undefined
+
+    return [{ op: "configure", nodeId: menu.id, set: { position: "static" }, unset: [] }]
   },
 }
 
 /** Every choice, in the order the band offers them. */
-export const ASKS: readonly Ask[] = [problem, shorter, proof, calmer, dropPitch]
+export const ASKS: readonly Ask[] = [problem, shorter, proof, calmer, unstickMenu, dropPitch]
 
 export const askById = (id: string | undefined): Ask | undefined =>
   id === undefined ? undefined : ASKS.find((ask) => ask.id === id)

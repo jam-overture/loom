@@ -1,4 +1,10 @@
-import { applyDelta, type ElementNode, type LoomNode, type LoomTree } from "@jam-overture/loom"
+import {
+  applyDelta,
+  sequentialIdFactory,
+  type ElementNode,
+  type LoomNode,
+  type LoomTree,
+} from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
@@ -84,8 +90,26 @@ describe("every choice the band offers", () => {
     expect(ask.label.length).toBeLessThan(ask.utterance.length)
   })
 
-  it("offers one choice per kind of change, and one the rules refuse", () => {
-    expect(ASKS).toHaveLength(5)
+  /**
+   * The claim the band makes about itself, asserted rather than counted.
+   *
+   * It was `toHaveLength(5)` and nothing else, which is a weaker check than its
+   * own title: five choices that all removed something would have satisfied it
+   * while the page three bands down said there are four kinds of change and
+   * *"this is the whole list"*. So the kinds are read off the plans the requests
+   * actually produce, and the literal stays beside them as the budget it always
+   * was — a sixth choice is a decision somebody makes here, not an afternoon.
+   */
+  it("offers every kind of change the page says exists, and one the rules refuse", () => {
+    const kinds = new Set(
+      ASKS.flatMap(
+        (ask) => ask.plan(basePage(), sequentialIdFactory("kinds"))?.map(({ op }) => op) ?? []
+      )
+    )
+
+    expect([...kinds].sort()).toEqual(["configure", "insert", "move", "remove"])
+    expect(ASKS.filter((ask) => ask.answer === "refused")).toHaveLength(1)
+    expect(ASKS).toHaveLength(6)
   })
 })
 
@@ -165,6 +189,40 @@ describe("what this site's rules do with each request", () => {
     const approved = await runAsk(basePage(), ask, true)
 
     expect(countOf(approved.page, "loom.nav")).toBe(1)
+  })
+})
+
+/**
+ * Two sentences of one card, held against each other.
+ *
+ * **A setting change rewrites nothing, and for one commit the panel said it
+ * did.** `unstick-menu` changes one value on the menu, its own line says *"no
+ * word of the page is rewritten"*, and the weighing two rungs below it said
+ * *"it rewrites something you marked as protected"* — the clause for a factor
+ * that covers both rewriting a protected piece and re-setting one, written when
+ * only the first was reachable from this page.
+ *
+ * It is asserted as the property rather than as the string, because the string
+ * is the thing that was wrong. A request whose whole plan is settings has not
+ * rewritten anything, so nothing in what the page says about it may claim it
+ * has, whatever words a later run reaches for.
+ */
+describe("a request that only changes settings", () => {
+  const settingsOnly = ASKS.filter((ask) => {
+    const ops = ask.plan(basePage(), sequentialIdFactory("settings"))
+
+    return ops !== undefined && ops.length > 0 && ops.every(({ op }) => op === "configure")
+  })
+
+  /** The sweep is not empty, which is the half an `ASKS` of nothing would pass. */
+  it("is a thing this band offers", () => {
+    expect(settingsOnly.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it.each(settingsOnly)("$id is never reported as having rewritten anything", async (ask) => {
+    const { record } = await runAsk(basePage(), ask, true)
+
+    expect(`${record.measured} ${record.weighed}`).not.toMatch(/rewrit/i)
   })
 })
 
