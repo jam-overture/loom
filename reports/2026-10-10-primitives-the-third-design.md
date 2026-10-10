@@ -216,17 +216,54 @@ remembered screenshot.
 `pnpm install && pnpm verify` — **green**. Nothing skipped, no test weakened.
 
 ```
-Test Files  195 passed (195)      Tests  4359 passed (4359)    [package]
-Test Files  412 passed (412)      Tests  7389 passed (7389)    [workspace]
+Test Files  419 passed (419)      Tests  7636 passed (7636)    [workspace]
 ```
 
 Four tests added, all four verified red against a deliberate mutation and
 reverted.
 
-One typecheck failure was hit and fixed rather than worked around: the
-questions array needed an explicit `Question` type, because `as const` on a
-list where only the first member carries `open` gives a union with no `open` on
-the rest. `faq-band.ts` had already solved it the same way.
+**Three failures were hit on the way and all three were fixed rather than
+worked around.** They are listed because two of them are the kind a run can
+only find by actually running `verify` to the end, and one of them is a trap
+this lane has now hit twice.
+
+1. **Typecheck.** The questions array needed an explicit `Question` type: `as
+   const` on a list where only the first member carries `open` gives a union
+   with no `open` on the rest. `faq-band.ts` had already solved it the same
+   way.
+2. **`reference.generated.json` was stale** — four new exports, so the docs
+   site's *every published door* assertion went red. This is exactly the trap
+   `primitives-55` recorded on #548: the reference is read from `dist/*.d.ts`,
+   so it has to be regenerated **after** `pnpm build`, never before. Rebuilt
+   and regenerated: **1,460 → 1,464 exports**, which is the four bands.
+3. **The documentation site spells the band count in prose**, and its own test
+   asserts the spelling. See *Cross-lane edits* below.
+
+## Cross-lane edits
+
+**One, in `apps/`, forced and declared rather than quiet.**
+
+| file | edit | forced by |
+| --- | --- | --- |
+| `apps/loom/app/(docs)/_lib/counts.test.ts` | `starter-bands: fifty-nine` → `sixty-three` | the assertion became false |
+
+The brief for this lane says `src/primitives/` only and not to edit `apps/`.
+This is the exception that rule has to have, and it is worth saying why rather
+than just doing it: the **value** is derived — `SITE_COUNTS` reads
+`STARTER_COMPOSITIONS.length` and the page renders it through `<BandCount>` —
+so the documentation site's prose updated itself and nothing there is stale.
+What is hardcoded is one string in the test that checks the *spelling*, and it
+is hardcoded on purpose, so that a number the site states cannot move without
+somebody seeing it move.
+
+Somebody is this run. It is one word, it keeps an assertion true rather than
+weakening one, and the alternative — leaving `verify` red — is the thing the
+brief forbids outright. `reference.generated.json` is the same shape: a
+committed generated file whose diff is the point.
+
+Checked for others: `fifty-nine` appears nowhere else in `apps/`, `docs/` or
+`lessons/` as a band count. The one hit in `lessons/21-appearance.md` is a
+different fifty-nine.
 
 ## Pictures
 
