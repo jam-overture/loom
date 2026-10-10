@@ -7,12 +7,23 @@ import {
   systemClock,
   type LoomTree,
 } from "@jam-overture/loom"
-import { commitIntent, confirmHeld, type HeldProposal } from "@jam-overture/loom/write"
+import {
+  commitIntent,
+  confirmHeld,
+  discardHeld,
+  type HeldProposal,
+} from "@jam-overture/loom/write"
 
 import { roomToLand } from "./arrival"
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { settingsOf } from "./plain-change"
-import { askedWith, DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
+import {
+  askedWith,
+  DEMO_LEADING_PRESET,
+  DEMO_OPENING_PRESET,
+  presetById,
+  presetInterpreter,
+} from "./presets"
 import { theEnding, whatTheRailShows } from "./rail"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
@@ -526,10 +537,47 @@ describe("a visitor who has done nothing", () => {
  * render, build, and pass every component test in this lane.
  */
 describe("the ask the arrival screen leads with", () => {
-  it("nominates an ask, and shows the part of the page it would touch", async () => {
-    const fresh = await sessionFor("leading")
+  /**
+   * The arrival screen, and both halves of what it now nominates.
+   *
+   * The demo opens with a change the Gate applies, so the first press moves
+   * the page; and that change configures the root, so there is no *part* to
+   * excerpt under the button — the part it is about is the page on the other
+   * half of the screen. The absence is asserted rather than left to the
+   * screenshot, because a preview quietly appearing here is a 358px block
+   * arriving on the one screen this lane has spent five runs clearing.
+   */
+  it("opens with a change that moves the page, and previews nothing under it", async () => {
+    const fresh = await sessionFor("opening")
     const { view } = await railOf(fresh)
 
+    expect(view.leading?.preset).toBe(DEMO_OPENING_PRESET)
+    expect(view.leading?.part).toBeUndefined()
+  })
+
+  /**
+   * **The handover, through the real write path, and it is the test that
+   * earns its place over the others here.**
+   *
+   * Four readings have to agree for the demo's second beat to exist at all:
+   * the press has to apply rather than be held, `landedOnYourPress` has to see
+   * the visitor's own change at the head, the nomination has to flip to the
+   * ask the Gate holds, and the preview has to arrive with it. Each of them is
+   * correct about itself while the sequence is broken — a nomination that
+   * never flips leaves a green button offering the visitor their own undo, and
+   * nothing in this lane fails.
+   */
+  it("hands the green button and the preview to the Gate's ask once a change has landed", async () => {
+    const fresh = await sessionFor("handover")
+    const opened = await ask(fresh, DEMO_OPENING_PRESET)
+
+    /** Applied, not held: the page moved on the one press the demo invited. */
+    expect(opened.record.outcome).toBe("applied")
+
+    const { view, tree } = await railOf(opened.session)
+
+    expect(tree.revision).toBe(1)
+    expect(view.landing).toBeDefined()
     expect(view.leading?.preset).toBe(DEMO_LEADING_PRESET)
     expect(view.leading?.part).toBeDefined()
     expect(view.leading?.part?.tree.root.type).toBe("loom.stat-grid")
@@ -541,6 +589,24 @@ describe("the ask the arrival screen leads with", () => {
      * so this is the only place the rail's two callbacks can be told apart.
      */
     expect(view.leading?.part?.where).toBe("ask")
+  })
+
+  /**
+   * And the nomination does not flip on a press that was only *raised*.
+   *
+   * An ask the Gate holds moves nothing, so a visitor looking at a page that
+   * has not moved is still on their first press — which is why the handover
+   * reads `landing` rather than counting records. The rail has a second reason
+   * to nominate nothing here (a question is open), so what this holds is the
+   * join: the two rules agree, and neither is carrying the other.
+   */
+  it("does not count a question nobody has answered as a change of theirs", async () => {
+    const fresh = await sessionFor("raised-only")
+    const raised = await ask(fresh, DEMO_LEADING_PRESET)
+    const { view, tree } = await railOf(raised.session)
+
+    expect(tree.revision).toBe(0)
+    expect(view.landing).toBeUndefined()
   })
 
   /**
@@ -557,6 +623,41 @@ describe("the ask the arrival screen leads with", () => {
 
     expect(view.waiting).toBeDefined()
     expect(view.leading).toBeUndefined()
+  })
+
+  /**
+   * **And a question the visitor said *no* to is still not a change of
+   * theirs**, which is the one reachable state where `landing` and *are there
+   * any records* give different answers.
+   *
+   * Decline the held ask and there is a record, a complete one, saying Loom
+   * was told not to. The page has not moved. Read as *a change has landed*,
+   * the green button would become the ask they have just refused; read as
+   * `landing`, it stays the press that moves the page — which is also the only
+   * thing left that would show them the surface works.
+   *
+   * Declined through the real write path, the way `actions.ts` declines it.
+   */
+  it("still opens with the moving press after a question the visitor declined", async () => {
+    const fresh = await sessionFor("declined")
+    const raised = await ask(fresh, DEMO_LEADING_PRESET)
+    const held = await holdsOf(raised.session, await headOf(raised.session))
+
+    expect(held.length).toBe(1)
+
+    const discarded = await discardHeld(beginDemoWrite(raised.session).path, {
+      proposalId: proposalIdSchema.parse(held[0]!.proposalId),
+      actor: "a demo visitor",
+    })
+
+    expect(discarded.ok).toBe(true)
+
+    const { view, tree } = await railOf(raised.session)
+
+    expect(tree.revision).toBe(0)
+    expect(raised.session.records.length).toBeGreaterThan(0)
+    expect(view.landing).toBeUndefined()
+    expect(view.leading?.preset).toBe(DEMO_OPENING_PRESET)
   })
 
   /**

@@ -6,17 +6,21 @@ import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
 import {
+  ACTION_CHANGE_SILENCES,
   CHANGE_SILENCES,
   COPY_CHANGE_SILENCES,
   COPY_SILENCES,
   copyChangeOf,
   copyReadingOf,
+  DEPLOYMENT_SILENCES,
   describeSilenceCondition,
   describeSilenceSubject,
   distinctSilences,
+  meaningOfActionChangeSilence,
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
+  meaningOfDeploymentSilence,
   meaningOfPaceChangeSilence,
   meaningOfPaceSilence,
   meaningOfReachSilence,
@@ -36,6 +40,7 @@ import {
   type ReaderTally,
   type SilenceCondition,
   type SilenceMeaning,
+  type SilenceVocabulary,
   type StoredPageViews,
 } from "./index.js"
 
@@ -124,9 +129,11 @@ const readingOf = (
 ) => pageReadingOf(tree, counters, declarations)
 
 const EVERY_MEANING: readonly SilenceMeaning[] = [
+  ...ACTION_CHANGE_SILENCES.map(meaningOfActionChangeSilence),
   ...CHANGE_SILENCES.map(meaningOfChangeSilence),
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
+  ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
@@ -135,9 +142,11 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
 describe("what a reading means when it says nothing", () => {
   it("maps every member of every set, with no condition from outside the published list", () => {
     expect(EVERY_MEANING).toHaveLength(
-      CHANGE_SILENCES.length +
+      ACTION_CHANGE_SILENCES.length +
+        CHANGE_SILENCES.length +
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
+        DEPLOYMENT_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
@@ -151,21 +160,47 @@ describe("what a reading means when it says nothing", () => {
   })
 
   /**
-   * The other side of the same guard, from the direction a sixth set arrives
-   * from. 0244 added one and mapped it onto conditions that were already
-   * published, which is the evidence that these are states of the world rather
-   * than a list of the names five modules happened to use — and a seventh set
-   * adding conditions nobody else reports is the thing worth noticing.
+   * The other side of the same guard, from the direction a new set arrives from,
+   * and it now asserts in **both** directions rather than one.
+   *
+   * The sixth and the seventh mapped entirely onto conditions already published,
+   * which was the evidence that these are states of the world rather than a list
+   * of the names five modules happened to use. The eighth brought exactly one of
+   * its own, and *which* is the fact worth holding: a nought that is a filing
+   * rule rather than an absence (0242, 0251) is a state nothing before a reading
+   * of what readers did could be in.
+   *
+   * So each later set declares what it adds, and the test fails if a set adds a
+   * condition it did not declare **or** declares one it does not add. The
+   * original assertion is the `[]` rows; a ninth set bringing a condition
+   * silently is still what this catches.
    */
-  it("maps the sixth set onto conditions the first five already reported", () => {
-    const others = new Set<SilenceCondition>(
-      EVERY_MEANING.filter((meaning) => meaning.vocabulary !== "pace-change").map(
-        (meaning) => meaning.condition
-      )
-    )
+  it("declares, for each set added after the fifth, which conditions it brought that no earlier set reported", () => {
+    const later: readonly [SilenceVocabulary, readonly SilenceCondition[], readonly SilenceCondition[]][] =
+      [
+        [
+          "pace-change",
+          PACE_CHANGE_SILENCES.map((of) => meaningOfPaceChangeSilence(of).condition),
+          [],
+        ],
+        ["deployment", DEPLOYMENT_SILENCES.map((of) => meaningOfDeploymentSilence(of).condition), []],
+        [
+          "action-change",
+          ACTION_CHANGE_SILENCES.map((of) => meaningOfActionChangeSilence(of).condition),
+          ["no-action-credited"],
+        ],
+      ]
 
-    for (const silence of PACE_CHANGE_SILENCES) {
-      expect(others).toContain(meaningOfPaceChangeSilence(silence).condition)
+    for (const [vocabulary, conditions, declared] of later) {
+      const others = new Set<SilenceCondition>(
+        EVERY_MEANING.filter((meaning) => meaning.vocabulary !== vocabulary).map(
+          (meaning) => meaning.condition
+        )
+      )
+
+      expect([...new Set(conditions.filter((condition) => !others.has(condition)))]).toEqual(
+        declared
+      )
     }
   })
 
@@ -187,8 +222,10 @@ describe("what a reading means when it says nothing", () => {
 
     expect(SILENCE_VOCABULARIES.map((vocabulary) => SUBJECT_OF_VOCABULARY[vocabulary])).toEqual([
       "comparison",
+      "comparison",
       "page",
       "comparison",
+      "page",
       "part",
       "comparison",
       "page",

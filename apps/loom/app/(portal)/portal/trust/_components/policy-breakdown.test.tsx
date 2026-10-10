@@ -35,7 +35,12 @@ const segment = (
   judged: number,
   survived: number,
   meanConfidence: number,
-  rulesets: Partial<Pick<PolicyCalibration, "fingerprints" | "unfingerprinted">> = {}
+  rulesets: Partial<
+    Pick<
+      PolicyCalibration,
+      "fingerprints" | "unfingerprinted" | "checkSets" | "unrecordedChecks"
+    >
+  > = {}
 ): PolicyCalibration => ({
   policyId,
   overall: scoreOf(judged, survived, meanConfidence),
@@ -200,5 +205,112 @@ describe("PolicyBreakdown, when a policy did not hold still", () => {
     expect(screen.getByText(/3 of them were judged before rulesets were recorded/)).toBeInstanceOf(
       HTMLElement
     )
+  })
+
+  /*
+   * The case the fingerprint cannot see at all: one policy name, never edited,
+   * and two write paths behind it. Nothing above this table would have said so,
+   * and the survival rate moved for the wiring rather than for the AI (0248).
+   */
+  describe("when the write path moved under one name", () => {
+    const oneNameTwoPaths = () =>
+      reportOf([segment("checkout", 8, 4, 0.8, { checkSets: [[], ["props"]] })])
+
+    it("opens for a page whose rules never moved", () => {
+      render(<PolicyBreakdown report={oneNameTwoPaths()} />)
+
+      expect(screen.getByText("what Loom was checking changed under this name")).toBeInstanceOf(
+        HTMLElement
+      )
+    })
+
+    /**
+     * A reader told their *rules* changed goes looking through a configuration
+     * that never moved. The summary is the line a closed disclosure shows, so it
+     * is the one that has to say which of the two it is.
+     */
+    it("says it was the checks and not the rules, on the line a closed one shows", () => {
+      const { container } = render(<PolicyBreakdown report={oneNameTwoPaths()} />)
+
+      expect(container.querySelector("summary")?.textContent).toBe(
+        "Careful: what Loom was checking changed while these were judged"
+      )
+      expect(screen.getByText(/Your rules held still on this page/)).toBeInstanceOf(HTMLElement)
+    })
+
+    it("keeps the rules' own summary when it is the rules that moved", () => {
+      const { container } = render(
+        <PolicyBreakdown
+          report={reportOf([segment("checkout", 6, 3, 0.8, { fingerprints: TWO_RULESETS })])}
+        />
+      )
+
+      expect(container.querySelector("summary")?.textContent).toBe(
+        "Careful: your rules changed while these were judged"
+      )
+    })
+
+    /**
+     * Both notes on one row, stacked, each saying which half it is about. The
+     * row is the only place a reader can see that the two moved together.
+     */
+    it("stacks the two notes when both halves moved under one name", () => {
+      render(
+        <PolicyBreakdown
+          report={reportOf([
+            segment("checkout", 8, 4, 0.8, {
+              fingerprints: TWO_RULESETS,
+              checkSets: [[], ["props"]],
+            }),
+          ])}
+        />
+      )
+
+      expect(screen.getByText("the rules changed under this name")).toBeInstanceOf(HTMLElement)
+      expect(screen.getByText("what Loom was checking changed under this name")).toBeInstanceOf(
+        HTMLElement
+      )
+    })
+
+    /**
+     * The row names the checks as the record spells them, so the legend under
+     * the table is what makes them act-on-able — and it lists every check this
+     * version has, because a reader working out why two write paths differ is
+     * working out what is *missing* from one of them.
+     */
+    it("translates the record's own names under the table", () => {
+      render(<PolicyBreakdown report={oneNameTwoPaths()} />)
+
+      expect(screen.getByText("the settings check")).toBeInstanceOf(HTMLElement)
+      expect(screen.getByText("the data check")).toBeInstanceOf(HTMLElement)
+      expect(screen.getByText(/every setting it would write/)).toBeInstanceOf(HTMLElement)
+    })
+
+    it("draws no legend on a page the write path never moved on", () => {
+      render(
+        <PolicyBreakdown
+          report={reportOf([segment("checkout", 6, 3, 0.8, { fingerprints: TWO_RULESETS })])}
+        />
+      )
+
+      expect(screen.queryByText("the settings check")).toBeNull()
+    })
+
+    /**
+     * A journal written before the field existed records nothing on every row
+     * for ever, and a disclosure headed *careful* that opened for all of those
+     * would be a warning about the passage of time.
+     */
+    it("does not open for a page that merely recorded nothing", () => {
+      const { container } = render(
+        <PolicyBreakdown
+          report={reportOf([
+            segment("checkout", 6, 3, 0.8, { checkSets: [], unrecordedChecks: 6 }),
+          ])}
+        />
+      )
+
+      expect(container.firstChild).toBeNull()
+    })
   })
 })
