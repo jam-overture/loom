@@ -6,14 +6,22 @@ import type { DemoPreset } from "./presets"
 /**
  * The part of the page the one invited press is about, before it is pressed.
  *
- * **The demo's single primary control names a part of the page a stranger has
+ * **The demo's primary control can name a part of the page a stranger has
  * never laid eyes on.** *Take the numbers off* is an instruction about a stat
  * band that is below the fold at 1280×900 and about four thousand pixels down
- * at 390×844. So the arrival screen — the one screen a visitor decides on —
- * offers a green button, a promise about *"the appointments, the years and the
- * waiting time"*, and no appointments, years or waiting time anywhere on it.
- * The first thing a stranger is asked to do is take somebody's word for what
- * they are about to remove.
+ * at 390×844. A green button, a promise about *"the appointments, the years
+ * and the waiting time"*, and no appointments, years or waiting time anywhere
+ * on the screen asks a stranger to take somebody's word for what they are
+ * about to remove.
+ *
+ * **It draws on the second press rather than the first, as of this run, and
+ * the reason is the same reason.** The demo now opens with the re-theme
+ * (`DEMO_OPENING_PRESET`), whose single operation configures the root — so
+ * `partFromOperations` refuses it, by the rule it already had, and the arrival
+ * screen has no preview under its button. That is right rather than a gap: the
+ * part that press is about is the page, and the page is the other half of the
+ * screen. The preview returns with the removal when the Gate's ask takes the
+ * green button, which is exactly the press that names something out of sight.
  *
  * `in-question.ts` argued exactly this and fixed it one step too late:
  *

@@ -1,7 +1,9 @@
+import { checksContinuityOf } from "@jam-overture/loom"
+
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { formatRate, NO_VALUE } from "@/app/(portal)/_lib/calibration-view"
 import { plainSpan, type Earlier, type TrendSpan, type TrendReading } from "@/app/(portal)/_lib/trust-trend"
-import { toneClasses } from "@/app/(portal)/_lib/vocabulary"
+import { plainWriteChecks, toneClasses } from "@/app/(portal)/_lib/vocabulary"
 
 /**
  * Whether the AI is getting better at judging itself — the one thing on this page
@@ -106,6 +108,20 @@ export const TrustTrend = ({
           {rulesetsPhrase(now, earlier)} A comparison is only drawn when both stretches ran on
           one and the same recorded ruleset.
         </p>
+
+        {/*
+         * The other half of *what judged these*, and the reason it is a second
+         * sentence rather than part of the one above: the two move
+         * independently. A policy you edited moves the ruleset and leaves this
+         * alone; a registry you wired into the write path moves this and leaves
+         * the ruleset byte-identical. A reader who has just been told the rules
+         * held still has been told half of what they came for.
+         */}
+        <p className="text-ink-muted">
+          {checksPhrase(now, earlier)} These are checks your deployment hands Loom rather than
+          rules you wrote, and either of them can turn a change that would have gone through
+          into one that was turned down — so a comparison needs them to have held still too.
+        </p>
       </TechnicalDetail>
     )}
   </section>
@@ -131,6 +147,51 @@ const rulesetsPhrase = (now: TrendSpan, earlier: TrendSpan): string => {
   return unrecorded === 0
     ? recorded
     : `${recorded} A further ${unrecorded} ${unrecorded === 1 ? "claim was" : "claims were"} judged before rulesets were recorded, so they could have run on anything.`
+}
+
+/**
+ * What was being checked across one stretch, or that the stretch does not say.
+ *
+ * Three answers, and the middle one is the ordinary case: a deployment that has
+ * wired neither seam is judged by its rules alone, which is most of them.
+ * `plainWriteChecks` gives that the words *nothing beyond your rules* rather
+ * than the record's "none", because a reader meeting *judged by none* has to
+ * work out what was missing.
+ */
+const checksOfSpan = (span: TrendSpan): string =>
+  span.checkSets.length === 0
+    ? "checks it did not record"
+    : span.checkSets.length === 1
+      ? plainWriteChecks(span.checkSets[0] ?? [])
+      : `${span.checkSets.length} different sets of checks`
+
+/**
+ * Whether one write path judged both stretches, said as one sentence when it did
+ * and as two readings when it did not.
+ *
+ * The union and not the sum, for `rulesetsPhrase`'s reason: one set of checks
+ * running across both stretches is one set, and a sum would print two. The
+ * per-stretch form is kept for the case where they differ, because *which* of
+ * the two gained a check is the fact a reader would go and look up.
+ */
+const checksPhrase = (now: TrendSpan, earlier: TrendSpan): string => {
+  const unrecorded = now.unrecordedChecks + earlier.unrecordedChecks
+  const one =
+    now.checkSets.length === 1 &&
+    earlier.checkSets.length === 1 &&
+    checksContinuityOf([...now.checkSets, ...earlier.checkSets]) === "single"
+
+  const recorded = one
+    ? `Both stretches were judged by the same checks: ${plainWriteChecks(
+        now.checkSets[0] ?? []
+      )}.`
+    : `This stretch was judged by ${checksOfSpan(now)}; the one before it, by ${checksOfSpan(
+        earlier
+      )}.`
+
+  return unrecorded === 0
+    ? recorded
+    : `${recorded} A further ${unrecorded} ${unrecorded === 1 ? "claim" : "claims"} across the two recorded no checks at all, so those could have been judged with anything in place.`
 }
 
 const SpanRow = ({ label, span }: { readonly label: string; readonly span: TrendSpan }) => (

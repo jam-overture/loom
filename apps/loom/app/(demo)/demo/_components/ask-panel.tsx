@@ -32,12 +32,14 @@ import { askForChange } from "../actions"
  * thing here that can be unavailable, and a surface that leads with the control
  * it might not have is a surface that fails on its own front door.
  *
- * **Which one is primary is `presets.ts`'s call** (`DEMO_LEADING_PRESET`), and
- * the reasoning is there because it is a claim about the table rather than
- * about this markup. What this file owes it is the sentence above the buttons:
- * the lead is now a change the Gate *holds*, so the panel has to say before the
- * first press that some asks wait for an answer, or the first press reads as a
- * button that did nothing.
+ * **Which one is primary is `presets.ts`'s call**, and the reasoning is there
+ * because it is a claim about the table rather than about this markup. It is
+ * two calls rather than one: the demo opens with a change that goes ahead on
+ * its own (`DEMO_OPENING_PRESET`) and the green button passes to the one the
+ * Gate holds (`DEMO_LEADING_PRESET`) once a change of the visitor's own is on
+ * the page. What this file owes both of them is the sentence above the
+ * buttons: a press that waits for an answer reads as a button that did nothing
+ * unless the panel has already said some asks wait.
  *
  * Two ways in, and they are not two systems. A chip posts a preset id and the
  * change is computed from the tree; the box posts a sentence and a model
@@ -67,12 +69,17 @@ import { askForChange } from "../actions"
  * before they have scrolled anywhere.
  *
  * This is the line that makes the primary control legible, and it had to be
- * added the moment the lead became a change the Gate holds
- * (`DEMO_LEADING_PRESET`). Press *Take the numbers off* without it and the page
- * does not move: a stranger has pressed the one thing this surface invited them
- * to press and watched nothing happen, which reads as a broken button for the
- * two seconds before they find the amber card. Told first that some asks wait
- * for them, the same two seconds read as the product working.
+ * added the moment a change the Gate holds could be the one in the primary
+ * slot. Press *Take the numbers off* without it and the page does not move: a
+ * stranger has pressed the thing this surface invited them to press and
+ * watched nothing happen, which reads as a broken button for the two seconds
+ * before they find the amber card. Told first that some asks wait for them,
+ * the same two seconds read as the product working.
+ *
+ * It is no longer the arrival screen's problem — `DEMO_OPENING_PRESET` moves
+ * the page on the first press — and it is still this screen's sentence,
+ * because the held ask takes the green button on the second and because three
+ * of the rows under it wait for an answer from the moment a visitor arrives.
  *
  * It says *some* and never *which*, for the reason `presets.ts` gives about
  * every promise on this panel: the verdict is computed at assessment time
@@ -346,12 +353,17 @@ export const AskPanel = ({
               * travel as one thing to whichever end of the screen the layout
               * puts them.
               *
-              * The lead is the sentence that stops the first press reading as
-              * a broken button. `DEMO_LEADING_PRESET` is a change the Gate
-              * holds — that is the whole of why it is the lead — so *Pressing
-              * this raises a question, not a change* is the expectation this
-              * surface most needs to set and the one a stranger has had to
-              * infer from a hedge about asks in general.
+              * The lead is the sentence that stops a press reading as a broken
+              * button, and it is the one line on this panel that changes
+              * between the demo's two beats without a word of it being
+              * written twice. On arrival it reads *Pressing this changes the
+              * page straight away*, because `DEMO_OPENING_PRESET` is a change
+              * the Gate applies; from the second press on it reads *Pressing
+              * this raises a question, not a change*, because the green button
+              * has passed to the one the Gate holds. Neither is typed here:
+              * both are `composeChange`'s answer about the button directly
+              * above, so the order can be reconsidered in `presets.ts` without
+              * a string in this file moving.
               *
               * **Two lines and no panel**, which is the restraint that keeps
               * this from being the card's argument made early. The weighing,

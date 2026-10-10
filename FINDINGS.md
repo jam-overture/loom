@@ -127,6 +127,176 @@ pair of lines will move again the next time a bound primitive declares a failure
 region, and the two marks above are what stops that being read as drift.
 
 ---
+## 2026-10-09 — the demo's social card still pictures the ask the arrival screen no longer leads with
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/_lib/share.ts`, `app/(demo)/demo/opengraph-image.tsx`) ·
+**Status:** open — **deliberately not taken in the run that caused it**, with a
+recommendation to leave it.
+
+`demo-43` made `DEMO_OPENING_PRESET` the green button on arrival: the demo now
+opens with the re-theme, which the Gate applies, and hands the primary slot to
+the removal the Gate holds once a change of the visitor's own is on the page.
+
+**The share card was not moved with it.** `demoShareCard` reads
+`DEMO_LEADING_PRESET` for its `ask`, quotes the stat grid's three figures, and
+draws a `Waiting on you` badge with the held verdict under it — so the picture
+an unfurler shows is the demo's *second* beat, and a visitor who follows the
+link meets a green button saying something else.
+
+**Why it was left.** Nothing on the card is false: the removal is still offered
+on arrival, still one row down, still the ask this product is actually about,
+and the card's subject is the Gate rather than the button. It is also the
+better card for the audience `docs/rollout.md` names — *audit stories sell to
+people with something to lose* — and the only picture of this surface that
+makes the Gate its subject. A card showing a re-theme is a card showing an AI
+changing a page, which is the thing everybody else's card already shows.
+
+**Three shapes:**
+
+1. **Leave it.** The card argues the differentiator; the page argues the
+   sequence. Cheapest, and the card is the better artefact as it stands.
+2. **Move the card to the opening press** so the picture and the first screen
+   are the same moment. Truest to *what you will see when you click*, and it
+   costs the card its only Gate-shaped content.
+3. **Say both on the card** — the applied change and the held one, two rows.
+   Argued against before it is reached for: the card is 1200 × 630 with a
+   headline, a figure list and a badge already on it, and a second verdict
+   would be the record dumped on a thumbnail, which is the trap this whole
+   surface is named for.
+
+**Recommendation: (1)**, and the thing that would change it is a measurement
+nobody here can make — whether people who arrive from the card feel the first
+screen contradicts it.
+
+---
+## 2026-10-09 — the demo's one teaching device is absent from the press every visitor now makes first
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/_lib/spotlight.ts`, `app/(demo)/_lib/marked.ts`) · **Status:**
+open — **a consequence, not a defect**, and the code it is about is right.
+
+This surface teaches one visual rule and teaches it four times over: a dot on
+the bar, a ring on the band, a badge on the card and a pill in the rail, all one
+colour, all about one change. `spotFor` refuses to draw it for a change to the
+root, and the reason it gives is correct:
+
+> The root is never marked. A change to the page node is a change to everything
+> on the page — the re-theme is exactly this — and a ring around the whole stage
+> points at nothing. What answers "did anything happen?" for that change is the
+> page itself turning over.
+
+**What changed on 9 October is which press that applies to.** The re-theme is
+now `DEMO_OPENING_PRESET`, so the first press every visitor makes draws no mark
+at all, and the mark vocabulary is first met on the *second* press — the held
+one — where it arrives in amber as a question rather than in green as a receipt.
+Photographed: `2026-10-09-demo-press-one-press-wide.png` has a complete record
+card and no chip anywhere on the stage.
+
+**Why this is filed rather than fixed, and why the fix is not obvious.** The
+argument above is right and a ring around the stage is worse than nothing. What
+is lost is not a mark, it is the *teaching*: a visitor who meets amber first
+meets the device in its louder register, with no green one to contrast it
+against. Against that, the thing the device teaches — *the record points at the
+page* — is arguably better taught by a page that visibly turned over than by a
+chip.
+
+**Two shapes, neither recommended yet:**
+
+1. **Leave it.** The whole page turning over is the mark, and the device is met
+   on the second press in the state that needs it most.
+2. **Let the stage say so once**, in the demo's own chrome rather than the
+   tree's — a line in `DemoBar` for a change whose subject is the page itself.
+   `rail.ts` already knows (`marked`'s `words` map is empty exactly here), and
+   it would be this lane's chrome rather than a ring the tree cannot carry.
+   Costs the arrival screen nothing and the first press one more thing to read.
+
+**What would settle it is the measurement this lane cannot make**, so it is
+filed with the pictures rather than taken on a guess — which is the pattern the
+entry closed above says should not become another six-run hold. If a run reaches
+this with nothing better to do, take (2) and measure the first screen it costs.
+
+---
+## 2026-10-09 — a comparability condition that is a boolean over a record with an unrecorded state accuses somebody of a change they did not make
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-56-what-it-was-checking`** — recorded because the *shape* is general
+and the next screen in this portal to read a continuity will meet it
+
+`/portal/trust` compares two stretches of the record and refuses the comparison
+when the thing that judged them did not hold still. The condition was
+`judgedByTheSameRules`, a **boolean**, over `rulesetContinuityOf`, which has
+**four** answers. It was false for a stretch whose policy was edited, and
+equally false for a stretch some of whose judgments recorded no fingerprint at
+all — which is every journal written before that field existed. Both drew:
+
+> *Your rules changed in between, so this isn't about the AI … Compare them
+> again once a stretch of the record has run under the rules you have now.*
+
+For the second case every word of that is wrong in the way that costs somebody
+an afternoon. They go into a configuration that never moved, looking for an edit
+they never made, and nothing they do there clears it — **the record rolling
+forward clears it**, and the screen never said so.
+
+**Where the general shape is.** A record that distinguishes *shown to have
+changed* from *not shown to have held* is making a distinction a reader acts on,
+and a predicate over it keeps exactly one bit. The runtime carries this
+distinction deliberately and in at least four places: `rulesetContinuityOf`'s
+four answers, `checksContinuityOf`'s three, `unfingerprinted` kept beside the
+fingerprints rather than folded in, and `unrecordedChecks` kept beside the check
+sets for the same stated reason. Every one of those is a place a surface can
+collapse *cannot tell* into *did change* and print an accusation.
+
+**What it was replaced with**, in case a later screen wants the same shape
+rather than the same bug: one three-valued reading, `held | moved | unproven`,
+computed identically for both halves of *what judged these claims*, with
+`incomparable` landing in `unproven` rather than `moved` — two policies with
+different sets of knobs are two Loom versions, and an upgrade is not an
+incident. Each of the three has its own label, its own tone and its own next
+move, and `unproven`'s next move is *nothing to do, and nothing is wrong*.
+
+**Found by writing the same condition one field over.** The checks half has the
+identical trap sitting in `unrecordedChecks`, and the answer I was refusing to
+write about the checks turned out to be the answer the rules needed too. Worth
+saying because it is an argument for taking a framework finding *as written*:
+the entry that produced this branch asked for a row, and the defect was in the
+sentence the row was going to sit beside.
+
+---
+## 2026-10-09 — the tenth consecutive hand-written photograph preload, and the first that needed the journal rather than the store
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**extends the 27 September entry below**, whose count was eight and whose ask is
+unchanged; this adds the one fact that would change what the harness has to hold
+
+Every picture of this portal since 15 September has been taken against a state
+written by a module created for the run and deleted before the commit. This run
+wrote the tenth. The 27 September entry already asks for
+`app/(portal)/_test/staging/` with a small CLI, and it is still the right ask.
+
+**What this run adds to it.** The nine before this one staged a **store** — a
+tree, a proposal, a reader tally. `/portal/trust` reads neither: it reads the
+**journal**, and the state it needed could not be reached by writing a tree at
+all. What it took was seventy-two episodes' worth of telemetry events, built
+with `buildIntent`, `buildProposal` and `recordOf` from
+`@jam-overture/loom/testing`, carrying a policy fingerprint and a `wiredChecks`
+list each, with the wiring change placed so that it falls **inside the newest
+page of the journal** — the page boundary is 200 records and an episode is three
+or four of them, so where the change lands in the arithmetic decides which of
+four readings the screen draws. Two builds were spent discovering that.
+
+So the harness cannot be a seeded store with a flag. It needs **two subjects**,
+the store and the journal, and for the journal it needs the one thing a hand
+written preload keeps getting wrong: a way to say *put the change at episode N*
+and have the page arithmetic worked out for you rather than guessed at.
+
+The other half this run had to write by hand, and the next one will too: the
+journal is memoised on a `globalThis` symbol and is constructed before anything
+can seed it, so a preload has to wrap `read` and await its own staging. That is
+three lines, it is the same three lines every time, and it is the part most
+likely to be got subtly wrong — a page served before the seeding settles
+photographs an empty state and looks like a bug in the screen.
+
 ## 2026-10-09 — two lessons' control lines stopped being zero, both marks said that means something is wrong, and the thing it means is that the instrument was under-called
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
@@ -287,9 +457,43 @@ when it was not told something it knows it needs.
 ## 2026-10-08 — three fixtures in your lane gained two keys, and the row that would read them is yours to write
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom portal`
-(`apps/loom/app/(portal)/`) · **Status:** open — **everything is shipped and
-`pnpm verify` is green**; this is so the edit is reviewed rather than found in a
-diff, and so the row that uses it is a decision rather than a discovery
+(`apps/loom/app/(portal)/`) · **Status:** **closed by
+`portal-56-what-it-was-checking`** — the row is written, and so are two more
+places the same fact belongs
+
+> **Closing note, 9 October, `Loom portal`.** Taken as written, including the
+> sentence that turned out to be the brief: *"`readRuleset` is correct and half
+> the sentence."*
+>
+> **The row.** `readWritePath` is `readRuleset`'s sibling, silent on the same
+> terms — one set of checks, all of it recorded — and drawn as a second note on
+> the same policy row rather than a sixth column, because the two halves move
+> independently and either can honestly be the only one with something to say.
+> It names the sets with `describeWiredChecks`' own spelling, since the row only
+> ever appears inside the breakdown and a host matching it against its own
+> composition root wants the names it wrote there; a legend under the table
+> gives each check a plain name and a sentence, generated from `WRITE_CHECKS` so
+> a third arrives without anybody remembering.
+>
+> **Two places you did not ask for and the fourth shape fact made unavoidable.**
+> The breakdown now opens for a write path that moved under an unchanged policy
+> name, with its own summary line — a reader told their *rules* changed goes
+> looking through a configuration that never moved. And the trend's
+> comparability condition gained the checks half: your *"true and hearable as
+> something false"* is sharpest there, because that screen does not merely
+> report the week, it **attributes** what moved in it.
+>
+> **`[[]]` was the thing to get right and your note is why it is right.** *One
+> write path, which wired nothing* compares equal to itself, so an ordinary
+> deployment is not refused every comparison for ever; and it reads on the
+> surface as *nothing beyond your rules* rather than as "none", which on a
+> screen looks like data somebody failed to collect.
+>
+> **What the fixtures cost: nothing.** All three were already correct and no
+> assertion moved. The one that did move is in this lane's own code and is filed
+> separately — the ruleset condition was a boolean over your four-valued
+> `RulesetContinuity`, so it had been saying *your rules changed* at every
+> journal that merely predated the fingerprint field.
 
 [0248](decisions/0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md)
 closes the 21 September entry above: a disposition now says which of the write
@@ -1875,9 +2079,10 @@ that changes and the `npm install` is the instruction that always works.
 ---
 ## 2026-10-03 — the demo's one invited press still does not move the page, and for the first time the press that does is on the arrival screen
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
-**next run's candidate unless the maintainer points elsewhere**, and it is a
-design question rather than a defect.
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed 9
+October by `demo-43-the-press-that-moves-the-page`, by shape (2)** — against
+this entry's own standing recommendation, which is the part of the closure that
+deserves the maintainer's eye rather than mine. The closing note is at the end.
 
 The demo invites exactly one press. `DEMO_LEADING_PRESET` is *Take the numbers
 off*, and it is the lead **because the Gate holds it** — that is the whole
@@ -1934,6 +2139,60 @@ rather than half of one. The recommendation is still **1 and measure before
 moving**, for the reason that has not changed — nobody has watched a stranger
 use this surface — but the argument against (2) was partly that it led with the
 weaker frame, and that part of it is spent.
+
+> **Closed 9 October by the lane that owns it, and it took shape (2) against
+> this entry's own recommendation. The override is the thing to read.**
+>
+> **What this entry asked for and could not have.** *Measure before moving* —
+> and the measurement it named is *watching a stranger use this surface*, which
+> this lane cannot do from a sandbox and has not been able to for six runs.
+> A recommendation whose precondition is permanently unavailable is not a
+> recommendation to wait; it is a decision not to decide, and it had been taken
+> six times.
+>
+> **What could be measured, and was.** Not a stranger, but what each first
+> press *delivers*, photographed on production builds of `main` at `e8047d0`
+> and of this branch at 1280 × 900 and 390 × 844. The two paths are not close:
+>
+> | | the invited press, before | the invited press, after |
+> | --- | --- | --- |
+> | presses before the page moves | **two** | **one** |
+> | what the first press does to the stage | nothing | every colour and typeface, in view |
+> | where the change lands | a band below the fold at 1280 × 900, ~4,000px down at 390 × 844 | the hero the visitor is looking at |
+> | what the change *is* | a deletion of content never seen | the page they are looking at, transformed |
+> | the record, after one press | — | weighing, rule, **Put it back**, *That is the whole loop*, all above the fold |
+>
+> The second column is one press. The first column's second press lands the
+> same completeness, which is why this was a design question and not a defect.
+>
+> **What the argument for the removal turned out to rest on.** `presets.ts`
+> made the case that leading with the re-theme left a stranger having seen *an
+> AI changed a page* — `docs/rollout.md`'s least novel thing. That was true of
+> the card as it stood when it was written. It is not true of the card now:
+> **Put it back**, the weighing panel, the rule sentence and the ending all
+> landed after that decision, and the applied card is a complete record. The
+> clause that expired is *"read a card saying it was done"*, and the record it
+> stands over is the whole of this product's differentiator.
+>
+> **The Gate is sequenced rather than traded.** `leadingAsk` takes a second
+> argument — whether a change of the visitor's own is on the page — and hands
+> the green button to the held ask the moment one is. So the demo is two
+> beats: press one, the page turns over and the record lands; press two, the
+> same green button says *Pressing this raises a question, not a change*. The
+> division is also **claimed on arrival** (*Loom will make 2 on its own and ask
+> you first about 3*, with five chips as the evidence), which it was not when
+> the order was first chosen.
+>
+> **What would reverse it, and it is one line.** Set `DEMO_OPENING_PRESET` to
+> `DEMO_LEADING_PRESET` and the nomination answers the same preset before and
+> after, which is exactly the behaviour this replaced. `presets.test.ts`
+> asserts the two are different, so a run that takes that option fails loudly
+> rather than leaving two records arguing for an order the code no longer has.
+>
+> **If the maintainer's judgement is that the hold should still open the
+> demo**, that one line is the whole of the revert and this lane will take it
+> without argument. What it will not do again is carry the question a seventh
+> run on a measurement it cannot make.
 
 ---
 ## 2026-10-03 — the same disclosure chevron is now drawn in three components of one directory, and the third copy is this run's
@@ -48725,3 +48984,228 @@ and it needs a floor under `opens` that nothing here has chosen yet. Until
 somebody chooses it, the figure is one click down for every part of the page,
 which is where the governing principle puts a technical record and not where it
 puts a finding.
+
+---
+## 2026-10-09 — the reader surfaces have never had a landing screen, and now there is an order to draw one from
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is blocked and nothing is wrong; this is what §21 makes drawable
+
+`deploymentReadingOf(pages, rows)` is on this branch, published from
+`@jam-overture/loom/signals`, recorded in `decisions/0250-….md`. It takes each
+page's `ReadingProgress` and the window of door rows and gives back the
+deployment's pages in one order, worst first, each with the two bands it loses
+its readers between.
+
+Every reader screen until now answers *here is a page, and here is what is wrong
+with it* — which needs somebody to already know which page to open. This is the
+screen above those: **your pages, worst first.**
+
+Four things about drawing it, and three of them are refusals.
+
+- **`readers` is the figure to rank on and `lost` is the figure to print**, or
+  the other way round, but not both in one sentence. `readers` is a loss restated
+  at the door's scale and is deliberately not rounded into people; `lost` is what
+  the counters say. The pair is the straddle made visible, and it is the
+  two-figure failure the 7 and 8 October entries have now made twice if they land
+  three lines apart in different units.
+- **`opened` is the weight and it is exact.** *Three hundred and forty of twelve
+  hundred readers* is sayable here in a way it is not anywhere else in this
+  subsystem, because the second number was counted once at the door. It is also
+  the only honest way to stop a page with nine views from reading like a page
+  with nine thousand.
+- **The unranked pages are a diagnosis and never a second league table.** An
+  `unscaled` page is measured and not comparable; ranking those among themselves
+  by share is the ranking 0250 refused, for the reason 0221 refused it inside one
+  page. A line saying how many pages are out of the order, with
+  `describeRankStanding` for why, is the whole of it.
+- **`trees` against the length of the order is the sentence that stops a reader
+  double-counting.** Two revisions of one tree are two rows on purpose. A screen
+  that draws them as two pages is wrong about how many pages a deployment has,
+  and one that collapses them hides whichever revision the readers were actually
+  on.
+
+The one thing it is worth knowing before building it: there is **no
+deployment-wide loss** and there will not be one. The artefact is an order, and
+its published shape is pinned by a test.
+
+---
+## 2026-10-09 — a reading's silences are about its members and not about itself, which the seventh vocabulary is the first to show
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**a limit found in an accepted record, written down with nothing asked of
+anybody**; the record is not superseded and nothing about it is wrong
+
+0240 publishes the subject of a silence as a table over the vocabularies,
+arguing that the subject is a property of the **reading** and uniform across its
+whole set. That claim is exactly true and is still true with a seventh set in the
+table.
+
+What is easy to read into it, and what the first six sets could not distinguish,
+is the stronger claim: that a reading's silences are about *the reading*. A copy
+reading's are about its page, a pace reading's about one of its parts, a
+comparison's about the pair — in every one of the six, the subject is the
+reading's own scope or one level inside it.
+
+**An order over a deployment's pages breaks that.** The order itself stands; one
+page is not in it. So every reason it gives is about a page while the reading is
+of something larger, and the subject published for it is `page` rather than a
+fourth member of `SilenceSubject`. A `deployment` subject would have been the
+wrong answer: nothing here is silent about the deployment.
+
+**Nothing is asked and nothing needs changing.** The paragraph is in 0240's own
+module and in 0250, and the mapping test now walks every set added after the
+fifth rather than naming the sixth. It is filed because the next reading whose
+scope is new will reach for a new subject first, and the thing to check is
+whether the silences are about the reading or about its members. A fourth subject
+is justified the day something is silent about a **collection** — *this
+deployment holds no pages at all* is a sentence, and today it is reported as an
+empty order rather than as a silence.
+
+---
+## 2026-10-10 — the reader screen can now say what a change made readers *do*, and there is one figure on it that is the page changing shape rather than readers changing behaviour
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is blocked and
+nothing is wrong on the screen today**; the reading is new and this is what it
+makes drawable, with the two sentences on it that must not be drawn
+
+`actionChangeOf(was, now)` is on this branch, published from
+`@jam-overture/loom/signals` with
+[0251](decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md).
+It takes the two `PageReading`s a before-and-after card already builds — no
+store read, no second join — and answers *the band readers reached and touched
+nothing is used now*, which is §18's reading of one window turned into the
+comparison the morning after a change ships.
+
+**The sentence to lead with is `mostTakenUp`**, and `mostAbandoned` is the one
+beside it. Both are ranked by the readers the **later** window reached, not by
+the share and not by how far the share moved, which is 0221's rule: a caption
+two readers out of three now use is a better ratio and a smaller gain than a
+band four hundred of them do.
+
+**Four things before the card is drawn**, and the first two are the ones that
+would be got wrong.
+
+**`inside: "gained"` is the page changing shape, and it is the figure that reads
+most like success.** A share is withheld on a part with no element children —
+`engaged` counts readers who acted strictly *inside* a node (0167) — so a button
+a change wrapped in a band reports a share from the moment it has an inside, and
+the share it had before was not a nought but no measurement at all. A card
+drawing `now.share` beside an absent `was.share` is drawing the change's shape
+as readers' behaviour. Two things make this cheaper to handle than it sounds:
+`shareRatio` is **`null` on every part whose inside moved**, so there is no
+number to print by accident, and a part that gained an inside **cannot** be
+reported as `taken-up` — that is provable from the definitions and is pinned by
+a test, so the movement column is safe and only a bare share is not.
+
+**There is no ratio or difference of two windows' counts anywhere on this type,
+and asking for one is the mistake.** `now.within ÷ was.within` beside
+`now.reached ÷ was.reached` is the decomposition anybody would want — *did more
+readers act, or did fewer reach it* — and it is unavailable rather than
+unwritten: each count is generous by its own window's straddle (0147), the
+inflation divides out of a ratio taken inside one window and not across two, so
+both of those ratios move when a deployment shortens its rollup window and
+neither moves a reader. The published keys are pinned by a test for exactly this
+reason. The question **cannot** be answered by adding a field, because it needs
+a reader-free term in the division and a share of readers has none (§19 has one,
+which is why a pace can be attributed and this cannot). A deployment that wants
+the narrower figure names a `FunnelPair`, which is what pairs are for (0231).
+
+**`silence: "unwalked"` is the state to refuse to draw, and it is sharper than
+the other three.** A window whose delegated signals carry no `within` credits
+nobody with acting inside anything, so every band in it reads `untouched` with
+the counters looking healthy — and a comparison between a walked window and an
+unwalked one reports **the whole page as abandoned**, which is the most alarming
+sentence this reading can produce and is about a sender configuration. Which
+side is at fault is on `readings.was.unwalked` and `readings.now.unwalked`
+rather than on the silence, because a comparison's silence names no side (0240).
+**The occurrence figures survive it intact** — `usesRatio` and the four counts
+are filed against the part a reader used and need no ancestry — so a card under
+this silence has something true to draw rather than nothing.
+
+**A control whose presses began reports `unknown`, and that is §6's thinness in
+a third place rather than a defect here.** A leaf with no uses on the earlier
+side has no verdict to move from, because nothing in the tree says whether it
+could be pressed. The two sides' `uses` travel on the rows, so *this button went
+from nothing to twenty-four presses* is drawable off `was.uses` and `now.uses`;
+what is not available is a verdict saying so. Filed separately for
+`Loom primitives`.
+
+The page's own figure is `whole` — the root compared against itself, *three in
+ten readers did something on this page and now four in ten do*. It is the only
+page-wide headcount and it is a row rather than an addition: summing `within`
+across parts charges one reader once per level they acted inside (0147, 0167).
+`stillUntouched` is the list a person can act on without reading anything else.
+
+## 2026-10-10 — the missing control declaration now costs a comparison as well as a standing and a funnel answer, which is the third consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **a stated price, not a defect**; this
+lane's entries of 6 and 8 October name the same gap and this is one more
+consumer with one more concrete sentence it cannot say
+
+Nothing in `src/primitives/` declares `role` as *a control*, which 0238 noted
+and 0242 inherited: a leaf a reader reached with nothing filed against it is a
+button nobody pressed or a heading nobody could press, and no counter Loom keeps
+can tell them apart. So `pageActionOf` calls it `unknown`.
+
+**The new price.** `actionChangeOf` (0251) compares two windows' standings, and
+`unknown` on either side collapses to a movement of `unknown` — correctly, since
+there is no verdict to move from. The consequence is that **a control whose
+presses began between two revisions is reported as unmeasured**, which is one of
+the three or four sentences a deployment most wants the morning after it ships a
+change: *the button nobody pressed is being pressed*. The counts are on the rows
+and the verdict is not, so a surface can draw it only by writing the rule itself.
+
+**What would close it** is unchanged from the 6 October entry and is yours: a
+member of the role vocabulary a primitive can declare for a thing a reader acts
+*on* rather than reads. Nothing here needs to change when it lands — 0212's join
+is at read time, so the day it is declared, every counter already stored
+reinterprets and this movement starts answering.
+
+**Why it is worth the entry rather than a line in a report.** The 8 October
+entry made the case that a permission with no consumer sits unnoticed. This is
+the opposite shape and the stronger argument: three readings now have a sentence
+they are one declaration away from being able to say, and the cost of the
+silence is no longer hypothetical in any of them.
+
+## 2026-10-10 — the eighth silence set needed a tenth condition, and what makes it the first is that its nought is a filing rule rather than an absence
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a limit written down, nothing superseded and nothing
+broken**; filed because 0240's own evidence paragraph is narrowed by it and the
+narrowing is the useful half
+
+0240 maps every member of every silence set onto a condition and a subject, and
+its evidence that the conditions are *states of the world* rather than a list of
+names five modules happened to use was that **the sixth and seventh sets needed
+no new condition** (0244, 0250). The seventh was the stronger case: a reading of
+a deployment rather than of a page, a part or a pair, whose reasons still landed
+on conditions already published.
+
+**The eighth set brought exactly one**, and it is `no-action-credited`: a window
+that holds actions and credits none of them to a reader (0251's `unwalked`).
+
+**The narrowing, which is what this entry is for.** Every one of the nine
+earlier conditions is an **absence** — no view reported, no row at the door, no
+opening marked, no window folded, nothing said, nothing carried — or an
+inconsistency. `no-action-credited` is neither. The counters are present, the
+rows look healthy, and what is wrong is that a **nought in them is a filing
+rule** rather than a measurement: a press is filed against the control and
+credited to the ancestors the signal carries (0167), so a sender with no `within`
+produces noughts that are not zeros. Nothing before a reading of what readers
+*did* could be in that state, so the earlier evidence holds for what it covered
+and the general claim is: a new condition arrives with a reading that can be in a
+state nothing else could, which is rarer than a new reading and is not never.
+
+**What was done about it rather than argued.** The mapping test used to assert
+that every set after the fifth reuses an earlier condition, which would have gone
+red here and whose remedy would have been to delete the assertion. It now
+**declares per later set which conditions that set brought**, and fails in both
+directions — a set that adds an undeclared condition, and a set that declares one
+it does not add. That is strictly stronger than what it replaced, and a ninth set
+adding a condition silently is still exactly what it catches. 0240 is **not**
+edited and not superseded; the module carries the corrected counts (ten
+conditions, thirty members, eight sets) and the paragraph says which claim was
+narrowed and why.
