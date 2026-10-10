@@ -1,9 +1,22 @@
-# 0251 — The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report
+# 0253 — The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report
 
 **Status:** Accepted
 **Date:** 2026-10-10
 **Section:** §4 — the SDK and the harness, not the library
 
+> **Renumbered to `0253` on 10 October 2026 by `Loom merge`.** This record was
+> written as `0251`, and so was
+> [0251](0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)
+> on #565, which took the number about twenty minutes earlier and landed
+> first — two records sharing a number is fatal under
+> [0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md). The
+> record already on `main` keeps its number, so this one moves to `0253`.
+> `0252` is **not** the next free number: it is reserved for #566's record,
+> which clashed with #565's 0250 the same way and is not merged yet, so taking
+> it would trade this clash for that one. A hole is reported rather than fatal
+> (0097). **Nothing this record decides changed**, and the paragraph below is
+> the reasoning as written on 10 October.
+>
 > **Why this number.** `0250` is claimed by #566, open and unmerged, and `0245`
 > by #548; `0251` is the next free one on `main` and on both branches. This
 > record adds a reporting field to an existing instrument and supersedes

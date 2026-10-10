@@ -19,7 +19,7 @@ import { createTree } from "../../src/tree/tree.js"
 import { defineSpecimen, WIDE } from "./specimen.js"
 
 /**
- * One registry, audited three times — the picture of what 0251 adds.
+ * One registry, audited three times — the picture of what 0253 adds.
  *
  * Two bound primitives, each correct: they draw a region when their binding
  * answers and a line of their own when it did not. The probe can only ask a

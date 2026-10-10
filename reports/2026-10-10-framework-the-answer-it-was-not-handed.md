@@ -93,13 +93,16 @@ instruments disagreeing about one declaration.
 
 ## Records
 
-- Added **0251** — *The audit reports the bound primitives it was not handed an
+- Added **0253** — *The audit reports the bound primitives it was not handed an
   answer for, and being answered under the wrong name is the same report.*
   `Accepted`. Nothing superseded.
 
 `0245` is claimed by #548 and `0250` by #566, both open and unmerged, so `0251`
-is the next free number on `main` and on both branches. `pnpm decisions:index`
-regenerated and it says the same.
+was the next free number on `main` and on both branches when this was written.
+#565 landed its own `0251` first, so `Loom merge` renumbered this record to
+`0253` at merge time — `0252` is held for #566, whose record clashed with #565's
+`0250` the same way and has not merged. A dated note under the record's header
+says so, and nothing it decides changed. `pnpm decisions:index` regenerated.
 
 ## Findings
 
