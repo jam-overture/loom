@@ -48865,3 +48865,228 @@ and it needs a floor under `opens` that nothing here has chosen yet. Until
 somebody chooses it, the figure is one click down for every part of the page,
 which is where the governing principle puts a technical record and not where it
 puts a finding.
+
+---
+## 2026-10-09 — the reader surfaces have never had a landing screen, and now there is an order to draw one from
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is blocked and nothing is wrong; this is what §21 makes drawable
+
+`deploymentReadingOf(pages, rows)` is on this branch, published from
+`@jam-overture/loom/signals`, recorded in `decisions/0250-….md`. It takes each
+page's `ReadingProgress` and the window of door rows and gives back the
+deployment's pages in one order, worst first, each with the two bands it loses
+its readers between.
+
+Every reader screen until now answers *here is a page, and here is what is wrong
+with it* — which needs somebody to already know which page to open. This is the
+screen above those: **your pages, worst first.**
+
+Four things about drawing it, and three of them are refusals.
+
+- **`readers` is the figure to rank on and `lost` is the figure to print**, or
+  the other way round, but not both in one sentence. `readers` is a loss restated
+  at the door's scale and is deliberately not rounded into people; `lost` is what
+  the counters say. The pair is the straddle made visible, and it is the
+  two-figure failure the 7 and 8 October entries have now made twice if they land
+  three lines apart in different units.
+- **`opened` is the weight and it is exact.** *Three hundred and forty of twelve
+  hundred readers* is sayable here in a way it is not anywhere else in this
+  subsystem, because the second number was counted once at the door. It is also
+  the only honest way to stop a page with nine views from reading like a page
+  with nine thousand.
+- **The unranked pages are a diagnosis and never a second league table.** An
+  `unscaled` page is measured and not comparable; ranking those among themselves
+  by share is the ranking 0250 refused, for the reason 0221 refused it inside one
+  page. A line saying how many pages are out of the order, with
+  `describeRankStanding` for why, is the whole of it.
+- **`trees` against the length of the order is the sentence that stops a reader
+  double-counting.** Two revisions of one tree are two rows on purpose. A screen
+  that draws them as two pages is wrong about how many pages a deployment has,
+  and one that collapses them hides whichever revision the readers were actually
+  on.
+
+The one thing it is worth knowing before building it: there is **no
+deployment-wide loss** and there will not be one. The artefact is an order, and
+its published shape is pinned by a test.
+
+---
+## 2026-10-09 — a reading's silences are about its members and not about itself, which the seventh vocabulary is the first to show
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**a limit found in an accepted record, written down with nothing asked of
+anybody**; the record is not superseded and nothing about it is wrong
+
+0240 publishes the subject of a silence as a table over the vocabularies,
+arguing that the subject is a property of the **reading** and uniform across its
+whole set. That claim is exactly true and is still true with a seventh set in the
+table.
+
+What is easy to read into it, and what the first six sets could not distinguish,
+is the stronger claim: that a reading's silences are about *the reading*. A copy
+reading's are about its page, a pace reading's about one of its parts, a
+comparison's about the pair — in every one of the six, the subject is the
+reading's own scope or one level inside it.
+
+**An order over a deployment's pages breaks that.** The order itself stands; one
+page is not in it. So every reason it gives is about a page while the reading is
+of something larger, and the subject published for it is `page` rather than a
+fourth member of `SilenceSubject`. A `deployment` subject would have been the
+wrong answer: nothing here is silent about the deployment.
+
+**Nothing is asked and nothing needs changing.** The paragraph is in 0240's own
+module and in 0250, and the mapping test now walks every set added after the
+fifth rather than naming the sixth. It is filed because the next reading whose
+scope is new will reach for a new subject first, and the thing to check is
+whether the silences are about the reading or about its members. A fourth subject
+is justified the day something is silent about a **collection** — *this
+deployment holds no pages at all* is a sentence, and today it is reported as an
+empty order rather than as a silence.
+
+---
+## 2026-10-10 — the reader screen can now say what a change made readers *do*, and there is one figure on it that is the page changing shape rather than readers changing behaviour
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is blocked and
+nothing is wrong on the screen today**; the reading is new and this is what it
+makes drawable, with the two sentences on it that must not be drawn
+
+`actionChangeOf(was, now)` is on this branch, published from
+`@jam-overture/loom/signals` with
+[0251](decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md).
+It takes the two `PageReading`s a before-and-after card already builds — no
+store read, no second join — and answers *the band readers reached and touched
+nothing is used now*, which is §18's reading of one window turned into the
+comparison the morning after a change ships.
+
+**The sentence to lead with is `mostTakenUp`**, and `mostAbandoned` is the one
+beside it. Both are ranked by the readers the **later** window reached, not by
+the share and not by how far the share moved, which is 0221's rule: a caption
+two readers out of three now use is a better ratio and a smaller gain than a
+band four hundred of them do.
+
+**Four things before the card is drawn**, and the first two are the ones that
+would be got wrong.
+
+**`inside: "gained"` is the page changing shape, and it is the figure that reads
+most like success.** A share is withheld on a part with no element children —
+`engaged` counts readers who acted strictly *inside* a node (0167) — so a button
+a change wrapped in a band reports a share from the moment it has an inside, and
+the share it had before was not a nought but no measurement at all. A card
+drawing `now.share` beside an absent `was.share` is drawing the change's shape
+as readers' behaviour. Two things make this cheaper to handle than it sounds:
+`shareRatio` is **`null` on every part whose inside moved**, so there is no
+number to print by accident, and a part that gained an inside **cannot** be
+reported as `taken-up` — that is provable from the definitions and is pinned by
+a test, so the movement column is safe and only a bare share is not.
+
+**There is no ratio or difference of two windows' counts anywhere on this type,
+and asking for one is the mistake.** `now.within ÷ was.within` beside
+`now.reached ÷ was.reached` is the decomposition anybody would want — *did more
+readers act, or did fewer reach it* — and it is unavailable rather than
+unwritten: each count is generous by its own window's straddle (0147), the
+inflation divides out of a ratio taken inside one window and not across two, so
+both of those ratios move when a deployment shortens its rollup window and
+neither moves a reader. The published keys are pinned by a test for exactly this
+reason. The question **cannot** be answered by adding a field, because it needs
+a reader-free term in the division and a share of readers has none (§19 has one,
+which is why a pace can be attributed and this cannot). A deployment that wants
+the narrower figure names a `FunnelPair`, which is what pairs are for (0231).
+
+**`silence: "unwalked"` is the state to refuse to draw, and it is sharper than
+the other three.** A window whose delegated signals carry no `within` credits
+nobody with acting inside anything, so every band in it reads `untouched` with
+the counters looking healthy — and a comparison between a walked window and an
+unwalked one reports **the whole page as abandoned**, which is the most alarming
+sentence this reading can produce and is about a sender configuration. Which
+side is at fault is on `readings.was.unwalked` and `readings.now.unwalked`
+rather than on the silence, because a comparison's silence names no side (0240).
+**The occurrence figures survive it intact** — `usesRatio` and the four counts
+are filed against the part a reader used and need no ancestry — so a card under
+this silence has something true to draw rather than nothing.
+
+**A control whose presses began reports `unknown`, and that is §6's thinness in
+a third place rather than a defect here.** A leaf with no uses on the earlier
+side has no verdict to move from, because nothing in the tree says whether it
+could be pressed. The two sides' `uses` travel on the rows, so *this button went
+from nothing to twenty-four presses* is drawable off `was.uses` and `now.uses`;
+what is not available is a verdict saying so. Filed separately for
+`Loom primitives`.
+
+The page's own figure is `whole` — the root compared against itself, *three in
+ten readers did something on this page and now four in ten do*. It is the only
+page-wide headcount and it is a row rather than an addition: summing `within`
+across parts charges one reader once per level they acted inside (0147, 0167).
+`stillUntouched` is the list a person can act on without reading anything else.
+
+## 2026-10-10 — the missing control declaration now costs a comparison as well as a standing and a funnel answer, which is the third consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **a stated price, not a defect**; this
+lane's entries of 6 and 8 October name the same gap and this is one more
+consumer with one more concrete sentence it cannot say
+
+Nothing in `src/primitives/` declares `role` as *a control*, which 0238 noted
+and 0242 inherited: a leaf a reader reached with nothing filed against it is a
+button nobody pressed or a heading nobody could press, and no counter Loom keeps
+can tell them apart. So `pageActionOf` calls it `unknown`.
+
+**The new price.** `actionChangeOf` (0251) compares two windows' standings, and
+`unknown` on either side collapses to a movement of `unknown` — correctly, since
+there is no verdict to move from. The consequence is that **a control whose
+presses began between two revisions is reported as unmeasured**, which is one of
+the three or four sentences a deployment most wants the morning after it ships a
+change: *the button nobody pressed is being pressed*. The counts are on the rows
+and the verdict is not, so a surface can draw it only by writing the rule itself.
+
+**What would close it** is unchanged from the 6 October entry and is yours: a
+member of the role vocabulary a primitive can declare for a thing a reader acts
+*on* rather than reads. Nothing here needs to change when it lands — 0212's join
+is at read time, so the day it is declared, every counter already stored
+reinterprets and this movement starts answering.
+
+**Why it is worth the entry rather than a line in a report.** The 8 October
+entry made the case that a permission with no consumer sits unnoticed. This is
+the opposite shape and the stronger argument: three readings now have a sentence
+they are one declaration away from being able to say, and the cost of the
+silence is no longer hypothetical in any of them.
+
+## 2026-10-10 — the eighth silence set needed a tenth condition, and what makes it the first is that its nought is a filing rule rather than an absence
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a limit written down, nothing superseded and nothing
+broken**; filed because 0240's own evidence paragraph is narrowed by it and the
+narrowing is the useful half
+
+0240 maps every member of every silence set onto a condition and a subject, and
+its evidence that the conditions are *states of the world* rather than a list of
+names five modules happened to use was that **the sixth and seventh sets needed
+no new condition** (0244, 0250). The seventh was the stronger case: a reading of
+a deployment rather than of a page, a part or a pair, whose reasons still landed
+on conditions already published.
+
+**The eighth set brought exactly one**, and it is `no-action-credited`: a window
+that holds actions and credits none of them to a reader (0251's `unwalked`).
+
+**The narrowing, which is what this entry is for.** Every one of the nine
+earlier conditions is an **absence** — no view reported, no row at the door, no
+opening marked, no window folded, nothing said, nothing carried — or an
+inconsistency. `no-action-credited` is neither. The counters are present, the
+rows look healthy, and what is wrong is that a **nought in them is a filing
+rule** rather than a measurement: a press is filed against the control and
+credited to the ancestors the signal carries (0167), so a sender with no `within`
+produces noughts that are not zeros. Nothing before a reading of what readers
+*did* could be in that state, so the earlier evidence holds for what it covered
+and the general claim is: a new condition arrives with a reading that can be in a
+state nothing else could, which is rarer than a new reading and is not never.
+
+**What was done about it rather than argued.** The mapping test used to assert
+that every set after the fifth reuses an earlier condition, which would have gone
+red here and whose remedy would have been to delete the assertion. It now
+**declares per later set which conditions that set brought**, and fails in both
+directions — a set that adds an undeclared condition, and a set that declares one
+it does not add. That is strictly stronger than what it replaced, and a ninth set
+adding a condition silently is still exactly what it catches. 0240 is **not**
+edited and not superseded; the module carries the corrected counts (ten
+conditions, thirty members, eight sets) and the paragraph says which claim was
+narrowed and why.
