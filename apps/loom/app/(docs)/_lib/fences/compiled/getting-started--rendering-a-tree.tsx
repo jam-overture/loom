@@ -24,8 +24,8 @@ import {
   validator,
 } from "../context/getting-started--rendering-a-tree"
 
-// page.mdx:10 — the inside of a function
-const functionAtLine10 = async () => {
+// page.mdx:12 — the inside of a function
+const functionAtLine12 = async () => {
 const registry = createStarterPrimitiveRegistry()
 
 if (!registry.ok) throw new Error("the registry was refused")
@@ -39,11 +39,11 @@ const rendered = renderLoomTree(tree, {
 return <main>{rendered.element}</main>
 }
 
-// page.mdx:43 — a program
+// page.mdx:45 — a program
 const { element, diagnostics, theme } = renderLoomTree(tree, options)
 
-// page.mdx:69 — the inside of an object literal
-const objectAtLine69 = {
+// page.mdx:73 — the inside of an object literal
+const objectAtLine73 = {
 props: {
   "loom:theme": {
     palette: "minimal",
@@ -53,8 +53,8 @@ props: {
 }
 }
 
-// page.mdx:114 — the inside of a function
-const functionAtLine114 = async () => {
+// page.mdx:118 — the inside of a function
+const functionAtLine118 = async () => {
 const served = await renderRequest(request, { source, resolver, validator, themes })
 
 if (!served.ok) return notFound()
@@ -62,4 +62,4 @@ if (!served.ok) return notFound()
 return <main>{served.value.element}</main>
 }
 
-export { functionAtLine10, element, diagnostics, theme, objectAtLine69, functionAtLine114, createThemeRegistry, createStarterPrimitiveRegistry, renderLoomTree }
+export { functionAtLine12, element, diagnostics, theme, objectAtLine73, functionAtLine118, createThemeRegistry, createStarterPrimitiveRegistry, renderLoomTree }

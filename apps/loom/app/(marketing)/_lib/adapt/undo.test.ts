@@ -171,24 +171,21 @@ describe("the undo is a change, and is judged like one", () => {
   })
 
   /**
-   * The one that makes the band worth building, and it was not arranged.
+   * The undo the rules let through, which is most of them.
    *
    * **An undo is judged, and this is the assertion that would fail if anything
-   * ever exempted one to make the demonstration tidier.**
+   * ever exempted one to make the demonstration tidier.** Putting back what
+   * `shorter` removed is an addition, and an addition of four bands is not a
+   * weight the rules stop, so this one goes through on its own and the page
+   * comes back exactly.
    *
    * It asserted something stronger until 1 October: that the undo of a held
    * change is *itself* held. That was true while the five choices ran against
-   * the front door, because the held one moved a protected band and putting it
-   * back moved the same protected band again. On this page the held one removes
-   * four bands, and putting four bands back is an insert, which the rules let
-   * through on its own. Measured across all five choices: **no undo on this
-   * page is held.**
-   *
-   * So what is asserted is what is true here — the undo goes through the same
-   * rules, carries its own record and its own verdict, and restores the page
-   * exactly. That the rules *can* hold an undo is a property of the system
-   * rather than of these five requests, and losing the demonstration of it is
-   * filed rather than hidden.
+   * the front door, where the held one moved a protected band. It stopped being
+   * true when they moved here, and for eight days **no undo on this page was
+   * held at all** — so the panel's sentence for that state could not be reached
+   * by any address. The test below this one is where it is reached, and
+   * `unstick-menu` is the request that reaches it.
    */
   it("judges the undo by the same rules, and restores the page exactly", async () => {
     const ask = askById("shorter")
@@ -210,6 +207,65 @@ describe("the undo is a change, and is judged like one", () => {
     /** And a yes changes nothing it had already allowed. */
     const answered = await runUndo(run.page, ask, run.undo, true)
 
+    expect(shapeOf(answered.page)).toBe(shapeOf(base))
+  })
+
+  /**
+   * **The undo the rules hold, which is the half of the claim this band could
+   * not show.**
+   *
+   * The fifth rung promises that putting a change back is weighed like anything
+   * else, and the panel carries a sentence for the state where the rules stop
+   * one: *"Nothing has moved. The change is still on the page below and stays
+   * there until you answer."* Between 1 October and this branch, **no address on
+   * this site could produce that state.** A sentence no address can reach is a
+   * promise with nothing behind it, which is the shape of defect the whole undo
+   * change was made to remove, one card lower down.
+   *
+   * `unstick-menu` reaches it, and the symmetry is arithmetic rather than
+   * arrangement. The rules protect the menu; a setting change on a protected
+   * piece weighs more than a request is let through on by itself; and the change
+   * that reverses a setting change is another setting change on the same piece.
+   * So the two are weighed the same way, which is why **the weighing sentence is
+   * asserted to be the same sentence** rather than merely to exist. If a run
+   * ever made an undo cheaper than the change it reverses, that equality is what
+   * would go red.
+   */
+  it("holds the undo of a change it held, on the same grounds, and lands it on a yes", async () => {
+    const ask = askById("unstick-menu")
+
+    if (ask === undefined) throw new Error("loom: the setting on a protected piece is not offered")
+
+    const base = basePage()
+
+    /** Held on the way out, with nothing yet to put back. */
+    const held = await runAsk(base, ask)
+
+    expect(held.record.landed).toBe(false)
+    expect(held.record.awaitingYou).toBe(true)
+    expect(held.undo).toBeUndefined()
+
+    /** Applied on the visitor's yes, which is when the inverse gets written. */
+    const run = await runAsk(base, ask, true)
+
+    if (run.undo === undefined) throw new Error("loom: the approved change landed without an undo")
+    expect(run.record.verdict).toBe("approved")
+
+    /** Held on the way back, for the same reason and at the same weight. */
+    const asked = await runUndo(run.page, ask, run.undo)
+
+    expect(asked.record.landed).toBe(false)
+    expect(asked.record.awaitingYou).toBe(true)
+    expect(asked.record.weighed).toBe(held.record.weighed)
+    expect(asked.record.verdictLine).toContain(FRONT_DOOR_POLICY.policyId)
+    /** And the page is the changed one, because nothing was put back. */
+    expect(shapeOf(asked.page)).toBe(shapeOf(run.page))
+
+    /** Then the second yes, which is the one that restores the page exactly. */
+    const answered = await runUndo(run.page, ask, run.undo, true)
+
+    expect(answered.record.landed).toBe(true)
+    expect(answered.record.verdict).toBe("approved")
     expect(shapeOf(answered.page)).toBe(shapeOf(base))
   })
 
@@ -322,11 +378,12 @@ describe("what the visitor reads afterwards", () => {
    * page nothing has happened to, it would be this site failing at its own
    * claim on the line a reader reads fastest.
    *
-   * It was asserted against a *held undo* until 1 October. No undo on this page
-   * is held — putting back what the held request removed is an insert, which
-   * the rules allow on their own — so the unanswered state it tests is now the
-   * held **change**: `shorter` without the visitor's yes, where nothing has
-   * been removed and so nothing has been restored either.
+   * It was asserted against a *held undo* until 1 October, and against a held
+   * **change** from then until this branch, because for those eight days no
+   * undo on this page was held at all. Both states are worth holding and both
+   * are held now: this one is `shorter` without the visitor's yes, where nothing
+   * has been removed and so nothing has been restored either, and the test below
+   * it is the held undo the sentence was written for.
    */
   it("does not claim a restoration that has not happened", async () => {
     const waiting = await askRunFor(contextFor({ ask: "shorter", back: true }))
@@ -358,6 +415,64 @@ describe("what the visitor reads afterwards", () => {
 
     expect(pageOf(waiting.record)).not.toContain("the page you arrived on")
     expect(pageOf(done.record, done.undone)).toContain("the page you arrived on")
+  })
+
+  /**
+   * **And the sentence written for a held undo, on a page a visitor can ask
+   * for.**
+   *
+   * `STILL_THERE` has been in `see-it-happen.ts` since the undo was built and
+   * no address could draw it: the state it describes is *the rules are holding
+   * the putting-back*, and until `unstick-menu` existed no request on this page
+   * produced one. So this walks the address a visitor would actually be on —
+   * the change approved, the undo asked for and not yet answered — and reads
+   * the card.
+   *
+   * The negative half is the part that would have caught the sentence being
+   * wrong rather than missing. Nothing has been put back in this state, so the
+   * payoff line must not be on the page: a card claiming *this is the page you
+   * arrived on* over a page still carrying the change is the defect the pair of
+   * sentences exists to prevent.
+   */
+  it("says the change is still there while the rules are holding the undo", async () => {
+    const context = contextFor({ ask: "unstick-menu", approve: true, back: true })
+    const run = await askRunFor(context)
+
+    if (run?.undone === undefined) throw new Error("loom: the undo did not run")
+
+    expect(run.undone.landed).toBe(false)
+    expect(run.undone.awaitingYou).toBe(true)
+
+    const page = treeFor(HOW_IT_WORKS, {
+      ...context,
+      record: run.record,
+      undone: run.undone,
+    })
+    const words = wordsOf(page.root)
+
+    expect(words).toContain("Nothing has moved.")
+    expect(words).not.toContain("the page you arrived on")
+
+    /**
+     * And the way to answer it is on the card, carrying everything the visitor
+     * has done. A held undo with no yes beside it is a question the page asks
+     * and gives the reader no way to answer.
+     */
+    const answer = askHref(ORIGIN, {
+      theme: THEME,
+      ask: "unstick-menu",
+      approve: true,
+      back: true,
+      backApprove: true,
+    })
+
+    expect(hrefsIn(bandOf(page, BAND.seeItHappen))).toContain(answer)
+
+    const followed = await askRunFor(
+      contextFor({ ask: "unstick-menu", approve: true, back: true, backApprove: true })
+    )
+
+    expect(followed?.undone?.landed).toBe(true)
   })
 
   /**

@@ -21,7 +21,7 @@ import { createTree, type LoomTree } from "../tree/tree.js"
 
 import { describeRenderDiagnostic } from "./diagnostics.js"
 import { staticPrimitiveResolver, type LoomPrimitiveProps } from "./primitive.js"
-import { unreadBindings } from "./reads.js"
+import { namesRead, unreadBindings } from "./reads.js"
 import { renderLoomTree } from "./render.js"
 
 /**
@@ -350,5 +350,40 @@ describe("unreadBindings", () => {
     expect(unreadBindings(["summary", "entries"], declared, { binding: "rows" })).toEqual([
       "entries",
     ])
+  })
+})
+
+/**
+ * The resolution on its own, because a second instrument asks it of a probe
+ * state rather than of a node and the two must not drift. `unreadBindings` is
+ * the same rule read the other way round, so these cases are the ones that
+ * would differ if it were reimplemented.
+ */
+describe("namesRead", () => {
+  it("answers one name per declaration, in the order declared", () => {
+    expect(namesRead(["summary", "entries"], {})).toEqual(["summary", "entries"])
+  })
+
+  it("takes a prop-named declaration's name from the props", () => {
+    expect(namesRead([{ fromProp: "binding", default: "entries" }], { binding: "rows" })).toEqual([
+      "rows",
+    ])
+  })
+
+  it("falls back to the default where the prop says nothing usable", () => {
+    const declared = [{ fromProp: "binding", default: "entries" }]
+
+    expect(namesRead(declared, {})).toEqual(["entries"])
+    expect(namesRead(declared, { binding: "" })).toEqual(["entries"])
+    expect(namesRead(declared, { binding: 7 })).toEqual(["entries"])
+  })
+
+  /** Neither sorted nor deduplicated — `unreadBindings` is the caller that wants a set. */
+  it("keeps a name declared twice twice", () => {
+    expect(namesRead(["z", "a", "z"], {})).toEqual(["z", "a", "z"])
+  })
+
+  it("answers nothing for a primitive that declared it reads nothing", () => {
+    expect(namesRead([], { binding: "rows" })).toEqual([])
   })
 })
