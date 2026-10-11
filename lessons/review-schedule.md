@@ -1776,10 +1776,16 @@ is why two rules at different levels sit on the same side of it.
 
 ## Set AN — two days after lesson 35
 
-Interleaved with 15, 24, 25, 27, 28, 29 and 33. Heavy on 29, because this seam is
-that lesson's instrument asked a question it never had to ask; and on 28, because
-the rule at the centre of it is a second copy of a fact about an instrument,
-written down in another party's file.
+Interleaved with 15, 24, 25, 27, 28, 29, 30 and 33. Heavy on 29, because this seam
+is that lesson's instrument asked a question it never had to ask; and on 28,
+because the rule at the centre of it is a second copy of a fact about an
+instrument, written down in another party's file.
+
+Question 11 was added on 11 October, after the lesson's ending was overtaken by
+the repository twice in three days. It is the only question in this set about
+something that did not exist when the lesson shipped, which is the reason it is
+last rather than placed by subject: a set is cumulative, and what you are
+recalling in it should be the course as it stands rather than as it was written.
 
 1. One probe reduces eight renders with `every` and another reduces the same eight
    with `some`. Say which verdict each belongs to, and then justify the pair from
@@ -1818,12 +1824,22 @@ written down in another party's file.
     and lesson 35 declines to report a proportion where a boolean is reported.
     Give the reason both declinings share, in a sentence about denominators or
     about who is making the claim. *(27, 35)*
+11. An audit now carries one list whose entry is a claim about the call rather
+    than about any component. Say which two inputs it is derived from and why a
+    probe outcome may not reach the computation. Then: a cheaper version of it
+    would have reported only *this call was handed nothing*, and a host told to
+    empty that list could satisfy it without supplying a single usable answer.
+    Say how, and then say which lesson's rule decides that the two causes are
+    one list with a reason rather than two lists. *(24, 30, 35)*
 
 Question 1 is the point of the set and question 2 is where a confident wrong answer
 is most likely — the two halves look like one question about one primitive, and they
 are two questions about two different kinds of fact. Question 6 is the one to
 answer slowly: the property being asked about is not a property of the rule's
-content.
+content. Question 11 is the newest thing in this set and the second half of it is
+the part to sit with: the failure it describes is a list at its most confident in
+exactly the case it was built to catch, which is a shape you have now met three
+times.
 
 ## Set AO — two days after lesson 36
 
