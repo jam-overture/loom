@@ -5,7 +5,7 @@ import { TREE_OPERATIONS, type ElementNode, type LoomNode } from "@jam-overture/
 import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
-import { DECISIONS_AT_LEAST, FACTS } from "./copy"
+import { DECISIONS_AT_LEAST, FACTS, INSTALL_COMMAND, PACKAGES } from "./copy"
 import { siteRegistry } from "./registry"
 import { treeFor } from "./render"
 import { DEFAULT_THEME, HOME } from "./site"
@@ -148,5 +148,42 @@ describe("what the site says about the repository", () => {
       "decisions written down",
       "kinds of change Loom allows",
     ])
+  })
+})
+
+/**
+ * The ask, held against the two manifests the repository publishes from.
+ *
+ * The install band is the only place on this site where being out of date is
+ * not a wording problem: a reader who pastes a line naming a package that does
+ * not exist gets an error instead of a library, and nothing on the page or in
+ * this lane's own tests would have said so. The names are not typed twice for
+ * the reason none of the numbers above are — they are read off the manifests
+ * `pnpm publish` uses, so a rename, or a third package becoming required, is
+ * red here on the run that does it.
+ *
+ * It asserts the set rather than the order, because which name comes first in
+ * an `npm install` is this lane's call and npm's behavior does not depend on
+ * it.
+ */
+describe("what the site tells a stranger to install", () => {
+  const nameOf = (manifest: string): string =>
+    JSON.parse(readFileSync(fileURLToPath(new URL(manifest, import.meta.url)), "utf8")).name
+
+  const published = (): readonly string[] => [
+    nameOf("../../../../../package.json"),
+    nameOf("../../../../../packages/primitives/package.json"),
+  ]
+
+  it("names the packages this repository actually publishes", () => {
+    expect([...PACKAGES].sort()).toEqual([...published()].sort())
+  })
+
+  it("asks for both of them in one command a reader can paste", () => {
+    for (const name of published()) {
+      expect(INSTALL_COMMAND).toContain(` ${name}`)
+    }
+
+    expect(INSTALL_COMMAND.startsWith("npm install ")).toBe(true)
   })
 })
