@@ -8,6 +8,74 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-11 — the assertion that makes `BOUND_ANSWERS` load-bearing cannot see an answer filed under the wrong name, and for the one leaf among the five nothing else can either
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
+(`src/primitives/library.test.ts`) · **Status:** open — **nothing is wrong in the
+library today and no test is failing**; found while re-teaching lesson 35 around
+[0253](decisions/0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md),
+and both halves below were executed on a throwaway edit rather than reasoned
+
+0253's Consequences leaves one call to this lane in as many words: *"`library.test.ts`
+asserts by hand what the audit can now say for itself — 'probes every bound
+primitive with an answer' — and whether to let that assertion go is `Loom
+primitives`' call, not this lane's."*
+
+**The answer is to keep it and add one line, because neither check subsumes the
+other.** That is the only thing this entry says, and it is said because the
+obvious reading of that sentence is *replace it*.
+
+`probes every bound primitive with an answer` compares the types the registry
+says are bound against `[...BOUND_ANSWERS.keys()]`. `notAnswered` is derived from
+the registration and the options, so it reports a bound primitive the call could
+not have seen answered. The two miss opposite things:
+
+| | a key missing or stale | every answer under a name the primitive does not read |
+| --- | --- | --- |
+| the key comparison | **fails** | passes |
+| `notAnswered` | silent on a stale key | **`names-not-answered`** |
+
+Both rows were run rather than reasoned, on a copy of the file that was reverted:
+
+- A key added for a type that is not registered — `loom.retired-reader` — fails
+  that assertion and nothing else: **1 failed, 360 passed.**
+- `loom.tally`'s two answers rekeyed from `value` to `amount`, which is a name it
+  does not read, leaves the file **green: 361 passed.** The key is still there,
+  so the comparison is satisfied; the primitive is a **leaf**, so it has no
+  region to report as dropped and `unplacedSlots` stays empty; and nothing else
+  in the file asks how many states it was probed in. The audit, asked, says
+  `loom.tally: names-not-answered`.
+
+The four region-shaped bound primitives would be caught in that second column
+today, incidentally, by `needs the answers to see the failure regions` going
+quiet. `loom.tally` is the one the fixture's own header says it is there for —
+*"a bound primitive probed only unanswered is probed in its failure state and
+nowhere else, and a throw on a real figure would not have been seen"* — and it is
+the one for which a misnamed answer is currently invisible.
+
+### What it would take
+
+One line beside the two that are already there:
+
+```ts
+expect(auditRegistry(registry, { answers: BOUND_ANSWERS }).notAnswered).toEqual([])
+```
+
+It is `src/primitives/` and therefore not this lane's to write. It is also not
+urgent: nothing is misnamed today, and the cost of the gap is a fixture that
+could rot quietly in one of its two directions rather than a page that is wrong.
+
+### Why it is filed rather than mentioned
+
+Lesson 35 now runs this comparison as its exercise G, against the real library,
+and prints the rejected one-cause version of `notAnswered` beside the real one so
+a reader can see a clean instrument reporting nothing on a call answered under a
+name nothing reads. The lesson teaches that a list can be at its most confident
+in exactly the case it was built to catch. Leaving the one assertion in this
+repository with that shape unmentioned, in the week the lesson about it was
+rewritten, would be teaching it rather than doing it.
+
+---
 ## 2026-10-10 — the two checks about one pair of nodes are eleven lines apart in your file, and the one that exists is the one whose failure renders as a hole
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`

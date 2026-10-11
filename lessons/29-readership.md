@@ -332,9 +332,10 @@ Every promise the audit can observe is kept — with one line's worth of
 asterisk, added on 9 October and explained below. The first promise it cannot
 observe has eighteen exceptions.
 
-> **Why the first line is 4 and not 0, since 9 October.** It is not four broken
-> primitives. `loom.feed`, `loom.trend`, `loom.voices` and `loom.plate` each
-> declare a region they draw **only when their source did not answer**
+> **Why the first line is 4 and not 0, and why the line under it is the answer.**
+> It is not four broken primitives. `loom.feed`, `loom.trend`, `loom.voices` and
+> `loom.plate` each declare a region they draw **only when their source did not
+> answer**
 > ([0246](../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md)),
 > and the audit above is called the way this exercise calls it — with no
 > answers. So the probe never puts them in the state that renders the region,
@@ -345,9 +346,26 @@ observe has eighteen exceptions.
 > again; `src/primitives/library.test.ts` does exactly that, and asserts both
 > the 0 and this 4.
 >
-> *This note was written by `Loom primitives` to keep the transcript true, not
-> by this lesson's author. The teaching above it is unrevised and the move
-> deserves better than a footnote — filed.*
+> **The second line is this lesson's own remedy, arriving from somewhere it did
+> not expect.** This lesson's answer to a promise nothing could check was to
+> instrument a place — a `Proxy`, which makes a read observable. The first line
+> above needs something else: the audit's judgement is sound and its *call* is
+> what is narrow, and no amount of watching the component would say so. So
+> [0253](../decisions/0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md)
+> gave the audit a field whose entry is a claim about the call rather than about
+> any component, derived from the registration and the options with no probe
+> outcome in it. That is why the `5` is larger than the `4`: `loom.tally` is a
+> leaf with no region to drop, so nothing about it can ever appear on the first
+> line, and this call was handed no answer for it just the same.
+>
+> **Which makes a fourth kind of remedy, beside the three this lesson names.**
+> Reach further, manufacture a second copy, instrument a place — and now: have
+> the answer say which question it answered. Lesson 35 is where that story is
+> told, because the sixteen days this field did not exist are its subject.
+>
+> *The first paragraph was written by `Loom primitives` to keep the transcript
+> true, not by this lesson's author, and said in as many words that the teaching
+> around it was unrevised. The three paragraphs under it are that revision.*
 
 If you are holding a number from Predict 3, this is the moment to compare it. But
 the number is the least interesting thing here, and the rows are why. **Read them
@@ -801,7 +819,7 @@ nowhere.
 
 ### Exercise C — every declared prop in the library that nothing read
 
-The sweep. Predict the number on the fourth line and the rows under it before you
+The sweep. Predict the number on the last line and the rows under it before you
 run this; if you wrote a number for Predict 3, this is where it gets marked.
 
 ```ts
@@ -816,6 +834,7 @@ describe("C", () => {
     const audit = auditRegistry(registry)
 
     console.log(`  declared slots no component placed:      ${audit.unplacedSlots.length}`)
+    console.log(`  bound primitives this call was handed no answer for: ${audit.notAnswered.length}`)
     console.log(`  declared behaviours no component placed: ${audit.unplacedBehaviours.length}`)
     console.log(`  components that threw under their own schema: ${audit.throwsOnDeclaredProps.length}`)
     console.log(`  primitives with a declared prop nothing read: ${rows.length}`)
@@ -834,7 +853,7 @@ describe("C", () => {
      first two of the second kind. Both land in the "measurement, not the code"
      group below, so the lesson's argument is unchanged and only its arithmetic
      moves; a member of a *third* kind would be news the prose has to answer.
-     This mark covers the fourth line and the rows under it, which are what the
+     This mark covers the last line and the rows under it, which are what the
      lesson is about. Loom primitives owns the change that would do it.
 
      The first line is also covered, as of 9 October, and the reason is the
@@ -847,13 +866,19 @@ describe("C", () => {
      moves, the sentence under this fence beginning "The two zeros are the
      control" has to move with it, because it says which lines are which.
 
-     The two zeros on the second and third lines are the control and move for
-     nobody: if one of those is what drifted, this mark does not cover it and
-     something is wrong. All four lines are in one fence because they are one
-     comparison and the prose names "the fourth line". -->
+     The second line is covered too, as of 10 October: it is the audit's own
+     count of the bound primitives this call was handed no answer for (0253), so
+     it moves with the set of bound primitives and is the line that explains the
+     one above it.
+
+     The remaining two lines, the ones reading zero, are the control and move
+     for nobody: if one of those is what drifted, this mark does not cover it
+     and something is wrong. All five lines are in one fence because they are
+     one comparison and the prose names "the last line". -->
 
 ```
   declared slots no component placed:      4
+  bound primitives this call was handed no answer for: 5
   declared behaviours no component placed: 0
   components that threw under their own schema: 0
   primitives with a declared prop nothing read: 10
@@ -869,12 +894,13 @@ describe("C", () => {
     loom.embed       src
 ```
 
-The two zeros are the control and they are the reason the fourth line is worth
+The two zeros are the control and they are the reason the last line is worth
 anything. It is not that this library is sloppy about its declarations — every
 promise anything has ever looked at is kept by every primitive, the first line's
 four included: those are four regions the audit was not put in a position to
-see, not four regions nobody draws (the note under the first transcript has the
-detail). The fourth line is the first promise nothing had looked at.
+see, not four regions nobody draws, and the line directly under them is the
+audit saying so about itself (the note under the first transcript has the
+detail). The last line is the first promise nothing had looked at.
 
 **This transcript is a second copy of a fact about `src/primitives/`, and it will
 go red when that fact changes.** That is deliberate here and it is the only place

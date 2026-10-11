@@ -436,45 +436,117 @@ was not written down as a limit anywhere the consequence landed, and the system
 reshaped itself around the answerable question so smoothly that the reshaping
 reads as design.
 
-### What the repository looks like today, which is the honest end of the lesson
+### What the repository looked like when this lesson shipped
 
-0185 is two weeks old at the time of writing. Here is the state of play, and it
-is three facts rather than one.
+This lesson went up on 8 October and the state of play was three facts rather
+than one. Read them in the past tense — all three, deliberately, because the next
+section is what happened to them and the sequence is most of what this lesson now
+teaches.
 
-**The mechanism exists, is proved, and is never pointed at a real primitive.**
-`auditRegistry` takes `{ answers }` — a map from primitive type to the states
-each one should be probed in — and `src/sdk/audit.test.ts` holds it to exactly
-the pair of claims exercise F below prints: a bound primitive's regions read as
-dropped when it is asked about props alone, and the report clears once the
-answers that reach them are declared. That suite is the only caller in the
-repository that passes `answers`, and the primitive it passes them for is
-`loom.bound-listing`, which exists in that file and on no page.
+**The mechanism existed, was proved, and was never pointed at a real
+primitive.** `auditRegistry` takes `{ answers }` — a map from primitive type to
+the states each one should be probed in — and `src/sdk/audit.test.ts` holds it to
+exactly the pair of claims exercise F below prints: a bound primitive's regions
+read as dropped when it is asked about props alone, and the report clears once
+the answers that reach them are declared. For sixteen days that suite was the
+only caller in the repository that passed `answers`, and the primitive it passed
+them for was `loom.bound-listing`, which exists in that file and on no page.
+Every audit of a registry of **real** primitives took one argument.
 
-Every audit of a registry of **real** primitives takes one argument. Exercise E
-prints the consequence from the audit's own side: five bound primitives, probed
-in as many states as their own schemas close over, and **not one of those states
-carrying an answer**.
+**The library still read as though the limit held.** `loom.feed`'s header was the
+original — *"it cannot supply an answer"*, true the day it was written, beside
+the sentence saying the limit was filed because the audit is the framework's.
+`loom.plate` landed on 6 October, thirteen days after 0185, and stated the rule
+again as a flat fact about the present: *a bound primitive declares only the
+regions it places without an answer, **because `auditRegistry` cannot supply
+one***. It could. It had been able to for thirteen days, and nothing anywhere
+said so to whoever wrote that line.
 
-**The library still reads as though the limit held.** `loom.feed`'s header is
-the original — *"it cannot supply an answer"*, which was true the day it was
-written, beside the sentence saying the limit was filed because the audit is the
-framework's. `loom.plate` landed on 6 October, thirteen days after 0185, and
-states the rule again as a flat fact about the present: *a bound primitive
-declares only the regions it places without an answer, **because `auditRegistry`
-cannot supply one***. It can. It has been able to for two weeks, and nothing
-anywhere said so to whoever wrote that line.
+**And the condition 0185 set for revisiting its own deferred alternative had been
+met.** It rejected generating an answer from a declared shape "for now", and
+wrote: *worth revisiting if a third bound primitive arrives.* Three more arrived
+in one change on 6 October. There are five, and that one is still open.
 
-**And the condition 0185 set for revisiting its own deferred alternative has
-been met.** It rejected generating an answer from a declared shape "for now",
-and wrote: *worth revisiting if a third bound primitive arrives.* Three more
-arrived in one change on 6 October. There are five.
+None of it was a defect in the sense of something broken on a page. Every bound
+primitive in the library worked. What had happened was smaller and harder to see:
+a rule was being quoted forward under a reason that had expired, and the
+instrument that had been taught to reach further was still being called the old
+way by the one suite whose red started it.
 
-None of that is this lesson's to fix — see the bottom of this file — and none of
-it is a defect in the sense of something broken on a page. Every bound primitive
-in the library works. What has happened is smaller and harder to see: a rule is
-being quoted forward under a reason that expired, and the instrument that was
-taught to reach further is still being called the old way by the one suite whose
-red started it.
+### What happened next, which is the honest end of the lesson
+
+Two things moved in the three days after this lesson shipped, and **nothing went
+red on either day.** That is not a coincidence and it is not a second failure. It
+is the third property above, holding exactly as stated, while the thing it
+predicts — that therefore nothing happens — turns out not to follow.
+
+**9 October: the library took the permission up, and went the other way.**
+[0246](../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md)
+gave `loom.feed`, `loom.trend`, `loom.voices` and `loom.plate` a region they draw
+only when their source did not answer — the shape 0180's clause forbade — and
+`library.test.ts` grew `BOUND_ANSWERS`, a hand-written map of three states per
+bound primitive, so the audit of the real library is now called with two
+arguments. Both headers quoted above were rewritten the same day: each now
+carries its old sentence as a **quotation with a date on it**, which is the
+honest form of a claim whose reason has expired.
+
+So the library moved twice, in opposite directions, for the same reason — it was
+the party with the red suite and the party that owned the file. That is worth
+sitting with before reading on, because it is the half of the general shape that
+does not go away when somebody is paying attention. The pressure lands where the
+instrument is not; being right about which direction to push does not move it.
+
+**And what moved it was a sentence, in a file nobody's suite reads.** No test
+went red. What happened is that the lane holding the red wrote one line into
+`FINDINGS.md`, and
+[0253](../decisions/0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md)
+quotes it as the whole argument for its own existence:
+
+> what changed in September was a **permission**, and a permission is the one
+> kind of change a suite cannot notice.
+
+That is this section's finding and it is not a comfortable one. The remedy that
+worked was somebody naming the shape, in prose, somewhere the lane that could act
+on it reads before choosing work — which is a mechanism with no guarantee
+attached, since it needs a reader, and which is nevertheless what closed a gap
+three programs had been silent about for sixteen days. A check would have been
+better. A check was not available: there is no program that can tell a primitive
+declaring fewer regions than it may from one declaring all it has.
+
+**10 October: the instrument moved, which this lesson said is the thing that
+never moves.** 0253 gave `RegistryAudit` a field, and the field is the lesson's
+own general shape with one clause removed. Compare them:
+
+> a correct answer to a narrower question, **with nothing in the answer saying it
+> was narrower**, is a force acting on whatever is cheapest to move
+
+`notAnswered` is that clause closed. It names the bound primitives this call was
+never put in a position to see answered, and its doc comment says what no other
+list on that type can say:
+
+> Unlike every other list, an entry is not a claim about the component. It is a
+> claim about this call.
+
+Derived from the registration and the options alone — no probe outcome reaches
+the computation, because a probe result cannot make *I was not told* true or
+false. Exercise E prints it, and the paragraph that used to be needed to explain
+why `unplacedSlots` is not empty is now a line of the output.
+
+**And the shape of the field is lesson 24's rule, applied by somebody who had
+read it.** 0253 had a choice between one field with a two-member `reason` and two
+fields, and lesson 24's test settles it: a reading needs one field per thing a
+caller would *do* differently, not per failure that sounds different. Being
+handed nothing and being handed an answer under a name the primitive does not
+read have the same remedy — supply an answer for that type — so they are one
+list, and the cause rides along as a `reason` for whoever is debugging. Exercise
+G runs the version that was rejected for the second cause, which is the part
+worth predicting before you read it.
+
+**What has not moved.** 0185's deferred alternative is still deferred, with its
+own threshold five bound primitives past; 0253 looked at it and left it where it
+was. And the general problem is untouched, which that record says in one line:
+the instance was catchable because something took the permission up, and *that
+does not generalise. The next permission sits exactly as long.*
 
 ---
 
@@ -483,10 +555,10 @@ red started it.
 | file | what to read |
 | --- | --- |
 | `src/sdk/conformance.ts` | `probeEditableDecoration`'s `every` and `probePlacement`'s `some`, forty lines apart. Then `probeConfigurations`, four lines, and the doc comment on `ProbeConfiguration` that says what `NO_DATA` used to be: *"not a default — it was the only state reachable"*. |
-| `src/sdk/audit.ts` | `auditRegistry` and `RegistryAuditOptions`. The header is the reporting bargain — it reports, it does not decide — and `ThrowingConfigurations.everyConfiguration` is a third quantifier choice, made for a third reason. |
-| `src/primitives/loom.feed.ts` | The three-state table in the header, `readAnswer`, and the paragraph that explains why no outcome reads as `empty`. The restriction is stated here as the primitive's own shape. |
-| `src/primitives/loom.plate.ts` | The same restriction, with the reason 0185 discharged, in a primitive that landed afterwards. |
-| `src/primitives/library.test.ts` | Every `auditRegistry(registry)` call in it. Count the arguments. |
+| `src/sdk/audit.ts` | `auditRegistry` and `RegistryAuditOptions`. The header is the reporting bargain — it reports, it does not decide — and `ThrowingConfigurations.everyConfiguration` is a third quantifier choice, made for a third reason. Then `UnansweredReason` and `unansweredReader`, which are four lines and the subject of the last section above. |
+| `src/primitives/loom.feed.ts` | The three-state table in the header, `readAnswer`, and the paragraph that explains why no outcome reads as `empty`. The restriction used to be stated here as the primitive's own shape; read what stands in its place, and who it is addressed to. |
+| `src/primitives/loom.plate.ts` | The same sentence, in a primitive that landed after the reason for it expired — now quoted rather than asserted, with the thirteen days on it. |
+| `src/primitives/library.test.ts` | Every `auditRegistry` call in it. Count the arguments, and then read `BOUND_ANSWERS`'s header for why the map that makes two of them possible has to be written by hand. |
 
 | record | what it settles |
 | --- | --- |
@@ -495,15 +567,18 @@ red started it.
 | [0185](../decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md) | The discharge, the four rejected alternatives, and the sentence this lesson is named after. |
 | [0095](../decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md) | The seam whose outcome the probe invents, and what a primitive does when told no. |
 | [0184](../decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md) | The declaration that gives the probe a binding's *name*, and why the name was never the hard half. |
+| [0246](../decisions/0246-a-bound-primitives-failure-region-is-a-slot-over-its-declared-sentence.md) | The library taking the permission up, sixteen days late, and what it did to the two headers above. |
+| [0253](../decisions/0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md) | The field that says the answer was narrower, its two-member reason, and the four alternatives — one of which exercise G runs. |
 
 ---
 
 ## Try it
 
-Six exercises. **Predict every output in writing, then run.** Exercise B is
+Seven exercises. **Predict every output in writing, then run.** Exercise B is
 Predict 1 and is the one to commit to hardest; exercise C is the derivation the
 middle of this lesson asks you to do rather than read; exercise F is Predict 3
-and 4 in one fence.
+and 4 in one fence. Exercise G is the one added after the lesson shipped, and the
+line to predict in it is the last one of the third block.
 
 Put each snippet into `src/scratch.test.ts` and run
 
@@ -520,7 +595,7 @@ import { createElement } from "react"
 import { describe, it } from "vitest"
 import { z } from "zod"
 
-import { NO_DATA, nodeDataOf, type NodeData } from "./data/resolution.js"
+import { NO_DATA, nodeDataOf, type DataOutcome, type NodeData } from "./data/resolution.js"
 import { primitiveTypeSchema, type PrimitiveType } from "./primitive-type.js"
 import { createStarterPrimitiveRegistry } from "./primitives/index.js"
 import type { LoomPrimitiveProps } from "./render/primitive.js"
@@ -567,6 +642,10 @@ const dropped = (entries: readonly { type: PrimitiveType; slots: readonly string
 const controls = (
   entries: readonly { type: PrimitiveType; behaviours: readonly string[] }[]
 ): string => entries.map(({ type, behaviours }) => `${type}: ${behaviours.join(" ")}`).join("; ") || "(none)"
+
+/** `notAnswered` is a list of names with a cause, which is what it reports. */
+const unanswered = (entries: readonly { type: PrimitiveType; reason: string }[]): string =>
+  entries.map(({ type, reason }) => `${type}: ${reason}`).join("; ") || "(none)"
 
 /**
  * A region and the decoration, both placed on one condition — which is the whole
@@ -833,6 +912,7 @@ describe("E", () => {
     console.log(`  notProbeable: ${names(audit.notProbeable)}`)
     console.log(`  unplacedSlots: ${dropped(audit.unplacedSlots)}`)
     console.log(`  unplacedBehaviours: ${controls(audit.unplacedBehaviours)}`)
+    console.log(`  notAnswered: ${unanswered(audit.notAnswered)}`)
 
     for (const primitive of bound) {
       const entry = audit.audits.find((one) => one.type === primitive.type)
@@ -857,15 +937,16 @@ describe("E", () => {
      second line and is registered in claims.test.ts, so correcting the fence
      means reading that sentence too.
 
-     The verdict lists were four empty lines when this was written and are
-     three. `unplacedSlots` stopped being empty on 9 October and the mark now
-     covers it: 0246 gave four primitives a region they draw only when their
-     source did not answer, this exercise calls `auditRegistry` with one
-     argument, and a region an unanswered probe cannot reach is a declaration it
-     did not see rendered. That is this lesson's own subject and not a defect, so
-     a further bound primitive declaring such a region moves the line — and
-     moves the paragraph under this fence beginning "Three of the four verdict
-     lists", which counts them.
+     Two of the verdict lines are covered and two are not. `unplacedSlots`
+     stopped being empty on 9 October: 0246 gave four primitives a region they
+     draw only when their source did not answer, this exercise calls
+     `auditRegistry` with one argument, and a region an unanswered probe cannot
+     reach is a declaration it did not see rendered. `notAnswered` arrived on
+     10 October (0253) and reports the same call from the other side, so it
+     moves whenever the set of bound primitives does. Both are this lesson's
+     own subject rather than a defect, and the paragraphs under this fence name
+     those two lines rather than counting them — deliberately, so that a sixth
+     bound primitive moves a transcript and not a sentence.
 
      `notDecorated`, `notProbeable` and `unplacedBehaviours` are the control and
      are expected to stay empty; if one of those three stops being empty, this
@@ -878,6 +959,7 @@ describe("E", () => {
   notProbeable: (none)
   unplacedSlots: loom.trend: unavailable; loom.voices: unavailable; loom.feed: unavailable; loom.plate: unavailable
   unplacedBehaviours: (none)
+  notAnswered: loom.trend: no-answers; loom.tally: no-answers; loom.voices: no-answers; loom.feed: no-answers; loom.plate: no-answers
   loom.trend: slots empty unavailable, probed in 4 states, 0 of them answered
   loom.tally: slots (none), probed in 1 state, 0 of them answered
   loom.voices: slots empty unavailable, probed in 11 states, 0 of them answered
@@ -891,9 +973,9 @@ renders had an answer in it.** Every
 judgement the library's own suite makes about its bound primitives is a judgement
 about the state a page is in before anybody has connected a source.
 
-Three of the four verdict lists above are the library being correct. The fourth
-is `unplacedSlots`, and **it stopped being empty on 9 October** — which is this
-lesson's subject arriving in its own transcript.
+`notDecorated`, `notProbeable` and `unplacedBehaviours` are the library being
+correct. `unplacedSlots` is not empty, and **it stopped being empty on
+9 October** — which is this lesson's subject arriving in its own transcript.
 
 It had been empty for two reasons, and the sentence that used to stand here
 named both: *"partly because the components are right and partly because no
@@ -915,6 +997,17 @@ read as a fact about the library for two weeks. Hand `auditRegistry` the
 `answers` 0185 built and the list is empty again —
 `src/primitives/library.test.ts` passes them, and asserts both this four and
 that nothing.
+
+**And the last line is the audit saying all of that about itself.** Everything
+above it is a claim about a component; `notAnswered` is a claim about this call,
+and the four paragraphs you have just read are the paragraph it replaces. On
+10 October, two days after this lesson shipped, 0253 gave the audit a way to
+report what it was never told — so a reader who runs E today and stops at
+`unplacedSlots` has a defect in front of them, and a reader who reads one line
+further has the audit's own note that it was probing five bound primitives
+blind. The remedy for an instrument that answers a narrower question than the
+one you asked is not always a better instrument. Sometimes it is an instrument
+that says which question it answered.
 
 And the way this lesson came to say that is the part worth keeping, because it is
 the argument happening to the argument. The transcript and the paragraph above it
@@ -1020,11 +1113,160 @@ asserts this same pair — dropped under props alone, clear once the answers are
 declared. The mechanism is built, tested, and correct.
 
 So the thing to sit with is not that it does not work. It is that **the first
-block is how this library is audited today**, and the only primitive those
-answers have ever been supplied for is one that exists in a test file and on no
-page. Not because anybody decided the second block was wrong — because supplying
-answers is a caller's job, the caller is a suite in another lane, and nothing
-goes red when a permission is left unused.
+block was how this library was audited for sixteen days**, and for all of them
+the only primitive those answers had ever been supplied for was one that exists
+in a test file and on no page. Not because anybody decided the second block was
+wrong — because supplying answers is a caller's job, the caller is a suite in
+another lane, and nothing goes red when a permission is left unused.
+
+### Exercise G — the same question asked three ways, and the field that was rejected
+
+This exercise did not exist when the lesson shipped. It is here because the
+instrument moved on 10 October and the move is the lesson's own argument closing,
+so the thing to do with it is the thing this course always asks: predict first.
+
+Three calls, one registry, and the **last line of each block is the one to
+commit to.** It is not `notAnswered`. It is what the cheapest version of
+`notAnswered` would have printed — the field the filing literally asked for,
+*bound primitives probed with no answer*, with no second cause and no reason —
+reimplemented here in five lines so that you can read the two side by side. Write
+down all three of its values before you run this.
+
+```ts
+/** The failure state every region-shaped bound primitive in the library draws for. */
+const UNAVAILABLE: DataOutcome = {
+  status: "unavailable",
+  unavailable: { reason: "not-resolved", detail: "nothing resolved it" },
+}
+
+/**
+ * What each bound primitive reads, and one answer it can draw. The row shape is
+ * the registrant's knowledge and nothing in the repository can derive it, which
+ * is the reason 0185 made these supplied rather than generated.
+ */
+const LIBRARY_ANSWERS: readonly (readonly [string, string, DataOutcome])[] = [
+  [
+    "loom.feed",
+    "entries",
+    { status: "ready", value: [{ title: "A release went out", detail: "Two fixes", meta: "April" }] },
+  ],
+  ["loom.trend", "series", { status: "ready", value: [{ label: "Jan", value: 24 }] }],
+  ["loom.voices", "voices", { status: "ready", value: [{ quote: "It reads like a product.", author: "A reader" }] }],
+  ["loom.plate", "image", { status: "ready", value: { src: "https://example.com/a.png", alt: "A photograph" } }],
+  ["loom.tally", "value", { status: "ready", value: 1284 }],
+]
+
+/** The same five answers, filed under whichever name the caller chooses. */
+const answersUnder = (
+  name: (declared: string) => string
+): ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]> =>
+  new Map(
+    LIBRARY_ANSWERS.map(([type, declared, ready]) => [
+      primitiveTypeSchema.parse(type),
+      [{ data: nodeDataOf({ [name(declared)]: ready }) }, { data: nodeDataOf({ [name(declared)]: UNAVAILABLE }) }],
+    ])
+  )
+
+/**
+ * The field the filing asked for and 0253 rejected: the bound primitives this
+ * call held no answer for at all, with no second cause and no reason.
+ */
+const heldNothingFor = (
+  registry: PrimitiveRegistry,
+  answers: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]> | undefined
+): string =>
+  registry.primitives
+    .filter((primitive) => (primitive.reads ?? []).length > 0)
+    .filter((primitive) => (answers?.get(primitive.type) ?? []).length === 0)
+    .map((primitive) => primitive.type)
+    .join(", ") || "(none)"
+
+describe("G", () => {
+  it("asks the audit the same question three ways and reads what it says about itself", () => {
+    const starter = createStarterPrimitiveRegistry()
+    if (!starter.ok) throw new Error("the starter library refused to register")
+    const registry = starter.value
+
+    const calls = [
+      ["one argument", undefined],
+      ["answers under the names the primitives declare", answersUnder((declared) => declared)],
+      ["answers under one name none of them reads", answersUnder(() => "rows")],
+    ] as const
+
+    for (const [how, answers] of calls) {
+      const audit = answers === undefined ? auditRegistry(registry) : auditRegistry(registry, { answers })
+
+      console.log(`  called with ${how}`)
+      console.log(`    unplacedSlots: ${dropped(audit.unplacedSlots)}`)
+      console.log(`    notAnswered: ${unanswered(audit.notAnswered)}`)
+      console.log(`    the rejected one-cause field would say: ${heldNothingFor(registry, answers)}`)
+    }
+  })
+})
+```
+
+<!-- moves: every line of this fence is read off the starter library at run time
+     — which primitives declare `reads`, and which of them declare a region an
+     unanswered probe cannot place — so all nine move when `Loom primitives`
+     ships or changes a bound primitive. A red here is this lesson's claim
+     following the code: re-run G and paste in what it prints. The sentence
+     under it beginning "All five" counts the first block's `notAnswered` line
+     and is registered in claims.test.ts, so correcting this fence means
+     reading that sentence too.
+
+     What the mark does not cover: the third block's `notAnswered` reading
+     `no-answers` rather than `names-not-answered`. That would mean a bound
+     primitive had started reading a binding called `rows`, which makes the
+     paragraph about the misnamed call wrong rather than stale — pick a name
+     nothing in the library reads and re-run, rather than pasting it in. -->
+
+```
+  called with one argument
+    unplacedSlots: loom.trend: unavailable; loom.voices: unavailable; loom.feed: unavailable; loom.plate: unavailable
+    notAnswered: loom.trend: no-answers; loom.tally: no-answers; loom.voices: no-answers; loom.feed: no-answers; loom.plate: no-answers
+    the rejected one-cause field would say: loom.trend, loom.tally, loom.voices, loom.feed, loom.plate
+  called with answers under the names the primitives declare
+    unplacedSlots: (none)
+    notAnswered: (none)
+    the rejected one-cause field would say: (none)
+  called with answers under one name none of them reads
+    unplacedSlots: loom.trend: unavailable; loom.voices: unavailable; loom.feed: unavailable; loom.plate: unavailable
+    notAnswered: loom.trend: names-not-answered; loom.tally: names-not-answered; loom.voices: names-not-answered; loom.feed: names-not-answered; loom.plate: names-not-answered
+    the rejected one-cause field would say: (none)
+```
+
+**All five are reported on the first call**, `loom.tally` included — and
+`loom.tally` is the line that says what kind of field this is. It has no regions
+at all, so it can never appear in `unplacedSlots` and nothing about it looks
+wrong from outside; it is here because this call was handed no answer for it,
+which is a fact about the call and true of a leaf exactly as it is true of a
+container.
+
+The second call is the library's own suite, in two lines. Both lists empty, and
+the four dropped regions gone — not excused, *reached*.
+
+**And the third call is why `notAnswered` has a `reason`.** Read the three lines
+of it together. `unplacedSlots` is identical to the first call: the same four
+regions, reported as dropped, by an audit that was handed answers for every
+primitive that declares one. The rejected field — the one the filing asked for,
+counting whether answers arrived — prints `(none)`, which is to say **clean**. A
+host told to make that list empty did so, by handing five answers keyed under a
+name no primitive in the library reads, and got back the identical wrong picture
+with an instrument reporting nothing to see.
+
+That is the whole of 0253's second cause, executed. The cheap version is not a
+weaker form of the right answer; it is an answer that is **most confident in
+exactly the case it was built to catch** — which is lesson 30's shape, where a
+plain list of binding names turned out to be silent on the broken page and loud
+on the working one. When you add a field so that something can say what it could
+not do, ask what the *satisfying* of it would look like, and whether somebody
+could satisfy it without doing the thing.
+
+`names-not-answered` is the line that distinguishes them, and it is one word in
+one list rather than a second list, for the reason lesson 24 gives: both causes
+have the same remedy, so a caller choosing which of two empty lists to assert
+would be holding a distinction that changes nothing they do. The cause is there
+for whoever is debugging, in the same place `everyConfiguration` is.
 
 ---
 
@@ -1063,7 +1305,10 @@ change to `definePrimitive` and to every bound primitive; and a generated
 instance of a row shape reaches the **rows** branch and never the empty one,
 which is the branch the restriction was about. It would close half the gap and
 add a declaration. 0185 said it was worth revisiting at a third bound primitive;
-there are five.
+there are five, and 0253 revisited it on 10 October and left it exactly where
+0185 had — because `reads` names a binding and not a shape, so the probe would be
+inventing a value and then measuring its own guess, which is the one thing the
+section above says cannot be done.
 
 **Derive the answer from `reads`.** The probe knows the name, so it could build
 an `unavailable` outcome with no help from anybody. Rejected as a half-measure
@@ -1155,14 +1400,28 @@ printed answer, because there is not one.
    what an author is supposed to do instead — and what makes that alternative
    strictly stronger rather than merely different.
 
-8. Exercise E prints five bound primitives and zero answered states. Say what has
-   to be true of a caller for that zero to change, say where such a caller would
-   live, and say why nothing in this repository fails today because of it.
+8. Exercise E prints five bound primitives and zero answered states, and
+   `library.test.ts` audits the same library with answers supplied. Both are
+   true. Say what is different about the two calls, and then say why nothing in
+   this repository fails on account of the first one.
+
+9. One field on the audit is a claim about the call rather than about a
+   component. Name it, say which two inputs it is derived from, and say why no
+   probe outcome may reach the computation. Then give the one-sentence reason it
+   carries a two-member `reason` rather than being split into two lists — and
+   name the earlier lesson whose rule settles that.
+
+10. Something closed this seam sixteen days after the permission landed, and it
+    was not a test. Say what it was, where it lives, and the one property it
+    has that makes it weaker than a check. Then say why it was the only thing
+    available.
 
 Where to look: 1, 2 and 4 are `src/sdk/conformance.ts`. 3 is
 `probeConfigurations` plus lesson 24. 5 is 0180's decision 3 beside 0185's "Why
 `Accepted`". 6 is this lesson. 7 is 0185's alternatives. 8 is every
-`auditRegistry` call in `src/primitives/library.test.ts`.
+`auditRegistry` call in `src/primitives/library.test.ts`. 9 is `UnansweredReason`
+in `src/sdk/audit.ts` beside 0253's Decision, and lesson 24. 10 is 0253's
+Context, which quotes it.
 
 ---
 
@@ -1195,9 +1454,21 @@ restating the rule with the expired reason — in a repository that is, by any
 reasonable standard, unusually careful about writing down why. Permission is the
 one kind of change a test cannot notice.
 
+**And then ask yourself the follow-up, which this lesson got to find out the
+answer to.** Given that nothing could go red, what did you expect would
+eventually happen? The honest first answer is *nothing, until somebody trips over
+it* — and what happened instead is that somebody wrote one sentence into the
+file the other lanes read before choosing work, and both the library and the
+instrument moved within three days. If you were certain the sentence would not be
+enough, that is the most useful thing on this page: a mechanism with no
+guarantee is not the same as a mechanism with no effect, and this course has
+spent eight lessons being right that the first is worth less than a program.
+
 One thing to carry forward, if you keep only one: **when a check and the thing it
 checks are owned by two different people, look at which of them is easier to
-change.** That is where the design will quietly go.
+change.** That is where the design will quietly go — and the cheapest way to
+stop it is not always a check. Sometimes it is making the answer say how narrow
+it was.
 
 ---
 
@@ -1218,9 +1489,16 @@ instrument answers correctly, every time, about exactly what it did.
 What is wrong is one layer up, and it is a thing about systems rather than about
 trees: **a correct answer to a narrower question, with nothing in the answer
 saying it was narrower, is a force acting on whatever is cheapest to move.** It
-moved a library. It is still moving one, two weeks after the reason stopped
-existing, because the only thing that could have stopped it is somebody reading
-two files in two directories on the same afternoon.
+moved a library, twice and in opposite directions, because the library was both
+times the party holding a red suite and the party owning the file.
+
+**What stopped it was the clause in the middle of that sentence coming true.**
+Three days after this lesson shipped, the audit grew a field that says which
+question it answered: `notAnswered`, a claim about the call rather than about any
+component. The force does not go away — the next permission sits exactly as long,
+which is 0253's own concession — but the particular instance stopped being
+invisible, and what made that happen was somebody writing the shape down in a
+file the lane that could act on it reads. Nothing went red on any day of it.
 
 The question to carry into a nineteenth seam is therefore about neither reach nor
 ownership: **what is this check's population, who chose it, and what has the
