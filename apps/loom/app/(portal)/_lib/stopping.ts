@@ -198,6 +198,28 @@ export const plainShare = (share: number): string => {
 const EVERYBODY = 0.995
 
 /**
+ * The least a fall has to carry to be read out loud: a share and the two names.
+ *
+ * `Fall` satisfies it structurally, so nothing changed at the call site that had
+ * it. It is written down because a **second** screen needs the sentence and
+ * holds no `Fall`: `_lib/fix-first.ts` ranks a deployment's pages off
+ * `deploymentReadingOf`, whose fall is the runtime's own `ReadingStop` — two
+ * node ids, a share and two counts, with no part named on it and no standing or
+ * reach to invent.
+ *
+ * The alternative was a second phrasing of one sentence in that module, and this
+ * lane has the scar: two spellings of one reading is how a portal comes to say
+ * the same arithmetic in two voices, which reads as two measurements.
+ */
+export type FallNaming = {
+  readonly share: number
+  /** The part they got to. */
+  readonly after: { readonly name: PartName }
+  /** The part fewer of them got to. */
+  readonly before: { readonly name: PartName }
+}
+
+/**
  * One fall, as a sentence.
  *
  * Two phrasings and the share chooses. *Nobody who got as far as the pricing
@@ -205,7 +227,7 @@ const EVERYBODY = 0.995
  * and *everybody … never went on* is the sentence a single template would have
  * produced.
  */
-export const fallSentence = (fall: Fall): FallLine =>
+export const fallSentence = (fall: FallNaming): FallLine =>
   fall.share >= EVERYBODY
     ? {
         before: "Nobody who got as far as ",
