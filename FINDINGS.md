@@ -50635,3 +50635,108 @@ to check when a photograph shows the wrong page.**
 
 The staging module was deleted before committing, as the eight before it were,
 and the shot list is beside the report.
+
+---
+## 2026-10-11 — one page with no readership withholds the reader share for the whole library, and that is the ordinary state rather than the exotic one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is blocked and
+nothing is wrong**; it is a property of 0256 worth writing down before another
+surface meets it
+
+`/portal/pieces` now draws the two shares the 11 October `Loom signals` entry
+asked for, and the first staged deployment made something plain that the record
+states and nobody had seen rendered:
+
+> **A reach silence is a property of one page and it is published against the
+> whole kind.**
+
+`KindReach.silence` is `unscaled` where *any* page a type stands on could not be
+put on the door's scale, and 0256 is right to refuse a share over the pages it
+could price — there is no safe direction to guess in, which is 0250's refusal for
+a page out of an order and 0221's inside one page.
+
+What that means on a screen, measured rather than argued: **three pages, one of
+them without a usable door row, and every reader share in the library went
+dark.** Not one row — all four, because every kind of piece stands on the page
+that could not be priced. A deployment of forty pages is likelier to have one
+such page than not, so this is the state the screen will be in most of the time
+and the healthy one is the exception.
+
+**Three things follow, and they are what the screen was built to do.**
+
+1. **The census half must never go dark with it.** `readShare` is a ratio of two
+   counts of parts of trees — no reader in either term, no window, no door — so
+   it stands whatever the door is doing. A surface that drew the two figures
+   together and withheld them together would have nothing to say about a
+   deployment that is merely missing one row.
+2. **Falling back has to say that it is falling back.** The card says why the
+   reader figure is absent rather than leaving a gap, because a reader who meets
+   a places figure and nothing under it cannot tell *nobody measured this* from
+   *one of its pages has no readership*, and those two send a person to
+   completely different places.
+3. **The page is the actionable half and it needs its own reason.** The staged
+   deployment reported `unopened` where the fixture expected `unmeasured` — a
+   door row that exists and says nothing ever began, against no row at all — and
+   the two have opposite remedies: a row that expired, and a sender that is not
+   marking its openings. `LibraryReach.unscaled` carries a `ReachSilence` per
+   page for exactly this, and a list that named the page without the reason
+   would send somebody after the wrong fault. A first draft of this screen
+   carried the reason and drew only the name.
+
+**For whoever draws the third surface off these readings:** the sentence above
+the rows has to be true of all three states of a door. *No count of how many
+readers arrived* is false of `unopened`, where the count is there and is nought.
+*No readership to weigh these figures against* is true of all three.
+
+---
+## 2026-10-11 — the twelfth hand-written photograph preload, and the obstacle to the harness is where it may live rather than what it does
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed against the 27 September entry**, which is unchanged and still right
+
+The eighth preload when the ask was written, the eleventh yesterday, the twelfth
+today: three pages built through the published builders, written through
+`TreeStore.create`, counters through `ReaderTallyStore.apply` with an
+`appearances` window, door rows through `ReaderTallyStore.opened`, and one page's
+openings withheld behind an environment variable so the withheld state could be
+photographed from the same build. Deleted before committing, as the eleven before
+it were. The shot lists are beside the report and are the half that survives.
+
+**What is new is not the count. It is that this run found the thing actually in
+the way, and it is not the writing.**
+
+The harness the 27 September entry asks for would live under
+`app/(portal)/_test/staging/`, and `_test/` is defined by this lane as *inside
+the lane and outside the production graph* — the argument `_test/plain-language.ts`
+makes for being there is that a screen must never be able to import the thing it
+is being judged against. A staging module has the opposite requirement: **it only
+works if a request path reaches it**, because the data has to be in the running
+server's memory store before the page renders. A preload under `_test/` that the
+application imports is `_test/` in name only.
+
+So the question the harness is blocked on is a placement question with three
+answers, none of them obviously right:
+
+- **`_test/staging/` imported dynamically behind an environment variable.** Keeps
+  the name honest and does not keep it out of the bundle, which is the property
+  the directory was named for.
+- **`_lib/staging.ts`, in the production graph, inert without its variable.** The
+  honest version of what every one of these twelve preloads has actually been,
+  and a module a screen can import.
+- **Not a module at all — a script that posts through the published intake.**
+  Slowest to write, and the only one that cannot affect a deployment that does
+  not run it. The counters have a public door (0146); the trees do not.
+
+**This is `Loom portal`'s to decide and it is not decided here**, because the
+choice binds every lane that photographs a screen behind a session and the right
+moment to make it is a run whose subject is the harness. What is recorded is that
+the next run to pick this up does not need to re-derive the obstacle: it is not
+*what should the staging produce* — twelve preloads have answered that — it is
+*where may it live*.
+
+**One line that is not this lane's:** `pnpm shoot --serve` serves a build rather
+than making one, and the `built …Z` line it prints is the only thing that says
+so. That cost two wasted shoots yesterday and none today, because the line was
+read. It is still worth a sentence in `docs/routines.md`, which is
+`Loom daily build`'s file.
