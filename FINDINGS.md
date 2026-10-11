@@ -47716,7 +47716,14 @@ it without measuring the lane again.
 ## 2026-10-05 — every consumer of `readingPaceOf` will write the same four lines to find its correction, and the pairing is the part that can be got wrong
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
-**Status:** open — **a measurement rather than a request**, and nothing is
+**Status:** **closed** — shape 1 shipped as `inflationFor(where, rows)` and is on
+`main`, published from `@jam-overture/loom/signals` beside `pageViewsFor`. Closed
+on 10 October by `signals-18`, which found this entry still open while the
+5 October entry recording the same remedy says `closed by
+signals-10-the-funnel-against-the-readers-who-arrived` — nothing had come back to
+flip this one. Verified rather than re-argued: `src/signals/page-views.ts:308`.
+
+Originally filed as: **a measurement rather than a request**, and nothing is
 blocked; the four lines are written and working on `main`'s next branch
 
 `PaceOptions.inflation` is one number, and the number that belongs there is a
@@ -49790,6 +49797,238 @@ conditions, thirty members, eight sets) and the paragraph says which claim was
 narrowed and why.
 
 ---
+## 2026-10-10 — the reader surfaces can now be asked about a deployment's library rather than its pages, and there is one figure on that screen that must never be printed as a share of readers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is blocked and
+nothing is wrong on the screen today**; the reading is new and this is what it
+makes drawable, with the one sentence on it that would be got wrong
+
+`libraryReadingOf(readings)` is on this branch, published from
+`@jam-overture/loom/signals` with
+[0257](decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md).
+It takes the `PageReading`s a portal already builds — no store read, no second
+join — and answers a question no screen in this subsystem has been able to ask:
+**not which page to fix, but which *kind of part* earns its place.** *Your
+testimonial band stands in nine places and readers reached two of them.*
+
+**The sentence to lead with is `mostSkipped`**, and it is a primitive type rather
+than a role because a type is the thing an author can replace. It is ranked by
+the **count** of places skipped and not by the share, which is 0221's rule
+carried across: a kind skipped in its one and only place is a perfect share and a
+smaller problem than one skipped in seven of nine.
+
+**The one figure to be careful with, and it is the headline one.** `readShare` is
+`read ÷ (read + skipped)` over **placements** — parts of trees — so no reader is
+counted in either term, no rollup window is in either term, and a deployment that
+shortens its window cannot move it. That is what makes it sound. What it is not
+is a share of people: **a placement on a page nine thousand readers opened counts
+the same as one on a page three readers opened**, so a kind read in the one busy
+place and skipped in nine quiet ones reports one in ten, and *most readers who
+met it read it* would have been true as well. Draw it as *the places this kind
+stands*, never as *readers skip this*. The weighted figure is a real question
+with a real answer and is filed separately in this lane; it needs the door's
+scale and is deliberately not on this type.
+
+**Four more things the screen can say, none of which needs a reader counted.**
+`wordShare` is the share of a kind's words a reader reached, addable because a
+page's words partition across its parts exactly once (0212). `activations`,
+`opens`, `closes` and `completions` are occurrences, filed against the part the
+reader used, so no press is in two rows (0167). `floored` is how many of a kind's
+placements have words nobody declared, which is the direction `wordShare` is
+wrong in. And `trees`, `revisions` and `placements` are the breadth behind every
+row — *nine places, on four pages, two of them two live revisions of one*.
+
+**`dwellMs` is a volume of attention and not a duration anybody spent.** A part is
+on screen while its children are, so a nested placement's seconds are its
+ancestors' too. It is comparable between two kinds that sit at the same depth and
+it must not be added across kinds, which is why the reading publishes no
+deployment-wide dwell and a card should not compute one.
+
+**Two silences, and they carry opposite instructions.** `unread` on a kind means
+nothing reported a view of any place it stands — point a reader at it.
+`unplaced` means there is none of it in the library at all, which only ever
+happens to a role row and is the reason a role row exists for every member of the
+vocabulary. A card that collapsed the two would tell somebody to go and measure a
+kind of part their deployment does not use. They are registered in the silence
+table with the fourth subject, `kind`, so `distinctSilences` keeps them apart for
+you.
+
+**The role rows are a census of one row today**, because nothing in
+`src/primitives/` declares a role. That is filed for `Loom primitives` and
+nothing here needs to change when it lands: the join is at read time (0212), so
+the day one is declared every counter already stored reinterprets.
+
+---
+## 2026-10-10 — the share of readers who met a kind of part and read it is a real question, and the honest version of it needs the door
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** closed by #576 — built as `libraryReachOf` in
+`src/signals/library-reach.ts` (0256, §24 of `docs/signals.md`), on the same
+branch that filed it. The shape below is what shipped, with one change: the
+weight is `min(appearances, opened)` rather than `opened`, because weighting by
+the openings alone would have projected a folded rate onto page views no rollup
+had reached — so nothing here is withheld for a collection that is behind
+
+0257 publishes a kind of part's standing as a share of the **places** it stands,
+and is explicit that this is not a share of readers. The figure everybody will
+ask for next is the other one: *of the readers who met your testimonial band,
+what share read it.*
+
+**It is answerable and it is a second question.** The arithmetic is
+`reached ÷ views` per placement and a weighted mean over them — two distinct
+counts, which is the first problem, and each inflated by **its own page's**
+straddle rate, which is the second and the worse. The pages whose readers linger
+would weigh most in the mean, and a deployment that shortened its rollup window
+would watch the figure move with no reader moving. That is §21's fact one level
+across, and §21's own correction is what fixes it: `opened` at the door, which is
+exact and per revision (0219).
+
+**So the shape, when it is wanted:** `libraryReachOf(readings, rows)`, taking the
+page-view rows the way `deploymentReadingOf` and `pageReachOf` already do and
+reusing the published matching rule (`pageViewsFor`, `inflationFor`) rather than
+writing a third copy of it. It would publish a scaled share per kind with the
+same two denominators §11 settled on — an estimate against the appearances and a
+ceiling against the openings — and would be withheld, per kind, for any page in
+it whose door row is missing or whose openings are unmarked.
+
+**Why it is not in this unit.** A census of places and a census of readers are
+two artefacts with two error models, and the second depends on a figure the first
+does not read at all. Shipping them together would have meant one type carrying
+two kinds of number, with the sound one and the corrected one side by side and
+nothing but prose telling them apart — and the prose is exactly what a surface
+skips. The honest version is its own unit.
+
+**Nothing is lost by waiting.** The share of places is sound today and is not
+superseded by the weighted figure; it answers *where this kind stands and whether
+it is reached there*, which is the question an author changing a primitive has.
+
+---
+## 2026-10-10 — the missing role declaration now costs a census as well as a comparison, a standing and a funnel answer, and this one is the whole of the figure rather than a row on it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **a stated price, not a defect**; this
+lane's entries of 6, 8 and 10 October name the same gap and this is the fourth
+consumer, and the first where the silence is the entire answer rather than one
+value in it
+
+Nothing in `src/primitives/` declares `role`, which 0238 noted, 0242 inherited
+and 0251 priced again. `libraryReadingOf` (0257) is the fourth consumer, and it
+is different in kind from the first three.
+
+**The new price.** The three earlier consumers lose *one verdict on one part* to
+the silence — a standing of `unknown` beside figures that still stand. This one
+publishes a **census by role**, and with nothing declared the census is one row:
+every placement in the library falls into the `null` role row, and the sentence
+the queue in `docs/signals.md` names in so many words — *which roles readers
+engage with and which they skip* — comes back as *everything, undeclared*. The
+type census answers fully and the role census answers nothing, out of the same
+pass over the same counters.
+
+**What would close it** is unchanged from the 6 October entry and is yours: role
+members a primitive can declare for the parts a page is actually made of. Nothing
+here needs to change when they land — 0212's join is at read time, so the day
+they are declared every counter already stored reinterprets and these rows start
+answering without a migration or a re-fold.
+
+**One thing this unit added that is worth knowing when they do land.** A role
+nothing in the library plays is **not** left out of the rows: it comes back with
+`placements: 0` and a silence of `unplaced`, so a deployment can see *nothing in
+this library is a heading* rather than reading the vocabulary itself to work out
+which rows are missing. A role added to the vocabulary and declared nowhere is
+therefore visible from the first reading after it ships, which is the opposite of
+the 8 October entry's worry about a permission with no consumer sitting
+unnoticed.
+
+---
+## 2026-10-11 — a kind of part now has two shares, they can differ by an order of magnitude, and only one of them is about readers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a screen to draw, with one pairing rule and one state to
+refuse**
+
+`libraryReadingOf` (0257) and `libraryReachOf` (0256) are two readings of the
+same list of `PageReading`s, keyed the same way and paired on the published
+`kindKeyOf`. They answer two questions about one primitive type and **the
+answers are not near each other**:
+
+- `KindReading.readShare` is the share of the **places** it stands that at least
+  one reader reached. Sound with no door row, no correction and no window in it.
+- `KindReach.share` is the share of the **readers who met it** that read it, as
+  a weighted mean of each place's own share with that page's arrivals behind it.
+
+A kind read in the one busy place and skipped in nine quiet ones is *one place
+in ten* and *nine readers in ten*. Both are true. A card that printed one figure
+and called it the other would be wrong by an order of magnitude in whichever
+direction the library's shape happens to put it.
+
+**So the ask is two labelled figures and never one.** *Reached in 2 of 9 places ·
+read by 93% of the readers who met it* is the row, and the words **places** and
+**readers** are load-bearing rather than decorative.
+
+**The one state to refuse to draw.** `KindReach.silence` of `unscaled`,
+`unopened` or `uncounted` means a page this kind stands on could not be put on
+the door's scale, so the **whole** kind has no share — not a share over the
+pages that could be priced. `LibraryReach.unscaled` names those pages with a
+`ReachSilence` on each, which is the page's own vocabulary and is the actionable
+half: one of those pages is why every withheld row above is withheld. Falling
+back to the census is right and should say that it is what it is doing.
+
+Two figures not to draw as engagement: `met` is a count of page views at the
+door's scale and is deliberately not rounded into people, and `openings` counts
+a page's readers **once per place the kind stands there**, so it is not a
+headcount either. `LibraryReach.arrivals` is the one addable count of readers
+here, and it is per page.
+
+---
+## 2026-10-11 — the missing role declaration now costs a weighted share as well as a census, a comparison, a standing and a funnel answer, and this is the fifth consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives` (`src/primitives/`) ·
+**Status:** open — **the same gap, now with five consumers**, and nothing here is
+broken by it
+
+Nothing in `src/primitives/` declares `role` (0114), so every role row in
+`libraryReachOf` comes back under `role: null` — the same thinness 0212 named,
+now in a fifth place: a standing on a funnel end (0238), a comparison of what
+readers did (0251), the census of the library (0257), and this.
+
+**What is new about this one is that the figure is a share of readers rather than
+a count of parts.** *Of the readers who met a heading, what share read it* is a
+sentence about a deployment's whole library and is answerable from counters
+already stored — and today the only row that can answer it is the row for
+*everything whose type said nothing*, which is the whole library and therefore
+answers nothing. The by-type rows are unaffected and are what works today.
+
+**It is one declaration per primitive and no migration.** The join is at read
+time (0212), so the day a type declares a role every counter already stored
+reinterprets and these rows start answering.
+
+---
+## 2026-10-11 — a test meant to say which silence set brought which condition was comparing each set against every other one, so the tenth reusing the ninth's condition would have deleted the ninth's record of it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** closed by #576 — fixed in `src/signals/silences.test.ts` in the same
+unit that would have tripped it
+
+0240's evidence that the silence conditions are states of the world rather than
+a list of names is *which sets brought a new one*, and the test that keeps that
+true declares, per set added after the fifth, the conditions it brought that no
+**earlier** set reported. That is what its name says. What it did was build the
+comparison set out of every meaning whose vocabulary was not the one under test —
+which is the same assertion exactly until a later set reuses an earlier one's
+condition.
+
+The tenth set reuses the ninth's `nothing-of-the-kind`, because a kind's share of
+readers is withheld for the same *there is none of it* the census is. Under the
+all-others form the ninth's declaration would have become `[]` and the test would
+have failed, and the obvious remedy — deleting the ninth's declaration — would
+have deleted the one fact the test exists to keep: that `nothing-of-the-kind`
+arrived with a reading keyed by a vocabulary.
+
+**It now accumulates in arrival order**, starting from the five original sets, so
+each set is held against what came before it. The published assertion is
+unchanged for the first four later sets and the test is strictly stronger: an
+eleventh set bringing a condition silently is still exactly what it catches.
 ## 2026-10-10 — a JSX space survives the test transform and not the build, so a rendered test is green on a junction the browser runs together
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`
