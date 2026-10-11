@@ -13,9 +13,11 @@ import {
 } from "@jam-overture/loom"
 import { compositionById } from "@jam-overture/loom/primitives"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 import { bandNodesIn } from "../compositions"
 import { spellOut } from "../counts"
+import { OWN_PRIMITIVE_TYPE, OWN_SOUND_PROPS, ownRegistry } from "../own/registry"
 
 /**
  * Every example on the site, as a tree.
@@ -123,6 +125,23 @@ export type DocsExample = {
    */
   readonly caption: string
   readonly build: () => LoomTree
+  /**
+   * The registry this one is rendered through, where it is not the site's.
+   *
+   * Absent for every example but one, and absence is the rule rather than a
+   * default worth having: `_lib/loom/registry.ts` is right that an example
+   * quietly registering a primitive of its own would be documenting a library
+   * the reader does not have. The exception is the page whose **subject** is a
+   * primitive of your own — there the extra entry is the thing being taught,
+   * the reader is shown its whole file, and a frame rendered through the
+   * starter library alone could not show it at all.
+   *
+   * It is on the example rather than on the component because the catalogue is
+   * what the test mounts: an example carrying its own registry is checked
+   * against that registry by `catalogue.test.tsx`, and nothing has to be told
+   * twice which pair belongs together.
+   */
+  readonly registry?: PrimitiveRegistry
 }
 
 /** A page, a heading and a sentence — the smallest tree that renders. */
@@ -472,6 +491,61 @@ const aPageThatStartedFromBands = (): LoomTree => {
   return page(ids, MINIMAL, {}, [band(ids, "hero"), band(ids, "features"), band(ids, "cta")])
 }
 
+/**
+ * A status page, built from the starter library and one primitive that is not
+ * in it.
+ *
+ * The heading, the sentence and the stack are the library's. The three rows are
+ * `status.service`, written on *A primitive of your own* and registered beside
+ * the library rather than instead of it — which is what a project looks like
+ * once it has a word of its own.
+ *
+ * Each row carries its detail as **children**, which is the prop-or-child rule
+ * doing visible work: a proposal can add a second sentence to a row with an
+ * `insert`, and nothing about the primitive had to change to allow it.
+ */
+const aPrimitiveOfYourOwn = (): LoomTree => {
+  const ids = sequentialIdFactory("ownprimitive")
+
+  const row = (service: string, state: string, since: string, detail: string): LoomNode =>
+    buildElement(ids, {
+      type: OWN_PRIMITIVE_TYPE,
+      props: { service, state, since },
+      children: [prose(ids, detail, { tone: "muted", size: "small" })],
+    })
+
+  /*
+   * A level-2 headline rather than a level-1 one, which is this example's only
+   * departure from the others and is about the frame rather than about the
+   * document. `level: 1` is the top step of the ramp, which is most of the
+   * frame's height before the first row arrives — and the thing a reader is
+   * here to look at is the three rows.
+   */
+  return page(ids, MINIMAL, { width: "readable" }, [
+    heading(ids, 2, "Vaughan & Rill status"),
+    prose(ids, "Everything we run, and how it is doing. Checked every minute.", { tone: "muted" }),
+    buildElement(ids, {
+      type: "loom.stack",
+      props: { direction: "column", gap: "snug" },
+      children: [
+        row(
+          "Storefront",
+          "operational",
+          "since Monday",
+          "Pages and search are answering normally."
+        ),
+        row(
+          String(OWN_SOUND_PROPS["service"]),
+          String(OWN_SOUND_PROPS["state"]),
+          String(OWN_SOUND_PROPS["since"]),
+          "Card payments are retrying. Nothing has been lost."
+        ),
+        row("Nightly export", "offline", "since 02:00 UTC", "Paused while we rebuild the index."),
+      ],
+    }),
+  ])
+}
+
 const entries: readonly DocsExample[] = [
   {
     id: "first-tree",
@@ -541,6 +615,14 @@ const entries: readonly DocsExample[] = [
     caption:
       "Scroll the frame: the opening, the middle and the close, taken from the library’s page sequence. Each was one insert, and what is on the screen afterwards is ordinary nodes — nothing in the tree records that a band put them there.",
     build: aPageThatStartedFromBands,
+  },
+  {
+    id: "a-primitive-of-your-own",
+    title: "A word the starter library does not have",
+    caption:
+      "Three rows of a primitive written on this page, registered beside the whole starter library. Ask to add a sentence and watch it land inside a row — the detail is children, so a proposal can add one.",
+    build: aPrimitiveOfYourOwn,
+    registry: ownRegistry,
   },
 ]
 

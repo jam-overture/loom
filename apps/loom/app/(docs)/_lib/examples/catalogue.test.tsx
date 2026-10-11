@@ -36,9 +36,11 @@ describe("the documented examples", () => {
     it(`renders "${id}" with nothing the runtime could not honour`, () => {
       if (example === undefined) throw new Error(`no example is registered as "${id}"`)
 
+      const registry = example.registry ?? docsRegistry
+
       const rendered = renderLoomTree(example.build(), {
-        resolver: docsRegistry,
-        validator: docsRegistry,
+        resolver: registry,
+        validator: registry,
         themes: docsThemes,
       })
 
