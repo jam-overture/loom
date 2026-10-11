@@ -124,6 +124,30 @@ describe("resolveDataPlan", () => {
     expect(outcome.unavailable.detail).toContain("profile")
   })
 
+  /**
+   * The same bound that the theme seam got, for the same reason and with a
+   * harder case: a source id is a dotted name rather than a word, so ten of
+   * them cost more characters than twenty-one palettes did. The clause names the
+   * nearest few and says how many it stands in for; the registry's own
+   * `sources` is where a caller goes for all of them.
+   */
+  it("bounds the clause rather than printing a registry of any size", async () => {
+    const many = Array.from({ length: 12 }, (_, index) =>
+      countingSource(`catalogue.part-${index}`, "a part")
+    )
+
+    const tree = boundTree({ things: { source: "catalogue.part" } })
+    const resolution = await resolveTreeData(tree, { registry: registryOf(...many) })
+
+    const outcome = resolution.lookup(tree.root.id)["things"]
+
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable.detail).toContain("(nearest 5 of 12)")
+    expect(outcome.unavailable.detail.length).toBeLessThan(130)
+  })
+
   it("costs one region of the page when one source is down, not the page", async () => {
     const tree = boundTree({
       up: { source: "profile" },
