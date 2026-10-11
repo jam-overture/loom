@@ -254,7 +254,7 @@ describe("the document sequence", () => {
    * decision rather than a diff that made a red build go away.
    */
   it("keeps the document bands out of the landing phrasebook, which is what leaves 0245 open", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(60)
+    expect(STARTER_COMPOSITIONS).toHaveLength(67)
 
     for (const composition of DOCUMENT_COMPOSITIONS) {
       expect(STARTER_COMPOSITIONS).not.toContain(composition)
@@ -463,32 +463,41 @@ describe("the reach the second sequence moves", () => {
    * work in this lane**, and this is the assertion that says so rather than a
    * sentence in a report that goes stale.
    *
-   * The other nine have reasons that are not *nobody wrote a band* — seven are
-   * the framework's asset seam, `loom.waiting-state` is a state this runtime is
-   * never in, and `loom.page` is the render root — so they are named here as a
-   * list a later run can read, and 0245 tabulates why each one is on it.
+   * The others have reasons that are not *nobody wrote a band*, and the split
+   * changed under this branch while it waited: when it was written, seven were
+   * filed as the framework's asset seam.
+   * [0255](../../decisions/0255-a-primitive-is-blocked-by-what-its-schema-requires-and-not-by-what-its-description-pictures.md)
+   * established that five of those seven carry no image prop at all, and #577
+   * then reached three of them — `loom.before-after`, `loom.carousel` and
+   * `loom.overlay` — with bands. So the list below is **six**, and only two of
+   * the six are the asset seam.
    */
   it("brings loom.link-trail into reach, which no band could do before", () => {
     expect(CATALOGUE_TYPES).not.toContain("loom.link-trail")
     expect(DOCUMENT_TYPES).toContain("loom.link-trail")
   })
 
-  it("leaves exactly nine primitives unreached, each for a reason that is not a missing band", () => {
+  it("leaves exactly six primitives unreached, each for a reason that is not a missing band", () => {
     const reached = new Set([...CATALOGUE_TYPES, ...DOCUMENT_TYPES])
     const unreached = STARTER_PRIMITIVES.map((entry) => entry.type)
       .filter((type) => !reached.has(type))
       .sort()
 
+    /** Sorted, so the reasons are in the comments rather than in the order. */
     expect(unreached).toEqual([
-      /** Seven waiting on an asset the framework owns. */
-      "loom.before-after",
-      "loom.carousel",
+      /** The asset seam. After 0255 it is this one and `loom.media` alone:
+       * both require a `src: mediaUrlSchema` no composition may ship. */
       "loom.embed",
+      /** Reachable and unbuilt: slots only, no URL prop. Its claim is the
+       * *opened* frame, which `pnpm specimen` cannot press, so its band wants
+       * the harness's other entry point. Filed in `FINDINGS.md`. */
       "loom.lightbox",
+      /** The asset seam, with `loom.embed` above. */
       "loom.media",
-      "loom.overlay",
       /** The render root: a band is inserted into a page and cannot be one. */
       "loom.page",
+      /** Not an asset — a surface whose height is known, per the 23 September
+       * correction that moved it out of the image row. */
       "loom.pin",
       /** A state resolution-before-the-walk means no component is ever in. */
       "loom.waiting-state",
