@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 
 import { treeIdSchema, type LoomTree, type TreeId } from "@jam-overture/loom"
 import {
+  deploymentReadingOf,
   describeReaderSignalStoreError,
   pageActionOf,
   pageReachOf,
@@ -10,6 +11,7 @@ import {
   pageViewReadingOf,
   readingPaceOf,
   readingProgressOf,
+  type ReadingProgress,
 } from "@jam-overture/loom/signals"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
@@ -21,6 +23,7 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { arrivalsOf, type PageArrivals } from "@/app/(portal)/_lib/arrivals"
 import { doingOf, type PageDoing } from "@/app/(portal)/_lib/doing"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { fixFirstOf, fixFirstRanks, NOT_IN_THE_ORDER } from "@/app/(portal)/_lib/fix-first"
 import { pageNameOf, unnamed, type PageName } from "@/app/(portal)/_lib/page-name"
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
 import { portalReaderSignals, portalReaderTallies, signalsAreDurable } from "@/app/(portal)/_lib/reader-signals"
@@ -29,10 +32,11 @@ import { pacingOf, type PagePacing } from "@/app/(portal)/_lib/pacing"
 import { skippingComparable, skippingFrom, type PageSkipping } from "@/app/(portal)/_lib/skipped"
 import { stoppingOf, type PageStopping } from "@/app/(portal)/_lib/stopping"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
-import { inPageOrder } from "@/app/(portal)/_lib/page-order"
+import { inPageOrder, losesMostRank } from "@/app/(portal)/_lib/page-order"
 import { portalStore } from "@/app/(portal)/_lib/store"
 
 import { PageReadingCard } from "./_components/page-reading"
+import { WhichPageFirst } from "./_components/which-page-first"
 
 /**
  * What people did on your pages — step 4 of `docs/signals.md`.
@@ -251,6 +255,24 @@ const ReadersPage = async ({
    */
   const doing = new Map<string, PageDoing>()
 
+  /*
+   * And the sixth reading, which is the only one that is not about a page.
+   *
+   * *Which page do I open first* needs every page's progress at once, so the
+   * readings are kept as they are taken rather than consumed in place. No read
+   * and no second join is added — `readingProgressOf(joined)` is the same call
+   * `stoppingOf` was already handed, held in a list as well as passed on.
+   *
+   * **A page that does not reach the join is not in it**, which is the version
+   * gap and is the one limit this reading has that the runtime's does not: a
+   * fall is a comparison between two parts of a page, so the counters have to
+   * be laid over the version they were filed against, and only one version of a
+   * page can be read from the store. The count of pages that fell out is handed
+   * over so the section says so rather than quietly listing fewer pages than
+   * the deployment has.
+   */
+  const progress: ReadingProgress[] = []
+
   for (const reading of readings) {
     const newest = reading.revisions[0]!.revision
     const tree = served.trees.get(reading.treeId)
@@ -278,8 +300,12 @@ const ReadersPage = async ({
      */
     const names = namesInTree(tree)
 
+    const walked = readingProgressOf(joined)
+
+    progress.push(walked)
+
     skipped.set(reading.treeId, skippingFrom(joined, names))
-    stopped.set(reading.treeId, stoppingOf(readingProgressOf(joined), names))
+    stopped.set(reading.treeId, stoppingOf(walked, names))
 
     /*
      * The correction for *this page at this version*, not the deployment's
@@ -327,19 +353,37 @@ const ReadersPage = async ({
   }
 
   /*
-   * By name, and it used to be by identifier.
+   * Which page to open first, which this screen could not say until today.
    *
-   * `revisionReadings` sorts on `treeId.localeCompare(treeId)` so a page's own
-   * versions stay together and newest-first, which is right and is untouched.
-   * What reached the screen was that arrangement — a list of pages ordered by the
-   * runtime's names for them, with a collation deciding ties on a value no reader
-   * can see. This screen has no rung to lead with: one page's readers are not
-   * more urgent than another's. So the tiebreak every other list here ends with
-   * is the whole order, and the sentence above the list says so. No read is added
-   * — `names` is three lines up. See `_lib/page-order.ts`.
+   * It was alphabetical, and `page-order.ts` had the argument for why written
+   * down: *there is no rung to lead with there*. True of what could be read at
+   * the time and wrong about the premise — a page's readers are not more urgent
+   * than another page's, and the readers a page is **losing** are. Comparing
+   * two pages' losses needs each loss put on the scale its own door counts in,
+   * because the raw counts are inflated by each page's own straddle rate, and
+   * that correction is 0250's rather than this lane's.
+   *
+   * So the runtime orders the pages and this screen reads the positions out of
+   * the order. No read is added: the progresses are the ones the loop above
+   * already took, and the door rows are the ones the pace correction already
+   * needed.
+   */
+  const fix = fixFirstOf(
+    deploymentReadingOf(progress, openings),
+    names,
+    served.partNames,
+    readings.length - progress.length
+  )
+
+  const ranks = fixFirstRanks(fix)
+
+  /*
+   * Worst first, then the shared tiebreak — and a page the order never saw
+   * below every page it did, rather than among them at a height nothing
+   * supports. `names` is above; nothing here is read for the sake of the sort.
    */
   const inOrder = inPageOrder(readings, (reading) => ({
-    rank: 0,
+    rank: losesMostRank(reading, ranks, NOT_IN_THE_ORDER),
     page: names.get(reading.treeId) ?? unnamed(reading.treeId),
   }))
 
@@ -416,7 +460,15 @@ const ReadersPage = async ({
         </StateNotice>
       ) : (
         <>
-          <ListOrder order="by-name" />
+          {/*
+           * Only on the whole deployment. An order over the one page somebody
+           * asked about is not an order, and *one of your pages is losing
+           * readers* about the page already named at the top of the screen is
+           * the portal telling a reader something they came here holding.
+           */}
+          {scoped === undefined && <WhichPageFirst fix={fix} />}
+
+          <ListOrder order="loses-most-first" />
 
           {inOrder.map((reading) => (
             <PageReadingCard
