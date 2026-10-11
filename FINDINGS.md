@@ -50153,6 +50153,122 @@ conditions, thirty members, eight sets) and the paragraph says which claim was
 narrowed and why.
 
 ---
+## 2026-10-11 — `ClosedChoice` is in two published signatures and exported from no door, so naming the type means indexing another one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/sdk/`) ·
+**Status:** open — **nothing is blocked**; a one-line export, and the lane that
+hit it is carrying a workaround
+
+`PrimitiveEntry.choices` is `readonly ClosedChoice[]`, and
+`probeConfigurations(choices: readonly ClosedChoice[])` takes one. Both are
+reachable from `@jam-overture/loom/sdk`. `ClosedChoice` itself is declared in
+`src/catalogue.ts` and re-exported from nowhere:
+
+```
+src/sdk/catalogue.ts    exports CataloguedPrimitive, CataloguedProp, PrimitiveCatalogue
+src/sdk/conformance.ts  imports ClosedChoice as a type, exports no alias
+src/sdk/definition.ts   imports ClosedChoice as a type, exports no alias
+```
+
+So a host can hold one, pass one and read one, and cannot write the type of a
+function that takes one. *A primitive of your own* wanted exactly that — a
+helper returning the closed choices for the primitive the page writes — and the
+import failed with `has no exported member 'ClosedChoice'`.
+
+**The workaround is in this lane and it is a workaround.**
+`PrimitiveEntry["choices"][number]` names the shape, and that is what
+`app/(docs)/_lib/own/proving.ts` uses. It reads as a type puzzle at the one line
+where a reader of that file wants a name, and it is the sort of thing a host
+copies into their own project because the obvious import is not there.
+
+`CataloguedProp` **is** exported and is the same kind of thing: a small
+projection a consumer reads off an entry. That is what makes this look like an
+oversight rather than a decision. If it is a decision, this entry is the place
+to say so once.
+
+---
+## 2026-10-11 — the first configuration the conformance probe builds is one the schema refuses, so a component that reads a required prop the obvious way is reported as a fault no valid tree can cause
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/sdk/`) ·
+**Status:** open — **latent, and nothing is red today**; it becomes a reader's
+first bad experience the moment somebody writes a primitive in a style the
+starter library happens not to use
+
+`probeConfigurations` returns the default configuration first and then each
+closed choice's value one at a time (0075):
+
+```ts
+export const probeConfigurations = (choices: readonly ClosedChoice[]): readonly JsonObject[] => [
+  {},
+  ...choices.flatMap(({ name, options }) => options.map((option) => ({ [name]: option }))),
+]
+```
+
+**`{}` is not a configuration built from the schema.** For any primitive with a
+required prop it is a props bag that primitive's own validator refuses, and no
+tree the Gate would accept can produce it. `auditRegistry` nonetheless reports
+what happens under it, and `throwsOnDeclaredProps` says in its own doc comment
+that an entry there means *"a tree the validator accepts can take the page
+down"*. For this row that sentence is false.
+
+Measured, with a primitive whose schema is
+`z.object({ service: z.string().min(1).max(60) }).strict()` and whose component
+is one line, `createElement("div", { ...loom.editable }, given.service.toUpperCase())`:
+
+```
+configurations the probe builds:  [{}]
+throwsOnDeclaredProps:            probe.dereferences — {} (Cannot read properties of undefined (reading 'toUpperCase'))
+                                  everyConfiguration: true
+notProbeable:                     probe.dereferences   (cause: threw)
+notDecorated:                     (empty)
+```
+
+Three consequences, and the third is the one that costs something:
+
+- It lands in **`throwsOnDeclaredProps`**, which *Scaffolding a project* teaches
+  as "the one that takes a page down".
+- It lands in **`notProbeable`** as well, beside the hook-using and class
+  components that are legitimately unjudgeable (0012), so every other list on
+  that audit is now silent about it.
+- `notDecorated` is **empty**, because nothing was ever successfully called, so
+  the audit cannot say whether the primitive is editable — which is the one
+  question the scaffolder's test exists to answer.
+
+**Why nothing in this repository is red.** Measured off the starter library:
+
+```
+registered:                       107
+with at least one required prop:   33
+throwsOnDeclaredProps:              0
+notProbeable:                       0
+```
+
+Thirty-three primitives take a required prop and none of them throws, because
+every one hands its props to React and React renders `undefined` as nothing.
+Not one calls a method on a prop value. So the probe is safe against a **house
+style** rather than against a rule, and the first thing a host writes that
+trims, uppercases, splits or parses a required prop is a red audit with a
+reproduction its schema would have rejected.
+
+**What the remedies look like**, and the choice is `src/sdk/`'s rather than
+this lane's:
+
+1. **Build the default configuration from the schema.** The required props
+   already have their shapes declared; a minimal valid bag is derivable for the
+   closed ones and is not for an arbitrary `z.string()`, which is probably why it
+   is `{}` today.
+2. **Let the registration supply it.** `RegistryAuditOptions` already carries
+   per-type `answers`; a per-type `props` beside it would let a host hand the
+   probe a sound bag, and a host auditing its own library is exactly who knows
+   one.
+3. **Say which row is which.** Keep `{}` and report what it found under a name
+   that does not claim the schema built it, so `throwsOnDeclaredProps` keeps the
+   meaning its doc comment states.
+
+Found while writing *A primitive of your own*, which runs `auditRegistry` on a
+primitive a reader has just been shown. That page's primitive renders its props
+rather than reading them, so it passes — and it passes for the same accidental
+reason the library does.
 ## 2026-10-10 — the reader surfaces can now be asked about a deployment's library rather than its pages, and there is one figure on that screen that must never be printed as a share of readers
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`

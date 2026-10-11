@@ -243,6 +243,12 @@ const orderedSections: readonly DocsSection[] = [
           "A primitive is a name, a schema and a component. The registry is the allowlist of what a proposal may say.",
       },
       {
+        slug: "a-primitive-of-your-own",
+        title: "A primitive of your own",
+        summary:
+          "One worked primitive, end to end: the schema, the component, the registration, what a model is told about it, and the tests that prove a person can edit it.",
+      },
+      {
         slug: "composition",
         title: "Children and slots",
         summary:
