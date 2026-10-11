@@ -9,6 +9,76 @@ list and it is not a report.
 
 ---
 
+## 2026-10-11 — three record numbers clashed across open branches in two days, and the check that catches a clash cannot see one until the branches meet
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/decisions/`, `decisions/README.md`) · **Status:** open — **nothing is
+broken and no branch is blocked**; the documented resolution works and has run
+twice, but it runs at the end rather than at the point the mistake is made
+
+`decisions/README.md` states the rule and, in the same paragraph, the reason
+this is filed:
+
+> `pnpm verify` fails if … two records claim the same number … That set is not
+> hypothetical: two concurrent sessions each wrote an `0032` on the same day,
+> and nothing noticed until their branches met.
+
+**It is still true that nothing notices until their branches meet.** The check
+reads one tree. A number claimed by another open branch is a *hole* in that
+tree — `*No record on this branch*` — which 0097 correctly reports and does not
+fail. So the state "two open branches both claim 0254" renders, on each branch,
+as a perfectly clean verify.
+
+### What it looked like this week
+
+| number | claimed by | when |
+| --- | --- | --- |
+| 0250 | #565 and #566 | 10 Oct |
+| 0251 | #565 and #568 | 10 Oct |
+| 0254 | #575 and #576 | 10 Oct 21:40, 11 Oct 09:56 |
+| 0256 | #576 and #578 | 11 Oct |
+
+Four in two days. Two were resolved by `Loom merge` renumbering at merge time,
+which is the documented resolution and it works — #568's record moved to 0253
+with a dated note and nothing it decided changed. The other two are live.
+
+**The resolution is not the problem; where it happens is.** Renumbering a merged
+record means editing the file, the index, every citation in `src/`, every
+mention in `FINDINGS.md`, the run's own report and any cross-lane doc comment
+that names it. #568's run listed nine such sites. All of that is work a lane
+does *after* writing a record, on a branch it has already verified, under a
+merge it did not plan for — which is the worst moment to be doing careful
+find-and-replace across a repository.
+
+### What would cost less
+
+A check that reads the **open pull requests** rather than one tree, and reports
+a number claimed by more than one open branch. The information is public and
+cheap: `gh api repos/.../pulls` plus the record filenames each one adds. Run it
+in `pnpm decisions:index` or beside it, and the second branch to claim a number
+learns at the moment it writes the record — when moving it costs one filename
+and one line — instead of at merge, when it costs nine sites and a dated note.
+
+It cannot be `pnpm verify`'s to fail on: verify runs offline and must, and a
+network call that fails closed would make every lane's gate depend on GitHub
+being up. **Reported and never fatal**, which is the shape 0097 already gives a
+hole.
+
+### What I am not asking for
+
+Not a number allocator or a lock. Seven routines coordinating through a shared
+counter is a bigger mechanism than the problem, and the current convention —
+take the next free number, whoever lands first keeps it — is right. This asks
+only that "free" become checkable against the branches that are actually open,
+which is the one fact the convention depends on and the one thing no tool here
+can currently see.
+
+**Owned by this lane** because it is process tooling under `tools/`, and filed
+rather than built because this run was woken by a base merge on #575 and
+building it here would widen that pull request into something unreviewable.
+
+---
+
 ## 2026-10-10 — #566 has been merge-blocked since this morning on three strings of your copy, and the row is seven lines in your file
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
