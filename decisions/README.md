@@ -337,6 +337,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0251](0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md) | A change to what readers did is a ratio of two shares, and an inside a change gave a part is not a reader | Accepted | §4c (reader signals) |
 | 0252 | *No record on this branch* | — | — |
 | [0253](0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md) | The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report | Accepted | §4, not the library |
-| 0254 | *No record on this branch* | — | — |
-| 0255 | *No record on this branch* | — | — |
-| [0256](0256-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md) | A refusal names the nearest registered ids and says how many it stands in for | Accepted | §3 (render seam), §4 (data and submission seams) |
+| [0254](0254-the-testing-door-publishes-one-primitive-broken-in-whichever-way-the-caller-names.md) | The testing door publishes one primitive broken in whichever way the caller names, and the fault is named for what the author did | Accepted | §1 (process), §3 (render seam) |
+| [0255](0255-a-primitive-is-blocked-by-what-its-schema-requires-and-not-by-what-its-description-pictures.md) | A primitive is blocked by what its schema requires, not by what its description pictures | Accepted | §5 |
+| [0256](0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md) | A kind's share of the readers who met it is a weighted mean of sound shares, and the weight is the door's | Accepted | §4c (reader signals) |
+| [0257](0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md) | A kind of part is read across the places it stands, and the unit is the placement and never the reader | Accepted | §4c (reader signals) |
+| [0258](0258-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md) | A refusal names the nearest registered ids and says how many it stands in for | Accepted | §3 (render seam), §4 (data and submission seams) |

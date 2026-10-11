@@ -1,8 +1,15 @@
-# 0256 — A refusal names the nearest registered ids and says how many it stands in for
+# 0258 — A refusal names the nearest registered ids and says how many it stands in for
 
 **Status:** Accepted
 **Date:** 2026-10-11
 **Section:** §3 (render seam), §4 (data and submission seams)
+
+> **Renumbered on 2026-10-11**, from 0256, when this branch (#578) was merged.
+> `main` had meanwhile accepted a different 0256 — *a kind's share of the readers
+> who met it is a weighted mean of sound shares* (#576) — and two records sharing
+> a number is fatal (0097). 0257 went to the other record on that same branch, so
+> 0258 was the next free number. Nothing in this record changed but its number;
+> the references to it on this branch were updated with it.
 
 ## Context
 

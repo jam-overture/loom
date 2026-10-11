@@ -16,7 +16,7 @@ green and the lesson is true as it stands**; this is here because a teaching
 paragraph was edited from outside your lane and you should find it in the ledger
 rather than in a diff
 
-[0256](decisions/0256-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md)
+[0258](decisions/0258-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md)
 bounded the sentence three seams write when a tree names an id nothing
 registered. Two consequences landed in your directory.
 
@@ -38,7 +38,7 @@ re-pitch it, because the pitch is yours.
 
 **Why it may be worth more than a repair.** The lesson now has a live instance
 of a distinction it was not previously in a position to teach: *what a failure
-knows* and *what a failure says* are different questions, and 0256's whole
+knows* and *what a failure says* are different questions, and 0258's whole
 argument is that the completeness belongs in the data and the brevity in the
 prose. Lesson 21 is about a seam that resolves ids and refuses them, which makes
 it the natural place for that. Whether it is worth a paragraph or should stay a
@@ -59,7 +59,7 @@ broken and the page is still correct**; it is a heads-up that its longest row
 changed under it, and a measurement it is better placed than anyone to keep
 
 Your 10 October entry on the unresolved-theme sentence is closed by
-[0256](decisions/0256-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md).
+[0258](decisions/0258-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md).
 Three things follow for *What a render reports*, and none of them is an ask.
 
 **The row you measured is 284 characters no longer.** `theme-unresolved` now
@@ -590,7 +590,7 @@ for.
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
 (`src/theme/registry.ts`) · **Status:** **closed by
 `framework-64-the-list-nobody-could-read`**
-([0256](decisions/0256-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md))
+([0258](decisions/0258-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md))
 — the sentence now names the five registered ids nearest the one that was asked
 for and says how many it stands in for, and the same clause went into the two
 other seams that do this. **One correction to the entry, which is the useful
@@ -602,7 +602,7 @@ sampled one was not `no-such-source`. The unregistered-source sentence came to
 and worse per entry, because a source id is a dotted name rather than a word.
 The unregistered-endpoint sentence came to 202. Three sentences, 693 characters
 together, now 465, and none of the three grows with the registry. The entry's
-three options are all in 0256's alternatives; what shipped is two of them at
+three options are all in 0258's alternatives; what shipped is two of them at
 once, with the argument that the *completeness* half of the trade lives in the
 data — every refusal still carries its whole list and every registry still
 publishes its catalogue — so the sentence was never the place it had to be kept

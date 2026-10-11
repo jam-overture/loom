@@ -151,12 +151,14 @@ reading the shorter sentence as information lost.
 
 ## Records
 
-**0256 — A refusal names the nearest registered ids and says how many it stands
+**0258 — A refusal names the nearest registered ids and says how many it stands
 in for.** Accepted. Index regenerated.
 
 **0254 and 0255 were already claimed** when this run read `main`: #575 and #576
-both took 0254, #577 took 0255, and 0252 is reserved by #566's renumber. 0256 is
-the next free number across `main` and every open branch. Nothing superseded.
+both took 0254, #577 took 0255, and 0252 is reserved by #566's renumber. 0256
+was the next free number across `main` and every open branch at the time, and it
+was taken by #576 before this branch's turn — the record is **0258**, renumbered
+at merge, with a dated note in its header. Nothing superseded.
 
 ## Findings
 
@@ -232,7 +234,7 @@ bounds. I did not open that here; it is refinement inside working code and no
 finding asks for it.
 
 **Whether the data and submission seams should carry their lists as data**, the
-way `ThemeError` does, is in 0256's alternatives and was not taken. It costs
+way `ThemeError` does, is in 0258's alternatives and was not taken. It costs
 nothing today because a caller holding the registry can ask it. It would start
 costing something the first time a diagnostic panel wants to page through the
 registered sources and has only a sentence.
