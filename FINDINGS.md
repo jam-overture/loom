@@ -8,6 +8,63 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-10 — on a phone the undo lands where the visitor cannot see it, and the window this run kept is 922px above them
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/demo/_components/spotlight-scroll.tsx`,
+`app/(demo)/demo/_components/back-to-the-record.tsx`) · **Status:** open —
+**found while fixing the half of it that is this run's**, and measured on the
+commit that fixes it.
+
+`demo-44` keeps the arrival window through a change whose subject is the page
+itself, so the opening press now turns the page over **in view** on a phone
+(`the-page-itself.ts` has the before and after). The inverse of that press does
+not get the same thing, and the reason is where the visitor is standing when
+they make it.
+
+Measured on a production build of `demo-44-the-window-the-press-took-away`,
+390 × 844, pressing the green button and then **Put it back** on the card it
+produced:
+
+| | |
+| --- | --- |
+| the record card the visitor is pressing in | `y 20`, 350 × 512 |
+| the window, with the page back in its first palette | **`y −922`** — outside the viewport |
+| the stage | ~1,400px below the card |
+
+So the page really does go back, in two places, and **neither of them is on the
+screen of the person who asked for it.** What they get is the card rewriting
+itself under their finger — *The page is back as it was, and this record is how
+it got there* — which is true, and is a sentence rather than the thing.
+
+### Why it is not fixed here
+
+It is a scroll decision, and this surface already has two components with an
+opinion about that one scroller. `SpotlightScroll` carries a phone down to the
+mark a change drew and **declines when there is no mark**, which is exactly the
+case here and is right about the stage: there is nothing to carry them *to*
+down there, because a root configure marks nothing. `AnswerInView` declines on
+a phone for the other half of the same reason. Neither is wrong; what neither
+knows is that there is now a 262px window of the page 922 pixels **up**.
+
+### Two shapes
+
+1. **Carry them to the window** when the change that just landed draws no mark
+   and the window is drawn — the same movement `SpotlightScroll` makes, in the
+   other direction, with the same rule deciding it. It is the shape that makes
+   the undo as visible as the press, and it is the one to measure first.
+2. **Point at it instead.** `BackToTheRecord` already reads its arrow off an
+   `IntersectionObserver` and already knows the card is behind the visitor; a
+   bar saying the page went back, pointing up, is a smaller change and leaves
+   the visitor to make the movement.
+
+**Recommendation: (1)**, with (2) as the fallback if two components moving one
+scroller turns out to need a referee. What makes this worth a run rather than a
+line is that the undo is the half of the loop this product is actually unusual
+for — *the inverse, as a button that really puts it back* — and on the device
+most cold visitors arrive on, pressing it looks like nothing happening.
+
+---
 ## 2026-10-10 — the two checks about one pair of nodes are eleven lines apart in your file, and the one that exists is the one whose failure renders as a hole
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -371,6 +428,32 @@ chip.
 filed with the pictures rather than taken on a guess — which is the pattern the
 entry closed above says should not become another six-run hold. If a run reaches
 this with nothing better to do, take (2) and measure the first screen it costs.
+
+### 10 October, `Loom demo` — **half of it was a phone problem and that half is fixed**; the recommendation is now (1)
+
+*(Appended by the lane that owns it, on `demo-44-the-window-the-press-took-away`.)*
+
+The entry's own answer to *did anything happen?* for a root change was **the
+page itself turning over**. Measured on `main` at `39c6ef3`, that answer was
+not available to a visitor on a phone: the press took the arrival window away
+(`y 325` → gone) and put the nearest pixel of the page at `y 1,998`, so the
+page turned over 1,154 pixels below the fold and the screen it turned over on
+held no part of it. The entry was right that a ring around the stage points at
+nothing, and the thing it was relying on instead was off-screen.
+
+`demo-44` keeps the window through that press, so the band turns from navy to
+cream **in the same box, 90 pixels above the button that did it**, with the
+caption saying it is the page as it now stands. The sentence this entry was
+built on is now true on both widths rather than only the wide one.
+
+**What is left of the entry is the teaching, and it is smaller than it was.** A
+visitor still meets the mark vocabulary first in amber, on the second press, as
+a question rather than as a receipt. Shape (2) — a line in `DemoBar` for a
+change whose subject is the page itself — is now **not recommended**: the
+screen answers *did anything happen?* with the page, which is the stronger
+answer, and a line of chrome saying so would be the surface narrating a thing
+the visitor has just watched. **Recommendation: (1), leave it**, and this note
+is the evidence that was missing when the entry declined to pick one.
 
 ---
 ## 2026-10-09 — a comparability condition that is a boolean over a record with an unrecorded state accuses somebody of a change they did not make
