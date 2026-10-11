@@ -50771,3 +50771,92 @@ to check when a photograph shows the wrong page.**
 
 The staging module was deleted before committing, as the eight before it were,
 and the shot list is beside the report.
+
+---
+## 2026-10-11 — the marketing surface is Loom trees with no store behind them, so the portal cannot govern the pages the maintainer actually ships
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/`) · **Raised by:** the maintainer, 11 October ·
+**Status:** open — **nothing is broken and nothing is blocked**; this is the one
+change that turns a surface into a governed one
+
+The maintainer asked for the marketing and docs surfaces to be *"hooked up to
+the portal under my account/login."* For `(marketing)` the answer is yes and
+this lane's half is small; for `(docs)` it is no.
+[0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+(`Proposed`) is the record and has the argument. The short version:
+
+`/`, `/how-it-works` and `/what-you-run` are each a real `LoomTree`, built by
+`homePageTree(context)` and its two siblings through the published builders and
+rendered with `renderLoomTree`. **Nothing is persisted** — there is no
+`TreeStore` anywhere under `(marketing)`, so the tree is constructed per request
+and thrown away. A tree with no row has no revision, no log, no inverse and no
+identity that outlives the request, so there is nothing for the portal to list,
+hold a proposal against, or read a history of.
+
+**What this lane would change**, and it is the whole of condition 1:
+
+- the three builders become the **seed** for three stored pages, written once
+  through the published `TreeStore.create`;
+- the three routes read the store by id and render what comes back, falling back
+  to the builder when the store is empty so an unseeded deployment still serves
+  the site.
+
+**The rearrangement is unaffected**, which is the part worth knowing before
+anybody worries about it: `runAsk` takes a tree and does not care where it came
+from, so `/?ask=…&approve=1` works identically against a stored page.
+
+**The line this lane has to draw, and only this lane can.** The builders take a
+context and some of what they build is *about the request* — the paper trail,
+the record of what the ask just did. That part is the demonstration around the
+page rather than the page, and it cannot be stored. Separating the two is a
+judgement about what the marketing site is, which is why this is filed rather
+than attempted.
+
+**Two things are not this lane's.** The portal registering the library those
+trees are built from is `Loom portal`'s (filed separately, same date, and it has
+a hazard in front of it). `DATABASE_URL` on the deployment is the maintainer's,
+without which any of this survives only until the process is replaced.
+
+---
+## 2026-10-11 — the portal registers four primitives and the trees it would have to govern are built from the whole library, and the two spell three names the same way
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Raised by:** the
+maintainer, 11 October · **Status:** open — **a unit of work with a known
+hazard in front of it**, not a one-line change
+
+Condition 2 of
+[0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md):
+a tree is readable only against the registry it was built for. `(marketing)`
+builds its pages from `createStarterPrimitiveRegistry()` — the whole library.
+`(portal)` registers four hand-written primitives. So a marketing page arriving
+in this store today would be a page of parts the portal cannot draw.
+
+**Why the four are not an oversight.** `/portal/app` reports the rest of the
+starter library as *pieces this app has not turned on*, which is one of the two
+governance facts that screen exists for — a registry is a decision, and the
+decision is invisible from inside a deployment. Swapping the registry does not
+break that screen; it empties it, and the emptying is the thing to decide
+rather than to do by accident.
+
+**The hazard, already on this ledger.** The 9 October entry records that this
+lane's fixtures **share three names with starter primitives and none of their
+schemas**. `loom.page`, `loom.heading`, `loom.card` and `loom.prose` exist in
+both, and the portal's take different props. Exchanging one registry for the
+other would therefore refuse the portal's own seed page and everything derived
+from it — the outline, the checkup, the drawn excerpt, the reader screens'
+part names. So the work is:
+
+1. decide whether the portal's four are a deployment's own primitives (in which
+   case they keep their names and the app registers both, which is a collision)
+   or an accident of early scaffolding (in which case they go and the seed is
+   rebuilt from the library);
+2. whichever it is, rebuild `seed.ts` against the chosen registry and re-record
+   every fixture that leans on the four;
+3. and say on `/portal/app` what the registry now is, because that screen's
+   whole subject is this decision.
+
+**Not started.** It is the portal's half of a change whose other half
+(`Loom marketing`, same date) has not been taken, and doing it first would leave
+this surface rebuilt against a registry nothing yet needs. It is small once the
+direction is settled and the direction is the maintainer's.
