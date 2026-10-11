@@ -83,6 +83,7 @@ export type PageOrder =
   | "ready-to-check-first"
   | "most-changed-first"
   | "most-wrong-first"
+  | "loses-most-first"
   | "worst-first"
   | "by-name"
 
@@ -105,15 +106,38 @@ export const ORDER_LEAD: Readonly<Record<PageOrder, string>> = {
    * not a page with anything wrong with it.
    */
   "most-wrong-first": "Pages the AI got most wrong come first.",
+  /**
+   * `/portal/readers`, and **the rung this module said did not exist.**
+   *
+   * The comment that stood here until 10 October was the argument for leaving
+   * that screen alphabetical:
+   *
+   * > *There is no rung to lead with there: a page's readers are not more or
+   * > less urgent than another page's, and the honest answer to why is this one
+   * > at the top is that it is called About.*
+   *
+   * It was right about what could be read at the time and it was wrong about
+   * the premise. A page's readers are not more urgent than another page's; the
+   * readers a page is **losing** are, and until `deploymentReadingOf` there was
+   * no sound way to compare two pages' losses — a raw count is inflated by each
+   * page's own straddle rate, so ranking on it ranks partly by how long readers
+   * stay (0250). The loss put on the scale the door counts in is comparable,
+   * and it is this rung.
+   *
+   * *Losing the most readers* rather than *worst*: the sweep owns that word for
+   * a page that does not add up, and a page losing readers partway through is
+   * not a page with anything wrong with it.
+   */
+  "loses-most-first": "Pages losing the most readers come first.",
   "worst-first": "Anything that needs looking at comes first.",
   /**
-   * The one order with no rank in front of it — `/portal/readers`, which had
-   * been arranging pages by their identifier. There is no rung to lead with
-   * there: a page's readers are not more or less urgent than another page's, and
-   * the honest answer to *why is this one at the top* is that it is called
-   * About. So the tiebreak is the whole order, and this is the sentence that
-   * says so rather than leaving a reader to work out that the list is
-   * alphabetical.
+   * The one order with no rank in front of it, and it is now nobody's.
+   *
+   * It was `/portal/readers`' until that screen gained a rung (above). It is
+   * kept because the sentence is the honest one for any list this portal has
+   * nothing to rank — and because a reader who met it on that screen yesterday
+   * and meets `loses-most-first` today is reading a changed order, which is
+   * exactly what `ListOrder` exists to tell them.
    */
   "by-name": "Pages are listed by name.",
 }
@@ -276,3 +300,27 @@ export const mostChangedRank = (page: { readonly revision: number }): number => 
  */
 export const mostWrongRank = (page: { readonly claims: readonly unknown[] }): number =>
   -page.claims.length
+
+/**
+ * `/portal/readers`, and the one rank read out of an order somebody else
+ * decided.
+ *
+ * Every other rank in this module is a rung computed here from a fact the
+ * screen had already read. This one is a **position**, looked up in the order
+ * `deploymentReadingOf` returned, because the comparison behind it is not one
+ * a portal may make: it is three keys deep (the loss at the door's scale, then
+ * the share, then the page and its newest version) and the two figures it
+ * compares are only comparable at all because of a correction the runtime
+ * applies. A portal re-deriving that would be a second implementation of 0250
+ * living next to the first.
+ *
+ * So `fix-first.ts` hands over the positions and this reads them. A page the
+ * order never saw sorts below every page it did: absent from an order is not a
+ * page with nothing wrong with it, and the sentence above the list says which
+ * pages those are and why.
+ */
+export const losesMostRank = (
+  page: { readonly treeId: string },
+  ranks: ReadonlyMap<string, number>,
+  absent: number
+): number => ranks.get(page.treeId) ?? absent

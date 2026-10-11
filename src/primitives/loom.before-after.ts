@@ -166,11 +166,43 @@ const chevron = (towards: "start" | "end"): ReactNode =>
     },
   })
 
+/**
+ * **A region hands its content the region's width**, which is why this is a
+ * grid of one stretched column rather than a flex row.
+ *
+ * `before` and `after` are slots, so what lands in them is the tree's business
+ * (0051) — and until a band put something other than a picture in one, every
+ * child this primitive had ever been given carried an intrinsic width. A
+ * flex item with no intrinsic width is `flex: 0 1 auto`, so it shrinks to its
+ * own min-content: a `loom.stat-chart` is `display: grid` with no width of its
+ * own, and it drew its six months in about a tenth of the band with the labels
+ * piled on top of each other, on both palettes, with every test green.
+ *
+ * A single stretched grid column gives any child the whole box — a picture is
+ * laid out exactly as it was, and a chart, a table or a card now gets the width
+ * the region was always promising it.
+ */
 const LAYER: CSSProperties = {
   position: "absolute",
   insetBlock: "0",
   insetInline: "0",
-  display: "flex",
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  /**
+   * **Each layer is opaque, or the two are a double exposure rather than two
+   * states.** The before layer is clipped over the after layer, so wherever the
+   * before layer's own content does not paint, the after layer shows straight
+   * through it — which never happened while every region held a photograph,
+   * because a photograph is opaque by construction. Put a chart in one and the
+   * band draws April at nineteen per cent and April at nineteen per cent on top
+   * of each other, and May's two numbers superimposed, on both palettes, with
+   * no diagnostic and every test green.
+   *
+   * It is the root's own ground rather than a new colour, so a band that fills
+   * its regions sees no difference and a band that does not gets the surface it
+   * would have had anyway.
+   */
+  background: colour("bg-surface-muted"),
 }
 
 /**
@@ -249,7 +281,12 @@ export const loomBeforeAfter = definePrimitive({
           key: "after",
           style:
             aspect === undefined
-              ? { display: "flex", width: "100%" }
+              ? {
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr)",
+                  width: "100%",
+                  background: colour("bg-surface-muted"),
+                }
               : { ...LAYER, position: "absolute" },
         },
         loom.slots["after"]

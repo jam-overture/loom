@@ -244,7 +244,7 @@ const DemoPage = async () => {
           <RailHeader />
 
           {/*
-            * The page, on the first screen — and only on the screen that had no
+            * The page, on the first screen — and only on a screen that has no
             * page on it.
             *
             * It sits between the claim and the controls because that is where
@@ -255,10 +255,14 @@ const DemoPage = async () => {
             * rendered through the same registry the stage used and wearing the
             * same theme, and the controls are under the thing they operate on.
             *
-            * Drawn on one width and one screen: `globals.css` takes it off a
-            * layout that already has the page beside the rail and off a frame
-            * too short to afford it, and `rail.ts` takes it off every screen
-            * after the first press. `the-page-itself.ts` argues both.
+            * Drawn on one width, and on every screen with no page on it:
+            * `globals.css` takes it off a layout that already has the page
+            * beside the rail and off a frame too short to afford it, and
+            * `rail.ts` takes it off any screen where a card is rendering a band
+            * or the stage is carrying a mark. The press this demo opens with
+            * produces neither, which is why the window now stands through it —
+            * turning over in place, under the button that turned it over.
+            * `the-page-itself.ts` argues both and has the measurement.
             */}
           {rail.pageItself && (
             <ThePageItselfView
