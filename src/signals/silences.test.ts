@@ -16,13 +16,16 @@ import {
   describeSilenceCondition,
   describeSilenceSubject,
   distinctSilences,
+  KIND_REACH_SILENCES,
   KIND_SILENCES,
+  libraryReachOf,
   libraryReadingOf,
   meaningOfActionChangeSilence,
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
   meaningOfDeploymentSilence,
+  meaningOfKindReachSilence,
   meaningOfKindSilence,
   meaningOfPaceChangeSilence,
   meaningOfPaceSilence,
@@ -138,6 +141,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
   ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
   ...KIND_SILENCES.map(meaningOfKindSilence),
+  ...KIND_REACH_SILENCES.map(meaningOfKindReachSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
@@ -152,6 +156,7 @@ describe("what a reading means when it says nothing", () => {
         COPY_CHANGE_SILENCES.length +
         DEPLOYMENT_SILENCES.length +
         KIND_SILENCES.length +
+        KIND_REACH_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
@@ -177,8 +182,16 @@ describe("what a reading means when it says nothing", () => {
    *
    * So each later set declares what it adds, and the test fails if a set adds a
    * condition it did not declare **or** declares one it does not add. The
-   * original assertion is the `[]` rows; a ninth set bringing a condition
+   * original assertion is the `[]` rows; an eleventh set bringing a condition
    * silently is still what this catches.
+   *
+   * **Each set is held against the sets that came before it and not against
+   * every other one**, which is what its own name has always said and what it
+   * now does. The two are the same assertion until a later set reuses an
+   * earlier one's condition — the tenth reuses the ninth's `nothing-of-the-kind`
+   * — and at that moment the all-others form would delete the ninth's
+   * declaration and report that nothing had ever brought it, which is the one
+   * fact this test exists to keep.
    */
   it("declares, for each set added after the fifth, which conditions it brought that no earlier set reported", () => {
     const later: readonly [SilenceVocabulary, readonly SilenceCondition[], readonly SilenceCondition[]][] =
@@ -199,18 +212,29 @@ describe("what a reading means when it says nothing", () => {
           KIND_SILENCES.map((of) => meaningOfKindSilence(of).condition),
           ["nothing-of-the-kind"],
         ],
+        [
+          "library-reach",
+          KIND_REACH_SILENCES.map((of) => meaningOfKindReachSilence(of).condition),
+          [],
+        ],
       ]
 
-    for (const [vocabulary, conditions, declared] of later) {
-      const others = new Set<SilenceCondition>(
-        EVERY_MEANING.filter((meaning) => meaning.vocabulary !== vocabulary).map(
-          (meaning) => meaning.condition
-        )
-      )
+    /** The five sets that were there before any of the above, in arrival order. */
+    const FIRST_FIVE: readonly SilenceVocabulary[] = ["change", "copy", "copy-change", "pace", "reach"]
 
-      expect([...new Set(conditions.filter((condition) => !others.has(condition)))]).toEqual(
+    const earlier = new Set<SilenceCondition>(
+      EVERY_MEANING.filter((meaning) => FIRST_FIVE.includes(meaning.vocabulary)).map(
+        (meaning) => meaning.condition
+      )
+    )
+
+    for (const [vocabulary, conditions, declared] of later) {
+      expect([...new Set(conditions.filter((condition) => !earlier.has(condition)))]).toEqual(
         declared
       )
+      expect(SILENCE_VOCABULARIES).toContain(vocabulary)
+
+      for (const condition of conditions) earlier.add(condition)
     }
   })
 
@@ -236,6 +260,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "kind",
       "kind",
       "part",
       "comparison",
@@ -616,6 +641,51 @@ describe("the mapping, against what the readings actually say", () => {
     expect(heading?.placements).toBe(0)
     expect(heading?.silence).toBe("unplaced")
     expect(meaningOfKindSilence("unplaced").condition).toBe("nothing-of-the-kind")
+  })
+
+  /**
+   * The tenth set, which brought no condition of its own: a kind's share of the
+   * readers who met it is withheld for the states of the **door**, and those
+   * were all named the first time a share of readers was taken of anything.
+   */
+  it("maps a kind standing on a page with no door row to no arrivals counted, of that kind", () => {
+    const reading = readingOf(treeOf(PAGE), [tally("page", { views: 9, reached: 9 })])
+    const reach = libraryReachOf([reading], [])
+    const section = reach.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.silence).toBe("unscaled")
+    expect(meaningOfKindReachSilence("unscaled").condition).toBe("no-arrivals-counted")
+    expect(meaningOfKindReachSilence("unscaled").subject).toBe("kind")
+  })
+
+  /**
+   * The limit on reuse, which is the thing the tenth set is evidence for: one
+   * state of the world, published twice because the two readings are about
+   * different things. A funnel could reuse a reach silence outright because a
+   * funnel is asked of a page; a census of the library cannot, and a surface
+   * drawing both must print two sentences rather than collapsing them.
+   */
+  it("keeps a kind the door cannot scale and a page the door cannot scale as one reason and not one state", () => {
+    const reading = readingOf(treeOf(PAGE), [tally("page", { views: 9, reached: 9 })])
+    const reach = libraryReachOf([reading], [])
+    const page = pageReachOf(reading, [])
+
+    expect(page.silence).toBe("unmeasured")
+    expect(reach.unscaled).toEqual([{ treeId: TREE, revision: 1, silence: "unmeasured" }])
+    expect(
+      relateSilences(
+        meaningOfKindReachSilence("unscaled"),
+        meaningOfReachSilence(page.silence ?? "unmeasured")
+      )
+    ).toBe("one-reason")
+    expect(
+      distinctSilences([
+        meaningOfKindReachSilence("unscaled"),
+        meaningOfReachSilence("unmeasured"),
+      ])
+    ).toHaveLength(2)
   })
 
   /**

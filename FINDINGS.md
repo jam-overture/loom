@@ -49616,8 +49616,12 @@ the day one is declared every counter already stored reinterprets.
 ## 2026-10-10 — the share of readers who met a kind of part and read it is a real question, and the honest version of it needs the door
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
-**Status:** open — **a question with a known answer and a known input**, written
-down rather than built, and nothing is blocked while it stays open
+**Status:** closed by #576 — built as `libraryReachOf` in
+`src/signals/library-reach.ts` (0256, §24 of `docs/signals.md`), on the same
+branch that filed it. The shape below is what shipped, with one change: the
+weight is `min(appearances, opened)` rather than `opened`, because weighting by
+the openings alone would have projected a folded rate onto page views no rollup
+had reached — so nothing here is withheld for a collection that is behind
 
 0254 publishes a kind of part's standing as a share of the **places** it stands,
 and is explicit that this is not a share of readers. The figure everybody will
@@ -49688,3 +49692,93 @@ which rows are missing. A role added to the vocabulary and declared nowhere is
 therefore visible from the first reading after it ships, which is the opposite of
 the 8 October entry's worry about a permission with no consumer sitting
 unnoticed.
+
+---
+## 2026-10-11 — a kind of part now has two shares, they can differ by an order of magnitude, and only one of them is about readers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a screen to draw, with one pairing rule and one state to
+refuse**
+
+`libraryReadingOf` (0254) and `libraryReachOf` (0256) are two readings of the
+same list of `PageReading`s, keyed the same way and paired on the published
+`kindKeyOf`. They answer two questions about one primitive type and **the
+answers are not near each other**:
+
+- `KindReading.readShare` is the share of the **places** it stands that at least
+  one reader reached. Sound with no door row, no correction and no window in it.
+- `KindReach.share` is the share of the **readers who met it** that read it, as
+  a weighted mean of each place's own share with that page's arrivals behind it.
+
+A kind read in the one busy place and skipped in nine quiet ones is *one place
+in ten* and *nine readers in ten*. Both are true. A card that printed one figure
+and called it the other would be wrong by an order of magnitude in whichever
+direction the library's shape happens to put it.
+
+**So the ask is two labelled figures and never one.** *Reached in 2 of 9 places ·
+read by 93% of the readers who met it* is the row, and the words **places** and
+**readers** are load-bearing rather than decorative.
+
+**The one state to refuse to draw.** `KindReach.silence` of `unscaled`,
+`unopened` or `uncounted` means a page this kind stands on could not be put on
+the door's scale, so the **whole** kind has no share — not a share over the
+pages that could be priced. `LibraryReach.unscaled` names those pages with a
+`ReachSilence` on each, which is the page's own vocabulary and is the actionable
+half: one of those pages is why every withheld row above is withheld. Falling
+back to the census is right and should say that it is what it is doing.
+
+Two figures not to draw as engagement: `met` is a count of page views at the
+door's scale and is deliberately not rounded into people, and `openings` counts
+a page's readers **once per place the kind stands there**, so it is not a
+headcount either. `LibraryReach.arrivals` is the one addable count of readers
+here, and it is per page.
+
+---
+## 2026-10-11 — the missing role declaration now costs a weighted share as well as a census, a comparison, a standing and a funnel answer, and this is the fifth consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives` (`src/primitives/`) ·
+**Status:** open — **the same gap, now with five consumers**, and nothing here is
+broken by it
+
+Nothing in `src/primitives/` declares `role` (0114), so every role row in
+`libraryReachOf` comes back under `role: null` — the same thinness 0212 named,
+now in a fifth place: a standing on a funnel end (0238), a comparison of what
+readers did (0251), the census of the library (0254), and this.
+
+**What is new about this one is that the figure is a share of readers rather than
+a count of parts.** *Of the readers who met a heading, what share read it* is a
+sentence about a deployment's whole library and is answerable from counters
+already stored — and today the only row that can answer it is the row for
+*everything whose type said nothing*, which is the whole library and therefore
+answers nothing. The by-type rows are unaffected and are what works today.
+
+**It is one declaration per primitive and no migration.** The join is at read
+time (0212), so the day a type declares a role every counter already stored
+reinterprets and these rows start answering.
+
+---
+## 2026-10-11 — a test meant to say which silence set brought which condition was comparing each set against every other one, so the tenth reusing the ninth's condition would have deleted the ninth's record of it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** closed by #576 — fixed in `src/signals/silences.test.ts` in the same
+unit that would have tripped it
+
+0240's evidence that the silence conditions are states of the world rather than
+a list of names is *which sets brought a new one*, and the test that keeps that
+true declares, per set added after the fifth, the conditions it brought that no
+**earlier** set reported. That is what its name says. What it did was build the
+comparison set out of every meaning whose vocabulary was not the one under test —
+which is the same assertion exactly until a later set reuses an earlier one's
+condition.
+
+The tenth set reuses the ninth's `nothing-of-the-kind`, because a kind's share of
+readers is withheld for the same *there is none of it* the census is. Under the
+all-others form the ninth's declaration would have become `[]` and the test would
+have failed, and the obvious remedy — deleting the ninth's declaration — would
+have deleted the one fact the test exists to keep: that `nothing-of-the-kind`
+arrived with a reading keyed by a vocabulary.
+
+**It now accumulates in arrival order**, starting from the five original sets, so
+each set is held against what came before it. The published assertion is
+unchanged for the first four later sets and the test is strictly stronger: an
+eleventh set bringing a condition silently is still exactly what it catches.

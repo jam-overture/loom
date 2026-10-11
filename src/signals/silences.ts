@@ -5,6 +5,7 @@ import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
 import type { DeploymentSilence } from "./deployment.js"
+import type { KindReachSilence } from "./library-reach.js"
 import type { KindSilence } from "./library.js"
 import type { PaceChangeSilence } from "./pace-change.js"
 import type { PaceSilence } from "./pace.js"
@@ -15,7 +16,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are nine of them. Each set's names are right in its own
+ * absent, and there are ten of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -140,6 +141,7 @@ export type SilenceVocabulary =
   | "copy-change"
   | "deployment"
   | "library"
+  | "library-reach"
   | "pace"
   | "pace-change"
   | "reach"
@@ -152,6 +154,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "copy-change",
     "deployment",
     "library",
+    "library-reach",
     "pace",
     "pace-change",
     "reach",
@@ -173,6 +176,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     "copy-change": "comparison",
     deployment: "page",
     library: "kind",
+    "library-reach": "kind",
     pace: "part",
     "pace-change": "comparison",
     reach: "page",
@@ -181,7 +185,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Eleven of them against thirty-two members across the nine sets, which is the
+ * Eleven of them against thirty-seven members across the ten sets, which is the
  * overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -214,6 +218,23 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * is the first time a set has added one — and the two arrived together for one
  * reason, because a subject that comes from a vocabulary is exactly a subject
  * that can be empty.
+ *
+ * **The tenth needed neither, and it is the first since the seventh to need
+ * nothing at all**
+ * ([0256](../../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)).
+ * A kind's share of the readers who met it is withheld for the states of the
+ * **door**, which were all named the first time a share of readers was taken of
+ * anything (0229), and for the two reasons the census of the same kinds already
+ * published. That is the shape of a set that adds nothing: it asks an old
+ * question of a new subject.
+ *
+ * **What it did show is that a set cannot always be reused, and the reason is
+ * the subject.** A funnel answer reports a reach silence unchanged, because a
+ * funnel is asked of a page and so is a reach reading, and the subject here is
+ * a property of the **reading**. A kind's share is asked of a kind, so the
+ * same three door states are published in two vocabularies at two subjects —
+ * which is not a duplication to remove but exactly the pair this module exists
+ * to relate: `one-reason`, never `one-state`.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -467,6 +488,38 @@ export const meaningOfKindSilence = (silence: KindSilence): SilenceMeaning => {
       return meaning("library", "no-view-reported")
     case "unplaced":
       return meaning("library", "nothing-of-the-kind")
+  }
+}
+
+/**
+ * What a kind's share of the readers who met it reports, of one kind (0256).
+ *
+ * The tenth set, and the first since the seventh to bring neither a condition
+ * nor a subject — which is the claim below holding rather than a coincidence:
+ * three of its five reasons are the states of the door, and the door's states
+ * were named the first time a share of readers was taken of anything.
+ *
+ * **It is also the first set that could not reuse another's outright.** A
+ * funnel answer reports a reach silence unchanged, because a funnel is asked of
+ * a page and so is a reach reading; this is asked of a **kind**, and a subject
+ * is a property of the reading rather than of the condition. So the three
+ * door states are said again here at a kind, the page they are true of is
+ * published with a reach silence on it, and this table is what says the two are
+ * one state at two subjects. The census's own two reasons are reused as values,
+ * because those were already a kind's.
+ */
+export const meaningOfKindReachSilence = (silence: KindReachSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("library-reach", "no-view-reported")
+    case "unplaced":
+      return meaning("library-reach", "nothing-of-the-kind")
+    case "unscaled":
+      return meaning("library-reach", "no-arrivals-counted")
+    case "unopened":
+      return meaning("library-reach", "no-openings-marked")
+    case "uncounted":
+      return meaning("library-reach", "no-window-folded")
   }
 }
 

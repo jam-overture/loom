@@ -338,3 +338,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0252 | *No record on this branch* | — | — |
 | [0253](0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md) | The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report | Accepted | §4, not the library |
 | [0254](0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md) | A kind of part is read across the places it stands, and the unit is the placement and never the reader | Accepted | §4c (reader signals) |
+| 0255 | *No record on this branch* | — | — |
+| [0256](0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md) | A kind's share of the readers who met it is a weighted mean of sound shares, and the weight is the door's | Accepted | §4c (reader signals) |

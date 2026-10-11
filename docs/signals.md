@@ -38,6 +38,7 @@ the portal every day.
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
 | Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0254](../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
+| Whether the readers who met a kind of part read it | each place's own sound share, weighted by the arrivals at its page's door ([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)), so a shorter rollup window cannot move it |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
@@ -1385,6 +1386,87 @@ Filed again for `Loom primitives`, now with a fourth consumer.
 screen in this subsystem that is about a deployment's **library** rather than its
 pages, the sentence to lead it with, and the one figure on it that must never be
 printed as a share of readers.
+
+### 24. The share of readers who met a kind of part · `Loom signals` · **done, 11 October**
+
+> §23 is the census of the library, written on the branch of #576 and not yet on
+> `main` when this was built. This step is on the **same** branch rather than a
+> second one, per `routines.md`' procedure step 3: it is the open finding that
+> pull request filed, and it imports the module that pull request adds.
+
+§23 publishes a kind's standing as a share of the **places** it stands, and is
+explicit about what it is not: *the testimonial band stands in nine places and
+readers reached two of them* counts a placement on a page nine thousand people
+read the same as one on a page three people read. A kind read in the one busy
+place and skipped in nine quiet ones reports a read share of one in ten, and
+*most of the readers who met it read it* would also have been true. The lane
+filed the honest version the same morning rather than putting a corrected number
+and an uncorrected one on one type with prose to tell them apart.
+
+**Done.** `libraryReachOf(readings, rows)` in
+[`src/signals/library-reach.ts`](../src/signals/library-reach.ts) answers *of the
+readers who met your testimonial band, six in ten read it.* It is the
+**fifteenth** thing taken out of what this subsystem already knows rather than
+collected: **nothing was added to a payload, a browser, a column, a store or the
+vocabulary**, and the broadcaster was not touched, so its weight is unchanged —
+measured both sides and byte-identical.
+
+Two things decide the shape
+([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)):
+
+- **The unit is one page view of one place, and a reader is never the unit.** Two
+  page views of two pages are two page views, with nothing saying whether one
+  person made both — rule 1 and 0146, not a gap — so the unit is the pair *(a
+  page view, a place this kind stands on that page)*, and that is what makes the
+  figure addable at all.
+- **Every term is put on the scale the door counts in, and that is what makes
+  the figure unmovable.** The arithmetic anybody writes first is a mean of
+  `reached ÷ views` weighted by the pages' readers, and each of those terms is
+  inflated by **its own page's** straddle rate (0147) — which is §21's fact one
+  level across. So the weight is `appearances ÷ (1 + inflation)`, which comes to
+  `min(appearances, opened)`, and the numerator is
+  `reached × weight ÷ appearances`: the result is a **weighted mean of each
+  page's own sound share with that page's exact arrivals behind it**. 0229's
+  cancellation has already happened inside each term before the pages meet, so a
+  deployment that shortens its rollup window cannot move the figure at all. A
+  test pins that against a fourfold straddle, with the figure the refused design
+  would have given published beside it.
+
+Four more settled in the building. **Nothing is withheld for a collection that is
+behind**, which is where this parts from §11: the weight keeps only the page
+views a rollup folded, so there is no projection onto an unmeasured reader to
+refuse — a lagging page weighs less than a caught-up one, which shifts the
+evidence and not the share, and `pending` says by how much. **A kind standing on
+a page the door cannot scale has no share at all**, not a share over the pages
+that could be priced, because a weighted mean over a subset is a figure whose
+denominator nobody named and *of the places we could price* is a caveat a surface
+reads past. **A placement nothing could speak for is in neither term**, which is
+§23's `read ÷ (read + skipped)` holding at the other unit. And **the page that
+could not be scaled is named in the page's own vocabulary**, not in this
+reading's — because a subject is published per vocabulary (0240), so the three
+door states are said twice at two subjects rather than reused.
+
+**A tenth silence vocabulary, and the first since the seventh to bring neither a
+condition nor a subject.** §17's table gains `library-reach`, five members, all
+mapping onto conditions already published — which is what a set that asks an old
+question of a new subject looks like. What it did add is a **limit on reuse**: a
+funnel answer reports a reach silence unchanged (§13) because a funnel is asked
+of a page and so is a reach reading, and this reading's subject is a kind. 0240
+is not superseded and not edited; the module carries the corrected counts and the
+paragraph. The test that pins which conditions each later set brought was
+comparing each set against **every other** one, so the tenth reusing the ninth's
+`nothing-of-the-kind` would have deleted the ninth's declaration and reported
+that nothing ever brought it; it now compares each set against the sets that came
+before it, which is what its own name always said.
+
+**The thinness is §6's, in a fifth place.** Every role row comes back under
+`role: null` until `src/primitives/` declares one. Filed again for
+`Loom primitives`, now with a fifth consumer.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the two
+shares of one kind side by side — *nine places in ten* and *nine readers in ten*
+are different sentences about the same primitive and can differ by an order of
+magnitude — and the one state to refuse to draw.
 
 ## Still not in scope
 
