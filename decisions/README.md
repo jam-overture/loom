@@ -337,3 +337,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0251](0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md) | A change to what readers did is a ratio of two shares, and an inside a change gave a part is not a reader | Accepted | §4c (reader signals) |
 | 0252 | *No record on this branch* | — | — |
 | [0253](0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md) | The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report | Accepted | §4, not the library |
+| 0254 | *No record on this branch* | — | — |
+| [0255](0255-a-primitive-is-blocked-by-what-its-schema-requires-and-not-by-what-its-description-pictures.md) | A primitive is blocked by what its schema requires, not by what its description pictures | Accepted | §5 |

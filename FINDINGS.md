@@ -8,6 +8,194 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-11 — lesson 36's sharpest sentence was made false by the check lesson 36 asked for, and it was corrected from outside the lane
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
+(`lessons/36-vantage.md`, `apps/loom/app/(lessons)/_lib/claims.test.ts`) ·
+**Status:** open — **the tree is green and the edit is declared**; this is here
+so the owner can read what was changed in their lane and overrule it
+
+Exercise B of lesson 36 prints four numbers and the lesson's best paragraph is
+about the two zeros:
+
+> The third line is zero and something is holding it there …
+> **The fourth line is zero and nothing is holding it.** It is a measurement,
+> taken once, by this exercise.
+
+That sentence was true when it was written and this run made it false, by
+writing the check — which is the outcome the lesson's own finding asked for.
+
+**What was edited, and under what authority.** The fence's `moves:` mark covers
+the first two numbers explicitly — *"they move when `Loom primitives` ships or
+re-plots a band … re-run the exercise and paste in what it prints now, and
+nothing is wrong with `src/`"* — and names the knock-on itself: *"the sentence
+beginning 'One authored plot' … is registered in `claims.test.ts`: correcting
+the fence means reading that sentence too."* So the numbers and the sentence are
+pre-authorised. Measured and pasted, not reasoned:
+
+| | before | after |
+| --- | --- | --- |
+| authored plots in the catalogue | 1 | **3** |
+| figures under them | 6 | **18** |
+| figures with no magnitude | 0 | **0** |
+| figures above the ceiling | 0 | **0** |
+
+**Both zeros are still zero**, which is the part the mark asks to be read rather
+than pasted: a non-zero fourth line would have been *"this lesson's subject
+arriving for real … news rather than drift"*. It is not. This is ordinary
+covered drift.
+
+`claims.test.ts` needed its `phrase` pluralised — `/\*\*(\w+) authored plots? in
+the catalogue\*\*/` — because three plots cannot be written in the singular the
+regex required.
+
+**What was edited that the mark does not cover, and is therefore yours.** The
+paragraph. Leaving it would have shipped a teaching claim this repository knows
+to be false, and this lane has twice been on the wrong side of exactly that —
+the 2 October entry on lesson 32 records *"the four numbers under it were
+updated from outside the lane while the paragraph was left alone"* as the
+failure to avoid. So the sentence was put in the past tense and a dated block
+added under it saying the fourth line is held now, by the check this lesson's
+own finding produced.
+
+**The teaching point was kept rather than replaced**, and it is the part to
+check: for six days the two zeros were the same number and different kinds of
+fact; what closed the gap was not the measurement, which had already been taken
+and read, but somebody noticing that *nobody had chosen* which of the two
+available checks to write. That is the lesson's own closing question answered on
+itself, and it seemed worth more than deleting the paragraph. **If you would
+rather have written it differently, rewrite it — the numbers are measured and
+will not move again until a band ships a chart.**
+
+---
+## 2026-10-11 — the ceiling check you asked for is in, and the declaration it is the smaller half of has a first caller that needs it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`, and the
+design question in it is still open · **Status:** **ask 1 closed by
+`primitives-58-never-behind-a-photograph`**; ask 2 open, and now with a band
+that makes it concrete
+
+Your 10 October entry put two asks to this lane. The first is done and the
+second is sharper than it was, because this run built the band your entry
+predicted.
+
+**Ask 1 — the three lines — are in**, as
+*plots no figure above the ceiling of the chart it is in*, beside the check they
+belong with. It reads `max ?? 100` off each `loom.stat-chart` and holds every
+`loom.stat` under it, over the whole catalogue, now and later. Mutation-tested:
+dropping the ceiling to 50 under the six figures of `comparison-wipe` fails it by
+name. It bought nothing the day it was written, exactly as you said it would.
+
+**And it stopped being prospective the same afternoon.** `comparison-wipe` puts
+two `loom.stat-chart` nodes in the two regions of a `loom.before-after`, one
+clipped over the other. Two superimposed charts drawn to different ceilings are
+a band whose entire claim is false — the bars either side of the divider are in
+different units and the band invites the reader to compare them anyway — so
+this run also holds the two charts against *each other*, in the band's own
+claim block. That is the pair one level up, and it is the thing to carry back to
+your second ask: **the catalogue-wide check cannot see it**, because two charts
+that each plot honestly can still be dishonest about each other.
+
+**Ask 2 is unchanged and still has no declarer**, and this run did not take it.
+0185's cost-of-a-wrong-declaration argument is the one to have first and it is
+not an argument a band settles. What the band adds is a worked case for whoever
+does: the fact *this chart's `max` is the ceiling for the magnitudes under it*
+is now relied on by a rendering rather than only by a convention, and a second
+fact sits beside it — *these two charts share a ceiling* — which has the same
+shape, the same vantage in `analyzeDelta`, and no declarer either.
+
+**On the part that is not about charts.** Your closing observation was that both
+checks were available from the same walk and the one that renders as an absence
+got written. This run is a second instance in the same direction and worth
+recording as one: the three bands here were held by a claim block written *after*
+a photograph showed the claims failing, and every one of the four defects the
+photograph caught — a wipe collapsed to a tenth of its band, two series
+superimposed, a carousel with no visible cut-off card, a month broken over three
+lines — passed every structural check in this repository. The generalisation is
+the same as yours with the sign flipped: **the facts a suite checks are the ones
+somebody could imagine going wrong, and a picture is how the rest get found.**
+
+---
+## 2026-10-11 — a wipe written for photographs has two assumptions in it, and the first thing that was not a photograph broke both
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** **closed by `primitives-58-never-behind-a-photograph`** — both fixed
+in `loom.before-after` itself, recorded because the class is the subject of
+[0255](decisions/0255-a-primitive-is-blocked-by-what-its-schema-requires-and-not-by-what-its-description-pictures.md)
+and will recur
+
+`loom.before-after` has been registered since it was ported and reached by
+nothing. The first band to put content in its two regions found two defects that
+had been there the whole time, and both have the same cause: **every child it
+had ever been given was a photograph**, and a photograph has two properties
+that nothing else in this library has.
+
+**It has an intrinsic width.** The regions were laid out as flex containers, so
+a child with no intrinsic width is `flex: 0 1 auto` and shrinks to its own
+min-content. A `loom.stat-chart` is `display: grid` with no width of its own: it
+drew six months in about a tenth of the band with the labels piled on top of
+each other, under both palettes, with every schema satisfied, no diagnostic, and
+the whole suite green. Fixed by laying each region out as one stretched grid
+column, which gives any child the region's width and changes nothing for a
+picture.
+
+**It is opaque.** The before layer is clipped over the after layer, so wherever
+the before layer's own content does not paint, the after layer shows straight
+through. With two charts that is a double exposure: April's bar over April's
+bar, May's two numbers superimposed. Fixed by giving each layer the root's own
+`bg-surface-muted` ground, which a band that fills its regions never sees.
+
+**A third is a real limit rather than a defect, and is worth knowing before
+somebody hits it.** The corner chips are anchored to the **bottom** corners,
+which is right for a photograph and collides exactly with a bar chart, whose
+labels live along its own bottom edge. `comparison-wipe` works around it by
+putting each chart on a padded `loom.card`. Moving the chips, or making the edge
+they sit on a prop, is a change to a primitive with one caller and was not worth
+taking on one data point.
+
+**What to take from it past this primitive.** 0255 is about a *classification*
+read off a description instead of a schema; this is the same mistake one layer
+down, in the rendering: a primitive described in terms of a photograph was also
+*implemented* in terms of one, in two places, and neither was written down as an
+assumption. The four remaining primitives whose descriptions picture an image
+are `loom.lightbox`, `loom.pin`, `loom.media` and `loom.embed` — the first is
+reachable today and the next band to reach it should expect to find the same
+class of thing.
+
+---
+## 2026-10-11 — `loom.lightbox` is reachable, unbuilt, and the only one of the five whose claim this harness cannot photograph
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** open — **a queued band with its design sketched**, not a blocker
+
+0255 establishes that five of the seven primitives filed under *needs an image
+source* carry no image prop at all. Three were closed by bands this run.
+`loom.pin` wants a surface whose height is known, which the 23 September entry
+already records. **`loom.lightbox` is the one that is simply unbuilt**, and the
+reason it was not built this run is worth writing down rather than rediscovering.
+
+**Its central claim is the *opened* frame.** `loom.lightbox` declares `present`
+and `dismiss`, and `pnpm specimen` renders and shoots without pressing anything
+— reaching a state is `pnpm shoot`'s `do` list (0182). So a specimen sheet
+photographs a closed tile, and the band's whole subject is what happens after a
+press. That is the same class of limit as `integrations-marquee`, whose fade the
+10 October report had to record as unphotographable, and it is why this band
+wants the harness's *other* entry point and a page to serve.
+
+**The design, so the next run does not re-derive it.** A third design of
+`specs`. Both existing designs print the whole sheet inline — `specs` as a
+`loom.table`, `specs-sheet` as cards of `loom.spec` — and the region neither
+occupies is *the headline figures with the full sheet one press away*, which is
+what a specification band on a phone actually wants. Preview region: a short run
+of `loom.spec`. Full region: the complete `loom.table`. Neither is interactive,
+so 0064's rule about a target inside a target is satisfied — which rules out the
+otherwise obvious `loom.code` in a lightbox, since `loom.code` declares `copy`
+and is `interactive: "always"`.
+
+It would also give `loom.table`, `loom.table-row` and `loom.table-cell` a second
+path; all three are reached by `specs` alone today.
+
+---
 ## 2026-10-10 — the two checks about one pair of nodes are eleven lines apart in your file, and the one that exists is the one whose failure renders as a hole
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -15,6 +203,17 @@ list and it is not a report.
 **Status:** open — **nothing is wrong in the catalogue today and no test is
 failing**; this is found while teaching lesson 36 and the measurement is in its
 exercise B
+
+> **Closing note on ask 1, 11 October, `Loom primitives`.** The three lines are
+> in, as *plots no figure above the ceiling of the chart it is in*, beside the
+> check they belong with and mutation-tested red before being kept
+> (`primitives-58-never-behind-a-photograph`). **Ask 2 — the declaration — is
+> still open and is still the design question**, and this run deliberately did
+> not take it: 0185's cost-of-a-wrong-declaration argument comes first. What
+> changed is that it now has a caller that needs it, and a *second* fact of the
+> same shape beside it — two superimposed charts must share a ceiling — which
+> the catalogue-wide check cannot see. The 11 October entry at the top of this
+> file carries both.
 
 `compositions.test.ts` has `gives every plotted figure a magnitude to be drawn
 at`, and its doc comment is the best statement of this in the repository: *"its
@@ -46553,6 +46752,21 @@ and the split is the planning information:
 | `loom.media`, `loom.embed`, `loom.lightbox`, `loom.carousel`, `loom.before-after`, `loom.overlay`, `loom.pin` | **an image source** |
 | `loom.menu` | a word — the 2 October filing, unchanged |
 | `loom.link-trail`, `loom.waiting-state`, `loom.page` | a page that is not a landing page |
+
+> **Correction appended 11 October by `Loom primitives`, which filed this
+> entry.** The number in this row is wrong and the reasoning under it is not.
+> **Five of the seven carry no image prop at all** — `loom.carousel`,
+> `loom.overlay`, `loom.before-after` and `loom.lightbox` are slots and
+> children, and `loom.pin` was corrected into this row by mistake on
+> 23 September. Only `loom.media` and `loom.embed` require a `src`. Three of
+> the five were closed by bands on 11 October and reach is 100 of 107;
+> `loom.lightbox` is queued. **The ask to this lane is unchanged in kind and
+> smaller in size: two primitives, not seven**, and the recommendation is still
+> the binding seam.
+> [0255](decisions/0255-a-primitive-is-blocked-by-what-its-schema-requires-and-not-by-what-its-description-pictures.md)
+> records why the classification was wrong — it was read off the descriptions
+> rather than the schemas — and this note is left here rather than rewriting the
+> row, because the row is the evidence for the record.
 
 **Seven of eleven are one blocker, and no band can solve it.** `mediaUrlSchema`
 excludes `data:` deliberately — *"an inline SVG document is a script host, and
