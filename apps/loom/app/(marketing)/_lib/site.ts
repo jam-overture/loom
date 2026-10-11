@@ -123,56 +123,72 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
- * built: what this is, then how it works, then **what you control**, then what
- * you are left holding afterwards. The rules page sits before the record
- * because a record of decisions is only interesting to someone who knows the
- * decisions were theirs to set.
+ * built: **what this is, then how it works, then what you would be running.**
+ * A reader who does not yet believe the thing is worth having has no use for
+ * the news that it installs as a package.
  *
- * **`/who-can-ask` sits directly after the rules**, because it is not a subject
- * of its own — it is the second half of one question. The rules page says what
- * may change; this one says that *who wanted it* is an input to the same
- * decision, and shows the four askers being told four different things. A
- * reader who has not yet been told a change is weighed at all has no use for
- * the news that it is weighed differently for a timer.
+ * The footer renders this list in order, and the front door is first in it
+ * although the bar leaves it out, because the footer's map is a map of the site
+ * and a map that omitted the front door would be the navigation failure this
+ * list exists to prevent.
  *
- * **`/putting-it-back` sits directly after the record**, for the same reason and
- * in the same shape: it is the second half of one question rather than a subject
- * of its own. The record page says what you are left holding; this one says that
- * what you are holding includes the way back, and shows every request on the
- * front door being put through and returned. A reader who has not yet been told
- * that anything is written down has no use for the news that one of the things
- * written down is reversible.
- *
- * **`/what-readers-do` closes that group rather than opening the site**, and
- * the temptation was to put it first. It is the input half of the whole premise
- * — what would make anybody ask for a change — so it reads like a beginning.
- * It is not one: a reader who has not yet been told that a change is weighed,
- * recorded and reversible has no reason to care that the page can also count
- * who reached which band, and every sentence on it about *asking for something*
- * is a sentence the five pages above it have already earned. So it sits third
- * in *what you are left holding*, after the record and the way back: what you
- * end up with is a paper trail, an undo, and a page that can say what it did
- * for the people reading it.
- *
- * **Then the objection**, which arrives the moment a reader believes the six
- * above rather than before it: *and when it doesn't work?* It sits where it does
- * because a reader who has not yet understood that a change is weighed at all
- * has no use for the list of ways one can fail to happen.
- *
- * The last two are the questions that arrive after all five of those, from
- * somebody who has decided they might want this and is working out what it would
- * cost them to try: **what is the thing**, and then **what do I have to hand
- * it**. They are in that order because the second only makes sense once the
- * first is answered — nobody asks what to hand over to something they still
- * think might be a hosted service.
- *
- * The footer renders this list in order, and the end is where a reader meets
- * the two pages the bar does not carry. The front door is the third the bar
- * leaves out and it is first here, because the footer's map is a map of the
- * site and a map that omitted the front door would be the navigation failure
- * this list exists to prevent.
+ * > **The fifty lines that used to be here argued the order of ten pages, and
+ * > seven of them do not exist.** They were real: `/the-rules`,
+ * > `/who-can-ask`, `/the-record`, `/putting-it-back`, `/what-readers-do`,
+ * > `/when-it-goes-wrong` and `/your-components`, each with a paragraph saying
+ * > why it sat where it sat. The site was cut to three pages on 26 September
+ * > and the reasoning stayed, so the one file that defines what this site *is*
+ * > spent a fortnight explaining a site nobody can open. Filed by this lane on
+ * > 7 October, and what is above is the rewrite it asked for: the order of the
+ * > three that are left, in three sentences. The seven paragraphs went rather
+ * > than being updated, because an argument for an adjacency between two pages
+ * > that are both gone is not history worth keeping in the file the next run
+ * > reads to find out what this site has. They are in `git log`.
  */
 export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN]
+
+/**
+ * The one page of this site a visitor can ask for a change to.
+ *
+ * It is `/how-it-works` and it used to be the front door. The maintainer moved
+ * the band on 1 October — *"Remove the see it happen section from the main
+ * landing page and only let it exist in the How it works section"* — and this
+ * constant exists because that move has now been found half-applied twice:
+ *
+ * | found | what was still pointed at the front door |
+ * | --- | --- |
+ * | 9 October | the reading of the address, so *Put it back* did nothing for eight days |
+ * | 11 October | the card a shared link unfurls as, and the picture behind it |
+ *
+ * Neither was a hard thing to get right. Both were the same easy thing to get
+ * wrong: *which page runs a request* was written as `route.path === HOME.path`
+ * in one file and `HOW_IT_WORKS` in another, so moving the band meant finding
+ * every place that had quietly decided it already. A comparison spelled out at
+ * the point of use is a decision nobody can grep for.
+ *
+ * So it is one name, and the four things that need the answer read it: the
+ * renderer that runs the request, the writer of an address, the words a shared
+ * link unfurls with, and the picture it unfurls as. A fifth page taking the
+ * band is one line here.
+ *
+ * **It is deliberately not a field on `SiteRoute`.** `inMenu` is a choice each
+ * route makes and three routes answer differently; this is a fact about the
+ * site of which there is exactly one, and a boolean on every route would invite
+ * a second page to set it — which is a state this site has no meaning for,
+ * because the band is the demonstration and there is one of those.
+ */
+export const ASKED_ROUTE: SiteRoute = HOW_IT_WORKS
+
+/**
+ * Whether this is that page.
+ *
+ * A predicate rather than letting each caller write the comparison, because the
+ * comparison is the thing that was written four times and went stale in three
+ * of them. Compared by path and not by identity: a card is drawn from a route
+ * looked up out of a query string, and `SITE_ROUTES.find` hands back the same
+ * object only for as long as nobody passes a copy.
+ */
+export const isAskedRoute = (route: SiteRoute): boolean => route.path === ASKED_ROUTE.path
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -635,21 +651,59 @@ export const internalHref = (origin: string, path: string, theme?: SiteThemeName
   const url = new URL(path, `${origin}/`)
 
   if (theme !== undefined) {
-    url.searchParams.set("theme", theme)
+    url.searchParams.set(ADDRESS_PARAMS.theme, theme)
   }
 
   return url.toString()
 }
 
 /**
- * The front door, with what the visitor has asked of it written into the address.
+ * The five words an address of this site is made of.
  *
- * The band that lets a visitor rearrange this page keeps nothing: no session, no
- * cookie, nothing on the server between one request and the next. What the page
- * looks like is a function of its address, which is why `/?ask=costs` can be
- * copied, shared, bookmarked and reloaded a week later and still be the page it
- * was — and why two people looking at the site cannot rearrange it under each
- * other.
+ * `askedHref` writes them and `askedFor` reads them, and both take the spelling
+ * from here, because a page that writes `back` and reads `back-yes` is a control
+ * that does nothing and a build that is green. Four of the five are ours to
+ * choose; `back-yes` is the spelling the record page's own sequence already
+ * uses, so the two pages name approval the same way.
+ *
+ * The names are written out literally in `addressed.test.ts` rather than
+ * compared against this record, which is the 8 October entry of this lane's own
+ * findings applied to itself: a test that interpolates the constant it is
+ * meant to pin is green on any misspelling.
+ */
+export const ADDRESS_PARAMS = {
+  theme: "theme",
+  ask: "ask",
+  approve: "approve",
+  back: "back",
+  backApprove: "back-yes",
+} as const
+
+/**
+ * What a yes looks like in an address, read the way every other parameter of
+ * this site is read.
+ *
+ * `1` rather than `yes` or `true`, and the first value rather than the last,
+ * which is `readThemeName`'s rule and `readAskId`'s. A query string may carry a
+ * parameter twice — a link built from a link built from a link — and the three
+ * answers disagreeing about which one counts is the kind of difference nobody
+ * finds by reading.
+ */
+export const readYes = (given: string | readonly string[] | undefined): boolean =>
+  (typeof given === "string" ? given : given?.[0]) === "1"
+
+/**
+ * `ASKED_ROUTE`, with what the visitor has asked of it written into the address.
+ *
+ * The band that lets a visitor rearrange that page keeps nothing: no session,
+ * no cookie, nothing on the server between one request and the next. What the
+ * page looks like is a function of its address, which is why
+ * `/how-it-works?ask=costs` can be copied, shared, bookmarked and reloaded a
+ * week later and still be the page it was, and why two people looking at the
+ * site cannot rearrange it under each other.
+ *
+ * It said *the front door* and gave `/?ask=costs` as the example until
+ * 11 October, which was true until the band moved on 1 October.
  */
 export type AskedFor = {
   readonly theme?: SiteThemeName
@@ -673,9 +727,9 @@ export type AskedFor = {
 const askedHref = (origin: string, path: string, options: AskedFor): string => {
   const url = new URL(path, `${origin}/`)
 
-  if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
-  if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
-  if (options.approve === true) url.searchParams.set("approve", "1")
+  if (options.theme !== undefined) url.searchParams.set(ADDRESS_PARAMS.theme, options.theme)
+  if (options.ask !== undefined) url.searchParams.set(ADDRESS_PARAMS.ask, options.ask)
+  if (options.approve === true) url.searchParams.set(ADDRESS_PARAMS.approve, "1")
   /**
    * Two parameters rather than one with three values, because they answer two
    * questions a visitor asks at two different moments — *put it back*, and then
@@ -685,14 +739,14 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
    * `-yes` is the suffix the record page's sequence already uses for exactly
    * this, so the two pages name approval the same way.
    */
-  if (options.back === true) url.searchParams.set("back", "1")
-  if (options.backApprove === true) url.searchParams.set("back-yes", "1")
+  if (options.back === true) url.searchParams.set(ADDRESS_PARAMS.back, "1")
+  if (options.backApprove === true) url.searchParams.set(ADDRESS_PARAMS.backApprove, "1")
 
   return url.toString()
 }
 
 export const askHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, HOW_IT_WORKS.path, options)
+  askedHref(origin, ASKED_ROUTE.path, options)
 
 /**
  * The mechanism page, with the request whose record it should print.
@@ -711,7 +765,7 @@ export const askHref = (origin: string, options: AskedFor = {}): string =>
  * the panel the visitor followed it from.
  */
 export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, HOW_IT_WORKS.path, options)
+  askedHref(origin, ASKED_ROUTE.path, options)
 
 /**
  * A link into another surface of the product.

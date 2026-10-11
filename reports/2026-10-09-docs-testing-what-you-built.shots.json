@@ -1,0 +1,64 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/testing-what-you-built",
+      "out": "2026-10-09-docs-testing-page-wide",
+      "viewport": "wide",
+      "waitFor": "aside nav",
+      "measure": [
+        "aside",
+        "aside a[aria-current=\"page\"]",
+        "text=Testing what you built"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/testing-what-you-built",
+      "out": "2026-10-09-docs-testing-page-phone",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/building-with-loom/testing-what-you-built",
+      "out": "2026-10-09-docs-testing-policy-wide",
+      "viewport": "wide",
+      "waitFor": "h2",
+      "do": [
+        {
+          "scrollTo": "text=The second test is the half that proves anything."
+        }
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/testing-what-you-built",
+      "out": "2026-10-09-docs-testing-suites-wide",
+      "viewport": "wide",
+      "waitFor": "[data-contract-suites]",
+      "do": [
+        {
+          "scrollTo": "[data-contract-suites]"
+        }
+      ],
+      "measure": [
+        "[data-contract-suites]",
+        "[data-contract-suites] li"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/testing-what-you-built",
+      "out": "2026-10-09-docs-testing-suites-phone",
+      "viewport": "phone",
+      "waitFor": "[data-contract-suites]",
+      "do": [
+        {
+          "scrollTo": "[data-contract-suites]"
+        }
+      ],
+      "measure": [
+        "[data-contract-suites]",
+        "[data-contract-suites] pre"
+      ]
+    }
+  ]
+}

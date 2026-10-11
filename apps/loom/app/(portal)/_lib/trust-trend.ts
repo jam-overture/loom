@@ -1,3 +1,9 @@
+import {
+  canonicalChecksOf,
+  checksContinuityOf,
+  rulesetContinuityOf,
+  type WriteCheck,
+} from "@jam-overture/loom"
 import type { CalibrationReport, RecordedTelemetry } from "@jam-overture/loom/telemetry"
 
 import { GAP_TOLERANCE } from "./calibration-view"
@@ -33,6 +39,23 @@ import { plainDay } from "./when"
  * window judged under different rules is refused a comparison instead of given a
  * misattributed one.
  *
+ * ## What "judged under the same rules" turned out not to cover
+ *
+ * A fingerprint proves which **rules** were consulted. It cannot reach the two
+ * seams a composition root hands the write path, because they are functions and
+ * a policy is a serialisable value (0179, 0208) — so a deployment that wires a
+ * registry in on Tuesday produces judgments whose fingerprint is byte-identical
+ * to Monday's and whose outcomes are not. Either seam can turn a change that
+ * would have gone through into one that was turned down, which is precisely the
+ * movement this section attributes. So the condition is now *one ruleset and one
+ * write path*, and 0248's `checkSets` is the second half of it.
+ *
+ * The condition also stopped being a boolean. *Your rules changed* is an
+ * accusation, and a stretch whose judgments recorded nothing is not that — it is
+ * a stretch from before the record carried the field, which no amount of looking
+ * through a configuration will fix. The four refusals below say which of the two
+ * they are, because the reader's next move is the whole difference between them.
+ *
  * ## What a page of the journal is not
  *
  * It is not a week. It is two hundred records, so two pages are two stretches of
@@ -65,6 +88,23 @@ export type TrendSpan = {
   readonly rulesets: readonly string[]
   /** Judged claims whose disposition named no ruleset at all. */
   readonly unfingerprinted: number
+  /**
+   * Every distinct set of optional write-path checks a judgment in this stretch
+   * was made under, each in canonical order and the whole list sorted.
+   *
+   * The rest of the sentence `rulesets` begins. A fingerprint proves which
+   * *rules* judged these claims and cannot reach the two seams a composition
+   * root hands over separately, either of which can turn a change that would
+   * have gone on into one that was turned down — so a stretch shown to be one
+   * ruleset is not thereby shown to be one write path, and a survival rate that
+   * moved the week somebody wired a registry in is explained by the wiring.
+   *
+   * Sorted here as well as per segment, because this is a union taken across
+   * segments and the order the segments arrived in must not reach the screen.
+   */
+  readonly checkSets: readonly (readonly WriteCheck[])[]
+  /** Judged claims whose disposition named no set of checks at all. */
+  readonly unrecordedChecks: number
   /**
    * When the stretch begins and ends, taken from `recordedAt` and never from
    * `occurredAt`.
@@ -100,6 +140,24 @@ export const spanOf = (
     new Set(report.byPolicy.flatMap((segment) => segment.fingerprints))
   ).sort()
 
+  /*
+   * Distinct by canonical spelling, so one write path running across three
+   * segments is one entry rather than three. `canonicalChecksOf` before the key
+   * is taken because a union is only as canonical as the thing that built it,
+   * and the sort is on that same key so the list is stable whatever order the
+   * segments came in.
+   */
+  const checkSets = Array.from(
+    new Map(
+      report.byPolicy
+        .flatMap((segment) => segment.checkSets)
+        .map((checks) => canonicalChecksOf(checks))
+        .map((checks) => [checks.join(","), checks] as const)
+    )
+  )
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([, checks]) => checks)
+
   /** A page is always ascending by `seq`, whichever end it was taken from. */
   const from = records.at(0)?.recordedAt
   const to = records.at(-1)?.recordedAt
@@ -113,6 +171,11 @@ export const spanOf = (
     rulesets,
     unfingerprinted: report.byPolicy.reduce(
       (total, segment) => total + segment.unfingerprinted,
+      0
+    ),
+    checkSets,
+    unrecordedChecks: report.byPolicy.reduce(
+      (total, segment) => total + segment.unrecordedChecks,
       0
     ),
     ...(from === undefined ? {} : { from }),
@@ -132,31 +195,79 @@ export const spanOf = (
 export const COMPARABLE_MINIMUM = Math.ceil(1 / GAP_TOLERANCE)
 
 /**
- * Whether the two stretches were judged by the same rules, which is the
- * condition on the comparison meaning anything about the AI.
+ * What two stretches show about one of the things that judged them: that it held
+ * still, that it moved, or that nothing here can say.
  *
- * `PolicyCalibration` already makes this argument one level down — a rate is not
+ * `PolicyCalibration` already makes the argument one level down — a rate is not
  * a property of the model alone, so pooling two gates produces a number that
  * moved for a reason the report cannot name. Two stretches are two pools, and
  * the same argument applies across time rather than across names.
  *
- * Strict on purpose. One recorded ruleset on each side and the same one, with
- * nothing unfingerprinted: anything else is a stretch not *shown* to be one gate,
- * and a comparison that treated "probably the same" as "the same" would attribute
- * a host's edit to the model.
+ * **Three states and not two, and the third is the one a dashboard would drop.**
+ * A stretch whose judgments recorded nothing about the rules they ran on is not
+ * a stretch whose rules changed — it is a stretch from before the record carried
+ * them — and the reader's next move is the whole difference. *Your rules
+ * changed* sends somebody into their own configuration to find an edit they
+ * never made, and nothing they do there will fix it. This screen said exactly
+ * that until today, for every stretch straddling the upgrade that added the
+ * field.
+ *
+ * `held` stays as strict as it was: one recorded answer on each side, the same
+ * one, and nothing unrecorded. Anything short of that is `unproven` rather than
+ * `held`, because a comparison that treated "probably the same" as "the same"
+ * would attribute a host's own edit to the model.
  */
-const judgedByTheSameRules = (now: TrendSpan, earlier: TrendSpan): boolean =>
-  now.unfingerprinted === 0 &&
-  earlier.unfingerprinted === 0 &&
-  now.rulesets.length === 1 &&
-  earlier.rulesets.length === 1 &&
-  now.rulesets[0] === earlier.rulesets[0]
+export type Steadiness = "held" | "moved" | "unproven"
+
+/** Whether the rules that judged the two stretches are shown to be one ruleset. */
+const rulesSteadiness = (now: TrendSpan, earlier: TrendSpan): Steadiness => {
+  const sides = [rulesetContinuityOf(now.rulesets), rulesetContinuityOf(earlier.rulesets)]
+  const across = rulesetContinuityOf([...now.rulesets, ...earlier.rulesets])
+
+  if (sides.includes("changed") || across === "changed") return "moved"
+  if (now.unfingerprinted > 0 || earlier.unfingerprinted > 0) return "unproven"
+
+  /*
+   * `incomparable` lands here rather than in `moved`: two policies with
+   * different sets of knobs are two Loom versions, and whether the values were
+   * also edited cannot be read from a digest — which is `readRuleset`'s reading
+   * of the same state, spelled the same way.
+   */
+  return sides.every((continuity) => continuity === "single") && across === "single"
+    ? "held"
+    : "unproven"
+}
+
+/**
+ * The same question about the other half of what judged them: whether one write
+ * path did.
+ *
+ * Deliberately the same shape as the rules above, so that the two conditions
+ * cannot drift into disagreeing about what "shown to have held still" means.
+ * The one asymmetry is in the runtime rather than here: a check list is made of
+ * Loom's own names, so two lists always compare directly and `checksContinuityOf`
+ * has no `incomparable` to map.
+ */
+const checksSteadiness = (now: TrendSpan, earlier: TrendSpan): Steadiness => {
+  const sides = [checksContinuityOf(now.checkSets), checksContinuityOf(earlier.checkSets)]
+  const across = checksContinuityOf([...now.checkSets, ...earlier.checkSets])
+
+  if (sides.includes("changed") || across === "changed") return "moved"
+  if (now.unrecordedChecks > 0 || earlier.unrecordedChecks > 0) return "unproven"
+
+  return sides.every((continuity) => continuity === "single") && across === "single"
+    ? "held"
+    : "unproven"
+}
 
 export type TrendKind =
   | "no-earlier-record"
   | "unreadable"
   | "too-few-to-compare"
   | "rules-changed"
+  | "rules-unproven"
+  | "checks-changed"
+  | "checks-unproven"
   | "steady"
   | "closer"
   | "further"
@@ -220,6 +331,100 @@ const readPassRate = (
   return `${direction}, and the AI still judged itself better than before — it was saying so in advance rather than being caught out.`
 }
 
+/**
+ * The sentence for the half that is not being reported, when it did not hold
+ * still either.
+ *
+ * Only one of the two can be the headline, so the other one goes in the
+ * `aside` — unasked rather than behind a disclosure, because a reader who fixes
+ * the cause they were told about and comes back to find the comparison still
+ * refused has been sent on an errand twice.
+ */
+const SECOND_CAUSE: Readonly<Record<"rules" | "checks", Readonly<Record<"moved" | "unproven", string>>>> =
+  {
+    rules: {
+      moved:
+        "Your own rules moved between these two stretches as well, so there are two reasons this is not a reading about the AI.",
+      unproven:
+        "Nor can these two stretches be shown to have run on one set of rules, so that side would have to hold still too.",
+    },
+    checks: {
+      moved:
+        "What Loom was checking before it let a change on moved as well — that is your deployment’s wiring rather than your rules.",
+      unproven:
+        "What Loom was checking before it let a change on is not recorded across all of these either, so that side cannot be shown to have held still.",
+    },
+  }
+
+const secondCause = (
+  which: "rules" | "checks",
+  steadiness: Steadiness
+): string | undefined => (steadiness === "held" ? undefined : SECOND_CAUSE[which][steadiness])
+
+/**
+ * Why no comparison is drawn, when something that judged these claims did not
+ * hold still between the two stretches.
+ *
+ * The rules come first when both are at fault, because they are the half a
+ * person wrote and can look at. The checks are their deployment's wiring, which
+ * is a different place to go and a sentence they should not have to read past
+ * the one they can act on.
+ *
+ * All four readings keep the two stretches' own numbers on the screen — the
+ * disclosure below this is drawn whatever the verdict. Nothing is withheld; what
+ * is withheld is the *attribution*, which is the one thing here that would be an
+ * invention.
+ */
+const refuseComparison = (rules: Steadiness, checks: Steadiness): TrendReading => {
+  if (rules === "moved") {
+    const aside = secondCause("checks", checks)
+
+    return {
+      kind: "rules-changed",
+      tone: "uninterpreted",
+      label: "Your rules changed in between, so this isn't about the AI",
+      meaning:
+        "Whether a change goes through is what your rules and the people here allow, not something the AI decides. These two stretches were judged under different rules, so anything that moved between them may be your own edit rather than the AI.",
+      next: "Compare them again once a stretch of the record has run under the rules you have now. The two readings are below either way.",
+      ...(aside === undefined ? {} : { aside }),
+    }
+  }
+
+  if (rules === "unproven") {
+    const aside = secondCause("checks", checks)
+
+    return {
+      kind: "rules-unproven",
+      tone: "inapplicable",
+      label: "We can't show your rules held still in between",
+      meaning:
+        "Whether a change goes through is what your rules and the people here allow, not something the AI decides. Some of these judgments did not record which rules they ran on, so nothing here can rule out that a movement is your own edit rather than the AI.",
+      next: "Nothing to do, and nothing is wrong: this is not a change you have to find. The comparison starts working once a stretch of the record has run that recorded it. The two readings are below either way.",
+      ...(aside === undefined ? {} : { aside }),
+    }
+  }
+
+  if (checks === "moved") {
+    return {
+      kind: "checks-changed",
+      tone: "uninterpreted",
+      label: "What Loom was checking changed in between, so this isn't about the AI",
+      meaning:
+        "Your rules did hold still. But your deployment can also hand Loom checks it runs before a change goes on, and any of them can turn a change that would have gone through into one that was turned down — so a different set of them across these two stretches means anything that moved may be that wiring rather than the AI.",
+      next: "Compare them again once a stretch of the record has run with the checks you have now. Which ones were in place is below.",
+    }
+  }
+
+  return {
+    kind: "checks-unproven",
+    tone: "inapplicable",
+    label: "We can't show Loom was checking the same things in between",
+    meaning:
+      "Your rules held still across both stretches. What Loom was checking before it let a change on is not recorded for all of these judgments, though, and either of those checks can turn a change that would have gone through into one that was turned down — so a movement could still be that wiring rather than the AI.",
+    next: "Nothing to do, and nothing is wrong: this is not a change you have to find. The comparison starts working once a stretch of the record has run that recorded it. The two readings are below either way.",
+  }
+}
+
 export const readTrend = (now: TrendSpan, earlier: Earlier): TrendReading => {
   if (earlier === "none") {
     return {
@@ -261,16 +466,10 @@ export const readTrend = (now: TrendSpan, earlier: Earlier): TrendReading => {
     }
   }
 
-  if (!judgedByTheSameRules(now, earlier)) {
-    return {
-      kind: "rules-changed",
-      tone: "uninterpreted",
-      label: "Your rules changed in between, so this isn't about the AI",
-      meaning:
-        "Whether a change goes through is what your rules and the people here allow, not something the AI decides. These two stretches were judged under different rules, so anything that moved between them may be your own edit rather than the AI.",
-      next: "Compare them again once a stretch of the record has run under the rules you have now. The two readings are below either way.",
-    }
-  }
+  const rules = rulesSteadiness(now, earlier)
+  const checks = checksSteadiness(now, earlier)
+
+  if (rules !== "held" || checks !== "held") return refuseComparison(rules, checks)
 
   const sharpened = Math.abs(earlier.gap) - Math.abs(now.gap)
 

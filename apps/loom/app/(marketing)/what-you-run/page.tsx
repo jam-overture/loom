@@ -1,7 +1,8 @@
+import { askedFor } from "@/app/(marketing)/_lib/addressed"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
-import { readThemeName, siteOrigin, WHAT_YOU_RUN } from "@/app/(marketing)/_lib/site"
+import { siteOrigin, WHAT_YOU_RUN } from "@/app/(marketing)/_lib/site"
 import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
@@ -10,16 +11,18 @@ export const generateMetadata = routeMetadata(WHAT_YOU_RUN)
 /**
  * The page that says what the thing on your own machine would be.
  *
- * The palette is the only thing it reads off the address. Nothing on it is a
- * function of a request — the measurement is taken against the front door as
- * this site publishes it, with the library and the palettes it renders with — so
- * it is as cheap to serve as the rules page.
+ * The palette is the only thing on it that an address changes. It still reads
+ * the whole address, through the same reader as the other two: nothing on this
+ * page is a function of a request, `pageTreeFor` runs one for the page carrying
+ * the band and for no other, and so the rest of what comes back is inert and
+ * this page is as cheap to serve as it was. What it buys is that no page of this
+ * site decides for itself which half of an address is worth reading, which is
+ * the decision that went stale when the band moved (`_lib/addressed.ts`).
  */
 const WhatYouRunPage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
-  const params = await searchParams
   const rendered = await renderSitePage(WHAT_YOU_RUN, {
     origin: await servedOrigin(),
-    theme: readThemeName(params["theme"]),
+    ...askedFor(await searchParams),
   })
 
   /**

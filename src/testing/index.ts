@@ -33,6 +33,7 @@
  */
 
 export {
+  brokenUnshownDefinition,
   cardDefinition,
   footerDefinition,
   headerDefinition,
@@ -40,6 +41,8 @@ export {
   registryOf,
   testDefinitions,
   testRegistry,
+  UNSHOWN_BREAKAGES,
+  type UnshownBreakage,
 } from "./definitions.js"
 
 export {

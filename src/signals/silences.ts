@@ -1,8 +1,12 @@
 import { everyMemberOf } from "../closed-set.js"
 
+import type { ActionChangeSilence } from "./action-change.js"
 import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
+import type { DeploymentSilence } from "./deployment.js"
+import type { KindReachSilence } from "./library-reach.js"
+import type { KindSilence } from "./library.js"
 import type { PaceChangeSilence } from "./pace-change.js"
 import type { PaceSilence } from "./pace.js"
 import type { ReachSilence } from "./reach.js"
@@ -12,8 +16,8 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are six of them. Each set's names are right in its own
- * sentence, and across the six they overlap in two ways that a surface drawing
+ * absent, and there are ten of them. Each set's names are right in its own
+ * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
  *
@@ -54,11 +58,20 @@ import type { ReachSilence } from "./reach.js"
  *
  * It is a property of the **reading** and not of the silence: every reason a
  * copy reading gives is about its page, every reason a pace reading gives is
- * about one part, and every reason any of the three comparisons gives is about
- * the pair. That is why the subjects are published as one table over the
+ * about one part, every reason a census of the library gives is about one kind
+ * of part, and every reason any of the three comparisons gives is about the
+ * pair. That is why the subjects are published as one table over the
  * vocabularies rather than as a field on nine conditions, and it is the
  * strongest form the answer has — a surface that knows which reading it is
  * drawing already knows what its silences are about.
+ *
+ * **It is not the reading's own scope, which the seventh set is the first to
+ * show.** An order over a deployment's pages is silent about one of its
+ * members: the order stands and one page is not in it, so every reason it gives
+ * is about a page while the reading is of something larger. The claim above
+ * holds — the subject is uniform across the set and is a property of the
+ * reading — and the thing it was easy to read into it, that a reading's
+ * silences are about the reading, was never true of anything but the first six.
  *
  * Pure, and the arithmetic is a comparison of two string pairs. It reaches no
  * store, no clock and no DOM, and it adds nothing to the broadcaster's import
@@ -81,11 +94,22 @@ export type SilenceSubject =
    * about the page on the screen.
    */
   | "comparison"
+  /**
+   * One kind of part, everywhere it stands in the pages read.
+   *
+   * The fourth subject, and the first that is not a thing a deployment holds. A
+   * page, a part and a pair all exist because something was read; a kind comes
+   * from the **vocabulary** — a primitive type or a role — so a reading of one
+   * can be silent because there is none of it, which no reading whose rows come
+   * from the data could ever report.
+   */
+  | "kind"
 
 export const SILENCE_SUBJECTS: readonly SilenceSubject[] = everyMemberOf<SilenceSubject>()([
   "page",
   "part",
   "comparison",
+  "kind",
 ])
 
 /** One line per subject, for a surface naming what a reason is about. */
@@ -97,6 +121,8 @@ export const describeSilenceSubject = (subject: SilenceSubject): string => {
       return "one part of the page"
     case "comparison":
       return "the two readings together, neither side named"
+    case "kind":
+      return "one kind of part, everywhere it stands in the pages read"
   }
 }
 
@@ -109,18 +135,26 @@ export const describeSilenceSubject = (subject: SilenceSubject): string => {
  * there is one vocabulary and not two.
  */
 export type SilenceVocabulary =
+  | "action-change"
   | "change"
   | "copy"
   | "copy-change"
+  | "deployment"
+  | "library"
+  | "library-reach"
   | "pace"
   | "pace-change"
   | "reach"
 
 export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
   everyMemberOf<SilenceVocabulary>()([
+    "action-change",
     "change",
     "copy",
     "copy-change",
+    "deployment",
+    "library",
+    "library-reach",
     "pace",
     "pace-change",
     "reach",
@@ -136,9 +170,13 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
  */
 export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSubject>> =
   Object.freeze({
+    "action-change": "comparison",
     change: "comparison",
     copy: "page",
     "copy-change": "comparison",
+    deployment: "page",
+    library: "kind",
+    "library-reach": "kind",
     pace: "part",
     "pace-change": "comparison",
     reach: "page",
@@ -147,15 +185,56 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Nine of them against twenty-two members across the six sets, which is the
+ * Eleven of them against thirty-seven members across the ten sets, which is the
  * overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
  *
- * **The sixth set needed no tenth condition**
- * ([0244](../../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)),
- * which is the first evidence that these are the states of the world rather
- * than a list of the names the modules before it happened to use.
+ * **Neither the sixth set nor the seventh needed a tenth condition**
+ * ([0244](../../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md),
+ * [0250](../../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)),
+ * which was the evidence that these are the states of the world rather than a
+ * list of the names the modules before them happened to use. The seventh was
+ * the stronger of the two: it is the first reading whose subject is not a page,
+ * a part or a pair, and its reasons still landed on conditions already here.
+ *
+ * **The eighth needed exactly one, and the reason is the thing worth writing
+ * down** ([0251](../../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)).
+ * `no-action-credited` is the first condition here that is not about a reader
+ * being absent, a row being absent or a word being undeclared: it is a window
+ * whose counters are present and whose **nought is a filing rule** rather than
+ * a measurement (0167, 0242). Nothing before a reading of what readers *did*
+ * could be in that state, so the earlier evidence is narrowed and not
+ * falsified — these are still the states of the world, and the way a new one
+ * arrives is with a reading that can be in one nothing else could.
+ *
+ * **The ninth needed one as well, and it is the same rule holding rather than a
+ * second exception**
+ * ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)).
+ * A census of the library is the first reading whose rows are keyed by the
+ * **vocabulary** and not by what a deployment holds, so it is the first that can
+ * report `nothing-of-the-kind`: every earlier set's subject exists by
+ * construction wherever its row does. It also brought the fourth subject, which
+ * is the first time a set has added one — and the two arrived together for one
+ * reason, because a subject that comes from a vocabulary is exactly a subject
+ * that can be empty.
+ *
+ * **The tenth needed neither, and it is the first since the seventh to need
+ * nothing at all**
+ * ([0256](../../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)).
+ * A kind's share of the readers who met it is withheld for the states of the
+ * **door**, which were all named the first time a share of readers was taken of
+ * anything (0229), and for the two reasons the census of the same kinds already
+ * published. That is the shape of a set that adds nothing: it asks an old
+ * question of a new subject.
+ *
+ * **What it did show is that a set cannot always be reused, and the reason is
+ * the subject.** A funnel answer reports a reach silence unchanged, because a
+ * funnel is asked of a page and so is a reach reading, and the subject here is
+ * a property of the **reading**. A kind's share is asked of a kind, so the
+ * same three door states are published in two vocabularies at two subjects —
+ * which is not a duplication to remove but exactly the pair this module exists
+ * to relate: `one-reason`, never `one-state`.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -212,6 +291,30 @@ export type SilenceCondition =
   | "readers-above-views"
   /** The change left no word of the page as it was, so there is no carried text to read. */
   | "nothing-carried"
+  /**
+   * The window holds actions and credits none of them to a reader.
+   *
+   * A press is filed against the control and credited to the addressed ancestors
+   * the signal carries (0167), so a sender whose delegated signals have no
+   * `within` adds occurrences and no reader anywhere. The counters are present
+   * and look healthy; what is wrong is that every share built on them is a
+   * nought that is a filing rule rather than a measurement (0242).
+   *
+   * The one condition here about a **nought that is not an absence**, which is
+   * why no earlier set could report it. The occurrence counts survive it intact,
+   * because they are filed against the part a reader used and need no ancestry.
+   */
+  | "no-action-credited"
+  /**
+   * There is none of it in the pages read.
+   *
+   * Not a measurement that is missing: the thing being asked about is absent
+   * from the library, which only a reading keyed by a vocabulary can say. A role
+   * no primitive declares and a type nothing places are both this, and the
+   * instruction it carries is the opposite of every other condition here —
+   * there is nothing to measure rather than nothing measured.
+   */
+  | "nothing-of-the-kind"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -223,6 +326,8 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "words-a-floor",
   "readers-above-views",
   "nothing-carried",
+  "no-action-credited",
+  "nothing-of-the-kind",
 ])
 
 /**
@@ -253,6 +358,10 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "it reports more readers than views, which no rollup produces"
     case "nothing-carried":
       return "the change left no word of the page as it was"
+    case "no-action-credited":
+      return "it holds actions and credits none of them to a reader"
+    case "nothing-of-the-kind":
+      return "there is none of it in the pages that were read"
   }
 }
 
@@ -269,6 +378,29 @@ const meaning = (vocabulary: SilenceVocabulary, condition: SilenceCondition): Si
   subject: SUBJECT_OF_VOCABULARY[vocabulary],
   vocabulary,
 })
+
+/**
+ * What a comparison of what readers *did* reports (0251).
+ *
+ * A comparison, so its subject is the pair and never the page on the screen —
+ * and `unwalked` is the one member of any set that does not say which side it is
+ * true of while being the one a surface most wants to name. The two readings
+ * travel on the comparison, each with its own `unwalked`, which is where that is
+ * answered; the condition is what the two sides have in common and no more, as
+ * `no-openings-marked` is for a deployment.
+ */
+export const meaningOfActionChangeSilence = (silence: ActionChangeSilence): SilenceMeaning => {
+  switch (silence) {
+    case "different-trees":
+      return meaning("action-change", "two-pages")
+    case "unwalked":
+      return meaning("action-change", "no-action-credited")
+    case "nothing-measured":
+      return meaning("action-change", "no-view-reported")
+    case "dissolved":
+      return meaning("action-change", "nothing-carried")
+  }
+}
 
 /** What a before-and-after reading's silence reports (0224). */
 export const meaningOfChangeSilence = (silence: ChangeSilence): SilenceMeaning => {
@@ -309,6 +441,85 @@ export const meaningOfCopyChangeSilence = (silence: CopyChangeSilence): SilenceM
       return meaning("copy-change", "nothing-carried")
     case "floored":
       return meaning("copy-change", "words-a-floor")
+  }
+}
+
+/**
+ * What an order over a deployment's pages reports, of one of them (0250).
+ *
+ * Every reason here is a fact about one revision of one page, so the subject is
+ * the page — which is the one case this table did not have, and the only thing
+ * about it that is new. A reading of a deployment is silent about its **members**
+ * rather than about itself: the order stands, and one page is not in it.
+ *
+ * `unscaled` is the second name in this subsystem for the state a share-of-readers
+ * reading calls `unmeasured`, and the two are deliberately not spelled alike. A
+ * reach reading has nothing to say at all without a row at the door; an order has
+ * a complete reading of that page and is missing only what would make it
+ * comparable with another, which is a different sentence to print even though it
+ * is one state of the world.
+ */
+export const meaningOfDeploymentSilence = (silence: DeploymentSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("deployment", "no-view-reported")
+    case "unscaled":
+      return meaning("deployment", "no-arrivals-counted")
+    case "unopened":
+      return meaning("deployment", "no-openings-marked")
+    case "inconsistent":
+      return meaning("deployment", "readers-above-views")
+  }
+}
+
+/**
+ * What a census of the library reports, of one kind of part (0257).
+ *
+ * Both reasons are about a kind and neither is about a page, so this is the set
+ * that put the fourth subject in the table above. `unplaced` is the one member
+ * in this subsystem whose condition is not an absence of measurement but an
+ * absence of the thing measured, and the distinction is worth a surface's
+ * attention: `unread` on a kind says point a reader at it, `unplaced` says
+ * nothing in this library is one.
+ */
+export const meaningOfKindSilence = (silence: KindSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("library", "no-view-reported")
+    case "unplaced":
+      return meaning("library", "nothing-of-the-kind")
+  }
+}
+
+/**
+ * What a kind's share of the readers who met it reports, of one kind (0256).
+ *
+ * The tenth set, and the first since the seventh to bring neither a condition
+ * nor a subject — which is the claim below holding rather than a coincidence:
+ * three of its five reasons are the states of the door, and the door's states
+ * were named the first time a share of readers was taken of anything.
+ *
+ * **It is also the first set that could not reuse another's outright.** A
+ * funnel answer reports a reach silence unchanged, because a funnel is asked of
+ * a page and so is a reach reading; this is asked of a **kind**, and a subject
+ * is a property of the reading rather than of the condition. So the three
+ * door states are said again here at a kind, the page they are true of is
+ * published with a reach silence on it, and this table is what says the two are
+ * one state at two subjects. The census's own two reasons are reused as values,
+ * because those were already a kind's.
+ */
+export const meaningOfKindReachSilence = (silence: KindReachSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("library-reach", "no-view-reported")
+    case "unplaced":
+      return meaning("library-reach", "nothing-of-the-kind")
+    case "unscaled":
+      return meaning("library-reach", "no-arrivals-counted")
+    case "unopened":
+      return meaning("library-reach", "no-openings-marked")
+    case "uncounted":
+      return meaning("library-reach", "no-window-folded")
   }
 }
 

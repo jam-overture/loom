@@ -143,7 +143,7 @@ describe("the review queue", () => {
     const { container } = on(TODAY, <Queue sets={SETS} parts={PARTS} questionKeys={KEYS} />)
 
     expect(container.textContent).toContain("Confident and wrong: 1")
-    expect(container.textContent).toContain("SET A q1")
+    expect(container.textContent).toContain("Set A q1")
     expect(container.textContent).toContain("1 of 3 questions got")
     expect(container.textContent).toContain("Behind you (1)")
   })

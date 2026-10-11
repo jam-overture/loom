@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { Corrections, type CorrectionQuestion } from "../../../_components/corrections"
+import { SecondLookPanel } from "../../../_components/second-look"
 import { blockNodes } from "../../../_lib/blocks"
 import { heading, prose, renderFragment } from "../../../_lib/loom"
 import { COURSE_QUESTIONS } from "../../../_lib/questions"
@@ -22,12 +23,19 @@ import * as style from "../../../_components/style"
  * recorded, graded and queued all along; this page was the only thing that had
  * not heard of them.
  *
- * The review index makes the opposite trade for the opposite reason — it lists
- * twenty-two sets and ships twenty-two headings, because a set's questions are
- * not needed until the reader opens it. Here there is no set to open; the
- * sitting is assembled out of five places at once, which is what makes it
- * interleaved by construction rather than by an author's care, and adding the
- * lessons to it widened that from twenty-two sources to nearly seventy.
+ * The review index makes the opposite trade for the opposite reason — a heading
+ * per set and no questions, because a set's questions are not needed until the
+ * reader opens it. Here there is no set to open; the sitting is assembled out of
+ * every set and every lesson at once, which is what makes it interleaved by
+ * construction rather than by an author's care.
+ *
+ * The counts that used to be in this paragraph are gone rather than corrected,
+ * and the reason is the course's own. They said twenty-two sets and nearly
+ * seventy sources, and had said it long after both were wrong, with nothing
+ * going red — because a number in a comment has no second copy anywhere, and
+ * writing a corrected one here would only restart the clock. Where the
+ * figure is not load-bearing — and it is not here, the trade is the point — the
+ * repair that does not rot is to stop stating it.
  */
 
 export const metadata: Metadata = {
@@ -74,6 +82,7 @@ const CorrectionsPage = () => (
   <main style={style.column(5)}>
     {intro}
     <Corrections questions={QUESTIONS} />
+    <SecondLookPanel />
   </main>
 )
 

@@ -205,6 +205,14 @@ export const StudyRecord = () => {
               you gave before you knew, and it only exists because something recorded it at the
               moment it was honest.
             </p>
+            {summary.sureAgainAndWrong === 0 ? undefined : (
+              <p style={style.note}>
+                {plural(summary.sureAgainAndWrong, "of them was", "of them were")} missed again on
+                the way back, with a 4 or a 5 on the re-answer. That is the rarest figure in this
+                file: it takes a miss, a lookup, a gap and a second rating to produce one, and none
+                of the four can be reconstructed from the others.
+              </p>
+            )}
           </>
         )}
 

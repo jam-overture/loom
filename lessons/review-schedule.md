@@ -51,6 +51,18 @@ you rated **4 or 5** and missed is not a gap — it is a belief about how the
 system works, held confidently, that turned out to be false. Those are the ones
 that survive being contradicted once, so those are the ones that come back.
 
+And the surface now says whether one did. A re-answer is rated before the reveal
+like everything else here, so **sure again and wrong** is a thing it can count:
+rated 4 or 5 on the way back, and still not got. Those figures are kept apart
+from the ones in the table below rather than added to them, and the reason is
+this section's own instruction — *look up only the specific point, then
+re-answer* — which means a correction is always rated after you have read the
+answer. That is the easier population. Pooling it with the cold ratings would
+make your calibration improve the more corrections you did, which is the one
+thing in this document that would be worth gaming. So the second table does not
+ask whether you knew it. It asks whether the reading took, and whether you could
+tell.
+
 ---
 
 ## Set A — two days after lesson 01
@@ -1764,10 +1776,16 @@ is why two rules at different levels sit on the same side of it.
 
 ## Set AN — two days after lesson 35
 
-Interleaved with 15, 24, 25, 27, 28, 29 and 33. Heavy on 29, because this seam is
-that lesson's instrument asked a question it never had to ask; and on 28, because
-the rule at the centre of it is a second copy of a fact about an instrument,
-written down in another party's file.
+Interleaved with 15, 24, 25, 27, 28, 29, 30 and 33. Heavy on 29, because this seam
+is that lesson's instrument asked a question it never had to ask; and on 28,
+because the rule at the centre of it is a second copy of a fact about an
+instrument, written down in another party's file.
+
+Question 11 was added on 11 October, after the lesson's ending was overtaken by
+the repository twice in three days. It is the only question in this set about
+something that did not exist when the lesson shipped, which is the reason it is
+last rather than placed by subject: a set is cumulative, and what you are
+recalling in it should be the course as it stands rather than as it was written.
 
 1. One probe reduces eight renders with `every` and another reduces the same eight
    with `some`. Say which verdict each belongs to, and then justify the pair from
@@ -1806,12 +1824,69 @@ written down in another party's file.
     and lesson 35 declines to report a proportion where a boolean is reported.
     Give the reason both declinings share, in a sentence about denominators or
     about who is making the claim. *(27, 35)*
+11. An audit now carries one list whose entry is a claim about the call rather
+    than about any component. Say which two inputs it is derived from and why a
+    probe outcome may not reach the computation. Then: a cheaper version of it
+    would have reported only *this call was handed nothing*, and a host told to
+    empty that list could satisfy it without supplying a single usable answer.
+    Say how, and then say which lesson's rule decides that the two causes are
+    one list with a reason rather than two lists. *(24, 30, 35)*
 
 Question 1 is the point of the set and question 2 is where a confident wrong answer
 is most likely — the two halves look like one question about one primitive, and they
 are two questions about two different kinds of fact. Question 6 is the one to
 answer slowly: the property being asked about is not a property of the rule's
-content.
+content. Question 11 is the newest thing in this set and the second half of it is
+the part to sit with: the failure it describes is a list at its most confident in
+exactly the case it was built to catch, which is a shape you have now met three
+times.
+
+## Set AO — two days after lesson 36
+
+Interleaved with 14, 18, 22, 23, 26, 27 and 35. Heavy on 27, because this seam is
+one clause of that lesson read more carefully and is unreadable if the clause is
+fuzzy; and on 22, because the pair-shaped seam this one wants is the one that
+lesson already has.
+
+1. A chart's ceiling is a prop *because nothing can compute it*. Give the second
+   half of that sentence, name the moment it is a claim about, and then name two
+   moments it is not a claim about. *(27, 36)*
+2. Two bands in the starter catalogue state the same ceiling with the same prop,
+   and one of them can never be checked. Say which, say what decides it, and then
+   say where that thing appears in the primitive's type, props schema or
+   catalogue line. *(18, 36)*
+3. Name the first argument `analyzeDelta` takes, and then name the one check
+   already wired into it that is about a pair of nodes rather than one. Say what
+   discipline it applies to the two trees and why measuring the operations would
+   be wrong. *(22, 36)*
+4. A meter refuses a value of 140 and a stat accepts a magnitude of 24000.
+   Explain both as one rule about where a number lives, and then say what
+   authoring a scale costs under that rule. *(36)*
+5. A `configure` pulls a chart's ceiling from 24000 to 100. Give the Gate's
+   verdict and reason code, and then say what the analysis correctly measured and
+   what was not in the measurement. *(07, 36)*
+6. A render of that page emits zero diagnostics and is right to. Say which
+   discipline of the two lesson 14 separates makes that correct, and say what a
+   diagnostic is *for* in a way that excludes this. *(14, 36)*
+7. Two faults live in the same pair of nodes — a figure with no magnitude, and a
+   figure above the ceiling. One is checked over the whole catalogue and one is
+   checked nowhere. Give the property of the *failures* that decided which. *(36)*
+8. Say what is actually missing before a fit check could live in the write path,
+   being precise that it is neither the walk nor the vantage. Then name the two
+   earlier seams that were closed by the thing that is missing — one by a host's
+   policy and one by a rule a primitive states about itself. *(22, 30, 36)*
+9. A check over the catalogue would pass on the day it was written and go on
+   passing. Say why lesson 23 is the reason to be careful about calling that a
+   remedy, and then make the case for writing it anyway using something about the
+   population rather than about the fault. *(23, 36)*
+10. Both of exercise B's zeros are zero. Say what holds one of them there and
+    what holds the other, and then say which lesson's rule that difference is an
+    instance of. *(26, 36)*
+
+Question 1 is the point of the set. Question 7 is where a confident wrong answer
+is most likely, because the honest answer is about people and the question sounds
+like it is about code. Question 10 is the one to answer slowly: the two numbers
+are identical and the facts behind them are not the same kind of fact.
 
 ---
 
@@ -1869,3 +1944,4 @@ renders this file rather than restating it.
 | AL | 2 days after L33 | | |
 | AM | 2 days after L34 | | |
 | AN | 2 days after L35 | | |
+| AO | 2 days after L36 | | |

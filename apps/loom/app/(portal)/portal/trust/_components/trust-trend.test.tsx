@@ -5,7 +5,9 @@ import { readTrend, type TrendSpan } from "@/app/(portal)/_lib/trust-trend"
 
 import { TrustTrend } from "./trust-trend"
 
-const RULES = "abc123"
+/** Two fingerprints sharing a shape half, so a pair of them reads as one policy edited. */
+const RULES = "abc123:1111111111111111"
+const EDITED = "abc123:2222222222222222"
 
 const spanWith = (over: Partial<TrendSpan> = {}): TrendSpan => ({
   judged: 20,
@@ -15,6 +17,8 @@ const spanWith = (over: Partial<TrendSpan> = {}): TrendSpan => ({
   unattributed: 0,
   rulesets: [RULES],
   unfingerprinted: 0,
+  checkSets: [[]],
+  unrecordedChecks: 0,
   from: "2026-10-01T00:00:00.000Z",
   to: "2026-10-05T00:00:00.000Z",
   ...over,
@@ -141,13 +145,81 @@ describe("TrustTrend", () => {
   })
 
   it("still shows both stretches when it refuses to attribute the movement", () => {
-    const { container } = draw(spanWith({ gap: 0.05 }), spanWith({ rulesets: ["other"] }))
+    const { container } = draw(spanWith({ gap: 0.05 }), spanWith({ rulesets: [EDITED] }))
 
     expect(screen.getByText(/isn.t about the AI/)).toBeTruthy()
     expect(container.querySelector("table")).toBeTruthy()
     expect(container.querySelector("details")?.textContent).toContain(
       "2 different recorded rulesets"
     )
+  })
+
+  /*
+   * The other half of *what judged these*, one click down beside the rulesets.
+   * A reader told the rules held still has been told half of what they came for.
+   */
+  describe("what Loom was checking", () => {
+    it("says a deployment that wired neither seam was judged by its rules alone", () => {
+      const { container } = draw(spanWith({ gap: 0.05 }), spanWith({ gap: 0.4 }))
+
+      expect(container.querySelector("details")?.textContent).toContain(
+        "Both stretches were judged by the same checks: nothing beyond your rules."
+      )
+    })
+
+    it("names the checks when there were some, in the portal's words", () => {
+      const { container } = draw(
+        spanWith({ gap: 0.05, checkSets: [["props", "bindings"]] }),
+        spanWith({ gap: 0.4, checkSets: [["props", "bindings"]] })
+      )
+
+      expect(container.querySelector("details")?.textContent).toContain(
+        "the settings check and the data check"
+      )
+    })
+
+    it("says which stretch had which when they differ, so a reader knows where to look", () => {
+      const { container } = draw(
+        spanWith({ gap: 0.05, checkSets: [["props"]] }),
+        spanWith({ gap: 0.4 })
+      )
+
+      expect(screen.getByText(/What Loom was checking changed in between/)).toBeTruthy()
+      expect(container.querySelector("details")?.textContent).toContain(
+        "This stretch was judged by the settings check; the one before it, by nothing beyond your rules."
+      )
+    })
+
+    it("counts the judgments that recorded nothing rather than leaving them out", () => {
+      const { container } = draw(
+        spanWith({ gap: 0.05, unrecordedChecks: 2 }),
+        spanWith({ gap: 0.4, unrecordedChecks: 1 })
+      )
+
+      expect(container.querySelector("details")?.textContent).toMatch(
+        /A further 3 claims across the two recorded no checks at all/
+      )
+    })
+
+    /**
+     * The sentence a reader acts on, and the one the old screen got wrong: an
+     * unrecorded check is not a change they have to go and find.
+     */
+    it("tells a check it cannot read apart from one that changed", () => {
+      draw(spanWith({ gap: 0.05, unrecordedChecks: 1 }), spanWith({ gap: 0.4 }))
+
+      expect(screen.getByText(/can.t show Loom was checking the same things/)).toBeTruthy()
+      expect(screen.getByText(/Nothing to do, and nothing is wrong/)).toBeTruthy()
+    })
+
+    it("carries the refusal's own name for anything looking at the rendered screen", () => {
+      const { container } = draw(
+        spanWith({ gap: 0.05, checkSets: [["props"]] }),
+        spanWith({ gap: 0.4 })
+      )
+
+      expect(container.querySelector("[data-trust-trend='checks-changed']")).toBeTruthy()
+    })
   })
 
   it("says a stretch with no timestamps has none rather than printing half a range", () => {

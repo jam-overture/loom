@@ -6,7 +6,9 @@ import { calibrationOf } from "../_lib/calibration"
 import { correctionQueue, dueCorrections, knownOnly } from "../_lib/corrections"
 import { dueNow, queueFor, type PartLessons, type QueueEntry, type ScheduledSet } from "../_lib/queue"
 import { recordIsKnown } from "../_lib/reading"
+import { questionLabel } from "../_lib/slugs"
 import { CorrectionsPanel } from "./corrections"
+import { SecondLookPanel } from "./second-look"
 import * as style from "./style"
 import { useProgress } from "./store"
 
@@ -221,7 +223,7 @@ export const Queue = ({ sets, parts, questionKeys }: QueueProps) => {
               ? "— nothing yet. That is the number to watch, because being sure and wrong is the one that does not fix itself."
               : `— ${calibration.confidentAndWrong
                   .slice(0, 6)
-                  .map((miss) => `${miss.set.replace("set-", "set ").toUpperCase()} q${miss.question}`)
+                  .map((miss) => questionLabel(miss.set, miss.question))
                   .join(", ")}. These are first in the corrections queue, and a later go at one does not remove it from this list — being sure and wrong happened.`}
           </p>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, ...style.column(1) }}>
@@ -235,6 +237,8 @@ export const Queue = ({ sets, parts, questionKeys }: QueueProps) => {
           </ul>
         </section>
       ) : undefined}
+
+      <SecondLookPanel />
     </div>
   )
 }

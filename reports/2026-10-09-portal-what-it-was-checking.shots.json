@@ -1,0 +1,56 @@
+{
+"outDir": "reports",
+"shots": [
+{
+"out": "2026-10-09-portal-what-it-was-checking-wide.png",
+"path": "/portal/trust",
+"viewport": { "width": 1680, "height": 1000, "label": "wide" },
+"fullPage": true,
+"waitFor": "text=Has it got better?",
+"measure": ["text=Has it got better?", "h2", "summary"],
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+{ "click": "button[type=submit]" },
+{ "waitFor": "text=What Loom has been doing" }
+]
+}
+},
+{
+"out": "2026-10-09-portal-what-it-was-checking-phone.png",
+"path": "/portal/trust",
+"viewport": "phone",
+"fullPage": true,
+"waitFor": "text=Has it got better?",
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+{ "click": "button[type=submit]" },
+{ "waitFor": "text=What Loom has been doing" }
+]
+}
+},
+{
+"out": "2026-10-09-portal-what-it-was-checking-open.png",
+"path": "/portal/trust",
+"viewport": { "width": 1680, "height": 1000, "label": "wide" },
+"fullPage": true,
+"waitFor": "text=Has it got better?",
+"do": [
+{ "click": "text=The two stretches, side by side" },
+{ "click": "text=Careful: what Loom was checking changed while these were judged" },
+{ "waitFor": "text=the settings check" }
+],
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+{ "click": "button[type=submit]" },
+{ "waitFor": "text=What Loom has been doing" }
+]
+}
+}
+]
+}

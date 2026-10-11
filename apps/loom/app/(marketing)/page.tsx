@@ -1,75 +1,60 @@
-import type { Metadata } from "next"
-
-import { askById, readAskId } from "@/app/(marketing)/_lib/adapt/asks"
+import { askedFor } from "@/app/(marketing)/_lib/addressed"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { servedOrigin } from "@/app/(marketing)/_lib/serving"
-import { type PageSearchParams as SearchParams, pageMetadata } from "@/app/(marketing)/_lib/share"
-import { HOME, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
+import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
+import { HOME, siteOrigin } from "@/app/(marketing)/_lib/site"
 import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
 /**
  * What this address unfurls as when somebody sends it to somebody else.
  *
- * A function rather than the constant it was, because the front door is not one
- * page: `/?ask=problem&approve=1` is the front door with a band lifted under the
- * headline, and the one thing this site can show that nothing else can is that
- * the arrangement has an address. A card that showed the published page for both
- * would be silent at exactly the moment the claim is being made.
+ * **The shared factory, as of 11 October, and this page was the one exception
+ * to it.** It had a `generateMetadata` of its own for eighteen lines of good
+ * reason: the front door was not one page, `/?ask=problem&approve=1` was the
+ * front door with a band lifted under the headline, and a card that showed the
+ * published page for both would have been silent at exactly the moment this
+ * site makes the claim nothing else can make.
  *
- * The rules are run to draw it, so the verdict on the card is the verdict on the
- * page rather than a description of one — but not here. `generateMetadata` only
- * writes the address of the picture; the run happens once, inside the route that
- * answers it, and only if somebody actually asks for the image.
+ * Every word of that was true until 1 October, when the band moved to
+ * `/how-it-works`. After it, this page read a request it does not act on and
+ * announced it — so a link to `/?ask=shorter&approve=1` unfurled as a request
+ * and opened a page that had not been asked anything, which is the one thing
+ * this site cannot afford to get wrong, because it is the claim.
+ *
+ * The factory reads the whole address and `pageMetadata` drops what this route
+ * cannot use, so what is announced here is the published front door. The run
+ * that used to be made to draw this card is made for `/how-it-works` now, by
+ * the same function, off the same constant the renderer reads.
  */
-export const generateMetadata = async ({
-  searchParams,
-}: {
-  readonly searchParams: SearchParams
-}): Promise<Metadata> => {
-  const params = await searchParams
-  const ask = askById(readAskId(params["ask"]))
-
-  return pageMetadata(HOME, {
-    origin: siteOrigin(),
-    theme: readThemeName(params["theme"]),
-    ...(ask === undefined ? {} : { ask, approve: params["approve"] === "1" }),
-  })
-}
+export const generateMetadata = routeMetadata(HOME)
 
 /**
  * The landing page: one tree, rendered.
  *
- * Everything a visitor can do to this page is in its address. The palette comes
- * off the query string, which is what makes the footer's re-theme link an
- * ordinary navigation rather than client state — and what the visitor has asked
- * the page for arrives the same way, so a rearranged page can be copied,
- * bookmarked and shared, and two people reading the site cannot move it under
- * each other.
+ * Everything a visitor can do to this site is in the address, which is what
+ * makes the footer's re-theme link an ordinary navigation rather than client
+ * state, and what lets a rearranged page be copied, bookmarked and shared
+ * without two readers moving the site under each other. It is read here through
+ * `askedFor`, the one reader, and read whole.
  *
- * An unrecognised value in either is the default rather than an error. A
- * landing page reached with a mangled address should be a page, not a 400.
+ * **The palette is the only part of it this page is a function of**, and that is
+ * a change of 1 October rather than a property: the band a request rearranges
+ * moved to `/how-it-works`, and `pageTreeFor` runs a request for that page and
+ * for no other. `addressed.test.ts` measures it — this page serves the same
+ * markup asked or not — and it reads the rest of the address anyway, because the
+ * last time a page here decided for itself which half of an address was worth
+ * reading, the half it dropped was the half the band needed.
+ *
+ * The card is no longer drawn from the request either. It was until
+ * 11 October, which made this page the only one announcing an arrangement it
+ * does not serve; `generateMetadata` above is the shared factory and this route
+ * is announced as the page it publishes.
  */
 const HomePage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
-  const params = await searchParams
-  const ask = readAskId(params["ask"])
   const rendered = await renderSitePage(HOME, {
     origin: await servedOrigin(),
-    theme: readThemeName(params["theme"]),
-    ...(ask === undefined
-      ? {}
-      : {
-          ask,
-          approve: params["approve"] === "1",
-          /**
-           * Putting it back is the visitor's second decision, so it is the
-           * address's second pair of answers. Both are ignored without an `ask`,
-           * because there is nothing to reverse — a mangled address should be a
-           * page rather than a 400, here as everywhere else on this site.
-           */
-          back: params["back"] === "1",
-          backApprove: params["back-yes"] === "1",
-        }),
+    ...askedFor(await searchParams),
   })
 
   /**

@@ -1,5 +1,6 @@
 import { ceilingOf, describeCeiling, withCeiling } from "../deadline.js"
 import type { JsonObject } from "../json.js"
+import { describeRegistered } from "../registered.js"
 import { err, type Result } from "../result.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -64,7 +65,10 @@ const askOne = async (
   if (!registered) {
     return err({
       reason: "no-such-endpoint",
-      detail: `registered: ${options.registry.endpoints.map((entry) => entry.id).join(", ") || "none"}`,
+      detail: `registered: ${describeRegistered(
+        to,
+        options.registry.endpoints.map((entry) => entry.id)
+      )}`,
     })
   }
 

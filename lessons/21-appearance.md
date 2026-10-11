@@ -725,7 +725,7 @@ The output:
   resolved  {"palette":"editorial","fontPack":"editorial-serif","stylePreset":"comfortable"}
             Editorial / Editorial Serif / Comfortable
   refused   {"palette":"warmer","fontPack":"editorial-serif","stylePreset":"comfortable"}
-            No palette "warmer". Registered: minimal, editorial, bold, paper, slate, sage, blush, harbour, citrus, lilac, graphite, clay, linen, midnight, carbon, plum, forest, ember, dusk, obsidian, tide.
+            No palette "warmer". Registered: paper, sage, harbour, carbon, ember (nearest 5 of 21).
   refused   {"palette":"editorial","fontPack":"editorial-serif"}
             Theme selection is malformed: stylePreset: Required
   refused   {"palette":"editorial","fontPack":"editorial-serif","stylePreset":"#f5f2ec"}
@@ -736,10 +736,14 @@ The output:
 
 Three things.
 
-The unknown-id error carries **the whole registered list**, which is the same
-move `describeRegistryError` makes for primitives — a model or a host that got
-the id wrong is told what the right ones are, in the failure, rather than being
-asked to go and look.
+The unknown-id error carries **the whole registered list** — `error.available`
+holds all twenty-one — which is the same move `describeRegistryError` makes for
+primitives: a model or a host that got the id wrong is told what the right ones
+are, in the failure, rather than being asked to go and look. The *sentence*
+prints the nearest few and says how many it stands in for, because a sentence
+goes in a log line and how many palettes a deployment registers is not a number
+the runtime sets. Worth separating, because the two are different questions:
+what the failure knows, and what it says.
 
 The second refusal is the operational fact from the prompt block, executed: a
 selection with two of three keys does not resolve. Not "resolves partially", not

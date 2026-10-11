@@ -285,6 +285,7 @@ describe("what the record page may show", () => {
       explanations: 0,
       corrections: 1,
       confidentAndWrong: 1,
+      sureAgainAndWrong: 0,
       firstDay: "2026-03-01",
       lastDay: "2026-03-10",
       days: 5,
