@@ -216,8 +216,8 @@ plan was wrong says so here rather than in a report nobody reads again.
 
 | # | Milestone | Owner | Done looks like | Status |
 | --- | --- | --- | --- | --- |
-| 1 | **A page with an ask, addressed and broadcasting** | maintainer session | Signals arriving at an intake, filed under one tree and revision. No model, no variants | **page chosen — the marketing site.** Blocked on naming the ask: it has none today |
-| 2 | **Serve a revision, and attribute to it** | `Loom marketing`, then maintainer session | Two revisions served, assignment randomised per view, tallies accumulating separately under each. The page can answer *where do readers stop*, per revision | **blocked on [0259](../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)** being accepted |
+| 1 | **A page with an ask, addressed and broadcasting** | maintainer session | Signals arriving at an intake, filed under one tree and revision. No model, no variants | **the ask exists.** 11 October: an install band on the front door, a `loom.code` panel printing the two package names, its presses asked about in `readers/asked.ts`. What is left is the intake |
+| 2 | **Serve a revision, and attribute to it** | `Loom marketing`, then maintainer session | Two revisions served, assignment randomised per view, tallies accumulating separately under each. The page can answer *where do readers stop*, per revision | **unblocked.** [0259](../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md) was accepted on 11 October, so the store-backed render is `Loom marketing`'s to do |
 | 3 | **Derivation from tallies** | maintainer session | Counters → one sentence a person could argue with, deterministic, with the numbers that produced it carried alongside. Tested against a case where it should say nothing | not started |
 | 4 | **The model seam, with a small local model** | maintainer session | Sentence → operations → the Gate → held for a person, and the record reads correctly: rationale, origin `system-signal`, inverse | not started |
 | 5 | **The allocator** | undecided | Recommends an arm, reports *no winner* when there is none, and cannot promote below the evidence floor | not started |
@@ -237,12 +237,15 @@ optimisation; it is description, and description is what nobody has today.
 
 ### What is blocked on the maintainer
 
-1. **Which node is the ask.** The page is chosen — the marketing site — and it
-   has no install ask on it. Naming one is a page-design decision rather than an
-   engineering one, and nothing downstream can be measured until it exists.
-2. **Accepting or refusing [0259](../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md).**
-   Milestone 2 is gated on it, and so is governing the marketing site from the
-   portal at all.
+1. ~~**Which node is the ask.**~~ **Answered on 11 October.** The front door
+   carries an install band: a heading, the two package names in a panel a reader
+   can copy, and one control into the docs. `loom.code` is in `CONTROL_TYPES`, so
+   the copy is a press this site asks to be told about. The ask is the `loom.code`
+   node of the install band on `/`; everything downstream points at it.
+2. ~~**Accepting or refusing [0259](../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md).**~~
+   **Accepted on 11 October.** Milestone 2 is unblocked, and the marketing
+   surface earns portal governance by rendering from the store rather than by
+   being wired to it.
 3. **Confirming the objective** above — reach as the target, conversion rate as
    the guard — or naming a different one.
 4. **The evidence floor**: how many views per arm before anything may be promoted
@@ -265,8 +268,10 @@ optimisation; it is description, and description is what nobody has today.
 
 ## Open questions
 
-1. **What is the ask?** The objective above is a shape; it needs one named node to
-   point at. Choosing it is a page-design decision and comes first.
+1. ~~**What is the ask?**~~ Answered 11 October: the install panel on the front
+   door. What is still open is whether it is in the right *place* — it sits after
+   the questions band, which is a judgement nobody has evidence for yet, and is
+   exactly the first thing the loop should be allowed to argue about.
 2. **Where does the loop live** once it is proven — a lane of its own, the signals
    lane, or the framework's? Step 7, deliberately last.
 3. **How many arms?** Two is the honest answer at this traffic; the design should

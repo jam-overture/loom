@@ -704,12 +704,20 @@ describe("the mechanism page's short answers", () => {
  * and a panel whose right-hand end is behind a gesture renders cleanly, emits
  * no diagnostic, measures no overflow and passes every test on this page.
  *
- * **This site now serves none of them**, and that is the 26 September cut
- * rather than a regression: seven were the mechanism page's raw record and the
- * eighth was the front door's *how this page is put together* band, and the
- * maintainer's direction retired the lot. The rule is kept rather than deleted
- * with them, written so it holds whatever the count is — vacuous today, and
- * waiting for the day somebody adds a panel back.
+ * **This site served none of them between 26 September and 11 October**, which
+ * was the cut of the 26th rather than a regression: seven were the mechanism
+ * page's raw record and the eighth was the front door's *how this page is put
+ * together* band, and the maintainer's direction retired the lot. The rule was
+ * kept rather than deleted with them, written so it holds whatever the count
+ * is, and waiting for the day somebody added a panel back.
+ *
+ * **That day was 11 October and the panel is the install line**, which is the
+ * one thing on this site the rule below was *not* written for: the default is
+ * right for a command, and `wrap: false` is now the answer a panel here can
+ * give rather than a thing no panel had ever said. The sweep is held at one for
+ * the reason it was held at zero — a sweep that silently stops finding things
+ * passes forever — and the count is the thing to change the day a second panel
+ * is deliberate.
  */
 describe("the panels that print data", () => {
   const everyPanel = async (): Promise<readonly ElementNode[]> => {
@@ -734,15 +742,21 @@ describe("the panels that print data", () => {
    * panel that wraps — which is exactly how the eight went unset for three
    * weeks.
    */
-  it("is none of them today, counted rather than assumed", async () => {
-    expect((await everyPanel()).length).toBe(0)
+  it("is the install line and nothing else, counted rather than assumed", async () => {
+    const panels = await everyPanel()
+    const printed = panels.flatMap((panel) =>
+      panel.children.flatMap((child) => (child.kind === "text" ? [child.value] : []))
+    )
+
+    expect(printed).toEqual(["npm install @jam-overture/loom @jam-overture/loom-primitives"])
   })
 
   /**
    * `wrap` is optional on the primitive and absent means `false`, which is right
-   * for a library that does not know what it is holding. This site does know: it
-   * has never printed a command. So a panel here either wraps or says out loud
-   * that it does not, and the day one arrives without an answer this fails.
+   * for a library that does not know what it is holding. This site does know
+   * what each of its panels holds, and as of 11 October that is one command and
+   * nothing else. So a panel here either wraps or says out loud that it does
+   * not, and the day one arrives without an answer this fails.
    */
   it("each say whether they wrap, rather than leaving it to the default", async () => {
     for (const panel of await everyPanel()) {

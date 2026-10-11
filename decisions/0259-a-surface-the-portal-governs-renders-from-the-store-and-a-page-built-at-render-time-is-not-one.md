@@ -1,19 +1,28 @@
 # 0259 — A surface the portal governs renders from the store, and a page built at render time is not one
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-11
 **Section:** §1, §5
 
-> **Why `Proposed`.** It changes no code and contradicts no `Accepted` record.
-> What it does is name the condition a surface has to meet before the portal can
-> govern it — and meeting that condition requires a **second lane** to change how
-> its routes render, which is not a portal routine's to decide. Written because
-> the maintainer asked on 11 October for the marketing and docs surfaces to be
-> *"hooked up to the portal under my account/login"*, and the honest answer is
-> that one of them nearly can be, the other cannot, and neither is wiring.
+> **Why it was raised as `Proposed`.** It changes no code and contradicts no
+> `Accepted` record. What it does is name the condition a surface has to meet
+> before the portal can govern it — and meeting that condition requires a
+> **second lane** to change how its routes render, which is not a portal
+> routine's to decide. Written because the maintainer asked on 11 October for
+> the marketing and docs surfaces to be *"hooked up to the portal under my
+> account/login"*, and the honest answer is that one of them nearly can be, the
+> other cannot, and neither is wiring.
 >
 > **Why this number.** `0258` is the highest record on `main` at `b7f90a5`, and
 > no open pull request adds one.
+>
+> **Accepted on 11 October**, the day it was raised. The maintainer answered
+> *"Accept 0259"* and, in the same breath, asked for the front door to name the
+> ask — which is the order this record argues for: the marketing surface earns
+> portal governance by rendering from a store, and the thing it is being
+> measured *for* has to exist on the page before either is worth doing.
+> Clause 4 stands as written: the docs surface is prose and is refused, and
+> nothing here is wiring.
 
 ## Context
 

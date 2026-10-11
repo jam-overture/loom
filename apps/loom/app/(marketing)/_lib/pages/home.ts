@@ -18,11 +18,12 @@ import {
   siteReadingBand,
   type ChromeContext,
 } from "../chrome"
-import { FACTS } from "../copy"
+import { FACTS, INSTALL_COMMAND } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import {
   action,
+  code,
   heading,
   inlineLink,
   prose,
@@ -732,6 +733,77 @@ const questions = (ids: IdFactory): LoomNode =>
   ])
 
 /**
+ * The ask, and the first time the front door has carried one.
+ *
+ * Every control on this page before 11 October sent a reader somewhere else to
+ * read more: the demonstration, `/how-it-works`, the repository, the four cards
+ * below. A visitor persuaded by all of it had nothing to press that would
+ * *start* them — **the two package names were nowhere on this site**, in any
+ * band, on any route, which a search of this directory said plainly on the day
+ * the conversion objective was written.
+ *
+ * That is the band's whole justification and it is worth stating as the
+ * measurement problem it was. `docs/adaptation.md` names *readers who reach the
+ * install ask* as the thing the loop optimises. A funnel whose last step is not
+ * on the surface being measured cannot be measured: a model pointed at this
+ * page would have been asked to raise a number the page had no way of
+ * producing, and every proposal it made would have been scored against noise.
+ *
+ * **One band, after the questions, rather than a line under the hero.** The
+ * hero placement is the one `loom.code`'s own `density: "compact"` was written
+ * for and is the obvious second thing to try; this is first because the ask
+ * reads differently to somebody whose objections have just been answered, and
+ * because *where the ask goes* is exactly the question this site exists to have
+ * settled by evidence rather than by taste. One band in one place, addressed as
+ * a node of its own, is the arrangement a proposal can move and the Gate can
+ * decide on.
+ *
+ * **The panel is the one deliberate `wrap: false` on this site**, and the note
+ * on `code` in `nodes.ts` is the reason: the default wraps because a pretty
+ * printed tree has no line structure to protect, and a shell line broken across
+ * two visual rows reads as two commands. This is the exception that note said
+ * it was keeping the prop for — the only line on the front door somebody is
+ * meant to type.
+ *
+ * It is paid for at the small end and the price is known: measured at 390, the
+ * panel shows 348 of the line's 530px, so 182px of it is behind a horizontal
+ * scroll with a track under it saying so. What makes that the right trade here
+ * rather than the one the September finding was about is the *Copy* button —
+ * the reader's way to the whole line is the control beside it rather than the
+ * gesture, and what they take is the whole line whatever is on screen.
+ *
+ * Nothing was added to the page to count the press that matters. `loom.code`
+ * draws its own copy control, so the type joining `CONTROL_TYPES` in
+ * `readers/asked.ts` is the whole of the instrumentation.
+ */
+const install = (ids: IdFactory, context: PageContext): LoomNode =>
+  section(
+    ids,
+    { width: "readable", eyebrow: BAND.install },
+    "Put it in a project you already have",
+    [
+      prose(
+        ids,
+        `There is nothing to sign up for. One package is Loom itself. The other is the set of ${FACTS.primitives} components this page is drawn from.`,
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, INSTALL_COMMAND, {
+        language: "bash",
+        tone: "terminal",
+        density: "compact",
+        wrap: false,
+      }),
+      stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
+        action(ids, "Follow the install guide", surfaceHref(context.origin, DOCS), {
+          variant: "primary",
+          scale: "large",
+        }),
+      ]),
+    ],
+    { align: "center" }
+  )
+
+/**
  * How a surface is offered here: the verb, and the mark above it.
  *
  * The sentence is **not** here — it is `Surface.blurb`, so the words a visitor
@@ -978,6 +1050,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
         facts(ids, context),
         questions(ids),
+        install(ids, context),
         waysIn(ids, context),
         closing(ids, context),
         ...siteReadingBand(ids, chrome),
