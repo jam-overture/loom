@@ -8,6 +8,44 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-11 — `askHref` and `mechanismHref` are the same function under two names, and every call site had to pick one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/site.ts`) · **Status:** open — **nothing is
+broken and nothing a reader sees is wrong**; it is one function with two
+exported names, and the names disagree about which page this site asks things of
+
+`site.ts` exports both, and after today they are character-for-character the
+same body:
+
+```ts
+export const askHref = (origin: string, options: AskedFor = {}): string =>
+  askedHref(origin, ASKED_ROUTE.path, options)
+
+export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
+  askedHref(origin, ASKED_ROUTE.path, options)
+```
+
+They were not the same in September: `askHref` wrote an address of the front
+door and `mechanismHref` wrote one of `/how-it-works`, which is why there are
+two. The maintainer moved the band to `/how-it-works` on 1 October and the two
+destinations became one. Counted on the day this was filed: **19 invocations
+across 8 files besides `site.ts`**, of which exactly one is `mechanismHref` —
+`pages/see-it-happen.ts:231`, the panel's link to the raw record. So the choice
+between the two names is being made, and it has been made the same way 18 times
+out of 19.
+
+**Not collapsed in the branch that found it, deliberately.** It is a rename
+across nine files in a pull request about what a shared link unfurls as, and
+which name survives is a real question rather than a tidy-up: `askHref` says
+what the address *carries* and `mechanismHref` says which *page* it addresses,
+and after `ASKED_ROUTE` the second is the one that can go stale again. The
+recommendation is `askHref`, with `mechanismHref` deleted rather than deprecated.
+
+What is not defensible either way is the doc comment above `mechanismHref`,
+which argues from a distinction between the two pages that no longer exists.
+`askHref`'s was corrected on this branch because it was false rather than
+merely redundant — it gave `/?ask=costs` as the example address.
 ## 2026-10-11 — a sentence lesson 21 teaches about became false, and the repair is arguably the better lesson
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
@@ -1924,6 +1962,13 @@ should have one* would be this lane moving a band its owner placed.
 ## 2026-10-07 — the doc comment on `SITE_ROUTES` argues an order for seven pages this site does not have
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-66-the-card-of-the-page-that-rearranges`** — rewritten
+rather than deleted, as the entry asked: what the three surviving pages are in
+and why they are in that order is three sentences, and a quoted note names the
+seven that went so the next reader is not left wondering whether the file was
+always this short. Original status below.
+
+**Status:**
 open — nothing is broken and nothing a reader sees is wrong; it is ~50 lines of
 false reasoning in the file that defines this site's navigation.
 
@@ -49308,6 +49353,14 @@ empty and nothing else.
 ## 2026-10-09 — the card for a rearranged address is drawn by the page that no longer rearranges, and the page that does unfurls as a brochure
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-66-the-card-of-the-page-that-rearranges`.** The exception
+is gone rather than moved: `ASKED_ROUTE` is the one constant naming the page a
+request is run against, and the renderer, the address writer, the words and the
+picture all read it. The `drop-pitch` card the entry below worried about is
+drawn and photographed in `reports/2026-10-11-marketing-the-card-of-the-page-that-rearranges.md`.
+Original status below.
+
+**Status:**
 open — the second half of the same 1 October move, measured today and not taken,
 because it changes what every shared link of this site says
 
