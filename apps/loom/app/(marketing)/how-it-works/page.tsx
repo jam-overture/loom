@@ -6,6 +6,31 @@ import { HOW_IT_WORKS, siteOrigin } from "@/app/(marketing)/_lib/site"
 import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
+/**
+ * What this address unfurls as, which on this page is **the verdict the rules
+ * reached**.
+ *
+ * The same factory every page of this site takes, and on this one it carries a
+ * request, because this is the page a request is run against. That used to be
+ * the front door and this page took a factory that read the palette and nothing
+ * else — so for ten days the one page on this site that rearranges in front of
+ * a visitor unfurled as a plain page, while the one that does not unfurled as a
+ * request it would not act on. Both halves were correct on 30 September.
+ *
+ * What a link of this page says, by what is in its address:
+ *
+ * | address | the card |
+ * | --- | --- |
+ * | `/how-it-works` | the published page |
+ * | `?ask=drop-pitch` | *Refused*, in the neutral tone, with the rule that refused it |
+ * | `?ask=unstick-menu` | *Waiting for you*, because the rules held it |
+ * | `…&approve=1&back=1` | *Waiting for you* again, on the putting-back |
+ *
+ * The last row is the one worth having. Nothing else on the internet unfurls as
+ * a product declining to undo its own change until a person says yes, and until
+ * today no address of this site could produce it: `ShareContext` carried two of
+ * the four parameters, so the picture could not be drawn.
+ */
 export const generateMetadata = routeMetadata(HOW_IT_WORKS)
 
 /**
