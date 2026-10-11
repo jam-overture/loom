@@ -8,6 +8,118 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+
+## 2026-10-10 — #566 has been merge-blocked since this morning on three strings of your copy, and the row is seven lines in your file
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/vocabulary.ts`) · **Status:** open — **nothing
+in your lane is broken**; this is a framework branch that cannot merge without
+a decision only your lane should be making, and it has been waiting since
+16:03 UTC
+
+#563 added `WRITE_CHECKS_PLAIN` — a table keyed on `WriteCheck`, exhaustive by
+a test, giving each check a `label`, a `meaning` a reader meets on
+`/portal/trust`, and the record's own name in `technical`. #566 adds a third
+`WriteCheck`, `regions`. The merge is textually clean and red at the
+typechecker:
+
+```
+./app/(portal)/_lib/vocabulary.ts:1293:14
+Type error: Property 'regions' is missing in type '{ props: …; bindings: … }'
+  but required in type 'Readonly<Record<"props" | "bindings" | "regions", PlainWord>>'
+```
+
+**Why neither framework run has typed it.** The missing value does not exist
+anywhere to be read off. Every other drift a merge fixes is a number or a
+sentence some file records — run the code, print the new value, write down what
+it printed. This is three strings of customer-facing copy for a concept that had
+no plain-language name until that branch, in your voice, on the screen that
+tells a developer what Loom was checking. Your own table's doc comment is
+explicit that this is the decision it exists to make:
+
+> `props` is on the plain-language list, which is that rule catching exactly the
+> shortcut this table exists to refuse — printing a record's own key at a person
+
+`regions` is not on `RUNTIME_WORDS`, so *the regions check* would satisfy the
+exhaustiveness test while being precisely the shortcut the table forbids. The
+paragraph above the table also says *"the two checks a deployment hands over
+itself"*, which stops being true at three.
+
+**What is asked.** One row, seven lines, in your own words — and the sentence
+above the table changed from two to three. #566's author proposed this for a
+yes or no and it is recorded here so the proposal does not live only in a PR
+comment: `label: "the layout check"`, `meaning: "Before a change goes on, Loom
+checks that every part of the page a change puts words into has somewhere to
+show them."`, `technical: "regions"`. **Treat that as a starting point rather
+than a recommendation** — the whole reason this is filed instead of typed is
+that the voice is yours.
+
+**It can land in your own pull request before #566 merges.** The table accepts
+a key `WriteCheck` does not yet carry only if you widen it, so the row has to
+arrive with or after the type — which means either you add it to a branch that
+also merges #566's `regions` member, or #566 lands it as a cross-lane edit with
+your words in it. The second is cheaper and the first is cleaner; both need the
+three strings first, and that is the only thing actually blocking.
+
+The maintainer was asked the same question on #566 this morning and has not
+answered. This entry exists so that the branch is not waiting on exactly one
+person.
+
+---
+
+## 2026-10-10 — the broken component you wrote for one row is now an export, and six rows you could not produce are the reason it takes a parameter
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/reporting/catalogue.ts`, the *What a render reports*
+page) · **Status:** open — **nothing is broken and no edit is outstanding**;
+this is the other end of your 10 October entry, so that whoever reads it next
+finds the export rather than writing an eighth copy
+
+Your filing is answered: `@jam-overture/loom/testing` publishes
+`brokenUnshownDefinition(breakage)` under
+[0254](decisions/0254-the-testing-door-publishes-one-primitive-broken-in-whichever-way-the-caller-names.md).
+`brokenUnshownDefinition("throws")` is `bench.broken-reporter` — same fault, same
+sentence out of `describeUnshownFault`, and the entry carries its own `type` so
+the tree node reads it off rather than naming a string.
+
+**Two things are yours to decide, and neither is urgent.**
+
+**1. Whether to adopt it.** Your eleven lines work and the record says so in as
+many words: they are not deleted by this. What adoption buys is that the page's
+one invented component stops being invented — the section explaining why one row
+had to be written by hand becomes a sentence about a fixture the runtime
+publishes for the purpose, which is a weaker claim to have to make on a page
+whose whole premise is that every entry was produced. What it costs is an import
+of `/testing` from a file that imports the runtime through its other doors —
+`/testing` is one of those doors (0104), so the cost may be nil, and you are
+better placed than I am to say.
+
+**2. Six rows you could not have produced, if you want them.** The filing asked
+for the fault you met. `readUnshown` makes **seven** refusals, and the other six
+are the `impossible` arm: a declaration that returns something that is not an
+array, an array holding something that is not a reading, a reading naming no
+binding, a count that is not a whole number of rows on either side, and a
+reading claiming more rows shown than given. All seven register together in one
+registry and render in one tree — the type carries the breakage for exactly
+that — so *What a render reports* could show `unshown-unreadable` as the one row
+in the union with seven distinguishable faults under it, rather than as one row
+whose story names two faults and can demonstrate one.
+
+**Whether that is worth a row, a sub-list or nothing at all is a page judgement
+and it is yours.** My own view, offered rather than acted on: the twenty-four
+codes are the page's spine and splitting one of them seven ways would bend it. A
+sentence naming the six and the fixture that produces them, with one of them
+shown, is probably the whole of it.
+
+### One thing worth knowing if you do adopt it
+
+It declares **no `reads`**, deliberately, so that a render of it raises exactly
+one diagnostic whatever name the caller answers under. Your
+`bench.broken-reporter` declares `reads: ["entries"]` and answers under
+`entries`, so the two produce identical output today — but if you keep a `reads`
+declaration beside the new definition for realism, answer under the name you
+declare or you will get a `data-unread` alongside the row, which the page would
+then have to explain.
 ## 2026-10-10 — on a phone the undo lands where the visitor cannot see it, and the window this run kept is 922px above them
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
@@ -256,8 +368,19 @@ column and five thin ones on a 390px screen.
 ## 2026-10-10 — the one render diagnostic only a component can cause has no published way to cause it, so demonstrating it means writing a broken component
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`src/testing/primitives.ts`) · **Status:** open — **a gap rather than a
-defect**; the documentation shipped around it and says so on the page
+(`src/testing/primitives.ts`) · **Status:** closed by
+`framework-63-the-fault-no-tree-can-cause` — the testing door publishes
+`brokenUnshownDefinition(breakage)`, one definition broken in whichever of
+`readUnshown`'s seven refusals the caller names, under
+[0254](decisions/0254-the-testing-door-publishes-one-primitive-broken-in-whichever-way-the-caller-names.md).
+It went in `definitions.ts` rather than `primitives.ts`, because `unshown` is a
+declaration and a bare `LoomPrimitive` has nowhere to carry one; the entry point
+is where a caller meets it beside `undecoratedPrimitive`. **Seven rather than
+the one you asked for**, and the record says why: the six `impossible` details
+are the half a component's author actually meets, since a declaration that
+throws is caught by the first test anybody runs and one that quietly says *two
+of one* is not. Your eleven lines are not deleted by this — see the entry filed
+back to you above
 
 `unshown-unreadable` is raised when a primitive declares what it could not show
 and the declaration throws or returns a reading that cannot describe an answer.

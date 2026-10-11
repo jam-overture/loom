@@ -337,3 +337,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0251](0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md) | A change to what readers did is a ratio of two shares, and an inside a change gave a part is not a reader | Accepted | §4c (reader signals) |
 | 0252 | *No record on this branch* | — | — |
 | [0253](0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md) | The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report | Accepted | §4, not the library |
+| [0254](0254-the-testing-door-publishes-one-primitive-broken-in-whichever-way-the-caller-names.md) | The testing door publishes one primitive broken in whichever way the caller names, and the fault is named for what the author did | Accepted | §1 (process), §3 (render seam) |
