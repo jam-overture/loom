@@ -210,7 +210,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  *
  * **The ninth needed one as well, and it is the same rule holding rather than a
  * second exception**
- * ([0254](../../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)).
+ * ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)).
  * A census of the library is the first reading whose rows are keyed by the
  * **vocabulary** and not by what a deployment holds, so it is the first that can
  * report `nothing-of-the-kind`: every earlier set's subject exists by
@@ -473,7 +473,7 @@ export const meaningOfDeploymentSilence = (silence: DeploymentSilence): SilenceM
 }
 
 /**
- * What a census of the library reports, of one kind of part (0254).
+ * What a census of the library reports, of one kind of part (0257).
  *
  * Both reasons are about a kind and neither is about a page, so this is the set
  * that put the fourth subject in the table above. `unplaced` is the one member

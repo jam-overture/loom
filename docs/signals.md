@@ -37,7 +37,7 @@ the portal every day.
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
-| Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0254](../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
+| Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
 | Whether the readers who met a kind of part read it | each place's own sound share, weighted by the arrivals at its page's door ([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)), so a shorter rollup window cannot move it |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
@@ -1330,7 +1330,7 @@ a column, a store or the vocabulary**, and the broadcaster was not touched, so
 its weight is unchanged — measured both sides and byte-identical.
 
 Two things decide the shape, and the first is what makes the figure sound
-([0254](../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)):
+([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)):
 
 - **The unit is the placement, and a reader is never the unit.** `views`,
   `reached` and `engaged` count distinct page views and are absent from every

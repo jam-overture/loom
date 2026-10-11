@@ -11,7 +11,7 @@ request, #576) · **Section:** §24 of [`docs/signals.md`](../docs/signals.md)
 readers who met your testimonial band, six in ten read it.*
 
 This was the open finding owned by this lane — filed yesterday, on this same
-branch, by the unit that refused to ship it inside 0254's type. It was the only
+branch, by the unit that refused to ship it inside 0257's type. It was the only
 open finding in the queue that was a thing to build rather than a limit written
 down, and the pull request comment offered it as next run's unit. It is now
 built and that finding is closed.
@@ -113,8 +113,9 @@ of the reading are pinned by a test, so adding one later has to argue with it.
 - **0256** — *A kind's share of the readers who met it is a weighted mean of
   sound shares, and the weight is the door's.* Accepted. Nothing superseded.
 
-I took **0256** rather than 0255: 0254 is this branch's, and 0255 is claimed by
-#577, which was open when I read the index. The rule is the next number free on
+I took **0256** rather than 0255: this branch's other record held 0254 when I
+read the index (renumbered to 0257 at merge, see the note in its header), and
+0255 is claimed by #577, which was open at the time. The rule is the next number free on
 `main`, and avoiding a clash I could see is strictly better than taking one.
 
 ## A test that would have been weakened rather than fixed

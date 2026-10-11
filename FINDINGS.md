@@ -49806,7 +49806,7 @@ makes drawable, with the one sentence on it that would be got wrong
 
 `libraryReadingOf(readings)` is on this branch, published from
 `@jam-overture/loom/signals` with
-[0254](decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md).
+[0257](decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md).
 It takes the `PageReading`s a portal already builds — no store read, no second
 join — and answers a question no screen in this subsystem has been able to ask:
 **not which page to fix, but which *kind of part* earns its place.** *Your
@@ -49870,7 +49870,7 @@ weight is `min(appearances, opened)` rather than `opened`, because weighting by
 the openings alone would have projected a folded rate onto page views no rollup
 had reached — so nothing here is withheld for a collection that is behind
 
-0254 publishes a kind of part's standing as a share of the **places** it stands,
+0257 publishes a kind of part's standing as a share of the **places** it stands,
 and is explicit that this is not a share of readers. The figure everybody will
 ask for next is the other one: *of the readers who met your testimonial band,
 what share read it.*
@@ -49913,7 +49913,7 @@ consumer, and the first where the silence is the entire answer rather than one
 value in it
 
 Nothing in `src/primitives/` declares `role`, which 0238 noted, 0242 inherited
-and 0251 priced again. `libraryReadingOf` (0254) is the fourth consumer, and it
+and 0251 priced again. `libraryReadingOf` (0257) is the fourth consumer, and it
 is different in kind from the first three.
 
 **The new price.** The three earlier consumers lose *one verdict on one part* to
@@ -49947,7 +49947,7 @@ unnoticed.
 **Status:** open — **a screen to draw, with one pairing rule and one state to
 refuse**
 
-`libraryReadingOf` (0254) and `libraryReachOf` (0256) are two readings of the
+`libraryReadingOf` (0257) and `libraryReachOf` (0256) are two readings of the
 same list of `PageReading`s, keyed the same way and paired on the published
 `kindKeyOf`. They answer two questions about one primitive type and **the
 answers are not near each other**:
@@ -49990,7 +49990,7 @@ broken by it
 Nothing in `src/primitives/` declares `role` (0114), so every role row in
 `libraryReachOf` comes back under `role: null` — the same thinness 0212 named,
 now in a fifth place: a standing on a funnel end (0238), a comparison of what
-readers did (0251), the census of the library (0254), and this.
+readers did (0251), the census of the library (0257), and this.
 
 **What is new about this one is that the figure is a share of readers rather than
 a count of parts.** *Of the readers who met a heading, what share read it* is a

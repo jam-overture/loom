@@ -2,7 +2,7 @@
 
 **Run:** `Loom signals`, evening of 10 October 2026
 **Branch:** `signals-18-which-parts-of-the-library-get-read`
-**Record added:** [0254](../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)
+**Record added:** [0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)
 
 ## What I completed
 
@@ -41,7 +41,7 @@ And on the reading: `mostSkipped`, `mostUsed`, the library-wide standings,
 ## Decisions I took that the step did not specify
 
 **The unit is the placement, and a reader is never the unit.** This is the whole
-of 0254 and it was the only real decision in the unit. `views`, `reached` and
+of 0257 and it was the only real decision in the unit. `views`, `reached` and
 `engaged` count distinct page views and are absent from every row — a
 `RoleReading` already refuses them one level down (0212), and across pages the
 case is stronger rather than weaker, because each page's distinct counts are
@@ -102,7 +102,7 @@ in both directions.
 
 ## Records added
 
-[0254](../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md),
+[0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md),
 **Accepted**: *A kind of part is read across the places it stands, and the unit
 is the placement and never the reader.* Nothing is superseded. `pnpm
 decisions:index` run; `pnpm verify` passes the drift check.
@@ -195,7 +195,7 @@ the pull request comment.
 
 ## Not built, and deliberately
 
-- **The weighted share of readers per kind.** Refused with its reason in 0254 and
+- **The weighted share of readers per kind.** Refused with its reason in 0257 and
   filed as its own unit. It needs the door's scale and it is a second error model.
 - **Per-reader identity** — parked since 30 September, not built, and no record
   argues for it. **Nothing in this unit makes it more expensive to add later:**

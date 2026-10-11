@@ -21,7 +21,7 @@ import type { ReachSilence } from "./reach.js"
  * readers reached two of them* — and is explicit that this is not a share of
  * readers: a placement on a page nine thousand people read counts the same as
  * one on a page three people read
- * ([0254](../../decisions/0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)).
+ * ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)).
  * The figure everybody asks for next is the other one, and this lane filed its
  * shape the same morning rather than shipping a corrected number beside an
  * uncorrected one on the same type.

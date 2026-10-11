@@ -1,10 +1,17 @@
-# 0254 — A kind of part is read across the places it stands, and the unit is the placement and never the reader
+# 0257 — A kind of part is read across the places it stands, and the unit is the placement and never the reader
 
 **Status:** Accepted
 
 **Date:** 10 October 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-11**, from 0254, when this branch (#576) was merged.
+> `main` had meanwhile accepted a different 0254 — *the testing door publishes
+> one primitive broken in whichever way the caller names* (#575) — and two
+> records sharing a number is fatal (0097). 0255 and 0256 were claimed on open
+> branches, so 0257 was the next free number. Nothing in this record changed but
+> its number; the references to it on this branch were updated with it.
 
 ## Context
 

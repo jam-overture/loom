@@ -8,7 +8,7 @@
 
 ## Context
 
-[0254](0254-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)
+[0257](0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)
 made the library askable for the first time, and was explicit about the one
 thing its figure is not. A kind's read share there is `read ÷ (read + skipped)`
 over the **places** it stands: a ratio of two counts of parts of trees, with no
@@ -19,7 +19,7 @@ in the one busy place and skipped in nine quiet ones reports a read share of one
 in ten, and *most of the readers who met it read it* would also have been true.
 
 The figure everybody asks for next is that other one, and this lane filed its
-shape rather than shipping it with a caveat inside 0254's type, because a census
+shape rather than shipping it with a caveat inside 0257's type, because a census
 of places and a census of readers are two artefacts with two error models and
 nothing but prose would have told them apart on one row.
 
@@ -91,7 +91,7 @@ the reading.
 `unknown` means the window said nothing about it, so putting its nought into the
 numerator against its page's readers would call it a skip — the one direction a
 census of a quiet deployment must not be wrong in (0212). It is counted as
-`unknown` and excluded, which is 0254's `read ÷ (read + skipped)` holding at the
+`unknown` and excluded, which is 0257's `read ÷ (read + skipped)` holding at the
 other unit.
 
 **The page that could not be scaled is named in the page's own vocabulary and
@@ -121,7 +121,7 @@ what this subsystem already knows rather than collected.
 
 ## Consequences
 
-**0254 is not superseded and is not corrected.** Its share of places is sound,
+**0257 is not superseded and is not corrected.** Its share of places is sound,
 needs no door row, and answers the question an author changing a primitive has —
 *where does this kind stand, and is it reached there*. This answers a different
 question, and the two are built from one list of readings and pair on
@@ -187,7 +187,7 @@ are said twice instead, at two subjects, which is what the relation table is
 for.
 
 **Putting the weighted share on `KindReading` beside the share of places.** This
-is 0254's own refusal and it still stands. One type carrying a corrected number
+is 0257's own refusal and it still stands. One type carrying a corrected number
 and an uncorrected one, with prose to tell them apart, is the near-duplicate
 this subsystem has been bitten by twice; and the two have different inputs, so
 the census would have had to take rows it does not read.
