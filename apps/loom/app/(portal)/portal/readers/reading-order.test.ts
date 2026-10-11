@@ -270,6 +270,71 @@ describe("the reader screen's reading order", () => {
     expect(source).toContain("tree === undefined || !skippingComparable")
   })
 
+  /**
+   * **The sixth reading, and the only one that is not about a page.**
+   *
+   * *Which page do I open first* needs every page's progress at once, and the
+   * progresses are the ones the loop already took — so the thing to pin is that
+   * the list is held rather than a second walk being taken for the order. A
+   * refactor that called `readingProgressOf` again inside the deployment
+   * reading would pass every other test on this screen and would be a second
+   * join by another name.
+   */
+  it("orders the pages off the progresses it already took, and takes no second walk", () => {
+    expect(source.match(/readingProgressOf\(/gu)).toHaveLength(1)
+    expect(source).toContain("progress.push(walked)")
+    expect(source).toContain("deploymentReadingOf(progress, openings)")
+  })
+
+  /**
+   * And that the order is the runtime's rather than this screen's.
+   *
+   * The comparison behind it is three keys deep and the two figures it compares
+   * are only comparable because of a correction the runtime applies (0250). A
+   * `sort` written here would be a second implementation of that record living
+   * next to the first, and it would look entirely correct in a screenshot of a
+   * deployment whose pages happen to be in the right order already.
+   */
+  it("reads the positions out of the runtime's order rather than ranking the pages itself", () => {
+    expect(source).toContain("fixFirstRanks(fix)")
+    expect(source).toContain("losesMostRank(reading, ranks, NOT_IN_THE_ORDER)")
+    expect(source).not.toContain("rank: 0")
+    expect(source).not.toContain(".sort(")
+  })
+
+  /**
+   * And that it says which order it is in, which is the half `page-order.ts`
+   * holds for all five lists: a reader who met `by-name` on this screen
+   * yesterday and meets a ranked order today is reading a changed list.
+   */
+  it("says which order the list is in, and it is no longer the one with no rank", () => {
+    expect(source).toContain('order="loses-most-first"')
+    expect(source).not.toContain('order="by-name"')
+  })
+
+  /**
+   * **The count of pages the order never saw, handed over rather than hidden.**
+   *
+   * A page whose counted window has not caught up with a change cannot be
+   * joined to the page it was filed against, so it is absent from the order for
+   * as long as an hour. A screen that passed the order a shorter list without
+   * saying so would be listing fewer pages than the deployment has, with no
+   * sentence anywhere saying which ones or why.
+   */
+  it("tells the order how many pages never reached it", () => {
+    expect(source).toContain("readings.length - progress.length")
+  })
+
+  /**
+   * And that the order is drawn only where there is one. An order over the one
+   * page somebody asked about is not an order, and *one of your pages is losing
+   * readers* about the page already named at the top of the screen is the portal
+   * telling a reader something they arrived holding.
+   */
+  it("draws the order for the deployment and never for one page", () => {
+    expect(source).toContain("{scoped === undefined && <WhichPageFirst")
+  })
+
   it("never reverses a row or a column to place something", () => {
     expect(source).not.toContain("flex-row-reverse")
     expect(source).not.toContain("flex-col-reverse")
