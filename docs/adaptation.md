@@ -157,6 +157,53 @@ closed, the reply is schema-constrained, and the Gate catches what gets through.
 6. **Every arm is attributable.** A reading that cannot name the revision it
    belongs to is dropped rather than pooled.
 
+## The page this runs on
+
+**The marketing site, and only it.** Chosen 11 October. The docs are not built in
+Loom — they are MDX — so they cannot be addressed, cannot broadcast, and are not
+part of this. 0259 refuses the same thing from the portal's side: prose is not
+brought under governance by rewriting it as a tree.
+
+The funnel therefore **ends at the click out of marketing**. The true conversion,
+an actual `npm install`, happens somewhere this deployment cannot see; npm's
+download API is an honest north star and can never be attributed to a variant.
+
+### What the site can and cannot see today
+
+| | |
+| --- | --- |
+| Measured | bands (`viewed`, `dwelled`), and `loom.action`, `loom.card`, `loom.link`, `loom.brand` (`activated`), FAQs (`disclosed`) |
+| **No conversion event** | `COMPLETION_TYPES` is empty. There is no form, so nothing can `complete` |
+| **Copy is invisible** | `loom.code` carries the copy control and declares itself interactive, but is not in `CONTROL_TYPES` — so pressing *copy* on an install command, the clearest intent-to-install a visitor can express, is not counted |
+| **There is no install on the page** | The home page's actions lead to two marketing pages, the demo, and the repository twice. "Install" appears in prose on `/what-you-run` and nowhere as an ask |
+
+So the funnel this loop exists to improve **does not exist yet**, and a model
+pointed at the page today would have no ask to move anybody toward. Naming it is
+milestone 1 and it is a page-design decision.
+
+**The baseline is already there, though.** The header renders a link per surface
+and `loom.link` is measured, so *clicked through toward the docs* is countable
+today — which makes adding an install ask the first before-and-after this loop
+can measure, rather than a change nobody can evaluate.
+
+### The dependency 0259 names, arrived at twice
+
+A variant is a revision, and revisions live in the store. The marketing routes
+build their pages per request, so today there is **no revision to serve, none to
+attribute a reading to, and nothing a proposal could change about what a visitor
+is given**.
+
+[0259](../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+reached the same requirement from the portal's side — *a surface is governed when
+the portal's store is where its pages come from* — and filed the work for
+`Loom marketing`. One change unlocks both, and it is the gate on milestone 2.
+
+**What it makes possible is worth saying out loud:** once the page comes from the
+store, *adding the install ask* is itself a proposal through the Gate — held for
+a person, recorded, revertible, and measurable against the revision before it.
+The site's first adaptive change would be the one that gives the loop something
+to optimise.
+
 ## The game plan
 
 Seven milestones. **Each is worth having if the next never happens** — that is
@@ -169,8 +216,8 @@ plan was wrong says so here rather than in a report nobody reads again.
 
 | # | Milestone | Owner | Done looks like | Status |
 | --- | --- | --- | --- | --- |
-| 1 | **A page with an ask, addressed and broadcasting** | maintainer session | Signals arriving at an intake, filed under one tree and revision. No model, no variants | **blocked** — needs the page, and which node is the ask |
-| 2 | **Serve a revision, and attribute to it** | maintainer session | Two revisions served, assignment randomised per view, tallies accumulating separately under each. The page can answer *where do readers stop*, per revision | not started |
+| 1 | **A page with an ask, addressed and broadcasting** | maintainer session | Signals arriving at an intake, filed under one tree and revision. No model, no variants | **page chosen — the marketing site.** Blocked on naming the ask: it has none today |
+| 2 | **Serve a revision, and attribute to it** | `Loom marketing`, then maintainer session | Two revisions served, assignment randomised per view, tallies accumulating separately under each. The page can answer *where do readers stop*, per revision | **blocked on [0259](../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)** being accepted |
 | 3 | **Derivation from tallies** | maintainer session | Counters → one sentence a person could argue with, deterministic, with the numbers that produced it carried alongside. Tested against a case where it should say nothing | not started |
 | 4 | **The model seam, with a small local model** | maintainer session | Sentence → operations → the Gate → held for a person, and the record reads correctly: rationale, origin `system-signal`, inverse | not started |
 | 5 | **The allocator** | undecided | Recommends an arm, reports *no winner* when there is none, and cannot promote below the evidence floor | not started |
@@ -190,11 +237,15 @@ optimisation; it is description, and description is what nobody has today.
 
 ### What is blocked on the maintainer
 
-1. **The page, and which node is the ask.** Milestone 1 cannot start without it,
-   and it is a page-design decision rather than an engineering one.
-2. **Confirming the objective** above — reach as the target, conversion rate as
+1. **Which node is the ask.** The page is chosen — the marketing site — and it
+   has no install ask on it. Naming one is a page-design decision rather than an
+   engineering one, and nothing downstream can be measured until it exists.
+2. **Accepting or refusing [0259](../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md).**
+   Milestone 2 is gated on it, and so is governing the marketing site from the
+   portal at all.
+3. **Confirming the objective** above — reach as the target, conversion rate as
    the guard — or naming a different one.
-3. **The evidence floor**: how many views per arm before anything may be promoted
+4. **The evidence floor**: how many views per arm before anything may be promoted
    without a person. The arithmetic above says a few hundred for reach; the number
    is a judgement about how much being wrong costs.
 

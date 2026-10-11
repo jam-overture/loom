@@ -50860,3 +50860,32 @@ part names. So the work is:
 (`Loom marketing`, same date) has not been taken, and doing it first would leave
 this surface rebuilt against a registry nothing yet needs. It is small once the
 direction is settled and the direction is the maintainer's.
+
+## 2026-10-11 — six specimen tests assume a git newer than the maintainer's, so `pnpm verify` cannot pass on his machine
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
+
+`tools/specimen/against.test.ts` builds a scratch repository with `git init -q -b main`.
+The `-b` switch arrived in **git 2.28**; the maintainer's machine runs **2.15**, where it
+is `error: unknown switch 'b'` and all six tests in *photographing the same sheet against
+a revision* fail.
+
+```
+→ Command failed: git init -q -b main
+   ❯ git tools/specimen/against.test.ts:303:3
+```
+
+**Nothing is wrong with `main`.** Cloud runs have a modern git and are green, which is why
+every routine's verify has passed all week and this has never been reported. The cost lands
+entirely on the one person who runs `pnpm verify` locally before merging by hand: his tree is
+red for a reason that has nothing to do with his change, every time, and the only way to tell
+a real failure from this one is to re-run the suite on `main` and compare.
+
+Two other git 2.15 gaps have already been met in this repository from interactive sessions —
+`git switch` and `git worktree remove` are both absent — so this is the third instance of one
+shape, and the first that fails a test.
+
+**What would close it:** `git init -q` followed by `git symbolic-ref HEAD refs/heads/main`,
+which is portable to every git this decade and produces exactly the same repository. A skip
+guarded on the git version would also work and is worse: a test that silently does not run on
+the maintainer's machine is how the next portability gap goes unnoticed for a month.
