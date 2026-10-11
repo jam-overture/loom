@@ -1,13 +1,16 @@
 import type { Metadata } from "next"
 
-import type { Ask } from "./adapt/asks"
+import { askById, type Ask } from "./adapt/asks"
 import type { ChangeRecord } from "./adapt/record"
+import { askedFor } from "./addressed"
 import { toneFor } from "./pages/answer"
 import {
+  ADDRESS_PARAMS,
+  ASKED_ROUTE,
   HOME,
   internalHref,
+  isAskedRoute,
   isPublicDeployment,
-  readThemeName,
   siteOrigin,
   type SiteRoute,
   type SiteThemeName,
@@ -140,13 +143,21 @@ export const publishedCard = (route: SiteRoute, origin: string): ShareCard => ({
 })
 
 /**
- * The front door as a visitor left it, as a card.
+ * `ASKED_ROUTE` as a visitor left it, as a card.
  *
  * The three lines are the three the answer band prints above the fold, in the
  * same order and off the same fields: the verdict as its label, the request
  * verbatim, and what the rules decided. That is deliberate — a card and the page
  * it opens should not be two accounts of one event — and it is what makes the
  * card impossible to write a sentence into.
+ *
+ * **It is handed one record and never two.** An address that carries an undo
+ * reaches two verdicts, and the one on the card is the second: a link to
+ * `?ask=unstick-menu&approve=1&back=1` is a link to a page whose last word is
+ * *the rules are holding the putting-back too*, and a card reporting the first
+ * verdict would be a card of the state before the thing the link is of. The
+ * record's own `asked` is *Put it back.* there, so the headline still quotes a
+ * request this repository ships and the card still writes nothing.
  */
 export const askedCard = (record: ChangeRecord, origin: string): ShareCard => ({
   wordmark: WORDMARK,
@@ -155,15 +166,29 @@ export const askedCard = (record: ChangeRecord, origin: string): ShareCard => ({
   headline: `“${record.asked}”`,
   supporting: record.verdictLine,
   footnote: record.measured,
-  address: displayAddress(origin, HOME.path),
+  address: displayAddress(origin, ASKED_ROUTE.path),
 })
 
-/** What the address is asking for, when it is asking for anything. */
+/**
+ * What the address is asking for, when it is asking for anything.
+ *
+ * **All four answers, and not the two a card happened to need.** `back` and
+ * `back-yes` were left out of this type until 11 October, so the picture's own
+ * address could not carry them and the one state on this site a competitor
+ * cannot screenshot — an undo the rules are holding — unfurled as the change
+ * going through. It is the 9 October finding one file over: a reader of an
+ * address that takes the parameters the caller thought it needed goes stale the
+ * day the page needs another one.
+ */
 export type ShareContext = {
   readonly origin: string
   readonly theme: SiteThemeName
   readonly ask?: Ask
   readonly approve?: boolean
+  /** Whether the visitor had pressed *Put it back* when they copied the address. */
+  readonly back?: boolean
+  /** And whether they had answered the rules holding that. */
+  readonly backApprove?: boolean
 }
 
 /**
@@ -183,11 +208,22 @@ export const shareImageHref = (route: SiteRoute, context: ShareContext): string 
   const url = new URL(SHARE_IMAGE_PATH, `${context.origin}/`)
 
   url.searchParams.set("page", route.path)
-  url.searchParams.set("theme", context.theme)
+  url.searchParams.set(ADDRESS_PARAMS.theme, context.theme)
 
-  if (context.ask !== undefined && route.path === HOME.path) {
-    url.searchParams.set("ask", context.ask.id)
-    if (context.approve === true) url.searchParams.set("approve", "1")
+  if (context.ask !== undefined && isAskedRoute(route)) {
+    /**
+     * Spelled off `ADDRESS_PARAMS` rather than typed, and the four are written
+     * in the order a visitor reaches them.
+     *
+     * The picture's address and the page's address are one convention with one
+     * set of names — `shareImageFor` reads this query through `askedFor`, the
+     * same function every page reads its own with — and this site has already
+     * paid twice for a parameter written in one spelling and read in another.
+     */
+    url.searchParams.set(ADDRESS_PARAMS.ask, context.ask.id)
+    if (context.approve === true) url.searchParams.set(ADDRESS_PARAMS.approve, "1")
+    if (context.back === true) url.searchParams.set(ADDRESS_PARAMS.back, "1")
+    if (context.backApprove === true) url.searchParams.set(ADDRESS_PARAMS.backApprove, "1")
   }
 
   return url.toString()
@@ -202,15 +238,23 @@ export const shareImageHref = (route: SiteRoute, context: ShareContext): string 
  * in a channel still needs to be told what the product is; the request alone
  * would be a quotation from nowhere.
  *
- * The request cannot be anything a stranger wrote: `readAskId` resolves one of
- * five ids or nothing at all, so what reaches here is a string this repository
- * ships rather than a string a URL carried.
+ * **The title is the request and never the verdict**, which is what keeps it
+ * one line for all four states of an address. `approve`, `back` and `back-yes`
+ * move the card and leave the title alone, because what a link is *about* is
+ * what somebody asked for, and what *happened* is the card's half to report.
+ * That was already true of `approve` on the day this was written; the other two
+ * read the same way rather than a second way.
+ *
+ * The request cannot be anything a stranger wrote: `readAskId` resolves an id
+ * off the list in `asks.ts` or nothing at all, so what reaches here is a string
+ * this repository ships rather than a string a URL carried. A count is left out
+ * on purpose: the one that was written here said five.
  */
 const wordsFor = (
   route: SiteRoute,
   context: ShareContext
 ): { readonly title: string; readonly description: string } =>
-  context.ask !== undefined && route.path === HOME.path
+  context.ask !== undefined && isAskedRoute(route)
     ? { title: context.ask.utterance, description: HOME.description }
     : { title: route.title, description: route.description }
 
@@ -270,27 +314,50 @@ export const pageMetadata = (route: SiteRoute, context: ShareContext): Metadata 
 export type PageSearchParams = Promise<Record<string, string | string[] | undefined>>
 
 /**
- * The `generateMetadata` a page of this site exports, given the route it is.
+ * The `generateMetadata` every page of this site exports, given the route it is.
  *
- * **Eight of the nine are this and nothing else**, because what a page unfurls
- * as is a function of the route and the palette and `pageMetadata` already takes
- * both. Written out per page it was twelve lines of identical glue, and twelve
- * lines of identical glue is how five pages came to have none of it: the layout
- * says *every page replaces everything a shared link unfurls as, in its own
+ * **Every page, with no exception**, and the exception is what this run removed.
+ * Until today the front door kept a `generateMetadata` of its own because its
+ * card was a function of what the visitor asked for as well as of the route, and
+ * the eight other pages took this one-liner. Both halves of that arrangement
+ * then went wrong at once when the band moved to `/how-it-works` on 1 October:
+ * the page that still read a request no longer acted on one, and the page that
+ * acts on one took the factory that reads no request.
+ *
+ * So the factory reads the **whole address** through `askedFor` — the one
+ * reader every page of this site reads its own address with — and
+ * `pageMetadata` drops what the route cannot use. A page that cannot run a
+ * request is announced exactly as it was, because `isAskedRoute` is false for
+ * it and `wordsFor` and `shareImageHref` both ask. Nothing is decided per page
+ * any more, which is the point: the judgement that went stale was *which page
+ * is the one that rearranges*, and it is now made in one constant rather than
+ * in a route's own export.
+ *
+ * What a tenth page copies is **one line naming its own route**, and there is
+ * nothing in it left to leave out. Twelve lines of identical glue is how five
+ * pages came to have none of it at all in September: the layout said *every
+ * page replaces everything a shared link unfurls as, in its own
  * `generateMetadata`*, and the pages added after that machinery landed copied
- * the shape of the page beside them — which did not have it — rather than the
- * shape of the comment. Nothing was red, because what was tested was
- * `pageMetadata`, and a page that never calls it fails no test of it.
- *
- * So what a tenth page copies is **one line naming its own route**, and there is
- * nothing in it left to leave out. The front door is the ninth and keeps its
- * own: its card is a function of what the visitor asked for as well, which is
- * the one thing this cannot take off an address it does not read.
+ * the shape of the page beside them rather than the shape of the comment.
+ * Nothing was red, because what was tested was `pageMetadata`, and a page that
+ * never calls it fails no test of it.
  */
 export const routeMetadata =
   (route: SiteRoute) =>
   async ({ searchParams }: { readonly searchParams: PageSearchParams }): Promise<Metadata> => {
-    const params = await searchParams
+    const state = askedFor(await searchParams)
+    const ask = askById(state.ask)
 
-    return pageMetadata(route, { origin: siteOrigin(), theme: readThemeName(params["theme"]) })
+    return pageMetadata(route, {
+      origin: siteOrigin(),
+      theme: state.theme,
+      ...(ask === undefined
+        ? {}
+        : {
+            ask,
+            approve: state.approve === true,
+            back: state.back === true,
+            backApprove: state.backApprove === true,
+          }),
+    })
   }

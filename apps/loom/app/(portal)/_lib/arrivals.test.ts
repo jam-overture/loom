@@ -28,6 +28,7 @@ import {
   gotThisFar,
   readersAt,
   readersCount,
+  readersOutOf,
   stillArriving,
   type PageArrivals,
 } from "./arrivals"
@@ -448,5 +449,24 @@ describe("the governing principle", () => {
     )
 
     expect(runtimeWordsIn(cannotBeAShare(arrivals) ?? "")).toEqual([])
+  })
+})
+
+/**
+ * The widening, for the caller that is not a page's reading.
+ *
+ * `readersOutOf` took a `PageArrivals` and now takes the count off it, so
+ * `_lib/fix-first.ts` — which holds a door row rather than a page's reading —
+ * says *about 340 of the 1200 readers* in the same words two other sections of
+ * this surface already use. A third spelling of one phrase is how a screen comes
+ * to say the same arithmetic in two voices.
+ */
+describe("readersOutOf takes the count rather than the reading", () => {
+  it("writes the phrase for a caller holding only two numbers", () => {
+    expect(readersOutOf(339.6, { arrived: 1200 })).toBe("about 340 of the 1200 readers")
+  })
+
+  it("says 1 reader and never 1 readers", () => {
+    expect(readersOutOf(1, { arrived: 1 })).toBe("about 1 of the 1 reader")
   })
 })

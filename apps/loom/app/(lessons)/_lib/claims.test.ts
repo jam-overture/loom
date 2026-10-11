@@ -555,15 +555,16 @@ const TRANSCRIPT_CLAIMS: readonly TranscriptClaim[] = [
     lesson: 36,
     file: "36-vantage.md",
     what: "the authored plots in the starter catalogue",
-    phrase: /\*\*(\w+) authored plot in the catalogue\*\*/,
+    phrase: /\*\*(\w+) authored plots? in the catalogue\*\*/,
     occurrences: 1,
     fence: /^authored plots in the catalogue:/,
     count: (lines) => numberOn(lines, /^authored plots in the catalogue: (\d+)$/),
     matters:
       "the sentence under lesson 36's exercise B, whose argument is that a check over this " +
       "population would pass today and that the population is the one that grows — so how " +
-      "big it is now is the figure the paragraph concedes. A second authored plot makes it " +
-      "wrong, and would also be the first chance the missing check had to find something",
+      "big it is now is the figure the paragraph concedes. A further authored plot makes it " +
+      "wrong. The population went 1 -> 3 on 11 October with `comparison-wipe`, which is also " +
+      "when the missing check got written, so the paragraph now carries both",
   },
 ]
 

@@ -1,0 +1,87 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-arrival-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "measure": ["aside", ".demo-part--arrival", "#ask form button.bg-affirm", "h1"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-one-press-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "aside li[id]" }],
+      "measure": [
+        "aside",
+        ".demo-part--arrival",
+        "text=This is the top of it, now.",
+        "#ask form button.bg-affirm",
+        "h1",
+        "aside li[id]"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-put-it-back-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "aside li[id]" },
+        { "click": "button:has-text(\"Put it back\")" },
+        { "waitFor": ".demo-part--arrival" }
+      ],
+      "measure": [".demo-part--arrival", "aside li[id]"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-marked-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "text=Repaint the top band" },
+        { "waitFor": "aside li[id]" }
+      ],
+      "measure": [".demo-part--arrival", "aside li[id]"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-question-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "aside li[id]" },
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "li button.bg-refuse" }
+      ],
+      "measure": [".demo-part--arrival", "aside li[id]"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-arrival-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask", "#ask ul li", "aside footer"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-one-press-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "aside li[id]" }],
+      "measure": ["aside", "aside li[id]", ".demo-part--arrival"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-10-demo-window-embed",
+      "viewport": { "width": 348, "height": 465, "label": "embed" },
+      "waitFor": "#ask",
+      "measure": ["#ask form button.bg-affirm", ".demo-part--arrival"]
+    }
+  ]
+}

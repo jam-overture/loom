@@ -174,6 +174,28 @@ describe("resolveTreeSubmissions", () => {
     expect(outcome.unavailable.detail).toContain("contact.enquiry")
   })
 
+  /**
+   * The third seam that answers an unknown id by listing the known ones, and
+   * the third to have that list bounded. A deployment's endpoint count grows
+   * with the forms it accepts, which is not a number this runtime sets.
+   */
+  it("bounds the clause rather than printing a registry of any size", async () => {
+    const many = Array.from({ length: 9 }, (_, index) =>
+      countingEndpoint(`contact.enquiry-${index}`, `/api/contact/${index}`)
+    )
+
+    const tree = posting({ to: "contact.enquiry" })
+    const resolution = await resolveTreeSubmissions(tree, { registry: registryOf(...many) })
+
+    const outcome = resolution.lookup(tree.root.id)
+
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable.detail).toContain("(nearest 5 of 9)")
+    expect(outcome.unavailable.detail.length).toBeLessThan(150)
+  })
+
   it("carries a malformed declaration through as a problem, with no outcome", async () => {
     const tree = posting({ to: "Contact_Enquiry" })
     const resolution = await resolveTreeSubmissions(tree, {

@@ -424,8 +424,16 @@ export const readersAt = (part: ArrivingPart, arrivals: PageArrivals): string | 
  * second reading spelling it its own way is a card where two sections say the
  * same arithmetic in two voices, which reads as two different measurements.
  */
-export const readersOutOf = (readers: number, arrivals: PageArrivals): string =>
-  `about ${Math.round(readers)} of the ${readersCount(arrivals.arrived)}`
+export const readersOutOf = (
+  readers: number,
+  /*
+   * The count, not the reading. `PageArrivals` satisfies it structurally so the
+   * two callers that hold one are untouched — and `_lib/fix-first.ts`, which
+   * holds a door row rather than a page's reading, gets the same phrase instead
+   * of a third spelling of it. Widened on 10 October for exactly that caller.
+   */
+  arrivals: { readonly arrived: number }
+): string => `about ${Math.round(readers)} of the ${readersCount(arrivals.arrived)}`
 
 /**
  * **The page-wide share of this page's readers, applied back to the exact

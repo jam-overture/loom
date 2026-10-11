@@ -1,0 +1,57 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/a-primitive-of-your-own",
+      "out": "2026-10-11-docs-own-primitive-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": [
+        "[data-example=\"a-primitive-of-your-own\"]",
+        "[data-own-catalogue]",
+        "[data-own-audit]",
+        "text=A primitive of your own"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/a-primitive-of-your-own",
+      "out": "2026-10-11-docs-own-primitive-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "measure": ["[data-example=\"a-primitive-of-your-own\"]", "[data-own-refusal]"]
+    },
+    {
+      "path": "/docs/building-with-loom/a-primitive-of-your-own",
+      "out": "2026-10-11-docs-own-primitive-example",
+      "viewport": "wide",
+      "waitFor": "[data-example=\"a-primitive-of-your-own\"]",
+      "clip": "[data-example=\"a-primitive-of-your-own\"]",
+      "do": [{ "scrollTo": "[data-example=\"a-primitive-of-your-own\"]" }]
+    },
+    {
+      "path": "/docs/building-with-loom/a-primitive-of-your-own",
+      "out": "2026-10-11-docs-own-primitive-catalogue",
+      "viewport": "wide",
+      "waitFor": "[data-own-catalogue]",
+      "clip": "[data-own-catalogue]",
+      "do": [{ "scrollTo": "[data-own-catalogue]" }]
+    },
+    {
+      "path": "/docs/building-with-loom/a-primitive-of-your-own",
+      "out": "2026-10-11-docs-own-primitive-audit",
+      "viewport": "wide",
+      "waitFor": "[data-own-audit]",
+      "clip": "[data-own-audit]",
+      "do": [{ "scrollTo": "[data-own-audit]" }]
+    },
+    {
+      "path": "/docs/building-with-loom/a-primitive-of-your-own",
+      "out": "2026-10-11-docs-own-primitive-refusals",
+      "viewport": "wide",
+      "waitFor": "[data-own-refusals]",
+      "clip": "[data-own-refusals]",
+      "do": [{ "scrollTo": "[data-own-refusals]" }]
+    }
+  ]
+}

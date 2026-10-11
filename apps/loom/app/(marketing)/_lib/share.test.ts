@@ -14,7 +14,14 @@ import {
   WORDMARK,
   type ShareCard,
 } from "./share"
-import { HOME, HOW_IT_WORKS, SITE_ROUTES, SITE_THEME_NAMES, WHAT_YOU_RUN } from "./site"
+import {
+  ASKED_ROUTE,
+  HOME,
+  HOW_IT_WORKS,
+  SITE_ROUTES,
+  SITE_THEME_NAMES,
+  WHAT_YOU_RUN,
+} from "./site"
 
 /**
  * What a shared link says, held against the pages it is a link to.
@@ -158,8 +165,22 @@ describe.each(ASKS)("a link somebody sends after asking $id", (ask) => {
       `“${run!.record.asked}”`,
       run!.record.verdictLine,
       run!.record.measured,
-      "loom.example",
+      "loom.example/how-it-works",
     ])
+  })
+
+  /**
+   * Where the card says it is, which moved on 11 October and is the half of
+   * this that a stranger checks: a card reading `loom.example` over a verdict
+   * reached on `/how-it-works` is a card pointing at a page that was asked
+   * nothing. Written out rather than taken from `displayAddress` so that the
+   * two spellings have to agree out loud.
+   */
+  it("says the address of the page the request was run against", async () => {
+    const run = await runFor(false)
+
+    expect(askedCard(run!.record, ORIGIN).address).toBe("loom.example/how-it-works")
+    expect(ASKED_ROUTE.path).toBe(HOW_IT_WORKS.path)
   })
 })
 
@@ -217,7 +238,7 @@ describe("the address of the picture", () => {
 
   it("carries the request, and whether the visitor said yes to it", () => {
     const url = new URL(
-      shareImageHref(HOME, {
+      shareImageHref(ASKED_ROUTE, {
         origin: ORIGIN,
         theme: "minimal",
         ask: askById("problem")!,
@@ -230,23 +251,80 @@ describe("the address of the picture", () => {
   })
 
   /**
-   * A request belongs to the front door and nowhere else. `/the-record?ask=…`
-   * is an address the site never writes, and a picture of a request against a
-   * page that cannot run one would be a card about nothing.
+   * **All four, which is what it carried two of.**
+   *
+   * `ShareContext` had `ask` and `approve` and no `back` or `back-yes`, so the
+   * picture of an address carrying an undo was the picture of the change going
+   * through. It is the same two-of-four the routes themselves carried for the
+   * eight days *Put it back* did nothing, one file over, and it is asserted by
+   * the names in the address rather than by the fields on the context: a card
+   * drawn from a query string is only as good as the spelling.
    */
-  it("is dropped on a page that cannot run one", () => {
+  it("carries the undo, and whether the visitor said yes to that", () => {
     const url = new URL(
-      shareImageHref(WHAT_YOU_RUN, {
+      shareImageHref(ASKED_ROUTE, {
         origin: ORIGIN,
         theme: "minimal",
-        ask: askById("problem")!,
+        ask: askById("unstick-menu")!,
+        approve: true,
+        back: true,
+        backApprove: true,
+      })
+    )
+
+    expect([...url.searchParams.keys()].sort()).toEqual([
+      "approve",
+      "ask",
+      "back",
+      "back-yes",
+      "page",
+      "theme",
+    ])
+    expect(url.searchParams.get("back")).toBe("1")
+    expect(url.searchParams.get("back-yes")).toBe("1")
+  })
+
+  it("leaves out the two answers the visitor did not give", () => {
+    const url = new URL(
+      shareImageHref(ASKED_ROUTE, {
+        origin: ORIGIN,
+        theme: "minimal",
+        ask: askById("unstick-menu")!,
         approve: true,
       })
     )
 
-    expect(url.searchParams.get("ask")).toBeNull()
-    expect(url.searchParams.get("approve")).toBeNull()
+    expect(url.searchParams.get("back")).toBeNull()
+    expect(url.searchParams.get("back-yes")).toBeNull()
   })
+
+  /**
+   * A request belongs to `ASKED_ROUTE` and nowhere else. `/what-you-run?ask=…`
+   * is an address the site never writes, and a picture of a request against a
+   * page that cannot run one would be a card about nothing.
+   *
+   * **The front door is one of those pages as of 11 October**, and it is the
+   * one this assertion would have missed: it was the page a request belonged to
+   * until the band moved, and for ten days after it the picture of
+   * `/?ask=shorter` was a verdict reached on a page the link does not open.
+   */
+  it.each(SITE_ROUTES.filter((route) => route.path !== ASKED_ROUTE.path))(
+    "is dropped on $path, which cannot run one",
+    (route) => {
+      const url = new URL(
+        shareImageHref(route, {
+          origin: ORIGIN,
+          theme: "minimal",
+          ask: askById("problem")!,
+          approve: true,
+          back: true,
+          backApprove: true,
+        })
+      )
+
+      expect([...url.searchParams.keys()].sort()).toEqual(["page", "theme"])
+    }
+  )
 })
 
 describe("what the document says about itself", () => {
@@ -267,11 +345,28 @@ describe("what the document says about itself", () => {
 
   it("titles a rearranged address with the request that made it", () => {
     const ask = askById("shorter")!
-    const meta = pageMetadata(HOME, { origin: ORIGIN, theme: "minimal", ask })
+    const meta = pageMetadata(ASKED_ROUTE, { origin: ORIGIN, theme: "minimal", ask })
 
     expect(meta.title).toBe(ask.utterance)
     expect(meta.description).toBe(HOME.description)
   })
+
+  /**
+   * And nowhere else, which is the half that was wrong rather than missing.
+   * `/?ask=shorter` was titled with the request for ten days after the band
+   * moved off the front door, so the title promised a rearrangement and the
+   * page served the published one.
+   */
+  it.each(SITE_ROUTES.filter((route) => route.path !== ASKED_ROUTE.path))(
+    "$path is titled as itself however the address is dressed up",
+    (route) => {
+      const ask = askById("shorter")!
+      const meta = pageMetadata(route, { origin: ORIGIN, theme: "minimal", ask, approve: true })
+
+      expect(meta.title).toBe(route.title)
+      expect(meta.description).toBe(route.description)
+    }
+  )
 
   /**
    * The arrangement is a view of the front door rather than a second page of
