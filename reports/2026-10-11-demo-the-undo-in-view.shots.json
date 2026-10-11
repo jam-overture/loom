@@ -1,0 +1,83 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-11-demo-undo-put-it-back-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "aside li[id]" },
+        { "click": "button:has-text(\"Put it back\")" },
+        { "waitFor": "#the-page-itself" },
+        { "wait": 400 }
+      ],
+      "measure": [
+        "#the-page-itself",
+        "text=This is the top of it, now.",
+        "aside li[id]",
+        "#ask form button.bg-affirm",
+        "text=Show the record",
+        "h1"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-11-demo-undo-one-press-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "aside li[id]" }, { "wait": 400 }],
+      "measure": [
+        "#the-page-itself",
+        "text=This is the top of it, now.",
+        "#ask form button.bg-affirm",
+        "aside li[id]"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-11-demo-undo-arrival-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "measure": ["#the-page-itself", "#ask form button.bg-affirm", "h1"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-11-demo-undo-marked-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [{ "click": "text=Repaint the top band" }, { "waitFor": "aside li[id]" }, { "wait": 400 }],
+      "measure": ["#the-page-itself", "aside li[id]"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-11-demo-undo-arrival-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask", "#ask ul li", "aside footer", "#the-page-itself"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-11-demo-undo-put-it-back-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "aside li[id]" },
+        { "click": "button:has-text(\"Put it back\")" },
+        { "waitFor": "aside li[id]" },
+        { "wait": 400 }
+      ],
+      "measure": ["aside", "aside li[id]", "#the-page-itself"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-11-demo-undo-embed",
+      "viewport": { "width": 348, "height": 465, "label": "embed" },
+      "waitFor": "#ask",
+      "measure": ["#ask form button.bg-affirm", "#the-page-itself"]
+    }
+  ]
+}
