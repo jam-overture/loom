@@ -28,6 +28,7 @@ import { theEnding, whatTheRailShows } from "./rail"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoSession, rememberRecord, type DemoSession } from "./session"
+import { THE_TOP_OF_IT, THE_TOP_OF_IT_NOW } from "./the-page-itself"
 import { whatEachWillSay } from "./what-it-will-say"
 
 /**
@@ -138,6 +139,35 @@ const allow = async (
 
   const write = beginDemoWrite(session)
   await confirmHeld(write.path, {
+    proposalId: proposalIdSchema.parse(proposalId),
+    actor: "a demo visitor",
+  })
+
+  const record = recordFromEvents(write.narrated(), held)
+  if (!record) throw new Error("the runtime narrated nothing")
+
+  return { session: rememberRecord(session, record), record }
+}
+
+/**
+ * And the other answer, written the way `actions.ts` writes it: the events are
+ * folded onto the card that was waiting rather than becoming a second card
+ * about the same ask, so the record's own outcome stops being *awaiting-you*.
+ *
+ * It is the fold that matters here. A test that discards the hold and leaves
+ * the record saying it is waiting leaves the page marked in amber for a
+ * question nothing can answer — a state the surface cannot reach, and one that
+ * quietly answers a different question than the one being asked.
+ */
+const refuse = async (
+  session: DemoSession,
+  held: ChangeRecord
+): Promise<{ readonly session: DemoSession; readonly record: ChangeRecord }> => {
+  const proposalId = held.heldProposalId
+  if (!proposalId) throw new Error("nothing was held")
+
+  const write = beginDemoWrite(session)
+  await discardHeld(write.path, {
     proposalId: proposalIdSchema.parse(proposalId),
     actor: "a demo visitor",
   })
@@ -636,26 +666,22 @@ describe("the ask the arrival screen leads with", () => {
    * `landing`, it stays the press that moves the page — which is also the only
    * thing left that would show them the surface works.
    *
-   * Declined through the real write path, the way `actions.ts` declines it.
+   * Declined through the real write path, the way `actions.ts` declines it —
+   * **including the fold onto the card that was waiting**, which this test did
+   * not do until `demo-44`. Discarding the hold alone leaves the record saying
+   * `awaiting-you`, so `spotlitChanges` marks the page amber for a question
+   * nothing can answer: a state the surface cannot reach, and one this
+   * assertion happened not to look at. The expectations are unchanged.
    */
   it("still opens with the moving press after a question the visitor declined", async () => {
     const fresh = await sessionFor("declined")
     const raised = await ask(fresh, DEMO_LEADING_PRESET)
-    const held = await holdsOf(raised.session, await headOf(raised.session))
+    const declined = await refuse(raised.session, raised.record)
 
-    expect(held.length).toBe(1)
-
-    const discarded = await discardHeld(beginDemoWrite(raised.session).path, {
-      proposalId: proposalIdSchema.parse(held[0]!.proposalId),
-      actor: "a demo visitor",
-    })
-
-    expect(discarded.ok).toBe(true)
-
-    const { view, tree } = await railOf(raised.session)
+    const { view, tree } = await railOf(declined.session)
 
     expect(tree.revision).toBe(0)
-    expect(raised.session.records.length).toBeGreaterThan(0)
+    expect(declined.session.records.length).toBeGreaterThan(0)
     expect(view.landing).toBeUndefined()
     expect(view.leading?.preset).toBe(DEMO_OPENING_PRESET)
   })
@@ -1079,23 +1105,142 @@ describe("the page on the first screen", () => {
   })
 
   /**
-   * And after a change that went ahead on its own, where the page moving is its
-   * own announcement and the record card is at the top of the rail.
+   * **And stays through the press the demo opens with, which is the behaviour
+   * this run reverses.**
    *
-   * The two cases are one condition — a record is what an ask produces — and
-   * they are asserted separately because the two outcomes reach it by different
-   * routes: this one has no hold anywhere, and the one above has nothing
-   * applied.
+   * It used to go quiet here too, on the premise that *the page moving is its
+   * own announcement*. That is true of the stage and false of the screen the
+   * announcement has to reach: the re-theme is applied rather than held, so no
+   * card renders a band; it configures the root, so `spotFor` draws no mark;
+   * and it removes nothing, so no card is holding content. Measured on `main`
+   * at `39c6ef3`, 390 × 844, the press took this window away at `y 325` and put
+   * the nearest pixel of the page at `y 1,998`.
+   *
+   * Three assertions rather than one, because the window surviving is only
+   * worth having if it is the page *now*: the revision it is of is the one the
+   * press produced, and the caption says so.
    */
-  it("says nothing once a change has landed", async () => {
+  it("stays through a change whose subject is the page itself", async () => {
     const session = await sessionFor("itself-after-landing")
-    const landed = await ask(session, "palette")
+    const landed = await ask(session, DEMO_OPENING_PRESET)
+
+    const { tree, view } = await railOf(landed.session)
+
+    expect(landed.record.outcome).toBe("applied")
+    expect(view.landing).toBeDefined()
+    expect(view.spots).toHaveLength(0)
+    expect(view.pageItself?.tree.revision).toBe(tree.revision)
+    expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT_NOW)
+  })
+
+  /**
+   * And goes quiet for the other change this demo applies on its own, which is
+   * the half that proves the condition is about the screen rather than about
+   * the press.
+   *
+   * *Repaint the top band* lands exactly as the re-theme does — one press, no
+   * question, a record at the top of the rail — and the page carries a green
+   * ring around the band it repainted, which `SpotlightScroll` carries a phone
+   * down to. The page is in front of the visitor, so the window has nothing to
+   * add and costs the asks under it 262 pixels.
+   */
+  it("says nothing when the change it landed is marked on the page", async () => {
+    const session = await sessionFor("itself-after-marked")
+    const landed = await ask(session, "backdrop")
 
     const { view } = await railOf(landed.session)
 
     expect(landed.record.outcome).toBe("applied")
     expect(view.landing).toBeDefined()
+    expect(view.spots.length).toBeGreaterThan(0)
     expect(view.pageItself).toBeUndefined()
+  })
+
+  /**
+   * And comes back saying what it said on arrival once the visitor puts the
+   * re-theme back, because an undo of a root configure is a root configure: the
+   * page returns to the palette it started on, in the window, in place.
+   *
+   * The caption still reads *now*, and that is `landing`'s doing rather than a
+   * special case: `landedOnYourPress` is about the change that produced the
+   * revision on the stage, and an undo is one — the visitor pressed for this
+   * state as much as they pressed for the last one.
+   */
+  it("shows the page going back, in the same window it came forward in", async () => {
+    const session = await sessionFor("itself-undone")
+    const landed = await ask(session, DEMO_OPENING_PRESET)
+    const undone = await ask(landed.session, DEMO_OPENING_PRESET)
+
+    const { tree, view } = await railOf(undone.session)
+
+    expect(undone.record.outcome).toBe("applied")
+    expect(view.pageItself?.tree.revision).toBe(tree.revision)
+    expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT_NOW)
+  })
+
+  /**
+   * And comes back saying what it said on arrival for a question the visitor
+   * **declined**, which is the one state where the two booleans this reading
+   * takes have to disagree.
+   *
+   * There is a record, nothing is held, nothing is marked and the page is
+   * exactly where it started — so the window is drawn, and captioning it *now*
+   * would be the surface claiming a change nobody made. `landing` is what
+   * keeps that straight; `records.length` would not.
+   */
+  it("does not say the page has moved after a question the visitor declined", async () => {
+    const fresh = await sessionFor("itself-declined")
+    const raised = await ask(fresh, DEMO_LEADING_PRESET)
+    const declined = await refuse(raised.session, raised.record)
+
+    const { view, tree } = await railOf(declined.session)
+
+    expect(declined.record.outcome).not.toBe("awaiting-you")
+    expect(tree.revision).toBe(0)
+    expect(view.landing).toBeUndefined()
+    expect(view.spots).toHaveLength(0)
+    expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT)
+  })
+
+  /**
+   * **Why the condition's second clause is not reachable by a defect, written
+   * as the law that makes it unreachable.**
+   *
+   * `shownElsewhere` asks two things — is a card rendering a band, and is the
+   * page carrying a mark — and this run's defect matrix caught the first with
+   * one test and the second with none. The reason is not that the clause is
+   * idle: it is that the two answers come off the same rule read twice. A band
+   * is drawn for the nodes a change touched and refused for the root
+   * (`partFromOperations`); a mark is drawn for the same nodes and refused for
+   * the root (`spotFor`). So no state this demo can reach has one without the
+   * other, and the clause is the half of the claim that is about cards rather
+   * than a branch waiting for a bug.
+   *
+   * Asserted over every ask this surface offers rather than over the one that
+   * leads, because what would break it is a *new* preset — or a free-text ask
+   * through the model — whose part draws where its mark cannot. If that ever
+   * happens this test says so, in the file where the condition is wired.
+   */
+  it("never renders a band in a card without marking the page", async () => {
+    const shown = (view: { readonly readings: ReadonlyMap<string, { readonly inQuestion?: unknown; readonly kept?: unknown }> }) =>
+      [...view.readings.values()].some(
+        (reading) => reading.inQuestion !== undefined || reading.kept !== undefined
+      )
+
+    for (const presetId of ["palette", "backdrop", "band", "trim", "promote"] as const) {
+      const fresh = await sessionFor(`itself-law-${presetId}`)
+      const asked = await ask(fresh, presetId)
+
+      const raised = await railOf(asked.session)
+      if (shown(raised.view)) expect(raised.view.spots.length).toBeGreaterThan(0)
+
+      if (asked.record.heldProposalId === undefined) continue
+
+      const answered = await allow(asked.session, asked.record)
+      const after = await railOf(answered.session)
+
+      if (shown(after.view)) expect(after.view.spots.length).toBeGreaterThan(0)
+    }
   })
 
   /**

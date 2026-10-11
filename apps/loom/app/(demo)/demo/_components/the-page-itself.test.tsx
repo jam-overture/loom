@@ -25,7 +25,7 @@ const themeOf = (tree: LoomTree) =>
     .theme
 
 const windowOn = (tree: LoomTree): PageItself => {
-  const page = thePageItself({ tree, asked: false })
+  const page = thePageItself({ tree, shownElsewhere: false, landed: false })
   if (page === undefined) throw new Error("the demo's page has no top band")
 
   return page

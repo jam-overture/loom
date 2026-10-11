@@ -285,7 +285,37 @@ describe("theme registry", () => {
     )
 
     expect(!result.ok && result.error.code).toBe("unknown-palette")
-    expect(!result.ok && describeThemeError(result.error)).toContain("editorial")
+
+    /**
+     * Named ids and a count of what they stand in for, rather than the whole
+     * registry: the sentence is bounded because its length would otherwise be
+     * the deployment's to set, and this one has twenty-one palettes.
+     */
+    const sentence = !result.ok ? describeThemeError(result.error) : ""
+
+    expect(sentence).toContain('No palette "chartreuse"')
+    expect(sentence).toContain("(nearest 5 of 21)")
+    expect(sentence.length).toBeLessThan(100)
+  })
+
+  /**
+   * The half that makes bounding the sentence cost nothing. A caller that wants
+   * every id has them on the error, and the sentence printing five is a choice
+   * about reading rather than about what the refusal knows.
+   */
+  it("carries every registered id on the refusal, however few the sentence prints", () => {
+    const result = registry.resolve(
+      themeSelectionSchema.parse({
+        palette: "chartreuse",
+        fontPack: "editorial-serif",
+        stylePreset: "comfortable",
+      })
+    )
+
+    const available = !result.ok && result.error.code === "unknown-palette" ? result.error.available : []
+
+    expect(available).toHaveLength(21)
+    expect(available).toContain("editorial")
   })
 
   it("names the malformed field rather than the whole selection", () => {

@@ -13,6 +13,7 @@ import { codeBand } from "./code-band.js"
 import { codeSessionBand } from "./code-session-band.js"
 import { comparisonBand } from "./comparison-band.js"
 import { comparisonWaysBand } from "./comparison-ways-band.js"
+import { comparisonWipeBand } from "./comparison-wipe-band.js"
 import { conversationBand } from "./conversation-band.js"
 import { contactBand } from "./contact-band.js"
 import { contactDetailsBand } from "./contact-details-band.js"
@@ -21,6 +22,7 @@ import { credentialsBand } from "./credentials-band.js"
 import { credentialsPostureBand } from "./credentials-posture-band.js"
 import { ctaBand } from "./cta-band.js"
 import { ctaBookingBand } from "./cta-booking-band.js"
+import { ctaOverlayBand } from "./cta-overlay-band.js"
 import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqAsideBand } from "./faq-aside-band.js"
 import { faqBand } from "./faq-band.js"
@@ -60,6 +62,7 @@ import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
 import { teamLeadsBand } from "./team-leads-band.js"
 import { testimonialsBand } from "./testimonials-band.js"
+import { testimonialsCarouselBand } from "./testimonials-carousel-band.js"
 import { testimonialsCollectedBand } from "./testimonials-collected-band.js"
 import { testimonialsWallBand } from "./testimonials-wall-band.js"
 import { whatsOnBand } from "./whats-on-band.js"
@@ -86,6 +89,7 @@ export {
   codeSessionBand,
   comparisonBand,
   comparisonWaysBand,
+  comparisonWipeBand,
   contactBand,
   conversationBand,
   contactDetailsBand,
@@ -94,6 +98,7 @@ export {
   credentialsPostureBand,
   ctaBand,
   ctaBookingBand,
+  ctaOverlayBand,
   ctaSignupBand,
   episodesBand,
   faqAsideBand,
@@ -133,6 +138,7 @@ export {
   teamBand,
   teamLeadsBand,
   testimonialsBand,
+  testimonialsCarouselBand,
   testimonialsCollectedBand,
   testimonialsWallBand,
   whatsOnBand,
@@ -219,9 +225,11 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   offeringsBand,
   comparisonBand,
   comparisonWaysBand,
+  comparisonWipeBand,
   testimonialsBand,
   testimonialsWallBand,
   testimonialsCollectedBand,
+  testimonialsCarouselBand,
   credentialsBand,
   credentialsPostureBand,
   teamBand,
@@ -242,6 +250,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   ctaBand,
   ctaSignupBand,
   ctaBookingBand,
+  ctaOverlayBand,
   footerBand,
   footerSignupBand,
   footerStatusBand,
