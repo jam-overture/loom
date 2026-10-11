@@ -6,6 +6,7 @@ import type { PageName } from "./page-name"
 import {
   byName,
   inPageOrder,
+  losesMostRank,
   mostChangedRank,
   mostWrongRank,
   needsYouRank,
@@ -21,12 +22,13 @@ const page = (name: string, treeId = `t_${name.toLowerCase()}`): PageName => ({
   derived: true,
 })
 
-/** The four with a rank in front of the tiebreak. */
+/** The ones with a rank in front of the tiebreak. */
 const RANKED: readonly PageOrder[] = [
   "needs-you-first",
   "ready-to-check-first",
   "most-changed-first",
   "most-wrong-first",
+  "loses-most-first",
   "worst-first",
 ]
 
@@ -307,5 +309,79 @@ describe("mostWrongRank — /portal/trust's list of pages the AI misjudged", () 
   it("says the AI got the page wrong rather than that the page is wrong", () => {
     expect(ORDER_LEAD["most-wrong-first"]).toContain("AI")
     expect(ORDER_LEAD["most-wrong-first"]).not.toMatch(/broken|bad|failing/iu)
+  })
+})
+
+describe("losesMostRank — `/portal/readers`", () => {
+  const RANKS: ReadonlyMap<string, number> = new Map([
+    ["t_shop", 0],
+    ["t_about", 1],
+    ["t_help", 2],
+  ])
+
+  const ABSENT = Number.MAX_SAFE_INTEGER
+
+  it("puts a page where the order the runtime returned put it", () => {
+    expect(losesMostRank({ treeId: "t_shop" }, RANKS, ABSENT)).toBe(0)
+    expect(losesMostRank({ treeId: "t_help" }, RANKS, ABSENT)).toBe(2)
+  })
+
+  /**
+   * **A position, not a rung computed here**, which is what separates this rank
+   * from the other five. The comparison behind it is three keys deep and the two
+   * figures it compares are only comparable because of a correction the runtime
+   * applies (0250) — so a portal re-deriving it would be a second implementation
+   * of that record living next to the first.
+   */
+  it("orders a list by the positions it was handed and by nothing of its own", () => {
+    expect(
+      inPageOrder(
+        [
+          { treeId: "t_help", page: page("Help", "t_help") },
+          { treeId: "t_shop", page: page("Autumn arrivals", "t_shop") },
+          { treeId: "t_about", page: page("About us", "t_about") },
+        ],
+        (row) => ({ rank: losesMostRank(row, RANKS, ABSENT), page: row.page })
+      ).map((row) => row.page.name)
+    ).toEqual(["Autumn arrivals", "About us", "Help"])
+  })
+
+  /**
+   * A page the order never saw is not a page with nothing wrong with it. It is
+   * one nothing can be said about yet — the counted window has not caught up
+   * with a change — and the sentence above the list says which pages those are.
+   * Sorting it among the ranked pages would put it at a height nothing supports.
+   */
+  it("sorts a page the order never saw below every page it did", () => {
+    expect(losesMostRank({ treeId: "t_new" }, RANKS, ABSENT)).toBe(ABSENT)
+
+    expect(
+      inPageOrder(
+        [
+          { treeId: "t_new", page: page("Aardvark", "t_new") },
+          { treeId: "t_help", page: page("Help", "t_help") },
+        ],
+        (row) => ({ rank: losesMostRank(row, RANKS, ABSENT), page: row.page })
+      ).map((row) => row.page.name)
+    ).toEqual(["Help", "Aardvark"])
+  })
+
+  /**
+   * The sentence names the readers a page is **losing**, not the page. A page
+   * losing readers partway through is not a page with anything wrong with it,
+   * and *worst* is the sweep's word for a page that does not add up.
+   */
+  it("says what leads the list without calling any page bad", () => {
+    expect(ORDER_LEAD["loses-most-first"]).toContain("losing the most readers")
+    expect(ORDER_LEAD["loses-most-first"]).not.toMatch(/worst|broken|bad|failing/iu)
+  })
+
+  /**
+   * The order this screen used to be in is kept rather than deleted, because the
+   * sentence is the honest one for any list this portal has nothing to rank —
+   * and because `ListOrder` is what tells a reader the list changed.
+   */
+  it("leaves the order it replaced in the table", () => {
+    expect(ORDER_LEAD["by-name"]).toBe("Pages are listed by name.")
   })
 })

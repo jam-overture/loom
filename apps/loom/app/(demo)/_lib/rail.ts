@@ -392,6 +392,8 @@ export const whatTheRailShows = <TPart>({
   }
 
   const about = spotlit[0]
+  /** Every mark the page is actually carrying, which two readings below ask about. */
+  const spots = drawn.flat()
   const waiting = setAside(records, openQuestions)
   const landing = landedOnYourPress(records, tree.revision)
   const available = stillToAsk(availablePresets(tree, ids), records, openQuestions)
@@ -419,20 +421,40 @@ export const whatTheRailShows = <TPart>({
   const askPart = nominated === undefined ? undefined : partTheAskWouldTouch(tree, ids, nominated)
 
   /**
-   * And the window on the arrival screen, which is the only reading here taken
-   * from the tree and the *absence* of everything else.
+   * And the window, which is the only reading here taken from the tree and the
+   * *absence* of everything else.
    *
-   * `records` rather than a flag: a record is what an ask produces
-   * (`session.ts`), so *nothing has been asked for* and *there are no records*
-   * are one fact rather than two free to disagree. It is also what makes every
-   * screen after the first byte-identical, which is the property this lane
-   * checks.
+   * **The absence is read off this screen rather than off the records**, and
+   * that is this run's correction. It used to be `records.length > 0` — the
+   * window went quiet at the first press — on the premise that from the first
+   * press onwards something else always brings the page to the visitor: the
+   * band inside a question, the mark answering carries them to, the content a
+   * removal's card is holding. That was a fact about the press the demo
+   * invited, and `demo-43` changed which press that is. A re-theme is applied
+   * rather than held, configures the root so `spotFor` draws no mark, and
+   * removes nothing — so on a phone it left a screen with no page on it, having
+   * just taken away the one window that was showing one.
+   *
+   * So the question is asked of the screen: **is any of this page already in
+   * front of them?** A band rendered inside a card, or a spotlight actually
+   * drawn — `drawn` rather than `spotlit`, for the reason `markedPage` is built
+   * from it two paragraphs up: a change can be worth marking and draw nothing,
+   * and this is the reading that is about what the visitor can see.
+   *
+   * Every screen that had an answer to that keeps exactly what it had, so the
+   * lane's byte-identical check still holds everywhere but the one state
+   * nothing was speaking for. `the-page-itself.ts` has the measurement.
    */
-  const itself = thePageItself({ tree, asked: records.length > 0 })
+  const shownElsewhere =
+    spots.length > 0 ||
+    [...readings.values()].some(
+      (reading) => reading.inQuestion !== undefined || reading.kept !== undefined
+    )
+  const itself = thePageItself({ tree, shownElsewhere, landed: landing !== undefined })
 
   return {
     available,
-    spots: drawn.flat(),
+    spots,
     marked,
     ...(waiting === undefined ? {} : { waiting }),
     ...(landing === undefined ? {} : { landing: landing.recordId }),

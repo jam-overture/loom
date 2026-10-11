@@ -1,0 +1,129 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "out": "2026-10-10-portal-which-page-first-wide",
+      "path": "/portal/readers",
+      "viewport": {
+        "width": 1680,
+        "height": 1000,
+        "label": "wide"
+      },
+      "waitFor": "text=Which page should I fix first?",
+      "measure": [
+        "text=Which page should I fix first?",
+        "text=Start with Autumn arrivals",
+        "text=Pages losing the most readers come first.",
+        "h2"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-10-portal-which-page-first-open",
+      "path": "/portal/readers",
+      "viewport": {
+        "width": 1680,
+        "height": 1500,
+        "label": "wide"
+      },
+      "waitFor": "text=Which page should I fix first?",
+      "do": [
+        {
+          "click": "text=How this order is worked out, and the counters behind it"
+        },
+        {
+          "waitFor": "text=deploymentReadingOf"
+        }
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      },
+      "measure": [
+        "text=Which page should I fix first?",
+        "text=off its own page-view row"
+      ]
+    },
+    {
+      "out": "2026-10-10-portal-which-page-first-phone",
+      "path": "/portal/readers",
+      "viewport": "phone",
+      "waitFor": "text=Which page should I fix first?",
+      "measure": [
+        "text=Which page should I fix first?",
+        "text=Start with Autumn arrivals"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-10-portal-which-page-first-order",
+      "path": "/portal/readers",
+      "viewport": {
+        "width": 1680,
+        "height": 2600,
+        "label": "wide"
+      },
+      "waitFor": "text=Which page should I fix first?",
+      "measure": [
+        "text=Autumn arrivals t_shop1 >> nth=0",
+        "text=Help and support t_help1 >> nth=0",
+        "text=About us t_about1 >> nth=0",
+        "text=Pricing t_price1 >> nth=0"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    }
+  ]
+}
