@@ -1,3 +1,4 @@
+import { describeRegistered } from "../registered.js"
 import { err, ok, type Result } from "../result.js"
 
 import {
@@ -28,10 +29,19 @@ export type ThemeError =
   | { readonly code: "unknown-style-preset"; readonly id: string; readonly available: readonly string[] }
   | { readonly code: "malformed-selection"; readonly detail: string }
 
+/**
+ * Why a theme did not resolve, and what could have.
+ *
+ * `available` holds every registered id and this prints the few nearest the one
+ * that was asked for, because the sentence lands in a log line whose length is
+ * not the deployment's to set. A caller that wants the whole list has it on the
+ * error, and a caller that wants it with names and descriptions has
+ * `catalogue()`.
+ */
 export const describeThemeError = (error: ThemeError): string =>
   error.code === "malformed-selection"
     ? `Theme selection is malformed: ${error.detail}`
-    : `No ${error.code.replace("unknown-", "").replace("-", " ")} "${error.id}". Registered: ${error.available.join(", ") || "none"}.`
+    : `No ${error.code.replace("unknown-", "").replace("-", " ")} "${error.id}". Registered: ${describeRegistered(error.id, error.available)}.`
 
 export type ThemeCatalogueEntry = {
   readonly id: string

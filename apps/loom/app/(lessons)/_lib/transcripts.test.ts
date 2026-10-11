@@ -73,6 +73,15 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
+ * 168 since 11 October, when lesson 35 gained an exercise G. The lesson's ending had
+ * been overtaken twice in three days — the library started passing `answers` on
+ * 9 October and the audit grew `notAnswered` on 10 October — so three of its
+ * paragraphs were claims about a repository that had moved, with every exercise in
+ * it green throughout, which is this course's oldest failure mode and the reason
+ * this file exists. The new fence is marked and carries a registered claim;
+ * exercise E's fence gained a line rather than a block, and lesson 29's exercise C
+ * the same, so neither moved this number.
+ *
  * 161 since lesson 35 (instruments). Lesson 36 (vantage) added six — one per
  * exercise, each a whole transcript in a single block. **Two of the six carry a
  * `moves:` mark, which is a first**, and the reason is that the lesson's two
@@ -180,7 +189,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 167
+const RECOGNISED_TRANSCRIPTS = 168
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
@@ -540,19 +549,24 @@ describe("the marks on a lesson's transcripts", () => {
    * that have declared what they could not show, the size of the starter library
    * and which of it binds anything, the catalogue's plotted bands and the figures
    * under them — so a new member of it is news rather than a mistake, and the mark
-   * stops the red being read as drift. Lesson 35's is both kinds at once: the
-   * sentence under it counts the second line of the fence, so the mark says which
-   * of its lines move and which of them — the three verdict lists still empty —
-   * are the library being correct and not covered.
+   * stops the red being read as drift. Lesson 35's exercise E is both kinds at
+   * once: the sentence under it counts the second line of the fence, so the mark
+   * says which of its lines move and which of them — the three verdict lists
+   * still empty — are the library being correct and not covered.
    *
-   * **Lesson 36 is the first lesson with two**, and that is a consequence of a
-   * mark governing exactly one fence. Its exercises A and B are two readings of
+   * **Lessons 35 and 36 have two each**, and that is a consequence of a mark
+   * governing exactly one fence. Lesson 35's second is its exercise G, added on
+   * 11 October: it reads the same library as E and prints three audits of it
+   * rather than one, and its mark carries the one thing it does *not* cover —
+   * the third call's reason reading `no-answers` would mean a primitive had
+   * started reading a binding the exercise picked for being unread, which makes
+   * a paragraph wrong rather than stale. Its exercises A and B are two readings of
    * one directory at two sizes: A lists each plotted band's ceiling and figures,
    * B counts the bands and the figures and then runs both halves of the pair
    * check over them. One mark covering both would have had to cover B's two
    * zeros, which are the control and whose moving is the lesson's subject
    * arriving for real. Two marks say two different things, which is what the
-   * convention is for.
+   * convention is for — and the first lesson to need it was 36, in October.
    *
    * **Load-bearing prose.** Lessons 32 and 24 had their numbers moved from outside
    * this lane, correctly, on 2 and 4 October, and both times the paragraph drawing
@@ -565,7 +579,7 @@ describe("the marks on a lesson's transcripts", () => {
    * number, deliberately and in as many words. **A fence wants a mark when
    * correcting a line of it is not the whole repair.**
    */
-  it("are on the seven fences that have signed up for one", () => {
+  it("are on the eight fences that have signed up for one", () => {
     const marked = WRITTEN_LESSONS.flatMap((entry) => {
       if (entry.file === undefined) return []
 
@@ -576,6 +590,6 @@ describe("the marks on a lesson's transcripts", () => {
         .map(() => entry.number)
     })
 
-    expect(marked).toEqual([24, 29, 32, 33, 35, 36, 36])
+    expect(marked).toEqual([24, 29, 32, 33, 35, 35, 36, 36])
   })
 })

@@ -21,7 +21,7 @@ import { STARTER_PRIMITIVES, createStarterPrimitiveRegistry } from "@jam-overtur
 
 import { heading, statGrid } from "../context/building-with-loom--primitives"
 
-// page.mdx:16 — a program
+// page.mdx:22 — a program
 const props = z
   .object({
     value: z.string().min(1).max(24),
@@ -41,18 +41,18 @@ export const stat = definePrimitive({
     createElement("div", { ...loom.editable }, given.value, given.label),
 })
 
-// page.mdx:101 — the inside of an object literal
-const objectAtLine101 = {
+// page.mdx:107 — the inside of an object literal
+const objectAtLine107 = {
 text: { excluded: "Not included" }
 }
 
-// page.mdx:111 — a program
+// page.mdx:117 — a program
 const built = createPrimitiveRegistry([stat, statGrid, heading])
 
 if (!built.ok) throw new Error(describeRegistryError(built.error))
 
-// page.mdx:149 — a program
+// page.mdx:155 — a program
 const chosen = selectPrimitives(STARTER_PRIMITIVES, ["loom.hero", "loom.prose"])
 
-export { props, objectAtLine101, built, chosen, createElement, z, definePrimitive, createPrimitiveRegistry, describeRegistryError, selectPrimitives, createStarterPrimitiveRegistry, STARTER_PRIMITIVES }
+export { props, objectAtLine107, built, chosen, createElement, z, definePrimitive, createPrimitiveRegistry, describeRegistryError, selectPrimitives, createStarterPrimitiveRegistry, STARTER_PRIMITIVES }
 export type { Props, LoomPrimitiveProps }

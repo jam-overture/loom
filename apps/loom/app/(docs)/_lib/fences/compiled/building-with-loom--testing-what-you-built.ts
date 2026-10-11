@@ -47,12 +47,12 @@ const rendered = renderLoomTree(tree, {
   themes: createThemeRegistry(),
 })
 
-// page.mdx:118 — a program
+// page.mdx:123 — a program
 it("renders the sample page with nothing to report", () => {
   expect(rendered.diagnostics).toEqual([])
 })
 
-// page.mdx:138 — a program
+// page.mdx:143 — a program
 const pricingPage = (): { readonly tree: LoomTree; readonly planId: NodeId } => {
   const ids = sequentialIdFactory("shop")
 
@@ -63,7 +63,7 @@ const pricingPage = (): { readonly tree: LoomTree; readonly planId: NodeId } => 
   return { tree: createTree(page, ids), planId: plan.id }
 }
 
-// page.mdx:158 — a program
+// page.mdx:163 — a program
 const askToRaiseThePrice = async (policy: GatePolicy) => {
   const { tree, planId } = pricingPage()
   const ids = sequentialIdFactory("ask")
@@ -102,7 +102,7 @@ const askToRaiseThePrice = async (policy: GatePolicy) => {
   return commitIntent(path, intent)
 }
 
-// page.mdx:214 — a program
+// page.mdx:219 — a program
 describe("the price on a plan", () => {
   it("cannot be changed without a person saying yes", async () => {
     const outcome = await askToRaiseThePrice(
@@ -119,7 +119,7 @@ describe("the price on a plan", () => {
   })
 })
 
-// page.mdx:243 — a program
+// page.mdx:248 — a program
 it("says why it was held", async () => {
   const outcome = await askToRaiseThePrice(
     gatePolicySchema.parse({ policyId: "shop", protectedPropKeys: ["price"] })
@@ -130,7 +130,7 @@ it("says why it was held", async () => {
   expect(outcome.held.disposition.reason.detail).toBe("configures protected price")
 })
 
-// page.mdx:279 — a program
+// page.mdx:284 — a program
 describeTreeStoreContract("memoryTreeStore", () => memoryTreeStore())
 
 export { tree, ids, registry, rendered, pricingPage, askToRaiseThePrice, sampleTree, testRegistry, buildIntent, buildProposal, collectingEventSink, fixedClock, scriptedInterpreter, createThemeRegistry, buildElement, buildText, createTree, sequentialIdFactory, fixedPolicy, ok, gatePolicySchema, renderLoomTree, expect, it, describe, memoryTreeStore, commitIntent, memoryHoldStore, describeTreeStoreContract }

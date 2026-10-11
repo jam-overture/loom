@@ -651,13 +651,13 @@ describe("B", () => {
      than drift — say so loudly rather than pasting it in. -->
 
 ```
-  authored plots in the catalogue: 1
-  figures under them:              6
+  authored plots in the catalogue: 3
+  figures under them:              18
   the check that exists   — figures with no magnitude:  0
   the check that does not — figures above the ceiling:  0
 ```
 
-**One authored plot in the catalogue**, and the two checks are eleven lines of
+**Three authored plots in the catalogue**, and the two checks are eleven lines of
 code between them in the same loop over the same walk.
 
 Both pass. That is the honest state of this finding and it is worth sitting with
@@ -667,8 +667,25 @@ have found nothing either.
 
 What the two zeros differ in is what they *mean*. The third line is zero and
 something is holding it there — `compositions.test.ts` asserts it on every run,
-over every band, including bands nobody has written. The fourth line is zero and
-nothing is holding it. It is a measurement, taken once, by this exercise.
+over every band, including bands nobody has written. The fourth line was zero
+and **nothing was holding it**: a measurement, taken once, by this exercise.
+
+> **As of 11 October it is held too, and this lesson is why.** `Loom primitives`
+> read the finding this exercise produced and wrote the three lines beside the
+> check that was already there — *plots no figure above the ceiling of the chart
+> it is in*, over every band, now and later. The first two numbers in the fence
+> moved on the same day and for the same reason: `comparison-wipe` puts two
+> authored plots in one band, which is also the first time the ceiling stopped
+> being a convention and started being load-bearing, because two charts
+> superimposed under one divider are comparable only if they are drawn to the
+> same ceiling.
+>
+> **The teaching point survives the fix and is sharper for it**, so it is
+> corrected here rather than deleted. For six days the fourth line and the third
+> line were the same number and different kinds of fact, and nothing in the
+> output said which was which. What closed the gap was not the measurement — the
+> measurement had been taken, and read, and was already zero — but somebody
+> noticing that *nobody had chosen* which of the two available checks to write.
 
 Which is the distinction lesson 26 is about, one floor down from where it teaches
 it: *a value and the reason it has that value are two facts, and a reading that

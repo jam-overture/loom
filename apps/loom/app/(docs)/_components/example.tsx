@@ -30,6 +30,13 @@ import { ProposalBox } from "./proposal-box"
  * building a tree is deterministic: the same id factory, the same counters, the
  * same bytes. Nothing here reads a clock until a reader clicks something.
  *
+ * **The registry is usually the site's and is not always.** An example may
+ * carry its own, and exactly one does: the page whose subject is a primitive
+ * of your own renders through the starter library plus that primitive.
+ * `_lib/own/registry.ts` is where the argument for the exception lives, and
+ * `catalogue.test.tsx` mounts each example through whichever registry it named,
+ * so the pair cannot come apart.
+ *
  * An unknown id throws rather than rendering an empty frame. A page that names
  * an example nobody wrote is a broken page, and the build is the right place to
  * find that out; `content.test.ts` finds it earlier still.
@@ -59,9 +66,11 @@ export const Example = ({ id, interactive = true }: { readonly id: string; reado
   const [seed] = useState<LoomTree>(example.build)
   const changed = tree.revision > 0
 
+  const registry = example.registry ?? docsRegistry
+
   const rendered = renderLoomTree(tree, {
-    resolver: docsRegistry,
-    validator: docsRegistry,
+    resolver: registry,
+    validator: registry,
     themes: docsThemes,
   })
 
