@@ -9,6 +9,76 @@ list and it is not a report.
 
 ---
 
+## 2026-10-11 — four record numbers were claimed twice in two days, and the check that catches a clash cannot see one until the branches meet
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/decisions/`, `decisions/README.md`) · **Status:** open — **nothing is
+broken and no branch is blocked**; the documented resolution works and has run
+three times this week, but it runs at the end rather than at the point the
+mistake is made
+
+`decisions/README.md` states the rule and, in the same paragraph, the reason
+this is filed:
+
+> `pnpm verify` fails if … two records claim the same number … That set is not
+> hypothetical: two concurrent sessions each wrote an `0032` on the same day,
+> and nothing noticed until their branches met.
+
+**It is still true that nothing notices until their branches meet.** The check
+reads one tree. A number claimed by another open branch is a *hole* in this
+one — `*No record on this branch*` — which 0097 correctly reports and does not
+fail. So the state *two open branches both claim 0254* renders, on each branch,
+as a perfectly clean verify.
+
+### What it looked like this week
+
+| number | claimed by | outcome |
+| --- | --- | --- |
+| 0250 | #565, #566 | #566 still open, still holding a number it must move off |
+| 0251 | #565, #568 | #568 renumbered to 0253 at merge, nine citation sites |
+| 0254 | #575, #576 | #575 merged 11 Oct 16:11 and holds it; **#576 must move** |
+| 0256 | #576, #578 | both open; one must move |
+
+Four in two days, and the last row is two *open* branches with no way to learn
+of each other.
+
+**The resolution is not the problem; where it happens is.** Renumbering means
+editing the file, the index, every citation in `src/`, every mention in
+`FINDINGS.md`, the run's own report, and any cross-lane doc comment naming it.
+#568's run listed nine such sites. That is careful find-and-replace across a
+repository, done *after* a lane has written and verified its branch, under a
+merge it did not plan for — the worst available moment for it.
+
+### What would cost less
+
+A check that reads the **open pull requests** rather than one tree, and reports
+a number claimed by more than one open branch. The information is public and
+cheap: the record filenames each open pull request adds. Run it in
+`pnpm decisions:index` or beside it, and the second branch to claim a number
+learns while moving still costs one filename and one line.
+
+It cannot be `pnpm verify`'s to fail on. Verify runs offline and must; a network
+call that fails closed would make every lane's merge gate depend on GitHub being
+up. **Reported and never fatal**, which is the shape 0097 already gives a hole.
+
+### What is not asked for
+
+Not an allocator and not a lock. Seven routines coordinating through a shared
+counter is a bigger mechanism than the problem, and the convention — take the
+next free number, whoever lands first keeps it — is right. This asks only that
+*free* become checkable against the branches that are actually open, which is
+the one fact the convention rests on and the one thing no tool here can see.
+
+### Why it is a second pull request rather than part of #575
+
+It was written on #575's branch and pushed about a minute after that branch
+merged, so it never reached `main` — which is a small instance of the same
+class: **a branch cannot see what happened to it while it was working.** The
+entry was already referenced in a comment on #575 as filed, so this is the one
+making that true rather than a change of mind.
+
+---
+
 ## 2026-10-10 — #566 has been merge-blocked since this morning on three strings of your copy, and the row is seven lines in your file
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
