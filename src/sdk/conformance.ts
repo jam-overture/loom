@@ -47,7 +47,15 @@ import type { SubmissionOutcome } from "../submit/resolution.js"
  * is why the verdict is a value.
  */
 
-/** A configuration the schema accepts that the component threw on. */
+/**
+ * A configuration the probe built that the component threw on.
+ *
+ * Built *from* the schema, which is not the same as accepted *by* it: the
+ * default configuration is `{}`, and a primitive with a required prop refuses
+ * that (0259). Whether a failure here is a fault of the component is
+ * `auditRegistry`'s partition, because the validator it needs lives on the
+ * registration rather than in this module.
+ */
 export type ProbeFailure = {
   readonly props: JsonObject
   readonly reason: string
@@ -232,10 +240,37 @@ const namesIn = (data: NodeData): readonly string[] => {
  * particular values together is not found. Nothing in the library is shaped
  * that way, and a primitive that were would be one nobody can read.
  */
-export const probeConfigurations = (choices: readonly ClosedChoice[]): readonly JsonObject[] => [
-  {},
-  ...choices.flatMap(({ name, options }) => options.map((option) => ({ [name]: option }))),
-]
+export const probeConfigurations = (choices: readonly ClosedChoice[]): readonly JsonObject[] =>
+  probeConfigurationsFrom([{}], choices)
+
+/**
+ * The same, from props a caller supplied rather than from nothing (0259).
+ *
+ * `probeConfigurations` starts from `{}`, which is a props bag the schema of any
+ * primitive with a required prop refuses — thirty-two of the hundred and seven
+ * starter primitives, where it is every configuration the probe builds. Those
+ * primitives answer anyway, because handing React a missing prop renders
+ * nothing; the first one to *read* a required prop throws, and a throw under a
+ * bag no valid tree can carry is not a fault of the component.
+ *
+ * A base is **supplied, not derived**, for the reason `ProbeAnswers` is: a
+ * required `z.string().min(1)` has no value the probe can read off the schema,
+ * and one it invented would make everything downstream a function of the guess.
+ * Whoever registered the primitive knows a bag it accepts.
+ *
+ * Each base is varied by each closed choice in turn — the sum again, not the
+ * product — so a caller who hands one bag gets that bag and that bag under
+ * every value its schema closes over, which is what 0075 asks for and what `{}`
+ * could not deliver for a primitive that requires anything.
+ */
+export const probeConfigurationsFrom = (
+  bases: readonly JsonObject[],
+  choices: readonly ClosedChoice[]
+): readonly JsonObject[] =>
+  bases.flatMap((base) => [
+    base,
+    ...choices.flatMap(({ name, options }) => options.map((option) => ({ ...base, [name]: option }))),
+  ])
 
 /**
  * The states a primitive is probed in: what its schema closes over, then what
@@ -455,8 +490,13 @@ export type PlacementVerdict =
       /**
        * Configurations built from the primitive's own schema that it threw on.
        * Never a reason to distrust the verdict — the configurations that
-       * answered still answered — and always a fault: a component that throws
-       * on a value its schema accepts is one a valid tree can crash a page with.
+       * answered still answered.
+       *
+       * A fault for every one of them its schema **accepts**, which is the
+       * partition `auditRegistry` makes and this module cannot: a component that
+       * throws on a value its schema accepts is one a valid tree can crash a
+       * page with, and one that throws on the empty bag it requires props
+       * against is a component nobody has handed props to yet (0259).
        */
       readonly threw: readonly ProbeFailure[]
     }

@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -21,7 +21,7 @@
           {
             "specifier": "@jam-overture/loom/sdk",
             "slug": "sdk",
-            "names": 8
+            "names": 9
           }
         ],
         "collisions": []
@@ -4727,7 +4727,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4773,7 +4773,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5763,7 +5763,7 @@
       "files": 213,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6228,7 +6228,7 @@
       "files": 76,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7288,7 +7288,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7296,7 +7296,7 @@
           {
             "specifier": "@jam-overture/loom",
             "slug": "runtime",
-            "names": 8
+            "names": 9
           }
         ],
         "collisions": []
@@ -7327,6 +7327,13 @@
               "signature": "type PrimitiveCatalogue = readonly CataloguedPrimitive[];",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "ClosedChoice",
+              "kind": "type",
+              "signature": "type ClosedChoice = {\n    readonly name: string;\n    readonly options: readonly (string | boolean)[];\n};",
+              "truncated": false,
+              "summary": "A prop whose accepted values can be listed rather than invented."
             }
           ]
         },
@@ -7373,7 +7380,7 @@
             {
               "name": "PrimitiveAudit",
               "kind": "type",
-              "signature": "type PrimitiveAudit = {\n    readonly type: PrimitiveType;\n    readonly verdict: ConformanceVerdict;\n    readonly placement: PlacementVerdict;\n    readonly submission: SubmissionVerdict;\n    /** What the author declared, beside what the probe saw. */\n    readonly declaresSubmits: boolean;\n    /** The props this primitive declared it frames. Empty for almost all. */\n    readonly framesProps: readonly string[];\n};",
+              "signature": "type PrimitiveAudit = {\n    readonly type: PrimitiveType;\n    readonly verdict: ConformanceVerdict;\n    readonly placement: PlacementVerdict;\n    readonly submission: SubmissionVerdict;\n    /** What the author declared, beside what the probe saw. */\n    readonly declaresSubmits: boolean;\n    /** The props this primitive declared it frames. Empty for almost all. */\n    readonly framesProps: readonly string[];\n    /**\n     * The configurations this primitive was probed under that its own schema\n     * refuses.\n     *\n     * Non-empty does not mean anything is wrong: the verdicts above still hold,\n     * because what they report is *reach* — some configuration placed this\n     * region, some configuration decorated — and a bag the schema refuses that\n     * places a region is still evidence the component reads it. It is here so a\n     * reader can tell how much of a verdict rests on configurations no tree could\n     * carry, which for the starter library is thirty-two primitives' worth.\n     */\n    readonly refusedConfigurations: readonly RefusedConfiguration[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -7406,6 +7413,27 @@
               "summary": "A bound primitive the audit was not put in a position to see answered."
             },
             {
+              "name": "RefusedConfiguration",
+              "kind": "type",
+              "signature": "type RefusedConfiguration = {\n    readonly props: JsonObject;\n    readonly issues: readonly PropsIssue[];\n};",
+              "truncated": false,
+              "summary": "A configuration the probe built and the primitive's own schema refuses."
+            },
+            {
+              "name": "UnconfiguredReason",
+              "kind": "type",
+              "signature": "type UnconfiguredReason = \n/** The audit was handed no props for this type, and `{}` is not enough. */\n\"no-props\"\n/**\n * It was handed some, and the schema refused every configuration they built.\n *\n * Reachable only by trying the first, and reported for the reason\n * `names-not-answered` is: a host told to empty this list by handing props\n * over can hand over a bag that is refused too, and with only the first cause\n * reported would get an empty list and the same unjudged primitive.\n */\n | \"props-not-accepted\";",
+              "truncated": false,
+              "summary": "Why the audit had no configuration a primitive's own schema accepts."
+            },
+            {
+              "name": "UnconfiguredPrimitive",
+              "kind": "type",
+              "signature": "type UnconfiguredPrimitive = {\n    readonly type: PrimitiveType;\n    /** The props its registration says it must have, name-sorted. */\n    readonly required: readonly string[];\n    readonly reason: UnconfiguredReason;\n    /** Every configuration the schema refused, with what it said about each. */\n    readonly refused: readonly RefusedConfiguration[];\n};",
+              "truncated": false,
+              "summary": "A primitive the audit could not put in a configuration its own schema accepts."
+            },
+            {
               "name": "ThrowingConfigurations",
               "kind": "type",
               "signature": "type ThrowingConfigurations = {\n    readonly type: PrimitiveType;\n    readonly failures: readonly ProbeFailure[];\n    /**\n     * Whether *nothing* the probe tried came back — the line between a fault the\n     * audit is certain of and one it is only reporting.\n     *\n     * `false`: some configurations rendered and this one threw, so the component\n     * is callable and a value its own schema accepts crashes it. Certain.\n     *\n     * `true`: every configuration threw, which is what a broken component and a\n     * hook-using one both look like from outside a renderer — and a hook-using\n     * component is a legitimate primitive. A host with none of those\n     * asserts the whole list empty; one that ships them asserts the `false` half\n     * and reads the rest.\n     */\n    readonly everyConfiguration: boolean;\n};",
@@ -7415,14 +7443,14 @@
             {
               "name": "RegistryAudit",
               "kind": "type",
-              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Declared a behaviour and dropped its control. Like `unplacedSlots` this is\n     * a promise the registration made and the component did not keep — and unlike\n     * a slot, nothing else on the page hints that something is missing, because\n     * the content a behaviour acts on renders perfectly without it.\n     */\n    readonly unplacedBehaviours: readonly UnplacedBehaviours[];\n    /**\n     * Declared it reads a binding and was never probed in a state that answered\n     * one. Reported rather than failed, like `notDecorated` and for the same\n     * reason: whether it matters depends on the deployment. A host\n     * auditing the library it ships asserts it empty, because an entry here means\n     * every other list on this audit is describing that primitive's unanswered\n     * branch and calling it the primitive.\n     *\n     * Unlike every other list, an entry is not a claim about the component. It is\n     * a claim about this call.\n     */\n    readonly notAnswered: readonly UnansweredReader[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n    /**\n     * Threw on props built from its own schema. A fault whoever registered it\n     * wants to know about — a tree the validator accepts can take the page down —\n     * and never a reason to distrust the rest of this audit, which is answered by\n     * the configurations that did render.\n     *\n     * Every primitive that threw is here, including one that threw under *all* of\n     * them. That case used to reach only `notProbeable`, beside the class and\n     * hook-using components that are legitimate primitives, so the most\n     * extreme instance of the fault this list exists for sat in the one list a\n     * host cannot assert empty. `everyConfiguration` marks it rather than hiding\n     * it.\n     */\n    readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[];\n    /**\n     * The registered primitives that post, as the probe observed them.\n     *\n     * This is the list a deployment holds its endpoint registry against: if\n     * anything here is registered, `renderRequest` wants `endpoints`, and a\n     * deployment that ships one without the other ships forms that render\n     * disabled. Derived rather than declared, so it is the truth about the\n     * components rather than the sum of their authors' intentions.\n     */\n    readonly submits: readonly PrimitiveType[];\n    /**\n     * Places an address and never declared it posts. Not a broken page — the\n     * form works — but the declaration is what a deployment reads to know the\n     * seam is load-bearing here, so an undeclared submitter is a form whose need\n     * for an endpoint registry is invisible until someone fills it in.\n     */\n    readonly undeclaredSubmitters: readonly PrimitiveType[];\n    /**\n     * Declared it posts and placed no address under any configuration probed.\n     * This is the failure the submission seam exists to prevent, caught one layer\n     * earlier than it would otherwise be: a submit control that goes nowhere\n     * renders, looks finished, and reports nothing until a visitor uses it.\n     */\n    readonly unwiredSubmitters: readonly PrimitiveType[];\n    /**\n     * The registered primitives that put a prop in a frame.\n     *\n     * This is the list a deployment holds its framable-origin registry against,\n     * exactly as `submits` is held against its endpoint registry: if anything\n     * here is registered, `renderRequest` wants `origins`, and a deployment that\n     * ships one without the other ships embeds that render a refusal.\n     *\n     * Declared rather than probed, which is the one place this audit takes an\n     * author's word for something it could in principle check. It could not\n     * check this one usefully: the seam already refuses to register a `frames`\n     * naming a prop the schema does not declare, and the failure left over — a\n     * primitive that puts a URL in an `iframe` and never said so — is invisible\n     * to a probe, because an `iframe` a primitive built out of a prop it did not\n     * declare looks exactly like one it did. What would catch that is a lint over\n     * the markup, not a call of the component. Named here rather than left as a\n     * gap somebody discovers.\n     */\n    readonly frames: readonly PrimitiveType[];\n};",
-              "truncated": false,
+              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /**\n     * The probe could not answer — neither a pass nor a failure.\n     *\n     * A primitive that threw under every configuration *its own schema refuses*\n     * is in `notConfigured` instead. Both are \"the probe got no answer\",\n     * and only one of them is a fact about the component: a class or hook-using\n     * component cannot be called at all, while a component nobody has\n     * handed required props to has not been asked a question it could answer.\n     */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Declared a behaviour and dropped its control. Like `unplacedSlots` this is\n     * a promise the registration made and the component did not keep — and unlike\n     * a slot, nothing else on the page hints that something is missing, because\n     * the content a behaviour acts on renders perfectly without it.\n     */\n    readonly unplacedBehaviours: readonly UnplacedBehaviours[];\n    /**\n     * Declared it reads a binding and was never probed in a state that answered\n     * one. Reported rather than failed, like `notDecorated` and for the same\n     * reason: whether it matters depends on the deployment. A host\n     * auditing the library it ships asserts it empty, because an entry here means\n     * every other list on this audit is describing that primitive's unanswered\n     * branch and calling it the primitive.\n     *\n     * Unlike every other list, an entry is not a claim about the component. It is\n     * a claim about this call.\n     */\n    readonly notAnswered: readonly UnansweredReader[];\n    /**\n     * Requires props and was probed under none its own schema accepts, so every\n     * other list on this audit is describing it under a bag no valid tree carries\n     *.\n     *\n     * Reported for the same reason `notAnswered` is, and asserted empty by the\n     * same kind of host: an entry means the probe never reached this primitive,\n     * and the remedy is to hand `auditRegistry` props for that type. It is\n     * deliberately *not* every primitive whose default configuration was refused\n     * — that is thirty-two of the starter library, all of which answer anyway —\n     * only those where nothing the probe accepted came back at all.\n     *\n     * Like `notAnswered`, an entry is not a claim about the component.\n     */\n    readonly notConfigured: readonly UnconfiguredPrimitive[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n    /**\n     * Threw on props its own schema **accepts**. A fault whoever registered it\n     * wants to know about — a tree the validator accepts can take the page down —\n     * and never a reason to distrust the rest of this audit, which is answered by\n     * the configurations that did render.\n     *\n     * Accepts, not merely *built from*: the probe's default configuration is the\n     * empty bag, which the schema of any primitive with a required prop refuses,\n     * and a throw under that is the probe handing a component props no tree could\n     *. Those land in `notConfigured` or in the audit's\n     * `refusedConfigurations` and never here, so the sentence above is true of\n     * every row.\n     *\n     * Every primitive that threw is here, including one that threw under *all* of\n     * them. That case used to reach only `notProbeable`, beside the class and\n     * hook-using components that are legitimate primitives, so the most\n     * extreme instance of the fault this list exists for sat in the one list a\n     * host cannot assert empty. `everyConfiguration` marks it rather than hiding\n     * it.\n     */\n    readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[];\n    /**\n     * The registered primitives that post, as the probe observed them.\n     *\n     * This is the list a deployment holds its endpoint registry against: if\n     * anything here is registered, `renderRequest` wants `endpoints`, and a\n     * deployment that ships one without the other ships forms that render\n     * disabled. Derived rather than declared, so it is the truth about the\n     * components rather than the sum of their authors' intentions.\n     */\n    readonly submits: readonly PrimitiveType[];\n    /**\n     * Places an address and never declared it posts. Not a broken page — the\n     * form works — but the declaration is what a deployment reads to know the\n     * seam is load-bearing here, so an undeclared submitter is a form whose need\n     * for an endpoint registry is invisible until someone fills it in.\n     */\n    readonly undeclaredSubmitters: readonly PrimitiveType[];\n    /**\n     * Declared it posts and placed no address under any configuration probed.\n     * This is the failure the submission seam exists to prevent, caught one layer\n     * earlier than it would otherwise be: a submit control that goes nowhere\n     * renders, looks finished, and reports nothing until a visitor uses it.\n     */\n    readonly unwiredSubmitters: readonly PrimitiveType[];\n    /**\n     * The registered primitives that put a prop in a frame.\n     *\n     * This is the list a deployment holds its framable-origin registry against,\n     * exactly as `submits` is held against its endpoint registry: if anything\n     * here is registered, `renderRequest` wants `origins`, and a deplo\n…",
+              "truncated": true,
               "summary": ""
             },
             {
               "name": "RegistryAuditOptions",
               "kind": "type",
-              "signature": "type RegistryAuditOptions = {\n    /**\n     * The answer states each type is probed in, beside the ones its own schema\n     * closes over.\n     *\n     * A `Map` rather than an object, because the key is a primitive type and a\n     * caller building one from `registry.primitives` has the branded strings\n     * already — and because a lookup on an object literal is a lookup on\n     * `Object.prototype` for any name that happens to be on it.\n     */\n    readonly answers?: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]>;\n};",
+              "signature": "type RegistryAuditOptions = {\n    /**\n     * The answer states each type is probed in, beside the ones its own schema\n     * closes over.\n     *\n     * A `Map` rather than an object, because the key is a primitive type and a\n     * caller building one from `registry.primitives` has the branded strings\n     * already — and because a lookup on an object literal is a lookup on\n     * `Object.prototype` for any name that happens to be on it.\n     */\n    readonly answers?: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]>;\n    /**\n     * Props bags each type is probed from, beside the empty one.\n     *\n     * For a primitive that requires nothing this changes nothing worth having —\n     * the empty bag is already accepted. For one that requires a prop the schema\n     * does not close over, it is the difference between an audit of the component\n     * and an audit of what it does when handed props no tree can carry.\n     *\n     * A bag per entry rather than one, because a primitive whose rendering turns\n     * on a required prop needs as many as there are branches — and each is varied\n     * by every closed choice in turn, so the cost is the sum again and not the\n     * product.\n     */\n    readonly props?: ReadonlyMap<PrimitiveType, readonly JsonObject[]>;\n};",
               "truncated": false,
               "summary": "What the audit is told beyond the registry itself."
             },
@@ -7473,7 +7501,7 @@
               "kind": "type",
               "signature": "type ProbeFailure = {\n    readonly props: JsonObject;\n    readonly reason: string;\n    /**\n     * The binding names the node had answers under when it threw, sorted, and\n     * absent when it had none.\n     *\n     * Without it two failures of `loom.feed` at its default props read as the\n     * same line twice, and the one that matters — *it renders until you answer\n     * it* — is the one a reader cannot pick out.\n     */\n    readonly answered?: readonly string[];\n};",
               "truncated": false,
-              "summary": "A configuration the schema accepts that the component threw on."
+              "summary": "A configuration the probe built that the component threw on."
             },
             {
               "name": "NotProbeableCause",
@@ -7532,6 +7560,13 @@
               "summary": "The prop configurations a primitive is probed under."
             },
             {
+              "name": "probeConfigurationsFrom",
+              "kind": "function",
+              "signature": "const probeConfigurationsFrom: (bases: readonly JsonObject[], choices: readonly ClosedChoice[]) => readonly JsonObject[]",
+              "truncated": false,
+              "summary": "The same, from props a caller supplied rather than from nothing."
+            },
+            {
               "name": "probeStates",
               "kind": "function",
               "signature": "const probeStates: (configurations: readonly JsonObject[], answers?: readonly ProbeAnswers[]) => readonly ProbeConfiguration[]",
@@ -7548,7 +7583,7 @@
             {
               "name": "PlacementVerdict",
               "kind": "type",
-              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviours whose control no probed configuration placed. */\n    readonly unplacedBehaviours: readonly BehaviourName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /**\n     * The configurations that answered — one unasked `{}` alone when the\n     * schema closes over nothing and the caller supplied no answers.\n     */\n    readonly probed: readonly ProbeConfiguration[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered — and always a fault: a component that throws\n     * on a value its schema accepts is one a valid tree can crash a page with.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
+              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviours whose control no probed configuration placed. */\n    readonly unplacedBehaviours: readonly BehaviourName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /**\n     * The configurations that answered — one unasked `{}` alone when the\n     * schema closes over nothing and the caller supplied no answers.\n     */\n    readonly probed: readonly ProbeConfiguration[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered.\n     *\n     * A fault for every one of them its schema **accepts**, which is the\n     * partition `auditRegistry` makes and this module cannot: a component that\n     * throws on a value its schema accepts is one a valid tree can crash a\n     * page with, and one that throws on the empty bag it requires props\n     * against is a component nobody has handed props to yet.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
               "truncated": false,
               "summary": "The second probe: does a primitive place what it was handed?"
             },
@@ -7893,7 +7928,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8121,7 +8156,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8580,7 +8615,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8934,7 +8969,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9102,7 +9137,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -11440,7 +11475,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11583,7 +11618,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11650,7 +11685,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12247,7 +12282,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12321,7 +12356,7 @@
       "files": 90,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12800,7 +12835,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1470,
+        "packageNames": 1474,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
