@@ -50771,3 +50771,135 @@ to check when a photograph shows the wrong page.**
 
 The staging module was deleted before committing, as the eight before it were,
 and the shot list is beside the report.
+
+---
+## 2026-10-12 — a kind of part now has three figures, two of them are shares of readers and only one is about what readers did, and the row that leads the new reading is never the page shell
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens
+and `/portal/pieces`) · **Status:** open — **a third figure for a card that
+already exists**, with two states to refuse to draw and one row not to lead with
+
+`libraryActionOf(readings, rows)` is on this branch, published from
+`@jam-overture/loom/signals` with
+[0259](decisions/0259-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md).
+It takes the same list of `PageReading`s and the same door rows `libraryReachOf`
+takes, keys its rows the same way, and pairs on the published `kindKeyOf` — so
+the screen #584 built needs no second read and no second join.
+
+**What it adds to a piece's card:** *3 in 10 of the readers who met it did
+something inside it.* That is a different sentence from either figure already
+there, and the three are not near each other:
+
+- `KindReading.readShare` — the share of the **places** it stands that a reader
+  reached (0257).
+- `KindReach.share` — the share of the **readers who met it** that read it
+  (0256).
+- `KindAction.share` — the share of **those same readers** that acted *inside*
+  it (0259).
+
+**The one thing that is new in how the third behaves, and it is good news for
+the screen.** 0256 withholds a kind's reach share whenever a page it stands on
+has no usable door row, which is the state #584 reports as the screen's most
+common. This share is withheld far less often, because the door is only a
+**weight** here: both its terms are reaches off one row, so a page's straddle
+cancels inside that page's own contribution and the door is needed only to weigh
+one page against another. So **a kind borne by one page is answered with no door
+row at all**, and so is a kind whose other pages nobody reached. A deployment
+whose reach column is entirely withheld can still have a full action column, and
+the screen should expect that rather than treat the two as one state.
+
+**The cost of that, which a surface has to carry:** a row answered without the
+door has a `share` and **no** `met`, `acted` or `ignored`. `onDoorScale` says
+which kind of row it is, and the counts are comparable between rows only where it
+is true. `LibraryAction.unranked` is how many type rows the lead could not see
+for that reason — a number worth printing beside the lead rather than dropping.
+
+**Two states to refuse to draw, with opposite remedies.** A silence of
+`unscaled`, `unopened` or `uncounted` is the door, exactly as in the reach
+reading — and `LibraryAction.unscaled` names the page. A silence of `unwalked`
+is **a sender crediting nobody**: the page holds presses and no `within`, so
+every share on it is a nought that is a filing rule (0167, 0242), and
+`LibraryAction.unwalked` names those pages. The counters look healthy in that
+state and the screen would otherwise print *nobody uses any of your components*.
+A silence of `unenterable` is neither: it means the kind is a leaf everywhere, so
+there is nothing to draw and nothing wrong — the census is the reading to fall
+back to.
+
+**One row not to lead with, and it is not excluded for you in `byType`.**
+`mostIgnored` already skips a kind whose placements are all page roots, because a
+root's figure is the page-wide *did anybody do anything at all* (0242) and
+contains every row it would outrank. The row itself is still in `byType` and
+still sorts first on count, so a screen that drew `byType[0]` as *the piece to
+look at* would print the page shell. Use `mostIgnored`, or read `roots` against
+`placements`.
+
+**Two numbers on the row that are places and not readers.** `standings` is the
+0242 standing of every placement including the leaves — *readers acted in it in 3
+of its 9 places* — and `leaves` is how many of its places have no inside at all.
+Neither is a headcount, and neither is the share.
+
+---
+## 2026-10-12 — the missing role declaration now costs a share of what readers *did* as well, and this is the sixth consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives` (`src/primitives/`) ·
+**Status:** open — **the same gap, now with six consumers**, and nothing here is
+broken by it
+
+Nothing in `src/primitives/` declares `role` (0114), so every role row in
+`libraryActionOf` comes back under `role: null` — the same thinness 0212 named,
+now in a sixth place after a standing on a funnel end (0238), a comparison of
+what readers did (0251), the census of the library (0257), a kind's share of the
+readers who met it (0256), and the four before those.
+
+**What is new about this one.** The sentence it cannot say is *of the readers who
+met a control, what share pressed something inside it* — and that is the one
+role question where the gap and this lane's 6 October entry are the **same**
+gap: a leaf a reader reached with nothing filed against it is a button nobody
+pressed or a heading nobody could press, and `libraryActionOf` reports every
+such kind as `unenterable` or `untouched` with no way to say which it deserved.
+A role for *a thing a reader acts on* would make both answerable at once.
+
+**It is one declaration per primitive and no migration.** The join is at read
+time (0212), so the day a type declares a role every counter already stored
+reinterprets and these rows start answering.
+
+---
+## 2026-10-12 — running the formatter on this repository reformats whatever it is pointed at, because there is no formatter configuration and nothing in `verify` would catch it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (the repository's
+own tooling) · **Status:** open — **caught and reverted inside the run that
+caused it**, and filed because the next lane to reach for a formatter will do
+the same thing
+
+This run wrote a new module, then ran `npx prettier --write` on it and on the two
+existing files it had edited, on the assumption that the repository's style was a
+formatter's output. **There is no `.prettierrc`, no `prettier.config.*`, no
+`.editorconfig` and no formatter in `package.json`** — not in the root and not in
+`apps/loom`. So prettier ran on its own defaults, which are not this
+repository's: it added a semicolon to the end of every statement in all three
+files and rewrapped at 80 columns where the code sits at up to about 100.
+
+**What it would have cost.** Two of the three files were `src/signals/silences.ts`
+and its test, where the actual change was a vocabulary member and a condition —
+about 150 lines across both. The reformat turned that into a diff touching
+roughly every line of a 640-line module and a 700-line suite, for a change
+nobody could then review. **Nothing in `pnpm verify` would have failed**: there
+is no lint or format step, so `build`, `typecheck`, `test`, `findings:check` and
+`prerender:check` are all green on a wholly reformatted file. It was caught
+because the count of semicolons in a file this lane had not written looked wrong,
+and the two existing files were reverted and re-edited by exact replacement
+instead.
+
+**The cheap habit, which is this entry's whole point:** the style in this
+repository is maintained by hand — no semicolons, double quotes, about a
+100-column wrap — and a run that wants a file formatted should match the file
+beside it rather than invoke a tool. `npx <formatter>` in a repository with no
+configuration for that formatter is a rewrite, not a format.
+
+**What would close it**, and it is not this lane's to write: either a
+`.prettierrc` that states the style the repository already follows plus a
+`format:check` in `verify`, or a line in `docs/routines.md` saying there is
+deliberately no formatter and why. Either is fine and the second is cheaper; what
+is expensive is the current state, where the question has no answer in the
+repository and every lane has to rediscover it. Filed as an observation for the
+lane that owns the tooling, not as an ask with a deadline.

@@ -5,6 +5,7 @@ import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
 import type { DeploymentSilence } from "./deployment.js"
+import type { KindActionSilence } from "./library-action.js"
 import type { KindReachSilence } from "./library-reach.js"
 import type { KindSilence } from "./library.js"
 import type { PaceChangeSilence } from "./pace-change.js"
@@ -16,7 +17,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are ten of them. Each set's names are right in its own
+ * absent, and there are eleven of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -141,6 +142,7 @@ export type SilenceVocabulary =
   | "copy-change"
   | "deployment"
   | "library"
+  | "library-action"
   | "library-reach"
   | "pace"
   | "pace-change"
@@ -154,6 +156,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "copy-change",
     "deployment",
     "library",
+    "library-action",
     "library-reach",
     "pace",
     "pace-change",
@@ -176,6 +179,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     "copy-change": "comparison",
     deployment: "page",
     library: "kind",
+    "library-action": "kind",
     "library-reach": "kind",
     pace: "part",
     "pace-change": "comparison",
@@ -185,8 +189,8 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Eleven of them against thirty-seven members across the ten sets, which is the
- * overlap this module exists to state. None of them replaces a set's own name:
+ * Twelve of them against forty-four members across the eleven sets, which is
+ * the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
  *
@@ -235,6 +239,23 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * same three door states are published in two vocabularies at two subjects —
  * which is not a duplication to remove but exactly the pair this module exists
  * to relate: `one-reason`, never `one-state`.
+ *
+ * **The eleventh needed one, and it is the first condition about the shape of a
+ * page** ([0259](../../decisions/0259-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)).
+ * `nothing-inside` is a kind of part standing only in places with no element
+ * part under them, so a reader could not have acted in one: the question does
+ * not exist rather than having gone unanswered. Every condition before it is
+ * about a window, a row, a vocabulary or a filing rule, and all of those would
+ * change if the deployment were read differently or read more — this one would
+ * be exactly as true if every reader in the world had read every page. Its one
+ * sibling is `says-nothing`, which is the same fact about a page's **words**,
+ * and the pair is now the shape of a page in the two things a reader can do
+ * with a part: read it and act in it.
+ *
+ * The same set is also the first to take another's whole type rather than
+ * standing beside it. The tenth found that a set cannot be reused across
+ * subjects; the eleventh is asked of a kind as well, so its five inherited
+ * members are the same states at the same subject and need no second spelling.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -315,6 +336,23 @@ export type SilenceCondition =
    * there is nothing to measure rather than nothing measured.
    */
   | "nothing-of-the-kind"
+  /**
+   * It has nothing inside it, so there is nothing a reader could act in.
+   *
+   * A press is filed against the control and credited to the addressed
+   * ancestors it happened inside (0167), so a part with no element part under it
+   * reports a nought for ever — which is the state `says-nothing` is for a
+   * page's words, one counter across.
+   *
+   * **The second condition here about the shape of the page rather than about
+   * the window**, and the pair is what makes the claim above still hold: these
+   * are states of the world, and the way a new one arrives is with a reading
+   * that can be in one nothing before it could. A reading of what readers *did*
+   * to a **kind** of part is the first that can report it, because a kind is
+   * answered over the places it stands and the question does not exist where
+   * none of them has an inside.
+   */
+  | "nothing-inside"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -328,6 +366,7 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "nothing-carried",
   "no-action-credited",
   "nothing-of-the-kind",
+  "nothing-inside",
 ])
 
 /**
@@ -362,6 +401,8 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "it holds actions and credits none of them to a reader"
     case "nothing-of-the-kind":
       return "there is none of it in the pages that were read"
+    case "nothing-inside":
+      return "it has nothing inside it, so there is nothing a reader could act in"
   }
 }
 
@@ -520,6 +561,43 @@ export const meaningOfKindReachSilence = (silence: KindReachSilence): SilenceMea
       return meaning("library-reach", "no-openings-marked")
     case "uncounted":
       return meaning("library-reach", "no-window-folded")
+  }
+}
+
+/**
+ * What a kind's share of the readers who acted inside it reports, of one kind
+ * (0259).
+ *
+ * **The eleventh set, and the first built on another's type rather than beside
+ * it.** It takes the tenth's five members whole — the census's two and the
+ * door's three — because the tenth's own limit was that a set cannot be reused
+ * across subjects, and this reading's subject is a kind exactly as that one's
+ * is. So the reuse is that limit used in the affirmative: same subject, same
+ * states, one word for one state on any surface drawing both.
+ *
+ * Two members are added and only one of them brings a condition. `unwalked` is
+ * `no-action-credited`, which the eighth set brought and which is the state of a
+ * window whose nought is a filing rule. `unenterable` is the twelfth condition
+ * and is **not about a window at all**: a kind standing only in places with
+ * nothing inside them has no question to answer, which would be exactly as true
+ * of a deployment every reader in the world had read.
+ */
+export const meaningOfKindActionSilence = (silence: KindActionSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("library-action", "no-view-reported")
+    case "unplaced":
+      return meaning("library-action", "nothing-of-the-kind")
+    case "unenterable":
+      return meaning("library-action", "nothing-inside")
+    case "unwalked":
+      return meaning("library-action", "no-action-credited")
+    case "unscaled":
+      return meaning("library-action", "no-arrivals-counted")
+    case "unopened":
+      return meaning("library-action", "no-openings-marked")
+    case "uncounted":
+      return meaning("library-action", "no-window-folded")
   }
 }
 
