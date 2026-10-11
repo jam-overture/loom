@@ -393,6 +393,17 @@
      the fold. Every pixel of this window costs the asks below it, so
      the two rules here are the two halves of one trade — how tall, and
      where it is not worth taking at all.
+
+     **The modifier keeps the name it was built under and the name is
+     now narrower than the thing.** Since `demo-44` this window also
+     stands through the press the demo opens with — a change to the page
+     itself, which renders no band in a card and draws no mark, so the
+     screen would otherwise have nothing of the page on it at all
+     (`_lib/the-page-itself.ts`). Nothing in either rule below depends on
+     which of those screens it is: both are the phone's first screen,
+     both trade the same pixels against the same press. Renamed, this
+     comment would be the only thing that changed and four files would
+     have moved, so it says so here instead.
      ══════════════════════════════════════════════════════════════════ */
 
   /*

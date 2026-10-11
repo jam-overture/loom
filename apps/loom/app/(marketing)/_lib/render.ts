@@ -12,7 +12,15 @@ import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { whatYouRunPageTree } from "./pages/what-you-run"
 import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
-import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, siteOrigin, type SiteRoute } from "./site"
+import {
+  ASKED_ROUTE,
+  HOME,
+  HOW_IT_WORKS,
+  WHAT_YOU_RUN,
+  isAskedRoute,
+  siteOrigin,
+  type SiteRoute,
+} from "./site"
 
 /**
  * Route → tree → rendered page, in one place.
@@ -28,7 +36,7 @@ import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, siteOrigin, type SiteRoute } from "./
  *
  * One type rather than one per page, because the map below is keyed by path and
  * a builder is looked up rather than called by name. Every field past the origin
- * and the palette is optional — what the visitor asked the front door for, and
+ * and the palette is optional — what the visitor asked `ASKED_ROUTE` for, and
  * the record of the run the mechanism page prints — so a page that does not read
  * a field cannot be broken by one arriving.
  *
@@ -111,8 +119,8 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
   const ask = askById(context.ask)
   if (ask === undefined) return undefined
 
-  const probe = await walk(treeFor(HOW_IT_WORKS, context), ask, context)
-  const staged = treeFor(HOW_IT_WORKS, {
+  const probe = await walk(treeFor(ASKED_ROUTE, context), ask, context)
+  const staged = treeFor(ASKED_ROUTE, {
     ...context,
     record: probe.record,
     ...(probe.undone === undefined ? {} : { undone: probe.undone }),
@@ -122,24 +130,27 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
 }
 
 /**
- * The run the mechanism page prints, against the front door as it is published.
+ * The run the mechanism page prints, against that page as it is published.
  *
  * Here rather than in the builder because a page builder is synchronous and a
  * request through the whole sequence is not — the same seam, and for the same
- * reason, as the ask the front door runs and the history the record page
- * replays. The front door is built fresh for it: the mechanism page's claim is
- * about *this site*, so a record of a fixture kept beside it would be a record
- * of nothing a reader can go and check.
+ * reason, as the ask itself. The page is built fresh for it: the claim is about
+ * *this site*, so a record of a fixture kept beside it would be a record of
+ * nothing a reader can go and check.
  *
- * **The front door it runs against carries no ask**, and that is the whole of
- * the arrangement rather than an oversight. The request is made here, so the
- * page it is made against has to be the one this site publishes at `/` — not
- * that page with the answer already standing on it. What the visitor's `ask`
- * decides is *which request to run*, never which page to run it against.
+ * **The page it runs against carries no ask**, and that is the whole of the
+ * arrangement rather than an oversight. The request is made here, so the page it
+ * is made against has to be the one this site publishes — not that page with the
+ * answer already standing on it. What the visitor's `ask` decides is *which
+ * request to run*, never which page to run it against.
+ *
+ * Three sentences here said *the front door* until 11 October, from when the
+ * run was made against `/` and the mechanism page only printed it. The page
+ * moved on 1 October and the explanation did not.
  */
 export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
   paperTrailFor(
-    treeFor(HOW_IT_WORKS, { origin: context.origin, theme: context.theme }),
+    treeFor(ASKED_ROUTE, { origin: context.origin, theme: context.theme }),
     context.ask,
     context.approve === true
   )
@@ -164,7 +175,7 @@ export const pageTreeFor = async (
    * visitor's `ask` decides is which request to run, never which page to run it
    * against.
    */
-  if (route.path === HOW_IT_WORKS.path) {
+  if (isAskedRoute(route)) {
     const trail = await trailFor(context)
     const run = await askRunFor({ ...context, trail })
 

@@ -6,7 +6,8 @@ import { PageBand } from "./page-band"
 
 /**
  * The top of the page, on the first screen, where a phone had no page on it at
- * all.
+ * all — and on the screen after the press, where `demo-43` gave it one that
+ * takes the page away again.
  *
  * `_lib/the-page-itself.ts` has the measurement — the stage begins 250px past
  * the fold at 390 × 844 — the one silence, and the three shapes that were
