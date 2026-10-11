@@ -131,8 +131,16 @@ describe("the visitor and the window their page moved in", () => {
    * other's way.** At `lg` the rail is a scroller of its own and `AnswerInView`
    * re-lands the card in it; at `lg` the stylesheet also takes this window off
    * the layout. Neither component reads the other, and neither reads a width:
-   * one walks up for a scroller and this measures a box, and the one CSS fact
+   * one walks up for a scroller, this measures a box, and the one CSS fact
    * decides both.
+   *
+   * **Asserted with the box a hidden element really reports**, which is all
+   * zeros — the wide shot's own measurement is `#the-page-itself x 0 y 0 0x0`.
+   * That is why there is no clause for this case: a rect of zeros is inside
+   * every viewport, so the one read below already answers it. A guard for it
+   * was written and the defect matrix caught nothing when it was removed, which
+   * is this row's whole point: the behaviour is real and the code for it was
+   * not.
    */
   it("declines on every screen the stylesheet takes the window off", () => {
     const { scrollIntoView } = browser({ top: 0, height: 0 })

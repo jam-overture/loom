@@ -62,19 +62,36 @@ import { THE_WINDOW } from "@/app/(demo)/_lib/the-page-itself"
  * that scrolls, and this measures the window's own box. `globals.css` argues
  * against the cheap way to read a breakpoint by name — *a media query is right
  * between a resize and a re-render and a mount-time read is not* — and a box
- * of no height is the fact itself. An element the stylesheet has taken off this
- * screen has no box, which is also the honest answer for a window that is not
- * in the document at all: there is nothing to carry anybody to.
+ * is the fact itself. A window that is not in the document at all gets the same
+ * answer one line earlier, for the same reason: there is nothing to carry
+ * anybody to.
  *
- * ## And it declines when they are already looking at it
+ * ## One read, and it is the whole of the condition
  *
- * The same token is handed to this on the opening press, where the window is at
- * `y 325` of an 844px screen and the visitor is looking straight at it. Moving
- * then would undo the thing `demo-44` measured: the window and the button it
- * was pressed with stay at the two coordinates they were at, and what changes
- * between the two screens is the page in the window. So *carry them to it* is
- * read strictly, as *it is not in front of them* — any part of the window off
- * either edge — and the press that already lands in view gets nothing.
+ * `box.top < 0 || box.bottom > window.innerHeight` — any part of the window off
+ * either edge of the screen. It is two refusals in one sentence, and the second
+ * of them is the reason there is no clause for it.
+ *
+ * **It declines when they are already looking at the window.** The same token
+ * is handed to this on the opening press, where the window is at `y 325` of an
+ * 844px screen and the visitor is looking straight at it. Moving then would
+ * undo the thing `demo-44` measured: the window and the button that turned the
+ * page over stay at the two coordinates they were at, and what changes between
+ * the two screens is the page in the window and nothing else.
+ *
+ * **And it declines where the window has no box**, which is the table above,
+ * **without a clause of its own.** An element with no boxes reports a rect of
+ * all zeros, so a window the stylesheet has taken off this screen reads as
+ * `top 0, bottom 0` — inside every viewport there is, and therefore in front of
+ * them. The wide layout's own measurement says so in as many words:
+ * `#the-page-itself  x 0 y 0  0x0`.
+ *
+ * **That clause was written, and the defect matrix deleted it.** Restoring
+ * *it acts on a screen the stylesheet took the window off* as a defect was
+ * caught by **nothing**, because the read below already answers it — so the
+ * guard was two lines that could never run and a second place for a later run
+ * to disagree with this one about what *no box* means. It is a sentence here
+ * instead, which is where the argument was anyway.
  *
  * **`center`, and the sibling's ceiling is not copied.** `SpotlightScroll`
  * centres a band unless it is taller than three quarters of the viewport,
@@ -102,15 +119,13 @@ export const PageInView = ({
     const box = onto.getBoundingClientRect()
 
     /*
-     * No box on this screen, so there is nothing to carry them to. The window
-     * is `display: none` at `lg` and on a frame under 46rem tall, and both are
-     * screens where something else is already doing this.
+     * Any part of the window off either edge, which is two refusals in one
+     * sentence: a visitor already looking at it is not moved, and neither is
+     * one on a screen the stylesheet took the window off — a hidden element
+     * reports a rect of all zeros, and all zeros is inside every viewport.
      */
-    if (box.height === 0) return
-
-    /* Already in front of them, which is every press made with the window on
-     * screen — the one this demo opens with, above all. */
-    if (box.top >= 0 && box.bottom <= window.innerHeight) return
+    const offTheirScreen = box.top < 0 || box.bottom > window.innerHeight
+    if (!offTheirScreen) return
 
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 

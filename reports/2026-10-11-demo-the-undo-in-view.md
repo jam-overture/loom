@@ -173,3 +173,154 @@ back as the same file.
 
 ## Real test numbers
 
+`pnpm install && pnpm verify` — **green, exit 0**, with the status written to a
+file as the last thing on its own line and read in a separate command. It was
+read that way twice, and the first time it mattered: the run's own notification
+said exit code 0 while the file said **`EXIT=2`**, which is the compound-command
+trap `docs/routines.md` names, and the failure under it was real — `tsc` caught
+a `ResolvedTheme | undefined` handed to an `exactOptionalPropertyTypes` prop in
+a test file `vitest` does not type. Fixed, re-run, green.
+
+| | `main` at `a6d3021` | this branch |
+| --- | --- | --- |
+| the demo lane | 53 files / **844** | 54 files / **859** |
+| `@loom/app` (`apps/loom/`) | — | 426 files / **7,975** |
+| `@jam-overture/loom` (`src/`, `tools/`) | 205 / 4,642 | **205 / 4,642** — `src/` untouched |
+| findings | 1,135 | **1,136**, 0 malformed |
+| `prerender:check` | — | 133 pages, 1,798 junctions, 0 run together |
+
+**The left-hand lane figure was measured on this tree rather than derived**:
+`git checkout origin/main -- "apps/loom/app/(demo)"`, the two new files removed,
+`vitest run` against the same installed dependencies, then back. `src/` and
+`tools/` are identical on both sides — `git diff origin/main --name-only`
+outside `apps/loom/app/(demo)/`, `FINDINGS.md` and `reports/` is empty.
+
+**+15 lane tests net, none weakened, skipped or deleted.**
+
+| | |
+| --- | --- |
+| `page-in-view.test.tsx` | **+8** — the one new file, for the one new component |
+| `the-page-itself.test.tsx` | **+4** — the name the lookup uses, and the join, as the journey |
+| `_lib/the-page-itself.test.ts` | **+3** — the field, its two silences, and the name |
+| `_lib/rail.test.ts` | **+0 tests, +5 assertions** inside tests it already had |
+
+**No test's expectation was reversed**, which is the difference between this
+run and the last one: nothing here replaces a behaviour, it adds one to a state
+that had none.
+
+**One of the five assertions cost a round and is worth the sentence.** *Shows
+the page going back, in the same window it came forward in* now also asserts
+that the undo's token differs from the press's, and the first attempt read the
+forward rail *after* the undo had been written. The store is one, so that rail
+was this session's single record against the already-undone tree — a state no
+visitor is ever in, and the assertion failed. Reading it before the undo is
+both correct and the order a visitor does it in, and there is a comment in the
+test saying so.
+
+### The defect matrix
+
+Each defect restored in turn **against the commit**, the demo lane run against
+it, and the lane restored between rows. Baseline **859 passed**.
+
+| defect restored | caught |
+| --- | --- |
+| the window never says which press moved it | **4** |
+| the window answers to no name | **4** |
+| the same token for every landing, so an undo does not re-run the effect | **3** |
+| the window is put at the top of the screen rather than centred | **3** |
+| it moves a visitor wherever the window is, in front of them or not | **2** |
+| the read is written as the top edge alone | **1** |
+| the scroll is not rendered beside the window | **1** |
+
+**Seven of seven, and an eighth row is why the component is twenty lines rather
+than twenty-two.**
+
+The first version had two guards: `box.height === 0` for *the window has no box
+on this screen*, and the viewport read for *they are already looking at it*.
+Restoring the first as a defect was caught by **nothing** — and the reason is
+not a missing test. An element with no boxes reports a rect of all zeros, and
+all zeros is inside every viewport, so the second read already answers the
+first. The wide shot's own measurement says it: `#the-page-itself x 0 y 0 0x0`.
+
+So the guard was two lines that could never run, and a second place for a later
+run to disagree with this one about what *no box* means. It is one named read
+now — `offTheirScreen` — with both halves of the argument above it, and the row
+above (`the read is written as the top edge alone`) is what keeps it from
+quietly becoming half of itself. **The matrix deleted code rather than
+demanding a test, which is the first time it has done that in this lane.**
+
+**The two fours are the field and its name**, from both ends: `moved` and
+`THE_WINDOW` each fail four tests when broken, which is what a fact wired
+through a reading, a section and a client component should look like.
+
+## Decisions taken that were not specified
+
+- **One field on the reading rather than a second boolean.** The caption and
+  the movement are the same fact read twice — a window that says *now* is a
+  window a press has just changed — so `moved` carries the revision and
+  `landed` sets both. Two switches would be two places to disagree about which
+  press moved the page.
+- **The revision rather than the record id.** `SpotlightScroll`'s own argument:
+  the effect must re-run when a visitor asks for something new and must not
+  re-run because the rail re-rendered. Every landing here produces a revision,
+  an undo included.
+- **No referee between the two scrolls.** The 10 October entry's recommendation
+  allowed for one. It is not needed: `display: none` at `lg` is the same CSS
+  fact as *the rail is a scroller of its own*, so the component that reads a box
+  and the component that walks for a scroller are already exclusive, and each
+  still reads the fact it depends on rather than a width.
+- **The window's name lives in `_lib`.** For the reason every sentence on this
+  surface does: a name written twice goes quiet the first time one of the two
+  is edited, and a scroll that does nothing is the quietest failure here.
+- **No decision record.** Nothing touches the tree schema, the delta model or
+  an `Accepted` record. Nothing escalated.
+- **Nothing outside `apps/loom/app/(demo)/` was opened for writing**, apart
+  from `FINDINGS.md` and `reports/`.
+
+## What was left out
+
+**The undo is visible and still not watchable.** The opening press turns the
+page over in place, under the visitor's eye. The undo cannot: the write lands,
+the window repaints, and only then does the effect carry them to it — so they
+arrive at a window that already changed. Filed, with the shape that would close
+it (carry them on the press rather than on the result, which the form already
+knows a round-trip earlier) and the shape that would not.
+
+**Nothing was measured by watching a stranger**, which is still the thing that
+would settle this lane's judgement calls and still not available from a sandbox.
+What this run measured is where the page is on a visitor's screen at the moment
+they have asked for it to be put back.
+
+**The three bands still rely on `pointer-events: none`**, carried a sixth run.
+**The disclosure chevron is still drawn in three components**, carried a ninth.
+**The folded reasoning on an answered card is still labelled in the present
+tense**, carried an eleventh.
+
+## Findings
+
+**Filed one, closed one.**
+
+- **Closed**, this lane's 10 October entry — *on a phone the undo lands where
+  the visitor cannot see it*. Shape (1), with the closing measurement in the
+  entry and shape (2) explicitly not needed.
+- **Filed**, for this lane: the undo is visible and is not watchable, because
+  the visitor is carried to a window that changed before they got there.
+  Measured on this commit, two shapes, recommendation **(1)** and **not on any
+  schedule** — it is the difference between *cannot see* and *cannot watch*,
+  and only the first was costing the demo a moment.
+
+**Re-verified, not re-filed:** `21st.dev` `ENOTFOUND` from `WebFetch`, a
+**forty-third** consecutive run, one call. `*.vercel.app` denied from the
+sandbox — the preview URL is on the pull request and the pictures are from a
+local production build.
+
+## Open questions
+
+**Nothing blocking.** The one judgement worth a second opinion is where the
+visitor is left standing after an undo: this run puts the page on their screen
+and the record card 901 pixels below it, with the bar at `y 804` taking them
+back in one press. That is the mirror of the trade `demo-44` made and it is made
+for the same reason — the thing they asked for should be the thing they can see.
+If the record should keep the screen instead, the revert is deleting
+`{page.moved && <PageInView token={page.moved} />}` from `the-page-itself.tsx`
+and nothing else.
