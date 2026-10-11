@@ -5,7 +5,7 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
-      "files": 96,
+      "files": 97,
       "narrower": [],
       "standing": {
         "packageNames": 1447,
@@ -3712,7 +3712,7 @@
               "kind": "function",
               "signature": "const describeThemeError: (error: ThemeError) => string",
               "truncated": false,
-              "summary": ""
+              "summary": "Why a theme did not resolve, and what could have."
             },
             {
               "name": "ThemeCatalogueEntry",
@@ -4770,7 +4770,7 @@
           "reach": "loaded"
         }
       ],
-      "files": 59,
+      "files": 60,
       "narrower": [],
       "standing": {
         "packageNames": 1447,

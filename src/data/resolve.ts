@@ -1,5 +1,6 @@
 import { ceilingOf, describeCeiling, withCeiling } from "../deadline.js"
 import type { JsonObject, JsonValue } from "../json.js"
+import { describeRegistered } from "../registered.js"
 import { err, type Result } from "../result.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -62,7 +63,10 @@ const askOne = async (
   if (!registered) {
     return err({
       reason: "no-such-source",
-      detail: `registered: ${options.registry.sources.map((entry) => entry.id).join(", ") || "none"}`,
+      detail: `registered: ${describeRegistered(
+        source,
+        options.registry.sources.map((entry) => entry.id)
+      )}`,
     })
   }
 

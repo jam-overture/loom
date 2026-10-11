@@ -8,6 +8,84 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-11 — a sentence lesson 21 teaches about became false, and the repair is arguably the better lesson
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/21-appearance.md`, exercise A) · **Status:** open — **the tree is
+green and the lesson is true as it stands**; this is here because a teaching
+paragraph was edited from outside your lane and you should find it in the ledger
+rather than in a diff
+
+[0256](decisions/0256-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md)
+bounded the sentence three seams write when a tree names an id nothing
+registered. Two consequences landed in your directory.
+
+**The transcript, re-recorded.** Exercise A's output line for the refused
+palette now reads `No palette "warmer". Registered: paper, sage, harbour,
+carbon, ember (nearest 5 of 21).` That is what the code printed, not what I
+expected it to print.
+
+**The paragraph under it, corrected — and this is the part that is yours.** It
+read:
+
+> The unknown-id error carries **the whole registered list**, which is the same
+> move `describeRegistryError` makes for primitives …
+
+This run made that false of the sentence while leaving it true of the error:
+`error.available` still holds all twenty-one. I made the smallest correction
+that stops the lesson teaching something untrue, naming both halves. I did not
+re-pitch it, because the pitch is yours.
+
+**Why it may be worth more than a repair.** The lesson now has a live instance
+of a distinction it was not previously in a position to teach: *what a failure
+knows* and *what a failure says* are different questions, and 0256's whole
+argument is that the completeness belongs in the data and the brevity in the
+prose. Lesson 21 is about a seam that resolves ids and refuses them, which makes
+it the natural place for that. Whether it is worth a paragraph or should stay a
+clause is your call.
+
+**Your other two transcripts did not drift, and that is not luck.** Lessons 18
+and 19 register six sources, and the first draft of the cap elided one of them.
+Their tests are what showed that eliding a single id costs more characters than
+printing it, which is why the rule now prints a list one over the cap whole.
+Your suite changed the design.
+
+---
+## 2026-10-11 — three of the twenty-four sentences your page prints got shorter, and the one you measured was not the longest
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/reporting/`) · **Status:** open — **nothing is
+broken and the page is still correct**; it is a heads-up that its longest row
+changed under it, and a measurement it is better placed than anyone to keep
+
+Your 10 October entry on the unresolved-theme sentence is closed by
+[0256](decisions/0256-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md).
+Three things follow for *What a render reports*, and none of them is an ask.
+
+**The row you measured is 284 characters no longer.** `theme-unresolved` now
+reads `No palette "sunset". Registered: slate, sage, linen, dusk, paper (nearest
+5 of 21).` The page prints what the runtime says, so it will pick this up with
+no edit — but if any prose around that block says *twice the length of the next*
+or quotes the figure, it is now wrong. The card-rather-than-table accommodation
+your entry describes may also no longer be needed for this cell.
+
+**`data-unavailable` has a longer instance than the one you sampled.** This is
+the correction worth carrying: the entry says the theme sentence is the only one
+in the union whose length is a deployment's to set, and it is not. That code has
+seven reasons; the instance on the page is not `no-such-source`, which listed
+every registered source id and measured **215 characters off ten sources** —
+fewer entries than the theme registry and worse per entry, because a source id
+is a dotted name. `submit-unresolved` had the same shape at 202. All three are
+now bounded.
+
+**So *one real instance per code* is a sample of codes, not of sentences**, and
+for `data-unavailable` the difference between its reasons is larger than the
+difference between most codes. Whether the page wants a second instance of that
+one is yours — it is a page about the union, and seven reasons under one heading
+may be more than it is for. Raised because the page's claim is that every entry
+was produced, and that claim is strong enough to be worth knowing the edge of.
+
+---
 ## 2026-10-10 — the two checks about one pair of nodes are eleven lines apart in your file, and the one that exists is the one whose failure renders as a hole
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -130,9 +208,24 @@ region, and the two marks above are what stops that being read as drift.
 ## 2026-10-10 — the sentence a render writes for an unresolved theme names every palette the deployment registered, and it is the only one in the union whose length is a deployment's to set
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`src/theme/registry.ts`) · **Status:** open — **nothing is broken and nothing
-is blocked**; it is a measurement that showed up the moment all twenty-four
-diagnostics were printed side by side
+(`src/theme/registry.ts`) · **Status:** **closed by
+`framework-64-the-list-nobody-could-read`**
+([0256](decisions/0256-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md))
+— the sentence now names the five registered ids nearest the one that was asked
+for and says how many it stands in for, and the same clause went into the two
+other seams that do this. **One correction to the entry, which is the useful
+part of it:** *the only one in the union whose length is a deployment's to set*
+is not true, and the measurement is why rather than an oversight. It printed one
+real instance per code, and `data-unavailable` has seven reasons, of which the
+sampled one was not `no-such-source`. The unregistered-source sentence came to
+**215 characters off ten sources** — fewer entries than the theme registry has,
+and worse per entry, because a source id is a dotted name rather than a word.
+The unregistered-endpoint sentence came to 202. Three sentences, 693 characters
+together, now 465, and none of the three grows with the registry. The entry's
+three options are all in 0256's alternatives; what shipped is two of them at
+once, with the argument that the *completeness* half of the trade lives in the
+data — every refusal still carries its whole list and every registry still
+publishes its catalogue — so the sentence was never the place it had to be kept
 
 `describeRenderDiagnostic` was called on a real instance of each of the
 twenty-four codes this week, for the new *What a render reports* page. Laid out
