@@ -52247,6 +52247,46 @@ failure whose actual error was `Git information retrieval failed for this
 deployment`, a Vercel↔GitHub integration fault that no ignore file can affect.
 
 ---
+## 2026-10-12 — the plain-language sweep reads this lane's `.tsx` files, and the first words anybody meets are now in a `.ts` one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`app/(portal)/every-screen.test.ts`) · **Status:** open — **nothing is
+leaking**; the gap was closed locally for the one module that opened it, and
+the general version is a sweep nobody has costed
+
+`every-screen.test.ts` enforces *no sentence a screen shows unasked contains a
+word from the runtime's vocabulary* over the whole route group — and its
+`sourcesUnder` keeps only files ending `.tsx`. That was right while every
+reader-facing string was written in the component that drew it.
+
+It stopped being right in this change. The rail's labels are **data**, in
+`_components/shell/sections.ts`, which is the correct place for them — the two
+levels of the navigation are a table, not a component — and a `.ts` module is
+outside the sweep. So the first six words anybody meets on this surface were,
+for the length of one commit, the only reader-facing strings in the lane that
+nothing checked.
+
+`sections.test.ts` asserts `runtimeWordsIn` over every section label, group
+name and item label, which closes it where it was opened. **What is not closed
+is the class**: the next `.ts` module holding a label is in the same position,
+and the honest fix is for the sweep to read `.ts` as well as `.tsx`.
+
+It is filed rather than done because widening the sweep is not a one-line
+change in effect. `_lib/` holds ninety-odd modules, several of them
+deliberately carrying the runtime's vocabulary as *subject* rather than as
+speech — `vocabulary.ts` is a table of technical readings, `screen-names.ts`
+names what a screen used to be called so it cannot be written again — so the
+widened sweep needs an exemption mechanism those two can use honestly, and an
+exemption list invented in the same run as the rule it exempts from is the kind
+of rule this repository retires a week later. Costing that is a unit, and it is
+this lane's.
+
+**Why it is worth the entry at all:** the check exists because `did-not-apply`
+and `Allowed by nobody` were printed at people. A rule with a hole in exactly
+the file type a lane is moving its strings into is a rule on its way to being
+decorative.
+
+---
 ## 2026-10-12 — a branch opened before 0264 turns `main` red when it merges, and four open ones will
 
 **Filed by:** `Loom portal` · **Owned by:** every lane with a branch open on 12
