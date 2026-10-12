@@ -1,0 +1,14 @@
+# Nothing here is read at build time or at runtime, and all of it is uploaded
+# and traced into every deployment without this file.
+#
+# `reports/` is 677MB, almost entirely screenshots: every report this repository
+# has ever written keeps the photographs it argued from, which is right for the
+# record and pointless in a serverless bundle. The build's own Turbopack warning
+# says the project is being traced whole — "Encountered unexpected file in NFT
+# list" — so without this they are not merely uploaded, they are candidates for
+# the function bundle Vercel size-limits.
+#
+# `decisions/` is deliberately NOT here: `(marketing)/_lib/copy.ts` counts the
+# records at build time, so excluding it would change what the site says about
+# itself.
+reports/
