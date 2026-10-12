@@ -245,7 +245,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * to relate: `one-reason`, never `one-state`.
  *
  * **The eleventh needed one, and it is the first condition about the shape of a
- * page** ([0262](../../decisions/0262-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)).
+ * page** ([0265](../../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)).
  * `nothing-inside` is a kind of part standing only in places with no element
  * part under them, so a reader could not have acted in one: the question does
  * not exist rather than having gone unanswered. Every condition before it is
@@ -262,7 +262,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * members are the same states at the same subject and need no second spelling.
  *
  * **The twelfth needed none, and it is where the claim above was most exposed**
- * ([0263](../../decisions/0263-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)).
+ * ([0266](../../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)).
  * A comparison of two windows of one library is the first comparison whose
  * subject is not the pair: its rows are keyed by the vocabulary, so every reason
  * it gives is about one kind of part across both windows rather than about the
@@ -582,7 +582,7 @@ export const meaningOfKindReachSilence = (silence: KindReachSilence): SilenceMea
 
 /**
  * What a kind's share of the readers who acted inside it reports, of one kind
- * (0262).
+ * (0265).
  *
  * **The eleventh set, and the first built on another's type rather than beside
  * it.** It takes the tenth's five members whole — the census's two and the
@@ -618,7 +618,7 @@ export const meaningOfKindActionSilence = (silence: KindActionSilence): SilenceM
 }
 
 /**
- * What a comparison of two windows of one library reports, of one kind (0263).
+ * What a comparison of two windows of one library reports, of one kind (0266).
  *
  * **The twelfth set, and the first comparison whose subject is not the pair.**
  * Every other comparison here names neither side — *one of the two windows held

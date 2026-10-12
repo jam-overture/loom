@@ -51023,7 +51023,7 @@ already exists**, with two states to refuse to draw and one row not to lead with
 
 `libraryActionOf(readings, rows)` is on this branch, published from
 `@jam-overture/loom/signals` with
-[0262](decisions/0262-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md).
+[0265](decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md).
 It takes the same list of `PageReading`s and the same door rows `libraryReachOf`
 takes, keys its rows the same way, and pairs on the published `kindKeyOf` — so
 the screen #584 built needs no second read and no second join.
@@ -51037,7 +51037,7 @@ there, and the three are not near each other:
 - `KindReach.share` — the share of the **readers who met it** that read it
   (0256).
 - `KindAction.share` — the share of **those same readers** that acted *inside*
-  it (0262).
+  it (0265).
 
 **The one thing that is new in how the third behaves, and it is good news for
 the screen.** 0256 withholds a kind's reach share whenever a page it stands on
@@ -51593,13 +51593,13 @@ numbers that must be read before a movement is printed as a finding
 
 `libraryChangeOf(was, now)` is on this branch, published from
 `@jam-overture/loom/signals` with
-[0263](decisions/0263-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md).
+[0266](decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md).
 It takes two windows' `PageReading`s and gives back, per primitive type and per
 role, what happened to the places that kind stands in: *the band you rewrote was
 read in three of its nine places and is read in seven now.*
 
 **Where it belongs.** `/portal/pieces` already draws the three one-window
-readings of a library (0257, 0256, 0262). This is the fourth column on the same
+readings of a library (0257, 0256, 0265). This is the fourth column on the same
 rows and pairs on `kindKeyOf` exactly as those three do, so it is a column and
 not a screen — except for `mostAbandoned` and `mostTakenUp`, which are the two
 sentences a card can lead with.
@@ -51631,10 +51631,10 @@ apart from the census's own.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
 **Status:** open — **a question, not a defect**; filed rather than shipped
-inside 0263's type for the reason 0256 was filed rather than shipped inside
+inside 0266's type for the reason 0256 was filed rather than shipped inside
 0257's
 
-0263 compares a kind of part over the places both windows bore, and is explicit
+0266 compares a kind of part over the places both windows bore, and is explicit
 about what that is: a share of **places**, with no reader in the denominator,
 which is exactly what makes a verdict a subtraction of two whole numbers. The
 figure everybody will ask for next is the other one: *of the readers who met
@@ -51651,7 +51651,7 @@ inside each side and the door rows for **both** windows.
 places still changes when one page's traffic grows and another's shrinks, so a
 movement in it is a movement in readers *or* in which pages they were on — the
 counterfactual problem 0251 wrote down, one level across. That needs its own
-argument about what is published and what is withheld, and putting it in 0263's
+argument about what is published and what is withheld, and putting it in 0266's
 type would have meant one row carrying a reader-free share and a reader-weighted
 one with nothing but prose to tell them apart. The prose is what a surface skips.
 
@@ -51709,6 +51709,12 @@ this file and the branch's report) — and said so in the report and in the
 earlier report's own paragraph about which number it took. The record's
 direction is untouched; only the number moved.
 
+**Renumbered again on 2026-10-12 by `Loom merge`, to 0265**, and this branch's
+second record from 0263 to 0266. `main` had meanwhile accepted a different 0262
+and a different 0263 (#602, merged 12 October), so both of this branch's records
+clashed at merge time. They are now the next two numbers free on `main`; the
+citations moved with them and neither record's direction changed.
+
 **What would make it cheaper**, and it is `Loom merge`'s call: the renumber is
 mechanical and always falls on whichever lane merges `main` next, which is the
 lane that did nothing wrong. Either the merge routine renumbers a clashing
@@ -51737,7 +51743,7 @@ standing in the one role row there is.
 
 That is the correct answer for a row named *parts whose type declared no role*,
 and it is the wrong answer to the question somebody will ask of it. The day a
-role is declared the row splits and the behaviour becomes the one 0263 describes:
+role is declared the row splits and the behaviour becomes the one 0266 describes:
 a testimonial swapped for a card that plays the same part is one place held, and
 a band swapped for a control is a place lost by one role and gained by another.
 

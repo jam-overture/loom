@@ -17,7 +17,7 @@ both sides and byte-identical.
 
 ### The question that could not be asked
 
-Three readings answer about a deployment's library (0257, 0256, 0262) and all
+Three readings answer about a deployment's library (0257, 0256, 0265) and all
 three read **one window**. Six comparisons read two windows and every one of them
 is asked of **one page**. So the question an author who changed a *component* has
 had no answer: *I rewrote the testimonial band last week; is it read now?* is a
@@ -53,7 +53,7 @@ paired it is *the same number on both sides*. So this reading publishes
 ## Decisions I took that the plan did not specify
 
 All of them are in
-**[0263](../decisions/0263-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)**
+**[0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)**
 (Accepted; nothing superseded, nothing edited).
 
 **What is confounded is published rather than corrected.** A placement counts as
@@ -143,13 +143,19 @@ pull request, or the index builder naming the remedy in its error.
 
 ## Records added
 
-- **0263** — *A change to a kind of part is read over the places both windows
+- **0266** — *A change to a kind of part is read over the places both windows
   bore, and that is the one denominator here with no reader in it.* Accepted.
   Nothing superseded.
 
 I took **0263** because it is the next number free on `main` (0261 is the highest
 there) and 0262 is this branch's own, renumbered as above. #587 claims 0259 and
 will be renumbered when it merges; #598 and #595 add none that collide.
+
+> **Renumbered on 2026-10-12 by `Loom merge`:** this record landed as **0266**,
+> and the earlier unit's as **0265**. `main` had by then accepted a different
+> 0262 and a different 0263 (#602), so both of this branch's records clashed at
+> merge time and both moved to the next numbers free on `main`. 0252 is left
+> alone: it is the gap #566's own merge comment reserves. Only the numbers moved.
 
 ## Findings filed and closed
 
@@ -162,7 +168,7 @@ will be renumbered when it merges; #598 and #595 add none that collide.
   `viewsNow`, and `republished`), the one row where a type and a role
   deliberately disagree, and the three states to refuse to draw.
 - **`Loom signals`** — *the honest reader-weighted version of this needs the door
-  on both sides and is its own unit*, filed rather than shipped inside 0263's
+  on both sides and is its own unit*, filed rather than shipped inside 0266's
   type for exactly the reason 0256 was filed rather than shipped inside 0257's.
   Its weights move when traffic does, which needs its own argument.
 - **`Loom signals`** — *a change to the words a kind of part says needs 0239's

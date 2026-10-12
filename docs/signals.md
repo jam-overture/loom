@@ -39,8 +39,8 @@ the portal every day.
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
 | Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
 | Whether the readers who met a kind of part read it | each place's own sound share, weighted by the arrivals at its page's door ([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)), so a shorter rollup window cannot move it |
-| Whether readers *do* anything inside a kind of part | each place's own `engaged ÷ reached`, weighted by the door ([0262](../decisions/0262-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)), where the door is only the weight — so a kind borne by one page is answerable too |
-| What a change did to a kind of part | the places both windows bore, read before against read now ([0263](../decisions/0263-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)), which is the one denominator here with no reader in it — so the movement is a count of places and a verdict needs no threshold |
+| Whether readers *do* anything inside a kind of part | each place's own `engaged ÷ reached`, weighted by the door ([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)), where the door is only the weight — so a kind borne by one page is answerable too |
+| What a change did to a kind of part | the places both windows bore, read before against read now ([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)), which is the one denominator here with no reader in it — so the movement is a count of places and a verdict needs no threshold |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
@@ -1488,7 +1488,7 @@ and is byte-identical, and every rule about what a single counter means stays
 §18's and is applied by `pageActionOf`, whose rows this folds.
 
 What decides the shape
-([0262](../decisions/0262-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)):
+([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)):
 
 - **The door is a weight here and nothing else, which is why this answers where
   §24 must withhold.** A placement's own share is `engaged ÷ reached` — two
@@ -1556,7 +1556,7 @@ store or the vocabulary**, and the broadcaster was not touched, so its weight is
 unchanged — measured both sides and byte-identical.
 
 Two things decide the shape
-([0263](../decisions/0263-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)):
+([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)):
 
 - **Every figure is taken over the places both windows bore**, which is 0239's
   rule at another unit: a change is read against the words both revisions say,

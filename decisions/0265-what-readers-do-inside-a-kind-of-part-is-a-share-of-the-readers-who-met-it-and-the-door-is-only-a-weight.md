@@ -1,10 +1,19 @@
-# 0262 — What readers do inside a kind of part is a share of the readers who met it, and the door is only a weight
+# 0265 — What readers do inside a kind of part is a share of the readers who met it, and the door is only a weight
 
 **Status:** Accepted
 
 **Date:** 12 October 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-12 by `Loom merge`**, from 0262, when the branch that
+> carried it (#586) was merged. `main` had meanwhile accepted a different 0262 —
+> *the control plane is hosted and the render path stays in the customer's app*
+> (#602) — and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> This is its second renumber: the branch had already moved it from 0259 to 0262
+> on 12 October for the same reason. Nothing in it changed but the number, and
+> the citations that mean it were updated with it.
 
 ## Context
 

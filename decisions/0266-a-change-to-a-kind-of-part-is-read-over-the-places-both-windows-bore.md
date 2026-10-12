@@ -1,10 +1,18 @@
-# 0263 — A change to a kind of part is read over the places both windows bore, and that is the one denominator here with no reader in it
+# 0266 — A change to a kind of part is read over the places both windows bore, and that is the one denominator here with no reader in it
 
 **Status:** Accepted
 
 **Date:** 12 October 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-12 by `Loom merge`**, from 0263, when the branch that
+> carried it (#586) was merged. `main` had meanwhile accepted a different 0263 —
+> *a page is a base tree and the deltas an audience earns* (#602) — and two
+> records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> Nothing in it changed but the number, and the citations that mean it were
+> updated with it.
 
 ## Context
 
@@ -13,7 +21,7 @@ Three readings answer about a deployment's **library**:
 counts the places a kind of part stands and how many were reached,
 [0256](0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)
 the share of the readers who met it that read it, and
-[0262](0262-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)
+[0265](0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)
 the share of those readers that acted inside it. All three are of **one window**.
 
 Six comparisons answer about two windows —
