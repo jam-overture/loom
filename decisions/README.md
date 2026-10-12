@@ -345,3 +345,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0259](0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md) | A surface the portal governs renders from the store, and a page built at render time is not one | Accepted | §1, §5 |
 | [0260](0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md) | A project is the unit Loom stores, governs and measures under | Proposed | §1, §5 |
 | [0261](0261-a-portal-screen-shows-state-and-the-record-lives-in-one-place.md) | A portal screen shows state, and the record lives in one place | Proposed | §5 |
+| [0262](0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md) | The control plane is hosted and the render path stays in the customer's app | Proposed | §1, §5 |
+| [0263](0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md) | A page is a base tree and the deltas an audience earns | Proposed | §1, §3, §5 |
