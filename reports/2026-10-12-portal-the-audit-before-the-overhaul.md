@@ -287,3 +287,60 @@ heads or tails of what I should be looking at, and therefore can't give you any
 real direction"* into a thing that can be reacted to in five minutes.
 
 Then the schema, then ingest, then logs.
+
+
+---
+
+## The prototype
+
+Built after the audit, under `/portal/preview`, with invented data. Five
+screens, every one of them **one viewport tall** — against 13,298px for the
+screen the first of them replaces.
+
+| | the prototype | what it replaces | |
+| --- | ---: | ---: | --- |
+| Workspace | 900px | — | nothing like it exists |
+| Project overview | 900px | 13,298px | `Your app` |
+| Logs | 900px | 900px, empty | `Readers` |
+| Rules | 900px | 1,892px | `Rules`, which has no controls |
+| Credentials | 900px | — | nothing like it exists |
+
+![workspace](2026-10-12-portal-proposed-workspace.png)
+
+Projects, with the four numbers somebody opens a portal for: whether it is
+receiving, how much, how much went wrong, how much is waiting on them.
+
+![project overview](2026-10-12-portal-proposed-overview.png)
+
+![logs](2026-10-12-portal-proposed-logs.png)
+
+Two rails, as asked: an icon rail with **words under the glyphs at rest**, and
+a second rail carrying the section's screens in groups. The seven tabs on the
+page inspector were all standing in for this. The selected log line is a query
+parameter rather than client state, so a log is a URL somebody can paste into
+a message.
+
+![rules](2026-10-12-portal-proposed-rules.png)
+
+Rules from the configuration side. Eleven controls and a caption, against 299
+words and none. The sentence that is the whole of the screen today sits behind
+the ⓘ, next to the setting it is about.
+
+![credentials](2026-10-12-portal-proposed-credentials.png)
+
+### Three things the prototype found in the existing design system
+
+- **`affirm` and `refuse` are not success and failure.** They are the primary
+  and secondary *button* styles: `--action-affirm-bg` is `#0a0a0a`. A badge
+  wearing `bg-affirm text-affirm-ink` comes out solid black, and
+  `text-affirm-ink` on a white row is white on white. The semantic set is
+  `applied` / `awaiting` / `rejected`. Both mistakes were made here and
+  photographed before they were found.
+- **The rail's labels exist but only on hover.** It is 56px wide and widens to
+  275px on pointer or focus, so at rest twelve destinations are twelve
+  identical glyphs. The labels were never missing; they were never visible.
+- **There is no way for a layout to know its own path.** `(portal)/layout.tsx`
+  mounts the chrome on everything beneath it and Next hands a layout only its
+  children, so the prototype could not bring its own. `proxy.ts` now forwards
+  the pathname as a header, which is one line in a guard that already runs on
+  every one of these routes.
