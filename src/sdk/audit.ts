@@ -55,7 +55,7 @@ export type PrimitiveAudit = {
   readonly framesProps: readonly string[]
   /**
    * The configurations this primitive was probed under that its own schema
-   * refuses (0259).
+   * refuses (0267).
    *
    * Non-empty does not mean anything is wrong: the verdicts above still hold,
    * because what they report is *reach* — some configuration placed this
@@ -166,7 +166,7 @@ export type UnconfiguredReason =
  *
  * What a reader does about it is hand `auditRegistry` a props bag for that type,
  * which is the one thing that makes every other list on this audit a claim about
- * the component again (0259).
+ * the component again (0267).
  */
 export type UnconfiguredPrimitive = {
   readonly type: PrimitiveType
@@ -205,7 +205,7 @@ export type RegistryAudit = {
    * The probe could not answer — neither a pass nor a failure.
    *
    * A primitive that threw under every configuration *its own schema refuses*
-   * is in `notConfigured` instead (0259). Both are "the probe got no answer",
+   * is in `notConfigured` instead (0267). Both are "the probe got no answer",
    * and only one of them is a fact about the component: a class or hook-using
    * component cannot be called at all (0012), while a component nobody has
    * handed required props to has not been asked a question it could answer.
@@ -238,7 +238,7 @@ export type RegistryAudit = {
   /**
    * Requires props and was probed under none its own schema accepts, so every
    * other list on this audit is describing it under a bag no valid tree carries
-   * (0259).
+   * (0267).
    *
    * Reported for the same reason `notAnswered` is, and asserted empty by the
    * same kind of host: an entry means the probe never reached this primitive,
@@ -266,7 +266,7 @@ export type RegistryAudit = {
    * Accepts, not merely *built from*: the probe's default configuration is the
    * empty bag, which the schema of any primitive with a required prop refuses,
    * and a throw under that is the probe handing a component props no tree could
-   * (0259). Those land in `notConfigured` or in the audit's
+   * (0267). Those land in `notConfigured` or in the audit's
    * `refusedConfigurations` and never here, so the sentence above is true of
    * every row.
    *
@@ -353,7 +353,7 @@ const throwingIn = (
  * Two fields, and both exist because a probe that reads a registration can only
  * build a question out of what the registration *closes over*. A binding's
  * answer is not in there (0185), and neither is a value for a required
- * `z.string()` (0259) — so for both, the host who registered the primitive is
+ * `z.string()` (0267) — so for both, the host who registered the primitive is
  * asked rather than guessed at.
  *
  * The first exists because a probe that can only ask a primitive
@@ -379,7 +379,7 @@ export type RegistryAuditOptions = {
    */
   readonly answers?: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]>
   /**
-   * Props bags each type is probed from, beside the empty one (0259).
+   * Props bags each type is probed from, beside the empty one (0267).
    *
    * For a primitive that requires nothing this changes nothing worth having —
    * the empty bag is already accepted. For one that requires a prop the schema
@@ -693,7 +693,7 @@ const describeDeclaration = (declaration: BindingDeclaration): string =>
  * Said only when there is something to say, and said before the answers clause
  * because it is the stronger of the two: an unanswered binding makes the
  * clauses above describe one branch of a primitive, and no accepted
- * configuration at all makes them describe a call no tree could make (0259).
+ * configuration at all makes them describe a call no tree could make (0267).
  */
 const describeConfiguration = (unconfigured: UnconfiguredPrimitive | undefined): string => {
   if (unconfigured === undefined) return ""

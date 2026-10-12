@@ -13,7 +13,7 @@ list and it is not a report.
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
 (`src/primitives/`) · **Status:** open — **nothing is broken, no list is
 non-empty and no test is failing**; this is the measurement behind
-[0259](decisions/0259-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md)
+[0267](decisions/0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md)
 and the one thing that record deliberately left to this lane
 
 `auditRegistry` probes from the empty props bag. Measured on this branch, over
@@ -35,13 +35,13 @@ decorating, `loom.stat` as a leaf and `loom.field` as placing children under
 `type: "select"`, and every one of those claims was observed under a bag the
 primitive's own validator would have refused in a tree.
 
-**0259 decided those claims stand.** What a non-throwing probe observes is
+**0267 decided those claims stand.** What a non-throwing probe observes is
 *reach* — some configuration decorated, some configuration placed this region —
 and a refused bag that places a region is still evidence the component reads it.
 Only the *fault* claim needed the configuration to be one a tree could carry,
 and that half is fixed. So this is not a defect and there is no list to empty.
 
-**What is yours.** 0259 added `RegistryAuditOptions.props`: a map from type to
+**What is yours.** 0267 added `RegistryAuditOptions.props`: a map from type to
 props bags, each varied by every closed choice, supplied rather than derived for
 the reason `ProbeAnswers` is. The library is the one caller that knows a bag for
 each of its own thirty-three — `{ label: "Revenue", value: "£2.4m" }` for
@@ -50626,7 +50626,7 @@ to say so once.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/sdk/`) ·
 **Status:** **closed by `framework-67-the-props-no-tree-carries`**
-([0259](decisions/0259-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md)),
+([0267](decisions/0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md)),
 by the third remedy and the second together and explicitly not the first —
 which was measured and does not work: of the thirty-three starter primitives
 with a required prop, **one** has all of them closed, so a bag derived from the

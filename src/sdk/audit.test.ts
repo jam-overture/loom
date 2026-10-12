@@ -89,7 +89,7 @@ const exploding = definePrimitive({
 
 
 /**
- * The shape 0259 exists for: a primitive that *reads* a required prop rather
+ * The shape 0267 exists for: a primitive that *reads* a required prop rather
  * than handing it to React.
  *
  * Thirty-two of the hundred and seven starter primitives require a prop and not
@@ -108,7 +108,7 @@ const shouting = definePrimitive({
 
 /**
  * The same, with a region reachable only under one value of a closed choice —
- * the 0075 shape and the 0259 shape at once, which is what makes a supplied bag
+ * the 0075 shape and the 0267 shape at once, which is what makes a supplied bag
  * have to be varied rather than probed on its own.
  */
 const shoutingListing = definePrimitive({
@@ -616,7 +616,7 @@ const BOUND_LISTING = primitiveTypeSchema.parse("loom.bound-listing")
 /**
  * The other half of what 0185 started, and the same argument: a probe builds its
  * questions out of what a registration closes over, and a value for a required
- * `z.string()` is not in there (0259).
+ * `z.string()` is not in there (0267).
  */
 describe("auditRegistry, on props it was not handed", () => {
   it("names a primitive it could put in no configuration the schema accepts", () => {

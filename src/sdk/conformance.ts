@@ -52,7 +52,7 @@ import type { SubmissionOutcome } from "../submit/resolution.js"
  *
  * Built *from* the schema, which is not the same as accepted *by* it: the
  * default configuration is `{}`, and a primitive with a required prop refuses
- * that (0259). Whether a failure here is a fault of the component is
+ * that (0267). Whether a failure here is a fault of the component is
  * `auditRegistry`'s partition, because the validator it needs lives on the
  * registration rather than in this module.
  */
@@ -244,7 +244,7 @@ export const probeConfigurations = (choices: readonly ClosedChoice[]): readonly 
   probeConfigurationsFrom([{}], choices)
 
 /**
- * The same, from props a caller supplied rather than from nothing (0259).
+ * The same, from props a caller supplied rather than from nothing (0267).
  *
  * `probeConfigurations` starts from `{}`, which is a props bag the schema of any
  * primitive with a required prop refuses — thirty-two of the hundred and seven
@@ -496,7 +496,7 @@ export type PlacementVerdict =
        * partition `auditRegistry` makes and this module cannot: a component that
        * throws on a value its schema accepts is one a valid tree can crash a
        * page with, and one that throws on the empty bag it requires props
-       * against is a component nobody has handed props to yet (0259).
+       * against is a component nobody has handed props to yet (0267).
        */
       readonly threw: readonly ProbeFailure[]
     }

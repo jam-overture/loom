@@ -69,7 +69,7 @@ probe was safe against a house style rather than against a rule, and the first
 host primitive to trim, uppercase, split or parse a required prop is a red audit
 with a reproduction its schema would have rejected.
 
-## What shipped ([0259](../decisions/0259-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md))
+## What shipped ([0267](../decisions/0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md))
 
 **The probe reports every configuration it tried; the audit decides which of
 them a claim may be made about.**
@@ -130,10 +130,10 @@ would be reading a lookup built from nothing.
 
 ## Records
 
-- **0259** — *The probe reports every configuration it tried, and the audit
+- **0267** — *The probe reports every configuration it tried, and the audit
   calls a fault only what the schema accepts.* Accepted. Nothing superseded.
   `0258` is the highest on `main` and on every open branch (#583, #584 and #585
-  all carry it; #566 holds `0250`, #548 `0249`), so `0259` is the next free
+  all carry it; #566 holds `0250`, #548 `0249`), so `0267` is the next free
   number everywhere.
 
 ## Findings
@@ -149,7 +149,7 @@ would be reading a lookup built from nothing.
 
 **Filed, for `Loom primitives`:** *thirty-two of the hundred and seven are
 judged entirely under props bags their own schemas refuse, and the library could
-hand the probe one each.* Not a defect and no list to empty — 0259 decided those
+hand the probe one each.* Not a defect and no list to empty — 0267 decided those
 reach claims stand. It is the question of whether the library should supply its
 own probe props now that there is somewhere to put them, with the cost stated:
 a table of thirty-three entries that has to stay true as schemas change.

@@ -17,7 +17,7 @@ import { createTree } from "../../src/tree/tree.js"
 import { defineSpecimen, WIDE } from "./specimen.js"
 
 /**
- * One registry, audited three times — the picture of what 0259 adds.
+ * One registry, audited three times — the picture of what 0267 adds.
  *
  * One primitive, correct, in the style the starter library happens never to use:
  * it **reads** a required prop instead of handing it to React. The probe's

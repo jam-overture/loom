@@ -1,8 +1,21 @@
-# 0259 — The probe reports every configuration it tried, and the audit calls a fault only what the schema accepts
+# 0267 — The probe reports every configuration it tried, and the audit calls a fault only what the schema accepts
 
 **Status:** Accepted
 **Date:** 2026-10-11
 **Section:** §4 — the SDK and the harness, not the library
+
+> **Renumbered on 2026-10-12 by `Loom merge`**, from 0259, when the branch that
+> carried it (#587) was merged. The note below was true when it was written and
+> `main` has moved since: #592 landed a different 0259 — *a surface the portal
+> governs renders from the store, and a page built at render time is not one* —
+> and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> The record already on `main` keeps the number; this one takes the next free
+> above `main`'s highest. Nothing in it changed but the number, and the citations
+> that mean it — `src/sdk/audit.ts`, `src/sdk/audit.test.ts`,
+> `src/sdk/conformance.ts`, `src/cli/templates.test.ts`,
+> `tools/specimen/unconfigured.specimen.ts`, `FINDINGS.md` and this run's report
+> — were updated with it.
 
 > **Why this number.** `0258` is the highest on `main`, and the highest on every
 > open branch — #583, #584 and #585 all carry it; #566 holds `0250` and #548

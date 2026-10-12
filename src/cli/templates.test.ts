@@ -97,7 +97,7 @@ describe("conformanceTest", () => {
    * The list a scaffolded project reaches first. A reader following *A primitive
    * of your own* writes a component that reads a required prop, and without this
    * assertion the generated suite passes while the audit has judged nothing
-   * about it (0259).
+   * about it (0267).
    */
   it("asserts the audit was put in a configuration it could judge", () => {
     const generated = conformanceTest()
