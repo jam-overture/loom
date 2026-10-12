@@ -1,0 +1,35 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "out": "2026-10-11-portal-which-piece-withheld",
+      "path": "/portal/pieces",
+      "viewport": {
+        "width": 1680,
+        "height": 1300,
+        "label": "wide"
+      },
+      "waitFor": "text=Which piece should I look at first?",
+      "measure": [
+        "text=1 page here has no readership to weigh these figures against, so no figure on this screen can be given as a share of readers. Nothing is wrong with that page and nothing about it is hidden — every figure about the places a piece stands still holds, and so does everything on the page’s own card.",
+        "text=Pricing",
+        "text=It stands in 7 places on 3 pages. >> nth=0"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    }
+  ]
+}
