@@ -385,59 +385,49 @@ export const readAskId = (given: string | readonly string[] | undefined): AskId 
 }
 
 /**
- * A change this site works out for itself, as the three things an interpreter
- * needs to be one.
- *
- * Extracted from `askInterpreter` on 23 September, when `floors.ts` needed the
- * same machinery for a request that is **not** one of the five buttons: a floor
- * probe has no `AskId`, no label and no place in the band, and the alternative
- * to a shared shape was a second copy of the block below — thirty lines whose
- * whole job is to say *this was computed, not guessed*, kept in step by hand.
- *
- * `interpreter` is a parameter rather than a constant for the same reason. Both
- * kinds are deterministic interpreters under
- * [0057](../../../../../../decisions/0057-a-preset-is-a-deterministic-interpreter.md),
- * and the record is the one place the difference between them is worth keeping:
- * a paper trail calling a floor probe one of the front door's buttons would be
- * naming the wrong request.
- */
-export type PlannedChange = {
-  readonly plan: (page: LoomTree, ids: IdFactory) => readonly TreeOperation[] | undefined
-  /** Why these changes answer the request, in the words the record will show. */
-  readonly rationale: string
-  /** What the refusal says when this page gives the plan nothing to do. */
-  readonly nothingToChange: string
-  /** What the record says worked the change out. Never a model, and it says so. */
-  readonly interpreter: string
-}
-
-/**
- * A planned change, as an interpreter.
+ * One of the choices, as an interpreter.
  *
  * It works the changes out against the page it is handed rather than against
- * the one the button was drawn on. That is not defensive coding: the front door
+ * the one the button was drawn on. That is not defensive coding: the site
  * builds a fresh page for every visit, and a set of changes computed against a
  * page nobody is looking at is precisely the stale proposal the whole sequence
  * exists to catch.
  *
- * The record it writes says what it is. `authoredBy: "runtime"` and a confidence
- * of 1, because these were computed rather than guessed, and a 1 nobody graded
- * would otherwise walk into calibration as a model's perfect score
+ * The record it writes says what it is. `authoredBy: "runtime"` and a
+ * confidence of 1, because these were computed rather than guessed, and a 1
+ * nobody graded would otherwise walk into calibration as a model's perfect
+ * score
  * ([0031](../../../../../../decisions/0031-calibration-is-a-reader-not-a-controller.md)).
+ * It is a deterministic interpreter and a real one
+ * ([0057](../../../../../../decisions/0057-a-preset-is-a-deterministic-interpreter.md)).
+ *
+ * **This was two functions and a type until 12 October.** `plannedInterpreter`
+ * took a `PlannedChange` — a plan, a rationale, a refusal line and an
+ * interpreter name — and `askInterpreter` was the one caller that filled it in
+ * from an `Ask`. The header said it was extracted on 23 September *"when
+ * `floors.ts` needed the same machinery for a request that is not one of the
+ * five buttons"*, and there is no `floors.ts` in this repository: no importer,
+ * no band, nothing that puts a request this site has no button for. So the
+ * shared shape carried one implementation, and `interpreter`, a parameter whose
+ * whole purpose was to let two kinds of request stamp a record differently, had
+ * one value.
+ *
+ * It is collapsed rather than re-explained because the two are not the same
+ * cost to get wrong. A comment that argues from a file nobody can open sends
+ * the next run looking for it; a type with one shape and a parameter with one
+ * value are read as a seam somebody is using. The seam is a `git revert` away
+ * on the day a second kind of request arrives, and on that day it will be
+ * extracted against something real.
  */
-export const plannedInterpreter = (
-  change: PlannedChange,
-  ids: IdFactory,
-  clock: Clock
-): ChangeInterpreter => ({
+export const askInterpreter = (ask: Ask, ids: IdFactory, clock: Clock): ChangeInterpreter => ({
   interpret: (intent, page) => {
-    const operations = change.plan(page, ids)
+    const operations = ask.plan(page, ids)
 
     return Promise.resolve(
       operations === undefined || operations.length === 0
         ? err({
             code: "refused",
-            detail: change.nothingToChange,
+            detail: `this page gives "${ask.label}" nothing to change`,
           })
         : ok({
             proposalId: ids.proposalId(),
@@ -448,11 +438,11 @@ export const plannedInterpreter = (
               baseRevision: page.revision,
               operations,
             },
-            rationale: change.rationale,
+            rationale: ask.rationale,
             provenance: {
               origin: intent.origin,
               ...(intent.actor === undefined ? {} : { actor: intent.actor }),
-              interpreter: change.interpreter,
+              interpreter: FRONT_DOOR_INTERPRETER,
               authoredBy: "runtime" as const,
               confidence: 1,
               interpretedAt: clock.now(),
@@ -461,16 +451,3 @@ export const plannedInterpreter = (
     )
   },
 })
-
-/** One of the five buttons, as an interpreter. */
-export const askInterpreter = (ask: Ask, ids: IdFactory, clock: Clock): ChangeInterpreter =>
-  plannedInterpreter(
-    {
-      plan: ask.plan,
-      rationale: ask.rationale,
-      nothingToChange: `this page gives "${ask.label}" nothing to change`,
-      interpreter: FRONT_DOOR_INTERPRETER,
-    },
-    ids,
-    clock
-  )

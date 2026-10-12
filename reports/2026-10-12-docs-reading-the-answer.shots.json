@@ -1,0 +1,47 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-10-12-docs-reading-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["[data-example=\"a-feed-reading-an-answer\"]", "text=Coming up"]
+    },
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-10-12-docs-reading-phone",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-10-12-docs-reading-example",
+      "viewport": "wide",
+      "waitFor": "[data-example=\"a-feed-reading-an-answer\"]",
+      "clip": "[data-example=\"a-feed-reading-an-answer\"]"
+    },
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-10-12-docs-reading-example-phone",
+      "viewport": "phone",
+      "waitFor": "[data-example=\"a-feed-reading-an-answer\"]",
+      "clip": "[data-example=\"a-feed-reading-an-answer\"]"
+    },
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-10-12-docs-reading-readers",
+      "viewport": "wide",
+      "waitFor": "[data-block=\"library-readers\"]",
+      "clip": "[data-block=\"library-readers\"]"
+    },
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-10-12-docs-reading-faults",
+      "viewport": "wide",
+      "waitFor": "[data-fault=\"data-unshown\"]",
+      "clip": "[data-block=\"reading-faults\"]"
+    }
+  ]
+}

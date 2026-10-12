@@ -1,0 +1,41 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/",
+      "out": "2026-10-12-marketing-bar-minimal-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["nav", "nav a", "text=What you run"]
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-10-12-marketing-bar-bold-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["nav", "text=What you run"]
+    },
+    {
+      "path": "/?theme=editorial",
+      "out": "2026-10-12-marketing-bar-editorial-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["nav"]
+    },
+    {
+      "path": "/",
+      "out": "2026-10-12-marketing-bar-minimal-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "measure": ["nav"]
+    },
+    {
+      "path": "/what-you-run",
+      "out": "2026-10-12-marketing-bar-what-you-run-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["nav"]
+    }
+  ]
+}

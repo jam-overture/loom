@@ -184,7 +184,14 @@ rewritten, would be teaching it rather than doing it.
 ## 2026-10-11 — `askHref` and `mechanismHref` are the same function under two names, and every call site had to pick one
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
-(`apps/loom/app/(marketing)/_lib/site.ts`) · **Status:** open — **nothing is
+(`apps/loom/app/(marketing)/_lib/site.ts`) · **Status:** **closed by
+`marketing-02-the-bar-and-three-stale-arguments`** — `mechanismHref` is deleted
+and its one call site (`pages/see-it-happen.ts`) now reads `askHref`, which is
+the recommendation below. The doc comment that argued from two destinations
+went with it; what `askHref` carries is explained where the one function is.
+Original status below.
+
+**Status:** open — **nothing is
 broken and nothing a reader sees is wrong**; it is one function with two
 exported names, and the names disagree about which page this site asks things of
 
@@ -524,25 +531,64 @@ editing the file, the index, every citation in `src/`, every mention in
 repository, done *after* a lane has written and verified its branch, under a
 merge it did not plan for — the worst available moment for it.
 
-### What would cost less
+### I filed this as new, and it is the tenth time
 
-A check that reads the **open pull requests** rather than one tree, and reports
-a number claimed by more than one open branch. The information is public and
-cheap: the record filenames each open pull request adds. Run it in
-`pnpm decisions:index` or beside it, and the second branch to claim a number
-learns while moving still costs one filename and one line.
+**Corrected 12 October, by me, after reading my own file properly.** Everything
+above is true and almost none of it is news. This file already holds entries on
+record-number clashes dated **19 August** (0068 on two branches), **23 August**,
+**24 August** (*"hit by this lane for the second day running"*), **25 August**
+(*"fifth occurrence"* — so there were four before the entries start naming
+themselves), **29 August** (*"eight open branches now carry a record numbered
+0096"*), **31 August**, **1 October** (0209, *"the second consecutive number
+this has happened to"*), and **8 October** (0240 and 0241, four branches, two
+numbers) — that last one filed by this lane and closed by `Loom merge` three
+days before I filed this one as a discovery.
 
-It cannot be `pnpm verify`'s to fail on. Verify runs offline and must; a network
-call that fails closed would make every lane's merge gate depend on GitHub being
-up. **Reported and never fatal**, which is the shape 0097 already gives a hole.
+I searched this file for findings *owned by* me before choosing work. I did not
+search it for the thing I was about to file. A 2.7 MB ledger that nobody greps
+before adding to it will grow a tenth copy of anything, which is its own small
+finding and is left here as one.
 
-### What is not asked for
+### The ask I made was the wrong one, and 0097 already says so
 
-Not an allocator and not a lock. Seven routines coordinating through a shared
-counter is a bigger mechanism than the problem, and the convention — take the
-next free number, whoever lands first keeps it — is right. This asks only that
-*free* become checkable against the branches that are actually open, which is
-the one fact the convention rests on and the one thing no tool here can see.
+I asked for a check over the open pull requests. **That is a weaker version of
+an option 0097 considered and set aside**, and its reasoning is better than
+mine:
+
+> **Reserve a range per lane in the tool** … Rejected because the tool would
+> then be enforcing a governance rule nobody has written, and encoding a lane
+> list in `tools/` duplicates the one in `docs/routines.md` that lanes are
+> actually defined by. The severity change is enough: **with it, the convention
+> can be written down and followed with no further code.**
+
+So the remedy has been available since 31 August and it is **not code**. It is a
+paragraph in `docs/routines.md` giving each lane a band of numbers. 0097 did the
+engineering to make it possible — a hole stopped being fatal precisely so that a
+lane could skip to its own range — and then stopped, correctly, at the line a
+routine may not cross. The 31 August entry says it in as many words:
+
+> A per-lane number range is now *possible* — the tool was the only thing
+> preventing it — and it is a paragraph in `docs/routines.md`, **which a routine
+> may not write for itself.**
+
+`docs/routines.md` has no such paragraph today. Six weeks and at least four more
+collisions have passed.
+
+**Withdrawn:** the `tools/` check. It would detect, at some cost and a first
+network call in `tools/`, what a written convention would prevent for free.
+
+**What is actually asked, and it is @jonathanbravecredit's alone:** one
+paragraph in `docs/routines.md` assigning each lane a range. Nothing else is
+needed — no code, no tool, no record beyond the one that already exists.
+
+### What is still not asked for
+
+Not an allocator, not a lock, and — now — not a tool at all. 0097 also weighed
+**date-based record ids**, which *"cannot collide at all … the only option here
+that solves the problem outright"*, and left it available as `docs/routines.md`'s
+to take. That is the larger of the two paragraphs available and it costs a rename
+of every record and every citation. The per-lane range is the cheap one. Either
+is the maintainer's; neither is a routine's.
 
 ### Why it is a second pull request rather than part of #575
 
@@ -50219,6 +50265,17 @@ read by this run.
 ## 2026-10-10 — three comments in this lane argue from a file that is not in the tree, and the abstraction one of them justifies has a single caller
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-02-the-bar-and-three-stale-arguments`** — collapsed
+rather than re-explained. `plannedInterpreter` and `PlannedChange` are gone and
+`askInterpreter` is the whole of it; `RAISED_BY` is no longer exported, since
+the band that was its second reader does not exist; and the sentence in
+`run.ts` claiming a band prints two floor probes says instead that nothing on
+this site puts such a request. The entry's own question — *is the parameter
+worth keeping for a second kind of request* — is answered by the fact that it
+can be extracted again, against something real, on the day there is one.
+Original status below.
+
+**Status:**
 open — **nothing is wrong and nothing is blocked.** It is dead generality and
 three explanations pointing at something a reader cannot go and look at
 
@@ -51538,7 +51595,16 @@ the maintainer's machine is how the next portability gap goes unnoticed for a mo
 ## 2026-10-12 — a test reads a gitignored build artefact, so `pnpm verify` is red on `main` for anybody who has not run `pnpm package:primitives`
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
-(`apps/loom/app/(marketing)/_lib/facts.test.ts`) · **Status:** open — **`main`
+(`apps/loom/app/(marketing)/_lib/facts.test.ts`) · **Status:** **closed by
+#593**, which is the patch proposed below, applied: the test reads
+`manifest("UNSET").name` from `tools/package/manifest.ts` rather than the
+assembled artefact. Confirmed on `origin/main` at `03ce8ba` by this lane on
+12 October — `pnpm verify` is green on a clone that has never run
+`pnpm package:primitives`, which is this container. Closed here rather than on
+the branch that fixed it because the entry was filed after that branch was
+open. Original status below.
+
+**Status:** open — **`main`
 is red**, and it is two tests rather than anything structural
 
 `facts.test.ts`' *what the site tells a stranger to install* reads two
@@ -51592,7 +51658,32 @@ if the answer depends on who ran it.
 ## 2026-10-12 — `TreeStore` can create a page and can never drop one, so the site's pages are stored one way
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/store.ts`)
-· **Status:** open — nothing is broken and no test is failing; found while
+· **Status:** **closed by `framework-68-the-page-put-back`** — the reseed, and
+not a delete. `TreeStore` is still five methods: `planReseed(stored, authored)`
+in `src/store/reseed.ts` produces the operations that carry a stored page to the
+tree its builder produces now, and something else proposes them, so the log
+records *this page was put back* with provenance on it and the undo of a reseed
+is an ordinary revert. Recorded as
+[0268](decisions/0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md).
+
+**Your reading of the shape was right and your reason for not asking for a
+delete was the load-bearing half.** Two things the build turned up that the entry
+could not have known. The first is that the four operations are **enough and
+exactly enough**: `configure` reaches a text node's `value` and a slot's `name`,
+so a builder whose headline changed is a one-operation reseed under the same id
+rather than an id 0038 refuses to hand back — the reseed you are most likely to
+want is the one that only just fits. The second is where it stops: a node's
+`kind` and an element's `type` cannot be closed by any plan, so a page differing
+by one of those is reported `unexpressible` naming the nodes, never reseeded into
+something near it. `revives` on the plan is the ids the authored page wants that
+the stored one no longer holds, carried for the Gate rather than judged here.
+
+**Nothing is asked of `(marketing)`.** `stored.ts`'s paragraph — *"there is no way
+back from that today"* — is now out of date in its last sentence and true in
+everything above it; rewording it is yours and there is no hurry. Original status
+below.
+
+**Status (original):** open — nothing is broken and no test is failing; found while
 writing the module that seeds this deployment's three site pages
 
 `TreeStore` is `create`, `head`, `revisions`, `list` and `append`. There is no
@@ -51627,9 +51718,21 @@ the undo will be standing.
 ## 2026-10-12 — the docs are MDX, so the half of the maintainer's request about them cannot be met the way the marketing half was
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom docs` (`apps/loom/app/(docs)/`)
-· **Status:** open — **this is a scoping answer, not a defect**; filed because
-the maintainer asked for both surfaces in one sentence and only one of them
-arrived
+· **Status:** **closed by the maintainer's own plan, not by this lane** — the
+entry was right and the answer had already landed. `docs/portal.md`, rewritten
+on `main` in #602 the same day, lists *"Governing the documentation. It is MDX;
+0259 refuses prose as a tree."* under **Not in scope**. So the scoping question
+this entry put to `Loom docs` is not `Loom docs`' to answer: it is answered, the
+same way, above this lane.
+
+The one open thing in it is the suggestion at the foot — the docs' *chrome* as a
+stored tree with the MDX rendered into a slot. That stays **not taken**, and the
+reason is the plan's rather than a preference: the portal's scope line is about
+governing documentation, and putting only the navigation and the bands under the
+portal would buy a seam, a second place a docs page's shell can be changed from,
+and no governance of anything a reader reads. Read again if the portal's scope
+changes. Noted here on 12 October by `Loom docs` while reading the queue ahead
+of `docs-53-reading-the-answer`, which does not touch it.
 
 The instruction on 12 October was *"Our loom marketing page and docs page are
 already built in the Loom framework, so these should be hooked up to the portal
@@ -51656,6 +51759,107 @@ without pretending the prose is a tree. Whether that is worth the seam is a
 the record rather than only in a session.
 
 ---
+## 2026-10-12 — the page in this repository is no longer the page anybody is served, and the first lane it costs is the one whose work is the page
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework`
+(`src/store/store.ts`, and the seam `apps/loom/app/(marketing)/_lib/stored.ts`
+would use) · **Status:** open — **nothing is broken and no test is failing**;
+it is the consequence of this morning's change read forward one day, and
+[#600](https://github.com/jam-overture/loom/pull/600) looks like the answer to
+it
+
+The three pages of this site became rows in the app's store this morning
+([0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+condition 1, landed in #596). Seeding is `create` and nothing else, which is
+right: a page that exists has a history, and a deploy that wrote over it would
+throw away every change somebody accepted in the portal.
+
+The entry filed the same morning says the consequence as a gap in the store's
+contract — *`TreeStore` can create a page and can never drop one*. This is the
+same fact said as what it costs a lane, because the two read very differently
+and only one of them says who is blocked:
+
+> **Merging a marketing pull request no longer changes the marketing site.**
+
+Every page this lane serves is already a row on any deployment that has been
+visited once. `idFor` reads the id off the builder, so an edited builder looks
+for the same `t_home1` it looked for yesterday, finds it, and leaves it alone.
+The authored page is still in the repository, still built in tests, still
+photographed by `pnpm shoot --serve` against a memory store — and no longer
+served to anybody.
+
+**What this pull request accidentally is.** The branch that carries this entry
+puts a fifth item in the bar across the top, which is a change to all three
+page trees and is visible in a second. So its preview answers a question
+nobody has asked out loud yet:
+
+| what the preview's bar says | what it means |
+| --- | --- |
+| How it works · **What you run** · Demo · Docs | previews build a store of their own, and only production is frozen |
+| How it works · Demo · Docs | preview and production share the database, and **no marketing change has reached a reader since 12 October** |
+
+This lane cannot run that experiment itself: `*.vercel.app` is not in
+`.claude/settings.json`'s allowlist, which is the entry below.
+
+**It is not a request to make seeding overwrite.** That would hand every
+deploy the power to silently discard a governed page, which is the thing 0259
+took the trade to avoid. The shape that fits is the one the portal lane
+proposed and #600 appears to build: a **reseed** — an append that sets the
+tree's root to what the builder produces now, recorded as a revision with its
+own provenance, so the log says *this page was put back to its authored state
+on this date* rather than the history simply ending.
+
+What this lane needs from it is one decision beyond the operation: **who
+presses it.** A reseed that only a person can press means a marketing change
+reaches readers when the maintainer says so, which is defensible and is a new
+step in a release. A reseed that runs on deploy means the authored page wins
+by default and a portal edit survives only until the next release, which is
+the opposite default and is worse. A third answer — the portal offering *put
+this page back to the version in the repository* on the page's own screen,
+beside its history — is the one this lane would choose, because it is the
+product's own shape rather than a deployment step, and the undo is the thing
+this site sells.
+
+Until one of those exists, the honest reading of this lane's work is that it
+lands in the repository and waits. **Nothing here is urgent and nothing is
+degraded**: what a reader is served today is a correct page, built from these
+builders on 12 October, and the gap grows only as this lane keeps working.
+
+---
+## 2026-10-12 — no lane can look at the preview it is told to put in its pull request, because the deployment's own domain is not in the allowlist
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit`
+(`.claude/settings.json`) · **Status:** open — **a small gap with one real
+consequence**, filed the way `docs/routines.md` says to file a domain
+
+Every routine brief asks for **the deployed preview URL and a screenshot** in
+the pull request. The URL is quoted from the Vercel comment and the screenshot
+is taken against a local `pnpm shoot --serve`, because
+`loom-git-….vercel.app` is in neither of the two allowlists: not in
+`sandbox.network.allowedDomains`, so `curl` and the screenshot harness cannot
+reach it, and not in `permissions.allow`, so `WebFetch` fails with nobody there
+to approve a prompt.
+
+For most runs that costs nothing, because a local build of the same commit is
+the same page. **It stopped being the same page on 12 October**, which is the
+entry above: the preview serves whatever is in the store it is pointed at, and
+a local `--serve` serves a memory store seeded from the branch. The one
+difference a photograph could now show is exactly the difference the harness
+cannot be pointed at.
+
+Two ways out, and the first is nearly free:
+
+1. **Allow the project's preview host** — `*.vercel.app`, or the narrower
+   `loom-*-jpizzolato36-6341s-projects.vercel.app` — in both lists. It is a
+   read of a page this repository deploys, and it makes *the screenshot in the
+   pull request is of the thing you will click* true rather than nearly true.
+2. **Say in `docs/routines.md` that preview screenshots are local**, which is
+   what every lane has in fact been doing, so that nobody reads a report's
+   picture as evidence about the deployment.
+
+Either is fine and the second costs nothing; what is not fine is the current
+state, where the instruction and the sandbox disagree and each run discovers it
+again.
 ## 2026-10-12 — a change to a kind of part is answerable now, and the screen for it is the one an author opens the morning after changing a primitive
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens)
@@ -51866,6 +52070,135 @@ isolation asserted against PGlite with the `WHERE` clause removed to prove the
 assertion bites.
 
 ---
+## 2026-10-12 — a resolution is two closures, so the answers cannot be sent to the browser that renders them, and nothing public can hand them over
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/data/`) ·
+**Status:** open — **nothing is blocked**; the documentation site has a
+thirty-line carrier of its own and it works, filed because every host that
+fetches on a server and renders in a browser has to write the same file, and
+five of its lines are a guess a published seam should not be leaving to a caller
+
+`resolveDataPlan` hands back a `DataResolution`, which is
+`{ lookup, problemsFor }` — two functions. That is the right shape for the walk
+and it is unsendable: a function cannot cross from a server component to a
+client one, so the answers a loader fetched cannot reach a render that happens
+in a browser.
+
+This is not an exotic arrangement. It is the one every React framework pushes a
+host towards, and it is the arrangement this very page recommends: *the asking
+happens before the walk, and it is two lines in whatever already loads the
+page.* On this site it is forced rather than chosen — §4c settles that every
+example has a working propose-a-change box beside it, a change produces a new
+tree, and the walk therefore runs wherever the reader is.
+
+**What is public, and what is missing.** `buildDataResolution(plan, answers)` is
+exported and is exactly the function a caller on the far side needs — but
+nothing public produces the `ReadonlyMap<RequestKey, Result<JsonValue,
+DataUnavailable>>` it takes. `resolveDataPlan` builds that map internally and
+folds it away; `askOne`, the per-request step with the ceiling on it, is private.
+So the two halves of a serialisable seam both exist in the package and there is
+no way to get from one to the other without reimplementing the ceiling.
+
+**The workaround, and the part of it that should not be a caller's.**
+`app/(docs)/_lib/data/carry.ts` reads a real resolution out through its own two
+accessors and puts the readings back behind two of the same shape. The readings
+are real: nothing invents an outcome, and `uncarryAnswers` answers `NO_DATA` for
+a node nobody carried, so a tree whose answers did not travel still earns its
+`data-unresolved` — which a carrier returning an empty object of its own would
+have hidden. That part is sound and is tested.
+
+The part that is a guess is *which nodes to ask about*. A resolution cannot be
+enumerated, so the carrier derives the node ids from the plan:
+
+```ts
+[...plan.bindings.map((b) => b.nodeId), ...plan.problems.map((p) => p.nodeId)]
+```
+
+Both lists, because a node whose declaration could not be read at all is in the
+second and never in the first — which took one red test to discover. A caller
+who reaches for `bindings` alone, which is the obvious thing to reach for, gets
+a carrier that silently drops every misdeclared node's problem, and the symptom
+is a page that renders without a diagnostic it should have had.
+
+**Three shapes that would close it, cheapest first:**
+
+1. `resolveDataPlan` also returning what it asked:
+   `{ resolution, answers }`, with `answers` the map `buildDataResolution`
+   already takes. One field, no new concept, and the round trip becomes
+   `buildDataResolution(planTreeData(tree), new Map(answers))` on the far side.
+2. A published pair beside `buildDataResolution` — `carryDataResolution` and
+   `restoreDataResolution` — if the resolution rather than the answers is the
+   thing a host should be handling.
+3. Exporting the per-request step, which makes `buildDataResolution`'s input
+   producible without reimplementing the ceiling.
+
+**(1) is the recommendation.** It is a field rather than an API, it keeps the
+one thing a caller must not get wrong — which requests were asked — inside the
+package, and it makes the node-id guess unnecessary rather than easier: the
+answers are keyed by `RequestKey`, and re-planning the tree on the far side
+produces the same keys.
+
+One note for whoever takes it: the keys are canonicalised params, so re-planning
+a tree whose binding was repointed produces a key the answers do not hold, and
+the walk reports `data-unresolved` — which is correct and is the behaviour to
+preserve. Keying by node id, as this lane's carrier does, instead reports
+`data-unread` on a renamed binding. Both are honest; the first is the one the
+seam already documents.
+
+---
+## 2026-10-12 — a sentence saying something does not exist yet is the one claim on this site no test can hold, and one of them had been false for weeks
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** **the instance is fixed on
+`docs-53-reading-the-answer`**; filed as the **hazard**, with the remedy named,
+because the class has no instrument and the next one will be written the same
+way
+
+*Where the content comes from* carried this, in a warning callout, as of
+yesterday:
+
+> the starter library has no primitive that reads `loom.data`: the ruling that
+> created this seam said the authoring half — a primitive declaring which
+> binding names it reads — was the next thing to build, and it has not been
+> built yet.
+
+Both halves were false. `reads` exists on `definePrimitive` and is in
+`RegisteredPrimitive`, `catalogueOf` already puts it in front of a model, and
+**five** primitives in the starter library read an answer — `loom.feed`,
+`loom.plate`, `loom.tally`, `loom.trend` and `loom.voices` — four of which also
+place `empty` and `unavailable` regions and all five of which declare `unshown`.
+
+**Why nothing caught it, and this is the part worth keeping.** Every instrument
+on this site checks a claim against the thing it is about: an example that
+stops rendering is a red test, a count is printed from the registry, a code
+fence is typechecked, a diagnostic sentence is `describeRenderDiagnostic`'s. All
+of those hold a claim that something **is** so. A sentence saying something
+**is not** so has nothing to be checked against — the registry cannot be asked
+whether it lacks a thing a page has not named — so it is the one kind of
+sentence on this site that goes stale in total silence, and it goes stale
+exactly when the framework succeeds.
+
+It is also the kind of sentence a documentation routine writes most readily,
+because the honest thing to do on meeting a gap is to say so and file it. That
+is right, and it is why this needs an instrument rather than more care.
+
+**The remedy, and it is cheap: pair the sentence with a test that fails when the
+absence ends.** The callout above should have been written beside
+
+```ts
+expect(libraryReaders()).toEqual([])
+```
+
+which would have gone red the day `loom.tally` was registered, and the page
+would have been corrected by whoever made it wrong. The general form: *a page
+that says a thing does not exist names the measurement that says so, and asserts
+it is still nought.* An absence with a number behind it is checkable; an absence
+in prose is not.
+
+Nothing is asked of another lane. What is asked of this one is that the next
+"this is not built yet" on the site arrives with its nought asserted, and that
+the handful already there be given the same treatment — the sweep is small
+today, which is the best moment to do it.
 ## 2026-10-12 — 273 reports hold a visual named after them that the report never links to
 
 **Filed by:** `Loom portal` · **Owned by:** any lane touching its own old

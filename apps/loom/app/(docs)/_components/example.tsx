@@ -4,6 +4,7 @@ import { type LoomTree } from "@jam-overture/loom"
 import { describeRenderDiagnostic, renderLoomTree } from "@jam-overture/loom/react"
 import { useState } from "react"
 
+import { uncarryAnswers, type CarriedAnswers } from "@/app/(docs)/_lib/data/carry"
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
 import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
 
@@ -46,7 +47,27 @@ import { ProposalBox } from "./proposal-box"
  * happens, and a documentation site that hid it would be teaching the reader
  * that it cannot happen.
  */
-export const Example = ({ id, interactive = true }: { readonly id: string; readonly interactive?: boolean }) => {
+export const Example = ({
+  id,
+  interactive = true,
+  answers,
+}: {
+  readonly id: string
+  readonly interactive?: boolean
+  /**
+   * The answers this example's questions were given, resolved on a server and
+   * sent here as data.
+   *
+   * Only `BoundExample` passes one, and only one example asks anything. The
+   * resolution is rebuilt rather than reconstructed: `uncarryAnswers` puts the
+   * real outcomes back behind the two accessors the walk reads, so an answer
+   * this frame could not use reports the same thing it would have reported on a
+   * server. Absent, the walk is given no resolution at all — which is correct
+   * for every tree that asks nothing, and is itself a diagnostic for one that
+   * does.
+   */
+  readonly answers?: CarriedAnswers
+}) => {
   const example = docsExamples.get(id)
 
   if (example === undefined) {
@@ -72,6 +93,7 @@ export const Example = ({ id, interactive = true }: { readonly id: string; reado
     resolver: registry,
     validator: registry,
     themes: docsThemes,
+    ...(answers === undefined ? {} : { data: uncarryAnswers(answers) }),
   })
 
   return (
