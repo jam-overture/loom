@@ -2,6 +2,8 @@ import { readdirSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { TREE_OPERATIONS, type ElementNode, type LoomNode } from "@jam-overture/loom"
+
+import { manifest } from "../../../../../tools/package/manifest"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
@@ -170,9 +172,30 @@ describe("what the site tells a stranger to install", () => {
   const nameOf = (manifest: string): string =>
     JSON.parse(readFileSync(fileURLToPath(new URL(manifest, import.meta.url)), "utf8")).name
 
+  /**
+   * The runtime's name is read off its manifest; the library's is read off the
+   * **module that authors** its manifest.
+   *
+   * This read `packages/primitives/package.json` until 12 October, which is
+   * gitignored — `.gitignore:23` ignores every package manifest under
+   * `packages/` — and assembled by
+   * `pnpm package:primitives`. So it passed on a machine that had run the
+   * packaging step at some point and failed on every fresh clone, with an
+   * `ENOENT` that names a path rather than the reason — and `pnpm verify` does
+   * not run that step, so `main` was red for anybody who had not.
+   *
+   * `tools/package/manifest.ts` is where the name is actually written, and its
+   * own comment says it exists to be *"data rather than a file somebody edits
+   * by hand"*. Reading it is what this test meant: still not typed twice, still
+   * red on the run that renames the package, and no longer dependent on what
+   * else the machine has done.
+   *
+   * `license` is a parameter of that manifest and nothing here asks about it,
+   * so the argument is a placeholder rather than a claim.
+   */
   const published = (): readonly string[] => [
     nameOf("../../../../../package.json"),
-    nameOf("../../../../../packages/primitives/package.json"),
+    String(manifest("UNSET").name),
   ]
 
   it("names the packages this repository actually publishes", () => {
