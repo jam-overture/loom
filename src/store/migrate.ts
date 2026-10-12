@@ -25,12 +25,15 @@ import type { LoomDatabase } from "./database.js"
  */
 export const TREE_STORE_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_trees (
-    tree_id text PRIMARY KEY,
+    project_id text NOT NULL DEFAULT 'prj_default',
+    tree_id text NOT NULL,
     revision integer NOT NULL,
     document jsonb NOT NULL,
-    updated_at timestamptz NOT NULL DEFAULT now()
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (project_id, tree_id)
   )`,
   `CREATE TABLE IF NOT EXISTS loom_revisions (
+    project_id text NOT NULL DEFAULT 'prj_default',
     tree_id text NOT NULL,
     revision integer NOT NULL,
     proposal_id text NOT NULL,
@@ -38,8 +41,33 @@ export const TREE_STORE_DDL: readonly string[] = [
     provenance jsonb NOT NULL,
     applied_at text NOT NULL,
     answered_by text,
-    PRIMARY KEY (tree_id, revision)
+    PRIMARY KEY (project_id, tree_id, revision)
   )`,
+  /*
+   * **The migration, for a database that predates projects (0260).**
+   *
+   * Two statements per table and both are needed. The column is additive and
+   * defaulted, so every row already written becomes the default project's —
+   * 0260 clause 5, *nothing is migrated by guessing*: those rows belong to the
+   * deployment that wrote them, and one project named for it is the honest
+   * answer rather than a distribution somebody invented.
+   *
+   * The key then has to widen, because a tree id is only unique **within** a
+   * project now and the old key says it is unique everywhere. Dropping by the
+   * name Postgres gives a primary key and re-adding is idempotent: after the
+   * first run the constraint exists again under the same name, so a second run
+   * drops and rebuilds an identical key. On a table created by the statements
+   * above it is already right and the pair is a no-op.
+   *
+   * Ordering matters and is why these are not beside their tables: the column
+   * must exist on both before either key can name it.
+   */
+  `ALTER TABLE loom_trees ADD COLUMN IF NOT EXISTS project_id text NOT NULL DEFAULT 'prj_default'`,
+  `ALTER TABLE loom_revisions ADD COLUMN IF NOT EXISTS project_id text NOT NULL DEFAULT 'prj_default'`,
+  `ALTER TABLE loom_trees DROP CONSTRAINT IF EXISTS loom_trees_pkey`,
+  `ALTER TABLE loom_trees ADD PRIMARY KEY (project_id, tree_id)`,
+  `ALTER TABLE loom_revisions DROP CONSTRAINT IF EXISTS loom_revisions_pkey`,
+  `ALTER TABLE loom_revisions ADD PRIMARY KEY (project_id, tree_id, revision)`,
   /**
    * For a database that already has the table: `CREATE TABLE IF NOT EXISTS`
    * silently leaves an existing table alone, columns and all, so a column added
