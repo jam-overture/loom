@@ -26,20 +26,34 @@ import type { LoomDatabase } from "../store/database.js"
  */
 export const TELEMETRY_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_telemetry (
+    project_id text NOT NULL DEFAULT 'prj_default',
     seq bigserial PRIMARY KEY,
     tree_id text NOT NULL,
     occurred_at text NOT NULL,
     event jsonb NOT NULL,
     recorded_at timestamptz NOT NULL DEFAULT now()
   )`,
-  `CREATE INDEX IF NOT EXISTS loom_telemetry_tree_seq_idx ON loom_telemetry (tree_id, seq)`,
+  /*
+   * **The project, for a database that predates it (0260).** No key widens
+   * here — `seq` is a surrogate and stays unique across the deployment, for the
+   * reason `schema.ts` gives. What changes is that both indexes lead with the
+   * project, so a read inside one does not walk another's rows.
+   *
+   * Dropped by name rather than created `IF NOT EXISTS`, because the names do
+   * not change: an existing index on the old columns would be left exactly as
+   * it was, and every read would go on scanning while appearing to be indexed.
+   */
+  `ALTER TABLE loom_telemetry ADD COLUMN IF NOT EXISTS project_id text NOT NULL DEFAULT 'prj_default'`,
+  `DROP INDEX IF EXISTS loom_telemetry_tree_seq_idx`,
+  `CREATE INDEX IF NOT EXISTS loom_telemetry_tree_seq_idx ON loom_telemetry (project_id, tree_id, seq)`,
   /**
    * Additive, idempotent, and the only statement here that is not about the
    * table's shape: it is what makes `assessments` on the journal a seek rather
    * than a scan of everything ever narrated. A deployment that runs the DDL
    * again gets it; one that never does keeps a correct journal and a slow lookup.
    */
-  `CREATE INDEX IF NOT EXISTS loom_telemetry_assessed_proposal_idx ON loom_telemetry ((event -> 'assessment' ->> 'proposalId')) WHERE event ->> 'type' = 'change-assessed'`,
+  `DROP INDEX IF EXISTS loom_telemetry_assessed_proposal_idx`,
+  `CREATE INDEX IF NOT EXISTS loom_telemetry_assessed_proposal_idx ON loom_telemetry (project_id, (event -> 'assessment' ->> 'proposalId')) WHERE event ->> 'type' = 'change-assessed'`,
   `ALTER TABLE loom_telemetry ENABLE ROW LEVEL SECURITY`,
 ]
 
