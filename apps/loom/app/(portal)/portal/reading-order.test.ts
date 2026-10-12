@@ -11,10 +11,10 @@ import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
  * lands on when they sign in, so whatever it says first is the portal's first
  * sentence to them.
  */
-const file = portalFile("portal", "page.tsx")
+const file = portalFile("portal", "[application]", "page.tsx")
 const source = screenSource(file)
 
-describe("the front door's reading order", () => {
+describe("the application screen's reading order", () => {
   /**
    * The screen used to be seven lines and a `redirect`. A reviewer's first
    * screen was a list of the places a change might be waiting rather than the
@@ -308,8 +308,8 @@ describe("what happened without you", () => {
   it("is headed by something true of both halves", () => {
     const heading = /<h1[^>]*>([\s\S]*?)<\/h1>/u.exec(source)?.[1]?.trim()
 
-    expect(heading).toBe('{screenName("/portal")}')
-    expect(screenName("/portal")).toBe("What Loom has been doing")
+    expect(heading).toBe('{screenName("/portal/[application]")}')
+    expect(screenName("/portal/[application]")).toBe("What needs you")
   })
 
   /** The count before the cards, for the reason the waiting half says its own. */

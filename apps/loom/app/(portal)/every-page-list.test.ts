@@ -98,11 +98,11 @@ describe("every list of pages in this portal", () => {
   it("finds the lists that exist, so an empty sweep cannot pass as clean", () => {
     expect(lists.map((list) => list.where).sort()).toEqual([
       "_components/unreadable-pages.tsx",
+      "portal/[application]/page.tsx",
       "portal/app/_components/app-composition.tsx",
       "portal/checkup/_components/checkup-choices.tsx",
       "portal/checkup/_components/sweep-rows.tsx",
       "portal/history/_components/tree-chooser.tsx",
-      "portal/page.tsx",
       "portal/pages/page.tsx",
       "portal/pieces/_components/which-piece-first.tsx",
       "portal/readers/page.tsx",
