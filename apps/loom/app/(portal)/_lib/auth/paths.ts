@@ -28,9 +28,8 @@ export const SIGN_IN_PATH = "/portal/sign-in"
  * an old link would be sent to sign in rather than forwarded on, which is a
  * redirect that only serves the people who do not need it.
  */
-export const DEMO_PATH = "/portal/demo"
 
-const PUBLIC_PATHS: readonly string[] = [SIGN_IN_PATH, DEMO_PATH]
+const PUBLIC_PATHS: readonly string[] = [SIGN_IN_PATH]
 
 export const isPublicPath = (pathname: string): boolean =>
   PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
