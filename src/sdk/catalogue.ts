@@ -26,8 +26,21 @@ import type { PrimitiveRegistry } from "./registry.js"
  * `export type *` never carried them and `sdk.catalogueFields` is `undefined`.
  * Naming the three types the catalogue is made of says the true thing in a way
  * the generator reads correctly.
+ *
+ * `ClosedChoice` is the fourth and is not part of the catalogue — it is
+ * deliberately left out of one (`catalogue.ts` says why). It is here because
+ * two published signatures hold one: `PrimitiveEntry.choices` and
+ * `probeConfigurations`, so a host could pass one and read one and had no way
+ * to write the type of a function that takes one. `CataloguedProp` is the same
+ * kind of small projection and was already exported, which is what made the
+ * omission an oversight rather than a decision.
  */
-export type { CataloguedPrimitive, CataloguedProp, PrimitiveCatalogue } from "../catalogue.js"
+export type {
+  CataloguedPrimitive,
+  CataloguedProp,
+  ClosedChoice,
+  PrimitiveCatalogue,
+} from "../catalogue.js"
 
 /**
  * The registry, projected into the catalogue other components read.

@@ -8,6 +8,60 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-11 — thirty-two of the hundred and seven are judged entirely under props bags their own schemas refuse, and the library could hand the probe one each
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **nothing is broken, no list is
+non-empty and no test is failing**; this is the measurement behind
+[0267](decisions/0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md)
+and the one thing that record deliberately left to this lane
+
+`auditRegistry` probes from the empty props bag. Measured on this branch, over
+`createStarterPrimitiveRegistry()`:
+
+| | |
+| --- | --- |
+| registered | 107 |
+| with at least one required prop | 33 |
+| whose default configuration their own schema refuses | 33 |
+| **every** configuration the probe builds refused | 32 |
+| of those, all required props closed (so derivable) | 1 |
+| `throwsOnDeclaredProps` / `notProbeable` / `notConfigured` | 0 / 0 / 0 |
+
+Nothing is red, and the reason is a **house style rather than a rule**: all
+thirty-three hand their props to React, and React renders a missing one as
+nothing. Not one calls a method on a prop value. So `loom.media` is reported as
+decorating, `loom.stat` as a leaf and `loom.field` as placing children under
+`type: "select"`, and every one of those claims was observed under a bag the
+primitive's own validator would have refused in a tree.
+
+**0267 decided those claims stand.** What a non-throwing probe observes is
+*reach* — some configuration decorated, some configuration placed this region —
+and a refused bag that places a region is still evidence the component reads it.
+Only the *fault* claim needed the configuration to be one a tree could carry,
+and that half is fixed. So this is not a defect and there is no list to empty.
+
+**What is yours.** 0267 added `RegistryAuditOptions.props`: a map from type to
+props bags, each varied by every closed choice, supplied rather than derived for
+the reason `ProbeAnswers` is. The library is the one caller that knows a bag for
+each of its own thirty-three — `{ label: "Revenue", value: "£2.4m" }` for
+`loom.stat`, `{ name: "email", label: "Email" }` for `loom.field` — and
+`library.test.ts` already holds `BOUND_ANSWERS` for the answers half, which is
+the shape this would take. Handing those over would make every verdict in that
+suite a claim about the component rather than about the component under a bag
+nothing could send it.
+
+The cost is a table of thirty-three entries that has to stay true as schemas
+change, which is real and is why this is a question rather than a request. The
+cheaper half, if the whole table is not worth it: the five bound primitives
+`BOUND_ANSWERS` already names, since those are the ones whose regions the suite
+reasons hardest about.
+
+Two things this is **not** asking for. It is not asking for a schema to be
+loosened — a required prop is required because the primitive needs it. And it is
+not asking for a component to be changed: handing props to React rather than
+reading them is good practice and is the only reason this was latent rather than
+a red audit.
 ## 2026-10-11 — the undo is now visible and is still not watchable, because the visitor is carried to a window that changed before they got there
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
@@ -50534,8 +50588,11 @@ narrowed and why.
 ## 2026-10-11 — `ClosedChoice` is in two published signatures and exported from no door, so naming the type means indexing another one
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/sdk/`) ·
-**Status:** open — **nothing is blocked**; a one-line export, and the lane that
-hit it is carrying a workaround
+**Status:** **closed by `framework-67-the-props-no-tree-carries`** — an
+oversight, not a decision, and `@jam-overture/loom/sdk` now exports
+`ClosedChoice` beside `CataloguedProp`. `app/(docs)/_lib/own/proving.ts` can
+drop `PrimitiveEntry["choices"][number]` for the import whenever that lane next
+touches the file; nothing forces it, and nothing breaks if it never does
 
 `PrimitiveEntry.choices` is `readonly ClosedChoice[]`, and
 `probeConfigurations(choices: readonly ClosedChoice[])` takes one. Both are
@@ -50568,9 +50625,24 @@ to say so once.
 ## 2026-10-11 — the first configuration the conformance probe builds is one the schema refuses, so a component that reads a required prop the obvious way is reported as a fault no valid tree can cause
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/sdk/`) ·
-**Status:** open — **latent, and nothing is red today**; it becomes a reader's
-first bad experience the moment somebody writes a primitive in a style the
-starter library happens not to use
+**Status:** **closed by `framework-67-the-props-no-tree-carries`**
+([0267](decisions/0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md)),
+by the third remedy and the second together and explicitly not the first —
+which was measured and does not work: of the thirty-three starter primitives
+with a required prop, **one** has all of them closed, so a bag derived from the
+schema is underivable for thirty-two of them without inventing a string.
+
+A throw is now a fault only under props the primitive's own validator accepts,
+so `throwsOnDeclaredProps`' stated sentence is true of every row. A primitive
+the probe could reach in no accepted configuration is `notConfigured` rather
+than `notProbeable`, carrying its required prop names, the refusals in the
+validator's words, and which of `no-props` and `props-not-accepted` applies.
+`RegistryAuditOptions.props` is the remedy a host applies, varied by every
+closed choice the way 0075 asks. The starter library audits identically — all
+three lists empty — and thirty-three of its audits now carry
+`refusedConfigurations`, which is the honest measure of what their verdicts rest
+on. The generated `loom init` test asserts `notConfigured` empty, because the
+reader this was found for meets that file first
 
 `probeConfigurations` returns the default configuration first and then each
 closed choice's value one at a time (0075):
