@@ -22,6 +22,7 @@
 import { z } from "zod"
 
 import { idPattern } from "../grammar.js"
+import { randomIdBody } from "../ids.js"
 
 /*
  * `prj`, which is the prefix an application id wore until 12 October. It moves
@@ -33,6 +34,9 @@ import { idPattern } from "../grammar.js"
 export const projectIdSchema = z.string().regex(idPattern("prj")).brand<"ProjectId">()
 
 export type ProjectId = z.infer<typeof projectIdSchema>
+
+/** A new project's id, minted when somebody makes one. Random, as an application's is. */
+export const newProjectId = (): ProjectId => projectIdSchema.parse(`prj_${randomIdBody()}`)
 
 /**
  * The project every application written before projects existed belongs to.

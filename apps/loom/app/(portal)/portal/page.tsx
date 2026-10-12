@@ -151,12 +151,19 @@ const Workspace = async () => {
     <Screen>
       <div className="flex items-baseline justify-between gap-4 pb-6">
         <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
-        <p className="text-ink-muted text-sm">
-          {totals.applications === 0
-            ? "Nothing registered yet."
-            : `${totals.applications} application${totals.applications === 1 ? "" : "s"}, ${totals.pages} page${totals.pages === 1 ? "" : "s"}${totals.waiting > 0 ? `, ${totals.waiting} waiting on you` : ""}.`}
-        </p>
+        <Link
+          href="/portal/new"
+          className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 text-sm no-underline"
+        >
+          Register an application
+        </Link>
       </div>
+
+      <p className="text-ink-muted pb-6 text-sm">
+        {totals.applications === 0
+            ? "Nothing registered yet."
+          : `${totals.applications} application${totals.applications === 1 ? "" : "s"}, ${totals.pages} page${totals.pages === 1 ? "" : "s"}${totals.waiting > 0 ? `, ${totals.waiting} waiting on you` : ""}.`}
+      </p>
 
       <div className="flex flex-col gap-8">
         {workspace.groups.map((group: ProjectGroup) => (

@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -724,6 +724,13 @@
               "signature": "interface IdFactory {\n    readonly nodeId: () => NodeId;\n    readonly treeId: () => TreeId;\n    readonly deltaId: () => DeltaId;\n    readonly intentId: () => IntentId;\n    readonly proposalId: () => ProposalId;\n}",
               "truncated": false,
               "summary": "Id minting is a side effect, so it enters the runtime through this seam rather than being called directly from pure code. Tests and replay tooling inject a deterministic factory; production injects the random one."
+            },
+            {
+              "name": "randomIdBody",
+              "kind": "function",
+              "signature": "const randomIdBody: () => string",
+              "truncated": false,
+              "summary": "The body of a random id, which is the part after the prefix."
             },
             {
               "name": "randomIdFactory",
@@ -4734,7 +4741,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4780,7 +4787,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5770,7 +5777,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6298,7 +6305,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7477,7 +7484,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8117,7 +8124,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8345,7 +8352,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8371,6 +8378,13 @@
               "signature": "type ApplicationId = z.infer<typeof applicationIdSchema>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "newApplicationId",
+              "kind": "function",
+              "signature": "const newApplicationId: () => ApplicationId",
+              "truncated": false,
+              "summary": "A new application's id, minted when somebody registers one."
             },
             {
               "name": "DEFAULT_APPLICATION_ID",
@@ -8490,6 +8504,13 @@
               "signature": "type ProjectId = z.infer<typeof projectIdSchema>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "newProjectId",
+              "kind": "function",
+              "signature": "const newProjectId: () => ProjectId",
+              "truncated": false,
+              "summary": "A new project's id, minted when somebody makes one. Random, as an application's is."
             },
             {
               "name": "DEFAULT_PROJECT_ID",
@@ -9070,7 +9091,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9424,7 +9445,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9676,7 +9697,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12147,7 +12168,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12290,7 +12311,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12357,7 +12378,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12954,7 +12975,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13028,7 +13049,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13507,7 +13528,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1548,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
