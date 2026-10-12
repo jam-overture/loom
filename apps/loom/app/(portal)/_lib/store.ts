@@ -1,5 +1,7 @@
 import { ensureSiteSeeded } from "@/app/(marketing)/_lib/stored"
-import { appStore } from "@/app/_lib/app/store"
+import { DEFAULT_PROJECT_ID } from "@jam-overture/loom/store"
+
+import { appProjects, appStore } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
 
@@ -20,6 +22,9 @@ import { seedTree } from "./seed"
  * reason is below.
  */
 export const portalStore = appStore
+
+/** The deployment's projects, under the name this lane uses for the other one. */
+export const portalProjects = appProjects
 
 const SEEDING_KEY = Symbol.for("loom.portal.seeding")
 
@@ -54,9 +59,30 @@ export const ensureSeeded = async (): Promise<void> => {
   carrier[SEEDING_KEY] ??= Promise.all([
     portalStore.create(seedTree()),
     ensureSiteSeeded(),
+    ensureDefaultProject(),
   ]).then(() => undefined)
 
   await carrier[SEEDING_KEY]
+}
+
+/**
+ * The project every row written before projects existed belongs to.
+ *
+ * `DEFAULT_PROJECT_ID` is the value five tables already default their
+ * `project_id` to, so this does not assign anything — it gives a name to what is
+ * already true, which is the one thing DDL could not do. A migration that
+ * invented the name would be guessing, and 0260 refuses that.
+ *
+ * Create-if-absent on the same terms as everything else here: a deployment that
+ * has renamed it keeps its name, because `create` refuses rather than
+ * overwrites.
+ */
+const ensureDefaultProject = async (): Promise<void> => {
+  await appProjects.create({
+    projectId: DEFAULT_PROJECT_ID,
+    name: "Your application",
+    createdAt: new Date(0).toISOString(),
+  })
 }
 
 export { storeIsDurable } from "./database"

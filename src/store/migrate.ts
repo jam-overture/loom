@@ -187,6 +187,31 @@ export const POLICY_LOG_DDL: readonly string[] = [
  * Creates the tables if they are absent. Every statement is `IF NOT EXISTS`, so
  * running it against a populated database is a no-op rather than a hazard.
  */
+/**
+ * The projects table.
+ *
+ * Carries no `project_id` default and no backfill, unlike every other statement
+ * here: the rows that already exist belong to `prj_default` by the default on
+ * their own columns, and a row *for* `prj_default` is seeded by the deployment
+ * rather than conjured by DDL — a migration that invented a project's name
+ * would be guessing, which 0260 refuses.
+ */
+export const PROJECT_STORE_DDL: readonly string[] = [
+  `CREATE TABLE IF NOT EXISTS loom_projects (
+      project_id text PRIMARY KEY,
+      name text NOT NULL,
+      created_at text NOT NULL,
+      host text
+    )`,
+  /**
+   * As every other table here does. It matters on a managed Postgres whose
+   * anon role can reach the schema: without it, the list of a deployment's
+   * projects — their names and the hosts they run on — is readable by anyone
+   * holding the publishable key.
+   */
+  `ALTER TABLE loom_projects ENABLE ROW LEVEL SECURITY`,
+]
+
 export const ensureTreeStoreSchema = async (db: LoomDatabase): Promise<void> => {
   await runStatements(db, TREE_STORE_DDL)
 }
@@ -210,6 +235,15 @@ export const ensureHoldStoreSchema = async (db: LoomDatabase): Promise<void> => 
  */
 export const ensurePolicyLogSchema = async (db: LoomDatabase): Promise<void> => {
   await runStatements(db, POLICY_LOG_DDL)
+}
+
+/**
+ * Creates the projects table if it is absent. Idempotent, and separate for the
+ * same reason the other three are: a deployment that wants more than one
+ * project gets the table by adding this call on purpose.
+ */
+export const ensureProjectStoreSchema = async (db: LoomDatabase): Promise<void> => {
+  await runStatements(db, PROJECT_STORE_DDL)
 }
 
 const runStatements = async (db: LoomDatabase, statements: readonly string[]): Promise<void> => {

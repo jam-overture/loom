@@ -4,7 +4,11 @@ import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
 import type { LoomDatabase } from "@jam-overture/loom/postgres"
-import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@jam-overture/loom/postgres"
+import {
+  ensureHoldStoreSchema,
+  ensureProjectStoreSchema,
+  ensureTreeStoreSchema,
+} from "@jam-overture/loom/postgres"
 import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
 import { storageSeams } from "./schema"
@@ -28,8 +32,8 @@ import { storageSeams } from "./schema"
 vi.setConfig({ testTimeout: 60_000 })
 
 /**
- * One database with all three seams in it, because that is the deployment the
- * page describes and because three tables' statements meeting in one schema is
+ * One database with every seam in it, because that is the deployment the
+ * page describes and because their statements meeting in one schema is
  * itself worth checking — a name collision between them would land here.
  */
 const migrated = async (): Promise<LoomDatabase> => {
@@ -37,6 +41,7 @@ const migrated = async (): Promise<LoomDatabase> => {
 
   await ensureTreeStoreSchema(db)
   await ensureHoldStoreSchema(db)
+  await ensureProjectStoreSchema(db)
   await ensureTelemetrySchema(db)
 
   return db
@@ -61,7 +66,7 @@ const rowsOf = async <Row,>(db: LoomDatabase, query: ReturnType<typeof sql>): Pr
 const tables = storageSeams.flatMap((seam) => seam.tables)
 
 describe("the tables this page describes", () => {
-  it("all exist once the three migrations have run", async () => {
+  it("all exist once the migrations have run", async () => {
     const db = await deployedDatabase()
     const present = await rowsOf<{ readonly tablename: string }>(
       db,

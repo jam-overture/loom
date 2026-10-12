@@ -178,3 +178,25 @@ export const loomPolicyRevisions = pgTable(
     ),
   ]
 )
+
+/**
+ * The projects a deployment has.
+ *
+ * The one table here whose rows are not scoped *by* a project, because they are
+ * the projects. Five tables carry `project_id` after
+ * [0260](../../decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
+ * and none of them could say what that id named: the column was a foreign key
+ * to nothing. This is what it points at.
+ *
+ * `created_at` is text rather than `timestamptz` to match `projectSchema`,
+ * which takes an ISO string — the same choice `loom_revisions.applied_at`
+ * makes, and for the same reason: what the row holds is what the type holds,
+ * so nothing has to agree about how a driver renders a timestamp.
+ */
+export const loomProjects = pgTable("loom_projects", {
+  projectId: text("project_id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: text("created_at").notNull(),
+  /** Absent until the project says where it lives. */
+  host: text("host"),
+})

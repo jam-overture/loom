@@ -52285,3 +52285,41 @@ this lane's.
 and `Allowed by nobody` were printed at people. A rule with a hole in exactly
 the file type a lane is moving its strings into is a rule on its way to being
 decorative.
+
+---
+## 2026-10-12 — a branch opened before 0264 turns `main` red when it merges, and four open ones will
+
+**Filed by:** `Loom portal` · **Owned by:** every lane with a branch open on 12
+October (`reports/`) · **Status:** open — **and it is this routine's doing**,
+which is why it is filed rather than left to be discovered a fifth time.
+
+[0264](decisions/0264-a-report-s-visual-is-stored-at-the-size-the-page-was-laid-out-at.md)
+made `pnpm reports:check` part of `pnpm verify`, refusing a visual that is not
+`.webp` or `.svg`. **It did not consider the branches already open.** A branch
+whose screenshots were shot before the rule passes its own `verify` against its
+own base, and turns `main` red the moment it merges, because the rule arrived
+between the two.
+
+It has happened twice already this afternoon, and both times another lane paid
+for it:
+
+- #584 merged an hour after #606 and reintroduced five PNGs. #586's own commit
+  message reads *"`main` is red, and it is this routine's doing"* — written by
+  the lane that cleaned it up, about a mess it did not make.
+- #587 carried one more and fixed it in a third commit on its own branch.
+
+**Four open pull requests still carry `.png` visuals** — #605, #601, #600 and
+#566 — and each will do the same on merge unless it runs `pnpm reports:shrink`
+first. That command is the whole fix, takes seconds, and rewrites the citations
+with the files; the gate's own failure message names it. It is filed here so the
+next lane to hit it reads *this is expected and here is the one command* rather
+than spending a round working out what changed under them.
+
+**This is a transition cost with a known end.** Only branches open on 12 October
+are affected; anything branched from `main` after #606 already has WebP visuals
+and cannot trip it. No change to the rule is proposed — a gate that exempted
+pre-existing files would have to keep a list of them forever, which is the thing
+the rule exists instead of.
+
+What I would do differently: a rule that invalidates in-flight work should have
+been merged with a note to the open branches, and I merged it with neither.
