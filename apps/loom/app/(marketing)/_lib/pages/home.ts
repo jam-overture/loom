@@ -38,16 +38,16 @@ import {
   DOCS,
   HOME,
   HOW_IT_WORKS,
-  internalHref,
   LESSONS,
   NPM_PACKAGE_URL,
   PORTAL,
   PRODUCT_SURFACES,
   REPOSITORY_URL,
   SITE_THEMES,
-  surfaceHref,
-  WHAT_YOU_RUN,
+  sitePath,
   type SiteThemeName,
+  surfacePath,
+  WHAT_YOU_RUN,
 } from "../site"
 
 /**
@@ -112,7 +112,7 @@ export type PageContext = {
   readonly counting?: boolean
 }
 
-const hero = (ids: IdFactory, context: PageContext): LoomNode =>
+const hero = (ids: IdFactory, ): LoomNode =>
   buildElement(ids, {
     type: "loom.hero",
     props: {
@@ -223,7 +223,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
         action(
           ids,
           "See how a change travels",
-          internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
+          sitePath(HOW_IT_WORKS.path),
           { variant: "primary", scale: "large" }
         ),
         /**
@@ -241,7 +241,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
          * the footer. It is reachable three ways from this page and none of
          * them is the first screen.
          */
-        action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), {
+        action(ids, "Try it yourself", surfacePath(DEMO), {
           variant: "secondary",
           scale: "large",
         }),
@@ -587,7 +587,7 @@ const problems = (ids: IdFactory): LoomNode =>
  * itself: every one of them is held against the code by a test, and the record
  * count is held as a floor it can never exceed. See `FACTS` in `copy.ts`.
  */
-const facts = (ids: IdFactory, context: PageContext): LoomNode =>
+const facts = (ids: IdFactory, ): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.facts }, "Built in the open", [
     /**
      * **Ranged left, as of this run, because it is the only alignment this band
@@ -692,7 +692,7 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
       action(
         ids,
         "What you would be running",
-        internalHref(context.origin, WHAT_YOU_RUN.path, context.theme),
+        sitePath(WHAT_YOU_RUN.path),
         TERTIARY_CONTROL
       ),
       action(ids, "Read the decisions", DECISIONS_URL, {
@@ -777,7 +777,7 @@ const questions = (ids: IdFactory): LoomNode =>
  * draws its own copy control, so the type joining `CONTROL_TYPES` in
  * `readers/asked.ts` is the whole of the instrumentation.
  */
-const install = (ids: IdFactory, context: PageContext): LoomNode =>
+const install = (ids: IdFactory, ): LoomNode =>
   section(
     ids,
     { width: "readable", eyebrow: BAND.install },
@@ -795,7 +795,7 @@ const install = (ids: IdFactory, context: PageContext): LoomNode =>
         wrap: false,
       }),
       stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
-        action(ids, "Follow the install guide", surfaceHref(context.origin, DOCS), {
+        action(ids, "Follow the install guide", surfacePath(DOCS), {
           variant: "primary",
           scale: "large",
         }),
@@ -918,7 +918,7 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * Nothing was added to the library to do it. A card, a heading, a sentence, a
  * rule and four words, all registered before this run started.
  */
-const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
+const waysIn = (ids: IdFactory, ): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.grid",
@@ -932,7 +932,7 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
 
         return buildElement(ids, {
           type: "loom.card",
-          props: { href: surfaceHref(context.origin, surface) },
+          props: { href: surfacePath(surface) },
           children: [
             heading(ids, 3, way.title),
             prose(ids, surface.blurb, { tone: "muted" }),
@@ -958,7 +958,7 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
  * is the answer to the first problem the page named an hour of reading ago: a
  * tool that generates components hands you work rather than taking it away.
  */
-const closing = (ids: IdFactory, context: PageContext): LoomNode =>
+const closing = (ids: IdFactory, ): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
     /**
      * The one sentence on the front door that carries its own link, and the
@@ -991,7 +991,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
         inlineLink(
           ids,
           "asked to move",
-          `${internalHref(context.origin, HOW_IT_WORKS.path, context.theme)}#${ANCHOR.seeItHappen}`
+          `${sitePath(HOW_IT_WORKS.path)}#${ANCHOR.seeItHappen}`
         ),
         ". None of it is code you would have to read afterwards.",
       ],
@@ -1001,7 +1001,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
       action(
         ids,
         "See how a change travels",
-        internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
+        sitePath(HOW_IT_WORKS.path),
         { variant: "primary", scale: "large" }
       ),
       action(ids, "Read the source", REPOSITORY_URL, {
@@ -1032,7 +1032,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
-        hero(ids, context),
+        hero(ids),
         whatIsIt(ids),
         vocabulary(ids),
         usingIt(ids),
@@ -1067,11 +1067,11 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * page uses what renders correctly today.
          */
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
-        facts(ids, context),
+        facts(ids),
         questions(ids),
-        install(ids, context),
-        waysIn(ids, context),
-        closing(ids, context),
+        install(ids),
+        waysIn(ids),
+        closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],

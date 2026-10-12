@@ -51282,3 +51282,70 @@ state**, after the 11 October one about six specimen tests assuming a newer
 which is the one failure mode a merge gate cannot have — `docs/routines.md`
 gives the gate four surfaces to protect and neither of these protects anything
 if the answer depends on who ran it.
+
+---
+## 2026-10-12 — `TreeStore` can create a page and can never drop one, so the site's pages are stored one way
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/store.ts`)
+· **Status:** open — nothing is broken and no test is failing; found while
+writing the module that seeds this deployment's three site pages
+
+`TreeStore` is `create`, `head`, `revisions`, `list` and `append`. There is no
+delete, in the contract or in either implementation.
+
+That was fine while every stored tree was a demonstration. As of today the
+three pages this site serves are rows
+([0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+condition 1), and seeding is deliberately create-if-absent: a page that exists
+has a history, and a deploy that re-seeded over the top would throw it away on
+every release. The consequence is the one worth filing:
+
+**Once a page is in the store, editing its builder stops changing the site, and
+there is no supported way to undo that.** The authored version is still in the
+repository and can still be built; it cannot be put back on the shelf. A
+deployment in that position has two options and neither is the product: append
+its way back to the shape it wants, or open a SQL client.
+
+This is not a request for `delete(treeId)` as such — a store whose rows are the
+audit trail has a good reason not to offer one, and "the row is gone" is a
+worse answer than "the row says it was replaced". The shape worth considering
+is closer to a **reseed**: an append that sets the tree's root to what the
+builder produces now, recorded as a revision with its own provenance, so the
+log says *this page was put back to its authored state on this date* instead of
+the history simply ending. That is a framework decision about what a store
+owes, which is why it is here and not in a commit.
+
+What this lane did instead: said so in `stored.ts`, where somebody reaching for
+the undo will be standing.
+
+---
+## 2026-10-12 — the docs are MDX, so the half of the maintainer's request about them cannot be met the way the marketing half was
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom docs` (`apps/loom/app/(docs)/`)
+· **Status:** open — **this is a scoping answer, not a defect**; filed because
+the maintainer asked for both surfaces in one sentence and only one of them
+arrived
+
+The instruction on 12 October was *"Our loom marketing page and docs page are
+already built in the Loom framework, so these should be hooked up to the portal
+under my account/login."* The marketing half is done and is what this branch
+carries. The docs half is not, and the reason is not effort.
+
+`(marketing)` pages are `LoomTree`s: they were already built from registered
+primitives, so storing them was a question of where the tree comes from.
+`(docs)` pages are **MDX files compiled to React**. There is no tree, so there
+is nothing for the portal to list, nothing for a delta to name, and nothing a
+Gate could weigh.
+
+0259's refusal covers this exactly: *prose is not governed by rewriting it as a
+tree.* Turning twenty-odd documentation pages into primitive trees to make them
+appear in the portal would make them worse to write and no better to read, and
+the portal would be governing a shape nobody authors in.
+
+**What is worth considering instead, and is this lane's call:** the docs' own
+shell — the navigation, the theme, the bands above and below the prose — is
+already built from primitives. That part could be a stored tree with the MDX
+rendered into a slot, which would put *the docs' chrome* under the portal
+without pretending the prose is a tree. Whether that is worth the seam is a
+`Loom docs` decision; this entry exists so the answer to the maintainer is on
+the record rather than only in a session.

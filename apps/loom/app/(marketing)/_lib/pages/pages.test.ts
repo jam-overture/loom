@@ -12,20 +12,21 @@ import { PLACEHOLDER_STRINGS } from "../copy"
 import { unhonored } from "../frames"
 import { SHORT_ANSWERS } from "./how-it-works"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
+import { asRequested } from "../requested"
+
 import {
   DEFAULT_THEME,
   DEMO,
   HOME,
   HOW_IT_WORKS,
-  internalHref,
   PRODUCT_SURFACES,
   readingNeighbors,
   SITE_ROUTES,
   SITE_THEME_NAMES,
   SITE_THEMES,
-  surfaceHref,
   type SiteRoute,
   type SiteThemeName,
+  surfacePath,
 } from "../site"
 
 /**
@@ -47,8 +48,19 @@ const ORIGIN = "https://loom.example"
  */
 const THEMES: readonly SiteThemeName[] = SITE_THEME_NAMES
 
+/**
+ * The page **as a reader is served it**, which is the builder's output with
+ * the request put back on it.
+ *
+ * It was the builder's output alone until 12 October, and that was the same
+ * thing: every link carried the origin and the palette because the builder
+ * baked them in. The pages are stored now (0259), so the builder's output is
+ * what goes *into* the store — bare paths, no palette — and `asRequested` is
+ * what a reader actually gets. A test of the served page that skipped it
+ * would be asserting the stored row and calling it the page.
+ */
 const rendered = (route: SiteRoute, theme: SiteThemeName) =>
-  renderTree(treeFor(route, { origin: ORIGIN, theme }), { origin: ORIGIN })
+  renderTree(asRequested(treeFor(route, { origin: ORIGIN, theme }), { theme }), { origin: ORIGIN })
 
 const markupOf = (route: SiteRoute, theme: SiteThemeName): string =>
   renderToStaticMarkup(rendered(route, theme).element)
@@ -233,7 +245,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     for (const neighbor of [before, after]) {
       if (neighbor === undefined) continue
 
-      expect(markup).toContain(`href="${internalHref(ORIGIN, neighbor.path, DEFAULT_THEME)}"`)
+      expect(markup).toContain(`href="${worn(neighbor.path, DEFAULT_THEME)}"`)
       expect(markup).toContain(`>${neighbor.label}<`)
     }
 
@@ -248,7 +260,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
      * that the way onward is offered at all.
      */
     if (onward !== undefined) {
-      expect(markup).toContain(`href="${surfaceHref(ORIGIN, onward)}"`)
+      expect(markup).toContain(`href="${surfacePath(onward)}"`)
       expect(markup).toContain(`>${onward.label}<`)
     }
   })
@@ -269,7 +281,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     const markup = markupOf(route, DEFAULT_THEME)
 
     for (const surface of PRODUCT_SURFACES) {
-      expect(markup).toContain(`href="${surfaceHref(ORIGIN, surface)}"`)
+      expect(markup).toContain(`href="${surfacePath(surface)}"`)
     }
   })
 
@@ -279,7 +291,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
       const markup = markupOf(route, theme)
 
       for (const other of THEMES.filter((name) => name !== theme)) {
-        expect(markup).toContain(`href="${internalHref(ORIGIN, route.path, other)}"`)
+        expect(markup).toContain(`href="${worn(route.path, other)}"`)
         expect(markup).toContain(`>${SITE_THEMES[other].label}<`)
       }
     }
@@ -294,8 +306,8 @@ describe.each(SITE_ROUTES)("$path", (route) => {
    */
   it("links to every route of the site, and to no unknown path on this origin", () => {
     const internal = linksIn(markupOf(route, DEFAULT_THEME))
-      .filter((href) => href.startsWith(ORIGIN))
-      .map((href) => new URL(href).pathname)
+      .filter((href) => href.startsWith("/"))
+      .map((href) => href.split("?")[0] ?? href)
     const surfaces = PRODUCT_SURFACES.map((surface) => surface.path)
 
     for (const other of SITE_ROUTES) expect(internal).toContain(other.path)
@@ -308,13 +320,28 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     const markup = markupOf(route, "bold")
 
     for (const other of SITE_ROUTES) {
-      expect(markup).toContain(`href="${internalHref(ORIGIN, other.path, "bold")}"`)
+      expect(markup).toContain(`href="${worn(other.path, "bold")}"`)
     }
   })
 
+  /**
+   * Two shapes of link now, and both are what `linkUrlSchema` permits: an
+   * absolute URL on an allowed scheme, or *a path beginning with / on this
+   * site*. The second is new as of 12 October — the pages are stored and one
+   * row is served from every host, so this site's own links carry no origin
+   * (0259).
+   *
+   * The thing being guarded is unchanged and is the reason not to simply drop
+   * the assertion: a `javascript:` or `data:` href would fail both arms.
+   */
   it("holds no link the scheme allowlist would have refused", () => {
     for (const href of linksIn(markupOf(route, DEFAULT_THEME))) {
-      expect(new URL(href).protocol).toMatch(/^https?:$/)
+      if (href.startsWith("/")) {
+        expect(href, href).toMatch(/^\/[^/]/u)
+        continue
+      }
+
+      expect(new URL(href).protocol, href).toMatch(/^https?:$/)
     }
   })
 
@@ -324,6 +351,17 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     expect([...markup.matchAll(/<h1\b/g)]).toHaveLength(1)
   })
 })
+
+/**
+ * A link to one of this site's own pages, as a reader is **served** it.
+ *
+ * The page is stored with a bare path on it and `asRequested` puts the
+ * reader's palette on at render (0259, `_lib/requested.ts`), so what reaches
+ * the markup is the path and one query parameter rather than the absolute URL
+ * the builders used to bake in. Another surface's link has no palette on it at
+ * all, which is `surfacePath` and is asserted as such.
+ */
+const worn = (path: string, theme: string): string => `${path}?${"theme"}=${theme}`
 
 describe("the words that are not engineering's to write", () => {
   const everything = SITE_ROUTES.map((route) => markupOf(route, DEFAULT_THEME)).join("\n")
@@ -388,7 +426,7 @@ describe("the words that are not engineering's to write", () => {
  * the whole markup would pass with all three of these deleted.
  */
 describe("the way to the demonstration", () => {
-  const DEMO_HREF = surfaceHref(ORIGIN, DEMO)
+  const DEMO_HREF = surfacePath(DEMO)
 
   const bandWith = (node: LoomNode, holds: (found: ElementNode) => boolean): ElementNode[] => [
     ...(node.kind === "element" && holds(node) ? [node] : []),
@@ -495,7 +533,7 @@ describe("a surface added to the product", () => {
      * footer's map, and the card. The guarded one is the bar's action rather
      * than a menu item, so two is its floor and the card is what this checks.
      */
-    const offers = home.split(`href="${surfaceHref(ORIGIN, surface)}"`).length - 1
+    const offers = home.split(`href="${surfacePath(surface)}"`).length - 1
 
     expect(offers).toBeGreaterThanOrEqual(2)
     expect(home).toContain(asRendered(surface.blurb))
@@ -532,7 +570,7 @@ describe("a surface added to the product", () => {
       })
 
     expect([...offered].sort()).toEqual(
-      PRODUCT_SURFACES.map((surface) => surfaceHref(ORIGIN, surface)).sort()
+      PRODUCT_SURFACES.map((surface) => surfacePath(surface)).sort()
     )
   })
 
