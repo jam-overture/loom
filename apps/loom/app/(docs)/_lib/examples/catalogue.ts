@@ -16,6 +16,8 @@ import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 import { bandNodesIn } from "../compositions"
+import { classesAnswers, classesPage } from "../data/reading"
+import type { CarriedAnswers } from "../data/carry"
 import { spellOut } from "../counts"
 import { OWN_PRIMITIVE_TYPE, OWN_SOUND_PROPS, ownRegistry } from "../own/registry"
 
@@ -142,6 +144,27 @@ export type DocsExample = {
    * twice which pair belongs together.
    */
   readonly registry?: PrimitiveRegistry
+  /**
+   * The answers this one's questions were given, where its tree asks any.
+   *
+   * Absent for every example but one, because almost every tree on this site is
+   * a document and says everything it has to say. The exception is the example
+   * whose **subject** is a primitive reading an answer: its tree deliberately
+   * does not contain the list it draws, so a frame rendered with no resolution
+   * would be showing the one thing that page is about going wrong.
+   *
+   * It is a function returning a promise because asking a deployment is
+   * asynchronous and rendering is not. The resolving happens on a server — in
+   * `BoundExample`, which is the only caller — and what reaches the browser is
+   * the answers, which is the arrangement the page itself recommends. The cost
+   * of the boundary is `_lib/data/carry.ts`, and why that file has to exist is
+   * filed.
+   *
+   * `catalogue.test.tsx` awaits it for any example that has one, so a tree that
+   * starts asking a question nobody answers is a red test rather than a
+   * diagnostic strip under a published page.
+   */
+  readonly answers?: () => Promise<CarriedAnswers>
 }
 
 /** A page, a heading and a sentence — the smallest tree that renders. */
@@ -623,6 +646,14 @@ const entries: readonly DocsExample[] = [
       "Three rows of a primitive written on this page, registered beside the whole starter library. Ask to add a sentence and watch it land inside a row — the detail is children, so a proposal can add one.",
     build: aPrimitiveOfYourOwn,
     registry: ownRegistry,
+  },
+  {
+    id: "a-feed-reading-an-answer",
+    title: "A list this tree does not contain",
+    caption:
+      "Not one of these classes is written in the tree. The feed asks the shop what is in the diary and draws whatever comes back, and the two sentences for an empty diary and an unreachable one are in the tree as regions. Open show the tree and look for what is missing.",
+    build: () => classesPage(),
+    answers: classesAnswers,
   },
 ]
 

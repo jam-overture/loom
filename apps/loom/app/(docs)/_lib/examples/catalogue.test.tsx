@@ -2,6 +2,7 @@ import { renderLoomTree } from "@jam-overture/loom/react"
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { uncarryAnswers } from "@/app/(docs)/_lib/data/carry"
 import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
 
 import { docsExamples, docsExampleIds } from "./catalogue"
@@ -33,15 +34,25 @@ describe("the documented examples", () => {
   for (const id of docsExampleIds) {
     const example = docsExamples.get(id)
 
-    it(`renders "${id}" with nothing the runtime could not honour`, () => {
+    it(`renders "${id}" with nothing the runtime could not honour`, async () => {
       if (example === undefined) throw new Error(`no example is registered as "${id}"`)
 
       const registry = example.registry ?? docsRegistry
+
+      /**
+       * An example that asks its deployment something is rendered the way the
+       * page renders it: resolved first, through the registered source. The
+       * zero-diagnostic rule is the same rule — a tree that asks for data and
+       * is drawn without it reports `data-unresolved` on every bound node, so
+       * this entry would fail here rather than being excused from the check.
+       */
+      const answers = example.answers === undefined ? undefined : await example.answers()
 
       const rendered = renderLoomTree(example.build(), {
         resolver: registry,
         validator: registry,
         themes: docsThemes,
+        ...(answers === undefined ? {} : { data: uncarryAnswers(answers) }),
       })
 
       expect(rendered.diagnostics).toEqual([])
@@ -78,6 +89,12 @@ describe("the documented examples", () => {
     })
 
     expect(rendered.theme?.palette.id).toBe("bold")
+  })
+
+  it("has exactly one example that asks its deployment anything", () => {
+    const asking = [...docsExamples.values()].filter((example) => example.answers !== undefined)
+
+    expect(asking.map((example) => example.id)).toEqual(["a-feed-reading-an-answer"])
   })
 
   it("gives every example a title and a caption", () => {

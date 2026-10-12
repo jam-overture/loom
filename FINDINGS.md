@@ -51718,9 +51718,21 @@ the undo will be standing.
 ## 2026-10-12 — the docs are MDX, so the half of the maintainer's request about them cannot be met the way the marketing half was
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom docs` (`apps/loom/app/(docs)/`)
-· **Status:** open — **this is a scoping answer, not a defect**; filed because
-the maintainer asked for both surfaces in one sentence and only one of them
-arrived
+· **Status:** **closed by the maintainer's own plan, not by this lane** — the
+entry was right and the answer had already landed. `docs/portal.md`, rewritten
+on `main` in #602 the same day, lists *"Governing the documentation. It is MDX;
+0259 refuses prose as a tree."* under **Not in scope**. So the scoping question
+this entry put to `Loom docs` is not `Loom docs`' to answer: it is answered, the
+same way, above this lane.
+
+The one open thing in it is the suggestion at the foot — the docs' *chrome* as a
+stored tree with the MDX rendered into a slot. That stays **not taken**, and the
+reason is the plan's rather than a preference: the portal's scope line is about
+governing documentation, and putting only the navigation and the bands under the
+portal would buy a seam, a second place a docs page's shell can be changed from,
+and no governance of anything a reader reads. Read again if the portal's scope
+changes. Noted here on 12 October by `Loom docs` while reading the queue ahead
+of `docs-53-reading-the-answer`, which does not touch it.
 
 The instruction on 12 October was *"Our loom marketing page and docs page are
 already built in the Loom framework, so these should be hooked up to the portal
@@ -52058,6 +52070,135 @@ isolation asserted against PGlite with the `WHERE` clause removed to prove the
 assertion bites.
 
 ---
+## 2026-10-12 — a resolution is two closures, so the answers cannot be sent to the browser that renders them, and nothing public can hand them over
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/data/`) ·
+**Status:** open — **nothing is blocked**; the documentation site has a
+thirty-line carrier of its own and it works, filed because every host that
+fetches on a server and renders in a browser has to write the same file, and
+five of its lines are a guess a published seam should not be leaving to a caller
+
+`resolveDataPlan` hands back a `DataResolution`, which is
+`{ lookup, problemsFor }` — two functions. That is the right shape for the walk
+and it is unsendable: a function cannot cross from a server component to a
+client one, so the answers a loader fetched cannot reach a render that happens
+in a browser.
+
+This is not an exotic arrangement. It is the one every React framework pushes a
+host towards, and it is the arrangement this very page recommends: *the asking
+happens before the walk, and it is two lines in whatever already loads the
+page.* On this site it is forced rather than chosen — §4c settles that every
+example has a working propose-a-change box beside it, a change produces a new
+tree, and the walk therefore runs wherever the reader is.
+
+**What is public, and what is missing.** `buildDataResolution(plan, answers)` is
+exported and is exactly the function a caller on the far side needs — but
+nothing public produces the `ReadonlyMap<RequestKey, Result<JsonValue,
+DataUnavailable>>` it takes. `resolveDataPlan` builds that map internally and
+folds it away; `askOne`, the per-request step with the ceiling on it, is private.
+So the two halves of a serialisable seam both exist in the package and there is
+no way to get from one to the other without reimplementing the ceiling.
+
+**The workaround, and the part of it that should not be a caller's.**
+`app/(docs)/_lib/data/carry.ts` reads a real resolution out through its own two
+accessors and puts the readings back behind two of the same shape. The readings
+are real: nothing invents an outcome, and `uncarryAnswers` answers `NO_DATA` for
+a node nobody carried, so a tree whose answers did not travel still earns its
+`data-unresolved` — which a carrier returning an empty object of its own would
+have hidden. That part is sound and is tested.
+
+The part that is a guess is *which nodes to ask about*. A resolution cannot be
+enumerated, so the carrier derives the node ids from the plan:
+
+```ts
+[...plan.bindings.map((b) => b.nodeId), ...plan.problems.map((p) => p.nodeId)]
+```
+
+Both lists, because a node whose declaration could not be read at all is in the
+second and never in the first — which took one red test to discover. A caller
+who reaches for `bindings` alone, which is the obvious thing to reach for, gets
+a carrier that silently drops every misdeclared node's problem, and the symptom
+is a page that renders without a diagnostic it should have had.
+
+**Three shapes that would close it, cheapest first:**
+
+1. `resolveDataPlan` also returning what it asked:
+   `{ resolution, answers }`, with `answers` the map `buildDataResolution`
+   already takes. One field, no new concept, and the round trip becomes
+   `buildDataResolution(planTreeData(tree), new Map(answers))` on the far side.
+2. A published pair beside `buildDataResolution` — `carryDataResolution` and
+   `restoreDataResolution` — if the resolution rather than the answers is the
+   thing a host should be handling.
+3. Exporting the per-request step, which makes `buildDataResolution`'s input
+   producible without reimplementing the ceiling.
+
+**(1) is the recommendation.** It is a field rather than an API, it keeps the
+one thing a caller must not get wrong — which requests were asked — inside the
+package, and it makes the node-id guess unnecessary rather than easier: the
+answers are keyed by `RequestKey`, and re-planning the tree on the far side
+produces the same keys.
+
+One note for whoever takes it: the keys are canonicalised params, so re-planning
+a tree whose binding was repointed produces a key the answers do not hold, and
+the walk reports `data-unresolved` — which is correct and is the behaviour to
+preserve. Keying by node id, as this lane's carrier does, instead reports
+`data-unread` on a renamed binding. Both are honest; the first is the one the
+seam already documents.
+
+---
+## 2026-10-12 — a sentence saying something does not exist yet is the one claim on this site no test can hold, and one of them had been false for weeks
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** **the instance is fixed on
+`docs-53-reading-the-answer`**; filed as the **hazard**, with the remedy named,
+because the class has no instrument and the next one will be written the same
+way
+
+*Where the content comes from* carried this, in a warning callout, as of
+yesterday:
+
+> the starter library has no primitive that reads `loom.data`: the ruling that
+> created this seam said the authoring half — a primitive declaring which
+> binding names it reads — was the next thing to build, and it has not been
+> built yet.
+
+Both halves were false. `reads` exists on `definePrimitive` and is in
+`RegisteredPrimitive`, `catalogueOf` already puts it in front of a model, and
+**five** primitives in the starter library read an answer — `loom.feed`,
+`loom.plate`, `loom.tally`, `loom.trend` and `loom.voices` — four of which also
+place `empty` and `unavailable` regions and all five of which declare `unshown`.
+
+**Why nothing caught it, and this is the part worth keeping.** Every instrument
+on this site checks a claim against the thing it is about: an example that
+stops rendering is a red test, a count is printed from the registry, a code
+fence is typechecked, a diagnostic sentence is `describeRenderDiagnostic`'s. All
+of those hold a claim that something **is** so. A sentence saying something
+**is not** so has nothing to be checked against — the registry cannot be asked
+whether it lacks a thing a page has not named — so it is the one kind of
+sentence on this site that goes stale in total silence, and it goes stale
+exactly when the framework succeeds.
+
+It is also the kind of sentence a documentation routine writes most readily,
+because the honest thing to do on meeting a gap is to say so and file it. That
+is right, and it is why this needs an instrument rather than more care.
+
+**The remedy, and it is cheap: pair the sentence with a test that fails when the
+absence ends.** The callout above should have been written beside
+
+```ts
+expect(libraryReaders()).toEqual([])
+```
+
+which would have gone red the day `loom.tally` was registered, and the page
+would have been corrected by whoever made it wrong. The general form: *a page
+that says a thing does not exist names the measurement that says so, and asserts
+it is still nought.* An absence with a number behind it is checkable; an absence
+in prose is not.
+
+Nothing is asked of another lane. What is asked of this one is that the next
+"this is not built yet" on the site arrives with its nought asserted, and that
+the handful already there be given the same treatment — the sweep is small
+today, which is the best moment to do it.
 ## 2026-10-12 — 273 reports hold a visual named after them that the report never links to
 
 **Filed by:** `Loom portal` · **Owned by:** any lane touching its own old

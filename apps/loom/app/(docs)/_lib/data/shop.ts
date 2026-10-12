@@ -107,6 +107,78 @@ const openingHours = defineSource({
   },
 })
 
+/**
+ * The shop's upcoming classes — the one source here whose rows are shaped for a
+ * **primitive** rather than for a table on this page.
+ *
+ * `loom.feed` is in the starter library and reads an answer under a name the
+ * tree gives it, so a page can show a list it never wrote. For that to be worth
+ * showing, something has to answer in the shape a feed entry has: a title, and
+ * optionally a line under it, something it is filed under, and somewhere to go.
+ *
+ * **One row has no title, and that is not a mistake in this file.** The shop
+ * never named the April class, and nothing stopped them: a `title` column that
+ * accepts an empty string is the ordinary state of somebody's database. This
+ * source's schema accepts it, because the schema at the seam describes *this
+ * deployment's rows* — and `loom.feed` refuses it, because its own schema
+ * describes *what it can draw*. The gap between those two schemas is the whole
+ * subject of the reading half of this page, and `data-unshown` is the runtime
+ * reporting it. Nothing in here fakes the condition; `limit` decides whether
+ * the unnamed row is asked for.
+ */
+/**
+ * `href` is `null` rather than absent on the two rows that have none, because a
+ * source answers JSON and `undefined` is not a JSON value — which is the same
+ * reason a column with nothing in it is `NULL` and not missing. `loom.feed`
+ * holds every address from a host's data to the library's scheme allowlist and
+ * draws an entry that fails it as words rather than a link, so a null costs the
+ * row nothing.
+ */
+const CLASSES: readonly { readonly title: string; readonly meta: string; readonly detail: string; readonly href: string | null }[] = [
+  {
+    title: "Buttercream basics",
+    meta: "Saturday 14 March",
+    detail: "Three hours, every tool provided, a cake each to take home.",
+    href: "https://example.com/classes/buttercream",
+  },
+  {
+    title: "Sourdough from a starter",
+    meta: "Sunday 22 March",
+    detail: "A morning at the bench, and a jar of starter to keep going with.",
+    href: null,
+  },
+  {
+    title: "Piping flowers",
+    meta: "Saturday 4 April",
+    detail: "Roses, peonies, and the one nobody gets right first time.",
+    href: "https://example.com/classes/piping",
+  },
+  { title: "", meta: "Sunday 12 April", detail: "Cupcakes, for small hands.", href: null },
+]
+
+const classes = defineSource({
+  id: "catalogue.classes",
+  description: "The classes this shop is running next, soonest first.",
+  params: z.object({ limit: z.number().int().min(1).max(12) }),
+  answers: z.array(
+    z.object({
+      title: z.string(),
+      meta: z.string(),
+      detail: z.string(),
+      href: z.string().url().nullable(),
+    })
+  ),
+  adapter: {
+    fetch: async ({ params }) => ({ ok: true, value: CLASSES.slice(0, params.limit) }),
+  },
+})
+
+/** How many rows this shop has, named so the page never writes the number. */
+export const CLASSES_HELD = CLASSES.length
+
+/** How many of them `loom.feed` can draw. The rest is the subject. */
+export const CLASSES_DRAWABLE = CLASSES.filter((row) => row.title.length > 0).length
+
 const registryOf = (entries: readonly SourceEntry[]): DataRegistry => {
   const built = createDataRegistry(entries)
 
@@ -118,7 +190,7 @@ const registryOf = (entries: readonly SourceEntry[]): DataRegistry => {
 }
 
 /** What this deployment can be asked about. The allowlist, and the page's subject. */
-export const shopRegistry = (): DataRegistry => registryOf([services, profileField, openingHours])
+export const shopRegistry = (): DataRegistry => registryOf([services, profileField, openingHours, classes])
 
 /**
  * The page, with its content taken out and questions left in its place.

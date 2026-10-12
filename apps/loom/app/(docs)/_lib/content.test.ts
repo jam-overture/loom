@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
 
-import { docsExampleIds } from "./examples/catalogue"
+import { docsExamples, docsExampleIds } from "./examples/catalogue"
 import {
   DOCS_LANDING_SLUG,
   docsHref,
@@ -65,7 +65,17 @@ const pagesOnDisk = (): readonly string[] =>
 const sourceOf = (sectionSlug: string, pageSlug: string): string =>
   readFileSync(pageFileFor(sectionSlug, pageSlug), "utf8")
 
-const EXAMPLE_REFERENCE = /<Example\s+id="([^"]+)"/g
+/**
+ * Both components that put an example on a page.
+ *
+ * `<BoundExample>` is the server component that resolves an example's questions
+ * before handing it over, and it names an example by exactly the same id. A
+ * pattern that knew only about `<Example>` would read the one example that asks
+ * its deployment anything as registered and never used — which is what happened
+ * the first time, and is the reason this is a pattern with an alternation in it
+ * rather than two patterns.
+ */
+const EXAMPLE_REFERENCE = /<(?:Bound)?Example\s+id="([^"]+)"/g
 
 const referencedExampleIds = (): readonly string[] =>
   writtenOrder.flatMap((entry) =>
@@ -73,6 +83,21 @@ const referencedExampleIds = (): readonly string[] =>
       (match) => match[1] ?? ""
     )
   )
+
+/**
+ * Which of the two components named each example, by id.
+ *
+ * `<Example` cannot match inside `<BoundExample` — the character before the
+ * word is `d` and the pattern wants `<` — so the two sets are disjoint without
+ * anything having to exclude one from the other.
+ */
+const namedBy = (component: "Example" | "BoundExample"): readonly string[] => {
+  const pattern = new RegExp(`<${component}\\s+id="([^"]+)"`, "g")
+
+  return writtenOrder.flatMap((entry) =>
+    [...sourceOf(entry.section.slug, entry.page.slug).matchAll(pattern)].map((match) => match[1] ?? "")
+  )
+}
 
 describe("the navigation and the pages on disk", () => {
   it("has a written page behind every link", () => {
@@ -140,6 +165,24 @@ describe("the examples the pages name", () => {
     const referenced = new Set(referencedExampleIds())
 
     expect(docsExampleIds.filter((id) => !referenced.has(id))).toEqual([])
+  })
+
+  it("names an example that asks for data through the component that resolves it", () => {
+    /**
+     * The pairing a published page would otherwise get wrong silently. The one
+     * example whose tree asks its deployment a question has to be named by
+     * `<BoundExample>`, because plain `<Example>` renders it with no resolution
+     * at all — which is legal, draws an empty list, and puts a diagnostic strip
+     * under it on a page about data arriving correctly.
+     */
+    const asking = docsExampleIds.filter((id) => docsExamples.get(id)?.answers !== undefined)
+
+    expect(asking.length).toBeGreaterThan(0)
+    expect([...namedBy("BoundExample")].sort()).toEqual([...asking].sort())
+
+    for (const id of namedBy("Example")) {
+      expect(docsExamples.get(id)?.answers, `<Example id="${id}">`).toBeUndefined()
+    }
   })
 
   it("shows at least one on the introduction", () => {

@@ -150,6 +150,15 @@ export const SITE_COUNTS = [
     ],
   },
   {
+    id: "binding-readers",
+    rendered: '<Count of="binding-readers"',
+    value: STARTER_PRIMITIVES.filter((entry) => entry.reads !== undefined && entry.reads.length > 0).length,
+    nouns: ["primitives"],
+    of: "the starter primitives that read an answer from a data binding",
+    from: "STARTER_PRIMITIVES, filtered on the reads each one declares",
+    claimedOn: [{ section: "building-with-loom", page: "where-content-comes-from" }],
+  },
+  {
     id: "starter-bands",
     rendered: '<BandCount of="bands"',
     value: STARTER_COMPOSITIONS.length,
