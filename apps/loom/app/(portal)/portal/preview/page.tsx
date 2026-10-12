@@ -1,6 +1,8 @@
 import Link from "next/link"
 
-import { WorkspaceShell } from "./_components/shell"
+import { Screen } from "@/app/(portal)/_components/screen"
+
+import { PreviewBanner, WorkspaceShell } from "./_components/shell"
 import { HEALTH_LABEL, HEALTH_TONE, PREVIEW_PROJECTS } from "./_lib/fixtures"
 
 /**
@@ -34,6 +36,8 @@ const Figure = ({
 
 const WorkspacePage = () => (
   <WorkspaceShell>
+    <Screen>
+      <PreviewBanner />
     <div className="flex items-center justify-between pb-5">
       <h1 className="text-xl tracking-tight">Projects</h1>
       <button
@@ -96,6 +100,7 @@ const WorkspacePage = () => (
         </li>
       ))}
     </ul>
+      </Screen>
   </WorkspaceShell>
 )
 

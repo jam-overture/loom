@@ -210,12 +210,16 @@ export const ProjectShell = ({
       <TopBar project={project} />
       <IconRail base={base} active={section.key} />
       {hasSecond && <SecondRail section={section} base={base} />}
-      <main className={`pt-12 ${hasSecond ? "pl-[280px]" : "pl-14"}`}>
-        <div className="mx-auto max-w-[1180px] px-7 py-6">
-          <PreviewBanner />
-          {children}
-        </div>
-      </main>
+      {/*
+       * No width here, and no padding. Both belong to `Screen`, which every
+       * screen below renders as its own outermost element — the rule
+       * `every-screen-width.test.ts` exists to keep, and which this shell
+       * broke on its first draft with a `max-w-[1180px]` that put dead space
+       * down the right of a 1280px display. That is the maintainer's own
+       * complaint from 3 October, reintroduced by the prototype meant to fix
+       * it, and caught by his test rather than by me.
+       */}
+      <main className={`pt-12 ${hasSecond ? "pl-[280px]" : "pl-14"}`}>{children}</main>
     </>
   )
 }
@@ -223,12 +227,7 @@ export const ProjectShell = ({
 export const WorkspaceShell = ({ children }: { children: React.ReactNode }) => (
   <>
     <TopBar />
-    <main className="pt-12">
-      <div className="mx-auto max-w-[1180px] px-7 py-8">
-        <PreviewBanner />
-        {children}
-      </div>
-    </main>
+    <main className="pt-12">{children}</main>
   </>
 )
 

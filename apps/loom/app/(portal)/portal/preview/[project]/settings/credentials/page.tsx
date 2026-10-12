@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation"
 
-import { ProjectShell } from "../../../_components/shell"
+import { Screen } from "@/app/(portal)/_components/screen"
+
+import { PreviewBanner, ProjectShell } from "../../../_components/shell"
 import { projectBySlug } from "../../../_lib/fixtures"
 
 /**
@@ -59,6 +61,8 @@ export const app = loom({
 
   return (
     <ProjectShell project={project} rest="/settings/credentials">
+    <Screen>
+      <PreviewBanner />
       <h1 className="pb-1 text-xl tracking-tight">Credentials</h1>
       <p className="text-ink-muted pb-5 text-xs">
         What your application sends with every batch so Loom knows whose it is.
@@ -101,7 +105,8 @@ export const app = loom({
           environment.
         </p>
       </section>
-    </ProjectShell>
+        </Screen>
+  </ProjectShell>
   )
 }
 

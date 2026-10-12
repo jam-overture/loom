@@ -60,7 +60,7 @@ export const SECTIONS: readonly Section[] = [
         items: [
           { label: "Settings", href: "/rules" },
           { label: "Try a change", href: "/rules/what-if" },
-          { label: "History", href: "/rules/history", soon: true },
+          { label: "Previous versions", href: "/rules/versions", soon: true },
         ],
       },
     ],

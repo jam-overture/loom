@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation"
 
-import { ProjectShell } from "../../_components/shell"
+import { Screen } from "@/app/(portal)/_components/screen"
+
+import { PreviewBanner, ProjectShell } from "../../_components/shell"
 import { projectBySlug } from "../../_lib/fixtures"
 
 /**
@@ -77,6 +79,8 @@ const RulesPage = async ({ params }: { params: Promise<{ project: string }> }) =
 
   return (
     <ProjectShell project={project} rest="/rules">
+    <Screen>
+      <PreviewBanner />
       <div className="flex items-baseline justify-between pb-1">
         <h1 className="text-xl tracking-tight">Rules</h1>
         <div className="flex gap-2">
@@ -184,7 +188,8 @@ const RulesPage = async ({ params }: { params: Promise<{ project: string }> }) =
           </tbody>
         </table>
       </section>
-    </ProjectShell>
+        </Screen>
+  </ProjectShell>
   )
 }
 

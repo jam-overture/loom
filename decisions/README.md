@@ -343,3 +343,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0257](0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md) | A kind of part is read across the places it stands, and the unit is the placement and never the reader | Accepted | §4c (reader signals) |
 | [0258](0258-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md) | A refusal names the nearest registered ids and says how many it stands in for | Accepted | §3 (render seam), §4 (data and submission seams) |
 | [0259](0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md) | A surface the portal governs renders from the store, and a page built at render time is not one | Accepted | §1, §5 |
+| [0260](0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md) | A project is the unit Loom stores, governs and measures under | Proposed | §1, §5 |
+| [0261](0261-a-portal-screen-shows-state-and-the-record-lives-in-one-place.md) | A portal screen shows state, and the record lives in one place | Proposed | §5 |

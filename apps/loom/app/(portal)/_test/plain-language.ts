@@ -57,8 +57,27 @@ export const RUNTIME_WORDS: readonly string[] = [
   "ids",
   "index",
   "insert",
-  "log",
-  "logs",
+  /*
+   * **`log` and `logs` came off this list on 12 October.**
+   *
+   * They were here because Loom's runtime means one thing by *the log* — the
+   * revision journal — and a reader has no reason to know that sense. What
+   * that reasoning missed is who the reader is. This list was written for a
+   * layperson, and the portal's reader is a developer running an application:
+   * for them `Logs` is the plainest word there is, and it is the word on the
+   * equivalent screen of every tool they already use.
+   *
+   * It is also the maintainer's own, twice on 12 October — *"I can also click
+   * on logs related to my project"* and *"Viewing / inspecting your loom logs
+   * / signals"* — while asking for the screen this lane is about to build. A
+   * check that forbids the word he used to commission the screen is a check
+   * measuring the wrong thing.
+   *
+   * Nothing else moves. `delta`, `gate`, `node`, `tree`, `revision` and the
+   * rest are Loom's inventions and stay banned; this is one word that belongs
+   * to the industry rather than to the runtime. Where the journal sense is
+   * meant precisely, write *journal*.
+   */
   "node",
   "nodes",
   "prop",

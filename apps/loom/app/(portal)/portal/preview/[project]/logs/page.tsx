@@ -1,7 +1,9 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { ProjectShell } from "../../_components/shell"
+import { Screen } from "@/app/(portal)/_components/screen"
+
+import { PreviewBanner, ProjectShell } from "../../_components/shell"
 import {
   LOG_TONE,
   PREVIEW_LOGS,
@@ -91,6 +93,8 @@ const LogsPage = async ({
 
   return (
     <ProjectShell project={project} rest="/logs">
+    <Screen>
+      <PreviewBanner />
       <div className="flex items-baseline justify-between pb-4">
         <h1 className="text-xl tracking-tight">Logs</h1>
         <div className="flex items-center gap-2">
@@ -238,7 +242,8 @@ const LogsPage = async ({
           </aside>
         )}
       </div>
-    </ProjectShell>
+        </Screen>
+  </ProjectShell>
   )
 }
 

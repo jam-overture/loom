@@ -1,7 +1,9 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { ProjectShell } from "../_components/shell"
+import { Screen } from "@/app/(portal)/_components/screen"
+
+import { PreviewBanner, ProjectShell } from "../_components/shell"
 import {
   ERRORS_BY_HOUR,
   HEALTH_LABEL,
@@ -79,6 +81,8 @@ const ProjectOverview = async ({ params }: { params: Promise<{ project: string }
 
   return (
     <ProjectShell project={project} rest="">
+    <Screen>
+      <PreviewBanner />
       <div className="flex items-start justify-between gap-4 pb-5">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl tracking-tight">{project.name}</h1>
@@ -179,7 +183,8 @@ const ProjectOverview = async ({ params }: { params: Promise<{ project: string }
           ))}
         </ul>
       </section>
-    </ProjectShell>
+        </Screen>
+  </ProjectShell>
   )
 }
 
