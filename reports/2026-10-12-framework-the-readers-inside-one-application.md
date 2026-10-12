@@ -112,8 +112,26 @@ Both halves of the change are load bearing, and neither can be removed quietly.
 
 ## Test numbers
 
-`pnpm install && pnpm verify` — green. Real numbers in the section below; nothing
-was skipped and nothing was weakened to get there.
+`pnpm install && pnpm verify` — **green**, exit 0.
+
+| suite | files | tests |
+| --- | --- | --- |
+| framework (`src/`, `tools/`) | 217 | 4,865 |
+| application (`apps/loom`) | 436 | 8,322 |
+
+Nine of those are new, all in `src/application/scoped.test.ts`: eight across the
+five reader tables and one on telemetry's `forget`. `pnpm findings:check` reads
+1,169 findings, 0 malformed. Nothing was skipped and no test was weakened.
+
+**The first verify was red and this is what it caught.** The three factories
+taking a second parameter moves the runtime's published surface, so
+`app/(docs)/_lib/api/extract.test.ts` failed on the generated API reference
+being stale — the test names its own fix, and `pnpm --filter @loom/app docs:api`
+is run and committed as the second commit on this branch. The only lines that
+changed are the three signatures and the three summaries now that those
+functions have doc comments. Worth recording because the first run reported
+`exit 0` through a `tail` pipeline that had swallowed the real code, which is a
+way to believe a red tree is green.
 
 ## Records
 
