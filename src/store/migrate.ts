@@ -116,16 +116,33 @@ export const TREE_STORE_DDL: readonly string[] = [
  */
 export const HOLD_STORE_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_holds (
-    proposal_id text PRIMARY KEY,
+    project_id text NOT NULL DEFAULT 'prj_default',
+    proposal_id text NOT NULL,
     tree_id text NOT NULL,
     base_revision integer NOT NULL,
     intent jsonb NOT NULL,
     proposal jsonb NOT NULL,
     disposition jsonb NOT NULL,
-    held_at text NOT NULL
+    held_at text NOT NULL,
+    PRIMARY KEY (project_id, proposal_id)
   )`,
-  `CREATE INDEX IF NOT EXISTS loom_holds_tree_id_held_at_idx ON loom_holds (tree_id, held_at)`,
-  `CREATE INDEX IF NOT EXISTS loom_holds_held_at_proposal_id_idx ON loom_holds (held_at, proposal_id)`,
+  /*
+   * **The project, for a database that predates it (0260).** Same shape as the
+   * tree store's above: the column is additive and defaulted, then the key
+   * widens, then the indexes are rebuilt to lead with it.
+   *
+   * The indexes are dropped by name rather than created `IF NOT EXISTS`,
+   * because the names do not change — an existing index on the old columns
+   * would be left exactly as it was, and every read of this table would go on
+   * scanning across projects while appearing to be indexed.
+   */
+  `ALTER TABLE loom_holds ADD COLUMN IF NOT EXISTS project_id text NOT NULL DEFAULT 'prj_default'`,
+  `ALTER TABLE loom_holds DROP CONSTRAINT IF EXISTS loom_holds_pkey`,
+  `ALTER TABLE loom_holds ADD PRIMARY KEY (project_id, proposal_id)`,
+  `DROP INDEX IF EXISTS loom_holds_tree_id_held_at_idx`,
+  `DROP INDEX IF EXISTS loom_holds_held_at_proposal_id_idx`,
+  `CREATE INDEX IF NOT EXISTS loom_holds_tree_id_held_at_idx ON loom_holds (project_id, tree_id, held_at)`,
+  `CREATE INDEX IF NOT EXISTS loom_holds_held_at_proposal_id_idx ON loom_holds (project_id, held_at, proposal_id)`,
   /** Locked on creation for the reason the tree store's tables are — see above. */
   `ALTER TABLE loom_holds ENABLE ROW LEVEL SECURITY`,
 ]
@@ -146,6 +163,7 @@ export const HOLD_STORE_DDL: readonly string[] = [
  */
 export const POLICY_LOG_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_policy_revisions (
+    project_id text NOT NULL DEFAULT 'prj_default',
     policy_id text NOT NULL,
     revision integer NOT NULL,
     fingerprint text NOT NULL,
@@ -153,9 +171,14 @@ export const POLICY_LOG_DDL: readonly string[] = [
     actor text NOT NULL,
     recorded_at text NOT NULL,
     note text,
-    PRIMARY KEY (policy_id, revision)
+    PRIMARY KEY (project_id, policy_id, revision)
   )`,
-  `CREATE INDEX IF NOT EXISTS loom_policy_revisions_fingerprint_idx ON loom_policy_revisions (policy_id, fingerprint)`,
+  /* The project, for a database that predates it — see the hold store's note. */
+  `ALTER TABLE loom_policy_revisions ADD COLUMN IF NOT EXISTS project_id text NOT NULL DEFAULT 'prj_default'`,
+  `ALTER TABLE loom_policy_revisions DROP CONSTRAINT IF EXISTS loom_policy_revisions_pkey`,
+  `ALTER TABLE loom_policy_revisions ADD PRIMARY KEY (project_id, policy_id, revision)`,
+  `DROP INDEX IF EXISTS loom_policy_revisions_fingerprint_idx`,
+  `CREATE INDEX IF NOT EXISTS loom_policy_revisions_fingerprint_idx ON loom_policy_revisions (project_id, policy_id, fingerprint)`,
   /** Locked on creation for the reason the tree store's tables are — see above. */
   `ALTER TABLE loom_policy_revisions ENABLE ROW LEVEL SECURITY`,
 ]
