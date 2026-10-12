@@ -97,7 +97,6 @@ export type AnswerContext = {
  */
 const where = (context: AnswerContext): string =>
   askHref(context.origin, {
-    theme: context.theme,
     ask: context.record.ask,
     ...(context.approve === true ? { approve: true } : {}),
     ...(context.back === true ? { back: true } : {}),
@@ -106,10 +105,9 @@ const where = (context: AnswerContext): string =>
 
 const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
   const { record } = context
-  const home = askHref(context.origin, { theme: context.theme })
+  const home = askHref(context.origin, {})
   /** Everything the visitor has done so far, which every link from here must keep. */
   const sofar = {
-    theme: context.theme,
     ask: record.ask,
     ...(context.approve === true ? { approve: true } : {}),
   }

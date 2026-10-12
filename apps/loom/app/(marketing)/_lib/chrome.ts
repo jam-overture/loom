@@ -5,23 +5,22 @@ import { COUNTED_ANCHOR } from "./bands"
 import { LICENSE_NOTICE } from "./copy"
 import { action, link, prose, stack } from "./nodes"
 import {
-  askHref,
   DECISIONS_URL,
   HOME,
-  HOW_IT_WORKS,
-  internalHref,
-  otherThemes,
+  LICENSE_URL,
+  paletteHref,
   PORTAL,
   PRODUCT_SURFACES,
   readingNeighbors,
   REPOSITORY_URL,
-  LICENSE_URL,
   SITE_ROUTES,
+  SITE_THEME_NAMES,
   SITE_THEMES,
-  surfaceHref,
-  WHAT_YOU_RUN,
+  sitePath,
   type SiteRoute,
   type SiteThemeName,
+  surfacePath,
+  WHAT_YOU_RUN,
 } from "./site"
 
 /**
@@ -105,12 +104,7 @@ export type ChromeContext = {
  * the *same* page underneath.
  */
 const inAnotherPalette = (context: ChromeContext, palette: SiteThemeName): string =>
-  context.current.path === HOW_IT_WORKS.path
-    ? askHref(context.origin, {
-        theme: palette,
-        ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
-      })
-    : internalHref(context.origin, context.current.path, palette)
+  paletteHref(context.current.path, palette)
 
 /**
  * A menu item, and the page the reader is already on says so.
@@ -121,7 +115,7 @@ const inAnotherPalette = (context: ChromeContext, palette: SiteThemeName): strin
  * is the accessible fact and the styling in one prop.
  */
 const menuLink = (ids: IdFactory, context: ChromeContext, route: SiteRoute): LoomNode =>
-  link(ids, route.label, internalHref(context.origin, route.path, context.theme), {
+  link(ids, route.label, sitePath(route.path), {
     scale: "medium",
     ...(route.path === context.current.path ? { current: true } : {}),
   })
@@ -145,13 +139,13 @@ const menuLink = (ids: IdFactory, context: ChromeContext, route: SiteRoute): Loo
  */
 export const MARK_PATH = "M5 5h14v6H5z M21 5h6v14H21z M13 21h14v6H13z M5 13h6v14H5z"
 
-const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
+const wordmark = (ids: IdFactory, ): LoomNode =>
   buildElement(ids, {
     type: "loom.brand",
     props: {
       name: "Loom",
       mark: MARK_PATH,
-      href: internalHref(context.origin, HOME.path, context.theme),
+      href: sitePath(HOME.path),
     },
   })
 
@@ -194,13 +188,13 @@ export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
     type: "loom.nav",
     props: { tone: "surface", position: "sticky", align: "end" },
     children: [
-      buildSlot(ids, "brand", [wordmark(ids, context)]),
+      buildSlot(ids, "brand", [wordmark(ids)]),
       ...SITE_ROUTES.filter((route) => route.inMenu).map((route) => menuLink(ids, context, route)),
       ...PRODUCT_SURFACES.filter((surface) => surface.inMenu).map((surface) =>
-        link(ids, surface.label, surfaceHref(context.origin, surface), { scale: "medium" })
+        link(ids, surface.label, surfacePath(surface), { scale: "medium" })
       ),
       buildSlot(ids, "actions", [
-        action(ids, SIGN_IN_LABEL, surfaceHref(context.origin, PORTAL), {
+        action(ids, SIGN_IN_LABEL, surfacePath(PORTAL), {
           variant: "secondary",
           scale: "small",
         }),
@@ -240,7 +234,7 @@ const linkGroup = (
  * The link is the page that says the rest of it, labeled with its own route
  * label so the two cannot drift apart.
  */
-const countingNote = (ids: IdFactory, context: ChromeContext): LoomNode =>
+const countingNote = (ids: IdFactory): LoomNode =>
   stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
     prose(
       ids,
@@ -250,7 +244,7 @@ const countingNote = (ids: IdFactory, context: ChromeContext): LoomNode =>
     link(
       ids,
       "What is counted",
-      `${internalHref(context.origin, WHAT_YOU_RUN.path, context.theme)}#${COUNTED_ANCHOR}`,
+      `${sitePath(WHAT_YOU_RUN.path)}#${COUNTED_ANCHOR}`,
       { tone: "muted", scale: "small" }
     ),
   ])
@@ -269,7 +263,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
     props: { tone: "plain", columns: "three" },
     children: [
       buildSlot(ids, "brand", [
-        wordmark(ids, context),
+        wordmark(ids),
         prose(ids, "Your AI can change this page. You can see exactly what it changed.", {
           size: "small",
           tone: "muted",
@@ -279,7 +273,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
         ids,
         "This site",
         SITE_ROUTES.map((route) =>
-          link(ids, route.label, internalHref(context.origin, route.path, context.theme), {
+          link(ids, route.label, sitePath(route.path), {
             tone: "muted",
             scale: "small",
             ...(route.path === context.current.path ? { current: true } : {}),
@@ -290,7 +284,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
         ids,
         "The product",
         PRODUCT_SURFACES.map((surface) =>
-          link(ids, surface.label, surfaceHref(context.origin, surface), {
+          link(ids, surface.label, surfacePath(surface), {
             tone: "muted",
             scale: "small",
           })
@@ -314,7 +308,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
             external: true,
           }),
         ]),
-        ...(context.counting === true ? [countingNote(ids, context)] : []),
+        ...(context.counting === true ? [countingNote(ids)] : []),
         /**
          * The re-theme, offered rather than described. Each is an ordinary link
          * to the same route wearing another palette, and what comes back is the
@@ -323,7 +317,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
          */
         stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
           prose(ids, PALETTE_SWITCHER_LABEL, { size: "small", tone: "muted" }),
-          ...otherThemes(context.theme).map((name) =>
+          ...SITE_THEME_NAMES.map((name) =>
             link(
               ids,
               SITE_THEMES[name].label,
@@ -454,7 +448,7 @@ export const siteReadingBand = (
   if (before === undefined) return []
 
   const cards: readonly LoomNode[] = [
-    wayOn(ids, BEFORE_LABEL, before.label, internalHref(context.origin, before.path, context.theme)),
+    wayOn(ids, BEFORE_LABEL, before.label, sitePath(before.path)),
     ...(after === undefined
       ? []
       : [
@@ -462,7 +456,7 @@ export const siteReadingBand = (
             ids,
             NEXT_LABEL,
             after.label,
-            internalHref(context.origin, after.path, context.theme)
+            sitePath(after.path)
           ),
         ]),
     /**
@@ -473,7 +467,7 @@ export const siteReadingBand = (
      */
     ...(onward === undefined
       ? []
-      : [wayOn(ids, NEXT_LABEL, onward.label, surfaceHref(context.origin, onward))]),
+      : [wayOn(ids, NEXT_LABEL, onward.label, surfacePath(onward))]),
   ]
 
   return [

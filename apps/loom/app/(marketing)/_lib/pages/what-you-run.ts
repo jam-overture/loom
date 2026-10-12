@@ -28,9 +28,9 @@ import {
   HOW_IT_WORKS,
   REPOSITORY_URL,
   SITE_THEMES,
+  sitePath,
+  surfacePath,
   WHAT_YOU_RUN,
-  internalHref,
-  surfaceHref,
 } from "../site"
 
 import type { PageContext } from "./home"
@@ -113,7 +113,7 @@ const whatYouBring = (ids: IdFactory): LoomNode =>
  * The measurement is the documentation's, and the code that made it is still in
  * the repository for anyone who wants to run it.
  */
-const whatLeaves = (ids: IdFactory, context: PageContext): LoomNode =>
+const whatLeaves = (ids: IdFactory, ): LoomNode =>
   splitSection(
     ids,
     { width: "wide", eyebrow: "What leaves your server" },
@@ -152,7 +152,7 @@ const whatLeaves = (ids: IdFactory, context: PageContext): LoomNode =>
           inlineLink(
             ids,
             "ready-made changes",
-            `${internalHref(context.origin, HOW_IT_WORKS.path, context.theme)}#${ANCHOR.seeItHappen}`
+            `${sitePath(HOW_IT_WORKS.path)}#${ANCHOR.seeItHappen}`
           ),
           " on the How it works page do not send anything at all. They are worked out on your own server, which is why they still work on a deployment with no model configured.",
         ],
@@ -205,7 +205,7 @@ const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
     ]
   )
 
-const closing = (ids: IdFactory, context: PageContext): LoomNode =>
+const closing = (ids: IdFactory, ): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Have a look at the rest", [
     prose(
       ids,
@@ -216,11 +216,11 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
       action(
         ids,
         "How a change travels",
-        internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
+        sitePath(HOW_IT_WORKS.path),
         { variant: "primary" }
       ),
-      action(ids, "Read the docs", surfaceHref(context.origin, DOCS), { variant: "secondary" }),
-      action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), TERTIARY_CONTROL),
+      action(ids, "Read the docs", surfacePath(DOCS), { variant: "secondary" }),
+      action(ids, "Try it yourself", surfacePath(DEMO), TERTIARY_CONTROL),
       action(ids, "Read the source", REPOSITORY_URL, { ...TERTIARY_CONTROL, external: true }),
     ]),
   ])
@@ -241,9 +241,9 @@ export const whatYouRunPageTree = (context: PageContext): LoomTree => {
         siteHeader(ids, chrome),
         hero(ids),
         whatYouBring(ids),
-        whatLeaves(ids, context),
+        whatLeaves(ids),
         whatIsCounted(ids, context),
-        closing(ids, context),
+        closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
