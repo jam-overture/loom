@@ -22,13 +22,20 @@ export type SiteRoute = {
    * The same flag `Surface` has carried since 28 August, for the same reason and
    * with the same guarantee behind it. The maintainer asked on #166 whether
    * eight items in the bar was too many; it was, the surfaces answered it, and
-   * the count crept back to eight as this route group grew a fourth page. A
-   * ninth is the flagged problem made worse.
+   * the count crept back to eight as this route group grew a fourth page.
    *
    * So a page may be kept out of the bar — and `chrome.test.ts` holds *out of
    * the bar* to mean exactly that and never *off the site*: whatever is left out
    * is in the footer's map, and the footer marks it as the page the reader is on
    * so the site still says where they are.
+   *
+   * **The flag is a judgement and the ceiling is the rule.** Eight is the number
+   * the maintainer called too many, so `BAR_CEILING` in `./chrome.ts` is eight
+   * and `bar.test.ts` fails on a ninth. Below that the flag is each page's own
+   * call about ten seconds of a stranger's attention, re-read when the site
+   * changes shape rather than inherited: two of these three answered it against
+   * a six-page site that was cut to three, and one of the two was wrong by
+   * 12 October.
    */
   readonly inMenu: boolean
 }
@@ -96,11 +103,26 @@ export const HOW_IT_WORKS: SiteRoute = {
  * and it ends by handing them over. It uses no vocabulary the documentation
  * teaches and prints no code.
  *
- * **It is `inMenu: false`, and that is now true of two pages.** The bar is the
- * eight items the maintainer asked about on #166; a sixth page is not worth a
- * ninth. `chrome.test.ts` holds *off the bar* to mean *in the footer's map and
- * nowhere unreachable*, and this page is offered from the front door's band of
- * ways in and from the two pages either side of it in the argument.
+ * **It is `inMenu: true` as of 12 October, and the paragraph that used to be
+ * here is why the flag needs re-reading rather than inheriting.** It said:
+ * *"The bar is the eight items the maintainer asked about on #166; a sixth page
+ * is not worth a ninth."* Both numbers were true when they were written and
+ * neither is now. The site was cut from six pages to three on 26 September, and
+ * the bar carries **four things** — one page, two surfaces and the action — so
+ * the ninth item that argument was protecting the reader from does not exist.
+ *
+ * What the flag is actually weighing is ten seconds of a stranger's attention,
+ * and on that question this page wins its place: it answers *what would I be
+ * installing*, which is the question a developer asks before they will read an
+ * installation guide, and it was reachable only from the footer's map and from
+ * links inside two other pages. A visitor who wanted it had to already know it
+ * was there.
+ *
+ * `chrome.test.ts` still holds *off the bar* to mean *in the footer's map and
+ * nowhere unreachable*, which is what makes `inMenu: false` safe for the front
+ * door. `bar.test.ts` holds the other end: the bar has a ceiling, it is stated
+ * as a number, and a page or a surface that would be the ninth item fails
+ * rather than arriving.
  */
 export const WHAT_YOU_RUN: SiteRoute = {
   path: "/what-you-run",
@@ -116,7 +138,7 @@ export const WHAT_YOU_RUN: SiteRoute = {
   title: "What you run — in your own app, not in front of it",
   description:
     "You install a package into an application you already host. Your components stay in your repository, and the only thing that leaves is one request to a model you chose, when somebody asks for a change.",
-  inMenu: false,
+  inMenu: true,
 }
 
 /**
@@ -764,26 +786,32 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
   return origin === "" ? `${url.pathname}${url.search}${url.hash}` : url.toString()
 }
 
-export const askHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, ASKED_ROUTE.path, options)
-
 /**
- * The mechanism page, with the request whose record it should print.
+ * The page a request is run against, with the request in the address.
  *
- * Same property as `askHref` and for the same reason: the page keeps nothing,
- * so what it prints is a function of its address. `/how-it-works` on its own is
- * the page it has always been — the record of the quietest of the five choices,
- * chosen because it is the one whose lines fit on a screen. With an ask in the
- * address it prints the record of *that* request instead, run against the same
- * published front door, which is what lets the front door hand a visitor the raw
- * record of the change they just watched rather than of a different one.
+ * The page keeps nothing, so what it shows is a function of its address.
+ * `/how-it-works` on its own is the page it has always been. With an ask in the
+ * address it rearranges for that request and prints its record, which is what
+ * lets one visitor hand another the record of the change they just watched
+ * rather than of a different one.
  *
- * `approve` travels with it because the record does. A change the rules held and
- * the visitor then allowed has a line the held one does not, and a link that
- * dropped the approval would open a page whose record is one line shorter than
- * the panel the visitor followed it from.
+ * `approve` travels with it because the record does. A change the rules held
+ * and the visitor then allowed has a line the held one does not, and a link
+ * that dropped the approval would open a page whose record is one line shorter
+ * than the panel the visitor followed it from.
+ *
+ * **There were two of these until 12 October**, and the second was
+ * `mechanismHref`. They were different functions in September, when `askHref`
+ * wrote an address of the front door and `mechanismHref` wrote one of
+ * `/how-it-works`; the maintainer moved the band on 1 October and the two
+ * destinations became the same page, after which 19 call sites across 8 files
+ * were choosing between two names for one body. `ASKED_ROUTE` is now the single
+ * answer to *which page*, so the name that says what the address **carries** is
+ * the one that survived. Filed on 11 October, collapsed here, and the deletion
+ * is the point: a second name is a decision every later call site has to make
+ * again.
  */
-export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
+export const askHref = (origin: string, options: AskedFor = {}): string =>
   askedHref(origin, ASKED_ROUTE.path, options)
 
 /**

@@ -6,13 +6,7 @@ import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
 import { heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
-import {
-  askPath,
-  DEMO,
-  mechanismHref,
-  type SiteThemeName,
-  surfacePath,
-} from "../site"
+import { askHref, askPath, DEMO, type SiteThemeName, surfacePath } from "../site"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -234,7 +228,7 @@ const readTheRecord = (
   buildElement(ids, {
     type: "loom.action",
     props: {
-      href: mechanismHref(context.origin, {
+      href: askHref(context.origin, {
         ask: record.ask,
         approve: context.approve === true,
       }),
@@ -470,7 +464,7 @@ const protectionNotice = (): string => {
  * a link that rebuilt the address from scratch would throw away at the worst
  * possible moment.
  */
-const typeYourOwn = (ids: IdFactory, ): readonly LoomNode[] => [
+const typeYourOwn = (ids: IdFactory): readonly LoomNode[] => [
   stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
     /**
      * Measured, so the sentence and the way out sit on one line rather than the

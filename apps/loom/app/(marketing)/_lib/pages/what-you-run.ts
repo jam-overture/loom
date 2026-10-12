@@ -113,7 +113,7 @@ const whatYouBring = (ids: IdFactory): LoomNode =>
  * The measurement is the documentation's, and the code that made it is still in
  * the repository for anyone who wants to run it.
  */
-const whatLeaves = (ids: IdFactory, ): LoomNode =>
+const whatLeaves = (ids: IdFactory): LoomNode =>
   splitSection(
     ids,
     { width: "wide", eyebrow: "What leaves your server" },
@@ -170,7 +170,7 @@ const whatLeaves = (ids: IdFactory, ): LoomNode =>
  * band's anchor. A site that quietly stopped saying what it counts while
  * carrying on counting would be failing at the one thing it sells.
  */
-const whatIsCounted = (ids: IdFactory, ): LoomNode =>
+const whatIsCounted = (ids: IdFactory): LoomNode =>
   splitSection(
     ids,
     { width: "wide", eyebrow: "What this page counts", anchor: COUNTED_ANCHOR },
@@ -219,7 +219,7 @@ const whatIsCounted = (ids: IdFactory, ): LoomNode =>
     ]
   )
 
-const closing = (ids: IdFactory, ): LoomNode =>
+const closing = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Have a look at the rest", [
     prose(
       ids,

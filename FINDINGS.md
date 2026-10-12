@@ -184,7 +184,14 @@ rewritten, would be teaching it rather than doing it.
 ## 2026-10-11 — `askHref` and `mechanismHref` are the same function under two names, and every call site had to pick one
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
-(`apps/loom/app/(marketing)/_lib/site.ts`) · **Status:** open — **nothing is
+(`apps/loom/app/(marketing)/_lib/site.ts`) · **Status:** **closed by
+`marketing-02-the-bar-and-three-stale-arguments`** — `mechanismHref` is deleted
+and its one call site (`pages/see-it-happen.ts`) now reads `askHref`, which is
+the recommendation below. The doc comment that argued from two destinations
+went with it; what `askHref` carries is explained where the one function is.
+Original status below.
+
+**Status:** open — **nothing is
 broken and nothing a reader sees is wrong**; it is one function with two
 exported names, and the names disagree about which page this site asks things of
 
@@ -50258,6 +50265,17 @@ read by this run.
 ## 2026-10-10 — three comments in this lane argue from a file that is not in the tree, and the abstraction one of them justifies has a single caller
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-02-the-bar-and-three-stale-arguments`** — collapsed
+rather than re-explained. `plannedInterpreter` and `PlannedChange` are gone and
+`askInterpreter` is the whole of it; `RAISED_BY` is no longer exported, since
+the band that was its second reader does not exist; and the sentence in
+`run.ts` claiming a band prints two floor probes says instead that nothing on
+this site puts such a request. The entry's own question — *is the parameter
+worth keeping for a second kind of request* — is answered by the fact that it
+can be extracted again, against something real, on the day there is one.
+Original status below.
+
+**Status:**
 open — **nothing is wrong and nothing is blocked.** It is dead generality and
 three explanations pointing at something a reader cannot go and look at
 
@@ -51577,7 +51595,16 @@ the maintainer's machine is how the next portability gap goes unnoticed for a mo
 ## 2026-10-12 — a test reads a gitignored build artefact, so `pnpm verify` is red on `main` for anybody who has not run `pnpm package:primitives`
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
-(`apps/loom/app/(marketing)/_lib/facts.test.ts`) · **Status:** open — **`main`
+(`apps/loom/app/(marketing)/_lib/facts.test.ts`) · **Status:** **closed by
+#593**, which is the patch proposed below, applied: the test reads
+`manifest("UNSET").name` from `tools/package/manifest.ts` rather than the
+assembled artefact. Confirmed on `origin/main` at `03ce8ba` by this lane on
+12 October — `pnpm verify` is green on a clone that has never run
+`pnpm package:primitives`, which is this container. Closed here rather than on
+the branch that fixed it because the entry was filed after that branch was
+open. Original status below.
+
+**Status:** open — **`main`
 is red**, and it is two tests rather than anything structural
 
 `facts.test.ts`' *what the site tells a stranger to install* reads two
@@ -51720,6 +51747,107 @@ without pretending the prose is a tree. Whether that is worth the seam is a
 the record rather than only in a session.
 
 ---
+## 2026-10-12 — the page in this repository is no longer the page anybody is served, and the first lane it costs is the one whose work is the page
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework`
+(`src/store/store.ts`, and the seam `apps/loom/app/(marketing)/_lib/stored.ts`
+would use) · **Status:** open — **nothing is broken and no test is failing**;
+it is the consequence of this morning's change read forward one day, and
+[#600](https://github.com/jam-overture/loom/pull/600) looks like the answer to
+it
+
+The three pages of this site became rows in the app's store this morning
+([0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+condition 1, landed in #596). Seeding is `create` and nothing else, which is
+right: a page that exists has a history, and a deploy that wrote over it would
+throw away every change somebody accepted in the portal.
+
+The entry filed the same morning says the consequence as a gap in the store's
+contract — *`TreeStore` can create a page and can never drop one*. This is the
+same fact said as what it costs a lane, because the two read very differently
+and only one of them says who is blocked:
+
+> **Merging a marketing pull request no longer changes the marketing site.**
+
+Every page this lane serves is already a row on any deployment that has been
+visited once. `idFor` reads the id off the builder, so an edited builder looks
+for the same `t_home1` it looked for yesterday, finds it, and leaves it alone.
+The authored page is still in the repository, still built in tests, still
+photographed by `pnpm shoot --serve` against a memory store — and no longer
+served to anybody.
+
+**What this pull request accidentally is.** The branch that carries this entry
+puts a fifth item in the bar across the top, which is a change to all three
+page trees and is visible in a second. So its preview answers a question
+nobody has asked out loud yet:
+
+| what the preview's bar says | what it means |
+| --- | --- |
+| How it works · **What you run** · Demo · Docs | previews build a store of their own, and only production is frozen |
+| How it works · Demo · Docs | preview and production share the database, and **no marketing change has reached a reader since 12 October** |
+
+This lane cannot run that experiment itself: `*.vercel.app` is not in
+`.claude/settings.json`'s allowlist, which is the entry below.
+
+**It is not a request to make seeding overwrite.** That would hand every
+deploy the power to silently discard a governed page, which is the thing 0259
+took the trade to avoid. The shape that fits is the one the portal lane
+proposed and #600 appears to build: a **reseed** — an append that sets the
+tree's root to what the builder produces now, recorded as a revision with its
+own provenance, so the log says *this page was put back to its authored state
+on this date* rather than the history simply ending.
+
+What this lane needs from it is one decision beyond the operation: **who
+presses it.** A reseed that only a person can press means a marketing change
+reaches readers when the maintainer says so, which is defensible and is a new
+step in a release. A reseed that runs on deploy means the authored page wins
+by default and a portal edit survives only until the next release, which is
+the opposite default and is worse. A third answer — the portal offering *put
+this page back to the version in the repository* on the page's own screen,
+beside its history — is the one this lane would choose, because it is the
+product's own shape rather than a deployment step, and the undo is the thing
+this site sells.
+
+Until one of those exists, the honest reading of this lane's work is that it
+lands in the repository and waits. **Nothing here is urgent and nothing is
+degraded**: what a reader is served today is a correct page, built from these
+builders on 12 October, and the gap grows only as this lane keeps working.
+
+---
+## 2026-10-12 — no lane can look at the preview it is told to put in its pull request, because the deployment's own domain is not in the allowlist
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit`
+(`.claude/settings.json`) · **Status:** open — **a small gap with one real
+consequence**, filed the way `docs/routines.md` says to file a domain
+
+Every routine brief asks for **the deployed preview URL and a screenshot** in
+the pull request. The URL is quoted from the Vercel comment and the screenshot
+is taken against a local `pnpm shoot --serve`, because
+`loom-git-….vercel.app` is in neither of the two allowlists: not in
+`sandbox.network.allowedDomains`, so `curl` and the screenshot harness cannot
+reach it, and not in `permissions.allow`, so `WebFetch` fails with nobody there
+to approve a prompt.
+
+For most runs that costs nothing, because a local build of the same commit is
+the same page. **It stopped being the same page on 12 October**, which is the
+entry above: the preview serves whatever is in the store it is pointed at, and
+a local `--serve` serves a memory store seeded from the branch. The one
+difference a photograph could now show is exactly the difference the harness
+cannot be pointed at.
+
+Two ways out, and the first is nearly free:
+
+1. **Allow the project's preview host** — `*.vercel.app`, or the narrower
+   `loom-*-jpizzolato36-6341s-projects.vercel.app` — in both lists. It is a
+   read of a page this repository deploys, and it makes *the screenshot in the
+   pull request is of the thing you will click* true rather than nearly true.
+2. **Say in `docs/routines.md` that preview screenshots are local**, which is
+   what every lane has in fact been doing, so that nobody reads a report's
+   picture as evidence about the deployment.
+
+Either is fine and the second costs nothing; what is not fine is the current
+state, where the instruction and the sandbox disagree and each run discovers it
+again.
 ## 2026-10-12 — a change to a kind of part is answerable now, and the screen for it is the one an author opens the morning after changing a primitive
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens)

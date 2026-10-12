@@ -137,7 +137,21 @@ const menuLink = (ids: IdFactory, context: ChromeContext, route: SiteRoute): Loo
  */
 export const MARK_PATH = "M5 5h14v6H5z M21 5h6v14H21z M13 21h14v6H13z M5 13h6v14H5z"
 
-const wordmark = (ids: IdFactory, ): LoomNode =>
+/**
+ * The most things the bar across the top may carry, counting its action.
+ *
+ * Eight, because eight is the number the maintainer looked at on #166 and said
+ * was too many. It is written here as the one place that answers *how many*,
+ * and `bar.test.ts` is what makes it a rule rather than a note: a page or a
+ * surface flagged into a full bar fails the gate on the run that flags it,
+ * naming what the bar already holds.
+ *
+ * It does not say which items. That is each page's and each surface's own
+ * `inMenu`, argued where the thing being left in or out is defined.
+ */
+export const BAR_CEILING = 8
+
+const wordmark = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.brand",
     props: {
@@ -151,8 +165,8 @@ const wordmark = (ids: IdFactory, ): LoomNode =>
  * The bar across the top: the mark, the menu, and the one thing the page wants
  * you to do.
  *
- * The menu is the pages and the surfaces marked `inMenu` — today three of this
- * site's five pages, the demonstration and the documentation. The portal is the
+ * The menu is the pages and the surfaces marked `inMenu` — today two of this
+ * site's three pages, the demonstration and the documentation. The portal is the
  * action rather than a menu item, and its word is **Sign in** rather than its
  * name: a stranger has no idea what a portal is, and the bar's right-hand action
  * is where every site they have used puts the way in.
@@ -180,6 +194,13 @@ const wordmark = (ids: IdFactory, ): LoomNode =>
  * halves now, and the guarantee is the one the surfaces already had: what the
  * bar leaves out, the footer's map carries — marked as the page the reader is
  * on, so a page off the bar still says where you are.
+ *
+ * **What the flag could not do is say how many is too many**, which is the
+ * question #166 actually asked. Eight flags set one at a time are eight
+ * paragraphs each arguing that this page is worth its slot, and the ninth
+ * arrives in a run that reads none of them. So the ceiling is a number here
+ * rather than an argument in eight files, and `bar.test.ts` counts the bar
+ * against it.
  */
 export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
   buildElement(ids, {
