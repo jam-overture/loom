@@ -66,7 +66,26 @@ export type SchemaTable = {
 }
 
 const CREATE_TABLE = /^CREATE TABLE IF NOT EXISTS (\w+) \(([\s\S]*)\)$/
-const ADD_COLUMN = /^ALTER TABLE (\w+) ADD COLUMN IF NOT EXISTS (\w+) (\w+)$/
+/**
+ * An added column, with the constraint and default it may carry.
+ *
+ * The trailing group was added on 12 October for `project_id`, which arrives
+ * `NOT NULL DEFAULT 'prj_default'` — a column added to a populated table has
+ * to say what the rows already there should hold, so a migration that adds one
+ * after the fact will usually carry both.
+ */
+const ADD_COLUMN = /^ALTER TABLE (\w+) ADD COLUMN IF NOT EXISTS (\w+) (\w+)(?: (.+))?$/
+
+/**
+ * A key being taken off and put back, which is how a key widens.
+ *
+ * A primary key cannot be altered in place, so a migration that adds a column
+ * to one drops the constraint and adds the wider one. The pair is read as a
+ * single act: the drop records nothing by itself, and the add below is what
+ * moves the `key` flags.
+ */
+const DROP_CONSTRAINT = /^ALTER TABLE (\w+) DROP CONSTRAINT IF EXISTS (\w+)$/
+const ADD_PRIMARY_KEY = /^ALTER TABLE (\w+) ADD PRIMARY KEY \(([^)]*)\)$/
 const ENABLE_ROW_SECURITY = /^ALTER TABLE (\w+) ENABLE ROW LEVEL SECURITY$/
 /**
  * An index on columns, on an expression, and partial or not.
@@ -163,11 +182,17 @@ const tableFrom = (name: string, body: string): SchemaTable => {
 const withAddedColumn = (
   columns: readonly SchemaColumn[],
   name: string,
-  type: string
-): readonly SchemaColumn[] =>
-  columns.some((column) => column.name === name)
-    ? columns.map((column) => (column.name === name ? { ...column, addedLater: true } : column))
-    : [...columns, { name, type, required: false, key: false, addedLater: true }]
+  type: string,
+  constraint?: string
+): readonly SchemaColumn[] => {
+  const required = constraint !== undefined && constraint.includes("NOT NULL")
+
+  return columns.some((column) => column.name === name)
+    ? columns.map((column) =>
+        column.name === name ? { ...column, addedLater: true, required } : column
+      )
+    : [...columns, { name, type, required, key: false, addedLater: true }]
+}
 
 const requireTable = (
   tables: readonly SchemaTable[],
@@ -216,7 +241,34 @@ export const tablesIn = (ddl: readonly string[]): readonly SchemaTable[] => {
 
       tables = replacing(tables, {
         ...table,
-        columns: withAddedColumn(table.columns, added[2], added[3]),
+        columns: withAddedColumn(table.columns, added[2], added[3], added[4]),
+      })
+      continue
+    }
+
+    /*
+     * Recognised and deliberately recorded as nothing. What a dropped key
+     * means to a reader is whatever replaces it, and the statement after this
+     * one says so — reporting the gap in between would describe a state the
+     * database is never observed in.
+     */
+    if (DROP_CONSTRAINT.test(statement)) {
+      requireTable(tables, statement.match(DROP_CONSTRAINT)?.[1] ?? "", statement)
+      continue
+    }
+
+    const keyed = statement.match(ADD_PRIMARY_KEY)
+    if (keyed?.[1] !== undefined && keyed[2] !== undefined) {
+      const table = requireTable(tables, keyed[1], statement)
+      const named = keyed[2].split(",").map((column) => column.trim())
+
+      tables = replacing(tables, {
+        ...table,
+        columns: table.columns.map((column) => ({
+          ...column,
+          key: named.includes(column.name),
+          required: named.includes(column.name) || column.required,
+        })),
       })
       continue
     }

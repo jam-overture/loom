@@ -15,14 +15,29 @@ import { index, integer, jsonb, pgTable, primaryKey, text, timestamp } from "dri
  * decomposed into node rows — the tree is read and written whole, and a schema
  * that shredded it would have to be migrated every time §1 changes the AST.
  */
-export const loomTrees = pgTable("loom_trees", {
-  treeId: text("tree_id").primaryKey(),
-  revision: integer("revision").notNull(),
-  document: jsonb("document").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
-})
+export const loomTrees = pgTable(
+  "loom_trees",
+  {
+    /**
+     * The project the tree belongs to (0260). First in the key rather than
+     * beside it: every read this store performs is already inside one project,
+     * so a composite key led by the project is the index those reads want, and
+     * a tree id only has to be unique within its own project.
+     *
+     * Defaulted so a database written before projects existed keeps answering.
+     * `DEFAULT_PROJECT_ID` is the value, spelled out here because DDL cannot
+     * import it — `project.test.ts` holds the two together.
+     */
+    projectId: text("project_id").notNull().default("prj_default"),
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    document: jsonb("document").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [primaryKey({ columns: [table.projectId, table.treeId] })]
+)
 
 /**
  * The log. The composite primary key is load-bearing rather than incidental: it
@@ -37,6 +52,8 @@ export const loomTrees = pgTable("loom_trees", {
 export const loomRevisions = pgTable(
   "loom_revisions",
   {
+    /** See `loomTrees.projectId`. */
+    projectId: text("project_id").notNull().default("prj_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     proposalId: text("proposal_id").notNull(),
@@ -51,7 +68,7 @@ export const loomRevisions = pgTable(
      */
     answeredBy: text("answered_by"),
   },
-  (table) => [primaryKey({ columns: [table.treeId, table.revision] })]
+  (table) => [primaryKey({ columns: [table.projectId, table.treeId, table.revision] })]
 )
 
 /**

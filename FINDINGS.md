@@ -51349,3 +51349,47 @@ rendered into a slot, which would put *the docs' chrome* under the portal
 without pretending the prose is a tree. Whether that is worth the seam is a
 `Loom docs` decision; this entry exists so the answer to the maintainer is on
 the record rather than only in a session.
+
+---
+## 2026-10-12 — the project scope reaches trees and revisions; holds, the policy log, signals and telemetry are still deployment-wide
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`,
+`src/signals/`, `src/telemetry/`) · **Status:** open — **this is the unfinished
+half of a change on a branch, not a defect on `main`**
+
+[0260](decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
+says a project is the unit Loom stores, governs and measures under, and that
+none of these reads can span two. `framework-01-a-project-above-the-tree`
+delivers that for **two of the nine tables**: `loom_trees` and
+`loom_revisions` carry `project_id`, their keys are widened, and
+`postgresTreeStore(db, { project })` cannot see another project's row — proved
+against PGlite, and the assertion fails when the `WHERE` clause is removed.
+
+**Seven tables are untouched and are still deployment-wide:**
+
+| table | owned by | what spanning two projects would do |
+| --- | --- | --- |
+| `loom_holds` | `src/store/postgres-holds.ts` | put one project's changes in another's review queue — the failure 0220 named by name |
+| `loom_policy_revisions` | `src/store/postgres-policy-log.ts` | resolve a fingerprint to another project's policy text |
+| `loom_reader_signals` | `src/signals/` | file a reader against whoever else holds that tree id |
+| `loom_reader_tallies` | `src/signals/` | add two projects' counts together |
+| `loom_reader_funnels` | `src/signals/` | as above |
+| `loom_reader_regions` | `src/signals/` | as above |
+| `loom_reader_page_views` | `src/signals/` | as above |
+| `loom_telemetry` | `src/telemetry/` | show one project's gate decisions on another's screen |
+
+**None of this is reachable today**, because nothing constructs a store with a
+project other than the default — the portal still holds one handle. It becomes
+reachable the moment a second project exists, which is why it is filed now
+rather than after.
+
+**So the order is load bearing:** the portal must not offer a second project
+until these seven are scoped. A screen that lets somebody create one, over a
+signal ledger that cannot tell two apart, would be mixing two customers'
+readers on the first day, and the mixing is not recoverable from the rows
+afterwards.
+
+The pattern is set and is mechanical: a `project_id` column defaulted to
+`prj_default`, the key widened, the handle scoped at construction, and the
+isolation asserted against PGlite with the `WHERE` clause removed to prove the
+assertion bites.
