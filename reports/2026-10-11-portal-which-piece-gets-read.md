@@ -206,11 +206,11 @@ was deleted before committing and both shot lists are beside this report.
 
 | | |
 | --- | --- |
-| [**the screen, as a reader meets it**](2026-10-11-portal-which-piece-wide.png) | `1680×1100@2x`, `scrollWidth 1680 / innerWidth 1680` |
-| [**the cards, with the pair on each**](2026-10-11-portal-which-piece-cards.png) | `1680×1700@2x`, all four pieces and both figures |
-| [**the record, one click down**](2026-10-11-portal-which-piece-open.png) | `1680×1500@2x`, the two arithmetics, the counters and what is not drawn |
-| [**the same, on a phone**](2026-10-11-portal-which-piece-phone.png) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
-| [**one page with no readership, which is the ordinary state**](2026-10-11-portal-which-piece-withheld.png) | `1680×1300@2x`, every reader share withheld and the page that is why |
+| [**the screen, as a reader meets it**](2026-10-11-portal-which-piece-wide.webp) | `1680×1100@2x`, `scrollWidth 1680 / innerWidth 1680` |
+| [**the cards, with the pair on each**](2026-10-11-portal-which-piece-cards.webp) | `1680×1700@2x`, all four pieces and both figures |
+| [**the record, one click down**](2026-10-11-portal-which-piece-open.webp) | `1680×1500@2x`, the two arithmetics, the counters and what is not drawn |
+| [**the same, on a phone**](2026-10-11-portal-which-piece-phone.webp) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
+| [**one page with no readership, which is the ordinary state**](2026-10-11-portal-which-piece-withheld.webp) | `1680×1300@2x`, every reader share withheld and the page that is why |
 
 The section's `h2` is at `y 186` and *Start with Card* at `y 282`, both above
 the fold at every viewport, which is the point of a landing section. The one

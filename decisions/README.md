@@ -348,3 +348,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0262](0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md) | The control plane is hosted and the render path stays in the customer's app | Proposed | §1, §5 |
 | [0263](0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md) | A page is a base tree and the deltas an audience earns | Proposed | §1, §3, §5 |
 | [0264](0264-a-report-s-visual-is-stored-at-the-size-the-page-was-laid-out-at.md) | A report's visual is stored at the size the page was laid out at | Accepted | §1 (process) |
+| [0265](0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md) | What readers do inside a kind of part is a share of the readers who met it, and the door is only a weight | Accepted | §4c (reader signals) |
+| [0266](0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md) | A change to a kind of part is read over the places both windows bore, and that is the one denominator here with no reader in it | Accepted | §4c (reader signals) |

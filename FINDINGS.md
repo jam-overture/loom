@@ -51015,6 +51015,136 @@ The staging module was deleted before committing, as the eight before it were,
 and the shot list is beside the report.
 
 ---
+## 2026-10-12 — a kind of part now has three figures, two of them are shares of readers and only one is about what readers did, and the row that leads the new reading is never the page shell
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens
+and `/portal/pieces`) · **Status:** open — **a third figure for a card that
+already exists**, with two states to refuse to draw and one row not to lead with
+
+`libraryActionOf(readings, rows)` is on this branch, published from
+`@jam-overture/loom/signals` with
+[0265](decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md).
+It takes the same list of `PageReading`s and the same door rows `libraryReachOf`
+takes, keys its rows the same way, and pairs on the published `kindKeyOf` — so
+the screen #584 built needs no second read and no second join.
+
+**What it adds to a piece's card:** *3 in 10 of the readers who met it did
+something inside it.* That is a different sentence from either figure already
+there, and the three are not near each other:
+
+- `KindReading.readShare` — the share of the **places** it stands that a reader
+  reached (0257).
+- `KindReach.share` — the share of the **readers who met it** that read it
+  (0256).
+- `KindAction.share` — the share of **those same readers** that acted *inside*
+  it (0265).
+
+**The one thing that is new in how the third behaves, and it is good news for
+the screen.** 0256 withholds a kind's reach share whenever a page it stands on
+has no usable door row, which is the state #584 reports as the screen's most
+common. This share is withheld far less often, because the door is only a
+**weight** here: both its terms are reaches off one row, so a page's straddle
+cancels inside that page's own contribution and the door is needed only to weigh
+one page against another. So **a kind borne by one page is answered with no door
+row at all**, and so is a kind whose other pages nobody reached. A deployment
+whose reach column is entirely withheld can still have a full action column, and
+the screen should expect that rather than treat the two as one state.
+
+**The cost of that, which a surface has to carry:** a row answered without the
+door has a `share` and **no** `met`, `acted` or `ignored`. `onDoorScale` says
+which kind of row it is, and the counts are comparable between rows only where it
+is true. `LibraryAction.unranked` is how many type rows the lead could not see
+for that reason — a number worth printing beside the lead rather than dropping.
+
+**Two states to refuse to draw, with opposite remedies.** A silence of
+`unscaled`, `unopened` or `uncounted` is the door, exactly as in the reach
+reading — and `LibraryAction.unscaled` names the page. A silence of `unwalked`
+is **a sender crediting nobody**: the page holds presses and no `within`, so
+every share on it is a nought that is a filing rule (0167, 0242), and
+`LibraryAction.unwalked` names those pages. The counters look healthy in that
+state and the screen would otherwise print *nobody uses any of your components*.
+A silence of `unenterable` is neither: it means the kind is a leaf everywhere, so
+there is nothing to draw and nothing wrong — the census is the reading to fall
+back to.
+
+**One row not to lead with, and it is not excluded for you in `byType`.**
+`mostIgnored` already skips a kind whose placements are all page roots, because a
+root's figure is the page-wide *did anybody do anything at all* (0242) and
+contains every row it would outrank. The row itself is still in `byType` and
+still sorts first on count, so a screen that drew `byType[0]` as *the piece to
+look at* would print the page shell. Use `mostIgnored`, or read `roots` against
+`placements`.
+
+**Two numbers on the row that are places and not readers.** `standings` is the
+0242 standing of every placement including the leaves — *readers acted in it in 3
+of its 9 places* — and `leaves` is how many of its places have no inside at all.
+Neither is a headcount, and neither is the share.
+
+---
+## 2026-10-12 — the missing role declaration now costs a share of what readers *did* as well, and this is the sixth consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives` (`src/primitives/`) ·
+**Status:** open — **the same gap, now with six consumers**, and nothing here is
+broken by it
+
+Nothing in `src/primitives/` declares `role` (0114), so every role row in
+`libraryActionOf` comes back under `role: null` — the same thinness 0212 named,
+now in a sixth place after a standing on a funnel end (0238), a comparison of
+what readers did (0251), the census of the library (0257), a kind's share of the
+readers who met it (0256), and the four before those.
+
+**What is new about this one.** The sentence it cannot say is *of the readers who
+met a control, what share pressed something inside it* — and that is the one
+role question where the gap and this lane's 6 October entry are the **same**
+gap: a leaf a reader reached with nothing filed against it is a button nobody
+pressed or a heading nobody could press, and `libraryActionOf` reports every
+such kind as `unenterable` or `untouched` with no way to say which it deserved.
+A role for *a thing a reader acts on* would make both answerable at once.
+
+**It is one declaration per primitive and no migration.** The join is at read
+time (0212), so the day a type declares a role every counter already stored
+reinterprets and these rows start answering.
+
+---
+## 2026-10-12 — running the formatter on this repository reformats whatever it is pointed at, because there is no formatter configuration and nothing in `verify` would catch it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (the repository's
+own tooling) · **Status:** open — **caught and reverted inside the run that
+caused it**, and filed because the next lane to reach for a formatter will do
+the same thing
+
+This run wrote a new module, then ran `npx prettier --write` on it and on the two
+existing files it had edited, on the assumption that the repository's style was a
+formatter's output. **There is no `.prettierrc`, no `prettier.config.*`, no
+`.editorconfig` and no formatter in `package.json`** — not in the root and not in
+`apps/loom`. So prettier ran on its own defaults, which are not this
+repository's: it added a semicolon to the end of every statement in all three
+files and rewrapped at 80 columns where the code sits at up to about 100.
+
+**What it would have cost.** Two of the three files were `src/signals/silences.ts`
+and its test, where the actual change was a vocabulary member and a condition —
+about 150 lines across both. The reformat turned that into a diff touching
+roughly every line of a 640-line module and a 700-line suite, for a change
+nobody could then review. **Nothing in `pnpm verify` would have failed**: there
+is no lint or format step, so `build`, `typecheck`, `test`, `findings:check` and
+`prerender:check` are all green on a wholly reformatted file. It was caught
+because the count of semicolons in a file this lane had not written looked wrong,
+and the two existing files were reverted and re-edited by exact replacement
+instead.
+
+**The cheap habit, which is this entry's whole point:** the style in this
+repository is maintained by hand — no semicolons, double quotes, about a
+100-column wrap — and a run that wants a file formatted should match the file
+beside it rather than invoke a tool. `npx <formatter>` in a repository with no
+configuration for that formatter is a rewrite, not a format.
+
+**What would close it**, and it is not this lane's to write: either a
+`.prettierrc` that states the style the repository already follows plus a
+`format:check` in `verify`, or a line in `docs/routines.md` saying there is
+deliberately no formatter and why. Either is fine and the second is cheaper; what
+is expensive is the current state, where the question has no answer in the
+repository and every lane has to rediscover it. Filed as an observation for the
+lane that owns the tooling, not as an ask with a deadline.
 ## 2026-10-11 — one page with no readership withholds the reader share for the whole library, and that is the ordinary state rather than the exotic one
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`
@@ -51454,6 +51584,172 @@ without pretending the prose is a tree. Whether that is worth the seam is a
 the record rather than only in a session.
 
 ---
+## 2026-10-12 — a change to a kind of part is answerable now, and the screen for it is the one an author opens the morning after changing a primitive
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens)
+· **Status:** open — **nothing is blocked and nothing on the screen today is
+wrong**; the reading is new and this is what it makes drawable, with the two
+numbers that must be read before a movement is printed as a finding
+
+`libraryChangeOf(was, now)` is on this branch, published from
+`@jam-overture/loom/signals` with
+[0266](decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md).
+It takes two windows' `PageReading`s and gives back, per primitive type and per
+role, what happened to the places that kind stands in: *the band you rewrote was
+read in three of its nine places and is read in seven now.*
+
+**Where it belongs.** `/portal/pieces` already draws the three one-window
+readings of a library (0257, 0256, 0265). This is the fourth column on the same
+rows and pairs on `kindKeyOf` exactly as those three do, so it is a column and
+not a screen — except for `mostAbandoned` and `mostTakenUp`, which are the two
+sentences a card can lead with.
+
+**The two numbers that are not optional.** `viewsWas` and `viewsNow` are floors
+on the two windows' page views, and every transition in the reading is
+confounded by them: a placement counts as read where **at least one** reader
+reached it, so a quieter window skips more places with nobody behaving
+differently. A card that prints *four of its nine places lost their reading*
+without those two beside it is printing a change in traffic as a change in
+reading. The same goes for `republished`, which says the pages moved as well as
+the window.
+
+**The one row where a type and a role deliberately disagree.** A node recast
+from one primitive into another is `lost` by the old type and `gained` by the
+new, and *held* in the role rows wherever the two play the same part. Both are
+true and the words are load-bearing: a surface that drew them as one number
+would be reporting a component that lost its readers when the place is still
+read.
+
+**The states to refuse to draw.** `unpaired` says the places moved rather than
+that nobody read them, and its remedy is the opposite of `unread`'s. `unplaced`
+is a role nothing in the library plays. All three are in the silence table as
+the twelfth vocabulary at the subject `kind`, so `distinctSilences` tells them
+apart from the census's own.
+
+---
+## 2026-10-12 — the honest reader-weighted version of a change to a kind of part needs the door on both sides, and is its own unit
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a question, not a defect**; filed rather than shipped
+inside 0266's type for the reason 0256 was filed rather than shipped inside
+0257's
+
+0266 compares a kind of part over the places both windows bore, and is explicit
+about what that is: a share of **places**, with no reader in the denominator,
+which is exactly what makes a verdict a subtraction of two whole numbers. The
+figure everybody will ask for next is the other one: *of the readers who met
+your testimonial band, the share that read it has gone from four in ten to
+seven.*
+
+**It is answerable and it is a second question.** Each side's figure already
+exists — `libraryReachOf` is a weighted mean of each place's own sound share at
+the door's scale (0256) — so the unit is a comparison of two of those over the
+paired places, which means `libraryChangeOf`'s pairing with 0256's arithmetic
+inside each side and the door rows for **both** windows.
+
+**Why it is not in this unit.** The weights move. A weighted mean over the same
+places still changes when one page's traffic grows and another's shrinks, so a
+movement in it is a movement in readers *or* in which pages they were on — the
+counterfactual problem 0251 wrote down, one level across. That needs its own
+argument about what is published and what is withheld, and putting it in 0266's
+type would have meant one row carrying a reader-free share and a reader-weighted
+one with nothing but prose to tell them apart. The prose is what a surface skips.
+
+**Nothing is lost by waiting.** The share of places is sound today and is not
+superseded by the weighted figure: it answers *in how many of the places this
+kind stands has it gained or lost its reading*, which is the question an author
+replacing a primitive has.
+
+---
+## 2026-10-12 — a change to the words a kind of part says cannot be read across two windows without 0239's intersection, per placement
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a limit written down with a shape to build**; nothing is
+wrong in what shipped
+
+A census publishes a kind's words and the words readers reached, and both add
+across its placements because a page's words partition across its parts exactly
+once (0212). `libraryChangeOf` compares no word at all, and the reason is that a
+paired placement is paired by **node**: the page's revision may have moved
+underneath it, so the two sides' words are two different sentences and
+`wordsReached ÷ words` before against after is not a before and an after.
+
+0239 solved exactly this for one page — a change is read against the words both
+revisions say, with what the change wrote counted apart — and the library-scale
+version of it is that intersection taken per placement and then added across
+placements of one kind. It is a unit of work, not a field: the intersection is
+per node and the addition is per kind, so the shape is `copyChangeOf` run per
+paired page and folded on `kindKeyOf`.
+
+**What it would answer that nothing does:** *you rewrote the testimonial band
+and readers now reach two thirds of the words it kept*, which is the sentence
+closest to what an author changing copy inside a primitive actually did.
+
+---
+## 2026-10-12 — a decision number taken on an open branch was merged onto `main` by another lane, and `pnpm decisions:index` then refuses to build
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom merge` · **Status:** open —
+**handled in the instance, and the general case is worth a line in
+`routines.md`**
+
+`routines.md` says to take the next number free on `main` and that a clash is
+renumbered when the pull request is merged. Both held and the clash still
+happened: #586 took 0259 on 11 October, because 0258 was the highest on `main`
+and no open branch claimed 0259; #592 then merged a marketing record **as** 0259
+before this lane merged `main` into its own branch the next morning.
+
+The result is not a conflict git reports. The two records are two files with two
+different names, so `main` merges cleanly and `pnpm decisions:index` then fails
+with *259 is claimed by …and…*, which is `pnpm verify` red on a branch whose own
+work is sound.
+
+**What this run did:** renumbered its own record to 0262 — the file, its own
+heading, and the four places that cite it (`silences.ts`, `docs/signals.md`,
+this file and the branch's report) — and said so in the report and in the
+earlier report's own paragraph about which number it took. The record's
+direction is untouched; only the number moved.
+
+**Renumbered again on 2026-10-12 by `Loom merge`, to 0265**, and this branch's
+second record from 0263 to 0266. `main` had meanwhile accepted a different 0262
+and a different 0263 (#602, merged 12 October), so both of this branch's records
+clashed at merge time. They are now the next two numbers free on `main`; the
+citations moved with them and neither record's direction changed.
+
+**What would make it cheaper**, and it is `Loom merge`'s call: the renumber is
+mechanical and always falls on whichever lane merges `main` next, which is the
+lane that did nothing wrong. Either the merge routine renumbers a clashing
+record as it lands a pull request (which is what `routines.md` already says it
+does, and this is the case where the clash is with `main` rather than with
+another open branch), or `tools/decisions/build-index.ts` names the remedy in
+its error — *renumber the record that is not on `main`* — so the lane that trips
+it does not have to work out which of the two is the newcomer.
+
+---
+## 2026-10-12 — the missing role declaration now costs a before-and-after as well, and this is the seventh consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **unchanged in substance from the six
+entries before it**; filed again because the cost is now a different sentence
+and because one of this reading's rows behaves worse under the silence than the
+others do
+
+Nothing in `src/primitives/` declares `role` (0114), so every role row in every
+reading of the library comes back under `role: null`. `libraryChangeOf` is the
+seventh consumer, and in it the undeclared row is not merely thin: it is the row
+that holds a **recast** node still. A node whose primitive type changed pairs in
+the role rows wherever the two types play the same part — and today every type
+plays none, so *every* swap of one primitive for another is a place still
+standing in the one role row there is.
+
+That is the correct answer for a row named *parts whose type declared no role*,
+and it is the wrong answer to the question somebody will ask of it. The day a
+role is declared the row splits and the behaviour becomes the one 0266 describes:
+a testimonial swapped for a card that plays the same part is one place held, and
+a band swapped for a control is a place lost by one role and gained by another.
+
+**What would close it** is unchanged: a role per starter primitive. Nothing here
+needs to change when it lands — 0212's join is at read time, so every counter
+already stored reinterprets.
 ## 2026-10-12 — the project scope reaches trees and revisions; holds, the policy log, signals and telemetry are still deployment-wide
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`,
