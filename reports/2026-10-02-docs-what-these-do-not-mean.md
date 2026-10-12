@@ -31,7 +31,7 @@ but a `completed` is **named after something the page cannot observe**, and the
 row left behind said only what it does mean, to a reader about to build a
 conversion report on it.
 
-![The vocabulary, with both halves](2026-10-02-docs-what-these-do-not-mean-vocabulary.png)
+![The vocabulary, with both halves](2026-10-02-docs-what-these-do-not-mean-vocabulary.webp)
 
 ## The plain version
 
@@ -131,7 +131,7 @@ the list it checks cannot see the list shrink*, filed by this lane on
 sentence about it. It holds against `READER_SIGNAL_KINDS` now, and against being
 more than one.
 
-![One row, close up](2026-10-02-docs-what-these-do-not-mean-row.png)
+![One row, close up](2026-10-02-docs-what-these-do-not-mean-row.webp)
 
 ## Decisions taken that were not specified
 
@@ -226,7 +226,7 @@ should is filed for `Loom signals`.
 
 ## At 390 pixels
 
-![On a phone](2026-10-02-docs-what-these-do-not-mean-phone.png)
+![On a phone](2026-10-02-docs-what-these-do-not-mean-phone.webp)
 
 `scrollWidth 390 / innerWidth 390` on all four shots. The caveat's hairline and
 indent survive the column; the JSON under each row scrolls inside its own box as

@@ -8,7 +8,7 @@
 **Finding closed:** *the write path refuses every node the runtime's own reserved keys are on, and the render path does not* — `Loom lessons`, 28 September
 **Findings filed:** *an unrecognised `loom:` key is now only a render diagnostic, and catching it at the write path is a four-lane change* · *the mangling, with one variable changed and the rest held still*
 
-![Four loom.feed nodes, each carrying loom:data, each drawn by the render seam](2026-09-28-framework-the-keys-the-runtime-puts-there-four-refused-nodes.png)
+![Four loom.feed nodes, each carrying loom:data, each drawn by the render seam](2026-09-28-framework-the-keys-the-runtime-puts-there-four-refused-nodes.webp)
 
 **Every node in that picture is one the Gate would not let anybody write.** It is
 `tools/specimen/answers.specimen.ts`, unmodified, photographed through the render

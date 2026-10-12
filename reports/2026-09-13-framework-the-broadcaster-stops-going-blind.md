@@ -4,7 +4,7 @@
 **Section:** §4c, reader signals · **Branch:**
 `framework-33-the-broadcaster-stops-going-blind`
 
-![The broadcaster stops going blind](2026-09-13-framework-the-broadcaster-stops-going-blind.png)
+![The broadcaster stops going blind](2026-09-13-framework-the-broadcaster-stops-going-blind.webp)
 
 ## Before anything else: the migration in my brief was finished on 19 August
 

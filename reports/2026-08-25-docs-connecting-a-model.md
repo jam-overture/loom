@@ -10,7 +10,7 @@ happens when you put a real model behind any of it.
 
 That page now exists, and it does not describe the prompt. It prints it.
 
-![The request a model would be sent, generated from the registry the example above renders through](2026-08-25-docs-connecting-a-model-request.png)
+![The request a model would be sent, generated from the registry the example above renders through](2026-08-25-docs-connecting-a-model-request.webp)
 
 ## What is on the page
 
@@ -32,12 +32,12 @@ an answer.
 
 **What one request costs**, and this is the one I did not expect to be so blunt.
 
-![Where a request's size actually goes](2026-08-25-docs-connecting-a-model-cost.png)
+![Where a request's size actually goes](2026-08-25-docs-connecting-a-model-cost.webp)
 
 **Who has to do something when it fails.** Seven codes, five actors, read off
 `interpretationFault` and `describeInterpretationError` rather than typed.
 
-![The seven ways a guess fails, in dark mode](2026-08-25-docs-connecting-a-model-faults.png)
+![The seven ways a guess fails, in dark mode](2026-08-25-docs-connecting-a-model-faults.webp)
 
 ## The decision that shaped the page
 
@@ -198,4 +198,4 @@ in `entry-points.ts`, which is one line per door and stays a single list. Not
 built, because it is a change to how the generated section reads and this branch
 is already a page. My recommendation is in the pull request comment.
 
-![The whole request at 390px, each block scrolling inside its own edge](2026-08-25-docs-connecting-a-model-phone.png)
+![The whole request at 390px, each block scrolling inside its own edge](2026-08-25-docs-connecting-a-model-phone.webp)

@@ -5,8 +5,8 @@
 **Branch:** `portal-08-can-you-trust-it` (→ `main`).
 
 Visuals, both from a clean local production build of this commit:
-[the page as it arrives](2026-08-21-portal-can-you-trust-it.png) ·
-[every disclosure opened, which is the same page with nothing hidden](2026-08-21-portal-can-you-trust-it-open.png).
+[the page as it arrives](2026-08-21-portal-can-you-trust-it.webp) ·
+[every disclosure opened, which is the same page with nothing hidden](2026-08-21-portal-can-you-trust-it-open.webp).
 
 ---
 

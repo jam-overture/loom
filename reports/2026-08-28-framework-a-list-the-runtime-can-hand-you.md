@@ -12,7 +12,7 @@ had seven since 19 August — and named the wider version in one sentence:
 
 This run closes both, and the wider one for records.
 
-![The same event, before and after](2026-08-28-framework-a-list-the-runtime-can-hand-you.png)
+![The same event, before and after](2026-08-28-framework-a-list-the-runtime-can-hand-you.webp)
 
 ---
 

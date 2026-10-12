@@ -20,7 +20,7 @@ production* and *When something looks wrong*. It is the complete list of what a
 render can tell you it could not honour, and every entry on it was produced by
 a render that told it.
 
-![The catalogue, at the group a reader is least likely to be the cause of](2026-10-10-docs-render-reports-groups.png)
+![The catalogue, at the group a reader is least likely to be the cause of](2026-10-10-docs-render-reports-groups.webp)
 
 ## The measurement that chose the page
 
@@ -224,11 +224,11 @@ Four shots, `pnpm shoot --serve apps/loom`, build stamped
 | the catalogue | `768×6274`, 24 cards in 3 groups | 24 cards at `350` wide |
 | the longest machine sentence | `290×128` on the phone, four lines | |
 
-![Every row, at the top of the list](2026-10-10-docs-render-reports-wide.png)
+![Every row, at the top of the list](2026-10-10-docs-render-reports-wide.webp)
 
-![The same page on a phone](2026-10-10-docs-render-reports-phone.png)
+![The same page on a phone](2026-10-10-docs-render-reports-phone.webp)
 
-![The four on the page that introduces them](2026-10-10-docs-rendering-a-tree-wide.png)
+![The four on the page that introduces them](2026-10-10-docs-rendering-a-tree-wide.webp)
 
 The catalogue is 6,274px tall at 1280, which is a long page and is the right
 shape for this one: it is read by arriving at it with a code, and both routes in

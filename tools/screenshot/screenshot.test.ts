@@ -52,6 +52,25 @@ describe("planning a shot list", () => {
   })
 
   /**
+   * The case that broke when the storage format changed: 13 of the 41 shot
+   * lists in `reports/` name a `.webp`, because that is the file they want to
+   * end up with. Chromium writes PNG, `pnpm reports:shrink` stores the WebP,
+   * and the list is right about the end state either way.
+   */
+  it("captures to png when the list names the webp it wants stored", () => {
+    const planned = planShots(listOf({ shots: [{ path: "/x", out: "the-record.webp" }] }))
+
+    expect(planned[0]?.file).toBe("the-record.png")
+    expect(planned[0]?.name).toBe("the-record")
+  })
+
+  it("does not append png to a name that already carries an image extension", () => {
+    const planned = planShots(listOf({ shots: [{ path: "/x", out: "shot.webp" }] }))
+
+    expect(planned[0]?.file).not.toContain(".webp.png")
+  })
+
+  /**
    * The file is relative to the list's `outDir` and the capture loop joins it
    * on, because that loop is shared with `pnpm specimen` and does the same
    * thing for both. Resolving it here as well put the picture two directories

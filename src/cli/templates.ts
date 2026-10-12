@@ -146,6 +146,25 @@ describe("the primitive registry", () => {
   })
 
   /**
+   * The audit probes from the empty props bag, which the schema of a primitive
+   * requiring anything refuses. That is fine for one that hands its props
+   * straight to React and not for one that reads them — \`name.toUpperCase()\`
+   * on a prop nobody passed throws, and nothing above can judge a component
+   * that was never successfully called.
+   *
+   * The fix is not to loosen the schema. Hand the audit a props bag it accepts:
+   *
+   * \`\`\`ts
+   * auditRegistry(registry, { props: new Map([["your.primitive", [{ name: "Example" }]]]) })
+   * \`\`\`
+   */
+  it("has no primitives the audit could not configure", () => {
+    const audit = auditRegistry(registry)
+
+    expect(audit.notConfigured, describeRegistryAudit(audit)).toEqual([])
+  })
+
+  /**
    * The one that stops a page rather than a portal: a component that throws on a
    * value its own schema accepts is one a tree the validator *accepted* can take
    * down. If you add a hook-using primitive, the probe cannot tell it from a

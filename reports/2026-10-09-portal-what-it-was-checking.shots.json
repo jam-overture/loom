@@ -2,7 +2,7 @@
 "outDir": "reports",
 "shots": [
 {
-"out": "2026-10-09-portal-what-it-was-checking-wide.png",
+"out": "2026-10-09-portal-what-it-was-checking-wide.webp",
 "path": "/portal/trust",
 "viewport": { "width": 1680, "height": 1000, "label": "wide" },
 "fullPage": true,
@@ -18,7 +18,7 @@
 }
 },
 {
-"out": "2026-10-09-portal-what-it-was-checking-phone.png",
+"out": "2026-10-09-portal-what-it-was-checking-phone.webp",
 "path": "/portal/trust",
 "viewport": "phone",
 "fullPage": true,
@@ -33,7 +33,7 @@
 }
 },
 {
-"out": "2026-10-09-portal-what-it-was-checking-open.png",
+"out": "2026-10-09-portal-what-it-was-checking-open.webp",
 "path": "/portal/trust",
 "viewport": { "width": 1680, "height": 1000, "label": "wide" },
 "fullPage": true,

@@ -272,10 +272,10 @@ order, nothing else and nothing styled by hand.
 
 | | |
 | --- | --- |
-| `never-behind-a-photograph-editorial-wide.png` | editorial, 1280 |
-| `never-behind-a-photograph-bold-wide.png` | bold, 1280 |
-| `never-behind-a-photograph-editorial-phone.png` | editorial, 390 |
-| `never-behind-a-photograph-bold-phone.png` | bold, 390 |
+| `never-behind-a-photograph-editorial-wide.webp` | editorial, 1280 |
+| `never-behind-a-photograph-bold-wide.webp` | bold, 1280 |
+| `never-behind-a-photograph-editorial-phone.webp` | editorial, 390 |
+| `never-behind-a-photograph-bold-phone.webp` | bold, 390 |
 
 **No overflow on any shot** (`scrollWidth 1280 / innerWidth 1280`; `390 / 390`).
 No literal colour anywhere — asserted page-wide by *reads every colour from the

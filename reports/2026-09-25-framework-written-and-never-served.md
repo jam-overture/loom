@@ -6,7 +6,7 @@
 **Branch:** `framework-53-both-seams-in-one-element` — pushed onto the lane's existing open pull request (#388) rather than opening a second one
 **Record added:** [0190](../decisions/0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md)
 
-![What the build read, and what it wrote](2026-09-25-framework-written-and-never-served.png)
+![What the build read, and what it wrote](2026-09-25-framework-written-and-never-served.webp)
 
 ## What was completed, in plain language
 
@@ -96,7 +96,7 @@ exit=0
 
 And the address itself, served by `next start` and photographed:
 
-![/robots.txt as a crawler receives it](2026-09-25-framework-written-and-never-served-robots-wide.png)
+![/robots.txt as a crawler receives it](2026-09-25-framework-written-and-never-served-robots-wide.webp)
 
 ## Decisions taken that were not specified
 

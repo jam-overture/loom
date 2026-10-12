@@ -5,11 +5,11 @@
 **Date:** 2026-09-08 · **Routine:** `Loom daily build` · **Section:** §1 (process) ·
 **Branch:** `framework-27-the-picture-every-lane-takes`
 
-![The harness photographing itself, bold palette, 390px](2026-09-08-framework-specimen-bold-phone.png)
+![The harness photographing itself, bold palette, 390px](2026-09-08-framework-specimen-bold-phone.webp)
 
 *The specimen this branch ships, photographed by the harness this branch ships.
 Six shots — three palettes at a true 390px and at 1280px — produced by one
-command. Above is `bold` at phone width; `2026-09-08-framework-specimen-editorial-wide.png`
+command. Above is `bold` at phone width; `2026-09-08-framework-specimen-editorial-wide.webp`
 is the same tree in the editorial palette at laptop width, and the other four are
 beside them in `reports/`.*
 

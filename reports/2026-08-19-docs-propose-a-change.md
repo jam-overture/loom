@@ -2,7 +2,7 @@
 
 **Routine:** `Loom docs` · **Branch:** `docs-02-propose-a-change` · **Section:** §4c
 
-![An ordinary change, applied — with the delta and the Gate's reasoning printed underneath](2026-08-19-docs-propose-a-change-applied.png)
+![An ordinary change, applied — with the delta and the Gate's reasoning printed underneath](2026-08-19-docs-propose-a-change-applied.webp)
 
 The second run of this routine, and the unit the first one deferred. §4c settles
 that every rendered example carries a working propose-a-change box; it now does.
@@ -55,7 +55,7 @@ paragraph later; neither opens with a type name.
 and the one tree on the site where a single `configure` breaks something several
 nodes away.
 
-![The same box in dark, refusing the change that would nest a link inside a link](2026-08-19-docs-propose-a-change-refused.png)
+![The same box in dark, refusing the change that would nest a link inside a link](2026-08-19-docs-propose-a-change-refused.webp)
 
 ## Decisions taken that were not specified
 
@@ -111,7 +111,7 @@ copy of an argument, which is the thing §4c's Architecture rule exists to refus
 Three and no more — there are exactly three dispositions, and a fourth colour
 would be inventing a verdict the runtime does not have.
 
-![A change held for the reader to answer, with the confirmation the Gate re-judges](2026-08-19-docs-propose-a-change-held.png)
+![A change held for the reader to answer, with the confirmation the Gate re-judges](2026-08-19-docs-propose-a-change-held.webp)
 
 ## What had to be written differently from what I wanted
 

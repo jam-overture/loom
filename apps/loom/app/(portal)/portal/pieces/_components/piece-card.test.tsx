@@ -157,4 +157,90 @@ describe("PieceCard", () => {
 
     expect(container.querySelector("details")?.open).toBe(false)
   })
+
+  /**
+   * Addressed by its type, so the section above the list can send a reader to
+   * the one card that needs them. The type is what the whole portal already
+   * calls this piece, so nothing had to be invented to link to it.
+   */
+  it("can be linked to by the type the rest of the portal calls it", () => {
+    const { container } = render(<PieceCard primitive={piece()} />)
+
+    expect(container.querySelector("#loom\\.card")).not.toBeNull()
+  })
+
+  /**
+   * **The two figures, and the reason they arrive as one value.**
+   *
+   * The share of the places a piece stands and the share of the readers who met
+   * it are different questions whose answers can differ by an order of
+   * magnitude — *one place in ten* and *nine readers in ten* about the same
+   * piece are both true. `howItIsRead` hands the card both halves at once, so
+   * there is no arrangement of this markup that prints one of them under the
+   * other's label.
+   */
+  it("draws both figures, each with its own population named", () => {
+    const { container } = render(
+      <PieceCard
+        primitive={piece()}
+        read={{
+          places: "It stands in 7 places on 3 pages. Readers reached it in 4 of them.",
+          readers: "2 in 10 of the readers who met it read it.",
+          withheld: undefined,
+        }}
+      />
+    )
+
+    const surface = surfaceOf(container)
+
+    expect(surface).toContain("4 of them")
+    expect(surface).toContain("2 in 10 of the readers who met it")
+  })
+
+  /**
+   * A reader who meets a places figure and a gap cannot tell a piece nobody has
+   * measured from a piece whose page has no count of arrivals, and those two
+   * send a person to completely different places. So the readers half is never
+   * absent: it is a share or it is the reason there is not one.
+   */
+  it("prints the reason instead of the readers figure, never a gap", () => {
+    const { container } = render(
+      <PieceCard
+        primitive={piece()}
+        read={{
+          places: "It stands in 7 places on 3 pages. Readers reached it in 4 of them.",
+          readers: undefined,
+          withheld: "One of the pages this piece stands on has no count of how many readers arrived.",
+        }}
+      />
+    )
+
+    const surface = surfaceOf(container)
+
+    expect(surface).toContain("4 of them")
+    expect(surface).toContain("no count of how many readers arrived")
+  })
+
+  /**
+   * Never *nothing uses this*: the reading is over the pages a deployment has
+   * counted and joined, so a piece standing only on a page whose counters have
+   * not caught up has no row and is in use all the same. The sentence is handed
+   * in for that reason — it needs to know how many pages were behind the
+   * figures, and a card does not.
+   */
+  it("says a piece is on none of the counted pages where it has no figures", () => {
+    const { container } = render(
+      <PieceCard primitive={piece()} unused="No page behind the figures on this screen uses this piece." />
+    )
+
+    expect(surfaceOf(container)).toContain("No page behind the figures on this screen")
+  })
+
+  /** The card a deployment that has measured nothing meets: exactly the card it always was. */
+  it("says nothing about readers where nothing has been measured", () => {
+    const surface = surfaceOf(render(<PieceCard primitive={piece()} />).container)
+
+    expect(surface).not.toContain("places")
+    expect(surface).not.toContain("readers")
+  })
 })

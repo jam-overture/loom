@@ -2,7 +2,7 @@
 
 **Routine:** `Loom docs` · **Branch:** `docs-04-the-api-reference` · **Section:** §4c
 
-![One entry point: title, blurb, table of contents, the first module](2026-08-20-docs-the-api-reference-entry.png)
+![One entry point: title, blurb, table of contents, the first module](2026-08-20-docs-the-api-reference-entry.webp)
 
 > *"The API reference is generated from the published entry points, not written.
 > A hand-maintained reference drifts within a week."*
@@ -57,7 +57,7 @@ without a duplicate rather than credited with the module's sentence. 158 of
 because a lint rule about comment spacing in `src/` is `Loom daily build`'s to
 add. The finding says so.
 
-![Every export a title, a sentence, and a signature — nothing more](2026-08-20-docs-the-api-reference-symbols.png)
+![Every export a title, a sentence, and a signature — nothing more](2026-08-20-docs-the-api-reference-symbols.webp)
 
 ## Two decisions taken that were not specified
 
@@ -97,7 +97,7 @@ step and CI says exactly what to do about it. A committed generated file is
 noise in a diff by default; here it earns its place, because the same pull
 request that changes the public surface shows what it changed.
 
-![The dark inversion, and a page with sixty-three modules in one glance](2026-08-20-docs-the-api-reference-dark.png)
+![The dark inversion, and a page with sixty-three modules in one glance](2026-08-20-docs-the-api-reference-dark.webp)
 
 ## Tests
 

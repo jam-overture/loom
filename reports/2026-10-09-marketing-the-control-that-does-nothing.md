@@ -105,11 +105,11 @@ md5s above are the proof that the two were one picture.
 
 | the change, said yes to | and put back |
 | --- | --- |
-| ![](2026-10-09-marketing-undo-before-wide.png) | ![](2026-10-09-marketing-undo-after-wide.png) |
+| ![](2026-10-09-marketing-undo-before-wide.webp) | ![](2026-10-09-marketing-undo-after-wide.webp) |
 | one entry, ending in *Put it back* | two entries, the second the undo's own |
 
-[the same thing at 390](2026-10-09-marketing-undo-after-phone.png) ·
-[on `bold` at 1280](2026-10-09-marketing-undo-after-bold-wide.png)
+[the same thing at 390](2026-10-09-marketing-undo-after-phone.webp) ·
+[on `bold` at 1280](2026-10-09-marketing-undo-after-bold-wide.webp)
 
 `1280 / 1280` and `390 / 390` on every shot, no overflow. The band grows from
 1,332px to 2,069px when the second entry arrives, which is why the two wide

@@ -39,7 +39,7 @@ press produces on `main`, in full, nothing left out:
 > [ Apply this change ] [ No thanks ]
 > ▸ Show the full record
 
-![before: the card as it stands on main, with a monospace origin code in the corner and a rule sentence whose "here" has no referent](2026-09-04-demo-what-an-ask-from-here-may-do-before.png)
+![before: the card as it stands on main, with a monospace origin code in the corner and a rule sentence whose "here" has no referent](2026-09-04-demo-what-an-ask-from-here-may-do-before.webp)
 
 Read the weighing and the rule together. The card says **how much risk this
 carries** — *Some risk* — and then says a limit was exceeded. **It never says
@@ -110,7 +110,7 @@ Same press, same card, on this branch:
 > This comes off the page, and everything under it goes too. *“3,400” “24” “92%”*
 > [ Apply this change ] [ No thanks ]
 
-![after: the origin code gone from the corner, and the ceiling said in plain words under the rule that read it](2026-09-04-demo-what-an-ask-from-here-may-do-after.png)
+![after: the origin code gone from the corner, and the ceiling said in plain words under the rule that read it](2026-09-04-demo-what-an-ask-from-here-may-do-after.webp)
 
 Three lines, in the order the Gate did them:
 
@@ -128,13 +128,13 @@ The whole card still fits one phone screen at 390×844, badge to disclosure,
 with both buttons in view — worth checking rather than assuming, since this made
 it two lines taller and `AnswerInView` scrolls the waiting card into view:
 
-![the same card at 390x844, whole, from the badge to the disclosure](2026-09-04-demo-what-an-ask-from-here-may-do-phone.png)
+![the same card at 390x844, whole, from the badge to the disclosure](2026-09-04-demo-what-an-ask-from-here-may-do-phone.webp)
 
 ### And the code went where the technical record goes
 
 Open *Show the full record* and the disclosure opens on a section it never had:
 
-![the disclosure open on a new "the ask" section, carrying the origin code and the time it was asked](2026-09-04-demo-what-an-ask-from-here-may-do-record.png)
+![the disclosure open on a new "the ask" section, carrying the origin code and the time it was asked](2026-09-04-demo-what-an-ask-from-here-may-do-record.webp)
 
 ```
 THE ASK
@@ -148,7 +148,7 @@ since this surface was built and which neither half of this card had ever
 printed, is beside it. The ceiling joins the verdict, next to the rule that read
 it:
 
-![the verdict rows, with "ceiling — low, for user-instruction" between the policy and the fingerprint](2026-09-04-demo-what-an-ask-from-here-may-do-verdict.png)
+![the verdict rows, with "ceiling — low, for user-instruction" between the policy and the fingerprint](2026-09-04-demo-what-an-ask-from-here-may-do-verdict.webp)
 
 ```
 THE VERDICT

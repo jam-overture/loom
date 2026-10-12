@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-19 · **Branch:**
 `primitives-39-the-half-it-could-not-say` · **Section:** §4b
 
-![The four bands of 19 September at 1280px, under editorial](2026-09-19-primitives-the-half-it-could-not-say-editorial-wide.png)
+![The four bands of 19 September at 1280px, under editorial](2026-09-19-primitives-the-half-it-could-not-say-editorial-wide.webp)
 
 ## What this run chose, and why that
 

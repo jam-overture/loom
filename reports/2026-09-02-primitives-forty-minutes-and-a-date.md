@@ -16,13 +16,13 @@ The library is **74 primitives**. The Hermes port is **52 of 70 blocks ported,
 67 of 70 settled**, and what remains is two pairs — `loom.book` and
 `loom.listing` — rather than the four the map carried this morning.
 
-![The library's two new bands under the editorial palette, at 1280px](2026-09-02-primitives-forty-minutes-wide-serif.png)
+![The library's two new bands under the editorial palette, at 1280px](2026-09-02-primitives-forty-minutes-wide-serif.webp)
 
-![The same page under the bold palette](2026-09-02-primitives-forty-minutes-wide-bold.png)
+![The same page under the bold palette](2026-09-02-primitives-forty-minutes-wide-bold.webp)
 
 Phone shots at a true 390px are alongside:
-[editorial](2026-09-02-primitives-forty-minutes-phone-serif.png),
-[bold](2026-09-02-primitives-forty-minutes-phone-bold.png).
+[editorial](2026-09-02-primitives-forty-minutes-phone-serif.webp),
+[bold](2026-09-02-primitives-forty-minutes-phone-bold.webp).
 
 *The editorial palette's two files are named `-serif` rather than `-editorial`,
 and the honest version of why is worth one paragraph, because the tidy version

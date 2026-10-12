@@ -98,9 +98,9 @@ before committing and the shot list is beside this report.
 
 | | |
 | --- | --- |
-| [**the two cards**](2026-10-08-portal-what-readers-did-wide.png) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
-| [**the record, one click down**](2026-10-08-portal-what-readers-did-open.png) | `1680×1000@2x`, every part with its standing and its counters |
-| [**the same, on a phone**](2026-10-08-portal-what-readers-did-phone.png) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
+| [**the two cards**](2026-10-08-portal-what-readers-did-wide.webp) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
+| [**the record, one click down**](2026-10-08-portal-what-readers-did-open.webp) | `1680×1000@2x`, every part with its standing and its counters |
+| [**the same, on a phone**](2026-10-08-portal-what-readers-did-phone.webp) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
 
 The section is the **second** `h3` on each card at `y 623`, above the fold at
 both viewports. The one clipping box both wide shots report is the collapsed

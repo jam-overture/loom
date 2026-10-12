@@ -55,13 +55,13 @@ to stand over it:
 
 | | |
 | --- | --- |
-| [**the arrival screen, wide**](2026-10-03-demo-the-proof-above-the-fold-after-wide.png) · [before](2026-10-03-demo-the-proof-above-the-fold-before-wide.png) | **the picture worth opening** — the claim and all four verdicts on one screen |
-| [the arrival screen, phone](2026-10-03-demo-the-proof-above-the-fold-after-phone.png) · [before](2026-10-03-demo-the-proof-above-the-fold-before-phone.png) | three of the four rows on the first screen, where none were |
-| [one click later, wide](2026-10-03-demo-the-proof-above-the-fold-after-opened-wide.png) · [on a phone](2026-10-03-demo-the-proof-above-the-fold-after-opened-phone.png) | **nothing is removed** — the band is back, unchanged |
-| [what it took to see a row before](2026-10-03-demo-the-proof-above-the-fold-before-asks-wide.png) | the old rail, scrolled to the last ask |
-| [the question, one press later](2026-10-03-demo-the-proof-above-the-fold-held-unchanged.png) | **unchanged, byte for byte** |
-| [the payoff, two presses later](2026-10-03-demo-the-proof-above-the-fold-applied-unchanged.png) | **unchanged, byte for byte** |
-| [the embed at 348 × 465](2026-10-03-demo-the-proof-above-the-fold-embed-unchanged.png) | **unchanged, byte for byte** |
+| [**the arrival screen, wide**](2026-10-03-demo-the-proof-above-the-fold-after-wide.webp) · [before](2026-10-03-demo-the-proof-above-the-fold-before-wide.webp) | **the picture worth opening** — the claim and all four verdicts on one screen |
+| [the arrival screen, phone](2026-10-03-demo-the-proof-above-the-fold-after-phone.webp) · [before](2026-10-03-demo-the-proof-above-the-fold-before-phone.webp) | three of the four rows on the first screen, where none were |
+| [one click later, wide](2026-10-03-demo-the-proof-above-the-fold-after-opened-wide.webp) · [on a phone](2026-10-03-demo-the-proof-above-the-fold-after-opened-phone.webp) | **nothing is removed** — the band is back, unchanged |
+| [what it took to see a row before](2026-10-03-demo-the-proof-above-the-fold-before-asks-wide.webp) | the old rail, scrolled to the last ask |
+| [the question, one press later](2026-10-03-demo-the-proof-above-the-fold-held-unchanged.webp) | **unchanged, byte for byte** |
+| [the payoff, two presses later](2026-10-03-demo-the-proof-above-the-fold-applied-unchanged.webp) | **unchanged, byte for byte** |
+| [the embed at 348 × 465](2026-10-03-demo-the-proof-above-the-fold-embed-unchanged.webp) | **unchanged, byte for byte** |
 
 ## What specifically failed, diagnosed before anything was built
 

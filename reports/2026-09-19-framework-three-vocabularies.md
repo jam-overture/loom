@@ -10,7 +10,7 @@
 runtime seam whose only surface is the string sent to a model, and no page in
 the repository wires one of the three registries into an interpreter yet.
 
-![five projections, two of which were sending](2026-09-19-framework-three-vocabularies.png)
+![five projections, two of which were sending](2026-09-19-framework-three-vocabularies.webp)
 
 ## What this was
 

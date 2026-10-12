@@ -7,9 +7,9 @@ Two pairs — `loom.milestone-list` / `loom.milestone` and `loom.person-grid` /
 [`docs/hermes-port-map.md`](../docs/hermes-port-map.md), which is the more
 useful half of this run.
 
-![The two new bands under the editorial palette](2026-08-17-primitives-the-sequence-bands-editorial.png)
+![The two new bands under the editorial palette](2026-08-17-primitives-the-sequence-bands-editorial.webp)
 
-![The same specimen under the bold palette](2026-08-17-primitives-the-sequence-bands-bold.png)
+![The same specimen under the bold palette](2026-08-17-primitives-the-sequence-bands-bold.webp)
 
 ## What the maintainer asked for
 

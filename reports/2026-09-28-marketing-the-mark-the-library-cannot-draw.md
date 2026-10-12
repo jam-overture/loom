@@ -9,9 +9,9 @@ alone.
 
 | the spike, `minimal` | |
 | --- | --- |
-| ![](2026-09-28-marketing-bar-glyph-minimal.png) | |
+| ![](2026-09-28-marketing-bar-glyph-minimal.webp) | |
 | **the same spike, `bold`** | |
-| ![](2026-09-28-marketing-bar-glyph-bold.png) | |
+| ![](2026-09-28-marketing-bar-glyph-bold.webp) | |
 
 The first is what was asked for. The second is why it is not shipping.
 
@@ -47,7 +47,7 @@ One or the other; `name` becomes the `alt`. **There is no mark-beside-wordmark
 shape in the library at all** — pointing the existing wordmark at the icon does
 not add a glyph, it *replaces* the word:
 
-![the glyph replacing the wordmark](2026-09-28-marketing-bar-glyph-replaces-wordmark.png)
+![the glyph replacing the wordmark](2026-09-28-marketing-bar-glyph-replaces-wordmark.webp)
 
 The spike composed around it with two `loom.logo` nodes in a row. It renders,
 and it is a hack: two logos where there is one brand, and the accessible name

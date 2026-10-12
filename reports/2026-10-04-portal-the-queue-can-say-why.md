@@ -83,8 +83,8 @@ a checkout or a mailer, and this one registers four pieces.
 
 | | |
 | --- | --- |
-| [**the review queue**](2026-10-04-portal-queue-why-wide.png) | `1680×1000@2x`, full page — both obstacles, on two cards |
-| [**the same, on a phone**](2026-10-04-portal-queue-why-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**the review queue**](2026-10-04-portal-queue-why-wide.webp) | `1680×1000@2x`, full page — both obstacles, on two cards |
+| [**the same, on a phone**](2026-10-04-portal-queue-why-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 ---
 

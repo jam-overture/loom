@@ -11,7 +11,7 @@ Now every page of it carries the way into the documentation, the way into the
 portal, and a band on the home page that says what is behind each — including
 that one of them needs a sign-in.
 
-![The home page](2026-08-20-marketing-the-front-door-home.png)
+![The home page](2026-08-20-marketing-the-front-door-home.webp)
 
 ---
 
@@ -54,7 +54,7 @@ cosmetic:
   previous "columns" were columns only in the sense that they were arranged that
   way.
 
-![The header](2026-08-20-marketing-the-front-door-header.png)
+![The header](2026-08-20-marketing-the-front-door-header.webp)
 
 A quiet button is not a nav item, which is the sharpest thing #97 says and is
 visible in the shot above: five buttons in a row read as five dismissed choices,
@@ -83,7 +83,7 @@ like it means something, so `surfaceHref` omits it and a test says so.
 
 ### Where to go from here
 
-![The band](2026-08-20-marketing-the-front-door-ways-in.png)
+![The band](2026-08-20-marketing-the-front-door-ways-in.webp)
 
 Three cards, and the middle one is the reason the band is worth building rather
 than leaving to the footer: **the portal needs a sign-in, and the card says so.**
@@ -102,7 +102,7 @@ way in, and *portal* is a name for something they have not seen yet. This is the
 `supabase.com` shape 0067 names, and it is also the plain-language rule: a
 stranger should not have to learn a noun to find the door.
 
-![The footer](2026-08-20-marketing-the-front-door-footer.png)
+![The footer](2026-08-20-marketing-the-front-door-footer.webp)
 
 ## Tests
 
@@ -169,7 +169,7 @@ renders it. Verified rather than assumed — `getComputedStyle` reports
 viewport capture for that reason. Worth knowing before anyone reads a future
 full-page screenshot as evidence.
 
-![Bold, in an ordinary viewport](2026-08-20-marketing-the-front-door-bold.png)
+![Bold, in an ordinary viewport](2026-08-20-marketing-the-front-door-bold.webp)
 
 **The face is still the fallback in every shot**, as it was last run. The layout
 links Geist under its real name and `curl` confirms the URL serves
@@ -177,10 +177,10 @@ links Geist under its real name and `curl` confirms the URL serves
 `fonts.googleapis.com` through the sandbox's egress proxy. The preview deployment
 is where the face gets confirmed, and it is still worth confirming by eye.
 
-- [home · minimal](2026-08-20-marketing-the-front-door-home.png)
-- [how it works · minimal](2026-08-20-marketing-the-front-door-how-it-works.png)
-- [header](2026-08-20-marketing-the-front-door-header.png) · [footer](2026-08-20-marketing-the-front-door-footer.png) · [the new band](2026-08-20-marketing-the-front-door-ways-in.png)
-- [home · bold](2026-08-20-marketing-the-front-door-bold.png)
+- [home · minimal](2026-08-20-marketing-the-front-door-home.webp)
+- [how it works · minimal](2026-08-20-marketing-the-front-door-how-it-works.webp)
+- [header](2026-08-20-marketing-the-front-door-header.webp) · [footer](2026-08-20-marketing-the-front-door-footer.webp) · [the new band](2026-08-20-marketing-the-front-door-ways-in.webp)
+- [home · bold](2026-08-20-marketing-the-front-door-bold.webp)
 
 ## Still outstanding, and unchanged by this run
 

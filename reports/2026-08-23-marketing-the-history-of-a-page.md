@@ -8,7 +8,7 @@ actually need and it is not *what happened to this page just now* — it is **wh
 happened to this page last Tuesday, and in what order, and which of those is the
 one to put back.** This run is the page that answers that.
 
-![Four requests, in order, with the front page as they left it](2026-08-23-marketing-the-history-of-a-page-run.png)
+![Four requests, in order, with the front page as they left it](2026-08-23-marketing-the-history-of-a-page-run.webp)
 
 ---
 
@@ -34,7 +34,7 @@ lists requests can be wrong about the page; an outline that only lists bands
 cannot say why. Together they are checkable against each other, and
 `the-record.test.ts` checks them.
 
-![Nothing asked for yet](2026-08-23-marketing-the-history-of-a-page-empty.png)
+![Nothing asked for yet](2026-08-23-marketing-the-history-of-a-page-empty.webp)
 
 ## It keeps nothing, and that is the interesting part
 
@@ -82,7 +82,7 @@ rearranged twice, the floor holds and the entry says which rules it was and what
 they protect. A history is where "the rule holds every time" stops being a claim
 about one button.
 
-![The refusal, three changes in](2026-08-23-marketing-the-history-of-a-page-refused.png)
+![The refusal, three changes in](2026-08-23-marketing-the-history-of-a-page-refused.webp)
 
 ## Putting it back, and the sentence that says what this page cannot do
 
@@ -104,7 +104,7 @@ rather than quietly offering a button for both cases: taking a change out of the
 a different question from undoing it. The place built to answer that one is the
 portal, and the page says so and links there.
 
-![A change the rules held, waiting for the visitor](2026-08-23-marketing-the-history-of-a-page-held.png)
+![A change the rules held, waiting for the visitor](2026-08-23-marketing-the-history-of-a-page-held.webp)
 
 ## Only what still has somewhere to go
 
@@ -185,7 +185,7 @@ The ones worth naming:
   exactly the right shape for a page's outline: a tick for a band that is there,
   a cross for one that was taken away, and a note for what happened to it.
 
-![The same page, bold palette, no colour named anywhere](2026-08-23-marketing-the-history-of-a-page-bold.png)
+![The same page, bold palette, no colour named anywhere](2026-08-23-marketing-the-history-of-a-page-bold.webp)
 
 ## Open questions
 
@@ -203,4 +203,4 @@ All the maintainer's, and all standing:
   rewrites. The header and the footer carry the page on every route meanwhile,
   which is what 0070 asks for; the deeper link is one line once #134 merges.
 
-![Three rows of menu on a phone, and the page below it](2026-08-23-marketing-the-history-of-a-page-phone.png)
+![Three rows of menu on a phone, and the page below it](2026-08-23-marketing-the-history-of-a-page-phone.webp)

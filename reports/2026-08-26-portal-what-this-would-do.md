@@ -9,10 +9,10 @@ signed-in browser:
 
 | | |
 | --- | --- |
-| [The review queue as a reviewer meets it](2026-08-26-portal-what-this-would-do.png) | 1280px |
-| [the same screen with every disclosure opened](2026-08-26-portal-what-this-would-do-open.png) | 1280px |
-| [a phone](2026-08-26-portal-what-this-would-do-phone.png) | 390px |
-| [the pages screen, and its durability notice](2026-08-26-portal-what-this-would-do-pages.png) | 1280px |
+| [The review queue as a reviewer meets it](2026-08-26-portal-what-this-would-do.webp) | 1280px |
+| [the same screen with every disclosure opened](2026-08-26-portal-what-this-would-do-open.webp) | 1280px |
+| [a phone](2026-08-26-portal-what-this-would-do-phone.webp) | 390px |
+| [the pages screen, and its durability notice](2026-08-26-portal-what-this-would-do-pages.webp) | 1280px |
 
 **How honest these are, stated plainly.** The screen, the store, the hold store,
 the read path and the components are all real. There is **no `ANTHROPIC_API_KEY`

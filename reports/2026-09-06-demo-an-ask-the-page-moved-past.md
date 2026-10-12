@@ -44,7 +44,7 @@ asking you**. It is not asking.
 
 | the card, before | the card, now |
 | --- | --- |
-| ![before: Waiting on you, no buttons, and the conflict code](2026-09-06-demo-an-ask-the-page-moved-past-before.png) | ![after: Nothing changed, the sentence, and Ask for this again](2026-09-06-demo-an-ask-the-page-moved-past-after.png) |
+| ![before: Waiting on you, no buttons, and the conflict code](2026-09-06-demo-an-ask-the-page-moved-past-before.webp) | ![after: Nothing changed, the sentence, and Ask for this again](2026-09-06-demo-an-ask-the-page-moved-past-after.webp) |
 
 ### Nothing in the runtime is wrong, and it is not even quiet about it
 
@@ -107,19 +107,19 @@ actually on the stage:
 
 | the page, before | the page, now |
 | --- | --- |
-| ![before: the numbers band still ringed amber, "This would be removed"](2026-09-06-demo-an-ask-the-page-moved-past-before-page.png) | ![after: the section that landed, ringed green, "New — just added"](2026-09-06-demo-an-ask-the-page-moved-past-after-page.png) |
+| ![before: the numbers band still ringed amber, "This would be removed"](2026-09-06-demo-an-ask-the-page-moved-past-before-page.webp) | ![after: the section that landed, ringed green, "New — just added"](2026-09-06-demo-an-ask-the-page-moved-past-after-page.webp) |
 
 **Nothing is removed.** The whole weighing stays on the card — both axes, the
 rule, the ceiling — and the two revisions behind the plain sentence are one click
 down, in a row labelled `weighed at`:
 
-![the disclosure: weighed at, revision 0, and the page is at 1](2026-09-06-demo-an-ask-the-page-moved-past-record.png)
+![the disclosure: weighed at, revision 0, and the page is at 1](2026-09-06-demo-an-ask-the-page-moved-past-record.webp)
 
 At 390×844 both cards fit the rail and are told apart by their badge and by the
 colour of the rule beside them — amber for a question still open, grey for one
 that is shut:
 
-![390x844: the applied card and the dead one, one above the other](2026-09-06-demo-an-ask-the-page-moved-past-phone.png)
+![390x844: the applied card and the dead one, one above the other](2026-09-06-demo-an-ask-the-page-moved-past-phone.webp)
 
 ## What was built
 

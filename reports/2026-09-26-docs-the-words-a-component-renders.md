@@ -9,12 +9,12 @@ run's is: `*.vercel.app` is off this sandbox's egress allowlist. Everything
 measured below is a production build (`next build && next start`), fetched over
 real HTTP and driven in Chromium.
 
-![The same query, on `main` and on this branch](2026-09-26-docs-the-words-a-component-renders-before-install.png)
+![The same query, on `main` and on this branch](2026-09-26-docs-the-words-a-component-renders-before-install.webp)
 
 *On `main`: **"Nothing on the site says 'same declaration reached two ways'"** —
 with the sentence three inches below the dialog, on the page behind it.*
 
-![The same query, answered](2026-09-26-docs-the-words-a-component-renders-after-install.png)
+![The same query, answered](2026-09-26-docs-the-words-a-component-renders-after-install.webp)
 
 *On this branch: one result, the page the sentence is on, cut at the sentence.*
 
@@ -130,7 +130,7 @@ end in something. On a written page a heading opens a section and is never
 inside a body; on a one-body page it ran into the sentence under it — *"…keeps
 its promises. No import has everything behind it The usual shape of a package…"*
 
-![Four results where there had been three unrelated headings](2026-09-26-docs-the-words-a-component-renders-after-wide.png)
+![Four results where there had been three unrelated headings](2026-09-26-docs-the-words-a-component-renders-after-wide.webp)
 
 *`no import has everything`: the front door first, with the band that answers as
 its excerpt — and, under it, the crowding this run also measured and filed.*
@@ -253,7 +253,7 @@ the module's own comment.
 `scrollWidth 390 / innerWidth 390`, on both. The dialog is the chrome's and this
 run did not touch it.
 
-![The search on a phone](2026-09-26-docs-the-words-a-component-renders-after-phone.png)
+![The search on a phone](2026-09-26-docs-the-words-a-component-renders-after-phone.webp)
 
 ## Scope
 

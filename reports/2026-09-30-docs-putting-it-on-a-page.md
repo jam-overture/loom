@@ -30,7 +30,7 @@ know how to mount one.
 There is now a section between *Registering your own* and *What a model gets
 shown* called **Putting it on a page**.
 
-![The two frames](2026-09-30-docs-putting-it-on-a-page-frames.png)
+![The two frames](2026-09-30-docs-putting-it-on-a-page-frames.webp)
 
 *The same band, rendered once and placed in two frames. Both call `themeStyle`,
 so the ink is the tree's in both. The top one kept the ground its own chrome was
@@ -82,7 +82,7 @@ to show a stranger what they were about to lose rendered like the top frame for
 three weeks. Nothing errored. The page states neither figure in prose — there is
 a test whose only job is that it does not.
 
-![What themeGround came back with](2026-09-30-docs-putting-it-on-a-page-ground.png)
+![What themeGround came back with](2026-09-30-docs-putting-it-on-a-page-ground.webp)
 
 *Three rows, read off the returned object rather than typed, so a fourth
 declaration on `ThemeGround` appears here and a renamed one cannot leave a stale
@@ -138,7 +138,7 @@ photographed on a desktop, and the first version cropped.
 lays out as it does on a phone, and the caption under each keeps its ratio on one
 line at font size.
 
-![On a phone](2026-09-30-docs-putting-it-on-a-page-phone.png)
+![On a phone](2026-09-30-docs-putting-it-on-a-page-phone.webp)
 
 ## The code block compiles
 

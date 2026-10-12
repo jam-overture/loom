@@ -14,12 +14,12 @@ signed-in browser, against a page **a live model changed during this run**:
 
 | | |
 | --- | --- |
-| [The page — headed by its own name, with the id under it](2026-09-06-portal-your-page-has-a-name.png) | 1280px |
-| [Your pages — a row a person can recognise](2026-09-06-portal-your-page-has-a-name-list.png) | 1280px |
-| [The front door — which page a waiting change is waiting on](2026-09-06-portal-your-page-has-a-name-front-door.png) | 1280px |
-| [Does it add up? — the chooser](2026-09-06-portal-your-page-has-a-name-checkup.png) | 1280px |
-| [History — the chooser, on a fresh deployment](2026-09-06-portal-your-page-has-a-name-history.png) | 1280px |
-| [a phone](2026-09-06-portal-your-page-has-a-name-phone.png) | 390px |
+| [The page — headed by its own name, with the id under it](2026-09-06-portal-your-page-has-a-name.webp) | 1280px |
+| [Your pages — a row a person can recognise](2026-09-06-portal-your-page-has-a-name-list.webp) | 1280px |
+| [The front door — which page a waiting change is waiting on](2026-09-06-portal-your-page-has-a-name-front-door.webp) | 1280px |
+| [Does it add up? — the chooser](2026-09-06-portal-your-page-has-a-name-checkup.webp) | 1280px |
+| [History — the chooser, on a fresh deployment](2026-09-06-portal-your-page-has-a-name-history.webp) | 1280px |
+| [a phone](2026-09-06-portal-your-page-has-a-name-phone.webp) | 390px |
 
 **How honest these are.** `LOOM_ANTHROPIC_API_KEY` is present in this
 environment, so nothing was staged. Two requests were typed into the real prompt

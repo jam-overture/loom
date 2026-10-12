@@ -12,12 +12,12 @@ Visuals — a production build of this commit, in a signed-in browser:
 
 | | |
 | --- | --- |
-| [What's changed, scoped to the page](2026-09-14-portal-named-by-what-it-leads-with-history.png) | 1280px — **the change** |
-| [The same screen, every disclosure open](2026-09-14-portal-named-by-what-it-leads-with-history-open.png) | 1280px |
-| [The page before the ask](2026-09-14-portal-named-by-what-it-leads-with-page-before.png) | 1280px — the card, and the rail beside it |
-| [The page after it](2026-09-14-portal-named-by-what-it-leads-with-page.png) | 1280px |
-| [The front door](2026-09-14-portal-named-by-what-it-leads-with-front.png) | 1280px |
-| [a phone](2026-09-14-portal-named-by-what-it-leads-with-phone.png) | 390px — 390 vs 390, no overflow |
+| [What's changed, scoped to the page](2026-09-14-portal-named-by-what-it-leads-with-history.webp) | 1280px — **the change** |
+| [The same screen, every disclosure open](2026-09-14-portal-named-by-what-it-leads-with-history-open.webp) | 1280px |
+| [The page before the ask](2026-09-14-portal-named-by-what-it-leads-with-page-before.webp) | 1280px — the card, and the rail beside it |
+| [The page after it](2026-09-14-portal-named-by-what-it-leads-with-page.webp) | 1280px |
+| [The front door](2026-09-14-portal-named-by-what-it-leads-with-front.webp) | 1280px |
+| [a phone](2026-09-14-portal-named-by-what-it-leads-with-phone.webp) | 390px — 390 vs 390, no overflow |
 
 **Taken from a running portal, with nothing staged.** A `next start` of this
 commit, signed in, the seeded page at revision 0, one thing typed into the prompt

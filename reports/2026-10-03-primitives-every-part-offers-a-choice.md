@@ -285,8 +285,8 @@ second band contains a kind of node the first has nowhere to put.
 
 | | editorial | bold |
 | --- | --- | --- |
-| wide, all eight bands | ![](2026-10-03-primitives-every-part-offers-a-choice-editorial-wide.png) | ![](2026-10-03-primitives-every-part-offers-a-choice-bold-wide.png) |
-| phone | ![](2026-10-03-primitives-every-part-offers-a-choice-editorial-phone.png) | ![](2026-10-03-primitives-every-part-offers-a-choice-bold-phone.png) |
+| wide, all eight bands | ![](2026-10-03-primitives-every-part-offers-a-choice-editorial-wide.webp) | ![](2026-10-03-primitives-every-part-offers-a-choice-bold-wide.webp) |
+| phone | ![](2026-10-03-primitives-every-part-offers-a-choice-editorial-phone.webp) | ![](2026-10-03-primitives-every-part-offers-a-choice-bold-phone.webp) |
 
 No shot overflows its viewport on either palette:
 
