@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4727,7 +4727,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4773,7 +4773,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5760,10 +5760,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 213,
+      "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5771,7 +5771,7 @@
           {
             "specifier": "@jam-overture/loom-primitives/compositions",
             "slug": "primitives-compositions",
-            "names": 13
+            "names": 21
           }
         ],
         "collisions": []
@@ -5837,6 +5837,34 @@
               "signature": "const PAGE_SEQUENCE: readonly Composition[]",
               "truncated": false,
               "summary": "One design of each band, in the order a page uses them."
+            },
+            {
+              "name": "DOCUMENT_COMPOSITIONS",
+              "kind": "value",
+              "signature": "const DOCUMENT_COMPOSITIONS: readonly DocumentComposition[]",
+              "truncated": false,
+              "summary": "Every design of every region of an interior document."
+            },
+            {
+              "name": "DOCUMENT_DESIGNS",
+              "kind": "value",
+              "signature": "const DOCUMENT_DESIGNS: Readonly<Record<DocumentPart, string>>",
+              "truncated": false,
+              "summary": "Which design each region of a document takes."
+            },
+            {
+              "name": "DOCUMENT_SEQUENCE",
+              "kind": "value",
+              "signature": "const DOCUMENT_SEQUENCE: readonly (Composition | DocumentComposition)[]",
+              "truncated": false,
+              "summary": "One design of each region of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DOCUMENT_TYPES",
+              "kind": "value",
+              "signature": "const DOCUMENT_TYPES: readonly string[]",
+              "truncated": false,
+              "summary": "The primitive types the document sequence needs, which is the second half of the registry a host building both kinds of page registers:"
             }
           ]
         },
@@ -5867,6 +5895,13 @@
               "summary": "A band of a page, dropped in whole as one operation."
             },
             {
+              "name": "Band",
+              "kind": "type",
+              "signature": "type Band = Omit<Composition, \"part\"> & {\n    readonly part: string;\n};",
+              "truncated": false,
+              "summary": "A band of some page kind, which is all that planning one needs to know."
+            },
+            {
               "name": "COMPOSITION_INTERPRETER",
               "kind": "value",
               "signature": "const COMPOSITION_INTERPRETER = \"loom/composition\"",
@@ -5890,16 +5925,44 @@
             {
               "name": "planComposition",
               "kind": "function",
-              "signature": "const planComposition: (composition: Composition, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
+              "signature": "const planComposition: (composition: Band, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
               "truncated": false,
               "summary": "One `insert`, computed against the tree as it stands."
             },
             {
               "name": "compositionInterpreter",
               "kind": "function",
-              "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
+              "signature": "const compositionInterpreter: (composition: Band, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
               "truncated": false,
               "summary": "A composition as an ordinary `ChangeInterpreter`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/document",
+          "title": "Document",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "DOCUMENT_PARTS",
+              "kind": "value",
+              "signature": "const DOCUMENT_PARTS: readonly [\"nav\", \"trail\", \"document\", \"onward\", \"footer\"]",
+              "truncated": false,
+              "summary": "The regions of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DocumentPart",
+              "kind": "type",
+              "signature": "type DocumentPart = (typeof DOCUMENT_PARTS)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DocumentComposition",
+              "kind": "type",
+              "signature": "type DocumentComposition = Omit<Composition, \"part\"> & {\n    readonly part: DocumentPart;\n};",
+              "truncated": false,
+              "summary": "A band of an interior document."
             }
           ]
         },
@@ -6225,10 +6288,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 76,
+      "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6236,7 +6299,7 @@
           {
             "specifier": "@jam-overture/loom-primitives",
             "slug": "primitives",
-            "names": 13
+            "names": 21
           }
         ],
         "collisions": []
@@ -6281,6 +6344,34 @@
               "signature": "const PAGE_SEQUENCE: readonly Composition[]",
               "truncated": false,
               "summary": "One design of each band, in the order a page uses them."
+            },
+            {
+              "name": "DOCUMENT_COMPOSITIONS",
+              "kind": "value",
+              "signature": "const DOCUMENT_COMPOSITIONS: readonly DocumentComposition[]",
+              "truncated": false,
+              "summary": "Every design of every region of an interior document."
+            },
+            {
+              "name": "DOCUMENT_DESIGNS",
+              "kind": "value",
+              "signature": "const DOCUMENT_DESIGNS: Readonly<Record<DocumentPart, string>>",
+              "truncated": false,
+              "summary": "Which design each region of a document takes."
+            },
+            {
+              "name": "DOCUMENT_SEQUENCE",
+              "kind": "value",
+              "signature": "const DOCUMENT_SEQUENCE: readonly (Composition | DocumentComposition)[]",
+              "truncated": false,
+              "summary": "One design of each region of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DOCUMENT_TYPES",
+              "kind": "value",
+              "signature": "const DOCUMENT_TYPES: readonly string[]",
+              "truncated": false,
+              "summary": "The primitive types the document sequence needs, which is the second half of the registry a host building both kinds of page registers:"
             }
           ]
         },
@@ -6507,6 +6598,13 @@
               "summary": "A band of a page, dropped in whole as one operation."
             },
             {
+              "name": "Band",
+              "kind": "type",
+              "signature": "type Band = Omit<Composition, \"part\"> & {\n    readonly part: string;\n};",
+              "truncated": false,
+              "summary": "A band of some page kind, which is all that planning one needs to know."
+            },
+            {
               "name": "COMPOSITION_INTERPRETER",
               "kind": "value",
               "signature": "const COMPOSITION_INTERPRETER = \"loom/composition\"",
@@ -6530,14 +6628,14 @@
             {
               "name": "planComposition",
               "kind": "function",
-              "signature": "const planComposition: (composition: Composition, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
+              "signature": "const planComposition: (composition: Band, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
               "truncated": false,
               "summary": "One `insert`, computed against the tree as it stands."
             },
             {
               "name": "compositionInterpreter",
               "kind": "function",
-              "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
+              "signature": "const compositionInterpreter: (composition: Band, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
               "truncated": false,
               "summary": "A composition as an ordinary `ChangeInterpreter`."
             }
@@ -6678,6 +6776,48 @@
               "name": "ctaSignupBand",
               "kind": "value",
               "signature": "const ctaSignupBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/document",
+          "title": "Document",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "DOCUMENT_PARTS",
+              "kind": "value",
+              "signature": "const DOCUMENT_PARTS: readonly [\"nav\", \"trail\", \"document\", \"onward\", \"footer\"]",
+              "truncated": false,
+              "summary": "The regions of an interior document, in the order a reader meets them."
+            },
+            {
+              "name": "DocumentPart",
+              "kind": "type",
+              "signature": "type DocumentPart = (typeof DOCUMENT_PARTS)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DocumentComposition",
+              "kind": "type",
+              "signature": "type DocumentComposition = Omit<Composition, \"part\"> & {\n    readonly part: DocumentPart;\n};",
+              "truncated": false,
+              "summary": "A band of an interior document."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/document-band",
+          "title": "Document band",
+          "summary": "The text itself — one continuous document, with the way around it beside it.",
+          "symbols": [
+            {
+              "name": "documentBand",
+              "kind": "value",
+              "signature": "const documentBand: DocumentComposition",
               "truncated": false,
               "summary": ""
             }
@@ -7006,6 +7146,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/nav-docs-band",
+          "title": "Nav docs band",
+          "summary": "The bar above a document: the way home, the sections of the site, what you are reading, and a way to search it.",
+          "symbols": [
+            {
+              "name": "navDocsBand",
+              "kind": "value",
+              "signature": "const navDocsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/nav-menus-band",
           "title": "Nav menus band",
           "summary": "",
@@ -7028,6 +7182,20 @@
               "name": "offeringsBand",
               "kind": "value",
               "signature": "const offeringsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/onward-band",
+          "title": "Onward band",
+          "summary": "Where this page sits in the run the reader is walking — back one, on one, and the way up.",
+          "symbols": [
+            {
+              "name": "onwardBand",
+              "kind": "value",
+              "signature": "const onwardBand: DocumentComposition",
               "truncated": false,
               "summary": ""
             }
@@ -7258,6 +7426,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/trail-band",
+          "title": "Trail band",
+          "summary": "Where the reader is, under the header and above the text.",
+          "symbols": [
+            {
+              "name": "trailBand",
+              "kind": "value",
+              "signature": "const trailBand: DocumentComposition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/whats-on-band",
           "title": "Whats on band",
           "summary": "",
@@ -7288,7 +7470,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7893,7 +8075,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8121,7 +8303,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8580,7 +8762,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8934,7 +9116,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9089,7 +9271,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 51,
+      "files": 52,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9102,7 +9284,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10276,6 +10458,76 @@
           ]
         },
         {
+          "module": "signals/library-change",
+          "title": "Library change",
+          "summary": "What a change did to a kind of part, everywhere it stands.",
+          "symbols": [
+            {
+              "name": "KindChangeSilence",
+              "kind": "type",
+              "signature": "type KindChangeSilence =\n/**\n * It stands in both windows, and no place of it can be spoken for on both\n * sides.\n *\n * Every paired placement is `unknown` in one window or the other — a page\n * neither window measured, or one window that measured it and one that did\n * not. The places are still counted in {@link KindChange.places}; what is\n * withheld is the comparison, because a standing of `unknown` is *nothing can\n * be said* and never *nobody read it*.\n */\n\"unread\"\n/**\n * Nothing in the pages read, on either side, is of this kind.\n *\n * Only ever a role row, and the reason a role row exists for every member of\n * the vocabulary: *nothing in this library is a heading* is a fact about the\n * library rather than a missing row. A type row cannot be in this state,\n * because a type row exists only where a part of that type stands on one side\n * or the other.\n */\n | \"unplaced\"\n/**\n * It stands in both windows and in no place that is in both.\n *\n * Every placement was gained or lost: the pages it stood on are gone and it\n * is somewhere else now, or the nodes were rewritten. There is nothing held\n * still, so there is nothing to compare — and that is an answer about the\n * **library** rather than about its readers, which\n * {@link KindChange.gained} and {@link KindChange.lost} are the size of.\n *\n * Kept apart from `unread` because the instructions are opposite: this one\n * says the places moved, and the other says nobody has been seen in them.\n */\n | \"unpaired\";",
+              "truncated": false,
+              "summary": "Why a kind of part has no before and after."
+            },
+            {
+              "name": "KIND_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const KIND_CHANGE_SILENCES: readonly KindChangeSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindChangeSilence",
+              "kind": "function",
+              "signature": "const describeKindChangeSilence: (silence: KindChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a kind has no before and after."
+            },
+            {
+              "name": "KindMovement",
+              "kind": "type",
+              "signature": "type KindMovement =\n/** More places of it are read now than were, which is the sentence a change to a primitive is made for. */\n\"taken-up\"\n/** Fewer are. */\n | \"abandoned\"\n/**\n * Exactly as many are, which includes places trading places: two taken up and\n * two fallen away is `held`, and the two counts are published so that a\n * surface can say so.\n */\n | \"held\"\n/**\n * No place of it was read in either window.\n *\n * Kept apart from `held` for the reason a comparison of what readers did\n * keeps `still-untouched` from it: *skipped everywhere, and still\n * skipped everywhere* is the one state here that is an instruction. There is\n * deliberately no sibling for *read everywhere and still read everywhere* —\n * that is `held` at a share of one, and it asks nobody to do anything.\n */\n | \"still-unread\"\n/** {@link KindChange.silence} says why nothing can be said. */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to a kind of part between the two windows."
+            },
+            {
+              "name": "KIND_MOVEMENTS",
+              "kind": "value",
+              "signature": "const KIND_MOVEMENTS: readonly KindMovement[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindMovement",
+              "kind": "function",
+              "signature": "const describeKindMovement: (movement: KindMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a kind's before and after in front of a person."
+            },
+            {
+              "name": "KindChange",
+              "kind": "type",
+              "signature": "type KindChange = {\n    readonly kind: KindKey;\n    /**\n     * What part a type plays, or `null`. Always `null` on a role row, which\n     * carries it as its key.\n     *\n     * The later window's answer where it stands there, so that a surface reading a\n     * row and the role beside it is reading today's library.\n     */\n    readonly role: PrimitiveRole | null;\n    /** Places of this kind that stand in both windows: the same node of the same page, of this kind on both sides. */\n    readonly places: number;\n    /** Places of it in the later window with no counterpart in the earlier one. */\n    readonly gained: number;\n    /** Places of it in the earlier window with no counterpart in the later one. */\n    readonly lost: number;\n    /**\n     * Of {@link places}, those with a verdict on **both** sides, which is the\n     * denominator of both shares.\n     *\n     * One number and not two, which is the whole of why the two shares are\n     * comparable: a place nothing can be said about in either window is in neither\n     * term, so the two sides are read over exactly the same set of places.\n     */\n    readonly comparable: number;\n    /** Comparable places skipped in the earlier window and read in the later one. */\n    readonly tookUp: number;\n    /** Comparable places read in the earlier window and skipped in the later one. */\n    readonly fellAway: number;\n    /** Comparable places read in both. */\n    readonly keptRead: number;\n    /** Comparable places skipped in both. */\n    readonly keptSkipped: number;\n    /**\n     * The share of {@link comparable} places that was read in the earlier window;\n     * `null` where {@link silence} says why not.\n     *\n     * *At least one reader reached it*, which is what a standing of `read` means\n     * and not what a person reads the word as. Places and never people: see\n     * the module documentation and `library.ts`, where the same figure is taken of\n     * one window.\n     */\n    readonly readShareWas: number | null;\n    /** The same share in the later window, over the same places. */\n    readonly readShareNow: number | null;\n    readonly movement: KindMovement;\n    /**\n     * Why the two shares are not there, and `null` where they are.\n     *\n     * About the comparison and not about the row: {@link places},\n     * {@link gained} and {@link lost} are counts of parts of trees and are true\n     * whatever any window measured, which is how a census publishes a standing\n     * beside a withheld share.\n     */\n    readonly silence: KindChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": "One kind of part, held against itself across two windows."
+            },
+            {
+              "name": "LibraryChange",
+              "kind": "type",
+              "signature": "type LibraryChange = {\n    /**\n     * Every type that stands in either window, most places fallen away first.\n     *\n     * Then the lower read share in the later window, then by type, so two kinds\n     * that lost the same number of places do not reorder on a refresh.\n     */\n    readonly byType: readonly KindChange[];\n    /**\n     * Every role in the vocabulary that stands in either window, then the row for\n     * parts whose type declared none, in the same order as {@link byType}.\n     *\n     * Thin today for the reason every role figure in this subsystem is thin:\n     * nothing in `src/primitives/` declares one, so nearly every part is in the\n     * `null` row — and in this reading that row is the one that treats a node\n     * whose type changed as a place still standing. The join is at read time\n     *, so the day a role is declared these rows start answering without a\n     * migration.\n     */\n    readonly byRole: readonly KindChange[];\n    /** Pages read in both windows, which is trees and not revisions. */\n    readonly pages: number;\n    /** Pages read in the later window only. */\n    readonly pagesGained: number;\n    /** Pages read in the earlier window only. */\n    readonly pagesLost: number;\n    /**\n     * Paired pages whose revision moved between the windows.\n     *\n     * The comparison still stands — a placement is paired by node, and whether\n     * readers reached it is a fact about the place either way — but it says that\n     * the pages changed as well as the window, which is the difference between\n     * *your readers behave differently* and *you changed your pages*. A reading\n     * where this is nought is two windows of one library.\n     */\n    readonly republished: number;\n    /** Places that stand in both windows, which is the sum of every type row's {@link KindChange.places}. */\n    readonly placements: number;\n    /** Places in the later window only. */\n    readonly gained: number;\n    /** Places in the earlier window only. */\n    readonly lost: number;\n    /**\n     * Paired nodes whose primitive type changed.\n     *\n     * A place one kind left and another took, counted in the first's {@link\n     * KindChange.lost} and the second's {@link KindChange.gained} — and held\n     * still in the role rows where the two types play the same part. Not an\n     * alarm: it is the commonest change an author makes to a library.\n     */\n    readonly recast: number;\n    /**\n     * A floor on the page views of the earlier window, added over the paired\n     * pages.\n     *\n     * `PageReading.views` is the largest `views` any one part of a page reports,\n     * which is a floor and not a count. Published because every transition\n     * in this reading is confounded by it: a quieter window skips more places with\n     * no reader behaving differently, and these two numbers are what let somebody\n     * see that before reading a movement as a finding.\n     *\n     * Not a count of readers, and not addable into one: a reader who read two\n     * pages is two page views here.\n     */\n    readonly viewsWas: number;\n    /** The same floor for the later window, over the same pages. */\n    readonly viewsNow: number;\n    /**\n     * The type that lost its reading in the most places, which is the kind to look\n     * at first.\n     *\n     * By the **count** of places and not by the share, for the reason a page's\n     * falls are ranked by the readers they lose and a census's kinds by the\n     * places they are skipped in: a kind that lost its one and only place\n     * is a perfect rate and a smaller problem than one that lost seven of nine.\n     * `null` where nothing anywhere fell away.\n     *\n     * A type and never a role, because a type is the thing an author can replace.\n     */\n    readonly mostAbandoned: KindChange | null;\n    /** The type that gained its reading in the most places, by the same rule. */\n    readonly mostTakenUp: KindChange | null;\n    /**\n     * Trees read at two revisions in one window, which are in nothing above.\n     *\n     * A page that is two live revisions in one window has no single counterpart in\n     * the other, and the comparison pairs by page. See the module documentation:\n     * excluded and named rather than picked between.\n     */\n    readonly ambiguous: readonly TreeId[];\n    /**\n     * Readings of a revision beyond the first, on either side, which were dropped.\n     *\n     * A caller that concatenated two reads of one window holds a page twice, and a\n     * page twice is the one way a census — or a comparison of two — can lie about\n     * how much of a library there is.\n     */\n    readonly duplicated: number;\n    /**\n     * Types the two windows disagree about the role of, where the later window's\n     * answer stands.\n     *\n     * A type plays one part, so a disagreement is not a change a deployment\n     * made: it is two readings joined against two different registries, held\n     * against each other. Every role row below is then about neither.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "What a change did to a deployment's library, by kind of part."
+            },
+            {
+              "name": "libraryChangeOf",
+              "kind": "function",
+              "signature": "const libraryChangeOf: (was: readonly PageReading[], now: readonly PageReading[]) => LibraryChange",
+              "truncated": false,
+              "summary": "What a change did to a kind of part, across every page it stands on."
+            }
+          ]
+        },
+        {
           "module": "signals/library-reach",
           "title": "Library reach",
           "summary": "Of the readers who met a kind of part, the share that read it.",
@@ -11249,7 +11501,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-reach\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-change\" | \"library-reach\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -11350,6 +11602,13 @@
               "signature": "const meaningOfKindActionSilence: (silence: KindActionSilence) => SilenceMeaning",
               "truncated": false,
               "summary": "What a kind's share of the readers who acted inside it reports, of one kind."
+            },
+            {
+              "name": "meaningOfKindChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfKindChangeSilence: (silence: KindChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two windows of one library reports, of one kind."
             },
             {
               "name": "meaningOfPaceSilence",
@@ -11496,7 +11755,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11639,7 +11898,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11706,7 +11965,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12303,7 +12562,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12377,7 +12636,7 @@
       "files": 90,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12856,7 +13115,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1477,
+        "packageNames": 1499,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

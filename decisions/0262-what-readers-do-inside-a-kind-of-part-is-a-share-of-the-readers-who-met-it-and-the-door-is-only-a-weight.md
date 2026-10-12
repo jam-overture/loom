@@ -1,4 +1,4 @@
-# 0259 — What readers do inside a kind of part is a share of the readers who met it, and the door is only a weight
+# 0262 — What readers do inside a kind of part is a share of the readers who met it, and the door is only a weight
 
 **Status:** Accepted
 

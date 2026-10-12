@@ -23,7 +23,7 @@ the published `kindKeyOf`:
 | --- | --- |
 | the **places** it stands, and how many were reached | §23, 0257 |
 | the **readers** who met those places, and how many read it | §24, 0256 |
-| **those same readers**, and how many acted inside it | §25, 0259 — new |
+| **those same readers**, and how many acted inside it | §25, 0262 — new |
 
 `engaged` has been on a tally since the counters existed and §18 interpreted it
 for one page four days ago. Nothing had ever asked it of a **component**, which
@@ -56,7 +56,7 @@ empty.
 ## Decisions I took that the plan did not specify
 
 All of them are in
-**[0259](../decisions/0259-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)**
+**[0262](../decisions/0262-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)**
 (Accepted; nothing superseded, nothing edited).
 
 **A count is published only on the door's scale.** A scale-free row publishes its
@@ -107,13 +107,19 @@ needed, now over three readings, and it is filed for the portal.
 
 ## Records added
 
-- **0259** — *What readers do inside a kind of part is a share of the readers who
+- **0262** — *What readers do inside a kind of part is a share of the readers who
   met it, and the door is only a weight.* Accepted. Nothing superseded.
 
-I took **0259** because it is the next number free on `main` (0258 is the
-highest; 0252 is a gap that #566 will take when it merges) and no open branch
-claims it: #583 and #585 add no record, #566's renumbers to 0252 by its own merge
-comment, and #548's is 0245.
+I took **0259** because it was the next number free on `main` at the time (0258
+the highest; 0252 a gap that #566 will take when it merges) and no open branch
+claimed it: #583 and #585 add no record, #566's renumbers to 0252 by its own
+merge comment, and #548's is 0245.
+
+**It was renumbered to 0262 by the following run**, on this same branch: #592
+merged a marketing record as 0259 between this branch being pushed and `main`
+being merged into it, so the repository held two 0259s and `pnpm decisions:index`
+refused to build. See `reports/2026-10-12-signals-the-change-a-component-made.md`
+— only the number moved, and the record's own direction is untouched.
 
 ## An eleventh silence vocabulary, and the twelfth condition
 
@@ -261,7 +267,7 @@ comment, with a recommendation for each.
 
 ## Not built, and deliberately
 
-- **A deployment-wide share across kinds.** Refused with its reason in 0259: its
+- **A deployment-wide share across kinds.** Refused with its reason in 0262: its
   denominator counts a page once per element node.
 - **Signal-to-intent derivation** — the framework lane's, and still out of scope
   for everyone.
