@@ -25,6 +25,7 @@ import {
 } from "@jam-overture/loom"
 
 import { portalPolicy, portalPropsVocabulary } from "./policy"
+import { portalRegistry } from "./registry"
 
 /**
  * The two floors this deployment had left open, measured on both sides.
@@ -350,7 +351,8 @@ describe("a change that sets a part up in a way that part refuses", () => {
 
     expect(detail).toContain("tone")
     expect(detail).toContain("shouty")
-    expect(detail).toContain("normal")
+    /** `default` and `muted` are the library's two; the portal's own four said `normal`. */
+    expect(detail).toContain("default")
     expect(detail).toContain("muted")
   })
 })
@@ -364,7 +366,7 @@ describe("a change that sets a part up in a way that part refuses", () => {
 describe("what the floors deliberately do not refuse", () => {
   it("lets an ordinary change to a part this site does register through", async () => {
     const outcome = await asThisDeployment([
-      { op: "configure", nodeId: PROSE, set: { tone: "normal" }, unset: [] },
+      { op: "configure", nodeId: PROSE, set: { tone: "default" }, unset: [] },
     ])
 
     expect({ kind: outcome.kind, factors: factorsOf(outcome) }).toEqual({
@@ -404,12 +406,22 @@ describe("what the floors deliberately do not refuse", () => {
  * module comment claims and the reason the two seams cannot drift.
  */
 describe("this deployment's wiring", () => {
+  /**
+   * **Derived from the registry rather than listed here**, which is what this
+   * file's own comment above claims the property is and what the literal list
+   * that used to sit here quietly stopped testing.
+   *
+   * It named the four primitives this portal registered until 11 October. A
+   * list of names is a second copy of the registry, so it passed for as long as
+   * the two agreed and failed the moment they did not — telling the reader the
+   * wiring was wrong when what had changed was the library. The assertion that
+   * survives a registry swap is the one that was meant all along: these are the
+   * same set, whatever the set is.
+   */
   it("declares exactly the types it registers, and at least one", () => {
     expect(portalPolicy.registeredPrimitiveTypes.length).toBeGreaterThan(0)
     expect([...portalPolicy.registeredPrimitiveTypes].sort()).toEqual(
-      ["loom.card", "loom.heading", "loom.page", "loom.prose"].map((type) =>
-        primitiveTypeSchema.parse(type)
-      )
+      portalRegistry.primitives.map((primitive) => primitive.type).sort()
     )
   })
 

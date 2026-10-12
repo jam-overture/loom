@@ -50822,8 +50822,27 @@ without which any of this survives only until the process is replaced.
 ## 2026-10-11 — the portal registers four primitives and the trees it would have to govern are built from the whole library, and the two spell three names the same way
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Raised by:** the
-maintainer, 11 October · **Status:** open — **a unit of work with a known
-hazard in front of it**, not a one-line change
+maintainer, 11 October · **Status:** **closed by
+`portal-59-the-library-this-app-runs-on`** — the maintainer chose option 2 the
+same day: *"replace them with the actual starter primitives and discard the old
+ones"*
+
+> **Closing note, 11 October.** Taken as written. The four are deleted, the
+> registry is `createStarterPrimitiveRegistry()`, and the seed is rebuilt
+> against the library's schemas. The migration was the three refusals this entry
+> predicted — `variant` → `tone`, a heading's `level` becoming required,
+> prose's `"normal"` → `"default"` — and they cost four test files rather than
+> the fifty-five that build these types, because most build deltas the registry
+> never validates.
+>
+> **Two things this entry did not predict, and both were found by the
+> photograph rather than by a test.** The library reads a theme and the portal
+> had never needed one, so the first picture after the swap showed the preview
+> pane drawing the page with no ramp, no palette and no spacing — a valid render
+> of an unthemed tree, which raises no diagnostic. And the screen then read
+> *103 pieces are registered and nothing uses them* over a wall of a hundred
+> names. Both are in the branch; the second changed what the screen says rather
+> than only what it draws.
 
 Condition 2 of
 [0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md):
@@ -50861,6 +50880,84 @@ part names. So the work is:
 this surface rebuilt against a registry nothing yet needs. It is small once the
 direction is settled and the direction is the maintainer's.
 
+---
+## 2026-10-11 — a theme mounts in the document it is rendered into, so the one render of this portal that has its own document was the one the theme did not reach
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+by `portal-59-the-library-this-app-runs-on` — recorded because the **shape** is
+general and nothing in this repository can catch it
+
+The portal rendered six places and I themed all six. The screen still drew the
+page unstyled, because there is a **seventh** and it is not in `(portal)`:
+`app/(preview)/portal/pages/[treeId]/surface/page.tsx`, which the device pane
+loads in an `iframe` so that a page shown at a phone's size has a phone's
+viewport.
+
+Three things make this worth writing down rather than filing as a slip.
+
+**A theme mounts its variables on a wrapper in the document it renders into.**
+Six themed renders in the parent document do nothing for a child document. So
+the failure is not "I missed a call site" so much as "a document boundary is
+also a theme boundary", and the portal has exactly one document boundary.
+
+**An unthemed render is a valid render.** Nothing failed, nothing was refused,
+and `renderLoomTree` raised no diagnostic — the markup was correct and every
+CSS variable behind it resolved to nothing. The published seam says so in as
+many words: *absent means the tree's theme is not resolved and nothing is
+mounted*. A page that renders and looks broken is the one failure mode a type
+checker, a unit test and a green gate all agree is fine.
+
+**The grep that found the other six could not find this one.** I listed call
+sites with `resolver: portalRegistry` scoped to `(portal)`, which is this lane's
+directory, and the seventh is in a route group of its own. It is the portal's by
+content — it imports the portal's registry and serves `/portal/pages/…/surface`
+— and `docs/routines.md` already settles that ownership follows what a file
+decides rather than where the framework makes it live. **A lane whose work is
+scoped by directory will miss the file its own rule says is its.**
+
+The remedy taken is the fix plus this entry. What would be stronger is a guard
+asserting every `renderLoomTree`/`renderLoomExcerpt`/`renderRequest` in the
+application that resolves against `portalRegistry` also passes `portalThemes` —
+a one-regex source test, not written here because the right home for it is a
+rule about the pair rather than about this lane, and because the photograph
+caught it in one run.
+
+---
+## 2026-10-11 — a reading written for a curated registry becomes an accusation when the registry is the whole library, and the fraction is the wrong thing to key it on
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+by `portal-59-the-library-this-app-runs-on` — recorded because the **shape** is
+the one this lane keeps meeting
+
+`/portal/app` said, of every piece nothing had reached for:
+
+> *The AI is offered these every time you ask for a change, and has never put
+> one on a page. That is either something your pages are missing, or something
+> your project no longer needs.*
+
+A sharp reading of a **curated** registry: a host that chose fourteen pieces and
+never used four has either a gap or some dead weight. The moment the registry
+became the library the same screen read *103 pieces are registered and nothing
+uses them*, with that advice under it — every word true and the advice wrong in
+the way that costs an afternoon, because a one-page app has not mislaid a
+hundred and three things.
+
+**The fraction is the wrong discriminator**, and it is the one anybody reaches
+for first. Four unused out of fourteen means opposite things depending on
+whether the fourteen were chosen. What separates the two is whether registering
+was a **decision**: a host that declined part of the library said something
+about its pages, and an unused piece it kept is part of what it said; a host
+that declined nothing said nothing, so an unused piece there carries no intent
+to report back. The caller already computes that fact for `libraryNote`, so the
+reading takes it rather than a count.
+
+**It is the fourth time this lane has had to split one reading in two**, after
+the rules/checks continuity (9 October), the two phrasings of a verb against a
+count (10 October), and the fall sentence's share of one. The pattern each time:
+a sentence that is correct about the state it was written for, meeting a second
+state nobody had yet produced. Worth saying once rather than four times —
+**when a screen's sentence contains advice, the advice is about a state, and the
+state is worth naming in the code beside it.**
 ## 2026-10-11 — six specimen tests assume a git newer than the maintainer's, so `pnpm verify` cannot pass on his machine
 
 **Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
@@ -50889,3 +50986,57 @@ shape, and the first that fails a test.
 which is portable to every git this decade and produces exactly the same repository. A skip
 guarded on the git version would also work and is worse: a test that silently does not run on
 the maintainer's machine is how the next portability gap goes unnoticed for a month.
+
+---
+## 2026-10-12 — a test reads a gitignored build artefact, so `pnpm verify` is red on `main` for anybody who has not run `pnpm package:primitives`
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/facts.test.ts`) · **Status:** open — **`main`
+is red**, and it is two tests rather than anything structural
+
+`facts.test.ts`' *what the site tells a stranger to install* reads two
+manifests to check the site names the packages this repository publishes:
+
+```ts
+nameOf("../../../../../package.json")
+nameOf("../../../../../packages/primitives/package.json")
+```
+
+The first exists. **The second is generated and gitignored** —
+`.gitignore:23` is `packages/*/package.json`, and the file is assembled by
+`pnpm package:primitives` from `tools/package/manifest.ts`, which is where the
+name `@jam-overture/loom-primitives` is actually authored. `packages/primitives/`
+holds a committed `README.md` and nothing else.
+
+So the test passes on a machine that has run the packaging step at some point
+and fails on every fresh clone:
+
+```
+Error: ENOENT: no such file or directory, open '…/packages/primitives/package.json'
+```
+
+Confirmed red on `origin/main` at `4ba67f8` with nothing of this lane's in the
+tree, which is how it was found: it arrived in a merge of `main` into an open
+portal branch and the branch was blamed first.
+
+**A proposed patch, because the rule says not to widen another lane's PR with
+one.** Read the name from the module that authors it rather than from the
+artefact it is assembled into:
+
+```ts
+import { PRIMITIVES_MANIFEST } from "../../../../../tools/package/manifest"
+//  … nameOf("../../../../../package.json"), PRIMITIVES_MANIFEST.name
+```
+
+That is the same move this repository keeps making and is the reason the test
+is wrong rather than unlucky: **a second copy of a fact fails when the two
+disagree, and an artefact is a copy.** `tools/package/manifest.ts` already
+exists to be *"data rather than a file somebody edits by hand"*, in its own
+words, so reading it is what the test meant.
+
+**It is the second entry in two days about `pnpm verify` depending on machine
+state**, after the 11 October one about six specimen tests assuming a newer
+`git` than the maintainer's. Both make the gate pass here and fail for him,
+which is the one failure mode a merge gate cannot have — `docs/routines.md`
+gives the gate four surfaces to protect and neither of these protects anything
+if the answer depends on who ran it.
