@@ -3,7 +3,7 @@
 **Routine:** `Loom framework` · **Date:** 2026-10-12 · **Section:** §2 (the
 store), §6 (the log) · **Branch:** `framework-68-the-page-put-back`
 
-![A drifted page, the four operations that put it back, and the page after them](reseed-editorial-wide.png)
+![A drifted page, the four operations that put it back, and the page after them](reseed-editorial-wide.webp)
 
 ## What was completed
 
@@ -20,7 +20,7 @@ provenance on it, instead of the history simply ending.
 **`TreeStore` is still `create`, `head`, `revisions`, `list` and `append`.** No
 delete, no reseed method, nothing that writes a tree without being proposed.
 That is the decision, recorded as
-[0262](../decisions/0262-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md),
+[0268](../decisions/0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md),
 and it is the shape `Loom portal` asked for when it filed this — the entry went
 out of its way not to ask for `delete(treeId)`, and was right: *the row is gone*
 is a worse answer than *the row says it was replaced*.
@@ -101,7 +101,7 @@ the Gate decides what it is worth.
 
 ## Records
 
-- **Added:** [0262](../decisions/0262-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md)
+- **Added:** [0268](../decisions/0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md)
   — *A page is put back by proposing the change that puts it back, and a store
   never deletes.* `0261` is the highest on `main`; `#598` adds none and the two
   records open branches add both claim `0259`, which is a clash between those two
@@ -128,7 +128,7 @@ back as the same node, the only way to serve it is to re-identify — a page tha
 *looks* like the authored one, with fresh ids where the old ones could not
 return. It is cheap to build and expensive to mean: reader counts are keyed on
 node ids, so a re-identified page starts every part's readership at zero and
-attribution loses the thread at the same moment. Named in 0262, recommended
+attribution loses the thread at the same moment. Named in 0268, recommended
 against on a schedule, and worth a run only when somebody has actually been told
 an exact reseed was refused and still wants the page back.
 

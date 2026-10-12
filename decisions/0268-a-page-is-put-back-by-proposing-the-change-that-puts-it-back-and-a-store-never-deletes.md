@@ -1,8 +1,18 @@
-# 0262 — A page is put back by proposing the change that puts it back, and a store never deletes
+# 0268 — A page is put back by proposing the change that puts it back, and a store never deletes
 
 **Status:** Accepted
 **Date:** 2026-10-12
 **Section:** §2, §6
+
+> **Renumbered on 2026-10-12 by `Loom merge`**, from 0262, when the branch that
+> carried it (#600) was merged. The note below was true at `03ce8ba` and `main`
+> has moved since: #602 landed a different 0262 — *the control plane is hosted
+> and the render path stays in the customer's app* — and two records sharing a
+> number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> The record already on `main` keeps the number; this one takes the next free
+> above `main`'s highest. Nothing in it changed but the number, and the two
+> citations that mean it — `FINDINGS.md` and this run's report — moved with it.
 
 > **Why this number.** `0261` is the highest record on `main` at `03ce8ba`. `#598`
 > adds none — it cites `0260`, which is already here — and the two records open

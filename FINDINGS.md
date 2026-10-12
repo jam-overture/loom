@@ -51637,7 +51637,7 @@ in `src/store/reseed.ts` produces the operations that carry a stored page to the
 tree its builder produces now, and something else proposes them, so the log
 records *this page was put back* with provenance on it and the undo of a reseed
 is an ordinary revert. Recorded as
-[0262](decisions/0262-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md).
+[0268](decisions/0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md).
 
 **Your reading of the shape was right and your reason for not asking for a
 delete was the load-bearing half.** Two things the build turned up that the entry
