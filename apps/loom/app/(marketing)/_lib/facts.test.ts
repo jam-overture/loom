@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest"
 import { DECISIONS_AT_LEAST, FACTS, INSTALL_COMMAND, PACKAGES } from "./copy"
 import { siteRegistry } from "./registry"
 import { treeFor } from "./render"
-import { DEFAULT_THEME, HOME } from "./site"
+import { DEFAULT_THEME, HOME, NPM_PACKAGE_URL } from "./site"
 
 /**
  * The numbers on the page, held against the thing they are about.
@@ -177,6 +177,16 @@ describe("what the site tells a stranger to install", () => {
 
   it("names the packages this repository actually publishes", () => {
     expect([...PACKAGES].sort()).toEqual([...published()].sort())
+  })
+
+  /**
+   * The half of an off-site address that can go wrong without anybody
+   * noticing. Whether `npmjs.com` serves the page is a person's check
+   * (`routes.test.ts` says why); whether the page it names is *this project's
+   * package* is a string this repository already states, so it is held here.
+   */
+  it("points at the package it publishes, not at a name that used to be ours", () => {
+    expect(NPM_PACKAGE_URL).toBe(`https://www.npmjs.com/package/${nameOf("../../../../../package.json")}`)
   })
 
   it("asks for both of them in one command a reader can paste", () => {

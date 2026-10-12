@@ -40,6 +40,7 @@ import {
   HOW_IT_WORKS,
   internalHref,
   LESSONS,
+  NPM_PACKAGE_URL,
   PORTAL,
   PRODUCT_SURFACES,
   REPOSITORY_URL,
@@ -797,6 +798,24 @@ const install = (ids: IdFactory, context: PageContext): LoomNode =>
         action(ids, "Follow the install guide", surfaceHref(context.origin, DOCS), {
           variant: "primary",
           scale: "large",
+        }),
+        /**
+         * The package page, and it is here because *is this real* is a
+         * different question from *how do I use it*.
+         *
+         * A stranger who has read this far has been told what Loom does by the
+         * site that wants them to install it, and the line above asks them to
+         * run something. The npm page is the only control on this site that
+         * answers from outside: a version, a publish date, a readme and a
+         * dependency count, none of it written here. Offered second because it
+         * is the smaller want — the guide is the path to using it, this is the
+         * path to believing it — and which of the two should be filled is
+         * exactly a `configure` the loop can argue about later.
+         */
+        action(ids, "See it on npm", NPM_PACKAGE_URL, {
+          variant: "secondary",
+          scale: "large",
+          external: true,
         }),
       ]),
     ],

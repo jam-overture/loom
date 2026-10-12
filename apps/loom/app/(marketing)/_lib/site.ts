@@ -781,6 +781,27 @@ export const surfaceHref = (origin: string, surface: Surface): string =>
 
 /** Where the site points when it points at the project itself. */
 export const REPOSITORY_URL = "https://github.com/jam-overture/loom"
+/**
+ * The package on npm, which is the one off-site link that is part of the ask.
+ *
+ * The install band prints a command and sends a reader to the documentation;
+ * this is the third thing somebody about to run that command wants, and it is
+ * a different want from either — **not how to use it, but whether it is real.**
+ * A published page with a version, a date and a readme answers that in a way a
+ * marketing site cannot answer about itself.
+ *
+ * It names the runtime rather than the starter library because the two package
+ * pages carry the same readme-shaped reassurance and a reader following one
+ * link does not want a choice. The command above it asks for both; this says
+ * what the first of them is.
+ *
+ * **Checked by a person, like every off-site link here** (`routes.test.ts`
+ * says why it cannot be checked by a test): loaded 11 October, `0.1.0`,
+ * public. `facts.test.ts` holds the package *name* in it against the manifest
+ * this repository publishes from, which is the half of the address that can go
+ * wrong silently.
+ */
+export const NPM_PACKAGE_URL = "https://www.npmjs.com/package/@jam-overture/loom"
 /** The licence itself, which the footer links to beside the sentence naming it. */
 export const LICENSE_URL = "https://github.com/jam-overture/loom/blob/main/LICENSE"
 export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/decisions"

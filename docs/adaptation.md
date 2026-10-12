@@ -69,10 +69,12 @@ two controls:
 | --- | --- | --- |
 | **The command** | the `loom.code` panel | The strongest thing this site can observe: the install line went to a clipboard |
 | **The guide** | the `loom.action` into `/docs` | A reader going to find out how. Weaker, and still adoption-shaped |
+| **The package** | the `loom.action` to npmjs.com | Added 11 October at the maintainer's instruction. A different want from the other two — not *how do I use it* but *is this real* — and the only control here that answers from outside this site |
 
-Either press is the objective. Nothing else is inside that band, so **a use
+Any of the three is the objective. Nothing else is inside that band, so **a use
 anywhere inside the install band is an install intent** — which matters because
-it is already a number this subsystem produces.
+it is already a number this subsystem produces, and because it means adding a
+fourth control does not change the figure's definition.
 
 ### The figure, and it needs no new counter
 
@@ -216,7 +218,7 @@ download API is an honest north star and can never be attributed to a variant.
 | | |
 | --- | --- |
 | Measured | bands (`viewed`, `dwelled`), and `loom.action`, `loom.card`, `loom.code`, `loom.link`, `loom.brand` (`activated`), FAQs (`disclosed`) |
-| **The ask** | An install band on `/` since 11 October: the command in a panel a reader can copy, and one control into `/docs`. A press on either names the band in its `within` |
+| **The ask** | An install band on `/` since 11 October: the command in a panel a reader can copy, one control into `/docs`, and one out to the package on npm. A press on any of the three names the band in its `within` |
 | **No conversion event** | `COMPLETION_TYPES` is empty. There is no form, so nothing can `complete` — and with the objective ending at a press rather than a submission, nothing needs one |
 | **The hand-typed install is invisible** | A reader who selects the line and copies it with the keyboard, or types it, is an adoption this site will never hear about. The figure is a floor and every report should say so |
 
@@ -327,12 +329,12 @@ the Gate would hold for a person.
 1. **Where the band sits.** It is after the questions today. Above the fold, or
    repeated in the closing band, are the two moves with an effect large enough to
    be seen.
-2. **A third control: the package on npm.** The objective is phrased as clicking
-   through to install, and the page offers a command and a guide but no link to
-   the package itself. Adding one is a page-design decision for the maintainer,
-   not a proposal the loop should make on its own — it is a new control rather
-   than a rearrangement, and the Gate's vocabulary for the loop is
-   insert/remove/move/configure over what the registry already has.
+2. ~~**A third control: the package on npm.**~~ **Done on 11 October**, at the
+   maintainer's instruction, which is the right way round: a new control is a
+   page-design decision and the loop's vocabulary is rearrangement of what is
+   already there. What is left for the loop is which of the three is *filled* —
+   the guide is primary today and the package page secondary, and that is a
+   `configure` it can argue about once there is traffic to argue with.
 3. **What the band says.** The weakest of the three, and the one to leave until
    the traffic can support it.
 
