@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { Screen } from "@/app/(portal)/_components/screen"
+import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 
 import { PreviewBanner, ProjectShell } from "../../_components/shell"
 import {
@@ -69,6 +70,8 @@ const LogsPage = async ({
   params: Promise<{ project: string }>
   searchParams: Promise<{ kind?: string; log?: string }>
 }) => {
+  await requireActor("/portal/preview")
+
   const { project: slug } = await params
   const { kind, log: openId } = await searchParams
   const project = projectBySlug(slug)

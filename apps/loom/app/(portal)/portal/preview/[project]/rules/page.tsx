@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { Screen } from "@/app/(portal)/_components/screen"
+import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 
 import { PreviewBanner, ProjectShell } from "../../_components/shell"
 import { projectBySlug } from "../../_lib/fixtures"
@@ -72,6 +73,8 @@ const Pick = ({ options }: { options: readonly string[] }) => (
 )
 
 const RulesPage = async ({ params }: { params: Promise<{ project: string }> }) => {
+  await requireActor("/portal/preview")
+
   const { project: slug } = await params
   const project = projectBySlug(slug)
 

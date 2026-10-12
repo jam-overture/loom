@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { Screen } from "@/app/(portal)/_components/screen"
+import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 
 import { PreviewBanner, WorkspaceShell } from "./_components/shell"
 import { HEALTH_LABEL, HEALTH_TONE, PREVIEW_PROJECTS } from "./_lib/fixtures"
@@ -34,7 +35,10 @@ const Figure = ({
   </div>
 )
 
-const WorkspacePage = () => (
+const WorkspacePage = async () => {
+  await requireActor("/portal/preview")
+
+  return (
   <WorkspaceShell>
     <Screen>
       <PreviewBanner />
@@ -102,6 +106,7 @@ const WorkspacePage = () => (
     </ul>
       </Screen>
   </WorkspaceShell>
-)
+  )
+}
 
 export default WorkspacePage
