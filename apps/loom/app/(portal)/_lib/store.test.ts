@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { sitePagesStored } from "@/app/(marketing)/_lib/stored"
 
@@ -69,5 +69,42 @@ describe("what the portal finds in the store", () => {
     expect(after.ok === true ? after.value.trees.length : -1).toBe(
       before.ok === true ? before.value.trees.length : -2
     )
+  })
+})
+
+/**
+ * The property that took production down when it was not held.
+ *
+ * Until 12 October the seed inserted blindly and let the primary key answer
+ * *already there*. On one machine that is a tidy idiom. On a serverless host it
+ * is six failing INSERTs per cold start, each holding a lock on the key it
+ * collided with until its transaction ends — so instances queue behind each
+ * other, and with `max: 1` on the pool everything else that instance wanted
+ * queues too. `/portal` and `/` returned 504 after five minutes, with
+ * `duplicate key value violates unique constraint` six times in one second in
+ * the database log.
+ *
+ * What a memory store cannot reproduce is the lock. What it can hold is the
+ * thing that removes it: **the steady state does not write.**
+ */
+describe("seeding a store that is already seeded", () => {
+  it("writes nothing the second time", async () => {
+    await ensureSeeded()
+
+    reset()
+    const wrote = vi.spyOn(portalStore, "create")
+    await ensureSeeded()
+
+    expect(wrote).not.toHaveBeenCalled()
+    wrote.mockRestore()
+  })
+
+  it("still puts everything on the shelf the first time", async () => {
+    await ensureSeeded()
+
+    const listed = await portalStore.list({})
+    if (!listed.ok) throw new Error("loom: the store would not list")
+
+    expect(listed.value.trees.length).toBeGreaterThanOrEqual(sitePagesStored().length + 1)
   })
 })
