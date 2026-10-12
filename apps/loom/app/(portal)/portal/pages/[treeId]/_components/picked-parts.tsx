@@ -5,7 +5,7 @@ import { describeRenderDiagnostic, renderLoomExcerpt } from "@jam-overture/loom/
 
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
-import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
 
 import { useSelection } from "./selection-context"
 
@@ -134,6 +134,7 @@ export const PickedParts = ({ tree }: { readonly tree: LoomTree }) => {
           const excerpt = renderLoomExcerpt(tree, row.nodeId, {
             resolver: portalRegistry,
             validator: portalRegistry,
+            themes: portalThemes,
           })
 
           return (

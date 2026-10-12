@@ -16,7 +16,7 @@ import { pageNameOf } from "@/app/(portal)/_lib/page-name"
 import { pageViewHref, pageViewLabel } from "@/app/(portal)/_lib/page-views"
 import { describeProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { proposedDrawing } from "@/app/(portal)/_lib/proposed-view"
-import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 
@@ -88,6 +88,7 @@ import { MarkLegendView } from "./_components/mark-legend"
 const DRAWING = {
   resolver: portalRegistry,
   validator: portalRegistry,
+  themes: portalThemes,
   editMode: true,
 } as const
 

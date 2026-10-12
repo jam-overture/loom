@@ -1,7 +1,7 @@
 import { renderLoomTree } from "@jam-overture/loom/react"
 import type { LoomTree } from "@jam-overture/loom"
 
-import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
 
 /**
  * A page, drawn small.
@@ -113,6 +113,7 @@ export const PageThumbnail = ({ tree }: { readonly tree: LoomTree }) => {
   const { element } = renderLoomTree(tree, {
     resolver: portalRegistry,
     validator: portalRegistry,
+    themes: portalThemes,
   })
 
   return (

@@ -6,7 +6,7 @@ import { renderRequest } from "@jam-overture/loom/react"
 import { auditRegistry } from "@jam-overture/loom/sdk"
 import { memoryTreeStore, treeSourceFromStore } from "@jam-overture/loom/store"
 
-import { portalRegistry } from "./registry"
+import { portalRegistry, portalThemes } from "./registry"
 import { seedTree } from "./seed"
 
 /**
@@ -122,7 +122,12 @@ describe("the seed through the render path", () => {
 
     const rendered = await renderRequest(
       { treeId: tree.treeId, editMode: false },
-      { source: treeSourceFromStore(store), resolver: portalRegistry, validator: portalRegistry }
+      {
+        source: treeSourceFromStore(store),
+        resolver: portalRegistry,
+        validator: portalRegistry,
+        themes: portalThemes,
+      }
     )
 
     expect(rendered.ok).toBe(true)
@@ -130,7 +135,13 @@ describe("the seed through the render path", () => {
 
     const markup = renderToStaticMarkup(rendered.value.element)
 
-    /** `variant: "outlined"` on the card, and `level: 1` on the first heading. */
+    /**
+     * `tone: "outline"` on the card, and `level: 1` on the first heading.
+     *
+     * The card's tone was `variant: "outlined"` until 11 October, against the
+     * four primitives this portal used to register. `registry.ts` has the
+     * whole table of what the exchange renamed.
+     */
     expect(markup).toContain("border")
     expect(markup).toContain("<h1")
     expect(rendered.value.diagnostics).toEqual([])
