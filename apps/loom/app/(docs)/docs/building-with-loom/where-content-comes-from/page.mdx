@@ -1,3 +1,4 @@
+import { Count } from "@/app/(docs)/_components/count"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 import {
   WhatComesBack,
@@ -5,6 +6,11 @@ import {
   WhenThereIsNoAnswer,
   WhoMayRepointIt,
 } from "@/app/(docs)/_components/data-seam"
+import {
+  BoundExample,
+  LibraryReaders,
+  ReadingFaults,
+} from "@/app/(docs)/_components/reading-the-answer"
 
 export const metadata = pageMetadata("building-with-loom", "where-content-comes-from")
 
@@ -25,8 +31,8 @@ of the page's history because it is not part of the page.
 So a tree can **ask** for it instead. The page says *put the services here*, and
 your app answers when somebody loads it.
 
-That is the whole of this page: the question, who answers it, and what happens
-when nobody can.
+That is the whole of this page: the question, who answers it, what happens when
+nobody can, and who draws the answer once it arrives.
 
 ## A binding is a question
 
@@ -221,7 +227,129 @@ declaration nobody could read would be the hardest kind of failure to notice.
   the failure is visible to you as well as to whoever is reading.
 </Callout>
 
-## Reading it, in a primitive of your own
+## Reading the answer
+
+Asking is only half of it. Something has to take what came back and put it on
+the page, and that something is a **primitive** — because a tree is a document,
+and a document does not loop over rows.
+
+<Count of="binding-readers" as="Word" /> primitives in the starter library
+already do this, so the first list you draw from your own data does not have to
+be written by you at all:
+
+<LibraryReaders />
+
+A feed is the straightforward one: a list of entries, drawn from whatever a
+source answered. Here is a bakery asking its own diary what classes are coming
+up.
+
+<BoundExample id="a-feed-reading-an-answer" />
+
+**Open *show the tree* and look for what is not in it.** No class, no date, no
+description. The tree says *put the diary here* and names the question; every
+word on the screen came out of the shop's database a moment before the page was
+drawn.
+
+That example is also the two lines from further up this page, in their natural
+home. The questions were planned and asked on a server — which is where going
+and getting somebody's data belongs — and the answers were handed to the render.
+
+Three things that feed says about itself are what make it usable at all, and all
+three are **declarations beside the component** rather than code inside it.
+
+### Which name it reads
+
+A binding has a name and the primitive has to look under it. `loom.feed` says
+which:
+
+```ts object-body
+reads: [{ fromProp: "binding", default: "entries" }],
+```
+
+In plain words: *read whatever my `binding` prop says, and read `entries` when
+nobody set it.* The bakery's tree set it to `classes`, so `classes` is the name
+the feed looks under.
+
+**Declaring it buys one specific thing, and it is the mistake everybody makes
+once.** Bind an answer under `clases` and tell the feed to read `classes`, and
+every single part of this works: the source is registered, the params are valid,
+the query runs, the answer arrives. The feed finds nothing under the name it was
+given, so it draws its empty region — correctly, forever, with nothing wrong
+anywhere. Because the primitive declared what it reads, the render says *the
+answer was resolved and then read by nobody* instead of leaving you to find that
+out from a customer.
+
+### What a reader sees when there is nothing
+
+A list has three endings and only one of them is a list: there are rows, there
+are no rows, or nobody could tell us. `loom.feed` places a **region** for each of
+the two that are not rows — `empty` and `unavailable` — and the bakery's tree
+fills both:
+
+> Nothing in the diary just yet. Ask us when you are next in.
+
+> We cannot reach the diary. Give us a ring and we will read it out.
+
+Neither of those drew above, because the diary answered with rows in it.
+
+Both sentences are **in the tree**, and that is the point of a region rather than
+a nicety. A sentence in the tree can be proposed, weighed, reviewed and
+translated like every other word a reader reads; a sentence compiled into a
+component can only be changed by somebody who can deploy. A primitive that reads
+data is the most likely thing you own to need a different sentence for a
+different customer, and this is where that sentence lives.
+
+Leave a region empty and the primitive falls back to a sentence its author
+declared, which is why the table above counts those too. `loom.tally` is the
+exception in it and worth a line: it draws one number, and one number has no
+empty state. An answer it cannot use is unavailable and nothing else — so it
+places no region at all and has exactly one sentence to its name.
+
+### Saying what it could not draw
+
+The last declaration is the one nobody expects to need. **A source's schema and
+a primitive's schema are different schemas, written by different people for
+different reasons.**
+
+The bakery's diary accepts a class with no name, because the bakery's database
+does and somebody really did leave the April one blank. `loom.feed` refuses that
+row, because a row with no title leaves it nothing to put on a page. Both
+schemas are right. Neither can be relaxed to suit the other.
+
+So an answer can be perfectly valid and still be partly undrawable, and the
+component is the only thing in the building that knows — a row's shape is a
+question only the thing drawing it can answer. `unshown` is where it says so,
+and the runtime turns that into a diagnostic for **you** rather than a sentence
+for a reader. The reader cannot do anything about a blank title. You can.
+
+<Callout>
+  **You still check the shape yourself, in anything you write.** The seam
+  validated the answer against the *source's* schema, and a primitive is never
+  told which source it was bound to — so it parses what it can draw, and says
+  what it could not. That is three lines of a primitive and it is the three lines
+  that stop a renamed column from emptying a page in silence.
+</Callout>
+
+## Three ways a binding is wrong when the data was fine
+
+Every row below was **caused**, not described. The shop answered correctly all
+three times:
+
+<ReadingFaults />
+
+Read together they are the three stages a binding passes through: somebody has
+to **resolve** it, something has to **read** it, and something has to **draw**
+it. Each stage has one way to go quietly wrong, and *quietly* is the word. The
+first two draw the feed's empty region — the same page a bakery with no classes
+booked would get, which is a sentence a reader has no reason to doubt. The third
+draws a shorter list with *"Some entries could not be shown."* under it, which is
+as much as a component can honestly tell a reader about a row it never saw.
+
+Nothing throws, nothing on any of the three pages looks broken, and all three are
+in the render's diagnostics, which is who they are addressed to and what
+[what a render reports](/docs/the-runtime/what-a-render-reports) is for.
+
+## Writing one that reads your own shape
 
 The answers arrive beside `props` rather than mixed into them, because the two
 have different authors: props are in the tree, proposed and weighed and
@@ -232,37 +360,57 @@ whoever runs the deployment.
 import { createElement } from "react"
 import { z } from "zod"
 import { definePrimitive } from "@jam-overture/loom/sdk"
+import type { DataOutcome } from "@jam-overture/loom"
 import type { LoomPrimitiveProps } from "@jam-overture/loom/react"
 
-const rows = z.array(z.object({ name: z.string(), price: z.string() }))
+/** What this component can draw. The source promised something looser. */
+const service = z.object({ name: z.string().min(1), price: z.string().min(1) })
+
+/**
+ * One reading of one answer, called by the component and by the declaration
+ * below — so the count and the page cannot disagree.
+ */
+const readServices = (answer: DataOutcome | undefined) => {
+  if (answer === undefined || answer.status === "unavailable") return undefined
+
+  const given = z.array(z.unknown()).safeParse(answer.value)
+
+  if (!given.success) return undefined
+
+  const drawable = given.data.flatMap((row) => {
+    const parsed = service.safeParse(row)
+
+    return parsed.success ? [parsed.data] : []
+  })
+
+  return { given: given.data.length, drawable }
+}
 
 export const serviceList = definePrimitive({
   type: "shop.service-list",
   description: "The shop's services, read from a catalogue.services binding.",
   props: z.object({}).strict(),
-  slots: [],
+  slots: ["empty", "unavailable"],
+  reads: ["services"],
+  unshown: (_props, data) => {
+    const reading = readServices(data["services"])
+
+    return reading === undefined
+      ? []
+      : [{ name: "services", given: reading.given, shown: reading.drawable.length }]
+  },
   component: ({ loom }: LoomPrimitiveProps<Record<string, never>>) => {
-    const answer = loom.data["services"]
+    const reading = readServices(loom.data["services"])
 
-    if (answer === undefined || answer.status === "unavailable") {
-      return createElement("p", loom.editable, "We could not load our services just now.")
-    }
+    if (reading === undefined) return loom.slots["unavailable"] ?? null
 
-    const services = rows.safeParse(answer.value)
-
-    if (!services.success) {
-      return createElement("p", loom.editable, "We could not load our services just now.")
-    }
-
-    if (services.data.length === 0) {
-      return createElement("p", loom.editable, "We have not listed any services yet.")
-    }
+    if (reading.drawable.length === 0) return loom.slots["empty"] ?? null
 
     return createElement(
       "ul",
       loom.editable,
-      services.data.map((service) =>
-        createElement("li", { key: service.name }, `${service.name} — ${service.price}`)
+      reading.drawable.map((row) =>
+        createElement("li", { key: row.name }, `${row.name} — ${row.price}`)
       )
     )
   },
@@ -271,23 +419,16 @@ export const serviceList = definePrimitive({
 
 `loom.data` is always there, empty for the overwhelming majority of nodes that
 bind nothing, so a primitive reads `loom.data.services` without first proving the
-map exists. The three endings in that component are the three cases in order:
-could not be answered, answered with nothing, answered.
-
-<Callout kind="warning">
-  **You have to check the shape yourself, and no primitive you were given reads a
-  binding at all.** The seam validated the answer against the *source's* schema,
-  and a primitive does not know which source it was bound to — so it parses what
-  it can render, as above. And the starter library has no primitive that reads
-  `loom.data`: the ruling that created this seam said the authoring half — a
-  primitive declaring which binding names it reads — was the next thing to build,
-  and it has not been built yet. Until it is, both halves of an example like this
-  one are yours to write. Both gaps are filed rather than papered over here.
-</Callout>
+map exists. `reads: ["services"]` is the simpler of the two forms — a fixed name,
+where the feed takes its name from a prop — and either way the point is the same:
+a name you declared is a name the runtime can hold you to.
 
 Writing a primitive is [one command and one
-file](/docs/getting-started/scaffolding-a-project), and what a primitive is made
-of is on [Primitives and the registry](/docs/building-with-loom/primitives).
+file](/docs/getting-started/scaffolding-a-project), what a primitive is made of
+is on [Primitives and the
+registry](/docs/building-with-loom/primitives), and one is taken from the
+decision to the tests on [A primitive of your
+own](/docs/building-with-loom/a-primitive-of-your-own).
 
 ## Who may change a question
 
@@ -329,7 +470,7 @@ held change of this weight into a refused one.
 
 ## What your app owes a reader
 
-Four things, and the first two are the ones people forget:
+Five things, and the first two are the ones people forget:
 
 1. **A different sentence for empty and for broken.** They arrive as different
    shapes precisely so you can tell them apart. Spending them on one message
@@ -340,3 +481,6 @@ Four things, and the first two are the ones people forget:
    anything that can propose a `configure` can change what you are asked for.
 4. **A line in your policy if the questions matter.** One key, once, before
    somebody asks for the interesting one.
+5. **A declaration, in anything you write, of what you read and what you
+   dropped.** Two of the three faults above are invisible without it, and both
+   are an afternoon of looking at a page that is not obviously wrong.

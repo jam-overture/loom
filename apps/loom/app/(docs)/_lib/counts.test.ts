@@ -15,6 +15,7 @@ import { compositionById, STARTER_COMPOSITIONS, STARTER_PRIMITIVES } from "@jam-
 
 import { registeredTypeCount, bandCount, nodesIn } from "./compositions"
 import { COUNT_EXEMPTIONS, SITE_COUNTS, countPhrasePattern, siteCount, spellOut } from "./counts"
+import { libraryReaders } from "./data/reading"
 import { outsideFences } from "./fences/spans"
 import { docsPagesIn, writtenDocsSections } from "./nav"
 import { KNOB_ORDER } from "./policy/knobs"
@@ -135,6 +136,13 @@ const SECOND_OPINION: Readonly<Record<string, number>> = {
   /** The order the page prints them in, which is a hand-written list. */
   "policy-settings": KNOB_ORDER.length,
   "starter-bands": bandCount,
+  /**
+   * Off the built registry rather than off the definitions `counts.ts` filters.
+   * A primitive whose `reads` survived into the definition and was dropped by
+   * registration — or the reverse — is the one way this number could be
+   * plausible and wrong, and comparing the two objects is what sees it.
+   */
+  "binding-readers": libraryReaders().length,
   /** The recipes, which the compiler holds against the union — not the list the page prints. */
   "render-diagnostics": renderDiagnosticCodes().length,
   /** The example's caption counts the same subtree a second time. */
@@ -161,6 +169,7 @@ describe("the numbers this site states about Loom", () => {
     expect(siteCount("starter-bands").value).toBe(STARTER_COMPOSITIONS.length)
     expect(siteCount("render-diagnostics").value).toBe(24)
     expect(siteCount("pricing-band-nodes").value).toBeGreaterThan(STARTER_COMPOSITIONS.length / 2)
+    expect(siteCount("binding-readers").value).toBe(5)
   })
 
   it("counts nothing twice", () => {
@@ -369,6 +378,7 @@ describe("spelling a number the way prose spells it", () => {
       "policy-settings: fourteen",
       "pricing-band-nodes: forty-four",
       "render-diagnostics: twenty-four",
+      "binding-readers: five",
       "starter-bands: sixty-seven",
     ])
   })
