@@ -196,7 +196,7 @@ const whoAsks = (ids: IdFactory): LoomNode =>
  * losing an argument it used to win. The documentation is the answer, and this
  * band is the handover.
  */
-const closing = (ids: IdFactory, ): LoomNode =>
+const closing = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { tone: "accent", width: "wide", eyebrow: "Going deeper" },

@@ -112,7 +112,7 @@ export type PageContext = {
   readonly counting?: boolean
 }
 
-const hero = (ids: IdFactory, ): LoomNode =>
+const hero = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.hero",
     props: {
@@ -587,7 +587,7 @@ const problems = (ids: IdFactory): LoomNode =>
  * itself: every one of them is held against the code by a test, and the record
  * count is held as a floor it can never exceed. See `FACTS` in `copy.ts`.
  */
-const facts = (ids: IdFactory, ): LoomNode =>
+const facts = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.facts }, "Built in the open", [
     /**
      * **Ranged left, as of this run, because it is the only alignment this band
@@ -777,7 +777,7 @@ const questions = (ids: IdFactory): LoomNode =>
  * draws its own copy control, so the type joining `CONTROL_TYPES` in
  * `readers/asked.ts` is the whole of the instrumentation.
  */
-const install = (ids: IdFactory, ): LoomNode =>
+const install = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { width: "readable", eyebrow: BAND.install },
@@ -918,7 +918,7 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * Nothing was added to the library to do it. A card, a heading, a sentence, a
  * rule and four words, all registered before this run started.
  */
-const waysIn = (ids: IdFactory, ): LoomNode =>
+const waysIn = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.grid",
@@ -958,7 +958,7 @@ const waysIn = (ids: IdFactory, ): LoomNode =>
  * is the answer to the first problem the page named an hour of reading ago: a
  * tool that generates components hands you work rather than taking it away.
  */
-const closing = (ids: IdFactory, ): LoomNode =>
+const closing = (ids: IdFactory): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
     /**
      * The one sentence on the front door that carries its own link, and the
