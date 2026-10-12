@@ -1085,6 +1085,7 @@ describe("the page on the first screen", () => {
     const hero = tree.root.kind === "element" ? tree.root.children[0] : undefined
 
     expect(view.pageItself?.tree.root.id).toBe(hero?.id)
+    expect(view.pageItself?.moved).toBeUndefined()
   })
 
   /**
@@ -1131,6 +1132,7 @@ describe("the page on the first screen", () => {
     expect(view.spots).toHaveLength(0)
     expect(view.pageItself?.tree.revision).toBe(tree.revision)
     expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT_NOW)
+    expect(view.pageItself?.moved).toBe(String(tree.revision))
   })
 
   /**
@@ -1169,6 +1171,12 @@ describe("the page on the first screen", () => {
   it("shows the page going back, in the same window it came forward in", async () => {
     const session = await sessionFor("itself-undone")
     const landed = await ask(session, DEMO_OPENING_PRESET)
+    /*
+     * Read before the undo, because the store is one and `railOf` reads its
+     * head: a rail built from `landed.session` afterwards is this session's one
+     * record against the undone tree, which is a state no visitor is ever in.
+     */
+    const forward = await railOf(landed.session)
     const undone = await ask(landed.session, DEMO_OPENING_PRESET)
 
     const { tree, view } = await railOf(undone.session)
@@ -1176,6 +1184,19 @@ describe("the page on the first screen", () => {
     expect(undone.record.outcome).toBe("applied")
     expect(view.pageItself?.tree.revision).toBe(tree.revision)
     expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT_NOW)
+
+    /*
+     * **And it is a second landing rather than the first one still standing**,
+     * which is the whole of what `page-in-view.tsx` needs from this reading and
+     * the one thing a revision shared between the two presses would break: the
+     * undo is pressed on the record card, 922 pixels down a phone's rail on a
+     * production build of `demo-44`, so the effect that carries the visitor
+     * back to the window has to re-run and a token that did not move would not
+     * make it.
+     */
+    expect(forward.view.pageItself?.moved).toBeDefined()
+    expect(view.pageItself?.moved).toBe(String(tree.revision))
+    expect(view.pageItself?.moved).not.toBe(forward.view.pageItself?.moved)
   })
 
   /**
@@ -1200,6 +1221,7 @@ describe("the page on the first screen", () => {
     expect(view.landing).toBeUndefined()
     expect(view.spots).toHaveLength(0)
     expect(view.pageItself?.caption).toBe(THE_TOP_OF_IT)
+    expect(view.pageItself?.moved).toBeUndefined()
   })
 
   /**

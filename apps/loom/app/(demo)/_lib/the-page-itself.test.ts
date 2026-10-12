@@ -2,7 +2,7 @@ import { buildElement, buildSlot, buildText, createTree, sequentialIdFactory } f
 import { describe, expect, it } from "vitest"
 
 import { demoPageTree } from "./page-tree"
-import { THE_TOP_OF_IT, THE_TOP_OF_IT_NOW, thePageItself } from "./the-page-itself"
+import { THE_TOP_OF_IT, THE_TOP_OF_IT_NOW, THE_WINDOW, thePageItself } from "./the-page-itself"
 
 /**
  * The reading on its own, over the demo's real tree and over three trees it
@@ -89,6 +89,31 @@ describe("thePageItself", () => {
   })
 
   /**
+   * And it says which press moved it, which is the half of the answer the
+   * caption cannot carry: the window being on the screen and the visitor being
+   * on the window are two different facts.
+   *
+   * The press this demo opens with is made with the window in front of them.
+   * Its inverse is pressed on the record card, measured at 922 pixels down a
+   * phone's rail on a production build of `demo-44` — so the page went back in
+   * a window nobody was looking at. `page-in-view.tsx` reads this field and has
+   * the table.
+   *
+   * **The revision, and the same answer decides it as decides the caption.** A
+   * window captioned *now* is a window a press has just changed, so a run that
+   * made one of the two conditional on something else would be giving this one
+   * screen two opinions about who moved it.
+   */
+  it("carries the revision the press produced, so the visitor can be brought to it", () => {
+    const tree = demoPageTree()
+
+    const window = thePageItself({ tree, shownElsewhere: false, landed: true })
+
+    expect(window?.moved).toBe(String(tree.revision))
+    expect(window?.caption).toBe(THE_TOP_OF_IT_NOW)
+  })
+
+  /**
    * And a declined question is not a change: the page is where it was, so the
    * window comes back saying what it said on arrival. The two booleans are read
    * off two different values in `rail.ts` (`landing`, and the marks and bands)
@@ -98,6 +123,20 @@ describe("thePageItself", () => {
     const window = thePageItself({ tree: demoPageTree(), shownElsewhere: false, landed: false })
 
     expect(window?.caption).toBe(THE_TOP_OF_IT)
+  })
+
+  /**
+   * And it carries nobody to a page that has not moved, which is the same
+   * sentence read the other way. A visitor on the arrival screen has not
+   * pressed anything; a visitor who declined a question has pressed something
+   * and the page is where it started. Neither is a landing, and scrolling
+   * either of them would be the surface moving for its own reasons — which is
+   * the rule `AnswerInView` already states about not acting on arrival.
+   */
+  it("moves nobody on arrival, or after a question they declined", () => {
+    expect(
+      thePageItself({ tree: demoPageTree(), shownElsewhere: false, landed: false })?.moved
+    ).toBeUndefined()
   })
 
   /**
@@ -167,6 +206,20 @@ describe("thePageItself", () => {
    * narrate the change — that is the record card's, forty pixels down, and a
    * caption competing with it is the third place one change is told about.
    */
+  /**
+   * And the name the document knows the window by, pinned as a literal rather
+   * than compared against itself.
+   *
+   * `page-in-view.tsx` looks the window up by this and the section answers to
+   * it, which is the shape `AnswerInView` already has with a record id: the
+   * element is rendered on the server, so what crosses the boundary is a name.
+   * A test that interpolated the constant would be green on any misspelling,
+   * which this lane filed twice in three days in October.
+   */
+  it("names the window, so the lookup and the section read one string", () => {
+    expect(THE_WINDOW).toBe("the-page-itself")
+  })
+
   it("says the same thing after a change, plus that it is the page as it stands", () => {
     expect(THE_TOP_OF_IT_NOW).toBe("This is the top of it, now.")
     expect(THE_TOP_OF_IT_NOW.startsWith(THE_TOP_OF_IT.replace(".", ""))).toBe(true)

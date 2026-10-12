@@ -8,6 +8,59 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-11 — the undo is now visible and is still not watchable, because the visitor is carried to a window that changed before they got there
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/demo/_components/page-in-view.tsx`,
+`app/(demo)/demo/_components/record-card.tsx`) · **Status:** open — **found
+while building the fix for the 10 October entry below**, measured on the commit
+that fixes it, and **not a defect**: it is the honest limit of what a scroll can
+buy, written down so the next run does not read the closed entry as more than it
+is.
+
+`demo-45` carries a visitor on a phone up to the window when the page in it
+moved under a press they made somewhere else. Measured on a production build of
+the branch at 390 x 844: the window arrives at `y 291` with its caption at
+`y 537`, where before the press it stood at `y -922`. The page they asked to put
+back is now on their screen.
+
+**What they do not get is the press's own best second.** The opening press is
+made with the window in front of them, so the page turns over **in place** — the
+window and the green button stay at `y 325` and `y 611` and everything in
+between changes colour and typeface. The undo cannot do that, because of the
+order the three things happen in:
+
+| | |
+| --- | --- |
+| the visitor presses **Put it back**, at `y 20` on the record card | |
+| the server action writes, and the page comes back with the tree reverted | the window now shows the first palette |
+| the effect runs and carries them 922px up | **they arrive at a window that already changed** |
+
+So the press shows a stranger *the change*, and the undo shows them *the result
+of one*. Under `prefers-reduced-motion` the second is a jump cut; without it, a
+glide to a window that was repainted before the glide began.
+
+### The shape that would close it, and the one that would not
+
+1. **Carry them before the write lands, not after.** The undo is a form, so
+   `useFormStatus` or a `useOptimistic` wrapper on the card knows the press has
+   happened a round-trip earlier than the window does. Carrying them on the
+   press rather than on the result puts the visitor in front of the window while
+   the request is still out, and the repaint then happens under their eye,
+   exactly as the opening press's does. The change is to the card's submit path
+   and to `page-in-view.tsx`'s trigger, not to the reading.
+2. **Animate the window instead.** Rejected before it is proposed: a transition
+   on the band would be this surface staging a change rather than showing one,
+   and the whole claim of the stage is that nothing here is a video.
+
+**Recommendation: (1), and not on any schedule.** What this run bought is the
+difference between *the visitor cannot see the undo* and *the visitor cannot
+watch it*, and only the first of those was costing the demo its second-best
+moment. The second is worth a run when there is nothing larger open, and it is
+worth measuring with a stopwatch rather than a ruler, which is an instrument
+this lane does not have from a sandbox.
+
+---
 ## 2026-10-11 — the assertion that makes `BOUND_ANSWERS` load-bearing cannot see an answer filed under the wrong name, and for the one leaf among the five nothing else can either
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -560,9 +613,31 @@ then have to explain.
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
 (`app/(demo)/demo/_components/spotlight-scroll.tsx`,
-`app/(demo)/demo/_components/back-to-the-record.tsx`) · **Status:** open —
-**found while fixing the half of it that is this run's**, and measured on the
-commit that fixes it.
+`app/(demo)/demo/_components/back-to-the-record.tsx`) · **Status:** **closed by
+`demo-45-the-undo-in-view`**, which built shape (1). Original status below.
+
+> **Closing note, 11 October.** Shape (1), measured on a production build of the
+> branch at 390 x 844 with the same sequence this entry was measured with. The
+> window goes from **`y -922`** to **`y 291`**, its caption *This is the top of
+> it, now.* to `y 537`, and the clinic's own heading inside it to `y 425` — so
+> the page a visitor asked to put back is on the screen of the person who asked.
+> The cost is stated in the report and is the mirror of the one it replaces: the
+> record card goes from `y 20` to `y 1,233`, and *Show the record* sits at
+> `y 804`, forty pixels above the fold, which takes them back in one press.
+>
+> **Shape (2) was not needed and is not built.** The new component is 20 lines
+> and the referee the recommendation worried about turned out to be the
+> stylesheet: the window is `display: none` at `lg`, which is the width at which
+> the rail becomes the scroller `AnswerInView` moves, so a box of no height is
+> already the whole of *not your turn*. Neither component reads the other and
+> neither reads a width.
+>
+> **What it does not do is in a new entry at the top of this file**: the visitor
+> is carried to a window that has already changed, where the opening press is
+> watched changing in place.
+
+**Original status:** open — **found while fixing the half of it that is this
+run's**, and measured on the commit that fixes it.
 
 `demo-44` keeps the arrival window through a change whose subject is the page
 itself, so the opening press now turns the page over **in view** on a phone
