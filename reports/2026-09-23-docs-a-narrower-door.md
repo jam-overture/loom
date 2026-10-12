@@ -11,7 +11,7 @@ finding and is not re-filed. Everything measured below is a production build
 (`pnpm build && next build && next start`), fetched over real HTTP and driven in
 Chromium.
 
-![When one door is another door onto a smaller room](2026-09-23-docs-a-narrower-door.png)
+![When one door is another door onto a smaller room](2026-09-23-docs-a-narrower-door.webp)
 
 ## What this run was
 
@@ -35,7 +35,7 @@ sixteen doors is a case where the answer is no.
 > does, and its JavaScript goes through 9 of the package's built files where
 > this one goes through 23.
 
-![The signals door, with the narrower one named under what must be installed](2026-09-23-docs-a-narrower-door-signals-wide.png)
+![The signals door, with the narrower one named under what must be installed](2026-09-23-docs-a-narrower-door-signals-wide.webp)
 
 ## Why this door and not a paragraph
 
@@ -98,7 +98,7 @@ is a test holding that line, with the reasoning in it.
 **It points one way only.** The wide door's page carries the band; the narrow
 one's does not.
 
-![The broadcaster's own page, which says nothing about the wider door](2026-09-23-docs-a-narrower-door-broadcast-wide.png)
+![The broadcaster's own page, which says nothing about the wider door](2026-09-23-docs-a-narrower-door-broadcast-wide.webp)
 
 A reader standing at the narrow door already has the cheap import. Telling them a
 wider one exists would be an invitation to pay for exports they have not asked

@@ -10,7 +10,7 @@
 seam whose surfaces are a string sent to a model and a diagnostic collected by
 the render walk, and no page in this repository declares one yet.
 
-![four nodes a feed can be, and what each declaration form says about them](2026-09-23-framework-a-name-a-prop-gives.png)
+![four nodes a feed can be, and what each declaration form says about them](2026-09-23-framework-a-name-a-prop-gives.webp)
 
 ## What this was
 

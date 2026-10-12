@@ -11,7 +11,7 @@ recorded in the ledger as **already there**.
 
 This branch builds it.
 
-![the front door, full page at 1280 — 5,207px, the thing a budget is about](2026-10-01-marketing-the-budget-never-built-front-door.png)
+![the front door, full page at 1280 — 5,207px, the thing a budget is about](2026-10-01-marketing-the-budget-never-built-front-door.webp)
 
 ---
 

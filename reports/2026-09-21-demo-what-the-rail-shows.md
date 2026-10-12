@@ -48,7 +48,7 @@ The card for that dead question said this, in this order:
 > You changed the page after asking for this. Loom weighed it against the page
 > as it was then, and won’t apply a decision to a page it hasn’t seen.
 
-[The card as it stands on `main`.](2026-09-21-demo-what-the-rail-shows-before.png)
+[The card as it stands on `main`.](2026-09-21-demo-what-the-rail-shows-before.webp)
 
 One card, contradicting itself twice, at the moment this surface exists for. A
 stranger reads *something it referred to has moved or gone*, then looks at the
@@ -66,7 +66,7 @@ The same two presses, on this branch: the card keeps the badge, the quoted ask,
 the sentence saying the change no longer fits, and the button offering to ask
 again — and the preview is gone, because there is nothing true left to show.
 
-[The same card, here.](2026-09-21-demo-what-the-rail-shows-after.png)
+[The same card, here.](2026-09-21-demo-what-the-rail-shows-after.webp)
 
 | | `main` | this branch |
 | --- | --- | --- |
@@ -296,11 +296,11 @@ branch's for the rest — with reduced motion, on a first arrival with no sessio
 
 | | |
 | --- | --- |
-| [the card, before](2026-09-21-demo-what-the-rail-shows-before.png) | `main`: *something it referred to has moved or gone*, then a picture of it |
-| [the card, after](2026-09-21-demo-what-the-rail-shows-after.png) | this branch: the note, and nothing else |
-| [the rail, before](2026-09-21-demo-what-the-rail-shows-phone-before.png) · [after](2026-09-21-demo-what-the-rail-shows-phone-after.png) | 390 wide, the whole rail after the same two presses |
-| [a live question](2026-09-21-demo-what-the-rail-shows-live.png) | the case that must not change: one press, the preview still there |
-| [a first arrival](2026-09-21-demo-what-the-rail-shows-arrival.png) · [on a phone](2026-09-21-demo-what-the-rail-shows-phone-arrival.png) | 1280 × 900 and 390 × 844, nothing pressed — the shot this unit must leave alone |
+| [the card, before](2026-09-21-demo-what-the-rail-shows-before.webp) | `main`: *something it referred to has moved or gone*, then a picture of it |
+| [the card, after](2026-09-21-demo-what-the-rail-shows-after.webp) | this branch: the note, and nothing else |
+| [the rail, before](2026-09-21-demo-what-the-rail-shows-phone-before.webp) · [after](2026-09-21-demo-what-the-rail-shows-phone-after.webp) | 390 wide, the whole rail after the same two presses |
+| [a live question](2026-09-21-demo-what-the-rail-shows-live.webp) | the case that must not change: one press, the preview still there |
+| [a first arrival](2026-09-21-demo-what-the-rail-shows-arrival.webp) · [on a phone](2026-09-21-demo-what-the-rail-shows-phone-arrival.webp) | 1280 × 900 and 390 × 844, nothing pressed — the shot this unit must leave alone |
 
 **The arrival shot is byte-identical across the change.** Same `md5`
 (`41955176d26c460db7cc93bef1227d5b`), same 749,611 bytes — one taken against a

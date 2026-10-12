@@ -151,9 +151,9 @@ this report.
 
 | | |
 | --- | --- |
-| [**the verdict, and the refusal under it**](2026-10-09-portal-what-it-was-checking-wide.png) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
-| [**both disclosures open**](2026-10-09-portal-what-it-was-checking-open.png) | `1680×1000@2x`, the two stretches and the breakdown with its legend |
-| [**the same, on a phone**](2026-10-09-portal-what-it-was-checking-phone.png) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
+| [**the verdict, and the refusal under it**](2026-10-09-portal-what-it-was-checking-wide.webp) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
+| [**both disclosures open**](2026-10-09-portal-what-it-was-checking-open.webp) | `1680×1000@2x`, the two stretches and the breakdown with its legend |
+| [**the same, on a phone**](2026-10-09-portal-what-it-was-checking-phone.webp) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
 
 The refusal is the second `h2`'s panel at `y 369`, above the fold at both
 viewports — a reader meets it without scrolling, which is the point of it

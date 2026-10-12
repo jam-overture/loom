@@ -30,12 +30,12 @@ it exist in the How it works section."*
 
 | | file |
 | --- | --- |
-| **the undo the rules are holding** | `2026-10-11-marketing-card-held-undo.png` |
-| the same card on `bold` | `2026-10-11-marketing-card-held-undo-bold.png` |
-| a refusal | `2026-10-11-marketing-card-refused.png` |
-| the published page | `2026-10-11-marketing-card-published.png` |
-| `/?ask=shorter&approve=1`, which no longer claims a rearrangement | `2026-10-11-marketing-card-front-door.png` |
-| the page that card opens, so the two can be read together | `2026-10-11-marketing-held-undo-panel.png` |
+| **the undo the rules are holding** | `2026-10-11-marketing-card-held-undo.webp` |
+| the same card on `bold` | `2026-10-11-marketing-card-held-undo-bold.webp` |
+| a refusal | `2026-10-11-marketing-card-refused.webp` |
+| the published page | `2026-10-11-marketing-card-published.webp` |
+| `/?ask=shorter&approve=1`, which no longer claims a rearrangement | `2026-10-11-marketing-card-front-door.webp` |
+| the page that card opens, so the two can be read together | `2026-10-11-marketing-held-undo-panel.webp` |
 
 The first one is a 1200×630 card reading **Waiting for you** / *"Put it back."* /
 *"This weighs more than your rules let a request through on its own, so it waits

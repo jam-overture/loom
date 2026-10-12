@@ -8,7 +8,7 @@
 sandbox's egress allowlist, the standing 19 August limit. Everything below was
 driven against a local render and the specimen harness.
 
-![The specification band under the metrics band, at 1280px, under bold](2026-09-21-primitives-the-numbers-it-could-not-print-bold-wide.png)
+![The specification band under the metrics band, at 1280px, under bold](2026-09-21-primitives-the-numbers-it-could-not-print-bold-wide.webp)
 
 ## What this run chose, and why that
 

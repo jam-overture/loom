@@ -1,0 +1,83 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "out": "2026-10-11-portal-which-piece-wide",
+      "path": "/portal/pieces",
+      "viewport": { "width": 1680, "height": 1100, "label": "wide" },
+      "waitFor": "text=Which piece should I look at first?",
+      "measure": [
+        "text=Which piece should I look at first?",
+        "text=Start with Card",
+        "text=These figures come from 3 pages.",
+        "h2"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          { "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+          { "click": "button[type=submit]" },
+          { "waitFor": "text=What Loom has been doing" }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-11-portal-which-piece-cards",
+      "path": "/portal/pieces",
+      "viewport": { "width": 1680, "height": 1700, "label": "wide" },
+      "waitFor": "text=Which piece should I look at first?",
+      "measure": [
+        "text=It stands in 7 places on 3 pages.",
+        "text=2 in 10 of the readers who met it read it."
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          { "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+          { "click": "button[type=submit]" },
+          { "waitFor": "text=What Loom has been doing" }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-11-portal-which-piece-open",
+      "path": "/portal/pieces",
+      "viewport": { "width": 1680, "height": 1500, "label": "wide" },
+      "waitFor": "text=Which piece should I look at first?",
+      "do": [
+        { "click": "text=Why there are two figures, and the counters behind them" },
+        { "waitFor": "text=libraryReachOf" }
+      ],
+      "measure": [
+        "text=Which piece should I look at first?",
+        "text=is a headcount"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          { "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+          { "click": "button[type=submit]" },
+          { "waitFor": "text=What Loom has been doing" }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-11-portal-which-piece-phone",
+      "path": "/portal/pieces",
+      "viewport": "phone",
+      "waitFor": "text=Which piece should I look at first?",
+      "measure": [
+        "text=Which piece should I look at first?",
+        "text=Start with Card"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          { "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" },
+          { "click": "button[type=submit]" },
+          { "waitFor": "text=What Loom has been doing" }
+        ]
+      }
+    }
+  ]
+}

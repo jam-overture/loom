@@ -20,7 +20,7 @@ exit condition for this section is a stranger getting a proposal accepted
 working only from the site, and the step that turns that from a demo into a
 thing they would ship is a test they trust.
 
-![The new page, and the rail with it](2026-10-09-docs-testing-page-wide.png)
+![The new page, and the rail with it](2026-10-09-docs-testing-page-wide.webp)
 
 ## The measurement that chose the page
 
@@ -77,7 +77,7 @@ everything, which is not a policy. No model is involved in either, because
 **The contract suites.** One line in a test file of a reader's own, and their
 store is held to exactly what Loom's two are held to.
 
-![The ready-made suites, rendered from the door that publishes them](2026-10-09-docs-testing-suites-wide.png)
+![The ready-made suites, rendered from the door that publishes them](2026-10-09-docs-testing-suites-wide.webp)
 
 That block is read off the generated reference rather than typed:
 `_lib/proving/contracts.ts` finds the suites in the door by the shape of their

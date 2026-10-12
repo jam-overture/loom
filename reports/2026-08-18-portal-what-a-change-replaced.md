@@ -5,7 +5,7 @@
 **Branch:** `portal-04-what-undoing-restores` (→ `main`).
 
 Visual: [three history rows carrying what their inverse would restore](2026-08-18-portal-what-a-change-replaced.svg)
-([png](2026-08-18-portal-what-a-change-replaced.png)). The copy is the exact text
+([png](2026-08-18-portal-what-a-change-replaced.webp)). The copy is the exact text
 the components emit; the ids and timestamps are illustrative, because the durable
 store on the preview holds no revisions yet (see recommendations).
 

@@ -26,7 +26,7 @@ Now the builders are a **seed** and the store is what gets served. The three
 pages are rows in the app's store, the portal lists them, and a change appended
 to one of them is a change a stranger is served.
 
-![the front door, served from the store](2026-10-12-marketing-stored-minimal-wide.png)
+![the front door, served from the store](2026-10-12-marketing-stored-minimal-wide.webp)
 
 ---
 
@@ -65,7 +65,7 @@ things it deliberately does not touch, each of which it got wrong first:
   root. The mark was a nicety invented in passing and the invariant is a
   decision somebody recorded.
 
-![the same stored page, bold](2026-10-12-marketing-stored-bold-wide.png)
+![the same stored page, bold](2026-10-12-marketing-stored-bold-wide.webp)
 
 The palette above is not in the row. It is the request's, applied to a page
 stored without one. The third palette and a phone width are alongside this
@@ -100,7 +100,7 @@ that now seeds both — this lane's demonstration page and the site's three.
 store and the other finds it done; both halves are create-if-absent, so the
 cost is one refused write per process.
 
-![the portal on a fresh server, signed into before the site was visited](2026-10-12-marketing-the-site-in-the-portal-wide.png)
+![the portal on a fresh server, signed into before the site was visited](2026-10-12-marketing-the-site-in-the-portal-wide.webp)
 
 The photograph above is a fresh server with nobody having opened the public
 site: sign in, and the pages are already there.

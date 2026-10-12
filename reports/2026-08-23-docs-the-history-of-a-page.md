@@ -11,7 +11,7 @@ It is written. And writing it meant the site had to stop pretending, because the
 one thing §4c will not allow is an example that demonstrates something the site
 is not actually doing.
 
-![The log, after two changes, with the contested undo declared before it is pressed](2026-08-23-docs-history-log.png)
+![The log, after two changes, with the contested undo declared before it is pressed](2026-08-23-docs-history-log.webp)
 
 ## What was actually wrong
 
@@ -54,7 +54,7 @@ like somebody waving through their own request (0029).
 
 **Undo, and watch the number go up.** This is the one worth the page.
 
-![The undo is a revision of its own, planned by `loom/revert`](2026-08-23-docs-history-undo-dark.png)
+![The undo is a revision of its own, planned by `loom/revert`](2026-08-23-docs-history-undo-dark.webp)
 
 ## The undo is the argument
 
@@ -83,7 +83,7 @@ but contested*, the row prints **writes over #2** beside the button, before it i
 pressed. Where there is no undo at all, the row prints the runtime's own sentence
 via `describeRevertPlan` rather than the site's paraphrase.
 
-![Held, answered, and the approver named — at 390px](2026-08-23-docs-history-phone.png)
+![Held, answered, and the approver named — at 390px](2026-08-23-docs-history-phone.webp)
 
 ## One decision that was not specified
 

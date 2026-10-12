@@ -5,7 +5,7 @@
 **Branch:** `framework-43-what-one-entry-costs`
 **Section:** §4 — Framework SDK, measured through the §2 interpretation prompt
 
-![what one interpretation request is made of](2026-09-18-framework-what-one-entry-costs.png)
+![what one interpretation request is made of](2026-09-18-framework-what-one-entry-costs.webp)
 
 ## What this was
 

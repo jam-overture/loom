@@ -13,7 +13,7 @@ and they turn out to be the same instruction:
 He is not off base. Both changes are right, and the reason they are right is
 the same reason.
 
-![the two bands, 1280](2026-10-01-marketing-what-is-loom-wide.png)
+![the two bands, 1280](2026-10-01-marketing-what-is-loom-wide.webp)
 
 ---
 

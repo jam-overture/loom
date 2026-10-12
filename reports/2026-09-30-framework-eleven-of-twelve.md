@@ -7,7 +7,7 @@
 **Records added:** [0206](../decisions/0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md). None superseded
 **Findings closed:** two. **Filed:** three
 
-![One answer, two audiences](2026-09-30-framework-eleven-of-twelve.png)
+![One answer, two audiences](2026-09-30-framework-eleven-of-twelve.webp)
 
 *`tools/specimen/unshown.specimen.ts`, 1280×900@2×, `editorial` + `editorial-serif` + `comfortable`. One source answers both columns with the same twelve rows; eleven carry a `title` and the twelfth carries `headline`, because somebody renamed a column. **The line in the right-hand card is not typed into the specimen** — it is drawn by calling `readUnshown`, `unshownRows` and `describeRenderDiagnostic`, the three functions the walk calls, on the same answer. It agrees character for character with what the harness printed from the walk's own diagnostics: `node n_1 was answered 12 rows under "entries" and "spec.listing" showed 11 of them, so the rest arrived and were not drawn`.*
 

@@ -8,7 +8,7 @@ for a person.
 There was no map for anything arriving without a browser. `/sitemap.xml` was a
 404 on the front door of the product.
 
-![the sitemap, served](2026-09-24-marketing-the-map-nothing-here-draws.png)
+![the sitemap, served](2026-09-24-marketing-the-map-nothing-here-draws.webp)
 
 ---
 

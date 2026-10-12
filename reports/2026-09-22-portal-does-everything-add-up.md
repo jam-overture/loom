@@ -15,11 +15,11 @@ on `github.com` rather than embedding them, for the reason in finding 4 below.
 
 | | |
 | --- | --- |
-| [One page doesn't add up](2026-09-22-portal-does-everything-add-up-wide.png) | 1280px — the verdict, the tally, and the four rows worst-first |
-| [The same screen on a phone](2026-09-22-portal-does-everything-add-up-phone.png) | 390px |
-| [Everything that could be checked adds up](2026-09-22-portal-does-everything-add-up-clean.png) | 1280px — the green arm, and the three pages it refuses to speak for |
-| [Nothing could be checked](2026-09-22-portal-does-everything-add-up-nothing-checked.png) | 1280px — `Checked just now 0`, and a headline that says so rather than a green tick |
-| [The screen that now has one thing to do](2026-09-22-portal-does-everything-add-up-landing.png) | 1280px — `/portal/checkup`, with the press above the list |
+| [One page doesn't add up](2026-09-22-portal-does-everything-add-up-wide.webp) | 1280px — the verdict, the tally, and the four rows worst-first |
+| [The same screen on a phone](2026-09-22-portal-does-everything-add-up-phone.webp) | 390px |
+| [Everything that could be checked adds up](2026-09-22-portal-does-everything-add-up-clean.webp) | 1280px — the green arm, and the three pages it refuses to speak for |
+| [Nothing could be checked](2026-09-22-portal-does-everything-add-up-nothing-checked.webp) | 1280px — `Checked just now 0`, and a headline that says so rather than a green tick |
+| [The screen that now has one thing to do](2026-09-22-portal-does-everything-add-up-landing.webp) | 1280px — `/portal/checkup`, with the press above the list |
 
 **How the pictures were taken.** Four trees built with the published builders
 into a `memoryTreeStore()` on `globalThis[Symbol.for("loom.portal.store")]`, one

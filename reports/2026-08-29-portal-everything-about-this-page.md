@@ -10,12 +10,12 @@ during this run**:
 
 | | |
 | --- | --- |
-| [The page, with the strip under its name](2026-08-29-portal-everything-about-this-page.png) | 1280px |
-| [What's been asked, scoped to one page](2026-08-29-portal-everything-about-this-page-asked.png) | 1280px |
-| [What's changed, scoped to one page](2026-08-29-portal-everything-about-this-page-changed.png) | 1280px |
-| [**Can you trust it?** — the view nothing had ever linked to](2026-08-29-portal-everything-about-this-page-trust.png) | 1280px |
-| [Does it add up?](2026-08-29-portal-everything-about-this-page-checkup.png) | 1280px |
-| [a phone](2026-08-29-portal-everything-about-this-page-phone.png) | 390px |
+| [The page, with the strip under its name](2026-08-29-portal-everything-about-this-page.webp) | 1280px |
+| [What's been asked, scoped to one page](2026-08-29-portal-everything-about-this-page-asked.webp) | 1280px |
+| [What's changed, scoped to one page](2026-08-29-portal-everything-about-this-page-changed.webp) | 1280px |
+| [**Can you trust it?** — the view nothing had ever linked to](2026-08-29-portal-everything-about-this-page-trust.webp) | 1280px |
+| [Does it add up?](2026-08-29-portal-everything-about-this-page-checkup.webp) | 1280px |
+| [a phone](2026-08-29-portal-everything-about-this-page-phone.webp) | 390px |
 
 **How honest these are, stated plainly, and this run is the strongest yet.**
 `LOOM_ANTHROPIC_API_KEY` is present in this environment, so nothing was staged.

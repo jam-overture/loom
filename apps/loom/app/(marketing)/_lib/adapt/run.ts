@@ -89,8 +89,15 @@ import { nothingHappened, recordOf, requestOf, type ChangeRecord } from "./recor
  * **It is not an edit to what this set of rules protects**, which is what keeps
  * the name honest: the three protected types are unchanged, and every answer the
  * five buttons get is unchanged. What the two add is a floor under *every*
- * request, including the ones this site offers no button for. `floors.ts` puts
- * two of those and prints what came back.
+ * request, including the ones this site offers no button for.
+ *
+ * **Nothing on this site puts such a request today.** The sentence here said
+ * *"`floors.ts` puts two of those and prints what came back"* until 12 October,
+ * and there is no `floors.ts`: nothing imports one and no band prints a floor
+ * probe. Whether it was deleted or never landed is not in this clone's fifty
+ * commits. The floors themselves are real and are read off `siteRegistry`
+ * above; what was not real is the band, so the claim that a visitor can see
+ * them working has gone rather than been reworded.
  */
 export const FRONT_DOOR_POLICY: GatePolicy = gatePolicySchema.parse({
   ...defaultGatePolicy,

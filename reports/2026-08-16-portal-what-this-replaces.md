@@ -4,10 +4,10 @@
 
 **Branch:** `portal-02-what-this-replaces` (→ `main`).
 
-Visuals: [the page and the record](2026-08-16-portal-what-this-replaces-page.png) ·
-[an insert, placed by its neighbour](2026-08-16-portal-what-this-replaces-insert.png) ·
-[a removal, and what goes with it](2026-08-16-portal-what-this-replaces-removal.png) ·
-[a hold the tree has moved past](2026-08-16-portal-what-this-replaces-stale.png).
+Visuals: [the page and the record](2026-08-16-portal-what-this-replaces-page.webp) ·
+[an insert, placed by its neighbour](2026-08-16-portal-what-this-replaces-insert.webp) ·
+[a removal, and what goes with it](2026-08-16-portal-what-this-replaces-removal.webp) ·
+[a hold the tree has moved past](2026-08-16-portal-what-this-replaces-stale.webp).
 
 ---
 

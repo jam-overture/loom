@@ -12,7 +12,7 @@ the order it should be read *once you are already reading*.
 The question somebody actually has on arrival is the other one: **what am I
 about to spend, and what do I have at the end of it.**
 
-![Six steps, each with what you will have when it is done](2026-09-09-docs-what-the-next-hour-looks-like.png)
+![Six steps, each with what you will have when it is done](2026-09-09-docs-what-the-next-hour-looks-like.webp)
 
 ## What shipped
 
@@ -27,7 +27,7 @@ sentence, it happened, and you can say why it was allowed. That is the brief's
 exit condition, and this is the first page on the site that states it as a
 route rather than leaving it to be assembled from the rail.
 
-![Where it sits: after what Loom is, before why](2026-09-09-docs-what-the-next-hour-looks-like-top.png)
+![Where it sits: after what Loom is, before why](2026-09-09-docs-what-the-next-hour-looks-like-top.webp)
 
 ## The split, and which half can lie
 
@@ -80,7 +80,7 @@ top has quietly stopped being one.
 already — that is the fence checker from 5 September doing work it was not
 built for, and the reason the route can say it without hedging.
 
-![The same route in dark](2026-09-09-docs-what-the-next-hour-looks-like-dark.png)
+![The same route in dark](2026-09-09-docs-what-the-next-hour-looks-like-dark.webp)
 
 ## The bug the screenshot found, and the tests could not
 
@@ -145,7 +145,7 @@ page has none of the vocabulary yet, so no runtime name may appear in the
 sentence promising them something — and the test enforces it against the
 runtime's own published surface rather than against a word list I wrote.
 
-![The route at a true 390px](2026-09-09-docs-what-the-next-hour-looks-like-phone.png)
+![The route at a true 390px](2026-09-09-docs-what-the-next-hour-looks-like-phone.webp)
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport and
 1280 at 1280, in both themes.

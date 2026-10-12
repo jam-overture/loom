@@ -9,7 +9,7 @@ sentence inside a panel — *putting it back restores every word rather than
 writing them out again* — and one assertion inside a test file, which is the one
 audience a claim does nothing for.
 
-![The four round trips](2026-09-14-marketing-putting-it-back-table.png)
+![The four round trips](2026-09-14-marketing-putting-it-back-table.webp)
 
 Four changes, out and back. Not one figure typed.
 
@@ -220,16 +220,16 @@ branch did not open it.
 
 ## How it looks
 
-![The page, whole](2026-09-14-marketing-putting-it-back.png)
+![The page, whole](2026-09-14-marketing-putting-it-back.webp)
 
 The band the page is worth reading for is the accent one in the middle, and it
 exists only because a run produced it:
 
-![Bold](2026-09-14-marketing-putting-it-back-bold.png)
+![Bold](2026-09-14-marketing-putting-it-back-bold.webp)
 
-![Editorial](2026-09-14-marketing-putting-it-back-editorial.png)
+![Editorial](2026-09-14-marketing-putting-it-back-editorial.webp)
 
-![At 390px](2026-09-14-marketing-putting-it-back-phone.png)
+![At 390px](2026-09-14-marketing-putting-it-back-phone.webp)
 
 `scrollWidth` is exactly 1280 at 1280 and exactly 390 at 390. At 390px both
 tables scroll inside their own edge, which is the primitive working as designed

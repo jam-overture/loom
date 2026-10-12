@@ -4,9 +4,9 @@
 
 **Branch:** `portal-01-white-and-empty` (→ `main`).
 
-Visuals: [the white](2026-08-15-portal-white-and-empty-white.png) ·
-[empty vs failed](2026-08-15-portal-white-and-empty-states.png) ·
-[keyboard](2026-08-15-portal-white-and-empty-keyboard.png).
+Visuals: [the white](2026-08-15-portal-white-and-empty-white.webp) ·
+[empty vs failed](2026-08-15-portal-white-and-empty-states.webp) ·
+[keyboard](2026-08-15-portal-white-and-empty-keyboard.webp).
 
 ---
 

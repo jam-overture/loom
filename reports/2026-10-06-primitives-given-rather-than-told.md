@@ -307,7 +307,7 @@ at the result. A bound chart's column count is the **database's**.
 
 Twelve months on a 390-pixel page:
 
-![before](2026-10-06-primitives-trend-overflow-before.png)
+![before](2026-10-06-primitives-trend-overflow-before.webp)
 
 *A twelve-point `loom.trend` at 390px under the shared rule, photographed at 1x
 and cropped to the plot. The frame is 401 pixels wide because the document was.*
@@ -317,7 +317,7 @@ the right of the document — `scrollWidth 401 / innerWidth 390`. **Caught by th
 specimen harness's own overflow check**, not by any test, which is the second
 time in this run that a picture found what a suite did not.
 
-![after](2026-10-06-primitives-trend-overflow-after.png)
+![after](2026-10-06-primitives-trend-overflow-after.webp)
 
 *The same series, same width, after. The sixth column peeking at the edge is the
 scroll region; the frame is 390 pixels because the document now is.*
@@ -415,8 +415,8 @@ be photographed doing before `answers` existed.
 
 | | editorial | bold |
 | --- | --- | --- |
-| wide | ![](2026-10-06-primitives-given-editorial-wide.png) | ![](2026-10-06-primitives-given-bold-wide.png) |
-| phone | ![](2026-10-06-primitives-given-editorial-phone.png) | ![](2026-10-06-primitives-given-bold-phone.png) |
+| wide | ![](2026-10-06-primitives-given-editorial-wide.webp) | ![](2026-10-06-primitives-given-bold-wide.webp) |
+| phone | ![](2026-10-06-primitives-given-editorial-phone.webp) | ![](2026-10-06-primitives-given-bold-phone.webp) |
 
 ```
 …-editorial-wide    1280x4600@2x  scrollWidth 1280 / innerWidth 1280

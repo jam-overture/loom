@@ -4,7 +4,7 @@
 past** since 11 September. Two of the three were things this deployment did not
 do.
 
-![the band, 1280 wide](2026-09-23-marketing-three-things-no-request-gets-past-band.png)
+![the band, 1280 wide](2026-09-23-marketing-three-things-no-request-gets-past-band.webp)
 
 ---
 

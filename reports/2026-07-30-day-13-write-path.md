@@ -5,9 +5,9 @@
 
 **Visual:** [the one write path](2026-07-30-day-13-write-path.svg) ·
 screenshots of the running build, driven against the live API:
-[a change applied](2026-07-30-day-13-write-path-applied.png) ·
-[a change held for review](2026-07-30-day-13-write-path-held.png) ·
-[the result of confirming one](2026-07-30-day-13-write-path-confirmed.png)
+[a change applied](2026-07-30-day-13-write-path-applied.webp) ·
+[a change held for review](2026-07-30-day-13-write-path-held.webp) ·
+[the result of confirming one](2026-07-30-day-13-write-path-confirmed.webp)
 
 **Branch:** `day-13-write-path`, off `main` at `453ddce`
 

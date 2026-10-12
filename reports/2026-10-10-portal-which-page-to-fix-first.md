@@ -149,10 +149,10 @@ before committing and the shot list is beside this report.
 
 | | |
 | --- | --- |
-| [**the order, as a reader meets it**](2026-10-10-portal-which-page-first-wide.png) | `1680×1000@2x`, `scrollWidth 1680 / innerWidth 1680` |
-| [**the record, one click down**](2026-10-10-portal-which-page-first-open.png) | `1680×1500@2x`, the arithmetic, the counters and the legend |
-| [**the same, on a phone**](2026-10-10-portal-which-page-first-phone.png) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
-| [**the section and the card it leads with**](2026-10-10-portal-which-page-first-order.png) | `1680×2600@2x`, the first card whole and the second beginning |
+| [**the order, as a reader meets it**](2026-10-10-portal-which-page-first-wide.webp) | `1680×1000@2x`, `scrollWidth 1680 / innerWidth 1680` |
+| [**the record, one click down**](2026-10-10-portal-which-page-first-open.webp) | `1680×1500@2x`, the arithmetic, the counters and the legend |
+| [**the same, on a phone**](2026-10-10-portal-which-page-first-phone.webp) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
+| [**the section and the card it leads with**](2026-10-10-portal-which-page-first-order.webp) | `1680×2600@2x`, the first card whole and the second beginning |
 
 The section is the first `h2` at `y 205`, with *Start with Autumn arrivals* at
 `y 282` — both above the fold at every viewport, which is the point of a landing

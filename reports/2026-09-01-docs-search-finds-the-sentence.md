@@ -12,7 +12,7 @@ the runtime's surface. A reader who typed a word that lives in a sentence was
 told the documentation had never heard of it, by a search box that had never
 read a sentence.
 
-![The word is in a paragraph, and the row shows the paragraph](2026-09-01-docs-search-finds-the-sentence.png)
+![The word is in a paragraph, and the row shows the paragraph](2026-09-01-docs-search-finds-the-sentence.webp)
 
 ## What shipped
 
@@ -24,7 +24,7 @@ offered; they are simply findable by what they *say* as well as by what they are
 *called*, and a row that is in the list because of its paragraph shows the
 paragraph with the typed words marked.
 
-![Four sections nobody could reach by the word they all use](2026-09-01-docs-search-finds-the-sentence-list.png)
+![Four sections nobody could reach by the word they all use](2026-09-01-docs-search-finds-the-sentence-list.webp)
 
 That excerpt is not decoration. A heading offered for a word that is not in the
 heading reads as a bug until the reader can see what earned it — so the excerpt
@@ -91,7 +91,7 @@ inside *propagate*, `ai` does not match inside *said* — while still letting
 somebody find `serverless` by typing `server`. A paragraph is long enough for a
 plain substring to be wrong in a way a title never is.
 
-![The claim the box makes when it finds nothing, and the limit under it](2026-09-01-docs-search-finds-the-sentence-empty.png)
+![The claim the box makes when it finds nothing, and the limit under it](2026-09-01-docs-search-finds-the-sentence-empty.webp)
 
 The empty state is the other half of this change. *"Nothing on the site says X"*
 was routinely false before today, and it is a strong enough claim to be worth
@@ -136,14 +136,14 @@ it. No page is obliged to keep saying any particular word for that test to hold.
 
 ## Dark and 390px, before the pull request
 
-![The same excerpt in dark, with two typed words marked](2026-09-01-docs-search-finds-the-sentence-dark.png)
+![The same excerpt in dark, with two typed words marked](2026-09-01-docs-search-finds-the-sentence-dark.webp)
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport and
 1280 at 1280. The rows are taller than they were, so on a phone the list scrolls
 inside its own box, which is what `max-h-96 overflow-y-auto` was already there
 for.
 
-![A three-line excerpt at a true 390px](2026-09-01-docs-search-finds-the-sentence-phone.png)
+![A three-line excerpt at a true 390px](2026-09-01-docs-search-finds-the-sentence-phone.webp)
 
 ## Scope
 

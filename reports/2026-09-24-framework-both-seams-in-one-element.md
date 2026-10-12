@@ -34,7 +34,7 @@ all three at once, which nothing in this repository could do yesterday.
 
 | before — the static harness | after — hydrated, and answered |
 | --- | --- |
-| ![static](2026-09-24-framework-both-seams-in-one-element-static.png) | ![settled](2026-09-24-framework-both-seams-in-one-element-settled.png) |
+| ![static](2026-09-24-framework-both-seams-in-one-element-static.webp) | ![settled](2026-09-24-framework-both-seams-in-one-element-settled.webp) |
 
 No *Copy*, no *Menu*, no slider and no *Open the panel* on the left. Both regions
 — the menu and the panel — are *visible* there, because the rules that hide them
@@ -52,7 +52,7 @@ Three states, reached by pressing:
 
 | disclosed | presented | dismissed |
 | --- | --- | --- |
-| ![disclosed](2026-09-24-framework-both-seams-in-one-element-disclosed.png) | ![presented](2026-09-24-framework-both-seams-in-one-element-presented.png) | ![dismissed](2026-09-24-framework-both-seams-in-one-element-dismissed.png) |
+| ![disclosed](2026-09-24-framework-both-seams-in-one-element-disclosed.webp) | ![presented](2026-09-24-framework-both-seams-in-one-element-presented.webp) | ![dismissed](2026-09-24-framework-both-seams-in-one-element-dismissed.webp) |
 
 **The `dismissed` shot is byte-identical to the `settled` one** — same md5
 (`a964564c4d2b685384b04ef427f60550`), same 238,718 bytes. `present` and `dismiss`

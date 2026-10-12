@@ -88,6 +88,47 @@ const exploding = definePrimitive({
 })
 
 
+/**
+ * The shape 0267 exists for: a primitive that *reads* a required prop rather
+ * than handing it to React.
+ *
+ * Thirty-two of the hundred and seven starter primitives require a prop and not
+ * one of them throws without it, because a missing prop spread into an element
+ * renders as nothing. This is the first style that does not survive it, and the
+ * empty configuration the probe builds by default is a bag its own schema
+ * refuses.
+ */
+const shouting = definePrimitive({
+  type: "loom.shouting",
+  description: "prints a required name in capitals",
+  props: z.object({ service: z.string().min(1).max(60) }).strict(),
+  component: ({ loom, props }) =>
+    createElement("div", { ...loom.editable }, props.service.toUpperCase()),
+})
+
+/**
+ * The same, with a region reachable only under one value of a closed choice —
+ * the 0075 shape and the 0267 shape at once, which is what makes a supplied bag
+ * have to be varied rather than probed on its own.
+ */
+const shoutingListing = definePrimitive({
+  type: "loom.shouting-listing",
+  description: "prints a required name, and places children only when listing",
+  props: z
+    .object({ service: z.string().min(1), kind: z.enum(["plain", "listing"]).optional() })
+    .strict(),
+  component: ({ loom, props, children }) =>
+    createElement(
+      "div",
+      { ...loom.editable },
+      props.service.toUpperCase(),
+      props.kind === "listing" ? children : null
+    ),
+})
+
+const SHOUTING = primitiveTypeSchema.parse(shouting.type)
+const SHOUTING_LISTING = primitiveTypeSchema.parse(shoutingListing.type)
+
 /** A form that does what a form does: posts where it was told to post. */
 const posting = definePrimitive({
   type: "loom.posting",
@@ -571,6 +612,138 @@ const unavailableUnder = (name: string): ProbeAnswers => ({
 })
 
 const BOUND_LISTING = primitiveTypeSchema.parse("loom.bound-listing")
+
+/**
+ * The other half of what 0185 started, and the same argument: a probe builds its
+ * questions out of what a registration closes over, and a value for a required
+ * `z.string()` is not in there (0267).
+ */
+describe("auditRegistry, on props it was not handed", () => {
+  it("names a primitive it could put in no configuration the schema accepts", () => {
+    const audit = auditRegistry(registryOf([shouting]))
+
+    expect(audit.notConfigured).toEqual([
+      {
+        type: "loom.shouting",
+        required: ["service"],
+        reason: "no-props",
+        refused: [{ props: {}, issues: [{ path: "service", message: "Required" }] }],
+      },
+    ])
+  })
+
+  /**
+   * The row the finding of 11 October was filed about. `{}` is not a
+   * configuration built from the schema for a primitive that requires anything,
+   * so a throw under it is not the fault `throwsOnDeclaredProps` claims — *a
+   * tree the validator accepts can take the page down* is false of a tree the
+   * validator would have refused.
+   */
+  it("does not call a throw on props the schema refuses a fault of the component", () => {
+    const audit = auditRegistry(registryOf([shouting]))
+
+    expect(audit.throwsOnDeclaredProps).toEqual([])
+  })
+
+  /**
+   * And does not leave it beside the class and hook-using components either,
+   * which is where the whole population used to land: those cannot be called at
+   * all, and this one was simply never asked a question it could answer.
+   */
+  it("keeps it out of the list a host cannot assert empty", () => {
+    const audit = auditRegistry(registryOf([shouting, hooked]))
+
+    expect(audit.notProbeable).toEqual(["loom.hooked"])
+    expect(audit.notConfigured.map((entry) => entry.type)).toEqual(["loom.shouting"])
+  })
+
+  it("judges it once it is handed props its schema accepts", () => {
+    const audit = auditRegistry(registryOf([shouting]), {
+      props: new Map([[SHOUTING, [{ service: "Acme" }]]]),
+    })
+
+    expect(audit.notConfigured).toEqual([])
+    expect(audit.notProbeable).toEqual([])
+    expect(audit.notDecorated).toEqual([])
+  })
+
+  /**
+   * The failure handing props over creates, reported for the reason
+   * `names-not-answered` is: a host told to empty this list can satisfy a check
+   * that only counted bags without any of them being accepted, and would read
+   * an empty list over the same unjudged primitive.
+   */
+  it("says so when the props it was handed are refused too", () => {
+    const audit = auditRegistry(registryOf([shouting]), {
+      props: new Map([[SHOUTING, [{ name: "Acme" }]]]),
+    })
+
+    expect(audit.notConfigured.map((entry) => entry.reason)).toEqual(["props-not-accepted"])
+  })
+
+  /** A supplied bag is varied by every closed choice, which is what 0075 asks of one. */
+  it("probes a supplied bag under every value the schema closes over", () => {
+    const audit = auditRegistry(registryOf([shoutingListing]), {
+      props: new Map([[SHOUTING_LISTING, [{ service: "Acme" }]]]),
+    })
+
+    expect(audit.notConfigured).toEqual([])
+    expect(audit.leaves).toEqual([])
+  })
+
+  /** Probed on its own, the same primitive is a leaf: the one bag it accepts has no `kind`. */
+  it("reports it a leaf when nothing varied the bag, which is the claim 0075 refuses", () => {
+    const audit = auditRegistry(registryOf([shoutingListing]), {
+      props: new Map([[SHOUTING_LISTING, [{ service: "Acme", kind: "plain" }]]]),
+    })
+
+    expect(audit.leaves).toEqual([])
+  })
+
+  /**
+   * The starter library's own position, which is why none of this is a defect
+   * list: thirty-three of its registrations refuse the empty bag and every one
+   * of them answers anyway, so the verdicts hold and rest on a configuration no
+   * tree carries.
+   */
+  it("reports the refused configurations of a primitive that answered regardless", () => {
+    const tolerant = definePrimitive({
+      type: "loom.tolerant",
+      description: "requires a prop and hands it straight to React",
+      props: z.object({ label: z.string() }).strict(),
+      component: ({ loom, props }) => createElement("div", { ...loom.editable }, props.label),
+    })
+    const audit = auditRegistry(registryOf([tolerant]))
+
+    expect(audit.notConfigured).toEqual([])
+    expect(audit.notDecorated).toEqual([])
+    expect(audit.audits[0]?.refusedConfigurations).toEqual([
+      { props: {}, issues: [{ path: "label", message: "Required" }] },
+    ])
+  })
+
+  it("changes nothing for a primitive that requires no props", () => {
+    expect(
+      auditRegistry(registryOf(testDefinitions), {
+        props: new Map([[primitiveTypeSchema.parse(testDefinitions[0]?.type ?? "loom.text"), [{}]]]),
+      })
+    ).toEqual(auditRegistry(registryOf(testDefinitions)))
+  })
+
+  it("has nothing to report for the starter library", () => {
+    const registry = createStarterPrimitiveRegistry()
+    if (!registry.ok) throw new Error(describeRegistryError(registry.error))
+
+    expect(auditRegistry(registry.value).notConfigured).toEqual([])
+  })
+
+  it("says in words that nothing above the clause is about the component", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([shouting])))
+
+    expect(described).toContain("requires `service` and was handed none")
+    expect(described).toContain("nothing above is a claim about this component")
+  })
+})
 
 /**
  * The half 0185's permission went sixteen days without (`FINDINGS.md`,

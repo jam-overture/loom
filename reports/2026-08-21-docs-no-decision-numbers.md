@@ -10,7 +10,7 @@ The maintainer, on the API reference that landed yesterday:
 Correct, and it was worse than it looked. This run makes it impossible rather
 than merely fixing today's instances.
 
-![The prop-validation seam, with its citation lifted out](2026-08-21-docs-no-decision-numbers-prose.png)
+![The prop-validation seam, with its citation lifted out](2026-08-21-docs-no-decision-numbers-prose.webp)
 
 ## Where they were coming from
 
@@ -70,7 +70,7 @@ dangling mid-thought — `telemetry/calibration` would have opened *"This is the
 measurement half of that promise"* with the promise deleted. Withholding the
 whole summary is less clever and much more honest.
 
-![A union type's own comments, citation lifted, code untouched](2026-08-21-docs-no-decision-numbers-signature.png)
+![A union type's own comments, citation lifted, code untouched](2026-08-21-docs-no-decision-numbers-signature.webp)
 
 ## What holds it
 

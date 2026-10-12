@@ -11,7 +11,7 @@ account here by deciding to — and on this deployment the door behind *Sign in*
 answers, correctly and in the portal lane's own words, **"This portal isn't set
 up yet."**
 
-![The four ways in, and the one with a door saying so](2026-09-10-marketing-whose-portal-is-it.png)
+![The four ways in, and the one with a door saying so](2026-09-10-marketing-whose-portal-is-it.webp)
 
 ---
 
@@ -111,7 +111,7 @@ been written against the field, and the field did not exist.
 | the front door's questions band | four questions | a fifth: *"Do I need an account to use this?"* |
 | `/the-record`'s last band | "…is the portal." | the same, then `PORTAL.door` |
 
-![The fifth question, which the bar has been asking on the reader's behalf since the site was written](2026-09-10-marketing-whose-portal-is-it-question.png)
+![The fifth question, which the bar has been asking on the reader's behalf since the site was written](2026-09-10-marketing-whose-portal-is-it-question.webp)
 
 ### The record page's band is the sharper of the two placements
 
@@ -121,7 +121,7 @@ opened a portal that is not the reader's. It was the one place on the site where
 thing. `door` is what makes the heading true: a portal comes with the site, so
 the one on a page of your own would be yours.
 
-![The record page's last band](2026-09-10-marketing-whose-portal-is-it-record.png)
+![The record page's last band](2026-09-10-marketing-whose-portal-is-it-record.webp)
 
 ### Both halves of the new question are composed, not typed
 
@@ -190,9 +190,9 @@ latitude that let the band's own note promise a property the band had lost.
 Both palettes and the third, at 1440 and at 390. `scrollWidth` exactly 1440 at
 1440 and exactly 390 at 390 on every shot.
 
-![The same band under the bold palette](2026-09-10-marketing-whose-portal-is-it-bold.png)
+![The same band under the bold palette](2026-09-10-marketing-whose-portal-is-it-bold.webp)
 
-![And on a phone, where the cards stack and both lines still land](2026-09-10-marketing-whose-portal-is-it-phone.png)
+![And on a phone, where the cards stack and both lines still land](2026-09-10-marketing-whose-portal-is-it-phone.webp)
 
 No colour is named in the diff. No primitive was added and none was missing: the
 whole unit is a card body, a question, a sentence and a type.

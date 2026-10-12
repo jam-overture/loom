@@ -1,3 +1,4 @@
+import { everyMemberOf } from "../closed-set.js"
 import type { NodeId } from "../ids.js"
 
 import { nodeLabel, type LoomNode } from "./node.js"
@@ -38,6 +39,24 @@ import type { LoomTree } from "./tree.js"
  * primitive.
  */
 export type NodeFacet = "kind" | "type" | "name" | "props" | "text" | "parent" | "position"
+
+/**
+ * Every facet, for the things that have to walk them rather than react to one.
+ *
+ * `reseed.ts` is the caller that needs it: which facets a `configure` can close
+ * decides whether a page can be put back to its authored shape at all, and that
+ * list is only trustworthy if a facet added here cannot be left out of it. With
+ * this, it cannot — the subset is checked against this list where it is written.
+ */
+export const NODE_FACETS: readonly NodeFacet[] = everyMemberOf<NodeFacet>()([
+  "kind",
+  "type",
+  "name",
+  "props",
+  "text",
+  "parent",
+  "position",
+])
 
 export type TreeDifference =
   /** Present in the base tree, absent from the compared one. */

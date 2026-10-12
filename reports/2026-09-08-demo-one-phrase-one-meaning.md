@@ -38,7 +38,7 @@ back”* appears once on that card: as the quotation of what the visitor pressed
 
 | before — three uses, two meanings | after — one use, and it is the quotation |
 | --- | --- |
-| ![before](2026-09-08-demo-one-phrase-one-meaning-before.png) | ![after](2026-09-08-demo-one-phrase-one-meaning-after.png) |
+| ![before](2026-09-08-demo-one-phrase-one-meaning-before.webp) | ![after](2026-09-08-demo-one-phrase-one-meaning-after.webp) |
 
 **The button stays, and that is the point.** Removing it would be the tidy fix
 and it would deny the interesting claim: an undo is a change of its own rather
@@ -66,7 +66,7 @@ It now reads that from the records, the same way `undoOffer` does and for the
 same stated reason — *the card cannot see the ask above its own* — and the page
 hands it down beside `offer`.
 
-![the press after the payoff](2026-09-08-demo-one-phrase-one-meaning-deeper.png)
+![the press after the payoff](2026-09-08-demo-one-phrase-one-meaning-deeper.webp)
 
 The card quotes *“Undo this change too.”*, the mark on the page says **This would
 go back off**, and the plain reading — computed against the tree, in the
@@ -130,7 +130,7 @@ Both directions in one frame at 390×844 — the undo's card with its new contro
 and the ask it undid directly below, still carrying the ordinary
 *“You put this back, so the page is as it was before this ask.”*
 
-![on a phone](2026-09-08-demo-one-phrase-one-meaning-phone.png)
+![on a phone](2026-09-08-demo-one-phrase-one-meaning-phone.webp)
 
 ---
 

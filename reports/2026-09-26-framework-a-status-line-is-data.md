@@ -4,7 +4,7 @@
 · **Branch:** `framework-54-a-build-that-did-not-finish` (pushed onto the open
 pull request, #395, rather than opening a second one)
 
-![Twelve supersession directions, and the two that were written at one end only](2026-09-26-framework-a-status-line-is-data.png)
+![Twelve supersession directions, and the two that were written at one end only](2026-09-26-framework-a-status-line-is-data.webp)
 
 ## What was completed, in plain language
 

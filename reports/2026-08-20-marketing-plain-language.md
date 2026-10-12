@@ -14,7 +14,7 @@ This run rewrites the copy in the reference's register and — more importantly 
 makes the register a **tested property of the surface**, because the reason it
 drifted is that it was the only thing here nothing checked.
 
-![The first screen](2026-08-20-marketing-plain-language-first-screen.png)
+![The first screen](2026-08-20-marketing-plain-language-first-screen.webp)
 
 ---
 
@@ -94,7 +94,7 @@ asks for something*, *The AI writes down what it wants to change*, *The change i
 measured*, *Your rules decide*, *What happened is written down* — and the two
 terms it genuinely needs arrive after the plain sentence that earns them.
 
-![The landing page](2026-08-20-marketing-plain-language-home.png)
+![The landing page](2026-08-20-marketing-plain-language-home.webp)
 
 ## What I took from the reference, and what I could not
 
@@ -112,7 +112,7 @@ line a visitor can copy. That is the conversion path; everything else is
 persuasion. `@loom/runtime` is `private: true` and unpublished, so there is no
 honest equivalent, and inventing one would be the first false claim on the site.
 
-![The reference](2026-08-20-marketing-plain-language-reference.png)
+![The reference](2026-08-20-marketing-plain-language-reference.webp)
 
 ## The merge with `main`, and the one thing it broke
 
@@ -134,7 +134,7 @@ verb, because a card invites where a menu item names. A test holds that table
 total against the surface list, since the run that adds the fifth surface will be
 in another lane and will have no reason to look at this file.
 
-![Where to go from here, with the course](2026-08-20-marketing-plain-language-ways-in.png)
+![Where to go from here, with the course](2026-08-20-marketing-plain-language-ways-in.webp)
 
 ## Tests
 

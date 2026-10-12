@@ -13,9 +13,9 @@ what is waiting on them:
 
 | | |
 | --- | --- |
-| [The front door, two pages that would not answer](2026-09-18-portal-the-pages-it-could-not-ask-wide.png) | 1280px — **the change**: the warning names them |
-| [The same screen, every disclosure open](2026-09-18-portal-the-pages-it-could-not-ask-open.png) | 1280px — nothing was removed to make the first one readable |
-| [a phone](2026-09-18-portal-the-pages-it-could-not-ask-phone.png) | 390px |
+| [The front door, two pages that would not answer](2026-09-18-portal-the-pages-it-could-not-ask-wide.webp) | 1280px — **the change**: the warning names them |
+| [The same screen, every disclosure open](2026-09-18-portal-the-pages-it-could-not-ask-open.webp) | 1280px — nothing was removed to make the first one readable |
+| [a phone](2026-09-18-portal-the-pages-it-could-not-ask-phone.webp) | 390px |
 
 **How the populated pictures were taken.** The recipe this lane filed on 15, 16
 and 17 September, with one addition: **both** carriers are filled by the

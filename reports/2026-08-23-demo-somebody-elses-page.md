@@ -238,10 +238,10 @@ Nothing blocking. Two worth a sentence, both carried:
 
 | | |
 | --- | --- |
-| [arrival](2026-08-23-demo-somebody-elses-page-arrival.png) | the first screen: a clinic's page, and an instrument. Two voices, and the bar says which is which before either of them speaks |
-| [held](2026-08-23-demo-somebody-elses-page-held.png) | *Take the numbers off* — 3,400 appointments, 24 years, 92% seen within a week, ringed amber, and **Waiting on you** beside it. This is the sixty seconds |
-| [applied](2026-08-23-demo-somebody-elses-page-applied.png) | one click later: the numbers are gone, the gap is ringed green, revision 1, *Put it back*. The chip collision described above is in this frame |
-| [phone](2026-08-23-demo-somebody-elses-page-phone.png) | stacked at 390×844: the disclosure survives two lines of bar, and the rail still leads |
+| [arrival](2026-08-23-demo-somebody-elses-page-arrival.webp) | the first screen: a clinic's page, and an instrument. Two voices, and the bar says which is which before either of them speaks |
+| [held](2026-08-23-demo-somebody-elses-page-held.webp) | *Take the numbers off* — 3,400 appointments, 24 years, 92% seen within a week, ringed amber, and **Waiting on you** beside it. This is the sixty seconds |
+| [applied](2026-08-23-demo-somebody-elses-page-applied.webp) | one click later: the numbers are gone, the gap is ringed green, revision 1, *Put it back*. The chip collision described above is in this frame |
+| [phone](2026-08-23-demo-somebody-elses-page-phone.webp) | stacked at 390×844: the disclosure survives two lines of bar, and the rail still leads |
 
 Every screenshot is this branch's `next build` output driven in Chromium — not
 the preview, which this environment cannot open (`vercel.app` is not on the

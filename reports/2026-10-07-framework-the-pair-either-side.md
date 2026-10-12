@@ -48,8 +48,8 @@ committed by hand.** The automated pair *is* the hand-made pair:
 
 | the flag's output | the committed file | `cmp` |
 | --- | --- | --- |
-| `against/…-back-on-the-trigger.png` | [`2026-10-07-framework-button-before.png`](2026-10-07-framework-button-before.png) | identical |
-| `…-back-on-the-trigger.png` | [`2026-10-07-framework-button-after.png`](2026-10-07-framework-button-after.png) | identical |
+| `against/…-back-on-the-trigger.png` | [`2026-10-07-framework-button-before.webp`](2026-10-07-framework-button-before.webp) | identical |
+| `…-back-on-the-trigger.png` | [`2026-10-07-framework-button-after.webp`](2026-10-07-framework-button-after.webp) | identical |
 
 That is the strongest thing available to say for it, and it is why **no new
 picture is committed with this report.** The two above are already in `reports/`;

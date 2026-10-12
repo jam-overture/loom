@@ -10,7 +10,7 @@ That is the standing 15 September finding and is not re-filed. Everything
 measured below is a production build (`pnpm build && next build && next start`),
 fetched over real HTTP and driven in Chromium.
 
-![None of the sixteen doors has everything behind it](2026-09-24-docs-none-of-them-has-everything.png)
+![None of the sixteen doors has everything behind it](2026-09-24-docs-none-of-them-has-everything.webp)
 
 ## What this run was
 
@@ -41,7 +41,7 @@ now says otherwise, in its own numbers:
 > nest: a name that is not on this page is not a name that does not exist, and
 > the search at the top of the page says which import it comes from.
 
-![The band on the root door's page, with the two imports it overlaps](2026-09-24-docs-none-of-them-has-everything-band-phone.png)
+![The band on the root door's page, with the two imports it overlaps](2026-09-24-docs-none-of-them-has-everything-band-phone.webp)
 
 ## What the measurement found that I had not planned for
 
@@ -66,7 +66,7 @@ twice, and nothing in the results says otherwise.
 So both pages now carry a line about it, and it is filed for the lane that owns
 `src/` as a thing the documentation can describe and not repair.
 
-![The signals door: what is elsewhere, what overlaps, and the name that is not the same thing](2026-09-24-docs-none-of-them-has-everything-band-signals.png)
+![The signals door: what is elsewhere, what overlaps, and the name that is not the same thing](2026-09-24-docs-none-of-them-has-everything-band-signals.webp)
 
 ## Three sentences, and each one is measured rather than assumed
 
@@ -90,7 +90,7 @@ these names* when another single door publishes this door's whole surface.
 behind `@loom/runtime/signals` as well, and it is the one door of the sixteen
 that **is** a slice of another one.
 
-![The broadcaster, which is the one door that is contained in another](2026-09-24-docs-none-of-them-has-everything-band-broadcast.png)
+![The broadcaster, which is the one door that is contained in another](2026-09-24-docs-none-of-them-has-everything-band-broadcast.webp)
 
 That last one is why the heading says what it says. The first draft read *This
 import is not part of a bigger one* on every page that was not the widest — a

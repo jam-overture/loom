@@ -12,9 +12,9 @@ Visuals — a production build of this commit, in a signed-in browser at
 
 | | |
 | --- | --- |
-| [The front door, with four changes waiting](2026-09-17-portal-what-the-queue-would-do-wide.png) | 1280px — **the change**, four different answers to "which of these is the big one" |
-| [The same screen, every disclosure open](2026-09-17-portal-what-the-queue-would-do-open.png) | 1280px — nothing was removed to make the first one readable |
-| [a phone](2026-09-17-portal-what-the-queue-would-do-phone.png) | 390px |
+| [The front door, with four changes waiting](2026-09-17-portal-what-the-queue-would-do-wide.webp) | 1280px — **the change**, four different answers to "which of these is the big one" |
+| [The same screen, every disclosure open](2026-09-17-portal-what-the-queue-would-do-open.webp) | 1280px — nothing was removed to make the first one readable |
+| [a phone](2026-09-17-portal-what-the-queue-would-do-phone.webp) | 390px |
 
 **How the populated pictures were taken, stated plainly.** No proposal in them
 was made by a model. The server was started with a preload that builds a

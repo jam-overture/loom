@@ -11,9 +11,9 @@ tested. They are unrelated to each other and are in one branch because they
 arrived together and neither is large enough to review on its own; the files do
 not overlap.
 
-- [`/portal/sign-in` at 1280](2026-09-28-portal-sign-in-banner-wide.png) — the
+- [`/portal/sign-in` at 1280](2026-09-28-portal-sign-in-banner-wide.webp) — the
   banner, on the screen he was looking at.
-- [`/portal/sign-in` on a phone](2026-09-28-portal-sign-in-banner-phone.png) —
+- [`/portal/sign-in` on a phone](2026-09-28-portal-sign-in-banner-phone.webp) —
   `scrollWidth 390 / innerWidth 390`.
 
 ---

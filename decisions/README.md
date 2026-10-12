@@ -347,3 +347,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0261](0261-a-portal-screen-shows-state-and-the-record-lives-in-one-place.md) | A portal screen shows state, and the record lives in one place | Proposed | §5 |
 | [0262](0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md) | The control plane is hosted and the render path stays in the customer's app | Proposed | §1, §5 |
 | [0263](0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md) | A page is a base tree and the deltas an audience earns | Proposed | §1, §3, §5 |
+| [0264](0264-a-report-s-visual-is-stored-at-the-size-the-page-was-laid-out-at.md) | A report's visual is stored at the size the page was laid out at | Accepted | §1 (process) |
+| [0265](0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md) | What readers do inside a kind of part is a share of the readers who met it, and the door is only a weight | Accepted | §4c (reader signals) |
+| [0266](0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md) | A change to a kind of part is read over the places both windows bore, and that is the one denominator here with no reader in it | Accepted | §4c (reader signals) |
+| [0267](0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md) | The probe reports every configuration it tried, and the audit calls a fault only what the schema accepts | Accepted | §4, not the library |
+| [0268](0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md) | A page is put back by proposing the change that puts it back, and a store never deletes | Accepted | §2, §6 |

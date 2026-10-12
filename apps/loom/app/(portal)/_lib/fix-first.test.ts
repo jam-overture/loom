@@ -18,12 +18,12 @@ import {
   notYetInTheOrder,
   ONE_PER_PAGE,
   outOfTheOrder,
-  pagesCount,
   RANK_STANDINGS_PLAIN,
   standingsHeld,
   whoItLoses,
 } from "./fix-first"
 import { unnamed, type PageName } from "./page-name"
+import { pagesCount } from "./vocabulary"
 import type { PartName } from "./part-name"
 import { runtimeWordsIn } from "../_test/plain-language"
 

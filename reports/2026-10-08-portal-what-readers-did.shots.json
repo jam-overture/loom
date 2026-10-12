@@ -2,7 +2,7 @@
 "outDir": "reports",
 "shots": [
 {
-"out": "2026-10-08-portal-what-readers-did-wide.png",
+"out": "2026-10-08-portal-what-readers-did-wide.webp",
 "path": "/portal/readers",
 "viewport": { "width": 1680, "height": 1000, "label": "wide" },
 "fullPage": true,
@@ -18,7 +18,7 @@
 }
 },
 {
-"out": "2026-10-08-portal-what-readers-did-phone.png",
+"out": "2026-10-08-portal-what-readers-did-phone.webp",
 "path": "/portal/readers",
 "viewport": "phone",
 "fullPage": true,
@@ -33,7 +33,7 @@
 }
 },
 {
-"out": "2026-10-08-portal-what-readers-did-open.png",
+"out": "2026-10-08-portal-what-readers-did-open.webp",
 "path": "/portal/readers",
 "viewport": { "width": 1680, "height": 1000, "label": "wide" },
 "fullPage": true,

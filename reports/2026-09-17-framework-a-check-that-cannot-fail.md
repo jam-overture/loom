@@ -5,7 +5,7 @@
 **Branch:** `framework-40-a-check-that-cannot-fail`
 **Section:** §2 — Composition Runtime, with one file in §6 — Telemetry
 
-![the same edit against both branches](2026-09-17-framework-a-check-that-cannot-fail.png)
+![the same edit against both branches](2026-09-17-framework-a-check-that-cannot-fail.webp)
 
 ## What this was
 

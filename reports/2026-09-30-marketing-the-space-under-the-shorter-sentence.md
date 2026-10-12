@@ -10,8 +10,8 @@ nothing** under their last line — taller than the sentence above it.
 
 | *Keep going*, 1280 × 900 | |
 | --- | --- |
-| before — `main` at `bab2de2` | ![](2026-09-30-marketing-ways-in-before-wide.png) |
-| after — this branch | ![](2026-09-30-marketing-ways-in-after-wide.png) |
+| before — `main` at `bab2de2` | ![](2026-09-30-marketing-ways-in-before-wide.webp) |
+| after — this branch | ![](2026-09-30-marketing-ways-in-after-wide.webp) |
 
 **It is a wide-viewport defect and only a wide-viewport one**, which is worth
 saying because this lane ships a phone shot in most reports and there is none
@@ -23,8 +23,8 @@ On `bold`, where a card has an edge you can see, it is three tall empty boxes:
 
 | `bold`, 1280 | |
 | --- | --- |
-| before | ![](2026-09-30-marketing-ways-in-before-bold.png) |
-| after | ![](2026-09-30-marketing-ways-in-after-bold.png) |
+| before | ![](2026-09-30-marketing-ways-in-before-bold.webp) |
+| after | ![](2026-09-30-marketing-ways-in-after-bold.webp) |
 
 ---
 
@@ -116,8 +116,8 @@ it is at the foot of every page but the front door.
 
 | *What to read next*, `/what-you-run`, 1280 | |
 | --- | --- |
-| before | ![](2026-09-30-marketing-read-next-before-wide.png) |
-| after | ![](2026-09-30-marketing-read-next-after-wide.png) |
+| before | ![](2026-09-30-marketing-read-next-before-wide.webp) |
+| after | ![](2026-09-30-marketing-read-next-after-wide.webp) |
 
 Two cards. One held *Before this · How it works* — two words — beside one
 holding the documentation's twenty-five-word blurb. Its own note also defended

@@ -7,7 +7,7 @@
 **Records added:** none — see *The decision that was not taken*
 **Finding closed:** *`hangingModelClient` is published and its two siblings are not, so each surface writes them* — `Loom docs`, 14 September
 
-![Four bound regions, one of them unreachable](2026-09-29-framework-the-two-doubles-that-were-not-there.png)
+![Four bound regions, one of them unreachable](2026-09-29-framework-the-two-doubles-that-were-not-there.webp)
 
 *`tools/specimen/answers.specimen.ts`, 1280×900@2×, `editorial` + `editorial-serif`
 + `comfortable`. The lower-left card is the state this unit is about: a region

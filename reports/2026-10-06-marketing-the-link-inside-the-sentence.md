@@ -5,7 +5,7 @@ it. Until today it carried a button underneath repeating its own words. It now
 carries the link in the sentence, and the words a reader would press are the
 words that go there.
 
-![after, on minimal](2026-10-06-marketing-inline-link-wide.png)
+![after, on minimal](2026-10-06-marketing-inline-link-wide.webp)
 
 `/what-you-run`, 1280×900, scrolled to the band.
 
@@ -19,7 +19,7 @@ words that go there.
 | what it measures | **242 × 35** | **155 × 21** |
 | the words | *See the ready-made changes*, four of them, said twice on one band | none added, four removed |
 
-![before](2026-10-06-marketing-inline-link-wide-before.png)
+![before](2026-10-06-marketing-inline-link-wide-before.webp)
 
 Both pictures are the same band at the same width on a local production build.
 Nothing else on the page moved.
@@ -34,7 +34,7 @@ body text around it; and `display: inline-block`, which cannot break mid-phrase.
 underline at rest, and a real inline box. The entry is closed and the closing
 names this branch.
 
-![on bold](2026-10-06-marketing-inline-link-bold.png)
+![on bold](2026-10-06-marketing-inline-link-bold.webp)
 
 The phrase is the paragraph's own muted grey on both, with a rule under it. That
 is the primitive's design rather than this lane's: there is no `tone`, because
@@ -200,9 +200,9 @@ and verify re-run from clean; the figures above are that run's.
 No decision record. This sets no prop, adds no primitive, and touches neither
 the tree schema, the delta model nor an `Accepted` record.
 
-![on editorial](2026-10-06-marketing-inline-link-editorial.png)
+![on editorial](2026-10-06-marketing-inline-link-editorial.webp)
 
-![at 390](2026-10-06-marketing-inline-link-phone.png)
+![at 390](2026-10-06-marketing-inline-link-phone.webp)
 
 At 390 the phrase is 155 × 21 on one line and the paragraph does not reflow
 around it. `scrollWidth 390 / innerWidth 390`.

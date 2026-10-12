@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -21,7 +21,7 @@
           {
             "specifier": "@jam-overture/loom/sdk",
             "slug": "sdk",
-            "names": 8
+            "names": 9
           }
         ],
         "collisions": []
@@ -4128,6 +4128,13 @@
               "summary": "What differs about a node both trees have. Ordered as listed."
             },
             {
+              "name": "NODE_FACETS",
+              "kind": "value",
+              "signature": "const NODE_FACETS: readonly NodeFacet[]",
+              "truncated": false,
+              "summary": "Every facet, for the things that have to walk them rather than react to one."
+            },
+            {
               "name": "TreeDifference",
               "kind": "type",
               "signature": "type TreeDifference = \n/** Present in the base tree, absent from the compared one. */\n{\n    readonly code: \"missing\";\n    readonly nodeId: NodeId;\n    readonly label: string;\n}\n/** Present in the compared tree, absent from the base one. */\n | {\n    readonly code: \"extra\";\n    readonly nodeId: NodeId;\n    readonly label: string;\n} | {\n    readonly code: \"changed\";\n    readonly nodeId: NodeId;\n    readonly label: string;\n    /** Never empty — an unchanged node produces no difference at all. */\n    readonly facets: readonly NodeFacet[];\n};",
@@ -4727,7 +4734,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4773,7 +4780,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5763,7 +5770,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6291,7 +6298,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7470,7 +7477,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7478,7 +7485,7 @@
           {
             "specifier": "@jam-overture/loom",
             "slug": "runtime",
-            "names": 8
+            "names": 9
           }
         ],
         "collisions": []
@@ -7509,6 +7516,13 @@
               "signature": "type PrimitiveCatalogue = readonly CataloguedPrimitive[];",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "ClosedChoice",
+              "kind": "type",
+              "signature": "type ClosedChoice = {\n    readonly name: string;\n    readonly options: readonly (string | boolean)[];\n};",
+              "truncated": false,
+              "summary": "A prop whose accepted values can be listed rather than invented."
             }
           ]
         },
@@ -7555,7 +7569,7 @@
             {
               "name": "PrimitiveAudit",
               "kind": "type",
-              "signature": "type PrimitiveAudit = {\n    readonly type: PrimitiveType;\n    readonly verdict: ConformanceVerdict;\n    readonly placement: PlacementVerdict;\n    readonly submission: SubmissionVerdict;\n    /** What the author declared, beside what the probe saw. */\n    readonly declaresSubmits: boolean;\n    /** The props this primitive declared it frames. Empty for almost all. */\n    readonly framesProps: readonly string[];\n};",
+              "signature": "type PrimitiveAudit = {\n    readonly type: PrimitiveType;\n    readonly verdict: ConformanceVerdict;\n    readonly placement: PlacementVerdict;\n    readonly submission: SubmissionVerdict;\n    /** What the author declared, beside what the probe saw. */\n    readonly declaresSubmits: boolean;\n    /** The props this primitive declared it frames. Empty for almost all. */\n    readonly framesProps: readonly string[];\n    /**\n     * The configurations this primitive was probed under that its own schema\n     * refuses.\n     *\n     * Non-empty does not mean anything is wrong: the verdicts above still hold,\n     * because what they report is *reach* — some configuration placed this\n     * region, some configuration decorated — and a bag the schema refuses that\n     * places a region is still evidence the component reads it. It is here so a\n     * reader can tell how much of a verdict rests on configurations no tree could\n     * carry, which for the starter library is thirty-two primitives' worth.\n     */\n    readonly refusedConfigurations: readonly RefusedConfiguration[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -7588,6 +7602,27 @@
               "summary": "A bound primitive the audit was not put in a position to see answered."
             },
             {
+              "name": "RefusedConfiguration",
+              "kind": "type",
+              "signature": "type RefusedConfiguration = {\n    readonly props: JsonObject;\n    readonly issues: readonly PropsIssue[];\n};",
+              "truncated": false,
+              "summary": "A configuration the probe built and the primitive's own schema refuses."
+            },
+            {
+              "name": "UnconfiguredReason",
+              "kind": "type",
+              "signature": "type UnconfiguredReason = \n/** The audit was handed no props for this type, and `{}` is not enough. */\n\"no-props\"\n/**\n * It was handed some, and the schema refused every configuration they built.\n *\n * Reachable only by trying the first, and reported for the reason\n * `names-not-answered` is: a host told to empty this list by handing props\n * over can hand over a bag that is refused too, and with only the first cause\n * reported would get an empty list and the same unjudged primitive.\n */\n | \"props-not-accepted\";",
+              "truncated": false,
+              "summary": "Why the audit had no configuration a primitive's own schema accepts."
+            },
+            {
+              "name": "UnconfiguredPrimitive",
+              "kind": "type",
+              "signature": "type UnconfiguredPrimitive = {\n    readonly type: PrimitiveType;\n    /** The props its registration says it must have, name-sorted. */\n    readonly required: readonly string[];\n    readonly reason: UnconfiguredReason;\n    /** Every configuration the schema refused, with what it said about each. */\n    readonly refused: readonly RefusedConfiguration[];\n};",
+              "truncated": false,
+              "summary": "A primitive the audit could not put in a configuration its own schema accepts."
+            },
+            {
               "name": "ThrowingConfigurations",
               "kind": "type",
               "signature": "type ThrowingConfigurations = {\n    readonly type: PrimitiveType;\n    readonly failures: readonly ProbeFailure[];\n    /**\n     * Whether *nothing* the probe tried came back — the line between a fault the\n     * audit is certain of and one it is only reporting.\n     *\n     * `false`: some configurations rendered and this one threw, so the component\n     * is callable and a value its own schema accepts crashes it. Certain.\n     *\n     * `true`: every configuration threw, which is what a broken component and a\n     * hook-using one both look like from outside a renderer — and a hook-using\n     * component is a legitimate primitive. A host with none of those\n     * asserts the whole list empty; one that ships them asserts the `false` half\n     * and reads the rest.\n     */\n    readonly everyConfiguration: boolean;\n};",
@@ -7597,14 +7632,14 @@
             {
               "name": "RegistryAudit",
               "kind": "type",
-              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Declared a behaviour and dropped its control. Like `unplacedSlots` this is\n     * a promise the registration made and the component did not keep — and unlike\n     * a slot, nothing else on the page hints that something is missing, because\n     * the content a behaviour acts on renders perfectly without it.\n     */\n    readonly unplacedBehaviours: readonly UnplacedBehaviours[];\n    /**\n     * Declared it reads a binding and was never probed in a state that answered\n     * one. Reported rather than failed, like `notDecorated` and for the same\n     * reason: whether it matters depends on the deployment. A host\n     * auditing the library it ships asserts it empty, because an entry here means\n     * every other list on this audit is describing that primitive's unanswered\n     * branch and calling it the primitive.\n     *\n     * Unlike every other list, an entry is not a claim about the component. It is\n     * a claim about this call.\n     */\n    readonly notAnswered: readonly UnansweredReader[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n    /**\n     * Threw on props built from its own schema. A fault whoever registered it\n     * wants to know about — a tree the validator accepts can take the page down —\n     * and never a reason to distrust the rest of this audit, which is answered by\n     * the configurations that did render.\n     *\n     * Every primitive that threw is here, including one that threw under *all* of\n     * them. That case used to reach only `notProbeable`, beside the class and\n     * hook-using components that are legitimate primitives, so the most\n     * extreme instance of the fault this list exists for sat in the one list a\n     * host cannot assert empty. `everyConfiguration` marks it rather than hiding\n     * it.\n     */\n    readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[];\n    /**\n     * The registered primitives that post, as the probe observed them.\n     *\n     * This is the list a deployment holds its endpoint registry against: if\n     * anything here is registered, `renderRequest` wants `endpoints`, and a\n     * deployment that ships one without the other ships forms that render\n     * disabled. Derived rather than declared, so it is the truth about the\n     * components rather than the sum of their authors' intentions.\n     */\n    readonly submits: readonly PrimitiveType[];\n    /**\n     * Places an address and never declared it posts. Not a broken page — the\n     * form works — but the declaration is what a deployment reads to know the\n     * seam is load-bearing here, so an undeclared submitter is a form whose need\n     * for an endpoint registry is invisible until someone fills it in.\n     */\n    readonly undeclaredSubmitters: readonly PrimitiveType[];\n    /**\n     * Declared it posts and placed no address under any configuration probed.\n     * This is the failure the submission seam exists to prevent, caught one layer\n     * earlier than it would otherwise be: a submit control that goes nowhere\n     * renders, looks finished, and reports nothing until a visitor uses it.\n     */\n    readonly unwiredSubmitters: readonly PrimitiveType[];\n    /**\n     * The registered primitives that put a prop in a frame.\n     *\n     * This is the list a deployment holds its framable-origin registry against,\n     * exactly as `submits` is held against its endpoint registry: if anything\n     * here is registered, `renderRequest` wants `origins`, and a deployment that\n     * ships one without the other ships embeds that render a refusal.\n     *\n     * Declared rather than probed, which is the one place this audit takes an\n     * author's word for something it could in principle check. It could not\n     * check this one usefully: the seam already refuses to register a `frames`\n     * naming a prop the schema does not declare, and the failure left over — a\n     * primitive that puts a URL in an `iframe` and never said so — is invisible\n     * to a probe, because an `iframe` a primitive built out of a prop it did not\n     * declare looks exactly like one it did. What would catch that is a lint over\n     * the markup, not a call of the component. Named here rather than left as a\n     * gap somebody discovers.\n     */\n    readonly frames: readonly PrimitiveType[];\n};",
-              "truncated": false,
+              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /**\n     * The probe could not answer — neither a pass nor a failure.\n     *\n     * A primitive that threw under every configuration *its own schema refuses*\n     * is in `notConfigured` instead. Both are \"the probe got no answer\",\n     * and only one of them is a fact about the component: a class or hook-using\n     * component cannot be called at all, while a component nobody has\n     * handed required props to has not been asked a question it could answer.\n     */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Declared a behaviour and dropped its control. Like `unplacedSlots` this is\n     * a promise the registration made and the component did not keep — and unlike\n     * a slot, nothing else on the page hints that something is missing, because\n     * the content a behaviour acts on renders perfectly without it.\n     */\n    readonly unplacedBehaviours: readonly UnplacedBehaviours[];\n    /**\n     * Declared it reads a binding and was never probed in a state that answered\n     * one. Reported rather than failed, like `notDecorated` and for the same\n     * reason: whether it matters depends on the deployment. A host\n     * auditing the library it ships asserts it empty, because an entry here means\n     * every other list on this audit is describing that primitive's unanswered\n     * branch and calling it the primitive.\n     *\n     * Unlike every other list, an entry is not a claim about the component. It is\n     * a claim about this call.\n     */\n    readonly notAnswered: readonly UnansweredReader[];\n    /**\n     * Requires props and was probed under none its own schema accepts, so every\n     * other list on this audit is describing it under a bag no valid tree carries\n     *.\n     *\n     * Reported for the same reason `notAnswered` is, and asserted empty by the\n     * same kind of host: an entry means the probe never reached this primitive,\n     * and the remedy is to hand `auditRegistry` props for that type. It is\n     * deliberately *not* every primitive whose default configuration was refused\n     * — that is thirty-two of the starter library, all of which answer anyway —\n     * only those where nothing the probe accepted came back at all.\n     *\n     * Like `notAnswered`, an entry is not a claim about the component.\n     */\n    readonly notConfigured: readonly UnconfiguredPrimitive[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n    /**\n     * Threw on props its own schema **accepts**. A fault whoever registered it\n     * wants to know about — a tree the validator accepts can take the page down —\n     * and never a reason to distrust the rest of this audit, which is answered by\n     * the configurations that did render.\n     *\n     * Accepts, not merely *built from*: the probe's default configuration is the\n     * empty bag, which the schema of any primitive with a required prop refuses,\n     * and a throw under that is the probe handing a component props no tree could\n     *. Those land in `notConfigured` or in the audit's\n     * `refusedConfigurations` and never here, so the sentence above is true of\n     * every row.\n     *\n     * Every primitive that threw is here, including one that threw under *all* of\n     * them. That case used to reach only `notProbeable`, beside the class and\n     * hook-using components that are legitimate primitives, so the most\n     * extreme instance of the fault this list exists for sat in the one list a\n     * host cannot assert empty. `everyConfiguration` marks it rather than hiding\n     * it.\n     */\n    readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[];\n    /**\n     * The registered primitives that post, as the probe observed them.\n     *\n     * This is the list a deployment holds its endpoint registry against: if\n     * anything here is registered, `renderRequest` wants `endpoints`, and a\n     * deployment that ships one without the other ships forms that render\n     * disabled. Derived rather than declared, so it is the truth about the\n     * components rather than the sum of their authors' intentions.\n     */\n    readonly submits: readonly PrimitiveType[];\n    /**\n     * Places an address and never declared it posts. Not a broken page — the\n     * form works — but the declaration is what a deployment reads to know the\n     * seam is load-bearing here, so an undeclared submitter is a form whose need\n     * for an endpoint registry is invisible until someone fills it in.\n     */\n    readonly undeclaredSubmitters: readonly PrimitiveType[];\n    /**\n     * Declared it posts and placed no address under any configuration probed.\n     * This is the failure the submission seam exists to prevent, caught one layer\n     * earlier than it would otherwise be: a submit control that goes nowhere\n     * renders, looks finished, and reports nothing until a visitor uses it.\n     */\n    readonly unwiredSubmitters: readonly PrimitiveType[];\n    /**\n     * The registered primitives that put a prop in a frame.\n     *\n     * This is the list a deployment holds its framable-origin registry against,\n     * exactly as `submits` is held against its endpoint registry: if anything\n     * here is registered, `renderRequest` wants `origins`, and a deplo\n…",
+              "truncated": true,
               "summary": ""
             },
             {
               "name": "RegistryAuditOptions",
               "kind": "type",
-              "signature": "type RegistryAuditOptions = {\n    /**\n     * The answer states each type is probed in, beside the ones its own schema\n     * closes over.\n     *\n     * A `Map` rather than an object, because the key is a primitive type and a\n     * caller building one from `registry.primitives` has the branded strings\n     * already — and because a lookup on an object literal is a lookup on\n     * `Object.prototype` for any name that happens to be on it.\n     */\n    readonly answers?: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]>;\n};",
+              "signature": "type RegistryAuditOptions = {\n    /**\n     * The answer states each type is probed in, beside the ones its own schema\n     * closes over.\n     *\n     * A `Map` rather than an object, because the key is a primitive type and a\n     * caller building one from `registry.primitives` has the branded strings\n     * already — and because a lookup on an object literal is a lookup on\n     * `Object.prototype` for any name that happens to be on it.\n     */\n    readonly answers?: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]>;\n    /**\n     * Props bags each type is probed from, beside the empty one.\n     *\n     * For a primitive that requires nothing this changes nothing worth having —\n     * the empty bag is already accepted. For one that requires a prop the schema\n     * does not close over, it is the difference between an audit of the component\n     * and an audit of what it does when handed props no tree can carry.\n     *\n     * A bag per entry rather than one, because a primitive whose rendering turns\n     * on a required prop needs as many as there are branches — and each is varied\n     * by every closed choice in turn, so the cost is the sum again and not the\n     * product.\n     */\n    readonly props?: ReadonlyMap<PrimitiveType, readonly JsonObject[]>;\n};",
               "truncated": false,
               "summary": "What the audit is told beyond the registry itself."
             },
@@ -7655,7 +7690,7 @@
               "kind": "type",
               "signature": "type ProbeFailure = {\n    readonly props: JsonObject;\n    readonly reason: string;\n    /**\n     * The binding names the node had answers under when it threw, sorted, and\n     * absent when it had none.\n     *\n     * Without it two failures of `loom.feed` at its default props read as the\n     * same line twice, and the one that matters — *it renders until you answer\n     * it* — is the one a reader cannot pick out.\n     */\n    readonly answered?: readonly string[];\n};",
               "truncated": false,
-              "summary": "A configuration the schema accepts that the component threw on."
+              "summary": "A configuration the probe built that the component threw on."
             },
             {
               "name": "NotProbeableCause",
@@ -7714,6 +7749,13 @@
               "summary": "The prop configurations a primitive is probed under."
             },
             {
+              "name": "probeConfigurationsFrom",
+              "kind": "function",
+              "signature": "const probeConfigurationsFrom: (bases: readonly JsonObject[], choices: readonly ClosedChoice[]) => readonly JsonObject[]",
+              "truncated": false,
+              "summary": "The same, from props a caller supplied rather than from nothing."
+            },
+            {
               "name": "probeStates",
               "kind": "function",
               "signature": "const probeStates: (configurations: readonly JsonObject[], answers?: readonly ProbeAnswers[]) => readonly ProbeConfiguration[]",
@@ -7730,7 +7772,7 @@
             {
               "name": "PlacementVerdict",
               "kind": "type",
-              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviours whose control no probed configuration placed. */\n    readonly unplacedBehaviours: readonly BehaviourName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /**\n     * The configurations that answered — one unasked `{}` alone when the\n     * schema closes over nothing and the caller supplied no answers.\n     */\n    readonly probed: readonly ProbeConfiguration[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered — and always a fault: a component that throws\n     * on a value its schema accepts is one a valid tree can crash a page with.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
+              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviours whose control no probed configuration placed. */\n    readonly unplacedBehaviours: readonly BehaviourName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /**\n     * The configurations that answered — one unasked `{}` alone when the\n     * schema closes over nothing and the caller supplied no answers.\n     */\n    readonly probed: readonly ProbeConfiguration[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered.\n     *\n     * A fault for every one of them its schema **accepts**, which is the\n     * partition `auditRegistry` makes and this module cannot: a component that\n     * throws on a value its schema accepts is one a valid tree can crash a\n     * page with, and one that throws on the empty bag it requires props\n     * against is a component nobody has handed props to yet.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
               "truncated": false,
               "summary": "The second probe: does a primitive place what it was handed?"
             },
@@ -8075,7 +8117,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8300,10 +8342,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 27,
+      "files": 30,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8578,6 +8620,69 @@
           ]
         },
         {
+          "module": "store/reseed",
+          "title": "Reseed",
+          "summary": "Planning a reseed: what it would take to put a stored page back to the shape its builder produces now.",
+          "symbols": [
+            {
+              "name": "NodeRevival",
+              "kind": "type",
+              "signature": "type NodeRevival = {\n    readonly nodeId: NodeId;\n    readonly label: string;\n};",
+              "truncated": false,
+              "summary": "A node the authored tree names and the stored page no longer holds."
+            },
+            {
+              "name": "NodeRetirement",
+              "kind": "type",
+              "signature": "type NodeRetirement = {\n    readonly nodeId: NodeId;\n    readonly label: string;\n};",
+              "truncated": false,
+              "summary": "A node the stored page holds that the authored tree does not, so the reseed removes it."
+            },
+            {
+              "name": "PageMismatch",
+              "kind": "type",
+              "signature": "type PageMismatch = {\n    readonly facet: \"treeId\";\n    readonly stored: TreeId;\n    readonly authored: TreeId;\n}\n/** The root is neither detachable nor insertable, so two roots are two pages. */\n | {\n    readonly facet: \"rootId\";\n    readonly stored: NodeId;\n    readonly authored: NodeId;\n};",
+              "truncated": false,
+              "summary": "Why the authored tree is not a build of the stored page at all."
+            },
+            {
+              "name": "ReseedPlan",
+              "kind": "type",
+              "signature": "type ReseedPlan =\n/**\n * The stored page is already the authored one, so there is nothing to propose.\n * Its own outcome rather than an empty operation list, because a delta carries\n * at least one operation and a caller that appended an empty one would\n * put a revision in the log that changed nothing.\n */\n{\n    readonly outcome: \"already-authored\";\n    readonly headRevision: number;\n} | {\n    readonly outcome: \"reseedable\";\n    /**\n     * The reseed, as operations. They become a delta when something proposes\n     * them; the id and base revision belong to that delta, not to this plan.\n     */\n    readonly operations: readonly TreeOperation[];\n    /** The head these operations were planned against. */\n    readonly headRevision: number;\n    readonly revives: readonly NodeRevival[];\n    /** What the reseed writes over — the changes since seeding that it undoes. */\n    readonly retires: readonly NodeRetirement[];\n} | {\n    readonly outcome: \"different-page\";\n    readonly mismatch: PageMismatch;\n}\n/**\n * Some difference between the two trees is not expressible in the four\n * operations, so no reseed can be proposed. Carries every difference that\n * stands in the way, named and labelled, which is the half a deployment can\n * act on: the authored tree has to change, or the page does.\n */\n | {\n    readonly outcome: \"unexpressible\";\n    readonly blocking: readonly TreeDifference[];\n}\n/**\n * An operation this module planned was refused by the tree it was planned\n * against. Nothing a caller did wrong and nothing it can fix — a bug here,\n * reported as a value so it surfaces as a refusal rather than a wrong page.\n */\n | {\n    readonly outcome: \"unplannable\";\n    readonly operation: TreeOperation;\n    readonly error: TreeError;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "UnreseedablePlan",
+              "kind": "type",
+              "signature": "type UnreseedablePlan = Exclude<ReseedPlan, {\n    readonly outcome: \"reseedable\";\n}>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "UNRESEEDABLE_FACETS",
+              "kind": "value",
+              "signature": "const UNRESEEDABLE_FACETS: readonly NodeFacet[]",
+              "truncated": false,
+              "summary": "The facets a `configure` cannot reach, so no plan can close them."
+            },
+            {
+              "name": "planReseed",
+              "kind": "function",
+              "signature": "const planReseed: (stored: LoomTree, authored: LoomTree) => ReseedPlan",
+              "truncated": false,
+              "summary": "What it would take to carry a stored page to the tree its builder produces now."
+            },
+            {
+              "name": "describeReseedPlan",
+              "kind": "function",
+              "signature": "const describeReseedPlan: (plan: ReseedPlan) => string",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "store/revert",
           "title": "Revert",
           "summary": "Planning a revert: reading the log to work out what undoing one of its entries would mean, without deciding anything.",
@@ -8811,7 +8916,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9165,7 +9270,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9258,9 +9363,9 @@
             {
               "name": "postgresHoldStore",
               "kind": "function",
-              "signature": "const postgresHoldStore: (db: LoomDatabase) => HoldStore",
+              "signature": "const postgresHoldStore: (db: LoomDatabase, scope?: StoreScope) => HoldStore",
               "truncated": false,
-              "summary": ""
+              "summary": "Every query is filtered by the project this handle speaks for, and every write sets it."
             }
           ]
         },
@@ -9272,9 +9377,9 @@
             {
               "name": "postgresPolicyLog",
               "kind": "function",
-              "signature": "const postgresPolicyLog: (db: LoomDatabase) => PolicyLog",
+              "signature": "const postgresPolicyLog: (db: LoomDatabase, scope?: StoreScope) => PolicyLog",
               "truncated": false,
-              "summary": ""
+              "summary": "Every query is filtered by the project this handle speaks for, and every write sets it."
             }
           ]
         },
@@ -9300,14 +9405,14 @@
             {
               "name": "loomHolds",
               "kind": "value",
-              "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The custody of what the Gate held back."
             },
             {
               "name": "loomPolicyRevisions",
               "kind": "value",
-              "signature": "const loomPolicyRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_policy_revisions\";\n    schema: undefined;\n    columns: {\n        policyId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        fingerprint: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"fingerprint\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        note: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"note\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomPolicyRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_policy_revisions\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policyId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        fingerprint: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"fingerprint\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        note: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"note\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The policy's own log."
             }
@@ -9320,7 +9425,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 50,
+      "files": 52,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9333,7 +9438,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10458,6 +10563,125 @@
           ]
         },
         {
+          "module": "signals/library-action",
+          "title": "Library action",
+          "summary": "Of the readers who met a kind of part, the share that did something inside it.",
+          "symbols": [
+            {
+              "name": "KindActionSilence",
+              "kind": "type",
+              "signature": "type KindActionSilence = KindReachSilence\n/**\n * No place this kind stands has anything inside it.\n *\n * A heading, a paragraph, a rule, an image and a button are all this: a press\n * is filed against the control and `engaged` counts the views whose reader\n * did something *strictly inside* a node, so a leaf reports a nought\n * for ever and the nought is a filing rule rather than a measurement.\n *\n * **It is a fact about the shape of the pages and not about the window**, and\n * it is the one reason here that would be exactly as true if every reader in\n * the world had read them. The question does not exist for this kind rather\n * than having gone unanswered — so the instruction it carries is *ask the\n * census instead*, never *collect more*.\n *\n * It is said of the kind only where **every** placement is a leaf. A kind that\n * bears parts in some places and not others is answered over the places where\n * the question exists, and {@link KindAction.leaves} is how many it stood in\n * where it did not.\n */\n | \"unenterable\"\n/**\n * A page that contributed readers holds actions and credits them to nobody.\n *\n * A press is credited to the addressed ancestors the signal carries, so\n * a sender whose delegated signals have no `within` adds occurrences and no\n * `engaged` anywhere on that page — a server synthesising batches, a replayed\n * fixture, a walk turned off. Every share on such a page is a nought that is a\n * filing rule, which is what `PageAction.unwalked` reports for one page.\n *\n * Withheld for the **whole** kind where any page behind the figure is in that\n * state, and not blended: such a page puts reach into the denominator and\n * nothing into the numerator, so a mean across pages would be dragged down by\n * a sender's configuration with no reader involved. That is the same class of\n * error as a page the door cannot scale, and it gets the same refusal.\n * {@link LibraryAction.unwalked} names the pages, which is the actionable half.\n */\n | \"unwalked\";",
+              "truncated": false,
+              "summary": "Why a kind has no share of the readers who acted inside it."
+            },
+            {
+              "name": "KIND_ACTION_SILENCES",
+              "kind": "value",
+              "signature": "const KIND_ACTION_SILENCES: readonly KindActionSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindActionSilence",
+              "kind": "function",
+              "signature": "const describeKindActionSilence: (silence: KindActionSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a kind has no share of its readers' actions."
+            },
+            {
+              "name": "KindAction",
+              "kind": "type",
+              "signature": "type KindAction = {\n    readonly kind: KindKey;\n    /** What part a type plays, or `null`. Always `null` on a role row, which carries it as its key. */\n    readonly role: PrimitiveRole | null;\n    /** Element nodes of this kind across the readings, as the census counts them. */\n    readonly placements: number;\n    /**\n     * Placements that bear element parts, which are the ones the question exists\n     * for.\n     *\n     * Taken off the tree the reading was built from, so it is a property of the\n     * pages and not of the window: a part keeps its children in a window nobody\n     * read.\n     */\n    readonly insides: number;\n    /**\n     * Placements with no element part under them, which are in no term here.\n     *\n     * `placements = insides + leaves`. Published rather than left to be inferred\n     * because on an ordinary library it is most of the rows, and a figure over a\n     * third of a kind's places should say so where it is.\n     */\n    readonly leaves: number;\n    /** Placements bearing parts that a window could speak for. */\n    readonly verdicts: number;\n    /** Placements bearing parts that no row named, and therefore excluded. */\n    readonly unknown: number;\n    /**\n     * Placements with a verdict that no reader reached.\n     *\n     * In neither term, because a reader who never got there says nothing about\n     * what readers do once they have. It is the reason a kind can have verdicts\n     * and still no share.\n     */\n    readonly unmet: number;\n    /**\n     * Placements at the root of their page.\n     *\n     * A root's `engaged` is the page-wide headcount of readers who did anything at\n     * all, so a row whose placements are roots is that figure and not a\n     * fact about a component. A kind is not a node and the same type is a root on\n     * one page and nested on another, so nothing is excluded for it — this is the\n     * number that says how much of the row is page-wide.\n     */\n    readonly roots: number;\n    /**\n     * Placements by the standing a page's own reading gives them, over\n     * **every** placement including the leaves.\n     *\n     * The *places* half of this row, and the one a surface must not print under\n     * the share's label: *readers acted in it in 3 of its 9 places* and *3 in 10\n     * of the readers who met it acted inside it* are different sentences about one\n     * component and can differ by an order of magnitude. It is the pairing care\n     * the other two readings of a library already needed once.\n     */\n    readonly standings: Readonly<Record<ActionStanding, number>>;\n    /** Revisions bearing a placement with an inside and a verdict. */\n    readonly pages: number;\n    /**\n     * Of those, the pages that contributed reach — the weights that actually\n     * decide the share.\n     *\n     * 1 is the scale-free case: one page's own sound figure, needing no door row.\n     * It is also what makes the door's silences conditional, since a page nobody\n     * reached needs no scale.\n     */\n    readonly weighed: number;\n    /**\n     * Page views that reached an enterable place of this kind, at the door's\n     * scale: `reached × min(appearances, opened) ÷ appearances`, added over the\n     * bearing placements.\n     *\n     * The denominator of {@link share}. **Not a count of people and deliberately\n     * not rounded into one**: the unit is the pair *(a page view, a place\n     * this kind stands on that page)*, so a page view of a page bearing three\n     * placements is three of them.\n     *\n     * `null` under a silence, and `null` on a scale-free row — where the share\n     * stands and there is no number on the door's scale to publish beside it.\n     */\n    readonly met: number | null;\n    /** The same page views whose reader acted inside the place, at the same scale. */\n    readonly acted: number | null;\n    /** `met − acted`: the page views that met an enterable place and did nothing in it. */\n    readonly ignored: number | null;\n    /**\n     * `acted ÷ met` — the share of the readers who met it that did something\n     * inside it.\n     *\n     * A weighted mean of each page's own sound share with that page's arrivals\n     * behind it, and the one figure here that survives where the counts do not:\n     * a scale-free row publishes this and no count. Above 1 exactly where\n     * {@link unreconciled} is non-nought and never otherwise.\n     */\n    readonly share: number | null;\n    /**\n     * Whether {@link met} and {@link acted} are on the door's scale, which is the\n     * only scale two rows' counts may be compared on.\n     *\n     * False on a scale-free row and under a silence. {@link share} is sound either\n     * way, which is the whole of what the door buys here.\n     */\n    readonly onDoorScale: boolean;\n    /**\n     * Appearances in excess of openings across the weighing pages, added **once\n     * per page** rather than once per placement.\n     *\n     * The weights here are a page's and not a placement's, which is where this\n     * parts from the reach reading's figure of the same name. It biases nothing:\n     * the straddle divided out inside each page's share before the pages met, so\n     * this is the measured size of a correction that has already happened.\n     */\n    readonly drift: number;\n    /**\n     * Openings across the weighing pages whose reading no rollup has folded yet.\n     *\n     * The one error left in the share, and it is in the weights rather than in any\n     * term: a lagging page weighs less than a caught-up one, which shifts the\n     * evidence and not the figure.\n     */\n    readonly pending: number;\n    /**\n     * No opening is waiting to be folded and nothing is unreconciled, so the\n     * weights are final.\n     *\n     * **Not an exactness claim and there is no `exact` here**, because no term of\n     * this share carries a straddle to be exact about. False under a silence.\n     */\n    readonly settled: boolean;\n    /**\n     * Placements crediting more readers with acting\n…",
+              "truncated": true,
+              "summary": "One kind of part, against what the readers who met it did inside it."
+            },
+            {
+              "name": "LibraryAction",
+              "kind": "type",
+              "signature": "type LibraryAction = {\n    /**\n     * Every type that stands anywhere, most readers ignored first.\n     *\n     * Then the lower share, then by type, so two kinds that are ignored equally\n     * do not reorder on a refresh. A kind with no share sorts after one whose\n     * share is nought.\n     */\n    readonly byType: readonly KindAction[];\n    /** Every role in the vocabulary, then the row for parts whose type declared none, in the same order. */\n    readonly byRole: readonly KindAction[];\n    /** Readings counted, which is revisions of pages and not trees. */\n    readonly pages: number;\n    /** Distinct trees across them. */\n    readonly trees: number;\n    /** Element nodes across them, which is the sum of every type row's placements. */\n    readonly placements: number;\n    /** Of those, the ones bearing element parts. */\n    readonly insides: number;\n    /** Of those, the ones with nothing inside them. `placements = insides + leaves`. */\n    readonly leaves: number;\n    /**\n     * Page views counted at the door across the pages read, added **once per\n     * page**.\n     *\n     * Addable for the reason no other count here is: a page view began on one\n     * revision of one tree and was counted once. It is the weight behind\n     * the whole reading and is the denominator of nothing.\n     */\n    readonly arrivals: number;\n    /** Placements by standing, over the whole library. */\n    readonly standings: Readonly<Record<ActionStanding, number>>;\n    /**\n     * The type the most readers met and did nothing inside, which is the kind to\n     * look at first.\n     *\n     * By the **count** of page views and not by the share, for the reason a page's\n     * falls are ranked by the readers they lose. A type and never a role,\n     * because a type is the thing an author can replace.\n     *\n     * **A kind that is only ever a page's root is not eligible**, which is how a\n     * page's own reading treats its root and the pace reading before it\n     *: a root's reach is the whole page's, so such a row contains every row\n     * it would outrank and would lead with *readers opened your pages and did\n     * nothing* for ever. It is the row's `roots` against its `placements` that\n     * decides, never the type's name — a kind is not a node, and a type that is a\n     * root on one page and a band on another is a fact about a component and stays\n     * in the ranking with {@link KindAction.roots} saying how much of it is\n     * page-wide.\n     *\n     * It can only ever be a row on the door's scale, since a count is the thing\n     * being ranked. {@link unranked} is how many rows had a share the ranking\n     * could not see.\n     */\n    readonly mostIgnored: KindAction | null;\n    /**\n     * Type rows with a share and no count, which the ranking above cannot\n     * include.\n     *\n     * The scale-free rows, and only those: a row the ranking passes over for being\n     * a page's root is excluded by design rather than for want of a scale.\n     * Published because a ranking that silently skipped rows is the kind of\n     * omission a surface presents as a complete answer.\n     */\n    readonly unranked: number;\n    /** Pages the door could scale, which is where every count here comes from. */\n    readonly scaled: number;\n    /**\n     * The pages bearing a measured placement that the door could not scale, by\n     * tree and newest revision first, with the reason in the vocabulary a page's\n     * own reading publishes.\n     *\n     * One of these pages is why a row above is withheld — or is harmless, because\n     * a page needs no scale until a second one is weighed against it. Reused from\n     * the reach reading rather than restated: it is a fact about a page either way.\n     */\n    readonly unscaled: readonly UnscaledPage[];\n    /**\n     * The pages holding actions that credit nobody, by tree and newest revision\n     * first.\n     *\n     * The sender diagnosis, and the actionable half of every `unwalked` row above.\n     * Empty is the healthy state, and so is a deployment nobody acted on at all —\n     * a page with no occurrences is not in this list.\n     */\n    readonly unwalked: readonly RevisionOf[];\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page twice, and a page twice\n     * is the one way a weighted figure can lie about how much weight is behind it.\n     */\n    readonly duplicated: number;\n    /**\n     * Door rows for one revision beyond the first, which were ignored.\n     *\n     * A store keeps one row per revision, so this is a caller's two reads again —\n     * and adding them would double a page's weight against every other page.\n     */\n    readonly duplicatedRows: number;\n    /**\n     * Types whose readings disagreed about the role they play, where the first\n     * reading's answer stands.\n     *\n     * Detected off the same readings by the same rule as the other two library\n     * readings, so the three cannot disagree about it.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "What a deployment's library gets its readers to do, by kind of part."
+            },
+            {
+              "name": "libraryActionOf",
+              "kind": "function",
+              "signature": "const libraryActionOf: (readings: readonly PageReading[], rows: readonly StoredPageViews[]) => LibraryAction",
+              "truncated": false,
+              "summary": "What a deployment's library gets its readers to do, by kind of part."
+            }
+          ]
+        },
+        {
+          "module": "signals/library-change",
+          "title": "Library change",
+          "summary": "What a change did to a kind of part, everywhere it stands.",
+          "symbols": [
+            {
+              "name": "KindChangeSilence",
+              "kind": "type",
+              "signature": "type KindChangeSilence =\n/**\n * It stands in both windows, and no place of it can be spoken for on both\n * sides.\n *\n * Every paired placement is `unknown` in one window or the other — a page\n * neither window measured, or one window that measured it and one that did\n * not. The places are still counted in {@link KindChange.places}; what is\n * withheld is the comparison, because a standing of `unknown` is *nothing can\n * be said* and never *nobody read it*.\n */\n\"unread\"\n/**\n * Nothing in the pages read, on either side, is of this kind.\n *\n * Only ever a role row, and the reason a role row exists for every member of\n * the vocabulary: *nothing in this library is a heading* is a fact about the\n * library rather than a missing row. A type row cannot be in this state,\n * because a type row exists only where a part of that type stands on one side\n * or the other.\n */\n | \"unplaced\"\n/**\n * It stands in both windows and in no place that is in both.\n *\n * Every placement was gained or lost: the pages it stood on are gone and it\n * is somewhere else now, or the nodes were rewritten. There is nothing held\n * still, so there is nothing to compare — and that is an answer about the\n * **library** rather than about its readers, which\n * {@link KindChange.gained} and {@link KindChange.lost} are the size of.\n *\n * Kept apart from `unread` because the instructions are opposite: this one\n * says the places moved, and the other says nobody has been seen in them.\n */\n | \"unpaired\";",
+              "truncated": false,
+              "summary": "Why a kind of part has no before and after."
+            },
+            {
+              "name": "KIND_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const KIND_CHANGE_SILENCES: readonly KindChangeSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindChangeSilence",
+              "kind": "function",
+              "signature": "const describeKindChangeSilence: (silence: KindChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a kind has no before and after."
+            },
+            {
+              "name": "KindMovement",
+              "kind": "type",
+              "signature": "type KindMovement =\n/** More places of it are read now than were, which is the sentence a change to a primitive is made for. */\n\"taken-up\"\n/** Fewer are. */\n | \"abandoned\"\n/**\n * Exactly as many are, which includes places trading places: two taken up and\n * two fallen away is `held`, and the two counts are published so that a\n * surface can say so.\n */\n | \"held\"\n/**\n * No place of it was read in either window.\n *\n * Kept apart from `held` for the reason a comparison of what readers did\n * keeps `still-untouched` from it: *skipped everywhere, and still\n * skipped everywhere* is the one state here that is an instruction. There is\n * deliberately no sibling for *read everywhere and still read everywhere* —\n * that is `held` at a share of one, and it asks nobody to do anything.\n */\n | \"still-unread\"\n/** {@link KindChange.silence} says why nothing can be said. */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to a kind of part between the two windows."
+            },
+            {
+              "name": "KIND_MOVEMENTS",
+              "kind": "value",
+              "signature": "const KIND_MOVEMENTS: readonly KindMovement[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindMovement",
+              "kind": "function",
+              "signature": "const describeKindMovement: (movement: KindMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a kind's before and after in front of a person."
+            },
+            {
+              "name": "KindChange",
+              "kind": "type",
+              "signature": "type KindChange = {\n    readonly kind: KindKey;\n    /**\n     * What part a type plays, or `null`. Always `null` on a role row, which\n     * carries it as its key.\n     *\n     * The later window's answer where it stands there, so that a surface reading a\n     * row and the role beside it is reading today's library.\n     */\n    readonly role: PrimitiveRole | null;\n    /** Places of this kind that stand in both windows: the same node of the same page, of this kind on both sides. */\n    readonly places: number;\n    /** Places of it in the later window with no counterpart in the earlier one. */\n    readonly gained: number;\n    /** Places of it in the earlier window with no counterpart in the later one. */\n    readonly lost: number;\n    /**\n     * Of {@link places}, those with a verdict on **both** sides, which is the\n     * denominator of both shares.\n     *\n     * One number and not two, which is the whole of why the two shares are\n     * comparable: a place nothing can be said about in either window is in neither\n     * term, so the two sides are read over exactly the same set of places.\n     */\n    readonly comparable: number;\n    /** Comparable places skipped in the earlier window and read in the later one. */\n    readonly tookUp: number;\n    /** Comparable places read in the earlier window and skipped in the later one. */\n    readonly fellAway: number;\n    /** Comparable places read in both. */\n    readonly keptRead: number;\n    /** Comparable places skipped in both. */\n    readonly keptSkipped: number;\n    /**\n     * The share of {@link comparable} places that was read in the earlier window;\n     * `null` where {@link silence} says why not.\n     *\n     * *At least one reader reached it*, which is what a standing of `read` means\n     * and not what a person reads the word as. Places and never people: see\n     * the module documentation and `library.ts`, where the same figure is taken of\n     * one window.\n     */\n    readonly readShareWas: number | null;\n    /** The same share in the later window, over the same places. */\n    readonly readShareNow: number | null;\n    readonly movement: KindMovement;\n    /**\n     * Why the two shares are not there, and `null` where they are.\n     *\n     * About the comparison and not about the row: {@link places},\n     * {@link gained} and {@link lost} are counts of parts of trees and are true\n     * whatever any window measured, which is how a census publishes a standing\n     * beside a withheld share.\n     */\n    readonly silence: KindChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": "One kind of part, held against itself across two windows."
+            },
+            {
+              "name": "LibraryChange",
+              "kind": "type",
+              "signature": "type LibraryChange = {\n    /**\n     * Every type that stands in either window, most places fallen away first.\n     *\n     * Then the lower read share in the later window, then by type, so two kinds\n     * that lost the same number of places do not reorder on a refresh.\n     */\n    readonly byType: readonly KindChange[];\n    /**\n     * Every role in the vocabulary that stands in either window, then the row for\n     * parts whose type declared none, in the same order as {@link byType}.\n     *\n     * Thin today for the reason every role figure in this subsystem is thin:\n     * nothing in `src/primitives/` declares one, so nearly every part is in the\n     * `null` row — and in this reading that row is the one that treats a node\n     * whose type changed as a place still standing. The join is at read time\n     *, so the day a role is declared these rows start answering without a\n     * migration.\n     */\n    readonly byRole: readonly KindChange[];\n    /** Pages read in both windows, which is trees and not revisions. */\n    readonly pages: number;\n    /** Pages read in the later window only. */\n    readonly pagesGained: number;\n    /** Pages read in the earlier window only. */\n    readonly pagesLost: number;\n    /**\n     * Paired pages whose revision moved between the windows.\n     *\n     * The comparison still stands — a placement is paired by node, and whether\n     * readers reached it is a fact about the place either way — but it says that\n     * the pages changed as well as the window, which is the difference between\n     * *your readers behave differently* and *you changed your pages*. A reading\n     * where this is nought is two windows of one library.\n     */\n    readonly republished: number;\n    /** Places that stand in both windows, which is the sum of every type row's {@link KindChange.places}. */\n    readonly placements: number;\n    /** Places in the later window only. */\n    readonly gained: number;\n    /** Places in the earlier window only. */\n    readonly lost: number;\n    /**\n     * Paired nodes whose primitive type changed.\n     *\n     * A place one kind left and another took, counted in the first's {@link\n     * KindChange.lost} and the second's {@link KindChange.gained} — and held\n     * still in the role rows where the two types play the same part. Not an\n     * alarm: it is the commonest change an author makes to a library.\n     */\n    readonly recast: number;\n    /**\n     * A floor on the page views of the earlier window, added over the paired\n     * pages.\n     *\n     * `PageReading.views` is the largest `views` any one part of a page reports,\n     * which is a floor and not a count. Published because every transition\n     * in this reading is confounded by it: a quieter window skips more places with\n     * no reader behaving differently, and these two numbers are what let somebody\n     * see that before reading a movement as a finding.\n     *\n     * Not a count of readers, and not addable into one: a reader who read two\n     * pages is two page views here.\n     */\n    readonly viewsWas: number;\n    /** The same floor for the later window, over the same pages. */\n    readonly viewsNow: number;\n    /**\n     * The type that lost its reading in the most places, which is the kind to look\n     * at first.\n     *\n     * By the **count** of places and not by the share, for the reason a page's\n     * falls are ranked by the readers they lose and a census's kinds by the\n     * places they are skipped in: a kind that lost its one and only place\n     * is a perfect rate and a smaller problem than one that lost seven of nine.\n     * `null` where nothing anywhere fell away.\n     *\n     * A type and never a role, because a type is the thing an author can replace.\n     */\n    readonly mostAbandoned: KindChange | null;\n    /** The type that gained its reading in the most places, by the same rule. */\n    readonly mostTakenUp: KindChange | null;\n    /**\n     * Trees read at two revisions in one window, which are in nothing above.\n     *\n     * A page that is two live revisions in one window has no single counterpart in\n     * the other, and the comparison pairs by page. See the module documentation:\n     * excluded and named rather than picked between.\n     */\n    readonly ambiguous: readonly TreeId[];\n    /**\n     * Readings of a revision beyond the first, on either side, which were dropped.\n     *\n     * A caller that concatenated two reads of one window holds a page twice, and a\n     * page twice is the one way a census — or a comparison of two — can lie about\n     * how much of a library there is.\n     */\n    readonly duplicated: number;\n    /**\n     * Types the two windows disagree about the role of, where the later window's\n     * answer stands.\n     *\n     * A type plays one part, so a disagreement is not a change a deployment\n     * made: it is two readings joined against two different registries, held\n     * against each other. Every role row below is then about neither.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "What a change did to a deployment's library, by kind of part."
+            },
+            {
+              "name": "libraryChangeOf",
+              "kind": "function",
+              "signature": "const libraryChangeOf: (was: readonly PageReading[], now: readonly PageReading[]) => LibraryChange",
+              "truncated": false,
+              "summary": "What a change did to a kind of part, across every page it stands on."
+            }
+          ]
+        },
+        {
           "module": "signals/library-reach",
           "title": "Library reach",
           "summary": "Of the readers who met a kind of part, the share that read it.",
@@ -11431,7 +11655,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-reach\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-change\" | \"library-reach\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -11452,7 +11676,7 @@
             {
               "name": "SilenceCondition",
               "kind": "type",
-              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no reader anywhere. The counters are present\n * and look healthy; what is wrong is that every share built on them is a\n * nought that is a filing rule rather than a measurement.\n *\n * The one condition here about a **nought that is not an absence**, which is\n * why no earlier set could report it. The occurrence counts survive it intact,\n * because they are filed against the part a reader used and need no ancestry.\n */\n | \"no-action-credited\"\n/**\n * There is none of it in the pages read.\n *\n * Not a measurement that is missing: the thing being asked about is absent\n * from the library, which only a reading keyed by a vocabulary can say. A role\n * no primitive declares and a type nothing places are both this, and the\n * instruction it carries is the opposite of every other condition here —\n * there is nothing to measure rather than nothing measured.\n */\n | \"nothing-of-the-kind\";",
+              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no reader anywhere. The counters are present\n * and look healthy; what is wrong is that every share built on them is a\n * nought that is a filing rule rather than a measurement.\n *\n * The one condition here about a **nought that is not an absence**, which is\n * why no earlier set could report it. The occurrence counts survive it intact,\n * because they are filed against the part a reader used and need no ancestry.\n */\n | \"no-action-credited\"\n/**\n * There is none of it in the pages read.\n *\n * Not a measurement that is missing: the thing being asked about is absent\n * from the library, which only a reading keyed by a vocabulary can say. A role\n * no primitive declares and a type nothing places are both this, and the\n * instruction it carries is the opposite of every other condition here —\n * there is nothing to measure rather than nothing measured.\n */\n | \"nothing-of-the-kind\"\n/**\n * It has nothing inside it, so there is nothing a reader could act in.\n *\n * A press is filed against the control and credited to the addressed\n * ancestors it happened inside, so a part with no element part under it\n * reports a nought for ever — which is the state `says-nothing` is for a\n * page's words, one counter across.\n *\n * **The second condition here about the shape of the page rather than about\n * the window**, and the pair is what makes the claim above still hold: these\n * are states of the world, and the way a new one arrives is with a reading\n * that can be in one nothing before it could. A reading of what readers *did*\n * to a **kind** of part is the first that can report it, because a kind is\n * answered over the places it stands and the question does not exist where\n * none of them has an inside.\n */\n | \"nothing-inside\";",
               "truncated": false,
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
@@ -11525,6 +11749,20 @@
               "signature": "const meaningOfKindReachSilence: (silence: KindReachSilence) => SilenceMeaning",
               "truncated": false,
               "summary": "What a kind's share of the readers who met it reports, of one kind."
+            },
+            {
+              "name": "meaningOfKindActionSilence",
+              "kind": "function",
+              "signature": "const meaningOfKindActionSilence: (silence: KindActionSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a kind's share of the readers who acted inside it reports, of one kind."
+            },
+            {
+              "name": "meaningOfKindChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfKindChangeSilence: (silence: KindChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two windows of one library reports, of one kind."
             },
             {
               "name": "meaningOfPaceSilence",
@@ -11671,7 +11909,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11814,7 +12052,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11881,7 +12119,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12475,10 +12713,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 39,
+      "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12515,9 +12753,9 @@
             {
               "name": "postgresTelemetryJournal",
               "kind": "function",
-              "signature": "const postgresTelemetryJournal: (db: LoomDatabase) => TelemetryJournal",
+              "signature": "const postgresTelemetryJournal: (db: LoomDatabase, scope?: StoreScope) => TelemetryJournal",
               "truncated": false,
-              "summary": ""
+              "summary": "Every query is filtered by the project this handle speaks for, and every write sets it."
             }
           ]
         },
@@ -12529,7 +12767,7 @@
             {
               "name": "loomTelemetry",
               "kind": "value",
-              "signature": "const loomTelemetry: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_telemetry\";\n    schema: undefined;\n    columns: {\n        seq: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"seq\";\n            tableName: \"loom_telemetry\";\n            dataType: \"number\";\n            columnType: \"PgBigSerial53\";\n            data: number;\n            driverParam: number;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        occurredAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"occurred_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        event: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"event\";\n            tableName: \"loom_telemetry\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomTelemetry: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_telemetry\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        seq: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"seq\";\n            tableName: \"loom_telemetry\";\n            dataType: \"number\";\n            columnType: \"PgBigSerial53\";\n            data: number;\n            driverParam: number;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        occurredAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"occurred_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        event: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"event\";\n            tableName: \"loom_telemetry\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "One table, because a journal is one thing: an append-only list of what the runtime narrated."
             }
@@ -12552,7 +12790,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13031,7 +13269,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1488,
+        "packageNames": 1518,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

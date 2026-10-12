@@ -143,14 +143,16 @@ export const NOT_A_RULE: DispositionReasonCode = "within-policy"
 /**
  * What raised the weight, one clause per code. Joined into the sentence below.
  *
- * **Exported since 23 September**, for the reason `BECAUSE` was: `floors.ts`
- * prints why two refused requests weighed what they did, and a second wording
- * kept beside that band would be one fact said two ways on one site. Two of the
- * clauses here — the piece nothing could draw and the setting nothing would
- * accept — described failures no request on this deployment could produce until
- * the floors were wired, and that band is what makes them reachable.
+ * **Not exported, unlike `BECAUSE`, and the difference is a consumer.** It was
+ * exported on 23 September for a band in a `floors.ts` that is not in this
+ * repository, and nothing outside this module has read it since. `BECAUSE` is
+ * exported because `/how-it-works` teaches the same sentences it reports with,
+ * and two copies of a sentence a reader meets on two screens would drift
+ * invisibly. There is no second reader of these clauses, so an export here is
+ * a door held open for one. `RECORD_VOCABULARY` below is what the register
+ * sweep reads, and it is this module's own.
  */
-export const RAISED_BY = {
+const RAISED_BY = {
   "protected-type-removed": "it destroys something you marked as protected",
   /**
    * **It said "rewrites" until a request reached it by changing a setting.**
