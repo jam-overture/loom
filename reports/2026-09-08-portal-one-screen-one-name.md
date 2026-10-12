@@ -12,11 +12,11 @@ browser, against a page **a live model changed four times during this run**:
 
 | | |
 | --- | --- |
-| [The front door, and what it says it is not](2026-09-08-portal-one-screen-one-name.png) | 1280px |
-| [**The rail, open** — the three renamed entries](2026-09-08-portal-one-screen-one-name-rail.png) | 1280px |
-| [What's been asked](2026-09-08-portal-one-screen-one-name-asked.png) | 1280px |
-| [What's changed — the tab you clicked is the heading you land on](2026-09-08-portal-one-screen-one-name-changed.png) | 1280px |
-| [a phone](2026-09-08-portal-one-screen-one-name-phone.png) | 390px |
+| [The front door, and what it says it is not](2026-09-08-portal-one-screen-one-name.webp) | 1280px |
+| [**The rail, open** — the three renamed entries](2026-09-08-portal-one-screen-one-name-rail.webp) | 1280px |
+| [What's been asked](2026-09-08-portal-one-screen-one-name-asked.webp) | 1280px |
+| [What's changed — the tab you clicked is the heading you land on](2026-09-08-portal-one-screen-one-name-changed.webp) | 1280px |
+| [a phone](2026-09-08-portal-one-screen-one-name-phone.webp) | 390px |
 
 **How honest these are.** `LOOM_ANTHROPIC_API_KEY` is present in this
 environment, so nothing was staged. Five requests were typed into the real

@@ -8,7 +8,7 @@ you do with this. None was written for the person who has read enough and is
 now deciding whether to adopt it, whose question is the other one — **what does
 this take away from me, and what can I not do.**
 
-![The page, and the trade stated before anything is itemised](2026-09-08-docs-what-it-costs-you.png)
+![The page, and the trade stated before anything is itemised](2026-09-08-docs-what-it-costs-you.webp)
 
 ## What shipped
 
@@ -20,7 +20,7 @@ each answered by what you do instead. Under every one is the ruling that imposed
 it and **what that ruling turned down** — and that second list is read out of
 the record as the page builds, never typed.
 
-![Eight costs, and the roads the ruling did not take](2026-09-08-docs-what-it-costs-you-dark.png)
+![Eight costs, and the roads the ruling did not take](2026-09-08-docs-what-it-costs-you-dark.webp)
 
 That split is the whole design of the page, and it is the section's own rule
 applied to a new shape. The plain sentence is written here because no record is
@@ -37,7 +37,7 @@ Reading all of them turns out to be the most useful number this site can put in
 front of somebody deciding: **483 alternatives, across 101 rulings** — and
 **22 of them are ones a record declines to close.**
 
-![The constraints that might lift, with the sentence that says so](2026-09-08-docs-what-it-costs-you-open.png)
+![The constraints that might lift, with the sentence that says so](2026-09-08-docs-what-it-costs-you-open.webp)
 
 Those 22 are the honest answer to *is this the shape it will keep*: Neon for
 per-preview database isolation, container queries instead of a width query,
@@ -128,7 +128,7 @@ page that looks complete and points nowhere.
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport and
 1280 at 1280, in both themes.
 
-![The eight costs at a true 390px](2026-09-08-docs-what-it-costs-you-phone.png)
+![The eight costs at a true 390px](2026-09-08-docs-what-it-costs-you-phone.webp)
 
 ## Scope
 

@@ -15,10 +15,10 @@ the reason the 22 September finding gives.
 
 | | |
 | --- | --- |
-| [Loom couldn't build that](2026-09-23-portal-what-it-objected-to-undo-refused-wide.png) | 1280px — an undo the Gate refused, and the two things it objected to |
-| [The same refusal, one click down](2026-09-23-portal-what-it-objected-to-undo-refused-opened.png) | 1280px — both disclosures open: the rule code, and the runtime's own sentence per objection |
-| [The same screen on a phone](2026-09-23-portal-what-it-objected-to-undo-refused-phone.png) | 390px |
-| [Every rule a change here is judged by](2026-09-23-portal-what-it-objected-to-rules-wide.png) | 1280px, full page — including the two that were missing from it |
+| [Loom couldn't build that](2026-09-23-portal-what-it-objected-to-undo-refused-wide.webp) | 1280px — an undo the Gate refused, and the two things it objected to |
+| [The same refusal, one click down](2026-09-23-portal-what-it-objected-to-undo-refused-opened.webp) | 1280px — both disclosures open: the rule code, and the runtime's own sentence per objection |
+| [The same screen on a phone](2026-09-23-portal-what-it-objected-to-undo-refused-phone.webp) | 390px |
+| [Every rule a change here is judged by](2026-09-23-portal-what-it-objected-to-rules-wide.webp) | 1280px, full page — including the two that were missing from it |
 
 **How the pictures were taken, and what is staged.** `pnpm shoot` signs in
 through a `before` — `#key`, the press, and a trailing `waitFor` on a rail link,

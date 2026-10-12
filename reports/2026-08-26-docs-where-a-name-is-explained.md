@@ -13,7 +13,7 @@ four paragraphs on what a composed failure is and prints the runtime's own audit
 lines. The reference had no way to point at it. That was the open question at the
 end of the last two docs reports, named both times as the next thing worth a run.
 
-![The most intimidating page on the site, with the prose in front of the names](2026-08-26-docs-where-a-name-is-explained.png)
+![The most intimidating page on the site, with the prose in front of the names](2026-08-26-docs-where-a-name-is-explained.webp)
 
 ## What shipped
 
@@ -28,7 +28,7 @@ in fenced blocks and in backticks. A page that stops naming an export stops bein
 offered for it in the same commit; a page that starts naming one is offered from
 then on, and nobody is told to update anything.
 
-![What the finding actually asked for, one link long](2026-08-26-docs-where-a-name-is-explained-symbol.png)
+![What the finding actually asked for, one link long](2026-08-26-docs-where-a-name-is-explained-symbol.webp)
 
 That is the whole of it: *`auditPalette` → Making it look like yours → Can it
 actually be read?* — the section that explains what the numbers under it mean.
@@ -63,7 +63,7 @@ sentence.**
 
 Which is also why the band is present when it has nothing to offer.
 
-![Four of the eleven doors are in this state, and now they say so](2026-08-26-docs-where-a-name-is-explained-empty.png)
+![Four of the eleven doors are in this state, and now they say so](2026-08-26-docs-where-a-name-is-explained-empty.webp)
 
 `cli`, `write`, `telemetry` and `telemetry/postgres` — 110 exports — have no
 prose anywhere on this site. A reader who lands on one and is told so stops
@@ -147,7 +147,7 @@ these rows are flex items, and it would the day one of them stops being one.
 carries `bg-surface-muted`, which is the one functional fill this theme keeps in
 both modes.
 
-![The band at a true 390px, where the longest page title wraps and the caption holds](2026-08-26-docs-where-a-name-is-explained-phone.png)
+![The band at a true 390px, where the longest page title wraps and the caption holds](2026-08-26-docs-where-a-name-is-explained-phone.webp)
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport.
 
@@ -182,4 +182,4 @@ doing only once the derived version is visibly wrong, and today it is not. Filed
 deployment must do and there is not a paragraph about it anywhere. That is what I
 would spend the next run on.
 
-![Dark, on the one door with a single page behind it](2026-08-26-docs-where-a-name-is-explained-dark.png)
+![Dark, on the one door with a single page behind it](2026-08-26-docs-where-a-name-is-explained-dark.webp)

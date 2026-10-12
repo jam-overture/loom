@@ -7,7 +7,7 @@
 **Records added:** none, and the reasoning is below. **None superseded**
 **Findings closed:** one. **Filed:** one
 
-![All 17 imports, and the fifth row is the one that could not be written yesterday](2026-10-01-framework-the-door-that-did-not-exist-doors-wide.png)
+![All 17 imports, and the fifth row is the one that could not be written yesterday](2026-10-01-framework-the-door-that-did-not-exist-doors-wide.webp)
 
 *`/docs/api-reference`, 1280×900@2×, built 2026-10-01T09:42:53.221Z. The heading
 counted sixteen yesterday. The fourth and fifth rows are the two doors of the
@@ -156,7 +156,7 @@ Nothing was skipped and nothing was weakened to get there. The one assertion tha
 is narrower than it was — `function` to *defined* — is described above with its
 reason, and it buys five doors that had no check at all.
 
-![the new page, on a phone](2026-10-01-framework-the-door-that-did-not-exist-phone.png)
+![the new page, on a phone](2026-10-01-framework-the-door-that-did-not-exist-phone.webp)
 
 *`/docs/api-reference/primitives-compositions`, 390×844@2×. The install band
 reads **"Everything this import loads arrives with `@jam-overture/loom-primitives`

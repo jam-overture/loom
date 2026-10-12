@@ -20,7 +20,7 @@ and this line is where it will be stated."* `docs/rollout.md` had it as the one
 hard gate on Phase 4 — *undecided, and it gates whether the repository can be
 public at all.*
 
-![the footer](2026-09-27-marketing-settled-footer.png)
+![the footer](2026-09-27-marketing-settled-footer.webp)
 
 **Nothing here is typed from a decision somebody reported.** The repository
 already stated MIT in two places — `LICENSE` at the root and `license` in the

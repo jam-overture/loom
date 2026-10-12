@@ -31,8 +31,8 @@ they already declare.
 
 ## The picture, and the control that makes it one
 
-![before](2026-10-07-framework-button-before.png)
-![after](2026-10-07-framework-button-after.png)
+![before](2026-10-07-framework-button-before.webp)
+![after](2026-10-07-framework-button-after.webp)
 
 One lightbox, opened and closed **entirely from the keyboard** — Tab to the
 trigger, Enter, Tab to the cross, Escape — photographed on `main` and on this

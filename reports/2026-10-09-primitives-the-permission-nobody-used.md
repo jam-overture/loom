@@ -200,10 +200,10 @@ viewports, **no overflow on any** (`scrollWidth 1280 / innerWidth 1280`;
 
 | | |
 | --- | --- |
-| `2026-10-09-primitives-failure-editorial-wide.png` | editorial, 1280 |
-| `2026-10-09-primitives-failure-bold-wide.png` | bold, 1280 |
-| `2026-10-09-primitives-failure-editorial-phone.png` | editorial, 390 |
-| `2026-10-09-primitives-failure-bold-phone.png` | bold, 390 |
+| `2026-10-09-primitives-failure-editorial-wide.webp` | editorial, 1280 |
+| `2026-10-09-primitives-failure-bold-wide.webp` | bold, 1280 |
+| `2026-10-09-primitives-failure-editorial-phone.webp` | editorial, 390 |
+| `2026-10-09-primitives-failure-bold-phone.webp` | bold, 390 |
 
 The sheet is **pairs, deliberately**. A column of authored failure regions would
 photograph well and prove nothing; the claim is that the slot sits *over* the

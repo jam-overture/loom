@@ -5,7 +5,7 @@ maintainer's instruction · **Date:** 2026-09-13
 **Branch:** `framework-32-signals-approved` · **Section:** §4c reader signals,
 §6 telemetry
 
-![The five steps, and the two lines that are not moving](2026-09-13-framework-signals-approved.png)
+![The five steps, and the two lines that are not moving](2026-09-13-framework-signals-approved.webp)
 
 **Read this before choosing work in any lane that touches signals.** No code
 changed on this branch. What changed is the direction four routines have been

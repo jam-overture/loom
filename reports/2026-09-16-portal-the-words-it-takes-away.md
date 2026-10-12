@@ -13,10 +13,10 @@ carrier:
 
 | | |
 | --- | --- |
-| [The review queue, with three changes waiting](2026-09-16-portal-the-words-it-takes-away-wide.png) | 1280px — **the change**, all three readings on one screen |
-| [The caveat card, every disclosure open](2026-09-16-portal-the-words-it-takes-away-card.png) | the new sentence, and the record under it |
-| [The same screen, every disclosure open](2026-09-16-portal-the-words-it-takes-away-open.png) | 1280px — nothing was removed to make the first one readable |
-| [a phone](2026-09-16-portal-the-words-it-takes-away-phone.png) | 390px |
+| [The review queue, with three changes waiting](2026-09-16-portal-the-words-it-takes-away-wide.webp) | 1280px — **the change**, all three readings on one screen |
+| [The caveat card, every disclosure open](2026-09-16-portal-the-words-it-takes-away-card.webp) | the new sentence, and the record under it |
+| [The same screen, every disclosure open](2026-09-16-portal-the-words-it-takes-away-open.webp) | 1280px — nothing was removed to make the first one readable |
+| [a phone](2026-09-16-portal-the-words-it-takes-away-phone.webp) | 390px |
 
 **How the populated pictures were taken, stated plainly.** No proposal in them
 was made by a model. The server was started with a preload that builds a

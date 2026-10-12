@@ -292,10 +292,10 @@ than to a measurement.
 
 | | |
 | --- | --- |
-| [arrival](2026-08-24-demo-the-first-press-is-the-one-loom-stops-arrival.png) | 1440×900. Four lines, then one green button, and the button asks for the thing the Gate stops |
-| [held](2026-08-24-demo-the-first-press-is-the-one-loom-stops-held.png) | **1440×800 — the viewport the second defect was measured at.** One press. Amber ring on the numbers, *Waiting on you*, and *Apply this change* / *No thanks* fully on screen where they were sixty-nine pixels under the fold |
-| [applied](2026-08-24-demo-the-first-press-is-the-one-loom-stops-applied.png) | one click later: numbers gone, gap ringed green, revision 1, *Put it back* — and the primary has re-nominated itself to the re-theme, unprompted. The chip collision described above is in this frame |
-| [phone](2026-08-24-demo-the-first-press-is-the-one-loom-stops-phone.png) | 390×844 on arrival: the rail leads, the frame reads in three lines, the primary is the width of the thumb |
+| [arrival](2026-08-24-demo-the-first-press-is-the-one-loom-stops-arrival.webp) | 1440×900. Four lines, then one green button, and the button asks for the thing the Gate stops |
+| [held](2026-08-24-demo-the-first-press-is-the-one-loom-stops-held.webp) | **1440×800 — the viewport the second defect was measured at.** One press. Amber ring on the numbers, *Waiting on you*, and *Apply this change* / *No thanks* fully on screen where they were sixty-nine pixels under the fold |
+| [applied](2026-08-24-demo-the-first-press-is-the-one-loom-stops-applied.webp) | one click later: numbers gone, gap ringed green, revision 1, *Put it back* — and the primary has re-nominated itself to the re-theme, unprompted. The chip collision described above is in this frame |
+| [phone](2026-08-24-demo-the-first-press-is-the-one-loom-stops-phone.webp) | 390×844 on arrival: the rail leads, the frame reads in three lines, the primary is the width of the thumb |
 
 Every screenshot is this branch's `next build` output driven in Chromium — not
 the preview, which this environment cannot open (`vercel.app` is not on the

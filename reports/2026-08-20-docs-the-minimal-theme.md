@@ -3,7 +3,7 @@
 **Routine:** `Loom docs` (live request) · **Branch:** `docs-03-the-minimal-theme`
 · **Section:** §4c
 
-![The introduction under the minimal theme, in Geist](2026-08-20-docs-the-minimal-theme-light.png)
+![The introduction under the minimal theme, in Geist](2026-08-20-docs-the-minimal-theme-light.webp)
 
 > *"The minimal theme is ready. Can we convert the doc page to the minimal
 > theme."*
@@ -80,7 +80,7 @@ h1 grew because the ramp is gentle through the reading sizes and jumps at the
 top — that is what makes a page read as one object with a title on it instead of
 a document with a masthead.
 
-![A refusal under the new palette: near-white ground, coloured ring, black button](2026-08-20-docs-the-minimal-theme-verdict.png)
+![A refusal under the new palette: near-white ground, coloured ring, black button](2026-08-20-docs-the-minimal-theme-verdict.webp)
 
 ## Three places this site does not copy the theme, and why
 
@@ -108,7 +108,7 @@ paper, structure carried by borders, the same mint as the only hue — and inver
 the two neutrals. If a dark minimal palette is ever registered, these numbers
 should move to match it, and the stylesheet says so.
 
-![Dark chrome, and a bold-themed example that does not invert with it](2026-08-20-docs-the-minimal-theme-dark.png)
+![Dark chrome, and a bold-themed example that does not invert with it](2026-08-20-docs-the-minimal-theme-dark.webp)
 
 ## The bug the conversion uncovered
 
@@ -132,7 +132,7 @@ than legibility.
 Fixed in this lane, where it belongs: `fills: true` on every example root, with
 a test that asserts it for all of them.
 
-![The bold example, painting its own canvas at last](2026-08-20-docs-the-minimal-theme-themed-example.png)
+![The bold example, painting its own canvas at last](2026-08-20-docs-the-minimal-theme-themed-example.webp)
 
 ## Decisions taken that were not specified
 

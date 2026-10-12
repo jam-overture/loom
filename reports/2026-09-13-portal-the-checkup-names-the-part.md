@@ -10,11 +10,11 @@ Visuals — a production build of this commit, in a signed-in browser at
 
 | | |
 | --- | --- |
-| [The list, named](2026-09-13-portal-the-checkup-names-the-part.png) | 1280px — **the change** |
-| [The same screen, every disclosure open](2026-09-13-portal-the-checkup-names-the-part-open.png) | 1280px — this is where `loom.footer` went |
-| [a phone](2026-09-13-portal-the-checkup-names-the-part-phone.png) | 390px |
-| [The front door](2026-09-13-portal-the-checkup-names-the-part-front.png) | 1280px — real, unmodified |
-| [A page that adds up](2026-09-13-portal-the-checkup-names-the-part-green.png) | 1280px — real, unmodified |
+| [The list, named](2026-09-13-portal-the-checkup-names-the-part.webp) | 1280px — **the change** |
+| [The same screen, every disclosure open](2026-09-13-portal-the-checkup-names-the-part-open.webp) | 1280px — this is where `loom.footer` went |
+| [a phone](2026-09-13-portal-the-checkup-names-the-part-phone.webp) | 390px |
+| [The front door](2026-09-13-portal-the-checkup-names-the-part-front.webp) | 1280px — real, unmodified |
+| [A page that adds up](2026-09-13-portal-the-checkup-names-the-part-green.webp) | 1280px — real, unmodified |
 
 **How the first three were taken, stated plainly.** A divergence cannot be
 produced in a healthy deployment: the checkup compares the stored page against a

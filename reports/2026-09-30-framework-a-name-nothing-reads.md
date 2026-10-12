@@ -7,7 +7,7 @@
 **Records added:** [0208](../decisions/0208-a-question-nothing-reads-is-refused-before-it-is-written.md). **None superseded**; 0198's two counts maintained, with a dated note saying so
 **Findings closed:** one. **Filed:** four
 
-![One delta, one policy, and the only difference is who was asked](2026-09-30-framework-a-name-nothing-reads.png)
+![One delta, one policy, and the only difference is who was asked](2026-09-30-framework-a-name-nothing-reads.webp)
 
 *`tools/specimen/unread-binding.specimen.ts`, 1280×900@2×, `editorial` + `editorial-serif` + `comfortable`. **Neither column is typed into the specimen.** Both call `assessChange` and `gate` — the two functions the composition runtime calls — on the same tree, the same delta, the same proposal and the same `defaultGatePolicy`, and draw what comes back. The only difference between them is the sixth argument. The `rows` and the `spec.listing` in the right-hand panel are the runtime's own detail line, which is the whole claim: the refusal carries the string a repairer rewrites.*
 

@@ -10,7 +10,7 @@ themes. It had no search — the last item on the brief's list of what
 It has one now: `⌘K`, a combobox over **813 findable things**, and a ranking
 rule with an opinion.
 
-![Typing "gate" puts the page that explains the Gate first](2026-08-22-docs-search-results.png)
+![Typing "gate" puts the page that explains the Gate first](2026-08-22-docs-search-results.webp)
 
 ## The one decision worth arguing about
 
@@ -39,7 +39,7 @@ rather than a tuning. **Nothing is hidden by it**: a reader who wants
 `definePrimitive` types `definePrimitive`, no page or heading is called that, and
 the export is the first and only result.
 
-![An identifier goes straight to the identifier](2026-08-22-docs-search-export.png)
+![An identifier goes straight to the identifier](2026-08-22-docs-search-export.webp)
 
 I found this by looking at a screenshot, which is the second time in three runs
 that a docs defect was invisible to every test and obvious in a picture. The
@@ -118,7 +118,7 @@ Two smaller things, both caught by writing the test rather than by using it:
   middle-clicks it, and a row that only answered a click handler would quietly
   not be one.
 
-![Three states, and the one that says nothing was found](2026-08-22-docs-search-empty.png)
+![Three states, and the one that says nothing was found](2026-08-22-docs-search-empty.webp)
 
 Loading, nothing-found and could-not-load are three different sentences. A box
 that shows an empty list for all three teaches a reader that the site has
@@ -137,7 +137,7 @@ and its comment gives a different (also true) reason — that vitest and
 without the reason, and this run lost a build to writing the obvious line first.
 Filed, with the suggestion that the next lane should not have to rediscover it.
 
-![The site in the dark](2026-08-22-docs-search-dark.png)
+![The site in the dark](2026-08-22-docs-search-dark.webp)
 
 ## On a phone it matters more, not less
 
@@ -146,7 +146,7 @@ header that does not stand down — the alpha badge and the repository link both
 do. That is deliberate: the rail is behind a menu at this width, so search is
 the *only* way to reach a page without first opening something else.
 
-![390px, with a query typed](2026-08-22-docs-search-phone.png)
+![390px, with a query typed](2026-08-22-docs-search-phone.webp)
 
 ## No decision record
 

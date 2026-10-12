@@ -6,7 +6,7 @@ title, the description and everything a shared link unfurls as, in its own
 exported a static `metadata` with a title and a sentence, so a link to any of
 them pasted into a channel previewed as a bare address with no picture at all.
 
-![The five addresses that unfurled as nothing](2026-09-15-marketing-nine-cards.png)
+![The five addresses that unfurled as nothing](2026-09-15-marketing-nine-cards.webp)
 
 Those five cards are what shipped. No new drawing, no new copy — the machinery
 was already generic over a route and had been since 2 September. What was
@@ -98,7 +98,7 @@ site that a re-theme is three registered ids and nothing else. The palette is in
 the address, so the card is drawn in the palette the visitor was looking at when
 they copied it.
 
-![One page, three palettes](2026-09-15-marketing-nine-cards-palettes.png)
+![One page, three palettes](2026-09-15-marketing-nine-cards-palettes.webp)
 
 Five pages gained that at the same time, for nothing, because it was already in
 `shareImageHref`.

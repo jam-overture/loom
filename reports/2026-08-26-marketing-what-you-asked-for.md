@@ -9,7 +9,7 @@ half-second after the click — and the answer is that **the browser puts the
 reader at the top of the document, and the top of the document is a hero 880px
 tall that is identical in every state.**
 
-![Before and after, at the same address](2026-08-26-marketing-what-you-asked-for.png)
+![Before and after, at the same address](2026-08-26-marketing-what-you-asked-for.webp)
 
 Both of those are `/?ask=problem&approve=1`. On the left, the visitor has asked
 *"Skip the tour. What problem does this actually solve?"*, the rules held it, the
@@ -50,7 +50,7 @@ expected copy, in all ten states — five requests, each of them also approved.
 
 ### The control is the one the rules are waiting for
 
-![The states](2026-08-26-marketing-what-you-asked-for-states.png)
+![The states](2026-08-26-marketing-what-you-asked-for-states.webp)
 
 | The rules said | Above the fold |
 | --- | --- |
@@ -113,14 +113,14 @@ is absent, **and** the menu is still child 0 and the opening band still child 1.
 An empty spread that quietly reordered something would pass the first check on
 its own.
 
-![The answer at 390px](2026-08-26-marketing-what-you-asked-for-phone.png)
+![The answer at 390px](2026-08-26-marketing-what-you-asked-for-phone.webp)
 
 On a phone the whole answer — verdict, request, reasoning and both controls — is
 on the first screen without scrolling. `scrollWidth` is exactly 390 at a 390px
 viewport in all five states, and the band was checked under all three registered
 palettes.
 
-![Under the bold palette](2026-08-26-marketing-what-you-asked-for-bold.png)
+![Under the bold palette](2026-08-26-marketing-what-you-asked-for-bold.webp)
 
 ## Where it sits, and why not inside the hero
 

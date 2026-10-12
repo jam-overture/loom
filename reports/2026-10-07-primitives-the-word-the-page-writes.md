@@ -365,10 +365,10 @@ returns `null` until an effect has run.
 
 | | editorial | bold |
 | --- | --- | --- |
-| the bar, shut | ![](2026-10-07-prim-named-ed-w-shut.png) | ![](2026-10-07-prim-named-bo-w-shut.png) |
-| the booking dialog | ![](2026-10-07-prim-named-ed-w-dialog.png) | ![](2026-10-07-prim-named-bo-w-dialog.png) |
-| the product menu | ![](2026-10-07-prim-named-ed-w-product.png) | ![](2026-10-07-prim-named-bo-w-product.png) |
-| §4 on a phone | ![](2026-10-07-prim-named-ed-p-long.png) | ![](2026-10-07-prim-named-bo-p-long.png) |
+| the bar, shut | ![](2026-10-07-prim-named-ed-w-shut.webp) | ![](2026-10-07-prim-named-bo-w-shut.webp) |
+| the booking dialog | ![](2026-10-07-prim-named-ed-w-dialog.webp) | ![](2026-10-07-prim-named-bo-w-dialog.webp) |
+| the product menu | ![](2026-10-07-prim-named-ed-w-product.webp) | ![](2026-10-07-prim-named-bo-w-product.webp) |
+| §4 on a phone | ![](2026-10-07-prim-named-ed-p-long.webp) | ![](2026-10-07-prim-named-bo-p-long.webp) |
 
 **The two to read at size are the first and the last.** The bar is the whole
 retraction in one strip — *Product* and *Account* at opposite ends of it, at the

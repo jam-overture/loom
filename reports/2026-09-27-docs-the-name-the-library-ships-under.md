@@ -37,12 +37,12 @@ On a reader's machine that is `ERR_PACKAGE_PATH_NOT_EXPORTED`. The subpath is
 withheld from the published `exports` map; it resolves inside this workspace and
 nowhere else.
 
-![Installation, before](2026-09-27-docs-the-name-the-library-ships-under-before-install.png)
+![Installation, before](2026-09-27-docs-the-name-the-library-ships-under-before-install.webp)
 
 *On `main`: "Loom is a single package", one package on the install line, and a
 warning saying it is not on a public registry.*
 
-![Installation, after](2026-09-27-docs-the-name-the-library-ships-under-after-install.png)
+![Installation, after](2026-09-27-docs-the-name-the-library-ships-under-after-install.webp)
 
 *On this branch: two packages, both on the install line, and what each is for.*
 
@@ -154,7 +154,7 @@ already render the file and its output, and the guard is a test asserting the
 page has **no fenced install command at all** — a claim about absence, which is
 the only kind a third copy cannot satisfy by agreeing with the second.
 
-![The bottom of the reference's primitives page, before and after](2026-09-27-docs-the-name-the-library-ships-under-after-reference.png)
+![The bottom of the reference's primitives page, before and after](2026-09-27-docs-the-name-the-library-ships-under-after-reference.webp)
 
 *The API reference door, under the name it ships as. The URL is unchanged —
 `apiSlugFor` resolves a published name back through the workspace's door, so
@@ -232,7 +232,7 @@ dependency list and the command are fixed; the numbers above are the run after.
 `scrollWidth 390 / innerWidth 390`, before and after. The longer install command
 wraps inside its block rather than widening the page.
 
-![Installation on a phone](2026-09-27-docs-the-name-the-library-ships-under-after-phone.png)
+![Installation on a phone](2026-09-27-docs-the-name-the-library-ships-under-after-phone.webp)
 
 ## Scope, and one deviation stated plainly
 

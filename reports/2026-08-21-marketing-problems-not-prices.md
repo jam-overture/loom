@@ -12,7 +12,7 @@ reached through the plan:
 
 #123 is merged. This run is the other two.
 
-![The new headline](2026-08-21-marketing-problems-not-prices-hero.png)
+![The new headline](2026-08-21-marketing-problems-not-prices-hero.webp)
 
 ---
 
@@ -65,7 +65,7 @@ regulated teams, agencies or hobbyists is positioning and is not mine; *that
 un-reviewable AI output is a problem* is not a market claim, it is the reason the
 Gate exists at all.
 
-![The band that replaced the capability list](2026-08-21-marketing-problems-not-prices-problems.png)
+![The band that replaced the capability list](2026-08-21-marketing-problems-not-prices-problems.webp)
 
 ### It uses `loom.mosaic`, which closes a finding from yesterday
 
@@ -105,9 +105,9 @@ ordinary, and a business refusing to let a machine delete the statement of what
 it does for people is the same instinct pointed at the thing that actually
 matters.
 
-![The refusal, now protecting the point rather than the prices](2026-08-21-marketing-problems-not-prices-refused.png)
+![The refusal, now protecting the point rather than the prices](2026-08-21-marketing-problems-not-prices-refused.webp)
 
-![What "Get to the point" does once you approve it](2026-08-21-marketing-problems-not-prices-moved.png)
+![What "Get to the point" does once you approve it](2026-08-21-marketing-problems-not-prices-moved.webp)
 
 ## The sentence that went stale in one commit
 
@@ -144,7 +144,7 @@ are all untouched. `decisions/README.md` forbids editing a record to reflect a
 band the site no longer has seemed the worse of the two. **Flagged in the pull
 request in case the maintainer would rather I had not.**
 
-![The same band in the bold palette, no colour named anywhere](2026-08-21-marketing-problems-not-prices-bold.png)
+![The same band in the bold palette, no colour named anywhere](2026-08-21-marketing-problems-not-prices-bold.webp)
 
 ## Tests
 

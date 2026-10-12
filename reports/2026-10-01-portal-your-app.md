@@ -138,9 +138,9 @@ by `next start`, in a signed-in browser.
 
 | | |
 | --- | --- |
-| [**the screen**, wide](2026-10-01-portal-your-app-wide.png) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
-| [**a piece picked and drawn**](2026-10-01-portal-your-app-picked-wide.png) | the card selected in the tree, rendered on its own underneath |
-| [**on a phone**](2026-10-01-portal-your-app-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**the screen**, wide](2026-10-01-portal-your-app-wide.webp) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
+| [**a piece picked and drawn**](2026-10-01-portal-your-app-picked-wide.webp) | the card selected in the tree, rendered on its own underneath |
+| [**on a phone**](2026-10-01-portal-your-app-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 **The rail's group names are not in any of them, and that is a finding rather than
 an omission.** The rail is fourteen pixels wide and its labels exist only on hover

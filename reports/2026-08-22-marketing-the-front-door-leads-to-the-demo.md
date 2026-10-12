@@ -13,7 +13,7 @@ is worth quoting because it is larger than a stale href:
 
 This run closes it.
 
-![The first screen, with the demo as the second action](2026-08-22-marketing-the-front-door-leads-to-the-demo-hero.png)
+![The first screen, with the demo as the second action](2026-08-22-marketing-the-front-door-leads-to-the-demo-hero.webp)
 
 ---
 
@@ -63,7 +63,7 @@ are prepared, and offers the page where they are not:
 > These five are prepared, so the whole sequence runs here without an AI in the
 > way. To ask for something in your own words, there is a page for that.
 
-![The line at the foot of the band, after a change has happened](2026-08-22-marketing-the-front-door-leads-to-the-demo-band.png)
+![The line at the foot of the band, after a change has happened](2026-08-22-marketing-the-front-door-leads-to-the-demo-band.webp)
 
 ### The invitation band lost a card and reads better for it
 
@@ -76,7 +76,7 @@ The repository card is gone and the band is now exactly `PRODUCT_SURFACES`.
 That is asserted rather than left as an intention: the next thing tempted into
 this band has to be a surface or has to change a test.
 
-![Four cards, one row, one per surface](2026-08-22-marketing-the-front-door-leads-to-the-demo-waysin.png)
+![Four cards, one row, one per surface](2026-08-22-marketing-the-front-door-leads-to-the-demo-waysin.webp)
 
 ### The mechanism page's foot pointed at GitHub and at home
 
@@ -90,7 +90,7 @@ three: home is the wordmark, a menu item marked as current, and a link in the
 footer's map. A fourth route to a page nobody is looking for is not a use of the
 last band on a page.
 
-![The foot of the mechanism page](2026-08-22-marketing-the-front-door-leads-to-the-demo-how-it-works.png)
+![The foot of the mechanism page](2026-08-22-marketing-the-front-door-leads-to-the-demo-how-it-works.webp)
 
 ## Decisions taken that were not specified
 
@@ -161,14 +161,14 @@ blurb, and on every page, in all three palettes.
 
 ## Both starter palettes, and a phone
 
-![Bold](2026-08-22-marketing-the-front-door-leads-to-the-demo-bold.png)
+![Bold](2026-08-22-marketing-the-front-door-leads-to-the-demo-bold.webp)
 
-![Editorial](2026-08-22-marketing-the-front-door-leads-to-the-demo-editorial.png)
+![Editorial](2026-08-22-marketing-the-front-door-leads-to-the-demo-editorial.webp)
 
 No colour is named anywhere in the change, which the existing per-palette
 assertions hold.
 
-![390px](2026-08-22-marketing-the-front-door-leads-to-the-demo-phone.png)
+![390px](2026-08-22-marketing-the-front-door-leads-to-the-demo-phone.webp)
 
 The phone screenshot is the one thing this run made worse, and it is filed rather
 than hidden — see below.

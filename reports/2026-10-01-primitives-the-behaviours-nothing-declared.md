@@ -166,7 +166,7 @@ Four states, two palettes, two viewports.
 
 ### `shut` — the control, and the half that is easy to leave out
 
-![four controls on a page, every region closed, editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-wide-shut.png)
+![four controls on a page, every region closed, editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-wide-shut.webp)
 
 A sheet of open panels proves three panels can be drawn and says nothing about
 whether they ever close; a primitive whose hide rule was written in the wrong
@@ -176,7 +176,7 @@ that would catch it. Four triggers are on the page — *Menu*, *Details*, three
 
 ### `the menu` — the thing `disclose` could never draw
 
-![a dropped menu over the page, bold](2026-10-01-primitives-the-behaviours-nothing-declared-bold-wide-the-menu.png)
+![a dropped menu over the page, bold](2026-10-01-primitives-the-behaviours-nothing-declared-bold-wide-the-menu.webp)
 
 `loom.nav` has collapsed its whole menu behind a button since 25 August, which is
 `disclose` doing the one thing `disclose` does: a region laid out beside its own
@@ -186,7 +186,7 @@ sentence 0176 exists for.
 
 ### `the popover` — and the wipe, dragged
 
-![a popover open beside a paragraph and the wipe at 80, editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-wide-the-popover.png)
+![a popover open beside a paragraph and the wipe at 80, editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-wide-the-popover.webp)
 
 Two things in one shot because the `fill` step takes no pointer press, so it
 leaves an open panel open. The wipe is at 80 here and at 50 in every other shot,
@@ -195,7 +195,7 @@ which is the first photograph in this repository of a behaviour control being
 
 ### `the lightbox` — the one region that covers the page
 
-![a lightbox open over a dimmed page, bold](2026-10-01-primitives-the-behaviours-nothing-declared-bold-wide-the-lightbox.png)
+![a lightbox open over a dimmed page, bold](2026-10-01-primitives-the-behaviours-nothing-declared-bold-wide-the-lightbox.webp)
 
 The **second** tile is the one pressed, and the other two are shut: 0176's
 rejected module-level store would have opened all three. The page behind is
@@ -206,7 +206,7 @@ the primitive `dismiss` was described for.
 
 ### Both palettes, and the phone
 
-![the lightbox on editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-wide-the-lightbox.png)
+![the lightbox on editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-wide-the-lightbox.webp)
 
 **The editorial shot is the one to look at for what the theme model costs.**
 `bg-overlay` is a *surface* — `#ffffff` under the light palettes — so a lightbox
@@ -215,8 +215,8 @@ is `loom.overlay`'s reasoning applied honestly rather than a hard-coded wash, it
 re-themes correctly, and a genuinely dark cinematic scrim wants a palette slot
 that does not exist. Already filed by `loom.overlay`'s own author; not re-filed.
 
-![the menu on a phone, editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-phone-the-menu.png)
-![the lightbox on a phone, bold](2026-10-01-primitives-the-behaviours-nothing-declared-bold-phone-the-lightbox.png)
+![the menu on a phone, editorial](2026-10-01-primitives-the-behaviours-nothing-declared-editorial-phone-the-menu.webp)
+![the lightbox on a phone, bold](2026-10-01-primitives-the-behaviours-nothing-declared-bold-phone-the-lightbox.webp)
 
 Both remaining palette/state pairs are in this folder; ten shots are committed of
 sixteen taken.

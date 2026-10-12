@@ -288,11 +288,11 @@ Nothing blocking. Two carried, unchanged by this run:
 
 | | |
 | --- | --- |
-| [before](2026-09-10-demo-the-part-it-is-about-before.png) | `main`, 390×844, two seconds after **Take the numbers off**: the question, the two buttons, and `Deletes the loom.stat-grid` |
-| [after](2026-09-10-demo-the-part-it-is-about-after.png) | the same press, same viewport, on this branch — the clinic's own numbers inside the question, buttons unmoved at y=646 |
-| [insert](2026-09-10-demo-the-part-it-is-about-insert.png) | *Add the opening hours*: the one preview that cannot be a screenshot of anything, because the section is not on the page yet |
-| [small](2026-09-10-demo-the-part-it-is-about-small.png) | 360×640, the narrowest phone worth caring about — the preview fits and the buttons stay on screen |
-| [wide](2026-09-10-demo-the-part-it-is-about-wide.png) | 1440×900 on this branch — the preview is removed by the stylesheet and not one pixel of the wide layout moved |
+| [before](2026-09-10-demo-the-part-it-is-about-before.webp) | `main`, 390×844, two seconds after **Take the numbers off**: the question, the two buttons, and `Deletes the loom.stat-grid` |
+| [after](2026-09-10-demo-the-part-it-is-about-after.webp) | the same press, same viewport, on this branch — the clinic's own numbers inside the question, buttons unmoved at y=646 |
+| [insert](2026-09-10-demo-the-part-it-is-about-insert.webp) | *Add the opening hours*: the one preview that cannot be a screenshot of anything, because the section is not on the page yet |
+| [small](2026-09-10-demo-the-part-it-is-about-small.webp) | 360×640, the narrowest phone worth caring about — the preview fits and the buttons stay on screen |
+| [wide](2026-09-10-demo-the-part-it-is-about-wide.webp) | 1440×900 on this branch — the preview is removed by the stylesheet and not one pixel of the wide layout moved |
 
 Both phone pairs are the same script driven against two `next build` outputs —
 this branch's and `main`'s — so the only difference in the frame is the change.

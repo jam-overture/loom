@@ -225,8 +225,9 @@ It never closes a pull request, deletes a branch, or schedules anything.
    rather than weakening a test to get green.
 6. Record decisions, regenerate the index with `pnpm decisions:index`. Close or
    file findings in `FINDINGS.md`.
-7. Report to `reports/YYYY-MM-DD-<slug>.md`, with a visual alongside. **Never
-   overwrite an existing report.** Cover, in plain language: what was completed,
+7. Report to `reports/YYYY-MM-DD-<slug>.md`, with a visual alongside — stored
+   with `pnpm reports:shrink`, which **Storing the picture** below explains.
+   **Never overwrite an existing report.** Cover, in plain language: what was completed,
    the section, decisions taken that were not specified and why, records added or
    superseded, findings filed or closed, open questions, and **real test numbers**
    — saying plainly if anything failed or was skipped.
@@ -517,6 +518,42 @@ set of named states that exists instead of it, and there will not be an
 `initScript`. Hovering is simply not asked for yet and would be a finding rather
 than an argument. Scrolling by a distance was asked for and declined: scroll to
 the element you mean. The last is the line itself.
+
+#### Storing the picture
+
+The harness writes PNG at capture scale, which is right for looking at and wrong
+for committing. One command turns what it wrote into what `reports/` holds:
+
+```bash
+pnpm reports:shrink
+```
+
+It re-encodes every raster under `reports/` as WebP at the size the page was
+actually laid out at — the capture divided by its `deviceScaleFactor` — and
+rewrites every citation that pointed at the old name, because a report whose
+picture 404s has lost the argument it was making. It only ever makes a file
+smaller, so running it twice is free, and `--dry-run` says what it would do.
+
+`pnpm verify` runs `pnpm reports:check`, which fails on a visual that is not
+`.webp` or `.svg`, or that weighs more than 1.2MB. That is the enforcement: you
+cannot forget this step and find out a year later.
+
+**Why this is a rule rather than a preference.** 1662 screenshots at the harness
+default came to 669MB, which was 95% of everything this repository tracked, and
+`.git` with it. The saving is the format and not the scale — the same pictures
+as PNG at the same reduced size came back only 1.4× smaller, and as WebP about
+5× — and nothing is lost that a reader could see, because the stored size is the
+size the screen showed. [0264](../decisions/0264-a-report-s-visual-is-stored-at-the-size-the-page-was-laid-out-at.md)
+records it.
+
+**Nothing is deleted to achieve this.** 387 visuals here are cited by no file,
+and it is tempting to call them waste. 273 of them are named after a report that
+exists and are that report's own diagram, which the report never wrote the image
+line for; the rest each share a date with seven to sixteen reports. And 81 are
+byte-identical to another visual, which is not duplication — it is the *before*
+and the *unchanged* of a pair, and that they are identical is the argument. Git
+stores one copy of those regardless. `reports:check` prints the uncited count and
+leaves them alone.
 
 ### The three files every lane writes to
 

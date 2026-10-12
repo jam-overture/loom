@@ -82,9 +82,9 @@ are the shipped code. **The only fiction is who asked and when.**
 
 | | |
 | --- | --- |
-| [**the screen**](2026-10-03-portal-why-it-cannot-be-undone-wide.png) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
-| [**the same, on a phone**](2026-10-03-portal-why-it-cannot-be-undone-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
-| [**the record, one click down**](2026-10-03-portal-why-it-cannot-be-undone-record-wide.png) | `cannot undo retention-budget-exceeded` · `retained 9` |
+| [**the screen**](2026-10-03-portal-why-it-cannot-be-undone-wide.webp) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
+| [**the same, on a phone**](2026-10-03-portal-why-it-cannot-be-undone-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**the record, one click down**](2026-10-03-portal-why-it-cannot-be-undone-record-wide.webp) | `cannot undo retention-budget-exceeded` · `retained 9` |
 
 The first picture holds both obstacles on one screen, which is the argument:
 

@@ -9,9 +9,9 @@ browser, against a page **a live model actually changed during this run**:
 
 | | |
 | --- | --- |
-| [The screen](2026-09-04-portal-what-loom-is-allowed-to-do.png) | 1280px |
-| [One rule, opened — the click the technical record is one of](2026-09-04-portal-what-loom-is-allowed-to-do-open.png) | 1280px |
-| [a phone](2026-09-04-portal-what-loom-is-allowed-to-do-phone.png) | 390px |
+| [The screen](2026-09-04-portal-what-loom-is-allowed-to-do.webp) | 1280px |
+| [One rule, opened — the click the technical record is one of](2026-09-04-portal-what-loom-is-allowed-to-do-open.webp) | 1280px |
+| [a phone](2026-09-04-portal-what-loom-is-allowed-to-do-phone.webp) | 390px |
 
 **How honest these are, stated plainly.** `LOOM_ANTHROPIC_API_KEY` is present in
 this environment, so nothing was staged. Five requests were typed into the real

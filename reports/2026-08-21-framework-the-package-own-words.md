@@ -3,10 +3,10 @@
 **Date:** 2026-08-21 · **Routine:** `Loom daily build` · **Section:** §4c ·
 **Branch:** `framework-01-the-package-own-words`
 
-![The API reference, before and after — reserved-props](2026-08-21-framework-the-package-own-words.png)
+![The API reference, before and after — reserved-props](2026-08-21-framework-the-package-own-words.webp)
 
 *Before and after on the same page of the real API reference, built twice.
-[View full size](https://github.com/jam-overture/loom/blob/main/reports/2026-08-21-framework-the-package-own-words.png)
+[View full size](https://github.com/jam-overture/loom/blob/main/reports/2026-08-21-framework-the-package-own-words.webp)
 — the repository is private, so an embedded image does not render for anyone
 (16 August finding).*
 
@@ -39,9 +39,9 @@ reference lifts a module's opening paragraph under its heading, where it stands
 in for every export beneath that says nothing of its own. A module without one
 leaves each of those as a bare name and a signature.
 
-![A module's opening paragraph, before and after](2026-08-21-framework-the-package-own-words-modules.png)
+![A module's opening paragraph, before and after](2026-08-21-framework-the-package-own-words-modules.webp)
 
-*[View full size](https://github.com/jam-overture/loom/blob/main/reports/2026-08-21-framework-the-package-own-words-modules.png)*
+*[View full size](https://github.com/jam-overture/loom/blob/main/reports/2026-08-21-framework-the-package-own-words-modules.webp)*
 
 **28 modules gained a paragraph** — 13 entry-point barrels that had no comment at
 all, and 15 whose first comment was attached to a declaration instead of being

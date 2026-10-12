@@ -229,17 +229,17 @@ Six shots, `pnpm shoot --serve apps/loom`.
 | the catalogue row | `768×328` | |
 | the audit | `768×275` | |
 
-![The primitive, rendered, with the propose box under it](2026-10-11-docs-own-primitive-example.png)
+![The primitive, rendered, with the propose box under it](2026-10-11-docs-own-primitive-example.webp)
 
-![What a model is handed](2026-10-11-docs-own-primitive-catalogue.png)
+![What a model is handed](2026-10-11-docs-own-primitive-catalogue.webp)
 
-![What the audit saw](2026-10-11-docs-own-primitive-audit.png)
+![What the audit saw](2026-10-11-docs-own-primitive-audit.webp)
 
-![Every refusal, produced by a render that was refused](2026-10-11-docs-own-primitive-refusals.png)
+![Every refusal, produced by a render that was refused](2026-10-11-docs-own-primitive-refusals.webp)
 
-![The whole page](2026-10-11-docs-own-primitive-wide.png)
+![The whole page](2026-10-11-docs-own-primitive-wide.webp)
 
-![The same page on a phone](2026-10-11-docs-own-primitive-phone.png)
+![The same page on a phone](2026-10-11-docs-own-primitive-phone.webp)
 
 Two things the measurements settled rather than suggested.
 

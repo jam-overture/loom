@@ -3,7 +3,7 @@
 **Routine:** `Loom daily build` · **Date:** 2026-10-10 · **Section:** §4, the
 SDK and the harness · **Branch:** `framework-62-the-answer-it-was-not-handed`
 
-![The same two primitives, audited three ways](2026-10-10-framework-not-answered-wide.png)
+![The same two primitives, audited three ways](2026-10-10-framework-not-answered-wide.webp)
 
 ## What was completed
 

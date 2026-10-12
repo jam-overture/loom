@@ -4,7 +4,7 @@
 
 **Branch:** `portal-03-calibration` (→ `main`).
 
-Visual: [the calibration page, with the misses under the table](2026-08-17-portal-where-the-grade-was-wrong.png).
+Visual: [the calibration page, with the misses under the table](2026-08-17-portal-where-the-grade-was-wrong.webp).
 
 ---
 

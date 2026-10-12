@@ -274,8 +274,8 @@ each of the two links in it.
 
 | | editorial | bold | minimal |
 | --- | --- | --- | --- |
-| wide | ![](2026-10-05-primitives-the-link-inside-a-sentence-editorial-wide.png) | ![](2026-10-05-primitives-the-link-inside-a-sentence-bold-wide.png) | ![](2026-10-05-primitives-the-link-inside-a-sentence-minimal-wide.png) |
-| phone | ![](2026-10-05-primitives-the-link-inside-a-sentence-editorial-phone.png) | ![](2026-10-05-primitives-the-link-inside-a-sentence-bold-phone.png) | ![](2026-10-05-primitives-the-link-inside-a-sentence-minimal-phone.png) |
+| wide | ![](2026-10-05-primitives-the-link-inside-a-sentence-editorial-wide.webp) | ![](2026-10-05-primitives-the-link-inside-a-sentence-bold-wide.webp) | ![](2026-10-05-primitives-the-link-inside-a-sentence-minimal-wide.webp) |
+| phone | ![](2026-10-05-primitives-the-link-inside-a-sentence-editorial-phone.webp) | ![](2026-10-05-primitives-the-link-inside-a-sentence-bold-phone.webp) | ![](2026-10-05-primitives-the-link-inside-a-sentence-minimal-phone.webp) |
 
 ```
 …-editorial-wide    1280x3400@2x  scrollWidth 1280 / innerWidth 1280

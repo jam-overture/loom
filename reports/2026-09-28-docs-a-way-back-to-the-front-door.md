@@ -25,12 +25,12 @@ That entry deliberately made no recommendation. It asked each of the three
 surfaces to **decide**, rather than inherit *no way back* from a migration that
 never intended it. This is this surface's decision.
 
-![The foot of a page, before](2026-09-28-docs-a-way-back-before-foot-of-page.png)
+![The foot of a page, before](2026-09-28-docs-a-way-back-before-foot-of-page.webp)
 
 *On `main`: the page ends at the pager and that is all there is. Nothing on the
 screen leaves the documentation.*
 
-![The foot of a page, after](2026-09-28-docs-a-way-back-after-foot-of-page.png)
+![The foot of a page, after](2026-09-28-docs-a-way-back-after-foot-of-page.webp)
 
 *On this branch: the same scroll position, and the page now has a foot.*
 
@@ -49,7 +49,7 @@ answered.
 **The wordmark is two links rather than one.** That is the part the finding
 expected an argument about, and the argument turned out to be a false choice.
 
-![The footer](2026-09-28-docs-a-way-back-after-footer.png)
+![The footer](2026-09-28-docs-a-way-back-after-footer.webp)
 
 ## The wordmark, and why the obvious answers are both wrong
 
@@ -77,7 +77,7 @@ screen reader, which hears two links and no punctuation.
 
 | before | after |
 | --- | --- |
-| ![](2026-09-28-docs-a-way-back-before-header.png) | ![](2026-09-28-docs-a-way-back-after-header.png) |
+| ![](2026-09-28-docs-a-way-back-before-header.webp) | ![](2026-09-28-docs-a-way-back-after-header.webp) |
 
 It costs no width, which matters more than it sounds: the header is the one
 piece of chrome present at every viewport, and on a phone it holds the search
@@ -138,7 +138,7 @@ stack; the header keeps two tap targets and the search box.
 
 | the header | the footer |
 | --- | --- |
-| ![](2026-09-28-docs-a-way-back-after-header-phone.png) | ![](2026-09-28-docs-a-way-back-after-footer-phone.png) |
+| ![](2026-09-28-docs-a-way-back-after-header-phone.webp) | ![](2026-09-28-docs-a-way-back-after-footer-phone.webp) |
 
 ## Decisions taken that were not specified
 

@@ -77,9 +77,9 @@ page.**
 
 | | before — this branch's head | after |
 | --- | --- | --- |
-| the excerpt inside the question, phone | reports/2026-09-26-demo-the-page-decides-before-phone.png | reports/2026-09-26-demo-the-page-decides-after-phone.png |
-| the frame the one invited press produces, wide | reports/2026-09-26-demo-the-page-decides-before-wide.png | reports/2026-09-26-demo-the-page-decides-after-wide.png |
-| the picture a link unfurls as | reports/2026-09-26-demo-the-page-decides-card-before.png | reports/2026-09-26-demo-the-page-decides-card-after.png |
+| the excerpt inside the question, phone | reports/2026-09-26-demo-the-page-decides-before-phone.webp | reports/2026-09-26-demo-the-page-decides-after-phone.webp |
+| the frame the one invited press produces, wide | reports/2026-09-26-demo-the-page-decides-before-wide.webp | reports/2026-09-26-demo-the-page-decides-after-wide.webp |
+| the picture a link unfurls as | reports/2026-09-26-demo-the-page-decides-card-before.webp | reports/2026-09-26-demo-the-page-decides-card-after.webp |
 
 Measured on the new build, same two viewports:
 

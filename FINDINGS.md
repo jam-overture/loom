@@ -1083,7 +1083,7 @@ root, and the reason it gives is correct:
 now `DEMO_OPENING_PRESET`, so the first press every visitor makes draws no mark
 at all, and the mark vocabulary is first met on the *second* press — the held
 one — where it arrives in amber as a question rather than in green as a receipt.
-Photographed: `2026-10-09-demo-press-one-press-wide.png` has a complete record
+Photographed: `2026-10-09-demo-press-one-press-wide.webp` has a complete record
 card and no chip anywhere on the stage.
 
 **Why this is filed rather than fixed, and why the fix is not obvious.** The
@@ -2625,13 +2625,13 @@ asked — *which registry is a decision about the shell* — is answered in
 [0232](decisions/0232-the-shell-mounts-a-theme-and-registers-no-primitives.md):
 a theme registry and **no primitive registry**, so the shell borrows the
 product's vocabulary of appearance and composes none of its content. The
-photographs are in `reports/2026-10-06-framework-not-found-wide.png` and
+photographs are in `reports/2026-10-06-framework-not-found-wide.webp` and
 `-phone.png`. Original status below.
 
 **Status:** open — **nothing is broken and the file's own reasoning is right**;
 what is filed is that the result is a screen, and nobody had looked at it
 
-![what a visitor gets](reports/2026-10-05-marketing-paths-not-found.png)
+![what a visitor gets](reports/2026-10-05-marketing-paths-not-found.webp)
 
 That is a real photograph, at 1280×760, of this application serving an address
 it has no route for. Times New — the browser's own default, through
@@ -3632,7 +3632,7 @@ it is now harder to miss.
 **The specifier is the longest on the site and the phone heading breaks
 mid-word** — *@jam-overture/loom-primitives/composit / ions*. `scrollWidth` is
 390 against `innerWidth` 390, so nothing overflows; it is only ugly. The
-screenshot is in `reports/2026-10-01-framework-the-door-that-did-not-exist-phone.png`.
+screenshot is in `reports/2026-10-01-framework-the-door-that-did-not-exist-phone.webp`.
 
 ### Also: your entry-point summary is mine and should probably be yours
 
@@ -4788,8 +4788,8 @@ The **only** variable is the length of the filename at the end:
 
 | chars | file | came back |
 | --- | --- | --- |
-| 139 | `2026-10-06-framework-copy-button-phone-mouse.png` | **clean** |
-| 139 | `2026-10-06-framework-copy-button-phone-touch.png` | **clean** |
+| 139 | `2026-10-06-framework-copy-button-phone-mouse.webp` | **clean** |
+| 139 | `2026-10-06-framework-copy-button-phone-touch.webp` | **clean** |
 | 148 | `2026-10-07-framework-the-button-they-came-from-before.png` | **mangled** — backticks wrapped around the whole URL inside the parens |
 | 174 | `…-the-button-they-came-from-minimal-wide-back-on-the-trigger.png` | **mangled** — backticks, and the closing `)` swallowed inside them |
 
@@ -18829,7 +18829,7 @@ that is one wordmark. `SITE_ROUTES` and `PRODUCT_SURFACES` in
 `app/(marketing)/_lib/site.ts` are already exported and already the list every
 other surface would need; nothing has to be duplicated to use them.
 
-Screenshots of all four headers are in `reports/2026-08-25-marketing-where-to-go-from-here-surfaces.png`.
+Screenshots of all four headers are in `reports/2026-08-25-marketing-where-to-go-from-here-surfaces.webp`.
 
 ---
 
@@ -24007,7 +24007,7 @@ happens, silently.** On a site whose whole argument is that it can always tell
 you what happened, that is materially worse than the link it would replace, so
 the band was withdrawn rather than shipped. Screenshot of the working-looking,
 non-working band:
-`reports/2026-09-04-marketing-the-last-typed-number-embed.png`.
+`reports/2026-09-04-marketing-the-last-typed-number-embed.webp`.
 
 **This is not a bug in the primitive.** Its doc comment names the omission
 deliberately — *"No form submission, no pointer lock, no downloads, and no
@@ -27935,7 +27935,7 @@ happens, silently.** On a site whose whole argument is that it can always tell
 you what happened, that is materially worse than the link it would replace, so
 the band was withdrawn rather than shipped. Screenshot of the working-looking,
 non-working band:
-`reports/2026-09-04-marketing-the-last-typed-number-embed.png`.
+`reports/2026-09-04-marketing-the-last-typed-number-embed.webp`.
 
 **This is not a bug in the primitive.** Its doc comment names the omission
 deliberately — *"No form submission, no pointer lock, no downloads, and no
@@ -34905,7 +34905,7 @@ recommended, and widened by one link
 against the built application, exactly as filed: click the wordmark inside the
 frame and the top page does not move, the frame loads `/`, and the front door
 renders inside its own embed. The picture is
-`reports/2026-09-18-demo-a-door-that-opens-into-the-box-before.png` and it has
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-before.webp` and it has
 two identical navigation bars and two *Sign in* buttons in it.
 
 **Taken as recommended.** `window.self !== window.top`, read by the bar, which
@@ -34919,7 +34919,7 @@ Measured the same way: the foot of the rail links to `/docs`, and inside the
 frame that loads the **whole documentation site into the box** — sidebar,
 search field and all, under a caption still reading *it belongs to a clinic that
 does not exist*
-(`reports/2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.png`). The
+(`reports/2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.webp`). The
 filing's own argument reaches it: `allow-top-navigation` is withheld and so is
 `allow-popups`, so there is no target this anchor can use, and the demonstration
 has exactly two links that leave it. Fixing one of two identical defects is the
@@ -38706,9 +38706,9 @@ in double backticks and the four that survived byte for byte:
 | chars | URL | outcome |
 | --- | --- | --- |
 | 168 | `…/blob/framework-51-an-answer-a-probe-can-be-handed/decisions/0180-a-primitive-that-draws-an-answer-declares-the-shape-it-can-draw.md` | **mangled** |
-| 158 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-before.png` | **mangled**, all three revisions |
-| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-after.png` | survived |
-| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-phone.png` | survived |
+| 158 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-before.webp` | **mangled**, all three revisions |
+| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-after.webp` | survived |
+| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-phone.webp` | survived |
 | 157 | `…/decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md` | survived |
 | 150 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed.md` | survived |
 
@@ -41585,8 +41585,8 @@ in light mode, so the mark rendered `#0a0a0a` on `bg-surface` `#1a1a1a`:
 
 | | |
 | --- | --- |
-| `minimal` | ![](../reports/2026-09-28-marketing-bar-glyph-minimal.png) |
-| `bold` | ![](../reports/2026-09-28-marketing-bar-glyph-bold.png) |
+| `minimal` | ![](../reports/2026-09-28-marketing-bar-glyph-minimal.webp) |
+| `bold` | ![](../reports/2026-09-28-marketing-bar-glyph-bold.webp) |
 
 An image is opaque to the cascade. No custom property reaches inside one, so a
 mark delivered as a file is blind to the only thing that decides what colour it
@@ -47291,7 +47291,7 @@ The type is `loom.inline-link`, the words are child text, and the only props are
 `aria-hidden`, in its own decoration context.
 
 **It is photographed on `minimal` as well as the usual two**, because `minimal`
-is what your finding was about — `reports/2026-10-05-primitives-the-link-inside-a-sentence-minimal-wide.png`,
+is what your finding was about — `reports/2026-10-05-primitives-the-link-inside-a-sentence-minimal-wide.webp`,
 §1, is the same sentence with each of the two links in it, and the difference is
 not subtle at size.
 
@@ -47595,10 +47595,10 @@ filing left open, all measured and written into
    page the sixth.
 
 **And the picture you said could not be taken, is taken.**
-`reports/2026-10-06-framework-copy-button-phone-touch.png` is the copy button
+`reports/2026-10-06-framework-copy-button-phone-touch.webp` is the copy button
 visible on a phone. Its control,
-`reports/2026-10-06-framework-copy-button-phone-mouse.png`, came back **byte-identical
-to your own committed `2026-10-06-docs-copy-button-phone.png`**, so the only
+`reports/2026-10-06-framework-copy-button-phone-mouse.webp`, came back **byte-identical
+to your own committed `2026-10-06-docs-copy-button-phone.webp`**, so the only
 variable between the pair is the pointer. Original status below.
 
 **Status:** open — **not urgent and
@@ -47624,7 +47624,7 @@ reveal never comes.
 
 **What it cost this run, concretely.** The copy button on every code block was
 invisible on touch devices and is fixed on `docs-47-the-controls-nothing-rendered`.
-The fix cannot be photographed. `2026-10-06-docs-copy-button-phone.png` in that
+The fix cannot be photographed. `2026-10-06-docs-copy-button-phone.webp` in that
 report is the clipped code block with no button on it, and **the same picture
 comes back from the fixed build and the shipped one**, because at a hover-capable
 390 pixels both are `opacity: 0`. The evidence in the report is the compiled CSS
@@ -48018,8 +48018,8 @@ One body, posted once, containing URLs of many lengths. Every URL in it, sorted:
 | 55 | a session link | clean |
 | 82 | the Vercel preview | clean |
 | 138 | `…/blob/<sha>/reports/2026-10-06-primitives-given-rather-than-told.md` | clean |
-| 147 | `…/reports/2026-10-06-primitives-trend-overflow-before.png` | clean |
-| 148 | `…/reports/2026-10-06-primitives-trend-overflow-after.png` | clean |
+| 147 | `…/reports/2026-10-06-primitives-trend-overflow-before.webp` | clean |
+| 148 | `…/reports/2026-10-06-primitives-trend-overflow-after.webp` | clean |
 | **159** | `…/reports/2026-10-06-primitives-given-rather-than-told-bold-phone.png` | **mangled** |
 | **160** | `…-editorial-phone.png` | **mangled** |
 | **164** | `…-bold-wide.png` | **mangled** |
@@ -48073,7 +48073,7 @@ back mangled on the first read.
 **Keep every URL in a pull request body under about 148 characters.** The lever
 with the most slack is the *filename*, not the ref. This run's screenshots were
 renamed from `2026-10-06-primitives-given-rather-than-told-editorial-wide.png`
-(63) to `2026-10-06-primitives-given-editorial-wide.png` (45), which brings the
+(63) to `2026-10-06-primitives-given-editorial-wide.webp` (45), which brings the
 URL to 145 and it posts clean.
 
 That is worth a convention, because **the report naming convention this
@@ -48105,8 +48105,8 @@ inline, in one call.
 
 | URL | characters | came back |
 | --- | --- | --- |
-| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-mouse.png` | **142** | **clean**, and `!` intact |
-| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-touch.png` | **142** | **clean**, and `!` intact |
+| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-mouse.webp` | **142** | **clean**, and `!` intact |
+| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-touch.webp` | **142** | **clean**, and `!` intact |
 | `…/blob/…/decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md` | **160** | mangled — ``` `` ``` injected, and the wrap swallowed the `**,` after it |
 
 It sits inside the 148–159 bracket this entry already measured rather than
@@ -51145,6 +51145,109 @@ deliberately no formatter and why. Either is fine and the second is cheaper; wha
 is expensive is the current state, where the question has no answer in the
 repository and every lane has to rediscover it. Filed as an observation for the
 lane that owns the tooling, not as an ask with a deadline.
+## 2026-10-11 — one page with no readership withholds the reader share for the whole library, and that is the ordinary state rather than the exotic one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is blocked and
+nothing is wrong**; it is a property of 0256 worth writing down before another
+surface meets it
+
+`/portal/pieces` now draws the two shares the 11 October `Loom signals` entry
+asked for, and the first staged deployment made something plain that the record
+states and nobody had seen rendered:
+
+> **A reach silence is a property of one page and it is published against the
+> whole kind.**
+
+`KindReach.silence` is `unscaled` where *any* page a type stands on could not be
+put on the door's scale, and 0256 is right to refuse a share over the pages it
+could price — there is no safe direction to guess in, which is 0250's refusal for
+a page out of an order and 0221's inside one page.
+
+What that means on a screen, measured rather than argued: **three pages, one of
+them without a usable door row, and every reader share in the library went
+dark.** Not one row — all four, because every kind of piece stands on the page
+that could not be priced. A deployment of forty pages is likelier to have one
+such page than not, so this is the state the screen will be in most of the time
+and the healthy one is the exception.
+
+**Three things follow, and they are what the screen was built to do.**
+
+1. **The census half must never go dark with it.** `readShare` is a ratio of two
+   counts of parts of trees — no reader in either term, no window, no door — so
+   it stands whatever the door is doing. A surface that drew the two figures
+   together and withheld them together would have nothing to say about a
+   deployment that is merely missing one row.
+2. **Falling back has to say that it is falling back.** The card says why the
+   reader figure is absent rather than leaving a gap, because a reader who meets
+   a places figure and nothing under it cannot tell *nobody measured this* from
+   *one of its pages has no readership*, and those two send a person to
+   completely different places.
+3. **The page is the actionable half and it needs its own reason.** The staged
+   deployment reported `unopened` where the fixture expected `unmeasured` — a
+   door row that exists and says nothing ever began, against no row at all — and
+   the two have opposite remedies: a row that expired, and a sender that is not
+   marking its openings. `LibraryReach.unscaled` carries a `ReachSilence` per
+   page for exactly this, and a list that named the page without the reason
+   would send somebody after the wrong fault. A first draft of this screen
+   carried the reason and drew only the name.
+
+**For whoever draws the third surface off these readings:** the sentence above
+the rows has to be true of all three states of a door. *No count of how many
+readers arrived* is false of `unopened`, where the count is there and is nought.
+*No readership to weigh these figures against* is true of all three.
+
+---
+## 2026-10-11 — the twelfth hand-written photograph preload, and the obstacle to the harness is where it may live rather than what it does
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed against the 27 September entry**, which is unchanged and still right
+
+The eighth preload when the ask was written, the eleventh yesterday, the twelfth
+today: three pages built through the published builders, written through
+`TreeStore.create`, counters through `ReaderTallyStore.apply` with an
+`appearances` window, door rows through `ReaderTallyStore.opened`, and one page's
+openings withheld behind an environment variable so the withheld state could be
+photographed from the same build. Deleted before committing, as the eleven before
+it were. The shot lists are beside the report and are the half that survives.
+
+**What is new is not the count. It is that this run found the thing actually in
+the way, and it is not the writing.**
+
+The harness the 27 September entry asks for would live under
+`app/(portal)/_test/staging/`, and `_test/` is defined by this lane as *inside
+the lane and outside the production graph* — the argument `_test/plain-language.ts`
+makes for being there is that a screen must never be able to import the thing it
+is being judged against. A staging module has the opposite requirement: **it only
+works if a request path reaches it**, because the data has to be in the running
+server's memory store before the page renders. A preload under `_test/` that the
+application imports is `_test/` in name only.
+
+So the question the harness is blocked on is a placement question with three
+answers, none of them obviously right:
+
+- **`_test/staging/` imported dynamically behind an environment variable.** Keeps
+  the name honest and does not keep it out of the bundle, which is the property
+  the directory was named for.
+- **`_lib/staging.ts`, in the production graph, inert without its variable.** The
+  honest version of what every one of these twelve preloads has actually been,
+  and a module a screen can import.
+- **Not a module at all — a script that posts through the published intake.**
+  Slowest to write, and the only one that cannot affect a deployment that does
+  not run it. The counters have a public door (0146); the trees do not.
+
+**This is `Loom portal`'s to decide and it is not decided here**, because the
+choice binds every lane that photographs a screen behind a session and the right
+moment to make it is a run whose subject is the harness. What is recorded is that
+the next run to pick this up does not need to re-derive the obstacle: it is not
+*what should the staging produce* — twelve preloads have answered that — it is
+*where may it live*.
+
+**One line that is not this lane's:** `pnpm shoot --serve` serves a build rather
+than making one, and the `built …Z` line it prints is the only thing that says
+so. That cost two wasted shoots yesterday and none today, because the line was
+read. It is still worth a sentence in `docs/routines.md`, which is
+`Loom daily build`'s file.
 ## 2026-10-11 — the marketing surface is Loom trees with no store behind them, so the portal cannot govern the pages the maintainer actually ships
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
@@ -51641,3 +51744,93 @@ a band swapped for a control is a place lost by one role and gained by another.
 **What would close it** is unchanged: a role per starter primitive. Nothing here
 needs to change when it lands — 0212's join is at read time, so every counter
 already stored reinterprets.
+## 2026-10-12 — the project scope reaches trees and revisions; holds, the policy log, signals and telemetry are still deployment-wide
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`,
+`src/signals/`, `src/telemetry/`) · **Status:** open — **this is the unfinished
+half of a change on a branch, not a defect on `main`**
+
+[0260](decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
+says a project is the unit Loom stores, governs and measures under, and that
+none of these reads can span two. `framework-01-a-project-above-the-tree`
+delivers that for **two of the nine tables**: `loom_trees` and
+`loom_revisions` carry `project_id`, their keys are widened, and
+`postgresTreeStore(db, { project })` cannot see another project's row — proved
+against PGlite, and the assertion fails when the `WHERE` clause is removed.
+
+**Seven tables are untouched and are still deployment-wide:**
+
+| table | owned by | what spanning two projects would do |
+| --- | --- | --- |
+| `loom_holds` | `src/store/postgres-holds.ts` | put one project's changes in another's review queue — the failure 0220 named by name |
+| `loom_policy_revisions` | `src/store/postgres-policy-log.ts` | resolve a fingerprint to another project's policy text |
+| `loom_reader_signals` | `src/signals/` | file a reader against whoever else holds that tree id |
+| `loom_reader_tallies` | `src/signals/` | add two projects' counts together |
+| `loom_reader_funnels` | `src/signals/` | as above |
+| `loom_reader_regions` | `src/signals/` | as above |
+| `loom_reader_page_views` | `src/signals/` | as above |
+| `loom_telemetry` | `src/telemetry/` | show one project's gate decisions on another's screen |
+
+**None of this is reachable today**, because nothing constructs a store with a
+project other than the default — the portal still holds one handle. It becomes
+reachable the moment a second project exists, which is why it is filed now
+rather than after.
+
+**So the order is load bearing:** the portal must not offer a second project
+until these seven are scoped. A screen that lets somebody create one, over a
+signal ledger that cannot tell two apart, would be mixing two customers'
+readers on the first day, and the mixing is not recoverable from the rows
+afterwards.
+
+The pattern is set and is mechanical: a `project_id` column defaulted to
+`prj_default`, the key widened, the handle scoped at construction, and the
+isolation asserted against PGlite with the `WHERE` clause removed to prove the
+assertion bites.
+
+---
+## 2026-10-12 — 273 reports hold a visual named after them that the report never links to
+
+**Filed by:** `Loom portal` · **Owned by:** any lane touching its own old
+reports (`reports/`) · **Status:** open — **not a defect in anything that runs**,
+and found while sizing `reports/` for
+[0264](decisions/0264-a-report-s-visual-is-stored-at-the-size-the-page-was-laid-out-at.md).
+
+387 visuals under `reports/` are cited by no file in the repository. **273 of
+them are named after a report that exists** — `2026-07-31-day-20-telemetry-journal.svg`
+beside `2026-07-31-day-20-telemetry-journal.md`, same stem, no image line in the
+markdown. They are that report's own picture, taken and committed and never
+shown. 139MB of them.
+
+This is filed rather than fixed because the fix is per-report judgement: the
+image line belongs where the report's argument wants it, and nothing can infer
+that. It is filed *at all* because the first draft of `reports:check` called an
+uncited visual a fault, and the fix for a fault is `rm`. **Anyone tempted to tidy
+`reports/` by deleting what nothing cites would delete these.** The check now
+prints the count and leaves them alone, deliberately.
+
+The remaining 114 each share a date with between seven and sixteen reports, so
+which report they belong to is not recoverable by name. A further 81 visuals are
+byte-identical to another and are **not** duplication — they are the `-before`
+and `-embed-unchanged` halves of pairs, where being identical *is* the argument
+(`docs/routines.md` says so), and git stores one copy regardless.
+
+---
+## 2026-10-12 — the NFT over-trace that `.vercelignore` works around is still unaddressed
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom app`
+(`app/(lessons)/_lib/run.ts`) · **Status:** open — the workaround holds; the
+cause does not.
+
+The Turbopack build warns `Encountered unexpected file in NFT list`, which is
+the whole project being traced rather than the modules a route reaches. A
+filesystem call under `app/(lessons)/_lib/run.ts` is the suspected cause.
+`.vercelignore` keeps `reports/` out of the upload, which is right on its own
+terms — nothing there is read at build time or at runtime — and is not a fix for
+the trace.
+
+Its comment claimed `reports/` was 677MB; after 0264 it is 136MB, and the
+comment now says so. **The exclusion is about what belongs in a serverless
+bundle, not about the size, and stands either way** — worth stating because the
+size was briefly and wrongly offered as the explanation for a Vercel deploy
+failure whose actual error was `Git information retrieval failed for this
+deployment`, a Vercel↔GitHub integration fault that no ignore file can affect.

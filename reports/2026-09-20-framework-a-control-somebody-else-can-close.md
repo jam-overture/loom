@@ -14,7 +14,7 @@ nothing places either control yet, deliberately, because `src/primitives/` is
 another lane's. The four pictures below were taken against a locally served,
 hydrated page instead, and the harness pressed the buttons.
 
-![the panel open, with the cross inside it](2026-09-20-framework-a-control-somebody-else-can-close-open.png)
+![the panel open, with the cross inside it](2026-09-20-framework-a-control-somebody-else-can-close-open.webp)
 
 The trigger is a `present` control. The cross is a `dismiss` control. Nothing
 passes between them but the DOM, and that is the whole of what this run built.
@@ -88,10 +88,10 @@ than described.
 
 | picture | what to look at |
 | --- | --- |
-| [closed](2026-09-20-framework-a-control-somebody-else-can-close-closed.png) | one button; the panel is hidden by the primitive's own rule |
-| [open](2026-09-20-framework-a-control-somebody-else-can-close-open.png) | pressed once — the scrim, the panel, and the cross in it |
-| [dismissed](2026-09-20-framework-a-control-somebody-else-can-close-dismissed.png) | the cross pressed |
-| [a phone](2026-09-20-framework-a-control-somebody-else-can-close-phone.png) | 390px, open; `scrollWidth` 390 against `innerWidth` 390 |
+| [closed](2026-09-20-framework-a-control-somebody-else-can-close-closed.webp) | one button; the panel is hidden by the primitive's own rule |
+| [open](2026-09-20-framework-a-control-somebody-else-can-close-open.webp) | pressed once — the scrim, the panel, and the cross in it |
+| [dismissed](2026-09-20-framework-a-control-somebody-else-can-close-dismissed.webp) | the cross pressed |
+| [a phone](2026-09-20-framework-a-control-somebody-else-can-close-phone.webp) | 390px, open; `scrollWidth` 390 against `innerWidth` 390 |
 
 **The closed and dismissed shots are byte-identical** — `md5` `89b66c48…` for
 both. The page after a cross closed it is pixel-for-pixel the page before the

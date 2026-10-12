@@ -13,11 +13,11 @@ cannot read, one with an answerable change alone.
 
 | | |
 | --- | --- |
-| [The queue, with a stuck row in it](2026-09-20-portal-the-change-nobody-can-answer-queue.png) | 1280px — **the change**: the first card, and the second sentence of the count above it |
-| [The same screen, every disclosure open](2026-09-20-portal-the-change-nobody-can-answer-open.png) | 1280px — the store's account of the row, and nothing removed to make the surface calm |
-| [Your pages](2026-09-20-portal-the-change-nobody-can-answer-pages.png) | 1280px — two marks on one row, and the count that stayed at what can be answered |
-| [The page screen](2026-09-20-portal-the-change-nobody-can-answer-page.png) | 1280px — the same row in the queue it is actually on |
-| [a phone](2026-09-20-portal-the-change-nobody-can-answer-phone.png) | 390px |
+| [The queue, with a stuck row in it](2026-09-20-portal-the-change-nobody-can-answer-queue.webp) | 1280px — **the change**: the first card, and the second sentence of the count above it |
+| [The same screen, every disclosure open](2026-09-20-portal-the-change-nobody-can-answer-open.webp) | 1280px — the store's account of the row, and nothing removed to make the surface calm |
+| [Your pages](2026-09-20-portal-the-change-nobody-can-answer-pages.webp) | 1280px — two marks on one row, and the count that stayed at what can be answered |
+| [The page screen](2026-09-20-portal-the-change-nobody-can-answer-page.webp) | 1280px — the same row in the queue it is actually on |
+| [a phone](2026-09-20-portal-the-change-nobody-can-answer-phone.webp) | 390px |
 
 **How the populated pictures were taken.** Two trees built with the published
 builders into a `memoryTreeStore()` on `globalThis[Symbol.for("loom.portal.store")]`,

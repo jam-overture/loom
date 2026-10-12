@@ -9,7 +9,7 @@ Along the way I found that **every markdown table on the site had been shipping
 as a paragraph of pipe characters**, on seven pages, since each was written. That
 is fixed too, and the fix is held by a test.
 
-![The eight ideas, each with a lesson and a ruling beside it](2026-08-21-docs-architecture-ideas.png)
+![The eight ideas, each with a lesson and a ruling beside it](2026-08-21-docs-architecture-ideas.webp)
 
 ## The maintainer's finding, and what I built for it
 
@@ -59,7 +59,7 @@ subject and the page has said what they are two paragraphs earlier. I think
 that is the right line; it is the one thing in this pull request I would like
 checked.
 
-![The index, dark](2026-08-21-docs-architecture-records.png)
+![The index, dark](2026-08-21-docs-architecture-records.webp)
 
 ## The tables were never tables
 
@@ -77,7 +77,7 @@ Nothing on the site could have caught this. `content.test.ts` checks that pages
 exist and are linked; the api-reference tests check generated data. Nobody
 checks what markdown turns into.
 
-![The Gate's three answers, as a table, for the first time](2026-08-21-docs-architecture-tables-restored.png)
+![The Gate's three answers, as a table, for the first time](2026-08-21-docs-architecture-tables-restored.webp)
 
 ### The fix, and why it is a string
 
@@ -137,7 +137,7 @@ One caveat worth stating plainly: after enabling GFM, the first build I checked
 still showed pipes. That was `.next` cache, not the fix. **Everything reported
 above is from a clean `rm -rf .next && next build`.**
 
-![The orientation on a phone](2026-08-21-docs-architecture-phone.png)
+![The orientation on a phone](2026-08-21-docs-architecture-phone.webp)
 
 ## No decision record
 

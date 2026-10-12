@@ -7,13 +7,13 @@ Five primitives — `loom.list`, `loom.list-item`, `loom.emphasis`, `loom.code-s
 finding that had been open since 19 August, and filing four. No decision record,
 for a reason the report explains and does not think is fine.
 
-![The specimen under the house palette](2026-08-23-primitives-the-prose-vocabulary-minimal.png)
+![The specimen under the house palette](2026-08-23-primitives-the-prose-vocabulary-minimal.webp)
 
-![The same specimen under editorial](2026-08-23-primitives-the-prose-vocabulary-editorial.png)
+![The same specimen under editorial](2026-08-23-primitives-the-prose-vocabulary-editorial.webp)
 
-![And under bold — the palette that caught the bug](2026-08-23-primitives-the-prose-vocabulary-bold.png)
+![And under bold — the palette that caught the bug](2026-08-23-primitives-the-prose-vocabulary-bold.webp)
 
-![The house palette at a true 390px, in an iframe because this Chromium will not lay out narrower than 485](2026-08-23-primitives-the-prose-vocabulary-phone.png)
+![The house palette at a true 390px, in an iframe because this Chromium will not lay out narrower than 485](2026-08-23-primitives-the-prose-vocabulary-phone.webp)
 
 ## Which primitives, and why those
 

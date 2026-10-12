@@ -7,7 +7,7 @@ follows a link to the second — because until this run there was no such link.
 
 **They would have been shown the record of a different request.**
 
-![The same address, before and after](2026-09-02-marketing-the-record-of-your-ask.png)
+![The same address, before and after](2026-09-02-marketing-the-record-of-your-ask.webp)
 
 A visitor who asks the front door *"I do not believe you. Show me the evidence."*
 watches a band appear and reads five plain steps about it. One level down,
@@ -33,7 +33,7 @@ three things it got wrong are fixed below.
 **`/how-it-works` reads an ask off its address, and the front door's panel hands
 it one.**
 
-![The panel, and the control that was added to it](2026-09-02-marketing-the-record-of-your-ask-panel.png)
+![The panel, and the control that was added to it](2026-09-02-marketing-the-record-of-your-ask-panel.webp)
 
 One new control beside *Put it back*: **See every line the machinery wrote**. It
 points at `/how-it-works?ask=<theirs>`, carrying the approval when there was one,
@@ -94,7 +94,7 @@ leave the page naming a request it is not showing.
 
 **3. The approved run is nine lines, not six.**
 
-![Nine lines, and the sentence that counts them](2026-09-02-marketing-the-record-of-your-ask-twice.png)
+![Nine lines, and the sentence that counts them](2026-09-02-marketing-the-record-of-your-ask-twice.webp)
 
 This is the one the rebuild found that nothing on either branch had looked at. A
 change the rules hold and the visitor then allows is put to the rules a **second**
@@ -111,7 +111,7 @@ being skipped, and this is the only place on the site that can show it.
 
 ### The refusal, asked for on purpose
 
-![The request this site refuses](2026-09-02-marketing-the-record-of-your-ask-refused.png)
+![The request this site refuses](2026-09-02-marketing-the-record-of-your-ask-refused.webp)
 
 The most interesting address on this site is now
 `/how-it-works?ask=drop-pitch` — the one change the rules will not allow, with
@@ -184,9 +184,9 @@ satisfy a test that only looked for the right one.
 
 ## Under both palettes, and on a phone
 
-![Bold](2026-09-02-marketing-the-record-of-your-ask-bold.png)
+![Bold](2026-09-02-marketing-the-record-of-your-ask-bold.webp)
 
-![At 390px](2026-09-02-marketing-the-record-of-your-ask-phone.png)
+![At 390px](2026-09-02-marketing-the-record-of-your-ask-phone.webp)
 
 No hard-coded colour; the band is the same tree wearing a different registered
 triple. `scrollWidth` is exactly 1280 at 1280 and exactly 390 at 390, measured on

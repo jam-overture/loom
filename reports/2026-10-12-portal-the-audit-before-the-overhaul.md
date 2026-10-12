@@ -74,21 +74,21 @@ screens away, and because that panel is a small dashed box when nothing is
 picked and a tall one when something is, the whole column jumps. That is the
 content jump — it is a layout bug, not an animation one.
 
-![the inspector, full height](2026-10-12-portal-audit-page-detail.png)
+![the inspector, full height](2026-10-12-portal-audit-page-detail.webp)
 
 **3. The screen the product is for is empty and apologising.** `Readers` is
 where signals are meant to land. It renders a dashed box that says no page has
 reported anything, and a grey box that says the counts would not be kept
 anyway. No table, no chart, no filter, no detail pane.
 
-![readers](2026-10-12-portal-audit-readers.png)
+![readers](2026-10-12-portal-audit-readers.webp)
 
 **4. `Rules` is a document about a config file you cannot edit.** Nine cards
 state the thresholds in prose — *"3 parts starts to count as risky, 12 counts
 as high risk"* — with no control beside any of them, and one card dumps all 107
 primitive type names as a paragraph.
 
-![rules](2026-10-12-portal-audit-rules.png)
+![rules](2026-10-12-portal-audit-rules.webp)
 
 ---
 
@@ -305,14 +305,14 @@ screen the first of them replaces.
 | Rules | 900px | 1,892px | `Rules`, which has no controls |
 | Credentials | 900px | — | nothing like it exists |
 
-![workspace](2026-10-12-portal-proposed-workspace.png)
+![workspace](2026-10-12-portal-proposed-workspace.webp)
 
 Projects, with the four numbers somebody opens a portal for: whether it is
 receiving, how much, how much went wrong, how much is waiting on them.
 
-![project overview](2026-10-12-portal-proposed-overview.png)
+![project overview](2026-10-12-portal-proposed-overview.webp)
 
-![logs](2026-10-12-portal-proposed-logs.png)
+![logs](2026-10-12-portal-proposed-logs.webp)
 
 Two rails, as asked: an icon rail with **words under the glyphs at rest**, and
 a second rail carrying the section's screens in groups. The seven tabs on the
@@ -320,13 +320,13 @@ page inspector were all standing in for this. The selected log line is a query
 parameter rather than client state, so a log is a URL somebody can paste into
 a message.
 
-![rules](2026-10-12-portal-proposed-rules.png)
+![rules](2026-10-12-portal-proposed-rules.webp)
 
 Rules from the configuration side. Eleven controls and a caption, against 299
 words and none. The sentence that is the whole of the screen today sits behind
 the ⓘ, next to the setting it is about.
 
-![credentials](2026-10-12-portal-proposed-credentials.png)
+![credentials](2026-10-12-portal-proposed-credentials.webp)
 
 ### Three things the prototype found in the existing design system
 

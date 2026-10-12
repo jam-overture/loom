@@ -11,7 +11,7 @@ failed`. That is the standing 15 September finding and is not re-filed.
 Everything measured below is a production build (`pnpm build && next build &&
 next start`), fetched over real HTTP and driven in Chromium.
 
-![Sixteen imports, and the four pairs with anything in common](2026-09-25-docs-a-front-door-for-the-reference.png)
+![Sixteen imports, and the four pairs with anything in common](2026-09-25-docs-a-front-door-for-the-reference.webp)
 
 ## What this run was
 
@@ -42,7 +42,7 @@ page*, *If you are hosting Loom*, *From a terminal, and from your tests* — eac
 one a link to its own page, with the sentence the site already keeps for it and
 the number of names behind it.
 
-![The front door: three groups, and every import with its size](2026-09-25-docs-a-front-door-for-the-reference-wide.png)
+![The front door: three groups, and every import with its size](2026-09-25-docs-a-front-door-for-the-reference-wide.webp)
 
 Then the part only this page can say, because it is a fact about the set rather
 than about any one door:
@@ -98,7 +98,7 @@ repeating the words directly above it is what a rail looks like when it has been
 given a shape it does not have. The current page is marked the way every other
 current page in that rail is — `aria-current` first, an underline second.
 
-![The rail: the section's own name is the link, and no row repeats it](2026-09-25-docs-a-front-door-for-the-reference-rail.png)
+![The rail: the section's own name is the link, and no row repeats it](2026-09-25-docs-a-front-door-for-the-reference-rail.webp)
 
 ### Installation lists the sixteen too, and that is the right answer for two readers
 
@@ -251,7 +251,7 @@ columns, which is why: the specifier is the longest unbroken string on the page,
 and a three-column table of sixteen of them either scrolls sideways or squeezes
 the sentence into a column two words across.
 
-![The front door on a phone](2026-09-25-docs-a-front-door-for-the-reference-phone.png)
+![The front door on a phone](2026-09-25-docs-a-front-door-for-the-reference-phone.webp)
 
 ## Findings
 

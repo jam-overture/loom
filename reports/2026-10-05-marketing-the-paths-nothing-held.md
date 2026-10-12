@@ -4,7 +4,7 @@ Every way out of this site into the rest of the product is a path. There are
 seven of them, they are on every page, and until today a build in which all of
 them pointed at nothing finished at **exit 0**.
 
-![the band, on minimal](2026-10-05-marketing-paths-ways-in-wide.png)
+![the band, on minimal](2026-10-05-marketing-paths-ways-in-wide.webp)
 
 `/`, 1280×820. Four cards, four addresses, four other lanes. Nothing on this
 page changed today; what changed is that the four are now held to pages this
@@ -35,7 +35,7 @@ pnpm --filter @loom/app build   →  EXIT=0
 No error, no warning naming it, 124 pages prerendered. The site shipped. This is
 the page a visitor pressing **Take the course** would have got:
 
-![what shipped at exit 0](2026-10-05-marketing-paths-not-found.png)
+![what shipped at exit 0](2026-10-05-marketing-paths-not-found.webp)
 
 Times New Roman, an unstyled `h1`, a blue underlined link, and nothing anywhere
 on it to tell a reader they are still on the same site. That screen is a second
@@ -197,11 +197,11 @@ found in, and the file that used to serve it — and **nothing outside
 `app/(marketing)/` has to be edited to get green.** The fix is the link, and the
 link is this lane's.
 
-![on bold](2026-10-05-marketing-paths-ways-in-bold.png)
+![on bold](2026-10-05-marketing-paths-ways-in-bold.webp)
 
-![the bar, which carries two of the seven](2026-10-05-marketing-paths-bar-wide.png)
+![the bar, which carries two of the seven](2026-10-05-marketing-paths-bar-wide.webp)
 
-![at 390](2026-10-05-marketing-paths-ways-in-phone.png)
+![at 390](2026-10-05-marketing-paths-ways-in-phone.webp)
 
 ---
 

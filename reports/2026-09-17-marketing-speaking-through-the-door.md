@@ -11,7 +11,7 @@ precondition this lane wrote down on 16 September for the other half of the
 framework lane's finding — *the door is open and nobody is speaking through it*.
 So the site speaks through it now, and says so where a reader can read it.
 
-![the page, 1280×900](2026-09-17-marketing-speaking-through-the-door.png)
+![the page, 1280×900](2026-09-17-marketing-speaking-through-the-door.webp)
 
 ---
 
@@ -169,7 +169,7 @@ and on:
 
 | | |
 | --- | --- |
-| ![counting nobody](2026-09-17-marketing-readings-not-counting.png) | ![counting](2026-09-17-marketing-readings-counting.png) |
+| ![counting nobody](2026-09-17-marketing-readings-not-counting.webp) | ![counting](2026-09-17-marketing-readings-counting.webp) |
 
 **The foot of every page, when it is counting:** *"This page counts which of its
 parts you reach, how long you stay and what you press — and never who you are."*
@@ -183,7 +183,7 @@ reader not to accept.
 
 | | |
 | --- | --- |
-| ![footer, counting nobody](2026-09-17-marketing-footer-not-counting.png) | ![footer, counting](2026-09-17-marketing-footer-counting.png) |
+| ![footer, counting nobody](2026-09-17-marketing-footer-not-counting.webp) | ![footer, counting](2026-09-17-marketing-footer-counting.webp) |
 
 **And the question band's answer to *do the bars come from real visitors?*** —
 still *no* on either deployment, with the second sentence saying whether the
@@ -282,9 +282,9 @@ width, in either state.
 
 | | |
 | --- | --- |
-| ![editorial](2026-09-17-marketing-speaking-through-the-door.png) | ![bold](2026-09-17-marketing-speaking-through-the-door-bold.png) |
+| ![editorial](2026-09-17-marketing-speaking-through-the-door.webp) | ![bold](2026-09-17-marketing-speaking-through-the-door-bold.webp) |
 
-![390px](2026-09-17-marketing-speaking-through-the-door-phone.png)
+![390px](2026-09-17-marketing-speaking-through-the-door-phone.webp)
 
 The phone shot is one image rather than two on purpose: photographed in both
 states, the files came back **byte-identical** (`md5 70373690…`), because

@@ -9,7 +9,7 @@ record of what it had measured — which, on a branch whose whole subject is a
 finding that claimed something was built when it was not, is not an irony worth
 leaving in place.
 
-![the front door as it now stands, full page at 1280 — 5,234px](2026-10-01-marketing-figures-that-missed-the-merge-front-door.png)
+![the front door as it now stands, full page at 1280 — 5,234px](2026-10-01-marketing-figures-that-missed-the-merge-front-door.webp)
 
 ---
 

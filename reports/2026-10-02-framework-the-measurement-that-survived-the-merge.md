@@ -43,7 +43,7 @@ $ pnpm shoot reports/2026-10-02-…-the-measurement-that-survived-the-merge.shot
       text=a selector that matches nothing  no match
 ```
 
-![The rail those numbers are about, re-measured on the merged tree](2026-10-02-framework-the-measurement-that-survived-the-merge-the-rail-wide.png)
+![The rail those numbers are about, re-measured on the merged tree](2026-10-02-framework-the-measurement-that-survived-the-merge-the-rail-wide.webp)
 
 | | yesterday, `cd4edab` | today, merged |
 | --- | --- | --- |

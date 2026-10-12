@@ -206,11 +206,11 @@ Nothing blocking. Two worth a sentence:
 
 | | |
 | --- | --- |
-| [held](2026-08-22-demo-the-page-points-at-itself-held.png) | *Remove the stats*: the band ringed amber, the chip, the amber dot and badge in the rail, the two buttons — the stage scrolled there by itself |
-| [applied](2026-08-22-demo-the-page-points-at-itself-applied.png) | one click later: the band is gone, the gap is ringed green, revision 1 |
-| [insert](2026-08-22-demo-the-page-points-at-itself-insert.png) | a held insert has no node yet, so the mark lands where it would go — eight hundred pixels down, and the visitor is taken to it |
-| [record](2026-08-22-demo-the-page-points-at-itself-record.png) | the disclosure open: the whole account to the policy fingerprint, beside the mark it is about. **Nothing was removed to make the surface land.** |
-| [phone](2026-08-22-demo-the-page-points-at-itself-phone.png) | stacked, after *Swap the hero backdrop*: carried to the top of the band, chip legible, nothing clipped |
+| [held](2026-08-22-demo-the-page-points-at-itself-held.webp) | *Remove the stats*: the band ringed amber, the chip, the amber dot and badge in the rail, the two buttons — the stage scrolled there by itself |
+| [applied](2026-08-22-demo-the-page-points-at-itself-applied.webp) | one click later: the band is gone, the gap is ringed green, revision 1 |
+| [insert](2026-08-22-demo-the-page-points-at-itself-insert.webp) | a held insert has no node yet, so the mark lands where it would go — eight hundred pixels down, and the visitor is taken to it |
+| [record](2026-08-22-demo-the-page-points-at-itself-record.webp) | the disclosure open: the whole account to the policy fingerprint, beside the mark it is about. **Nothing was removed to make the surface land.** |
+| [phone](2026-08-22-demo-the-page-points-at-itself-phone.webp) | stacked, after *Swap the hero backdrop*: carried to the top of the band, chip legible, nothing clipped |
 
 Every screenshot above is this branch's `next build` output driven in Chromium,
 not the preview — see the pull request for the preview URL, which this

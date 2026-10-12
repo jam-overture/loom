@@ -10,7 +10,7 @@ asked?**
 That decision is a `GatePolicy`. It has thirteen settings. Before today the site
 named three of them, in passing, on a page about something else.
 
-![One ask, judged twice, and the only difference is one line of vocabulary](2026-09-04-docs-what-ai-may-change-comparison.png)
+![One ask, judged twice, and the only difference is one line of vocabulary](2026-09-04-docs-what-ai-may-change-comparison.webp)
 
 ## What shipped
 
@@ -52,7 +52,7 @@ so the sentence cannot outlive the fact.
 
 ### Thirteen settings, read off the type
 
-![The four fields only you can write, and the defaults read out of the build](2026-09-04-docs-what-ai-may-change-knobs.png)
+![The four fields only you can write, and the defaults read out of the build](2026-09-04-docs-what-ai-may-change-knobs.webp)
 
 The rows are a **`Record<keyof GatePolicy, Knob>`**. A fourteenth setting in the
 runtime stops the documentation site compiling until somebody writes the sentence
@@ -120,13 +120,13 @@ claim rather than a check:
 
 ## Dark and 390px, before the pull request
 
-![The same pair in dark, with the stakes equal on both sides](2026-09-04-docs-what-ai-may-change-dark.png)
+![The same pair in dark, with the stakes equal on both sides](2026-09-04-docs-what-ai-may-change-dark.webp)
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport and
 1280 at 1280. The comparison columns are `flex-col` below the `sm` breakpoint, so
 on a phone the two verdicts stack rather than squeeze.
 
-![The whole page at a true 390px](2026-09-04-docs-what-ai-may-change-phone.png)
+![The whole page at a true 390px](2026-09-04-docs-what-ai-may-change-phone.webp)
 
 One defect the screenshots caught and the tests did not: the knob sentences are
 rendered as **text nodes rather than as MDX**, so the backticks I had written

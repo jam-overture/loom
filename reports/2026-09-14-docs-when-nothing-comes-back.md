@@ -13,7 +13,7 @@ since before the runtime could produce one*.
 
 So this run is the ceiling, and the finding is closed as part of it.
 
-![The page a reader lands on](2026-09-14-docs-when-nothing-comes-back.png)
+![The page a reader lands on](2026-09-14-docs-when-nothing-comes-back.webp)
 
 ## What shipped
 
@@ -32,7 +32,7 @@ how to see the state your own interface shows when nothing comes back.
 trouble page now asks a seventh question, of a source that never answers, and
 the row is produced by the runtime's ceiling reporting it.
 
-![Seven questions, six reasons, and the row a hang now writes](2026-09-14-docs-when-nothing-comes-back-seventh-row.png)
+![Seven questions, six reasons, and the row a hang now writes](2026-09-14-docs-when-nothing-comes-back-seventh-row.webp)
 
 The row above it changed too. `shop.stock` used to answer `unavailable` with the
 detail *"the query timed out"* — a sentence typed by this lane, on a seam that
@@ -48,7 +48,7 @@ which is the one thing here I did not plan to do.
 Everything else on the page is a sentence about a rule. This is the rule
 happening, three times, to three real seams:
 
-![Three seams, three expiries, three aborts](2026-09-14-docs-when-nothing-comes-back-doors.png)
+![Three seams, three expiries, three aborts](2026-09-14-docs-when-nothing-comes-back-doors.webp)
 
 Every sentence in the last column was written by the runtime as the page was
 built, about a promise that is **still unresolved**: a model client that never
@@ -65,7 +65,7 @@ exactly the connections it has already given up on.
 
 That one silent integration costs its own region rather than the page.
 
-![One page, four bound regions, one source that never replies](2026-09-14-docs-when-nothing-comes-back-regions.png)
+![One page, four bound regions, one source that never replies](2026-09-14-docs-when-nothing-comes-back-regions.webp)
 
 That is the shop from *Where the content comes from*, served with one of its
 three sources replaced by one that never answers. Two regions got their answers
@@ -187,7 +187,7 @@ rather than a check:
 1280 at 1280. The two produced tables are the blocks that could overflow, and
 each scrolls inside its own box.
 
-![At a true 390px](2026-09-14-docs-when-nothing-comes-back-phone.png)
+![At a true 390px](2026-09-14-docs-when-nothing-comes-back-phone.webp)
 
 The screenshots are all light, and that is a gap rather than a choice: `pnpm
 shoot` photographs an address, the theme lives in `localStorage`, and the

@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-18 · **Branch:**
 `primitives-38-the-page-points-at-itself` · **Section:** §4b
 
-![The bar and the three new bands at 1280px, under bold](2026-09-18-primitives-the-page-points-at-itself-bold-wide.png)
+![The bar and the three new bands at 1280px, under bold](2026-09-18-primitives-the-page-points-at-itself-bold-wide.webp)
 
 ## What this run chose, and why that
 
@@ -155,10 +155,10 @@ placeholder at a glance, without anything having to say so.
 
 | | |
 | --- | --- |
-| [editorial, 1280](2026-09-18-primitives-the-page-points-at-itself-editorial-wide.png) | the bar, then `hero`, `steps`, and the three new bands |
-| [bold, 1280](2026-09-18-primitives-the-page-points-at-itself-bold-wide.png) | the same, dark ground |
-| [editorial, 390](2026-09-18-primitives-the-page-points-at-itself-editorial-phone.png) | `scrollWidth 390 / innerWidth 390` |
-| [bold, 390](2026-09-18-primitives-the-page-points-at-itself-bold-phone.png) | `scrollWidth 390 / innerWidth 390` |
+| [editorial, 1280](2026-09-18-primitives-the-page-points-at-itself-editorial-wide.webp) | the bar, then `hero`, `steps`, and the three new bands |
+| [bold, 1280](2026-09-18-primitives-the-page-points-at-itself-bold-wide.webp) | the same, dark ground |
+| [editorial, 390](2026-09-18-primitives-the-page-points-at-itself-editorial-phone.webp) | `scrollWidth 390 / innerWidth 390` |
+| [bold, 390](2026-09-18-primitives-the-page-points-at-itself-bold-phone.webp) | `scrollWidth 390 / innerWidth 390` |
 
 **A screenshot cannot show a destination.** The nav bar after this change is
 pixel-identical to the nav bar before it — four menu items reading the same four
