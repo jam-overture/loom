@@ -11,6 +11,8 @@
  * inside, so a caller that imports a store already needs it.
  */
 export * from "../project/project.js"
+export * from "../project/memory.js"
+export * from "../project/store.js"
 
 export * from "./attribution.js"
 export * from "./driver.js"
