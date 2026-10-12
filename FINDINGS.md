@@ -432,9 +432,9 @@ path; all three are reached by `specs` alone today.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
 (`tools/decisions/`, `decisions/README.md`) · **Status:** open — **nothing is
-broken and no branch is blocked**; the documented resolution works and has run
-three times this week, but it runs at the end rather than at the point the
-mistake is made
+broken and no branch is blocked**; the documented resolution works and ran
+three times this week, twice within ninety minutes of each other — but it runs
+at the end rather than at the point the mistake is made
 
 `decisions/README.md` states the rule and, in the same paragraph, the reason
 this is filed:
@@ -451,15 +451,17 @@ as a perfectly clean verify.
 
 ### What it looked like this week
 
-| number | claimed by | outcome |
+| number | claimed by | how it resolved |
 | --- | --- | --- |
-| 0250 | #565, #566 | #566 still open, still holding a number it must move off |
-| 0251 | #565, #568 | #568 renumbered to 0253 at merge, nine citation sites |
-| 0254 | #575, #576 | #575 merged 11 Oct 16:11 and holds it; **#576 must move** |
-| 0256 | #576, #578 | both open; one must move |
+| 0250 | #565, #566 | unresolved — #566 is still open, still holding a number it will have to move off |
+| 0251 | #565, #568 | #568 renumbered to **0253** at merge; its run listed nine citation sites |
+| 0254 | #575, #576 | #575 merged 16:11 and kept it; #576's record renumbered to **0257** |
+| 0256 | #576, #578 | #576 kept it; #578's record renumbered to **0258** |
 
-Four in two days, and the last row is two *open* branches with no way to learn
-of each other.
+Four numbers, three renumberings, one still pending — and the bottom two rows
+both resolved on the afternoon of 11 October, inside about ninety minutes.
+Neither branch could have known: at the moment each wrote its record, the
+number it took was a clean hole on its own tree.
 
 **The resolution is not the problem; where it happens is.** Renumbering means
 editing the file, the index, every citation in `src/`, every mention in
@@ -495,6 +497,24 @@ merged, so it never reached `main` — which is a small instance of the same
 class: **a branch cannot see what happened to it while it was working.** The
 entry was already referenced in a comment on #575 as filed, so this is the one
 making that true rather than a change of mind.
+
+The table above was written while two of its rows were still predictions. Both
+resolved the same afternoon — so in the time it took to file a finding about
+renumbering at merge, renumbering at merge happened twice.
+
+**And then it happened to the correction.** The table went into #582 as
+forecasts; by the time both rows had resolved I pushed the measured version,
+and #582 had merged about ten minutes earlier, so `main` carried the forecasts
+and a comment of mine on #582 said the measured table was pushed when it was
+not. This entry is the third pull request on one finding, and the first two
+each lost a race to a merge they could not see coming.
+
+That is not a complaint about `Loom merge`, which is doing exactly what it
+should and doing it fast. It is the same shape one layer up, and it is the
+practical lesson for every lane here: **in this repository a branch may merge
+within minutes of going green, so anything a run still intends to push is
+already too late.** Push first and comment after — and when a report or a
+comment claims a push, check that it landed before claiming it.
 
 ---
 
