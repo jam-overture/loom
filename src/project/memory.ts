@@ -9,8 +9,8 @@ import type { ProjectStore, ProjectStoreError } from "./store.js"
  * The counterpart to `memoryStore`, and it carries the same warning: a `Map`
  * keeps nothing across a process, so on the serverless hosts §3 targets it
  * keeps nothing at all. What it is honestly for is the suite, a lesson, and the
- * first run of an application that has not been given a `DATABASE_URL` yet —
- * where seeing one project called *your application* beats seeing an error.
+ * first run of an project that has not been given a `DATABASE_URL` yet —
+ * where seeing one project called *your project* beats seeing an error.
  *
  * The listing sorts, and the first draft of this file did not — its comment
  * claimed insertion order "happens to be oldest first", which confuses the
@@ -57,7 +57,6 @@ export const memoryProjectStore = (seed: readonly Project[] = []): ProjectStore 
       const next = projectSchema.safeParse({
         ...found.value,
         ...(to.name === undefined ? {} : { name: to.name }),
-        ...(to.host === undefined ? {} : { host: to.host }),
       })
       if (!next.success) {
         return err({ code: "unreadable", projectId, detail: next.error.issues[0]?.message ?? "invalid" })

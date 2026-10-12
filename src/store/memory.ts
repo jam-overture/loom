@@ -1,4 +1,4 @@
-import { DEFAULT_PROJECT_ID, type StoreScope } from "../project/project.js"
+import { DEFAULT_APPLICATION_ID, type StoreScope } from "../application/application.js"
 import type { TreeId } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok } from "../result.js"
@@ -37,7 +37,7 @@ type Entry = {
 }
 
 export const memoryTreeStore = (scope: StoreScope = {}): TreeStore => {
-  const project = scope.project ?? DEFAULT_PROJECT_ID
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
   /*
    * Keyed by project and tree even though a handle only ever sees one project,
    * so that this store means the same thing the Postgres one does: a tree id

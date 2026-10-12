@@ -3,22 +3,19 @@ import type { Result } from "../result.js"
 import type { Project, ProjectId } from "./project.js"
 
 /**
- * Custody of the projects a deployment has.
+ * Custody of the projects a deployment has — the grouping, not the thing
+ * grouped.
  *
- * [0260](../../decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
- * decided what a project is and five tables carry its id, so a tree, a hold, a
- * policy revision and a journal entry each know which project they belong to.
- * Nothing stored the project itself: `Project` was a type nothing wrote, and
- * `DEFAULT_PROJECT_ID` was the only one that could be named. A portal whose
- * first screen lists the projects you have therefore had nothing to list, and
- * the maintainer's own sentence — *"the whole portal is geared toward one app
- * when I can have many"* — stayed true of the data even after it stopped being
- * true of the schema.
+ * A project holds applications and nothing else, which is what makes this the
+ * shorter of the two stores: there is no host, because a project is not
+ * deployed anywhere, and no scope type, because nothing is stored *under* a
+ * project — the five scoped tables name their application, and the application
+ * names its project.
  *
- * This is the row that makes a project nameable. It is deliberately thin, for
- * the reason `projectSchema` gives: the registry, the policy and the ingest
- * credential are each already somebody's, and this says only that the project
- * exists and what a person calls it.
+ * It has the same four methods and the same refusal to delete, for a reason
+ * that is one step removed but no weaker: deleting a project would orphan or
+ * cascade through every application in it, and each of those owns a governance
+ * record. *The project says it was closed* beats *the project is gone* here too.
  */
 
 export type ProjectStoreError =
@@ -88,9 +85,9 @@ export type ProjectStore = {
    */
   readonly list: () => Promise<Result<readonly Project[], ProjectStoreError>>
 
-  /** Change what a person calls it, and where they say it lives. */
+  /** Change what a person calls it. */
   readonly rename: (
     projectId: ProjectId,
-    to: { readonly name?: string; readonly host?: string }
+    to: { readonly name: string }
   ) => Promise<Result<Project, ProjectStoreError>>
 }

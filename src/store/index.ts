@@ -10,9 +10,12 @@
  * entry point of its own: it is the scope every one of these reads sits
  * inside, so a caller that imports a store already needs it.
  */
+export * from "../application/application.js"
+export * from "../application/memory.js"
 export * from "../project/project.js"
 export * from "../project/memory.js"
 export * from "../project/store.js"
+export * from "../application/store.js"
 
 export * from "./attribution.js"
 export * from "./driver.js"

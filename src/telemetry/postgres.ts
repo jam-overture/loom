@@ -2,7 +2,7 @@ import { and, asc, desc, eq, gt, inArray, lt, sql, type SQL } from "drizzle-orm"
 import { z } from "zod"
 
 import { treeIdSchema } from "../ids.js"
-import { DEFAULT_PROJECT_ID, type StoreScope } from "../project/project.js"
+import { DEFAULT_APPLICATION_ID, type StoreScope } from "../application/application.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
@@ -91,8 +91,8 @@ export const postgresTelemetryJournal = (
   db: LoomDatabase,
   scope: StoreScope = {}
 ): TelemetryJournal => {
-  const project = scope.project ?? DEFAULT_PROJECT_ID
-  const mine = (...rest: (SQL | undefined)[]) => and(eq(loomTelemetry.projectId, project), ...rest)
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
+  const mine = (...rest: (SQL | undefined)[]) => and(eq(loomTelemetry.applicationId, project), ...rest)
 
   return {
   record: async (batch) => {
@@ -101,7 +101,7 @@ export const postgresTelemetryJournal = (
     try {
       await db.insert(loomTelemetry).values(
         batch.map((entry) => ({
-          projectId: project,
+          applicationId: project,
           treeId: entry.treeId,
           occurredAt: entry.occurredAt,
           event: entry.event,

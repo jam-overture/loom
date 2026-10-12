@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4734,7 +4734,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4780,7 +4780,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5770,7 +5770,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6298,7 +6298,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7477,7 +7477,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8117,7 +8117,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8342,10 +8342,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 32,
+      "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8353,6 +8353,111 @@
         "collisions": []
       },
       "groups": [
+        {
+          "module": "application/application",
+          "title": "Application",
+          "summary": "The thing a customer registers with Loom, and the unit everything is stored and governed under.",
+          "symbols": [
+            {
+              "name": "applicationIdSchema",
+              "kind": "schema",
+              "signature": "const applicationIdSchema: z.ZodBranded<…>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ApplicationId",
+              "kind": "type",
+              "signature": "type ApplicationId = z.infer<typeof applicationIdSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DEFAULT_APPLICATION_ID",
+              "kind": "value",
+              "signature": "const DEFAULT_APPLICATION_ID: ApplicationId",
+              "truncated": false,
+              "summary": "The application every row written before applications existed belongs to."
+            },
+            {
+              "name": "applicationSchema",
+              "kind": "schema",
+              "signature": "const applicationSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": "What a deployment knows about one of its applications."
+            },
+            {
+              "name": "Application",
+              "kind": "type",
+              "signature": "type Application = z.infer<typeof applicationSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "StoreScope",
+              "kind": "type",
+              "signature": "type StoreScope = {\n    readonly application?: ApplicationId;\n};",
+              "truncated": false,
+              "summary": "The application a store handle speaks for."
+            }
+          ]
+        },
+        {
+          "module": "application/memory",
+          "title": "Memory",
+          "summary": "A `ApplicationStore` in a `Map`, for a test and for a deployment with no database.",
+          "symbols": [
+            {
+              "name": "memoryApplicationStore",
+              "kind": "function",
+              "signature": "const memoryApplicationStore: (seed?: readonly Application[]) => ApplicationStore",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "application/store",
+          "title": "Store",
+          "summary": "Custody of the applications a deployment has.",
+          "symbols": [
+            {
+              "name": "ApplicationStoreError",
+              "kind": "type",
+              "signature": "type ApplicationStoreError = \n/** No application under this id. */\n{\n    readonly code: \"not-found\";\n    readonly applicationId: ApplicationId;\n} | {\n    readonly code: \"already-exists\";\n    readonly applicationId: ApplicationId;\n}\n/** A row the current code cannot parse, which is a row an older one wrote. */\n | {\n    readonly code: \"unreadable\";\n    readonly applicationId: ApplicationId;\n    readonly detail: string;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ApplicationStoreErrorCode",
+              "kind": "type",
+              "signature": "type ApplicationStoreErrorCode = ApplicationStoreError[\"code\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "applicationStoreErrorCodes",
+              "kind": "value",
+              "signature": "const applicationStoreErrorCodes: readonly ApplicationStoreErrorCode[]",
+              "truncated": false,
+              "summary": "The four codes, in the order a deployment meets them, for the same reason `storeErrorCodes` exists: anything that walks the taxonomy rather than reacting to one member otherwise keeps a copy that is silently wrong the day a fifth lands."
+            },
+            {
+              "name": "describeApplicationStoreError",
+              "kind": "function",
+              "signature": "const describeApplicationStoreError: (error: ApplicationStoreError) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ApplicationStore",
+              "kind": "type",
+              "signature": "type ApplicationStore = {\n    /**\n     * Record an application. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (application: Application) => Promise<Result<Application, ApplicationStoreError>>;\n    /** One application. */\n    readonly get: (applicationId: ApplicationId) => Promise<Result<Application, ApplicationStoreError>>;\n    /**\n     * Every application, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose application count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way applications are not.\n     */\n    readonly list: () => Promise<Result<readonly Application[], ApplicationStoreError>>;\n    /** Change what a person calls it, and where they say it lives. */\n    readonly rename: (applicationId: ApplicationId, to: {\n        readonly name?: string;\n        readonly host?: string;\n    }) => Promise<Result<Application, ApplicationStoreError>>;\n};",
+              "truncated": false,
+              "summary": "Four methods, and **no delete**."
+            }
+          ]
+        },
         {
           "module": "project/memory",
           "title": "Memory",
@@ -8370,7 +8475,7 @@
         {
           "module": "project/project",
           "title": "Project",
-          "summary": "The thing a deployment holds many of, and the thing an application registers as.",
+          "summary": "The grouping a person puts their applications into.",
           "symbols": [
             {
               "name": "projectIdSchema",
@@ -8391,14 +8496,14 @@
               "kind": "value",
               "signature": "const DEFAULT_PROJECT_ID: ProjectId",
               "truncated": false,
-              "summary": "The project every row written before projects existed belongs to."
+              "summary": "The project every application written before projects existed belongs to."
             },
             {
               "name": "projectSchema",
               "kind": "schema",
               "signature": "const projectSchema: z.ZodObject<…>",
               "truncated": false,
-              "summary": "What a deployment knows about one of its projects."
+              "summary": "What a deployment knows about one of its projects, which is as little as a grouping can be and still be one."
             },
             {
               "name": "Project",
@@ -8406,20 +8511,13 @@
               "signature": "type Project = z.infer<typeof projectSchema>;",
               "truncated": false,
               "summary": ""
-            },
-            {
-              "name": "StoreScope",
-              "kind": "type",
-              "signature": "type StoreScope = {\n    readonly project?: ProjectId;\n};",
-              "truncated": false,
-              "summary": "The project a store handle speaks for."
             }
           ]
         },
         {
           "module": "project/store",
           "title": "Store",
-          "summary": "Custody of the projects a deployment has.",
+          "summary": "Custody of the projects a deployment has — the grouping, not the thing grouped.",
           "symbols": [
             {
               "name": "ProjectStoreError",
@@ -8452,7 +8550,7 @@
             {
               "name": "ProjectStore",
               "kind": "type",
-              "signature": "type ProjectStore = {\n    /**\n     * Record a project. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (project: Project) => Promise<Result<Project, ProjectStoreError>>;\n    /** One project. */\n    readonly get: (projectId: ProjectId) => Promise<Result<Project, ProjectStoreError>>;\n    /**\n     * Every project, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose project count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way projects are not.\n     */\n    readonly list: () => Promise<Result<readonly Project[], ProjectStoreError>>;\n    /** Change what a person calls it, and where they say it lives. */\n    readonly rename: (projectId: ProjectId, to: {\n        readonly name?: string;\n        readonly host?: string;\n    }) => Promise<Result<Project, ProjectStoreError>>;\n};",
+              "signature": "type ProjectStore = {\n    /**\n     * Record a project. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (project: Project) => Promise<Result<Project, ProjectStoreError>>;\n    /** One project. */\n    readonly get: (projectId: ProjectId) => Promise<Result<Project, ProjectStoreError>>;\n    /**\n     * Every project, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose project count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way projects are not.\n     */\n    readonly list: () => Promise<Result<readonly Project[], ProjectStoreError>>;\n    /** Change what a person calls it. */\n    readonly rename: (projectId: ProjectId, to: {\n        readonly name: string;\n    }) => Promise<Result<Project, ProjectStoreError>>;\n};",
               "truncated": false,
               "summary": "Four methods, and **no delete**."
             }
@@ -8972,7 +9070,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9323,10 +9421,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 37,
+      "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9375,11 +9473,25 @@
               "summary": "The policy log's schema, as statements a host can run."
             },
             {
+              "name": "APPLICATION_STORE_DDL",
+              "kind": "value",
+              "signature": "const APPLICATION_STORE_DDL: readonly string[]",
+              "truncated": false,
+              "summary": "The projects table."
+            },
+            {
               "name": "PROJECT_STORE_DDL",
               "kind": "value",
               "signature": "const PROJECT_STORE_DDL: readonly string[]",
               "truncated": false,
-              "summary": "The projects table."
+              "summary": "The projects the applications are grouped under."
+            },
+            {
+              "name": "APPLICATION_ID_MIGRATION",
+              "kind": "value",
+              "signature": "const APPLICATION_ID_MIGRATION: readonly string[]",
+              "truncated": false,
+              "summary": "Moving the ids themselves, which the rename above does not."
             },
             {
               "name": "ensureTreeStoreSchema",
@@ -9403,11 +9515,25 @@
               "summary": "Creates the policy log's table if it is absent. Idempotent on the same terms, and separate for the same reason: a deployment that wants a record of who changed its acceptance policy gets it by adding this call on purpose."
             },
             {
+              "name": "ensureApplicationStoreSchema",
+              "kind": "function",
+              "signature": "const ensureApplicationStoreSchema: (db: LoomDatabase) => Promise<void>",
+              "truncated": false,
+              "summary": "Creates the projects table if it is absent. Idempotent, and separate for the same reason the other three are: a deployment that wants more than one project gets the table by adding this call on purpose."
+            },
+            {
               "name": "ensureProjectStoreSchema",
               "kind": "function",
               "signature": "const ensureProjectStoreSchema: (db: LoomDatabase) => Promise<void>",
               "truncated": false,
-              "summary": "Creates the projects table if it is absent. Idempotent, and separate for the same reason the other three are: a deployment that wants more than one project gets the table by adding this call on purpose."
+              "summary": "Creates the projects table if it is absent. Idempotent on the same terms."
+            },
+            {
+              "name": "migrateApplicationIds",
+              "kind": "function",
+              "signature": "const migrateApplicationIds: (db: LoomDatabase) => Promise<void>",
+              "truncated": false,
+              "summary": "Carries `prj_default` to `app_default` across every table that names an application. Safe to run on a database that has already been carried, and on one that was never on the old value."
             }
           ]
         },
@@ -9422,6 +9548,20 @@
               "signature": "const postgresTreeStore: (db: LoomDatabase, scope?: StoreScope) => TreeStore",
               "truncated": false,
               "summary": "Every query below is filtered by the project this handle speaks for, and every write sets it. There is no path through this module that reads or writes a row belonging to another project, which is the one property a governance surface cannot get wrong: *a hold listing that spanned two apps would put one app's changes in another's queue.*"
+            }
+          ]
+        },
+        {
+          "module": "store/postgres-applications",
+          "title": "Postgres applications",
+          "summary": "The projects a deployment has, backed by Postgres.",
+          "symbols": [
+            {
+              "name": "postgresApplicationStore",
+              "kind": "function",
+              "signature": "const postgresApplicationStore: (db: LoomDatabase) => ApplicationStore",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -9475,37 +9615,44 @@
             {
               "name": "loomTrees",
               "kind": "value",
-              "signature": "const loomTrees: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_trees\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_trees\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_trees\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_trees\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        document: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"document\";\n            tableName: \"loom_trees\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        updatedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"updated_at\";\n            tableName: \"loom_trees\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomTrees: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_trees\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_trees\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_trees\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_trees\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        document: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"document\";\n            tableName: \"loom_trees\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        updatedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"updated_at\";\n            tableName: \"loom_trees\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The snapshot. `document` is the whole `LoomTree`, stored as JSON rather than decomposed into node rows — the tree is read and written whole, and a schema that shredded it would have to be migrated every time §1 changes the AST."
             },
             {
               "name": "loomRevisions",
               "kind": "value",
-              "signature": "const loomRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_revisions\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        delta: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"delta\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        provenance: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"provenance\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        appliedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"applied_at\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        answeredBy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"answered_by\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_revisions\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        delta: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"delta\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        provenance: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"provenance\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        appliedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"applied_at\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        answeredBy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"answered_by\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The log. The composite primary key is load-bearing rather than incidental: it makes the *database* enforce the revision sequence, so two writers racing at the same base revision cannot both commit even if both passed the base-revision check before either finished. The in-memory store gets that property from being single-threaded; here it has to come from a constraint."
             },
             {
               "name": "loomHolds",
               "kind": "value",
-              "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The custody of what the Gate held back."
             },
             {
               "name": "loomPolicyRevisions",
               "kind": "value",
-              "signature": "const loomPolicyRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_policy_revisions\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policyId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        fingerprint: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"fingerprint\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        note: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"note\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomPolicyRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_policy_revisions\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policyId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        fingerprint: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"fingerprint\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        note: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"note\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The policy's own log."
             },
             {
+              "name": "loomApplications",
+              "kind": "value",
+              "signature": "const loomApplications: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_applications\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        host: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"host\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "truncated": false,
+              "summary": "The applications a deployment governs."
+            },
+            {
               "name": "loomProjects",
               "kind": "value",
-              "signature": "const loomProjects: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_projects\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        host: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"host\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomProjects: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_projects\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
-              "summary": "The projects a deployment has."
+              "summary": "The projects a deployment has, which group the applications above."
             }
           ]
         }
@@ -9529,7 +9676,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12000,7 +12147,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12143,7 +12290,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12210,7 +12357,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12804,10 +12951,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 40,
+      "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12858,7 +13005,7 @@
             {
               "name": "loomTelemetry",
               "kind": "value",
-              "signature": "const loomTelemetry: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_telemetry\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        seq: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"seq\";\n            tableName: \"loom_telemetry\";\n            dataType: \"number\";\n            columnType: \"PgBigSerial53\";\n            data: number;\n            driverParam: number;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        occurredAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"occurred_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        event: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"event\";\n            tableName: \"loom_telemetry\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomTelemetry: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_telemetry\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        seq: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"seq\";\n            tableName: \"loom_telemetry\";\n            dataType: \"number\";\n            columnType: \"PgBigSerial53\";\n            data: number;\n            driverParam: number;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        occurredAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"occurred_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        event: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"event\";\n            tableName: \"loom_telemetry\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "One table, because a journal is one thing: an append-only list of what the runtime narrated."
             }
@@ -12878,10 +13025,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 91,
+      "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13360,7 +13507,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1528,
+        "packageNames": 1545,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

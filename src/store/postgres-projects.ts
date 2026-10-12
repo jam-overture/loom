@@ -25,16 +25,15 @@ import { loomProjects } from "./schema.js"
 /**
  * A row on the way out, checked rather than cast.
  *
- * `host` is nullable in the column and optional in the type, which is the one
- * place the two shapes genuinely differ: SQL has no way to say *absent*, so the
- * null is dropped here rather than handed to a schema that would refuse it.
+ * Three columns and no nullable one, which is the whole difference from the
+ * application store next door: a project has an identity and a name, and
+ * nothing that can be absent.
  */
 const toProject = (row: typeof loomProjects.$inferSelect): Result<Project, ProjectStoreError> => {
   const parsed = projectSchema.safeParse({
     projectId: row.projectId,
     name: row.name,
     createdAt: row.createdAt,
-    ...(row.host === null ? {} : { host: row.host }),
   })
 
   return parsed.success
@@ -53,7 +52,6 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
         projectId: project.projectId,
         name: project.name,
         createdAt: project.createdAt,
-        host: project.host ?? null,
       })
       return ok(project)
     } catch (cause) {
@@ -139,7 +137,6 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
       const next = projectSchema.safeParse({
         ...current.value,
         ...(to.name === undefined ? {} : { name: to.name }),
-        ...(to.host === undefined ? {} : { host: to.host }),
       })
       if (!next.success) {
         return err({
@@ -151,7 +148,7 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
 
       await db
         .update(loomProjects)
-        .set({ name: next.data.name, host: next.data.host ?? null })
+        .set({ name: next.data.name })
         .where(eq(loomProjects.projectId, projectId))
 
       return ok(next.data)

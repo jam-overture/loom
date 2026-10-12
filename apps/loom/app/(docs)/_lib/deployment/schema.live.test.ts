@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest"
 import type { LoomDatabase } from "@jam-overture/loom/postgres"
 import {
   ensureHoldStoreSchema,
+  ensureApplicationStoreSchema,
   ensureProjectStoreSchema,
   ensureTreeStoreSchema,
 } from "@jam-overture/loom/postgres"
@@ -41,6 +42,12 @@ const migrated = async (): Promise<LoomDatabase> => {
 
   await ensureTreeStoreSchema(db)
   await ensureHoldStoreSchema(db)
+  /**
+   * Applications before projects, as `db:push` runs them and for the reason it
+   * gives: the first renames the table that briefly held applications, and the
+   * second creates a fresh one under the freed name.
+   */
+  await ensureApplicationStoreSchema(db)
   await ensureProjectStoreSchema(db)
   await ensureTelemetrySchema(db)
 

@@ -1,6 +1,6 @@
 import { and, asc, eq, sql, type SQL } from "drizzle-orm"
 
-import { DEFAULT_PROJECT_ID, type StoreScope } from "../project/project.js"
+import { DEFAULT_APPLICATION_ID, type StoreScope } from "../application/application.js"
 import { err, ok, type Result } from "../result.js"
 import {
   clampHoldLimit,
@@ -125,15 +125,15 @@ const pageEnd = (rows: readonly (typeof loomHolds.$inferSelect)[]): HoldPosition
  * thing a review queue cannot do. `waiting` is that listing.
  */
 export const postgresHoldStore = (db: LoomDatabase, scope: StoreScope = {}): HoldStore => {
-  const project = scope.project ?? DEFAULT_PROJECT_ID
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
   /** Every read starts here, so a query cannot forget the project by omission. */
-  const mine = (...rest: (SQL | undefined)[]) => and(eq(loomHolds.projectId, project), ...rest)
+  const mine = (...rest: (SQL | undefined)[]) => and(eq(loomHolds.applicationId, project), ...rest)
 
   return {
   hold: async (held) => {
     try {
       await db.insert(loomHolds).values({
-        projectId: project,
+        applicationId: project,
         proposalId: held.proposalId,
         treeId: held.treeId,
         baseRevision: held.baseRevision,

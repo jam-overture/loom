@@ -86,6 +86,7 @@ describe("what the deployment page tells a host about their database", () => {
     expect(storageSeams.map((seam) => seam.tables.map((table) => table.name))).toEqual([
       ["loom_trees", "loom_revisions"],
       ["loom_holds"],
+      ["loom_applications"],
       ["loom_projects"],
       ["loom_telemetry"],
     ])

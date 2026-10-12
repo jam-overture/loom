@@ -25,10 +25,10 @@ export const loomTrees = pgTable(
      * a tree id only has to be unique within its own project.
      *
      * Defaulted so a database written before projects existed keeps answering.
-     * `DEFAULT_PROJECT_ID` is the value, spelled out here because DDL cannot
+     * `DEFAULT_APPLICATION_ID` is the value, spelled out here because DDL cannot
      * import it — `project.test.ts` holds the two together.
      */
-    projectId: text("project_id").notNull().default("prj_default"),
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     document: jsonb("document").notNull(),
@@ -36,7 +36,7 @@ export const loomTrees = pgTable(
       .notNull()
       .default(sql`now()`),
   },
-  (table) => [primaryKey({ columns: [table.projectId, table.treeId] })]
+  (table) => [primaryKey({ columns: [table.applicationId, table.treeId] })]
 )
 
 /**
@@ -52,8 +52,8 @@ export const loomTrees = pgTable(
 export const loomRevisions = pgTable(
   "loom_revisions",
   {
-    /** See `loomTrees.projectId`. */
-    projectId: text("project_id").notNull().default("prj_default"),
+    /** See `loomTrees.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     proposalId: text("proposal_id").notNull(),
@@ -68,7 +68,7 @@ export const loomRevisions = pgTable(
      */
     answeredBy: text("answered_by"),
   },
-  (table) => [primaryKey({ columns: [table.projectId, table.treeId, table.revision] })]
+  (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision] })]
 )
 
 /**
@@ -105,7 +105,7 @@ export const loomHolds = pgTable(
      * against; within a project that is unchanged, and across projects two
      * proposals that happen to share an id were never the same proposal.
      */
-    projectId: text("project_id").notNull().default("prj_default"),
+    applicationId: text("application_id").notNull().default("app_default"),
     proposalId: text("proposal_id").notNull(),
     treeId: text("tree_id").notNull(),
     baseRevision: integer("base_revision").notNull(),
@@ -114,7 +114,7 @@ export const loomHolds = pgTable(
     disposition: jsonb("disposition").notNull(),
     heldAt: text("held_at").notNull(),
   },
-  (table) => [primaryKey({ columns: [table.projectId, table.proposalId] })]
+  (table) => [primaryKey({ columns: [table.applicationId, table.proposalId] })]
 )
 
 /**
@@ -149,8 +149,8 @@ export const loomHolds = pgTable(
 export const loomPolicyRevisions = pgTable(
   "loom_policy_revisions",
   {
-    /** The project whose policy this is (0260). See `loomTrees.projectId`. */
-    projectId: text("project_id").notNull().default("prj_default"),
+    /** The project whose policy this is (0260). See `loomTrees.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     policyId: text("policy_id").notNull(),
     revision: integer("revision").notNull(),
     fingerprint: text("fingerprint").notNull(),
@@ -164,7 +164,7 @@ export const loomPolicyRevisions = pgTable(
     note: text("note"),
   },
   (table) => [
-    primaryKey({ columns: [table.projectId, table.policyId, table.revision] }),
+    primaryKey({ columns: [table.applicationId, table.policyId, table.revision] }),
     /**
      * The join `judgedUnder` is. Without it, resolving the fingerprint on a
      * disposition is a scan of every policy revision the deployment has ever
@@ -172,7 +172,7 @@ export const loomPolicyRevisions = pgTable(
      * it once per record on the page.
      */
     index("loom_policy_revisions_fingerprint_idx").on(
-      table.projectId,
+      table.applicationId,
       table.policyId,
       table.fingerprint
     ),
@@ -180,23 +180,45 @@ export const loomPolicyRevisions = pgTable(
 )
 
 /**
- * The projects a deployment has.
+ * The applications a deployment governs.
  *
- * The one table here whose rows are not scoped *by* a project, because they are
- * the projects. Five tables carry `project_id` after
- * [0260](../../decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
- * and none of them could say what that id named: the column was a foreign key
- * to nothing. This is what it points at.
+ * The unit everything else is stored under: five tables carry `application_id`
+ * and none of them could say what that id named until this existed — the column
+ * was a foreign key to nothing.
  *
- * `created_at` is text rather than `timestamptz` to match `projectSchema`,
+ * It carried the name *project* until 12 October, when the maintainer settled
+ * the hierarchy as **account > project > application** and the thing with the
+ * pages turned out to be the third of those rather than the second.
+ *
+ * `created_at` is text rather than `timestamptz` to match `applicationSchema`,
  * which takes an ISO string — the same choice `loom_revisions.applied_at`
  * makes, and for the same reason: what the row holds is what the type holds,
  * so nothing has to agree about how a driver renders a timestamp.
+ */
+export const loomApplications = pgTable("loom_applications", {
+  applicationId: text("application_id").primaryKey(),
+  /**
+   * The project it is grouped under. Not null and not defaulted in the type,
+   * but defaulted in the DDL so a database written before projects existed
+   * keeps answering — the same device every scoped column here uses.
+   */
+  projectId: text("project_id").notNull().default("prj_default"),
+  name: text("name").notNull(),
+  createdAt: text("created_at").notNull(),
+  /** Absent until the application says where it lives. */
+  host: text("host"),
+})
+
+/**
+ * The projects a deployment has, which group the applications above.
+ *
+ * Three columns, because the grouping is organisational and owns nothing yet.
+ * No row anywhere is scoped by a project: the five scoped tables name their
+ * application and the application names its project, so there is one place a
+ * thing's project is recorded and nothing to disagree with.
  */
 export const loomProjects = pgTable("loom_projects", {
   projectId: text("project_id").primaryKey(),
   name: text("name").notNull(),
   createdAt: text("created_at").notNull(),
-  /** Absent until the project says where it lives. */
-  host: text("host"),
 })

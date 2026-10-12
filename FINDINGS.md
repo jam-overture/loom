@@ -52283,3 +52283,46 @@ the rule exists instead of.
 
 What I would do differently: a rule that invalidates in-flight work should have
 been merged with a note to the open branches, and I merged it with neither.
+
+---
+## 2026-10-12 — the prototype portal screens say *project* where they mean *application*
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`app/(portal)/portal/preview/`) · **Status:** open — **deliberately left**,
+and filed so it is left on purpose rather than forgotten.
+
+[0269](decisions/0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md)
+settled the hierarchy as **account > project > application** and renamed the
+word everywhere it is a stored thing. The prototype screens under
+`portal/preview/` are the one place it was not renamed: the route is
+`[project]`, the fixtures are `PREVIEW_PROJECTS`, and the credentials screen
+prints a `projectId: "prj_…"` that no longer exists in that shape.
+
+They are invented data on screens whose whole purpose is to be replaced by the
+promotion, and renaming them now means renaming them twice. **If the promotion
+slips more than a few days, rename them** — a prototype that teaches the wrong
+word is worse than one that is merely unfinished, and the maintainer reads these
+screens.
+
+---
+## 2026-10-12 — an account is an environment variable, and it is now a named level
+
+**Filed by:** `Loom portal` · **Owned by:** whoever takes hosting
+(`app/(portal)/_lib/auth/`) · **Status:** open.
+
+The hierarchy is **account > project > application**. The bottom two are rows
+([0269](decisions/0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md)).
+The top is `parseRoster(process.env…)` — a list of `actor:key` pairs, one per
+deployment, with no row anywhere and no way for two accounts to exist in one
+deployment at all.
+
+That is correct for a self-hosted control plane and cannot survive a hosted one
+([0262](decisions/0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md)):
+the moment two customers share a deployment, every store needs an account above
+the application it already filters by, and `requireActor` has to return
+something a row can point at.
+
+**Filed rather than built because it is the hosting decision's work, not this
+one's.** What this change buys is that the level is named, so the next run does
+not quietly build something else in its place — which is what happened to
+*application*, and is why this record exists.

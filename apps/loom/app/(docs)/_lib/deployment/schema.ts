@@ -1,4 +1,9 @@
-import { HOLD_STORE_DDL, PROJECT_STORE_DDL, TREE_STORE_DDL } from "@jam-overture/loom/postgres"
+import {
+  APPLICATION_STORE_DDL,
+  HOLD_STORE_DDL,
+  PROJECT_STORE_DDL,
+  TREE_STORE_DDL,
+} from "@jam-overture/loom/postgres"
 import { TELEMETRY_DDL } from "@jam-overture/loom/telemetry/postgres"
 
 /**
@@ -69,8 +74,8 @@ const CREATE_TABLE = /^CREATE TABLE IF NOT EXISTS (\w+) \(([\s\S]*)\)$/
 /**
  * An added column, with the constraint and default it may carry.
  *
- * The trailing group was added on 12 October for `project_id`, which arrives
- * `NOT NULL DEFAULT 'prj_default'` — a column added to a populated table has
+ * The trailing group was added on 12 October for `application_id`, which arrives
+ * `NOT NULL DEFAULT 'app_default'` — a column added to a populated table has
  * to say what the rows already there should hold, so a migration that adds one
  * after the fact will usually carry both.
  */
@@ -99,6 +104,27 @@ const DROP_CONSTRAINT = /^ALTER TABLE (\w+) DROP CONSTRAINT IF EXISTS (\w+)$/
 const DROP_INDEX = /^DROP INDEX IF EXISTS (\w+)$/
 const ADD_PRIMARY_KEY = /^ALTER TABLE (\w+) ADD PRIMARY KEY \(([^)]*)\)$/
 const ENABLE_ROW_SECURITY = /^ALTER TABLE (\w+) ENABLE ROW LEVEL SECURITY$/
+
+/**
+ * A guarded block, which this page reads as *a step that leaves no trace in the
+ * shape*.
+ *
+ * Postgres has no `RENAME … IF EXISTS`, so a rename that must be safe to run
+ * twice asks the catalogue first and does its work inside `DO $$ … $$`. The
+ * block that carried `loom_projects` to `loom_applications`
+ * ([0269](../../../../../decisions/0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md))
+ * is the first of them here.
+ *
+ * It is skipped rather than parsed, and that is the honest reading: the table it
+ * produces is declared by the `CREATE TABLE IF NOT EXISTS` after it, which this
+ * page already reads, so a database that ran the block and one that never
+ * needed it end up at the same shape. **What the page describes is where a host
+ * arrives, not the route they took.** A block that did something the following
+ * statements do not also declare would be invisible here, which is why this is a
+ * named shape rather than a catch-all: anything that is not a guarded block
+ * still throws.
+ */
+const GUARDED_BLOCK = /^DO \$\$[\s\S]*\$\$$/
 /**
  * An index on columns, on an expression, and partial or not.
  *
@@ -323,6 +349,8 @@ export const tablesIn = (ddl: readonly string[]): readonly SchemaTable[] => {
       continue
     }
 
+    if (GUARDED_BLOCK.test(statement)) continue
+
     throw new Error(`loom: this page does not know what "${statement}" does`)
   }
 
@@ -386,11 +414,24 @@ export const storageSeams: readonly StorageSeam[] = [
     tables: tablesIn(HOLD_STORE_DDL),
   },
   {
-    id: "projects",
+    id: "applications",
     title: "The applications you have registered",
     keeps: "One row per application Loom governs for you, and what you call it.",
     without:
       "Everything you store belongs to one unnamed application, and nothing can tell you which pages are whose.",
+    specifier: "@jam-overture/loom/postgres",
+    ensure: "ensureApplicationStoreSchema",
+    postgres: "postgresApplicationStore",
+    memory: "memoryApplicationStore",
+    memorySpecifier: "@jam-overture/loom/store",
+    tables: tablesIn(APPLICATION_STORE_DDL),
+  },
+  {
+    id: "projects",
+    title: "The projects you group them under",
+    keeps: "One row per project, and what you call it. Applications name the project they are in.",
+    without:
+      "Every application sits in the same unnamed group, which is fine until you have enough of them to want folders.",
     specifier: "@jam-overture/loom/postgres",
     ensure: "ensureProjectStoreSchema",
     postgres: "postgresProjectStore",
