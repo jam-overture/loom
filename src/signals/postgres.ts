@@ -5,6 +5,11 @@ import { z } from "zod"
 import { nodeIdSchema, treeIdSchema } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
+import {
+  DEFAULT_APPLICATION_ID,
+  type ApplicationId,
+  type StoreScope,
+} from "../application/application.js"
 import { err, ok } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
 
@@ -65,6 +70,17 @@ export * from "./migrate.js"
  * matters more here than most: the buffer's `signals` column holds a document a
  * browser composed, and a batch written by an older parser must not reach a
  * rollup unvalidated.
+ */
+
+/**
+ * Each of the three factories below is a public function that resolves the
+ * application and a private one that has it.
+ *
+ * The split is what keeps `application` a plain `ApplicationId` everywhere it
+ * is read rather than an optional unwrapped at each use, so a query cannot
+ * filter on `undefined` by forgetting the default. It also leaves the bodies
+ * where they were: scoping these tables changed the lines that name a column
+ * and nothing else, which is what a reader of the diff should be able to see.
  */
 
 const failure = (cause: unknown, detail: string): ReaderSignalStoreError => ({
@@ -151,13 +167,28 @@ const storedPageViewsSchema = z.object({
   updatedAt: instantSchema,
 })
 
-export const postgresReaderSignalJournal = (db: LoomDatabase): ReaderSignalJournal => ({
+/**
+ * Every read is filtered by the application this handle speaks for (0269), and
+ * every write sets it.
+ *
+ * A reader is filed against the application whose page they read. Folding two
+ * would add two customers' counts together, and the addition is not
+ * recoverable from the rows afterwards — which is why this landed before
+ * anything could construct a second application rather than after.
+ */
+export const postgresReaderSignalJournal = (
+  db: LoomDatabase,
+  scope: StoreScope = {}
+): ReaderSignalJournal => journalIn(db, scope.application ?? DEFAULT_APPLICATION_ID)
+
+const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJournal => ({
   receive: async (batches) => {
     if (batches.length === 0) return ok(undefined)
 
     try {
       await db.insert(loomReaderSignals).values(
         batches.map((batch) => ({
+          applicationId: application,
           treeId: batch.treeId,
           revision: batch.revision,
           sentAt: batch.sentAt,
@@ -192,6 +223,7 @@ export const postgresReaderSignalJournal = (db: LoomDatabase): ReaderSignalJourn
         .from(loomReaderSignals)
         .where(
           and(
+            eq(loomReaderSignals.applicationId, application),
             request?.treeId === undefined ? undefined : eq(loomReaderSignals.treeId, request.treeId),
             from === undefined
               ? undefined
@@ -237,7 +269,12 @@ export const postgresReaderSignalJournal = (db: LoomDatabase): ReaderSignalJourn
     try {
       const removed = await db
         .delete(loomReaderSignals)
-        .where(lt(loomReaderSignals.seq, before))
+        /**
+         * Scoped like every read, so retention run for one application cannot
+         * drop another's buffer. `seq` is database-wide, so an unfiltered
+         * `DELETE` here would have taken every application's rows below it.
+         */
+        .where(and(eq(loomReaderSignals.applicationId, application), lt(loomReaderSignals.seq, before)))
         .returning({ seq: loomReaderSignals.seq })
 
       return ok<ForgetOutcome>({ removed: removed.length })
@@ -247,17 +284,37 @@ export const postgresReaderSignalJournal = (db: LoomDatabase): ReaderSignalJourn
   },
 })
 
-/** Every counter table is filtered the same way, on the two columns they all share. */
+/**
+ * Every counter table is filtered the same way, on the three columns they all
+ * share.
+ *
+ * The application is first and is not optional, unlike the two a request may
+ * narrow by: a reading always happens inside one application, and taking it
+ * here rather than at each call site is what stops a counter query being
+ * written without it.
+ */
 const within = (
-  columns: { readonly treeId: PgColumn; readonly revision: PgColumn },
+  columns: {
+    readonly applicationId: PgColumn
+    readonly treeId: PgColumn
+    readonly revision: PgColumn
+  },
+  application: ApplicationId,
   request: TallyReadRequest | undefined
 ) =>
   and(
+    eq(columns.applicationId, application),
     request?.treeId === undefined ? undefined : eq(columns.treeId, request.treeId),
     request?.revision === undefined ? undefined : eq(columns.revision, request.revision)
   )
 
-export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => ({
+/** Scoped on the same terms as the journal — see its note. */
+export const postgresReaderTallyStore = (
+  db: LoomDatabase,
+  scope: StoreScope = {}
+): ReaderTallyStore => tallyStoreIn(db, scope.application ?? DEFAULT_APPLICATION_ID)
+
+const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTallyStore => ({
   /**
    * Two upserts in one transaction.
    *
@@ -279,6 +336,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
             .insert(loomReaderTallies)
             .values(
               foldedBy(tallies, tallyKey, addTallies).map((tally) => ({
+                applicationId: application,
                 treeId: tally.treeId,
                 revision: tally.revision,
                 nodeId: tally.nodeId,
@@ -295,7 +353,12 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
               }))
             )
             .onConflictDoUpdate({
-              target: [loomReaderTallies.treeId, loomReaderTallies.revision, loomReaderTallies.nodeId],
+              target: [
+                loomReaderTallies.applicationId,
+                loomReaderTallies.treeId,
+                loomReaderTallies.revision,
+                loomReaderTallies.nodeId,
+              ],
               set: {
                 type: sql`excluded.type`,
                 views: sql`${loomReaderTallies.views} + excluded.views`,
@@ -322,6 +385,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
             .insert(loomReaderPageViews)
             .values(
               foldedBy(appearances, pageViewKey, addPageViewCounts).map((count) => ({
+                applicationId: application,
                 treeId: count.treeId,
                 revision: count.revision,
                 appearances: count.views,
@@ -329,7 +393,11 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
               }))
             )
             .onConflictDoUpdate({
-              target: [loomReaderPageViews.treeId, loomReaderPageViews.revision],
+              target: [
+            loomReaderPageViews.applicationId,
+            loomReaderPageViews.treeId,
+            loomReaderPageViews.revision,
+          ],
               set: {
                 appearances: sql`${loomReaderPageViews.appearances} + excluded.appearances`,
                 updatedAt,
@@ -342,6 +410,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
             .insert(loomReaderFunnels)
             .values(
               foldedBy(funnels, funnelKey, addFunnelAnswers).map((answer) => ({
+                applicationId: application,
                 treeId: answer.treeId,
                 revision: answer.revision,
                 fromNodeId: answer.pair.from.nodeId,
@@ -355,6 +424,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
             )
             .onConflictDoUpdate({
               target: [
+                loomReaderFunnels.applicationId,
                 loomReaderFunnels.treeId,
                 loomReaderFunnels.revision,
                 loomReaderFunnels.fromNodeId,
@@ -396,6 +466,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
         .insert(loomReaderPageViews)
         .values(
           foldedBy(openings, pageViewKey, addPageViewCounts).map((count) => ({
+            applicationId: application,
             treeId: count.treeId,
             revision: count.revision,
             opened: count.views,
@@ -403,7 +474,11 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
           }))
         )
         .onConflictDoUpdate({
-          target: [loomReaderPageViews.treeId, loomReaderPageViews.revision],
+          target: [
+                loomReaderPageViews.applicationId,
+                loomReaderPageViews.treeId,
+                loomReaderPageViews.revision,
+              ],
           set: {
             opened: sql`${loomReaderPageViews.opened} + excluded.opened`,
             updatedAt,
@@ -418,7 +493,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
 
   tallies: async (request?: TallyReadRequest) => {
     try {
-      const rows = await db.select().from(loomReaderTallies).where(within(loomReaderTallies, request))
+      const rows = await db.select().from(loomReaderTallies).where(within(loomReaderTallies, application, request))
       const parsed = z.array(storedTallySchema).safeParse(rows)
 
       return parsed.success
@@ -434,7 +509,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
 
   funnels: async (request?: TallyReadRequest) => {
     try {
-      const rows = await db.select().from(loomReaderFunnels).where(within(loomReaderFunnels, request))
+      const rows = await db.select().from(loomReaderFunnels).where(within(loomReaderFunnels, application, request))
       const parsed = z.array(storedFunnelSchema).safeParse(rows)
 
       return parsed.success
@@ -453,7 +528,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
       const rows = await db
         .select()
         .from(loomReaderPageViews)
-        .where(within(loomReaderPageViews, request))
+        .where(within(loomReaderPageViews, application, request))
       const parsed = z.array(storedPageViewsSchema).safeParse(rows)
 
       return parsed.success
@@ -483,7 +558,13 @@ const storedRegionSchema = z.object({
   updatedAt: instantSchema,
 })
 
-export const postgresReaderRegionStore = (db: LoomDatabase): ReaderRegionStore => ({
+/** Scoped on the same terms as the journal — see its note. */
+export const postgresReaderRegionStore = (
+  db: LoomDatabase,
+  scope: StoreScope = {}
+): ReaderRegionStore => regionStoreIn(db, scope.application ?? DEFAULT_APPLICATION_ID)
+
+const regionStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderRegionStore => ({
   /**
    * One upsert, additive in the statement, for the reason the tallies are: this
    * runs on the request path and two deliveries arriving together is the
@@ -499,6 +580,7 @@ export const postgresReaderRegionStore = (db: LoomDatabase): ReaderRegionStore =
         .insert(loomReaderRegions)
         .values(
           foldedBy(counts, regionKey, addRegionCounts).map((count) => ({
+            applicationId: application,
             treeId: count.treeId,
             revision: count.revision,
             region: count.region,
@@ -507,7 +589,12 @@ export const postgresReaderRegionStore = (db: LoomDatabase): ReaderRegionStore =
           }))
         )
         .onConflictDoUpdate({
-          target: [loomReaderRegions.treeId, loomReaderRegions.revision, loomReaderRegions.region],
+          target: [
+            loomReaderRegions.applicationId,
+            loomReaderRegions.treeId,
+            loomReaderRegions.revision,
+            loomReaderRegions.region,
+          ],
           set: {
             views: sql`${loomReaderRegions.views} + excluded.views`,
             updatedAt,
@@ -522,7 +609,7 @@ export const postgresReaderRegionStore = (db: LoomDatabase): ReaderRegionStore =
 
   regions: async (request?: TallyReadRequest) => {
     try {
-      const rows = await db.select().from(loomReaderRegions).where(within(loomReaderRegions, request))
+      const rows = await db.select().from(loomReaderRegions).where(within(loomReaderRegions, application, request))
       const parsed = z.array(storedRegionSchema).safeParse(rows)
 
       return parsed.success

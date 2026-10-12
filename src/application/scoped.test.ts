@@ -8,21 +8,40 @@ import { policyNamed, recordingOf } from "../testing/policy-log-contract.js"
 import { ensureHoldStoreSchema, ensurePolicyLogSchema } from "../store/migrate.js"
 import { postgresHoldStore } from "../store/postgres-holds.js"
 import { postgresPolicyLog } from "../store/postgres-policy-log.js"
+import { ensureReaderSignalsSchema } from "../signals/migrate.js"
+import {
+  postgresReaderRegionStore,
+  postgresReaderSignalJournal,
+  postgresReaderTallyStore,
+} from "../signals/postgres.js"
+import type { FunnelAnswer, ReaderTally } from "../signals/rollup.js"
+import type { ReaderRegionCount } from "../signals/region.js"
+import type { RevisionViews } from "../signals/page-views.js"
+import {
+  batchOf,
+  nodeId,
+  primitiveType,
+  region,
+  viewed,
+  TREE,
+} from "../testing/reader-signal-contract.js"
 import { ensureTelemetrySchema } from "../telemetry/migrate.js"
 import { postgresTelemetryJournal } from "../telemetry/postgres.js"
 
 import { applicationIdSchema } from "./application.js"
 
 /**
- * The three tables that needed only the application dimension, held to the claim
- * the tree store was held to: **one application's handle cannot see another
- * application's row.**
+ * Every table outside the tree store, held to the claim the tree store was held
+ * to: **one application's handle cannot see another application's row.**
  *
- * The five reader-signal tables are deliberately absent. They need the audience
- * dimension as well
+ * The five reader-signal tables were deliberately absent until now, to take the
+ * application and the audience dimension
  * ([0263](../../decisions/0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md)
- * clause 5) and should take both in one migration rather than being moved
- * twice.
+ * clause 5) in one migration rather than being moved twice. They take the
+ * application alone instead:
+ * [0270](../../decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+ * holds the argument, which is that 0263 is Proposed and the lane waiting on
+ * this one is blocked today.
  *
  * Against PGlite rather than the memory stores, for the reason
  * `application.test.ts` records: an in-memory store is isolated by having its own
@@ -216,5 +235,252 @@ describe("the journal", () => {
       yours: theirs.ok === true ? theirs.value.records.length : -1,
       mine: ours.ok === true ? ours.value.records.length : -1,
     }).toEqual({ yours: 0, mine: episode.length })
+  })
+
+  /**
+   * The assertion this file was missing, and it was failing.
+   *
+   * `forget` was the one statement in `telemetry/postgres.ts` that did not go
+   * through the handle's own filter when the application landed, and `seq` is a
+   * `bigserial` counting across every application in the database — so
+   * retention run for one was deleting every other's records below the same
+   * number. Nothing had reached it because nothing builds a second handle yet,
+   * which is the only reason this is a test rather than an incident.
+   */
+  it("does not forget another application's records", async () => {
+    const { mine, yours } = await stores()
+    const episode = sampleEpisode()
+
+    expect((await mine.record(episode)).ok).toBe(true)
+
+    const forgotten = await yours.forget({ before: 1_000_000 })
+    const ours = await mine.read()
+
+    expect({
+      removed: forgotten.ok === true ? forgotten.value.removed : -1,
+      mine: ours.ok === true ? ours.value.records.length : -1,
+    }).toEqual({ removed: 0, mine: episode.length })
+  })
+})
+
+/**
+ * The five reader tables, which are the measurement rather than the governance.
+ *
+ * The failure here is quieter than the review queue's and worse to discover:
+ * a hold in the wrong queue is visible on a screen, where two applications'
+ * readers summed into one tally is a number that looks right and cannot be
+ * taken apart again afterwards. 0263 clause 5 says it of audiences and it is
+ * the same sentence about applications.
+ *
+ * **Both sides of every assertion are checked.** The note at the top of this
+ * file is about three assertions that passed on *nothing was found* while
+ * appearing to test isolation, so each of these reads its own application too
+ * and expects the row it wrote — a filter that matched nothing would fail here
+ * rather than look like isolation.
+ */
+describe("the reader tables", () => {
+  const AT = "2026-10-12T00:00:00.000Z"
+
+  const shared = async () => {
+    const db = drizzle(new PGlite())
+    await ensureReaderSignalsSchema(db)
+
+    return db
+  }
+
+  const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
+    treeId: TREE,
+    revision: 1,
+    nodeId: nodeId("hero"),
+    type: primitiveType("loom.section"),
+    views: 1,
+    reached: 1,
+    engaged: 0,
+    dwellMs: 500,
+    activations: 0,
+    opens: 0,
+    closes: 0,
+    completions: 0,
+    ...overrides,
+  })
+
+  const answer: FunnelAnswer = {
+    treeId: TREE,
+    revision: 1,
+    pair: {
+      from: { nodeId: nodeId("pricing"), kind: "viewed" },
+      to: { nodeId: nodeId("buy"), kind: "activated" },
+    },
+    reached: 40,
+    converted: 9,
+  }
+
+  const opening: RevisionViews = { treeId: TREE, revision: 1, views: 3 }
+
+  const counted: ReaderRegionCount = {
+    treeId: TREE,
+    revision: 1,
+    region: region("GB"),
+    views: 2,
+  }
+
+  describe("the buffer", () => {
+    const journals = async () => {
+      const db = await shared()
+
+      return {
+        mine: postgresReaderSignalJournal(db, { application: MINE }),
+        yours: postgresReaderSignalJournal(db, { application: YOURS }),
+      }
+    }
+
+    it("does not read one application's batches as another's", async () => {
+      const { mine, yours } = await journals()
+
+      expect((await mine.receive([batchOf([viewed("hero")])])).ok).toBe(true)
+
+      const theirs = await yours.read()
+      const ours = await mine.read()
+
+      expect({
+        yours: theirs.ok === true ? theirs.value.batches.length : -1,
+        mine: ours.ok === true ? ours.value.batches.length : -1,
+      }).toEqual({ yours: 0, mine: 1 })
+    })
+
+    /**
+     * `seq` is a `bigserial`, so it counts across every application in the
+     * database. An unfiltered `DELETE` below a sequence number — which is what
+     * retention is — would therefore have dropped another application's buffer,
+     * and the row this asserts on is one with a *lower* `seq` than the cutoff.
+     */
+    it("does not forget another application's batches", async () => {
+      const { mine, yours } = await journals()
+
+      expect((await mine.receive([batchOf([viewed("hero")])])).ok).toBe(true)
+
+      const forgotten = await yours.forget({ before: 1_000_000 })
+      const ours = await mine.read()
+
+      expect({
+        removed: forgotten.ok === true ? forgotten.value.removed : -1,
+        mine: ours.ok === true ? ours.value.batches.length : -1,
+      }).toEqual({ removed: 0, mine: 1 })
+    })
+  })
+
+  describe("the counters", () => {
+    const stores = async () => {
+      const db = await shared()
+
+      return {
+        mine: postgresReaderTallyStore(db, { application: MINE }),
+        yours: postgresReaderTallyStore(db, { application: YOURS }),
+      }
+    }
+
+    it("does not read one application's tallies as another's", async () => {
+      const { mine, yours } = await stores()
+
+      expect((await mine.apply({ tallies: [tally()], funnels: [] }, AT)).ok).toBe(true)
+
+      const theirs = await yours.tallies()
+      const ours = await mine.tallies()
+
+      expect({
+        yours: theirs.ok === true ? theirs.value.length : -1,
+        mine: ours.ok === true ? ours.value.length : -1,
+      }).toEqual({ yours: 0, mine: 1 })
+    })
+
+    /**
+     * The claim the widened key exists for, and the one this whole change is
+     * about: the upsert is additive *within* an application, so two
+     * applications counting the same node of the same revision keep two rows
+     * instead of one row holding the sum. Before the key widened, the second
+     * `apply` would have found the first's row on conflict and added to it.
+     */
+    it("does not add one application's readers to another's count", async () => {
+      const { mine, yours } = await stores()
+
+      await mine.apply({ tallies: [tally({ views: 7 })], funnels: [] }, AT)
+      await yours.apply({ tallies: [tally({ views: 2 })], funnels: [] }, AT)
+
+      const theirs = await yours.tallies()
+      const ours = await mine.tallies()
+
+      expect({
+        yours: theirs.ok === true ? theirs.value.map((row) => row.views) : [],
+        mine: ours.ok === true ? ours.value.map((row) => row.views) : [],
+      }).toEqual({ yours: [2], mine: [7] })
+    })
+
+    it("does not read one application's funnels as another's", async () => {
+      const { mine, yours } = await stores()
+
+      expect((await mine.apply({ tallies: [], funnels: [answer] }, AT)).ok).toBe(true)
+
+      const theirs = await yours.funnels()
+      const ours = await mine.funnels()
+
+      expect({
+        yours: theirs.ok === true ? theirs.value.length : -1,
+        mine: ours.ok === true ? ours.value.length : -1,
+      }).toEqual({ yours: 0, mine: 1 })
+    })
+
+    it("does not count one application's page views as another's", async () => {
+      const { mine, yours } = await stores()
+
+      expect((await mine.opened([opening], AT)).ok).toBe(true)
+
+      const theirs = await yours.pageViews()
+      const ours = await mine.pageViews()
+
+      expect({
+        yours: theirs.ok === true ? theirs.value.map((row) => row.opened) : [],
+        mine: ours.ok === true ? ours.value.map((row) => row.opened) : [],
+      }).toEqual({ yours: [], mine: [3] })
+    })
+  })
+
+  describe("the regions", () => {
+    const stores = async () => {
+      const db = await shared()
+
+      return {
+        mine: postgresReaderRegionStore(db, { application: MINE }),
+        yours: postgresReaderRegionStore(db, { application: YOURS }),
+      }
+    }
+
+    it("does not read one application's regions as another's", async () => {
+      const { mine, yours } = await stores()
+
+      expect((await mine.count([counted], AT)).ok).toBe(true)
+
+      const theirs = await yours.regions()
+      const ours = await mine.regions()
+
+      expect({
+        yours: theirs.ok === true ? theirs.value.length : -1,
+        mine: ours.ok === true ? ours.value.length : -1,
+      }).toEqual({ yours: 0, mine: 1 })
+    })
+
+    it("does not add one application's region count to another's", async () => {
+      const { mine, yours } = await stores()
+
+      await mine.count([counted], AT)
+      await yours.count([{ ...counted, views: 5 }], AT)
+
+      const theirs = await yours.regions()
+      const ours = await mine.regions()
+
+      expect({
+        yours: theirs.ok === true ? theirs.value.map((row) => row.views) : [],
+        mine: ours.ok === true ? ours.value.map((row) => row.views) : [],
+      }).toEqual({ yours: [5], mine: [2] })
+    })
   })
 })

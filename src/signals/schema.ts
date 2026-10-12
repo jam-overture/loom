@@ -19,6 +19,13 @@ import {
  * — and it is in the schema rather than in a policy because a single table
  * would make the retention rule a `DELETE` somebody has to remember to write
  * correctly forever.
+ *
+ * All five carry `application_id` (0269), led by it in every key and every
+ * index, on the same terms as the store's four: a reader is filed against the
+ * application whose page they read, and no reading here spans two. The column
+ * arrives alone rather than beside the audience dimension 0263 clause 5 asks
+ * for, which is a decision with a cost — [0270](../../decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+ * holds the argument.
  */
 
 /**
@@ -38,6 +45,18 @@ export const loomReaderSignals = pgTable(
   "loom_reader_signals",
   {
     seq: bigserial("seq", { mode: "number" }).primaryKey(),
+    /**
+     * The application the reading belongs to (0269). First in the key and in
+     * every index, as it is on the store's tables, because every read of this
+     * table is already inside one application.
+     *
+     * Defaulted so a database written before applications existed keeps
+     * answering, and so that every rollup, door and screen that names no
+     * application goes on meaning what it meant. `DEFAULT_APPLICATION_ID` is
+     * the value, spelled out because DDL cannot import it — `scoped.test.ts`
+     * holds the two together.
+     */
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     /** What the page said the time was, which is a number a page said. */
@@ -48,7 +67,9 @@ export const loomReaderSignals = pgTable(
       .notNull()
       .default(sql`now()`),
   },
-  (table) => [index("loom_reader_signals_tree_seq_idx").on(table.treeId, table.seq)]
+  (table) => [
+    index("loom_reader_signals_tree_seq_idx").on(table.applicationId, table.treeId, table.seq),
+  ]
 )
 
 /**
@@ -61,6 +82,8 @@ export const loomReaderSignals = pgTable(
 export const loomReaderTallies = pgTable(
   "loom_reader_tallies",
   {
+    /** See `loomReaderSignals.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     nodeId: text("node_id").notNull(),
@@ -85,7 +108,7 @@ export const loomReaderTallies = pgTable(
     completions: bigint("completions", { mode: "number" }).notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
-  (table) => [primaryKey({ columns: [table.treeId, table.revision, table.nodeId] })]
+  (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision, table.nodeId] })]
 )
 
 /**
@@ -98,6 +121,8 @@ export const loomReaderTallies = pgTable(
 export const loomReaderFunnels = pgTable(
   "loom_reader_funnels",
   {
+    /** See `loomReaderSignals.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     fromNodeId: text("from_node_id").notNull(),
@@ -111,6 +136,7 @@ export const loomReaderFunnels = pgTable(
   (table) => [
     primaryKey({
       columns: [
+        table.applicationId,
         table.treeId,
         table.revision,
         table.fromNodeId,
@@ -138,6 +164,8 @@ export const loomReaderFunnels = pgTable(
 export const loomReaderRegions = pgTable(
   "loom_reader_regions",
   {
+    /** See `loomReaderSignals.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     /** A country code, or the word for not knowing. A closed set, so this column cannot be written freely. */
@@ -145,7 +173,9 @@ export const loomReaderRegions = pgTable(
     views: bigint("views", { mode: "number" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
-  (table) => [primaryKey({ columns: [table.treeId, table.revision, table.region] })]
+  (table) => [primaryKey({
+      columns: [table.applicationId, table.treeId, table.revision, table.region],
+    })]
 )
 
 /**
@@ -168,6 +198,8 @@ export const loomReaderRegions = pgTable(
 export const loomReaderPageViews = pgTable(
   "loom_reader_page_views",
   {
+    /** See `loomReaderSignals.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     /** Page views that began. Counted once, at the door, never recounted. */
@@ -176,5 +208,5 @@ export const loomReaderPageViews = pgTable(
     appearances: bigint("appearances", { mode: "number" }).notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
-  (table) => [primaryKey({ columns: [table.treeId, table.revision] })]
+  (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision] })]
 )

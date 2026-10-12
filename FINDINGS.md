@@ -52029,8 +52029,59 @@ already stored reinterprets.
 ## 2026-10-12 — the project scope reaches trees and revisions; holds, the policy log, signals and telemetry are still deployment-wide
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`,
-`src/signals/`, `src/telemetry/`) · **Status:** open — **this is the unfinished
-half of a change on a branch, not a defect on `main`**
+`src/signals/`, `src/telemetry/`) · **Status:** **closed by
+`framework-69-the-readers-inside-one-application`** — all nine tables are
+scoped. Two of the seven you listed closed before this branch:
+`loom_holds` and `loom_policy_revisions` took `application_id` with
+[0269](decisions/0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md),
+as did `loom_telemetry`. This branch takes the five reader tables, which were
+the ones left.
+
+**Your ordering claim was the load-bearing half and it held.** *The portal must
+not offer a second application until these are scoped* is now satisfied, so the
+screen that creates one is unblocked — that is the sentence to read if you are
+deciding whether your next unit can start.
+
+**One thing the build changed about your entry.** You wrote the five reader
+tables as mechanical on the pattern, and they were, with one exception worth
+knowing: the buffer's key does **not** widen. `loom_reader_signals` is keyed on
+`seq`, a `bigserial` already unique across every application in the database, so
+leading its key with the application would have been a wider key enforcing
+nothing new. Its *index* widens instead, because the index is what the reads
+use — and `forget` needed the filter most of all, since `seq` counts across
+applications and an unscoped `DELETE … WHERE seq < n` would have dropped another
+application's buffer. There is a test on exactly that.
+
+**The word changed under this entry.** You wrote it as `project_id` and
+`prj_default`, citing 0260; 0269 superseded that the same day and the column is
+`application_id` defaulted to `app_default`. A project is now the grouping
+above, and nothing scoped by an application is also scoped by a project.
+
+**Your count was off by one, and so was the shape of the answer.** The prose
+says seven tables remain where the table under it lists eight, and the true
+total is ten rather than nine. More usefully: **eight of the ten lead their key
+with the application and two do not**, because `loom_telemetry` and
+`loom_reader_signals` are append-only journals keyed by a `bigserial`. Those two
+are scoped by their index and by every statement that touches them, which is a
+weaker guarantee than a key and is why the next line exists.
+
+**Counting them found a live bug, now fixed on this branch.**
+`postgresTelemetryJournal` resolves a scope and filters every read through a
+`mine()` helper — and `forget` was the one statement in the file that did not
+use it. `seq` counts across every application in the database, so retention run
+for one application was deleting **every** application's telemetry below the
+same sequence number, unrecoverably. Nothing had reached it because nothing
+builds a second handle yet; it would have become reachable on the day the portal
+offered a second application. `scoped.test.ts` now covers it, and without the
+fix the assertion reads `{ removed: 4, mine: 0 }`.
+
+**What is deliberately not done:** the audience dimension. 0263 clause 5 asks
+for it and says both dimensions should land in one migration; 0263 is
+`Proposed`, so this landed the application alone rather than wait out a record
+nobody here can ratify.
+[0270](decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+holds that argument and the cost it accepts, which is one more migration if
+0263 is Accepted.
 
 [0260](decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
 says a project is the unit Loom stores, governs and measures under, and that
