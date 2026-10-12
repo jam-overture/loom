@@ -26,7 +26,7 @@ import type { LoomDatabase } from "../store/database.js"
  */
 export const TELEMETRY_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_telemetry (
-    project_id text NOT NULL DEFAULT 'prj_default',
+    application_id text NOT NULL DEFAULT 'app_default',
     seq bigserial PRIMARY KEY,
     tree_id text NOT NULL,
     occurred_at text NOT NULL,
@@ -43,9 +43,9 @@ export const TELEMETRY_DDL: readonly string[] = [
    * not change: an existing index on the old columns would be left exactly as
    * it was, and every read would go on scanning while appearing to be indexed.
    */
-  `ALTER TABLE loom_telemetry ADD COLUMN IF NOT EXISTS project_id text NOT NULL DEFAULT 'prj_default'`,
+  `ALTER TABLE loom_telemetry ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
   `DROP INDEX IF EXISTS loom_telemetry_tree_seq_idx`,
-  `CREATE INDEX IF NOT EXISTS loom_telemetry_tree_seq_idx ON loom_telemetry (project_id, tree_id, seq)`,
+  `CREATE INDEX IF NOT EXISTS loom_telemetry_tree_seq_idx ON loom_telemetry (application_id, tree_id, seq)`,
   /**
    * Additive, idempotent, and the only statement here that is not about the
    * table's shape: it is what makes `assessments` on the journal a seek rather
@@ -53,7 +53,7 @@ export const TELEMETRY_DDL: readonly string[] = [
    * again gets it; one that never does keeps a correct journal and a slow lookup.
    */
   `DROP INDEX IF EXISTS loom_telemetry_assessed_proposal_idx`,
-  `CREATE INDEX IF NOT EXISTS loom_telemetry_assessed_proposal_idx ON loom_telemetry (project_id, (event -> 'assessment' ->> 'proposalId')) WHERE event ->> 'type' = 'change-assessed'`,
+  `CREATE INDEX IF NOT EXISTS loom_telemetry_assessed_proposal_idx ON loom_telemetry (application_id, (event -> 'assessment' ->> 'proposalId')) WHERE event ->> 'type' = 'change-assessed'`,
   `ALTER TABLE loom_telemetry ENABLE ROW LEVEL SECURITY`,
 ]
 

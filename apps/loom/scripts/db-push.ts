@@ -2,7 +2,13 @@ import nextEnv from "@next/env"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@jam-overture/loom/postgres"
+import {
+  ensureApplicationStoreSchema,
+  ensureHoldStoreSchema,
+  ensureProjectStoreSchema,
+  ensureTreeStoreSchema,
+  migrateApplicationIds,
+} from "@jam-overture/loom/postgres"
 import { ensureReaderSignalsSchema } from "@jam-overture/loom/signals/postgres"
 import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
@@ -58,6 +64,18 @@ try {
   await ensureHoldStoreSchema(db)
   await ensureTelemetrySchema(db)
   /**
+   * Applications before projects, and the order is load-bearing.
+   *
+   * `ensureApplicationStoreSchema` renames the `loom_projects` that #608 created
+   * — which held applications — into `loom_applications`.
+   * `ensureProjectStoreSchema` then creates a fresh `loom_projects` for the
+   * grouping. Run the other way round, the `CREATE TABLE IF NOT EXISTS` sees
+   * the old table, skips, and the rename then carries it off: the deployment
+   * ends with no projects table and no error. A test holds this.
+   */
+  await ensureApplicationStoreSchema(db)
+  await ensureProjectStoreSchema(db)
+  /**
    * The buffer and the two counters. Created even on a deployment that never
    * switches signals on, because the alternative is a deployment that does
    * switch them on discovering the tables are missing from a route handler that
@@ -66,9 +84,17 @@ try {
   await ensureReaderSignalsSchema(db)
   /** The portal's own table, not the runtime's — see `lib/auth/attempts-postgres.ts`. */
   await ensureSignInAttemptsSchema(db)
+  /**
+   * Last, because it is the only data statement here and every column it writes
+   * to has to exist first. It carries rows written before 12 October from
+   * `prj_default` to `app_default`, and is a no-op on a database that has
+   * already been carried or was never on the old value.
+   */
+  await migrateApplicationIds(db)
   console.log(
-    "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_reader_signals, " +
-      "loom_reader_tallies, loom_reader_funnels and loom_signin_attempts are present"
+    "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_projects, " +
+      "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels " +
+      "and loom_signin_attempts are present"
   )
 } finally {
   await client.end()

@@ -34,24 +34,6 @@ export const describeProjectStoreContract = (
       expect(await store.get(project.projectId)).toEqual({ ok: true, value: project })
     })
 
-    it("keeps a host when one was given, and omits the key when none was", async () => {
-      const store = await make()
-      const withHost = projectFixture({
-        projectId: projectIdSchema.parse("prj_hosted"),
-        host: "shop.example.com",
-      })
-      const without = projectFixture({ projectId: projectIdSchema.parse("prj_bare") })
-
-      await store.create(withHost)
-      await store.create(without)
-
-      const read = await store.get(withHost.projectId)
-      expect(read.ok && read.value.host).toBe("shop.example.com")
-
-      const bare = await store.get(without.projectId)
-      expect(bare.ok && "host" in bare.value).toBe(false)
-    })
-
     it("refuses an id already taken rather than overwriting the rows under it", async () => {
       const store = await make()
       const first = projectFixture({ name: "The first" })
@@ -114,7 +96,7 @@ export const describeProjectStoreContract = (
 
     it("renames without touching anything else", async () => {
       const store = await make()
-      const project = projectFixture({ name: "Before", host: "old.example.com" })
+      const project = projectFixture({ name: "Before" })
       await store.create(project)
 
       const renamed = await store.rename(project.projectId, { name: "After" })
@@ -123,18 +105,6 @@ export const describeProjectStoreContract = (
         ok: true,
         value: { ...project, name: "After" },
       })
-      const read = await store.get(project.projectId)
-      expect(read.ok && read.value.host).toBe("old.example.com")
-    })
-
-    it("sets a host on a project that had none", async () => {
-      const store = await make()
-      const project = projectFixture()
-      await store.create(project)
-
-      const moved = await store.rename(project.projectId, { host: "shop.example.com" })
-
-      expect(moved.ok && moved.value.host).toBe("shop.example.com")
     })
 
     it("refuses to rename a project that is not there", async () => {

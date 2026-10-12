@@ -1,7 +1,7 @@
 import { ensureSiteSeeded } from "@/app/(marketing)/_lib/stored"
-import { DEFAULT_PROJECT_ID } from "@jam-overture/loom/store"
+import { DEFAULT_APPLICATION_ID, DEFAULT_PROJECT_ID } from "@jam-overture/loom/store"
 
-import { appProjects, appStore } from "@/app/_lib/app/store"
+import { appApplications, appProjects, appStore } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
 
@@ -24,6 +24,9 @@ import { seedTree } from "./seed"
 export const portalStore = appStore
 
 /** The deployment's projects, under the name this lane uses for the other one. */
+export const portalApplications = appApplications
+
+/** The projects those applications are grouped under. */
 export const portalProjects = appProjects
 
 const SEEDING_KEY = Symbol.for("loom.portal.seeding")
@@ -60,6 +63,7 @@ export const ensureSeeded = async (): Promise<void> => {
     portalStore.create(seedTree()),
     ensureSiteSeeded(),
     ensureDefaultProject(),
+    ensureDefaultApplication(),
   ]).then(() => undefined)
 
   await carrier[SEEDING_KEY]
@@ -68,8 +72,8 @@ export const ensureSeeded = async (): Promise<void> => {
 /**
  * The project every row written before projects existed belongs to.
  *
- * `DEFAULT_PROJECT_ID` is the value five tables already default their
- * `project_id` to, so this does not assign anything — it gives a name to what is
+ * `DEFAULT_APPLICATION_ID` is the value five tables already default their
+ * `application_id` to, so this does not assign anything — it gives a name to what is
  * already true, which is the one thing DDL could not do. A migration that
  * invented the name would be guessing, and 0260 refuses that.
  *
@@ -79,6 +83,26 @@ export const ensureSeeded = async (): Promise<void> => {
  */
 const ensureDefaultProject = async (): Promise<void> => {
   await appProjects.create({
+    projectId: DEFAULT_PROJECT_ID,
+    name: "Your projects",
+    createdAt: new Date(0).toISOString(),
+  })
+}
+
+/**
+ * The application every row written before applications existed belongs to.
+ *
+ * `DEFAULT_APPLICATION_ID` is the value five tables default their
+ * `application_id` to, so this does not assign anything — it gives a name to
+ * what is already true, which is the one thing DDL could not do.
+ *
+ * Create-if-absent on the same terms as everything else here: a deployment that
+ * has renamed it keeps its name, because `create` refuses rather than
+ * overwrites.
+ */
+const ensureDefaultApplication = async (): Promise<void> => {
+  await appApplications.create({
+    applicationId: DEFAULT_APPLICATION_ID,
     projectId: DEFAULT_PROJECT_ID,
     name: "Your application",
     createdAt: new Date(0).toISOString(),

@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, gt, lt } from "drizzle-orm"
 import { z } from "zod"
 
-import { DEFAULT_PROJECT_ID, type StoreScope } from "../project/project.js"
+import { DEFAULT_APPLICATION_ID, type StoreScope } from "../application/application.js"
 import { proposalIdSchema, treeIdSchema, type TreeId } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { provenanceSchema } from "../runtime/proposal.js"
@@ -32,6 +32,7 @@ export * from "./database.js"
 export * from "./migrate.js"
 export * from "./postgres-holds.js"
 export * from "./postgres-policy-log.js"
+export * from "./postgres-applications.js"
 export * from "./postgres-projects.js"
 export * from "./schema.js"
 
@@ -114,9 +115,9 @@ const toStoredRevision = (row: z.infer<typeof storedRevisionSchema>): StoredRevi
  * projects is unexpressible rather than merely forbidden.
  */
 export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): TreeStore => {
-  const project = scope.project ?? DEFAULT_PROJECT_ID
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
   /** Every read starts here, so a query cannot forget the project by omission. */
-  const mine = (treeId: TreeId) => and(eq(loomTrees.projectId, project), eq(loomTrees.treeId, treeId))
+  const mine = (treeId: TreeId) => and(eq(loomTrees.applicationId, project), eq(loomTrees.treeId, treeId))
   const readHead = async (treeId: TreeId): Promise<Result<LoomTree, StoreError>> => {
     const rows = await db
       .select({ document: loomTrees.document })
@@ -135,7 +136,7 @@ export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): Tre
     create: async (tree) => {
       try {
         await db.insert(loomTrees).values({
-          projectId: project,
+          applicationId: project,
           treeId: tree.treeId,
           revision: tree.revision,
           document: tree,
@@ -187,7 +188,7 @@ export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): Tre
           .from(loomRevisions)
           .where(
             and(
-              eq(loomRevisions.projectId, project),
+              eq(loomRevisions.applicationId, project),
               eq(loomRevisions.treeId, treeId),
               from === undefined
                 ? undefined
@@ -238,7 +239,7 @@ export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): Tre
           .from(loomTrees)
           .where(
             and(
-              eq(loomTrees.projectId, project),
+              eq(loomTrees.applicationId, project),
               request?.cursor === undefined ? undefined : gt(loomTrees.treeId, request.cursor)
             )
           )
@@ -301,7 +302,7 @@ export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): Tre
           }
 
           await tx.insert(loomRevisions).values({
-            projectId: project,
+            applicationId: project,
             treeId,
             revision: applied.value.revision,
             proposalId: request.proposalId,

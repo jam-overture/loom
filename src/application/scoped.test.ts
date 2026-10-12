@@ -11,12 +11,12 @@ import { postgresPolicyLog } from "../store/postgres-policy-log.js"
 import { ensureTelemetrySchema } from "../telemetry/migrate.js"
 import { postgresTelemetryJournal } from "../telemetry/postgres.js"
 
-import { projectIdSchema } from "./project.js"
+import { applicationIdSchema } from "./application.js"
 
 /**
- * The three tables that needed only the project dimension, held to the claim
- * the tree store was held to: **one project's handle cannot see another
- * project's row.**
+ * The three tables that needed only the application dimension, held to the claim
+ * the tree store was held to: **one application's handle cannot see another
+ * application's row.**
  *
  * The five reader-signal tables are deliberately absent. They need the audience
  * dimension as well
@@ -25,7 +25,7 @@ import { projectIdSchema } from "./project.js"
  * twice.
  *
  * Against PGlite rather than the memory stores, for the reason
- * `project.test.ts` records: an in-memory store is isolated by having its own
+ * `application.test.ts` records: an in-memory store is isolated by having its own
  * map, so it proves nothing about a `WHERE` clause.
  *
  * **Built on the suite's own fixtures.** The first draft invented the shapes
@@ -36,8 +36,8 @@ import { projectIdSchema } from "./project.js"
 
 vi.setConfig({ testTimeout: 30_000 })
 
-const MINE = projectIdSchema.parse("prj_mine")
-const YOURS = projectIdSchema.parse("prj_yours")
+const MINE = applicationIdSchema.parse("app_mine")
+const YOURS = applicationIdSchema.parse("app_yours")
 
 describe("the review queue, which is the one 0220 named", () => {
   const shared = async () => {
@@ -51,8 +51,8 @@ describe("the review queue, which is the one 0220 named", () => {
     const db = await shared()
 
     return {
-      mine: postgresHoldStore(db, { project: MINE }),
-      yours: postgresHoldStore(db, { project: YOURS }),
+      mine: postgresHoldStore(db, { application: MINE }),
+      yours: postgresHoldStore(db, { application: YOURS }),
     }
   }
 
@@ -61,7 +61,7 @@ describe("the review queue, which is the one 0220 named", () => {
    * two apps would put one app's changes in another's queue, which is the one
    * failure a governance surface cannot have.*
    */
-  it("does not put one project's held change in another's queue", async () => {
+  it("does not put one application's held change in another's queue", async () => {
     const { mine, yours } = await stores()
     const held = heldProposalFixture()
 
@@ -76,7 +76,7 @@ describe("the review queue, which is the one 0220 named", () => {
     }).toEqual({ yours: 0, mine: 1 })
   })
 
-  it("does not answer for another project's hold by id", async () => {
+  it("does not answer for another application's hold by id", async () => {
     const { mine, yours } = await stores()
     const held = heldProposalFixture()
 
@@ -88,7 +88,7 @@ describe("the review queue, which is the one 0220 named", () => {
     expect({ yours: theirs.ok, mine: ours.ok }).toEqual({ yours: false, mine: true })
   })
 
-  it("does not list another project's holds against a tree of the same id", async () => {
+  it("does not list another application's holds against a tree of the same id", async () => {
     const { mine, yours } = await stores()
     const held = heldProposalFixture()
 
@@ -104,11 +104,11 @@ describe("the review queue, which is the one 0220 named", () => {
   })
 
   /**
-   * The key widened rather than loosened. Two projects may each hold a proposal
-   * of the same id — they were never the same proposal — and within one project
+   * The key widened rather than loosened. Two applications may each hold a proposal
+   * of the same id — they were never the same proposal — and within one application
    * a second attempt still loses to the database rather than to a check.
    */
-  it("keeps 'already held' a fact the database establishes, within a project", async () => {
+  it("keeps 'already held' a fact the database establishes, within an application", async () => {
     const { mine, yours } = await stores()
     const held = heldProposalFixture()
 
@@ -121,7 +121,7 @@ describe("the review queue, which is the one 0220 named", () => {
     expect(again.ok === false ? again.error.code : "held").toBe("already-held")
   })
 
-  it("does not release another project's hold", async () => {
+  it("does not release another application's hold", async () => {
     const { mine, yours } = await stores()
     const held = heldProposalFixture()
 
@@ -140,12 +140,12 @@ describe("the policy log", () => {
     await ensurePolicyLogSchema(db)
 
     return {
-      mine: postgresPolicyLog(db, { project: MINE }),
-      yours: postgresPolicyLog(db, { project: YOURS }),
+      mine: postgresPolicyLog(db, { application: MINE }),
+      yours: postgresPolicyLog(db, { application: YOURS }),
     }
   }
 
-  it("does not show one project's policy as another's current", async () => {
+  it("does not show one application's policy as another's current", async () => {
     const { mine, yours } = await stores()
     const policy = policyNamed("pol_main")
 
@@ -160,10 +160,10 @@ describe("the policy log", () => {
   /**
    * The read this scoping exists for. `judgedUnder` resolves the fingerprint on
    * a disposition into the policy text it was judged under — unscoped, it would
-   * answer with another project's policy whenever two happened to fingerprint
+   * answer with another application's policy whenever two happened to fingerprint
    * alike, which is a change reported as judged under rules it never met.
    */
-  it("does not resolve a fingerprint against another project's policy", async () => {
+  it("does not resolve a fingerprint against another application's policy", async () => {
     const { mine, yours } = await stores()
 
     expect((await mine.record(recordingOf(policyNamed("pol_main")))).ok).toBe(true)
@@ -198,12 +198,12 @@ describe("the journal", () => {
     await ensureTelemetrySchema(db)
 
     return {
-      mine: postgresTelemetryJournal(db, { project: MINE }),
-      yours: postgresTelemetryJournal(db, { project: YOURS }),
+      mine: postgresTelemetryJournal(db, { application: MINE }),
+      yours: postgresTelemetryJournal(db, { application: YOURS }),
     }
   }
 
-  it("does not show one project's records to the other", async () => {
+  it("does not show one application's records to the other", async () => {
     const { mine, yours } = await stores()
     const episode = sampleEpisode()
 

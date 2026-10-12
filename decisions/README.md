@@ -352,3 +352,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0266](0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md) | A change to a kind of part is read over the places both windows bore, and that is the one denominator here with no reader in it | Accepted | §4c (reader signals) |
 | [0267](0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md) | The probe reports every configuration it tried, and the audit calls a fault only what the schema accepts | Accepted | §4, not the library |
 | [0268](0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md) | A page is put back by proposing the change that puts it back, and a store never deletes | Accepted | §2, §6 |
+| [0269](0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md) | An application is the unit Loom governs, and a project groups them | Accepted | §3 (portal) |

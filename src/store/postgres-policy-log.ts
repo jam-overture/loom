@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, gt, lt, type SQL } from "drizzle-orm"
 
-import { DEFAULT_PROJECT_ID, type ProjectId, type StoreScope } from "../project/project.js"
+import { DEFAULT_APPLICATION_ID, type ApplicationId, type StoreScope } from "../application/application.js"
 
 import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok, type Result } from "../result.js"
@@ -71,14 +71,14 @@ const toRevision = (
  */
 const newest = async (
   db: LoomDatabase,
-  project: ProjectId,
+  project: ApplicationId,
   policyId: string
 ): Promise<Result<PolicyRevision | undefined, PolicyLogError>> => {
   try {
     const rows = await db
       .select()
       .from(loomPolicyRevisions)
-      .where(and(eq(loomPolicyRevisions.projectId, project), eq(loomPolicyRevisions.policyId, policyId)))
+      .where(and(eq(loomPolicyRevisions.applicationId, project), eq(loomPolicyRevisions.policyId, policyId)))
       .orderBy(desc(loomPolicyRevisions.revision))
       .limit(1)
 
@@ -100,9 +100,9 @@ const newest = async (
  * judged under rules it was never judged under.
  */
 export const postgresPolicyLog = (db: LoomDatabase, scope: StoreScope = {}): PolicyLog => {
-  const project = scope.project ?? DEFAULT_PROJECT_ID
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
   const mine = (...rest: (SQL | undefined)[]) =>
-    and(eq(loomPolicyRevisions.projectId, project), ...rest)
+    and(eq(loomPolicyRevisions.applicationId, project), ...rest)
 
   return {
   record: async (request) => {
@@ -125,7 +125,7 @@ export const postgresPolicyLog = (db: LoomDatabase, scope: StoreScope = {}): Pol
 
     try {
       await db.insert(loomPolicyRevisions).values({
-        projectId: project,
+        applicationId: project,
         policyId: revision.policyId,
         revision: revision.revision,
         fingerprint: revision.fingerprint,
@@ -280,7 +280,7 @@ export const postgresPolicyLog = (db: LoomDatabase, scope: StoreScope = {}): Pol
       const held = await db
         .selectDistinct({ fingerprint: loomPolicyRevisions.fingerprint })
         .from(loomPolicyRevisions)
-        .where(and(eq(loomPolicyRevisions.projectId, project), eq(loomPolicyRevisions.policyId, policyId)))
+        .where(and(eq(loomPolicyRevisions.applicationId, project), eq(loomPolicyRevisions.policyId, policyId)))
         /**
          * Bounded for the same reason, and again without cost to the answer:
          * `heldShapes` only has to separate *nothing was recorded under this

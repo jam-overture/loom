@@ -1,10 +1,16 @@
 import {
+  memoryApplicationStore,
   memoryProjectStore,
   memoryTreeStore,
+  type ApplicationStore,
   type ProjectStore,
   type TreeStore,
 } from "@jam-overture/loom/store"
-import { postgresProjectStore, postgresTreeStore } from "@jam-overture/loom/postgres"
+import {
+  postgresApplicationStore,
+  postgresProjectStore,
+  postgresTreeStore,
+} from "@jam-overture/loom/postgres"
 
 import { portalDatabase } from "./database"
 
@@ -43,9 +49,14 @@ const build = (): TreeStore =>
   portalDatabase === undefined ? memoryTreeStore() : postgresTreeStore(portalDatabase)
 
 const CARRIER_KEY = Symbol.for("loom.portal.store")
-const PROJECTS_KEY = Symbol.for("loom.portal.projects")
+const APPLICATIONS_KEY = Symbol.for("loom.app.applications")
+const PROJECTS_KEY = Symbol.for("loom.app.projects")
 
-type Carrier = { [CARRIER_KEY]?: TreeStore; [PROJECTS_KEY]?: ProjectStore }
+type Carrier = {
+  [CARRIER_KEY]?: TreeStore
+  [APPLICATIONS_KEY]?: ApplicationStore
+  [PROJECTS_KEY]?: ProjectStore
+}
 
 const carrier = globalThis as unknown as Carrier
 
@@ -61,6 +72,19 @@ export const appStore: TreeStore = (carrier[CARRIER_KEY] ??= build())
  *
  * The seeding is still each surface's, as above: this module says a project
  * store exists, not what is in it.
+ */
+const buildApplications = (): ApplicationStore =>
+  portalDatabase === undefined ? memoryApplicationStore() : postgresApplicationStore(portalDatabase)
+
+export const appApplications: ApplicationStore = (carrier[APPLICATIONS_KEY] ??= buildApplications())
+
+/**
+ * The projects those applications are grouped under.
+ *
+ * The third store composed here, and the one that owns nothing yet: a project
+ * has an identity and a name, and the applications in it carry its id. Nothing
+ * is scoped by it, so it needs no handle per project the way the tree store
+ * needs one per application.
  */
 const buildProjects = (): ProjectStore =>
   portalDatabase === undefined ? memoryProjectStore() : postgresProjectStore(portalDatabase)

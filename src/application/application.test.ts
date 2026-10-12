@@ -9,7 +9,8 @@ import { postgresTreeStore } from "../store/postgres.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
 
-import { DEFAULT_PROJECT_ID, projectIdSchema, projectSchema } from "./project.js"
+import { DEFAULT_APPLICATION_ID, applicationIdSchema, applicationSchema } from "./application.js"
+import { DEFAULT_PROJECT_ID } from "../project/project.js"
 
 /**
  * The identifier above the tree, and the one property it exists for.
@@ -18,8 +19,8 @@ import { DEFAULT_PROJECT_ID, projectIdSchema, projectSchema } from "./project.js
  * priced a second app and named the failure it would cause if done badly: *a
  * hold listing that spanned two apps would put one app's changes in another's
  * queue, which is the one failure a governance surface cannot have.* Every
- * assertion here is a version of **one project's handle cannot see another
- * project's row**.
+ * assertion here is a version of **one application's handle cannot see another
+ * application's row**.
  */
 
 const treeIn = (prefix: string) => {
@@ -28,32 +29,33 @@ const treeIn = (prefix: string) => {
   return createTree(buildElement(ids, { type: "loom.page", props: {}, children: [] }), ids)
 }
 
-describe("a project id", () => {
+describe("an application id", () => {
   it("is spelled, because a person reads it off a screen and pastes it", () => {
-    expect(projectIdSchema.safeParse("prj_storefront").success).toBe(true)
-    expect(projectIdSchema.safeParse("p_storefront").success).toBe(false)
-    expect(projectIdSchema.safeParse("storefront").success).toBe(false)
+    expect(applicationIdSchema.safeParse("app_storefront").success).toBe(true)
+    expect(applicationIdSchema.safeParse("p_storefront").success).toBe(false)
+    expect(applicationIdSchema.safeParse("storefront").success).toBe(false)
   })
 
   /**
    * The DDL cannot import a TypeScript constant, so the default is written out
    * in both places. This is the assertion that keeps them the same — without
-   * it, a rename here would silently leave every migrated row in a project
+   * it, a rename here would silently leave every migrated row in an application
    * nothing reads.
    */
   it("is the same default the migration writes", () => {
-    const declaring = TREE_STORE_DDL.filter((statement) => statement.includes("project_id text"))
+    const declaring = TREE_STORE_DDL.filter((statement) => statement.includes("application_id text"))
 
     /* Two tables created, two tables altered. Every one of them sets it. */
     expect(declaring.length).toBe(4)
     for (const statement of declaring) {
-      expect(statement, statement).toContain(`DEFAULT '${DEFAULT_PROJECT_ID}'`)
+      expect(statement, statement).toContain(`DEFAULT '${DEFAULT_APPLICATION_ID}'`)
     }
   })
 
-  it("names a project whose shape is thin on purpose", () => {
+  it("names an application whose shape is thin on purpose", () => {
     expect(
-      projectSchema.safeParse({
+      applicationSchema.safeParse({
+        applicationId: DEFAULT_APPLICATION_ID,
         projectId: DEFAULT_PROJECT_ID,
         name: "Storefront",
         createdAt: "2026-10-12T00:00:00.000Z",
@@ -62,7 +64,8 @@ describe("a project id", () => {
 
     /* The registry, the policy and the credential are each somebody else's. */
     expect(
-      projectSchema.safeParse({
+      applicationSchema.safeParse({
+        applicationId: DEFAULT_APPLICATION_ID,
         projectId: DEFAULT_PROJECT_ID,
         name: "Storefront",
         createdAt: "2026-10-12T00:00:00.000Z",
@@ -72,13 +75,13 @@ describe("a project id", () => {
   })
 })
 
-describe("the migration a database that predates projects gets", () => {
+describe("the migration a database that predates applications gets", () => {
   it("adds the column before it widens either key", () => {
     const at = (needle: string): number =>
       TREE_STORE_DDL.findIndex((statement) => statement.includes(needle))
 
-    const addsColumn = at("ADD COLUMN IF NOT EXISTS project_id")
-    const widensKey = at("ADD PRIMARY KEY (project_id, tree_id)")
+    const addsColumn = at("ADD COLUMN IF NOT EXISTS application_id")
+    const widensKey = at("ADD PRIMARY KEY (application_id, tree_id)")
 
     expect(addsColumn).toBeGreaterThanOrEqual(0)
     expect(widensKey).toBeGreaterThan(addsColumn)
@@ -100,8 +103,8 @@ describe("the migration a database that predates projects gets", () => {
     const keys = TREE_STORE_DDL.filter((statement) => statement.includes("ADD PRIMARY KEY"))
 
     expect(keys).toEqual([
-      "ALTER TABLE loom_trees ADD PRIMARY KEY (project_id, tree_id)",
-      "ALTER TABLE loom_revisions ADD PRIMARY KEY (project_id, tree_id, revision)",
+      "ALTER TABLE loom_trees ADD PRIMARY KEY (application_id, tree_id)",
+      "ALTER TABLE loom_revisions ADD PRIMARY KEY (application_id, tree_id, revision)",
     ])
   })
 })
@@ -112,14 +115,14 @@ describe("the migration a database that predates projects gets", () => {
  * **The memory store proves nothing here and the first draft of this file
  * pretended otherwise.** Every `memoryTreeStore()` call has always built its
  * own `Map`, so two handles are isolated whether or not the key carries a
- * project — three assertions passed, and passed just as happily with the
- * project stripped out of the key. The scoping that matters is the `WHERE`
+ * application — three assertions passed, and passed just as happily with the
+ * application stripped out of the key. The scoping that matters is the `WHERE`
  * clause, and it only exists in Postgres.
  *
  * PGlite is Postgres compiled to WebAssembly, which is what `postgres.test.ts`
  * already uses: one database, two handles, no Docker.
  */
-describe("two projects in one database", () => {
+describe("two applications in one database", () => {
   vi.setConfig({ testTimeout: 30_000 })
 
   const shared = async () => {
@@ -129,26 +132,26 @@ describe("two projects in one database", () => {
     return db
   }
 
-  it("lets the same tree id exist in both, which is what 'unique within a project' means", async () => {
+  it("lets the same tree id exist in both, which is what 'unique within an application' means", async () => {
     const db = await shared()
     const tree = treeIn("same")
 
-    const mine = postgresTreeStore(db, { project: projectIdSchema.parse("prj_mine") })
-    const yours = postgresTreeStore(db, { project: projectIdSchema.parse("prj_yours") })
+    const mine = postgresTreeStore(db, { application: applicationIdSchema.parse("app_mine") })
+    const yours = postgresTreeStore(db, { application: applicationIdSchema.parse("app_yours") })
 
     expect((await mine.create(tree)).ok).toBe(true)
     expect((await yours.create(tree)).ok).toBe(true)
 
-    /* And a second time in the same project is still a collision. */
+    /* And a second time in the same application is still a collision. */
     const again = await mine.create(tree)
 
     expect(again.ok === false ? again.error.code : "created").toBe("already-exists")
   })
 
-  it("does not show one project's tree to the other", async () => {
+  it("does not show one application's tree to the other", async () => {
     const db = await shared()
-    const mine = postgresTreeStore(db, { project: projectIdSchema.parse("prj_mine") })
-    const yours = postgresTreeStore(db, { project: projectIdSchema.parse("prj_yours") })
+    const mine = postgresTreeStore(db, { application: applicationIdSchema.parse("app_mine") })
+    const yours = postgresTreeStore(db, { application: applicationIdSchema.parse("app_yours") })
 
     const tree = treeIn("mine")
     await mine.create(tree)
@@ -158,10 +161,10 @@ describe("two projects in one database", () => {
     expect(read.ok === false ? read.error.code : "found").toBe("not-found")
   })
 
-  it("does not list one project's trees under the other", async () => {
+  it("does not list one application's trees under the other", async () => {
     const db = await shared()
-    const mine = postgresTreeStore(db, { project: projectIdSchema.parse("prj_mine") })
-    const yours = postgresTreeStore(db, { project: projectIdSchema.parse("prj_yours") })
+    const mine = postgresTreeStore(db, { application: applicationIdSchema.parse("app_mine") })
+    const yours = postgresTreeStore(db, { application: applicationIdSchema.parse("app_yours") })
 
     await mine.create(treeIn("one"))
     await mine.create(treeIn("two"))
@@ -179,10 +182,10 @@ describe("two projects in one database", () => {
    * one app's changes in another's queue.* The log is the same shape of claim,
    * and it is the one a reviewer reads before answering.
    */
-  it("does not show one project's log to the other", async () => {
+  it("does not show one application's log to the other", async () => {
     const db = await shared()
-    const mine = postgresTreeStore(db, { project: projectIdSchema.parse("prj_mine") })
-    const yours = postgresTreeStore(db, { project: projectIdSchema.parse("prj_yours") })
+    const mine = postgresTreeStore(db, { application: applicationIdSchema.parse("app_mine") })
+    const yours = postgresTreeStore(db, { application: applicationIdSchema.parse("app_yours") })
 
     const tree = treeIn("same")
     await mine.create(tree)
@@ -193,10 +196,10 @@ describe("two projects in one database", () => {
     expect(log.ok === true ? log.value.revisions.length : -1).toBe(0)
   })
 
-  it("is the default project when the caller named none", async () => {
+  it("is the default application when the caller named none", async () => {
     const db = await shared()
     const silent = postgresTreeStore(db)
-    const named = postgresTreeStore(db, { project: DEFAULT_PROJECT_ID })
+    const named = postgresTreeStore(db, { application: DEFAULT_APPLICATION_ID })
 
     const tree = treeIn("quiet")
     await silent.create(tree)
