@@ -21,6 +21,7 @@ export const BAND = {
   facts: "Where it is today",
   asData: "How this page is put together",
   questions: "Questions",
+  install: "Install it",
   waysIn: "Keep going",
 } as const
 

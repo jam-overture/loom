@@ -170,8 +170,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers sixty-six bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(66)
+  it("offers sixty-seven bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(67)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -1389,13 +1389,22 @@ describe("the parts that offered no choice", () => {
    */
   it("gives the bar, the mosaic, the comparison and the footer a second design each", () => {
     /**
-     * **The bar has three as of 7 October**, and it is the one part in this
-     * assertion where that is worth a sentence rather than a longer array.
+     * **The bar has four as of 8 October**, and it is the one part in this
+     * assertion where the array is worth a sentence rather than a count.
      * `nav-menus` is the design the band beside it documented as *impossible*
-     * until 0234 let a tree name a control — so the third entry is a retraction
-     * landing, not a fourth taste.
+     * until 0234 let a tree name a control, so the third entry is a retraction
+     * landing rather than a fourth taste.
+     *
+     * The fourth is a different kind of addition again: `nav-docs` is the bar
+     * an **interior document** takes, and it exists because the canonical
+     * cannot be shared onto one. `navBand` points its menu at fragments of
+     * `PAGE_SEQUENCE` — correctly, by 0168 — and those are five links into
+     * bands a document has not got. It earns 0162's bar on a search field and
+     * a version badge rather than on its `href`s, which would have been a
+     * `configure`; the assertion two tests below that two designs of a part
+     * never build the same tree is what holds that honest.
      */
-    expect(designsOf("nav")).toEqual(["nav", "nav-centred", "nav-menus"])
+    expect(designsOf("nav")).toEqual(["nav", "nav-centred", "nav-menus", "nav-docs"])
     expect(designsOf("bento")).toEqual(["bento", "bento-mixed"])
     /**
      * **The comparison has three as of 11 October**, and the third is the only

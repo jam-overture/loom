@@ -6,7 +6,13 @@ import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
 import { heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
-import { askHref, DEMO, mechanismHref, surfaceHref, type SiteThemeName } from "../site"
+import {
+  askPath,
+  DEMO,
+  mechanismHref,
+  type SiteThemeName,
+  surfacePath,
+} from "../site"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -229,7 +235,6 @@ const readTheRecord = (
     type: "loom.action",
     props: {
       href: mechanismHref(context.origin, {
-        theme: context.theme,
         ask: record.ask,
         approve: context.approve === true,
       }),
@@ -243,10 +248,9 @@ const panelActions = (
   context: SeeItHappenContext,
   record: ChangeRecord
 ): readonly LoomNode[] => {
-  const home = askHref(context.origin, { theme: context.theme })
+  const home = askPath()
   /** Everything the visitor has done so far, which every link from here must keep. */
   const sofar = {
-    theme: context.theme,
     ask: record.ask,
     ...(context.approve === true ? { approve: true } : {}),
   }
@@ -260,9 +264,7 @@ const panelActions = (
             buildElement(ids, {
               type: "loom.action",
               props: {
-                href: askHref(
-                  context.origin,
-                  record.putBack
+                href: askPath(record.putBack
                     ? { ...sofar, back: true, backApprove: true }
                     : { ...sofar, approve: true }
                 ),
@@ -287,7 +289,7 @@ const panelActions = (
       buildElement(ids, {
         type: "loom.action",
         props: {
-          href: reversible ? askHref(context.origin, { ...sofar, back: true }) : home,
+          href: reversible ? askPath({ ...sofar, back: true }) : home,
           variant: reversible ? "primary" : "secondary",
         },
         children: [buildText(ids, reversible ? "Put it back" : "Start again")],
@@ -468,7 +470,7 @@ const protectionNotice = (): string => {
  * a link that rebuilt the address from scratch would throw away at the worst
  * possible moment.
  */
-const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly LoomNode[] => [
+const typeYourOwn = (ids: IdFactory, ): readonly LoomNode[] => [
   stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
     /**
      * Measured, so the sentence and the way out sit on one line rather than the
@@ -494,7 +496,7 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
          * handed a parameter that means nothing and looks like it means
          * something.
          */
-        href: surfaceHref(context.origin, DEMO),
+        href: surfacePath(DEMO),
         ...TERTIARY_CONTROL,
       },
       children: [buildText(ids, "Try the demo")],
@@ -512,7 +514,7 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
         buildElement(ids, {
           type: "loom.action",
           props: {
-            href: askHref(context.origin, { theme: context.theme, ask: ask.id }),
+            href: askPath({ ask: ask.id }),
             variant: context.ask === ask.id ? "primary" : "secondary",
           },
           children: [buildText(ids, ask.label)],
@@ -584,6 +586,6 @@ export const seeItHappenBand = (ids: IdFactory, context: SeeItHappenContext): Lo
        */
       choices(ids, context),
       ...panels(ids, context),
-      ...typeYourOwn(ids, context),
+      ...typeYourOwn(ids),
     ],
   })

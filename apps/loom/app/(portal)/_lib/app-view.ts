@@ -120,6 +120,88 @@ export const unusedPieces = (pieces: readonly PieceUsage[]): readonly PieceUsage
 const plural = (count: number, noun: string): string =>
   `${count} ${noun}${count === 1 ? "" : "s"}`
 
+/** What the screen says about the pieces nothing has reached for. */
+export type UnusedReading = {
+  /** The headline, which is what a reader meets first. */
+  readonly title: string
+  /** What it means, and whether it is anything to act on. */
+  readonly meaning: string
+}
+
+/**
+ * The pieces nothing uses, read two different ways — and **the thing that
+ * chooses is not how many there are.**
+ *
+ * ## The sentence that stopped being true on 11 October
+ *
+ * This screen used to say, of every unused piece:
+ *
+ * > *The AI is offered these every time you ask for a change, and has never put
+ * > one on a page. That is either something your pages are missing, or something
+ * > your project no longer needs.*
+ *
+ * That is a sharp and useful reading of a **curated** registry. A host that sat
+ * down and chose fourteen pieces, four of which have never appeared, has either
+ * a gap or some dead weight, and either is worth knowing.
+ *
+ * It is a nonsense reading of a registry that is the whole library. The portal
+ * registered the library on 11 October (`registry.ts`), and the screen
+ * immediately read:
+ *
+ * > *103 pieces are registered and nothing uses them.*
+ *
+ * Every word true, and the advice under it wrong in a way that would cost
+ * somebody an afternoon: a one-page deployment has not *missed* a hundred and
+ * three things and does not *no longer need* them. The library is simply bigger
+ * than the app, which is what a library is for.
+ *
+ * ## Why the discriminator is the registry and not a fraction
+ *
+ * The obvious fix is a threshold — say it the sharp way under some fraction and
+ * the gentle way above it. It is the wrong cut, because the same ratio means
+ * opposite things on the two deployments: four unused out of fourteen chosen is
+ * a finding, and four unused out of fourteen that happen to be all Loom ships is
+ * not.
+ *
+ * What actually separates them is whether registering was a **decision**. A host
+ * that declined some of the library said something about its pages, and the
+ * pieces it kept and never used are part of what it said. A host that registered
+ * everything declined nothing and said nothing, so an unused piece there carries
+ * no intent to report back.
+ *
+ * So the caller passes that fact — it already computes it for `libraryNote` —
+ * and this reads one way or the other. Neither phrasing hides a name: the list
+ * is drawn under both, because the governance fact is the same fact and only its
+ * reading changes.
+ */
+export const unusedReading = (
+  unused: number,
+  used: number,
+  /** Whether this app registered everything the library ships, declining nothing. */
+  wholeLibrary: boolean
+): UnusedReading | null => {
+  if (unused === 0) return null
+
+  if (wholeLibrary) {
+    return {
+      title: `Your pages are built from ${used} of the ${plural(used + unused, "piece")} Loom ships`,
+      meaning:
+        "This app turned the whole library on, so the AI may reach for any of them and has reached for these. There is nothing to do about the rest — a library is meant to be larger than any one app, and the rest is what is available rather than what is missing. The catalogue below lists every piece, used or not.",
+    }
+  }
+
+  return {
+    title:
+      unused === 1
+        ? "One piece is registered and nothing uses it"
+        : `${plural(unused, "piece")} are registered and nothing uses them`,
+    meaning:
+      unused === 1
+        ? "The AI is offered it every time you ask for a change, and has never put it on a page. That is either something your pages are missing, or something your project no longer needs."
+        : "The AI is offered these every time you ask for a change, and has never put one on a page. That is either something your pages are missing, or something your project no longer needs.",
+  }
+}
+
 /**
  * What the app is, in one sentence, for the top of the screen.
  *

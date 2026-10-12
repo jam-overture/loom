@@ -1,63 +1,60 @@
-import { memoryTreeStore, type TreeStore } from "@jam-overture/loom/store"
-import { postgresTreeStore } from "@jam-overture/loom/postgres"
+import { ensureSiteSeeded } from "@/app/(marketing)/_lib/stored"
+import { appStore } from "@/app/_lib/app/store"
 
-import { portalDatabase } from "./database"
 import { seedTree } from "./seed"
 
 /**
- * The store: Postgres when one is configured, memory when not.
+ * The app's store, and the portal's own seeding of it.
  *
- * Both are supported states rather than a real one and a broken one — the same
- * shape as the interpreter, where absence degrades honestly instead of failing
- * obscurely. Memory is right for `pnpm dev`, where one process makes the log
- * durable for as long as you are looking at it. It is wrong for a serverless
- * deployment, where an append lands on the instance that served the request and is
- * absent from the next, which is the whole reason 0022 exists.
+ * **The store moved to `app/_lib/app/` on 12 October** and is re-exported here
+ * under the name this lane has always used, so no screen changed its import.
+ * It moved because `(marketing)` now renders from it too
+ * ([0259](../../../../../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+ * condition 1), which makes it the app's rather than this surface's — the
+ * store module has the argument.
  *
- * The connection itself belongs to `database.ts`, which the telemetry journal
- * shares: two contracts, one handle, one pool.
- *
- * The store handle is also the scope of what the portal may see (0020) — here
- * everything, because there is one tenant. A deployment with more would hand the
- * portal a narrower handle rather than teach the portal about tenants.
+ * **What stayed here is the seed**, because what a store should contain is not
+ * a property of the store. The demonstration page is this lane's and is
+ * authored next door in `./seed.ts`; the three pages the site serves are
+ * `(marketing)`'s and are authored there. This module seeds both, and the
+ * reason is below.
  */
-const build = (): TreeStore =>
-  portalDatabase === undefined ? memoryTreeStore() : postgresTreeStore(portalDatabase)
+export const portalStore = appStore
 
-const CARRIER_KEY = Symbol.for("loom.portal.store")
 const SEEDING_KEY = Symbol.for("loom.portal.seeding")
 
-type Carrier = {
-  [CARRIER_KEY]?: TreeStore
-  [SEEDING_KEY]?: Promise<void>
-}
+type Carrier = { [SEEDING_KEY]?: Promise<void> }
 
 const carrier = globalThis as unknown as Carrier
 
 /**
- * Constructing the store is cheap: postgres.js does not connect until the first
- * query, so nothing here reaches the network.
- */
-export const portalStore: TreeStore = (carrier[CARRIER_KEY] ??= build())
-
-/**
- * Seeding is deferred to the first request that needs it, and never happens at
- * module scope.
+ * Put this deployment's pages in the store, once per process.
  *
- * Importing a module must not perform IO. `next build` evaluates route modules
- * while collecting page data, so a query at import time makes the *build* depend
- * on the database being reachable and correctly migrated — which is exactly
- * backwards, since the build is what produces the code that runs the migration's
- * consumers. A deployment should fail because the app is broken, not because a
- * table did not exist yet at build time.
+ * ## Why the site's pages are seeded from here
  *
- * Memoised on the same carrier as the store, so concurrent requests on one
- * instance share a single attempt and a re-evaluated module does not re-seed.
- * `already-exists` is ignored by design: a second instance, or a restart against
- * a populated database, must not replace a tree that has since been edited.
+ * `(marketing)` seeds its three pages when one of them is requested, which is
+ * correct and is not sufficient: **it means the portal shows an empty shelf
+ * until somebody visits the public site.** A maintainer who deploys, signs in
+ * and looks at *Your pages* is doing the one thing most likely to come first,
+ * and what they would have seen is the demonstration page alone — which reads
+ * as *the site is not hooked up*, not as *nobody has been to the site yet*.
+ *
+ * That was found by photographing this screen rather than by reasoning about
+ * it: every test passed, the site served from the store, and the portal
+ * listing was still wrong, because no test and no type knows the order a
+ * person does things in.
+ *
+ * So both seeds run here, and `(marketing)` keeps its own call: whichever
+ * surface is reached first seeds the store, and the other finds it done.
+ * Neither overwrites anything — both are create-if-absent — so running both on
+ * every portal screen costs one refused write per process and buys an order
+ * nobody has to know about.
  */
 export const ensureSeeded = async (): Promise<void> => {
-  carrier[SEEDING_KEY] ??= portalStore.create(seedTree()).then(() => undefined)
+  carrier[SEEDING_KEY] ??= Promise.all([
+    portalStore.create(seedTree()),
+    ensureSiteSeeded(),
+  ]).then(() => undefined)
 
   await carrier[SEEDING_KEY]
 }

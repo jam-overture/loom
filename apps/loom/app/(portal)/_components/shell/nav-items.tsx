@@ -93,9 +93,11 @@ const strokeProps = {
  * industry would use — `Security` — is a claim four sizes larger than the screen:
  * it reports failed sign-ins to this portal and nothing else.
  *
- * `Demo` is the one entry that leaves this route group, and it is in the first
- * group because it is a thing this deployment *has*: the surface anyone can see
- * without a key.
+ * **There is no `Demo` entry, and that is deliberate.** One stood here pointing
+ * at `/demo`, justified in this comment as "a thing this deployment has". The
+ * maintainer asked for it gone repeatedly and the comment is what it was asked
+ * of instead — a rail is what a person came here to work in, not a tour of the
+ * product they have already bought.
  */
 export const NAV_GROUPS: readonly ShellNavGroup[] = [
   {
@@ -150,22 +152,6 @@ export const NAV_GROUPS: readonly ShellNavGroup[] = [
           <svg {...strokeProps}>
             <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" />
             <polyline points="9 12 11 14 15 10" />
-          </svg>
-        ),
-      },
-      {
-        /**
-         * The one public route, listed here anyway: a reviewer looking at what
-         * this deployment holds should be able to reach the surface anyone else
-         * can see, without having to be told the path.
-         */
-        label: "Demo",
-        href: "/demo",
-        icon: (
-          <svg {...strokeProps}>
-            <rect x="3" y="4" width="18" height="14" rx="2" />
-            <path d="M8 21h8" />
-            <path d="M10 9l4 2-4 2z" />
           </svg>
         ),
       },

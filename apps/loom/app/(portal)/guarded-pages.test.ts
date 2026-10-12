@@ -54,7 +54,6 @@ const APP = join(process.cwd(), "app", "(portal)")
  */
 const UNGUARDED_BY_DESIGN: readonly string[] = [
   "portal/sign-in/page.tsx",
-  "portal/demo/page.tsx",
   "portal/trees/[[...rest]]/page.tsx",
   "portal/calibration/[[...rest]]/page.tsx",
   "portal/audit/[[...rest]]/page.tsx",
@@ -90,7 +89,6 @@ describe("every page", () => {
     expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
       "portal/audit/[[...rest]]/page.tsx",
       "portal/calibration/[[...rest]]/page.tsx",
-      "portal/demo/page.tsx",
       "portal/primitives/[[...rest]]/page.tsx",
       "portal/sign-in/page.tsx",
       "portal/trees/[[...rest]]/page.tsx",

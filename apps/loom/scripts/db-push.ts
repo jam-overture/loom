@@ -7,7 +7,7 @@ import { ensureReaderSignalsSchema } from "@jam-overture/loom/signals/postgres"
 import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
-import { resolveConnectionString } from "../app/(portal)/_lib/connection"
+import { resolveConnectionString } from "../app/_lib/app/connection"
 
 /**
  * Creates the tables the portal needs — the store's, the telemetry journal's, and

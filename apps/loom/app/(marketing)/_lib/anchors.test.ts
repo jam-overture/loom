@@ -216,7 +216,8 @@ describe("the way back to what happened", () => {
 
       if (link === undefined) throw new Error("loom: the notice offers no way back")
 
-      const url = new URL(link)
+      /* A path, not a URL, since 12 October — this site's own links carry no origin (0259). */
+      const url = new URL(link, "https://site.invalid")
 
       expect({
         ask: url.searchParams.get("ask"),

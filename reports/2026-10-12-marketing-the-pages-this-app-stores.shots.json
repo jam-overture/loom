@@ -1,0 +1,41 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/",
+      "out": "2026-10-12-marketing-stored-minimal-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["h1"]
+    },
+    {
+      "path": "/?theme=editorial",
+      "out": "2026-10-12-marketing-stored-editorial-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["h1"]
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-10-12-marketing-stored-bold-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["h1"]
+    },
+    {
+      "path": "/what-you-run?theme=editorial",
+      "out": "2026-10-12-marketing-stored-what-you-run-editorial-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["h1"]
+    },
+    {
+      "path": "/how-it-works?theme=bold",
+      "out": "2026-10-12-marketing-stored-how-it-works-bold-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "measure": ["h1"]
+    }
+  ]
+}
