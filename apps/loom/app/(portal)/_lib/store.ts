@@ -59,12 +59,12 @@ const carrier = globalThis as unknown as Carrier
  * nobody has to know about.
  */
 export const ensureSeeded = async (): Promise<void> => {
-  carrier[SEEDING_KEY] ??= Promise.all([
-    portalStore.create(seedTree()),
-    ensureSiteSeeded(),
-    ensureDefaultProject(),
-    ensureDefaultApplication(),
-  ]).then(() => undefined)
+  carrier[SEEDING_KEY] ??= (async () => {
+    await placeTree(seedTree())
+    await ensureSiteSeeded()
+    await ensureDefaultProject()
+    await ensureDefaultApplication()
+  })()
 
   await carrier[SEEDING_KEY]
 }
@@ -81,7 +81,39 @@ export const ensureSeeded = async (): Promise<void> => {
  * has renamed it keeps its name, because `create` refuses rather than
  * overwrites.
  */
+/**
+ * Put a tree in the store if it is not there, by **asking first**.
+ *
+ * `create` refuses a tree that exists, which is correct and was being used as
+ * the question: the seed inserted blindly and let the primary key answer. That
+ * works on one machine and falls over on a serverless host, and it took
+ * production down on 12 October — `/portal` and `/` returning 504 after five
+ * minutes, with `duplicate key value violates unique constraint` six times in
+ * one second in the database log and `canceling statement due to statement
+ * timeout` behind it.
+ *
+ * **A failing INSERT is not free.** It takes a lock on the conflicting key
+ * until its transaction ends, so concurrent instances inserting the same six
+ * keys queue behind each other — and with `max: 1` on the pool, everything else
+ * that instance wanted queues behind that. A `SELECT` on a primary key takes no
+ * lock and answers in a millisecond.
+ *
+ * The write is still guarded by the constraint, so two instances that both find
+ * it absent are still safe: one wins, the other is refused, and neither
+ * overwrites. What changed is that the steady state — the row is already there,
+ * which is every request after the first — no longer writes at all.
+ */
+const placeTree = async (tree: ReturnType<typeof seedTree>): Promise<void> => {
+  const existing = await portalStore.head(tree.treeId)
+  if (existing.ok) return
+
+  await portalStore.create(tree)
+}
+
 const ensureDefaultProject = async (): Promise<void> => {
+  const existing = await appProjects.get(DEFAULT_PROJECT_ID)
+  if (existing.ok) return
+
   await appProjects.create({
     projectId: DEFAULT_PROJECT_ID,
     name: "Your projects",
@@ -101,6 +133,9 @@ const ensureDefaultProject = async (): Promise<void> => {
  * overwrites.
  */
 const ensureDefaultApplication = async (): Promise<void> => {
+  const existing = await appApplications.get(DEFAULT_APPLICATION_ID)
+  if (existing.ok) return
+
   await appApplications.create({
     applicationId: DEFAULT_APPLICATION_ID,
     projectId: DEFAULT_PROJECT_ID,

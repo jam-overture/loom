@@ -130,7 +130,11 @@ const carrier = globalThis as unknown as Carrier
 export const ensureSiteSeeded = async (): Promise<void> => {
   carrier[SEEDING_KEY] ??= (async () => {
     for (const { route } of sitePagesStored()) {
-      await appStore.create(treeFor(route, storedContext()))
+      const tree = treeFor(route, storedContext())
+      const existing = await appStore.head(tree.treeId)
+      if (existing.ok) continue
+
+      await appStore.create(tree)
     }
   })()
 
