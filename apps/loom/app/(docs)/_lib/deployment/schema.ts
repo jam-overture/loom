@@ -85,6 +85,18 @@ const ADD_COLUMN = /^ALTER TABLE (\w+) ADD COLUMN IF NOT EXISTS (\w+) (\w+)(?: (
  * moves the `key` flags.
  */
 const DROP_CONSTRAINT = /^ALTER TABLE (\w+) DROP CONSTRAINT IF EXISTS (\w+)$/
+
+/**
+ * An index being taken off and put back, which is how an index widens.
+ *
+ * `CREATE INDEX IF NOT EXISTS` keys on the *name*, so an index whose columns
+ * change under the same name has to be dropped first — otherwise the old one
+ * is left exactly as it was and every read goes on scanning while appearing to
+ * be indexed. Read as a pair with the create below it, for the reason a
+ * dropped constraint is: the gap between them is not a state the database is
+ * ever observed in.
+ */
+const DROP_INDEX = /^DROP INDEX IF EXISTS (\w+)$/
 const ADD_PRIMARY_KEY = /^ALTER TABLE (\w+) ADD PRIMARY KEY \(([^)]*)\)$/
 const ENABLE_ROW_SECURITY = /^ALTER TABLE (\w+) ENABLE ROW LEVEL SECURITY$/
 /**
@@ -254,6 +266,17 @@ export const tablesIn = (ddl: readonly string[]): readonly SchemaTable[] => {
      */
     if (DROP_CONSTRAINT.test(statement)) {
       requireTable(tables, statement.match(DROP_CONSTRAINT)?.[1] ?? "", statement)
+      continue
+    }
+
+    const dropped = statement.match(DROP_INDEX)
+    if (dropped?.[1] !== undefined) {
+      const name = dropped[1]
+
+      tables = tables.map((table) => ({
+        ...table,
+        indexes: table.indexes.filter((index) => index.name !== name),
+      }))
       continue
     }
 
