@@ -55,6 +55,17 @@ eras:
 
 ## After
 
+**What a depth-1 clone transfers — which is what Vercel and CI fetch — goes from
+603.0MB to 136.7MB.** Measured by packing each ref's commit and tree with no
+history:
+
+```
+origin/main    603.0 MB
+HEAD           136.7 MB
+```
+
+The whole tree at `HEAD` is 162.4MB against `origin/main`'s 703.0MB.
+
 ```
 1776 visuals in reports/, 125.1MB, none over 1.1MB, 386 cited by no file
 ```
@@ -115,8 +126,16 @@ before and are identical after.
   git ref, which is not a thing to change without exercising it, and exercising
   it needs a build, Playwright and a ref checkout. Both entry points print the
   reminder; `verify` is the enforcement.
-- **A shallow clone gets the whole saving immediately**, which is what CI and
-  Vercel take. A full `git clone` still carries the old PNGs in history.
+- **A shallow clone gets the whole saving immediately** — 603.0MB to 136.7MB,
+  measured — which is what CI and Vercel take. A full `git clone` still carries
+  the old PNGs in history and will until someone decides a rewrite is worth
+  falsifying the SHA citations for. That trade is not taken here.
+
+  The first version of this measurement was wrong and is worth recording: packing
+  each ref with `--revs` made the *new* branch look 120MB **larger**, because
+  that walks all history and this branch's history contains both the PNGs and the
+  WebPs. The number above packs the commit and its tree with `--no-walk`, which
+  is the question a shallow clone actually asks.
 
 ## Two things the check got wrong before it was right
 
