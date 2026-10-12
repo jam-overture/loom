@@ -19,7 +19,7 @@ routines' own.
 `/what-you-run` is in the bar across the top. One link, and the reason it was
 not there is the actual subject of the run.
 
-![the front door, with the page one click away](2026-10-12-marketing-bar-minimal-wide.png)
+![the front door, with the page one click away](2026-10-12-marketing-bar-minimal-wide.webp)
 
 | | before | after |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ equals `innerWidth` on every shot, the bar is 1080px holding six pressable
 things that end at x 1148, and the phone still folds the menu into its
 disclosure.
 
-![bold](2026-10-12-marketing-bar-bold-wide.png)
+![bold](2026-10-12-marketing-bar-bold-wide.webp)
 
 ---
 
