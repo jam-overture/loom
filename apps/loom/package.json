@@ -12,9 +12,9 @@
     "verify": "pnpm build && pnpm typecheck && pnpm test",
     "docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
     "docs:fences": "tsx \"app/(docs)/_lib/fences/generate.ts\"",
-    "db:push": "tsx scripts/db-push.ts",
-    "telemetry:prune": "tsx scripts/telemetry-prune.ts",
-    "signals:collect": "tsx scripts/signals-collect.ts"
+    "db:push": "pnpm --filter @jam-overture/loom build && tsx scripts/db-push.ts",
+    "telemetry:prune": "pnpm --filter @jam-overture/loom build && tsx scripts/telemetry-prune.ts",
+    "signals:collect": "pnpm --filter @jam-overture/loom build && tsx scripts/signals-collect.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
