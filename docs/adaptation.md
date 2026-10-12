@@ -41,62 +41,105 @@ already exists.
 | --- | --- |
 | **Serving a chosen revision to a reader** | The host's `TreeSource` decides what a request renders. Nothing selects today |
 | **Assignment** — which reader sees which revision | Per *page view*, because there is no cross-visit identity and there deliberately will not be (0146) |
-| **A named objective** | Per deployment. The next section argues for a shape |
+| **A named objective** | Per deployment. Named on 11 October — adoption, as the next section states it — and still to be written into a deployment's configuration |
 | **An allocator** | Smallest piece here. Thompson or epsilon-greedy over revisions |
-| **Promotion and guardrails** | Minimum exposure, an early stop for a clear loser, and a person in the loop while traffic is small |
+| **Promotion and the floor** | Minimum exposure, an early stop for a clear loser, and a person in the loop — which, at the traffic this page has and the objective it was given, means every time |
 | **Derivation from counters** | A sentence a person could argue with, computed from tallies — the step the ski prototype proved |
 
 ## The objective
 
-A landing page has one ask — a form, a sign-up, a *request access* — and the
-honest decision metric is **of the readers who reached the ask, how many
-completed it**, which is exactly a funnel pair.
+**Adoption: readers who go and install the framework.** That is what this work
+was asked for in the first place — *turn visitors into people who go to download
+and install the loom framework* — and the maintainer restated it on 11 October:
+whatever gets the most of that is what to build.
 
-**But that is not what to optimise for, and the reason is causal.** A structural
-change moves furniture: it reorders bands, lifts the ask, shortens the path. What
-that can actually change is **how many readers get to the ask at all**. Whether
-somebody who is looking at the form fills it in is mostly about the offer, not
-the layout.
+**This section used to name reach as the thing to optimise, and that was a
+mistake of filing rather than of arithmetic.** Reach is a *proxy*: it resolves
+four times faster at this traffic, which is a real argument and is still true
+below. Writing it under the heading **the objective** made a statistical
+convenience look like a decision about what the project wants, and it is not one.
+The goal has not moved. Reach goes back to being what explains a result.
 
-So:
+### What an install is, on the page as it stands
 
-| | Metric | Why |
+The front door has carried the ask since 11 October, and it is one band holding
+two controls:
+
+| | Node | What a press means |
 | --- | --- | --- |
-| **Optimise** | `reached` on the ask band ÷ `views` | What a structural change can move, and it fires for every reader who scrolls — ten to fifty times the events of a completion |
-| **Guard** | `converted` ÷ `reached` on the funnel pair | Stops a variant winning by dragging uninterested readers to the form. If reach goes up and this goes down, the variant is not an improvement |
-| **Describe** | `dwellMs` and `engaged` per band | Where readers stop, which is worth having on day one whether or not anything is ever optimised |
+| **The command** | the `loom.code` panel | The strongest thing this site can observe: the install line went to a clipboard |
+| **The guide** | the `loom.action` into `/docs` | A reader going to find out how. Weaker, and still adoption-shaped |
 
-Both numbers already exist per revision. Neither needs a new kind, a new field,
-or anything on the wire.
+Either press is the objective. Nothing else is inside that band, so **a use
+anywhere inside the install band is an install intent** — which matters because
+it is already a number this subsystem produces.
+
+### The figure, and it needs no new counter
+
+| | Figure | Where it comes from |
+| --- | --- | --- |
+| **Optimise** | distinct page views with a use inside the install band ÷ page views | `PartAction.within` (0167) over `pageViewsFor` |
+| **Explain** | `reached` on the install band ÷ page views, and `within ÷ reached` | `reach.ts` and `PartAction.share` as they stand |
+| **Describe** | `dwellMs` and `engaged` per band | Where readers stop, worth having whether or not anything is optimised |
+
+Two things were checked in the code rather than assumed, because the objective
+rests on both:
+
+- **A press on *Copy* names the band.** `ancestryOf` in `broadcast.ts` walks
+  every addressed ancestor of the pressed element, and the per-kind `types`
+  filter applies only to the target's own type — so narrowing what this site
+  asks about does not clip the chain, and the `activated` signal from the panel
+  carries the install section in its `within`.
+- **The rate has a home already.** Dividing a part's distinct-view count by the
+  page views counted at the door is exactly the join `reach.ts` makes, with its
+  ceiling and its over-count stated (0147, 0219). The objective wants that join
+  with `within` where `reached` is. One reading of an existing shape; no new
+  counter, no new kind, nothing on the wire.
+
+**There is no guard metric now, and that is a simplification rather than an
+omission.** The guard existed because the target was a proxy: reach could be won
+by dragging uninterested readers at the ask. A target that *is* the terminal
+event cannot be gamed by its own proxy. What replaces it is the decomposition —
+`installs ÷ views` = `reached ÷ views` × `within ÷ reached` — which says whether
+a variant won by getting more readers to the band or by making the band work
+harder, and that is the sentence a person needs in order to agree with it.
 
 ## What your traffic means, stated plainly
 
 A LinkedIn post is a burst of a few hundred views at best, and then quiet.
 
-Rough sample sizes, for 80% power at the usual threshold:
+Rough sample sizes, per arm, for 80% power at the usual threshold:
 
-| To detect | Per variant |
-| --- | --- |
-| reach 30% → 40% | **~350 views** |
-| completion 5% → 7.5% | **~1,500 views** |
+| To detect | Per arm | Two arms |
+| --- | --- | --- |
+| reach 30% → 40% | ~350 views | ~700 |
+| **installs 2% → 4%** (a doubling) | **~1,150 views** | **~2,300** |
+| installs 2% → 3% | ~3,800 views | ~7,600 |
 
-So reach is **four times cheaper** to learn about than completion, and even reach
-will not resolve from one post. Three consequences, and they are design
-requirements rather than disappointments:
+**The objective is the expensive one, and it was chosen anyway.** That is the
+right call — a cheap answer to the wrong question is worth nothing — but the
+consequences are design requirements and not disappointments:
 
-1. **A person promotes, not the bandit.** Below a floor the deployment sets, the
-   allocator may *recommend* and may not promote. This is not a workaround: it is
-   what the Gate already does — a structural `system-signal` change is above the
-   `low` ceiling, so it is held for a human by default. The loop ends at *here is
-   the change, here is why, and here is the evidence* until there is enough
-   evidence to end it anywhere else.
-2. **"No winner" is a first-class outcome** and must be reported as confidently
-   as a winner. The failure mode of every experimentation tool is that it never
-   says this.
-3. **Assign per view, randomly, and never by time.** One burst of traffic and one
-   quiet week are different populations; a variant that ran on Tuesday is not
-   comparable to one that ran on Friday. Randomised per view, the burst is one
-   cohort and both arms are inside it.
+1. **A person promotes, not the bandit**, and for a long while that is the only
+   mode. Below a floor the deployment sets, the allocator may *recommend* and may
+   not promote. This is what the Gate already does: a structural `system-signal`
+   change is above the `low` ceiling and is held for a human by default. The loop
+   ends at *here is the change, here is why, here is the evidence*.
+2. **Only large moves are worth proposing.** At this traffic nothing under a
+   doubling will resolve, so the loop should argue about where the ask *is* —
+   above the fold, in the closing band, in the menu — and never about wording a
+   button. A proposal whose honest expected effect is a few percent is a proposal
+   that cannot be judged, and the brief should say so rather than make it.
+3. **"No winner" is a first-class outcome**, reported as confidently as a winner.
+   The failure mode of every experimentation tool is that it never says this.
+4. **Assign per view, randomly, and never by time.** One burst and one quiet week
+   are different populations; randomised per view, the burst is one cohort and
+   both arms are inside it.
+5. **Reach is the leading indicator and is read first.** It moves before the
+   objective does and resolves four times sooner, so a variant that is winning
+   reach and flat on installs at 300 views is the ordinary early state and not a
+   result. It is a reason to keep a variant running, never a reason to promote
+   one.
 
 **The first milestone is description, not decision.** With two hundred views you
 can see where readers stop, which question they open, and whether anyone reaches
@@ -172,19 +215,19 @@ download API is an honest north star and can never be attributed to a variant.
 
 | | |
 | --- | --- |
-| Measured | bands (`viewed`, `dwelled`), and `loom.action`, `loom.card`, `loom.link`, `loom.brand` (`activated`), FAQs (`disclosed`) |
-| **No conversion event** | `COMPLETION_TYPES` is empty. There is no form, so nothing can `complete` |
-| **Copy is invisible** | `loom.code` carries the copy control and declares itself interactive, but is not in `CONTROL_TYPES` — so pressing *copy* on an install command, the clearest intent-to-install a visitor can express, is not counted |
-| **There is no install on the page** | The home page's actions lead to two marketing pages, the demo, and the repository twice. "Install" appears in prose on `/what-you-run` and nowhere as an ask |
+| Measured | bands (`viewed`, `dwelled`), and `loom.action`, `loom.card`, `loom.code`, `loom.link`, `loom.brand` (`activated`), FAQs (`disclosed`) |
+| **The ask** | An install band on `/` since 11 October: the command in a panel a reader can copy, and one control into `/docs`. A press on either names the band in its `within` |
+| **No conversion event** | `COMPLETION_TYPES` is empty. There is no form, so nothing can `complete` — and with the objective ending at a press rather than a submission, nothing needs one |
+| **The hand-typed install is invisible** | A reader who selects the line and copies it with the keyboard, or types it, is an adoption this site will never hear about. The figure is a floor and every report should say so |
 
-So the funnel this loop exists to improve **does not exist yet**, and a model
-pointed at the page today would have no ask to move anybody toward. Naming it is
-milestone 1 and it is a page-design decision.
+So the funnel this loop exists to improve **exists as of 11 October**, and the
+rows above are the whole of what a model pointed at this page can be told.
 
-**The baseline is already there, though.** The header renders a link per surface
-and `loom.link` is measured, so *clicked through toward the docs* is countable
-today — which makes adding an install ask the first before-and-after this loop
-can measure, rather than a change nobody can evaluate.
+**The before-and-after is the band itself.** The site counted *clicked through
+toward the docs* before the band existed, through the header's `loom.link` per
+surface; it now counts the band's own presses as well. The first thing the
+tallies can answer is whether naming the ask changed anything, which is a
+question about this change rather than about a variant of it.
 
 ### The dependency 0259 names, arrived at twice
 
@@ -221,7 +264,7 @@ plan was wrong says so here rather than in a report nobody reads again.
 | 3 | **Derivation from tallies** | maintainer session | Counters → one sentence a person could argue with, deterministic, with the numbers that produced it carried alongside. Tested against a case where it should say nothing | not started |
 | 4 | **The model seam, with a small local model** | maintainer session | Sentence → operations → the Gate → held for a person, and the record reads correctly: rationale, origin `system-signal`, inverse | not started |
 | 5 | **The allocator** | undecided | Recommends an arm, reports *no winner* when there is none, and cannot promote below the evidence floor | not started |
-| 6 | **Promotion and guardrails** | undecided | Promotion goes through the Gate like any change and is revertible; the guard metric stops a variant that wins reach and loses conversion | not started |
+| 6 | **Promotion and the floor** | undecided | Promotion goes through the Gate like any change and is revertible; nothing is promoted below the evidence floor, and the decomposition is reported beside every result so a person can see whether the variant won at the band or on the way to it | not started |
 | 7 | **Harden what proved stable into `src/`** | a lane, decided then | The parts that stopped changing move out of the prototype. This is when the lane question gets answered rather than guessed | not started |
 
 **Milestones 1 to 4 are a maintainer session's**, in the open, on a prototype —
@@ -246,11 +289,20 @@ optimisation; it is description, and description is what nobody has today.
    **Accepted on 11 October.** Milestone 2 is unblocked, and the marketing
    surface earns portal governance by rendering from the store rather than by
    being wired to it.
-3. **Confirming the objective** above — reach as the target, conversion rate as
-   the guard — or naming a different one.
+3. ~~**Confirming the objective.**~~ **Answered on 11 October: adoption.**
+   *"The objective is to get people to click to install the Loom library from
+   NPM. Whatever gets us the most of that is what we need."* The target is the
+   install band's own number — `within ÷ page views` — and reach is demoted to
+   the thing that explains it. The section above is rewritten to say so.
 4. **The evidence floor**: how many views per arm before anything may be promoted
-   without a person. The arithmetic above says a few hundred for reach; the number
-   is a judgement about how much being wrong costs.
+   without a person. **A recommendation, since the objective is now the expensive
+   one:** 1,000 views per arm, which is just under the ~1,150 a doubling needs, so
+   the floor is never the thing that lets a weak result through — the test is.
+   At the traffic described above that means *a person decides, every time*, for
+   the foreseeable future, and the honest thing is to build the loop that way
+   rather than to pick a floor low enough to make it feel automatic. The number
+   is still a judgement about how much being wrong costs, and it is the
+   maintainer's.
 
 ### Where this is written down
 
@@ -265,6 +317,24 @@ optimisation; it is description, and description is what nobody has today.
   needs it.
 - **Multi-page journeys.** One page, one view, one objective, until that works.
 - **Automatic promotion below the evidence floor.** The allocator may recommend.
+
+## The first variants, when there are any
+
+Named here so the loop is not handed a blank page, and because at this traffic
+only large moves resolve (above). None of these is decided; each is a proposal
+the Gate would hold for a person.
+
+1. **Where the band sits.** It is after the questions today. Above the fold, or
+   repeated in the closing band, are the two moves with an effect large enough to
+   be seen.
+2. **A third control: the package on npm.** The objective is phrased as clicking
+   through to install, and the page offers a command and a guide but no link to
+   the package itself. Adding one is a page-design decision for the maintainer,
+   not a proposal the loop should make on its own — it is a new control rather
+   than a rearrangement, and the Gate's vocabulary for the loop is
+   insert/remove/move/configure over what the registry already has.
+3. **What the band says.** The weakest of the three, and the one to leave until
+   the traffic can support it.
 
 ## Open questions
 
