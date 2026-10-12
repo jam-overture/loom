@@ -12287,7 +12287,7 @@
           "reach": "loaded"
         }
       ],
-      "files": 14,
+      "files": 16,
       "narrower": [],
       "standing": {
         "packageNames": 1545,
@@ -12327,23 +12327,23 @@
             {
               "name": "postgresReaderSignalJournal",
               "kind": "function",
-              "signature": "const postgresReaderSignalJournal: (db: LoomDatabase) => ReaderSignalJournal",
+              "signature": "const postgresReaderSignalJournal: (db: LoomDatabase, scope?: StoreScope) => ReaderSignalJournal",
               "truncated": false,
-              "summary": ""
+              "summary": "Every read is filtered by the application this handle speaks for, and every write sets it."
             },
             {
               "name": "postgresReaderTallyStore",
               "kind": "function",
-              "signature": "const postgresReaderTallyStore: (db: LoomDatabase) => ReaderTallyStore",
+              "signature": "const postgresReaderTallyStore: (db: LoomDatabase, scope?: StoreScope) => ReaderTallyStore",
               "truncated": false,
-              "summary": ""
+              "summary": "Scoped on the same terms as the journal — see its note."
             },
             {
               "name": "postgresReaderRegionStore",
               "kind": "function",
-              "signature": "const postgresReaderRegionStore: (db: LoomDatabase) => ReaderRegionStore",
+              "signature": "const postgresReaderRegionStore: (db: LoomDatabase, scope?: StoreScope) => ReaderRegionStore",
               "truncated": false,
-              "summary": ""
+              "summary": "Scoped on the same terms as the journal — see its note."
             }
           ]
         }
