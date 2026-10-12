@@ -95,23 +95,50 @@ describe("the page a counting deployment serves", () => {
     }
   })
 
-  it("says in the foot of every page that it is counting, when it is", async () => {
-    expect(await markup(true)).toContain("never counts who you are")
-  })
-
-  it("says nothing about counting anywhere on a page that counts nobody", async () => {
-    const page = await markup(false)
-
-    expect(page).not.toContain("never counts who you are")
-    expect(page).not.toContain("counts which of its parts")
-  })
-
   /**
-   * The page whose subject this is says which of the two deployments it is
-   * running on, in the band where it prints the numbers.
+   * **The site makes no claim about whether counting is on, in either state.**
+   *
+   * It made two until 12 October: a line in the footer when counting was on,
+   * and a sentence on `/what-you-run` saying which of the two deployments you
+   * were reading. Both were written when every page was rebuilt per request,
+   * so both tracked the setting for free.
+   *
+   * They stopped being free when the pages became stored rows (0259): a
+   * sentence about the current setting freezes at the moment it is written and
+   * is false from the first time anybody changes it — and *nobody reading this
+   * page has been counted* is the worst of the two to be wrong about. The
+   * maintainer's instruction was to take the message off the site whether it
+   * is counting or not.
+   *
+   * **What is not removed is the explanation.** `/what-you-run` still has its
+   * *what this page counts* section, which is true of a Loom page whatever any
+   * deployment has switched on, and that is what the footer line used to point
+   * at. Asserted below so that dropping the pointer cannot quietly become
+   * dropping the subject.
    */
-  it("tells the reader of the readers page which deployment they are on", async () => {
-    expect(await readersPage(false)).toContain("nobody reading this page has been counted")
-    expect(await readersPage(true)).toContain("Counting is switched on here")
+  it("makes no claim about whether counting is switched on, either way", async () => {
+    for (const counting of [true, false]) {
+      const page = await markup(counting)
+
+      expect(page, `footer, counting=${counting}`).not.toContain("never counts who you are")
+      expect(page, `footer, counting=${counting}`).not.toContain("counts which of its parts")
+
+      const readers = await readersPage(counting)
+
+      expect(readers, `readers page, counting=${counting}`).not.toContain(
+        "nobody reading this page has been counted"
+      )
+      expect(readers, `readers page, counting=${counting}`).not.toContain(
+        "Counting is switched on here"
+      )
+    }
+  })
+
+  it("still explains what a page is able to count, on the page that is about it", async () => {
+    for (const counting of [true, false]) {
+      expect(await readersPage(counting), `counting=${counting}`).toContain(
+        "what a page is able to count"
+      )
+    }
   })
 })

@@ -28,16 +28,39 @@ import { readSession, SESSION_COOKIE } from "@/app/(portal)/_lib/auth/session"
  * warns on the old filename. It is the same hook, and it now always runs on the
  * Node runtime.
  */
+/**
+ * The path, forwarded to the server components beneath.
+ *
+ * A layout cannot read the URL it is rendering — Next gives it `children` and
+ * nothing else — and `(portal)/layout.tsx` has to know one thing about it:
+ * whether the screen below brings its own chrome. The shell prototype under
+ * `/portal/preview` does, and the layout's topbar and rail are what it is
+ * proposing to replace, so the two cannot both be mounted.
+ *
+ * Set here because the guard already runs on every one of these paths, so this
+ * costs a header rather than a hook. It goes when the prototype becomes the
+ * portal and there is one chrome again.
+ */
+export const PATH_HEADER = "x-loom-path"
+
+const forwarding = (request: NextRequest): NextResponse => {
+  const headers = new Headers(request.headers)
+
+  headers.set(PATH_HEADER, request.nextUrl.pathname)
+
+  return NextResponse.next({ request: { headers } })
+}
+
 export const proxy = async (request: NextRequest): Promise<NextResponse> => {
   const { pathname, search } = request.nextUrl
 
-  if (isPublicPath(pathname)) return NextResponse.next()
+  if (isPublicPath(pathname)) return forwarding(request)
 
   if (portalAuth.ok) {
     const token = request.cookies.get(SESSION_COOKIE)?.value
     const session = token ? await readSession(token, portalAuth.value.secret, Date.now()) : undefined
 
-    if (session?.ok) return NextResponse.next()
+    if (session?.ok) return forwarding(request)
   }
 
   const signIn = new URL(SIGN_IN_PATH, request.url)

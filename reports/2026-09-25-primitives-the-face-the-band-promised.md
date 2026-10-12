@@ -15,7 +15,7 @@ nothing new on it to look at** — a primitive is a thing a tree uses, and this
 deployment seeds trees that carry none of these bands. Everything below was
 driven against the specimen harness and a local render
 
-![Five bands under editorial, at 1280px](2026-09-25-primitives-the-face-the-band-promised-editorial-wide.png)
+![Five bands under editorial, at 1280px](2026-09-25-primitives-the-face-the-band-promised-editorial-wide.webp)
 
 ## What this run chose, and why that
 
@@ -174,7 +174,7 @@ nothing, because it is the one value that means *as many as fit*.
 
 | before — `main` | after |
 | --- | --- |
-| ![Three columns and an orphan](2026-09-25-primitives-the-face-the-band-promised-footer-before.png) | ![Four columns](2026-09-25-primitives-the-face-the-band-promised-footer-after.png) |
+| ![Three columns and an orphan](2026-09-25-primitives-the-face-the-band-promised-footer-before.webp) | ![Four columns](2026-09-25-primitives-the-face-the-band-promised-footer-after.webp) |
 
 Both crops are the same band in the same assembled page at 1280, cut from the
 whole-page photograph at 1:1. The *before* was taken with `loom.footer.ts`

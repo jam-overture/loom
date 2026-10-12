@@ -11,7 +11,7 @@ read its history, ask somebody's database for its contents and take it to
 production. Every one of them is about the page changing because **somebody
 asked**. Nothing on the site said a published page can say anything back.
 
-![The page, and the tree it is about](2026-09-13-docs-what-your-readers-do.png)
+![The page, and the tree it is about](2026-09-13-docs-what-your-readers-do.webp)
 
 ## What shipped
 
@@ -36,7 +36,7 @@ reader to import it.
 
 Driven the way the page tells a reader to drive it:
 
-![Four kinds, from a browser, with real numbers in them](2026-09-13-docs-what-your-readers-do-live.png)
+![Four kinds, from a browser, with real numbers in them](2026-09-13-docs-what-your-readers-do-live.webp)
 
 `dwelled loom.section 524ms` is 524 milliseconds somebody's tab was actually
 open. Nothing on this site has previously been able to show a browser-side seam
@@ -52,7 +52,7 @@ mentions it. A broadcaster reporting everything would pass the other five.
 
 That addressing a page costs nothing but attributes.
 
-![What addressing writes, and what it does not](2026-09-13-docs-what-your-readers-do-addressing.png)
+![What addressing writes, and what it does not](2026-09-13-docs-what-your-readers-do-addressing.webp)
 
 **815 bytes across twelve elements**, and the four attribute names are the whole
 of it. The pass/fail line under the table is not "did it write the four" but
@@ -70,7 +70,7 @@ computes 815 from the attribute strings, and the rendered diff is 815.
 *What a signal does not carry*, and it is written around a refusal rather than a
 promise:
 
-![Five things at one endpoint](2026-09-13-docs-what-your-readers-do-readback.png)
+![Five things at one endpoint](2026-09-13-docs-what-your-readers-do-readback.webp)
 
 A signal with the **label of the button on it** is refused — the whole batch,
 with the offending key named — not quietly trimmed. That is what makes "a signal
@@ -82,7 +82,7 @@ The four kinds are likewise walked out of `READER_SIGNAL_KINDS`, so a fifth kind
 added to the runtime fails the page — naming the kind — rather than quietly not
 appearing on a page that says there are four.
 
-![The vocabulary, in dark](2026-09-13-docs-what-your-readers-do-dark.png)
+![The vocabulary, in dark](2026-09-13-docs-what-your-readers-do-dark.webp)
 
 ## Decisions taken that were not specified
 
@@ -172,7 +172,7 @@ claim rather than a check:
 1280 at 1280, in both themes. The blocks that could overflow are the JSON in the
 kinds table, the batch, and the code fences; each scrolls inside its own box.
 
-![At a true 390px](2026-09-13-docs-what-your-readers-do-phone.png)
+![At a true 390px](2026-09-13-docs-what-your-readers-do-phone.webp)
 
 ## Scope
 

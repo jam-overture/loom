@@ -9,7 +9,7 @@ finding and is not re-filed. Everything measured below is a production build
 (`pnpm build && next build && next start`), fetched over real HTTP and driven in
 Chromium.
 
-![What each door makes you install, and how it was found out](2026-09-22-docs-before-the-import-will-run.png)
+![What each door makes you install, and how it was found out](2026-09-22-docs-before-the-import-will-run.webp)
 
 ## What this run was
 
@@ -47,7 +47,7 @@ page:
 > pnpm add drizzle-orm vitest
 > ```
 
-![The contracts door, with what it loads above everything else on the page](2026-09-22-docs-before-the-import-will-run-contracts-wide.png)
+![The contracts door, with what it loads above everything else on the page](2026-09-22-docs-before-the-import-will-run-contracts-wide.webp)
 
 ## Two strengths, and why a page must not state them the same way
 
@@ -69,7 +69,7 @@ the client it adapts is the thing a host passes in. Its page says so:
 > this import loads reaches it — the mention is in the types, which are gone by
 > the time the code runs.
 
-![The adapter door, where the SDK is in the types and nowhere else](2026-09-22-docs-before-the-import-will-run-anthropic-wide.png)
+![The adapter door, where the SDK is in the types and nowhere else](2026-09-22-docs-before-the-import-will-run-anthropic-wide.webp)
 
 **The declared walk is deliberately one file deep.** Followed all the way, a
 declaration graph reaches every package any type in its neighbourhood mentions
@@ -86,7 +86,7 @@ which announces when no written page names anything: a reader told that this
 import needs nothing stops wondering, and a reader shown no band at all cannot
 tell that from a site that never checked.
 
-![The root door, which needs nothing, saying so](2026-09-22-docs-before-the-import-will-run-runtime-wide.png)
+![The root door, which needs nothing, saying so](2026-09-22-docs-before-the-import-will-run-runtime-wide.webp)
 
 ## What I declined, and what the measurement said
 

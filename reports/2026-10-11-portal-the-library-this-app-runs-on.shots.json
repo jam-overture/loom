@@ -1,0 +1,15 @@
+{
+  "outDir": "reports",
+  "shots": [
+    { "out": "2026-10-11-portal-library-page-wide", "path": "/portal/pages/t_seed1",
+      "viewport": { "width": 1680, "height": 1100, "label": "wide" },
+      "waitFor": "h1", "measure": ["h1", "iframe", "text=Loom"], "before": {"path":"/portal/sign-in","do":[{"fill":"input[name=key]","text":"portal-photograph-key-0123456789"},{"click":"button[type=submit]"},{"waitFor":"text=What Loom has been doing"}]} },
+    { "out": "2026-10-11-portal-library-app-wide", "path": "/portal/app",
+      "viewport": { "width": 1680, "height": 1200, "label": "wide" },
+      "waitFor": "text=What it is built from",
+      "measure": ["text=What it is built from", "text=Loom ships"], "before": {"path":"/portal/sign-in","do":[{"fill":"input[name=key]","text":"portal-photograph-key-0123456789"},{"click":"button[type=submit]"},{"waitFor":"text=What Loom has been doing"}]} },
+    { "out": "2026-10-11-portal-library-pages-wide", "path": "/portal/pages",
+      "viewport": { "width": 1680, "height": 900, "label": "wide" },
+      "waitFor": "h1", "before": {"path":"/portal/sign-in","do":[{"fill":"input[name=key]","text":"portal-photograph-key-0123456789"},{"click":"button[type=submit]"},{"waitFor":"text=What Loom has been doing"}]} }
+  ]
+}

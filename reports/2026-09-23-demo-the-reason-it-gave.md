@@ -68,8 +68,8 @@ contradicting it. `moved.ts`'s own module comment says this is *“one sentence,
 whichever way a visitor reaches it.”* The card was printing two, and a stranger
 read the false one first because it was larger and higher.
 
-[Before and after, the whole rail in one frame.](2026-09-23-demo-the-reason-it-gave-before.png)
-· [after](2026-09-23-demo-the-reason-it-gave-after.png)
+[Before and after, the whole rail in one frame.](2026-09-23-demo-the-reason-it-gave-before.webp)
+· [after](2026-09-23-demo-the-reason-it-gave-after.webp)
 
 ## What a stranger can understand now
 
@@ -86,8 +86,8 @@ in the loud position, in words a stranger reads in one pass:
 > **You changed the page after asking for this. Loom weighed it against the page
 > as it was then, and won’t apply a decision to a page it hasn’t seen.**
 
-[The two cards in the two-pane layout.](2026-09-23-demo-the-reason-it-gave-wide.png)
-· [the same on a phone](2026-09-23-demo-the-reason-it-gave-phone.png)
+[The two cards in the two-pane layout.](2026-09-23-demo-the-reason-it-gave-wide.webp)
+· [the same on a phone](2026-09-23-demo-the-reason-it-gave-phone.webp)
 
 ## The change
 

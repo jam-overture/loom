@@ -164,17 +164,17 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
           title="You don't have any pages yet."
           action={
             <Link
-              href="/demo"
+              href="/docs/getting-started/your-first-tree"
               className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 no-underline"
             >
-              Try the demo →
+              How a page gets here →
             </Link>
           }
         >
           <p>
-            The demo needs no account and no database. You type what you want changed, and you
-            watch Loom decide whether to do it, ask you first, or turn it down — which is the
-            whole of what this portal is for.
+            A page shows up here as soon as this deployment stores one. From there you can see it
+            as a reader does, ask for a change in your own words, and answer whatever Loom decides
+            to put to you.
           </p>
           <TechnicalDetail summary="Why this deployment has no pages">
             <p>

@@ -16,7 +16,7 @@ losing to newer arrivals in the findings queue each time. It is closed.
 Every page in the API reference is titled with the import you would type. There
 are seventeen of them, and on a phone ten were broken in the middle of a word.
 
-![Before](2026-10-03-docs-where-a-specifier-breaks-before-broadcast-phone.png)
+![Before](2026-10-03-docs-where-a-specifier-breaks-before-broadcast-phone.webp)
 
 ```
 @jam-
@@ -51,7 +51,7 @@ first. `<wbr/>` is an element whose entire meaning is *you may break the line
 here* — no width, no character, nothing added to the text. One after each slash,
 which is where a person would break it themselves.
 
-![After](2026-10-03-docs-where-a-specifier-breaks-broadcast-phone.png)
+![After](2026-10-03-docs-where-a-specifier-breaks-broadcast-phone.webp)
 
 ## Four candidates, measured rather than reasoned about
 
@@ -86,7 +86,7 @@ thing to try.
 gone, which is the whole of what the finding asked for, and the first line still
 ends on a hyphen.
 
-![The one that is imperfect rather than fixed](2026-10-03-docs-where-a-specifier-breaks-compositions-phone.png)
+![The one that is imperfect rather than fixed](2026-10-03-docs-where-a-specifier-breaks-compositions-phone.webp)
 
 **The markup that would fix that last one is the one not to take**, and this is
 the run's one real decision. `white-space: nowrap` on each segment breaks at
@@ -162,7 +162,7 @@ hard as a producer is tested anywhere on this site.
 
 **A component printing no rows at all passed every one of those assertions.**
 
-![The map of doors](2026-10-03-docs-where-a-specifier-breaks-doors-wide.png)
+![The map of doors](2026-10-03-docs-where-a-specifier-breaks-doors-wide.webp)
 
 `_components/entry-points.test.tsx` now reads it back out of the document: a row
 per door, each specifier **in the order the list gives them** — a shuffled table

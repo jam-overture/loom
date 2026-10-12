@@ -13,7 +13,7 @@ import type { OutlineRow } from "@/app/(portal)/_lib/outline"
 import type { PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 import { inPageOrder } from "@/app/(portal)/_lib/page-order"
 import { pageViewHref } from "@/app/(portal)/_lib/page-views"
-import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
 
 /**
  * The app, as the tree it is actually built as — and any part of it, drawn.
@@ -102,6 +102,7 @@ const Excerpt = ({ page, nodeId }: { readonly page: CompositionPage; readonly no
   const { element, found, diagnostics } = renderLoomExcerpt(page.tree, nodeId, {
     resolver: portalRegistry,
     validator: portalRegistry,
+    themes: portalThemes,
   })
 
   const row = page.rows.find((candidate) => candidate.nodeId === nodeId)

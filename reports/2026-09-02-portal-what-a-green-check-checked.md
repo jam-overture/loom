@@ -9,9 +9,9 @@ browser, against a page **a live model changed twice during this run**:
 
 | | |
 | --- | --- |
-| [The checkup, as a reader meets it](2026-09-02-portal-what-a-green-check-checked.png) | 1280px |
-| [Both disclosures open — nothing was removed](2026-09-02-portal-what-a-green-check-checked-open.png) | 1280px |
-| [a phone](2026-09-02-portal-what-a-green-check-checked-phone.png) | 390px |
+| [The checkup, as a reader meets it](2026-09-02-portal-what-a-green-check-checked.webp) | 1280px |
+| [Both disclosures open — nothing was removed](2026-09-02-portal-what-a-green-check-checked-open.webp) | 1280px |
+| [a phone](2026-09-02-portal-what-a-green-check-checked-phone.webp) | 390px |
 
 **How honest these are.** `LOOM_ANTHROPIC_API_KEY` is present in this
 environment, so nothing was staged. Two requests were typed into the real prompt

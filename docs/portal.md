@@ -1,290 +1,209 @@
-# The portal — the approved plan
+# The portal — what we are building
 
-**Status: redirected by the maintainer, 1 October 2026.** This supersedes the
-27 September plan's *framing* and keeps everything it got right. The earlier
-version is in the history of this file; what it planned as phases 1–3 is built
-and on `main`, and what it planned as phases 4–7 is still here, re-sequenced
-under the model below.
+**Rewritten on 12 October.** The previous version was the approved plan of 1
+October and it assumed one app per deployment throughout, which
+[0260](../decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
+refuses. It also described screens the maintainer has since read and rejected:
 
-It does not supersede `docs/rollout.md`, which places §5 among the surfaces. It
-says what §5 does next.
+> *"The whole portal is geared toward one app… when I can have many."*
+> *"I can't even make heads or tails of what I should be looking at and
+> therefore can't give you any real direction."*
 
-## Why this was rewritten
+That verdict was checked rather than taken on faith. All fourteen screens were
+photographed signed in: eight were exactly one viewport tall with nothing below
+the fold, three could not be scrolled to the bottom (`Your app` at 13,298px),
+and the whole route group held 32 interactive controls in 35,438 lines. The
+measurements are in
+[`reports/2026-10-12-portal-the-audit-before-the-overhaul.md`](../reports/2026-10-12-portal-the-audit-before-the-overhaul.md).
 
-The 27 September plan opened on the maintainer's verdict that the portal did not
-say *what am I supposed to do here*. It fixed that one page at a time, and on
-1 October the verdict was sharper and about the whole surface:
+**This document is the direction.** It is written so that work can stop at any
+point and resume without re-deciding anything.
 
-> *"The portal is a disorganized mess. I don't know what I should be looking for.
-> I don't know what I should be looking at. I don't know what I am looking at.
-> Loom framework is a governance model. As such the portal should reflect that."*
+---
 
-**The defect is not any screen. It is that the portal was a flat list of nouns.**
-Fourteen screens, each individually defensible, with nothing saying how they
-relate — so a person arriving had to already know the model in order to find the
-screens that describe it.
+## The model
 
-## The model, which is now the information architecture
+Loom splits along the line between **governing** a page and **serving** it
+([0262](../decisions/0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md)).
 
-Loom is a governance framework, and a governance framework has four parts. Every
-screen in this portal belongs to exactly one of them:
-
-| | the question | the screens |
+| | runs where | an outage costs |
 | --- | --- | --- |
-| **Your app** | what is governed, what it may be built from, what it may do | Your app · Pages · Pieces · Rules · Demo |
-| **Changes** | what was asked, what was allowed, what landed | the queue · What's been asked · What's changed |
-| **Evidence** | what came of it | Readers · Trust · Checkup |
-| **This portal** | the tool itself, which is a different subject | Sign-ins |
+| **Control plane** — portal, signal intake, governance record, policy, every model call | Loom's machines, or the customer's if they self-host | governance; **no page stops** |
+| **Data plane** — resolve a request to a tree, draw it | always the customer's app | their site |
 
-The rail carries those four names. The first group leads, and its first entry is
-**Your app** — the screen the portal did not have, and the absence that made the
-rest read as a heap. A tool whose first screen is a queue assumes you already
-know what you have.
+The property that makes this safe already exists and is already tested:
+`pageTreeFor` is `(await storedPageFor(route)) ?? treeFor(route, context)`, so
+an unreachable control plane degrades to the authored page rather than to an
+error.
 
-## What the maintainer asked for, in his words
+**Self-hosting is the same portal against the customer's own database.** One
+codebase, two operators.
 
-1. **"Be able to know which apps I have registered with Loom."**
-2. **"Within each app, which components are registered as primitives"** — *"as the
-   literal tree they are constructed as. First as a base tree for my app"*, later
-   drillable by persona — and *"select one or many primitives and see how they are
-   rendered."*
-3. **"See my policy easily and gameplan out changes to my gate policy to generate
-   better outcomes."**
-4. **"Manage tracked events by primitive and have a better way to do this (maybe
-   policy level) than going one by one."**
+## What a page is
 
-And one more, coming:
+One **base tree**, plus **deltas that apply when an audience matches**
+([0263](../decisions/0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md)).
 
-> *"We are going to have to create a layer / view where we can hook up the app
-> events from Loom into our AI model and see them feed in."*
+- An audience is a predicate over the opaque render context — site, region,
+  locale, cohort, flag. Loom never learns what the values mean.
+- A variant is a delta, so it is held, judged, logged and inverted by the
+  machinery that already does that. A fix to the base reaches every audience.
+- Per-user means *rules mapping context to deltas*, not a tree per user.
+- Composition happens in the customer's process, per request, with nothing
+  about the reader leaving it.
 
-## The thing (1) runs into, which is architectural
+## The flow we are building toward
 
-**Loom has no concept of an app.** A deployment is one registry, one policy source
-and one store, wired at a composition root; `PolicySource` can vary a *policy* per
-tree and per ask (0033), and nothing above a tree groups anything else.
+The maintainer's own sequence, 12 October:
 
-So *which apps have I registered* has nothing behind it, and a portal that drew a
-list of one would be inventing a data model the framework does not have — in the
-one place where inventing one is most expensive, because every page, hold and
-signal is addressed under it.
+1. The customer **registers their app** → project id and an ingest key.
+2. Loom **reads its current state** → the governed copy of their trees.
+3. **Signals ingest** → what readers did, per page, per audience.
+4. A **link to their AI service**, for prompting from inside the portal.
+5. A **link to their model** to read signals and propose how the app evolves.
+6. **Responses are written back** to the tree and sync down to their app.
 
-[0220](../decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
-is `Proposed`: it writes down what an app already *is* in Loom's terms, and what
-would have to change for there to be several. **The portal builds the single-app
-answer honestly and says it is one.** Accepting or refusing 0220 is the
-maintainer's, and §1's to build if it is accepted.
+Steps 4 and 5 run in the control plane. **Nothing that calls a model is in the
+render path.** Holding the customer's model credential is accepted; the runtime's
+existing in-app model adapter stays supported and may be deprecated later in
+favour of the portal rather than removed.
 
-## What already exists, and is under-used
+---
 
-Checked against the code on 1 October. It matters because it changes the order of
-the work: most of what is left is assembly.
+## Build order
 
-| | where |
-| --- | --- |
-| **Every registered piece, with its declaration** | `registry.primitives` — type, description, slots, declared props, role, behaviours, what it frames, what it submits, what it reads |
-| **What the library ships** | `STARTER_PRIMITIVES` on `@jam-overture/loom/primitives`, which is how a portal can say *what this app has not turned on* |
-| **Whether a piece leaves a handle in the page** | `auditRegistry` + `decorationFromAudit`, already run once at module scope |
-| **Rendering one part on its own, in the tree's theme** | `renderLoomExcerpt` |
-| **Every rule the Gate consults** | `GatePolicy`, with `POLICY_FIELDS` derived from the schema so a field cannot be added without the rules screen hearing about it |
-| **Judging without writing** | `composeChange` stops at the verdict (0021) — which is what makes a policy gameplan a read |
-| **What the Gate actually decided, kept** | the telemetry journal: every episode, its disposition, its stake factors (0198) and its policy fingerprint |
-| **Reader signals, per node per revision** | `@jam-overture/loom/signals` — four kinds, folded and rolled up |
+Each unit is one pull request. **Do not start a unit whose input is not on
+`main`.**
 
-Two things are genuinely absent: **A/B serving**, and the `completed` signal kind
-(step 2 of [`signals.md`](signals.md), approved and unbuilt) without which the
-portal can measure attention and **not conversion**.
+### 0 · The records · **three proposed, awaiting acceptance**
 
-## The records this plan rests on
+| | what it settles | status |
+| --- | --- | --- |
+| 0260 | a project is the unit Loom stores under | **merged** |
+| 0261 | a portal screen shows state, not explanation | **merged** |
+| 0262 | the control plane is hosted; the render path is theirs | proposed |
+| 0263 | a page is a base tree plus audience-scoped deltas | proposed |
 
-- **[0200](../decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)**
-  — the portal may put a control next to the measurement that argues for it; a
-  person always pulls it; **no measurement in this system may write a policy, a
-  delta or an intent.** `Proposed`. The policy gameplan below is built strictly
-  inside it: a simulation is a read, and the change itself is a button.
-- **[0199](../decisions/0199-the-outline-may-render-what-it-addresses-and-a-hand-may-yet-move-a-node.md)**
-  — rendering the selection in isolation is inside 0019 and buildable now;
-  **moving a node by hand is not.** `Proposed`.
-- **[0220](../decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)**
-  — what an app is, and why there is one. `Proposed`.
+### 1 · Project identity through the schema · **partly done**
 
-**0019's title is now narrower than the surface.** *The portal is a review queue,
-not a design tool* was right about the second half and has stopped being the whole
-of the first: the review queue is one of four parts of a governance portal. The
-refusal it exists for — no canvas, no property inspector, no moving a node by hand
-— is untouched and is restated under *Still not in scope*.
+**Done** (#598): `loom_trees` and `loom_revisions` carry `project_id`, keys
+widened, isolation proved against PGlite, migration applied to production.
 
-## The plan, in order
+**Remaining — seven tables, and they split in two:**
 
-Each unit is one pull request, reviewable on its own. **Do not start a unit whose
-input is not on `main`.**
+| table | needs | may start |
+| --- | --- | --- |
+| `loom_holds` | project | **now** |
+| `loom_policy_revisions` | project | **now** |
+| `loom_telemetry` | project | **now** |
+| `loom_reader_signals` | project **and** audience | after 0263 |
+| `loom_reader_tallies` | project **and** audience | after 0263 |
+| `loom_reader_funnels` | project **and** audience | after 0263 |
+| `loom_reader_regions` | project **and** audience | after 0263 |
+| `loom_reader_page_views` | project **and** audience | after 0263 |
 
-### 1. Your app · `Loom portal` · **built, 1 October**
+**The signal tables should take both dimensions in one migration.** 0263
+clause 5: a signal that does not name its audience cannot be compared with the
+variant it was serving against, and two variants folded into one tally cannot
+be separated afterwards. Doing project now and audience later means migrating
+the same five tables twice and leaving a window where the data is already
+ambiguous.
 
-The screen the portal did not have. What this deployment governs: its pages and
-the pieces they are built from, **as one tree** — the app at the root, each page a
-branch, each part a leaf named by the piece it is — with any part selectable and
-drawn on its own through `renderLoomExcerpt`.
+> **Standing constraint until this unit is finished: the portal must not offer
+> a second project.** A screen that lets somebody create one, over a signal
+> ledger that cannot tell two apart, mixes two customers' readers on the first
+> day, and the mixing is not recoverable from the rows.
 
-Beside it, the two governance facts no repository has:
+### 2 · The audience dimension · **after 0263**
 
-- **which registered pieces nothing uses** — a piece the AI is offered every time
-  it is asked for a change and has never once reached for;
-- **which of the library's pieces this app has not turned on** — a registry is a
-  decision, and the decision is invisible from inside the deployment.
+Base tree plus audience-scoped deltas in the store; a composing `TreeSource`
+beside `treeSourceFromStore`, which stays for deployments that want one tree per
+id.
 
-The rail is regrouped and its groups are named. Answers (1), honestly and
-singular, and (2) except for personas.
+### 3 · Accounts, workspace, projects
 
-### 2. The policy, read and played against · `Loom portal` · **approved, next**
+Accounts replacing the environment-variable roster. A workspace listing
+projects, with create and delete. A project switcher in the top bar. 0027's
+second half: **the actor comes from the session, the scope comes from the
+route.**
 
-Answers (3), and it is the largest single piece of value left in this surface.
+### 4 · Registration, credentials, ingest authentication · *the stated purpose*
 
-`/portal/rules` lists what the Gate consults. What it cannot do is the half the
-maintainer asked for: **what a different policy would have decided.**
+Create a project → project id, ingest key, copy-paste snippet.
+`/api/reader-signals` learns to authenticate that key, check the origin, and
+file signals under the project and audience. **It authenticates nobody today** —
+one environment switch and nothing else — and the whole stated purpose rests on
+it.
 
-The mechanism exists and is a read. `composeChange` stops at the verdict without
-writing (0021), and the telemetry journal holds every change this deployment has
-ever judged — the intent, the proposal, the disposition and the stake factors
-(0198). So a gameplan is: take the episodes already on the record, re-judge them
-under a policy the reader is editing on the screen, and show what would have moved.
+### 5 · The sync
 
-> *Lower the confidence floor to 0.6 and 4 of your last 30 changes stop waiting for
-> you. Two of those four are the ones you turned down.*
+How an accepted change reaches the customer's app, and how the app's current
+state reaches the portal. Push, pull on an interval, or at build time. 0262
+names this as owed and deliberately does not design it; all three satisfy the
+degrade-to-authored property.
 
-Three rules it is built under, and none is negotiable:
+### 6 · The AI links
 
-- **It is a simulation, and the policy is not written by it.** 0200 clause 4. The
-  screen ends in a button a person presses, and what that button does is a change
-  recorded like any other change.
-- **It replays what happened, and never invents a change to judge.** A gameplan
-  over fabricated proposals is a demo, not evidence.
-- **It says what it cannot know.** A re-judgement cannot tell you whether the
-  model would have proposed the same thing under a different policy, because the
-  policy is resolved before interpretation (`PolicySource` cannot see the
-  proposal, deliberately). Say so on the screen.
+Their service, for prompting from the portal. Their model, for reading signals
+and proposing an evolution. Credentials held encrypted in the control plane.
 
-**Needs:** nothing new from the framework. A **policy history** does — the record
-of what a policy *was* when a change was judged — and 0200 already files it. A
-fingerprint is on each episode, so the gameplan can say *these were judged under a
-policy that is not the one you have now* without it.
+### 7 · Logs and signals
 
-### 3. What is tracked, managed by the piece · `Loom portal` · **approved, after 2**
+Filter rail, timeline, dense table, right-hand detail pane. `Activity`,
+`History` and `Readers` fold into it. Per audience, once 0263 lands.
 
-Answers (4). Today a reader signal is declared per node, and the maintainer's
-words are that doing it *"one by one"* is the wrong altitude — *"maybe policy
-level."*
+### 8 · Policy as configuration
 
-He is right, and the shape follows from where the declaration already lives: what
-a page emits is a property of the **piece**, not of the node, because the
-primitive is what renders the element a signal is filed against. So the screen is
-a matrix — every registered piece against the four signal kinds — and a rule set
-at the piece level applies to every node of that type on every page.
+What-if becomes the Rules screen. Each rule is a control with its current value;
+the prose moves behind an info affordance beside the setting it explains.
 
-**This one has a framework half and the boundary has to be drawn before it is
-built.** What is per-piece and what is per-deployment, where the rule is stored,
-and whether it belongs on the policy or beside it, is `Loom daily build`'s to
-answer. The portal's half is the screen and the vocabulary; a finding goes to
-them first.
+---
 
-### 4. The front door, folded in · `Loom portal` · **approved, after 1**
+## Promoting the prototype
 
-`/portal` is still a second home: it opens on the queue and on what changed
-without asking. With *Your app* built, the two overlap at the top and differ
-below.
+The maintainer approved the prototype on 12 October — *"I like the preview, so
+let's move that in as the actual portal"* — so its layout is the target shape
+rather than a proposal. It is at `/portal/preview` with invented data, and
+**promotion is a sequence, not a move**: a screen graduates when it is wired to
+something real, and the screen it replaces is deleted in the same change.
 
-The merge is: **one landing**, which answers *what do I have* and *what needs me*
-in that order, with the queue intact and the recent record under it. It is small,
-it is mostly deletion, and it is after (1) because it cannot be done until the
-screen it folds into exists.
+| prototype screen | real when | replaces |
+| --- | --- | --- |
+| Pages, inspector, Pieces | **now** — the store, the outline and the registry all exist | `/portal/pages`, `/portal/pages/[treeId]`, `/portal/pieces` |
+| Rules | unit 8 — needs policy writes | `/portal/rules`, `/portal/rules/what-if` |
+| Logs | unit 7 | `/portal/activity`, `/portal/history`, `/portal/readers`, `/portal/trust`, `/portal/checkup` |
+| Project overview | unit 3 | `/portal` front door |
+| Workspace | unit 3 | nothing — no such screen exists |
+| Credentials | unit 4 | nothing |
 
-### 5. The feed into the model · `Loom portal` + `Loom daily build` · **shape only**
+`/portal/app` — `Your app` — is deleted rather than replaced. It is 0220's
+screen and 0220 is refused.
 
-The maintainer, 1 October:
+**A prototype screen may not ship on invented data.** Until its unit lands it
+stays under `/portal/preview`, behind the banner that says every number on it
+is made up.
 
-> *"We are going to have to create a layer / view where we can hook up the app
-> events from Loom into our AI model and see them feed in. We are going to start
-> building this soon, so start thinking about how to represent it in the dashboard
-> now."*
+---
 
-Nothing is built for this yet and nothing should be until the framework half has a
-shape. What the portal can already say about how it would be represented, so that
-the screen is not invented twice:
+## Settled
 
-- **It is a fourth group, not a fifth screen.** The feed is evidence becoming an
-  ask: signals in, an adaptation proposed, the Gate judging it like anything else.
-  Every one of those already has a screen — Readers, What's been asked, the queue
-  — and the loop is what joins them. The representation is a **path**, drawn once,
-  with each hop linking to the screen that already holds that half.
-- **`scheduled-adaptation` is already a first-class origin.** `autoApplyCeiling`
-  gives it `low` by default, so an adaptation the model proposes on its own is
-  held for a person at anything above trivial stakes. That is the governance story
-  and it is already true — the portal's job is to show it, not to build it.
-- **The thing a person will actually want is the refusal rate.** *The model
-  proposed 14 adaptations from what readers did; 9 were held, 3 refused, you said
-  yes to 6.* That is a funnel over data this portal already reads, and it is the
-  one screen in the ecosystem that could show a model's own suggestions being
-  governed.
-- **It must not become a control loop.** 0031 refuses a runtime one and 0200
-  clause 4 forbids a measurement writing anything. A signal becomes an *intent* a
-  person can answer, never a change.
+- Hosted control plane, local render path, self-hosting as the same codebase.
+- Base tree plus audience-scoped deltas; per-user is rules, not trees.
+- Loom holds the customer's model credential.
+- The runtime's in-app model adapter stays.
+- The prototype's layout is the portal's layout.
+- The plain-language brief is scoped out of `(portal)` and *nothing is ever
+  removed* is withdrawn as a screen rule (0261).
 
-**Open, and the maintainer's or §1's:** what triggers an adaptation, what the model
-is handed (a rollup? a page and its counters?), and whether an adaptation is an
-`EditIntent` like any other. The portal assumes the last is yes, because every
-screen it already has depends on it.
+## Open
 
-### 6. Analytics, surfaced · `Loom portal` · **approved, after 4**
+- **The sync mechanism** (unit 5) — push, pull, or build-time.
+- **What an audience predicate looks like on the wire** — the shape a host
+  writes and the portal reads.
+- **Whether the portal becomes the only place a model is called**, or the
+  in-app adapter stays indefinitely.
 
-Step 4 of [`signals.md`](signals.md), half-built as `/portal/readers`. Reachability
-is most of it: per page and per piece, tied to the selection the app screen already
-has, and *before and after a change*, which exists and is the strongest thing on
-the screen. **It cannot report conversion until `completed`** — say that on the
-screen rather than showing engagement under a word that implies outcome.
+## Not in scope
 
-### 7. `completed` · `Loom daily build` · **approved** (unchanged from `signals.md` step 2)
-
-The signal kind that closes a funnel. Unbuilt since 13 September. It is the
-difference between *they looked at the pricing band* and *they bought*.
-
-### 8. A/B — serving · `Loom daily build` · **needs a record first**
-
-Two revisions of one page served concurrently, readers split between them. Framework
-work: it touches how a tree is chosen for a request. The measuring half is nearly
-free — signals are already filed per node **per revision**.
-
-**Open questions for that record:** how a reader is assigned without acquiring an
-identity (0146 refuses a visitor id, and a split that persists across visits is
-exactly one); whether a variant is a revision or something else; what happens to a
-variant when the Gate accepts a change underneath it.
-
-### 9. Results, and the levers · `Loom portal` · **after 8, under 0200**
-
-Read a test's results, and — beside them — the controls that act on what they say.
-The person pulls the lever, the result never does, and the portal says which of the
-two happened.
-
-## Still not in scope
-
-- **A measurement writing anything.** 0200 clause 4. A signal does not become an
-  intent, a gap does not move a floor, an A/B result does not promote a variant.
-  Every one of those is a button.
-- **Moving a node by hand.** 0199 clause 4 — an open question with the maintainer's
-  argument for it recorded, deliberately not built.
-- **A property inspector.** Typing a value into a field is the canvas 0019 refused.
-- **A multi-app data model.** 0220 is `Proposed` and is §1's if it is accepted. The
-  portal says there is one app rather than pretending to a list.
-- **Account tiers, gates or paywalls.** The portal is free and the bar does not
-  change if that ever stops being true.
-
-## The test that applies to all of it
-
-Unchanged since 18 August:
-
-> Could a bright high schooler, who has never read a decision record, say what
-> happened and what they should do next?
-
-And its commercial twin, from `rollout.md`:
-
-> A developer using Loom opens the portal daily, because it tells them something
-> they cannot get anywhere else.
+- Rewriting the marketing site. Under 0262 its claims stay true as written.
+- Governing the documentation. It is MDX; 0259 refuses prose as a tree.

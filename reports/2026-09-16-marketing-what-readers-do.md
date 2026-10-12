@@ -15,7 +15,7 @@ reason that matters:
 `/what-readers-do` is the tenth page and the marketing half of that plan's fifth
 step. Its middle band is nine bars, and not one of the figures on them was typed.
 
-![the page, 1280×900](2026-09-16-marketing-what-readers-do.png)
+![the page, 1280×900](2026-09-16-marketing-what-readers-do.webp)
 
 ---
 
@@ -203,9 +203,9 @@ column of bars does not have them.
 
 | | |
 | --- | --- |
-| ![editorial](2026-09-16-marketing-what-readers-do-editorial.png) | ![bold](2026-09-16-marketing-what-readers-do-bold.png) |
+| ![editorial](2026-09-16-marketing-what-readers-do-editorial.webp) | ![bold](2026-09-16-marketing-what-readers-do-bold.webp) |
 
-![390px](2026-09-16-marketing-what-readers-do-phone.png)
+![390px](2026-09-16-marketing-what-readers-do-phone.webp)
 
 No colour is named anywhere in the diff; every value is a token. Nothing was
 added to the library — the page is `loom.hero`, `loom.section`, `loom.meter`,

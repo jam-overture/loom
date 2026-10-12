@@ -296,13 +296,13 @@ Nothing blocking. One carried forward from 13 September, unanswered:
 
 | | |
 | --- | --- |
-| [applied, before](2026-09-14-demo-what-the-record-did-applied-before.png) | `main`: the visitor pressed **Apply this change** and the sentence describing it went away |
-| [applied, after](2026-09-14-demo-what-the-record-did-applied-after.png) | this branch, same press: *"This came off the page, and everything under it went too."* over the three figures |
-| [unattended, before](2026-09-14-demo-what-the-record-did-unattended-before.png) | `main`: a change Loom made on its own — ask, verdict, and nothing in between |
-| [unattended, after](2026-09-14-demo-what-the-record-did-unattended-after.png) | the same card, now saying what it did |
-| [undo](2026-09-14-demo-what-the-record-did-undo.png) | the payoff, read as a return rather than an arrival — the `restoring` flag arriving through the real action |
-| [phone](2026-09-14-demo-what-the-record-did-phone.png) | 390×844, where this matters most: the page is thousands of pixels away and the sentence is the only account of it |
-| [screen](2026-09-14-demo-what-the-record-did-screen.png) | 1280×900, the whole demo two seconds after saying yes |
+| [applied, before](2026-09-14-demo-what-the-record-did-applied-before.webp) | `main`: the visitor pressed **Apply this change** and the sentence describing it went away |
+| [applied, after](2026-09-14-demo-what-the-record-did-applied-after.webp) | this branch, same press: *"This came off the page, and everything under it went too."* over the three figures |
+| [unattended, before](2026-09-14-demo-what-the-record-did-unattended-before.webp) | `main`: a change Loom made on its own — ask, verdict, and nothing in between |
+| [unattended, after](2026-09-14-demo-what-the-record-did-unattended-after.webp) | the same card, now saying what it did |
+| [undo](2026-09-14-demo-what-the-record-did-undo.webp) | the payoff, read as a return rather than an arrival — the `restoring` flag arriving through the real action |
+| [phone](2026-09-14-demo-what-the-record-did-phone.webp) | 390×844, where this matters most: the page is thousands of pixels away and the sentence is the only account of it |
+| [screen](2026-09-14-demo-what-the-record-did-screen.webp) | 1280×900, the whole demo two seconds after saying yes |
 
 Both wide pairs are **the same script driven against two real `next build`
 outputs** — `main`'s and this branch's — so the only difference in the frame is

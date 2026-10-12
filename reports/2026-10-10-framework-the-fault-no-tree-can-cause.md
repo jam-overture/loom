@@ -4,7 +4,7 @@
 (process), §3 (the render seam) · **Branch:**
 `framework-63-the-fault-no-tree-can-cause`
 
-![Seven faults, each one produced](2026-10-10-framework-seven-faults-wide.png)
+![Seven faults, each one produced](2026-10-10-framework-seven-faults-wide.webp)
 
 ## The migration is done, and this run says so because the brief still asks
 

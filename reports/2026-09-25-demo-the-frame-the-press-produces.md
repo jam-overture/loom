@@ -87,8 +87,8 @@ side, with nothing else competing.
 
 | | before — `main` | after — this branch |
 | --- | --- | --- |
-| the frame the press produces, wide | [1280 × 900](2026-09-25-demo-the-frame-the-press-produces-before-wide.png) | [the same frame](2026-09-25-demo-the-frame-the-press-produces-after-wide.png) |
-| the same on a phone | [390 × 844](2026-09-25-demo-the-frame-the-press-produces-before-phone.png) | [the same frame](2026-09-25-demo-the-frame-the-press-produces-after-phone.png) |
+| the frame the press produces, wide | [1280 × 900](2026-09-25-demo-the-frame-the-press-produces-before-wide.webp) | [the same frame](2026-09-25-demo-the-frame-the-press-produces-after-wide.webp) |
+| the same on a phone | [390 × 844](2026-09-25-demo-the-frame-the-press-produces-before-phone.webp) | [the same frame](2026-09-25-demo-the-frame-the-press-produces-after-phone.webp) |
 
 Measured on the same builds:
 
@@ -115,7 +115,7 @@ the question dies silently. **That warning is untouched — not one character, n
 one class.** What changed is where the press leaves the visitor, and the caution
 was always welded to the controls rather than to the press:
 
-[The same visitor, scrolled back to the controls](2026-09-25-demo-the-frame-the-press-produces-after-controls.png) —
+[The same visitor, scrolled back to the controls](2026-09-25-demo-the-frame-the-press-produces-after-controls.webp) —
 the caution pinned at the top of the rail at 44–147, in amber, with the four
 asks it is about beginning at 103 directly under it, and the question below.
 
@@ -126,7 +126,7 @@ unit was measured for — on screen, above the controls, amber, before the press
 holds. What it has stopped doing is greeting a visitor who has done nothing
 wrong.
 
-[The payoff frame, still intact](2026-09-25-demo-the-frame-the-press-produces-after-applied.png) —
+[The payoff frame, still intact](2026-09-25-demo-the-frame-the-press-produces-after-applied.webp) —
 press *Apply this change* and the sixty seconds end with the green bar in the
 gap reading **Something was removed here: “3,400” “24” “92%”**, and the card at
 the top of the rail saying *You said yes. Loom held this change until you

@@ -72,10 +72,10 @@ the visitor has asked for nothing.
 
 | | |
 | --- | --- |
-| [**the arrival screen, on a phone**](2026-10-06-demo-first-screen-arrival-phone.png) · [before](2026-10-06-demo-first-screen-arrival-phone-before.png) | **the picture worth opening** — the only frame in this unit that moved |
-| [the arrival screen, wide](2026-10-06-demo-first-screen-arrival-wide-unchanged.png) | **unchanged, byte for byte** |
-| [the embed at 348 × 465](2026-10-06-demo-first-screen-embed-unchanged.png) | **unchanged, byte for byte** |
-| [the question, one press later](2026-10-06-demo-first-screen-held-phone-unchanged.png) | **unchanged, byte for byte** |
+| [**the arrival screen, on a phone**](2026-10-06-demo-first-screen-arrival-phone.webp) · [before](2026-10-06-demo-first-screen-arrival-phone-before.webp) | **the picture worth opening** — the only frame in this unit that moved |
+| [the arrival screen, wide](2026-10-06-demo-first-screen-arrival-wide-unchanged.webp) | **unchanged, byte for byte** |
+| [the embed at 348 × 465](2026-10-06-demo-first-screen-embed-unchanged.webp) | **unchanged, byte for byte** |
+| [the question, one press later](2026-10-06-demo-first-screen-held-phone-unchanged.webp) | **unchanged, byte for byte** |
 
 ### `_lib/the-page-itself.ts` — which node, and the one silence
 

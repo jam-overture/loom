@@ -9,7 +9,7 @@ Done. The band that offers the five choices, and the notice that reports what
 the rules decided, are both on `/how-it-works` now. The front door no longer
 runs a request.
 
-![the band on the mechanism page](2026-10-01-marketing-see-it-happen-moves-band.png)
+![the band on the mechanism page](2026-10-01-marketing-see-it-happen-moves-band.webp)
 
 ---
 
@@ -118,7 +118,7 @@ None was relaxed. Each now says what it always meant.
 
 ## The held answer, in place
 
-![a held request on the mechanism page](2026-10-01-marketing-see-it-happen-moves-held.png)
+![a held request on the mechanism page](2026-10-01-marketing-see-it-happen-moves-held.webp)
 
 ---
 

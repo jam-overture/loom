@@ -63,11 +63,18 @@ const seedCard = (): LoomNode & { readonly kind: "element" } => {
   return card
 }
 
-/** One `configure` on the card, which is the smallest change that alters the drawing. */
-const restyle = (revision: number, variant: string): StoredRevision =>
-  entryOf(revision, [
-    { op: "configure", nodeId: seedCard().id, set: { variant }, unset: [] },
-  ])
+/**
+ * One `configure` on the card, which is the smallest change that alters the
+ * drawing.
+ *
+ * It set `variant` until 11 October, which was the portal's own card primitive's
+ * prop. The library's card calls the same idea `tone`, so the seed carries that
+ * and a configure writing `variant` would be overwriting a prop no card has —
+ * which is how this test came to read `undefined` as the value before the
+ * change.
+ */
+const restyle = (revision: number, tone: string): StoredRevision =>
+  entryOf(revision, [{ op: "configure", nodeId: seedCard().id, set: { tone }, unset: [] }])
 
 const replayed = (progression: ReturnType<typeof foldVersions>) => progression
 
@@ -90,7 +97,7 @@ describe("foldVersions", () => {
     const folded = foldVersions(seedTree(), [
       restyle(1, "prominent"),
       restyle(2, "flat"),
-      restyle(3, "outlined"),
+      restyle(3, "outline"),
     ])
 
     expect(folded.versions.map((version) => version.version)).toEqual([0, 1, 2, 3])
@@ -104,13 +111,13 @@ describe("foldVersions", () => {
    */
   it("hands back a distinct tree for each version, each carrying that change", () => {
     const folded = foldVersions(seedTree(), [restyle(1, "prominent"), restyle(2, "flat")])
-    const variants = folded.versions.map((version) => {
+    const tones = folded.versions.map((version) => {
       const card = version.tree.root.children[2]
 
-      return card?.kind === "element" ? card.props.variant : undefined
+      return card?.kind === "element" ? card.props.tone : undefined
     })
 
-    expect(variants).toEqual(["outlined", "prominent", "flat"])
+    expect(tones).toEqual(["outline", "prominent", "flat"])
     expect(folded.versions.map((version) => version.tree.revision)).toEqual([0, 1, 2])
   })
 

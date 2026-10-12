@@ -17,7 +17,7 @@ Four primitives, and the library is **74**.
 They are one unit: **what a page does that none of its bands do** — announce,
 orient, run past the edge, and show how much of a thing there is.
 
-![The four, editorial, 1280px](2026-09-05-primitives-furniture-editorial-wide.png)
+![The four, editorial, 1280px](2026-09-05-primitives-furniture-editorial-wide.webp)
 
 ## Why these, and not the two Hermes pairs that are left
 
@@ -116,7 +116,7 @@ scroll-linked mask would say the true thing and is not the static CSS 0055
 requires. So the affordance is the honest one: **an item is never wider than 82%
 of the band**, which cuts the next one off visibly at every width.
 
-![The same page under `bold`, at a true 390px](2026-09-05-primitives-furniture-bold-phone.png)
+![The same page under `bold`, at a true 390px](2026-09-05-primitives-furniture-bold-phone.webp)
 
 ## What the pictures found and no assertion could
 

@@ -15,10 +15,10 @@ screen.** Every sentence quoted in this report is in one of them.
 
 | | |
 | --- | --- |
-| [The review queue](2026-09-11-portal-the-queue-names-its-parts-queue.png) | 1280px — the held proposal, in a person's words |
-| [The same screen with every disclosure open](2026-09-11-portal-the-queue-names-its-parts-record.png) | 1280px — **nothing removed** |
-| [The front door](2026-09-11-portal-the-queue-names-its-parts-front-door.png) | 1280px |
-| [a phone](2026-09-11-portal-the-queue-names-its-parts-phone.png) | 390px, `scrollWidth 390 / innerWidth 390` |
+| [The review queue](2026-09-11-portal-the-queue-names-its-parts-queue.webp) | 1280px — the held proposal, in a person's words |
+| [The same screen with every disclosure open](2026-09-11-portal-the-queue-names-its-parts-record.webp) | 1280px — **nothing removed** |
+| [The front door](2026-09-11-portal-the-queue-names-its-parts-front-door.webp) | 1280px |
+| [a phone](2026-09-11-portal-the-queue-names-its-parts-phone.webp) | 390px, `scrollWidth 390 / innerWidth 390` |
 
 **The 4 September hang did not reproduce.** The last run could photograph
 nothing, because a request typed into the real prompt box never returned. Today

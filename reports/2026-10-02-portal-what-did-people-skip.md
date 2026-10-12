@@ -62,10 +62,10 @@ rather than in the diff.
 
 | | |
 | --- | --- |
-| [**a page that drops off**](2026-10-02-portal-what-did-people-skip-wide.png) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
-| [**the same, on a phone**](2026-10-02-portal-what-did-people-skip-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
-| [**a page read to the bottom**](2026-10-02-portal-what-did-people-skip-whole-wide.png) | the settled state, said out loud rather than by absence |
-| [**a page the counters cannot speak for**](2026-10-02-portal-what-did-people-skip-behind-wide.png) | the version gap, which is the state of every page for an hour after it changes |
+| [**a page that drops off**](2026-10-02-portal-what-did-people-skip-wide.webp) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
+| [**the same, on a phone**](2026-10-02-portal-what-did-people-skip-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**a page read to the bottom**](2026-10-02-portal-what-did-people-skip-whole-wide.webp) | the settled state, said out loud rather than by absence |
+| [**a page the counters cannot speak for**](2026-10-02-portal-what-did-people-skip-behind-wide.webp) | the version gap, which is the state of every page for an hour after it changes |
 
 The first picture is the one to look at. Its three sentences, over a real
 rollup:

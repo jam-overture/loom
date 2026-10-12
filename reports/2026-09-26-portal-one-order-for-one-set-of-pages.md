@@ -20,16 +20,16 @@ been of the wrong build. It was found because the server log was read as well as
 the status code, which is the same two-sources habit the gate rule is written
 under.
 
-- [`/portal/checkup` — before](2026-09-26-portal-one-order-checkup-before.png) — 1280px, the defect in one frame: the one page you can check is **fourth**
-- [`/portal/checkup` — after](2026-09-26-portal-one-order-checkup-after.png) — 1280px, it is first, and the list says so
-- [`/portal/pages` — before](2026-09-26-portal-one-order-pages-before.png) — 1280px
-- [`/portal/pages` — after](2026-09-26-portal-one-order-pages-after.png) — 1280px, the page with three changes waiting on an answer leads
-- [`/portal/pages` on a phone — before](2026-09-26-portal-one-order-pages-phone-before.png) — 390px
-- [`/portal/pages` on a phone — after](2026-09-26-portal-one-order-pages-phone-after.png) — 390px
-- [`/portal/history` — before](2026-09-26-portal-one-order-history-before.png) — 1280px
-- [`/portal/history` — after](2026-09-26-portal-one-order-history-after.png) — 1280px, the longest history leads and the two empty ones tie-break by name
-- [`/portal/checkup/everything` — before](2026-09-26-portal-one-order-sweep-before.png) — 1280px
-- [`/portal/checkup/everything` — after](2026-09-26-portal-one-order-sweep-after.png) — 1280px, worst first as before, said out loud
+- [`/portal/checkup` — before](2026-09-26-portal-one-order-checkup-before.webp) — 1280px, the defect in one frame: the one page you can check is **fourth**
+- [`/portal/checkup` — after](2026-09-26-portal-one-order-checkup-after.webp) — 1280px, it is first, and the list says so
+- [`/portal/pages` — before](2026-09-26-portal-one-order-pages-before.webp) — 1280px
+- [`/portal/pages` — after](2026-09-26-portal-one-order-pages-after.webp) — 1280px, the page with three changes waiting on an answer leads
+- [`/portal/pages` on a phone — before](2026-09-26-portal-one-order-pages-phone-before.webp) — 390px
+- [`/portal/pages` on a phone — after](2026-09-26-portal-one-order-pages-phone-after.webp) — 390px
+- [`/portal/history` — before](2026-09-26-portal-one-order-history-before.webp) — 1280px
+- [`/portal/history` — after](2026-09-26-portal-one-order-history-after.webp) — 1280px, the longest history leads and the two empty ones tie-break by name
+- [`/portal/checkup/everything` — before](2026-09-26-portal-one-order-sweep-before.webp) — 1280px
+- [`/portal/checkup/everything` — after](2026-09-26-portal-one-order-sweep-after.webp) — 1280px, worst first as before, said out loud
 
 **How the pictures were taken.** Four pages in a memory store built with the
 published builders onto `globalThis[Symbol.for("loom.portal.store")]`, three of

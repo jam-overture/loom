@@ -10,15 +10,15 @@ two records. One decision record, `0094`, forced by the two pairs disagreeing
 about the same field on the same day. Two defects found by screenshots and by
 nothing else.
 
-![The specimen under editorial](2026-08-26-primitives-what-you-can-book-editorial.png)
+![The specimen under editorial](2026-08-26-primitives-what-you-can-book-editorial.webp)
 
-![The same page under bold](2026-08-26-primitives-what-you-can-book-bold.png)
+![The same page under bold](2026-08-26-primitives-what-you-can-book-bold.webp)
 
-![And under the house palette](2026-08-26-primitives-what-you-can-book-minimal.png)
+![And under the house palette](2026-08-26-primitives-what-you-can-book-minimal.webp)
 
-![The same page in edit mode, where every node is addressable exactly once](2026-08-26-primitives-what-you-can-book-editing.png)
+![The same page in edit mode, where every node is addressable exactly once](2026-08-26-primitives-what-you-can-book-editing.webp)
 
-![At a true 390px, in a real phone viewport](2026-08-26-primitives-what-you-can-book-phone.png)
+![At a true 390px, in a real phone viewport](2026-08-26-primitives-what-you-can-book-phone.webp)
 
 ## Which primitives, and why those
 

@@ -183,14 +183,14 @@ never seen.
 
 | | `md5` | |
 | --- | --- | --- |
-| [**one press, 1280 × 900**](2026-10-09-demo-press-one-press-wide.png) | `03f930af…` | **the picture worth opening** |
-| [the arrival screen](2026-10-09-demo-press-arrival-wide.png) · [before](2026-10-09-demo-press-arrival-wide-before.png) | `3b34079e…` ← `e8fd0ea8…` | the green button and its verdict, both changed, neither typed |
-| [the second beat](2026-10-09-demo-press-second-beat-wide.png) | `4b5aceac…` | the handover: the same green button, now the Gate's, with its preview back |
-| [the arrival screen on a phone](2026-10-09-demo-press-arrival-phone.png) · [before](2026-10-09-demo-press-arrival-phone-before.png) | `a3177980…` ← `8498ace7…` | the preview and the press are now about the same thing |
-| [one press on a phone](2026-10-09-demo-press-one-press-phone.png) | `ce9b0d63…` | the handover, and the way back pointing **down** at the record |
-| [what the first press used to produce](2026-10-09-demo-press-first-press-wide-before.png) | `cccd3199…` | `main`'s question card, for the comparison above |
-| [the question, on the second beat](2026-10-09-demo-press-question-wide.png) | `049439d5…` | the Gate's moment, unchanged, one press later than it was |
-| [the embed at 348 × 465](2026-10-09-demo-press-embed.png) | `7c20a054…` | the whole first beat above the fold in somebody else's page |
+| [**one press, 1280 × 900**](2026-10-09-demo-press-one-press-wide.webp) | `03f930af…` | **the picture worth opening** |
+| [the arrival screen](2026-10-09-demo-press-arrival-wide.webp) · [before](2026-10-09-demo-press-arrival-wide-before.webp) | `3b34079e…` ← `e8fd0ea8…` | the green button and its verdict, both changed, neither typed |
+| [the second beat](2026-10-09-demo-press-second-beat-wide.webp) | `4b5aceac…` | the handover: the same green button, now the Gate's, with its preview back |
+| [the arrival screen on a phone](2026-10-09-demo-press-arrival-phone.webp) · [before](2026-10-09-demo-press-arrival-phone-before.webp) | `a3177980…` ← `8498ace7…` | the preview and the press are now about the same thing |
+| [one press on a phone](2026-10-09-demo-press-one-press-phone.webp) | `ce9b0d63…` | the handover, and the way back pointing **down** at the record |
+| [what the first press used to produce](2026-10-09-demo-press-first-press-wide-before.webp) | `cccd3199…` | `main`'s question card, for the comparison above |
+| [the question, on the second beat](2026-10-09-demo-press-question-wide.webp) | `049439d5…` | the Gate's moment, unchanged, one press later than it was |
+| [the embed at 348 × 465](2026-10-09-demo-press-embed.webp) | `7c20a054…` | the whole first beat above the fold in somebody else's page |
 
 ## Real test numbers
 

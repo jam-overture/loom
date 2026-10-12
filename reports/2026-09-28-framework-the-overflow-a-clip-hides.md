@@ -15,7 +15,7 @@
 > across any of it. The finding at the foot of this run's entries has both
 > mechanisms and the check that actually answers the question.
 
-![The page the old measurement called clean](2026-09-28-framework-a-clip-hides-an-overflow-phone.png)
+![The page the old measurement called clean](2026-09-28-framework-a-clip-hides-an-overflow-phone.webp)
 
 *390 × 844, `bold` + `bold-sans` + `airy-modern`. The document measurement on
 this page is `scrollWidth 390 / innerWidth 390` — clean, and it has been clean

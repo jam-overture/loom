@@ -212,9 +212,9 @@ visitor away and remembering where they were going, and a URL outside all four
 reaching the application's own not-found. That is 0070's access model, observed
 rather than asserted.
 
-- [`…-marketing.png`](2026-08-19-framework-one-application-marketing.png) — `/`
-- [`…-docs.png`](2026-08-19-framework-one-application-docs.png) — `/docs/getting-started/introduction`
-- [`…-lessons.png`](2026-08-19-framework-one-application-lessons.png) — `/lessons`, the shell
-- [`…-portal.png`](2026-08-19-framework-one-application-portal.png) — `/portal/sign-in`
+- [`…-marketing.png`](2026-08-19-framework-one-application-marketing.webp) — `/`
+- [`…-docs.png`](2026-08-19-framework-one-application-docs.webp) — `/docs/getting-started/introduction`
+- [`…-lessons.png`](2026-08-19-framework-one-application-lessons.webp) — `/lessons`, the shell
+- [`…-portal.png`](2026-08-19-framework-one-application-portal.webp) — `/portal/sign-in`
 
 No follow-up scheduled and no self-check-in armed.

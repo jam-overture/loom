@@ -12,7 +12,7 @@ demo rather than describing it"* — which was built, wired, rendered, looked at
 and withdrawn, because the demo does not work inside the frame. That is the more
 useful half of the report and it is at the bottom.
 
-![The three numbers on the front door, all counted](2026-09-04-marketing-the-last-typed-number.png)
+![The three numbers on the front door, all counted](2026-09-04-marketing-the-last-typed-number.webp)
 
 ---
 
@@ -69,7 +69,7 @@ with itself passes however the page was built — so what is asserted moved:
 The band is unchanged in geometry and in every palette; the numbers are the same
 numbers, arrived at differently.
 
-![The same band under the bold palette](2026-09-04-marketing-the-last-typed-number-bold.png)
+![The same band under the bold palette](2026-09-04-marketing-the-last-typed-number-bold.webp)
 
 `FACTS.decisions` is deliberately **not** re-derived. It stays a floor for the
 reason recorded on 27 August: counting `decisions/` means reading the disk, and
@@ -117,7 +117,7 @@ argument of `renderTree` so no page could be rendered without one.
 
 It rendered. It was allowlisted. Here it is:
 
-![The demonstration, framed on the front door — and not working](2026-09-04-marketing-the-last-typed-number-embed.png)
+![The demonstration, framed on the front door — and not working](2026-09-04-marketing-the-last-typed-number-embed.webp)
 
 Then a click on the large green button produced this, in the console, and nothing
 at all on the page:

@@ -1,7 +1,7 @@
 import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
-import { MAINTAINERS_OWN, RESERVED_VOCABULARY } from "./copy"
+import { MAINTAINERS_OWN, PACKAGES, RESERVED_VOCABULARY } from "./copy"
 import { pageTreeFor, treeFor } from "./render"
 import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
 import { DEFAULT_THEME, HOME, SITE_ROUTES, type SiteRoute } from "./site"
@@ -44,7 +44,32 @@ import { readerCopy, sentencesOf, uses, wordCountOf, wordsOf, type ReaderString 
  * cannot see the machinery is a register test that passes for the wrong reason.
  */
 const pageWords = async (route: SiteRoute): Promise<string> =>
-  wordsOf((await pageTreeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME })).root)
+  withoutPackageNames(
+    wordsOf((await pageTreeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME })).root)
+  )
+
+/**
+ * The one span of a served page that is not copy, taken out before the sweep.
+ *
+ * The front door prints an install command, and
+ * `@jam-overture/loom-primitives` is a reserved word in the middle of a package
+ * name. The sweep below reads text nodes — correctly, that is the lesson of
+ * 24 August — so it read the command and reported the front door for saying
+ * *primitives* to a stranger, which is a true reading of a false thing: nobody
+ * reads a line they are going to paste, and the name is npm's rather than this
+ * lane's to word.
+ *
+ * **Exactly the published names and nothing else**, longest first so that
+ * `@jam-overture/loom` cannot eat the start of the longer one and leave
+ * `-primitives` behind. A sentence that says *primitive* on its own is
+ * untouched by this and still fails, which is the property that makes the
+ * exemption safe to have: it cannot be widened by writing worse copy, only by
+ * publishing another package.
+ */
+const withoutPackageNames = (text: string): string =>
+  [...PACKAGES]
+    .sort((left, right) => right.length - left.length)
+    .reduce((stripped, name) => stripped.split(name).join(" "), text)
 
 /**
  * The opening band, wherever it sits in the tree.

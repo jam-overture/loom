@@ -3,7 +3,7 @@
 The front door has offered a button reading **Put it back** since 20 August. It
 was a link to `/`.
 
-![The record, with two entries in it](2026-09-05-marketing-putting-it-back.png)
+![The record, with two entries in it](2026-09-05-marketing-putting-it-back.webp)
 
 Pressing it dropped `?ask=` from the address and the page was rebuilt from its
 source. The result looked exactly right, which is the entire reason nothing
@@ -42,14 +42,14 @@ so the rules hold it and the visitor answers. Putting it back **moves that same
 protected band again** — so the rules hold the undo too, and there is no way
 round it but the same yes.
 
-![The rules holding the undo](2026-09-05-marketing-putting-it-back-held.png)
+![The rules holding the undo](2026-09-05-marketing-putting-it-back-held.webp)
 
 Nothing was arranged to produce that. It falls out of running the undo through
 the rules the site already publishes, and the only way to lose it would be to
 exempt an undo to make the band tidier. `undo.test.ts` asserts it in both
 directions so nothing ever does.
 
-![And the same yes, a second time](2026-09-05-marketing-putting-it-back-answered.png)
+![And the same yes, a second time](2026-09-05-marketing-putting-it-back-answered.webp)
 
 What the five choices now do, measured this run:
 
@@ -167,7 +167,7 @@ and one of these was written that way before it was caught.
 
 Under the bold palette, with no colour named anywhere in this diff:
 
-![The same two records, another palette](2026-09-05-marketing-putting-it-back-bold.png)
+![The same two records, another palette](2026-09-05-marketing-putting-it-back-bold.webp)
 
 And the price of the second card, off `next start` on the production build:
 
@@ -189,8 +189,8 @@ than the anecdote. The alternative inside this lane is to stop showing the secon
 record on a narrow viewport, which is hiding the thing the band exists for from
 every visitor on a phone.
 
-![At 390px](2026-09-05-marketing-putting-it-back-phone.png)
+![At 390px](2026-09-05-marketing-putting-it-back-phone.webp)
 
-![The front door, whole](2026-09-05-marketing-putting-it-back-home.png)
+![The front door, whole](2026-09-05-marketing-putting-it-back-home.webp)
 
 Nothing scheduled and nothing armed.

@@ -190,13 +190,13 @@ one on `main` and have since `primitives-19`. Checked rather than done here.
 
 | File | What it shows |
 | --- | --- |
-| `2026-09-06-primitives-exchange-editorial-wide.png` | The whole specimen, `editorial` at 1280 |
-| `2026-09-06-primitives-exchange-bold-wide.png` | The same page, `bold` |
-| `2026-09-06-primitives-exchange-minimal-wide.png` | The same page, `minimal` |
-| `2026-09-06-primitives-exchange-editorial-phone.png` | 390px, `editorial` |
-| `2026-09-06-primitives-exchange-bold-phone.png` | 390px, `bold` |
-| `2026-09-06-primitives-reveal-before.png` | The first screen, motion **on** and nothing scrolled |
-| `2026-09-06-primitives-reveal-during.png` | Mid-scroll: the row below sits at 56% while the band above has arrived |
+| `2026-09-06-primitives-exchange-editorial-wide.webp` | The whole specimen, `editorial` at 1280 |
+| `2026-09-06-primitives-exchange-bold-wide.webp` | The same page, `bold` |
+| `2026-09-06-primitives-exchange-minimal-wide.webp` | The same page, `minimal` |
+| `2026-09-06-primitives-exchange-editorial-phone.webp` | 390px, `editorial` |
+| `2026-09-06-primitives-exchange-bold-phone.webp` | 390px, `bold` |
+| `2026-09-06-primitives-reveal-before.webp` | The first screen, motion **on** and nothing scrolled |
+| `2026-09-06-primitives-reveal-during.webp` | Mid-scroll: the row below sits at 56% while the band above has arrived |
 
 The five specimen shots are taken with reduced motion, for the reason the finding
 above gives; the two reveal shots are taken with motion on, which is what makes

@@ -4,7 +4,7 @@
 **Branch:** `framework-34-the-capture-half` · **Section:** §4c — reader signals,
 §6 — telemetry
 
-![The capture half, and where the view key stops](2026-09-14-framework-the-capture-half.png)
+![The capture half, and where the view key stops](2026-09-14-framework-the-capture-half.webp)
 
 ## Before anything else, two standing corrections to my brief
 

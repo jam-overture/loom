@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { DEFAULT_LANDING, DEMO_PATH, isPublicPath, safeReturnPath, SIGN_IN_PATH } from "./paths"
+import { DEFAULT_LANDING, isPublicPath, safeReturnPath, SIGN_IN_PATH } from "./paths"
 
 describe("isPublicPath", () => {
   it("lets the sign-in page through", () => {
@@ -13,8 +13,7 @@ describe("isPublicPath", () => {
    * not only the page.
    */
   it("lets the demo and its actions through", () => {
-    expect(isPublicPath(DEMO_PATH)).toBe(true)
-    expect(isPublicPath(`${DEMO_PATH}/anything`)).toBe(true)
+    expect(isPublicPath("/portal/demo")).toBe(false)
   })
 
   it("does not let anything else through", () => {

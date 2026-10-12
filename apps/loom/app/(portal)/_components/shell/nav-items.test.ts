@@ -163,9 +163,23 @@ describe("NAV_GROUPS", () => {
     expect(ambiguous.filter((item) => item.exact !== true)).toEqual([])
   })
 
-  it("finds a route served by another surface's route group", () => {
+  /**
+   * Was `finds a route served by another surface's route group`, which used the
+   * rail's `Demo` entry as its example of an href outside `(portal)`.
+   *
+   * That entry is gone on the maintainer's instruction of 12 October, so the
+   * example had to move — `routeExists` is still exercised across route groups
+   * by `/`, the marketing front door the wordmark points at. What replaces the
+   * rest of it is the standing instruction itself, because this is the rail the
+   * link kept coming back to.
+   */
+  it("still resolves an href outside this route group", () => {
     expect(GROUPS().length).toBeGreaterThan(1)
-    expect(routeExists("/demo")).toBe(true)
-    expect(items.some((item) => item.href === "/demo")).toBe(true)
+    expect(routeExists("/")).toBe(true)
+  })
+
+  it("offers no demo", () => {
+    expect(items.filter((item) => item.href.includes("demo"))).toEqual([])
+    expect(items.filter((item) => /demo/i.test(item.label))).toEqual([])
   })
 })

@@ -272,11 +272,11 @@ a first arrival with no session.
 
 | | |
 | --- | --- |
-| [the embed, before](2026-09-19-demo-nothing-to-press-embed-before.png) | `main` at **348 × 465**, the size of this demonstration inside the front door on a phone: a three-row bar, a heading, three paragraphs, and the top 67px of a button |
-| [the embed, after](2026-09-19-demo-nothing-to-press-embed-after.png) | the same box on this branch: whose page, what it is, the button, what it does, and what Loom does with every ask — and *or ask for one of these* peeking under it |
-| [the phone, before](2026-09-19-demo-nothing-to-press-phone-before.png) | `main` at 390 × 844 |
-| [the phone, after](2026-09-19-demo-nothing-to-press-phone-after.png) | this branch: the same screen with the lead 114px higher. **A standalone phone was never the problem** — at 844 tall every control was already in view on `main`, which is exactly why the box on the landing page is where this run's measurements were taken |
-| [the wide arrival](2026-09-19-demo-nothing-to-press-wide-unchanged.png) | 1280 × 900, **`md5`-identical on both builds** — the layout this surface is normally judged on, untouched |
+| [the embed, before](2026-09-19-demo-nothing-to-press-embed-before.webp) | `main` at **348 × 465**, the size of this demonstration inside the front door on a phone: a three-row bar, a heading, three paragraphs, and the top 67px of a button |
+| [the embed, after](2026-09-19-demo-nothing-to-press-embed-after.webp) | the same box on this branch: whose page, what it is, the button, what it does, and what Loom does with every ask — and *or ask for one of these* peeking under it |
+| [the phone, before](2026-09-19-demo-nothing-to-press-phone-before.webp) | `main` at 390 × 844 |
+| [the phone, after](2026-09-19-demo-nothing-to-press-phone-after.webp) | this branch: the same screen with the lead 114px higher. **A standalone phone was never the problem** — at 844 tall every control was already in view on `main`, which is exactly why the box on the landing page is where this run's measurements were taken |
+| [the wide arrival](2026-09-19-demo-nothing-to-press-wide-unchanged.webp) | 1280 × 900, **`md5`-identical on both builds** — the layout this surface is normally judged on, untouched |
 
 **To see it yourself:** open the preview at `/demo` and drag the window narrower
 than 1024px, or open `/` on a phone and look at the band under **Your turn**.

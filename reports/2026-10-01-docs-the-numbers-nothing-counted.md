@@ -33,7 +33,7 @@ in this lane's own ledger, on 16 September, filed by this lane against itself:
 
 The grep was never run here. It is a mechanism now instead.
 
-![The installation page](2026-10-01-docs-the-numbers-nothing-counted-installation.png)
+![The installation page](2026-10-01-docs-the-numbers-nothing-counted-installation.webp)
 
 ## The plain version
 
@@ -99,7 +99,7 @@ the page's `<meta name="description">`, its pager caption, and its row on the
 section landing. **It says thirteen beside a page that says fourteen**, and no
 reading of `page.mdx` would ever have looked at it.
 
-![The rail, and the summary that was wrong](2026-10-01-docs-the-numbers-nothing-counted-rail.png)
+![The rail, and the summary that was wrong](2026-10-01-docs-the-numbers-nothing-counted-rail.webp)
 
 So the sweep's second half is **this route group's own string and template
 literals**, comments stripped. That reaches the rail's summaries, every
@@ -139,9 +139,9 @@ one the assertion was pointed at — which is where the stale one actually was.
 finding's own: a ramp has eight steps because eight is the shape of a ramp, not
 because somebody put eight things in a list. It is a constant the prose may name.
 
-![Fourteen settings, produced](2026-10-01-docs-the-numbers-nothing-counted-settings.png)
+![Fourteen settings, produced](2026-10-01-docs-the-numbers-nothing-counted-settings.webp)
 
-![Seventeen named slots, produced](2026-10-01-docs-the-numbers-nothing-counted-slots.png)
+![Seventeen named slots, produced](2026-10-01-docs-the-numbers-nothing-counted-slots.webp)
 
 ## Decisions taken that were not specified
 
@@ -253,7 +253,7 @@ replaced by two, not removed. Nothing was weakened and nothing was skipped.
 
 ## At 390 pixels
 
-![On a phone](2026-10-01-docs-the-numbers-nothing-counted-installation-phone.png)
+![On a phone](2026-10-01-docs-the-numbers-nothing-counted-installation-phone.webp)
 
 `scrollWidth 390 / innerWidth 390`. The sentence wraps where it wraps and the
 produced word is an ordinary word to a line-breaker, which is the other half of

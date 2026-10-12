@@ -2,7 +2,7 @@
 
 The maintainer asked for the marketing site to be converted to the `minimal` theme registered in [#103](https://github.com/jam-overture/loom/pull/103). It is: `/` and `/how-it-works` now render **white paper, black ink and Hyperion's green** with no query string, and the two starter palettes stay reachable as what they always were — the demonstration, not the front door.
 
-![The home page under the minimal theme](2026-08-20-marketing-the-minimal-theme-home.png)
+![The home page under the minimal theme](2026-08-20-marketing-the-minimal-theme-home.webp)
 
 ---
 
@@ -82,10 +82,10 @@ One test still names `bold` explicitly — *"keeps the visitor's palette when th
 
 All four taken against one `next start`, full page.
 
-- [home · minimal](2026-08-20-marketing-the-minimal-theme-home.png) — the front door
-- [how it works · minimal](2026-08-20-marketing-the-minimal-theme-how-it-works.png)
-- [home · editorial](2026-08-20-marketing-the-minimal-theme-home-editorial.png) — unchanged but for the hero backdrop
-- [home · bold](2026-08-20-marketing-the-minimal-theme-home-bold.png) — footer now offers Minimal and Editorial
+- [home · minimal](2026-08-20-marketing-the-minimal-theme-home.webp) — the front door
+- [how it works · minimal](2026-08-20-marketing-the-minimal-theme-how-it-works.webp)
+- [home · editorial](2026-08-20-marketing-the-minimal-theme-home-editorial.webp) — unchanged but for the hero backdrop
+- [home · bold](2026-08-20-marketing-the-minimal-theme-home-bold.webp) — footer now offers Minimal and Editorial
 
 What the theme does to the page, which is more than a recolour: `bg-surface` equals the canvas white, so every card, the nav, the footer and the pricing tiers are defined by their border instead of by a change of background. The green appears only as the pill's ring, the icon tiles, the check marks, the featured tier's ring and the closing band's tint. The type is one family separated by weight alone — Geist where the face resolves, and these shots were taken before the layout linked it, so what they show is the fallback grotesque the stack falls through to. The shapes and the weights are right; the face is not.
 

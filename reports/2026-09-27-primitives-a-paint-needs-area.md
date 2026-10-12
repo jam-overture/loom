@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-27 · **Branch:**
 `primitives-47-a-paint-needs-area` · **Section:** §4b
 
-![The bold hero on a phone, with the light spread across it instead of pooled at the bottom](2026-09-27-primitives-paint-needs-area-hero-phone-after.png)
+![The bold hero on a phone, with the light spread across it instead of pooled at the bottom](2026-09-27-primitives-paint-needs-area-hero-phone-after.webp)
 
 ## What this run chose, and why that
 
@@ -87,7 +87,7 @@ before either corner — and it is what the rule was asking for.
 
 | before — `main` | after |
 | --- | --- |
-| ![Two small round smudges floating in a wide strip](2026-09-27-primitives-paint-needs-area-aurora-strip-before.png) | ![A warm wash running the width of the same strip](2026-09-27-primitives-paint-needs-area-aurora-strip-after.png) |
+| ![Two small round smudges floating in a wide strip](2026-09-27-primitives-paint-needs-area-aurora-strip-before.webp) | ![A warm wash running the width of the same strip](2026-09-27-primitives-paint-needs-area-aurora-strip-after.webp) |
 
 The defect that picture shows is not dimness. A circle in a 736-by-170 field is
 a circle with the field empty either side of it, so **the light was not even
@@ -105,7 +105,7 @@ band 1280 wide fans its beams out almost horizontally.
 
 | before — `main` | after |
 | --- | --- |
-| ![A flat starburst reading as a vanishing point](2026-09-27-primitives-paint-needs-area-rays-strip-before.png) | ![Beams falling from a point above the band](2026-09-27-primitives-paint-needs-area-rays-strip-after.png) |
+| ![A flat starburst reading as a vanishing point](2026-09-27-primitives-paint-needs-area-rays-strip-before.webp) | ![Beams falling from a point above the band](2026-09-27-primitives-paint-needs-area-rays-strip-after.webp) |
 
 `-10rem` **is the hero's own value** — `-20%` of the 800-pixel band these beams
 were drawn in — so the designed case is unchanged to the pixel and every shorter
@@ -170,7 +170,7 @@ minimum size pushed its own track wide.
 
 | before — `main`, `scrollWidth 401 / innerWidth 390` | after, `390 / 390` |
 | --- | --- |
-| ![A figure running off the right edge of a phone](2026-09-27-primitives-paint-needs-area-stat-phone-before.png) | ![The same four figures inside the page](2026-09-27-primitives-paint-needs-area-stat-phone-after.png) |
+| ![A figure running off the right edge of a phone](2026-09-27-primitives-paint-needs-area-stat-phone-before.webp) | ![The same four figures inside the page](2026-09-27-primitives-paint-needs-area-stat-phone-after.webp) |
 
 `.loom-stat` declares `container-type: inline-size` and `.loom-stat-value` takes
 `min(var(--loom-scale-7), 26cqi)`. **One declaration does both jobs**, which is
@@ -222,8 +222,8 @@ all.
 
 | | before — `main` | after |
 | --- | --- | --- |
-| editorial | ![](2026-09-27-primitives-paint-needs-area-sheet-editorial-before.png) | ![](2026-09-27-primitives-paint-needs-area-sheet-editorial-after.png) |
-| bold | ![](2026-09-27-primitives-paint-needs-area-sheet-bold-before.png) | ![](2026-09-27-primitives-paint-needs-area-sheet-bold-after.png) |
+| editorial | ![](2026-09-27-primitives-paint-needs-area-sheet-editorial-before.webp) | ![](2026-09-27-primitives-paint-needs-area-sheet-editorial-after.webp) |
+| bold | ![](2026-09-27-primitives-paint-needs-area-sheet-bold-before.webp) | ![](2026-09-27-primitives-paint-needs-area-sheet-bold-after.webp) |
 
 Ten bands each, at 1280, `scrollWidth 1280 / innerWidth 1280` on all four, no
 diagnostics. The phone sheets measure 390 against 390.

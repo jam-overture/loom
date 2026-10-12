@@ -8,9 +8,9 @@ from **20 blocks ported to 29**. Plus
 [0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md),
 which is the half of this run that decides the seven pairs after it.
 
-![The two new bands under the editorial palette](2026-08-18-primitives-the-catalogue-bands-editorial.png)
+![The two new bands under the editorial palette](2026-08-18-primitives-the-catalogue-bands-editorial.webp)
 
-![The same specimen under the bold palette](2026-08-18-primitives-the-catalogue-bands-bold.png)
+![The same specimen under the bold palette](2026-08-18-primitives-the-catalogue-bands-bold.webp)
 
 ## Which primitives, and why those
 

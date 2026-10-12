@@ -35,9 +35,9 @@ to photograph it — a specimen of markup no real page has.
 
 Left, the same specimen with no endpoints declared. Right, with them.
 
-![A form with nowhere to post: a notice over a disabled fieldset, every control at six-tenths opacity](2026-09-15-framework-the-instruments-form-grey.png)
+![A form with nowhere to post: a notice over a disabled fieldset, every control at six-tenths opacity](2026-09-15-framework-the-instruments-form-grey.webp)
 
-![The same form with a declared target: full contrast, the checkbox legible, no notice](2026-09-15-framework-the-instruments-form-posting.png)
+![The same form with a declared target: full contrast, the checkbox legible, no notice](2026-09-15-framework-the-instruments-form-posting.webp)
 
 **One change from the shape the finding proposed, and it is the interesting
 part.** It asked for endpoints; it gets **targets**. The seam takes a
@@ -68,7 +68,7 @@ in `/tmp`, and its best image was the one the harness did not take.
 
 The page below, photographed on load and then with two steps and a clip:
 
-![The figure on load: a card reading "Nothing observed yet."](2026-09-15-framework-the-instruments-figure-empty.png)
+![The figure on load: a card reading "Nothing observed yet."](2026-09-15-framework-the-instruments-figure-empty.webp)
 
 ```json
 {
@@ -79,7 +79,7 @@ The page below, photographed on load and then with two steps and a clip:
 }
 ```
 
-![The figure after the steps, clipped to the element: a table of bands, signals and counts](2026-09-15-framework-the-instruments-figure-clipped.png)
+![The figure after the steps, clipped to the element: a table of bands, signals and counts](2026-09-15-framework-the-instruments-figure-clipped.webp)
 
 **Three things had to be decided rather than inherited**, and each is a way the
 obvious implementation would have been quietly wrong:
@@ -94,7 +94,7 @@ reader-signal broadcaster *is* a delegated listener on the root, so suppressing
 the event would photograph the instrument instead of the page. Proven rather
 than asserted: below is a shot whose only step clicks a link to `example.com`.
 
-![The figure reading "The link's own delegated listener still ran — and the page did not go anywhere."](2026-09-15-framework-the-instruments-navigation-pinned.png)
+![The figure reading "The link's own delegated listener still ran — and the page did not go anywhere."](2026-09-15-framework-the-instruments-navigation-pinned.webp)
 
 **Overflow is measured after the steps, not before.** Nobody asked for this. A
 disclosure that opens or a list that grows is precisely what pushes a page past

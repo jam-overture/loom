@@ -10,7 +10,7 @@ The maintainer, after rewriting four of this lane's sentences himself:
 Every string on the three live pages, dumped and read one at a time.
 **38 of them were rewritten.** One of them was also wrong.
 
-![the front door](2026-10-01-marketing-plain-language-home.png)
+![the front door](2026-10-01-marketing-plain-language-home.webp)
 
 ---
 
@@ -140,9 +140,9 @@ together · 3 metadata conventions, 0 unserved.
 `pnpm shoot`, all three pages plus the front door at phone width —
 `scrollWidth 1280 / innerWidth 1280` and `390 / 390`, no overflow anywhere.
 
-![how it works](2026-10-01-marketing-plain-language-how-it-works.png)
+![how it works](2026-10-01-marketing-plain-language-how-it-works.webp)
 
-![what you run](2026-10-01-marketing-plain-language-what-you-run.png)
+![what you run](2026-10-01-marketing-plain-language-what-you-run.webp)
 
 No decision record. No primitive added, no prop set that was not set before,
 nothing under `src/` opened, nothing outside `app/(marketing)/` and `reports/`.

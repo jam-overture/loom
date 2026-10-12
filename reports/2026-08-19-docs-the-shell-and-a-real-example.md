@@ -3,7 +3,7 @@
 **Routine:** `Documentation site` · **Branch:** `docs-01-the-shell-and-a-real-example`
 · **Section:** §4c
 
-![The site in light, with a code block and the tree it renders](2026-08-19-docs-the-shell-and-a-real-example-light.png)
+![The site in light, with a code block and the tree it renders](2026-08-19-docs-the-shell-and-a-real-example-light.webp)
 
 The first run of this routine. `apps/docs` did not exist; it does now, with six
 written pages, four live examples, and the two decisions §4c settles enforced by
@@ -44,7 +44,7 @@ registry, and each frame carries a **show the tree** disclosure printing the
 exact value the render walked — so the code above an example and the page below
 it cannot drift apart.
 
-![The same site in dark, with a container and its children rendering live](2026-08-19-docs-the-shell-and-a-real-example-dark.png)
+![The same site in dark, with a container and its children rendering live](2026-08-19-docs-the-shell-and-a-real-example-dark.webp)
 
 ## Decisions taken that were not specified
 

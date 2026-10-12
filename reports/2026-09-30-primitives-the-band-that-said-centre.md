@@ -174,7 +174,7 @@ it** — because a photograph of a successful workaround shows nothing.
 
 ### `bold`, wide — before
 
-![six bands on bold before the change](2026-09-30-primitives-the-band-that-said-centre-before-bold-wide.png)
+![six bands on bold before the change](2026-09-30-primitives-the-band-that-said-centre-before-bold-wide.webp)
 
 The finding, photographed. The eyebrow pill is centred, the lead paragraph is
 centred, the two buttons are centred, and the largest words on the page are hard
@@ -185,7 +185,7 @@ finding describes on the real front door.
 
 ### `editorial`, wide — after
 
-![the same six bands on editorial after the change](2026-09-30-primitives-the-band-that-said-centre-editorial-wide.png)
+![the same six bands on editorial after the change](2026-09-30-primitives-the-band-that-said-centre-editorial-wide.webp)
 
 **The fourth band is the one to look at, not the hero.** *The boxes keep their
 width*: its eyebrow, heading and caption centre, and the table under them is
@@ -201,7 +201,7 @@ repository.
 
 ### The strip, at 390 — before above, after below
 
-![a wrapped banner message ranged left](2026-09-30-primitives-the-band-that-said-centre-before-editorial-phone.png)
+![a wrapped banner message ranged left](2026-09-30-primitives-the-band-that-said-centre-before-editorial-phone.webp)
 
 The banner is in the top 260px of the phone shots, and `too.` on the third line
 is the entire visible difference. It is also the reason for this run's filed

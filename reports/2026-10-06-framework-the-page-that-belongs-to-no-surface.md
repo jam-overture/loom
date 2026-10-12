@@ -6,10 +6,10 @@
 
 | before — `Loom marketing`, 5 October | after — this branch |
 | --- | --- |
-| ![what a visitor got](2026-10-05-marketing-paths-not-found.png) | ![what a visitor gets](2026-10-06-framework-not-found-wide.png) |
+| ![what a visitor got](2026-10-05-marketing-paths-not-found.webp) | ![what a visitor gets](2026-10-06-framework-not-found-wide.webp) |
 
 *Both at 1280×760, both real photographs of this application serving an address
-it has no route for. The phone is [beside them](2026-10-06-framework-not-found-phone.png);
+it has no route for. The phone is [beside them](2026-10-06-framework-not-found-phone.webp);
 the shot list is committed next to this report.*
 
 ---

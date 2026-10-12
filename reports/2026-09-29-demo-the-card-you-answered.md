@@ -56,9 +56,9 @@ it opens where a card opens.
 
 | | before (`main` at `8db2cfb`) | after |
 | --- | --- | --- |
-| the payoff frame, wide | `reports/2026-09-29-demo-the-card-you-answered-before-wide.png` | `reports/2026-09-29-demo-the-card-you-answered-after-wide.png` |
-| the question, wide — **unchanged** | `reports/2026-09-29-demo-the-card-you-answered-question-unchanged.png` | same file, byte for byte |
-| the same sequence on a phone — **unchanged** | `reports/2026-09-29-demo-the-card-you-answered-phone-unchanged.png` | same file, byte for byte |
+| the payoff frame, wide | `reports/2026-09-29-demo-the-card-you-answered-before-wide.webp` | `reports/2026-09-29-demo-the-card-you-answered-after-wide.webp` |
+| the question, wide — **unchanged** | `reports/2026-09-29-demo-the-card-you-answered-question-unchanged.webp` | same file, byte for byte |
+| the same sequence on a phone — **unchanged** | `reports/2026-09-29-demo-the-card-you-answered-phone-unchanged.webp` | same file, byte for byte |
 
 The `before` frame's first line of rail is *"undoes it."* The `after` frame's
 first line is **Applied**, and under it *"Take the numbers band off the page."*,

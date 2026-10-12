@@ -144,6 +144,21 @@ export const subjectReading = (subject: string | PartName): string =>
   typeof subject === "string" ? subject : partReading(subject)
 
 /**
+ * `1 page` and never `1 pages`, which is the first thing a reader distrusts.
+ *
+ * Here on the run a **second** screen needed it, which is the rule this file
+ * holds for every shape in it: `_lib/fix-first.ts` wrote it for the order over a
+ * deployment's pages, and `_lib/pieces-read.ts` says how many pages a census of
+ * the library is taken over. Two spellings of one count word is how a portal
+ * comes to print *1 pages* on one screen and not the other.
+ *
+ * It carries the noun and never the verb. *1 page of these 2 are not in the
+ * order* passed every assertion about the number, which is the scar the callers
+ * both write their two phrasings under.
+ */
+export const pagesCount = (count: number): string => (count === 1 ? "1 page" : `${count} pages`)
+
+/**
  * "title", "title and width", "title, width and gap".
  *
  * A comma-separated list is what a schema prints and an "and" before the last

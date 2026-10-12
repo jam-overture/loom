@@ -168,14 +168,14 @@ any frame too short to afford it, and neither rule moved.
 
 | | `md5` | |
 | --- | --- | --- |
-| [**one press, 390 × 844**](2026-10-10-demo-window-one-press-phone.png) · [before](2026-10-10-demo-window-one-press-phone-before.png) | `674ca228…` ← `ce9b0d63…` | **the picture worth opening** — the same screen, with the page turned over in it |
-| [the arrival screen](2026-10-10-demo-window-arrival-phone.png) · [before](2026-10-10-demo-window-arrival-phone-before.png) | `a3177980…` = `a3177980…` | byte-identical; the screen this run does not touch |
-| [a marked change, on a phone](2026-10-10-demo-window-marked-phone.png) | `1c934553…` | the control: the page is in front of them, so the window stays away |
-| [a question open](2026-10-10-demo-window-question-phone.png) | `ad41aaa6…` | the other control, unchanged |
-| [after **Put it back**](2026-10-10-demo-window-put-it-back-phone.png) | `66d64278…` | the half this run does not fix, and the finding filed for it |
-| [1280 × 900, arrival](2026-10-10-demo-window-arrival-wide.png) | `3b34079e…` — unchanged byte for byte | the wide arrival screen |
-| [1280 × 900, one press](2026-10-10-demo-window-one-press-wide.png) | `03f930af…` — unchanged byte for byte | the wide payoff frame |
-| [the embed at 348 × 465](2026-10-10-demo-window-embed.png) | `7c20a054…` — unchanged byte for byte | inside somebody else's page |
+| [**one press, 390 × 844**](2026-10-10-demo-window-one-press-phone.webp) · [before](2026-10-10-demo-window-one-press-phone-before.webp) | `674ca228…` ← `ce9b0d63…` | **the picture worth opening** — the same screen, with the page turned over in it |
+| [the arrival screen](2026-10-10-demo-window-arrival-phone.webp) · [before](2026-10-10-demo-window-arrival-phone-before.webp) | `a3177980…` = `a3177980…` | byte-identical; the screen this run does not touch |
+| [a marked change, on a phone](2026-10-10-demo-window-marked-phone.webp) | `1c934553…` | the control: the page is in front of them, so the window stays away |
+| [a question open](2026-10-10-demo-window-question-phone.webp) | `ad41aaa6…` | the other control, unchanged |
+| [after **Put it back**](2026-10-10-demo-window-put-it-back-phone.webp) | `66d64278…` | the half this run does not fix, and the finding filed for it |
+| [1280 × 900, arrival](2026-10-10-demo-window-arrival-wide.webp) | `3b34079e…` — unchanged byte for byte | the wide arrival screen |
+| [1280 × 900, one press](2026-10-10-demo-window-one-press-wide.webp) | `03f930af…` — unchanged byte for byte | the wide payoff frame |
+| [the embed at 348 × 465](2026-10-10-demo-window-embed.webp) | `7c20a054…` — unchanged byte for byte | inside somebody else's page |
 
 ## Real test numbers
 

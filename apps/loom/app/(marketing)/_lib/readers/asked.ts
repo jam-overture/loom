@@ -77,9 +77,27 @@ export const BAND_TYPES = ["loom.hero", "loom.section"] as const
  * own reading order, and *which of the four destinations on the front door did
  * they take* — a card each, and every press on both was landing nowhere.
  */
+/**
+ * **`loom.code` joined them on 11 October, with the install ask.**
+ *
+ * It is the one entry here that is not shaped like a control and is the most
+ * important press on the site. The panel is a code listing; what makes it a
+ * control is that the primitive draws its own *Copy* button, registered
+ * `interactive` for it, and copying the install line is the closest thing this
+ * site has to somebody deciding to use Loom. Leaving the type out would have
+ * attributed that press nowhere — a type this list does not name is a press
+ * counted nowhere — and *did the reader take the command* is the question
+ * `docs/adaptation.md` points a model at.
+ *
+ * It is also honest about what it cannot see: a reader who selects the line and
+ * copies it by hand, or types it, is a conversion this site will never hear
+ * about. The button is the only half that is answerable, so the figure built on
+ * it is a floor and the lane that does the arithmetic should read it as one.
+ */
 export const CONTROL_TYPES = [
   "loom.action",
   "loom.card",
+  "loom.code",
   "loom.link",
   "loom.brand",
 ] as const

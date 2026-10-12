@@ -11,7 +11,7 @@ import { readersOutOf } from "./arrivals"
 import { unnamed, type PageName } from "./page-name"
 import type { PartName } from "./part-name"
 import { fallReading, fallSentence, type FallLine } from "./stopping"
-import type { PlainWord } from "./vocabulary"
+import { pagesCount, type PlainWord } from "./vocabulary"
 
 /**
  * Which of your pages to open first.
@@ -209,9 +209,6 @@ export const RANK_STANDINGS_PLAIN: Readonly<Record<RankStanding, PlainWord>> = {
     technical: "inconsistent",
   },
 }
-
-/** `1 page` and never `1 pages`, which is the first thing a reader distrusts. */
-export const pagesCount = (count: number): string => (count === 1 ? "1 page" : `${count} pages`)
 
 /**
  * The reading, from the runtime's order and the names the pages give

@@ -184,14 +184,33 @@ export const fallReading = (line: FallLine): string =>
  * reads as nobody, and *almost all* rather than a `10 in 10` that reads as
  * everybody — and everybody is a different sentence, below, because *nobody went
  * on* is how English says it.
+ *
+ * **Never a percentage**, which is the rule `reading-view.ts` states for every
+ * count on these screens: two of two is not the same news as two hundred of two
+ * hundred, and a surface printing `100%` for both makes the smallest sample in
+ * the portal look like the strongest evidence in it.
+ *
+ * ## Why the population is a parameter
+ *
+ * *The people* is right for a fall, where the population is the readers who got
+ * as far as the part above it and the sentence names that part either side of
+ * this phrase. It is wrong for a **kind of piece**, whose share is of the
+ * readers who met it across every page it stands on — and *7 in 10 of the
+ * people* there would be a share of a population nothing on the screen names.
+ *
+ * Widened rather than re-spelled, because a second tenths phrasing in
+ * `pieces-read.ts` is how one reading comes to be said in two voices: the two
+ * would round the same number differently the first time somebody changed one,
+ * and *7 in 10* beside *almost all* about the same share is two measurements as
+ * far as a reader can tell. Every existing caller is untouched by the default.
  */
-export const plainShare = (share: number): string => {
+export const plainShare = (share: number, population: string = "people"): string => {
   const tenths = Math.round(share * 10)
 
-  if (tenths <= 0) return "fewer than 1 in 10 of the people"
-  if (tenths >= 10) return "almost all of the people"
+  if (tenths <= 0) return `fewer than 1 in 10 of the ${population}`
+  if (tenths >= 10) return `almost all of the ${population}`
 
-  return `${tenths} in 10 of the people`
+  return `${tenths} in 10 of the ${population}`
 }
 
 /** Where the share is the whole of it: nobody at all went on. */

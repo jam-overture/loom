@@ -12,7 +12,7 @@ on the pull request, which is a primary source and is the first run to have one.
 a tree, and this deployment seeds trees that carry none of the four. Everything
 below was driven against the specimen harness and a local render.
 
-![Four bands under editorial, at 1280px](2026-09-24-primitives-the-rows-that-were-a-run-editorial-wide.png)
+![Four bands under editorial, at 1280px](2026-09-24-primitives-the-rows-that-were-a-run-editorial-wide.webp)
 
 ## What this run chose, and why that
 

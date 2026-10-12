@@ -5,7 +5,7 @@ import postgres from "postgres"
 import { applyRetention, describeRetention, retentionPolicySchema } from "@jam-overture/loom/telemetry"
 import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
-import { resolveConnectionString } from "../app/(portal)/_lib/connection"
+import { resolveConnectionString } from "../app/_lib/app/connection"
 
 /**
  * Forgets telemetry older than the configured age.

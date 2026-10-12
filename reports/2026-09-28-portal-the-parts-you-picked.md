@@ -58,10 +58,10 @@ against the seeded page `t_seed1`.
 
 | | |
 | --- | --- |
-| [**before**, on `main`](2026-09-28-portal-the-parts-you-picked-before-wide.png) | two parts clicked; **only the second survives**, and neither is drawn |
-| [**after** — two parts inside one card](2026-09-28-portal-the-parts-you-picked-after-wide.png) | both outlined, both drawn, and the ask widened to the card that holds them |
-| [**after**, on a phone](2026-09-28-portal-the-parts-you-picked-after-phone.png) | 390px, `scrollWidth 390 / innerWidth 390` |
-| [**after** — two parts at opposite ends](2026-09-28-portal-the-parts-you-picked-spread-wide.png) | nothing smaller than the page holds them, and the screen says so |
+| [**before**, on `main`](2026-09-28-portal-the-parts-you-picked-before-wide.webp) | two parts clicked; **only the second survives**, and neither is drawn |
+| [**after** — two parts inside one card](2026-09-28-portal-the-parts-you-picked-after-wide.webp) | both outlined, both drawn, and the ask widened to the card that holds them |
+| [**after**, on a phone](2026-09-28-portal-the-parts-you-picked-after-phone.webp) | 390px, `scrollWidth 390 / innerWidth 390` |
+| [**after** — two parts at opposite ends](2026-09-28-portal-the-parts-you-picked-spread-wide.webp) | nothing smaller than the page holds them, and the screen says so |
 
 The before picture was taken from `main` itself — checked out, rebuilt,
 photographed, and checked back — rather than described, because the difference

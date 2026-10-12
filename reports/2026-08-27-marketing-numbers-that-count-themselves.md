@@ -11,7 +11,7 @@ This run closes it. Two of the three numbers now count themselves, the third is
 a floor that nothing outside this lane can move, and the band says so on the
 page.
 
-![Built in the open, minimal](2026-08-27-marketing-numbers-that-count-themselves-band.png)
+![Built in the open, minimal](2026-08-27-marketing-numbers-that-count-themselves-band.webp)
 
 ---
 
@@ -84,9 +84,9 @@ for itself — the floor is checked too, in the direction that matters. It is
 `loom.prose`, muted, centred and measured, which is the composition the band at
 the foot of this page already uses for the same job.
 
-![The band under the bold palette](2026-08-27-marketing-numbers-that-count-themselves-bold.png)
+![The band under the bold palette](2026-08-27-marketing-numbers-that-count-themselves-bold.webp)
 
-![The band under the editorial palette](2026-08-27-marketing-numbers-that-count-themselves-editorial.png)
+![The band under the editorial palette](2026-08-27-marketing-numbers-that-count-themselves-editorial.webp)
 
 ## Tests
 
@@ -133,7 +133,7 @@ exists for:
 `scrollWidth` is 390 at a 390px viewport and the band was looked at under all
 three registered palettes.
 
-![The band at 390px](2026-08-27-marketing-numbers-that-count-themselves-phone.png)
+![The band at 390px](2026-08-27-marketing-numbers-that-count-themselves-phone.webp)
 
 ## Decisions and findings
 

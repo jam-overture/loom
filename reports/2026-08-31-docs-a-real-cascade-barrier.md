@@ -15,13 +15,13 @@ adds the test that keeps it that way.
 
 ## The line that was not in the tree
 
-![The example on Children and slots, before: a horizontal rule above the heading that no primitive drew](2026-08-31-docs-a-real-cascade-barrier-example-before.png)
+![The example on Children and slots, before: a horizontal rule above the heading that no primitive drew](2026-08-31-docs-a-real-cascade-barrier-example-before.webp)
 
 That rule under **SLOTS** is `.prose h2 { border-top: 1px solid var(--edge) }`,
 a rule about markdown headings, landing on a `loom.heading` inside a rendered
 `LoomTree`. **A reader who copied that tree got no line.**
 
-![The same example after: the tree draws itself and nothing else does](2026-08-31-docs-a-real-cascade-barrier-example-after.png)
+![The same example after: the tree draws itself and nothing else does](2026-08-31-docs-a-real-cascade-barrier-example-after.webp)
 
 The heading also gets its own tracking back, which is why it now wraps
 differently — the docs site had been setting `letter-spacing: -0.02em` on it,
@@ -94,16 +94,16 @@ link, a chip on a backtick span — in its own colour. `currentColor` is what do
 it, and the amber callout now gets an amber chip where the shared grey sat on
 both and belonged to neither.
 
-![The two callouts in dark, with tinted chips and an underlined link](2026-08-31-docs-a-real-cascade-barrier-dark.png)
+![The two callouts in dark, with tinted chips and an underlined link](2026-08-31-docs-a-real-cascade-barrier-dark.webp)
 
 ## What the reference gained, which I did not expect
 
 Every one of 429 symbol headings was carrying 40px of margin from `.prose h3`,
 on top of the `py-6` its own component declares.
 
-![Before: the name floats 40px below the divider that introduces it](2026-08-31-docs-a-real-cascade-barrier-reference-before.png)
+![Before: the name floats 40px below the divider that introduces it](2026-08-31-docs-a-real-cascade-barrier-reference-before.webp)
 
-![After: the spacing the component actually asked for](2026-08-31-docs-a-real-cascade-barrier-reference-after.png)
+![After: the spacing the component actually asked for](2026-08-31-docs-a-real-cascade-barrier-reference-after.webp)
 
 Six symbols now sit where five did, and a name sits with its signature rather
 than adrift between two dividers. Nobody chose the 40px; it is the gap between
@@ -113,7 +113,7 @@ The contents box lost its `block!` and its links gained an underline they never
 had — those links had been getting one from prose, and the barrier would have
 taken it away silently.
 
-![The contents box: two columns without `block!`, links with their affordance](2026-08-31-docs-a-real-cascade-barrier-contents.png)
+![The contents box: two columns without `block!`, links with their affordance](2026-08-31-docs-a-real-cascade-barrier-contents.webp)
 
 ## How this was checked
 
@@ -161,7 +161,7 @@ anywhere asserted that class** until this run.
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport on all
 four pages this touched.
 
-![The installation page at a true 390px](2026-08-31-docs-a-real-cascade-barrier-phone.png)
+![The installation page at a true 390px](2026-08-31-docs-a-real-cascade-barrier-phone.webp)
 
 ## `main` has been red for six days
 

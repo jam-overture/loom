@@ -12,7 +12,11 @@ import { describe, expect, it } from "vitest"
 import { RESERVED_VOCABULARY } from "../copy"
 import type { PageContext } from "../pages/home"
 import { askRunFor, renderTree, treeFor } from "../render"
-import { HOW_IT_WORKS, askHref, type SiteThemeName } from "../site"
+import {
+  askPath,
+  HOW_IT_WORKS,
+  type SiteThemeName,
+} from "../site"
 import { wordsOf } from "../words"
 import { BAND } from "../bands"
 import { ASKS, askById, type Ask } from "./asks"
@@ -36,6 +40,9 @@ import { frontDoorUndo, PUT_IT_BACK, runUndo } from "./undo"
  */
 
 const ORIGIN = "https://loom.example"
+
+/** A stand-in origin for taking a path apart; see the walk below. */
+const NO_ORIGIN = "https://site.invalid"
 const THEME: SiteThemeName = "minimal"
 
 const contextFor = (context: Partial<PageContext> = {}): PageContext => ({
@@ -343,7 +350,14 @@ describe("what the visitor reads afterwards", () => {
 
     const page = treeFor(HOW_IT_WORKS, { ...context, record: run.record })
     const offered = hrefsIn(bandOf(page, BAND.seeItHappen))
-    const pressed = offered.find((href) => new URL(href).searchParams.get("back") === "1")
+    /*
+     * A base, since 12 October: this site's own controls carry a path and no
+     * origin (0259), and `new URL` of a path alone throws. The base is never
+     * reached — only the parameters are read off it.
+     */
+    const pressed = offered.find(
+      (href) => new URL(href, NO_ORIGIN).searchParams.get("back") === "1"
+    )
 
     if (pressed === undefined) {
       throw new Error(`loom: the panel offers ${ask.id} no way to put it back`)
@@ -352,7 +366,7 @@ describe("what the visitor reads afterwards", () => {
     /** And the notice at the top of the page offers the same address, not a different one. */
     expect(hrefsOf(page).filter((href) => href === pressed)).toHaveLength(2)
 
-    const params = new URL(pressed).searchParams
+    const params = new URL(pressed, NO_ORIGIN).searchParams
 
     expect(params.get("ask")).toBe(ask.id)
 
@@ -458,9 +472,7 @@ describe("what the visitor reads afterwards", () => {
      * has done. A held undo with no yes beside it is a question the page asks
      * and gives the reader no way to answer.
      */
-    const answer = askHref(ORIGIN, {
-      theme: THEME,
-      ask: "unstick-menu",
+    const answer = askPath({ ask: "unstick-menu",
       approve: true,
       back: true,
       backApprove: true,
@@ -516,7 +528,7 @@ describe("what the visitor reads afterwards", () => {
       )
     )
 
-    expect(hrefs).not.toContain(askHref(ORIGIN, { theme: THEME, ask: "calmer", back: true }))
+    expect(hrefs).not.toContain(askPath({ ask: "calmer", back: true }))
   })
 
   /**
