@@ -42,6 +42,7 @@ export const SECTIONS: readonly Section[] = [
         name: "This project",
         items: [
           { label: "All pages", href: "/pages" },
+          { label: "The front door", href: "/pages/t_home1" },
           { label: "Waiting on you", href: "/pages?filter=waiting" },
           { label: "Changed recently", href: "/pages?filter=changed" },
         ],
