@@ -257,17 +257,17 @@ Six shots, `pnpm shoot --serve apps/loom`.
 | page | `scrollWidth 1280 / innerWidth 1280` | `scrollWidth 390 / innerWidth 390` |
 | the example frame | `768×755` | |
 
-![The feed, drawing a list the tree does not contain](2026-10-12-docs-reading-example.png)
+![The feed, drawing a list the tree does not contain](2026-10-12-docs-reading-example.webp)
 
-![Every primitive in the library that reads an answer](2026-10-12-docs-reading-readers.png)
+![Every primitive in the library that reads an answer](2026-10-12-docs-reading-readers.webp)
 
-![Three faults, each produced by causing it](2026-10-12-docs-reading-faults.png)
+![Three faults, each produced by causing it](2026-10-12-docs-reading-faults.webp)
 
-![The whole page](2026-10-12-docs-reading-wide.png)
+![The whole page](2026-10-12-docs-reading-wide.webp)
 
-![The same page on a phone](2026-10-12-docs-reading-phone.png)
+![The same page on a phone](2026-10-12-docs-reading-phone.webp)
 
-![The example on a phone, clipped behind the site's own header](2026-10-12-docs-reading-example-phone.png)
+![The example on a phone, clipped behind the site's own header](2026-10-12-docs-reading-example-phone.webp)
 
 Two things the pictures settled rather than suggested.
 
