@@ -32,6 +32,7 @@ export * from "./database.js"
 export * from "./migrate.js"
 export * from "./postgres-holds.js"
 export * from "./postgres-policy-log.js"
+export * from "./postgres-projects.js"
 export * from "./schema.js"
 
 /**

@@ -1,4 +1,4 @@
-import { HOLD_STORE_DDL, TREE_STORE_DDL } from "@jam-overture/loom/postgres"
+import { HOLD_STORE_DDL, PROJECT_STORE_DDL, TREE_STORE_DDL } from "@jam-overture/loom/postgres"
 import { TELEMETRY_DDL } from "@jam-overture/loom/telemetry/postgres"
 
 /**
@@ -386,6 +386,19 @@ export const storageSeams: readonly StorageSeam[] = [
     tables: tablesIn(HOLD_STORE_DDL),
   },
   {
+    id: "projects",
+    title: "The applications you have registered",
+    keeps: "One row per application Loom governs for you, and what you call it.",
+    without:
+      "Everything you store belongs to one unnamed application, and nothing can tell you which pages are whose.",
+    specifier: "@jam-overture/loom/postgres",
+    ensure: "ensureProjectStoreSchema",
+    postgres: "postgresProjectStore",
+    memory: "memoryProjectStore",
+    memorySpecifier: "@jam-overture/loom/store",
+    tables: tablesIn(PROJECT_STORE_DDL),
+  },
+  {
     id: "telemetry",
     title: "The account of what happened",
     keeps:
@@ -401,5 +414,5 @@ export const storageSeams: readonly StorageSeam[] = [
   },
 ]
 
-/** Every table a deployment that takes all three ends up with. */
+/** Every table a deployment that takes all of them ends up with. */
 export const storageTables: readonly SchemaTable[] = storageSeams.flatMap((seam) => seam.tables)

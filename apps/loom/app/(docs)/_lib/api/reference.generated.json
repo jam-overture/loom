@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4734,7 +4734,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4780,7 +4780,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5770,7 +5770,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6298,7 +6298,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7477,7 +7477,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8117,7 +8117,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8342,10 +8342,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 30,
+      "files": 32,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8353,6 +8353,20 @@
         "collisions": []
       },
       "groups": [
+        {
+          "module": "project/memory",
+          "title": "Memory",
+          "summary": "A `ProjectStore` in a `Map`, for a test and for a deployment with no database.",
+          "symbols": [
+            {
+              "name": "memoryProjectStore",
+              "kind": "function",
+              "signature": "const memoryProjectStore: (seed?: readonly Project[]) => ProjectStore",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
         {
           "module": "project/project",
           "title": "Project",
@@ -8399,6 +8413,48 @@
               "signature": "type StoreScope = {\n    readonly project?: ProjectId;\n};",
               "truncated": false,
               "summary": "The project a store handle speaks for."
+            }
+          ]
+        },
+        {
+          "module": "project/store",
+          "title": "Store",
+          "summary": "Custody of the projects a deployment has.",
+          "symbols": [
+            {
+              "name": "ProjectStoreError",
+              "kind": "type",
+              "signature": "type ProjectStoreError = \n/** No project under this id. */\n{\n    readonly code: \"not-found\";\n    readonly projectId: ProjectId;\n} | {\n    readonly code: \"already-exists\";\n    readonly projectId: ProjectId;\n}\n/** A row the current code cannot parse, which is a row an older one wrote. */\n | {\n    readonly code: \"unreadable\";\n    readonly projectId: ProjectId;\n    readonly detail: string;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ProjectStoreErrorCode",
+              "kind": "type",
+              "signature": "type ProjectStoreErrorCode = ProjectStoreError[\"code\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "projectStoreErrorCodes",
+              "kind": "value",
+              "signature": "const projectStoreErrorCodes: readonly ProjectStoreErrorCode[]",
+              "truncated": false,
+              "summary": "The four codes, in the order a deployment meets them, for the same reason `storeErrorCodes` exists: anything that walks the taxonomy rather than reacting to one member otherwise keeps a copy that is silently wrong the day a fifth lands."
+            },
+            {
+              "name": "describeProjectStoreError",
+              "kind": "function",
+              "signature": "const describeProjectStoreError: (error: ProjectStoreError) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ProjectStore",
+              "kind": "type",
+              "signature": "type ProjectStore = {\n    /**\n     * Record a project. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (project: Project) => Promise<Result<Project, ProjectStoreError>>;\n    /** One project. */\n    readonly get: (projectId: ProjectId) => Promise<Result<Project, ProjectStoreError>>;\n    /**\n     * Every project, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose project count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way projects are not.\n     */\n    readonly list: () => Promise<Result<readonly Project[], ProjectStoreError>>;\n    /** Change what a person calls it, and where they say it lives. */\n    readonly rename: (projectId: ProjectId, to: {\n        readonly name?: string;\n        readonly host?: string;\n    }) => Promise<Result<Project, ProjectStoreError>>;\n};",
+              "truncated": false,
+              "summary": "Four methods, and **no delete**."
             }
           ]
         },
@@ -8916,7 +8972,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9267,10 +9323,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 36,
+      "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9319,11 +9375,18 @@
               "summary": "The policy log's schema, as statements a host can run."
             },
             {
+              "name": "PROJECT_STORE_DDL",
+              "kind": "value",
+              "signature": "const PROJECT_STORE_DDL: readonly string[]",
+              "truncated": false,
+              "summary": "The projects table."
+            },
+            {
               "name": "ensureTreeStoreSchema",
               "kind": "function",
               "signature": "const ensureTreeStoreSchema: (db: LoomDatabase) => Promise<void>",
               "truncated": false,
-              "summary": "Creates the tables if they are absent. Every statement is `IF NOT EXISTS`, so running it against a populated database is a no-op rather than a hazard."
+              "summary": ""
             },
             {
               "name": "ensureHoldStoreSchema",
@@ -9338,6 +9401,13 @@
               "signature": "const ensurePolicyLogSchema: (db: LoomDatabase) => Promise<void>",
               "truncated": false,
               "summary": "Creates the policy log's table if it is absent. Idempotent on the same terms, and separate for the same reason: a deployment that wants a record of who changed its acceptance policy gets it by adding this call on purpose."
+            },
+            {
+              "name": "ensureProjectStoreSchema",
+              "kind": "function",
+              "signature": "const ensureProjectStoreSchema: (db: LoomDatabase) => Promise<void>",
+              "truncated": false,
+              "summary": "Creates the projects table if it is absent. Idempotent, and separate for the same reason the other three are: a deployment that wants more than one project gets the table by adding this call on purpose."
             }
           ]
         },
@@ -9384,6 +9454,20 @@
           ]
         },
         {
+          "module": "store/postgres-projects",
+          "title": "Postgres projects",
+          "summary": "The projects a deployment has, backed by Postgres.",
+          "symbols": [
+            {
+              "name": "postgresProjectStore",
+              "kind": "function",
+              "signature": "const postgresProjectStore: (db: LoomDatabase) => ProjectStore",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "store/schema",
           "title": "Schema",
           "summary": "Two tables: the log, and the snapshot it produces.",
@@ -9415,6 +9499,13 @@
               "signature": "const loomPolicyRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_policy_revisions\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policyId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy_id\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        fingerprint: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"fingerprint\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        policy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"policy\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        note: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"note\";\n            tableName: \"loom_policy_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The policy's own log."
+            },
+            {
+              "name": "loomProjects",
+              "kind": "value",
+              "signature": "const loomProjects: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_projects\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        host: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"host\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "truncated": false,
+              "summary": "The projects a deployment has."
             }
           ]
         }
@@ -9438,7 +9529,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -11909,7 +12000,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12052,7 +12143,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12119,7 +12210,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12716,7 +12807,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12790,7 +12881,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13269,7 +13360,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1518,
+        "packageNames": 1528,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

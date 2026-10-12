@@ -1,5 +1,10 @@
-import { memoryTreeStore, type TreeStore } from "@jam-overture/loom/store"
-import { postgresTreeStore } from "@jam-overture/loom/postgres"
+import {
+  memoryProjectStore,
+  memoryTreeStore,
+  type ProjectStore,
+  type TreeStore,
+} from "@jam-overture/loom/store"
+import { postgresProjectStore, postgresTreeStore } from "@jam-overture/loom/postgres"
 
 import { portalDatabase } from "./database"
 
@@ -38,11 +43,28 @@ const build = (): TreeStore =>
   portalDatabase === undefined ? memoryTreeStore() : postgresTreeStore(portalDatabase)
 
 const CARRIER_KEY = Symbol.for("loom.portal.store")
+const PROJECTS_KEY = Symbol.for("loom.portal.projects")
 
-type Carrier = { [CARRIER_KEY]?: TreeStore }
+type Carrier = { [CARRIER_KEY]?: TreeStore; [PROJECTS_KEY]?: ProjectStore }
 
 const carrier = globalThis as unknown as Carrier
 
 export const appStore: TreeStore = (carrier[CARRIER_KEY] ??= build())
+
+/**
+ * The projects this deployment has.
+ *
+ * Composed here beside the tree store and for the same reasons — one database
+ * handle, one decision about durability, and no surface reaching into another's
+ * internals to find it. It is the one store whose rows are not scoped by a
+ * project, because they are the projects.
+ *
+ * The seeding is still each surface's, as above: this module says a project
+ * store exists, not what is in it.
+ */
+const buildProjects = (): ProjectStore =>
+  portalDatabase === undefined ? memoryProjectStore() : postgresProjectStore(portalDatabase)
+
+export const appProjects: ProjectStore = (carrier[PROJECTS_KEY] ??= buildProjects())
 
 export { storeIsDurable } from "./database"
