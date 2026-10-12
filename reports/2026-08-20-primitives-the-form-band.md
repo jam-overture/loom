@@ -7,11 +7,11 @@ taking the library from **41 to 45**, plus both findings this lane owned, plus a
 defect found by looking at a screenshot that every test in the repository was
 blind to.
 
-![The form band under the house palette](2026-08-20-primitives-the-form-band-minimal.png)
+![The form band under the house palette](2026-08-20-primitives-the-form-band-minimal.webp)
 
-![The same specimen under the bold palette](2026-08-20-primitives-the-form-band-bold.png)
+![The same specimen under the bold palette](2026-08-20-primitives-the-form-band-bold.webp)
 
-![And under editorial](2026-08-20-primitives-the-form-band-editorial.png)
+![And under editorial](2026-08-20-primitives-the-form-band-editorial.webp)
 
 ## Which primitives, and why those
 
@@ -141,7 +141,7 @@ fixtures and fails on any combining `padding-inline` with `width: 100%` and no
 `box-sizing: border-box`. It caught a sixth instance the moment it was written —
 `loom.button` with `width: "full"`, added an hour earlier in this same run.
 
-![The specimen at 390px, which is what the fix is for](2026-08-20-primitives-the-form-band-phone.png)
+![The specimen at 390px, which is what the fix is for](2026-08-20-primitives-the-form-band-phone.webp)
 
 ## Both findings this lane owned, closed
 

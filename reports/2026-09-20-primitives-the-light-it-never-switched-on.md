@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-20 · **Branch:**
 `primitives-40-the-light-it-never-switched-on` · **Section:** §4b
 
-![The two bands that wear a treatment, at 1280px, under bold](2026-09-20-primitives-the-light-it-never-switched-on-bold-wide.png)
+![The two bands that wear a treatment, at 1280px, under bold](2026-09-20-primitives-the-light-it-never-switched-on-bold-wide.webp)
 
 ## What this run chose, and why that
 

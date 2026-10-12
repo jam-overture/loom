@@ -14,9 +14,9 @@ states the screen can now be in are in one photograph.
 
 | | |
 | --- | --- |
-| [Three pages, three answers](2026-09-21-portal-the-page-these-numbers-are-not-about-wide.png) | 1280px — **the change**: the notice on the first card, the line under the heading on the other two, and the whole of the third card's comparison block |
-| [The same screen, every disclosure open](2026-09-21-portal-the-page-these-numbers-are-not-about-open.png) | 1280px — the collection window, both version numbers, and the instant as the record holds it |
-| [a phone](2026-09-21-portal-the-page-these-numbers-are-not-about-phone.png) | 390px |
+| [Three pages, three answers](2026-09-21-portal-the-page-these-numbers-are-not-about-wide.webp) | 1280px — **the change**: the notice on the first card, the line under the heading on the other two, and the whole of the third card's comparison block |
+| [The same screen, every disclosure open](2026-09-21-portal-the-page-these-numbers-are-not-about-open.webp) | 1280px — the collection window, both version numbers, and the instant as the record holds it |
+| [a phone](2026-09-21-portal-the-page-these-numbers-are-not-about-phone.webp) | 390px |
 
 **How the populated pictures were taken.** Three trees built with the published
 builders into a `memoryTreeStore()` on `globalThis[Symbol.for("loom.portal.store")]`,

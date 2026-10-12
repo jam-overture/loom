@@ -9,10 +9,10 @@ browser:
 
 | | |
 | --- | --- |
-| [the page as it arrives](2026-08-27-portal-what-loom-can-put-on-your-page.png) | 1280px |
-| [every disclosure opened, which is the same page with nothing hidden](2026-08-27-portal-what-loom-can-put-on-your-page-open.png) | 1280px |
-| [a phone](2026-08-27-portal-what-loom-can-put-on-your-page-phone.png) | 390px |
-| [the empty state, which is what a project that has registered nothing sees](2026-08-27-portal-what-loom-can-put-on-your-page-empty.png) | 1280px |
+| [the page as it arrives](2026-08-27-portal-what-loom-can-put-on-your-page.webp) | 1280px |
+| [every disclosure opened, which is the same page with nothing hidden](2026-08-27-portal-what-loom-can-put-on-your-page-open.webp) | 1280px |
+| [a phone](2026-08-27-portal-what-loom-can-put-on-your-page-phone.webp) | 390px |
+| [the empty state, which is what a project that has registered nothing sees](2026-08-27-portal-what-loom-can-put-on-your-page-empty.webp) | 1280px |
 
 **How honest these are, stated plainly.** The first three are the real screen
 reading the real registry — nothing is scripted, because this page has no data

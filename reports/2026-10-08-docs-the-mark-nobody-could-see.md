@@ -38,9 +38,9 @@ of the reference and all 3 of *Architecture*. So for more than half of this
 site, a reader who arrived by any means other than the rail itself got a rail
 showing *Getting started* with nothing highlighted anywhere on it.
 
-![The rail on the last page of the site, before](2026-10-08-docs-before-rail-wide.png)
+![The rail on the last page of the site, before](2026-10-08-docs-before-rail-wide.webp)
 
-![And after](2026-10-08-docs-after-rail-wide.png)
+![And after](2026-10-08-docs-after-rail-wide.webp)
 
 **Why nothing caught it.** Everything a screen reader is told was right, and
 still is: `aria-current="page"` on the rail, `aria-selected` and
@@ -55,9 +55,9 @@ whether the marked row's box is inside the scroller's.
 Nine presses of ArrowDown and nothing on the screen is highlighted. The footer
 of the dialog says *↑↓ to move*.
 
-![Nine presses of ArrowDown, before](2026-10-08-docs-before-results-wide.png)
+![Nine presses of ArrowDown, before](2026-10-08-docs-before-results-wide.webp)
 
-![And after](2026-10-08-docs-after-results-wide.png)
+![And after](2026-10-08-docs-after-results-wide.webp)
 
 This is the worst of the three, because the other two leave a reader
 uninformed and this one leaves them wrong: `Enter` opens a page they never saw.
@@ -105,7 +105,7 @@ button into the middle of a list with the button off-screen.
 
 | before | after |
 | --- | --- |
-| ![](2026-10-08-docs-before-menu-phone.png) | ![](2026-10-08-docs-after-menu-phone.png) |
+| ![](2026-10-08-docs-before-menu-phone.webp) | ![](2026-10-08-docs-after-menu-phone.webp) |
 
 The reader is on *Decision records* in both.
 

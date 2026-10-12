@@ -8,7 +8,7 @@ the proxy answers `403 CONNECT tunnel failed`. That is the standing 15 September
 finding and is not re-filed. The photographs below are production builds
 (`pnpm build && next build && next start`), taken in Chromium.
 
-![Two files, one compiler, and the question each instrument asks](2026-09-20-docs-the-door-the-reference-describes.png)
+![Two files, one compiler, and the question each instrument asks](2026-09-20-docs-the-door-the-reference-describes.webp)
 
 ## What this run was
 
@@ -46,7 +46,7 @@ module and reported everything it found there, `export const` included.
 So the page told a reader to import two functions from `@loom/runtime/sdk`. Here
 is what shipped, photographed today on a real build with the defect put back:
 
-![catalogueFields, on the real page, as a function](2026-09-20-docs-the-door-the-reference-describes-false-page.png)
+![catalogueFields, on the real page, as a function](2026-09-20-docs-the-door-the-reference-describes-false-page.webp)
 
 A name, a kind badge reading **function**, and a full signature. On that entry
 point `catalogueFields` is `undefined`. The same page carried `closedChoices` the

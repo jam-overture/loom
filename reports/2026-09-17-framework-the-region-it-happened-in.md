@@ -3,7 +3,7 @@
 **Date:** 2026-09-17 · **Routine:** `Loom daily build` · **Section:** §6 — Reader
 signals · **Branch:** `framework-41-the-region-it-happened-in`
 
-![One press, before and after](2026-09-17-framework-the-region-it-happened-in.png)
+![One press, before and after](2026-09-17-framework-the-region-it-happened-in.webp)
 
 ## What was done, in plain language
 

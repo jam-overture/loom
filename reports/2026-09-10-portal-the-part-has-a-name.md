@@ -12,11 +12,11 @@ browser:
 
 | | |
 | --- | --- |
-| [The page](2026-09-10-portal-the-part-has-a-name-page.png) | 1280px |
-| [What's been asked](2026-09-10-portal-the-part-has-a-name-asked.png) | 1280px |
-| [What's changed](2026-09-10-portal-the-part-has-a-name-changed.png) | 1280px |
-| [The front door](2026-09-10-portal-the-part-has-a-name-front-door.png) | 1280px |
-| [a phone](2026-09-10-portal-the-part-has-a-name-phone.png) | 390px |
+| [The page](2026-09-10-portal-the-part-has-a-name-page.webp) | 1280px |
+| [What's been asked](2026-09-10-portal-the-part-has-a-name-asked.webp) | 1280px |
+| [What's changed](2026-09-10-portal-the-part-has-a-name-changed.webp) | 1280px |
+| [The front door](2026-09-10-portal-the-part-has-a-name-front-door.webp) | 1280px |
+| [a phone](2026-09-10-portal-the-part-has-a-name-phone.webp) | 390px |
 
 ### How honest these are, stated plainly, and this run is the weakest in a month
 

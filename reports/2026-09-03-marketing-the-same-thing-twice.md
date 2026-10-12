@@ -4,7 +4,7 @@ The front door ended on a claim it could not keep. **"None of it was written by
 hand"** — directly above a button reading *Read the source*, which leads to a
 file with that sentence typed into it.
 
-![The band, minimal palette](2026-09-03-marketing-the-same-thing-twice.png)
+![The band, minimal palette](2026-09-03-marketing-the-same-thing-twice.webp)
 
 The sentence has been there since 19 August. What it was reaching for is true:
 no band of this site is written out as a web page, and that property is what
@@ -44,7 +44,7 @@ The closing band keeps its heading and loses its second sentence:
 | **was** | "…every one of them is a piece the AI could be asked to move. **None of it was written by hand.**" |
 | **is** | "…every one of them is a piece the AI could be asked to move, **and none of it is code you would have to read afterwards.**" |
 
-![The closing band](2026-09-03-marketing-the-same-thing-twice-closing.png)
+![The closing band](2026-09-03-marketing-the-same-thing-twice-closing.webp)
 
 The replacement is not a hedge. It is the answer to the first problem the page
 named half an hour of reading earlier — *it writes code, and somebody has to read
@@ -65,7 +65,7 @@ were aligned. `end-wide` gives the listing the room its longest line needs and
 the paragraph fills the region beside it — and on a phone, where the regions
 stack, the three arrive in the same order they read in.
 
-![At 390px](2026-09-03-marketing-the-same-thing-twice-phone.png)
+![At 390px](2026-09-03-marketing-the-same-thing-twice-phone.webp)
 
 `scrollWidth` is exactly 1440 at 1440 and exactly 390 at 390. Measured at four
 widths, the panel hides nothing at 1440, 1024 or 768; at 390 there are 162px
@@ -74,9 +74,9 @@ a layout fault.
 
 ### Under the other two palettes
 
-![Editorial](2026-09-03-marketing-the-same-thing-twice-editorial.png)
+![Editorial](2026-09-03-marketing-the-same-thing-twice-editorial.webp)
 
-![Bold](2026-09-03-marketing-the-same-thing-twice-bold.png)
+![Bold](2026-09-03-marketing-the-same-thing-twice-bold.webp)
 
 No colour is named anywhere in the new module. Every tone on the band —
 the box's accent, the panel's surface, the muted prose — is a token the palette
@@ -182,6 +182,6 @@ run.
   because `fonts.googleapis.com` is not reachable from the sandbox and neither is
   `*.vercel.app`.
 
-![The front door, whole](2026-09-03-marketing-the-same-thing-twice-home.png)
+![The front door, whole](2026-09-03-marketing-the-same-thing-twice-home.webp)
 
 Nothing scheduled and nothing armed.

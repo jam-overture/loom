@@ -8,8 +8,8 @@ experience.*
 
 | 1280, `minimal` | |
 | --- | --- |
-| before | ![](2026-09-27-marketing-hero-before-wide.png) |
-| after | ![](2026-09-27-marketing-hero-after-wide.png) |
+| before | ![](2026-09-27-marketing-hero-before-wide.webp) |
+| after | ![](2026-09-27-marketing-hero-after-wide.webp) |
 
 ---
 
@@ -61,8 +61,8 @@ earlier today](2026-09-27-marketing-a-band-that-faces-its-answer.md).
 
 | `bold` | |
 | --- | --- |
-| before | ![](2026-09-27-marketing-hero-before-bold.png) |
-| after | ![](2026-09-27-marketing-hero-after-bold.png) |
+| before | ![](2026-09-27-marketing-hero-before-bold.webp) |
+| after | ![](2026-09-27-marketing-hero-after-bold.webp) |
 
 **The phone is unchanged in shape and it is worth saying why that is not luck.**
 
@@ -71,7 +71,7 @@ earlier today](2026-09-27-marketing-a-band-that-faces-its-answer.md).
 | headline | 5 lines | 5 lines |
 | lead runs past the fold | yes | yes |
 
-![the phone](2026-09-27-marketing-hero-after-phone.png)
+![the phone](2026-09-27-marketing-hero-after-phone.webp)
 
 The new headline is ten short words where the old was six long ones, so it wraps
 to the same height. Both leads run past the fold on a 390 screen, which is a

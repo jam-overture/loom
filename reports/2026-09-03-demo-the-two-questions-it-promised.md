@@ -231,12 +231,12 @@ sandbox's egress allowlist; the standing 19 August finding).
 
 | | |
 | --- | --- |
-| [before, held](2026-09-03-demo-the-two-questions-it-promised-before-held.png) | the card at the moment of decision: a rule's conclusion, a described loss, and a green button |
-| [after, held](2026-09-03-demo-the-two-questions-it-promised-after-held.png) | the same press, with both of the rail's questions answered above the rule that read them |
-| [before, applied](2026-09-03-demo-the-two-questions-it-promised-before-applied.png) | the payoff card, which never said what was weighed |
-| [after, applied](2026-09-03-demo-the-two-questions-it-promised-after-applied.png) | the same card, with the weighing kept as part of the record |
-| [wide](2026-09-03-demo-the-two-questions-it-promised-wide.png) | 1440×900, the whole screen: the ringed band on the stage, the card beside it, both buttons above the fold |
-| [phone](2026-09-03-demo-the-two-questions-it-promised-phone.png) | 390×844, the same, stacked |
+| [before, held](2026-09-03-demo-the-two-questions-it-promised-before-held.webp) | the card at the moment of decision: a rule's conclusion, a described loss, and a green button |
+| [after, held](2026-09-03-demo-the-two-questions-it-promised-after-held.webp) | the same press, with both of the rail's questions answered above the rule that read them |
+| [before, applied](2026-09-03-demo-the-two-questions-it-promised-before-applied.webp) | the payoff card, which never said what was weighed |
+| [after, applied](2026-09-03-demo-the-two-questions-it-promised-after-applied.webp) | the same card, with the weighing kept as part of the record |
+| [wide](2026-09-03-demo-the-two-questions-it-promised-wide.webp) | 1440×900, the whole screen: the ringed band on the stage, the card beside it, both buttons above the fold |
+| [phone](2026-09-03-demo-the-two-questions-it-promised-phone.webp) | 390×844, the same, stacked |
 
 **To see it yourself:** open `/demo`, press the green button, and read the panel
 between *"asked by a demo visitor"* and the rule sentence — then press **Apply

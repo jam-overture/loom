@@ -37,17 +37,17 @@ sentence to reason about.
 
 | before — one ring, two identical questions | after — a ring each, and each card wearing its own |
 | --- | --- |
-| ![before](2026-09-07-demo-two-questions-two-marks-before.png) | ![after](2026-09-07-demo-two-questions-two-marks-after.png) |
+| ![before](2026-09-07-demo-two-questions-two-marks-before.webp) | ![after](2026-09-07-demo-two-questions-two-marks-after.webp) |
 
 The other question's ring, which did not exist on this page before this unit —
 and the pill on the card in view reading *different* words, which is the signal
 *this ring is not this card's*:
 
-![the other mark](2026-09-07-demo-two-questions-two-marks-other-mark.png)
+![the other mark](2026-09-07-demo-two-questions-two-marks-other-mark.webp)
 
 At 390×844 the pill sits beside the badge and the rail's line takes two:
 
-![on a phone](2026-09-07-demo-two-questions-two-marks-phone.png)
+![on a phone](2026-09-07-demo-two-questions-two-marks-phone.webp)
 
 ---
 

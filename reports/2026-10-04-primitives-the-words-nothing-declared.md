@@ -247,8 +247,8 @@ were wrong, the panel under the band would say so.
 
 | | editorial | bold |
 | --- | --- | --- |
-| wide | ![](2026-10-04-primitives-the-words-nothing-declared-editorial-wide.png) | ![](2026-10-04-primitives-the-words-nothing-declared-bold-wide.png) |
-| phone | ![](2026-10-04-primitives-the-words-nothing-declared-editorial-phone.png) | ![](2026-10-04-primitives-the-words-nothing-declared-bold-phone.png) |
+| wide | ![](2026-10-04-primitives-the-words-nothing-declared-editorial-wide.webp) | ![](2026-10-04-primitives-the-words-nothing-declared-bold-wide.webp) |
+| phone | ![](2026-10-04-primitives-the-words-nothing-declared-editorial-phone.webp) | ![](2026-10-04-primitives-the-words-nothing-declared-bold-phone.webp) |
 
 ```
 …-editorial-wide   1280x3600@2x  scrollWidth 1280 / innerWidth 1280

@@ -9,10 +9,10 @@ with the recipe #234 filed and verified:
 
 | | |
 | --- | --- |
-| [The front door, all clear](2026-09-05-portal-four-units-one-tree.png) | 1280px |
-| [Nothing yet, for comparison — the same screen family, the other state](2026-09-05-portal-four-units-one-tree-nothing-yet.png) | 1280px |
-| [The page screen, with the review queue settled](2026-09-05-portal-four-units-one-tree-page.png) | 1280px |
-| [a phone](2026-09-05-portal-four-units-one-tree-phone.png) | 390px |
+| [The front door, all clear](2026-09-05-portal-four-units-one-tree.webp) | 1280px |
+| [Nothing yet, for comparison — the same screen family, the other state](2026-09-05-portal-four-units-one-tree-nothing-yet.webp) | 1280px |
+| [The page screen, with the review queue settled](2026-09-05-portal-four-units-one-tree-page.webp) | 1280px |
+| [a phone](2026-09-05-portal-four-units-one-tree-phone.webp) | 390px |
 
 Put the first two side by side. That is the whole of the second half of this run:
 a **green solid card** for *"You're all caught up."* and a **dashed slot** for

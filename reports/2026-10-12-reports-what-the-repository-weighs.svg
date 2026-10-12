@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 250" width="880" height="250" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <style>
+    .h { font-size: 15px; fill: #44403c; font-weight: 600 }
+    .inbar { font-size: 14px; fill: #fff; text-anchor: middle; font-weight: 600 }
+    .tot { font-size: 14px; fill: #44403c; font-weight: 600 }
+    .k { font-size: 13px; fill: #57534e }
+    .t { font-size: 17px; fill: #1c1917; font-weight: 700 }
+  </style>
+  <rect width="880" height="250" fill="#fafaf9"/>
+  <text x="20" y="30" class="t">What this repository weighs, by what is in it</text>
+  <text x="20" y="54" class="h">before — the harness default, a full-page PNG at deviceScaleFactor 2</text>
+  <rect x="20.0" y="64" width="649.9" height="46" fill="#b45309"/>
+  <text x="344.9" y="92.0" class="inbar">669MB</text>
+  <rect x="671.4" y="64" width="1.2" height="46" fill="#78716c"/>
+  <rect x="673.6" y="64" width="29.4" height="46" fill="#1c1917"/>
+  <text x="714.5" y="92.0" class="tot">700MB total</text>
+  <text x="20" y="158" class="h">after — WebP at the size the page was laid out at</text>
+  <rect x="20.0" y="168" width="120.7" height="46" fill="#15803d"/>
+  <text x="80.4" y="196.0" class="inbar">124MB</text>
+  <rect x="142.2" y="168" width="1.2" height="46" fill="#78716c"/>
+  <rect x="144.4" y="168" width="29.4" height="46" fill="#1c1917"/>
+  <text x="185.4" y="196.0" class="tot">155MB total</text>
+  <g transform="translate(20, 228)">
+    <rect x="0" y="-11" width="13" height="13" fill="#b45309"/><text x="19" y="0" class="k">report images, before</text>
+    <rect x="168" y="-11" width="13" height="13" fill="#15803d"/><text x="187" y="0" class="k">report images, after</text>
+    <rect x="330" y="-11" width="13" height="13" fill="#78716c"/><text x="349" y="0" class="k">report diagrams (SVG)</text>
+    <rect x="508" y="-11" width="13" height="13" fill="#1c1917"/><text x="527" y="0" class="k">src, apps, docs, decisions, tools, FINDINGS</text>
+  </g>
+</svg>

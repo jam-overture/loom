@@ -6,7 +6,7 @@
 
 ---
 
-![The loom.field probe before and after, and auditPalette on a host palette](2026-08-20-framework-the-audit-answers-from-every-shape.png)
+![The loom.field probe before and after, and auditPalette on a host palette](2026-08-20-framework-the-audit-answers-from-every-shape.webp)
 
 ## What this run did
 

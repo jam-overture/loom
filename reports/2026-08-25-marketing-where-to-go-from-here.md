@@ -6,7 +6,7 @@ product side by side and look at the front door the way a stranger meets it —
 and the two bands that carry a visitor *onward* were the two worst-composed
 things on the page.
 
-![Where to go from here, before and after](2026-08-25-marketing-where-to-go-from-here.png)
+![Where to go from here, before and after](2026-08-25-marketing-where-to-go-from-here.webp)
 
 ---
 
@@ -60,7 +60,7 @@ it held one surface in one direction before.
 
 ### The band that makes the argument
 
-![Writing to the rhythm](2026-08-25-marketing-where-to-go-from-here-rhythm.png)
+![Writing to the rhythm](2026-08-25-marketing-where-to-go-from-here-rhythm.webp)
 
 *What this is for* is four problems in a `loom.mosaic`, whose `alternating`
 rhythm is **wide, narrow, narrow, wide**. The spans belong to the container and
@@ -88,7 +88,7 @@ ignored.
 
 ## Four surfaces, four front doors
 
-![The four headers](2026-08-25-marketing-where-to-go-from-here-surfaces.png)
+![The four headers](2026-08-25-marketing-where-to-go-from-here-surfaces.webp)
 
 The brief names the shape to aim at — *a marketing root, docs at a path, the
 signed-in product at another, all feeling like one thing.* This is the first run
@@ -138,7 +138,7 @@ So it ships at 32px, it is filed for `Loom primitives` with a suggested `scale`
 prop, and it is the first thing to look at on the preview. On a phone the cards
 are full width and the size is right; it is only wrong at four across.
 
-![The band under the bold palette](2026-08-25-marketing-where-to-go-from-here-bold.png)
+![The band under the bold palette](2026-08-25-marketing-where-to-go-from-here-bold.webp)
 
 ## Tests
 
@@ -192,7 +192,7 @@ The three new ones:
 Measured alongside: `scrollWidth` is exactly 390 at a 390px viewport, and both
 bands were checked under all three registered palettes.
 
-![The whole front door at 390px](2026-08-25-marketing-where-to-go-from-here-phone.png)
+![The whole front door at 390px](2026-08-25-marketing-where-to-go-from-here-phone.webp)
 
 ## Decisions and findings
 

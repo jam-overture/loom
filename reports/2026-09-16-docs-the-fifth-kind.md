@@ -8,7 +8,7 @@ opened — `vercel.app` is off this sandbox's egress allowlist, which is the
 standing 15 September finding and is not re-filed. Every screenshot below is a
 production build of this commit, served locally by `next start`.
 
-![The vocabulary, and the addition that is not in it](2026-09-16-docs-the-fifth-kind-approved.png)
+![The vocabulary, and the addition that is not in it](2026-09-16-docs-the-fifth-kind-approved.webp)
 
 ## What this run was
 
@@ -97,7 +97,7 @@ names in code voice is live, except `hovered`, which it names on purpose.
 1280 at 1280. The dashed block is prose and wraps; the JSON beside each kind
 scrolls inside its own box, as it already did.
 
-![The same section on a phone](2026-09-16-docs-the-fifth-kind-approved-phone.png)
+![The same section on a phone](2026-09-16-docs-the-fifth-kind-approved-phone.webp)
 
 The screenshots are light. That is the standing gap this lane recorded on 14 and
 15 September — `pnpm shoot` photographs an address, the theme lives in

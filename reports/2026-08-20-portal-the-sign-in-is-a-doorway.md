@@ -5,9 +5,9 @@
 **Branch:** `portal-07-the-sign-in-is-a-doorway` (→ `main`).
 
 Visuals, all against a local production build:
-[the configured deployment, ready to sign in](2026-08-20-portal-the-sign-in-is-a-doorway-ready.png) ·
-[the misconfigured deployment, in plain language](2026-08-20-portal-the-sign-in-is-a-doorway-not-set-up.png) ·
-[the operator's message still there, one click away](2026-08-20-portal-the-sign-in-is-a-doorway-disclosure.png).
+[the configured deployment, ready to sign in](2026-08-20-portal-the-sign-in-is-a-doorway-ready.webp) ·
+[the misconfigured deployment, in plain language](2026-08-20-portal-the-sign-in-is-a-doorway-not-set-up.webp) ·
+[the operator's message still there, one click away](2026-08-20-portal-the-sign-in-is-a-doorway-disclosure.webp).
 
 ---
 

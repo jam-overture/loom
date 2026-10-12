@@ -58,11 +58,11 @@ for the three changes**.
 
 | | |
 | --- | --- |
-| [**the screen he sent**](2026-10-04-portal-dead-space-versions-wide.png) | the drawn page on the left, what made it on the right |
-| [**the same, on a phone**](2026-10-04-portal-dead-space-versions-phone.png) | `390×844@2x`, stacked, `scrollWidth 390 / innerWidth 390` |
-| [**the pieces**](2026-10-04-portal-dead-space-pieces-wide.png) | four across instead of four down |
-| [**the rules**](2026-10-04-portal-dead-space-rules-wide.png) | nine cards, three columns — the whole governance model on one screen |
-| [**the pieces on a phone**](2026-10-04-portal-dead-space-pieces-phone.png) | one column, no overflow |
+| [**the screen he sent**](2026-10-04-portal-dead-space-versions-wide.webp) | the drawn page on the left, what made it on the right |
+| [**the same, on a phone**](2026-10-04-portal-dead-space-versions-phone.webp) | `390×844@2x`, stacked, `scrollWidth 390 / innerWidth 390` |
+| [**the pieces**](2026-10-04-portal-dead-space-pieces-wide.webp) | four across instead of four down |
+| [**the rules**](2026-10-04-portal-dead-space-rules-wide.webp) | nine cards, three columns — the whole governance model on one screen |
+| [**the pieces on a phone**](2026-10-04-portal-dead-space-pieces-phone.webp) | one column, no overflow |
 
 The rules screen is the one to look at. Nine rule cards were nine screens of
 scrolling down a 768-pixel strip; they are now one screen you can read without

@@ -177,8 +177,8 @@ The two frames that moved:
 
 | | | |
 | --- | --- | --- |
-| [**the panel, one press in**](2026-10-08-demo-four-more-panel-wide.png) · [before](2026-10-08-demo-four-more-panel-wide-before.png) | `7ee4f45b…` → `dfce4674…` | **the picture worth opening** |
-| [the panel on a phone](2026-10-08-demo-four-more-panel-phone.png) · [before](2026-10-08-demo-four-more-panel-phone-before.png) | `bc69ed61…` → `8ff550d1…` | the same sentence, one line taller |
+| [**the panel, one press in**](2026-10-08-demo-four-more-panel-wide.webp) · [before](2026-10-08-demo-four-more-panel-wide-before.webp) | `7ee4f45b…` → `dfce4674…` | **the picture worth opening** |
+| [the panel on a phone](2026-10-08-demo-four-more-panel-phone.webp) · [before](2026-10-08-demo-four-more-panel-phone-before.webp) | `bc69ed61…` → `8ff550d1…` | the same sentence, one line taller |
 
 ## Real test numbers
 

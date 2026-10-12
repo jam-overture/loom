@@ -66,7 +66,7 @@ export type UnresolvedResolution = "absent" | "unrelated"
 nothing that reads it today changes. `unrelated` is a render given one built from
 a different tree's plan, and it is the row that used to be silent.
 
-![the two seams, before and after](2026-09-16-framework-a-resolution-that-cannot-answer.png)
+![the two seams, before and after](2026-09-16-framework-a-resolution-that-cannot-answer.webp)
 
 *Every cell is one script's output against `dist/` on each branch — the published
 surface rather than the source. 1280×900; `scrollWidth` 1280 against

@@ -227,12 +227,12 @@ frame is the change.
 
 | | |
 | --- | --- |
-| [before, wide](2026-09-11-demo-a-ring-is-a-claim-before-wide.png) | `main`, 1440×900, the removal applied: the testimonial ringed green, its own left rule under the ring |
-| [after, wide](2026-09-11-demo-a-ring-is-a-claim-after-wide.png) | the same moment on this branch: the bar across the seam, the quote left alone, its rule visible again |
-| [before, phone](2026-09-11-demo-a-ring-is-a-claim-before-phone.png) | `main`, 390×844, same press — the ring is the whole screen |
-| [after, phone](2026-09-11-demo-a-ring-is-a-claim-after-phone.png) | this branch, `scrollWidth 390 / innerWidth 390` |
-| [before, insert](2026-09-11-demo-a-ring-is-a-claim-before-insert.png) | `main`, 1440×900, *Add the opening hours* held: the closing panel ringed amber, and nothing about it would change |
-| [after, insert](2026-09-11-demo-a-ring-is-a-claim-after-insert.png) | this branch: the amber bar across the seam the section would land in |
+| [before, wide](2026-09-11-demo-a-ring-is-a-claim-before-wide.webp) | `main`, 1440×900, the removal applied: the testimonial ringed green, its own left rule under the ring |
+| [after, wide](2026-09-11-demo-a-ring-is-a-claim-after-wide.webp) | the same moment on this branch: the bar across the seam, the quote left alone, its rule visible again |
+| [before, phone](2026-09-11-demo-a-ring-is-a-claim-before-phone.webp) | `main`, 390×844, same press — the ring is the whole screen |
+| [after, phone](2026-09-11-demo-a-ring-is-a-claim-after-phone.webp) | this branch, `scrollWidth 390 / innerWidth 390` |
+| [before, insert](2026-09-11-demo-a-ring-is-a-claim-before-insert.webp) | `main`, 1440×900, *Add the opening hours* held: the closing panel ringed amber, and nothing about it would change |
+| [after, insert](2026-09-11-demo-a-ring-is-a-claim-after-insert.webp) | this branch: the amber bar across the seam the section would land in |
 
 Every shot measured `scrollWidth === innerWidth`.
 

@@ -3,7 +3,7 @@
 **Date:** 2026-09-26 · **Routine:** `Loom daily build` · **Section:** §1 (process)
 · **Branch:** `framework-56-the-states-a-shot-could-not-reach`
 
-![One timeline, and the two places a shot could not stand on it](2026-09-26-framework-the-states-a-shot-could-not-reach.png)
+![One timeline, and the two places a shot could not stand on it](2026-09-26-framework-the-states-a-shot-could-not-reach.webp)
 
 ## The migration
 
@@ -234,17 +234,17 @@ before this branch not one of them could have been.
 **`storageBlocked`** — the state a reader cannot see is happening. Before the
 fix above, the second of these was byte-identical to the first.
 
-- `2026-09-26-framework-start-record-ordinary-wide.png`
-- `2026-09-26-framework-start-record-blocked-wide.png`
+- `2026-09-26-framework-start-record-ordinary-wide.webp`
+- `2026-09-26-framework-start-record-blocked-wide.webp`
 
 **`storage`** — a record that will not parse, seeded before the first paint.
 
-- `2026-09-26-framework-start-record-unreadable-wide.png`
+- `2026-09-26-framework-start-record-unreadable-wide.webp`
 
 **`scrollTo`** — the same page, before and after one step, no press anywhere.
 
-- `2026-09-26-framework-scroll-before-wide.png`
-- `2026-09-26-framework-scroll-after-wide.png`
+- `2026-09-26-framework-scroll-before-wide.webp`
+- `2026-09-26-framework-scroll-after-wide.webp`
 
 One thing a lane should know: a `scrollTo` whose selector matches nothing fails
 the shot loudly, with a `TimeoutError` naming the selector, rather than

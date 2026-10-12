@@ -9,7 +9,7 @@ it is a decision about what a stranger should read next.
 The only thing that read it was the footer's map, which renders it as ten links
 in a column, where being third and being ninth look exactly alike.
 
-![the band, 1280 wide](2026-09-22-marketing-the-way-on-band.png)
+![the band, 1280 wide](2026-09-22-marketing-the-way-on-band.webp)
 
 ---
 
@@ -43,7 +43,7 @@ visitor to: *See how a change travels* is the primary action of the last band
 on `/`. A reader who follows the front door's main call to action lands on a
 page with no way forward in it.
 
-![the foot of `/the-record`, which now offers one of the two orphans](2026-09-22-marketing-the-way-on-in-context.png)
+![the foot of `/the-record`, which now offers one of the two orphans](2026-09-22-marketing-the-way-on-in-context.webp)
 
 The screenshot above is `/the-record` at 1280, and its *Next* card is
 `/putting-it-back` — one of the two pages that, before this branch, no page's
@@ -88,7 +88,7 @@ now* at the foot of it is not another page of argument. `onward` is `DOCS`, on
 exactly one page — a pager whose `next` were *Docs* on all ten would be a menu
 item pretending to be a sequence.
 
-![the hand-off, 1280 wide](2026-09-22-marketing-the-way-on-handoff.png)
+![the hand-off, 1280 wide](2026-09-22-marketing-the-way-on-handoff.webp)
 
 **That one card carries the surface's blurb and no other card does**, and the
 asymmetry is the point. Every other card names a page of an argument the reader

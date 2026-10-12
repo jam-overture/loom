@@ -272,10 +272,10 @@ nothing else and nothing styled by hand.
 
 | | |
 | --- | --- |
-| `the-third-design-editorial-wide.png` | editorial, 1280 |
-| `the-third-design-bold-wide.png` | bold, 1280 |
-| `the-third-design-editorial-phone.png` | editorial, 390 |
-| `the-third-design-bold-phone.png` | bold, 390 |
+| `the-third-design-editorial-wide.webp` | editorial, 1280 |
+| `the-third-design-bold-wide.webp` | bold, 1280 |
+| `the-third-design-editorial-phone.webp` | editorial, 390 |
+| `the-third-design-bold-phone.webp` | bold, 390 |
 
 **No overflow on any shot** (`scrollWidth 1280 / innerWidth 1280`;
 `390 / 390`). No literal colour anywhere — asserted page-wide by

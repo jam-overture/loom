@@ -11,7 +11,7 @@ That entry merged to `main` in #411. This branch is the fix and the correction.
 
 | the band on a preview | the band after this |
 | --- | --- |
-| ![](2026-09-27-marketing-facing-embed-broken.png) | ![](2026-09-27-marketing-facing-embed-fixed.png) |
+| ![](2026-09-27-marketing-facing-embed-broken.webp) | ![](2026-09-27-marketing-facing-embed-fixed.webp) |
 
 ---
 

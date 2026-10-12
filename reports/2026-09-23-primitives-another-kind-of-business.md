@@ -11,7 +11,7 @@ unverified: `*.vercel.app` is off this sandbox's egress allowlist, the standing
 host drops into a tree, and this deployment seeds trees that do not carry one.
 Everything below was driven against the specimen harness and a local render.
 
-![Four bands under bold, at 1280px](2026-09-23-primitives-another-kind-of-business-bold-wide.png)
+![Four bands under bold, at 1280px](2026-09-23-primitives-another-kind-of-business-bold-wide.webp)
 
 ## What this run chose, and why that
 

@@ -109,9 +109,9 @@ before. The pictures came out at 780×20188, 2560×1800 and 780×1688 — every 
 at 2×, the full-page shot full-page and the viewport shot exactly 900 tall,
 which is `fullPage` being honoured per shot through the shared seam.
 
-![/the-record at wide, taken by pnpm shoot](2026-09-08-framework-shoot-the-record-wide.png)
+![/the-record at wide, taken by pnpm shoot](2026-09-08-framework-shoot-the-record-wide.webp)
 
-![/docs at phone, taken by pnpm shoot](2026-09-08-framework-shoot-docs-phone.png)
+![/docs at phone, taken by pnpm shoot](2026-09-08-framework-shoot-docs-phone.webp)
 
 ## Test numbers
 

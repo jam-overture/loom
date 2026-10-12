@@ -3,7 +3,7 @@
 **Date:** 2026-08-29 · **Routine:** `Loom daily build` · **Section:** §4b ·
 **Branch:** `framework-19-two-inks-a-reader-tells-apart`
 
-![CIELAB ΔE between the pairs the library asks a reader to distinguish, across all 21 starter palettes](2026-08-29-framework-two-inks-a-reader-tells-apart.png)
+![CIELAB ΔE between the pairs the library asks a reader to distinguish, across all 21 starter palettes](2026-08-29-framework-two-inks-a-reader-tells-apart.webp)
 
 ## What was done, in plain language
 

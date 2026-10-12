@@ -273,12 +273,12 @@ Nothing blocking.
 
 | | |
 | --- | --- |
-| [rail, before](2026-09-15-demo-the-card-you-already-read-rail-before.png) | `main`: the whole rail after five asks, 3,851px, five cards you cannot tell apart |
-| [rail, after](2026-09-15-demo-the-card-you-already-read-rail-after.png) | this branch, same five presses: 3,057px, and the five asks are legible as five different things |
-| [before](2026-09-15-demo-the-card-you-already-read-before.png) | 1280×900, framed at the second card — one and a half cards on screen |
-| [after](2026-09-15-demo-the-card-you-already-read-after.png) | the same frame: three cards, each headed by its own ask |
-| [opened](2026-09-15-demo-the-card-you-already-read-opened.png) | one fold opened — the panel, the rule and the comparison, whole, where they always were |
-| [phone](2026-09-15-demo-the-card-you-already-read-phone.png) | 390×844, where the rail is the entire surface. `scrollWidth` 390 against `innerWidth` 390 — no horizontal overflow |
+| [rail, before](2026-09-15-demo-the-card-you-already-read-rail-before.webp) | `main`: the whole rail after five asks, 3,851px, five cards you cannot tell apart |
+| [rail, after](2026-09-15-demo-the-card-you-already-read-rail-after.webp) | this branch, same five presses: 3,057px, and the five asks are legible as five different things |
+| [before](2026-09-15-demo-the-card-you-already-read-before.webp) | 1280×900, framed at the second card — one and a half cards on screen |
+| [after](2026-09-15-demo-the-card-you-already-read-after.webp) | the same frame: three cards, each headed by its own ask |
+| [opened](2026-09-15-demo-the-card-you-already-read-opened.webp) | one fold opened — the panel, the rule and the comparison, whole, where they always were |
+| [phone](2026-09-15-demo-the-card-you-already-read-phone.webp) | 390×844, where the rail is the entire surface. `scrollWidth` 390 against `innerWidth` 390 — no horizontal overflow |
 
 Both wide pairs are **the same script driven against two real `next build`
 outputs**, `main`'s and this branch's, so the only difference in the frame is the

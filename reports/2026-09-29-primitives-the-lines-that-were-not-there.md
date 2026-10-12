@@ -202,7 +202,7 @@ that carry the argument; in each, **before is above and after is below**.
 
 ### `bold` — the tables
 
-![the spec table and the comparison table, before and after, on bold](2026-09-29-primitives-the-lines-that-were-not-there-bold-tables-pair.png)
+![the spec table and the comparison table, before and after, on bold](2026-09-29-primitives-the-lines-that-were-not-there-bold-tables-pair.webp)
 
 This is the finding, photographed. In the upper half the specification table's
 rows run together as one dark block and the comparison table has no grid at all —
@@ -213,7 +213,7 @@ would have destroyed.
 
 ### `editorial` — the same two tables
 
-![the same tables on editorial](2026-09-29-primitives-the-lines-that-were-not-there-editorial-tables-pair.png)
+![the same tables on editorial](2026-09-29-primitives-the-lines-that-were-not-there-editorial-tables-pair.webp)
 
 **The control, and it is meant to look like nothing happened.** 6.48 → 9.06 is a
 real change in the measurement and very nearly no change to the eye, which is the
@@ -222,7 +222,7 @@ imperceptible where it was already doing its job. Nothing got heavier.
 
 ### `bold` — the FAQ separators
 
-![five questions, before and after, on bold](2026-09-29-primitives-the-lines-that-were-not-there-bold-faq-pair.png)
+![five questions, before and after, on bold](2026-09-29-primitives-the-lines-that-were-not-there-bold-faq-pair.webp)
 
 The middle case, and the one that argues for measuring rather than eyeballing.
 This band sits on `bg-canvas` where `border-subtle` scores 9.02 — comfortably

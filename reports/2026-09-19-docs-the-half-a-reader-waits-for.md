@@ -8,7 +8,7 @@ the proxy answers `403 CONNECT tunnel failed`. That is the standing 15 September
 finding and is not re-filed. Every picture below is a production build of this
 commit (`pnpm build && next start`), photographed in Chromium.
 
-![The file a reader waits for](2026-09-19-docs-the-half-a-reader-waits-for.png)
+![The file a reader waits for](2026-09-19-docs-the-half-a-reader-waits-for.webp)
 
 ## What this run was
 
@@ -77,7 +77,7 @@ answers by title, section and summary while the other three files are still in
 flight. The names land underneath and turn on the band that finds a published
 name; the words and the blocks follow as they always have.
 
-![planReverts, found from the names file](2026-09-19-docs-the-half-a-reader-waits-for-found.png)
+![planReverts, found from the names file](2026-09-19-docs-the-half-a-reader-waits-for-found.webp)
 
 ## The thing that made the names file small, which was not the split
 
@@ -120,7 +120,7 @@ The words and the code *rank* rows that are already in the list; the names
 and is told every published name has been searched will believe the site has
 never heard of it.
 
-![The interval the split creates](2026-09-19-docs-the-half-a-reader-waits-for-inflight.png)
+![The interval the split creates](2026-09-19-docs-the-half-a-reader-waits-for-inflight.webp)
 
 > Nothing on the site says “planReverts”.
 > *Every page and every section are searched — the published names are still
@@ -231,7 +231,7 @@ reverting two files. `git status` is clean of everything but this change.
 1280 at 1280, measured on the built application with the dialog open and a query
 typed.
 
-![The dialog on a phone](2026-09-19-docs-the-half-a-reader-waits-for-phone.png)
+![The dialog on a phone](2026-09-19-docs-the-half-a-reader-waits-for-phone.webp)
 
 The pictures are light. That is the standing gap recorded on 14, 15 and 16
 September — the harness photographs an address, the theme lives in

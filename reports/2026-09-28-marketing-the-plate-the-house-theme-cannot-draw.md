@@ -11,8 +11,8 @@ see.
 
 | `/how-it-works`, `minimal`, 1280 | |
 | --- | --- |
-| before | ![](2026-09-28-marketing-plate-hiw-minimal-before.png) |
-| after | ![](2026-09-28-marketing-plate-hiw-minimal-after.png) |
+| before | ![](2026-09-28-marketing-plate-hiw-minimal-before.webp) |
+| after | ![](2026-09-28-marketing-plate-hiw-minimal-after.webp) |
 
 *Three bands of the same kind. In the first picture the third one is stepped in
 and nothing is drawn around it. In the second the only inset band on the page is
@@ -88,8 +88,8 @@ them flattens it. It does not:
 
 | the front door, `bold` | |
 | --- | --- |
-| before | ![](2026-09-28-marketing-plate-home-bold-before.png) |
-| after | ![](2026-09-28-marketing-plate-home-bold-after.png) |
+| before | ![](2026-09-28-marketing-plate-home-bold-before.webp) |
+| after | ![](2026-09-28-marketing-plate-home-bold-after.webp) |
 
 Three charcoal plates are gone and the page still reads as a page, because the
 things that were carrying its structure are still there and draw their own
@@ -101,8 +101,8 @@ palette, which is why *Going deeper* is the only indented band left on
 
 | `/how-it-works`, `bold` | |
 | --- | --- |
-| before | ![](2026-09-28-marketing-plate-hiw-bold-before.png) |
-| after | ![](2026-09-28-marketing-plate-hiw-bold-after.png) |
+| before | ![](2026-09-28-marketing-plate-hiw-bold-before.webp) |
+| after | ![](2026-09-28-marketing-plate-hiw-bold-after.webp) |
 
 `/what-you-run` on the house theme, whole, is the clearest single picture of
 what changed — every eyebrow, every heading, the hero and the footer now on one
@@ -110,8 +110,8 @@ left rule:
 
 | | |
 | --- | --- |
-| before | ![](2026-09-28-marketing-plate-what-you-run-before.png) |
-| after | ![](2026-09-28-marketing-plate-what-you-run-after.png) |
+| before | ![](2026-09-28-marketing-plate-what-you-run-before.webp) |
+| after | ![](2026-09-28-marketing-plate-what-you-run-after.webp) |
 
 ## The test, and why it is a guard rather than a preference
 
@@ -138,7 +138,7 @@ demonstration runs in — are the ones to give it back to first.
 
 The front door on a phone. Photographed at 390 × 844 while looking for this:
 
-![the first two phone screens](2026-09-28-marketing-phone-fold.png)
+![the first two phone screens](2026-09-28-marketing-phone-fold.webp)
 
 *Two screens. The fold is the exact middle of that picture.*
 

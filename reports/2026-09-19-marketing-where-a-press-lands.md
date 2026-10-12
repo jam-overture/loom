@@ -19,7 +19,7 @@ filed the rest for this lane with the recipe, and named the thing it was filing:
 the arithmetic demonstrate anything and it is a thing no browser will ever
 send."* This is that.
 
-![the two bands, 1280×900, minimal](2026-09-19-marketing-where-a-press-lands-bands.png)
+![the two bands, 1280×900, minimal](2026-09-19-marketing-where-a-press-lands-bands.webp)
 
 ---
 
@@ -167,7 +167,7 @@ one band twice — the shape that was quietly answering zero.
 
 | | |
 | --- | --- |
-| ![bold](2026-09-19-marketing-where-a-press-lands-bands-bold.png) | ![390px](2026-09-19-marketing-where-a-press-lands-bands-phone.png) |
+| ![bold](2026-09-19-marketing-where-a-press-lands-bands-bold.webp) | ![390px](2026-09-19-marketing-where-a-press-lands-bands-phone.webp) |
 
 `scrollWidth 1280 / innerWidth 1280` wide and `390 / 390` on the phone, measured
 by the harness on the built application under `next start`. **No colour is named

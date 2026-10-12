@@ -87,9 +87,9 @@ and the shot list is beside this report.
 
 | | |
 | --- | --- |
-| [**the reader card**](2026-10-07-portal-how-many-people-wide.png) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
-| [**the disclosure open**](2026-10-07-portal-how-many-people-open.png) | `1680×1000@2x`, both denominators and the straddle, one click down |
-| [**the same, on a phone**](2026-10-07-portal-how-many-people-phone.png) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
+| [**the reader card**](2026-10-07-portal-how-many-people-wide.webp) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
+| [**the disclosure open**](2026-10-07-portal-how-many-people-open.webp) | `1680×1000@2x`, both denominators and the straddle, one click down |
+| [**the same, on a phone**](2026-10-07-portal-how-many-people-phone.webp) | `390×844@2x touch`, `scrollWidth 390 / innerWidth 390` |
 
 Staged figures, so the photographs can be read against them: `opened 320`,
 `appearances 384`, so `drift 64` and `inflation 20.0%`; reach down the page 384,

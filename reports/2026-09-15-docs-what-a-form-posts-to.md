@@ -16,7 +16,7 @@ that on a site that had never said what a form **is**. A reader who followed the
 endpoint row had nowhere to go. That was the wrong order, and this run puts it
 right.
 
-![The page a reader lands on](2026-09-15-docs-what-a-form-posts-to.png)
+![The page a reader lands on](2026-09-15-docs-what-a-form-posts-to.webp)
 
 ## What shipped
 
@@ -48,7 +48,7 @@ above them saying why, because nothing in that tree says where it posts.
 Then the same tree with `loom:submit` on its form, resolved against a real
 endpoint as the page was built:
 
-![The same tree, once a deployment has answered](2026-09-15-docs-what-a-form-posts-to-connected.png)
+![The same tree, once a deployment has answered](2026-09-15-docs-what-a-form-posts-to-connected.webp)
 
 Nothing about the form changed. The fields are the same nodes, the button is the
 same node, the layout prop is the same. What changed is that somebody answered.
@@ -62,7 +62,7 @@ paragraph.
 
 ## The five reasons, reached rather than described
 
-![Five ways a form ends up with nowhere to post](2026-09-15-docs-what-a-form-posts-to-reasons.png)
+![Five ways a form ends up with nowhere to post](2026-09-15-docs-what-a-form-posts-to-reasons.webp)
 
 Every row is a real endpoint that really behaves that way: one that says no, one
 that cannot answer, one that throws, one that answers with an address the seam
@@ -78,7 +78,7 @@ deployment serving another language would replace them.
 **That a proposal cannot quietly move a form.** Two configures on one node,
 judged by the policy a deployment has before it has configured anything:
 
-![One accepted, one held, under one policy](2026-09-15-docs-what-a-form-posts-to-gate.png)
+![One accepted, one held, under one policy](2026-09-15-docs-what-a-form-posts-to-gate.webp)
 
 Laying the fields out in two columns is accepted. Sending the form to the
 newsletter list instead is `requires-confirmation`, `high`,
@@ -94,7 +94,7 @@ address nobody weighed. Produced by writing one and planning it.
 
 ## What the seam will carry as an address
 
-![Seven strings, two of them carried](2026-09-15-docs-what-a-form-posts-to-actions.png)
+![Seven strings, two of them carried](2026-09-15-docs-what-a-form-posts-to-actions.webp)
 
 The two middle rows are the reason this is a schema rather than a leading-slash
 check. `//forms.example.net/collect` and `/\forms.example.net/collect` both begin
@@ -176,7 +176,7 @@ code, under any of the five failures.
 1280 at 1280. The produced tables are the blocks that could overflow, and each
 scrolls inside its own box.
 
-![At a true 390px](2026-09-15-docs-what-a-form-posts-to-phone.png)
+![At a true 390px](2026-09-15-docs-what-a-form-posts-to-phone.webp)
 
 The screenshots are all light, which is the same gap this lane recorded
 yesterday rather than a new one: `pnpm shoot` photographs an address, the theme

@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-16 · **Branch:**
 `primitives-36-the-phrasebook-and-the-page` · **Section:** §4b
 
-![The four new designs at 1280px, under bold](2026-09-16-primitives-the-phrasebook-and-the-page-bold-wide.png)
+![The four new designs at 1280px, under bold](2026-09-16-primitives-the-phrasebook-and-the-page-bold-wide.webp)
 
 ## What this run chose, and why that
 

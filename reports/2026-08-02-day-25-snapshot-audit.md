@@ -14,7 +14,7 @@ neither carries a maintainer comment — only Vercel's deploy bot. **There was n
 review feedback to act on**, so this run continued the build order.
 
 One gap to record plainly: **the previous run left no report.** #32 and #33
-landed on `main` with a screenshot (`2026-08-02-day-20-primitives.png`) and no
+landed on `main` with a screenshot (`2026-08-02-day-20-primitives.webp`) and no
 `.md` beside it, so what those two PRs decided is only in their commit messages
 and in the code. Nothing was lost that this run needed — the day 22 and day 23
 reports still name the queue — but it is the first missing entry in the trail.

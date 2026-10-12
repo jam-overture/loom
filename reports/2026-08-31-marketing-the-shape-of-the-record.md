@@ -4,7 +4,7 @@ Sixteen runs have made this site deeper. This one looked at the state **every**
 visitor meets — the front door before anybody has clicked anything — and found
 the site's most important band opening as an empty box.
 
-![Before and after, at the same address](2026-08-31-marketing-the-shape-of-the-record.png)
+![Before and after, at the same address](2026-08-31-marketing-the-shape-of-the-record.webp)
 
 Both of those are `/`, with nothing in the query string. On the left is `main`.
 The band promises *pick one, watch what happens, and read what the page wrote
@@ -31,7 +31,7 @@ it was a sentence in a box rather than something a reader could see.
 
 ### The morph is the demonstration
 
-![The same five rungs, before the click and after it](2026-08-31-marketing-the-shape-of-the-record-states.png)
+![The same five rungs, before the click and after it](2026-08-31-marketing-the-shape-of-the-record-states.webp)
 
 Left is `/`. Right is `/?ask=problem` — the visitor asked *"Skip the tour. What
 problem does this actually solve?"*, the page worked the change out, measured it,
@@ -84,7 +84,7 @@ measurement disproved it, and the comment now carries the number.
 **The phone is the weakest thing in this change, and this lane has no lever on
 it.**
 
-![The band at 390px](2026-08-31-marketing-the-shape-of-the-record-phone.png)
+![The band at 390px](2026-08-31-marketing-the-shape-of-the-record-phone.webp)
 
 `loom.milestone` lays each rung out as `5.5rem auto 1fr` — an 88px marker column
 reserved at every viewport, and reserved whether or not a marker is set. At
@@ -111,7 +111,7 @@ padding it was designed with.
 
 ## Under the other two palettes
 
-![Editorial and Bold](2026-08-31-marketing-the-shape-of-the-record-palettes.png)
+![Editorial and Bold](2026-08-31-marketing-the-shape-of-the-record-palettes.webp)
 
 Not one colour, size, weight or spacing step is written anywhere in this change.
 The hollow dot is `loom.milestone`'s `planned` state, which takes its border from

@@ -56,9 +56,9 @@ ringed on the page, when they have.
 
 | | before | after |
 | --- | --- | --- |
-| the arrival screen, wide | `reports/2026-09-27-demo-what-the-press-is-about-before-wide.png` | `reports/2026-09-27-demo-what-the-press-is-about-after-wide.png` |
-| the arrival screen, phone | `reports/2026-09-27-demo-what-the-press-is-about-before-phone.png` | `reports/2026-09-27-demo-what-the-press-is-about-after-phone.png` |
-| what the press then produces | — | `reports/2026-09-27-demo-what-the-press-is-about-pressed-wide.png` |
+| the arrival screen, wide | `reports/2026-09-27-demo-what-the-press-is-about-before-wide.webp` | `reports/2026-09-27-demo-what-the-press-is-about-after-wide.webp` |
+| the arrival screen, phone | `reports/2026-09-27-demo-what-the-press-is-about-before-phone.webp` | `reports/2026-09-27-demo-what-the-press-is-about-after-phone.webp` |
+| what the press then produces | — | `reports/2026-09-27-demo-what-the-press-is-about-pressed-wide.webp` |
 
 The arc a stranger now runs, and it is one object followed the whole way:
 

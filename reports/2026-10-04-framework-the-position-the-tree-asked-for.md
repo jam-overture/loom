@@ -11,7 +11,7 @@ percentage across. A band declaring `position: 35` rendered at 35 in the server'
 markup and sat at **50** the instant hydration landed. On every page a reader
 actually visits, the prop did nothing.
 
-![The band, before and after](2026-10-04-framework-the-position-band.png)
+![The band, before and after](2026-10-04-framework-the-position-band.webp)
 
 The mechanism is three lines and
 [0096](../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)
@@ -73,9 +73,9 @@ Read off the PNGs directly, at three rows each, rather than taken from the
 `main` the thumb sits exactly over the divider at the midpoint, which is why the
 defect looked plausible in a photograph until somebody declared a position.
 
-The same change, [editorial wide](2026-10-04-framework-the-position-editorial-wide.png) ·
-[bold wide](2026-10-04-framework-the-position-bold-wide.png) ·
-[editorial phone](2026-10-04-framework-the-position-editorial-phone.png).
+The same change, [editorial wide](2026-10-04-framework-the-position-editorial-wide.webp) ·
+[bold wide](2026-10-04-framework-the-position-bold-wide.webp) ·
+[editorial phone](2026-10-04-framework-the-position-editorial-phone.webp).
 
 ## Decisions I made that nobody specified
 

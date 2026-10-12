@@ -4,7 +4,7 @@
 **Branch:** `framework-the-fold-bounded-at-both-ends`, cut from `main` at `f79e1d9`. Not stacked.
 **Records:** [0228](../decisions/0228-the-tree-as-it-was-is-a-fold-bounded-at-both-ends-and-the-head-is-answered-from-the-log.md). **None superseded.**
 
-![What the tree as it was costs to read](2026-10-05-framework-the-fold-bounded-at-both-ends.png)
+![What the tree as it was costs to read](2026-10-05-framework-the-fold-bounded-at-both-ends.webp)
 
 *Measured here, both columns. The grey bar is what a consumer has to do today:
 page `revisions()` to the end and fold the prefix, because a page cannot be asked
