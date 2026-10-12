@@ -1,140 +1,199 @@
 import Link from "next/link"
 
-import { renderCatalogue } from "@jam-overture/loom"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
-import { CardGrid, Measured, Screen } from "@/app/(portal)/_components/screen"
+import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { MOST_PAGES_DRAWN, pieceUsage, type PieceUsage } from "@/app/(portal)/_lib/app-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { headsOf } from "@/app/(portal)/_lib/page-name"
+import { settingsOf } from "@/app/(portal)/_lib/piece-view"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
-
-import { PieceCard } from "./_components/piece-card"
+import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 
 /**
- * What the AI is allowed to put on a page here, and nothing else.
+ * What the AI may build from — as a table somebody can find something in.
  *
- * This was `/portal/primitives`. A primitive is the framework's word — it is in
- * the marketing lane's own list of words a visitor has never heard — and the
- * page led with it in lower case over the sentence *"This is exactly what a
- * model is told it may build."* Both halves of that sentence are the most
- * valuable thing on the screen and neither was written for the person reading
- * it.
+ * ## What this replaces
  *
- * The route is `/portal/pieces` because *piece* is what the rest of the portal
- * already calls one. A change's plain reading says *"it brings 3 more pieces
- * with it"* and *"the 4 pieces inside it"*; a reviewer moving from that sentence
- * to this page should not have to learn a second word for the thing they just
- * read about. `/portal/primitives` answers permanently with a 308, the same
- * shape the three earlier renames took.
+ * 107 cards in three columns, each carrying a paragraph, with no search, no
+ * grouping and no order a reader chose. Photographed on 12 October at **10,426
+ * pixels**, which is eleven screens. The maintainer's verdict was that cards
+ * *"especially for any complex website will be overwhelming"*, and 107 is the
+ * starter set — somebody with their own component library has more.
  *
- * The claim the page exists to make is the one a repository cannot make: **this
- * list bounds what an AI can do to your pages.** It is not a document about the
- * catalogue, it is the catalogue — the same projection `catalogueOf` hands the
- * interpreter, read from the same registry (0013) — so a piece on this page that
- * a proposal cannot use, or the reverse, is impossible rather than unlikely.
- * Each card carries the line the model is given, produced by the runtime's own
- * formatter, which is what turns the claim into something a reader can check.
+ * ## Why a row rather than a card
+ *
+ * A card is the right shape for a thing you browse and the wrong one for a
+ * thing you look up. Nobody arrives here to read about `loom.tier`; they arrive
+ * to find out whether a piece is registered, whether anything uses it, and how
+ * much of it there is to configure. Those are four short facts, which is a row.
+ *
+ * The sentence each card led with is the registry's own description and is kept
+ * — it is what the model is handed (0013), so a screen that dropped it would be
+ * showing something other than the catalogue. It is the row's last column, where
+ * a reader scanning the first four can ignore it.
+ *
+ * ## The one number that changes what somebody does
+ *
+ * **Used.** Zero means either a piece to turn off or one they meant to use and
+ * have not, and both are actions. It is counted over the pages actually drawn
+ * rather than over the store, for `app-view.ts`'s reason: a count that silently
+ * spanned pages the reader cannot see is the one number here nobody could check.
+ * The window's size is stated below the table.
  */
-const PiecesPage = async () => {
-  await requireActor("/portal/pieces")
 
+const usedFilter = (shown: string | undefined) => (piece: PieceUsage) =>
+  shown === "unused" ? piece.used === 0 : shown === "used" ? piece.used > 0 : true
+
+const PiecesPage = async ({ searchParams }: { searchParams: Promise<{ show?: string }> }) => {
+  await requireActor("/portal/pieces")
+  await ensureSeeded()
+
+  const { show } = await searchParams
   const catalogue = catalogueOf(portalRegistry)
+
+  /*
+   * The same window `Your app` draws, so the two cannot disagree about what
+   * "used" counts. When that screen goes, this becomes the only reader of it.
+   */
+  const listed = await portalStore.list({ limit: MOST_PAGES_DRAWN })
+  const trees = listed.ok
+    ? [...(await headsOf(portalStore, listed.value.trees.map((row) => row.treeId))).values()]
+    : []
+
+  const pieces = pieceUsage(portalRegistry, trees)
+  const settings = new Map(catalogue.map((entry) => [String(entry.type), settingsOf(entry)]))
+  const slots = new Map(catalogue.map((entry) => [String(entry.type), entry.slots.length]))
+  const describes = new Map(catalogue.map((entry) => [String(entry.type), entry.description]))
+
+  const shown = pieces.filter(usedFilter(show))
+  const used = pieces.filter((piece) => piece.used > 0).length
+
+  const tab = (label: string, href: string, on: boolean) => (
+    <Link
+      key={label}
+      href={href}
+      className={`rounded-md px-2 py-1 text-xs no-underline ${
+        on ? "bg-surface-active text-ink" : "text-ink-secondary hover:bg-surface-hover"
+      }`}
+    >
+      {label}
+    </Link>
+  )
 
   return (
     <Screen>
-      <header className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="text-2xl tracking-tight">What Loom can put on your page</h1>
-          {catalogue.length > 0 && (
-            <Link href="/portal/pages" className="text-xs">
-              Ask for a change →
-            </Link>
-          )}
-        </div>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h1 className="text-xl tracking-tight">Pieces</h1>
+        <span className="text-ink-muted text-xs">
+          {used} of {pieces.length} used on the {trees.length} page
+          {trees.length === 1 ? "" : "s"} below
+        </span>
+      </div>
 
-        {/*
-         * Two leads rather than one with a clause in it, and neither says what
-         * the notice below already says. The first draft of this screen had the
-         * empty lead reading "the AI has nothing it can build with" directly
-         * above a notice headed "There is nothing here for the AI to build
-         * with" — the same fact twice, one line apart, which is the defect this
-         * lane has now shipped and photographed four times. Found by looking at
-         * the page.
-         */}
-        <Measured>
-          <p className="text-ink-muted text-sm">
-            {catalogue.length === 0
-              ? "This is the list of pieces the AI is handed every time you ask for a change."
-              : `Your project is set up with ${catalogue.length} kinds of piece. The AI is handed this exact list every time you ask for a change — anything that is not on it has nothing to draw it, so it would never appear on your page.`}
-          </p>
-        </Measured>
-      </header>
-
-      {catalogue.length === 0 ? (
-        /*
-         * The clearest instance of "what do I do now?" on this surface, and the
-         * one a new person is most likely to meet: a deployment that has
-         * registered nothing renders no pages at all, and the old screen said so
-         * with the heading, the count `0 registered.` and an empty list.
-         *
-         * An empty catalogue is a developer's problem with a developer's fix, so
-         * the action leaves the portal. That is the honest next move, and it is
-         * better than a reassuring sentence that leads nowhere.
-         */
+      {pieces.length === 0 ? (
         <StateNotice
           tone="empty"
-          title="There is nothing here for the AI to build with."
+          title="Nothing is registered here."
           action={
-            <Link href="/docs/building-with-loom/primitives">How to add the first one →</Link>
+            <Link
+              href="/docs/building-with-loom/primitives"
+              className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 no-underline"
+            >
+              How a piece gets registered →
+            </Link>
           }
         >
           <p>
-            Loom brings no components of its own. It can only use what this project has
-            registered, and this project has registered none — so a request to add anything
-            would come back with nothing to show for it.
-          </p>
-          <p>
-            That is the whole bargain, seen from its empty end: what you register is the
-            complete list of what an AI can do to your site.
+            This is the list the AI is handed every time somebody asks for a change. While it is
+            empty there is nothing for a change to be made out of, so nothing can be proposed.
           </p>
         </StateNotice>
       ) : (
-        /*
-         * A grid, which is what the eighteen of these were always waiting for.
-         * They were a single column: eighteen self-contained cards, each a name,
-         * a sentence and a row of chips, stacked down a 768-pixel strip. Nothing
-         * on one of them refers to the one above it, which is the test for
-         * whether a list wants to be a column at all.
-         *
-         * 320 rather than the page cards' 288. A piece card's widest line is its
-         * description — a real sentence — and at 288 the common ones wrap to four
-         * lines and the cards stop being the same height as each other.
-         */
-        <CardGrid min={320}>
-          {catalogue.map((primitive) => (
-            <li key={primitive.type}>
-              <PieceCard primitive={primitive} />
-            </li>
-          ))}
-        </CardGrid>
-      )}
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="border-edge-subtle flex gap-0.5 rounded-md border p-0.5">
+              {tab("All", "/portal/pieces", show === undefined)}
+              {tab("Used", "/portal/pieces?show=used", show === "used")}
+              {tab("Unused", "/portal/pieces?show=unused", show === "unused")}
+            </div>
+            <span className="text-ink-muted text-[11px]">
+              {shown.length} shown
+            </span>
+          </div>
 
-      {catalogue.length > 0 && (
-        <TechnicalDetail summary="The whole list, as the AI receives it">
-          <p className="text-ink-secondary">
-            This block is sent with every request for a change, ahead of your page itself. It
-            is the same catalogue this screen is built from, rendered by the runtime rather
-            than by this page, so the two cannot disagree.
-          </p>
-          <pre className="text-ink-secondary border-edge-subtle bg-surface-hover overflow-x-auto rounded-sm border p-2 font-mono whitespace-pre-wrap">
-            {renderCatalogue(catalogue)}
-          </pre>
-          <p>
-            Adding to it is a developer&rsquo;s job and a code change, not a setting in here —{" "}
-            <Link href="/docs/building-with-loom/primitives">how to register a piece</Link>.
-          </p>
-        </TechnicalDetail>
+          <table className="w-full table-fixed border-collapse text-left">
+            <thead>
+              <tr className="text-ink-muted border-edge-subtle border-b text-[10px] tracking-widest uppercase">
+                <th className="w-[150px] py-1.5 pr-3 font-normal">Piece</th>
+                <th className="w-[170px] py-1.5 pr-3 font-normal">Name</th>
+                <th className="w-[56px] py-1.5 pr-3 font-normal">Used</th>
+                <th className="w-[54px] py-1.5 pr-3 font-normal">Slots</th>
+                <th className="w-[72px] py-1.5 pr-3 font-normal">Settings</th>
+                <th className="py-1.5 font-normal">What it is for</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((piece) => {
+                const setting = settings.get(String(piece.type))
+
+                return (
+                  <tr
+                    key={String(piece.type)}
+                    className="border-edge-subtle hover:bg-surface-hover border-b align-top text-xs"
+                  >
+                    <td className="truncate py-1.5 pr-3 font-mono" title={String(piece.type)}>
+                      {String(piece.type)}
+                    </td>
+                    <td className="truncate py-1.5 pr-3">{piece.name}</td>
+                    <td
+                      className={`py-1.5 pr-3 font-mono ${piece.used === 0 ? "text-ink-placeholder" : ""}`}
+                    >
+                      {piece.used}
+                    </td>
+                    <td className="text-ink-muted py-1.5 pr-3 font-mono">
+                      {slots.get(String(piece.type)) ?? 0}
+                    </td>
+                    {/*
+                     * An em dash for `unknowable`, which is not zero. A piece
+                     * whose declared schema is not an object has settings that
+                     * cannot be enumerated — `catalogue.ts` is explicit that
+                     * this is "unknown, which is not the same claim as none",
+                     * and a 0 here would make it the same claim.
+                     */}
+                    <td className="text-ink-muted py-1.5 pr-3 font-mono">
+                      {setting === undefined || setting.kind === "unknowable"
+                        ? "—"
+                        : setting.kind === "none"
+                          ? 0
+                          : setting.required.length + setting.optional.length}
+                    </td>
+                    <td className="text-ink-secondary py-1.5">
+                      {describes.get(String(piece.type)) ?? ""}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+
+          {shown.length === 0 && (
+            <p className="text-ink-muted py-6 text-center text-xs">
+              Nothing matched. Every registered piece is in use.
+            </p>
+          )}
+
+          <TechnicalDetail summary="What “used” is counted over">
+            <p>
+              The {trees.length} most recently stored page{trees.length === 1 ? "" : "s"}, which is
+              a window rather than a sample — a sample has holes and a reader cannot tell a hole
+              from a piece nothing uses. A piece used only on a page outside the window reads as
+              unused here, and the count above says how wide the window is.
+            </p>
+          </TechnicalDetail>
+        </>
       )}
     </Screen>
   )
