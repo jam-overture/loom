@@ -3,7 +3,7 @@
 **Routine:** `Loom daily build` · **Date:** 2026-10-11 · **Section:** §4 (the
 SDK and the harness) · **Branch:** `framework-67-the-props-no-tree-carries`
 
-![One primitive that reads a required prop, audited three ways](2026-10-11-framework-unconfigured-wide.png)
+![One primitive that reads a required prop, audited three ways](2026-10-11-framework-unconfigured-wide.webp)
 
 ## What was completed
 
