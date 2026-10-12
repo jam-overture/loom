@@ -92,6 +92,56 @@ primitive type names as a paragraph.
 
 ---
 
+## The portal is a document, not a tool — and that is a written policy
+
+The maintainer, on the Supabase screenshots: *"Not wordy, everything intuitive
+and where it needs to be. Just a master class of functional UI which we should
+aim for."*
+
+Here is the gap, counted. Prose is words inside a `<p>` on the screen's own
+file; controls are every `input`, `select`, `textarea` and `button` in it:
+
+| screen | prose words | controls |
+| --- | ---: | ---: |
+| front door | 493 | 0 |
+| Trust | 403 | 0 |
+| What-if | 361 | 0 |
+| Readers | 322 | 0 |
+| Rules | 299 | 0 |
+| Pages | 270 | 0 |
+| Checkup | 249 | 0 |
+| Pieces | 177 | 0 |
+| Your app | 125 | 0 |
+
+**In the whole portal — 35,438 lines — there are 32 interactive controls, in
+six files.** Fourteen inputs, seventeen buttons, one textarea. The Rules
+screen, whose entire subject is settings, contains none of them: it describes
+the thresholds in sentences and offers no way to move one.
+
+**This is not drift. It is a convention, written down and enforced.**
+`_lib/vocabulary.ts` carries the brief, and FINDINGS cites it three times:
+
+> **Plain language is the default. The technical record is one click away.
+> Nothing is ever removed.**
+
+That is a good rule for a marketing page and for documentation, and it is the
+wrong rule for a working tool. *Nothing is ever removed* is what produces a
+13,298px screen; *plain language is the default* is what produces 493 words on
+a front door that could be six numbers and a table. Every screen above obeys
+it faithfully.
+
+**So the convention has to change with the portal, or the next routine will
+write the prose back.** The replacement, scoped to `(portal)` only and leaving
+`(marketing)` and `(docs)` as they are:
+
+> **A portal screen shows state, not explanation.** The default unit is a row,
+> a number or a control — never a paragraph. Explanation lives next to the
+> control it is about, behind a label or an info affordance, and never in body
+> copy. A screen that cannot be understood without a paragraph is the wrong
+> screen.
+
+---
+
 ## The thing underneath all of it
 
 **The portal is a faithful rendering of a data model the maintainer has just
@@ -168,12 +218,17 @@ needed by the third.
 
 Each step ends with something that can be looked at.
 
-### 0 · The record · *needs sign-off before any code*
+### 0 · Two records · *needs sign-off before any code*
 
-A decision record refusing 0220 and defining a **project**: the unit Loom
-stores, governs and measures under. It supersedes 0220, and it rewrites
-`docs/portal.md`, which is the approved plan the current portal was built to
-and which assumes one app throughout.
+**0260 — a project is the unit Loom stores, governs and measures under.**
+Refuses 0220, supersedes it, and rewrites `docs/portal.md`, which is the
+approved plan the current portal was built to and which assumes one app
+throughout.
+
+**0261 — a portal screen shows state, not explanation.** Scopes the plain
+language brief to `(marketing)` and `(docs)` and replaces it inside
+`(portal)`, as above. Without this the prose grows back, because it is
+currently the rule.
 
 ### 1 · Project identity, through the schema · *invisible, and everything waits on it*
 
