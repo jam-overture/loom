@@ -4,7 +4,7 @@
 **Branch:** `framework-31-the-ceiling-on-a-foreign-call` · **Section:** §2 — the
 change pipeline, §4c — the data seam, §4d — the submission seam
 
-![Three seams, one ceiling](2026-09-13-framework-the-ceiling-on-a-foreign-call.png)
+![Three seams, one ceiling](2026-09-13-framework-the-ceiling-on-a-foreign-call.webp)
 
 ## Before anything else: my brief's headline task has been done for twenty-five days
 

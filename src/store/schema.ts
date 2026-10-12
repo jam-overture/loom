@@ -15,14 +15,29 @@ import { index, integer, jsonb, pgTable, primaryKey, text, timestamp } from "dri
  * decomposed into node rows — the tree is read and written whole, and a schema
  * that shredded it would have to be migrated every time §1 changes the AST.
  */
-export const loomTrees = pgTable("loom_trees", {
-  treeId: text("tree_id").primaryKey(),
-  revision: integer("revision").notNull(),
-  document: jsonb("document").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
-})
+export const loomTrees = pgTable(
+  "loom_trees",
+  {
+    /**
+     * The project the tree belongs to (0260). First in the key rather than
+     * beside it: every read this store performs is already inside one project,
+     * so a composite key led by the project is the index those reads want, and
+     * a tree id only has to be unique within its own project.
+     *
+     * Defaulted so a database written before projects existed keeps answering.
+     * `DEFAULT_PROJECT_ID` is the value, spelled out here because DDL cannot
+     * import it — `project.test.ts` holds the two together.
+     */
+    projectId: text("project_id").notNull().default("prj_default"),
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    document: jsonb("document").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [primaryKey({ columns: [table.projectId, table.treeId] })]
+)
 
 /**
  * The log. The composite primary key is load-bearing rather than incidental: it
@@ -37,6 +52,8 @@ export const loomTrees = pgTable("loom_trees", {
 export const loomRevisions = pgTable(
   "loom_revisions",
   {
+    /** See `loomTrees.projectId`. */
+    projectId: text("project_id").notNull().default("prj_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     proposalId: text("proposal_id").notNull(),
@@ -51,7 +68,7 @@ export const loomRevisions = pgTable(
      */
     answeredBy: text("answered_by"),
   },
-  (table) => [primaryKey({ columns: [table.treeId, table.revision] })]
+  (table) => [primaryKey({ columns: [table.projectId, table.treeId, table.revision] })]
 )
 
 /**
@@ -74,15 +91,31 @@ export const loomRevisions = pgTable(
  * both implementations read a queue oldest-first by the same comparison rather
  * than by two that happen to agree.
  */
-export const loomHolds = pgTable("loom_holds", {
-  proposalId: text("proposal_id").primaryKey(),
-  treeId: text("tree_id").notNull(),
-  baseRevision: integer("base_revision").notNull(),
-  intent: jsonb("intent").notNull(),
-  proposal: jsonb("proposal").notNull(),
-  disposition: jsonb("disposition").notNull(),
-  heldAt: text("held_at").notNull(),
-})
+export const loomHolds = pgTable(
+  "loom_holds",
+  {
+    /**
+     * The project the hold belongs to (0260). First in the key, as it is on
+     * the two tables above, because every read of this table is already inside
+     * one project.
+     *
+     * Widening the key does not weaken what it was doing. The note on `hold`
+     * in `postgres-holds.ts` is that the key is what makes *already held* a
+     * fact the database establishes rather than a check the code races
+     * against; within a project that is unchanged, and across projects two
+     * proposals that happen to share an id were never the same proposal.
+     */
+    projectId: text("project_id").notNull().default("prj_default"),
+    proposalId: text("proposal_id").notNull(),
+    treeId: text("tree_id").notNull(),
+    baseRevision: integer("base_revision").notNull(),
+    intent: jsonb("intent").notNull(),
+    proposal: jsonb("proposal").notNull(),
+    disposition: jsonb("disposition").notNull(),
+    heldAt: text("held_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.projectId, table.proposalId] })]
+)
 
 /**
  * The policy's own log.
@@ -116,6 +149,8 @@ export const loomHolds = pgTable("loom_holds", {
 export const loomPolicyRevisions = pgTable(
   "loom_policy_revisions",
   {
+    /** The project whose policy this is (0260). See `loomTrees.projectId`. */
+    projectId: text("project_id").notNull().default("prj_default"),
     policyId: text("policy_id").notNull(),
     revision: integer("revision").notNull(),
     fingerprint: text("fingerprint").notNull(),
@@ -129,13 +164,17 @@ export const loomPolicyRevisions = pgTable(
     note: text("note"),
   },
   (table) => [
-    primaryKey({ columns: [table.policyId, table.revision] }),
+    primaryKey({ columns: [table.projectId, table.policyId, table.revision] }),
     /**
      * The join `judgedUnder` is. Without it, resolving the fingerprint on a
      * disposition is a scan of every policy revision the deployment has ever
      * recorded — which is small today and is on the path of a screen that reads
      * it once per record on the page.
      */
-    index("loom_policy_revisions_fingerprint_idx").on(table.policyId, table.fingerprint),
+    index("loom_policy_revisions_fingerprint_idx").on(
+      table.projectId,
+      table.policyId,
+      table.fingerprint
+    ),
   ]
 )

@@ -11,7 +11,7 @@ titled *How much is at stake*, *Whether it can be undone*, *Which rules applied*
 — and one line in a questions list. A visitor who believed the front door and
 wanted to know what they would be signing up for had nowhere to go.
 
-![The rules, under the editorial palette](2026-08-28-marketing-the-line-you-draw-editorial.png)
+![The rules, under the editorial palette](2026-08-28-marketing-the-line-you-draw-editorial.webp)
 
 `/the-rules` is that page. It is the fourth route on the site and, per the
 recorded positioning, the half of the pitch that is supposed to be the
@@ -69,7 +69,7 @@ removal thresholds, the breadth threshold, the refusal floor, and what each of
 the four kinds of asker may do before a person is involved. Nothing in that band
 is typed.
 
-![The table, read off the policy the site is served with](2026-08-28-marketing-the-line-you-draw-tables.png)
+![The table, read off the policy the site is served with](2026-08-28-marketing-the-line-you-draw-tables.webp)
 
 ### The property worth the whole run
 
@@ -105,7 +105,7 @@ what is asserted.
 Adding a fourth page to a site whose eight-item bar the maintainer had already
 questioned on #166 would have made nine. So the bar did not grow.
 
-![The bar, still eight things](2026-08-28-marketing-the-line-you-draw-menu.png)
+![The bar, still eight things](2026-08-28-marketing-the-line-you-draw-menu.webp)
 
 The header used to carry *every unguarded surface*, which is a rule about
 permissions answering a question about attention — and it grew by one every time
@@ -177,7 +177,7 @@ promising to defend something this deployment would in fact let a machine delete
 `scrollWidth` is exactly 390 at a 390px viewport, including both tables, and the
 page was checked under all three registered palettes.
 
-![Both tables on a phone](2026-08-28-marketing-the-line-you-draw-phone-tables.png)
+![Both tables on a phone](2026-08-28-marketing-the-line-you-draw-phone-tables.webp)
 
 ## The register, held harder than the rule requires
 

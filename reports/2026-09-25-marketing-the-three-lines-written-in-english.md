@@ -12,8 +12,8 @@ they were the only three a reader could not finish.**
 
 | before — `main` | after — this branch |
 | --- | --- |
-| ![](2026-09-25-marketing-three-lines-before-wide.png) | ![](2026-09-25-marketing-three-lines-after-wide.png) |
-| ![](2026-09-25-marketing-three-lines-before-phone.png) | ![](2026-09-25-marketing-three-lines-after-phone.png) |
+| ![](2026-09-25-marketing-three-lines-before-wide.webp) | ![](2026-09-25-marketing-three-lines-after-wide.webp) |
+| ![](2026-09-25-marketing-three-lines-before-phone.webp) | ![](2026-09-25-marketing-three-lines-after-phone.webp) |
 
 The line reads `"rationale": "This changes two settings on the opening band: the
 pattern painted behind it, and how tall it sta` and then the panel ends. Three
@@ -91,7 +91,7 @@ finding below: what this band actually wants is a ceiling, not a longer page.
 The front door's panel is the one where the gain is plainest, because it is the
 one a visitor is meant to read at a glance:
 
-![the front door's panel at 390](2026-09-25-marketing-three-lines-front-door.png)
+![the front door's panel at 390](2026-09-25-marketing-three-lines-front-door.webp)
 
 `"title": "This box is one of those pieces"` and `"value": "So is the menu. So
 is every band above."` both used to end at 39 characters.

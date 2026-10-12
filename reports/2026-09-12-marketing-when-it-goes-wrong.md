@@ -13,7 +13,7 @@ it doesn't?**
 
 The answer is the best one this product has and the site was not making it.
 
-![The page, whole](2026-09-12-marketing-when-it-goes-wrong.png)
+![The page, whole](2026-09-12-marketing-when-it-goes-wrong.webp)
 
 ---
 
@@ -70,7 +70,7 @@ moved, produces a page nobody wrote and nobody asked for.
 
 ### The refusal, run on the page rather than described
 
-![The refusal band](2026-09-12-marketing-when-it-goes-wrong-refused.png)
+![The refusal band](2026-09-12-marketing-when-it-goes-wrong-refused.webp)
 
 Every sentence above that band is a sentence, and a sentence about refusing
 things is the cheapest sentence in the industry. So the band spends the one asset
@@ -218,11 +218,11 @@ rather than re-filed.
 
 Three palettes, and the phone.
 
-![Bold](2026-09-12-marketing-when-it-goes-wrong-bold.png)
+![Bold](2026-09-12-marketing-when-it-goes-wrong-bold.webp)
 
-![Editorial](2026-09-12-marketing-when-it-goes-wrong-editorial.png)
+![Editorial](2026-09-12-marketing-when-it-goes-wrong-editorial.webp)
 
-![At 390px](2026-09-12-marketing-when-it-goes-wrong-phone.png)
+![At 390px](2026-09-12-marketing-when-it-goes-wrong-phone.webp)
 
 `scrollWidth` is exactly 1440 at 1440 and exactly 390 at 390.
 
@@ -237,7 +237,7 @@ improvement cannot be made back.
 
 The front door, with `Home` off the bar:
 
-![The front door](2026-09-12-marketing-when-it-goes-wrong-front-door.png)
+![The front door](2026-09-12-marketing-when-it-goes-wrong-front-door.webp)
 
 Every screenshot is in the fallback face rather than Geist, as every set this
 lane has published has been. See the font finding.

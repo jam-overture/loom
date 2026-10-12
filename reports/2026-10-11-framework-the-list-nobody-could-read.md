@@ -4,7 +4,7 @@
 seam), §4 (data and submission seams) · **Branch:**
 `framework-64-the-list-nobody-could-read`
 
-![Three refusals, the clause each one ends on, and what it costs](2026-10-11-framework-bounded-wide.png)
+![Three refusals, the clause each one ends on, and what it costs](2026-10-11-framework-bounded-wide.webp)
 
 ## What was completed
 
@@ -66,7 +66,7 @@ two pictures differ in exactly the thing this change touches and nothing else.
 `reports/against/` is gitignored, so the before sheet is committed here under a
 short name, as that rule asks.
 
-![The same sheet, pointed at origin/main — 693 characters where this branch writes 465](2026-10-11-framework-unbounded-wide.png)
+![The same sheet, pointed at origin/main — 693 characters where this branch writes 465](2026-10-11-framework-unbounded-wide.webp)
 
 ## Decisions that were not specified, and why
 

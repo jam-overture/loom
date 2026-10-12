@@ -243,12 +243,12 @@ rail screenshot cuts the subject off the bottom.
 
 | | |
 | --- | --- |
-| [before, held](2026-09-02-demo-the-offer-that-withdrew-itself-before-held.png) | two seconds after **Put it back**: no button, under a sentence still saying *“Put it back” undoes it* |
-| [after, held](2026-09-02-demo-the-offer-that-withdrew-itself-after-held.png) | the same press: **“You’ve asked to put this back. It’s waiting on your yes, on the card above.”** |
-| [before, declined](2026-09-02-demo-the-offer-that-withdrew-itself-before-declined.png) | after **No thanks** on the undo. Identical to the frame above: the offer is gone for the rest of the visit |
-| [after, declined](2026-09-02-demo-the-offer-that-withdrew-itself-after-declined.png) | the same press: **Put it back** is under the card again, with its caution |
-| [after, spent](2026-09-02-demo-the-offer-that-withdrew-itself-after-spent.png) | and once the undo is allowed: **“You put this back, so the page is as it was before this ask.”** |
-| [phone](2026-09-02-demo-the-offer-that-withdrew-itself-phone.png) | 390×844, the held undo |
+| [before, held](2026-09-02-demo-the-offer-that-withdrew-itself-before-held.webp) | two seconds after **Put it back**: no button, under a sentence still saying *“Put it back” undoes it* |
+| [after, held](2026-09-02-demo-the-offer-that-withdrew-itself-after-held.webp) | the same press: **“You’ve asked to put this back. It’s waiting on your yes, on the card above.”** |
+| [before, declined](2026-09-02-demo-the-offer-that-withdrew-itself-before-declined.webp) | after **No thanks** on the undo. Identical to the frame above: the offer is gone for the rest of the visit |
+| [after, declined](2026-09-02-demo-the-offer-that-withdrew-itself-after-declined.webp) | the same press: **Put it back** is under the card again, with its caution |
+| [after, spent](2026-09-02-demo-the-offer-that-withdrew-itself-after-spent.webp) | and once the undo is allowed: **“You put this back, so the page is as it was before this ask.”** |
+| [phone](2026-09-02-demo-the-offer-that-withdrew-itself-phone.webp) | 390×844, the held undo |
 
 **The driver reported the defect on its own.** On the `before` build the script's
 fourth step — ask again, and this time allow it — logged `!! "Put it back" is not

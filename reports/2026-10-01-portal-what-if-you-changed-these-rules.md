@@ -77,12 +77,12 @@ down by hand. Nothing was seeded and no component was rendered outside Next.
 
 | | |
 | --- | --- |
-| [**the screen on arrival**](2026-10-01-portal-what-if-wide.png) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
-| [**the answer**, with the floor at 50%](2026-10-01-portal-what-if-lowered-wide.png) | the sentence this whole screen exists for |
-| [**the answer on a phone**](2026-10-01-portal-what-if-lowered-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
-| [**nothing is allowed at all**](2026-10-01-portal-what-if-refused-wide.png) | `refusalFloor` at `low`, where all three are refused |
-| [**the empty state**](2026-10-01-portal-what-if-empty-wide.png) | a fresh deployment, which is what the preview will show |
-| [**the way in**](2026-10-01-portal-what-if-rules-wide.png) | `/portal/rules`, with the new link above *Ask for a change* |
+| [**the screen on arrival**](2026-10-01-portal-what-if-wide.webp) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
+| [**the answer**, with the floor at 50%](2026-10-01-portal-what-if-lowered-wide.webp) | the sentence this whole screen exists for |
+| [**the answer on a phone**](2026-10-01-portal-what-if-lowered-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**nothing is allowed at all**](2026-10-01-portal-what-if-refused-wide.webp) | `refusalFloor` at `low`, where all three are refused |
+| [**the empty state**](2026-10-01-portal-what-if-empty-wide.webp) | a fresh deployment, which is what the preview will show |
+| [**the way in**](2026-10-01-portal-what-if-rules-wide.webp) | `/portal/rules`, with the new link above *Ask for a change* |
 
 The second picture is the one to look at. Its three sentences are:
 

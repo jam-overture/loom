@@ -252,11 +252,11 @@ Nothing blocking. Two worth a sentence when you next look at this:
 
 | | |
 | --- | --- |
-| [before](2026-08-21-demo-a-public-front-door-before.png) | `/portal/demo` as it was: two white halves, portal chrome, five grey pills, the empty record's vocabulary list |
-| [arrival](2026-08-21-demo-a-public-front-door-arrival.png) | `/demo`, first ten seconds — the claim, one button, what it will do |
-| [held](2026-08-21-demo-a-public-front-door-held.png) | one click later: the Gate holding a change, in plain words, with both answers and what it would change — all above the fold |
-| [record](2026-08-21-demo-a-public-front-door-record.png) | the disclosure open: the whole record, to the policy fingerprint |
-| [phone](2026-08-21-demo-a-public-front-door-phone.png) | controls first, page below |
+| [before](2026-08-21-demo-a-public-front-door-before.webp) | `/portal/demo` as it was: two white halves, portal chrome, five grey pills, the empty record's vocabulary list |
+| [arrival](2026-08-21-demo-a-public-front-door-arrival.webp) | `/demo`, first ten seconds — the claim, one button, what it will do |
+| [held](2026-08-21-demo-a-public-front-door-held.webp) | one click later: the Gate holding a change, in plain words, with both answers and what it would change — all above the fold |
+| [record](2026-08-21-demo-a-public-front-door-record.webp) | the disclosure open: the whole record, to the policy fingerprint |
+| [phone](2026-08-21-demo-a-public-front-door-phone.webp) | controls first, page below |
 
 **The preview:**
 <https://loom-git-demo-01-a-public-fr-b94825-jpizzolato36-6341s-projects.vercel.app/demo>

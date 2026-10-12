@@ -8,7 +8,7 @@
 **Finding closed:** the second half of *`border-subtle` is under the visibility floor on four of the eight starter palettes* — `Loom primitives`, 29 September
 **Finding filed:** *0204 and `hairline()` both count the starter set as eight palettes, and it is twenty-one* — for `Loom primitives`
 
-![The edge eight palettes declared and did not draw](2026-09-29-framework-a-line-against-its-ground.png)
+![The edge eight palettes declared and did not draw](2026-09-29-framework-a-line-against-its-ground.webp)
 
 *The eight palettes this run corrected, `main` on the left and this branch on the
 right. Each card sets `border-subtle` on three things — its own four-sided edge,

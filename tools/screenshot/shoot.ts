@@ -6,6 +6,8 @@ import { browsersRoot, describeBrowserError, locateChromium } from "../specimen/
 import { captureShots, describeShot } from "../specimen/capture.js"
 import { chromiumBrowser, describeLauncherError, loadChromium } from "../specimen/playwright.js"
 
+import { governs, REMEMBER_TO_STORE } from "../reports/stored.js"
+
 import {
   describeBuildError,
   describeReadinessError,
@@ -124,6 +126,9 @@ const takeShots = async (): Promise<Result<boolean, string>> => {
     const results = await captureShots(planShots(addressed), browser, { outDir: addressed.outDir })
 
     for (const result of results) process.stdout.write(`${describeShot(result)}\n`)
+    if (results.length > 0 && governs(addressed.outDir)) {
+      process.stdout.write(`\n${REMEMBER_TO_STORE}\n`)
+    }
     return ok(results.some((result) => result.overflowed))
   } finally {
     await browser.close()

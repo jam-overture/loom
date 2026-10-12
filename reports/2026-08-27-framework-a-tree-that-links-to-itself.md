@@ -4,7 +4,7 @@
 **Date:** 2026-08-27 · **Routine:** `Loom daily build` · **Section:** §4b ·
 **Branch:** `framework-15-a-tree-that-links-to-itself`
 
-![Four values that begin with a slash, and where a browser actually goes](2026-08-27-framework-a-tree-that-links-to-itself.png)
+![Four values that begin with a slash, and where a browser actually goes](2026-08-27-framework-a-tree-that-links-to-itself.webp)
 
 ## The migration, first
 

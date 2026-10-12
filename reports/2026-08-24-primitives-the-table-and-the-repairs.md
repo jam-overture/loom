@@ -9,13 +9,13 @@ shipped and that no test in this repository could see. **Four cross-lane finding
 closed** and six recorded, two of which this run also closed. No decision record,
 for the second run running and the same reason.
 
-![The specimen under the house palette](2026-08-24-primitives-the-table-and-the-repairs-minimal.png)
+![The specimen under the house palette](2026-08-24-primitives-the-table-and-the-repairs-minimal.webp)
 
-![The same specimen under editorial](2026-08-24-primitives-the-table-and-the-repairs-editorial.png)
+![The same specimen under editorial](2026-08-24-primitives-the-table-and-the-repairs-editorial.webp)
 
-![And under bold — the palette that caught the header-weight bug, again](2026-08-24-primitives-the-table-and-the-repairs-bold.png)
+![And under bold — the palette that caught the header-weight bug, again](2026-08-24-primitives-the-table-and-the-repairs-bold.webp)
 
-![The house palette at a true 390px, in an iframe because this Chromium will not lay out narrower than 485](2026-08-24-primitives-the-table-and-the-repairs-phone.png)
+![The house palette at a true 390px, in an iframe because this Chromium will not lay out narrower than 485](2026-08-24-primitives-the-table-and-the-repairs-phone.webp)
 
 ## Which primitives, and why those
 

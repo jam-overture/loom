@@ -10,15 +10,15 @@ table is now empty**, and one of its three verdicts turned out to be wrong in an
 instructive way. One decision record, `0091`. Three defects found by screenshots
 and by nothing else.
 
-![The specimen under editorial](2026-08-25-primitives-the-band-that-moves-editorial.png)
+![The specimen under editorial](2026-08-25-primitives-the-band-that-moves-editorial.webp)
 
-![The same specimen under bold — the palette that caught the invisible divider](2026-08-25-primitives-the-band-that-moves-bold.png)
+![The same specimen under bold — the palette that caught the invisible divider](2026-08-25-primitives-the-band-that-moves-bold.webp)
 
-![And under the house palette](2026-08-25-primitives-the-band-that-moves-minimal.png)
+![And under the house palette](2026-08-25-primitives-the-band-that-moves-minimal.webp)
 
-![The same page rendered in edit mode: the bands hold still, and every node is addressable exactly once](2026-08-25-primitives-the-band-that-moves-editing.png)
+![The same page rendered in edit mode: the bands hold still, and every node is addressable exactly once](2026-08-25-primitives-the-band-that-moves-editing.webp)
 
-![At a true 390px, in a real phone viewport rather than an iframe](2026-08-25-primitives-the-band-that-moves-phone.png)
+![At a true 390px, in a real phone viewport rather than an iframe](2026-08-25-primitives-the-band-that-moves-phone.webp)
 
 ## Which primitives, and why those
 

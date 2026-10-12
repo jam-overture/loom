@@ -18,11 +18,11 @@ copies of one sentence can fill a list that is ten rows long.
 Those sixteen now arrive as **one row**, the closest, saying *the closest of 9
 imports*. The nine slots it gives back go to the rest of the site.
 
-![The same query, before and after](2026-09-27-docs-a-row-that-stands-for-sixteen-before-wide.png)
+![The same query, before and after](2026-09-27-docs-a-row-that-stands-for-sixteen-before-wide.webp)
 
 *On `main`: nine import pages, and the heading that answers below the fold.*
 
-![The same query, answered](2026-09-27-docs-a-row-that-stands-for-sixteen-after-wide.png)
+![The same query, answered](2026-09-27-docs-a-row-that-stands-for-sixteen-after-wide.webp)
 
 *On this branch: one row for the imports, and* What you actually need *second —
 with the sentence it found visible on the page behind the dialog.*
@@ -98,9 +98,9 @@ no entry is one of anything.
 
 The second row is the one there is a picture of:
 
-![The bottom of the list, before](2026-09-27-docs-a-row-that-stands-for-sixteen-before-install.png)
+![The bottom of the list, before](2026-09-27-docs-a-row-that-stands-for-sixteen-before-install.webp)
 
-![The bottom of the list, after](2026-09-27-docs-a-row-that-stands-for-sixteen-after-install.png)
+![The bottom of the list, after](2026-09-27-docs-a-row-that-stands-for-sixteen-after-install.webp)
 
 **The cost, stated rather than buried: some lists get shorter.** *peer
 dependency* returns three rows where it returned ten, and *the import itself
@@ -199,7 +199,7 @@ is the re-run.
 `scrollWidth 390 / innerWidth 390`, before and after. The fold line wraps within
 the row.
 
-![The folded row on a phone](2026-09-27-docs-a-row-that-stands-for-sixteen-after-phone.png)
+![The folded row on a phone](2026-09-27-docs-a-row-that-stands-for-sixteen-after-phone.webp)
 
 ## Scope
 

@@ -95,7 +95,7 @@ the bar is now the same colour as.
 
 | minimal, 390 | bold, 390 |
 | --- | --- |
-| ![](2026-10-08-marketing-strip-minimal-phone.png) | ![](2026-10-08-marketing-strip-bold-phone.png) |
+| ![](2026-10-08-marketing-strip-minimal-phone.webp) | ![](2026-10-08-marketing-strip-bold-phone.webp) |
 | `#ffffff` | `#0a0a0a` |
 
 **The strip above both of these used to be `#ffffff`.** Over the left-hand page
@@ -104,8 +104,8 @@ the default palette is light, so a reader who never touches the switcher is the
 one reader the old behaviour was right for. Over the right-hand page it is a
 white band across the top of a black screen.
 
-[editorial at 390](2026-10-08-marketing-strip-editorial-phone.png) ·
-[bold at 1280](2026-10-08-marketing-strip-bold-wide.png)
+[editorial at 390](2026-10-08-marketing-strip-editorial-phone.webp) ·
+[bold at 1280](2026-10-08-marketing-strip-bold-wide.webp)
 
 `390 / 390` and `1280 / 1280` on every shot — no overflow. The `h1` is at
 `y 330` on minimal and `y 318` on bold, unmoved: this change adds no element

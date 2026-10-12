@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-26 · **Branch:**
 `primitives-46-earning-the-wide-cell` · **Section:** §4b
 
-![The bento band's lead cell, with the change it is talking about inside it](2026-09-26-primitives-wide-cell-bento-after.png)
+![The bento band's lead cell, with the change it is talking about inside it](2026-09-26-primitives-wide-cell-bento-after.webp)
 
 ## What this run chose, and why that
 
@@ -39,7 +39,7 @@ and a sentence — so the first thing a reader met after the features grid was
 
 | before — `main` | after |
 | --- | --- |
-| ![A wide cell with a glyph, a title and one sentence in it](2026-09-26-primitives-wide-cell-bento-before.png) | ![The same cell with a window over a diff beside the words](2026-09-26-primitives-wide-cell-bento-after.png) |
+| ![A wide cell with a glyph, a title and one sentence in it](2026-09-26-primitives-wide-cell-bento-before.webp) | ![The same cell with a window over a diff beside the words](2026-09-26-primitives-wide-cell-bento-after.webp) |
 
 **`loom.feature` grows a `media` region.** It is a slot rather than a child
 because the tile *places* it — after the words, and turned beside them when the
@@ -81,7 +81,7 @@ of them, and the product's own name the same size and colour in the middle.
 
 | before — `main` | after |
 | --- | --- |
-| ![Eight words scattered on two dashed circles](2026-09-26-primitives-wide-cell-orbit-before.png) | ![Eight plated marks on one ring, each connected back to a grounded hub](2026-09-26-primitives-wide-cell-orbit-after.png) |
+| ![Eight words scattered on two dashed circles](2026-09-26-primitives-wide-cell-orbit-before.webp) | ![Eight plated marks on one ring, each connected back to a grounded hub](2026-09-26-primitives-wide-cell-orbit-after.webp) |
 
 Three changes, and the content is untouched.
 
@@ -150,8 +150,8 @@ which is the granularity doc's sharper question, asked of all four.
 
 | | |
 | --- | --- |
-| ![editorial, 1280](2026-09-26-primitives-wide-cell-ed-wide.png) | ![bold, 1280](2026-09-26-primitives-wide-cell-bold-wide.png) |
-| ![editorial, 390](2026-09-26-primitives-wide-cell-ed-phone.png) | ![bold, 390](2026-09-26-primitives-wide-cell-bold-phone.png) |
+| ![editorial, 1280](2026-09-26-primitives-wide-cell-ed-wide.webp) | ![bold, 1280](2026-09-26-primitives-wide-cell-bold-wide.webp) |
+| ![editorial, 390](2026-09-26-primitives-wide-cell-ed-phone.webp) | ![bold, 390](2026-09-26-primitives-wide-cell-bold-phone.webp) |
 
 `earning-the-wide-cell.specimen.ts` is committed. Overflow measured by the
 harness on all four sheets: 1280 vs 1280 wide, 390 vs 390 phone, under both

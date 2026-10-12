@@ -287,6 +287,36 @@ describe("the sentences a person reads", () => {
   })
 
   /**
+   * **The population is the caller's and the rounding is not.**
+   *
+   * *The people* is right for a fall, where the parts either side of the phrase
+   * name the population. It is wrong for a kind of piece, whose share is of the
+   * readers who met it across every page it stands on — so `_lib/pieces-read.ts`
+   * passes its own noun rather than spelling the tenths a second time.
+   *
+   * Two phrasings of one reading is how a portal comes to round one number two
+   * ways: the day somebody changed a boundary in one of them, *7 in 10* and
+   * *almost all* would be printed about the same share on two screens, and a
+   * reader has no way to read that as anything but two measurements. Every end
+   * of the scale takes the noun, which is the half a caller passing a string to
+   * one branch would miss.
+   */
+  it.each([
+    [1, "almost all of the readers who met it"],
+    [0.9, "9 in 10 of the readers who met it"],
+    [0.02, "fewer than 1 in 10 of the readers who met it"],
+  ] as readonly [number, string][])(
+    "says a share of %s against the population it is a share of",
+    (share, said) => {
+      expect(plainShare(share, "readers who met it")).toBe(said)
+    }
+  )
+
+  it("keeps the people for every caller that was already saying them", () => {
+    expect(plainShare(0.4)).toBe(plainShare(0.4, "people"))
+  })
+
+  /**
    * The share leads and the counts do not, which is the reverse of every other
    * section on this card. `_lib/stopping.ts` has the argument: a reach is
    * generous by every visit that straddled a roll-up boundary and a ratio

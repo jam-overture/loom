@@ -14,7 +14,7 @@ removed last month looks exactly as convincing as one that works.
 
 One of them could not compile, and had never been able to.
 
-![The block on `The history of a page`, as it now reads](2026-09-05-docs-the-code-on-the-page-compiles.png)
+![The block on `The history of a page`, as it now reads](2026-09-05-docs-the-code-on-the-page-compiles.webp)
 
 ## What was wrong with that block
 
@@ -151,7 +151,7 @@ check it against and `noImplicitAny` refuses it, and the page immediately before
 it in the rail already writes exactly this. It reads as consistency rather than
 noise.
 
-![The annotated component fragment, on Children and slots](2026-09-05-docs-the-code-on-the-page-compiles-composition.png)
+![The annotated component fragment, on Children and slots](2026-09-05-docs-the-code-on-the-page-compiles-composition.webp)
 
 Everything else that changed is the one declaring word on ten fences, which
 nobody reading the site can see.
@@ -188,12 +188,12 @@ without anyone editing a test, and what is asserted is the shape of the claim â€
 that every block is either compiled or visibly abridged, and that the compiled
 ones are the large majority.
 
-![The same block in dark](2026-09-05-docs-the-code-on-the-page-compiles-dark.png)
+![The same block in dark](2026-09-05-docs-the-code-on-the-page-compiles-dark.webp)
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport and 1280
 at 1280.
 
-![At a true 390px](2026-09-05-docs-the-code-on-the-page-compiles-phone.png)
+![At a true 390px](2026-09-05-docs-the-code-on-the-page-compiles-phone.webp)
 
 ## Scope
 

@@ -157,13 +157,13 @@ by a photograph rather than by an assertion.
 
 | | `md5` | |
 | --- | --- | --- |
-| [**after Put it back, 390 × 844**](2026-10-11-demo-undo-put-it-back-phone.png) · [before](2026-10-10-demo-window-put-it-back-phone.png) | `05b216c7` ← `66d64278` | **the picture worth opening** — the page the visitor asked to put back, on their screen |
-| [one press, 390 × 844](2026-10-11-demo-undo-one-press-phone.png) | `674ca228` — unchanged byte for byte | the screen this must not move, and does not |
-| [the arrival screen](2026-10-11-demo-undo-arrival-phone.png) | `a3177980` — unchanged byte for byte | |
-| [a marked change, on a phone](2026-10-11-demo-undo-marked-phone.png) | `1c934553` — unchanged byte for byte | the control: no window, so nothing to carry anybody to |
-| [1280 × 900, arrival](2026-10-11-demo-undo-arrival-wide.png) | `3b34079e` — unchanged byte for byte | |
-| [1280 × 900, after Put it back](2026-10-11-demo-undo-put-it-back-wide.png) | `0846a2c9` | the layout where the other scroll owns the movement |
-| [the embed at 348 × 465](2026-10-11-demo-undo-embed.png) | `7c20a054` — unchanged byte for byte | inside somebody else's page |
+| [**after Put it back, 390 × 844**](2026-10-11-demo-undo-put-it-back-phone.webp) · [before](2026-10-10-demo-window-put-it-back-phone.webp) | `05b216c7` ← `66d64278` | **the picture worth opening** — the page the visitor asked to put back, on their screen |
+| [one press, 390 × 844](2026-10-11-demo-undo-one-press-phone.webp) | `674ca228` — unchanged byte for byte | the screen this must not move, and does not |
+| [the arrival screen](2026-10-11-demo-undo-arrival-phone.webp) | `a3177980` — unchanged byte for byte | |
+| [a marked change, on a phone](2026-10-11-demo-undo-marked-phone.webp) | `1c934553` — unchanged byte for byte | the control: no window, so nothing to carry anybody to |
+| [1280 × 900, arrival](2026-10-11-demo-undo-arrival-wide.webp) | `3b34079e` — unchanged byte for byte | |
+| [1280 × 900, after Put it back](2026-10-11-demo-undo-put-it-back-wide.webp) | `0846a2c9` | the layout where the other scroll owns the movement |
+| [the embed at 348 × 465](2026-10-11-demo-undo-embed.webp) | `7c20a054` — unchanged byte for byte | inside somebody else's page |
 
 **The before picture is the one 10 October's report shipped**, and the five
 byte-identical hashes above are why it is a fair comparison: `(demo)` on `main`

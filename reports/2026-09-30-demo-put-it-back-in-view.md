@@ -74,9 +74,9 @@ second telling **on the card below** and this one is on the same card.
 
 | | before (`main` at `f4eca0d`) | after |
 | --- | --- | --- |
-| the payoff frame, wide | `reports/2026-09-30-demo-put-it-back-in-view-before-wide.png` | `reports/2026-09-30-demo-put-it-back-in-view-after-wide.png` |
-| the question, wide — **unchanged** | `reports/2026-09-30-demo-put-it-back-in-view-question-unchanged.png` | same file, byte for byte |
-| the payoff on a phone | — | `reports/2026-09-30-demo-put-it-back-in-view-phone.png` |
+| the payoff frame, wide | `reports/2026-09-30-demo-put-it-back-in-view-before-wide.webp` | `reports/2026-09-30-demo-put-it-back-in-view-after-wide.webp` |
+| the question, wide — **unchanged** | `reports/2026-09-30-demo-put-it-back-in-view-question-unchanged.webp` | same file, byte for byte |
+| the payoff on a phone | — | `reports/2026-09-30-demo-put-it-back-in-view-phone.webp` |
 
 The whole card is now on one screen, end to end: **Applied**, the visitor's own
 sentence in quotation marks, *this change is live on the page beside you*, the

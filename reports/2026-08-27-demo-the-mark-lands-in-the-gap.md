@@ -269,11 +269,11 @@ Nothing blocking. Two carried, unchanged by this run:
 
 | | |
 | --- | --- |
-| [before](2026-08-27-demo-the-mark-lands-in-the-gap-before.png) | `main`, two seconds after **Apply this change**: the chip printed across the testimonial's first line |
-| [after](2026-08-27-demo-the-mark-lands-in-the-gap-after.png) | the same press, same viewport, same scroll, on this branch: the chip in the gap the numbers left |
-| [insert before](2026-08-27-demo-the-mark-lands-in-the-gap-insert-before.png) | *Something new would go here*, inside the closing band's corner |
-| [insert after](2026-08-27-demo-the-mark-lands-in-the-gap-insert-after.png) | the same ask, with the chip in the gap the section would fill |
-| [phone](2026-08-27-demo-the-mark-lands-in-the-gap-phone.png) | 390×844, the applied removal. The gap is narrower and the chip still clears the quote |
+| [before](2026-08-27-demo-the-mark-lands-in-the-gap-before.webp) | `main`, two seconds after **Apply this change**: the chip printed across the testimonial's first line |
+| [after](2026-08-27-demo-the-mark-lands-in-the-gap-after.webp) | the same press, same viewport, same scroll, on this branch: the chip in the gap the numbers left |
+| [insert before](2026-08-27-demo-the-mark-lands-in-the-gap-insert-before.webp) | *Something new would go here*, inside the closing band's corner |
+| [insert after](2026-08-27-demo-the-mark-lands-in-the-gap-insert-after.webp) | the same ask, with the chip in the gap the section would fill |
+| [phone](2026-08-27-demo-the-mark-lands-in-the-gap-phone.webp) | 390×844, the applied removal. The gap is narrower and the chip still clears the quote |
 
 Every pair is the same script driven against two `next build` outputs — this
 branch's and `main`'s — so the only difference in the frame is the change. Not the

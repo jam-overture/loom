@@ -33,7 +33,7 @@ about the reader's own afternoon.
 
 One band, from the maintainer's own sketch of four beats.
 
-![the band, 1280](2026-09-30-marketing-two-things-you-do-wide.png)
+![the band, 1280](2026-09-30-marketing-two-things-you-do-wide.webp)
 
 | file | what changed |
 | --- | --- |

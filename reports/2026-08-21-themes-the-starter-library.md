@@ -7,9 +7,9 @@ The starter theme sets go from **three of each to 21 palettes, 20 font packs and
 as a supported part of the package rather than as the scratch file it started
 as.
 
-![Every palette, every slot, with the pairings that have to hold](2026-08-21-themes-the-starter-library-swatches.png)
+![Every palette, every slot, with the pairings that have to hold](2026-08-21-themes-the-starter-library-swatches.webp)
 
-![Ten combinations of palette, font pack and style preset, on the same page](2026-08-21-themes-the-starter-library-pages.png)
+![Ten combinations of palette, font pack and style preset, on the same page](2026-08-21-themes-the-starter-library-pages.webp)
 
 ## Why this run happened at all, and in someone else's lane
 

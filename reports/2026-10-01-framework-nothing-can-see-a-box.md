@@ -29,7 +29,7 @@ against a production build of `apps/loom` at `2026-10-01T21:23:21.852Z`. The
 shot list is committed beside the pictures, which is the whole point of the
 unit: every number above can be re-taken by anybody.*
 
-![The rail those numbers are about](2026-10-01-framework-nothing-can-see-a-box-the-rail-wide.png)
+![The rail those numbers are about](2026-10-01-framework-nothing-can-see-a-box-the-rail-wide.webp)
 
 ## First, the two things a fresh session needs to know
 

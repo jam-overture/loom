@@ -10,7 +10,7 @@ like this:
 Two answers: it happens, or it is refused. That is the product everybody else
 has.
 
-![The band, with what the five requests actually do](2026-09-09-marketing-the-answer-it-did-not-have-band.png)
+![The band, with what the five requests actually do](2026-09-09-marketing-the-answer-it-did-not-have-band.webp)
 
 Run against this site's own rules, the five answer **three landed, one refused,
 and one held** — *Get to the point* moves a band the rules protect rather than
@@ -18,7 +18,7 @@ destroying it, which is not damage and is not a machine's call either, so it
 stops and asks. A visitor told the page would rearrange on its own pressed the
 first button on the band and got this:
 
-![The same band, one button pressed](2026-09-09-marketing-the-answer-it-did-not-have-held.png)
+![The same band, one button pressed](2026-09-09-marketing-the-answer-it-did-not-have-held.webp)
 
 *Waiting for you.* **I say yes — go ahead.**
 
@@ -161,13 +161,13 @@ should look like.
 - **#224, #231 and #237 are still contained in this branch and can be closed.**
   Restated, unchanged.
 
-![The record page, the same sentence from the same function](2026-09-09-marketing-the-answer-it-did-not-have-record.png)
+![The record page, the same sentence from the same function](2026-09-09-marketing-the-answer-it-did-not-have-record.webp)
 
-![The rules page, counting the same exceptions off the same list](2026-09-09-marketing-the-answer-it-did-not-have-rules.png)
+![The rules page, counting the same exceptions off the same list](2026-09-09-marketing-the-answer-it-did-not-have-rules.webp)
 
-![Under the bold palette](2026-09-09-marketing-the-answer-it-did-not-have-bold.png)
+![Under the bold palette](2026-09-09-marketing-the-answer-it-did-not-have-bold.webp)
 
-![At 390px](2026-09-09-marketing-the-answer-it-did-not-have-phone.png)
+![At 390px](2026-09-09-marketing-the-answer-it-did-not-have-phone.webp)
 
 `scrollWidth` is exactly 1440 at 1440 and exactly 390 at 390, on every page shot.
 

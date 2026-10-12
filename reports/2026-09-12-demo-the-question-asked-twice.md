@@ -246,10 +246,10 @@ Nothing blocking. Three carried:
 
 | | |
 | --- | --- |
-| [before, wide](2026-09-12-demo-the-question-asked-twice-before-record-wide.png) | `main` at 1440×900, the record section alone: the same question twice, two green buttons |
-| [after, wide](2026-09-12-demo-the-question-asked-twice-after-record-wide.png) | the same press on this branch — one card, half the height |
-| [before, phone](2026-09-12-demo-the-question-asked-twice-before-record-phone.png) | 390×844, where the duplicate costs the visitor a second screen of scrolling |
-| [after, phone](2026-09-12-demo-the-question-asked-twice-after-record-phone.png) | the same, once |
+| [before, wide](2026-09-12-demo-the-question-asked-twice-before-record-wide.webp) | `main` at 1440×900, the record section alone: the same question twice, two green buttons |
+| [after, wide](2026-09-12-demo-the-question-asked-twice-after-record-wide.webp) | the same press on this branch — one card, half the height |
+| [before, phone](2026-09-12-demo-the-question-asked-twice-before-record-phone.webp) | 390×844, where the duplicate costs the visitor a second screen of scrolling |
+| [after, phone](2026-09-12-demo-the-question-asked-twice-after-record-phone.webp) | the same, once |
 
 Both pairs are the same script driven against two real `next build` outputs —
 this branch's and `main`'s — so the only difference in the frame is the change.

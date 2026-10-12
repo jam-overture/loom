@@ -7,9 +7,9 @@ constants module, and [0062](../decisions/0062-a-general-arranger-is-named-for-t
 The library goes from **25 to 29**, and for the first time a page can say "these
 two things, side by side" without borrowing a band that means something else.
 
-![The four new primitives under the editorial palette](2026-08-17-primitives-compose-and-arrange-editorial.png)
+![The four new primitives under the editorial palette](2026-08-17-primitives-compose-and-arrange-editorial.webp)
 
-![The same specimen under the bold palette](2026-08-17-primitives-compose-and-arrange-bold.png)
+![The same specimen under the bold palette](2026-08-17-primitives-compose-and-arrange-bold.webp)
 
 ## Why these four
 

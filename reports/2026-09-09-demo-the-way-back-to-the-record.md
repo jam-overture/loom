@@ -245,11 +245,11 @@ Nothing blocking. Two carried, unchanged by this run:
 
 | | |
 | --- | --- |
-| [before](2026-09-09-demo-the-way-back-to-the-record-before.png) | `main`, 390×844, two seconds after **Apply this change**: a chip, a testimonial, and no record anywhere |
-| [after](2026-09-09-demo-the-way-back-to-the-record-after.png) | the same press, same viewport, same scroll, on this branch |
-| [waiting](2026-09-09-demo-the-way-back-to-the-record-waiting.png) | the held state, after a visitor scrolls down to look at the mark themselves |
-| [record](2026-09-09-demo-the-way-back-to-the-record-record.png) | where **Show the record** lands: the top of the card, not its last line |
-| [wide](2026-09-09-demo-the-way-back-to-the-record-wide.png) | 1440×900 on this branch — the bar is in the tree and `display: none`, and nothing about the wide layout moved |
+| [before](2026-09-09-demo-the-way-back-to-the-record-before.webp) | `main`, 390×844, two seconds after **Apply this change**: a chip, a testimonial, and no record anywhere |
+| [after](2026-09-09-demo-the-way-back-to-the-record-after.webp) | the same press, same viewport, same scroll, on this branch |
+| [waiting](2026-09-09-demo-the-way-back-to-the-record-waiting.webp) | the held state, after a visitor scrolls down to look at the mark themselves |
+| [record](2026-09-09-demo-the-way-back-to-the-record-record.webp) | where **Show the record** lands: the top of the card, not its last line |
+| [wide](2026-09-09-demo-the-way-back-to-the-record-wide.webp) | 1440×900 on this branch — the bar is in the tree and `display: none`, and nothing about the wide layout moved |
 
 Every pair is the same script driven against two `next build` outputs — this
 branch's and `main`'s — so the only difference in the frame is the change. Not the

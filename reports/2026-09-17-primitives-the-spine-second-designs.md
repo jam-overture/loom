@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-17 · **Branch:**
 `primitives-37-the-spine-second-designs` · **Section:** §4b
 
-![The six bands at 1280px, under bold](2026-09-17-primitives-the-spine-second-designs-bold-wide.png)
+![The six bands at 1280px, under bold](2026-09-17-primitives-the-spine-second-designs-bold-wide.webp)
 
 ## What this run chose, and why that
 
@@ -182,10 +182,10 @@ than a ruling.
 
 | | |
 | --- | --- |
-| [editorial, 1280](2026-09-17-primitives-the-spine-second-designs-editorial-wide.png) | the four designs with the two canonicals they alternate with |
-| [bold, 1280](2026-09-17-primitives-the-spine-second-designs-bold-wide.png) | the same, dark ground — the chart's gradient columns are the palette, not a colour in the band |
-| [editorial, 390](2026-09-17-primitives-the-spine-second-designs-editorial-phone.png) | `scrollWidth 390 / innerWidth 390` |
-| [bold, 390](2026-09-17-primitives-the-spine-second-designs-bold-phone.png) | `scrollWidth 390 / innerWidth 390` |
+| [editorial, 1280](2026-09-17-primitives-the-spine-second-designs-editorial-wide.webp) | the four designs with the two canonicals they alternate with |
+| [bold, 1280](2026-09-17-primitives-the-spine-second-designs-bold-wide.webp) | the same, dark ground — the chart's gradient columns are the palette, not a colour in the band |
+| [editorial, 390](2026-09-17-primitives-the-spine-second-designs-editorial-phone.webp) | `scrollWidth 390 / innerWidth 390` |
+| [bold, 390](2026-09-17-primitives-the-spine-second-designs-bold-phone.webp) | `scrollWidth 390 / innerWidth 390` |
 
 `cta-signup` photographs **dimmed, with a notice above it**, and that is correct
 rather than a bad shot: `loom.form` disables its own fieldset when no submission

@@ -8,7 +8,7 @@ requests unmerged.
 So this run built no fifth thing. It merged the four into one branch, resolved
 the conflicts by hand, and got it green.
 
-![The front door with all four units on it](2026-09-06-marketing-four-units-held.png)
+![The front door with all four units on it](2026-09-06-marketing-four-units-held.webp)
 
 ---
 
@@ -96,9 +96,9 @@ page, shows itself as data, and counts its own facts.
 the visitor allowed, then an undo **the same rules also hold**, with both records
 in the panel.
 
-![The record of that ask, on /how-it-works](2026-09-06-marketing-four-units-record.png)
+![The record of that ask, on /how-it-works](2026-09-06-marketing-four-units-record.webp)
 
-![The front door, unasked](2026-09-06-marketing-four-units-home.png)
+![The front door, unasked](2026-09-06-marketing-four-units-home.webp)
 
 Measured on the running build, not assumed:
 
@@ -118,7 +118,7 @@ than being re-filed. The fix is in the primitive; the only fix available in this
 lane is to hide the second record on a phone, which hides the thing the band
 exists to show.
 
-![At 390px](2026-09-06-marketing-four-units-phone.png)
+![At 390px](2026-09-06-marketing-four-units-phone.webp)
 
 ## Decisions and findings
 

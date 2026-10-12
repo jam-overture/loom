@@ -12,7 +12,7 @@ it wanted three pages on the same branch before it could be written. They are
 all here now, so this run wrote it: *When something looks wrong*, the eighth and
 last page of **The runtime**.
 
-![Five nodes of a real page, and who put each of them there](2026-09-07-docs-when-something-looks-wrong.png)
+![Five nodes of a real page, and who put each of them there](2026-09-07-docs-when-something-looks-wrong.webp)
 
 ## What shipped
 
@@ -51,7 +51,7 @@ that happening, against a reader clamped to one revision a page.
 `auditSnapshot`, which two pages **named** and none had ever run. Three things
 it can say, and the page shows all three:
 
-![The three answers, each one produced by an audit](2026-09-07-docs-when-something-looks-wrong-audits.png)
+![The three answers, each one produced by an audit](2026-09-07-docs-when-something-looks-wrong-audits.webp)
 
 **Two of those had to be staged, and the page says so in a callout rather than
 letting a reader think the runtime broke a store to make a picture.** Nothing in
@@ -70,7 +70,7 @@ something you can take to whoever ran the update.
 
 The part nobody expects, and the reason this section exists:
 
-![A hold judged against revision 3, answered when head is 4](2026-09-07-docs-when-something-looks-wrong-late.png)
+![A hold judged against revision 3, answered when head is 4](2026-09-07-docs-when-something-looks-wrong-late.webp)
 
 **A change that waited while the page moved on is dead, not stale.** It names
 the revision it was judged against, so it can never apply again; `confirmHeld`

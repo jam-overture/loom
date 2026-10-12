@@ -201,7 +201,23 @@ export const shotListSchema = z.object({
 
 export type ShotList = z.infer<typeof shotListSchema>
 
-const withExtension = (out: string): string => (out.endsWith(".png") ? out : `${out}.png`)
+/**
+ * What the browser writes, which is not what `reports/` stores.
+ *
+ * Since [0264](../../decisions/0264-a-report-s-visual-is-stored-at-the-size-the-page-was-laid-out-at.md)
+ * a visual is committed as WebP, and a shot list names the file it wants to end
+ * up with — 13 of the 41 lists in `reports/` say `.webp` today. Chromium cannot
+ * write one, so the capture is PNG and `pnpm reports:shrink` turns it into the
+ * name the list asked for. Normalising here is what keeps a list that says
+ * `the-record.webp` from producing `the-record.webp.png`, which is what it did
+ * when the storage format changed and this function still only knew one
+ * extension.
+ */
+const CAPTURED = ".png"
+const IMAGE = /\.(?:png|webp|jpe?g)$/i
+
+const withExtension = (out: string): string =>
+  IMAGE.test(out) ? out.replace(IMAGE, CAPTURED) : `${out}${CAPTURED}`
 
 const joinPath = (left: string, right: string): string =>
   `${left.replace(/\/+$/, "")}/${right.replace(/^\/+/, "")}`
@@ -220,7 +236,7 @@ const urlFor = (list: ShotList, path: string): string => {
 }
 
 /** A shot's name is its file without the extension, which is what a report quotes. */
-const nameOf = (out: string): string => out.replace(/\.png$/, "")
+const nameOf = (out: string): string => out.replace(IMAGE, "")
 
 type PlannedApproach = z.infer<typeof approachSchema>
 

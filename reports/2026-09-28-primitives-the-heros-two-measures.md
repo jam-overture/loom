@@ -176,9 +176,9 @@ as fixed before anything was.
 
 | | before | after |
 | --- | --- | --- |
-| `minimal` | ![](2026-09-28-primitives-heros-two-measures-minimal-wide-before.png) | ![](2026-09-28-primitives-heros-two-measures-minimal-wide-after.png) |
-| `editorial` | ![](2026-09-28-primitives-heros-two-measures-editorial-wide-before.png) | ![](2026-09-28-primitives-heros-two-measures-editorial-wide-after.png) |
-| `bold` | ![](2026-09-28-primitives-heros-two-measures-bold-wide-before.png) | ![](2026-09-28-primitives-heros-two-measures-bold-wide-after.png) |
+| `minimal` | ![](2026-09-28-primitives-heros-two-measures-minimal-wide-before.webp) | ![](2026-09-28-primitives-heros-two-measures-minimal-wide-after.webp) |
+| `editorial` | ![](2026-09-28-primitives-heros-two-measures-editorial-wide-before.webp) | ![](2026-09-28-primitives-heros-two-measures-editorial-wide-after.webp) |
+| `bold` | ![](2026-09-28-primitives-heros-two-measures-bold-wide-before.webp) | ![](2026-09-28-primitives-heros-two-measures-bold-wide-after.webp) |
 
 The rules crossing *build web apps.* and crossing the primary button are the
 first finding. The three lines becoming two, and the buttons rising, are the
@@ -188,9 +188,9 @@ second.
 
 | | before | after |
 | --- | --- | --- |
-| `minimal` | ![](2026-09-28-primitives-heros-two-measures-minimal-phone-before.png) | ![](2026-09-28-primitives-heros-two-measures-minimal-phone-after.png) |
-| `editorial` | ![](2026-09-28-primitives-heros-two-measures-editorial-phone-before.png) | ![](2026-09-28-primitives-heros-two-measures-editorial-phone-after.png) |
-| `bold` | ![](2026-09-28-primitives-heros-two-measures-bold-phone-before.png) | ![](2026-09-28-primitives-heros-two-measures-bold-phone-after.png) |
+| `minimal` | ![](2026-09-28-primitives-heros-two-measures-minimal-phone-before.webp) | ![](2026-09-28-primitives-heros-two-measures-minimal-phone-after.webp) |
+| `editorial` | ![](2026-09-28-primitives-heros-two-measures-editorial-phone-before.webp) | ![](2026-09-28-primitives-heros-two-measures-editorial-phone-after.webp) |
+| `bold` | ![](2026-09-28-primitives-heros-two-measures-bold-phone-before.webp) | ![](2026-09-28-primitives-heros-two-measures-bold-phone-after.webp) |
 
 The phone is the control. `64rem` does not bite at 390px, so the measure changes
 nothing there and the only difference is the paint going behind the words —

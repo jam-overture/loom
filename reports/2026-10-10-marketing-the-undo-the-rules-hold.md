@@ -68,12 +68,12 @@ production build at 1280:
 
 | | picture |
 | --- | --- |
-| held on the way out, waiting for a yes | `2026-10-10-marketing-held-change-wide.png` |
-| **held on the way back**, two cards, the second waiting | `2026-10-10-marketing-held-undo-wide.png` |
-| put back, restored | `2026-10-10-marketing-undo-landed-wide.png` |
-| the same held undo on `bold` | `2026-10-10-marketing-held-undo-bold.png` |
-| and on a phone | `2026-10-10-marketing-held-undo-phone.png` |
-| the refusal it pairs with | `2026-10-10-marketing-refused-wide.png` |
+| held on the way out, waiting for a yes | `2026-10-10-marketing-held-change-wide.webp` |
+| **held on the way back**, two cards, the second waiting | `2026-10-10-marketing-held-undo-wide.webp` |
+| put back, restored | `2026-10-10-marketing-undo-landed-wide.webp` |
+| the same held undo on `bold` | `2026-10-10-marketing-held-undo-bold.webp` |
+| and on a phone | `2026-10-10-marketing-held-undo-phone.webp` |
+| the refusal it pairs with | `2026-10-10-marketing-refused-wide.webp` |
 
 **The change is one a reader can see**, which is the part a record-keeping
 demonstration most often skips. Scrolled to the band, with the harness reading

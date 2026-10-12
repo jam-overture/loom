@@ -14,7 +14,7 @@ beginner reaches by leaving Getting started.
 This adds the page that closes the arc: **Your first change**, the last page of
 Getting started, where the reader does the entire loop by hand in the browser.
 
-![The page, the live example, and the pager that now runs build → render → change](2026-09-03-docs-your-first-change.png)
+![The page, the live example, and the pager that now runs build → render → change](2026-09-03-docs-your-first-change.webp)
 
 ## What shipped
 
@@ -46,9 +46,9 @@ The held verdict and the accepted-by-a-person verdict are not screenshots pasted
 into prose — they are the live example responding to the two clicks the page
 tells the reader to make.
 
-![Demote the heading: held, with the delta, the stakes, and the button that answers it](2026-09-03-docs-your-first-change-held.png)
+![Demote the heading: held, with the delta, the stakes, and the button that answers it](2026-09-03-docs-your-first-change-held.webp)
 
-![Apply it anyway: applied, revision 1, and the log says allowed by the reader](2026-09-03-docs-your-first-change-accepted.png)
+![Apply it anyway: applied, revision 1, and the log says allowed by the reader](2026-09-03-docs-your-first-change-accepted.webp)
 
 The second image is the exit condition happening: a change the Gate would not
 apply on its own reaches the page because a person allowed it, and the log

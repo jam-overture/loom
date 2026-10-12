@@ -13,7 +13,7 @@ calls that ceiling **"the one place origin is load-bearing rather than merely
 recorded."** It is the most structurally interesting fact this product has, and
 the site was *stating* it, on a site whose entire method is to show.
 
-![The comparison](2026-09-13-marketing-who-can-ask-comparison.png)
+![The comparison](2026-09-13-marketing-who-can-ask-comparison.webp)
 
 Sixteen marks. Not one of them typed.
 
@@ -208,15 +208,15 @@ file*, and this branch did not.
 
 ## How it looks
 
-![The page, whole](2026-09-13-marketing-who-can-ask.png)
+![The page, whole](2026-09-13-marketing-who-can-ask.webp)
 
 Three palettes and the phone:
 
-![Editorial](2026-09-13-marketing-who-can-ask-editorial.png)
+![Editorial](2026-09-13-marketing-who-can-ask-editorial.webp)
 
-![Bold](2026-09-13-marketing-who-can-ask-bold.png)
+![Bold](2026-09-13-marketing-who-can-ask-bold.webp)
 
-![At 390px](2026-09-13-marketing-who-can-ask-phone.png)
+![At 390px](2026-09-13-marketing-who-can-ask-phone.webp)
 
 `scrollWidth` is exactly 1280 at 1280 and exactly 390 at 390.
 
@@ -228,7 +228,7 @@ words, composed from the same runs — a mitigation rather than a fix. Filed.
 And `/the-rules`, with its questions now in the runtime's order and the hand-off
 to the demonstration under its table:
 
-![The rules](2026-09-13-marketing-who-can-ask-rules.png)
+![The rules](2026-09-13-marketing-who-can-ask-rules.webp)
 
 Every screenshot is in the fallback face rather than Geist, as every set this
 lane has published has been. See the font finding.

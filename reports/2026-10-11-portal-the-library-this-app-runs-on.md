@@ -91,9 +91,9 @@ rule says its files are not all in it.
 
 | | |
 | --- | --- |
-| [**the page, drawn by the library**](2026-10-11-portal-library-page-wide.png) | `1680×1100@2x` — the ramp, the card, the spacing |
-| [**what the app is built from**](2026-10-11-portal-library-app-wide.png) | `1680×1200@2x` — the new reading |
-| [**the thumbnails**](2026-10-11-portal-library-pages-wide.png) | `1680×900@2x` |
+| [**the page, drawn by the library**](2026-10-11-portal-library-page-wide.webp) | `1680×1100@2x` — the ramp, the card, the spacing |
+| [**what the app is built from**](2026-10-11-portal-library-app-wide.webp) | `1680×1200@2x` — the new reading |
+| [**the thumbnails**](2026-10-11-portal-library-pages-wide.webp) | `1680×900@2x` |
 
 ### A reading written for a curated registry became an accusation
 
