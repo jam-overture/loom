@@ -1,3 +1,13 @@
+/*
+ * Every import below comes from `@jam-overture/loom`'s **built** output, not
+ * its source, so this script is only ever as current as `dist/`. That is why
+ * `db:push` builds the package before running it: the maintainer pulled a
+ * branch that renamed a table, ran `db:push`, and got
+ * `does not provide an export named 'ensureApplicationStoreSchema'` — which
+ * says nothing about the missing build and everything about a module that
+ * looked broken. `telemetry:prune` and `signals:collect` import the same way
+ * and now build the same way.
+ */
 import nextEnv from "@next/env"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
