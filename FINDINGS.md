@@ -51287,7 +51287,32 @@ if the answer depends on who ran it.
 ## 2026-10-12 — `TreeStore` can create a page and can never drop one, so the site's pages are stored one way
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/store.ts`)
-· **Status:** open — nothing is broken and no test is failing; found while
+· **Status:** **closed by `framework-68-the-page-put-back`** — the reseed, and
+not a delete. `TreeStore` is still five methods: `planReseed(stored, authored)`
+in `src/store/reseed.ts` produces the operations that carry a stored page to the
+tree its builder produces now, and something else proposes them, so the log
+records *this page was put back* with provenance on it and the undo of a reseed
+is an ordinary revert. Recorded as
+[0262](decisions/0262-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md).
+
+**Your reading of the shape was right and your reason for not asking for a
+delete was the load-bearing half.** Two things the build turned up that the entry
+could not have known. The first is that the four operations are **enough and
+exactly enough**: `configure` reaches a text node's `value` and a slot's `name`,
+so a builder whose headline changed is a one-operation reseed under the same id
+rather than an id 0038 refuses to hand back — the reseed you are most likely to
+want is the one that only just fits. The second is where it stops: a node's
+`kind` and an element's `type` cannot be closed by any plan, so a page differing
+by one of those is reported `unexpressible` naming the nodes, never reseeded into
+something near it. `revives` on the plan is the ids the authored page wants that
+the stored one no longer holds, carried for the Gate rather than judged here.
+
+**Nothing is asked of `(marketing)`.** `stored.ts`'s paragraph — *"there is no way
+back from that today"* — is now out of date in its last sentence and true in
+everything above it; rewording it is yours and there is no hurry. Original status
+below.
+
+**Status (original):** open — nothing is broken and no test is failing; found while
 writing the module that seeds this deployment's three site pages
 
 `TreeStore` is `create`, `head`, `revisions`, `list` and `append`. There is no
