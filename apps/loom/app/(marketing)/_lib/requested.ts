@@ -1,7 +1,14 @@
 import { walkTree, type ElementNode, type LoomNode, type LoomTree } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { ADDRESS_PARAMS, SITE_THEMES, type SiteThemeName } from "./site"
+import { ADDRESS_PARAMS, SITE_ROUTES, SITE_THEMES, type SiteThemeName } from "./site"
+
+/**
+ * The base a path is parsed against. Never read, never in the output — a path
+ * is not a URL, so one has to be borrowed to reach `pathname` and
+ * `searchParams` at all. `.invalid` is reserved by RFC 2606.
+ */
+const NO_ORIGIN = "https://site.invalid"
 
 /**
  * What a request puts back on a stored page.
@@ -47,8 +54,25 @@ import { ADDRESS_PARAMS, SITE_THEMES, type SiteThemeName } from "./site"
  * transform, and that is a bigger decision than a palette.
  */
 
-/** Whether an href points at a page of this site rather than away from it. */
-const isSameSite = (href: string): boolean => href.startsWith("/")
+/**
+ * Whether an href points at a **page of this site**, rather than merely at
+ * something on this origin.
+ *
+ * The difference is the whole of the rule, and the first version of this got
+ * it wrong by testing for a leading slash: `/demo`, `/docs` and `/portal` are
+ * other surfaces of this deployment, served from the same host and built by
+ * other lanes, and a palette this site invented means nothing to any of them.
+ * Putting `?theme=bold` on the way out would be marketing's livery following a
+ * reader into a tool that has never heard of it.
+ *
+ * Caught by `chrome.test.ts`' *carries the visitor's palette on its own links
+ * and not into another surface*, which existed before any of this and was
+ * right about a property that outlived the implementation it was written for.
+ */
+const SITE_PATHS: ReadonlySet<string> = new Set(SITE_ROUTES.map((route) => route.path))
+
+const isSameSite = (href: string): boolean =>
+  href.startsWith("/") && SITE_PATHS.has(new URL(href, NO_ORIGIN).pathname)
 
 /**
  * The palette named in an href, where it names one.
@@ -57,19 +81,34 @@ const isSameSite = (href: string): boolean => href.startsWith("/")
  * never read and never reaches the output.
  */
 const paletteIn = (href: string): string | null =>
-  new URL(href, "https://site.invalid").searchParams.get(ADDRESS_PARAMS.theme)
+  new URL(href, NO_ORIGIN).searchParams.get(ADDRESS_PARAMS.theme)
 
 const withPalette = (href: string, theme: SiteThemeName): string => {
-  const url = new URL(href, "https://site.invalid")
+  const url = new URL(href, NO_ORIGIN)
 
   url.searchParams.set(ADDRESS_PARAMS.theme, theme)
 
   return `${url.pathname}${url.search}${url.hash}`
 }
 
-/** Every element of a tree, rebuilt by a function of itself. */
+/**
+ * Every element of a tree, rebuilt by a function of itself.
+ *
+ * **It descends through nodes that are not elements**, which the first version
+ * did not: it returned any non-element node untouched, and a slot is a node
+ * with children. The site's chrome puts its brand link inside
+ * `buildSlot(ids, "brand", …)`, so the link to `/` was never reached and the
+ * header came back wearing no palette at all — found by `chrome.test.ts`'
+ * *carries the visitor's palette on its own links*, not by reading this.
+ */
 const mapElements = (node: LoomNode, of: (element: ElementNode) => ElementNode): LoomNode => {
-  if (node.kind !== "element") return node
+  const children = "children" in node ? (node.children as readonly LoomNode[] | undefined) : undefined
+
+  if (node.kind !== "element") {
+    return children === undefined
+      ? node
+      : ({ ...node, children: children.map((child) => mapElements(child, of)) } as LoomNode)
+  }
 
   const mapped = of(node)
 
@@ -94,22 +133,22 @@ export const asRequested = (tree: LoomTree, { theme }: RequestedLook): LoomTree 
     if (typeof href === "string" && isSameSite(href)) {
       const named = paletteIn(href)
 
-      if (named === null) {
-        return { ...element, props: { ...element.props, href: withPalette(href, theme) } }
-      }
-
       /*
-       * A switcher link: its palette is its meaning, so the href is left as it
-       * is and the one the reader is wearing is marked.
+       * **A link that already names a palette is left exactly as it is.** Its
+       * palette is its own meaning — the footer's switcher is a row of *this
+       * one means bold* — and overwriting them with the reader's would turn
+       * the switcher into three links to the page you are already on.
        *
-       * **Only `loom.link` is marked.** `current` is that primitive's prop and
-       * the registry is strict, so setting it on a `loom.action` is six
-       * `invalid-props` diagnostics and a band that does not draw — which is
-       * what the first version of this did, and what `pages.test.ts`' *renders
-       * with nothing the runtime could not honor* caught.
+       * An earlier version also marked the one the reader was wearing, with
+       * `current`. It is gone, and the reason is worth keeping: `pages.test.ts`
+       * asserts that re-theming a page *changes only the root's variables*,
+       * which is 0049's claim about what a re-theme is. Marking a different
+       * link per palette changes the markup below the root and breaks it. The
+       * mark was a nicety invented in passing; the invariant is a decision
+       * somebody recorded, and a nicety does not get to quietly cost one.
        */
-      return element.type === "loom.link" && named === theme
-        ? { ...element, props: { ...element.props, current: true } }
+      return named === null
+        ? { ...element, props: { ...element.props, href: withPalette(href, theme) } }
         : element
     }
 

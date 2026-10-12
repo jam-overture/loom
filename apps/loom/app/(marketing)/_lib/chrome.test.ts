@@ -11,19 +11,23 @@ import {
   siteReadingBand,
   type ChromeContext,
 } from "./chrome"
+import { treeIdSchema } from "@jam-overture/loom"
+
+import { asRequested, sameSiteHrefs } from "./requested"
+
 import {
   DEFAULT_THEME,
   DOCS,
   HOME,
   HOW_IT_WORKS,
-  internalHref,
   PORTAL,
   PRODUCT_SURFACES,
   readingNeighbors,
   SITE_ROUTES,
-  surfaceHref,
-  WHAT_YOU_RUN,
+  sitePath,
   type SiteRoute,
+  surfacePath,
+  WHAT_YOU_RUN,
 } from "./site"
 import { wordsOf } from "./words"
 
@@ -120,11 +124,11 @@ describe("the header", () => {
     const hrefs = hrefsIn(header())
 
     for (const route of IN_MENU) {
-      expect(hrefs).toContain(internalHref(ORIGIN, route.path, DEFAULT_THEME))
+      expect(hrefs).toContain(sitePath(route.path))
     }
 
     for (const surface of PRODUCT_SURFACES.filter((one) => one.inMenu)) {
-      expect(hrefs).toContain(surfaceHref(ORIGIN, surface))
+      expect(hrefs).toContain(surfacePath(surface))
     }
   })
 
@@ -154,7 +158,7 @@ describe("the header", () => {
     )
 
     for (const surface of PRODUCT_SURFACES) {
-      expect(menu.includes(surfaceHref(ORIGIN, surface))).toBe(surface.inMenu)
+      expect(menu.includes(surfacePath(surface))).toBe(surface.inMenu)
     }
   })
 
@@ -174,7 +178,7 @@ describe("the header", () => {
     )
 
     for (const route of SITE_ROUTES) {
-      expect(menu.includes(internalHref(ORIGIN, route.path, DEFAULT_THEME))).toBe(route.inMenu)
+      expect(menu.includes(sitePath(route.path))).toBe(route.inMenu)
     }
   })
 
@@ -182,11 +186,11 @@ describe("the header", () => {
     const foot = hrefsIn(footer())
 
     for (const surface of PRODUCT_SURFACES.filter((one) => !one.inMenu)) {
-      expect(foot).toContain(surfaceHref(ORIGIN, surface))
+      expect(foot).toContain(surfacePath(surface))
     }
 
     for (const route of OFF_MENU) {
-      expect(foot).toContain(internalHref(ORIGIN, route.path, DEFAULT_THEME))
+      expect(foot).toContain(sitePath(route.path))
     }
   })
 
@@ -202,7 +206,7 @@ describe("the header", () => {
 
     expect(buttons).toHaveLength(1)
     expect(labelOf(buttons[0] as LoomNode)).toBe("Sign in")
-    expect(hrefsIn(actions)).toEqual([surfaceHref(ORIGIN, PORTAL)])
+    expect(hrefsIn(actions)).toEqual([surfacePath(PORTAL)])
   })
 
   /**
@@ -236,15 +240,48 @@ describe("the header", () => {
     }
   })
 
+  /**
+   * **The palette is put on at render now, not built in.**
+   *
+   * The chrome stores paths with no palette on them, because one stored row is
+   * served from every host and to every reader (0259). `asRequested` puts the
+   * reader's palette back — so the property this test has always been about,
+   * *the look follows you through the site and stops at its edge*, is asserted
+   * where it now happens rather than deleted along with the implementation it
+   * used to describe.
+   *
+   * The second half is the half that caught a bug: the first version of
+   * `asRequested` themed every href beginning with `/`, which is `/demo`,
+   * `/docs` and `/portal` as well — marketing's livery following a reader into
+   * a tool that has never heard of it.
+   */
   it("carries the visitor's palette on its own links and not into another surface", () => {
     const bar = siteHeader(sequentialIdFactory("t"), { ...context(), theme: "bold" })
-    const hrefs = hrefsIn(bar)
 
-    expect(hrefs).toContain(internalHref(ORIGIN, HOW_IT_WORKS.path, "bold"))
+    for (const href of hrefsIn(bar)) {
+      expect(href, href).not.toContain("theme=")
+    }
+
+    const worn = sameSiteHrefs(
+      asRequested(
+        { schemaVersion: 1, treeId: treeIdSchema.parse("t_chrome1"), revision: 0, root: bar as never },
+        { theme: "bold" }
+      )
+    )
+
+    expect(worn.length).toBeGreaterThan(0)
+    for (const href of worn) expect(href, href).toContain("theme=bold")
+
+    const rendered = hrefsIn(
+      asRequested(
+        { schemaVersion: 1, treeId: treeIdSchema.parse("t_chrome1"), revision: 0, root: bar as never },
+        { theme: "bold" }
+      ).root
+    )
 
     for (const surface of PRODUCT_SURFACES) {
-      for (const href of hrefs.filter((one) => new URL(one).pathname === surface.path)) {
-        expect(href).not.toContain("theme=")
+      for (const href of rendered.filter((one) => one.split("?")[0] === surface.path)) {
+        expect(href, href).not.toContain("theme=")
       }
     }
   })
@@ -274,10 +311,10 @@ describe("the footer", () => {
     const hrefs = hrefsIn(footer())
 
     for (const route of SITE_ROUTES) {
-      expect(hrefs).toContain(internalHref(ORIGIN, route.path, DEFAULT_THEME))
+      expect(hrefs).toContain(sitePath(route.path))
     }
     for (const surface of PRODUCT_SURFACES) {
-      expect(hrefs).toContain(surfaceHref(ORIGIN, surface))
+      expect(hrefs).toContain(surfacePath(surface))
     }
   })
 
@@ -295,20 +332,35 @@ describe("the footer", () => {
    * appear on one that is counting would be the thing the note exists to
    * prevent.
    */
-  it("says what is being counted, on a deployment that is counting", () => {
-    const words = wordsOf(counting())
+  /**
+   * **The footer says nothing about counting, on either deployment.**
+   *
+   * It carried a line when counting was on — *this page counts which of its
+   * parts you reach… it never counts who you are* — which was free while every
+   * page was rebuilt per request and stopped being free when the pages became
+   * stored rows (0259): a sentence about the current setting freezes when it is
+   * written and is wrong from the first time anybody changes it.
+   *
+   * Removed on the maintainer's instruction, 12 October, in both states. What
+   * it pointed at is still there: `/what-you-run`'s *what this page counts*
+   * section, which is true of a Loom page whatever a deployment has switched
+   * on. `readers/counting.test.ts` holds that end.
+   */
+  it("says nothing about counting, whether the deployment counts or not", () => {
+    for (const [name, band] of [
+      ["counting", counting()],
+      ["not counting", footer()],
+    ] as const) {
+      const words = wordsOf(band)
 
-    expect(words).toContain("This page counts which of its parts you reach")
-    expect(words).toContain("never counts who you are")
-  })
-
-  it("says nothing about counting on a deployment that counts nobody", () => {
-    expect(wordsOf(footer())).not.toContain("counts which of its parts")
+      expect(words, name).not.toContain("counts which of its parts")
+      expect(words, name).not.toContain("never counts who you are")
+    }
   })
 
   it("points the disclosure at the page that says the rest of it", () => {
     expect(hrefsIn(counting())).toContain(
-      internalHref(ORIGIN, WHAT_YOU_RUN.path, DEFAULT_THEME)
+      sitePath(WHAT_YOU_RUN.path)
     )
   })
 })
@@ -358,7 +410,7 @@ describe("the band that says what to read next", () => {
     for (const neighbor of [before, after]) {
       if (neighbor === undefined) continue
 
-      const href = internalHref(ORIGIN, neighbor.path, DEFAULT_THEME)
+      const href = sitePath(neighbor.path)
       const card = cards.find((found) => found.props["href"] === href)
 
       expect(card, `${route.path} should offer ${neighbor.path}`).toBeDefined()
@@ -366,7 +418,7 @@ describe("the band that says what to read next", () => {
     }
 
     if (onward !== undefined) {
-      expect(hrefsIn(band)).toContain(surfaceHref(ORIGIN, onward))
+      expect(hrefsIn(band)).toContain(surfacePath(onward))
     }
   })
 
@@ -398,7 +450,7 @@ describe("the band that says what to read next", () => {
     const offered = new Set(SITE_ROUTES.flatMap((route) => readingBand(route).flatMap(hrefsIn)))
 
     for (const route of SITE_ROUTES) {
-      expect(offered.has(internalHref(ORIGIN, route.path, DEFAULT_THEME)), route.path).toBe(true)
+      expect(offered.has(sitePath(route.path)), route.path).toBe(true)
     }
   })
 
@@ -408,14 +460,29 @@ describe("the band that says what to read next", () => {
    * is that `?theme=bold` arriving at a surface that does not read it is a
    * parameter that means nothing and looks like it means something.
    */
+  /**
+   * As with the header: the band stores paths with no palette on them and
+   * `asRequested` puts the reader's on at render, so the property is asserted
+   * where it now happens.
+   */
   it("carries the visitor's palette along the site and not into another surface", () => {
-    const along = hrefsIn(bandOn(HOW_IT_WORKS))
+    const band = bandOn(HOW_IT_WORKS)
 
-    expect(along.every((href) => href.includes(`theme=${DEFAULT_THEME}`))).toBe(true)
+    for (const href of hrefsIn(band)) expect(href, href).not.toContain("theme=")
+
+    const worn = sameSiteHrefs(
+      asRequested(
+        { schemaVersion: 1, treeId: treeIdSchema.parse("t_band1"), revision: 0, root: band as never },
+        { theme: DEFAULT_THEME }
+      )
+    )
+
+    expect(worn.length).toBeGreaterThan(0)
+    for (const href of worn) expect(href, href).toContain(`theme=${DEFAULT_THEME}`)
 
     const last = SITE_ROUTES[SITE_ROUTES.length - 1]
 
     expect(last).toBeDefined()
-    expect(hrefsIn(bandOn(last as SiteRoute))).toContain(surfaceHref(ORIGIN, DOCS))
+    expect(hrefsIn(bandOn(last as SiteRoute))).toContain(surfacePath(DOCS))
   })
 })

@@ -32,9 +32,15 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  * It follows that **editing a builder stops changing the site** once that page
  * exists. That is the trade 0259 names and the maintainer took: a page is a
  * thing you govern rather than code you edit, and the way to change it is to
- * ask for a change. A deployment that wants the authored version back deletes
- * the row, which is a deliberate act and not something a deploy does by
- * accident.
+ * ask for a change.
+ *
+ * **There is no way back from that today**, and it is worth saying plainly
+ * rather than implying otherwise: `TreeStore` is `create`, `head`, `revisions`,
+ * `list` and `append`. Nothing deletes. So a deployment that decides it wants
+ * the authored page back cannot drop the row and re-seed — it can only append
+ * its way there, or go to the database by hand. Filed for `Loom framework`
+ * rather than worked around here, because a store contract is not this lane's
+ * to extend.
  *
  * ## The ids are the builders' own
  *

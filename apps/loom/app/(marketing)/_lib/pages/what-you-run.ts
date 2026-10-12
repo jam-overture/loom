@@ -170,7 +170,7 @@ const whatLeaves = (ids: IdFactory, ): LoomNode =>
  * band's anchor. A site that quietly stopped saying what it counts while
  * carrying on counting would be failing at the one thing it sells.
  */
-const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
+const whatIsCounted = (ids: IdFactory, ): LoomNode =>
   splitSection(
     ids,
     { width: "wide", eyebrow: "What this page counts", anchor: COUNTED_ANCHOR },
@@ -190,11 +190,25 @@ const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
        * broadcaster is mounted at all, so the sentence and the behavior cannot
        * disagree.
        */
+      /*
+       * **No claim about whether it is switched on here**, which this sentence
+       * used to make in two versions chosen by `context.counting`.
+       *
+       * The page is stored and served from the store as of 12 October (0259),
+       * so a sentence about the deployment's current setting freezes at the
+       * moment it was written and becomes false the first time somebody
+       * changes it — and *nobody reading this page has been counted* is the
+       * worst of the two to be wrong about. The maintainer's instruction on
+       * 12 October was to take the tracking-status message off the site
+       * whether it is counting or not, and this is the second place it was
+       * being made.
+       *
+       * What stays is the part that is true of a Loom page whatever any
+       * deployment has switched on, which is what this section is for.
+       */
       prose(
         ids,
-        context.counting === true
-          ? "Everything above is happening on the page you are reading. Counting is switched on here."
-          : "It is switched off on this deployment, so nobody reading this page has been counted.",
+        "Everything above is what a page is able to count. Whether it is switched on is a setting of whoever is serving it.",
         { tone: "muted" }
       ),
       prose(
@@ -242,7 +256,7 @@ export const whatYouRunPageTree = (context: PageContext): LoomTree => {
         hero(ids),
         whatYouBring(ids),
         whatLeaves(ids),
-        whatIsCounted(ids, context),
+        whatIsCounted(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),

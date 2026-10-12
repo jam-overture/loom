@@ -7,7 +7,7 @@ import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
 import { heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
 import {
-  askHref,
+  askPath,
   DEMO,
   mechanismHref,
   type SiteThemeName,
@@ -248,7 +248,7 @@ const panelActions = (
   context: SeeItHappenContext,
   record: ChangeRecord
 ): readonly LoomNode[] => {
-  const home = askHref(context.origin, {})
+  const home = askPath()
   /** Everything the visitor has done so far, which every link from here must keep. */
   const sofar = {
     ask: record.ask,
@@ -264,9 +264,7 @@ const panelActions = (
             buildElement(ids, {
               type: "loom.action",
               props: {
-                href: askHref(
-                  context.origin,
-                  record.putBack
+                href: askPath(record.putBack
                     ? { ...sofar, back: true, backApprove: true }
                     : { ...sofar, approve: true }
                 ),
@@ -291,7 +289,7 @@ const panelActions = (
       buildElement(ids, {
         type: "loom.action",
         props: {
-          href: reversible ? askHref(context.origin, { ...sofar, back: true }) : home,
+          href: reversible ? askPath({ ...sofar, back: true }) : home,
           variant: reversible ? "primary" : "secondary",
         },
         children: [buildText(ids, reversible ? "Put it back" : "Start again")],
@@ -516,7 +514,7 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
         buildElement(ids, {
           type: "loom.action",
           props: {
-            href: askHref(context.origin, { ask: ask.id }),
+            href: askPath({ ask: ask.id }),
             variant: context.ask === ask.id ? "primary" : "secondary",
           },
           children: [buildText(ids, ask.label)],

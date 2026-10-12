@@ -827,6 +827,16 @@ export const surfaceHref = (origin: string, surface: Surface): string =>
  *
  * The absolute pair above is untouched and is still what metadata uses.
  */
+/**
+ * The asked route, as a path this site can store.
+ *
+ * `askHref` keeps taking an origin because metadata still needs an absolute
+ * URL. A link **in a tree** never does: the invariant this change establishes
+ * is that no href in a stored page carries a host, so that one row serves
+ * every deployment of this site.
+ */
+export const askPath = (options: AskedFor = {}): string => askedHref("", ASKED_ROUTE.path, options)
+
 export const sitePath = (path: string): string => path
 
 /**

@@ -3,7 +3,10 @@ import { buildElement, buildText, type IdFactory, type LoomNode } from "@jam-ove
 import { ANCHOR } from "../bands"
 import type { ChangeRecord } from "../adapt/record"
 import { action, prose, stack, TERTIARY_CONTROL } from "../nodes"
-import { askHref, type SiteThemeName } from "../site"
+import {
+  askPath,
+  type SiteThemeName,
+} from "../site"
 
 /**
  * The answer, where the visitor lands.
@@ -96,7 +99,7 @@ export type AnswerContext = {
  * and not all of it.
  */
 const where = (context: AnswerContext): string =>
-  askHref(context.origin, {
+  askPath({
     ask: context.record.ask,
     ...(context.approve === true ? { approve: true } : {}),
     ...(context.back === true ? { back: true } : {}),
@@ -105,7 +108,7 @@ const where = (context: AnswerContext): string =>
 
 const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
   const { record } = context
-  const home = askHref(context.origin, {})
+  const home = askPath()
   /** Everything the visitor has done so far, which every link from here must keep. */
   const sofar = {
     ask: record.ask,
@@ -119,9 +122,7 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
       ? action(
           ids,
           "I say yes, go ahead",
-          askHref(
-            context.origin,
-            record.putBack
+          askPath(record.putBack
               ? { ...sofar, back: true, backApprove: true }
               : { ...sofar, approve: true }
           ),
@@ -130,7 +131,7 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
       : action(
           ids,
           reversible ? "Put it back" : "Start again",
-          reversible ? askHref(context.origin, { ...sofar, back: true }) : home,
+          reversible ? askPath({ ...sofar, back: true }) : home,
           { variant: reversible ? "primary" : "secondary" }
         ),
     /**

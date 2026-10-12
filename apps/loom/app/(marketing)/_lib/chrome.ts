@@ -1,7 +1,6 @@
 import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
 import type { AskId } from "./adapt/asks"
-import { COUNTED_ANCHOR } from "./bands"
 import { LICENSE_NOTICE } from "./copy"
 import { action, link, prose, stack } from "./nodes"
 import {
@@ -20,7 +19,6 @@ import {
   type SiteRoute,
   type SiteThemeName,
   surfacePath,
-  WHAT_YOU_RUN,
 } from "./site"
 
 /**
@@ -214,42 +212,6 @@ const linkGroup = (
   })
 
 /**
- * What the foot of the page says when this deployment is counting its readers,
- * and says nowhere when it is not.
- *
- * **It is here because it has to be on every page.** The broadcaster is started
- * by the layout, so whichever of the ten pages somebody landed on is counting
- * them, and the one page *about* counting cannot be the only page that mentions
- * it — a reader who never reaches `/what-readers-do` would never have been told.
- * The footer is the band every page ends with and the one that already carries
- * the things that are true of the whole site.
- *
- * **What it may promise is exactly what `asked.ts` asks for**, which is why the
- * sentence names parts rather than people: the bands a reader reached, how long
- * they were on screen, and what they pressed. The second half is the one worth
- * the words — there is nowhere in a signal to put a name, an account or
- * anything that joins one visit to another (0146), so *never who you are* is a
- * property of the record rather than a setting somebody left switched on.
- *
- * The link is the page that says the rest of it, labeled with its own route
- * label so the two cannot drift apart.
- */
-const countingNote = (ids: IdFactory): LoomNode =>
-  stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
-    prose(
-      ids,
-      "This page counts which of its parts you reach, how long you stay and what you press. It never counts who you are.",
-      { size: "small", tone: "muted" }
-    ),
-    link(
-      ids,
-      "What is counted",
-      `${sitePath(WHAT_YOU_RUN.path)}#${COUNTED_ANCHOR}`,
-      { tone: "muted", scale: "small" }
-    ),
-  ])
-
-/**
  * The band that closes the page, and the only complete map of the product on
  * it.
  *
@@ -308,7 +270,6 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
             external: true,
           }),
         ]),
-        ...(context.counting === true ? [countingNote(ids)] : []),
         /**
          * The re-theme, offered rather than described. Each is an ordinary link
          * to the same route wearing another palette, and what comes back is the

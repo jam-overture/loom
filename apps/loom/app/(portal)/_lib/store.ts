@@ -1,3 +1,4 @@
+import { ensureSiteSeeded } from "@/app/(marketing)/_lib/stored"
 import { appStore } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
@@ -13,8 +14,10 @@ import { seedTree } from "./seed"
  * store module has the argument.
  *
  * **What stayed here is the seed**, because what a store should contain is not
- * a property of the store. This is the portal's demonstration page; the three
- * pages the site serves are seeded by `(marketing)`, where they are authored.
+ * a property of the store. The demonstration page is this lane's and is
+ * authored next door in `./seed.ts`; the three pages the site serves are
+ * `(marketing)`'s and are authored there. This module seeds both, and the
+ * reason is below.
  */
 export const portalStore = appStore
 
@@ -24,8 +27,34 @@ type Carrier = { [SEEDING_KEY]?: Promise<void> }
 
 const carrier = globalThis as unknown as Carrier
 
+/**
+ * Put this deployment's pages in the store, once per process.
+ *
+ * ## Why the site's pages are seeded from here
+ *
+ * `(marketing)` seeds its three pages when one of them is requested, which is
+ * correct and is not sufficient: **it means the portal shows an empty shelf
+ * until somebody visits the public site.** A maintainer who deploys, signs in
+ * and looks at *Your pages* is doing the one thing most likely to come first,
+ * and what they would have seen is the demonstration page alone — which reads
+ * as *the site is not hooked up*, not as *nobody has been to the site yet*.
+ *
+ * That was found by photographing this screen rather than by reasoning about
+ * it: every test passed, the site served from the store, and the portal
+ * listing was still wrong, because no test and no type knows the order a
+ * person does things in.
+ *
+ * So both seeds run here, and `(marketing)` keeps its own call: whichever
+ * surface is reached first seeds the store, and the other finds it done.
+ * Neither overwrites anything — both are create-if-absent — so running both on
+ * every portal screen costs one refused write per process and buys an order
+ * nobody has to know about.
+ */
 export const ensureSeeded = async (): Promise<void> => {
-  carrier[SEEDING_KEY] ??= portalStore.create(seedTree()).then(() => undefined)
+  carrier[SEEDING_KEY] ??= Promise.all([
+    portalStore.create(seedTree()),
+    ensureSiteSeeded(),
+  ]).then(() => undefined)
 
   await carrier[SEEDING_KEY]
 }
