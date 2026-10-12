@@ -50986,3 +50986,57 @@ shape, and the first that fails a test.
 which is portable to every git this decade and produces exactly the same repository. A skip
 guarded on the git version would also work and is worse: a test that silently does not run on
 the maintainer's machine is how the next portability gap goes unnoticed for a month.
+
+---
+## 2026-10-12 — a test reads a gitignored build artefact, so `pnpm verify` is red on `main` for anybody who has not run `pnpm package:primitives`
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/facts.test.ts`) · **Status:** open — **`main`
+is red**, and it is two tests rather than anything structural
+
+`facts.test.ts`' *what the site tells a stranger to install* reads two
+manifests to check the site names the packages this repository publishes:
+
+```ts
+nameOf("../../../../../package.json")
+nameOf("../../../../../packages/primitives/package.json")
+```
+
+The first exists. **The second is generated and gitignored** —
+`.gitignore:23` is `packages/*/package.json`, and the file is assembled by
+`pnpm package:primitives` from `tools/package/manifest.ts`, which is where the
+name `@jam-overture/loom-primitives` is actually authored. `packages/primitives/`
+holds a committed `README.md` and nothing else.
+
+So the test passes on a machine that has run the packaging step at some point
+and fails on every fresh clone:
+
+```
+Error: ENOENT: no such file or directory, open '…/packages/primitives/package.json'
+```
+
+Confirmed red on `origin/main` at `4ba67f8` with nothing of this lane's in the
+tree, which is how it was found: it arrived in a merge of `main` into an open
+portal branch and the branch was blamed first.
+
+**A proposed patch, because the rule says not to widen another lane's PR with
+one.** Read the name from the module that authors it rather than from the
+artefact it is assembled into:
+
+```ts
+import { PRIMITIVES_MANIFEST } from "../../../../../tools/package/manifest"
+//  … nameOf("../../../../../package.json"), PRIMITIVES_MANIFEST.name
+```
+
+That is the same move this repository keeps making and is the reason the test
+is wrong rather than unlucky: **a second copy of a fact fails when the two
+disagree, and an artefact is a copy.** `tools/package/manifest.ts` already
+exists to be *"data rather than a file somebody edits by hand"*, in its own
+words, so reading it is what the test meant.
+
+**It is the second entry in two days about `pnpm verify` depending on machine
+state**, after the 11 October one about six specimen tests assuming a newer
+`git` than the maintainer's. Both make the gate pass here and fail for him,
+which is the one failure mode a merge gate cannot have — `docs/routines.md`
+gives the gate four surfaces to protect and neither of these protects anything
+if the answer depends on who ran it.
