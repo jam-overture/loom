@@ -131,6 +131,36 @@ export const PLACEHOLDER_COPY = {} as const
  */
 export const LICENSE_NOTICE = "Loom is open source under the MIT license."
 
+/**
+ * The two packages, and the line a reader is meant to type.
+ *
+ * The front door asks for an install as of 11 October, and the ask is two
+ * package names — which makes this the one string on this site that is **not
+ * copy**. Nobody reads it. It is pasted into a terminal, so a word in it is
+ * correct or it is broken, and none of the rules this file exists to enforce
+ * apply to it: it cannot be said more plainly, it cannot be said in the
+ * reader's words, and `@jam-overture/loom-primitives` carries one of the
+ * reserved words above in the middle of it because that is the package's name.
+ *
+ * **That last fact is why these are a constant rather than a literal in the
+ * page.** `voice.test.ts` sweeps every word the site serves for the reserved
+ * vocabulary, and it found `primitives` inside the package name on the first
+ * run after the band was written — correctly, because the sweep reads text
+ * nodes and a command is a text node. The exemption is this list, stripped
+ * before the sweep: a span that is exactly a published package name is not the
+ * site using the word, and nothing else is exempt. A band that wrote
+ * *primitive* in a sentence is still red.
+ *
+ * `facts.test.ts` holds the names against the two manifests the repository
+ * publishes from, so the day a package is renamed, or a third one becomes
+ * required, the page that tells a stranger what to install goes red rather than
+ * quietly printing a line that installs nothing.
+ */
+export const PACKAGES: readonly string[] = ["@jam-overture/loom", "@jam-overture/loom-primitives"]
+
+/** The ask on the front door, as one line. */
+export const INSTALL_COMMAND = `npm install ${PACKAGES.join(" ")}`
+
 export type PlaceholderKey = keyof typeof PLACEHOLDER_COPY
 
 /** The list, for the test and for the report. */
