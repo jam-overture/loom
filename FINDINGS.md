@@ -524,25 +524,64 @@ editing the file, the index, every citation in `src/`, every mention in
 repository, done *after* a lane has written and verified its branch, under a
 merge it did not plan for — the worst available moment for it.
 
-### What would cost less
+### I filed this as new, and it is the tenth time
 
-A check that reads the **open pull requests** rather than one tree, and reports
-a number claimed by more than one open branch. The information is public and
-cheap: the record filenames each open pull request adds. Run it in
-`pnpm decisions:index` or beside it, and the second branch to claim a number
-learns while moving still costs one filename and one line.
+**Corrected 12 October, by me, after reading my own file properly.** Everything
+above is true and almost none of it is news. This file already holds entries on
+record-number clashes dated **19 August** (0068 on two branches), **23 August**,
+**24 August** (*"hit by this lane for the second day running"*), **25 August**
+(*"fifth occurrence"* — so there were four before the entries start naming
+themselves), **29 August** (*"eight open branches now carry a record numbered
+0096"*), **31 August**, **1 October** (0209, *"the second consecutive number
+this has happened to"*), and **8 October** (0240 and 0241, four branches, two
+numbers) — that last one filed by this lane and closed by `Loom merge` three
+days before I filed this one as a discovery.
 
-It cannot be `pnpm verify`'s to fail on. Verify runs offline and must; a network
-call that fails closed would make every lane's merge gate depend on GitHub being
-up. **Reported and never fatal**, which is the shape 0097 already gives a hole.
+I searched this file for findings *owned by* me before choosing work. I did not
+search it for the thing I was about to file. A 2.7 MB ledger that nobody greps
+before adding to it will grow a tenth copy of anything, which is its own small
+finding and is left here as one.
 
-### What is not asked for
+### The ask I made was the wrong one, and 0097 already says so
 
-Not an allocator and not a lock. Seven routines coordinating through a shared
-counter is a bigger mechanism than the problem, and the convention — take the
-next free number, whoever lands first keeps it — is right. This asks only that
-*free* become checkable against the branches that are actually open, which is
-the one fact the convention rests on and the one thing no tool here can see.
+I asked for a check over the open pull requests. **That is a weaker version of
+an option 0097 considered and set aside**, and its reasoning is better than
+mine:
+
+> **Reserve a range per lane in the tool** … Rejected because the tool would
+> then be enforcing a governance rule nobody has written, and encoding a lane
+> list in `tools/` duplicates the one in `docs/routines.md` that lanes are
+> actually defined by. The severity change is enough: **with it, the convention
+> can be written down and followed with no further code.**
+
+So the remedy has been available since 31 August and it is **not code**. It is a
+paragraph in `docs/routines.md` giving each lane a band of numbers. 0097 did the
+engineering to make it possible — a hole stopped being fatal precisely so that a
+lane could skip to its own range — and then stopped, correctly, at the line a
+routine may not cross. The 31 August entry says it in as many words:
+
+> A per-lane number range is now *possible* — the tool was the only thing
+> preventing it — and it is a paragraph in `docs/routines.md`, **which a routine
+> may not write for itself.**
+
+`docs/routines.md` has no such paragraph today. Six weeks and at least four more
+collisions have passed.
+
+**Withdrawn:** the `tools/` check. It would detect, at some cost and a first
+network call in `tools/`, what a written convention would prevent for free.
+
+**What is actually asked, and it is @jonathanbravecredit's alone:** one
+paragraph in `docs/routines.md` assigning each lane a range. Nothing else is
+needed — no code, no tool, no record beyond the one that already exists.
+
+### What is still not asked for
+
+Not an allocator, not a lock, and — now — not a tool at all. 0097 also weighed
+**date-based record ids**, which *"cannot collide at all … the only option here
+that solves the problem outright"*, and left it available as `docs/routines.md`'s
+to take. That is the larger of the two paragraphs available and it costs a rename
+of every record and every citation. The per-lane range is the cheap one. Either
+is the maintainer's; neither is a routine's.
 
 ### Why it is a second pull request rather than part of #575
 
