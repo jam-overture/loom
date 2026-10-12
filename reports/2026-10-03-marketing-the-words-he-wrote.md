@@ -4,7 +4,7 @@ Four copy changes the maintainer gave as a table of *current* against *change
 to*, applied to the front door. Three of the four are his words verbatim; two
 carry a one-word edit, and both are marked below.
 
-![the front door](2026-10-03-his-words-after-hero.png)
+![the front door](2026-10-03-his-words-after-hero.webp)
 
 ---
 

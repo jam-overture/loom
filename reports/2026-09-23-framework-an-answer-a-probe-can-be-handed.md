@@ -84,9 +84,9 @@ sources answer with.
 
 | | |
 | --- | --- |
-| [**Before**](2026-09-23-framework-an-answer-a-probe-can-be-handed-before.png) | four states, one sentence. *This list could not be loaded.* four times |
-| [**After**](2026-09-23-framework-an-answer-a-probe-can-be-handed-after.png) | rows, the region the tree gave for an answer of none, *could not be loaded*, and *could not be shown* |
-| [The same on a phone](2026-09-23-framework-an-answer-a-probe-can-be-handed-phone.png) | 390px |
+| [**Before**](2026-09-23-framework-an-answer-a-probe-can-be-handed-before.webp) | four states, one sentence. *This list could not be loaded.* four times |
+| [**After**](2026-09-23-framework-an-answer-a-probe-can-be-handed-after.webp) | rows, the region the tree gave for an answer of none, *could not be loaded*, and *could not be shown* |
+| [The same on a phone](2026-09-23-framework-an-answer-a-probe-can-be-handed-phone.webp) | 390px |
 
 The before frame is the photograph every lane that has tried to look at a bound
 primitive has taken, and it is why one of them stopped using this harness.

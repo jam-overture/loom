@@ -12,10 +12,10 @@ browser, against a page **a live model changed five times during this run**:
 
 | | |
 | --- | --- |
-| [Both halves, populated — one change waiting, four made without asking](2026-09-07-portal-what-loom-did-without-you.png) | 1280px |
-| [Caught up, and still with something to read](2026-09-07-portal-what-loom-did-without-you-caught-up.png) | 1280px |
-| [The record, one click down](2026-09-07-portal-what-loom-did-without-you-record.png) | 1280px |
-| [a phone](2026-09-07-portal-what-loom-did-without-you-phone.png) | 390px |
+| [Both halves, populated — one change waiting, four made without asking](2026-09-07-portal-what-loom-did-without-you.webp) | 1280px |
+| [Caught up, and still with something to read](2026-09-07-portal-what-loom-did-without-you-caught-up.webp) | 1280px |
+| [The record, one click down](2026-09-07-portal-what-loom-did-without-you-record.webp) | 1280px |
+| [a phone](2026-09-07-portal-what-loom-did-without-you-phone.webp) | 390px |
 
 **How honest these are.** `LOOM_ANTHROPIC_API_KEY` is present in this
 environment, so nothing was staged. Five requests were typed into the real

@@ -11,7 +11,7 @@ is about a *part* of the thing, and a reader who had understood all five still
 could not say whether this is a library they add to something, a service they
 point something at, or a site somebody else hosts for them.
 
-![The page, whole](2026-09-11-marketing-what-you-run.png)
+![The page, whole](2026-09-11-marketing-what-you-run.webp)
 
 ---
 
@@ -216,11 +216,11 @@ link moved.
 
 Three palettes, and the phone.
 
-![Bold](2026-09-11-marketing-what-you-run-bold.png)
+![Bold](2026-09-11-marketing-what-you-run-bold.webp)
 
-![Editorial](2026-09-11-marketing-what-you-run-editorial.png)
+![Editorial](2026-09-11-marketing-what-you-run-editorial.webp)
 
-![At 390px](2026-09-11-marketing-what-you-run-phone.png)
+![At 390px](2026-09-11-marketing-what-you-run-phone.webp)
 
 `scrollWidth` is exactly 1440 at 1440 and exactly 390 at 390.
 

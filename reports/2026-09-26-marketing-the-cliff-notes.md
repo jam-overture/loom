@@ -29,7 +29,7 @@ gave rather than of a target I set: he asked for three pages to be folded into
 one, and once the mechanism was in one place the four remaining pages about it
 had nothing left to say. Every band is one line from coming back.
 
-![the whole mechanism, one page](2026-09-26-marketing-the-cliff-notes-how-it-works-full.png)
+![the whole mechanism, one page](2026-09-26-marketing-the-cliff-notes-how-it-works-full.webp)
 
 ---
 
@@ -47,7 +47,7 @@ short band each for the four questions the retired pages answered at length, the
 **`/what-you-run` — the one buying question.** It runs in your app, you bring
 your own components, one request leaves when somebody asks. 486 words.
 
-![what you run](2026-09-26-marketing-the-cliff-notes-what-you-run-full.png)
+![what you run](2026-09-26-marketing-the-cliff-notes-what-you-run-full.webp)
 
 ### What was deleted
 

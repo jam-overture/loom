@@ -10,10 +10,10 @@ against a live model:
 
 | | |
 | --- | --- |
-| [the screen as it arrives](2026-08-24-portal-what-loom-has-been-doing.png) | live |
-| [the same screen with every disclosure opened](2026-08-24-portal-what-loom-has-been-doing-open.png) | live |
-| [a fresh deployment, before anyone has asked for anything](2026-08-24-portal-what-loom-has-been-doing-empty.png) | live |
-| [a phone](2026-08-24-portal-what-loom-has-been-doing-phone.png) | live |
+| [the screen as it arrives](2026-08-24-portal-what-loom-has-been-doing.webp) | live |
+| [the same screen with every disclosure opened](2026-08-24-portal-what-loom-has-been-doing-open.webp) | live |
+| [a fresh deployment, before anyone has asked for anything](2026-08-24-portal-what-loom-has-been-doing-empty.webp) | live |
+| [a phone](2026-08-24-portal-what-loom-has-been-doing-phone.webp) | live |
 
 **Nothing was staged and no fixture was substituted.** The two episodes in the
 pictures are two real asks typed into the real prompt box on `/portal/pages/t_seed1`,

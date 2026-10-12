@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-15 · **Branch:**
 `primitives-35-a-table-a-phone-can-read` · **Section:** §4b
 
-![The three tables at 390px, under editorial](2026-09-15-primitives-a-table-a-phone-can-read-editorial-phone.png)
+![The three tables at 390px, under editorial](2026-09-15-primitives-a-table-a-phone-can-read-editorial-phone.webp)
 
 ## Why this and not more primitives
 

@@ -29,11 +29,11 @@ were being asked *sixth*, as the policy's own words about its own thresholds.
 
 **Closed** — what a person meets now:
 
-![The held-proposal card, closed](2026-08-19-portal-in-plain-language-card-closed.png)
+![The held-proposal card, closed](2026-08-19-portal-in-plain-language-card-closed.webp)
 
 **Open** — one click on *The whole record*, and nothing has been lost:
 
-![The held-proposal card, with the whole record disclosed](2026-08-19-portal-in-plain-language-card-open.png)
+![The held-proposal card, with the whole record disclosed](2026-08-19-portal-in-plain-language-card-open.webp)
 
 The proposal, both axes the Gate weighed, the rule code, the policy id, the
 fingerprint and the inverse are all still there — `stakes-above-ceiling`,
@@ -47,7 +47,7 @@ faithful live render. The review-queue card is covered by its own rendering test
 
 The pages list, which is where a new person starts:
 
-![The pages list](2026-08-19-portal-in-plain-language-pages.png)
+![The pages list](2026-08-19-portal-in-plain-language-pages.webp)
 
 ## The high-schooler test, applied to each screen I shipped
 

@@ -4,14 +4,14 @@
 **Branch:** `framework-55-the-word-the-tree-wrote`, cut from `main` at `6686895`. Not stacked.
 **Records:** [0234](../decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md). **None superseded.**
 
-![Three triggers of one primitive, two named by their nodes and one by the library](2026-10-05-framework-the-word-the-tree-wrote-presented.png)
+![Three triggers of one primitive, two named by their nodes and one by the library](2026-10-05-framework-the-word-the-tree-wrote-presented.webp)
 
 *One primitive, three nodes, hydrated and photographed by the harness. The first
 two triggers carry the words their nodes carry. The third node names nothing and
 is announced by the string the primitive declared. The cross inside the open
 panel is still `Close`, because this primitive did not say its cross was named
 from the page. The arrival shot is
-[beside it](2026-10-05-framework-the-word-the-tree-wrote-settled.png).*
+[beside it](2026-10-05-framework-the-word-the-tree-wrote-settled.webp).*
 
 ---
 

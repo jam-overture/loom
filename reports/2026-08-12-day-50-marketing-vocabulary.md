@@ -5,8 +5,8 @@ follow-ups you approved on #68.
 
 **Branch:** `day-50-marketing-vocabulary` (→ `main`).
 
-**Screenshots:** [editorial](2026-08-12-day-50-marketing-vocabulary-editorial.png) ·
-[bold](2026-08-12-day-50-marketing-vocabulary-bold.png) — the same tree, both
+**Screenshots:** [editorial](2026-08-12-day-50-marketing-vocabulary-editorial.webp) ·
+[bold](2026-08-12-day-50-marketing-vocabulary-bold.webp) — the same tree, both
 starter palettes, nothing changed but three ids on the root.
 
 ---

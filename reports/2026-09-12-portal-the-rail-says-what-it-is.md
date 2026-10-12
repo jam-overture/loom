@@ -11,11 +11,11 @@ browser:
 
 | | |
 | --- | --- |
-| [The page](2026-09-12-portal-the-rail-says-what-it-is-page.png) | 1280px |
-| [The page, with the card picked](2026-09-12-portal-the-rail-says-what-it-is-picked.png) | 1280px — *Just this part: Card `n_seed9`* |
-| [The rail, with a part picked](2026-09-12-portal-the-rail-says-what-it-is-rail.png) | 1280px |
-| [The same rail, both disclosures open](2026-09-12-portal-the-rail-says-what-it-is-rail-open.png) | 1280px — this is where `loom.card` went |
-| [a phone](2026-09-12-portal-the-rail-says-what-it-is-phone.png) | 390px |
+| [The page](2026-09-12-portal-the-rail-says-what-it-is-page.webp) | 1280px |
+| [The page, with the card picked](2026-09-12-portal-the-rail-says-what-it-is-picked.webp) | 1280px — *Just this part: Card `n_seed9`* |
+| [The rail, with a part picked](2026-09-12-portal-the-rail-says-what-it-is-rail.webp) | 1280px |
+| [The same rail, both disclosures open](2026-09-12-portal-the-rail-says-what-it-is-rail-open.webp) | 1280px — this is where `loom.card` went |
+| [a phone](2026-09-12-portal-the-rail-says-what-it-is-phone.webp) | 390px |
 
 ---
 

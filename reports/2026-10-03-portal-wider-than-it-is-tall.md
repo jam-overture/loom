@@ -59,8 +59,8 @@ their real reads, naming and rendering.
 
 | | before | after |
 | --- | --- | --- |
-| **the front door** | [2150px, two columns](2026-10-03-portal-vertical-before-front.png) | [**1774px**, three columns, two-column lower half](2026-10-03-portal-vertical-after-front.png) |
-| **your pages** | [958px, a column of names at 576px](2026-10-03-portal-vertical-before-pages.png) | [**1028px**, a full-width grid of drawn pages](2026-10-03-portal-vertical-after-pages.png) |
+| **the front door** | [2150px, two columns](2026-10-03-portal-vertical-before-front.webp) | [**1774px**, three columns, two-column lower half](2026-10-03-portal-vertical-after-front.webp) |
+| **your pages** | [958px, a column of names at 576px](2026-10-03-portal-vertical-before-pages.webp) | [**1028px**, a full-width grid of drawn pages](2026-10-03-portal-vertical-after-pages.webp) |
 
 ---
 

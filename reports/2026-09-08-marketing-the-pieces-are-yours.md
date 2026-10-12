@@ -10,7 +10,7 @@ breath — so the one question that decides whether a developer can use Loom at
 all was left for the reader to guess at: **do I have to rebuild my page in
 somebody else's components?**
 
-![The card on the left, and everything the AI is told about it](2026-09-08-marketing-the-pieces-are-yours-specimen.png)
+![The card on the left, and everything the AI is told about it](2026-09-08-marketing-the-pieces-are-yours-specimen.webp)
 
 The answer is no, it has always been no, and four pages did not say it. This run
 is the fifth page: `/your-components`.
@@ -58,7 +58,7 @@ claim.
 
 ### The front door stopped leaving the reader to reconcile it
 
-![The band where the misreading happened](2026-09-08-marketing-the-pieces-are-yours-caption.png)
+![The band where the misreading happened](2026-09-08-marketing-the-pieces-are-yours-caption.webp)
 
 The smallest available repair. Both sentences stay — they were never wrong. The
 stat's caption changed from *“Each one takes its colours and type from whatever
@@ -176,11 +176,11 @@ house palette and the bold one.
   `rgb(255,212,0)`. It reads as low contrast in a scaled-down screenshot and is
   not.
 
-![The page, whole](2026-09-08-marketing-the-pieces-are-yours.png)
+![The page, whole](2026-09-08-marketing-the-pieces-are-yours.webp)
 
-![The same page under the bold palette](2026-09-08-marketing-the-pieces-are-yours-bold.png)
+![The same page under the bold palette](2026-09-08-marketing-the-pieces-are-yours-bold.webp)
 
-![At 390px](2026-09-08-marketing-the-pieces-are-yours-phone.png)
+![At 390px](2026-09-08-marketing-the-pieces-are-yours-phone.webp)
 
 No colour is named anywhere in the diff. No primitive was added and no local
 component exists.

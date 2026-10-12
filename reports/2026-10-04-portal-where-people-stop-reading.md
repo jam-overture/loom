@@ -120,8 +120,8 @@ list is beside this report.
 
 | | |
 | --- | --- |
-| [**the reader screen**](2026-10-04-portal-stop-reading-wide.png) | `1680×1000@2x`, full page |
-| [**the same, on a phone**](2026-10-04-portal-stop-reading-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**the reader screen**](2026-10-04-portal-stop-reading-wide.webp) | `1680×1000@2x`, full page |
+| [**the same, on a phone**](2026-10-04-portal-stop-reading-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 ---
 

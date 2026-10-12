@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-14 · **Branch:**
 `primitives-31-tier-a-finishes` · **Section:** §4b
 
-![The four things this run built, under bold](2026-09-14-primitives-tier-a-finishes-bold-wide.png)
+![The four things this run built, under bold](2026-09-14-primitives-tier-a-finishes-bold-wide.webp)
 
 ## The maintainer's finding, first
 

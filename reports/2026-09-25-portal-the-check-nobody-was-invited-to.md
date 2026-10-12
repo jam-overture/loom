@@ -21,11 +21,11 @@ maintainer).
 
 | | |
 | --- | --- |
-| [The front door, with a third question on it](2026-09-25-portal-the-check-nobody-was-invited-to-wide.png) | 1280px — four pages, one of which a checkup can speak for |
-| [The same screen on a phone](2026-09-25-portal-the-check-nobody-was-invited-to-phone.png) | 390px |
-| [With the runtime's account open](2026-09-25-portal-the-check-nobody-was-invited-to-open.png) | 1280px — the seed, the fold, the snapshot and the summed revisions, one click down |
-| [A deployment nothing has been accepted on](2026-09-25-portal-the-check-nobody-was-invited-to-fresh.png) | 1280px — one page, nothing to replay, and the check still worth running |
-| [A deployment nothing can be checked on](2026-09-25-portal-the-check-nobody-was-invited-to-nothing.png) | 1280px — the arm that must not read as a milder version of the one above it |
+| [The front door, with a third question on it](2026-09-25-portal-the-check-nobody-was-invited-to-wide.webp) | 1280px — four pages, one of which a checkup can speak for |
+| [The same screen on a phone](2026-09-25-portal-the-check-nobody-was-invited-to-phone.webp) | 390px |
+| [With the runtime's account open](2026-09-25-portal-the-check-nobody-was-invited-to-open.webp) | 1280px — the seed, the fold, the snapshot and the summed revisions, one click down |
+| [A deployment nothing has been accepted on](2026-09-25-portal-the-check-nobody-was-invited-to-fresh.webp) | 1280px — one page, nothing to replay, and the check still worth running |
+| [A deployment nothing can be checked on](2026-09-25-portal-the-check-nobody-was-invited-to-nothing.webp) | 1280px — the arm that must not read as a milder version of the one above it |
 
 **How the pictures were taken, and the standing finding this half-closes.**
 Three memory stores built with the published builders onto

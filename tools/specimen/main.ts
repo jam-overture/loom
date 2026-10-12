@@ -10,6 +10,8 @@ import { describeArgsError, parseSpecimenArgs } from "./args.js"
 import { describeBaselineError, digestShots, photographBaseline } from "./baseline.js"
 import { browsersRoot, describeBrowserError, locateChromium } from "./browser.js"
 import { bundleSpecimen, describeBundleError } from "./bundle.js"
+import { governs, REMEMBER_TO_STORE } from "../reports/stored.js"
+
 import { captureShots, describeShot, type ShotResult } from "./capture.js"
 import { SPECIMEN_BUNDLE_FILE } from "./page.js"
 import { isLive, planShots, shotsAt } from "./plan.js"
@@ -111,6 +113,7 @@ const photograph = async (): Promise<readonly ShotResult[]> => {
 const results = await photograph()
 
 for (const result of results) process.stdout.write(`${describeShot(result)}\n`)
+if (results.length > 0 && governs(outDir)) process.stdout.write(`\n${REMEMBER_TO_STORE}\n`)
 process.exitCode = results.some((result) => result.overflowed) ? 1 : 0
 
 /**

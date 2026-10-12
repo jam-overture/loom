@@ -76,20 +76,20 @@ per theme and a link correct on `minimal` says nothing about `bold`.
 
 ## What it looks like
 
-![the closing band, 1280](2026-10-07-marketing-claim-links-wide.png)
+![the closing band, 1280](2026-10-07-marketing-claim-links-wide.webp)
 
 The link is on the words the sentence already ended on. It wraps across the
 line break the way a phrase in a paragraph should, which is the property
 `loom.inline-link` exists for and the reason this is not a control under the
 paragraph.
 
-![the same band on bold](2026-10-07-marketing-claim-links-bold.png)
+![the same band on bold](2026-10-07-marketing-claim-links-bold.webp)
 
 **No hard-coded colour.** On `bold` the phrase takes that palette's muted
 foreground over its accent band, and the underline comes with it. Measured at
 `110x20` on both `editorial` and `bold`, against `107x21` at 390.
 
-![at 390](2026-10-07-marketing-claim-links-phone.png)
+![at 390](2026-10-07-marketing-claim-links-phone.webp)
 
 | | |
 | --- | --- |

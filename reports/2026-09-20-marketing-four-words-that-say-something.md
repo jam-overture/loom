@@ -4,7 +4,7 @@ This run began by opening the front door and looking at it, which is the
 instrument this lane had not used for a while. Three things came back, and only
 one of them was mine to fix.
 
-![the band, 1280×900, minimal](2026-09-20-marketing-four-words-that-say-something-band.png)
+![the band, 1280×900, minimal](2026-09-20-marketing-four-words-that-say-something-band.webp)
 
 ---
 
@@ -92,7 +92,7 @@ third one went with it.
 
 ### The hero paints its backdrop on top of its own headline
 
-![the front door under `bold`, 1280×900](2026-09-20-marketing-four-words-that-say-something-paint-over-copy.png)
+![the front door under `bold`, 1280×900](2026-09-20-marketing-four-words-that-say-something-paint-over-copy.webp)
 
 The grid's 1px lines cross *components,* and *Loom creates* and read as a
 strikethrough, and they cross the primary button too. Every paint in
@@ -156,7 +156,7 @@ the one sentence on the site that says what the product does.
 
 | | |
 | --- | --- |
-| ![bold](2026-09-20-marketing-four-words-that-say-something-band-bold.png) | on a phone the grid collapses to one column, four terms down the page |
+| ![bold](2026-09-20-marketing-four-words-that-say-something-band-bold.webp) | on a phone the grid collapses to one column, four terms down the page |
 
 `scrollWidth 1280 / innerWidth 1280` wide and `390 / 390` on the phone, measured
 by the harness on the built application under `next start`. **No colour is named

@@ -59,8 +59,8 @@ written them that way.** The fiction is who asked, and a policy declaring
 
 | | |
 | --- | --- |
-| [**three changes, one of which is not fully undoable**](2026-10-04-portal-undo-history-wide.png) | `1680×1000@2x`, full page |
-| [**the same, on a phone**](2026-10-04-portal-undo-history-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**three changes, one of which is not fully undoable**](2026-10-04-portal-undo-history-wide.webp) | `1680×1000@2x`, full page |
+| [**the same, on a phone**](2026-10-04-portal-undo-history-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 The first picture is the argument, because it has the contrast in it. Version 3:
 

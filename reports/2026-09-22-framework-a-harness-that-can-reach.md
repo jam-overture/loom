@@ -49,13 +49,13 @@ this report, so every picture here can be retaken.
 
 | picture | what to look at |
 | --- | --- |
-| [`session-none`](2026-09-22-framework-a-harness-that-can-reach-session-none.png) | *Sign in to see this.* — the only picture of this screen the harness could take before today |
-| [`session-raced`](2026-09-22-framework-a-harness-that-can-reach-session-raced.png) | signed in, and **not waited for**. Read the next paragraph |
-| [`session-reached`](2026-09-22-framework-a-harness-that-can-reach-session-reached.png) | the numbers behind the session, photographed by a shot list |
-| [`search-empty`](2026-09-22-framework-a-harness-that-can-reach-search-empty.png) | a combobox with nothing in it — the only state a `click` could reach |
-| [`search-answering`](2026-09-22-framework-a-harness-that-can-reach-search-answering.png) | `planRevert`, two of eight pages, the state the box exists for |
-| [`frame-untouched`](2026-09-22-framework-a-harness-that-can-reach-frame-untouched.png) | a framed demonstration, waiting |
-| [`frame-pressed`](2026-09-22-framework-a-harness-that-can-reach-frame-pressed.png) | the control inside the frame, pressed |
+| [`session-none`](2026-09-22-framework-a-harness-that-can-reach-session-none.webp) | *Sign in to see this.* — the only picture of this screen the harness could take before today |
+| [`session-raced`](2026-09-22-framework-a-harness-that-can-reach-session-raced.webp) | signed in, and **not waited for**. Read the next paragraph |
+| [`session-reached`](2026-09-22-framework-a-harness-that-can-reach-session-reached.webp) | the numbers behind the session, photographed by a shot list |
+| [`search-empty`](2026-09-22-framework-a-harness-that-can-reach-search-empty.webp) | a combobox with nothing in it — the only state a `click` could reach |
+| [`search-answering`](2026-09-22-framework-a-harness-that-can-reach-search-answering.webp) | `planRevert`, two of eight pages, the state the box exists for |
+| [`frame-untouched`](2026-09-22-framework-a-harness-that-can-reach-frame-untouched.webp) | a framed demonstration, waiting |
+| [`frame-pressed`](2026-09-22-framework-a-harness-that-can-reach-frame-pressed.webp) | the control inside the frame, pressed |
 
 **`session-none` and `session-raced` are byte-identical** — same `md5`
 (`59c87d5be7cb4929fc0e8605a9e928e8`), both 1280×900@2×. The second one signed in

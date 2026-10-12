@@ -2,7 +2,7 @@
 "outDir": "reports",
 "shots": [
 {
-"out": "2026-10-07-portal-how-many-people-wide.png",
+"out": "2026-10-07-portal-how-many-people-wide.webp",
 "path": "/portal/readers",
 "viewport": {
 "width": 1680,
@@ -32,7 +32,7 @@
 }
 },
 {
-"out": "2026-10-07-portal-how-many-people-phone.png",
+"out": "2026-10-07-portal-how-many-people-phone.webp",
 "path": "/portal/readers",
 "viewport": "phone",
 "fullPage": true,
@@ -54,7 +54,7 @@
 }
 },
 {
-"out": "2026-10-07-portal-how-many-people-open.png",
+"out": "2026-10-07-portal-how-many-people-open.webp",
 "path": "/portal/readers",
 "viewport": {
 "width": 1680,

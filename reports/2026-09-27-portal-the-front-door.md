@@ -16,9 +16,9 @@ which carries the plan and the two `Proposed` records.
 **Visuals** — a production build, photographed by a server started after it, in a
 signed-in browser against a staged deployment of four pages.
 
-- [`/portal` — after](2026-09-27-portal-front-door-after-wide.png) — 1280px, full
+- [`/portal` — after](2026-09-27-portal-front-door-after-wide.webp) — 1280px, full
   page. The pages lead, drawn, ordered needs-you-first; the queue is below them.
-- [`/portal` on a phone — after](2026-09-27-portal-front-door-after-phone.png) —
+- [`/portal` on a phone — after](2026-09-27-portal-front-door-after-phone.webp) —
   390px, `scrollWidth 390 / innerWidth 390`.
 
 **No before picture, and the reason is the defect.** `/portal` on `main` has no

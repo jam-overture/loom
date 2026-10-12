@@ -13,7 +13,7 @@ report in this repository is photographed. The right is the same page with
 
 | the server a lane was running | the server the harness started |
 | --- | --- |
-| ![stale](2026-09-25-framework-a-server-that-outlived-its-build-stale.png) | ![served](2026-09-25-framework-a-server-that-outlived-its-build-served.png) |
+| ![stale](2026-09-25-framework-a-server-that-outlived-its-build-stale.webp) | ![served](2026-09-25-framework-a-server-that-outlived-its-build-served.webp) |
 
 The eyebrow on the left is a build that is no longer on disk. Nothing in the
 picture says so, and until today nothing in a report could have.

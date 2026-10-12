@@ -247,9 +247,9 @@ The three frames that moved:
 
 | | | |
 | --- | --- | --- |
-| [**the panel, one press in**](2026-10-07-demo-way-back-panel-wide.png) · [before](2026-10-07-demo-way-back-panel-wide-before.png) | `0185fe92…` → `f44aaa03…` | **the picture worth opening** |
-| [the ending](2026-10-07-demo-way-back-ending-wide.png) · [before](2026-10-07-demo-way-back-ending-wide-before.png) | `8544e9b3…` → `03f930af…` | five became four |
-| [the panel on a phone](2026-10-07-demo-way-back-panel-phone.png) · [before](2026-10-07-demo-way-back-panel-phone-before.png) | `bbb64be7…` → `bc69ed61…` | the same sentence, same geometry |
+| [**the panel, one press in**](2026-10-07-demo-way-back-panel-wide.webp) · [before](2026-10-07-demo-way-back-panel-wide-before.webp) | `0185fe92…` → `f44aaa03…` | **the picture worth opening** |
+| [the ending](2026-10-07-demo-way-back-ending-wide.webp) · [before](2026-10-07-demo-way-back-ending-wide-before.webp) | `8544e9b3…` → `03f930af…` | five became four |
+| [the panel on a phone](2026-10-07-demo-way-back-panel-phone.webp) · [before](2026-10-07-demo-way-back-panel-phone-before.webp) | `bbb64be7…` → `bc69ed61…` | the same sentence, same geometry |
 
 ## Real test numbers
 

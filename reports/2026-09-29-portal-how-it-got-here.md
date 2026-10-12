@@ -44,8 +44,8 @@ A production build, photographed by a server the harness started
 
 | | |
 | --- | --- |
-| [**the empty state**, wide](2026-09-29-portal-how-it-got-here-empty-wide.png) | `1280×900@2x`, `scrollWidth 1280 / innerWidth 1280` |
-| [**the empty state**, on a phone](2026-09-29-portal-how-it-got-here-empty-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**the empty state**, wide](2026-09-29-portal-how-it-got-here-empty-wide.webp) | `1280×900@2x`, `scrollWidth 1280 / innerWidth 1280` |
+| [**the empty state**, on a phone](2026-09-29-portal-how-it-got-here-empty-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 This is the real screen on the real deployment, and **the empty state is all it
 can show**, because the seeded page has never been changed. The brief singles
@@ -65,10 +65,10 @@ by the real `foldVersions` from the deployment's real starting shape.
 
 | | |
 | --- | --- |
-| [**version 0** — where the page started](2026-09-29-portal-how-it-got-here-v0-wide.png) | the headline reads *Loom*; the notice says nothing had happened to it yet |
-| [**version 2**](2026-09-29-portal-how-it-got-here-v2-wide.png) | the same page, now headed *Autumn arrivals*, with a line under it that did not exist two versions ago |
-| [**version 4** — the newest](2026-09-29-portal-how-it-got-here-v4-wide.png) | the card added, the original line gone, and *This is the newest one.* |
-| [**version 2**, on a phone](2026-09-29-portal-how-it-got-here-v2-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**version 0** — where the page started](2026-09-29-portal-how-it-got-here-v0-wide.webp) | the headline reads *Loom*; the notice says nothing had happened to it yet |
+| [**version 2**](2026-09-29-portal-how-it-got-here-v2-wide.webp) | the same page, now headed *Autumn arrivals*, with a line under it that did not exist two versions ago |
+| [**version 4** — the newest](2026-09-29-portal-how-it-got-here-v4-wide.webp) | the card added, the original line gone, and *This is the newest one.* |
+| [**version 2**, on a phone](2026-09-29-portal-how-it-got-here-v2-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 Why it had to be done this way is the second finding below, in full: **no page
 on this deployment has a second version**, and the honest ways to give one all

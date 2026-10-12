@@ -71,8 +71,8 @@ predicate, three readers, and only one of them had been told.
 
 | before | after |
 | --- | --- |
-| ![before: the held undo marked "Something new would go here"](2026-09-05-demo-an-undo-is-not-an-arrival-before-held.png) | ![after: the held undo marked "What was here would come back"](2026-09-05-demo-an-undo-is-not-an-arrival-after-held.png) |
-| ![before: the restored band marked "New — just added"](2026-09-05-demo-an-undo-is-not-an-arrival-before-restored.png) | ![after: the restored band marked "Back — exactly as it was"](2026-09-05-demo-an-undo-is-not-an-arrival-after-restored.png) |
+| ![before: the held undo marked "Something new would go here"](2026-09-05-demo-an-undo-is-not-an-arrival-before-held.webp) | ![after: the held undo marked "What was here would come back"](2026-09-05-demo-an-undo-is-not-an-arrival-after-held.webp) |
+| ![before: the restored band marked "New — just added"](2026-09-05-demo-an-undo-is-not-an-arrival-before-restored.webp) | ![after: the restored band marked "Back — exactly as it was"](2026-09-05-demo-an-undo-is-not-an-arrival-after-restored.webp) |
 
 Press 3 now reads **What was here would come back**, over the gap the numbers
 left, with the card under it saying *"This goes back on the page, exactly as it

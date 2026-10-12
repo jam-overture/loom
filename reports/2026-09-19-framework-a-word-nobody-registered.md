@@ -6,7 +6,7 @@
 **Section:** §2 — Composition Runtime, at the Gate's inputs
 **Pull request:** [#345](https://github.com/jam-overture/loom/pull/345)
 
-![the fourteenth knob](2026-09-19-framework-a-word-nobody-registered.png)
+![the fourteenth knob](2026-09-19-framework-a-word-nobody-registered.webp)
 
 ## What this was
 
@@ -93,7 +93,7 @@ actionable thing a model can be told, because the catalogue it was handed alread
 lists what does — while only a refusal reaches a repairer at all. A confirmation
 would put an invented word to a person who can only answer no.
 
-![the two lists nobody should write by hand](2026-09-19-framework-a-word-nobody-registered-derived.png)
+![the two lists nobody should write by hand](2026-09-19-framework-a-word-nobody-registered-derived.webp)
 
 ## Unspecified decisions, and why they went this way
 

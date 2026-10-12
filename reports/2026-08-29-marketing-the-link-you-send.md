@@ -9,7 +9,7 @@ card, no picture, and a title only because Next puts one in the document by
 default. And the address that mattered most unfurled as the one that mattered
 least, because **they were identical**.
 
-![The front door, and the same address after somebody asked it for something](2026-08-29-marketing-the-link-you-send.png)
+![The front door, and the same address after somebody asked it for something](2026-08-29-marketing-the-link-you-send.webp)
 
 Those are two addresses on this site. The top one is `/`. The bottom one is
 `/?ask=problem` — the front door after a visitor asked it *"Skip the tour. What
@@ -53,7 +53,7 @@ record, in all ten states — five requests, each of them also approved.
 
 ### The pill is the answer band's rule, not a second one
 
-![Allowed, and refused](2026-08-29-marketing-the-link-you-send-verdicts.png)
+![Allowed, and refused](2026-08-29-marketing-the-link-you-send-verdicts.webp)
 
 The first version painted every verdict in the accent, which is precisely the
 mistake the band above the fold shipped and fixed on 26 August — and it is worse
@@ -84,7 +84,7 @@ about this exact page** — something a reader learns from one glance at two car
 side by side, and could never have learnt from a label that was always there
 telling them where they were.
 
-![The two inner pages](2026-08-29-marketing-the-link-you-send-pages.png)
+![The two inner pages](2026-08-29-marketing-the-link-you-send-pages.webp)
 
 ### It wears the palette the address names
 

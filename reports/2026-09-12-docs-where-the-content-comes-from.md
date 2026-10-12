@@ -11,7 +11,7 @@ price that moved on Tuesday.
 
 The seam for that has existed since 15 August and had never been written about.
 
-![A binding, and the four on one page](2026-09-12-docs-where-the-content-comes-from.png)
+![A binding, and the four on one page](2026-09-12-docs-where-the-content-comes-from.webp)
 
 ## What shipped
 
@@ -44,7 +44,7 @@ That is the whole reason resolution happens before the walk instead of inside
 it, and printing it beside the tree that produced it is the only way to show it
 without asking a reader to take it on trust.
 
-![What came back, and the row that does not repeat itself](2026-09-12-docs-where-the-content-comes-from-answers.png)
+![What came back, and the row that does not repeat itself](2026-09-12-docs-where-the-content-comes-from-answers.webp)
 
 The other produced claim is the one a reader is most likely to disbelieve: the
 shop has no opening hours, and the answer is **`ready` with an empty list**, not
@@ -95,7 +95,7 @@ Gate makes of exactly that ask, produced twice as the page builds:
 Out of the box, a band showing a shop's services can quietly start showing
 somebody's orders and nobody is asked. The fix is one line and the page gives it.
 
-![One repointed binding, judged twice](2026-09-12-docs-where-the-content-comes-from-policy.png)
+![One repointed binding, judged twice](2026-09-12-docs-where-the-content-comes-from-policy.webp)
 
 The finding beside it is the asymmetry. A repointed **form** has its own stake
 factor, host-independent, and `stakes.ts` gives the reason in its own words:
@@ -119,7 +119,7 @@ registered. The last row is not one of the six — it is a `loom:data` that is n
 a binding map at all, which is what a tree looks like coming back from storage
 with something the seam cannot read.
 
-![The six, in dark](2026-09-12-docs-where-the-content-comes-from-dark.png)
+![The six, in dark](2026-09-12-docs-where-the-content-comes-from-dark.webp)
 
 ## Tests
 
@@ -167,7 +167,7 @@ arithmetic the page shows.
 1280 at 1280, in both themes. The blocks that could overflow are the answer
 values and the code fences, and each scrolls inside its own box.
 
-![At a true 390px](2026-09-12-docs-where-the-content-comes-from-phone.png)
+![At a true 390px](2026-09-12-docs-where-the-content-comes-from-phone.webp)
 
 The one visual change made for the phone was to print the answers multi-line and
 to stop repeating the shared one — which turned out to be the better block on a

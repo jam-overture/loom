@@ -51,11 +51,11 @@ the first finding below.
 
 | | |
 | --- | --- |
-| [**the screen**, wide](2026-09-30-portal-what-it-would-look-like-wide.png) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
-| [**the screen**, on a phone](2026-09-30-portal-what-it-would-look-like-phone.png) | `390×844@2x`, full page, `scrollWidth 390 / innerWidth 390` |
-| [**a change to the page's words**](2026-09-30-portal-what-it-would-look-like-words-wide.png) | the case where there is nothing to outline, and the screen says so |
-| [**the queue card**, on the page screen](2026-09-30-portal-what-it-would-look-like-queue-wide.png) | *See what it would look like →*, between the account and the buttons |
-| [**the front door**](2026-09-30-portal-what-it-would-look-like-front-door-wide.png) | the waiting queue, now leading here |
+| [**the screen**, wide](2026-09-30-portal-what-it-would-look-like-wide.webp) | `1280×900@2x`, full page, `scrollWidth 1280 / innerWidth 1280` |
+| [**the screen**, on a phone](2026-09-30-portal-what-it-would-look-like-phone.webp) | `390×844@2x`, full page, `scrollWidth 390 / innerWidth 390` |
+| [**a change to the page's words**](2026-09-30-portal-what-it-would-look-like-words-wide.webp) | the case where there is nothing to outline, and the screen says so |
+| [**the queue card**, on the page screen](2026-09-30-portal-what-it-would-look-like-queue-wide.webp) | *See what it would look like →*, between the account and the buttons |
+| [**the front door**](2026-09-30-portal-what-it-would-look-like-front-door-wide.webp) | the waiting queue, now leading here |
 
 The change in the first two is a real one: somebody typed *"the bottom of the
 page feels like it's missing something — add whatever you think belongs there, I

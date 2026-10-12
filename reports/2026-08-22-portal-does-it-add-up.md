@@ -10,10 +10,10 @@ against the seeded tree:
 
 | | |
 | --- | --- |
-| [the result as it arrives](2026-08-22-portal-does-it-add-up.png) | live |
-| [the same result with every disclosure opened](2026-08-22-portal-does-it-add-up-open.png) | live |
-| [the chooser](2026-08-22-portal-does-it-add-up-chooser.png) | live |
-| [the three verdicts a healthy deployment cannot produce](2026-08-22-portal-does-it-add-up-states.png) | fixture fold, real components |
+| [the result as it arrives](2026-08-22-portal-does-it-add-up.webp) | live |
+| [the same result with every disclosure opened](2026-08-22-portal-does-it-add-up-open.webp) | live |
+| [the chooser](2026-08-22-portal-does-it-add-up-chooser.webp) | live |
+| [the three verdicts a healthy deployment cannot produce](2026-08-22-portal-does-it-add-up-states.webp) | fixture fold, real components |
 
 ---
 

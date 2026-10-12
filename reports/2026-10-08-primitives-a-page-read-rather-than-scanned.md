@@ -291,8 +291,8 @@ and it is `DOCUMENT_SEQUENCE` verbatim, so it cannot drift from the catalogue.
 
 | | editorial | bold |
 | --- | --- | --- |
-| the document, 1280 | ![](prim-doc-editorial-wide.png) | ![](prim-doc-bold-wide.png) |
-| on a phone | ![](prim-doc-editorial-phone.png) | ![](prim-doc-bold-phone.png) |
+| the document, 1280 | ![](prim-doc-editorial-wide.webp) | ![](prim-doc-bold-wide.webp) |
+| on a phone | ![](prim-doc-editorial-phone.webp) | ![](prim-doc-bold-phone.webp) |
 
 ```
 prim-doc-{editorial,bold}-wide    1280x900@2x   scrollWidth 1280 / innerWidth 1280

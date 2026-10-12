@@ -7,13 +7,13 @@ Three primitives — `loom.comparison-table`, `loom.comparison-row`,
 record, plus one Hermes block and the last genuinely open question in the port
 map. Eleven new tests. `pnpm verify` green.
 
-![The band under the house palette](2026-08-22-primitives-the-comparison-band-minimal.png)
+![The band under the house palette](2026-08-22-primitives-the-comparison-band-minimal.webp)
 
-![The same band under bold](2026-08-22-primitives-the-comparison-band-bold.png)
+![The same band under bold](2026-08-22-primitives-the-comparison-band-bold.webp)
 
-![And under editorial](2026-08-22-primitives-the-comparison-band-editorial.png)
+![And under editorial](2026-08-22-primitives-the-comparison-band-editorial.webp)
 
-![The house palette on a 390px phone — the band scrolls inside its own edge and the criterion stays put](2026-08-22-primitives-the-comparison-band-phone.png)
+![The house palette on a 390px phone — the band scrolls inside its own edge and the criterion stays put](2026-08-22-primitives-the-comparison-band-phone.webp)
 
 ## Which primitives, and why those
 

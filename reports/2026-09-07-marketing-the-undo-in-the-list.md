@@ -4,7 +4,7 @@
 from the address, and the page was rebuilt from the published front door with
 that request never made.
 
-![The rules holding the undo of a change they already held once](2026-09-07-marketing-the-undo-in-the-list-editorial.png)
+![The rules holding the undo of a change they already held once](2026-09-07-marketing-the-undo-in-the-list-editorial.webp)
 
 That reaches a page which *looks* the same. It is not the same thing, and the
 difference between those two things is the entire product. The front door
@@ -148,7 +148,7 @@ button writes `proof.shorter-back`, **and** that it does not write `proof`.
 
 ## Both palettes
 
-![The same page under the bold palette](2026-09-07-marketing-the-undo-in-the-list-bold.png)
+![The same page under the bold palette](2026-09-07-marketing-the-undo-in-the-list-bold.webp)
 
 Rendered from the built application served locally, at 1440px, in both starter
 palettes. No colour is named anywhere in the diff.

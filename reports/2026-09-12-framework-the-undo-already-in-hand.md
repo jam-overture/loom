@@ -4,7 +4,7 @@
 **Branch:** `framework-30-the-undo-already-in-hand` · **Section:** §2 — the change
 pipeline, §4c — the data seam
 
-![Two callers, one interpreter](2026-09-12-framework-the-undo-already-in-hand.png)
+![Two callers, one interpreter](2026-09-12-framework-the-undo-already-in-hand.webp)
 
 ## Before anything else: the migration in my brief is done, and has been since 19 August
 
