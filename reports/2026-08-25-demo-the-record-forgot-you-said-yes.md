@@ -288,10 +288,10 @@ Nothing blocking. Two carried, unchanged by this run:
 
 | | |
 | --- | --- |
-| [before](2026-08-25-demo-the-record-forgot-you-said-yes-before.png) | `main` this morning. Two **Applied** cards in one rail. One was made by Loom alone and one only because a person pressed a button, and nothing distinguishes them |
-| [after](2026-08-25-demo-the-record-forgot-you-said-yes-after.png) | the same two cards on this branch. *You said yes. Loom held this change until you answered.* — and the palette card below still says it went ahead on its own |
-| [record](2026-08-25-demo-the-record-forgot-you-said-yes-record.png) | one card with the disclosure open: the plain sentence in the light, and **the verdict** ending `answered · confirmed by a demo visitor` |
-| [phone](2026-08-25-demo-the-record-forgot-you-said-yes-phone.png) | 390×844, the same card after answering. The sentence wraps to two lines and the rule holds |
+| [before](2026-08-25-demo-the-record-forgot-you-said-yes-before.webp) | `main` this morning. Two **Applied** cards in one rail. One was made by Loom alone and one only because a person pressed a button, and nothing distinguishes them |
+| [after](2026-08-25-demo-the-record-forgot-you-said-yes-after.webp) | the same two cards on this branch. *You said yes. Loom held this change until you answered.* — and the palette card below still says it went ahead on its own |
+| [record](2026-08-25-demo-the-record-forgot-you-said-yes-record.webp) | one card with the disclosure open: the plain sentence in the light, and **the verdict** ending `answered · confirmed by a demo visitor` |
+| [phone](2026-08-25-demo-the-record-forgot-you-said-yes-phone.webp) | 390×844, the same card after answering. The sentence wraps to two lines and the rule holds |
 
 Every screenshot is this branch's `next build` output driven in Chromium — not the
 preview, which this environment cannot open (`vercel.app` is not on the sandbox's

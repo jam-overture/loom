@@ -10,15 +10,15 @@ thing on a stranger's first screen that did not line up.
 
 | the front door, 1280 × 900 | |
 | --- | --- |
-| before — `main` at `657d27e` | ![](2026-09-29-marketing-the-headline-in-the-centred-band-before-wide.png) |
-| after — this branch | ![](2026-09-29-marketing-the-headline-in-the-centred-band-after-wide.png) |
+| before — `main` at `657d27e` | ![](2026-09-29-marketing-the-headline-in-the-centred-band-before-wide.webp) |
+| after — this branch | ![](2026-09-29-marketing-the-headline-in-the-centred-band-after-wide.webp) |
 
 On a phone it is not subtle at all:
 
 | 390 × 844 | |
 | --- | --- |
-| before | ![](2026-09-29-marketing-the-headline-in-the-centred-band-before-phone.png) |
-| after | ![](2026-09-29-marketing-the-headline-in-the-centred-band-after-phone.png) |
+| before | ![](2026-09-29-marketing-the-headline-in-the-centred-band-before-phone.webp) |
+| after | ![](2026-09-29-marketing-the-headline-in-the-centred-band-after-phone.webp) |
 
 ---
 
@@ -78,8 +78,8 @@ sentence belonging to it floating in the middle of the band.
 
 | *Built in the open*, 1280 | |
 | --- | --- |
-| before | ![](2026-09-29-marketing-the-headline-in-the-centred-band-before-facts.png) |
-| after | ![](2026-09-29-marketing-the-headline-in-the-centred-band-after-facts.png) |
+| before | ![](2026-09-29-marketing-the-headline-in-the-centred-band-before-facts.webp) |
+| after | ![](2026-09-29-marketing-the-headline-in-the-centred-band-after-facts.webp) |
 
 **It is ranged left rather than centred, and that is forced rather than
 preferred.** `loom.section` has no `align`, and it renders its own eyebrow with
@@ -97,7 +97,7 @@ out across a row, not a line of the band's running text.
 The fix is a `textAlign`, so a re-theme cannot reach it — and saying so is only
 worth anything if it was photographed. `bold`, after:
 
-![](2026-09-29-marketing-the-headline-in-the-centred-band-after-bold-wide.png)
+![](2026-09-29-marketing-the-headline-in-the-centred-band-after-bold-wide.webp)
 
 ---
 

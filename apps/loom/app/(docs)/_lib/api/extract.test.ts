@@ -465,7 +465,7 @@ describe("how much of the package is behind one door", () => {
   it("names the two doors the root door overlaps, and says how much", () => {
     expect(apiEntryAt("runtime")?.standing.sharedWith).toEqual([
       { specifier: "@jam-overture/loom/react", slug: "react", names: 5 },
-      { specifier: "@jam-overture/loom/sdk", slug: "sdk", names: 8 },
+      { specifier: "@jam-overture/loom/sdk", slug: "sdk", names: 9 },
     ])
   })
 

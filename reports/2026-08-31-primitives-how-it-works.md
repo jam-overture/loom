@@ -8,13 +8,13 @@ first `id` this library has ever rendered. **No new decision record**, on
 purpose. Two defects found by the screenshots and by nothing else, and one
 non-defect the screenshots claimed and a measurement disproved.
 
-![The specimen under editorial](2026-08-31-how-it-works-editorial.png)
+![The specimen under editorial](2026-08-31-how-it-works-editorial.webp)
 
-![The same page under bold](2026-08-31-how-it-works-bold.png)
+![The same page under bold](2026-08-31-how-it-works-bold.webp)
 
-![And under the house palette](2026-08-31-how-it-works-minimal.png)
+![And under the house palette](2026-08-31-how-it-works-minimal.webp)
 
-![At a true 390px, where the orbit's two rings become one](2026-08-31-how-it-works-phone.png)
+![At a true 390px, where the orbit's two rings become one](2026-08-31-how-it-works-phone.webp)
 
 ## Which primitives, and why those
 

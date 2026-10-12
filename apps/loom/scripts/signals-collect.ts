@@ -10,7 +10,7 @@ import {
 } from "@jam-overture/loom/signals"
 import { postgresReaderSignalJournal, postgresReaderTallyStore } from "@jam-overture/loom/signals/postgres"
 
-import { resolveConnectionString } from "../app/(portal)/_lib/connection"
+import { resolveConnectionString } from "../app/_lib/app/connection"
 
 /**
  * Counts the reader-signal buffer into the durable tallies and drops what it

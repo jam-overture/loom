@@ -8,7 +8,7 @@ argument for that sentence.
 Nothing on the site was the sentence being true. This run makes it true, on the
 page making it, in front of the visitor.
 
-![The band, before anyone has asked for anything](2026-08-21-marketing-see-it-happen-band.png)
+![The band, before anyone has asked for anything](2026-08-21-marketing-see-it-happen-band.webp)
 
 ---
 
@@ -33,7 +33,7 @@ Those four choices are that list, performed on the page making the claim.
 | **Price first** | Lifts the plans under the headline | **Held** — a person decides |
 | **Delete the prices** | Takes the plans away entirely | **Refused** — and saying yes does not help |
 
-![The plans, moved under the headline](2026-08-21-marketing-see-it-happen-moved.png)
+![The plans, moved under the headline](2026-08-21-marketing-see-it-happen-moved.webp)
 
 ## The rules are a real set of rules
 
@@ -54,7 +54,7 @@ is that some things do not happen however emphatically they are asked for, and
 the band says which two before offering the button that will be refused for
 exactly that reason.
 
-![The refusal, with the reason attached](2026-08-21-marketing-see-it-happen-refused.png)
+![The refusal, with the reason attached](2026-08-21-marketing-see-it-happen-refused.webp)
 
 ## Saying yes, and what the record says about it
 
@@ -74,7 +74,7 @@ applied is passed separately rather than read off the verdict. The first version
 read it off the verdict and reported "waiting for you" on a page that had already
 moved.
 
-![The approved change, and the record of the hold that preceded it](2026-08-21-marketing-see-it-happen-approved.png)
+![The approved change, and the record of the hold that preceded it](2026-08-21-marketing-see-it-happen-approved.webp)
 
 ## Nothing is kept, and the address is the whole of the state
 
@@ -138,7 +138,7 @@ And the panel says plainly that the change was worked out from the page rather
 than asked of an AI, which is a selling point rather than a caveat: **the rules
 cannot tell the difference, because they weigh the change and never its author.**
 
-![The same band, in the bold palette, with no colour named anywhere](2026-08-21-marketing-see-it-happen-bold.png)
+![The same band, in the bold palette, with no colour named anywhere](2026-08-21-marketing-see-it-happen-bold.webp)
 
 ## Fixed on the way past
 

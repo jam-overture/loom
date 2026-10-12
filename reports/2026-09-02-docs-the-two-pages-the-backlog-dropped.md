@@ -12,7 +12,7 @@ Neither conflicted with another lane; they conflicted with **each other**, both
 having been cut from `main` and both adding a page to the same section of
 `nav.ts`. Rebuilding them one at a time would recreate that conflict on purpose.
 
-![Both pages in the rail, and the endings table on the first of them](2026-09-02-docs-the-two-pages-the-backlog-dropped-endings.png)
+![Both pages in the rail, and the endings table on the first of them](2026-09-02-docs-the-two-pages-the-backlog-dropped-endings.webp)
 
 ## What shipped
 
@@ -32,7 +32,7 @@ Every table on both pages is generated. The endings table is folded from a real
 journal of ten asks; the schema tables are read out of the SQL the runtime would
 actually run against a host's database, as the page builds.
 
-![The tables, read from the statements the runtime runs](2026-09-02-docs-the-two-pages-the-backlog-dropped-schema.png)
+![The tables, read from the statements the runtime runs](2026-09-02-docs-the-two-pages-the-backlog-dropped-schema.webp)
 
 ## The tests were fine. The prose was not.
 
@@ -73,7 +73,7 @@ written that way: it links to *Connecting a model*, quotes the sentence it
 actually rests on, and if that page is rewritten again **the failure lands on
 the page making the claim** rather than on the reader who believed it.
 
-![The quotation, in dark](2026-09-02-docs-the-two-pages-the-backlog-dropped-calibration.png)
+![The quotation, in dark](2026-09-02-docs-the-two-pages-the-backlog-dropped-calibration.webp)
 
 Both rules were verified by mutation rather than assumed:
 
@@ -142,9 +142,9 @@ locally, which is the same build from the same commit but is not the deployment.
 1280 at 1280. The generated schema tables are the widest thing on either page
 and scroll inside their own box rather than the document.
 
-![The deployment page at a true 390px](2026-09-02-docs-the-two-pages-the-backlog-dropped-phone.png)
+![The deployment page at a true 390px](2026-09-02-docs-the-two-pages-the-backlog-dropped-phone.webp)
 
-![Store failures in dark](2026-09-02-docs-the-two-pages-the-backlog-dropped-dark.png)
+![Store failures in dark](2026-09-02-docs-the-two-pages-the-backlog-dropped-dark.webp)
 
 ## Scope
 

@@ -1,7 +1,10 @@
 import type { CataloguedPrimitive } from "@jam-overture/loom"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import type { HowItIsRead } from "@/app/(portal)/_lib/pieces-read"
 import { catalogueLineFor, plainPieceName, settingsOf, spacesReading } from "@/app/(portal)/_lib/piece-view"
+
+import { HowRead } from "./how-read"
 
 /**
  * One kind of piece, as somebody deciding what to ask for reads it.
@@ -19,12 +22,45 @@ import { catalogueLineFor, plainPieceName, settingsOf, spacesReading } from "@/a
  * it — and the registry's own vocabulary is one click down, under the line the
  * model is actually given.
  */
-export const PieceCard = ({ primitive }: { readonly primitive: CataloguedPrimitive }) => {
+export const PieceCard = ({
+  primitive,
+  read,
+  unused,
+}: {
+  readonly primitive: CataloguedPrimitive
+  /**
+   * How this piece is actually read, where the deployment has counted anything.
+   *
+   * Absent on a catalogue nothing has been measured against, which is every
+   * deployment until a page broadcasts — so this card is the card it has always
+   * been by default, and the reader half is an addition rather than a condition.
+   */
+  readonly read?: HowItIsRead | undefined
+  /**
+   * What to say instead, where this piece is in the catalogue and on none of
+   * the pages the figures come from.
+   *
+   * Handed in rather than composed here, because the honest sentence needs to
+   * know how many pages were behind the reading and a card does not. Never
+   * *nothing uses this*: see `_lib/pieces-read.ts`.
+   */
+  readonly unused?: string | undefined
+}) => {
   const settings = settingsOf(primitive)
   const spaces = spacesReading(primitive)
 
   return (
-    <div className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-md border p-4">
+    /*
+     * Addressed by its type, so the section above can send a reader to the one
+     * card that needs them. The identifier is what the whole portal calls this
+     * piece, so nothing new has to be invented to link to it — and an anchor is
+     * the right mechanism rather than a screen of its own, because the card a
+     * person is being sent to is already on the page they are on.
+     */
+    <div
+      id={primitive.type}
+      className="border-edge-subtle bg-surface-base flex scroll-mt-4 flex-col gap-2 rounded-md border p-4"
+    >
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h2 className="text-md tracking-tight">{plainPieceName(primitive.type)}</h2>
         <span className="text-ink-muted font-mono text-2xs">{primitive.type}</span>
@@ -58,6 +94,34 @@ export const PieceCard = ({ primitive }: { readonly primitive: CataloguedPrimiti
       )}
 
       {spaces !== undefined && <p className="text-ink-muted text-xs">{spaces}</p>}
+
+      {/*
+       * How it is read, which is the one thing on this card that changes
+       * between visits — and the two figures that must never be drawn as one.
+       *
+       * `HowItIsRead` arrives as a pair, so this card cannot print the share of
+       * places under a sentence about readers: the places half is always there,
+       * and the readers half is either a share or the reason there is not one.
+       * A piece read in the one busy place and skipped in nine quiet ones is
+       * *one place in ten* and *nine readers in ten*, both true, and a card
+       * printing one of those under the other's label would be wrong by an
+       * order of magnitude.
+       *
+       * Set apart by a rule rather than by a heading. What it says is about the
+       * same piece as everything above it, and a heading would make a four-line
+       * card into two sections.
+       */}
+      {read !== undefined && (
+        <div className="border-edge-subtle flex flex-col gap-1 border-t pt-2">
+          <HowRead read={read} />
+        </div>
+      )}
+
+      {read === undefined && unused !== undefined && (
+        <div className="border-edge-subtle flex flex-col gap-1 border-t pt-2">
+          <p className="text-ink-muted text-xs">{unused}</p>
+        </div>
+      )}
 
       {/*
        * The disclosure that makes the page's claim checkable rather than

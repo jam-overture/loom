@@ -303,11 +303,11 @@ Nothing blocking. Two carried, unchanged by this run:
 
 | | |
 | --- | --- |
-| [before](2026-08-26-demo-put-it-back-says-what-it-is-before.png) | `main` this morning, two seconds after **Put it back**. The page has not moved, the bar still says revision 1, and the new card quotes the visitor saying *“Undo revision 1.”* |
-| [after](2026-08-26-demo-put-it-back-says-what-it-is-after.png) | the same press, same viewport, same scroll position, on this branch. The card is headed *“Put it back.”* — and nothing else about the state has changed, because nothing else was wrong with it |
-| [caution](2026-08-26-demo-put-it-back-says-what-it-is-caution.png) | the payoff card *before* that press: the undo, and the line under it that now says what pressing it will do |
-| [record](2026-08-26-demo-put-it-back-says-what-it-is-record.png) | the undo's card with the disclosure open. **The proposal** begins `asked · Undo revision 1.` — the runtime's own sentence, whole, one click down |
-| [phone](2026-08-26-demo-put-it-back-says-what-it-is-phone.png) | 390×844, both cards after the press. The quotation and the caution both hold |
+| [before](2026-08-26-demo-put-it-back-says-what-it-is-before.webp) | `main` this morning, two seconds after **Put it back**. The page has not moved, the bar still says revision 1, and the new card quotes the visitor saying *“Undo revision 1.”* |
+| [after](2026-08-26-demo-put-it-back-says-what-it-is-after.webp) | the same press, same viewport, same scroll position, on this branch. The card is headed *“Put it back.”* — and nothing else about the state has changed, because nothing else was wrong with it |
+| [caution](2026-08-26-demo-put-it-back-says-what-it-is-caution.webp) | the payoff card *before* that press: the undo, and the line under it that now says what pressing it will do |
+| [record](2026-08-26-demo-put-it-back-says-what-it-is-record.webp) | the undo's card with the disclosure open. **The proposal** begins `asked · Undo revision 1.` — the runtime's own sentence, whole, one click down |
+| [phone](2026-08-26-demo-put-it-back-says-what-it-is-phone.webp) | 390×844, both cards after the press. The quotation and the caution both hold |
 
 Every screenshot is this branch's `next build` output driven in Chromium at
 1440×800 and 390×844 — not the preview, which this environment cannot open

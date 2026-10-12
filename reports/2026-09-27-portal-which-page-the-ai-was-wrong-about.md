@@ -15,14 +15,14 @@ been filed against this lane since the 26 September report.
 two files have different `md5`s, which is the check the 26 and 27 September
 entries exist to force.
 
-- [`/portal/trust` — before](2026-09-27-portal-which-page-trust-before-wide.png) —
+- [`/portal/trust` — before](2026-09-27-portal-which-page-trust-before-wide.webp) —
   1280px, full page. Six wrong claims, and **not one of them says which page it
   was about.** Three of the rows carry the Gate's own sentence in italics on the
   surface. No row has a disclosure at all.
-- [`/portal/trust` — after](2026-09-27-portal-which-page-trust-after-wide.png) —
+- [`/portal/trust` — after](2026-09-27-portal-which-page-trust-after-wide.webp) —
   1280px, full page. Every claim names its page; a new list of the pages the AI
   misjudged sits under the groups; every row has the record one click down.
-- [`/portal/trust` on a phone — after](2026-09-27-portal-which-page-trust-after-phone.png)
+- [`/portal/trust` on a phone — after](2026-09-27-portal-which-page-trust-after-phone.webp)
   — 390px, `scrollWidth 390 / innerWidth 390`.
 
 ---

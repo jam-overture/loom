@@ -3,9 +3,9 @@
 **Routine:** `Loom primitives` (first run) · **Section:** §4b step 5 ·
 **Branch:** `primitives-01-pricing-and-proof`
 
-![The pricing band and the proof wall under the editorial palette](2026-08-16-primitives-pricing-and-proof-editorial.png)
+![The pricing band and the proof wall under the editorial palette](2026-08-16-primitives-pricing-and-proof-editorial.webp)
 
-![The same two bands under the bold palette](2026-08-16-primitives-pricing-and-proof-bold.png)
+![The same two bands under the bold palette](2026-08-16-primitives-pricing-and-proof-bold.webp)
 
 ## What shipped
 

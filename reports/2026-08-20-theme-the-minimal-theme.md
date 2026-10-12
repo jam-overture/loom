@@ -7,9 +7,9 @@ A house theme, specified by the maintainer rather than ported: `minimal` /
 in the starter set so all four surfaces can reach it, plus the contrast suite
 that decided where the green went.
 
-![The chrome specimen under the minimal theme](2026-08-20-theme-the-minimal-theme.png)
+![The chrome specimen under the minimal theme](2026-08-20-theme-the-minimal-theme.webp)
 
-![The same tree under all three palettes](2026-08-20-theme-the-minimal-theme-three-palettes.png)
+![The same tree under all three palettes](2026-08-20-theme-the-minimal-theme-three-palettes.webp)
 
 ## What was asked for
 

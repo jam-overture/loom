@@ -162,7 +162,7 @@ setting at all is a barrier rather than a skip: a removal is not something a lat
 configure put back.
 
 Both directions are asserted, in `put-back.test.ts` and again over the real write
-path in `pipeline.test.ts`, and the refusal is [photographed](2026-09-20-demo-back-the-way-it-came-in-between.png).
+path in `pipeline.test.ts`, and the refusal is [photographed](2026-09-20-demo-back-the-way-it-came-in-between.webp).
 
 ## Decisions taken that were not specified
 
@@ -305,12 +305,12 @@ branch's for the rest — with reduced motion, on a first arrival with no sessio
 
 | | |
 | --- | --- |
-| [the rail, before](2026-09-20-demo-back-the-way-it-came-before.png) | `main`, after two presses of **Re-theme the whole page**: two cards, identical to the word, over a page that has visibly gone back |
-| [the rail, after](2026-09-20-demo-back-the-way-it-came-after.png) | the same two presses on this branch. The newest card, at the top, reads *The whole page went back to how it looked* |
-| [the mark, before](2026-09-20-demo-back-the-way-it-came-mark-before.png) | `main`, two presses of **Repaint the top band**: the ring says **Just changed** |
-| [the mark, after](2026-09-20-demo-back-the-way-it-came-mark.png) | this branch, same two presses: **Changed back** |
-| [the refusal](2026-09-20-demo-back-the-way-it-came-in-between.png) | palette, band, palette — the newest card says what it said before, because the page is still carrying a repainted band |
-| [a phone, before](2026-09-20-demo-back-the-way-it-came-phone-before.png) · [after](2026-09-20-demo-back-the-way-it-came-phone.png) | 390 × 844, stacked, no overflow either way |
+| [the rail, before](2026-09-20-demo-back-the-way-it-came-before.webp) | `main`, after two presses of **Re-theme the whole page**: two cards, identical to the word, over a page that has visibly gone back |
+| [the rail, after](2026-09-20-demo-back-the-way-it-came-after.webp) | the same two presses on this branch. The newest card, at the top, reads *The whole page went back to how it looked* |
+| [the mark, before](2026-09-20-demo-back-the-way-it-came-mark-before.webp) | `main`, two presses of **Repaint the top band**: the ring says **Just changed** |
+| [the mark, after](2026-09-20-demo-back-the-way-it-came-mark.webp) | this branch, same two presses: **Changed back** |
+| [the refusal](2026-09-20-demo-back-the-way-it-came-in-between.webp) | palette, band, palette — the newest card says what it said before, because the page is still carrying a repainted band |
+| [a phone, before](2026-09-20-demo-back-the-way-it-came-phone-before.webp) · [after](2026-09-20-demo-back-the-way-it-came-phone.webp) | 390 × 844, stacked, no overflow either way |
 
 **To see it yourself:** open the preview at `/demo` and press **Re-theme the whole
 page** twice. The card that appears at the top of *the record* is the whole of

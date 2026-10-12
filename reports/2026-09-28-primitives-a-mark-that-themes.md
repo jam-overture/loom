@@ -15,7 +15,7 @@ as never-cross** — see *The lane* at the foot.
 
 | `minimal` | `bold` |
 | --- | --- |
-| ![](2026-09-28-primitives-brand-minimal.png) | ![](2026-09-28-primitives-brand-bold.png) |
+| ![](2026-09-28-primitives-brand-minimal.webp) | ![](2026-09-28-primitives-brand-bold.webp) |
 
 Same tree, same path data, no second file and no palette-to-asset mapping. That
 is the whole claim and it is the one an image cannot make.

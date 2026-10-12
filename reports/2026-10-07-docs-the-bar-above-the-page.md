@@ -70,7 +70,7 @@ The 2 is not a coincidence and the page says so: a nominated color is one
 palette's canvas, every canvas in the registry is different, so each half of the
 pair is exact for exactly one tree under exactly one machine. There is no third.
 
-![The section at 1280, with one reader's two outcomes](2026-10-07-docs-bar-section-wide.png)
+![The section at 1280, with one reader's two outcomes](2026-10-07-docs-bar-section-wide.webp)
 
 ## The site had the defect the example is about
 
@@ -117,7 +117,7 @@ meaning is that there is no line. A reader would have been looking at a border
 of mine and reading it as the thing being described. There is one outline around
 the pair now and nothing between.
 
-![The three outcomes, each with a pairing that lands in it](2026-10-07-docs-bar-outcomes-wide.png)
+![The three outcomes, each with a pairing that lands in it](2026-10-07-docs-bar-outcomes-wide.webp)
 
 Row one is one uniform block, which is correct. Row two is where the real seam
 is visible and subtle, which is the argument. Row three needs no explaining.
@@ -128,7 +128,7 @@ position that a narrower screen does not have. Fixed by naming the thing
 instead of its position; not filed, because one instance is not yet a class and
 the sweep that would find them is a worse idea than the habit.
 
-![At 390 pixels, where there is no left](2026-10-07-docs-bar-section-phone.png)
+![At 390 pixels, where there is no left](2026-10-07-docs-bar-section-phone.webp)
 
 ## The first dark screenshot this lane has taken
 
@@ -140,7 +140,7 @@ closes that**, and has since 0195:
 { "path": "/docs/building-with-loom/theming", "start": { "storage": { "loom-docs-theme": "dark" } } }
 ```
 
-![The same section with dark stored](2026-10-07-docs-bar-section-dark-wide.png)
+![The same section with dark stored](2026-10-07-docs-bar-section-dark-wide.webp)
 
 Worth a line because the limitation was being carried forward rather than
 retried, and the mechanism that ends it was added three weeks ago.

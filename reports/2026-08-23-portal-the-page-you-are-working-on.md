@@ -9,10 +9,10 @@ build of this commit with a signed-in browser against the seeded tree:
 
 | | |
 | --- | --- |
-| [the screen as it arrives](2026-08-23-portal-the-page-you-are-working-on.png) | live |
-| [a part picked that the page cannot be clicked to reach](2026-08-23-portal-the-page-you-are-working-on-picked.png) | live |
-| [the same screen with every disclosure opened](2026-08-23-portal-the-page-you-are-working-on-open.png) | live |
-| [a phone](2026-08-23-portal-the-page-you-are-working-on-phone.png) | live |
+| [the screen as it arrives](2026-08-23-portal-the-page-you-are-working-on.webp) | live |
+| [a part picked that the page cannot be clicked to reach](2026-08-23-portal-the-page-you-are-working-on-picked.webp) | live |
+| [the same screen with every disclosure opened](2026-08-23-portal-the-page-you-are-working-on-open.webp) | live |
+| [a phone](2026-08-23-portal-the-page-you-are-working-on-phone.webp) | live |
 
 Nothing was staged and no fixture was substituted. A checkup needs a store and a
 seed; this screen needs neither, so it photographs directly.

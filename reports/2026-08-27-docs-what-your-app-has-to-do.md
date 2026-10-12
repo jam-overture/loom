@@ -10,7 +10,7 @@ and until this page it had **no prose anywhere on this site**: twenty-one
 exports, described by their own signatures and nothing else. That was the first
 of the four zeroes filed on #167, and the page I said I would write next.
 
-![The page a host lands on, and the example it opens with](2026-08-27-docs-what-your-app-has-to-do.png)
+![The page a host lands on, and the example it opens with](2026-08-27-docs-what-your-app-has-to-do.webp)
 
 **What your app has to do** is the fifth page in *The runtime*, and the last
 written page before the API reference.
@@ -23,7 +23,7 @@ The first half is small on purpose — three things to build (`store`, `holds`,
 `runtime`), one function to call, and the two fields people leave out of an ask
 and what each of them costs.
 
-![The write path, and the three things a change needs before it can exist](2026-08-27-docs-what-your-app-has-to-do-wiring.png)
+![The write path, and the three things a change needs before it can exist](2026-08-27-docs-what-your-app-has-to-do-wiring.webp)
 
 The second half is the part a host actually has to plan for: **every way
 `commitIntent` can end, and what a deployment owes a person for each one.**
@@ -39,9 +39,9 @@ in-memory stores are opened and seven asks are sent through `commitIntent` with
 this site's own Gate policy behind them. The line in the middle of each card is
 `describeWriteOutcome`'s sentence about the outcome that came back.
 
-![Four of the seven, each produced by a real trip through the write path](2026-08-27-docs-what-your-app-has-to-do-endings.png)
+![Four of the seven, each produced by a real trip through the write path](2026-08-27-docs-what-your-app-has-to-do-endings.webp)
 
-![The three that are somebody else's problem](2026-08-27-docs-what-your-app-has-to-do-endings-rest.png)
+![The three that are somebody else's problem](2026-08-27-docs-what-your-app-has-to-do-endings-rest.webp)
 
 Two things hold it together, and they are the reason this is worth more than a
 table:
@@ -75,7 +75,7 @@ than a read.
 The runtime keeps these seven apart deliberately. The page's job was to say what
 each of them means for a person, which is the one half a runtime cannot supply.
 
-![The second door: answering a change that is waiting](2026-08-27-docs-what-your-app-has-to-do-answering.png)
+![The second door: answering a change that is waiting](2026-08-27-docs-what-your-app-has-to-do-answering.webp)
 
 ## What the page deliberately does not repeat
 
@@ -174,4 +174,4 @@ cost and what the deployment learns from a month of them — because it is the
 largest remaining door with no prose, and because *Connecting a model* already
 ends by pointing at a cost nobody can see the shape of yet.
 
-![The cards at a true 390 pixels, wrapping rather than scrolling](2026-08-27-docs-what-your-app-has-to-do-phone.png)
+![The cards at a true 390 pixels, wrapping rather than scrolling](2026-08-27-docs-what-your-app-has-to-do-phone.webp)

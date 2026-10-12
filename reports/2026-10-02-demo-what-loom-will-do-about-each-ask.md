@@ -65,11 +65,11 @@ stop and ask you about* — and be checked on it fifteen seconds later.
 
 | | |
 | --- | --- |
-| [the arrival screen, wide](2026-10-02-demo-what-loom-will-do-about-each-ask-after-wide.png) · [before](2026-10-02-demo-what-loom-will-do-about-each-ask-before-wide.png) | the count, in the pixels the claim used to hold |
-| [**the four rows**](2026-10-02-demo-what-loom-will-do-about-each-ask-after-asks-wide.png) · [on a phone](2026-10-02-demo-what-loom-will-do-about-each-ask-after-asks-phone.png) | **the picture worth opening** — two and two, as the sentence said |
-| [the arrival screen, phone](2026-10-02-demo-what-loom-will-do-about-each-ask-after-phone.png) · [before](2026-10-02-demo-what-loom-will-do-about-each-ask-before-phone.png) | the count above the fold at 390 × 844 |
-| [the question, one press later](2026-10-02-demo-what-loom-will-do-about-each-ask-held-unchanged.png) | **unchanged, byte for byte** |
-| [the payoff, two presses later](2026-10-02-demo-what-loom-will-do-about-each-ask-after-applied-wide.png) | unchanged but for one pixel of scroll clamp |
+| [the arrival screen, wide](2026-10-02-demo-what-loom-will-do-about-each-ask-after-wide.webp) · [before](2026-10-02-demo-what-loom-will-do-about-each-ask-before-wide.webp) | the count, in the pixels the claim used to hold |
+| [**the four rows**](2026-10-02-demo-what-loom-will-do-about-each-ask-after-asks-wide.webp) · [on a phone](2026-10-02-demo-what-loom-will-do-about-each-ask-after-asks-phone.webp) | **the picture worth opening** — two and two, as the sentence said |
+| [the arrival screen, phone](2026-10-02-demo-what-loom-will-do-about-each-ask-after-phone.webp) · [before](2026-10-02-demo-what-loom-will-do-about-each-ask-before-phone.webp) | the count above the fold at 390 × 844 |
+| [the question, one press later](2026-10-02-demo-what-loom-will-do-about-each-ask-held-unchanged.webp) | **unchanged, byte for byte** |
+| [the payoff, two presses later](2026-10-02-demo-what-loom-will-do-about-each-ask-after-applied-wide.webp) | unchanged but for one pixel of scroll clamp |
 
 ## What specifically failed, diagnosed before anything was built
 

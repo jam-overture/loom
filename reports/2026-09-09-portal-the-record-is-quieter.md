@@ -13,12 +13,12 @@ page a live model changed three times during the run:
 
 | | |
 | --- | --- |
-| [**What's been asked** — three real asks, one the AI could not interpret](2026-09-09-portal-the-record-is-quieter-asked.png) | 1280px |
-| [**What's changed, before**](2026-09-09-portal-the-record-is-quieter-changed-before.png) · [**after**](2026-09-09-portal-the-record-is-quieter-changed.png) | 1280px |
-| [**Sign-ins, before**](2026-09-09-portal-the-record-is-quieter-sign-ins-before.png) · [**after**](2026-09-09-portal-the-record-is-quieter-sign-ins.png) | 1280px |
-| [What Loom can put on your page](2026-09-09-portal-the-record-is-quieter-pieces.png) | 1280px |
-| [Can you trust the AI?](2026-09-09-portal-the-record-is-quieter-trust.png) | 1280px |
-| [a phone](2026-09-09-portal-the-record-is-quieter-phone.png) | 390px |
+| [**What's been asked** — three real asks, one the AI could not interpret](2026-09-09-portal-the-record-is-quieter-asked.webp) | 1280px |
+| [**What's changed, before**](2026-09-09-portal-the-record-is-quieter-changed-before.webp) · [**after**](2026-09-09-portal-the-record-is-quieter-changed.webp) | 1280px |
+| [**Sign-ins, before**](2026-09-09-portal-the-record-is-quieter-sign-ins-before.webp) · [**after**](2026-09-09-portal-the-record-is-quieter-sign-ins.webp) | 1280px |
+| [What Loom can put on your page](2026-09-09-portal-the-record-is-quieter-pieces.webp) | 1280px |
+| [Can you trust the AI?](2026-09-09-portal-the-record-is-quieter-trust.webp) | 1280px |
+| [a phone](2026-09-09-portal-the-record-is-quieter-phone.webp) | 390px |
 
 **How honest these are.** `LOOM_ANTHROPIC_API_KEY` is present in this
 environment, so nothing is staged. Three requests were typed into the real

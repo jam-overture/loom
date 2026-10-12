@@ -15,10 +15,10 @@ the reason the 22 September finding gives.
 
 | | |
 | --- | --- |
-| [What's changed, with three changes in it](2026-09-24-portal-a-change-has-a-number-history-wide.png) | 1280px, full page — *Version 3*, *Version 2*, *Version 1* |
-| [The same rows, one click down](2026-09-24-portal-a-change-has-a-number-record-open.png) | 1280px — the record open, reading `in the record  revision 3` |
-| [The same screen on a phone](2026-09-24-portal-a-change-has-a-number-history-phone.png) | 390px |
-| [A number this page has not reached](2026-09-24-portal-a-change-has-a-number-missed-wide.png) | 1280px — *"Version 900 isn't among the changes shown here"* |
+| [What's changed, with three changes in it](2026-09-24-portal-a-change-has-a-number-history-wide.webp) | 1280px, full page — *Version 3*, *Version 2*, *Version 1* |
+| [The same rows, one click down](2026-09-24-portal-a-change-has-a-number-record-open.webp) | 1280px — the record open, reading `in the record  revision 3` |
+| [The same screen on a phone](2026-09-24-portal-a-change-has-a-number-history-phone.webp) | 390px |
+| [A number this page has not reached](2026-09-24-portal-a-change-has-a-number-missed-wide.webp) | 1280px — *"Version 900 isn't among the changes shown here"* |
 
 **What is staged, and what is real.** `pnpm shoot` does not start your
 application, and a healthy deployment of this portal is seeded with one page at

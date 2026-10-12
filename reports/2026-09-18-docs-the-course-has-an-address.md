@@ -8,7 +8,7 @@ opened — `vercel.app` is off this sandbox's egress allowlist, which is the
 standing 15 September finding and is not re-filed. Every screenshot below is a
 production build of this commit, served locally by `next start`.
 
-![The two doors, and the one that leaves](2026-09-18-docs-the-course-has-an-address-doors.png)
+![The two doors, and the one that leaves](2026-09-18-docs-the-course-has-an-address-doors.webp)
 
 ## What this run was
 
@@ -57,14 +57,14 @@ and the words are in the prose rather than inside each link, because a
 visually-hidden "opens on GitHub" reads well under a pair of doors and badly on
 a table with one row per record.
 
-![The list, and where each row goes](2026-09-18-docs-the-course-has-an-address-records.png)
+![The list, and where each row goes](2026-09-18-docs-the-course-has-an-address-records.webp)
 
 *What it costs you* is where the two kinds sit closest together, and so the place
 the mark is easiest to get wrong: **the ruling** leaves and *shows it happening*
 does not, in the same box. A test walks every link the page renders and asserts
 the mark is on exactly the ones whose address leaves.
 
-![Both kinds of link, in one box](2026-09-18-docs-the-course-has-an-address-costs.png)
+![Both kinds of link, in one box](2026-09-18-docs-the-course-has-an-address-costs.webp)
 
 ## The thing the screenshot taught me, which changed the page
 
@@ -86,7 +86,7 @@ behind one idea, they have done none of the course, and the first screen asks
 them four closed-book questions about lessons they have not read. The old link
 handed them a file they could simply read.
 
-![Where the door lands](2026-09-18-docs-the-course-has-an-address-landing.png)
+![Where the door lands](2026-09-18-docs-the-course-has-an-address-landing.webp)
 
 **This lane's half is prose, and it is now checked rather than believed.** *The
 two doors* says the course runs in order, that a lesson opens with a closed-book
@@ -161,7 +161,7 @@ One closed:
 1280 at 1280, on all four pages photographed. The doors stack to one column and
 the mark stays with the link it belongs to.
 
-![The doors, on a phone](2026-09-18-docs-the-course-has-an-address-phone.png)
+![The doors, on a phone](2026-09-18-docs-the-course-has-an-address-phone.webp)
 
 The screenshots are light. That is the standing gap this lane recorded on 14, 15
 and 16 September — `pnpm shoot` photographs an address, the theme lives in

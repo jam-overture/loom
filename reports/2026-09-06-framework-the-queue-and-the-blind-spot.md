@@ -62,7 +62,7 @@ page nobody can read instead of refusing it.
 
 The reason is the picture below.
 
-![loom.offering with a price and without one](2026-09-06-framework-offering-price-wide.png)
+![loom.offering with a price and without one](2026-09-06-framework-offering-price-wide.webp)
 
 The left card is what a reader sees. The right card is what the probe sees.
 `registryPairings` renders each primitive under `probeConfigurations` — the empty

@@ -312,11 +312,11 @@ Nothing blocking. Two carried, unchanged by this run:
 
 | | |
 | --- | --- |
-| [before](2026-09-01-demo-what-allowing-it-would-do-before.png) | `main` at `d7375ef`, the held card: the buttons first, then *Deletes the `loom.stat-grid`, and the 3 pieces inside it*, then two collapsed disclosures |
-| [after](2026-09-01-demo-what-allowing-it-would-do-after.png) | the same press on this branch: *This comes off the page, and everything under it goes too. "3,400" "24" "92%"* — above the buttons, in the amber of the ring around the band on the left, and one disclosure instead of two |
-| [record](2026-09-01-demo-what-allowing-it-would-do-record.png) | *Show the full record*, open, with its nested *What the change record says* open too. Nothing was removed: the rationale, the interpreter, the delta, the portal's whole reading, both revision numbers, both stake factors, the inverse, the rule, the policy and the fingerprint |
-| [phone before](2026-09-01-demo-what-allowing-it-would-do-phone-before.png) | 390×844 on `main`. The page is off-screen and the card names two ids under a button the visitor has already read |
-| [phone](2026-09-01-demo-what-allowing-it-would-do-phone.png) | the same viewport on this branch. The card answers its own question before it asks it, and the two buttons sit where the second disclosure used to |
+| [before](2026-09-01-demo-what-allowing-it-would-do-before.webp) | `main` at `d7375ef`, the held card: the buttons first, then *Deletes the `loom.stat-grid`, and the 3 pieces inside it*, then two collapsed disclosures |
+| [after](2026-09-01-demo-what-allowing-it-would-do-after.webp) | the same press on this branch: *This comes off the page, and everything under it goes too. "3,400" "24" "92%"* — above the buttons, in the amber of the ring around the band on the left, and one disclosure instead of two |
+| [record](2026-09-01-demo-what-allowing-it-would-do-record.webp) | *Show the full record*, open, with its nested *What the change record says* open too. Nothing was removed: the rationale, the interpreter, the delta, the portal's whole reading, both revision numbers, both stake factors, the inverse, the rule, the policy and the fingerprint |
+| [phone before](2026-09-01-demo-what-allowing-it-would-do-phone-before.webp) | 390×844 on `main`. The page is off-screen and the card names two ids under a button the visitor has already read |
+| [phone](2026-09-01-demo-what-allowing-it-would-do-phone.webp) | the same viewport on this branch. The card answers its own question before it asks it, and the two buttons sit where the second disclosure used to |
 
 Every pair is one script driven against two `next build` outputs — this branch's
 and `main`'s, both served locally — so the only difference in the frame is the

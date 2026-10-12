@@ -22,7 +22,7 @@ own, and `aspect: "adaptive"` gives a framed application a different shape at a
 different width. The entry closing the first of them ends *"§4d is unblocked, and
 the band can be rebuilt."* This is the rebuild.
 
-![the band, 1280×900](2026-09-18-marketing-embedding-the-demo.png)
+![the band, 1280×900](2026-09-18-marketing-embedding-the-demo.webp)
 
 ---
 
@@ -136,7 +136,7 @@ seen yet.
 
 | | |
 | --- | --- |
-| ![bold](2026-09-18-marketing-embedding-the-demo-bold.png) | ![390px](2026-09-18-marketing-embedding-the-demo-phone.png) |
+| ![bold](2026-09-18-marketing-embedding-the-demo-bold.webp) | ![390px](2026-09-18-marketing-embedding-the-demo-phone.webp) |
 
 `scrollWidth 1280 / innerWidth 1280` and `390 / 390` — no overflow at either
 width, in either palette. No colour is named anywhere in the diff.

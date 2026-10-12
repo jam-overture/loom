@@ -40,13 +40,13 @@ began **four hundred and forty pixels below the screen.**
 
 | | |
 | --- | --- |
-| [**after *Re-theme the whole page***](2026-10-04-demo-one-press-retheme-wide.png) · [before](2026-10-04-demo-one-press-retheme-wide-before.png) | **the picture worth opening** — the page transformed, and the whole record of it, side by side |
-| [after *Repaint the top band*](2026-10-04-demo-one-press-repaint-wide.png) · [before](2026-10-04-demo-one-press-repaint-wide-before.png) | the quieter change, same movement |
-| [the arrival screen](2026-10-04-demo-one-press-arrival-wide-unchanged.png) | **unchanged, byte for byte** |
-| [the question, one press later](2026-10-04-demo-one-press-held-unchanged.png) | **unchanged, byte for byte** |
-| [the answered card, two presses later](2026-10-04-demo-one-press-applied-unchanged.png) | **unchanged, byte for byte** |
-| [the embed at 348 × 465](2026-10-04-demo-one-press-embed-unchanged.png) | **unchanged, byte for byte** |
-| [the phone, after the same press](2026-10-04-demo-one-press-retheme-phone-unchanged.png) | **unchanged** — same geometry to the pixel, and see *the one frame that will not hash* |
+| [**after *Re-theme the whole page***](2026-10-04-demo-one-press-retheme-wide.webp) · [before](2026-10-04-demo-one-press-retheme-wide-before.webp) | **the picture worth opening** — the page transformed, and the whole record of it, side by side |
+| [after *Repaint the top band*](2026-10-04-demo-one-press-repaint-wide.webp) · [before](2026-10-04-demo-one-press-repaint-wide-before.webp) | the quieter change, same movement |
+| [the arrival screen](2026-10-04-demo-one-press-arrival-wide-unchanged.webp) | **unchanged, byte for byte** |
+| [the question, one press later](2026-10-04-demo-one-press-held-unchanged.webp) | **unchanged, byte for byte** |
+| [the answered card, two presses later](2026-10-04-demo-one-press-applied-unchanged.webp) | **unchanged, byte for byte** |
+| [the embed at 348 × 465](2026-10-04-demo-one-press-embed-unchanged.webp) | **unchanged, byte for byte** |
+| [the phone, after the same press](2026-10-04-demo-one-press-retheme-phone-unchanged.webp) | **unchanged** — same geometry to the pixel, and see *the one frame that will not hash* |
 
 ## What specifically failed, diagnosed before anything was built
 

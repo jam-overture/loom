@@ -11,7 +11,7 @@ on 28 August when he closed sixteen pull requests unmerged.
 So this run built no fifth page. It merged the four into one tree, and then dealt
 with what the merge turned up — which was not the conflicts.
 
-![The two blocks a reader sees, and the two programs the compiler now reads](2026-09-06-docs-four-pages-one-compiler.png)
+![The two blocks a reader sees, and the two programs the compiler now reads](2026-09-06-docs-four-pages-one-compiler.webp)
 
 **The conflicts took ten minutes.** There were three: two appends to
 `FINDINGS.md`, and one fence that two branches had corrected differently. #243
@@ -109,7 +109,7 @@ down knows where a name came from. A marker written *above* a block is the
 leading trivia of that block's first statement — so where the block opened with
 an import, the marker went into the discard with it.
 
-![The connection block, with the two lines that make it compile](2026-09-06-docs-four-pages-one-compiler-connection.png)
+![The connection block, with the two lines that make it compile](2026-09-06-docs-four-pages-one-compiler-connection.webp)
 
 The blocks that lost their marker were therefore exactly the copy-me-whole ones.
 `what-your-app-has-to-do` had one marker of three. The fix is to put the marker
@@ -165,13 +165,13 @@ So it says less:
 > Every page, every section and every published name are searched. The words in
 > them are still loading; code blocks are never searched.
 
-![The claim the box makes while the second file is still in flight](2026-09-06-docs-four-pages-one-compiler-inflight.png)
+![The claim the box makes while the second file is still in flight](2026-09-06-docs-four-pages-one-compiler-inflight.webp)
 
 Getting that wrong would have been the exact overclaim the sentence was written to
 end. The shot above is the real state, forced by holding the prose request open:
 the box is working, and it is saying what it has not read yet.
 
-![The same box once both halves are in, finding a word that only a paragraph carries](2026-09-06-docs-four-pages-one-compiler-prose.png)
+![The same box once both halves are in, finding a word that only a paragraph carries](2026-09-06-docs-four-pages-one-compiler-prose.webp)
 
 ## Tests
 
@@ -210,13 +210,13 @@ server stops emitting something the browser can merge.
 
 ## Dark and 390px, before the pull request
 
-![The two blocks in dark](2026-09-06-docs-four-pages-one-compiler-dark.png)
+![The two blocks in dark](2026-09-06-docs-four-pages-one-compiler-dark.webp)
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport. The
 code blocks scroll inside their own box rather than the page, which is what they
 already did.
 
-![The pair at a true 390px](2026-09-06-docs-four-pages-one-compiler-phone.png)
+![The pair at a true 390px](2026-09-06-docs-four-pages-one-compiler-phone.webp)
 
 ## Scope
 

@@ -7,9 +7,9 @@
 — every primitive from both runs, live under both palettes. Not a screenshot;
 see the finding below for why that matters.
 
-![The pricing band and the proof wall under the editorial palette](2026-08-16-primitives-a-perk-and-a-perk-list-item-editorial.png)
+![The pricing band and the proof wall under the editorial palette](2026-08-16-primitives-a-perk-and-a-perk-list-item-editorial.webp)
 
-![The same bands under the bold palette](2026-08-16-primitives-a-perk-and-a-perk-list-item-bold.png)
+![The same bands under the bold palette](2026-08-16-primitives-a-perk-and-a-perk-list-item-bold.webp)
 
 This run exists to answer the maintainer's review of #75. It is not planned
 work, and everything in it traces to one of his three points.

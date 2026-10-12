@@ -33,7 +33,7 @@ because one application has one icon.
 Four marks were drawn first and **all four were rejected**. They are kept here
 because the failures are more instructive than the survivor.
 
-![the first set](2026-09-28-marketing-mark-first-set.png)
+![the first set](2026-09-28-marketing-mark-first-set.webp)
 
 | | why it failed |
 | --- | --- |
@@ -54,7 +54,7 @@ a picture — arriving for the third time in two days.
 
 ## The second round
 
-![the second set](2026-09-28-marketing-mark-second-set.png)
+![the second set](2026-09-28-marketing-mark-second-set.webp)
 
 | | |
 | --- | --- |
@@ -69,7 +69,7 @@ half a pixel and close up**, and the interlace — the whole of what the mark
 says — turns into a solid spiral. Widening them to 2px costs nothing at large
 sizes and is the difference between a mark and a smudge at small ones:
 
-![1px against 2px gaps](2026-09-28-marketing-mark-gaps.png)
+![1px against 2px gaps](2026-09-28-marketing-mark-gaps.webp)
 
 ## What shipped
 

@@ -21,13 +21,13 @@ and both were broken. One of them was replacing every page of the documentation
 site with an error screen for a particular reader, and had been for as long as
 the toggle has existed.
 
-![The quickstart page with site data blocked, on the shipped build](2026-10-06-docs-storage-blocked-shipped-phone.png)
+![The quickstart page with site data blocked, on the shipped build](2026-10-06-docs-storage-blocked-shipped-phone.webp)
 
 That is `/docs/getting-started/quickstart` at 390 pixels on `main`, in a browser
 where the reader has blocked site data. It is the same picture at 1280. It is
 the same picture on every page of the site.
 
-![The same page, same conditions, on this branch](2026-10-06-docs-storage-blocked-fixed-phone.png)
+![The same page, same conditions, on this branch](2026-10-06-docs-storage-blocked-fixed-phone.webp)
 
 ## The first defect: a read that throws, inside an effect
 
@@ -282,7 +282,7 @@ was noticed; it was re-run against the real characters.
 
 ## The visual, and the one this run could not take
 
-![The first code block on the installation page, at 390 pixels](2026-10-06-docs-copy-button-phone.png)
+![The first code block on the installation page, at 390 pixels](2026-10-06-docs-copy-button-phone.webp)
 
 **That picture is identical on this branch and on `main`, and that is the
 finding.** `VIEWPORTS.phone` is `390x844` at `deviceScaleFactor: 2` and nothing

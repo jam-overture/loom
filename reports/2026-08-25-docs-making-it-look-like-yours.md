@@ -11,7 +11,7 @@ renders.
 
 **Making it look like yours** is that page, third in *Building with Loom*.
 
-![The example that opens it: a palette nobody on this project chose by hand](2026-08-25-docs-making-it-look-like-yours.png)
+![The example that opens it: a palette nobody on this project chose by hand](2026-08-25-docs-making-it-look-like-yours.webp)
 
 ## The thing that made it worth a page
 
@@ -37,13 +37,13 @@ declared — the enum is written in tier order and says so, so the break is the
 moment the prefix changes, and a tier declared in the component would be a second
 opinion about the runtime's ordering.
 
-![Seventeen slots, three palettes, and no colour typed by hand](2026-08-25-docs-making-it-look-like-yours-slots.png)
+![Seventeen slots, three palettes, and no colour typed by hand](2026-08-25-docs-making-it-look-like-yours-slots.webp)
 
 **The contrast audit** calls `auditPalette` on all twenty-one palettes at build
 time and prints what came back — `describePaletteAudit`'s own sentences, not a
 paraphrase.
 
-![The runtime's own audit lines, including the ones it does not clear](2026-08-25-docs-making-it-look-like-yours-audit.png)
+![The runtime's own audit lines, including the ones it does not clear](2026-08-25-docs-making-it-look-like-yours-audit.webp)
 
 This is the block I would defend hardest. A documentation page could easily have
 summarised *"the starter palettes are accessible"* and been technically defensible
@@ -57,7 +57,7 @@ their real ratios.
 **The brand-colour derivation** runs `derivePaletteChecked` on a mint at build
 time, so the claim the section rests on is a measurement rather than an excuse.
 
-![1.73:1 and 5.19:1, both measured as the page built](2026-08-25-docs-making-it-look-like-yours-brand.png)
+![1.73:1 and 5.19:1, both measured as the page built](2026-08-25-docs-making-it-look-like-yours-brand.webp)
 
 The section had to say *your brand colour will come back darker than your brand
 book says, and that is correct*. Asserted, that reads as the tool being clumsy.
@@ -192,4 +192,4 @@ question #155 raised and is still the one thing I would spend a run on next: a
 reader landing on `runtime` from search sees `auditPalette`'s signature and has
 no way to reach the page that explains what a composed failure is.
 
-![The whole page at 390px](2026-08-25-docs-making-it-look-like-yours-phone.png)
+![The whole page at 390px](2026-08-25-docs-making-it-look-like-yours-phone.webp)

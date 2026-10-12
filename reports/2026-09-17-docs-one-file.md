@@ -8,7 +8,7 @@
 15 September finding and is not re-filed. Every screenshot below is a production
 build of this commit, served locally by `next start`.
 
-![The run, and the three answers](2026-09-17-docs-one-file-run-it.png)
+![The run, and the three answers](2026-09-17-docs-one-file-run-it.webp)
 
 ## What this run was
 
@@ -115,7 +115,7 @@ asserted:
 
 The second is the one that turned into a finding.
 
-![Things worth breaking, and the edge under it](2026-09-17-docs-one-file-breaking.png)
+![Things worth breaking, and the edge under it](2026-09-17-docs-one-file-breaking.webp)
 
 ## Decisions taken that were not specified
 
@@ -185,7 +185,7 @@ goes red and gets rewritten.
 1280 at 1280. The file block scrolls inside its own box, as every code block on
 this site does; the terminal panel does the same.
 
-![The file, on a phone](2026-09-17-docs-one-file-phone.png)
+![The file, on a phone](2026-09-17-docs-one-file-phone.webp)
 
 The screenshots are light. That is the standing gap this lane recorded on 14, 15
 and 16 September — `pnpm shoot` photographs an address, the theme lives in

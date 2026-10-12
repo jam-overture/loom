@@ -9,7 +9,7 @@ finding and is not re-filed. Everything measured below is a production build
 (`pnpm build && next build && next start`), fetched over real HTTP and driven in
 Chromium.
 
-![What the search box downloads, and in what order](2026-09-21-docs-the-words-of-the-section-you-are-in.png)
+![What the search box downloads, and in what order](2026-09-21-docs-the-words-of-the-section-you-are-in.webp)
 
 ## What this run was
 

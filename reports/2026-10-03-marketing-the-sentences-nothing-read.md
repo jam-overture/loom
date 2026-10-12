@@ -5,13 +5,13 @@ anybody decided it was out of scope — because every rule in this lane that
 reads copy was written against the function that happened to be in front of
 whoever wrote it.
 
-![the record panel before](2026-10-03-nothing-read-before-refused.png)
+![the record panel before](2026-10-03-nothing-read-before-refused.webp)
 
 Rung 3, on `main`. One sentence, fifty words, a colon and four semicolons, in a
 rung of a five-step rail. It is the heaviest change this site can be asked for
 and the record names all five reasons it was refused.
 
-![and after](2026-10-03-nothing-read-after-refused.png)
+![and after](2026-10-03-nothing-read-after-refused.webp)
 
 Same five facts, six short sentences, nothing dropped.
 

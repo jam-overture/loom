@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gt, lt } from "drizzle-orm"
 import { z } from "zod"
 
+import { DEFAULT_PROJECT_ID, type StoreScope } from "../project/project.js"
 import { proposalIdSchema, treeIdSchema, type TreeId } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { provenanceSchema } from "../runtime/proposal.js"
@@ -100,12 +101,26 @@ const toStoredRevision = (row: z.infer<typeof storedRevisionSchema>): StoredRevi
   return answeredBy === null || answeredBy === undefined ? entry : { ...entry, answeredBy }
 }
 
-export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
+/**
+ * Every query below is filtered by the project this handle speaks for (0260),
+ * and every write sets it. There is no path through this module that reads or
+ * writes a row belonging to another project, which is the one property a
+ * governance surface cannot get wrong (0220): *a hold listing that spanned two
+ * apps would put one app's changes in another's queue.*
+ *
+ * The scope is a constructor argument rather than a parameter on each method,
+ * so no signature in `@jam-overture/loom/store` changed and spanning two
+ * projects is unexpressible rather than merely forbidden.
+ */
+export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): TreeStore => {
+  const project = scope.project ?? DEFAULT_PROJECT_ID
+  /** Every read starts here, so a query cannot forget the project by omission. */
+  const mine = (treeId: TreeId) => and(eq(loomTrees.projectId, project), eq(loomTrees.treeId, treeId))
   const readHead = async (treeId: TreeId): Promise<Result<LoomTree, StoreError>> => {
     const rows = await db
       .select({ document: loomTrees.document })
       .from(loomTrees)
-      .where(eq(loomTrees.treeId, treeId))
+      .where(mine(treeId))
       .limit(1)
 
     const row = rows[0]
@@ -119,6 +134,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
     create: async (tree) => {
       try {
         await db.insert(loomTrees).values({
+          projectId: project,
           treeId: tree.treeId,
           revision: tree.revision,
           document: tree,
@@ -152,7 +168,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
         const present = await db
           .select({ treeId: loomTrees.treeId, revision: loomTrees.revision })
           .from(loomTrees)
-          .where(eq(loomTrees.treeId, treeId))
+          .where(mine(treeId))
           .limit(1)
 
         /** "No tree" and "a tree with no changes" are different answers. */
@@ -170,6 +186,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
           .from(loomRevisions)
           .where(
             and(
+              eq(loomRevisions.projectId, project),
               eq(loomRevisions.treeId, treeId),
               from === undefined
                 ? undefined
@@ -218,7 +235,12 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
         const rows = await db
           .select({ treeId: loomTrees.treeId, revision: loomTrees.revision })
           .from(loomTrees)
-          .where(request?.cursor === undefined ? undefined : gt(loomTrees.treeId, request.cursor))
+          .where(
+            and(
+              eq(loomTrees.projectId, project),
+              request?.cursor === undefined ? undefined : gt(loomTrees.treeId, request.cursor)
+            )
+          )
           .orderBy(asc(loomTrees.treeId))
           /** One extra row answers "is there another page" without a count. */
           .limit(limit + 1)
@@ -253,7 +275,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
           const rows = await tx
             .select({ document: loomTrees.document })
             .from(loomTrees)
-            .where(eq(loomTrees.treeId, treeId))
+            .where(mine(treeId))
             .for("update")
             .limit(1)
 
@@ -278,6 +300,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
           }
 
           await tx.insert(loomRevisions).values({
+            projectId: project,
             treeId,
             revision: applied.value.revision,
             proposalId: request.proposalId,
@@ -290,7 +313,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
           await tx
             .update(loomTrees)
             .set({ revision: applied.value.revision, document: applied.value })
-            .where(and(eq(loomTrees.treeId, treeId), eq(loomTrees.revision, snapshot.value.revision)))
+            .where(and(mine(treeId), eq(loomTrees.revision, snapshot.value.revision)))
 
           return ok(applied.value)
         })

@@ -5,8 +5,8 @@
 
 **Visual:** [what an outline row addresses](2026-07-30-day-12-addressing.svg) ·
 screenshots of the running build:
-[a text row delegating](2026-07-30-day-12-selection-delegated.png) ·
-[an element selected directly](2026-07-30-day-12-selection-direct.png)
+[a text row delegating](2026-07-30-day-12-selection-delegated.webp) ·
+[an element selected directly](2026-07-30-day-12-selection-direct.webp)
 
 **Branch:** `day-12-addressing`, off `main` at `e379d25`
 

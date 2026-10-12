@@ -13,7 +13,13 @@ import type { PaperTrail } from "../adapt/paper-trail"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { JOURNEY, STEPS_CAPITALISED } from "../journey"
 import { action, heading, prose, section, splitSection, stack } from "../nodes"
-import { DEMO, DOCS, HOW_IT_WORKS, SITE_THEMES, surfaceHref } from "../site"
+import {
+  DEMO,
+  DOCS,
+  HOW_IT_WORKS,
+  SITE_THEMES,
+  surfacePath,
+} from "../site"
 
 import { answerBand } from "./answer"
 import type { PageContext } from "./home"
@@ -190,7 +196,7 @@ const whoAsks = (ids: IdFactory): LoomNode =>
  * losing an argument it used to win. The documentation is the answer, and this
  * band is the handover.
  */
-const closing = (ids: IdFactory, context: PageContext): LoomNode =>
+const closing = (ids: IdFactory, ): LoomNode =>
   section(
     ids,
     { tone: "accent", width: "wide", eyebrow: "Going deeper" },
@@ -202,10 +208,10 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
         { measured: true }
       ),
       stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
-        action(ids, "Read the docs", surfaceHref(context.origin, DOCS), {
+        action(ids, "Read the docs", surfacePath(DOCS), {
           variant: "primary",
         }),
-        action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), {
+        action(ids, "Try it yourself", surfacePath(DEMO), {
           variant: "secondary",
         }),
       ]),
@@ -311,7 +317,7 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
           ...(context.record === undefined ? {} : { record: context.record }),
           ...(context.undone === undefined ? {} : { undone: context.undone }),
         }),
-        closing(ids, context),
+        closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],

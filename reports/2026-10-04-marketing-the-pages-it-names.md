@@ -4,7 +4,7 @@ One sentence on this site tells a reader that something is on another page of
 it, and until today it left them to go and find it. The same sentence named the
 wrong page for a day in September, and nothing anywhere could have said so.
 
-![the band, on minimal](2026-10-04-the-pages-it-names-wide.png)
+![the band, on minimal](2026-10-04-the-pages-it-names-wide.webp)
 
 `/what-you-run`, 1280×900. The control under the muted paragraph is new, and it
 carries the anchor of the band it is about rather than the address of the page.
@@ -113,15 +113,15 @@ So it is **a finding for `Loom primitives` and not a fix here**, and the site
 ships the control the library does have. That control is unambiguous on every
 palette, which the inline version was not:
 
-![on bold](2026-10-04-the-pages-it-names-bold-wide.png)
+![on bold](2026-10-04-the-pages-it-names-bold-wide.webp)
 
-![on editorial](2026-10-04-the-pages-it-names-editorial-wide.png)
+![on editorial](2026-10-04-the-pages-it-names-editorial-wide.webp)
 
-![at 390](2026-10-04-the-pages-it-names-phone.png)
+![at 390](2026-10-04-the-pages-it-names-phone.webp)
 
 And the band it sends them to, which is the claim being made:
 
-![the ready-made changes, where the sentence says they are](2026-10-04-the-pages-it-names-landing-wide.png)
+![the ready-made changes, where the sentence says they are](2026-10-04-the-pages-it-names-landing-wide.webp)
 
 ---
 

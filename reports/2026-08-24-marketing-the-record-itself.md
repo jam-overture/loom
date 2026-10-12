@@ -7,7 +7,7 @@ mechanism page explains the five steps it takes.
 
 All three *describe* the record. None of them had ever shown one.
 
-![The record itself, on the mechanism page](2026-08-24-marketing-the-record-itself-trail.png)
+![The record itself, on the mechanism page](2026-08-24-marketing-the-record-itself-trail.webp)
 
 ---
 
@@ -39,7 +39,7 @@ sequence for the change this site refuses, stopping at the answer.
 Nobody typed that reason. It was counted off the change, and the rules that
 weighed it are named on the same line with a digest of what they contained.
 
-![The one it will not do](2026-08-24-marketing-the-record-itself-refused.png)
+![The one it will not do](2026-08-24-marketing-the-record-itself-refused.webp)
 
 ## Why the whole envelope, and why it is long
 
@@ -128,7 +128,7 @@ fixed too, by the same line.
 getting wrong: sizing the page by its contents, and declaring anything the theme
 owns.
 
-![The same lines, bold palette, no colour named anywhere](2026-08-24-marketing-the-record-itself-bold.png)
+![The same lines, bold palette, no colour named anywhere](2026-08-24-marketing-the-record-itself-bold.webp)
 
 ## Tests
 
@@ -175,7 +175,7 @@ tree in the repository to use `loom.code`** — the lessons surface has a builde
 for it and no lesson currently renders one — and it behaves correctly under all
 three palettes and at 390px once the page above it stops being sized by it.
 
-![The panel scrolling inside its own edge, at 390px](2026-08-24-marketing-the-record-itself-phone.png)
+![The panel scrolling inside its own edge, at 390px](2026-08-24-marketing-the-record-itself-phone.webp)
 
 ## Open questions
 

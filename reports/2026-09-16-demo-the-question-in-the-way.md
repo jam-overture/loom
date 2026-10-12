@@ -274,12 +274,12 @@ All five are the same script driven against two real `next build` outputs,
 
 | | |
 | --- | --- |
-| [before](2026-09-16-demo-the-question-in-the-way-before.png) | `main`, one press in: four live asks above the question, two green buttons on the rail, nothing saying they are related |
-| [after](2026-09-16-demo-the-question-in-the-way-after.png) | the same press: the caution pinned to the top of the rail in the question's own amber, and one green button on the rail — the one under the question |
-| [two questions](2026-09-16-demo-the-question-in-the-way-two-questions.png) | the plural, and the whole panel: *ask for something else* with all five asks under it and no primary, the claim and the frame above |
-| [answer it first](2026-09-16-demo-the-question-in-the-way-answer-it-first.png) | the link followed — the card lands clear of the strip rather than behind it |
-| [phone](2026-09-16-demo-the-question-in-the-way-phone.png) | 390×844. `scrollWidth` 390 against `innerWidth` 390 — no horizontal overflow |
-| [arrival](2026-09-16-demo-the-question-in-the-way-arrival.png) | the first screen, unchanged: md5-identical to `main`'s |
+| [before](2026-09-16-demo-the-question-in-the-way-before.webp) | `main`, one press in: four live asks above the question, two green buttons on the rail, nothing saying they are related |
+| [after](2026-09-16-demo-the-question-in-the-way-after.webp) | the same press: the caution pinned to the top of the rail in the question's own amber, and one green button on the rail — the one under the question |
+| [two questions](2026-09-16-demo-the-question-in-the-way-two-questions.webp) | the plural, and the whole panel: *ask for something else* with all five asks under it and no primary, the claim and the frame above |
+| [answer it first](2026-09-16-demo-the-question-in-the-way-answer-it-first.webp) | the link followed — the card lands clear of the strip rather than behind it |
+| [phone](2026-09-16-demo-the-question-in-the-way-phone.webp) | 390×844. `scrollWidth` 390 against `innerWidth` 390 — no horizontal overflow |
+| [arrival](2026-09-16-demo-the-question-in-the-way-arrival.webp) | the first screen, unchanged: md5-identical to `main`'s |
 
 Not the preview deployment, which this environment cannot open (`vercel.app` is
 not on the sandbox's egress allowlist; the standing 19 August finding).

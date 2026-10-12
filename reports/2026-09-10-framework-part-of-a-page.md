@@ -2,7 +2,7 @@
 
 **Routine:** `Loom daily build` · **Section:** §1
 **Branch:** `framework-25-where-the-face-is` (#230), twentieth unit
-**Visual:** `reports/2026-09-10-framework-part-of-a-page.png`
+**Visual:** `reports/2026-09-10-framework-part-of-a-page.webp`
 
 ## What was completed
 

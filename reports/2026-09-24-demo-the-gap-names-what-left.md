@@ -63,9 +63,9 @@ moment is one bar of green and the word *something*.
 
 | before — `main` | after — this branch |
 | --- | --- |
-| [the payoff frame, wide](2026-09-24-demo-the-gap-names-what-left-before.png) | [the same frame](2026-09-24-demo-the-gap-names-what-left-after.png) |
-| [the same on a phone](2026-09-24-demo-the-gap-names-what-left-phone-before.png) | [the same on a phone](2026-09-24-demo-the-gap-names-what-left-phone-after.png) |
-| [a question about a section that has not arrived](2026-09-24-demo-the-gap-names-what-left-insert-before.png) | [the same question](2026-09-24-demo-the-gap-names-what-left-insert-after.png) |
+| [the payoff frame, wide](2026-09-24-demo-the-gap-names-what-left-before.webp) | [the same frame](2026-09-24-demo-the-gap-names-what-left-after.webp) |
+| [the same on a phone](2026-09-24-demo-the-gap-names-what-left-phone-before.webp) | [the same on a phone](2026-09-24-demo-the-gap-names-what-left-phone-after.webp) |
+| [a question about a section that has not arrived](2026-09-24-demo-the-gap-names-what-left-insert-before.webp) | [the same question](2026-09-24-demo-the-gap-names-what-left-insert-after.webp) |
 
 ## What a stranger can understand now
 

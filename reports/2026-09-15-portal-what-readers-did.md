@@ -10,10 +10,10 @@ Visuals — a production build of this commit, in a signed-in browser at
 
 | | |
 | --- | --- |
-| [The screen, with something to say](2026-09-15-portal-what-readers-did-wide.png) | 1280px — **the change** |
-| [The same screen, every disclosure open](2026-09-15-portal-what-readers-did-open.png) | 1280px — nothing was removed to make the first one readable |
-| [a phone](2026-09-15-portal-what-readers-did-phone.png) | 390px |
-| [The empty state](2026-09-15-portal-what-readers-did-empty-wide.png) · [on a phone](2026-09-15-portal-what-readers-did-empty-phone.png) | 1280px / 390px — real, unmodified, and what every deployment shows today |
+| [The screen, with something to say](2026-09-15-portal-what-readers-did-wide.webp) | 1280px — **the change** |
+| [The same screen, every disclosure open](2026-09-15-portal-what-readers-did-open.webp) | 1280px — nothing was removed to make the first one readable |
+| [a phone](2026-09-15-portal-what-readers-did-phone.webp) | 390px |
+| [The empty state](2026-09-15-portal-what-readers-did-empty-wide.webp) · [on a phone](2026-09-15-portal-what-readers-did-empty-phone.webp) | 1280px / 390px — real, unmodified, and what every deployment shows today |
 
 **How the populated pictures were taken, stated plainly.** No counter in them was
 put there by a reader, because nothing in this deployment can receive one yet —

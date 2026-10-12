@@ -80,9 +80,9 @@ before committing and the shot list is beside this report.
 
 | | |
 | --- | --- |
-| [**the trust screen**](2026-10-06-portal-has-it-got-better-wide.png) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
-| [**the disclosure open**](2026-10-06-portal-has-it-got-better-open.png) | `1680×1000@2x`, the technical record one click down |
-| [**the same, on a phone**](2026-10-06-portal-has-it-got-better-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**the trust screen**](2026-10-06-portal-has-it-got-better-wide.webp) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
+| [**the disclosure open**](2026-10-06-portal-has-it-got-better-open.webp) | `1680×1000@2x`, the technical record one click down |
+| [**the same, on a phone**](2026-10-06-portal-has-it-got-better-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 The staged figures, so the photographs can be read against them: this stretch 49
 judged, 69% survived, mean claim 95%, gap `+0.26`; the one before 49 judged, 49%

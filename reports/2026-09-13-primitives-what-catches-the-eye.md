@@ -3,7 +3,7 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-13 · **Branch:**
 `primitives-28-what-catches-the-eye` · **Section:** §4b
 
-![The pricing row and the four tones, under bold](2026-09-13-primitives-what-catches-the-eye-bold-wide.png)
+![The pricing row and the four tones, under bold](2026-09-13-primitives-what-catches-the-eye-bold-wide.webp)
 
 ## What this run built, and why this rather than anything else
 

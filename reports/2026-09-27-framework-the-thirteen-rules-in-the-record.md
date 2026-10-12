@@ -7,7 +7,7 @@
 **Record added:** [0198](../decisions/0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md)
 **Finding closed:** *the two `critical` factors the floors raise are dropped by the telemetry summary* — `Loom portal`, 23 September
 
-![Five refusals, grouped by reason code and by rule](2026-09-27-framework-the-thirteen-rules-in-the-record.png)
+![Five refusals, grouped by reason code and by rule](2026-09-27-framework-the-thirteen-rules-in-the-record.webp)
 
 ## The migration is done, and this run did not touch it
 

@@ -90,9 +90,9 @@ is the portal's own seed tree, read through the store — nothing staged.
 
 | | |
 | --- | --- |
-| [**Desktop**](2026-10-03-portal-pane-desktop-wide.png) | 1280×800, *shown at 64%* |
-| [**Tablet**](2026-10-03-portal-pane-tablet-wide.png) | 834×1112 |
-| [**Phone**](2026-10-03-portal-pane-phone-wide.png) | 390×844, at full size |
+| [**Desktop**](2026-10-03-portal-pane-desktop-wide.webp) | 1280×800, *shown at 64%* |
+| [**Tablet**](2026-10-03-portal-pane-tablet-wide.webp) | 834×1112 |
+| [**Phone**](2026-10-03-portal-pane-phone-wide.webp) | 390×844, at full size |
 
 ---
 

@@ -13,9 +13,9 @@ browsers report *where* they pressed, and one whose do not.
 
 | | |
 | --- | --- |
-| [Two pages, two kinds of silence](2026-09-19-portal-the-part-nobody-uses-wide.png) | 1280px — **the change**: the second and fourth lines of the Pricing card, and the whole of the note on Field notes |
-| [The same screen, every disclosure open](2026-09-19-portal-the-part-nobody-uses-open.png) | 1280px — the new column, and nothing removed to make the first one readable |
-| [a phone](2026-09-19-portal-the-part-nobody-uses-phone.png) | 390px |
+| [Two pages, two kinds of silence](2026-09-19-portal-the-part-nobody-uses-wide.webp) | 1280px — **the change**: the second and fourth lines of the Pricing card, and the whole of the note on Field notes |
+| [The same screen, every disclosure open](2026-09-19-portal-the-part-nobody-uses-open.webp) | 1280px — the new column, and nothing removed to make the first one readable |
+| [a phone](2026-09-19-portal-the-part-nobody-uses-phone.webp) | 390px |
 
 **How the populated pictures were taken.** The recipe this lane filed on 15, 16,
 17 and 18 September, with its third carrier: two trees are built with the

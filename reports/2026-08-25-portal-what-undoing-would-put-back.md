@@ -9,11 +9,11 @@ signed-in browser:
 
 | | |
 | --- | --- |
-| [History as it arrives](2026-08-25-portal-what-undoing-would-put-back.png) | 1280px |
-| [the same screen with every disclosure opened](2026-08-25-portal-what-undoing-would-put-back-open.png) | 1280px |
-| [a phone](2026-08-25-portal-what-undoing-would-put-back-phone.png) | 390px |
-| [the chooser, which is where the nav lands you](2026-08-25-portal-what-undoing-would-put-back-chooser.png) | 1280px |
-| [a revision that is not on the page](2026-08-25-portal-what-undoing-would-put-back-miss.png) | 1280px |
+| [History as it arrives](2026-08-25-portal-what-undoing-would-put-back.webp) | 1280px |
+| [the same screen with every disclosure opened](2026-08-25-portal-what-undoing-would-put-back-open.webp) | 1280px |
+| [a phone](2026-08-25-portal-what-undoing-would-put-back-phone.webp) | 390px |
+| [the chooser, which is where the nav lands you](2026-08-25-portal-what-undoing-would-put-back-chooser.webp) | 1280px |
+| [a revision that is not on the page](2026-08-25-portal-what-undoing-would-put-back-miss.webp) | 1280px |
 
 **How honest these are, stated plainly.** The screen, the store, the read path
 and the components are all real. The three revisions in the pictures were

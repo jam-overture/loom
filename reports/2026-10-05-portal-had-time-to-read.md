@@ -89,8 +89,8 @@ list is beside this report.
 
 | | |
 | --- | --- |
-| [**the reader screen**](2026-10-05-portal-had-time-wide.png) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
-| [**the same, on a phone**](2026-10-05-portal-had-time-phone.png) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
+| [**the reader screen**](2026-10-05-portal-had-time-wide.webp) | `1680×1000@2x`, full page, `scrollWidth 1680 / innerWidth 1680` |
+| [**the same, on a phone**](2026-10-05-portal-had-time-phone.webp) | `390×844@2x`, `scrollWidth 390 / innerWidth 390` |
 
 ---
 

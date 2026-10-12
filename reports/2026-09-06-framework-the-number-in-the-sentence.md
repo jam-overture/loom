@@ -3,7 +3,7 @@
 **Date:** 2026-09-06 · **Lane:** `Loom daily build` · **Sections:** §2, tooling
 **Branch:** `framework-25-where-the-face-is` ([#230](https://github.com/jam-overture/loom/pull/230)) · units eight and nine
 
-![The record, at 1440px](2026-09-06-framework-the-record-wide.png)
+![The record, at 1440px](2026-09-06-framework-the-record-wide.webp)
 
 *Taken by the harness this run added, against a `next start` of this branch. The
 picture is the evidence for the second unit as much as it is the visual for the

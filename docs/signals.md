@@ -39,6 +39,8 @@ the portal every day.
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
 | Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
 | Whether the readers who met a kind of part read it | each place's own sound share, weighted by the arrivals at its page's door ([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)), so a shorter rollup window cannot move it |
+| Whether readers *do* anything inside a kind of part | each place's own `engaged ÷ reached`, weighted by the door ([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)), where the door is only the weight — so a kind borne by one page is answerable too |
+| What a change did to a kind of part | the places both windows bore, read before against read now ([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)), which is the one denominator here with no reader in it — so the movement is a count of places and a verdict needs no threshold |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
@@ -1467,6 +1469,155 @@ before it, which is what its own name always said.
 shares of one kind side by side — *nine places in ten* and *nine readers in ten*
 are different sentences about the same primitive and can differ by an order of
 magnitude — and the one state to refuse to draw.
+
+### 25. What readers do inside a kind of part · `Loom signals` · **done, 12 October**
+
+§23 counts the places a kind stands and §24 the readers who met them. Both are
+about attention, and the third question about one primitive type is the one the
+person who wrote it actually has: *of the readers who met my pricing card, how
+many did something inside it?* `engaged` has been on a tally since the counters
+existed, §18 interpreted it for one page on 8 October, and nothing had ever asked
+it of a **component**.
+
+**Done.** `libraryActionOf(readings, rows)` in
+[`src/signals/library-action.ts`](../src/signals/library-action.ts) answers it,
+per type and per role, as the **sixteenth** thing taken out of what this
+subsystem already knows rather than collected: **nothing was added to a payload,
+a browser, a column, a store or the vocabulary**, the broadcaster was not touched
+and is byte-identical, and every rule about what a single counter means stays
+§18's and is applied by `pageActionOf`, whose rows this folds.
+
+What decides the shape
+([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)):
+
+- **The door is a weight here and nothing else, which is why this answers where
+  §24 must withhold.** A placement's own share is `engaged ÷ reached` — two
+  distinct counts off one row, so the straddle divides out (0242, 0221) — and
+  across pages the weight is put on the door's scale exactly as §24 does. But
+  **both terms are reaches off the same rows**, so a page's own scale cancels
+  inside its own contribution and only the relative weight of one page against
+  another needs the door. A kind borne by **one** page therefore needs no door
+  row at all, and a page nobody reached needs none either. Two or more weighing
+  pages with one unscalable is §24's refusal unchanged.
+- **A count is published only on the door's scale.** A scale-free row publishes
+  its share and not `met`, `acted` or `ignored`, because mixing two scales in one
+  column would misrank the one ordering that matters. `unranked` says how many
+  rows the ranking could not see.
+- **There is no nought share.** The denominator is the readers who got there, so
+  a kind nothing reached is a silence and never a nought — which is the one thing
+  the counters cannot tell apart from nobody ever seeing it.
+- **A kind that is only ever a page's root does not lead the reading.** A root's
+  figure is the page's own (§18), so it contains every row it would outrank; it is
+  kept out of the lead by the row's `roots` against its `placements` and never by
+  the type's name, because a type that is a root on one page and a band on another
+  is a fact about a component.
+
+**An eleventh silence vocabulary, and the first built on another's type rather
+than beside it.** `library-action`, seven members, subject `kind`. Five are §24's
+whole set taken as it stands — the affirmative use of the limit §24 found, since
+one state at one subject should be one word — and a test pins the pair as
+`one-state`. Two are added: `unwalked`, the eighth set's `no-action-credited`
+said of a kind, and `unenterable`, the **twelfth condition**. That one is the
+first in this subsystem about the **shape of a page** rather than about a window,
+a row, a vocabulary or a filing rule: a kind standing only in places with nothing
+inside them has no question to answer, and that would be exactly as true if
+everybody had read everything. Its sibling is `says-nothing`. 0240 is not
+superseded and not edited; the module carries the corrected counts and the
+paragraph.
+
+**The thinness is §6's, in a sixth place** — every role row is `role: null` until
+`src/primitives/` declares one. Filed again for `Loom primitives`.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: a third
+figure on the card `/portal/pieces` now draws, the two states to refuse to draw
+and their opposite remedies, and the two numbers on a row that are places rather
+than readers.
+
+### 26. What a change did to a kind of part · `Loom signals` · **done, 12 October**
+
+§23, §24 and §25 read a deployment's **library** and all three read one window.
+Six comparisons read two windows — §10, §15, §16, §19, §20 and §22 — and every
+one of them is asked of **one page**.
+
+So the question an author who changed a *component* has could not be asked.
+*I rewrote the testimonial band last week; is it read now?* is a question about a
+kind of part across forty pages, and the only thing available was two censuses on
+two screens with somebody subtracting one share from the other — **which is
+wrong, and not by a little.** The two censuses are over different sets of places:
+publish a page in between and every kind on it reports a worse share with no
+reader behaving differently.
+
+**Done.** `libraryChangeOf(was, now)` in
+[`src/signals/library-change.ts`](../src/signals/library-change.ts) answers *the
+band you rewrote was read in three of its nine places and is read in seven now.*
+It is the **seventeenth** thing taken out of what this subsystem already knows
+rather than collected: **nothing was added to a payload, a browser, a column, a
+store or the vocabulary**, and the broadcaster was not touched, so its weight is
+unchanged — measured both sides and byte-identical.
+
+Two things decide the shape
+([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)):
+
+- **Every figure is taken over the places both windows bore**, which is 0239's
+  rule at another unit: a change is read against the words both revisions say,
+  and a change to a library is read against the places both windows bore. A
+  placement only one side bears is in `gained` or `lost` and in no share.
+- **What holding the places still buys is the one denominator in this subsystem
+  with no reader in it.** All six comparisons above compare *shares*, because a
+  count of readers is inflated by its own window's straddle (0147) and nothing
+  divides out between two windows. Here the denominator is a count of **places**
+  and — once they are paired — it is the same number on both sides. So this is
+  the only comparison here that publishes the movement as **counts of places
+  that changed hands** (`tookUp`, `fellAway`) and whose verdict is the sign of a
+  subtraction of two whole numbers, with no threshold in it anywhere.
+
+Four more settled in the building.
+
+**What is confounded is published rather than corrected.** A placement is `read`
+where **at least one** reader reached it (0212, 0235), so a quiet window skips
+more places with nobody behaving differently. `viewsWas` and `viewsNow` travel on
+the reading as floors (0147) and say so; nothing is withheld for it and nothing
+is scaled by it, because a floor on a window's views is not a correction and a
+threshold on how much traffic counts as comparable would be a threshold about a
+deployment's own schedule.
+
+**The two keys answer differently about one change, and both are right.** A node
+whose type changed is a place one kind left and another took — `recast`, `lost`
+by the old type and `gained` by the new, because a type is what an author
+replaces. The role rows hold it still wherever the two types play the same part,
+because a role is what a part plays for a reader (0114).
+
+**A page held at two revisions in one window is excluded and named.** A census
+keeps two live revisions apart on purpose (§21, §23); a comparison pairs by page,
+so such a tree has no single counterpart and picking one would be a number nobody
+could account for. It is in `ambiguous`, which is §7's refusal in another costume.
+A paired page whose revision moved is compared and the fact is published as
+`republished`, so *your readers behave differently* can be told from *you changed
+your pages*.
+
+**A twelfth silence vocabulary that brings nothing** — `library-change`, three
+members, no new condition and no new subject. It is the first **comparison**
+whose subject is a `kind` rather than the pair, which is where 0240's claim was
+most exposed and where it holds: the rows are keyed by the vocabulary, so every
+reason is about one kind of part across both windows. `unpaired` is
+`nothing-carried`, the state a comparison of words reports of words and one of
+paces reports of parts, said of a place. 0240 is not superseded and not edited.
+
+**The thinness is §6's, in a seventh place** — every role row is `role: null`
+until `src/primitives/` declares one, and in this reading that row is also the one
+that treats a recast node as a place still standing. Filed again for
+`Loom primitives`.
+
+**Not built and filed:** the reader-weighted comparison (*of the readers who met
+it, the share that read it has gone from four in ten to seven*), which needs the
+door on both sides and is a weighted mean whose weights move when traffic does;
+and the library-scale version of §16's words, which needs 0239's intersection per
+placement because a paired placement's revision may have moved underneath it.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the screen
+an author opens the morning after changing a primitive, the two numbers that must
+be read before a movement is printed as a finding, and the one row where a type
+and a role deliberately disagree.
 
 ## Still not in scope
 

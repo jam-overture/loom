@@ -50,7 +50,7 @@ the pages. The number on `main` today is **11,012px**.
 Re-measured on `0f239ef` rather than carried over from the earlier branch, since
 #435 landed in between:
 
-![the first two phone screens](2026-09-28-marketing-phone-fold-remeasured.png)
+![the first two phone screens](2026-09-28-marketing-phone-fold-remeasured.webp)
 
 *Two screens at 390 wide. The fold is the exact middle.*
 

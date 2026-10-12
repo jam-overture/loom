@@ -3,7 +3,7 @@
 **Date:** 2026-08-28 · **Routine:** `Loom daily build` (framework) · **Section:** §4b
 · **Branch:** `framework-18-a-same-origin-path-is-not-a-scheme`
 
-![Before and after: two path-shaped form actions that resolved to another origin](2026-08-28-framework-a-same-origin-path.png)
+![Before and after: two path-shaped form actions that resolved to another origin](2026-08-28-framework-a-same-origin-path.webp)
 
 ## What was completed
 

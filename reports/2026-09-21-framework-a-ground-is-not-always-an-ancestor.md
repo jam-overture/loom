@@ -12,7 +12,7 @@ look at** in any case: this is the contrast derivation and a palette ground, and
 no page renders differently. The picture below is a diagram rather than a
 screenshot, and it is the whole of the argument.
 
-![the two walks: the ancestor chain the probe followed, and the stack the page renders](2026-09-21-framework-a-ground-is-not-always-an-ancestor.png)
+![the two walks: the ancestor chain the probe followed, and the stack the page renders](2026-09-21-framework-a-ground-is-not-always-an-ancestor.webp)
 
 ## What this was
 

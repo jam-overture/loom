@@ -5,7 +5,7 @@ September and worth one line by its own estimate. The line took a minute. What
 the line uncovered took the run, and one of the two things it uncovered was not
 in the finding at all.
 
-![the measured band, 1280 wide](2026-09-21-marketing-the-origin-it-never-mentioned-what-leaves.png)
+![the measured band, 1280 wide](2026-09-21-marketing-the-origin-it-never-mentioned-what-leaves.webp)
 
 ---
 
@@ -72,7 +72,7 @@ of the origin itself.
 
 ## What the wiring found, which the finding did not mention
 
-![where everything ends up, 1280 wide](2026-09-21-marketing-the-origin-it-never-mentioned-where-it-ends-up.png)
+![where everything ends up, 1280 wide](2026-09-21-marketing-the-origin-it-never-mentioned-where-it-ends-up.webp)
 
 The two bands on this page are a pair. The comparison says where each thing a
 reader owns ends up; the measured band is the last column of it, counted. The

@@ -136,8 +136,8 @@ the exact rule the finding will tell `loom.nav` to write:
 | 390px | `flex` — present (blockified as a flex item, which is expected) |
 | 900px | `none` — the media query's property won |
 
-![The control present at 390px](2026-09-01-framework-a-handle-on-the-control-probe-phone.png)
-![The control gone at 900px, with no wrapper and no gap](2026-09-01-framework-a-handle-on-the-control-probe-wide.png)
+![The control present at 390px](2026-09-01-framework-a-handle-on-the-control-probe-phone.webp)
+![The control gone at 900px, with no wrapper and no gap](2026-09-01-framework-a-handle-on-the-control-probe-wide.webp)
 
 **These two images are a probe page, not the product.** Nothing in the app looks
 different after this change and there is deliberately nothing to screenshot: a
