@@ -419,7 +419,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [32](32-layout.md) | Layout: the fault that exists only after a browser has made it | Why *does this page overflow* is not a question about the page, and which one of the five inputs it is a function of anybody here owns; why the one automated visual check in this repository is blind inside a `loom.backdrop` and both of them are right; where the line falls between the half of an instrument that needs a laid-out page and the half that is arithmetic, and which exclusions can live on each side of it; why a measurement that had never been taken was deliberately kept out of the exit code in the change that first took it; which of the functions this harness hands to a browser a test can run and what decides it, which is a signature and not anybody's diligence — and what it meant that the sentence this lesson used to draw under that transcript was left contradicting it on `main` for two days. |
 | [33](33-shortfall.md) | Shortfall: the fact whose only witness runs too late to report it | Why the ways a binding can be wrong divide into the ones a walk sees from outside the primitive and the one it cannot; who the sentence on the page is for and who the count is for; the three reasons a component may not raise a diagnostic and which of them would hold in a system with no component model at all; why one declaration on a primitive is a function where eight are data; what a guard around another author's code owes the page it is inside — and the one thing this seam cannot catch, with the construction that makes it unlikely and the reason that construction cannot be enforced. |
 | [34](34-hindsight.md) | Hindsight: the fact a witness saw and may not write down | Why *would this policy have changed anything* is a question only a record can answer, and why rebuilding the page from a record is wrong in the one direction that reassures; the partition the Gate's stakes rules are cut along, which question each side of it answers, and why only one of them can be asked again; why a narrowed input is a contract rather than an abridgement, and why the simulation runs the Gate's own rules rather than a copy; what a level means when something that fed it was never written down, and why a floor that happens to be right is still a floor; when a missing field is provably harmless and what it takes to show it — and why the answer to this question is not allowed to be the type the Gate returns. |
-| [35](35-instruments.md) | Instruments: the rule a probe's reach wrote in the library's hand | Why one claim about a primitive made from eight renders needs a quantifier, and why the two probes in one file choose opposite ones without either being careless; which direction a larger population can move each kind of verdict, and why that is what made extending the probe a cheap change to a library nobody re-read; what a closed choice is to an instrument and why an open prop contributes not one sample but none; what cannot be invented for a probe, and the two halves of why an invented one would be worthless; how a rule about what a bound primitive may declare turns out to be an instrument's reach written in somebody else's file — and what it means that the limit was discharged two weeks ago, the mechanism that discharged it has no caller, and a primitive shipped since then restating the rule with the expired reason. |
+| [35](35-instruments.md) | Instruments: the rule a probe's reach wrote in the library's hand | Why one claim about a primitive made from eight renders needs a quantifier, and why the two probes in one file choose opposite ones without either being careless; which direction a larger population can move each kind of verdict, and why that is what made extending the probe a cheap change to a library nobody re-read; what a closed choice is to an instrument and why an open prop contributes not one sample but none; what cannot be invented for a probe, and the two halves of why an invented one would be worthless; how a rule about what a bound primitive may declare turns out to be an instrument's reach written in somebody else's file; what it meant that the limit sat discharged for sixteen days with no caller while a primitive shipped restating the rule with the expired reason — and what closed it in the end, which was neither a test nor anybody noticing, and what a field that says *I was not told* has to do to avoid being satisfiable by somebody who has not done the thing. |
 | [36](36-vantage.md) | Vantage: the fact a render cannot see and a document already holds | Why *nothing can compute this* is a claim about a moment rather than about a system, and which of three moments in Loom has no vantage on a plotted band's claim; why one of two sibling bands in the catalogue can be checked forever and the other never can, and why the thing that decides it is in neither band's type, props or schema; why a ceiling in a schema and a ceiling in a prop are different kinds of promise, and what authoring a scale costs under that difference; what the write path is handed, what it spends it on, and what forced the one pair-shaped walk it has; what is actually missing before a second one could exist, which is neither the walk nor the vantage — and what it means that two checks about one pair of nodes sit eleven lines apart and the one that exists is the one whose failure renders as a hole. |
 
 Parts I to IV are the system, and the [review
@@ -786,10 +786,27 @@ it did. The fault is one layer up and it is about systems rather than trees: *a
 correct answer to a narrower question, with nothing in the answer saying it was
 narrower, is a force acting on whatever is cheapest to move* — and what is
 cheapest to move is never the instrument, because the instrument is in somebody
-else's directory and the red test is in yours. Two weeks after the discharge the
-mechanism has no caller, the library's own audit still runs unanswered, and a
-primitive that shipped since restates the rule with the expired reason. Nothing
-went red, because permission is the one kind of change a test cannot notice.
+else's directory and the red test is in yours. For sixteen days after the
+discharge the mechanism had no caller, the library's own audit ran unanswered,
+and a primitive that shipped in that window restated the rule with the expired
+reason. Nothing went red on any of those days, because permission is the one kind
+of change a test cannot notice.
+
+**And then the lesson was overtaken twice in the three days after it shipped,
+which is now its ending.** On 9 October the library took the permission up and
+started passing answers; on 10 October the audit grew `notAnswered`, a field
+whose entry is a claim about the *call* rather than about any component — which
+is the clause in the middle of that sentence, closed. Nothing went red on either
+day either. What moved them was one sentence written into the file the other
+lanes read before choosing work, which
+[0253](../decisions/0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md)
+quotes as the whole argument for its own existence — and that is the
+uncomfortable half, because a remedy that needs a reader has no guarantee
+attached and was the only thing available. The lesson's exercise G runs the
+cheaper field the filing had asked for and shows it reporting a clean instrument
+on a call answered under a name no primitive reads, so the general problem is
+untouched, exactly as that record concedes: the next permission sits exactly as
+long.
 
 The question to carry into a nineteenth seam is therefore about neither reach,
 ownership, timing nor what you kept: **what is this check's population, who chose

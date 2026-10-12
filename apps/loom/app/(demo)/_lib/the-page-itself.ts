@@ -146,6 +146,31 @@ export type PageItself = {
    * need to go: the press carries them.
    */
   readonly caption: string
+  /**
+   * Present when the page in this window has just moved under the visitor's
+   * own press, and it carries the revision that press produced.
+   *
+   * **The window being on the screen and the visitor being on the window are
+   * two different facts**, and until this run only the first of them was
+   * answered. The press this demo opens with is made with the window in front
+   * of the visitor, so it turns over where they are looking. Its inverse is
+   * pressed on the record card, 922 pixels down a phone's rail, and the page
+   * goes back in a window they are no longer anywhere near.
+   *
+   * So the window says who moved it as well as what it is, and
+   * `page-in-view.tsx` is what carries a visitor who is not looking at it. It
+   * is one field rather than a second boolean beside `landed` because the
+   * caption and the movement are the same fact read twice: a window that says
+   * *now* is a window a press has just changed, and the two can no longer
+   * disagree about which press that was.
+   *
+   * The revision rather than the record id, for the reason `SpotlightScroll`'s
+   * token gives: the effect must run again when a visitor asks for something
+   * new and must not run because the rail re-rendered. Every landing on this
+   * surface produces a revision, an undo included, and a question the visitor
+   * declined produces neither a revision nor a landing.
+   */
+  readonly moved?: string
 }
 
 /**
@@ -157,6 +182,22 @@ export type PageItself = {
  * thing, this one says that what is in the window is a part of it.
  */
 export const THE_TOP_OF_IT = "This is the top of it."
+
+/**
+ * What the window is called in the document.
+ *
+ * It exists because `page-in-view.tsx` has to find the window from a client
+ * component, which is the same thing `AnswerInView` does with a record id and
+ * for the same reason: the element is rendered on the server, through a
+ * registry that does not cross the boundary, so what crosses is a name.
+ *
+ * Here rather than in the markup so that the component looking it up and the
+ * section answering to it read one string. A name written twice is a name that
+ * goes quiet the first time one of the two is edited, and a scroll that does
+ * nothing is the quietest failure this surface has: nothing throws, nothing
+ * renders differently, and the only evidence is a photograph.
+ */
+export const THE_WINDOW = "the-page-itself"
 
 /**
  * And what it says once a change the visitor pressed for is on the page.
@@ -223,9 +264,10 @@ export const thePageItself = ({
   /**
    * Whether a change the visitor pressed for is on the page — `rail.ts`'s
    * `landing`, which is the same boolean the nomination turns on. It decides
-   * the caption and nothing else: a question declined leaves the page where it
-   * was, and a window captioned *now* over an unmoved page would claim a change
-   * nobody made.
+   * the caption and whether the visitor is carried to the window, and those are
+   * one decision: a question declined leaves the page where it was, so a window
+   * captioned *now* would claim a change nobody made, and carrying somebody to
+   * it would carry them to a page that has not moved.
    */
   readonly landed: boolean
 }): PageItself | undefined => {
@@ -234,5 +276,9 @@ export const thePageItself = ({
   const band = topBand(tree.root)
   if (band === undefined) return undefined
 
-  return { tree: { ...tree, root: band }, caption: landed ? THE_TOP_OF_IT_NOW : THE_TOP_OF_IT }
+  return {
+    tree: { ...tree, root: band },
+    caption: landed ? THE_TOP_OF_IT_NOW : THE_TOP_OF_IT,
+    ...(landed ? { moved: String(tree.revision) } : {}),
+  }
 }

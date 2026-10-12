@@ -205,7 +205,8 @@ describe("the sentence about the ready-made changes", () => {
 
       expect({
         state: page.state,
-        links: links.map((link) => `${wordsOn(link)} → ${new URL(String(link.props["href"])).pathname}`),
+        links: links.map((link) => /* A base since 12 October: this site's links are paths (0259). */
+            `${wordsOn(link)} → ${new URL(String(link.props["href"]), "https://site.invalid").pathname}`),
         controls: elements.filter((element) => NOT_IN_A_SENTENCE.includes(element.type)).length,
       }).toEqual({
         state: page.state,

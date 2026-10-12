@@ -428,6 +428,15 @@ const namesOn = (lines: readonly string[], label: RegExp): number => {
   return names.length === 0 ? 0 : (names[0] ?? "").split(/,\s*/).filter((name) => name !== "").length
 }
 
+/** The semicolon-separated entries a line ends in, counted. */
+const entriesOn = (lines: readonly string[], label: RegExp): number => {
+  const entries = lines.flatMap((line) => label.exec(line)?.[1] ?? [])
+
+  return entries.length === 0
+    ? 0
+    : (entries[0] ?? "").split(/;\s*/).filter((entry) => entry !== "").length
+}
+
 /** The one number a line states. */
 const numberOn = (lines: readonly string[], label: RegExp): number =>
   Number(lines.flatMap((line) => label.exec(line)?.[1] ?? [])[0] ?? NaN)
@@ -513,6 +522,21 @@ const TRANSCRIPT_CLAIMS: readonly TranscriptClaim[] = [
       "the sentence under lesson 35's exercise E, whose subject is that the library's own " +
       "audit never answers a bound primitive — so how many of them there are to answer is " +
       "the figure the paragraph turns on. A sixth bound primitive makes it wrong",
+  },
+  {
+    lesson: 35,
+    file: "35-instruments.md",
+    what: "the bound primitives a one-argument audit reports it was never answered for",
+    phrase: /\*\*All (\w+) are reported on the first call\*\*/,
+    occurrences: 1,
+    fence: /^called with one argument$/,
+    count: (lines) => entriesOn(lines, /^notAnswered: (.+)$/),
+    matters:
+      "the sentence opening the paragraph under lesson 35's exercise G, whose argument is " +
+      "that `notAnswered` reports a fact about the call and therefore reaches a leaf that " +
+      "`unplacedSlots` never can \u2014 so how many bound primitives there are to report is the " +
+      "figure it turns on. The count is read off the first of the fence's three " +
+      "`notAnswered` lines, which is the unanswered call",
   },
   {
     lesson: 36,

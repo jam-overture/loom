@@ -1,5 +1,8 @@
 import { GeistSans } from "geist/font/sans"
 import type { Metadata, Viewport } from "next"
+import { headers } from "next/headers"
+
+import { PATH_HEADER } from "@/proxy"
 
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
 
@@ -54,8 +57,28 @@ export const dynamic = "force-dynamic"
  * the middleware is (0027) — it is that a nav offering four routes which all
  * redirect back to sign-in is a claim the portal cannot honour.
  */
+/**
+ * The shell prototype brings its own topbar and rails, and they are a proposal
+ * to replace the ones below. Mounting both would stack two chromes on top of
+ * each other, so this layout stands aside for that one subtree — see
+ * `PATH_HEADER` in `proxy.ts`. It is temporary in the same way the prototype
+ * is.
+ */
+const BRINGS_ITS_OWN_CHROME = "/portal/preview"
+
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const signedIn = (await currentActor()) !== null
+  const path = (await headers()).get(PATH_HEADER) ?? ""
+  const ownChrome =
+    path === BRINGS_ITS_OWN_CHROME || path.startsWith(`${BRINGS_ITS_OWN_CHROME}/`)
+
+  if (ownChrome) {
+    return (
+      <html lang="en" className={GeistSans.variable}>
+        <body className="min-h-screen">{children}</body>
+      </html>
+    )
+  }
 
   return (
     /*

@@ -724,8 +724,19 @@ export type AskedFor = {
  * runs running is a pair of individually correct things that had never been read
  * next to each other. So there is one spelling and the path is the argument.
  */
+/**
+ * The base a path is parsed against when there is no origin to parse it
+ * against.
+ *
+ * Never read and never in the output: `origin` is empty exactly when the
+ * caller wants a path, and a path is not a URL, so one has to be borrowed to
+ * get at `searchParams` at all. `.invalid` is reserved by RFC 2606 and resolves
+ * nowhere, so a leak would be loud rather than quietly pointing at a real host.
+ */
+const NO_ORIGIN = "https://site.invalid"
+
 const askedHref = (origin: string, path: string, options: AskedFor): string => {
-  const url = new URL(path, `${origin}/`)
+  const url = new URL(path, `${origin === "" ? NO_ORIGIN : origin}/`)
 
   if (options.theme !== undefined) url.searchParams.set(ADDRESS_PARAMS.theme, options.theme)
   if (options.ask !== undefined) url.searchParams.set(ADDRESS_PARAMS.ask, options.ask)
@@ -742,7 +753,15 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
   if (options.back === true) url.searchParams.set(ADDRESS_PARAMS.back, "1")
   if (options.backApprove === true) url.searchParams.set(ADDRESS_PARAMS.backApprove, "1")
 
-  return url.toString()
+  /*
+   * **A path when the caller gave no origin**, which is how the three site
+   * pages are seeded (`./stored.ts`): one stored row is served from every host
+   * this deployment answers on, so an absolute href in it would freeze
+   * whichever host wrote it. Metadata still passes an origin and still gets an
+   * absolute URL, which is what a canonical link and a share card are obliged
+   * to give.
+   */
+  return origin === "" ? `${url.pathname}${url.search}${url.hash}` : url.toString()
 }
 
 export const askHref = (origin: string, options: AskedFor = {}): string =>
@@ -779,8 +798,85 @@ export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
 export const surfaceHref = (origin: string, surface: Surface): string =>
   internalHref(origin, surface.path)
 
+/**
+ * The same destination, as a path this site can **store**.
+ *
+ * ## Why a second pair of these exists
+ *
+ * `internalHref` and `surfaceHref` build an absolute URL, because the things
+ * that needed one were the canonical link, the share card, the structured data
+ * and the sitemap — all of them metadata, and all of them obliged to say which
+ * host they mean. The page's own links were built the same way for no reason
+ * beyond their being to hand.
+ *
+ * That stopped being free on 12 October, when the three site pages became
+ * **stored trees** ([0259](../../../../../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+ * condition 1). A stored tree is written once and served from every host this
+ * deployment answers on, so an absolute href freezes whichever origin seeded
+ * it — and every preview deployment has its own. A stored `?theme=` freezes
+ * the look the seeder happened to be wearing.
+ *
+ * So the page's links are now paths: no origin, no theme. `linkUrlSchema`
+ * accepts *"a path beginning with / on this site"* and always has, so nothing
+ * about the primitive had to change.
+ *
+ * **The theme is put back at render**, from the address, by
+ * `_lib/stored.ts`' request pass — which is the line 0259 asked somebody to
+ * draw between what the page is and what the request is. A link's destination
+ * is the page's; the livery it is wearing is the request's.
+ *
+ * The absolute pair above is untouched and is still what metadata uses.
+ */
+/**
+ * The asked route, as a path this site can store.
+ *
+ * `askHref` keeps taking an origin because metadata still needs an absolute
+ * URL. A link **in a tree** never does: the invariant this change establishes
+ * is that no href in a stored page carries a host, so that one row serves
+ * every deployment of this site.
+ */
+export const askPath = (options: AskedFor = {}): string => askedHref("", ASKED_ROUTE.path, options)
+
+export const sitePath = (path: string): string => path
+
+/**
+ * A route wearing a named palette — the one href whose theme is **its own
+ * meaning** rather than the request's.
+ *
+ * Every other link on the site is stored theme-free and has the reader's
+ * palette put on it at render. A re-theme link is the exception by definition:
+ * *this* link means bold, whoever is looking at it, so the palette belongs in
+ * the stored href and the request pass leaves it alone.
+ */
+export const paletteHref = (path: string, palette: SiteThemeName): string =>
+  `${path}?${ADDRESS_PARAMS.theme}=${palette}`
+
+/** A surface of this deployment — the demo, the docs, the portal — as a path. */
+export const surfacePath = (surface: Surface): string => surface.path
+
 /** Where the site points when it points at the project itself. */
 export const REPOSITORY_URL = "https://github.com/jam-overture/loom"
+/**
+ * The package on npm, which is the one off-site link that is part of the ask.
+ *
+ * The install band prints a command and sends a reader to the documentation;
+ * this is the third thing somebody about to run that command wants, and it is
+ * a different want from either — **not how to use it, but whether it is real.**
+ * A published page with a version, a date and a readme answers that in a way a
+ * marketing site cannot answer about itself.
+ *
+ * It names the runtime rather than the starter library because the two package
+ * pages carry the same readme-shaped reassurance and a reader following one
+ * link does not want a choice. The command above it asks for both; this says
+ * what the first of them is.
+ *
+ * **Checked by a person, like every off-site link here** (`routes.test.ts`
+ * says why it cannot be checked by a test): loaded 11 October, `0.1.0`,
+ * public. `facts.test.ts` holds the package *name* in it against the manifest
+ * this repository publishes from, which is the half of the address that can go
+ * wrong silently.
+ */
+export const NPM_PACKAGE_URL = "https://www.npmjs.com/package/@jam-overture/loom"
 /** The licence itself, which the footer links to beside the sentence naming it. */
 export const LICENSE_URL = "https://github.com/jam-overture/loom/blob/main/LICENSE"
 export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/decisions"

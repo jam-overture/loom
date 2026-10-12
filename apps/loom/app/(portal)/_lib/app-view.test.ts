@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { walkTree } from "@jam-overture/loom"
+import { primitiveTypeSchema, walkTree } from "@jam-overture/loom"
 import { STARTER_PRIMITIVES } from "@jam-overture/loom/primitives"
 
 import {
@@ -17,6 +17,27 @@ import { seedTree } from "./seed"
 import { runtimeWordsIn } from "../_test/plain-language"
 
 const registered = portalRegistry.primitives.map((primitive) => primitive.type)
+
+/**
+ * A usage row, built rather than taken off this deployment.
+ *
+ * Several assertions below used to read *the pieces this portal registers* and
+ * *the pieces the seed uses* as though they were the same list, which they were
+ * while the registry was the four primitives the portal wrote for itself. It
+ * registered the library on 11 October and they stopped being the same list, so
+ * every one of those assertions failed — about the deployment, not about the
+ * function under test.
+ *
+ * These functions take a list of rows and know nothing about any registry, so
+ * the tests now hand them rows. What is left reading the real deployment is
+ * only what is genuinely about the real deployment, and it is marked as such.
+ */
+const row = (type: string, used: number) => ({
+  type: primitiveTypeSchema.parse(type),
+  name: type.replace("loom.", ""),
+  description: `the ${type}`,
+  used,
+})
 
 describe("pieceUsage", () => {
   /**
@@ -86,26 +107,22 @@ describe("unusedPieces", () => {
    * registered and never used is something the AI is offered every time it is
    * asked for a change and has never once reached for.
    */
-  /**
-   * Over a tree rather than over a hand-written tally, because the interesting
-   * case is a piece the registry has and the pages do not — and on this
-   * deployment every registered piece is on the seed, so the case has to be made
-   * by taking a page away rather than by inventing a count.
-   */
-  it("names the pieces nothing on any page is built from", () => {
-    const everywhere = unusedPieces(pieceUsage(portalRegistry, [seedTree()]))
-    const nowhere = unusedPieces(pieceUsage(portalRegistry, []))
+  it("names the pieces nothing on any page is built from, and only those", () => {
+    const some = unusedPieces([row("loom.page", 1), row("loom.nav", 0), row("loom.card", 3)])
 
-    expect(everywhere).toEqual([])
-    expect(nowhere.map((piece) => piece.type)).toEqual(registered)
-    expect(nowhere.every((piece) => piece.used === 0)).toBe(true)
+    expect(some.map((piece) => piece.type)).toEqual(["loom.nav"])
+    expect(some.every((piece) => piece.used === 0)).toBe(true)
   })
 
   it("names none when every registered piece is on a page", () => {
-    const everyPiece = pieceUsage(portalRegistry, [seedTree()])
+    expect(unusedPieces([row("loom.page", 1), row("loom.card", 2)])).toEqual([])
+  })
 
-    expect(everyPiece.every((piece) => piece.used > 0)).toBe(true)
-    expect(unusedPieces(everyPiece)).toEqual([])
+  /** And nothing is used on a deployment with no pages, whatever is registered. */
+  it("names all of them when there are no pages at all", () => {
+    const nowhere = unusedPieces(pieceUsage(portalRegistry, []))
+
+    expect(nowhere.map((piece) => piece.type)).toEqual(registered)
   })
 })
 
@@ -125,7 +142,7 @@ describe("appSummary", () => {
    * app, which is every app on its first day. Found by reading a screenshot.
    */
   it("says all of them rather than a fraction of itself when every piece is used", () => {
-    const usage = pieceUsage(portalRegistry, [seedTree()])
+    const usage = [row("loom.page", 1), row("loom.heading", 2), row("loom.prose", 1)]
 
     expect(appSummary(1, usage)).toContain(`all ${usage.length} kinds of piece`)
     expect(appSummary(1, usage)).not.toContain(`${usage.length} of the ${usage.length}`)
@@ -187,12 +204,24 @@ describe("what this app has not turned on", () => {
    * for something Loom could have drawn. Both are choices rather than defects,
    * and both are invisible from inside the deployment.
    */
-  it("names what the library ships and this registry does not", () => {
-    const missing = notRegistered(portalRegistry, STARTER_PRIMITIVES)
+  it("names what a library ships and a registry does not", () => {
+    const missing = notRegistered(portalRegistry, [
+      ...STARTER_PRIMITIVES,
+      { type: "acme.buy-button" },
+    ])
 
-    expect(STARTER_PRIMITIVES.length).toBeGreaterThan(registered.length)
-    expect(missing.length).toBe(STARTER_PRIMITIVES.length - registered.length)
+    expect(missing.map((piece) => piece.type)).toEqual(["acme.buy-button"])
     expect(missing.map((piece) => piece.type)).not.toContain("loom.card")
+  })
+
+  /**
+   * **And what this deployment's own answer now is**, which is the fact the
+   * screen turns on: it registered the library and declined nothing, so there is
+   * nothing it has not turned on.
+   */
+  it("names nothing for this app, because it registers the whole library", () => {
+    expect(notRegistered(portalRegistry, STARTER_PRIMITIVES)).toEqual([])
+    expect(registered.length).toBe(STARTER_PRIMITIVES.length)
   })
 
   it("names nothing when a registry has everything the library ships", () => {
@@ -206,11 +235,16 @@ describe("what this app has not turned on", () => {
   })
 
   it("says how much of the library is on, in a person's words", () => {
-    const note = libraryNote(STARTER_PRIMITIVES.length, registered.length)
+    const note = libraryNote(40, 12)
 
-    expect(note).toContain(`${STARTER_PRIMITIVES.length} pieces`)
-    expect(note).toContain(`turned ${registered.length} of them on`)
+    expect(note).toContain("40 pieces")
+    expect(note).toContain("turned 12 of them on")
     expect(runtimeWordsIn(note ?? "")).toEqual([])
+  })
+
+  /** And says nothing at all for this app, which has all of it on. */
+  it("says nothing when the app has turned the whole library on", () => {
+    expect(libraryNote(STARTER_PRIMITIVES.length, registered.length)).toBeNull()
   })
 
   /** A real state, not a rounding of the others: there is nothing left to say. */

@@ -5,7 +5,7 @@ import { renderRequest } from "@jam-overture/loom/react"
 import { treeSourceFromStore } from "@jam-overture/loom/store"
 
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
-import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 
 /**
@@ -61,6 +61,20 @@ const SurfacePage = async ({ params }: { params: Promise<{ treeId: string }> }) 
       source: treeSourceFromStore(portalStore),
       resolver: portalRegistry,
       validator: portalRegistry,
+      /*
+       * The theme, which this document needs more than any other render the
+       * portal makes and was the last to get it.
+       *
+       * A library primitive reads its colour, family and size off the resolved
+       * theme, and the theme mounts its variables on a wrapper **in the
+       * document it is rendered into**. This is a document of its own, so the
+       * portal's other renders being themed does nothing for it: the first
+       * photograph after the registry swap showed the pane drawing the page
+       * with no ramp, no palette and no spacing, which is what every CSS
+       * variable resolving to nothing looks like. Nothing failed and no
+       * diagnostic was raised, because an unthemed render is a valid render.
+       */
+      themes: portalThemes,
     }
   )
 

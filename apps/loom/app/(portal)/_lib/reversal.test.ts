@@ -256,7 +256,7 @@ describe("previewReversal, end to end", () => {
     const configured = await store.append(
       seed.treeId,
       appendOf(
-        deltaOf(1, [{ op: "configure", nodeId: card.id, set: { variant: "prominent" }, unset: [] }], seed.treeId),
+        deltaOf(1, [{ op: "configure", nodeId: card.id, set: { tone: "accent" }, unset: [] }], seed.treeId),
         1
       )
     )
@@ -267,9 +267,15 @@ describe("previewReversal, end to end", () => {
     if (reversal?.kind !== "revertable") throw new Error("a fresh reconfigure is cleanly revertable")
     expect(reversal.restores).toHaveLength(1)
     expect(reversal.restores[0]?.subject).toBe(card.id)
-    // The seed set variant to "outlined"; undoing the change puts that back.
+    /*
+     * The seed sets the card's tone to "outline"; undoing the change puts that
+     * back. It was `variant: "outlined"` until 11 October — the portal's own
+     * card primitive's prop — and a configure over a prop the card does not
+     * carry restores *nothing at all* rather than a value, which is a different
+     * sentence and was this assertion's failure.
+     */
     expect(reversal.restores[0] && readingOf(reversal.restores[0])).toBe(
-      `Puts ${card.id}'s variant back to “outlined”.`
+      `Puts ${card.id}'s tone back to “outline”.`
     )
     expect(reversal.discards).toEqual([])
   })

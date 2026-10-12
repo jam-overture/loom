@@ -18,11 +18,12 @@ import {
   siteReadingBand,
   type ChromeContext,
 } from "../chrome"
-import { FACTS } from "../copy"
+import { FACTS, INSTALL_COMMAND } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import {
   action,
+  code,
   heading,
   inlineLink,
   prose,
@@ -37,15 +38,16 @@ import {
   DOCS,
   HOME,
   HOW_IT_WORKS,
-  internalHref,
   LESSONS,
+  NPM_PACKAGE_URL,
   PORTAL,
   PRODUCT_SURFACES,
   REPOSITORY_URL,
   SITE_THEMES,
-  surfaceHref,
-  WHAT_YOU_RUN,
+  sitePath,
   type SiteThemeName,
+  surfacePath,
+  WHAT_YOU_RUN,
 } from "../site"
 
 /**
@@ -110,7 +112,7 @@ export type PageContext = {
   readonly counting?: boolean
 }
 
-const hero = (ids: IdFactory, context: PageContext): LoomNode =>
+const hero = (ids: IdFactory, ): LoomNode =>
   buildElement(ids, {
     type: "loom.hero",
     props: {
@@ -221,7 +223,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
         action(
           ids,
           "See how a change travels",
-          internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
+          sitePath(HOW_IT_WORKS.path),
           { variant: "primary", scale: "large" }
         ),
         /**
@@ -239,7 +241,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
          * the footer. It is reachable three ways from this page and none of
          * them is the first screen.
          */
-        action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), {
+        action(ids, "Try it yourself", surfacePath(DEMO), {
           variant: "secondary",
           scale: "large",
         }),
@@ -585,7 +587,7 @@ const problems = (ids: IdFactory): LoomNode =>
  * itself: every one of them is held against the code by a test, and the record
  * count is held as a floor it can never exceed. See `FACTS` in `copy.ts`.
  */
-const facts = (ids: IdFactory, context: PageContext): LoomNode =>
+const facts = (ids: IdFactory, ): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.facts }, "Built in the open", [
     /**
      * **Ranged left, as of this run, because it is the only alignment this band
@@ -690,7 +692,7 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
       action(
         ids,
         "What you would be running",
-        internalHref(context.origin, WHAT_YOU_RUN.path, context.theme),
+        sitePath(WHAT_YOU_RUN.path),
         TERTIARY_CONTROL
       ),
       action(ids, "Read the decisions", DECISIONS_URL, {
@@ -730,6 +732,95 @@ const questions = (ids: IdFactory): LoomNode =>
       ),
     }),
   ])
+
+/**
+ * The ask, and the first time the front door has carried one.
+ *
+ * Every control on this page before 11 October sent a reader somewhere else to
+ * read more: the demonstration, `/how-it-works`, the repository, the four cards
+ * below. A visitor persuaded by all of it had nothing to press that would
+ * *start* them — **the two package names were nowhere on this site**, in any
+ * band, on any route, which a search of this directory said plainly on the day
+ * the conversion objective was written.
+ *
+ * That is the band's whole justification and it is worth stating as the
+ * measurement problem it was. `docs/adaptation.md` names *readers who reach the
+ * install ask* as the thing the loop optimises. A funnel whose last step is not
+ * on the surface being measured cannot be measured: a model pointed at this
+ * page would have been asked to raise a number the page had no way of
+ * producing, and every proposal it made would have been scored against noise.
+ *
+ * **One band, after the questions, rather than a line under the hero.** The
+ * hero placement is the one `loom.code`'s own `density: "compact"` was written
+ * for and is the obvious second thing to try; this is first because the ask
+ * reads differently to somebody whose objections have just been answered, and
+ * because *where the ask goes* is exactly the question this site exists to have
+ * settled by evidence rather than by taste. One band in one place, addressed as
+ * a node of its own, is the arrangement a proposal can move and the Gate can
+ * decide on.
+ *
+ * **The panel is the one deliberate `wrap: false` on this site**, and the note
+ * on `code` in `nodes.ts` is the reason: the default wraps because a pretty
+ * printed tree has no line structure to protect, and a shell line broken across
+ * two visual rows reads as two commands. This is the exception that note said
+ * it was keeping the prop for — the only line on the front door somebody is
+ * meant to type.
+ *
+ * It is paid for at the small end and the price is known: measured at 390, the
+ * panel shows 348 of the line's 530px, so 182px of it is behind a horizontal
+ * scroll with a track under it saying so. What makes that the right trade here
+ * rather than the one the September finding was about is the *Copy* button —
+ * the reader's way to the whole line is the control beside it rather than the
+ * gesture, and what they take is the whole line whatever is on screen.
+ *
+ * Nothing was added to the page to count the press that matters. `loom.code`
+ * draws its own copy control, so the type joining `CONTROL_TYPES` in
+ * `readers/asked.ts` is the whole of the instrumentation.
+ */
+const install = (ids: IdFactory, ): LoomNode =>
+  section(
+    ids,
+    { width: "readable", eyebrow: BAND.install },
+    "Put it in a project you already have",
+    [
+      prose(
+        ids,
+        `There is nothing to sign up for. One package is Loom itself. The other is the set of ${FACTS.primitives} components this page is drawn from.`,
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, INSTALL_COMMAND, {
+        language: "bash",
+        tone: "terminal",
+        density: "compact",
+        wrap: false,
+      }),
+      stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
+        action(ids, "Follow the install guide", surfacePath(DOCS), {
+          variant: "primary",
+          scale: "large",
+        }),
+        /**
+         * The package page, and it is here because *is this real* is a
+         * different question from *how do I use it*.
+         *
+         * A stranger who has read this far has been told what Loom does by the
+         * site that wants them to install it, and the line above asks them to
+         * run something. The npm page is the only control on this site that
+         * answers from outside: a version, a publish date, a readme and a
+         * dependency count, none of it written here. Offered second because it
+         * is the smaller want — the guide is the path to using it, this is the
+         * path to believing it — and which of the two should be filled is
+         * exactly a `configure` the loop can argue about later.
+         */
+        action(ids, "See it on npm", NPM_PACKAGE_URL, {
+          variant: "secondary",
+          scale: "large",
+          external: true,
+        }),
+      ]),
+    ],
+    { align: "center" }
+  )
 
 /**
  * How a surface is offered here: the verb, and the mark above it.
@@ -827,7 +918,7 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * Nothing was added to the library to do it. A card, a heading, a sentence, a
  * rule and four words, all registered before this run started.
  */
-const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
+const waysIn = (ids: IdFactory, ): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.grid",
@@ -841,7 +932,7 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
 
         return buildElement(ids, {
           type: "loom.card",
-          props: { href: surfaceHref(context.origin, surface) },
+          props: { href: surfacePath(surface) },
           children: [
             heading(ids, 3, way.title),
             prose(ids, surface.blurb, { tone: "muted" }),
@@ -867,7 +958,7 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
  * is the answer to the first problem the page named an hour of reading ago: a
  * tool that generates components hands you work rather than taking it away.
  */
-const closing = (ids: IdFactory, context: PageContext): LoomNode =>
+const closing = (ids: IdFactory, ): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
     /**
      * The one sentence on the front door that carries its own link, and the
@@ -900,7 +991,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
         inlineLink(
           ids,
           "asked to move",
-          `${internalHref(context.origin, HOW_IT_WORKS.path, context.theme)}#${ANCHOR.seeItHappen}`
+          `${sitePath(HOW_IT_WORKS.path)}#${ANCHOR.seeItHappen}`
         ),
         ". None of it is code you would have to read afterwards.",
       ],
@@ -910,7 +1001,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
       action(
         ids,
         "See how a change travels",
-        internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
+        sitePath(HOW_IT_WORKS.path),
         { variant: "primary", scale: "large" }
       ),
       action(ids, "Read the source", REPOSITORY_URL, {
@@ -941,7 +1032,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
-        hero(ids, context),
+        hero(ids),
         whatIsIt(ids),
         vocabulary(ids),
         usingIt(ids),
@@ -976,10 +1067,11 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * page uses what renders correctly today.
          */
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
-        facts(ids, context),
+        facts(ids),
         questions(ids),
-        waysIn(ids, context),
-        closing(ids, context),
+        install(ids),
+        waysIn(ids),
+        closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],

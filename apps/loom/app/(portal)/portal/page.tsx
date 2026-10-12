@@ -571,17 +571,17 @@ const PortalHome = async () => {
             title="You don't have any pages yet, so nothing can be waiting."
             action={
               <Link
-                href="/demo"
+                href="/docs/getting-started/your-first-tree"
                 className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 no-underline"
               >
-                Try the demo →
+                How a page gets here →
               </Link>
             }
           >
             <p>
-              The demo needs no account and no database. You type what you want changed, and you
-              watch Loom decide whether to do it, ask you first, or turn it down — which is exactly
-              what this screen is for once you have pages of your own.
+              Once this deployment holds pages, every change anybody asks for lands here first —
+              the ones Loom allowed, the ones it turned down, and the ones it is waiting on you to
+              answer.
             </p>
             <TechnicalDetail summary="Why this deployment has no pages">
               <p>
