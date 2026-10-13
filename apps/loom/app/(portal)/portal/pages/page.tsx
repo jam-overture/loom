@@ -9,6 +9,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { headsOf, nameFrom, namesIn } from "@/app/(portal)/_lib/page-name"
+import { keptBy, PAGE_FILTER_NAME, readPageFilter } from "@/app/(portal)/_lib/page-filter"
 import { inPageOrder, needsYouRank } from "@/app/(portal)/_lib/page-order"
 import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
@@ -36,8 +37,13 @@ import { pagesWaitingSummary } from "@/app/(portal)/_lib/unreadable-change"
  * hold read that fails costs the count and nothing else: a page whose waiting
  * changes cannot be counted still lists, and still opens.
  */
-const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: string }> }) => {
-  const { after } = await searchParams
+const PagesPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ after?: string; filter?: string }>
+}) => {
+  const { after, filter: asked } = await searchParams
+  const filter = readPageFilter(asked)
   await requireActor("/portal/pages")
   /**
    * The cursor is passed straight back through the URL without being read. That
@@ -140,10 +146,24 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
    * which of these needs me. Every rung of `needsYouRank` is a field already on
    * these rows, so the order costs no read. See `_lib/page-order.ts`.
    */
-  const summaries = inPageOrder(unordered, (page) => ({
+  /**
+   * The filter, applied after the order rather than before it.
+   *
+   * It changes which rows are here and not which order they are in: a reader
+   * who narrows to the pages waiting on them should find them in the same
+   * arrangement they were already in, with the rest gone. Filtering first would
+   * work today and would be the kind of coupling that stops working the moment
+   * a rank reads anything about its neighbours.
+   *
+   * **It costs no read.** Every field it tests is one this screen already holds
+   * to put a count on each card.
+   */
+  const ordered = inPageOrder(unordered, (page) => ({
     rank: needsYouRank(page),
     page: page.page,
   }))
+
+  const summaries = ordered.filter((page) => keptBy(filter, page))
 
   return (
     <Screen>
@@ -152,9 +172,27 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         <h1 className="text-2xl tracking-tight">Your pages</h1>
         <p className="text-ink-muted text-sm">
           {summaries.length === 0
-            ? "Pages that Loom is looking after will show up here."
+            ? filter === undefined
+              ? "Pages that Loom is looking after will show up here."
+              : `Nothing is waiting on you. ${ordered.length === 1 ? "Your one page is" : `All ${ordered.length} of your pages are`} up to date.`
             : pagesWaitingSummary(summaries)}
         </p>
+        {/*
+          * Said on the screen rather than only in the rail, because a narrowed
+          * list that looks like the whole list is the one way this feature can
+          * mislead — and a person who arrives on a link has not seen the rail
+          * entry that narrowed it.
+          */}
+        {filter === undefined ? null : (
+          <p className="text-ink-muted text-sm">
+            Showing {PAGE_FILTER_NAME[filter].toLowerCase()}, which is{" "}
+            {summaries.length} of {ordered.length}.{" "}
+            <Link href="/portal/pages" className="no-underline hover:underline">
+              Show all of them
+            </Link>
+            .
+          </p>
+        )}
       </Measured>
 
       {summaries.length === 0 ? (
@@ -178,9 +216,10 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
           <TechnicalDetail summary="Why this deployment has no pages">
             <p>
               A tree arrives one of two ways: a host calls{" "}
-              <span className="font-mono">create</span> on a store handle, or this portal seeds
-              one on first read. Seeing nothing here means neither has happened against the
-              store this deployment is pointed at.
+              <span className="font-mono">create</span> on a store handle, or{" "}
+              <span className="font-mono">db:push</span> seeds this deployment&rsquo;s own.
+              Seeing nothing here means neither has happened against the store this deployment
+              is pointed at.
             </p>
           </TechnicalDetail>
         </StateNotice>

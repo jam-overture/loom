@@ -52462,3 +52462,39 @@ What it probably is: a third state in the patch, so `to.host` can be `string`,
 `undefined` (unchanged) or `null` (cleared) — the shape every JSON patch
 eventually arrives at. That is a change to what `rename` *means* and a surface
 does not get to make it, which is why this is filed rather than worked around.
+
+---
+## 2026-10-13 — a listing says what a page is at, never when, so *changed recently* cannot be drawn
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`) ·
+**Status:** open — **a prototype entry that could not be built, and the reason
+is the contract rather than the screen**
+
+`TreeListing` is the whole of what a listing gives about a page:
+
+```ts
+export type TreeListing = {
+  readonly treeId: TreeId
+  readonly revision: number
+}
+```
+
+The prototype's `Pages` submenu offers four entries. Two of them are now on the
+real rail, one is a bookmark the rail refuses on purpose, and the fourth —
+**Changed recently** — is this finding.
+
+A revision number counts what has happened to *one* page. It does not compare
+across two: a page edited nine times last March outranks one edited twice this
+morning, which is the opposite of what the entry promises. `loom_revisions`
+carries `applied_at` per row, so the fact exists and the listing does not carry
+it.
+
+The comment above the type already anticipates this — *"only some
+implementations could fill honestly"* — which is the right instinct and is why
+this is filed rather than worked around. A memory store can answer *when was
+this last appended to*; whether every store can, and whether a listing should
+grow a second ordering, is §1's call.
+
+What a surface must not do meanwhile is fake it. `/portal/pages` reads
+`?filter=changed` as no filter at all, the same answer a typo gets, rather than
+sorting by a number that does not mean what the label says.
