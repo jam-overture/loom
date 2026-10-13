@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { faultFor, hostFrom, readRegistration } from "./registering"
+import { faultFor, hostFrom, readRegistration, readRename } from "./registering"
 
 describe("the host somebody typed", () => {
   it("takes a bare host as it is", () => {
@@ -84,5 +84,52 @@ describe("what somebody filled in", () => {
 
     expect(read.ok).toBe(false)
     expect(!read.ok && faultFor(read.faults, "name")).toBeDefined()
+  })
+})
+
+/**
+ * Renaming, which is registering minus the project and must not disagree with
+ * it about anything else.
+ *
+ * The rules are shared rather than restated, so these tests are mostly about
+ * the one place the two operations genuinely differ: an empty host box.
+ */
+describe("what an application may be renamed to", () => {
+  it("takes a name and a host", () => {
+    const read = readRename({ name: "  The shop  ", host: "https://shop.example.com/pricing" })
+
+    expect(read.ok && read.value).toEqual({ name: "The shop", host: "shop.example.com" })
+  })
+
+  /**
+   * An empty box is reported as empty, and what that means is the action's
+   * business — `ApplicationStore.rename` cannot clear a host today, so the
+   * screen has to say so rather than quietly do nothing.
+   */
+  it("reports an emptied host as empty rather than guessing what it meant", () => {
+    const read = readRename({ name: "The shop", host: "   " })
+
+    expect(read.ok && read.value.host).toBeUndefined()
+  })
+
+  it("refuses a name it would have refused at registration", () => {
+    const registered = readRegistration({ name: "", host: "", project: "new" })
+    const renamed = readRename({ name: "", host: "" })
+
+    expect([registered.ok, renamed.ok]).toEqual([false, false])
+    expect(!renamed.ok && faultFor(renamed.faults, "name")).toBeDefined()
+  })
+
+  it("refuses a host it would have refused at registration", () => {
+    const read = readRename({ name: "Fine", host: "not a host" })
+
+    expect(read.ok).toBe(false)
+    expect(!read.ok && faultFor(read.faults, "host")).toBeDefined()
+  })
+
+  it("does not fall over on fields that are not strings", () => {
+    const read = readRename({ name: 7, host: null })
+
+    expect(read.ok).toBe(false)
   })
 })

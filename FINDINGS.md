@@ -52423,3 +52423,42 @@ timing of a correct key distinguishable.
 
 Not decided here, because it is a security posture rather than a defect, and
 the lane that found it is not the one that gets to choose.
+
+---
+## 2026-10-13 — `rename` cannot clear a field, so a host set once is a host forever
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/application/`,
+`src/project/`) · **Status:** open — **a settings screen is refusing half an
+edit it has no way to make**
+
+`ApplicationStore.rename` takes `{ name?, host? }` and both implementations
+read an absent field the same way:
+
+```ts
+const next = applicationSchema.safeParse({
+  ...found.value,
+  ...(to.name === undefined ? {} : { name: to.name }),
+  ...(to.host === undefined ? {} : { host: to.host }),
+})
+```
+
+Absent means *leave it alone*, which is the right reading for a partial update
+and leaves **no way to express "remove it"**. `ProjectStore.rename` has the same
+shape with one field, so it has the same gap waiting for its second.
+
+`/portal/[application]/settings` is the first screen that can edit an
+application, and it meets this immediately: it shows the host in a box, and a
+person who empties the box and presses save means *I do not have a host any
+more*. Today that submits an absent host, renames nothing, and would report
+success — the one outcome a settings screen must never produce. So the screen
+refuses that half of the edit and says why, which is honest and is not what
+anybody wants.
+
+What the fix is not: `host: ""`. An empty string is not absent and
+`applicationSchema` should go on refusing it, or every store gains a second
+spelling of nothing.
+
+What it probably is: a third state in the patch, so `to.host` can be `string`,
+`undefined` (unchanged) or `null` (cleared) — the shape every JSON patch
+eventually arrives at. That is a change to what `rename` *means* and a surface
+does not get to make it, which is why this is filed rather than worked around.

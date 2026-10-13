@@ -1,8 +1,8 @@
 "use client"
 
 import { useActionState } from "react"
-import { useFormStatus } from "react-dom"
 
+import { Field, Submit } from "@/app/(portal)/_components/form"
 import { faultFor } from "@/app/(portal)/_lib/registering"
 
 import { registerApplication, type RegistrationReport } from "../actions"
@@ -14,53 +14,6 @@ import { registerApplication, type RegistrationReport } from "../actions"
  * without losing what was typed, which is the whole of what a person minds about
  * a form that refuses them.
  */
-
-const Field = ({
-  label,
-  name,
-  hint,
-  fault,
-  ...input
-}: {
-  label: string
-  name: string
-  hint?: string | undefined
-  fault?: string | undefined
-} & React.InputHTMLAttributes<HTMLInputElement>) => (
-  <label className="flex flex-col gap-1.5">
-    <span className="text-sm">{label}</span>
-    <input
-      name={name}
-      className={`border-edge bg-surface-base rounded-md border px-2.5 py-1.5 text-sm ${fault === undefined ? "" : "border-refuse-edge"}`}
-      aria-invalid={fault === undefined ? undefined : true}
-      aria-describedby={fault === undefined ? undefined : `${name}-fault`}
-      {...input}
-    />
-    {fault === undefined ? (
-      hint === undefined ? null : (
-        <span className="text-ink-muted text-xs">{hint}</span>
-      )
-    ) : (
-      <span id={`${name}-fault`} className="text-refuse-ink text-xs">
-        {fault}
-      </span>
-    )}
-  </label>
-)
-
-const Submit = () => {
-  const { pending } = useFormStatus()
-
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="bg-affirm text-affirm-ink border-affirm-edge self-start rounded-md border px-3 py-1.5 text-sm disabled:opacity-60"
-    >
-      {pending ? "Registering…" : "Register it"}
-    </button>
-  )
-}
 
 export const RegistrationForm = ({
   projects,
@@ -119,7 +72,7 @@ export const RegistrationForm = ({
         <p className="text-refuse-ink text-sm">{report.detail}</p>
       )}
 
-      <Submit />
+      <Submit label="Register it" pendingLabel="Registering…" />
     </form>
   )
 }
