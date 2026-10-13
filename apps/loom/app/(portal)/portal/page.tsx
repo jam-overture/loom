@@ -9,7 +9,6 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { within } from "@/app/_lib/app/bounded"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { ensureSeeded, portalApplications, portalProjects, portalStore } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
@@ -99,18 +98,18 @@ const Group = ({ name, applications }: { name: string; applications: readonly Ap
 const summaryFor = async (
   application: ApplicationSummary["application"]
 ): Promise<ApplicationSummary> => {
-  const listed = await within(portalStore.list({}))
-  if (listed?.ok !== true) return { application, pages: 0, waiting: 0, unreadable: 0 }
+  const listed = await portalStore.list({})
+  if (!listed.ok) return { application, pages: 0, waiting: 0, unreadable: 0 }
 
   const perPage = await Promise.all(
-    listed.value.trees.map(async (listing) => await within(portalHolds.forTree(listing.treeId)))
+    listed.value.trees.map(async (listing) => await portalHolds.forTree(listing.treeId))
   )
 
   return {
     application,
     pages: listed.value.trees.length,
-    waiting: perPage.reduce((sum, holds) => sum + (holds?.ok === true ? holds.value.held.length : 0), 0),
-    unreadable: perPage.filter((holds) => holds?.ok !== true).length,
+    waiting: perPage.reduce((sum, holds) => sum + (holds.ok ? holds.value.held.length : 0), 0),
+    unreadable: perPage.filter((holds) => !holds.ok).length,
   }
 }
 
@@ -119,28 +118,25 @@ const Workspace = async () => {
   await ensureSeeded()
 
   /**
-   * Bounded, for the reason `_lib/app/bounded.ts` gives: a store that refuses
-   * is a state this screen already draws, and a store that does not answer was
-   * a screen that never arrived. `undefined` is treated as the refusal it is
-   * indistinguishable from at render time — the reader is told the store could
-   * not be reached, which is true either way and is what they came here to
-   * find out.
+   * Both reads answer within a budget, for the reason
+   * `_lib/app/bounded-store.ts` gives: a store that refuses is a state this
+   * screen already draws, and a store that does not answer was a screen that
+   * never arrived. The budget is on the handle rather than written here, so the
+   * ten screens that never had one have one too — and a timeout arrives as
+   * `unavailable`, which the branch below was already able to say.
    */
   const [projects, applications] = await Promise.all([
-    within(portalProjects.list()),
-    within(portalApplications.list()),
+    portalProjects.list(),
+    portalApplications.list(),
   ])
 
-  if (projects?.ok !== true || applications?.ok !== true) {
+  if (!projects.ok || !applications.ok) {
     /**
      * Written out rather than compressed into a ternary: the two stores have
      * different error types, and a reader of this file should be able to see
      * which sentence comes from which without resolving a conditional.
      */
     const detail = ((): string => {
-      if (projects === undefined || applications === undefined) {
-        return "the store did not answer within the time this screen waits"
-      }
       if (!projects.ok) return describeProjectStoreError(projects.error)
       if (!applications.ok) return describeApplicationStoreError(applications.error)
 

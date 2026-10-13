@@ -1,6 +1,8 @@
 import { memoryTelemetryJournal, type TelemetryJournal } from "@jam-overture/loom/telemetry"
 import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
+import { boundedTelemetryJournal } from "@/app/_lib/app/bounded-store"
+
 import { portalDatabase } from "./database"
 
 /**
@@ -22,7 +24,19 @@ type Carrier = { [CARRIER_KEY]?: TelemetryJournal }
 
 const carrier = globalThis as unknown as Carrier
 
-export const portalTelemetry: TelemetryJournal = (carrier[CARRIER_KEY] ??=
+/** Unbounded, for the runtime narrating itself inside a write. */
+export const telemetryForWriting: TelemetryJournal = (carrier[CARRIER_KEY] ??=
   portalDatabase === undefined
     ? memoryTelemetryJournal()
     : postgresTelemetryJournal(portalDatabase))
+
+/**
+ * The same journal, read with a budget, for the six screens that print it.
+ *
+ * `/portal/activity`, both rules screens, `/portal/trust` and the application
+ * screen each `await portalTelemetry.read(…)` and then draw a notice if it
+ * refused. Until 13 October a journal that did not answer meant none of those
+ * notices was reachable and the screen was a 504 instead.
+ * `_lib/app/bounded-store.ts` has the argument.
+ */
+export const portalTelemetry: TelemetryJournal = boundedTelemetryJournal(telemetryForWriting)

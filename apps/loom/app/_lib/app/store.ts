@@ -12,6 +12,11 @@ import {
   postgresTreeStore,
 } from "@jam-overture/loom/postgres"
 
+import {
+  boundedApplicationStore,
+  boundedProjectStore,
+  boundedTreeStore,
+} from "./bounded-store"
 import { portalDatabase } from "./database"
 
 /**
@@ -60,7 +65,34 @@ type Carrier = {
 
 const carrier = globalThis as unknown as Carrier
 
-export const appStore: TreeStore = (carrier[CARRIER_KEY] ??= build())
+/**
+ * The handle the **write path and the seeding** take, with no budget on reads.
+ *
+ * Two callers, one reason. A read made inside a write is not a screen waiting
+ * for a page — it is `append` checking the head it is applying to, and giving
+ * up on it would turn a slow database into a refused change rather than a slow
+ * one.
+ *
+ * The seeding's reason is sharper, and it is the trap this split exists to
+ * avoid. A seed asks `head` before it writes (that is #615, and it is why a
+ * request no longer inserts blindly). Hand it a *bounded* handle and a slow
+ * store makes that question answer `unavailable` — on which the seed correctly
+ * declines to write, **and then finishes**, so `waitForSeeding` records it as
+ * done and the deployment never seeds at all. Unbounded, the seed is cut off by
+ * its own budget one level up, which reports *still going*, keeps the promise,
+ * and lets the work land in the background. `./bounded-store.ts` has the rest
+ * of the argument.
+ */
+export const appStoreForWriting: TreeStore = (carrier[CARRIER_KEY] ??= build())
+
+/**
+ * The handle every **screen** takes, whose reads answer within a budget.
+ *
+ * Bounded here rather than at each call site, because ten portal screens
+ * awaited this store with no budget until 13 October and the eleventh did not —
+ * which is a rule that has to hold everywhere held in the one place it can be.
+ */
+export const appStore: TreeStore = boundedTreeStore(appStoreForWriting)
 
 /**
  * The projects this deployment has.
@@ -76,7 +108,12 @@ export const appStore: TreeStore = (carrier[CARRIER_KEY] ??= build())
 const buildApplications = (): ApplicationStore =>
   portalDatabase === undefined ? memoryApplicationStore() : postgresApplicationStore(portalDatabase)
 
-export const appApplications: ApplicationStore = (carrier[APPLICATIONS_KEY] ??= buildApplications())
+/** Unbounded, for the seeding — `appStoreForWriting` has the reason. */
+export const appApplicationsForWriting: ApplicationStore = (carrier[APPLICATIONS_KEY] ??=
+  buildApplications())
+
+export const appApplications: ApplicationStore =
+  boundedApplicationStore(appApplicationsForWriting)
 
 /**
  * The projects those applications are grouped under.
@@ -89,6 +126,9 @@ export const appApplications: ApplicationStore = (carrier[APPLICATIONS_KEY] ??= 
 const buildProjects = (): ProjectStore =>
   portalDatabase === undefined ? memoryProjectStore() : postgresProjectStore(portalDatabase)
 
-export const appProjects: ProjectStore = (carrier[PROJECTS_KEY] ??= buildProjects())
+/** Unbounded, for the seeding — `appStoreForWriting` has the reason. */
+export const appProjectsForWriting: ProjectStore = (carrier[PROJECTS_KEY] ??= buildProjects())
+
+export const appProjects: ProjectStore = boundedProjectStore(appProjectsForWriting)
 
 export { storeIsDurable } from "./database"
