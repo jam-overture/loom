@@ -1620,6 +1620,85 @@ an author opens the morning after changing a primitive, the two numbers that mus
 be read before a movement is printed as a finding, and the one row where a type
 and a role deliberately disagree.
 
+### 27. What a change did to the words a kind of part says · `Loom signals` · **done, 12 October**
+
+§26 compares a kind of part across two windows and is explicit about the one
+thing it refuses: **words**. A paired placement there is paired by node, so the
+page's revision may have moved underneath it — the two sides' words are then two
+different sentences, and a share of one against a share of the other is not a
+before and an after. It filed the shape of the missing unit and shipped without
+it.
+
+That unit is the sentence an author who edited copy inside a primitive actually
+has: *you rewrote the testimonial band and readers now reach two thirds of the
+words it kept.* §14 publishes a kind's words and the words readers reached, of
+one window; §16 reads a change against the words both revisions say, of **one
+page**. Nothing joined the two.
+
+**Done.** `libraryCopyChangeOf(was, now)` in
+[`src/signals/library-copy-change.ts`](../src/signals/library-copy-change.ts)
+is §16's method taken per placement and added across the placements of one kind.
+It is the **eighteenth** thing taken out of what this subsystem already knows
+rather than collected: **nothing was added to a payload, a browser, a column, a
+store or the vocabulary**, the broadcaster was not touched and is byte-identical,
+and the text pairing and the words-per-part rule are both reused from the
+readings that publish them rather than spelled a second time.
+
+What decides the shape
+([0270](../decisions/0270-a-change-to-the-words-a-kind-of-part-says-is-read-over-the-words-both-windows-say-and-a-floor-costs-the-signed-figure.md)):
+
+- **Every figure is over the carried words** — the words both windows say word
+  for word, in the places both windows bear. A stronger hold than §26's: a count
+  of places is held still by pairing the places, and carried words are held still
+  by being *the same sentences*. A placement whose text changed is in `rewritten`
+  and in no share, and it is published beside the share because the share is
+  about what is left: a band nine tenths rewritten has a carried share about the
+  tenth it kept.
+- **The whole library gets a total, which no other reading of a library has.**
+  §23, §24, §25 and §26 all refuse a figure added across kinds, because a figure
+  over every kind at once counts a page once per element node. Words do not do
+  that — a part's own words partition its page exactly once (0212, 0235) — so the
+  rows add and the total *is* the type rows added up. It follows the types
+  because a recast node is a place one kind left and another took, and the role
+  rows hold it still: the two keys cannot both be the total. There is no verdict
+  and no silence at that scale, because every reason this reading withholds
+  something is a reason about one kind of part (0240).
+- **A floor costs the signed figure and nothing else.** A signed sum over
+  passages can have the wrong sign under a floor where a single passage's
+  movement cannot (0239), so `words.change` is withheld with `floored` as the
+  reason while both shares, both masses and every count stay. **The places
+  answer is never withheld for a floor** — §26 answers for every row silenced
+  here, which is where the silence points.
+- **The confound is published rather than corrected**, as §26's is: the two
+  windows' view floors travel on the reading, nothing is scaled by them, and no
+  threshold decides what counts as comparable traffic.
+
+**A thirteenth silence vocabulary that brings nothing, and the first assembled
+out of three sets** — `library-copy-change`, five members, subject `kind`:
+§23's `unplaced`, §26's `unpaired`, and §16's `wordless` and `floored` said of a
+kind rather than of a page. That last pair is the instructive half: `words-a-floor`
+arrived with a reading of one page's words and is reported here at another
+subject, which is `one-reason` and never `one-state`. `floored` is also the only
+member of any set in this subsystem whose reading withholds **one figure** while
+every other figure on its row stands. 0240 is not superseded and not edited; the
+module carries the corrected counts.
+
+**The thinness is §6's, in an eighth place** — every role row is `role: null`
+until `src/primitives/` declares one, and in this reading that row is also the
+one that keeps the words of a node whose type changed. Filed again for
+`Loom primitives`.
+
+**Not built and filed:** the word-weighted reader figure (*the typical reader
+reached this many of its words*), which adds signed per-page terms whose weights
+are each page's own views — §16 withholds it for one page under a floor, and at
+the scale of a library the weights move without one.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the two
+numbers that must be read together before a movement is printed (the carried
+share and the rewriting beside it), the first deployment-wide word figure any
+library reading has published, and the row whose verdict is withheld while its
+shares are drawable.
+
 ### 28. Whether what a deployment collects can be trusted · `Loom signals` · **done, 13 October**
 
 > §27 is the words a change left standing, written on the branch of #613 and not

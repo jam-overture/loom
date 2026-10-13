@@ -17,7 +17,7 @@ import { pageViewHref, pageViewLabel } from "@/app/(portal)/_lib/page-views"
 import { describeProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { proposedDrawing } from "@/app/(portal)/_lib/proposed-view"
 import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
-import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
+import { portalStore } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 
 import { HeldProposalCard } from "../../_components/held-proposal"
@@ -106,7 +106,6 @@ const ProposedChangePage = async ({
   const back = pageViewHref("page", page.data)
 
   await requireActor(`/portal/pages/${page.data}/proposed/${asked.data}`)
-  await ensureSeeded()
 
   const held = await portalHolds.get(asked.data)
 

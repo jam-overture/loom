@@ -15,6 +15,12 @@ import type { LoomDatabase } from "../store/database.js"
  * is the only combination in Loom that could correlate anything across a
  * tenancy boundary. It expires within hours; the policy does not depend on
  * that.
+ *
+ * Every table is led by `application_id` (0269). The backfill is the column
+ * default rather than an `UPDATE`: these five never carried `project_id`, so
+ * there is no earlier spelling to correct the way `APPLICATION_ID_MIGRATION`
+ * corrects the store's — rows that predate the column belong to the deployment
+ * that wrote them, which is what `app_default` names.
  */
 
 /**
@@ -27,6 +33,7 @@ import type { LoomDatabase } from "../store/database.js"
  */
 export const READER_SIGNALS_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_reader_signals (
+    application_id text NOT NULL DEFAULT 'app_default',
     seq bigserial PRIMARY KEY,
     tree_id text NOT NULL,
     revision integer NOT NULL,
@@ -35,9 +42,28 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     signals jsonb NOT NULL,
     received_at timestamptz NOT NULL DEFAULT now()
   )`,
-  `CREATE INDEX IF NOT EXISTS loom_reader_signals_tree_seq_idx ON loom_reader_signals (tree_id, seq)`,
+  /**
+   * **The application, for a database that predates it (0269).** The same
+   * shape the store's tables take: the column is additive and defaulted, and
+   * then the index is rebuilt to lead with it.
+   *
+   * The buffer's key does not widen, unlike the four counters below. It is
+   * `seq`, a `bigserial`, which is already unique across every application the
+   * database holds — so leading the key with the application would be a wider
+   * key for no constraint that was not already enforced. The index is the part
+   * that matters here, because the index is what the reads use.
+   *
+   * Dropped by name rather than created `IF NOT EXISTS`, for the reason the
+   * store's note gives: the name does not change, so an existing index on the
+   * old columns would be left exactly as it was and every read would go on
+   * scanning across applications while appearing to be indexed.
+   */
+  `ALTER TABLE loom_reader_signals ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `DROP INDEX IF EXISTS loom_reader_signals_tree_seq_idx`,
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_tree_seq_idx ON loom_reader_signals (application_id, tree_id, seq)`,
   `ALTER TABLE loom_reader_signals ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_tallies (
+    application_id text NOT NULL DEFAULT 'app_default',
     tree_id text NOT NULL,
     revision integer NOT NULL,
     node_id text NOT NULL,
@@ -51,7 +77,7 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     closes bigint NOT NULL,
     completions bigint NOT NULL DEFAULT 0,
     updated_at timestamptz NOT NULL,
-    PRIMARY KEY (tree_id, revision, node_id)
+    PRIMARY KEY (application_id, tree_id, revision, node_id)
   )`,
   /**
    * For a deployment whose tallies table predates the counter regions are
@@ -65,8 +91,13 @@ export const READER_SIGNALS_DDL: readonly string[] = [
    * what nobody was counting.
    */
   `ALTER TABLE loom_reader_tallies ADD COLUMN IF NOT EXISTS completions bigint NOT NULL DEFAULT 0`,
+  /** The application, for a database that predates it — see the buffer's note above. */
+  `ALTER TABLE loom_reader_tallies ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_reader_tallies DROP CONSTRAINT IF EXISTS loom_reader_tallies_pkey`,
+  `ALTER TABLE loom_reader_tallies ADD PRIMARY KEY (application_id, tree_id, revision, node_id)`,
   `ALTER TABLE loom_reader_tallies ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_funnels (
+    application_id text NOT NULL DEFAULT 'app_default',
     tree_id text NOT NULL,
     revision integer NOT NULL,
     from_node_id text NOT NULL,
@@ -76,26 +107,40 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     reached bigint NOT NULL,
     converted bigint NOT NULL,
     updated_at timestamptz NOT NULL,
-    PRIMARY KEY (tree_id, revision, from_node_id, from_kind, to_node_id, to_kind)
+    PRIMARY KEY (application_id, tree_id, revision, from_node_id, from_kind, to_node_id, to_kind)
   )`,
+  /** The application, for a database that predates it — see the buffer's note above. */
+  `ALTER TABLE loom_reader_funnels ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_reader_funnels DROP CONSTRAINT IF EXISTS loom_reader_funnels_pkey`,
+  `ALTER TABLE loom_reader_funnels ADD PRIMARY KEY (application_id, tree_id, revision, from_node_id, from_kind, to_node_id, to_kind)`,
   `ALTER TABLE loom_reader_funnels ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_regions (
+    application_id text NOT NULL DEFAULT 'app_default',
     tree_id text NOT NULL,
     revision integer NOT NULL,
     region text NOT NULL,
     views bigint NOT NULL,
     updated_at timestamptz NOT NULL,
-    PRIMARY KEY (tree_id, revision, region)
+    PRIMARY KEY (application_id, tree_id, revision, region)
   )`,
+  /** The application, for a database that predates it — see the buffer's note above. */
+  `ALTER TABLE loom_reader_regions ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_reader_regions DROP CONSTRAINT IF EXISTS loom_reader_regions_pkey`,
+  `ALTER TABLE loom_reader_regions ADD PRIMARY KEY (application_id, tree_id, revision, region)`,
   `ALTER TABLE loom_reader_regions ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_page_views (
+    application_id text NOT NULL DEFAULT 'app_default',
     tree_id text NOT NULL,
     revision integer NOT NULL,
     opened bigint NOT NULL DEFAULT 0,
     appearances bigint NOT NULL DEFAULT 0,
     updated_at timestamptz NOT NULL,
-    PRIMARY KEY (tree_id, revision)
+    PRIMARY KEY (application_id, tree_id, revision)
   )`,
+  /** The application, for a database that predates it — see the buffer's note above. */
+  `ALTER TABLE loom_reader_page_views ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_reader_page_views DROP CONSTRAINT IF EXISTS loom_reader_page_views_pkey`,
+  `ALTER TABLE loom_reader_page_views ADD PRIMARY KEY (application_id, tree_id, revision)`,
   `ALTER TABLE loom_reader_page_views ENABLE ROW LEVEL SECURITY`,
 ]
 

@@ -52029,8 +52029,59 @@ already stored reinterprets.
 ## 2026-10-12 — the project scope reaches trees and revisions; holds, the policy log, signals and telemetry are still deployment-wide
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`,
-`src/signals/`, `src/telemetry/`) · **Status:** open — **this is the unfinished
-half of a change on a branch, not a defect on `main`**
+`src/signals/`, `src/telemetry/`) · **Status:** **closed by
+`framework-69-the-readers-inside-one-application`** — all nine tables are
+scoped. Two of the seven you listed closed before this branch:
+`loom_holds` and `loom_policy_revisions` took `application_id` with
+[0269](decisions/0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md),
+as did `loom_telemetry`. This branch takes the five reader tables, which were
+the ones left.
+
+**Your ordering claim was the load-bearing half and it held.** *The portal must
+not offer a second application until these are scoped* is now satisfied, so the
+screen that creates one is unblocked — that is the sentence to read if you are
+deciding whether your next unit can start.
+
+**One thing the build changed about your entry.** You wrote the five reader
+tables as mechanical on the pattern, and they were, with one exception worth
+knowing: the buffer's key does **not** widen. `loom_reader_signals` is keyed on
+`seq`, a `bigserial` already unique across every application in the database, so
+leading its key with the application would have been a wider key enforcing
+nothing new. Its *index* widens instead, because the index is what the reads
+use — and `forget` needed the filter most of all, since `seq` counts across
+applications and an unscoped `DELETE … WHERE seq < n` would have dropped another
+application's buffer. There is a test on exactly that.
+
+**The word changed under this entry.** You wrote it as `project_id` and
+`prj_default`, citing 0260; 0269 superseded that the same day and the column is
+`application_id` defaulted to `app_default`. A project is now the grouping
+above, and nothing scoped by an application is also scoped by a project.
+
+**Your count was off by one, and so was the shape of the answer.** The prose
+says seven tables remain where the table under it lists eight, and the true
+total is ten rather than nine. More usefully: **eight of the ten lead their key
+with the application and two do not**, because `loom_telemetry` and
+`loom_reader_signals` are append-only journals keyed by a `bigserial`. Those two
+are scoped by their index and by every statement that touches them, which is a
+weaker guarantee than a key and is why the next line exists.
+
+**Counting them found a live bug, now fixed on this branch.**
+`postgresTelemetryJournal` resolves a scope and filters every read through a
+`mine()` helper — and `forget` was the one statement in the file that did not
+use it. `seq` counts across every application in the database, so retention run
+for one application was deleting **every** application's telemetry below the
+same sequence number, unrecoverably. Nothing had reached it because nothing
+builds a second handle yet; it would have become reachable on the day the portal
+offered a second application. `scoped.test.ts` now covers it, and without the
+fix the assertion reads `{ removed: 4, mine: 0 }`.
+
+**What is deliberately not done:** the audience dimension. 0263 clause 5 asks
+for it and says both dimensions should land in one migration; 0263 is
+`Proposed`, so this landed the application alone rather than wait out a record
+nobody here can ratify.
+[0273](decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+holds that argument and the cost it accepts, which is one more migration if
+0263 is Accepted.
 
 [0260](decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
 says a project is the unit Loom stores, governs and measures under, and that
@@ -52442,3 +52493,154 @@ with it; and the fault it enables needs an instant handed in, which is the first
 option any reading here would take. That is a unit of work with a decision in it
 — *a counter row says when each of its writers last touched it* — and not a field
 added on the way past.
+## 2026-10-12 — a kind of part now has a words answer as well as a places answer, and the one to draw depends on a floor
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open
+
+[0270](decisions/0270-a-change-to-the-words-a-kind-of-part-says-is-read-over-the-words-both-windows-say-and-a-floor-costs-the-signed-figure.md)
+adds `libraryCopyChangeOf`, which answers *you rewrote the testimonial band and
+readers now reach two thirds of the words it kept.* It sits beside
+[0266](decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md),
+which answers the same change in **places**, and a screen about a changed
+component now has two readings of it rather than one.
+
+**Three things a surface has to get right, and one of them is new in this
+subsystem.**
+
+1. **The carried share is meaningless without the rewriting beside it.** Every
+   figure is over the words both windows say word for word, so a band whose
+   words are nine tenths rewritten has a share about the tenth it kept.
+   `rewritten` and `rewrittenWords` are on every row for exactly this, and a
+   card that printed the share alone would report a sentence about a tenth of a
+   component as a sentence about the component.
+2. **A floored row has shares and no verdict**, which is the first row in this
+   subsystem shaped that way: `words.change` is `null` and `movement` is
+   `unknown` while `readShareWas`, `readShareNow` and both masses are there and
+   true. The remedy is not *draw nothing* — it is draw the two shares, and point
+   at 0266 for the verdict, which a floor cannot reach. `silence` is `floored`
+   and the row says how many of its words are a floor.
+3. **There is a deployment-wide word figure, and it is the first one any reading
+   of a library has had.** `LibraryCopyChange.words` is the type rows added up,
+   sound because words partition a page (0212, 0235) where places do not (0257).
+   It is numbers and never a verdict — no movement and no silence at that scale —
+   so a headline drawn from it has to be written from the counts.
+
+**The two states to refuse to draw** are `unpaired` (the change left no sentence
+standing, so the places and the rewriting are the answer) and `unplaced` (a role
+nothing in the library plays). `wordless` is a third and is neither: the places
+are there and their words are a floor.
+
+**Where it goes:** the same card `/portal/pieces` draws, which already carries
+§23, §24 and §25, and the morning-after screen 0266 was filed for.
+
+---
+## 2026-10-12 — the word-weighted reader figure for a change to a kind of part is a third unit, and its weights move without a floor
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a question, not a defect**; filed for the reason 0256 was
+filed rather than shipped inside 0257's type, and the reason the reader-weighted
+places figure was filed yesterday rather than shipped inside 0266's
+
+0270 compares the carried words of a kind of part by **standing**: a word counts
+as read where at least one reader reached the part saying it. The figure
+everybody will ask for next is the per-reader one: *the typical reader reached
+two hundred of its words and reaches three hundred now.*
+
+**It is answerable and it is a third question.** Each page's term already exists
+— `copyChangeOf`'s `typical` is `Σ readers × words ÷ views` over the carried
+passages (0239) — so the unit is those per-page terms added across the placements
+of one kind.
+
+**Why it is not in 0270's type.** The terms are per-page means, so adding them
+across pages weights each page by its own traffic: the figure moves when one
+page grows and another shrinks with no reader reading differently. 0239 withholds
+`typical` for **one page** under a floor, because signed terms scaled by
+different factors can sum to the wrong sign; at the scale of a library the
+weights move with no floor involved at all. That needs its own argument about
+what is published and what is withheld, and it is the same argument the
+reader-weighted places figure needs — which suggests the two are one unit rather
+than two.
+
+**Nothing is lost by waiting.** The carried-word share is sound today and is not
+superseded by the weighted figure: it answers *of the words this kind kept, the
+share that is read anywhere*, which is the question an author who rewrote a
+primitive has.
+
+---
+## 2026-10-12 — the missing role declaration now costs a kind's word comparison as well, which is the eighth consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **a repeat with one new consequence**,
+and the consequence is why it is filed again rather than left to the standing
+entry
+
+Nothing in `src/primitives/` declares a role (0114), so every role row in every
+reading of a library is the `null` row. 0270 is the eighth reading to be thin for
+that reason, and in this one the role rows carry something the type rows cannot:
+a node whose **type** changed is a place one kind left and another took, and the
+role rows are where *to a reader it is the same place still standing* survives.
+
+So the role rows here are not a second view of the same number — they are the
+only place a recast component's words are compared at all, and today that
+comparison lands entirely in the row for *everything whose type said nothing*,
+which is the whole library and answers nothing.
+
+**One declaration per primitive and no migration.** The join is at read time
+(0212), so the day a type declares a role every counter already stored
+reinterprets and these rows start answering.
+## 2026-10-13 — one table is reached through two handles, and the intake's one is the only unbounded reader of it left in the app
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/_lib/reader-signals/`) · **Status:** open — **nothing is broken
+today**, because the handle in question only ever writes
+
+`loom_reader_signals` is composed twice in this app:
+
+- `(portal)/_lib/reader-signals.ts` — read by `/portal/readers`, and as of today
+  read through `boundedReaderSignalJournal`, so a buffer that does not answer
+  becomes a sentence rather than a 504.
+- `_lib/reader-signals/intake.ts` — built fresh from `portalDatabase` for the
+  `POST /api/reader-signals` endpoint.
+
+Both sit on the same `portalDatabase`, so this costs no second connection and is
+not a durability bug. What it costs is the thing today's change was about: a rule
+applied at a composition root is only applied to the roots somebody found. The
+intake's journal calls `receive` only, which is a **write**, and writes are
+deliberately unbounded — so there is nothing to fix right now and every reason
+to notice that the next method added there inherits no budget.
+
+The question for this lane is whether the intake should take the portal's handle
+rather than build its own. It probably should not — an endpoint anyone on the
+internet can POST to has different needs from a screen — in which case the
+honest fix is for its own composition to say so, rather than for the resemblance
+to go unremarked.
+
+---
+## 2026-10-13 — sign-in still fails closed when the throttle is unreachable, and that is now a decision somebody has to make rather than a thing nobody had looked at
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer · **Status:** open —
+**awaiting a policy decision, not a fix**
+
+`attempt-sign-in.ts` reads the attempt log **before** comparing the key:
+
+```ts
+const known = await log.recall(attempt.subject, cutoff)
+if (!known.ok) return { code: "unavailable", detail: known.error.detail }
+```
+
+Today's change bounds `recall`, so an unreachable throttle refuses in 1.5
+seconds instead of hanging a form anyone on the internet can reach. That is
+strictly better and it is not the whole question: **the refusal locks everybody
+out of the portal while the database is unwell**, which is exactly when somebody
+wants to get in and look at it.
+
+The alternatives are not close to equal and neither is obviously right. Failing
+open means a database wobble removes the brute-force throttle. Failing closed
+means a database wobble removes the portal. A third option — compare the key
+first and consult the throttle only on a *failed* comparison — keeps the
+throttle for the attacker and lets the maintainer in, at the cost of making the
+timing of a correct key distinguishable.
+
+Not decided here, because it is a security posture rather than a defect, and
+the lane that found it is not the one that gets to choose.
