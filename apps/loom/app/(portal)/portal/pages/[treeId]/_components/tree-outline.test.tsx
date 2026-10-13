@@ -275,3 +275,275 @@ describe("TreeOutline", () => {
     }
   })
 })
+
+/**
+ * The folding and the search, on the component rather than on the reading.
+ *
+ * `_lib/outline-view.test.ts` holds which rows a state draws. What is left here
+ * is what a reader can actually do with that: type in a box, press an arrow,
+ * and get the whole page back. Every assertion is also the *nothing is removed*
+ * rule read as a sequence — a row that is folded away is reached by pressing
+ * one thing, and a search that found nothing is undone by pressing one thing.
+ */
+
+/**
+ * A page long enough to arrive folded: a root, a space, and eleven cards each
+ * holding its own words. Twenty-four rows, against a budget of twenty — so the
+ * list opens the page and the space, draws the eleven cards, and holds their
+ * words back. Which pages arrive folded and how far is
+ * `_lib/outline-view.test.ts`'s question; this file's is what a reader can do
+ * about it.
+ *
+ * Ten of the cards are called `Card`, which is what a real page looks like and
+ * is the reason a search is worth having at all. The eleventh is an `Offer`
+ * holding *Buy now*, and it is the row every test below reaches for: it sits at
+ * depth 3 behind one chevron, it is the thing a reader actually wants to point
+ * at, and it is nameable without matching the other ten.
+ */
+const CARDS = 11
+
+const nested: readonly OutlineRow[] = [
+  { ...row("n_page", "element", "Page", "loom.page", addressable("n_page")), depth: 0 },
+  {
+    ...row("n_body", "slot", "Body space", "body", addressable("n_body")),
+    parentId: "n_page" as NodeId,
+    depth: 1,
+  },
+  ...Array.from({ length: CARDS }, (_unused, index) => {
+    const last = index === CARDS - 1
+
+    return [
+      {
+        ...row(
+          `n_card${index}`,
+          "element",
+          last ? "Offer" : "Card",
+          last ? "loom.offer" : "loom.card",
+          addressable(`n_card${index}`)
+        ),
+        parentId: "n_body" as NodeId,
+        depth: 2,
+      },
+      {
+        ...row(
+          `n_words${index}`,
+          "text",
+          last ? "Buy now" : `Words ${index}`,
+          null,
+          addressable(`n_words${index}`)
+        ),
+        parentId: `n_card${index}` as NodeId,
+        depth: 3,
+      },
+    ]
+  }).flat(),
+]
+
+const inside = (label: string) =>
+  screen.getByRole("button", { name: `Show what is inside ${label}` })
+
+/**
+ * The row itself, by its exact name.
+ *
+ * `/Card/` matches the fold control beside it too, which is the one cost of
+ * naming that control after the part it opens — and the name is worth the cost,
+ * because twenty bare *Show* buttons is what a screen reader reads out
+ * otherwise. The marks and the count on a row are `aria-hidden`, so a row's
+ * accessible name is the part's name and nothing else.
+ */
+const part = (label: string) => screen.getByRole("button", { name: label })
+
+describe("TreeOutline, folded", () => {
+  it("arrives with the deepest parts folded away, and says how many are drawn", () => {
+    outline(nested)
+
+    expect(screen.queryByRole("button", { name: /Buy now/ })).toBeNull()
+    expect(document.body.textContent).toContain("Showing 13 of 24 parts")
+  })
+
+  /** The number on a folded row is what makes it a disclosure and not a filter. */
+  it("says how many parts a folded row is holding, without opening it", () => {
+    const { container } = outline(nested)
+    const rowsDrawn = [...container.querySelectorAll('[data-outline="list"] li')]
+    const card = rowsDrawn.find((one) => one.textContent?.includes("Offer"))
+
+    expect(card?.textContent).toContain("1")
+    expect(inside("Offer").getAttribute("aria-expanded")).toBe("false")
+  })
+
+  it("opens a folded row when its arrow is pressed, and closes it again", () => {
+    outline(nested)
+
+    fireEvent.click(inside("Offer"))
+
+    expect(screen.getByRole("button", { name: /Buy now/ })).toBeInstanceOf(HTMLElement)
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide what is inside Offer" }))
+
+    expect(screen.queryByRole("button", { name: /Buy now/ })).toBeNull()
+  })
+
+  /**
+   * Opening a part must not pick it. A reader looking inside a card has not
+   * asked for a change to the card, and one control doing both is the thing
+   * that would make this list unusable for the screen it is on.
+   */
+  it("does not pick a row when its arrow is pressed", () => {
+    outline(nested)
+
+    fireEvent.click(inside("Offer"))
+
+    expect(part("Offer").getAttribute("aria-pressed")).toBe("false")
+    expect(document.body.textContent).toContain("24 parts")
+  })
+
+  it("offers no arrow on a part with nothing inside it", () => {
+    outline(nested)
+
+    fireEvent.click(inside("Offer"))
+
+    expect(screen.queryByRole("button", { name: /inside Buy now/ })).toBeNull()
+  })
+
+  it("says nothing about folding on a page small enough to show whole", () => {
+    outline()
+
+    expect(document.body.textContent).not.toContain("Showing")
+  })
+})
+
+describe("TreeOutline, searched", () => {
+  const find = () => screen.getByRole("searchbox", { name: "Find a part of this page" })
+
+  it("finds a part folded three levels down, without anything being opened", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "buy" } })
+
+    expect(screen.getByRole("button", { name: /Buy now/ })).toBeInstanceOf(HTMLElement)
+    expect(document.body.textContent).toContain("1 part matches")
+  })
+
+  /** A match is shown with what holds it, because a match on its own locates nothing. */
+  it("shows everything a match is inside along with it", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "buy" } })
+
+    for (const label of ["Page", "Body space", "Offer"]) {
+      expect(part(label), label).toBeInstanceOf(HTMLElement)
+    }
+  })
+
+  it("answers to the registry's own word as well as to the person's", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "loom.offer" } })
+
+    expect(document.body.textContent).toContain("1 part matches")
+    expect(part("Offer")).toBeInstanceOf(HTMLElement)
+  })
+
+  it("says plainly that nothing is called that, rather than showing an empty box", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "trombone" } })
+
+    expect(document.body.textContent).toContain("No part of this page is called")
+    expect(document.body.textContent).toContain("trombone")
+  })
+
+  /** The way back is a control, not a gesture. */
+  it("puts the whole page back when asked, from a search that found nothing", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "trombone" } })
+    fireEvent.click(screen.getByRole("button", { name: "Show the whole page again" }))
+
+    expect((find() as HTMLInputElement).value).toBe("")
+    expect(part("Offer")).toBeInstanceOf(HTMLElement)
+    expect(document.body.textContent).toContain("Showing 13 of 24 parts")
+  })
+
+  it("keeps the page's own count in the heading while a search is narrowing the list", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "buy" } })
+
+    expect(document.body.textContent).toContain("24 parts")
+  })
+
+  it("offers no arrows while a search is running, because the search decides the list", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "card" } })
+
+    expect(screen.queryAllByRole("button", { name: /what is inside/ })).toEqual([])
+  })
+
+  /**
+   * A part picked by clicking the page itself is deeper than the list arrives
+   * open to on any real page, so without this the list marks a row that is not
+   * on the screen.
+   */
+  it("unfolds everything holding a part that was picked while searching", () => {
+    outline(nested)
+
+    fireEvent.change(find(), { target: { value: "buy" } })
+    fireEvent.click(screen.getByRole("button", { name: /Buy now/ }))
+    fireEvent.click(screen.getByRole("button", { name: "Show the whole page again" }))
+
+    expect(screen.getByRole("button", { name: /Buy now/ }).getAttribute("aria-pressed")).toBe(
+      "true"
+    )
+  })
+})
+
+describe("the box the list sits in", () => {
+  /**
+   * The audit's second finding, as a property: the pane that says what you
+   * picked has to be on the same screen as the row you picked it with, and a
+   * list that can be any height at all is the one arrangement where that cannot
+   * be guaranteed. 189 open rows made that list 4,594px tall and put
+   * `Nothing picked yet` at y 5,298.
+   */
+  it("is bounded and scrolls inside itself on a page long enough to fold", () => {
+    const { container } = outline(nested)
+    const list = container.querySelector('[data-outline="list"]')
+
+    expect(list?.className).toContain("overflow-y-auto")
+    expect(list?.className).toContain("h-[24rem]")
+  })
+
+  /**
+   * A reserved height and not a maximum. A `max-h` lets the box collapse, so a
+   * reader typing into the search box watches everything under the list move on
+   * every keystroke — measured at 346px folded, 384px on a search that matched
+   * and 10px on one that did not.
+   */
+  it("holds its height through a search that matched and one that did not", () => {
+    const { container } = outline(nested)
+    const height = () => container.querySelector('[data-outline="list"]')?.className
+    const before = height()
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "Find a part of this page" }), {
+      target: { value: "offer" },
+    })
+    expect(height()).toBe(before)
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "Find a part of this page" }), {
+      target: { value: "trombone" },
+    })
+    expect(height()).toBe(before)
+  })
+
+  /**
+   * Nothing to fold means nothing moves, and a 384px box around three rows
+   * would be padding a list out to look like a problem it does not have.
+   */
+  it("reserves no height on a page short enough to arrive whole", () => {
+    const { container } = outline()
+
+    expect(container.querySelector('[data-outline="list"]')?.className).not.toContain("h-[24rem]")
+  })
+})
