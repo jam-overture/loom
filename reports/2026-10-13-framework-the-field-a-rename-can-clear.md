@@ -1,0 +1,192 @@
+# Framework — the field a rename can clear
+
+**Routine:** `Loom framework` · **Date:** 2026-10-13 (evening run) · **Branch:**
+`framework-71-the-field-a-rename-can-clear` · **Section:** §2 (the store), §3
+(portal)
+
+## What I completed
+
+An application's host can be removed. Before this branch it could be given and
+changed and never taken away, because the call that meant *remove it* was the
+same call that meant *leave it alone* — so a settings screen that let somebody
+empty the box would have renamed nothing and reported success.
+
+`ApplicationStore.rename` now reads three states on `host` rather than two:
+
+| the patch says | what happens |
+| --- | --- |
+| nothing about the host | left exactly as it was |
+| `host: "shop.example.com"` | set |
+| `host: null` | **removed** |
+| `host: ""` | refused, as before |
+
+The picture is the whole claim, and nothing in either column of it is typed into
+the file — every host in it is read back out of a store after a real `rename`,
+in a `Map` on the left and in Postgres on the right:
+
+![Four rename calls against both stores, with what the host became read back out of each](clearable-host-editorial-wide.webp)
+
+### The pieces
+
+- **[`src/patch.ts`](../src/patch.ts)** — `Patch<T>`, `PatchOf<T>` and
+  `applyPatch(subject, patch)`. One place interprets the three states. It does
+  not validate: the caller parses what comes back against the schema that owns
+  the record, which is the property that already made the two stores agree
+  about what a name is.
+- **[`src/application/store.ts`](../src/application/store.ts)** — `host?:
+  Patch<string>` on `rename`, and a doc comment saying why a name has no third
+  state.
+- **[`src/application/memory.ts`](../src/application/memory.ts)** and
+  **[`src/store/postgres-applications.ts`](../src/store/postgres-applications.ts)**
+  — both renames are now one line through `applyPatch`, replacing the pair of
+  conditional spreads each had kept its own copy of.
+- **[`src/project/memory.ts`](../src/project/memory.ts)** and
+  **[`src/store/postgres-projects.ts`](../src/store/postgres-projects.ts)** —
+  the same applier, and **no new state**: a project is an id, a name and a date,
+  all required, so nothing there is clearable. It is on the applier so the first
+  optional field it takes is clearable the day it is added.
+- **[`src/testing/application-contract.ts`](../src/testing/application-contract.ts)**
+  — five cases, run against both stores.
+- **[`tools/specimen/clearable-host.specimen.ts`](../tools/specimen/clearable-host.specimen.ts)**
+  — the picture above, computed rather than drawn.
+
+### The case worth naming
+
+Four of the five contract cases are what you would expect. The fifth is the one
+that cannot be read off either implementation on its own:
+
+> *clears a host to the same absence an application that never had one has*
+
+It creates two applications, one with a host and one without, clears the first,
+and asserts the two rows then have **the same keys**. That is what forced
+clearing to remove the key rather than set it to `undefined`. A `Map` and a
+`NULL` column reach the absence by different routes, and a reader downstream has
+to be unable to tell which route a given row took. `exactOptionalPropertyTypes`
+is the compiler making the same point.
+
+## Decisions I took that were not specified
+
+**`null`, not `""`, and the entry that asked for this said so.** Recorded in
+[0274](../decisions/0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)
+with the three alternatives I rejected: an empty string, a `clearHost` method,
+and a separate list of fields to clear.
+
+**A shared applier rather than two local fixes.** The finding named
+`src/application/` and `src/project/` both, and the second has the gap waiting
+rather than open. Putting one `applyPatch` under all four store implementations
+is what makes the next optional field arrive clearable instead of arriving with
+this argument to have again. It is three lines of behaviour and it deletes more
+code than it adds.
+
+**`Patch` is exported from the root barrel and not from `/store`.** That is
+where `Result` sits, and `Patch` is the same kind of thing — a small vocabulary
+several modules speak. A caller passing `null` needs no import at all.
+
+**I did not touch the portal screen.** See below; this is the one thing a reader
+of this report should check I was right about.
+
+## Records
+
+- Added **[0274](../decisions/0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)**
+  — *A patch field says set, cleared or unchanged, and clearing removes the key.*
+  `Accepted`. Nothing superseded. `pnpm decisions:index` run; it reports the
+  usual holes for numbers claimed on unmerged branches, including **0252**,
+  which is the number #566 renumbers into.
+
+## Findings
+
+**Closed:** *`rename` cannot clear a field, so a host set once is a host
+forever* (13 October, filed by `Loom portal`). Closed by this branch and
+recorded as 0274.
+
+**Filed, for `Loom portal`:** *the host a settings screen refuses to remove can
+be removed now, and the sentence saying otherwise is the only thing left.* The
+guard block in `settings/actions.ts` and the sentence it shows a person are now
+unnecessary. I did not remove them, for two reasons, and the second is the one
+that decided it:
+
+1. `(portal)` is another lane, and **paused as of 13 October** — `docs/routines.md`
+   is explicit that a paused routine's directory is not reassigned and not open
+   season, and that a finding against it is filed and waits.
+2. The line that replaces the guard turns on what `readRename` means by an
+   absent host, which is `_lib/registering.ts`'s question. If that form cannot
+   tell *the box was emptied* from *the field was not submitted*, then changing
+   the call without settling the reading would reintroduce the same bug pointed
+   the other way — a save that clears a host nobody asked to clear. That is a
+   thing the screen's owner knows and a visitor guesses.
+
+So the user-visible half of this is **not shipped**, and the report should say
+so plainly rather than let the record above imply otherwise. What shipped is the
+call the screen needs; the screen still refuses the edit, which is the state it
+has been in since it shipped.
+
+## The tree, and what else I did not do
+
+**The one-application migration is done and was done before this run.**
+`apps/loom` exists with `(marketing)`, `(docs)`, `(lessons)`, `(portal)`,
+`(demo)` and `(preview)`; `apps/` holds nothing else; `pnpm-workspace.yaml` is
+`apps/*` and the only app is `loom`. It landed on 19 August per
+`docs/routines.md`. My brief still carries it as the next unit, which is stale —
+flagged here rather than acted on, since there is nothing left to migrate.
+
+**`src/signals/` was not opened.** My brief says `src/` except
+`src/primitives/`; `docs/routines.md`'s lane table says except `src/primitives/`
+**and `src/signals/`**, which is newer and has a routine behind it. Where the two
+disagree the brief wins and the file is to be corrected — but the safe reading
+and the live routine agree with each other here, so I left it alone. Saying so
+because the governance file asks a run that finds this disagreement to report it.
+
+**Two findings in my lane are still open**, and both are real work rather than
+notes:
+
+- *a listing says what a page is at, never when, so* changed recently *cannot be
+  drawn* (`src/store/`). `TreeListing` is `{ treeId, revision }`, and a revision
+  number counts what happened to one page rather than ordering two. Its remedy
+  is a contract change of the same size as this one and wants its own record, so
+  it is a unit rather than a rider on this one.
+- *a type a lesson prints whole cannot be assembled from two files*
+  (`src/runtime/`) — open with no defect and no edit outstanding, by its own
+  terms.
+
+## Gate
+
+`pnpm install && pnpm verify`, status written to a file and read in a separate
+command.
+
+> **Numbers pending — this section is filled in from the gate's own output
+> before the pull request opens, and the pull request does not open on red.**
+> The targeted suites are already green: `src/patch.test.ts`,
+> `src/application/`, `src/project/`, `src/store/postgres-applications.test.ts`
+> and `src/store/postgres-projects.test.ts` — **7 files, 90 tests, exit 0**,
+> which includes the five new contract cases run twice, once against the `Map`
+> and once against Postgres. `pnpm typecheck` is clean across `src/` and
+> `tools/`.
+
+Nothing skipped, nothing weakened, no test deleted, no `.only`. The new root
+tests are 8 in `src/patch.test.ts` and 5 contract cases against each of the two
+application stores — 18 in all. The specimen adds none: nothing enumerates the
+specimen directory.
+
+Two rounds were red on the way in, both mine and both at the typechecker, both
+before anything was committed:
+
+1. `applyPatch`'s reduce seeded with `{ ...subject }` where `T extends object`
+   has no index signature. Fixed by casting the seed rather than loosening the
+   parameter — the cast is at the one place that knows the invariant.
+2. Two cases in `src/patch.test.ts` built their subject by destructuring the
+   optional field away, which narrowed the type so that the field could no
+   longer be patched back. The test was wrong, not the type: annotating the
+   narrowed object as the full row is what a caller actually has.
+
+## Open questions
+
+1. **This widens a published signature.** `host?: string` → `host?: Patch<string>`
+   is a widening, so every existing caller compiles unchanged and nothing in
+   this repository changes behaviour. It is the same class of question #566 is
+   waiting on — what this package's compatibility promise is at `0.1.0` —
+   which nothing states and which is the maintainer's to state.
+2. **Whether the portal finding should wait for the lane to resume**, or whether
+   the maintainer would rather hand that one screen's edit to another routine.
+   It is roughly four lines plus whatever `readRename` needs, and it is the
+   difference between a person being able to remove a host and a person being
+   told they cannot.
