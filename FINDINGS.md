@@ -51763,7 +51763,31 @@ the record rather than only in a session.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom framework`
 (`src/store/store.ts`, and the seam `apps/loom/app/(marketing)/_lib/stored.ts`
-would use) · **Status:** open — **nothing is broken and no test is failing**;
+would use) · **Status:** **closed by `framework-70-the-page-put-back-on-purpose`**
+— `reseedPage(path, { treeId, authored, origin, actor })` in `src/write/reseed.ts`
+proposes the reseed through the one write path, so a marketing change can reach
+readers again.
+
+**The question this entry asked — *who presses it* — is answered by the Gate
+rather than by any of the three answers it offered.** `reseedDiscards` reads the
+log and declares the revisions the reseed would overwrite, and
+[0035](decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md)
+already made discarded work a rule rather than a level: a change that writes over
+work in the log is never applied without a person, whatever latitude its origin
+has. So a page nobody has edited is reseeded outright, and a page somebody
+edited through the portal is **held**, carrying the sentence that names what it
+would overwrite. The caller does not choose the safety; the cost of the
+particular reseed does.
+
+That makes this lane's answer (3) — *put this page back to the version in the
+repository*, on the page's own screen beside its history — a button over a
+function rather than a decision, and it is `Loom portal`'s to place. A deploy
+step may also call it, and cannot quietly discard an editor's work. Recorded as
+[0272](decisions/0272-who-presses-a-reseed-is-the-gate-s-question-and-the-answer-is-what-the-reseed-costs.md).
+
+The original entry follows, unchanged.
+
+**Originally filed:** open — **nothing is broken and no test is failing**;
 it is the consequence of this morning's change read forward one day, and
 [#600](https://github.com/jam-overture/loom/pull/600) looks like the answer to
 it
@@ -52419,6 +52443,95 @@ not quietly build something else in its place — which is what happened to
 *application*, and is why this record exists.
 
 ---
+## 2026-10-13 — putting a page back is now one call, and the screen it belongs on is the page's own
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is broken and no test
+is failing**; this is a capability arriving, not a defect
+
+`reseedPage` landed in `framework-70-the-page-put-back-on-purpose`, and this is
+the half it cannot build: the lane that owns the portal's screens owns where the
+button goes.
+
+> `reseedPage(path, { treeId, authored, origin, actor })` — from
+> `@jam-overture/loom/write`. It reads head, plans the reseed, reads the log for
+> what the reseed would overwrite, and proposes it through the one write path.
+
+**What this lane preferred is now the cheap option.** The entry `Loom marketing`
+filed on 12 October set out three answers to *who presses it* and chose the
+third — *put this page back to the version in the repository*, offered on the
+page's own screen beside its history, because the undo is the thing this product
+sells. That is now a button over a function:
+[0272](decisions/0272-who-presses-a-reseed-is-the-gate-s-question-and-the-answer-is-what-the-reseed-costs.md)
+declined to build a switch, so no policy has to be set before the screen exists.
+
+**Four endings to render, and the third is the interesting one.**
+
+| outcome | what the screen says |
+| --- | --- |
+| `already-authored` | the stored page *is* the repository's — offer nothing, or offer it greyed |
+| `committed` | put back, and the history gained a revision saying so |
+| `held` | **the reseed is waiting for somebody**, and `held.disposition.reason.detail` names the revisions it would overwrite |
+| `not-reseedable` | the two have diverged past what four operations can express; `describeReseedOutcome` says how |
+
+The `held` ending is not an error state and should not be drawn as one. It is
+the Gate doing the thing that makes the button safe to offer at all — a page
+somebody edited through the portal is never reseeded without a person — and it
+lands in the same custody `/portal/trust` already answers, so the hold a reseed
+creates is a hold that screen can resolve today with nothing new wired.
+
+**What the page's own screen can show before anybody presses anything**, if it
+wants to: `planReseed` and `reseedDiscards` are both exported, so *this page has
+drifted, and putting it back would overwrite three changes* is composable
+without proposing. Flagged rather than built, because it is a sentence on a
+screen and the words are this lane's.
+
+**The builder is the caller's to supply.** `ReseedRequest.authored` is a fresh
+build of the page — §3 has no registry of pages and cannot run one. Whatever
+module the portal already uses to seed is holding the thing to pass.
+
+---
+## 2026-10-13 — every undo in this repository was judged as though the host had wired neither optional check, and said so in the record
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework`
+(`src/write/computed.ts`) · **Status:** **closed by
+`framework-70-the-page-put-back-on-purpose`** — filed and closed in one run,
+recorded because the shape of the mistake outlives it
+
+`revertRevision` assembled its composition runtime as an object literal naming
+five fields, under a comment explaining that building it field by field made
+dropping the repairer *a statement instead of an omission*. That reasoning was
+right about the repairer and wrong about the method.
+
+`propsVocabulary` ([0179](decisions/0179-what-a-primitive-accepts-is-a-vocabulary-the-write-path-is-handed-not-a-field-on-a-policy.md))
+and `bindingReader` ([0208](decisions/0208-a-question-nothing-reads-is-refused-before-it-is-written.md))
+were added to `CompositionRuntime` afterwards. A literal that names five fields
+does not fail to compile when the type it returns grows — it silently stops
+passing the new one. So on the undo path:
+
+- a deployment that refuses AI-authored props its own schemas reject **did not
+  refuse them**, which is a real hole in a real check;
+- the judgment recorded `wiredChecks: []`, which is
+  [0248](decisions/0248-which-optional-checks-were-in-place-is-named-on-the-judgment-beside-the-rules-that-were-consulted.md)
+  inverted. That field exists because the policy fingerprint cannot see a seam,
+  so a record saying a wired check was not wired is **worse than no record** — a
+  later reading cannot tell it from the truth.
+
+Nothing was failing, and nothing was going to start: the drop is invisible to
+every test that does not wire a vocabulary *and then* undo something. It was
+found by building the reseed path beside the revert one and reading the revert
+path as the pattern to copy, which is how it would have spread rather than how
+it would have been caught.
+
+`computedChangeRuntime` is now the one place a computed change gets its runtime.
+It removes `repairer` by name and carries everything else by rest element, so the
+omission stays a statement while a seventh seam reaches the Gate on the day it
+lands. `src/write/computed.test.ts` asserts the carried key set rather than the
+two seams by name, for the same reason.
+
+**The general shape, for every lane:** an object literal that rebuilds a type
+field by field is a list that goes silently wrong the day the type grows. Where
+the point is to *drop* something, name the dropped field and spread the rest.
 ## 2026-10-13 — a deployment can now be told its measurement is broken without first asking a question about reading, and the screen for it is about the collection rather than the readers
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`

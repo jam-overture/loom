@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4734,7 +4734,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4780,7 +4780,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5770,7 +5770,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6298,7 +6298,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7477,7 +7477,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8117,7 +8117,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8345,7 +8345,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8833,6 +8833,20 @@
               "signature": "const describeReseedPlan: (plan: ReseedPlan) => string",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "ReseedDiscardsRequest",
+              "kind": "type",
+              "signature": "type ReseedDiscardsRequest = {\n    readonly treeId: TreeId;\n    /**\n     * The reseed's own operations, as `planReseed` produced them.\n     *\n     * The operations rather than the plan's `revives` and `retires`, because\n     * `namedNodeIds` already reaches every node any of the four operations names —\n     * so a reseed that only reconfigures a headline, naming no revival and no\n     * retirement, still declares the revision that last wrote that headline.\n     * Taking the two lists instead would have missed exactly the commonest reseed\n     * there is.\n     */\n    readonly operations: readonly TreeOperation[];\n};",
+              "truncated": false,
+              "summary": "What a reseed writes over: every entry in the log that touched a node the reseed is about to change."
+            },
+            {
+              "name": "reseedDiscards",
+              "kind": "function",
+              "signature": "const reseedDiscards: (reader: TreeReader, request: ReseedDiscardsRequest) => Promise<Result<readonly DiscardedWork[], StoreError>>",
+              "truncated": false,
+              "summary": "Reads the whole log once and reports the entries a reseed would write over."
             }
           ]
         },
@@ -9067,10 +9081,10 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
-      "files": 55,
+      "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9145,6 +9159,20 @@
               "signature": "const discardHeld: (path: WritePath, answer: ProposalAnswer) => Promise<Result<HeldProposal, HoldError>>",
               "truncated": false,
               "summary": "Answers a held proposal with no."
+            }
+          ]
+        },
+        {
+          "module": "write/computed",
+          "title": "Computed",
+          "summary": "The runtime a change the runtime computed is judged under.",
+          "symbols": [
+            {
+              "name": "computedChangeRuntime",
+              "kind": "function",
+              "signature": "const computedChangeRuntime: (runtime: CompositionRuntime, interpreter: ChangeInterpreter) => CompositionRuntime",
+              "truncated": false,
+              "summary": "The host's runtime, with every judging seam carried and the repairer dropped."
             }
           ]
         },
@@ -9352,6 +9380,69 @@
           ]
         },
         {
+          "module": "write/reseed",
+          "title": "Reseed",
+          "summary": "Putting a page back, as a change like any other — and the half that makes the operation pressable.",
+          "symbols": [
+            {
+              "name": "RESEED_INTERPRETER",
+              "kind": "value",
+              "signature": "const RESEED_INTERPRETER = \"loom/reseed\"",
+              "truncated": false,
+              "summary": "What produced the delta, for `Provenance.interpreter`. Not a model."
+            },
+            {
+              "name": "ReseedablePlan",
+              "kind": "type",
+              "signature": "type ReseedablePlan = Extract<ReseedPlan, {\n    readonly outcome: \"reseedable\";\n}>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "UnproposableReseed",
+              "kind": "type",
+              "signature": "type UnproposableReseed = Exclude<UnreseedablePlan, {\n    readonly outcome: \"already-authored\";\n}>;",
+              "truncated": false,
+              "summary": "Everything that stops a reseed being proposed. `already-authored` is not one — see `ReseedOutcome`."
+            },
+            {
+              "name": "reseedInterpreter",
+              "kind": "function",
+              "signature": "const reseedInterpreter: (plan: ReseedablePlan, discards: readonly DiscardedWork[], idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
+              "truncated": false,
+              "summary": "The same interpreter every reseed uses, with the plan's half filled in."
+            },
+            {
+              "name": "ReseedRequest",
+              "kind": "type",
+              "signature": "type ReseedRequest = {\n    readonly treeId: TreeId;\n    /**\n     * A fresh build of the page — what the builder in the repository produces now.\n     *\n     * The caller's rather than something this module could obtain, because a\n     * builder is the host's: §3 has no registry of pages and no way to run one.\n     * The surfaces hold theirs already, and both sides of the comparison being\n     * passed in is what keeps this testable without a build step.\n     */\n    readonly authored: LoomTree;\n    readonly origin: IntentOrigin;\n    readonly actor?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReseedOutcome",
+              "kind": "type",
+              "signature": "type ReseedOutcome = WriteOutcome\n/**\n * The stored page is already the tree the builder produces, so nothing was\n * proposed and nothing needed to be.\n *\n * Its own ending rather than one of the obstacles below, which is the\n * difference between this and `revertRevision`. A reseed is the kind of\n * operation that gets pressed twice — by a person who cannot see whether the\n * first took, and by a deploy that runs on every release — so *the page is\n * already right* is the healthy answer, and a caller that could not tell it\n * from *the page cannot be put back* would report a success as a failure on\n * every release after the first.\n */\n | {\n    readonly kind: \"already-authored\";\n    readonly headRevision: number;\n}\n/**\n * Nothing was proposed, because no reseed could be planned: the two trees are\n * different pages, or they differ by something no operation can express.\n * Writing over accepted work is not one of these — that is a proposal the Gate\n * holds, not a plan that failed.\n */\n | {\n    readonly kind: \"not-reseedable\";\n    readonly plan: UnproposableReseed;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeReseedOutcome",
+              "kind": "function",
+              "signature": "const describeReseedOutcome: (outcome: ReseedOutcome) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "reseedPage",
+              "kind": "function",
+              "signature": "const reseedPage: (path: WritePath, request: ReseedRequest) => Promise<ReseedOutcome>",
+              "truncated": false,
+              "summary": "Puts a page back to its authored shape, if it can be expressed and the Gate agrees."
+            }
+          ]
+        },
+        {
           "module": "write/revert",
           "title": "Revert",
           "summary": "Undo, as a change like any other.",
@@ -9424,7 +9515,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9676,7 +9767,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12329,7 +12420,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12472,7 +12563,7 @@
       "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12539,7 +12630,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13136,7 +13227,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13207,10 +13298,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 92,
+      "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13689,7 +13780,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1569,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
