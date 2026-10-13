@@ -103,6 +103,18 @@ export const SECTIONS: readonly Section[] = [
            */
           { label: screenName("/portal"), href: "/portal", exact: true },
           { label: "Your app", href: "/portal/app" },
+          /*
+           * A verb among nouns, and it earns the place: registering an
+           * application is what the maintainer called this portal's primary
+           * purpose, and `/portal/new` is a route a reader can type. The
+           * workspace screen's own button is the path most people will take;
+           * a rail that omitted the screen anyway would be hiding the main
+           * thing this portal is for behind one button on one screen.
+           *
+           * The label is the screen's heading rather than a shorter invention,
+           * which is this file's rule for every item in a second rail.
+           */
+          { label: "Register an application", href: "/portal/new" },
         ],
       },
     ],
