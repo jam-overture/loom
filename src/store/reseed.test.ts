@@ -14,9 +14,11 @@ import type { LoomNode } from "../tree/node.js"
 import { withRoot, type LoomTree } from "../tree/tree.js"
 
 import { memoryTreeStore } from "./memory.js"
+import { DEFAULT_REVISION_LIMIT } from "./store.js"
 import {
   describeReseedPlan,
   planReseed,
+  reseedDiscards,
   UNRESEEDABLE_FACETS,
   type ReseedPlan,
 } from "./reseed.js"
@@ -569,5 +571,171 @@ describe("planReseed", () => {
         })
       ).toBe("a planned remove was refused: node-not-found")
     })
+  })
+})
+
+/**
+ * `reseedDiscards` is the half the Gate needs and `planReseed` deliberately does
+ * not provide: not *can this page go back* but *whose accepted work does putting
+ * it back destroy*. The declaration is what makes 0035's rule fire, so these
+ * assertions are the difference between a reseed that waits for a person and one
+ * that overwrites an editor's change on a deploy.
+ */
+describe("reseedDiscards reads the log for what a reseed would write over", () => {
+  /** A page with a real log behind it: the authored build, then the changes named. */
+  const loggedPage = async (
+    ...history: readonly (readonly TreeOperation[])[]
+  ): Promise<{ readonly store: ReturnType<typeof memoryTreeStore>; readonly tree: LoomTree }> => {
+    const authored = authoredBuild()
+    const store = memoryTreeStore()
+    await store.create(authored)
+
+    const reached = await history.reduce<Promise<LoomTree>>(
+      async (previous, operations) => {
+        const current = await previous
+        const appended = await store.append(authored.treeId, {
+          proposalId: spare.proposalId(),
+          delta: deltaOf(authored, operations, current.revision),
+          provenance,
+          appliedAt: FIXED_INSTANT,
+        })
+        if (!appended.ok) throw new Error(`append: ${appended.error.code}`)
+
+        return appended.value
+      },
+      Promise.resolve(authored)
+    )
+
+    return { store, tree: reached }
+  }
+
+  const setValue = (nodeId: NodeId, value: string): readonly TreeOperation[] => [
+    { op: "configure", nodeId, set: { value }, unset: [] },
+  ]
+
+  it("declares the revision that changed the node a reseed reconfigures", async () => {
+    const { store, tree } = await loggedPage(setValue(ids.headline, "Drifted"))
+    const plan = reseedable(planReseed(tree, authoredBuild()))
+
+    const discards = await reseedDiscards(store, {
+      treeId: tree.treeId,
+      operations: plan.operations,
+    })
+    if (!discards.ok) throw new Error(discards.error.code)
+
+    expect(discards.value).toEqual([{ revision: 1, nodeIds: [ids.headline] }])
+  })
+
+  /**
+   * The commonest reseed there is — one edited value — names no revival and no
+   * retirement. A declaration built from the plan's two lists would therefore be
+   * empty here, and the reseed would have applied over the editor's change with
+   * nobody asked. That is why `ReseedDiscardsRequest` takes the operations.
+   */
+  it("declares work for a reseed that revives and retires nothing", async () => {
+    const { store, tree } = await loggedPage(setValue(ids.body, "Edited in the portal"))
+    const plan = reseedable(planReseed(tree, authoredBuild()))
+
+    expect(plan.revives).toEqual([])
+    expect(plan.retires).toEqual([])
+
+    const discards = await reseedDiscards(store, {
+      treeId: tree.treeId,
+      operations: plan.operations,
+    })
+    if (!discards.ok) throw new Error(discards.error.code)
+
+    expect(discards.value).toEqual([{ revision: 1, nodeIds: [ids.body] }])
+  })
+
+  it("declares nothing when the log touched no node the reseed names", async () => {
+    const { store, tree } = await loggedPage(setValue(ids.body, "Edited in the portal"))
+
+    const discards = await reseedDiscards(store, {
+      treeId: tree.treeId,
+      operations: setValue(ids.footer, "back"),
+    })
+    if (!discards.ok) throw new Error(discards.error.code)
+
+    expect(discards.value).toEqual([])
+  })
+
+  it("declares every entry that touched a reseeded node, ascending, and not the ones that did not", async () => {
+    const { store, tree } = await loggedPage(
+      setValue(ids.headline, "first"),
+      setValue(ids.body, "untouched by the reseed"),
+      setValue(ids.headline, "second")
+    )
+
+    const discards = await reseedDiscards(store, {
+      treeId: tree.treeId,
+      operations: setValue(ids.headline, "back"),
+    })
+    if (!discards.ok) throw new Error(discards.error.code)
+
+    expect(discards.value).toEqual([
+      { revision: 1, nodeIds: [ids.headline] },
+      { revision: 3, nodeIds: [ids.headline] },
+    ])
+  })
+
+  it("names only the overlap when one revision changed a reseeded node and another", async () => {
+    const { store, tree } = await loggedPage([
+      ...setValue(ids.headline, "both"),
+      ...setValue(ids.body, "both"),
+    ])
+
+    const discards = await reseedDiscards(store, {
+      treeId: tree.treeId,
+      operations: setValue(ids.headline, "back"),
+    })
+    if (!discards.ok) throw new Error(discards.error.code)
+
+    expect(discards.value).toEqual([{ revision: 1, nodeIds: [ids.headline] }])
+  })
+
+  it("reads an empty log as nothing discarded rather than as an error", async () => {
+    const { store, tree } = await loggedPage()
+
+    const discards = await reseedDiscards(store, {
+      treeId: tree.treeId,
+      operations: setValue(ids.headline, "back"),
+    })
+    if (!discards.ok) throw new Error(discards.error.code)
+
+    expect(discards.value).toEqual([])
+  })
+
+  /**
+   * A log too long for one page is the case where a hand-rolled walk quietly
+   * reports a cheaper reseed than the real one, so the limit is crossed on
+   * purpose rather than assumed irrelevant.
+   */
+  it("walks past the end of the first page", async () => {
+    const edits = Array.from({ length: DEFAULT_REVISION_LIMIT + 3 }, (_, index) =>
+      setValue(ids.headline, `edit ${index}`)
+    )
+    const { store, tree } = await loggedPage(...edits)
+
+    const discards = await reseedDiscards(store, {
+      treeId: tree.treeId,
+      operations: setValue(ids.headline, "back"),
+    })
+    if (!discards.ok) throw new Error(discards.error.code)
+
+    expect(discards.value).toHaveLength(edits.length)
+    expect(discards.value.at(-1)?.revision).toBe(edits.length)
+  })
+
+  it("reports the store's error rather than an empty declaration, which would read as a clean log", async () => {
+    const { tree } = await loggedPage(setValue(ids.headline, "Drifted"))
+    const unreadable = memoryTreeStore()
+
+    const discards = await reseedDiscards(unreadable, {
+      treeId: tree.treeId,
+      operations: setValue(ids.headline, "back"),
+    })
+
+    expect(discards.ok).toBe(false)
   })
 })

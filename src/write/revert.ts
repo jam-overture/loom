@@ -3,11 +3,11 @@ import type { Clock } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
 import type { ChangeInterpreter } from "../runtime/interpreter.js"
 import { inverseInterpreter } from "../runtime/inverse.js"
-import type { CompositionRuntime } from "../runtime/pipeline.js"
 import { describeRevertPlan, planRevert, type RevertPlan, type UnrevertablePlan } from "../store/revert.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import { commitIntent, describeWriteOutcome, type WriteOutcome, type WritePath } from "./commit.js"
+import { computedChangeRuntime } from "./computed.js"
 
 /**
  * Undo, as a change like any other.
@@ -129,25 +129,6 @@ export const describeRevertOutcome = (outcome: RevertOutcome): string =>
     : describeWriteOutcome(outcome)
 
 /**
- * The same runtime, interpreting reverts.
- *
- * Built field by field rather than spread, so that dropping the repairer is a
- * statement instead of an omission: repair (0006) exists to let a model try a
- * smaller version of what the Gate refused, and there is no smaller version of
- * an undo. A revert the Gate refuses is refused.
- */
-const revertingRuntime = (
-  runtime: CompositionRuntime,
-  interpreter: ChangeInterpreter
-): CompositionRuntime => ({
-  interpreter,
-  policySource: runtime.policySource,
-  events: runtime.events,
-  clock: runtime.clock,
-  idFactory: runtime.idFactory,
-})
-
-/**
  * Undoes a revision, if the log allows it and the Gate agrees.
  *
  * The intent is synthesised here rather than taken from the caller, because the
@@ -186,7 +167,7 @@ export const revertRevision = async (
     {
       store: path.store,
       holds: path.holds,
-      runtime: revertingRuntime(path.runtime, revertInterpreter(plan, idFactory, clock)),
+      runtime: computedChangeRuntime(path.runtime, revertInterpreter(plan, idFactory, clock)),
     },
     intent
   )

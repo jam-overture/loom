@@ -7,6 +7,7 @@ import type { CopySilence } from "./copy.js"
 import type { DeploymentSilence } from "./deployment.js"
 import type { KindActionSilence } from "./library-action.js"
 import type { KindChangeSilence } from "./library-change.js"
+import type { KindCopyChangeSilence } from "./library-copy-change.js"
 import type { KindReachSilence } from "./library-reach.js"
 import type { KindSilence } from "./library.js"
 import type { PaceChangeSilence } from "./pace-change.js"
@@ -145,6 +146,7 @@ export type SilenceVocabulary =
   | "library"
   | "library-action"
   | "library-change"
+  | "library-copy-change"
   | "library-reach"
   | "pace"
   | "pace-change"
@@ -160,6 +162,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "library",
     "library-action",
     "library-change",
+    "library-copy-change",
     "library-reach",
     "pace",
     "pace-change",
@@ -184,6 +187,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     library: "kind",
     "library-action": "kind",
     "library-change": "kind",
+    "library-copy-change": "kind",
     "library-reach": "kind",
     pace: "part",
     "pace-change": "comparison",
@@ -193,7 +197,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Twelve of them against forty-seven members across the twelve sets, which is
+ * Twelve of them against fifty-two members across the thirteen sets, which is
  * the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -272,6 +276,19 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * census's own. The subject being a property of the reading and not of its scope
  * is what makes that work; a `comparison` subject here would have put *one of
  * the two windows was quiet* over a row about a primitive type.
+ *
+ * **The thirteenth needed none either, and it is the first set assembled out of
+ * three** ([0270](../../decisions/0270-a-change-to-the-words-a-kind-of-part-says-is-read-over-the-words-both-windows-say-and-a-floor-costs-the-signed-figure.md)).
+ * A comparison of two windows' words at the scale of a library reports the
+ * census's `unplaced`, the places comparison's `unpaired`, and the two states a
+ * change to one page's words already reports of that page — `wordless` and
+ * `floored` — said of a kind rather than of a page. The last pair is the
+ * instructive one: `words-a-floor` arrived with a reading of **one page's**
+ * words, and it is reported here at a different subject for the same reason the
+ * door's three states are reported at two (`one-reason`, never `one-state`).
+ * `floored` is also the only member of any set here that withholds a single
+ * figure while every other figure on its row stands, which is what a reading
+ * whose denominator is a count of words rather than of readers can do.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -645,6 +662,36 @@ export const meaningOfKindChangeSilence = (silence: KindChangeSilence): SilenceM
       return meaning("library-change", "nothing-of-the-kind")
     case "unpaired":
       return meaning("library-change", "nothing-carried")
+  }
+}
+
+/**
+ * What a comparison of two windows' words at the scale of a library reports
+ * (0270).
+ *
+ * Five members and not one new condition, and the subject is the kind for the
+ * reason the comparison of places has it: the rows are keyed by the vocabulary,
+ * so every reason is about one kind of part across both windows.
+ *
+ * `floored` is the one member in this table whose reading withholds a figure
+ * rather than a comparison — the signed movement in a mass of words, which a
+ * floor can give the wrong sign, where the two shares it is the difference of
+ * both stand (0239).
+ */
+export const meaningOfKindCopyChangeSilence = (
+  silence: KindCopyChangeSilence
+): SilenceMeaning => {
+  switch (silence) {
+    case "unplaced":
+      return meaning("library-copy-change", "nothing-of-the-kind")
+    case "unpaired":
+      return meaning("library-copy-change", "nothing-carried")
+    case "wordless":
+      return meaning("library-copy-change", "says-nothing")
+    case "unread":
+      return meaning("library-copy-change", "no-view-reported")
+    case "floored":
+      return meaning("library-copy-change", "words-a-floor")
   }
 }
 

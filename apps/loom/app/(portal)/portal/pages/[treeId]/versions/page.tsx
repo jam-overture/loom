@@ -13,7 +13,7 @@ import { pageNameOf, unnamed } from "@/app/(portal)/_lib/page-name"
 import { pageViewHref, pageViewLabel } from "@/app/(portal)/_lib/page-views"
 import { versionsOf } from "@/app/(portal)/_lib/progression"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
-import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
+import { portalStore } from "@/app/(portal)/_lib/store"
 
 import { VersionPlayer } from "./_components/version-player"
 
@@ -70,7 +70,6 @@ const VersionsPage = async ({ params }: { params: Promise<{ treeId: string }> })
   if (!parsed.success) notFound()
 
   await requireActor(`/portal/pages/${parsed.data}/versions`)
-  await ensureSeeded()
 
   /**
    * The page as it stands, read once, for its name. A screen that cannot name
