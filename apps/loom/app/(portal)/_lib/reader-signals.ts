@@ -9,6 +9,11 @@ import {
   postgresReaderTallyStore,
 } from "@jam-overture/loom/signals/postgres"
 
+import {
+  boundedReaderSignalJournal,
+  boundedReaderTallyStore,
+} from "@/app/_lib/app/bounded-store"
+
 import { portalDatabase } from "./database"
 
 /**
@@ -61,15 +66,25 @@ const carrier = globalThis as unknown as Carrier
  * query — so nothing here reaches the network at import time, which is the rule
  * `store.ts` states at length and this module inherits.
  */
-export const portalReaderSignals: ReaderSignalJournal = (carrier[CARRIER_JOURNAL] ??=
+/** Unbounded, for the intake endpoint and the collector. */
+export const readerSignalsForWriting: ReaderSignalJournal = (carrier[CARRIER_JOURNAL] ??=
   portalDatabase === undefined
     ? memoryReaderSignalJournal()
     : postgresReaderSignalJournal(portalDatabase))
 
-export const portalReaderTallies: ReaderTallyStore = (carrier[CARRIER_TALLIES] ??=
+/** Read with a budget, for `/portal/readers` asking whether anything is waiting. */
+export const portalReaderSignals: ReaderSignalJournal =
+  boundedReaderSignalJournal(readerSignalsForWriting)
+
+/** Unbounded, for the collector folding a window in. */
+export const readerTalliesForWriting: ReaderTallyStore = (carrier[CARRIER_TALLIES] ??=
   portalDatabase === undefined
     ? memoryReaderTallyStore()
     : postgresReaderTallyStore(portalDatabase))
+
+/** Read with a budget, for the readers and pieces screens. */
+export const portalReaderTallies: ReaderTallyStore =
+  boundedReaderTallyStore(readerTalliesForWriting)
 
 /**
  * Whether what readers did outlives this process.

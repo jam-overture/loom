@@ -70,7 +70,11 @@ import type { TreeId } from "@jam-overture/loom"
  * only place a reader is actually confused.
  */
 
-export type PortalRoute = "/portal" | "/portal/activity" | "/portal/history"
+export type PortalRoute =
+  | "/portal"
+  | "/portal/[application]"
+  | "/portal/activity"
+  | "/portal/history"
 
 /**
  * The screen a reader most often means instead, and the difference between them.
@@ -117,8 +121,17 @@ export type Screen = {
  */
 const SCREENS: readonly Screen[] = [
   {
+    /**
+     * The workspace, and a rename the maintainer asked for by name.
+     *
+     * *What Loom has been doing* was one of eight complaints on 12 October, and
+     * it was unclear for a reason a better phrase would not have fixed: the
+     * screen led with *Your pages*, which is what `/portal/pages` leads with,
+     * and it assumed one application. It is now the list of applications, which
+     * is a subject rather than a summary.
+     */
     route: "/portal",
-    name: "What Loom has been doing",
+    name: "Your applications",
     elsewhere: {
       route: "/portal/activity",
       clause:
@@ -131,6 +144,22 @@ const SCREENS: readonly Screen[] = [
      * uses to catch one that has already gone. What was wrong was never the
      * words; it was one screen carrying two subjects under them.
      */
+    formerly: ["What Loom has been doing"],
+  },
+  {
+    /**
+     * What the old `/portal` was, under the application it was always about.
+     *
+     * The name answers the question the screen answers — *what do I do now* —
+     * rather than describing the machinery, which is what the old one did.
+     */
+    route: "/portal/[application]",
+    name: "What needs you",
+    elsewhere: {
+      route: "/portal/activity",
+      clause:
+        "This is what has happened lately. Every request anyone has ever made — including the ones that changed nothing — is in",
+    },
     formerly: [],
   },
   {

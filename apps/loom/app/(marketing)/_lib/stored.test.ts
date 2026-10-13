@@ -10,14 +10,14 @@ import {
   type Provenance,
   type TreeDelta,
 } from "@jam-overture/loom"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { beforeAll, describe, expect, it, vi } from "vitest"
 
-import { appStore } from "@/app/_lib/app/store"
+import { appStore, appStoreForWriting, siteStore } from "@/app/_lib/app/store"
 
 import { treeFor } from "./builders"
 import { pageTreeFor } from "./render"
 import { HOME, HOW_IT_WORKS, SITE_ROUTES, WHAT_YOU_RUN } from "./site"
-import { ensureSiteSeeded, sitePagesStored, storedIdFor, storedPageFor } from "./stored"
+import { seedSitePages, sitePagesStored, storedIdFor, storedPageFor } from "./stored"
 
 /**
  * The claim 0259 condition 1 is made of: **what this site serves comes out of
@@ -48,17 +48,16 @@ const PROVENANCE: Provenance = {
 }
 
 /**
- * The memo that makes seeding happen once per process, reset per test.
+ * The seed, run once for this file.
  *
- * `ensureSiteSeeded` deliberately holds its promise on `globalThis` so that a
- * server handling its second request does not re-walk three pages. A test that
- * wants to know what a *fresh* process does has to put that back, and reaching
- * for the symbol is the honest way to say so — the alternative is an exported
- * `resetForTests`, which is production API existing for the tests.
+ * It used to run itself, on the first request to any page, memoised on
+ * `globalThis` — so these tests reset that symbol to ask what a fresh process
+ * does. The seed is `db:push`'s work as of 13 October and the memo is gone with
+ * it, so a test that wants a seeded store says so.
  */
-const asIfFirstRequest = (): void => {
-  delete (globalThis as Record<symbol, unknown>)[Symbol.for("loom.site.seeding")]
-}
+beforeAll(async () => {
+  await seedSitePages()
+})
 
 const headingIn = (tree: LoomTree): ElementNode => {
   const heading = [...walkTree(tree.root)].find(
@@ -76,8 +75,6 @@ const configure = (tree: LoomTree, nodeId: NodeId, set: JsonObject): TreeDelta =
   baseRevision: tree.revision,
   operations: [{ op: "configure", nodeId, set, unset: [] }],
 })
-
-beforeEach(asIfFirstRequest)
 
 describe("the rows this site is", () => {
   it("is every route it serves, and only those", () => {
@@ -107,7 +104,7 @@ describe("seeding", () => {
   it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
     "puts %s in the store at revision 0",
     async (_path, route) => {
-      await ensureSiteSeeded()
+      await seedSitePages()
 
       const id = storedIdFor(route)
       const head = id === undefined ? undefined : await appStore.head(id)
@@ -123,7 +120,7 @@ describe("seeding", () => {
    * release without anybody pressing anything.
    */
   it("never writes over a page that is already there", async () => {
-    await ensureSiteSeeded()
+    await seedSitePages()
 
     const id = storedIdFor(WHAT_YOU_RUN)
     if (id === undefined) throw new Error("loom: /what-you-run is not stored")
@@ -140,13 +137,53 @@ describe("seeding", () => {
 
     expect(appended.ok).toBe(true)
 
-    /* A second process starting up, which is what a deploy is. */
-    asIfFirstRequest()
-    await ensureSiteSeeded()
+    /* A second deploy running `db:push` again, which is what a release is. */
+    await seedSitePages()
 
     const after = await appStore.head(id)
 
     expect(after.ok === true ? after.value.revision : "absent").toBe(1)
+  })
+})
+
+/**
+ * What one request costs, counted rather than reasoned about.
+ *
+ * Until 13 October a marketing request made **four** store calls: three seeding
+ * reads that each answered *already there*, and then the one the page is for.
+ * The pool is `max: 1`, so those are four round trips in a row, and on a cold
+ * instance they sit behind a TLS connection being opened as well.
+ *
+ * That is what put `the store did not answer within 1500ms` on `/portal` with
+ * a database whose slowest statement is 31ms. A budget cannot fix a queue; the
+ * only thing that does is not joining it.
+ *
+ * So the number is the test. Nothing here asserts *how fast* — that depends on
+ * a network this suite does not have — only that a request asks the store for
+ * the page it is serving and for nothing else.
+ */
+describe("what one request costs", () => {
+  it("reaches the database once, and writes nothing", async () => {
+    /**
+     * Counted on the **unbounded** handle, which is the one that actually talks
+     * to Postgres — `siteStore` is a wrapper over it, so one page read is one
+     * call here. Four would be the old shape: three seeding reads and then the
+     * page.
+     */
+    const reads = vi.spyOn(appStoreForWriting, "head")
+    const writes = vi.spyOn(appStoreForWriting, "create")
+
+    try {
+      await storedPageFor(HOME)
+
+      expect({ reads: reads.mock.calls.length, writes: writes.mock.calls.length }).toEqual({
+        reads: 1,
+        writes: 0,
+      })
+    } finally {
+      reads.mockRestore()
+      writes.mockRestore()
+    }
   })
 })
 
@@ -204,8 +241,14 @@ describe("what the route serves", () => {
    * so it passed whether the fallback existed or not.
    */
   it("is the authored page when the store cannot be read", async () => {
+    /**
+     * On `siteStore`, which is the handle this surface reads through as of
+     * 13 October — `appStore` carries the portal's longer budget and is not
+     * what `storedPageFor` calls. A spy on it would never fire, and the
+     * assertion below would be made against a store that answered normally.
+     */
     const refuse = vi
-      .spyOn(appStore, "head")
+      .spyOn(siteStore, "head")
       .mockResolvedValue(err({ code: "unavailable", detail: "the database is down" }))
 
     try {
