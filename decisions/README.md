@@ -354,3 +354,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0268](0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md) | A page is put back by proposing the change that puts it back, and a store never deletes | Accepted | §2, §6 |
 | [0269](0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md) | An application is the unit Loom governs, and a project groups them | Accepted | §3 (portal) |
 | [0270](0270-a-change-to-the-words-a-kind-of-part-says-is-read-over-the-words-both-windows-say-and-a-floor-costs-the-signed-figure.md) | A change to the words a kind of part says is read over the words both windows say, and a floor costs the signed figure | Accepted | §4c (reader signals) |
+| 0271 | *No record on this branch* | — | — |
+| 0272 | *No record on this branch* | — | — |
+| [0273](0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md) | The reader tables take the application now and the audience when it is ratified | Accepted | §5 (signals), §3 (portal) |
