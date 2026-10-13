@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4734,7 +4734,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4780,7 +4780,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5770,7 +5770,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6298,7 +6298,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7477,7 +7477,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8117,7 +8117,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8345,7 +8345,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9070,7 +9070,7 @@
       "files": 55,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9424,7 +9424,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9663,7 +9663,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 52,
+      "files": 53,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9676,7 +9676,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10503,6 +10503,104 @@
               "signature": "const funnelReachOf: (reading: PageReading, funnels: readonly StoredFunnel[], rows: readonly StoredPageViews[]) => FunnelReach",
               "truncated": false,
               "summary": "Read a revision's funnels against the readers that revision had, and against the tree that revision is."
+            }
+          ]
+        },
+        {
+          "module": "signals/health",
+          "title": "Health",
+          "summary": "Whether what a deployment collected can be trusted, and which of its pages cannot.",
+          "symbols": [
+            {
+              "name": "COUNTS_INFLATED_ABOVE",
+              "kind": "value",
+              "signature": "const COUNTS_INFLATED_ABOVE = 0.5",
+              "truncated": false,
+              "summary": "How generous a revision's distinct counts may be before its absolute figures are not worth printing."
+            },
+            {
+              "name": "CollectionFault",
+              "kind": "type",
+              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n *\n * Every rate on the page is left with the view floor for a denominator, which\n * is short of the page views there were, and nothing on the page can be\n * put on the same scale as another page's.\n *\n * **Three causes and the rows cannot tell them apart:** the revision was\n * served by senders older than the opening marker, the door row has passed out\n * of the deployment's retention window while the counters it describes have\n * not, or the counters were assembled by something that is not a sender. So\n * the remedy is `undetermined` rather than one of the three guessed.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n *\n * An honest sender marks at most one batch of each page view as the one that\n * opened it, and a deployment whose senders do not is the deployment a\n * share-of-readers reading calls `unopened`: every rate\n * denominator-less while the counters look perfectly healthy. It is the one\n * fault here whose symptom is invisible on every screen that does not divide\n * by the door.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n *\n * Not a broken sender and not a broken rollup: a rollup window shorter than\n * the visits being measured, which is the one control a deployment has over\n * this error. The shares stay sound and the counts do not.\n */\n | \"counts-inflated\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no `engaged` at all. Taken from\n * {@link pageActionOf} rather than spelled a second time, so the two readings\n * cannot come to disagree about what it looks like.\n */\n | \"actions-uncredited\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n *\n * The two faults a **caller** can have rather than a deployment: a tree and a\n * window that do not belong together, which leaves most parts reading\n * `skipped` while the numbers stay plausible, and two reads\n * concatenated instead of one, which neither sums nor overwrites honestly\n *. Published as one fault because the hand it falls to is one hand and\n * the fix is one fix, with both counts on the row.\n */\n | \"rows-mishandled\";",
+              "truncated": false,
+              "summary": "Something wrong with what a deployment is collecting, rather than a quiet window."
+            },
+            {
+              "name": "COLLECTION_FAULTS",
+              "kind": "value",
+              "signature": "const COLLECTION_FAULTS: readonly CollectionFault[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeCollectionFault",
+              "kind": "function",
+              "signature": "const describeCollectionFault: (fault: CollectionFault) => string",
+              "truncated": false,
+              "summary": "One line per fault, for a surface naming what is wrong."
+            },
+            {
+              "name": "FaultRemedy",
+              "kind": "type",
+              "signature": "type FaultRemedy = \n/** The pages: a newer broadcaster, or one whose delegation walks the ancestry. */\n\"senders\"\n/** The deployment's own configuration: the rollup window. */\n | \"configuration\"\n/** The surface that asked: it handed in a tree and a window that do not match, or two reads. */\n | \"caller\"\n/**\n * Nothing the rows can name.\n *\n * One fault out of five, and it is the honest answer rather than a gap: a\n * missing door row is an old sender, an expired row or a hand-built counter,\n * and inventing one of the three is worse than naming none.\n */\n | \"undetermined\";",
+              "truncated": false,
+              "summary": "Whose hand a fault falls to."
+            },
+            {
+              "name": "FAULT_REMEDIES",
+              "kind": "value",
+              "signature": "const FAULT_REMEDIES: readonly FaultRemedy[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "remedyOf",
+              "kind": "function",
+              "signature": "const remedyOf: (fault: CollectionFault) => FaultRemedy",
+              "truncated": false,
+              "summary": "Whose hand this fault falls to, which is the half of a fault a person acts on."
+            },
+            {
+              "name": "HealthStanding",
+              "kind": "type",
+              "signature": "type HealthStanding =\n/** Measured, with nothing wrong that these rows can see. */\n\"sound\"\n/** At least one fault, named on the row. */\n | \"faulted\"\n/**\n * Nothing was collected about this revision at all.\n *\n * No counters and no page views at the door, which is a page nobody opened in\n * the window rather than anything wrong. Checked before the door is, so a page\n * nobody read is never reported as a page the door could not price.\n */\n | \"unmeasured\"\n/**\n * The door counted page views of this revision and no rollup has folded any of\n * them.\n *\n * A revision published minutes ago and a collection that has stopped look\n * exactly alike here, because the lag of the tallies behind the buffer is one\n * window by design and the row's one timestamp is written by both\n * writers. So this names the state and claims nothing about which it is.\n */\n | \"unfolded\";",
+              "truncated": false,
+              "summary": "Where one revision of one page stands."
+            },
+            {
+              "name": "HEALTH_STANDINGS",
+              "kind": "value",
+              "signature": "const HEALTH_STANDINGS: readonly HealthStanding[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeHealthStanding",
+              "kind": "function",
+              "signature": "const describeHealthStanding: (standing: HealthStanding) => string",
+              "truncated": false,
+              "summary": "One line per standing, for a surface saying why a page is where it is."
+            },
+            {
+              "name": "PageHealth",
+              "kind": "type",
+              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the three that are the deployment's, then the caller's.\n     *\n     * Empty on every standing but `faulted`.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     *\n     * A floor and not a count, which is why it is never ranked and never\n     * added to an arrival count here.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     *\n     * On a faulted page these are the readers whose measurement its faults\n     * affect, which is what makes one faulted page worse than another.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     *\n     * Zero where there is no door row, because an absent row reports no openings\n     * rather than none pending.\n     */\n    readonly pending: number;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n};",
+              "truncated": false,
+              "summary": "One revision of one page, and what is wrong with what was collected about it."
+            },
+            {
+              "name": "CollectionHealth",
+              "kind": "type",
+              "signature": "type CollectionHealth = {\n    /** Every revision read, by tree id and newest revision first. */\n    readonly pages: readonly PageHealth[];\n    /**\n     * Faulted revisions the door can price, worst first.\n     *\n     * Most arrivals, then the larger view floor, then tree id and newest revision\n     * first — so two pages costing the same do not reorder on a refresh. By\n     * headcount and never by a count of faults: one fault on a page nine thousand\n     * people read is worse than four on a page three did.\n     */\n    readonly faulted: readonly PageHealth[];\n    /**\n     * Faulted revisions with no exact arrival count, by tree id and newest\n     * revision first.\n     *\n     * Out of the ranking rather than in it at a guessed height, which is the\n     * refusal an order of pages makes about a page the door cannot scale,\n     * said about an order of faults.\n     */\n    readonly unpriced: readonly PageHealth[];\n    /** The faulted page costing the most readers, which is the one to look at first. */\n    readonly worst: PageHealth | null;\n    readonly standings: Readonly<Record<HealthStanding, number>>;\n    /**\n     * How many revisions carry each fault.\n     *\n     * A count of pages and never of readers, and it does **not** add to\n     * {@link standings}' `faulted`: a revision with three faults is one faulted\n     * page and is in three of these rows.\n     */\n    readonly faults: Readonly<Record<CollectionFault, number>>;\n    /**\n     * Page views at the door of every faulted revision the door can price, added\n     * — each revision once however many faults it has.\n     *\n     * The headline figure: *the measurement of eleven hundred of your readers is\n     * wrong in some way*. Exact and addable because a page view began on one\n     * revision of one tree and was counted once.\n     */\n    readonly readersAffected: number;\n    /**\n     * Page views at the door across every revision read, added.\n     *\n     * The weight behind `readersAffected` — a share of readers rather than a share\n     * of pages is what says whether a fault is marginal. This sees the pages its\n     * caller read and not the deployment's.\n     */\n    readonly arrivals: number;\n    /**\n     * Openings no rollup has folded, added across the revisions read.\n     *\n     * Published rather than judged, for the reason the module's own documentation\n     * gives: one timestamp written by two writers cannot tell a fresh revision\n     * from a stalled collection.\n     */\n    readonly pending: number;\n    /**\n     * Distinct trees across the revisions read, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand\n     * here, as they do in an order of pages and a census of a library\n     *.\n     */\n    readonly trees: number;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * The one lie this reading can be told: a caller holding one page twice would\n     * have its readers counted twice in `readersAffected`, and a count that has\n     * been added cannot be unadded.\n     */\n    readonly duplicated: number;\n};",
+              "truncated": false,
+              "summary": "What a deployment is collecting, and what is wrong with it."
+            },
+            {
+              "name": "collectionHealthOf",
+              "kind": "function",
+              "signature": "const collectionHealthOf: (readings: readonly PageReading[], rows: readonly StoredPageViews[]) => CollectionHealth",
+              "truncated": false,
+              "summary": "What a deployment is collecting, read off the page readings and the door rows it already has."
             }
           ]
         },
@@ -12147,7 +12245,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12290,7 +12388,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12357,7 +12455,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12954,7 +13052,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13028,7 +13126,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13507,7 +13605,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1558,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

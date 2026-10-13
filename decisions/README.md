@@ -353,3 +353,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0267](0267-the-probe-reports-every-configuration-and-the-audit-judges-only-the-ones-the-schema-accepts.md) | The probe reports every configuration it tried, and the audit calls a fault only what the schema accepts | Accepted | §4, not the library |
 | [0268](0268-a-page-is-put-back-by-proposing-the-change-that-puts-it-back-and-a-store-never-deletes.md) | A page is put back by proposing the change that puts it back, and a store never deletes | Accepted | §2, §6 |
 | [0269](0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md) | An application is the unit Loom governs, and a project groups them | Accepted | §3 (portal) |
+| 0270 | *No record on this branch* | — | — |
+| [0271](0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md) | A fault in a deployment's collection is named by what it costs, with the hand it falls to, and a page's readers are counted once | Accepted | §4c (reader signals) |
