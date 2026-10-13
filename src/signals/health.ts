@@ -36,12 +36,12 @@ import type { PageReading } from "./parts.js"
  * ## A fault is named by what it costs, and the remedy is named only where the
  * rows determine one
  *
- * The five faults here are not five shapes of missing data; they are five
+ * The six faults here are not six shapes of missing data; they are six
  * different things to go and do, and the reason to report them together is that
  * a person looking at a reader screen cannot tell them apart from the figures.
  * {@link remedyOf} publishes which of four hands each one falls to — the pages,
  * the configuration, the caller — and `undetermined` where the rows genuinely do
- * not say, which is one fault out of five and is better than inventing one of
+ * not say, which is one fault out of six and is better than inventing one of
  * three causes.
  *
  * ## What a fault costs is the page's arrivals, and a page is counted once
@@ -75,18 +75,26 @@ import type { PageReading } from "./parts.js"
  *
  * ## What is published as a figure rather than judged
  *
- * **Openings no rollup has folded.** `pending` is *the other sign of the same
- * subtraction* (0219) and is what a stalled collection looks like — and it is
- * also what a revision published two minutes ago looks like, because the
- * ordinary lag of the tallies behind the buffer is one window
+ * **Openings no rollup has folded, where nothing says when a fold last was.**
+ * `pending` is *the other sign of the same subtraction* (0219) and is what a
+ * stalled collection looks like — and it is also what a revision published two
+ * minutes ago looks like, because the ordinary lag of the tallies behind the
+ * buffer is one window
  * ([0158](../../decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)).
- * Telling those two apart needs to know when a rollup last folded this revision,
- * and the row carries one `updatedAt` written by both writers — so a busy page
- * whose rollup has stopped keeps a fresh timestamp while its appearances never
- * move, and a quiet healthy page looks stale by the same measure. The rows
- * cannot answer it, so this does not pretend to: `pending` is published per page
- * and added across the deployment, and no fault is raised from it. Filed with
- * the shape that would answer it.
+ * `updatedAt` cannot tell those apart, because the door writes it on every
+ * delivery: a busy page whose rollup has stopped keeps a fresh timestamp while
+ * its appearances never move.
+ *
+ * A page-view row now carries `foldedAt`, written by the fold and by nothing
+ * else ([0274](../../decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)),
+ * so the lag is readable — against a schedule the caller hands in, because how
+ * long a fold may honestly be behind is the deployment's own cron interval and
+ * rollup window and is not the framework's to assume. Hand one in and
+ * `collection-stalled` is raised on the pages whose openings have waited longer
+ * than that. Hand none in, or read a row no fold has ever touched, and nothing
+ * is claimed: `pending` is published per page and added across the deployment,
+ * {@link CollectionHealth.unattested} counts the revisions whose lag could not
+ * be read at all, and no fault is raised from either.
  *
  * Pure, linear in the readings times the rows, and reaches no store, clock or
  * DOM.
@@ -110,6 +118,49 @@ import type { PageReading } from "./parts.js"
  * remedy — a longer window — is the deployment's own configuration.
  */
 export const COUNTS_INFLATED_ABOVE = 0.5
+
+/**
+ * What a deployment expects of its own collection, which is the one fact here
+ * that no row can supply.
+ *
+ * Nothing in this subsystem schedules a fold: a host calls
+ * {@link collectReaderSignals} from a cron, a deploy hook or by hand, and the
+ * ripeness window it folds behind is its own configuration (0146, 0158). So
+ * *how late is late* is two numbers only the deployment knows, and a framework
+ * that guessed would fault a deployment that folds hourly for not folding in
+ * ten minutes.
+ *
+ * Handed in rather than assumed, which is the shape the straddle correction
+ * already takes
+ * ([0230](../../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)),
+ * and optional, because a caller with no schedule to state should get a reading
+ * that judges nothing rather than one that judges against a default.
+ */
+export type CollectionSchedule = {
+  /**
+   * The instant the reading is taken, as an ISO 8601 timestamp.
+   *
+   * A parameter and never a clock read inside, for the reason every other
+   * instant in this subsystem is handed in: a reading that read the wall clock
+   * would answer differently on two calls over one set of rows.
+   */
+  readonly at: string
+  /**
+   * The longest a fold may honestly be behind, in milliseconds.
+   *
+   * The deployment's collection interval **plus** its ripeness window, not the
+   * window alone: a batch is not folded until it ripens, and then not until the
+   * next run, so the two add. A deployment that folds every hour behind a
+   * ten-minute window expects a fold within seventy minutes, and anything
+   * shorter handed in here is a fault on a healthy collection.
+   *
+   * Nothing is judged where this is not a positive, finite number of
+   * milliseconds — a nought would call the lag the design *requires* a fault,
+   * which is the one way this reading could be made to cry wolf on every page
+   * of a healthy deployment.
+   */
+  readonly foldsWithinMs: number
+}
 
 /** Something wrong with what a deployment is collecting, rather than a quiet window. */
 export type CollectionFault =
@@ -151,6 +202,38 @@ export type CollectionFault =
    */
   | "counts-inflated"
   /**
+   * Page views of this revision are waiting to be folded and the last fold of
+   * it was longer ago than the deployment said its collection takes.
+   *
+   * `pending` openings are the ordinary state of a live page — the lag of the
+   * tallies behind the buffer is one window by design (0158) — so the fault is
+   * never the pending count itself. It is the **age** of the fold that should
+   * have cleared it, read off `foldedAt` and judged against the
+   * {@link CollectionSchedule} the caller handed in. Nothing is raised without
+   * one, and nothing is raised on a row no fold has ever touched, which is
+   * every row of a deployment upgraded past this column until its next run.
+   *
+   * What it costs is every count on the page: a fold that never comes is
+   * counters frozen where they were while the door goes on counting arrivals,
+   * so each rate reads lower than the truth by however much reading has
+   * happened since. It falls to the same hand as a window that is too short —
+   * the deployment's own configuration — because what has stopped is the thing
+   * it schedules.
+   *
+   * **It can hide behind `openings-unmarked`.** A deployment whose senders
+   * never mark an opening has nothing pending by construction, so a stall there
+   * is invisible until the door is counting again — which is why the marker is
+   * the first fault to fix and is published first.
+   *
+   * **It cannot be true at the same time as `counts-inflated`**, and the reason
+   * is arithmetic rather than policy: `drift` and `pending` are the two signs of
+   * one subtraction (0219), so a revision whose appearances have outrun its
+   * openings has nothing pending to be late. The two faults the same hand
+   * answers for are therefore alternatives, which is why they are adjacent in
+   * {@link COLLECTION_FAULTS} rather than additive.
+   */
+  | "collection-stalled"
+  /**
    * The window holds uses of this page and credits none of them to a reader.
    *
    * A press is filed against the control and credited to the addressed ancestors
@@ -178,6 +261,7 @@ export const COLLECTION_FAULTS: readonly CollectionFault[] =
     "door-unscaled",
     "openings-unmarked",
     "counts-inflated",
+    "collection-stalled",
     "actions-uncredited",
     "rows-mishandled",
   ])
@@ -191,6 +275,8 @@ export const describeCollectionFault = (fault: CollectionFault): string => {
       return "page views of this version appeared in a rollup and nothing said one began"
     case "counts-inflated":
       return "the rollup window is shorter than the visits, so every count against this version is high"
+    case "collection-stalled":
+      return "page views of this version have been waiting longer than a fold is meant to take"
     case "actions-uncredited":
       return "readers acted on this page and no reader was credited with acting inside anything"
     case "rows-mishandled":
@@ -209,7 +295,7 @@ export type FaultRemedy =
   /**
    * Nothing the rows can name.
    *
-   * One fault out of five, and it is the honest answer rather than a gap: a
+   * One fault out of six, and it is the honest answer rather than a gap: a
    * missing door row is an old sender, an expired row or a hand-built counter,
    * and inventing one of the three is worse than naming none.
    */
@@ -230,6 +316,8 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
     case "openings-unmarked":
       return "senders"
     case "counts-inflated":
+      return "configuration"
+    case "collection-stalled":
       return "configuration"
     case "actions-uncredited":
       return "senders"
@@ -257,9 +345,11 @@ export type HealthStanding =
    * them.
    *
    * A revision published minutes ago and a collection that has stopped look
-   * exactly alike here, because the lag of the tallies behind the buffer is one
-   * window by design (0158) and the row's one timestamp is written by both
-   * writers. So this names the state and claims nothing about which it is.
+   * alike in the counts, because the lag of the tallies behind the buffer is one
+   * window by design (0158). Where the row attests a fold and a caller handed in
+   * a schedule, the two are told apart and a stalled one is `faulted` instead
+   * (0274); where either is missing, this names the state and claims nothing
+   * about which it is.
    */
   | "unfolded"
 
@@ -280,7 +370,7 @@ export const describeHealthStanding = (standing: HealthStanding): string => {
     case "unmeasured":
       return "nothing was collected about this version in the window"
     case "unfolded":
-      return "page views began and no rollup has folded any of them yet"
+      return "page views began and no rollup has folded any of them yet, and nothing here says that is late"
   }
 }
 
@@ -323,6 +413,18 @@ export type PageHealth = {
    * rather than none pending.
    */
   readonly pending: number
+  /**
+   * When a rollup last folded a window holding page views of this revision, or
+   * `null` where nothing attests one — including every revision with no door
+   * row at all.
+   *
+   * Published whether or not a schedule was handed in, because *the last fold
+   * of this page was at nine this morning* is the sentence an operator reads
+   * before any verdict about it (0274). `null` is not *never folded*: a row
+   * written before the column existed says the same thing, and the first fold
+   * after an upgrade fills it in.
+   */
+  readonly foldedAt: string | null
   /** Counters naming nodes this revision does not contain. */
   readonly orphaned: number
   /** Node counters and door rows handed in more than once, added. */
@@ -382,11 +484,27 @@ export type CollectionHealth = {
   /**
    * Openings no rollup has folded, added across the revisions read.
    *
-   * Published rather than judged, for the reason the module's own documentation
-   * gives: one timestamp written by two writers cannot tell a fresh revision
-   * from a stalled collection.
+   * A figure and not a verdict: most of it is the ordinary one-window lag of
+   * the tallies behind the buffer (0158). Whether any of it is late is
+   * `collection-stalled`, which needs the fold's own timestamp and a schedule
+   * (0274) — so this number is published the same whether one was handed in or
+   * not.
    */
   readonly pending: number
+  /**
+   * Revisions with openings waiting and no fold timestamp to judge the wait by.
+   *
+   * The honest companion to `pending`, and the state a deployment is in for one
+   * run after it upgrades past the `folded_at` column: the openings are real,
+   * the lag may be a minute or a fortnight, and the rows do not say. A surface
+   * showing `pending` without this would let a reader take *no fault* for
+   * *nothing is late*.
+   *
+   * It counts rows rather than readers, and it is **not** a fault: nothing is
+   * wrong with a row that cannot answer a question nobody could ask of it
+   * before today.
+   */
+  readonly unattested: number
   /**
    * Distinct trees across the revisions read, which is not the number of pages.
    *
@@ -420,6 +538,43 @@ const EMPTY_FAULTS: Readonly<Record<CollectionFault, number>> = Object.freeze(
 )
 
 /**
+ * Whether this revision's openings have waited longer than a fold is meant to
+ * take.
+ *
+ * **Four states answer *no* without anything being sound**, and each of them is
+ * a refusal rather than a gap:
+ *
+ * - **no schedule.** How long a fold may be behind is the deployment's cron
+ *   interval plus its ripeness window, and a framework that supplied a default
+ *   would fault an hourly collection for not being a ten-minute one.
+ * - **nothing pending.** A collection that has stopped where nobody is arriving
+ *   is costing no reader's measurement anything, and there is nothing waiting
+ *   for it to be late for.
+ * - **no fold attested.** A row written before `folded_at` existed, or one no
+ *   fold has touched, says *nothing here can tell you* — and it reads exactly
+ *   like a brand-new revision (0274).
+ * - **a schedule that is not a positive, finite number of milliseconds, or an
+ *   instant that does not parse.** A nought allowance would make the lag the
+ *   design requires into a fault on every live page.
+ *
+ * A fold timestamp ahead of the instant handed in is a clock disagreeing with
+ * itself, and it answers *no* by the same subtraction rather than by a special
+ * case: a negative age is never longer than a positive allowance.
+ */
+const stalled = (door: RevisionPageViews | null, schedule: CollectionSchedule | undefined): boolean => {
+  if (door === null || schedule === undefined) return false
+  if (door.pending <= 0 || door.foldedAt === undefined) return false
+  if (!Number.isFinite(schedule.foldsWithinMs) || schedule.foldsWithinMs <= 0) return false
+
+  const at = Date.parse(schedule.at)
+  const folded = Date.parse(door.foldedAt)
+
+  if (Number.isNaN(at) || Number.isNaN(folded)) return false
+
+  return at - folded > schedule.foldsWithinMs
+}
+
+/**
  * One revision's row, with every fault it has rather than the first one found.
  *
  * A page with an old sender and a short window has two things to do and a
@@ -428,7 +583,8 @@ const EMPTY_FAULTS: Readonly<Record<CollectionFault, number>> = Object.freeze(
 const healthOf = (
   reading: PageReading,
   door: RevisionPageViews | null,
-  doubledRows: number
+  doubledRows: number,
+  schedule: CollectionSchedule | undefined
 ): PageHealth => {
   const doubled = reading.duplicated.length + doubledRows
   const faults: CollectionFault[] = []
@@ -440,6 +596,7 @@ const healthOf = (
   if (door !== null && door.inflation !== null && door.inflation > COUNTS_INFLATED_ABOVE) {
     faults.push("counts-inflated")
   }
+  if (stalled(door, schedule)) faults.push("collection-stalled")
   if (pageActionOf(reading).unwalked) faults.push("actions-uncredited")
   if (reading.orphaned.length > 0 || doubled > 0) faults.push("rows-mishandled")
 
@@ -462,6 +619,7 @@ const healthOf = (
     appearances: door?.appearances ?? null,
     inflation: door?.inflation ?? null,
     pending: door?.pending ?? 0,
+    foldedAt: door?.foldedAt ?? null,
     orphaned: reading.orphaned.length,
     doubled,
   }
@@ -495,10 +653,16 @@ const byPage = (one: PageHealth, other: PageHealth): number =>
  * The rows are the whole window of door rows a deployment holds, not one page's
  * — each revision's own row is picked out of them by the published rule (0219),
  * so no caller writes the matching itself.
+ *
+ * The schedule is optional and is the only argument here that is not a row: a
+ * caller that states what its collection promises gets `collection-stalled`
+ * judged for it, and one that does not gets every other fault and `pending`
+ * published unjudged (0274).
  */
 export const collectionHealthOf = (
   readings: readonly PageReading[],
-  rows: readonly StoredPageViews[]
+  rows: readonly StoredPageViews[],
+  schedule?: CollectionSchedule
 ): CollectionHealth => {
   const seen = new Set<string>()
   const pages: PageHealth[] = []
@@ -516,7 +680,7 @@ export const collectionHealthOf = (
 
     const door = pageViewsFor(reading, rows)
 
-    pages.push(healthOf(reading, door.measured, door.duplicated))
+    pages.push(healthOf(reading, door.measured, door.duplicated, schedule))
   }
 
   const standings = { ...EMPTY_STANDINGS }
@@ -544,6 +708,7 @@ export const collectionHealthOf = (
     readersAffected: faulted.reduce((sum, page) => sum + (page.arrivals ?? 0), 0),
     arrivals: pages.reduce((sum, page) => sum + (page.arrivals ?? 0), 0),
     pending: pages.reduce((sum, page) => sum + page.pending, 0),
+    unattested: pages.filter((page) => page.pending > 0 && page.foldedAt === null).length,
     trees: new Set(pages.map((page) => page.treeId)).size,
     duplicated,
   }

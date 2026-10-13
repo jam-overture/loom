@@ -28,6 +28,16 @@ import type { ReaderSignalBatch } from "./signal.js"
  * already ships for the region counter, and this is the second thing derived
  * from it rather than a second thing sent.
  *
+ * **One of the two numbers now says when it was written, and the other
+ * deliberately does not.** `appearances` carries `foldedAt`, stamped by the
+ * rollup and by nothing else, because the subtraction above has a second sign:
+ * `opened − appearances` is the openings no fold has reached, which is the
+ * buffer as a number *and* what a collection that has stopped looks like. The
+ * row's `updatedAt` cannot tell those apart — the door writes it on every
+ * delivery — so the fold's own timestamp is the one thing that can, and a
+ * reading judges a lag against the schedule its deployment hands in
+ * ([0274](../../decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)).
+ *
  * **There is no floor here, and that is not an oversight.** A region bucket is
  * floored because a country with four views in it is a person
  * ([0214](../../decisions/0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md));
@@ -77,9 +87,34 @@ export type ReaderPageViews = {
   readonly appearances: number
 }
 
-/** A page-view row as the store keeps it, which is the pair plus when it last moved. */
+/**
+ * A page-view row as the store keeps it, which is the pair, when it last moved,
+ * and when the fold last touched it.
+ */
 export type StoredPageViews = ReaderPageViews & {
+  /**
+   * When either writer last moved this row.
+   *
+   * Written by the door on every delivery that opened a page view *and* by
+   * every rollup that folded one, which is what makes it useless for telling a
+   * stalled collection from a quiet one: a busy page whose rollup has stopped
+   * keeps a fresh timestamp while its appearances never move again.
+   */
   readonly updatedAt: string
+  /**
+   * When a rollup last folded a window holding page views of this revision, or
+   * absent where nothing attests a fold.
+   *
+   * **Absent is not *never folded*.** It is *nothing here can say*: a row
+   * written before the column existed, a store a caller built by hand, a
+   * fixture. The two cases are one state, no reading claims anything from it,
+   * and the first fold after an upgrade fills it in (0274).
+   *
+   * Where it *is* there, it is the one timestamp in this subsystem written by a
+   * single writer, and therefore the only thing that can say an opening has
+   * been pending longer than it should be.
+   */
+  readonly foldedAt?: string
 }
 
 /**

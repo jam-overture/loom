@@ -159,13 +159,31 @@ const storedFunnelSchema = z
     })
   )
 
-const storedPageViewsSchema = z.object({
-  treeId: treeIdSchema,
-  revision: z.number().int().nonnegative(),
-  opened: countSchema,
-  appearances: countSchema,
-  updatedAt: instantSchema,
-})
+/**
+ * `folded_at` is absent rather than `null` on the way out, because *nothing
+ * attests a fold* is one state and a reading should not have two spellings of
+ * it to check (0274). A row written before the column existed and one no fold
+ * has touched are the same answer.
+ */
+const storedPageViewsSchema = z
+  .object({
+    treeId: treeIdSchema,
+    revision: z.number().int().nonnegative(),
+    opened: countSchema,
+    appearances: countSchema,
+    updatedAt: instantSchema,
+    foldedAt: instantSchema.nullable().default(null),
+  })
+  .transform(
+    (row): StoredPageViews => ({
+      treeId: row.treeId,
+      revision: row.revision,
+      opened: row.opened,
+      appearances: row.appearances,
+      updatedAt: row.updatedAt,
+      ...(row.foldedAt === null ? {} : { foldedAt: row.foldedAt }),
+    })
+  )
 
 /**
  * Every read is filtered by the application this handle speaks for (0269), and
@@ -390,6 +408,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
                 revision: count.revision,
                 appearances: count.views,
                 updatedAt,
+                foldedAt: updatedAt,
               }))
             )
             .onConflictDoUpdate({
@@ -401,6 +420,13 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
               set: {
                 appearances: sql`${loomReaderPageViews.appearances} + excluded.appearances`,
                 updatedAt,
+                /**
+                 * The fold's own timestamp, which only this writer sets (0274).
+                 * The door's upsert below leaves the column out of its `set`
+                 * entirely, so an arrival can never make a stalled collection
+                 * look like a fresh one.
+                 */
+                foldedAt: updatedAt,
               },
             })
         }
@@ -455,6 +481,11 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
    * It touches one column and leaves the other where it was, so a door and a
    * rollup writing the same row at the same instant cannot lose each other's
    * number.
+   *
+   * **`folded_at` is absent from the insert and from the `set`**, which is the
+   * whole of what makes it readable as a fold's age (0274): an arrival must
+   * never move it, and a row this write creates attests no fold rather than
+   * attesting one at the moment a reader arrived.
    */
   opened: async (openings, at) => {
     if (openings.length === 0) return ok(undefined)

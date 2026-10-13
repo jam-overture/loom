@@ -52120,8 +52120,12 @@ replacing a primitive has.
 ## 2026-10-12 — a change to the words a kind of part says cannot be read across two windows without 0239's intersection, per placement
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
-**Status:** open — **a limit written down with a shape to build**; nothing is
-wrong in what shipped
+**Status:** closed by #613 — built as `libraryCopyChangeOf` in
+`src/signals/library-copy-change.ts`, which is §27 of the plan and 0270. Closed
+on 13 October, the day that pull request landed. Original status below.
+
+**Original status:** open — **a limit written down with a shape to build**;
+nothing is wrong in what shipped
 
 A census publishes a kind's words and the words readers reached, and both add
 across its placements because a page's words partition across its parts exactly
@@ -52881,8 +52885,12 @@ door rows are the ones `/portal/readers` already reads.
 ## 2026-10-13 — a stalled rollup cannot be told from a freshly published revision, because the page-view row carries one timestamp written by two writers
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`, `src/signals/tally.ts`) · **Status:** open — **a
-limit written down with a shape to build**; nothing is wrong in what shipped
+(`src/signals/page-views.ts`, `src/signals/tally.ts`) · **Status:** closed by
+`signals-29-when-the-fold-last-touched-the-row` — built as the shape below, with
+one addition: the window is not what a caller hands in. Original status below.
+
+**Original status:** open — **a limit written down with a shape to build**;
+nothing is wrong in what shipped
 
 `loom_reader_page_views` holds `opened`, counted at the door, and `appearances`,
 counted by the rollup (0219). `pending` is `opened − appearances`, and §8 says
@@ -53254,3 +53262,81 @@ that reaches a reviewer rather than a maintainer's terminal.
 The fix is the same four words in front of the command. Filed rather than taken
 here because a package script is not this change's business, and because
 somebody should decide whether `docs:fences` wants it too.
+
+---
+## 2026-10-13 — a stalled collection is now a fault, and the collection screen has a timestamp to draw beside the figure it could not judge
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the collection
+screen) · **Status:** open
+
+[0274](decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)
+adds `folded_at` to the door row and a sixth fault to `collectionHealthOf`:
+`collection-stalled`, raised where page views are waiting to be folded and the
+last fold of that revision is older than the schedule the caller handed in. It
+is the fault [0271](decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)
+drafted and dropped, now answerable.
+
+**What changes on the screen that lane already has filed.**
+
+1. **`collectionHealthOf` takes a third argument now**, and it is optional. With
+   no `CollectionSchedule` the reading is exactly what it was yesterday — five
+   faults and an unjudged `pending`. With one it is six faults. The schedule is
+   two numbers: the instant the reading is taken, and `foldsWithinMs`, the
+   deployment's collection interval **plus** its rollup window. The second
+   number has nowhere to be configured today, which is the other finding filed
+   with this one.
+2. **`PageHealth.foldedAt` is the sentence to draw beside `pending`** — *the last
+   fold of this page was at nine this morning* reads before any verdict about
+   whether that is late, and it is published whether or not a schedule was handed
+   in.
+3. **`unattested` is the one state never to draw as *nothing is late*.** It
+   counts the revisions with openings waiting and no fold timestamp to judge the
+   wait by, which is every row of this deployment until its next collection run
+   after the migration. A card that printed `pending` with no fault beside it
+   would let a reader take *no fault* for *on time*, which is the one misreading
+   this reading exists to prevent.
+4. **The two configuration faults are alternatives and not an addition**, so an
+   errand card for `configuration` prints one of them and never both: `drift` and
+   `pending` are the two signs of one subtraction, so an inflated revision has
+   nothing pending to be late.
+
+**Where it goes:** the collection screen filed on 13 October, beside
+`readersAffected ÷ arrivals`. It needs no new store read — the fold timestamp
+arrives on the door rows a reader screen already holds.
+
+---
+## 2026-10-13 — a deployment can state how long its rollup window is and has nowhere at all to state how often it folds
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:** open
+— **nothing is broken**; it is the half of a new reading's input that lives
+outside this lane
+
+[0274](decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)
+judges a stalled collection against `foldsWithinMs`: how long a fold may honestly
+be behind, which is **the ripeness window plus the interval between runs**. A
+batch is not folded until it ripens, and then not until the next run, so the two
+add.
+
+**Loom knows the first number and not the second.** `LOOM_SIGNAL_WINDOW_MS` is
+read by `signals-collect.ts` and defaults to an hour. How often that script runs
+is whatever schedules it — a Vercel cron, a GitHub action, a person — and
+`apps/loom/vercel.json` schedules nothing at all, so the cadence is not in this
+repository in any form.
+
+The record refuses to guess it, and that refusal is the design: a default of one
+window would fault a deployment folding hourly behind a ten-minute window on
+every page it has. So the schedule is assembled by whoever calls the reading,
+and a portal screen has one of its two numbers.
+
+**The shape, which is small:** an operator-facing setting beside the window —
+`LOOM_SIGNAL_COLLECT_EVERY_MS` is the obvious spelling — read by nothing except
+the surfaces that need to say *this collection is late*, documented in
+`docs/deployment.md` next to the cron the operator is told to set up, and
+defaulted to nothing rather than to a number. Absent, the stall stays unjudged
+and `unattested` says so, which is the honest state and not a fault.
+
+**Why it is filed rather than taken.** `apps/loom/scripts/` and the deployment
+documentation are not this lane's, and the value that matters is the one the
+operator types rather than the plumbing that reads it. The reading already works
+the moment somebody hands the two numbers in.
