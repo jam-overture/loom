@@ -52247,6 +52247,46 @@ failure whose actual error was `Git information retrieval failed for this
 deployment`, a Vercel↔GitHub integration fault that no ignore file can affect.
 
 ---
+## 2026-10-12 — the plain-language sweep reads this lane's `.tsx` files, and the first words anybody meets are now in a `.ts` one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`app/(portal)/every-screen.test.ts`) · **Status:** open — **nothing is
+leaking**; the gap was closed locally for the one module that opened it, and
+the general version is a sweep nobody has costed
+
+`every-screen.test.ts` enforces *no sentence a screen shows unasked contains a
+word from the runtime's vocabulary* over the whole route group — and its
+`sourcesUnder` keeps only files ending `.tsx`. That was right while every
+reader-facing string was written in the component that drew it.
+
+It stopped being right in this change. The rail's labels are **data**, in
+`_components/shell/sections.ts`, which is the correct place for them — the two
+levels of the navigation are a table, not a component — and a `.ts` module is
+outside the sweep. So the first six words anybody meets on this surface were,
+for the length of one commit, the only reader-facing strings in the lane that
+nothing checked.
+
+`sections.test.ts` asserts `runtimeWordsIn` over every section label, group
+name and item label, which closes it where it was opened. **What is not closed
+is the class**: the next `.ts` module holding a label is in the same position,
+and the honest fix is for the sweep to read `.ts` as well as `.tsx`.
+
+It is filed rather than done because widening the sweep is not a one-line
+change in effect. `_lib/` holds ninety-odd modules, several of them
+deliberately carrying the runtime's vocabulary as *subject* rather than as
+speech — `vocabulary.ts` is a table of technical readings, `screen-names.ts`
+names what a screen used to be called so it cannot be written again — so the
+widened sweep needs an exemption mechanism those two can use honestly, and an
+exemption list invented in the same run as the rule it exempts from is the kind
+of rule this repository retires a week later. Costing that is a unit, and it is
+this lane's.
+
+**Why it is worth the entry at all:** the check exists because `did-not-apply`
+and `Allowed by nobody` were printed at people. A rule with a hole in exactly
+the file type a lane is moving its strings into is a rule on its way to being
+decorative.
+
+---
 ## 2026-10-12 — a branch opened before 0264 turns `main` red when it merges, and four open ones will
 
 **Filed by:** `Loom portal` · **Owned by:** every lane with a branch open on 12
@@ -52326,3 +52366,60 @@ something a row can point at.
 one's.** What this change buys is that the level is named, so the next run does
 not quietly build something else in its place — which is what happened to
 *application*, and is why this record exists.
+
+---
+## 2026-10-13 — one table is reached through two handles, and the intake's one is the only unbounded reader of it left in the app
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/_lib/reader-signals/`) · **Status:** open — **nothing is broken
+today**, because the handle in question only ever writes
+
+`loom_reader_signals` is composed twice in this app:
+
+- `(portal)/_lib/reader-signals.ts` — read by `/portal/readers`, and as of today
+  read through `boundedReaderSignalJournal`, so a buffer that does not answer
+  becomes a sentence rather than a 504.
+- `_lib/reader-signals/intake.ts` — built fresh from `portalDatabase` for the
+  `POST /api/reader-signals` endpoint.
+
+Both sit on the same `portalDatabase`, so this costs no second connection and is
+not a durability bug. What it costs is the thing today's change was about: a rule
+applied at a composition root is only applied to the roots somebody found. The
+intake's journal calls `receive` only, which is a **write**, and writes are
+deliberately unbounded — so there is nothing to fix right now and every reason
+to notice that the next method added there inherits no budget.
+
+The question for this lane is whether the intake should take the portal's handle
+rather than build its own. It probably should not — an endpoint anyone on the
+internet can POST to has different needs from a screen — in which case the
+honest fix is for its own composition to say so, rather than for the resemblance
+to go unremarked.
+
+---
+## 2026-10-13 — sign-in still fails closed when the throttle is unreachable, and that is now a decision somebody has to make rather than a thing nobody had looked at
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer · **Status:** open —
+**awaiting a policy decision, not a fix**
+
+`attempt-sign-in.ts` reads the attempt log **before** comparing the key:
+
+```ts
+const known = await log.recall(attempt.subject, cutoff)
+if (!known.ok) return { code: "unavailable", detail: known.error.detail }
+```
+
+Today's change bounds `recall`, so an unreachable throttle refuses in 1.5
+seconds instead of hanging a form anyone on the internet can reach. That is
+strictly better and it is not the whole question: **the refusal locks everybody
+out of the portal while the database is unwell**, which is exactly when somebody
+wants to get in and look at it.
+
+The alternatives are not close to equal and neither is obviously right. Failing
+open means a database wobble removes the brute-force throttle. Failing closed
+means a database wobble removes the portal. A third option — compare the key
+first and consult the throttle only on a *failed* comparison — keeps the
+throttle for the attacker and lets the maintainer in, at the cost of making the
+timing of a correct key distinguishable.
+
+Not decided here, because it is a security posture rather than a defect, and
+the lane that found it is not the one that gets to choose.

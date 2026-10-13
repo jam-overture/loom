@@ -1,13 +1,16 @@
 import Link from "next/link"
 
-import { describeStoreError } from "@jam-overture/loom/store"
+import {
+  describeApplicationStoreError,
+  describeProjectStoreError,
+} from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
-import { ensureSeeded, portalApplications, portalProjects, portalStore } from "@/app/(portal)/_lib/store"
+import { portalApplications, portalProjects, portalStore } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 import {
   workspaceOf,
@@ -112,15 +115,33 @@ const summaryFor = async (
 
 const Workspace = async () => {
   await requireActor("/portal")
-  await ensureSeeded()
 
+  /**
+   * Both reads answer within a budget, for the reason
+   * `_lib/app/bounded-store.ts` gives: a store that refuses is a state this
+   * screen already draws, and a store that does not answer was a screen that
+   * never arrived. The budget is on the handle rather than written here, so the
+   * ten screens that never had one have one too — and a timeout arrives as
+   * `unavailable`, which the branch below was already able to say.
+   */
   const [projects, applications] = await Promise.all([
     portalProjects.list(),
     portalApplications.list(),
   ])
 
   if (!projects.ok || !applications.ok) {
-    const failure = projects.ok ? applications : projects
+    /**
+     * Written out rather than compressed into a ternary: the two stores have
+     * different error types, and a reader of this file should be able to see
+     * which sentence comes from which without resolving a conditional.
+     */
+    const detail = ((): string => {
+      if (!projects.ok) return describeProjectStoreError(projects.error)
+      if (!applications.ok) return describeApplicationStoreError(applications.error)
+
+      return "the store could not be read"
+    })()
+
     return (
       <Screen>
         <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
@@ -130,9 +151,7 @@ const Workspace = async () => {
             moment.
           </p>
           <TechnicalDetail>
-            <p className="font-mono">
-              {failure.ok ? "" : describeStoreError(failure.error as never)}
-            </p>
+            <p className="font-mono">{detail}</p>
             <p>
               This is the store declining to answer, not a deployment with nothing in it. The two
               look alike on screen and are opposites.

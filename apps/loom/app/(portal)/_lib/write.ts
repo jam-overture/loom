@@ -9,20 +9,27 @@ import { postgresHoldStore } from "@jam-overture/loom/postgres"
 import { collectTelemetry } from "@jam-overture/loom/telemetry"
 import { memoryHoldStore, type HoldStore, type WritePath } from "@jam-overture/loom/write"
 
+import { boundedHoldStore } from "@/app/_lib/app/bounded-store"
+import { appStoreForWriting } from "@/app/_lib/app/store"
+
 import { portalDatabase } from "./database"
 import { portalInterpreter, portalRepairer } from "./interpreter"
 import { portalPolicy, portalPropsVocabulary } from "./policy"
-import { portalStore } from "./store"
-import { portalTelemetry } from "./telemetry"
+import { telemetryForWriting } from "./telemetry"
 
 /**
  * The portal's one write path (0017).
  *
- * Assembled here and nowhere else, so `portalStore.append` has exactly one
- * caller in the app. That is the convention 0017 admitted it could not make
- * structural: `TreeStore` is a public interface and nothing stops another module
- * calling it, so the enforcement is that no other module is handed the store for
+ * Assembled here and nowhere else, so `append` has exactly one caller in the
+ * app. That is the convention 0017 admitted it could not make structural:
+ * `TreeStore` is a public interface and nothing stops another module calling
+ * it, so the enforcement is that no other module is handed the store for
  * writing.
+ *
+ * It takes `appStoreForWriting` rather than the handle the screens read
+ * through, which is the one new thing here as of 13 October: the screens' handle
+ * answers a read within a budget and that is exactly wrong inside a write.
+ * `_lib/app/bounded-store.ts` has the argument.
  *
  * A write is now begun rather than referenced, because the event sink is the one
  * part of it that cannot be process-wide: telemetry is collected while the change
@@ -64,8 +71,19 @@ const carrier = globalThis as unknown as Carrier
  * card is for, and why it is worded as somebody having answered rather than as
  * something having gone wrong.
  */
-export const portalHolds: HoldStore = (carrier[CARRIER_KEY] ??=
+export const holdsForWriting: HoldStore = (carrier[CARRIER_KEY] ??=
   portalDatabase === undefined ? memoryHoldStore() : postgresHoldStore(portalDatabase))
+
+/**
+ * The same custody, read with a budget, for the screens that draw the queue.
+ *
+ * The write path above takes the unbounded handle and this is what a screen
+ * imports — the split `_lib/app/bounded-store.ts` argues for, and the hold
+ * store is where it matters most: giving up on `get` inside a `release` would
+ * tell a reviewer their change was not held when it was, which is the one
+ * sentence on that screen that must never be wrong.
+ */
+export const portalHolds: HoldStore = boundedHoldStore(holdsForWriting)
 
 /**
  * Whether a change waiting for an answer outlives the process holding it.
@@ -117,7 +135,7 @@ export type PortalWrite = {
 }
 
 export const beginWrite = (): PortalWrite => {
-  const collector = collectTelemetry(portalTelemetry)
+  const collector = collectTelemetry(telemetryForWriting)
 
   /**
    * One request's assessments, kept for as long as the action that began the
@@ -152,8 +170,8 @@ export const beginWrite = (): PortalWrite => {
 
   return {
     path: {
-      store: portalStore,
-      holds: portalHolds,
+      store: appStoreForWriting,
+      holds: holdsForWriting,
       runtime: {
         interpreter: portalInterpreter,
         policySource: fixedPolicy(portalPolicy),

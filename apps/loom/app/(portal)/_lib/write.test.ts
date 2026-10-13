@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { portalTelemetry } from "./telemetry"
+import { portalTelemetry, telemetryForWriting } from "./telemetry"
 import { beginWrite } from "./write"
 
 /**
@@ -114,8 +114,14 @@ describe("beginWrite", () => {
    */
   it("keeps the reasoning even when the journal refuses the same event", async () => {
     const write = beginWrite()
+    /**
+     * On the unbounded handle, because that is the one the write path takes as
+     * of 13 October — `portalTelemetry` is the screens' handle and its reads
+     * answer within a budget. A spy on the wrapper's `record` would never fire
+     * and this test would hold vacuously.
+     */
     const failing = vi
-      .spyOn(portalTelemetry, "record")
+      .spyOn(telemetryForWriting, "record")
       .mockResolvedValue({ ok: false, error: { code: "unavailable", detail: "no journal" } } as never)
 
     write.path.runtime.events.emit({

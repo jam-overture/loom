@@ -6,7 +6,7 @@ import { treeSourceFromStore } from "@jam-overture/loom/store"
 
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
 import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
-import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
+import { portalStore } from "@/app/(portal)/_lib/store"
 
 /**
  * One page, drawn alone, for the pane that sizes it.
@@ -53,7 +53,6 @@ const SurfacePage = async ({ params }: { params: Promise<{ treeId: string }> }) 
 
   if (!parsed.success) notFound()
 
-  await ensureSeeded()
 
   const rendered = await renderRequest(
     { treeId: parsed.data, editMode: true },
