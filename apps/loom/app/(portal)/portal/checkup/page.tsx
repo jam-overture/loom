@@ -13,7 +13,7 @@ import { describeAudit } from "@/app/(portal)/_lib/audit-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { nameFor } from "@/app/(portal)/_lib/page-name"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
-import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
+import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
 import { CheckupBasis } from "./_components/checkup-basis"
 import { CheckupVerdictPanel } from "./_components/checkup-verdict"
@@ -45,7 +45,6 @@ import { CheckupTreeChooser } from "./_components/tree-chooser"
 const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: string }> }) => {
   const { tree } = await searchParams
   await requireActor("/portal/checkup")
-  await ensureSeeded()
 
   if (tree === undefined) {
     return (

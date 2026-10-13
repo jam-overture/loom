@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { appStore, appStoreForWriting } from "@/app/_lib/app/store"
+import { appStoreForWriting, siteStore } from "@/app/_lib/app/store"
 
 import { pageTreeFor } from "./render"
 import { storedIdFor } from "./stored"
@@ -60,9 +60,9 @@ describe("a page whose store will not answer", () => {
   }, 20_000)
 
   /**
-   * The same hang, read through the handle directly, so that the sentence the
-   * portal shows a person is the one this produces: *storage is unavailable:
-   * the store did not answer within 1500ms*. Every screen in the portal has a
+   * The same hang, read through the handle directly, so that the sentence a
+   * screen shows a person is the one this produces: *storage is unavailable:
+   * the store did not answer within …ms*. Every screen in the portal has a
    * branch on that and none of them had anything to put in it.
    */
   it("answers unavailable rather than nothing, so a screen can say so", async () => {
@@ -71,7 +71,7 @@ describe("a page whose store will not answer", () => {
     const treeId = storedIdFor(HOME)
     if (treeId === undefined) throw new Error("loom: the home page is not stored under an id")
 
-    const answer = await appStore.head(treeId)
+    const answer = await siteStore.head(treeId)
 
     expect(answer.ok).toBe(false)
     expect(answer.ok === false ? answer.error.code : undefined).toBe("unavailable")

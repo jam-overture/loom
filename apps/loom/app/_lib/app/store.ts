@@ -17,6 +17,7 @@ import {
   boundedProjectStore,
   boundedTreeStore,
 } from "./bounded-store"
+import { SITE_READ_BUDGET_MS } from "./bounded"
 import { portalDatabase } from "./database"
 
 /**
@@ -93,6 +94,16 @@ export const appStoreForWriting: TreeStore = (carrier[CARRIER_KEY] ??= build())
  * which is a rule that has to hold everywhere held in the one place it can be.
  */
 export const appStore: TreeStore = boundedTreeStore(appStoreForWriting)
+
+/**
+ * The same store on the shorter budget, for `(marketing)`.
+ *
+ * Two wrappers over one store, because the budget a read deserves is decided by
+ * what happens when it runs out, and the two surfaces answer that differently:
+ * the site serves the page it was authored as, the portal says it could not
+ * look. `./bounded.ts` has the argument.
+ */
+export const siteStore: TreeStore = boundedTreeStore(appStoreForWriting, SITE_READ_BUDGET_MS)
 
 /**
  * The projects this deployment has.

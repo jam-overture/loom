@@ -10,7 +10,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
-import { ensureSeeded, portalApplications, portalProjects, portalStore } from "@/app/(portal)/_lib/store"
+import { portalApplications, portalProjects, portalStore } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 import {
   workspaceOf,
@@ -115,7 +115,6 @@ const summaryFor = async (
 
 const Workspace = async () => {
   await requireActor("/portal")
-  await ensureSeeded()
 
   /**
    * Both reads answer within a budget, for the reason

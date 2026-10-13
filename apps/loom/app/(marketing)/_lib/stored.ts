@@ -1,9 +1,8 @@
 import type { LoomTree, TreeId } from "@jam-overture/loom"
 
-import { waitForSeeding } from "@/app/_lib/app/bounded"
 import { absent } from "@/app/_lib/app/bounded-store"
 
-import { appStore, appStoreForWriting } from "@/app/_lib/app/store"
+import { appStoreForWriting, siteStore } from "@/app/_lib/app/store"
 
 import { SITE_PAGES, treeFor } from "./builders"
 import { readersCountedHere } from "./readers/counting"
@@ -117,32 +116,26 @@ export const sitePagesStored = (): readonly SitePage[] =>
 export const storedIdFor = (route: SiteRoute): TreeId | undefined =>
   sitePagesStored().find((page) => page.route.path === route.path)?.treeId
 
-const SEEDING_KEY = Symbol.for("loom.site.seeding")
-
-type Carrier = { [SEEDING_KEY]?: Promise<void> }
-
-const carrier = globalThis as unknown as Carrier
-
 /**
- * Write any of this site's pages the store does not have, once per process.
+ * Write any of this site's pages the store does not have. **Run by `db:push`.**
  *
- * `create` is the whole of it: a store that already holds the id refuses, and
- * being refused is the correct outcome rather than an error to report. The
- * result is deliberately not read for that reason.
+ * `create` is guarded by `absent`: the store is asked first, and only a
+ * positive *there is nothing here* is a reason to write. A store that did not
+ * answer is not, which is the guard that keeps #615 fixed.
+ *
+ * It was memoised and budgeted and ran on every marketing request until
+ * 13 October. `(portal)/_lib/store.ts` has the argument for why it moved; the
+ * short of it is that three round trips answering *already there* are three
+ * round trips a reader waits for.
  */
-export const ensureSiteSeeded = async (): Promise<void> => {
-  const work = (carrier[SEEDING_KEY] ??= (async () => {
-    for (const { route } of sitePagesStored()) {
-      const tree = treeFor(route, storedContext())
-      const existing = await appStoreForWriting.head(tree.treeId)
-      if (!absent(existing)) continue
+export const seedSitePages = async (): Promise<void> => {
+  for (const { route } of sitePagesStored()) {
+    const tree = treeFor(route, storedContext())
+    const existing = await appStoreForWriting.head(tree.treeId)
+    if (!absent(existing)) continue
 
-      await appStoreForWriting.create(tree)
-    }
-  })())
-
-  /** Budgeted and forgotten on failure, for the reason `seeding-wait.ts` gives. */
-  if ((await waitForSeeding(work)) === "failed") delete carrier[SEEDING_KEY]
+    await appStoreForWriting.create(tree)
+  }
 }
 
 /**
@@ -160,21 +153,24 @@ export const storedPageFor = async (route: SiteRoute): Promise<LoomTree | undefi
 
   if (treeId === undefined) return undefined
 
-  await ensureSiteSeeded()
-
   /**
-   * `appStore` reads within a budget, which is what makes the fallback below
+   * `siteStore` reads within a budget, which is what makes the fallback below
    * reachable at all. It was only ever reached when the store *refused*: a
    * store that does not answer returns no `Result`, so the authored page — the
    * thing 0262 promises a reader when the control plane is unreachable — was
    * itself unreachable, and this site served a 504 instead.
    *
-   * The budget moved from here to the handle on 13 October, so that the ten
-   * portal screens that never had one got it too. `_lib/app/bounded-store.ts`
-   * has the argument; what this line cares about is that a slow store now
-   * answers `unavailable`, which is a refusal, which is a page.
+   * The budget moved from here to the handle on 13 October, so that the
+   * eighteen portal screens that never had one got it too.
+   * `_lib/app/bounded-store.ts` has the argument; what this line cares about is
+   * that a slow store now answers `unavailable`, which is a refusal, which is a
+   * page.
+   *
+   * **This is now the only query a marketing request makes.** It used to be the
+   * fourth: the three seeding reads went first, each answering *already there*,
+   * on a pool of one connection where every query waits for the last.
    */
-  const head = await appStore.head(treeId)
+  const head = await siteStore.head(treeId)
 
   return head.ok ? head.value : undefined
 }
