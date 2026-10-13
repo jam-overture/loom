@@ -2,7 +2,6 @@ import type { LoomTree } from "@jam-overture/loom"
 import { renderLoomTree, type RenderOutput } from "@jam-overture/loom/react"
 
 import { askById, type Ask } from "./adapt/asks"
-import { paperTrailFor, type PaperTrail } from "./adapt/paper-trail"
 import type { ChangeRecord } from "./adapt/record"
 import { runAsk, type AskRun } from "./adapt/run"
 import { runUndo } from "./adapt/undo"
@@ -119,32 +118,6 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
   return walk(staged, ask, context)
 }
 
-/**
- * The run the mechanism page prints, against that page as it is published.
- *
- * Here rather than in the builder because a page builder is synchronous and a
- * request through the whole sequence is not — the same seam, and for the same
- * reason, as the ask itself. The page is built fresh for it: the claim is about
- * *this site*, so a record of a fixture kept beside it would be a record of
- * nothing a reader can go and check.
- *
- * **The page it runs against carries no ask**, and that is the whole of the
- * arrangement rather than an oversight. The request is made here, so the page it
- * is made against has to be the one this site publishes — not that page with the
- * answer already standing on it. What the visitor's `ask` decides is *which
- * request to run*, never which page to run it against.
- *
- * Three sentences here said *the front door* until 11 October, from when the
- * run was made against `/` and the mechanism page only printed it. The page
- * moved on 1 October and the explanation did not.
- */
-export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
-  paperTrailFor(
-    treeFor(ASKED_ROUTE, { origin: context.origin, theme: context.theme }),
-    context.ask,
-    context.approve === true
-  )
-
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
@@ -155,15 +128,18 @@ export const pageTreeFor = async (
    * main landing page and only let it exist in the How it works section."*
    *
    * So this page does what the front door used to: it runs the visitor's
-   * request against **itself**, and renders the page the request produced. The
-   * paper trail it already printed is still printed, now of the same page it is
-   * on rather than of the front door.
+   * request against **itself**, and renders the page the request produced.
    *
-   * The trail is built against the page *as published* — without the ask
-   * applied — for the reason it always was: the request is made here, so the
-   * page it is made against has to be the one this site publishes. What the
-   * visitor's `ask` decides is which request to run, never which page to run it
-   * against.
+   * **It runs that request twice and nothing else**, as of 13 October. A third
+   * and a fourth run used to happen here: `trailFor` resolved a `PaperTrail`
+   * for every asked request, and the band that printed it was rewritten away on
+   * 26 September. The field stayed on the context, the resolution stayed on
+   * this path, and the comment that stood here said the trail was *"still
+   * printed"* of a page that had stopped printing it.
+   *
+   * `pages/handed.test.ts` is what now holds it, and it holds the general
+   * thing rather than this one: a field on the context is a promise that some
+   * page reads it.
    */
   /**
    * **The published page comes from the store as of 12 October**
@@ -199,10 +175,9 @@ export const pageTreeFor = async (
    * governs.
    */
   if (isAskedRoute(route) && context.ask !== undefined) {
-    const trail = await trailFor(context)
-    const run = await askRunFor({ ...context, trail })
+    const run = await askRunFor(context)
 
-    return asRequested(run === undefined ? treeFor(route, { ...context, trail }) : run.page, {
+    return asRequested(run === undefined ? treeFor(route, context) : run.page, {
       theme: context.theme,
     })
   }

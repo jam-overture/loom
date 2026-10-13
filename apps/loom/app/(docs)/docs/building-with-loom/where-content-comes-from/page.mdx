@@ -126,11 +126,20 @@ and the schema is the only thing that makes the claim true on the day somebody
 renames a column.
 
 <Callout>
-  **Today you write the bindings yourself.** A model is shown the primitives your
-  deployment registered and the themes it can name — and not the sources. It can
-  emit a binding, but only by guessing at a source id, and a guess is refused at
-  the seam. So in practice a binding is written by whoever builds the page, and
-  the schema above is what will still be true on the day that changes. Filed.
+  **A model can write a binding, and it is shown what to point one at.** The
+  prompt your deployment sends carries a list of the sources you registered:
+  each id, the line its author wrote about what it answers, and the params it
+  declares. That list is your deployment's to hand over, the same way the list
+  of primitives is, and a deployment that leaves it out is back to a model
+  inventing ids that get refused at the seam.
+
+  The binding **name** is the part that is not the model's to choose, because
+  the name belongs to the primitive reading the answer rather than to the
+  source. So the prompt tells a model to bind only under a name the node's own
+  primitive says it reads. A name nothing reads is answered and then read by
+  nobody, which is a page that changed and looks exactly like a page that did
+  not. [Connecting a model](/docs/the-runtime/connecting-a-model) is where the
+  rest of that prompt is.
 </Callout>
 
 ## Asking, before anything is drawn

@@ -199,10 +199,36 @@ your prompt box at it, give it fifty milliseconds, and you will see what your
 reader sees on the afternoon a provider stops answering — without waiting three
 minutes to find out.
 
-There is no published equivalent for a source or an endpoint yet, and there is
-nothing to it: an adapter that never answers is a `fetch` returning
-`new Promise(() => {})`, which is four characters more than the one that answers
-straight away.
+**The other two seams have the same double.** `hangingSource` and
+`hangingEndpoint` are a source and an endpoint that never answer, and each one
+hands back something a promise of your own cannot:
+
+```ts
+import {
+  createDataRegistry,
+  describeDataRegistryError,
+  resolveTreeData,
+} from "@jam-overture/loom"
+import { hangingSource } from "@jam-overture/loom/testing"
+
+const silent = hangingSource("catalogue.services", "What this shop offers.")
+
+const built = createDataRegistry([silent.entry])
+
+if (!built.ok) throw new Error(describeDataRegistryError(built.error))
+
+const resolution = await resolveTreeData(tree, { registry: built.value, ceilingMs: 50 })
+
+/** "no answer in 50ms" — so whatever the adapter was holding can be let go. */
+const abort = silent.abortedWith()
+```
+
+**That last line is the half worth having.** Writing a source that never answers
+takes one line — a `fetch` returning `new Promise(() => {})` — and a source that
+can tell you what the runtime's abort said takes a second object listening to
+the signal. So the hand-written version proves the page shows the right state
+and says nothing about whether the connection behind it was released, which is
+the part that decides whether an afternoon like this costs you a database.
 
 ## What this does not cover
 

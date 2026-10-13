@@ -1,6 +1,5 @@
 import {
   createEndpointRegistry,
-  defineEndpoint,
   DEFAULT_ENDPOINT_CEILING_MS,
   DEFAULT_INTERPRETER_CEILING_MS,
   DEFAULT_SOURCE_CEILING_MS,
@@ -14,9 +13,16 @@ import {
   resolveTreeData,
   resolveTreeSubmissions,
   sequentialIdFactory,
+  type EndpointEntry,
   type EndpointRegistry,
 } from "@jam-overture/loom"
-import { buildIntent, fixedClock, formTree, hangingModelClient } from "@jam-overture/loom/testing"
+import {
+  buildIntent,
+  fixedClock,
+  formTree,
+  hangingEndpoint,
+  hangingModelClient,
+} from "@jam-overture/loom/testing"
 
 import { boundPage, shopWithASilentSource } from "@/app/(docs)/_lib/data/shop"
 
@@ -29,6 +35,15 @@ import { boundPage, shopWithASilentSource } from "@/app/(docs)/_lib/data/shop"
  * `setTimeout` standing in for an integration: the model client, the data source
  * and the submission endpoint all return a promise that is never resolved, which
  * is the only honest imitation of a socket nobody is going to answer.
+ *
+ * **All three are the runtime's own published doubles now**, which they were
+ * not until today. `hangingModelClient` always was; `hangingSource` and
+ * `hangingEndpoint` were published on 29 September and this file went on
+ * carrying hand-written versions of both — so the page said there was no
+ * published double for either, for a fortnight, because the lane writing that
+ * sentence had copies of its own and no reason to look. The framework routine
+ * filed the choice and left it to this lane. It is taken here, and the reason
+ * it is taken is the sentence rather than the duplication.
  *
  * The ceilings a **deployment** gets are read from the runtime's own published
  * constants and printed beside the produced sentences, so the page can say
@@ -152,23 +167,8 @@ const askASourceThatNeverAnswers = async (): Promise<Door> => {
 
 const SILENT_ENDPOINT = "billing.checkout"
 
-const endpointRegistry = (aborted: (reason: string) => void): EndpointRegistry => {
-  const built = createEndpointRegistry([
-    defineEndpoint({
-      id: SILENT_ENDPOINT,
-      description: "Where the basket posts, once a token has been minted for it.",
-      endpoint: {
-        target: ({ signal }) =>
-          new Promise(() => {
-            signal?.addEventListener("abort", () => {
-              const { reason } = signal
-
-              aborted(reason instanceof Error ? reason.message : "unnamed")
-            })
-          }),
-      },
-    }),
-  ])
+const endpointRegistry = (entry: EndpointEntry): EndpointRegistry => {
+  const built = createEndpointRegistry([entry])
 
   if (!built.ok) {
     throw new Error(`loom: the documented endpoint registry was refused — ${describeEndpointRegistryError(built.error)}`)
@@ -186,12 +186,10 @@ const endpointRegistry = (aborted: (reason: string) => void): EndpointRegistry =
  * page, and a token store saying nothing at all used to cost the page.
  */
 const askAnEndpointThatNeverSays = async (): Promise<Door> => {
-  let heard: string | undefined
+  const silent = hangingEndpoint(SILENT_ENDPOINT, "Where the basket posts, once a token has been minted for it.")
   const { tree, ids } = formTree(SILENT_ENDPOINT)
   const resolution = await resolveTreeSubmissions(tree, {
-    registry: endpointRegistry((reason) => {
-      heard = reason
-    }),
+    registry: endpointRegistry(silent.entry),
     ceilingMs: DOCS_CEILING_MS,
   })
 
@@ -208,7 +206,7 @@ const askAnEndpointThatNeverSays = async (): Promise<Door> => {
     constant: "DEFAULT_ENDPOINT_CEILING_MS",
     sentence: describeSubmissionUnavailable(outcome.unavailable),
     code: outcome.unavailable.reason,
-    abort: heard ?? "nothing — the endpoint was never aborted",
+    abort: silent.abortedWith() ?? "nothing — the endpoint was never aborted",
   }
 }
 

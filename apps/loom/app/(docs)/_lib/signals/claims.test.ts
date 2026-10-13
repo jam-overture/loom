@@ -298,15 +298,26 @@ describe("the two entry points", () => {
 
 describe("the limits this page admits to", () => {
   /**
-   * Three of these are open findings against other lanes, and the page's value
-   * rests on saying so rather than describing a seam that is finished. A run
-   * that quietly dropped one would be the documentation drifting *towards*
+   * The page's value rests on saying what the seam does not do, so a run that
+   * quietly dropped one of these would be the documentation drifting *towards*
    * optimism, which is the direction that costs a reader most.
+   *
+   * **One of these used to be a lie this file held in place**, and it is the
+   * reason `_lib/absences.ts` exists. The assertion was
+   * `expect(flowed).toContain("Nothing stores or interprets these")`, and the
+   * page said exactly that: where batches live, how they are aggregated and how
+   * long they are kept were all undecided. They were undecided when the
+   * sentence was written. The deferral was lifted on 13 September, the journal
+   * and the rollups were built, and `@jam-overture/loom/signals` grew to three
+   * hundred names — and this assertion went on passing the whole time, because
+   * what it checked was that the page still said it.
+   *
+   * The two below are safe for a reason worth naming: each is a claim about
+   * **how the broadcaster behaves**, and the behaviour is in the runtime where a
+   * test can reach it. The one that was dangerous was a claim about what the
+   * runtime *lacked*, which nothing here could reach. Those live in
+   * `absences.ts` now, each beside the measurement that will contradict it.
    */
-  it("says nothing stores or interprets signals yet", () => {
-    expect(flowed).toContain("Nothing stores or interprets these")
-  })
-
   it("says a broadcaster watches only the nodes present when it started", () => {
     expect(flowed).toContain("watches the nodes that were there when it started")
   })
