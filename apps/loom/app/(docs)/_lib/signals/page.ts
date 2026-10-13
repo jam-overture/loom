@@ -38,13 +38,21 @@ const buildSubject = () => {
 }
 
 /**
- * A kind this page has prose for, which is not the same list as the runtime's.
+ * A kind this page has prose for, which was once not the same list as the
+ * runtime's.
  *
- * The vocabulary is closed but it is not finished: `completed` is approved and
- * not built. Writing the union this way means the page carries its sentences
- * before the runtime carries the kind, and that the type **erases itself** on
- * the day it lands — once `ReaderSignalKind` includes `completed`, this union is
- * `ReaderSignalKind` and every table below still has exactly the right keys.
+ * Written when the vocabulary was closed and not finished — `completed` was
+ * approved and not built — so that the page could carry its sentences before
+ * the runtime carried the kind. The type was designed to **erase itself** on
+ * the day it landed: once `ReaderSignalKind` included `completed`, this union
+ * would be `ReaderSignalKind` and every table below would still have exactly
+ * the right keys.
+ *
+ * **It landed, and the erasure worked.** `READER_SIGNAL_KINDS` has five members
+ * and this union is now `ReaderSignalKind` exactly. Nothing had to be edited
+ * for that, which is the whole of why it was written this way, and it is kept
+ * as the shape to reach for the next time a page is ready before a runtime is:
+ * a union that dissolves beats a list that has to be remembered.
  *
  * The alternative was a page that argues there are four, which is what this
  * page used to do and what stopped the runtime growing for three days.

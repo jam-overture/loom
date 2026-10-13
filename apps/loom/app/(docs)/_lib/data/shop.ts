@@ -14,6 +14,7 @@ import {
   type NodeId,
   type SourceEntry,
 } from "@jam-overture/loom"
+import { hangingSource } from "@jam-overture/loom/testing"
 import { z } from "zod"
 
 /**
@@ -368,16 +369,6 @@ const deliverySlots = defineSource({
   answers: z.array(z.string()),
 })
 
-export type SilentSource = {
-  readonly entry: SourceEntry
-  /**
-   * What the runtime's abort said once it gave up, or `undefined` while it is
-   * still waiting. An adapter hears this; it is how a deployment releases the
-   * connection nothing is going to read.
-   */
-  readonly abortedWith: () => string | undefined
-}
-
 /**
  * An integration that never answers — the failure a `try` cannot catch, because
  * nothing is thrown and nothing comes back.
@@ -388,34 +379,21 @@ export type SilentSource = {
  * open. The runtime's ceiling is what turns it into one of the ordinary values
  * in this table.
  *
- * The promise is deliberately one that never settles. A `setTimeout` long enough
- * to be interesting would make the documentation build wait for it, and a page
- * whose evidence costs ten seconds a build is a page somebody eventually
- * produces from a fixture instead.
+ * **It is the runtime's double rather than this lane's, and that is new.** This
+ * file carried its own `silentSource` for a month after `hangingSource` was
+ * published, which cost more than a duplicated function: *When nothing comes
+ * back* went on telling readers there was no published double for a source,
+ * because the lane writing that sentence had one of its own and no reason to
+ * look. The private copy is what made the page's claim feel true. Filed on 29
+ * September by the framework routine, which asked this lane to decide and left
+ * both copies alone; this is the decision.
+ *
+ * The promise behind it is deliberately one that never settles. A `setTimeout`
+ * long enough to be interesting would make the documentation build wait for it,
+ * and a page whose evidence costs ten seconds a build is a page somebody
+ * eventually produces from a fixture instead.
  */
-export const silentSource = (id: string, description: string): SilentSource => {
-  let aborted: string | undefined
-
-  return {
-    abortedWith: () => aborted,
-    entry: defineSource({
-      id,
-      description,
-      params: z.object({}),
-      answers: z.array(z.string()),
-      adapter: {
-        fetch: ({ signal }) =>
-          new Promise(() => {
-            signal?.addEventListener("abort", () => {
-              const { reason } = signal
-
-              aborted = reason instanceof Error ? reason.message : "unnamed"
-            })
-          }),
-      },
-    }),
-  }
-}
+export const silentSource = hangingSource
 
 /** The shop, plus five integrations having a bad afternoon. */
 export const troubleRegistry = (): DataRegistry =>

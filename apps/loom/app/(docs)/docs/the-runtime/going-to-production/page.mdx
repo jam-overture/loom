@@ -151,9 +151,29 @@ when you set the database up, and run it again whenever you upgrade Loom.
   and then fails the first write that needed the column.
 </Callout>
 
-This is deliberately not a migration framework. There is one version of this
-schema and no upgrade path yet, so a list of statements that are safe to re-run
-is the honest amount of machinery for it.
+This is deliberately not a migration framework. A list of statements that are
+safe to re-run is the honest amount of machinery for a schema with one version.
+
+**The one thing a re-run cannot do is move data that is already there.** Adding
+a column is something `IF NOT EXISTS` can carry; carrying a *value* from an old
+spelling to a new one is not, and where Loom needs that it publishes the move by
+name beside the schema calls. Loom publishes one of those:
+
+```ts
+import { migrateApplicationIds } from "@jam-overture/loom/postgres"
+
+/** Carries `prj_default` to `app_default` everywhere an application is named. */
+await migrateApplicationIds(db)
+```
+
+Run it once if your database was created before Loom started calling the thing
+it governs an application. It is safe on a database that has already been
+carried and on one that was never on the old value, so running it when you did
+not need it costs nothing.
+
+There is **no general upgrade path**, and while there is one named move there is
+no order to keep track of either. The day there are two, this page owes you the
+order to run them in.
 
 ## The tables are locked as they are created
 
