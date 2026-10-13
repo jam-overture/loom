@@ -4,7 +4,7 @@ import { DEFAULT_APPLICATION_ID, DEFAULT_PROJECT_ID } from "@jam-overture/loom/s
 import { appApplications, appProjects, appStore } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
-import { waitForSeeding } from "./seeding-wait"
+import { waitForSeeding } from "@/app/_lib/app/bounded"
 
 /**
  * The app's store, and the portal's own seeding of it.

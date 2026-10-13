@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { waitForSeeding } from "./seeding-wait"
+import { waitForSeeding, within } from "./bounded"
 
 const never = (): Promise<void> => new Promise<void>(() => undefined)
 
@@ -29,5 +29,34 @@ describe("waiting for a seed", () => {
     const quick = new Promise<void>((resolve) => setTimeout(resolve, 1))
 
     expect(await waitForSeeding(quick, 500)).toBe("seeded")
+  })
+})
+
+describe("a read that will not answer", () => {
+  it("comes back as nothing rather than waiting", async () => {
+    const started = Date.now()
+
+    expect(await within(never(), 20)).toBeUndefined()
+    expect(Date.now() - started).toBeLessThan(1_000)
+  })
+
+  /**
+   * The case the marketing site needed. Its fallback to the authored page was
+   * only reachable when the store returned a refusal; a hang returned nothing
+   * at all, so the page waited instead of serving what it was written as.
+   */
+  it("hands back what the store said when it answered in time", async () => {
+    expect(await within(Promise.resolve({ ok: true as const, value: 7 }), 500)).toEqual({
+      ok: true,
+      value: 7,
+    })
+  })
+
+  it("comes back as nothing when the store threw", async () => {
+    expect(await within(Promise.reject(new Error("no database")))).toBeUndefined()
+  })
+
+  it("does not mistake a falsy answer for an absent one", async () => {
+    expect(await within(Promise.resolve(0), 500)).toBe(0)
   })
 })
