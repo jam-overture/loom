@@ -139,9 +139,11 @@ and `unattested` says so, which is the honest state.
 
 ## Test numbers, which are real
 
-`pnpm verify` green end to end — build, typecheck, **RUNTIME_TESTS runtime tests**
-across RUNTIME_FILES files, findings and reports checks, **APP_TESTS app tests**
-across APP_FILES files, and the prerender check. Exit 0.
+`pnpm verify` green end to end — build, typecheck, **4,978 runtime tests** across
+221 files, findings and reports checks (1,191 findings, 0 malformed), **8,557 app
+tests** across 445 files, and the prerender check (133 pages, 1,835 text
+junctions, 0 run together). **Exit 0**, read out of a file rather than off a
+pipe, per the merge-gate rule.
 
 Nothing was skipped and no test was weakened.
 
