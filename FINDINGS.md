@@ -52366,3 +52366,154 @@ something a row can point at.
 one's.** What this change buys is that the level is named, so the next run does
 not quietly build something else in its place — which is what happened to
 *application*, and is why this record exists.
+
+---
+## 2026-10-13 — a page built in Loom is the only kind of page on this deployment that does not fit a phone, because a tree has no viewport and the ramps are fixed pixels
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`src/theme/apply.ts`, `src/theme/font-packs.ts`) and `Loom primitives`
+(`src/primitives/loom.hero.ts`, `src/primitives/loom.page.ts`) ·
+**Status:** open — **nothing is broken and no test is failing.** Every page is
+correct, every overflow measurement passes, and the only instrument that sees
+this is a camera
+
+Measured on this branch's build with `pnpm shoot`, at 390×844 and at 1280×900,
+on all three starter palettes. The front door's own numbers first:
+
+| at 390, front door | minimal | editorial | bold |
+| --- | --- | --- | --- |
+| the `h1` box | 254 × 247 | 254 × 197 | 250 × 197 |
+| the first call to action | **286 past the fold** | **182 past** | **196 past** |
+
+So on a phone the first screen of this site is a menu bar, an eyebrow that
+wraps to two lines, and part of a headline. **Neither button in the hero is on
+it, under any palette.** The same measurement at 1280 puts both buttons at
+y 694, comfortably above a fold at 900.
+
+**The 254 is the more useful half of the number.** In a 390-pixel viewport the
+headline is given a 254-pixel column, which is 68 pixels of gutter on each
+side, or 35% of the screen. That is `loom.page`'s `paddingInline: space(4)`
+plus `loom.hero`'s `paddingInline: space(6)`, both fixed lengths off the
+spacing ramp, and into that column goes a headline set at the font pack's top
+step — 72px under two packs and 88px under `bold-sans`, also fixed. Three
+characters a line, six lines.
+
+**The comparison is what makes it a framework finding rather than this lane's
+composition.** The same build, the same browser, the same 390 pixels:
+
+| page at 390 | how its chrome is built | the `h1` |
+| --- | --- | --- |
+| `/docs` | hand-written React | x 20, **350 wide**, 48 tall |
+| `/lessons` | hand-written React | x 20, **350 wide**, 49 tall |
+| `/demo`, its own bar | hand-written React | x 20, **350 wide**, 73 tall |
+| `/demo`, the Loom tree inside it | composed primitives | x 64, 262 wide, 197 tall |
+| `/`, `/how-it-works`, `/what-you-run` | composed primitives | x 68, 254 wide, 148–247 tall |
+
+Every surface written by hand gives a phone a 20-pixel gutter and a headline
+sized for the screen. Every page composed out of registered primitives gives it
+a 64 to 68 pixel gutter and a desktop headline. This site is the one surface
+built entirely in Loom, so it is the one that gets it everywhere, and it is the
+front door.
+
+**No composition can reach it, and that is the point rather than a complaint.**
+`--loom-scale-1…8` and `--loom-spacing-1…8` are emitted as pixels in
+`src/theme/apply.ts:67` from the pack's `scaleRamp`, and **a `LoomTree` has no
+viewport**: there is no prop, no theme selection and no node that means
+*smaller on a phone*. This surface's own stylesheet cannot do it either —
+`(marketing)/globals.css` is forbidden from declaring type, spacing or any
+`--loom-*`, with `globals.test.ts` holding the rule, because a second source of
+truth is exactly what the re-theme guarantee (0049) cannot have. That rule is
+right and this entry is not asking for an exception to it.
+
+The arithmetic says composition cannot nearly reach it either, which is worth
+writing down so nobody spends a run on the attempt. The hero needs to lose
+about **290 pixels** to put its first button above a 844-pixel fold. The two
+levers this lane actually owns are worth about **75** between them: dropping
+`backdrop` to `none` removes the hero's own `space(6)` and widens the column
+from 254 to 302, which is roughly one line off the headline and one off the
+lead, and it costs the grid behind the band on every screen.
+
+**Three shapes, named so the owners have somewhere to start rather than a
+problem.** This lane has no view on which is right:
+
+1. **A fluid ramp.** `apply.ts` emits `clamp()` per step instead of `px`, with
+   the pack's existing number as the upper bound. Nothing in any tree changes
+   and every surface gets it at once. It is the smallest diff and it makes a
+   font pack's declared numbers a maximum rather than a size, which is a change
+   to what `scaleRamp` means and probably wants a record.
+2. **A pack declares a second ramp**, for a narrow viewport, and `apply.ts`
+   emits both behind a media query. More honest about what a pack is choosing
+   and it is four starter packs to retune.
+3. **The padding only.** `loom.page` and `loom.hero` shrink their inline
+   padding below some width. It buys the 48 pixels of column and leaves the
+   headline at 72px, so it is the cheapest and it does not fix the fold.
+
+Nothing here is urgent and nothing is degraded for a reader on a laptop. What
+it costs today is that the one surface whose job is to be sent to a stranger is
+the one that reads worst on the device a stranger is most likely holding, and
+that **a marketing site built in the framework it sells cannot be shown on a
+phone is evidence about the framework rather than about the site.**
+
+The shot list that produced every number above is committed beside this run's
+report as `reports/2026-10-13-marketing-the-page-that-ran-four-changes-to-show-one.shots.json`,
+so re-measuring after a fix is one command.
+
+---
+## 2026-10-13 — the band was deleted on 26 September and the work behind it ran until today, because nothing holds a context field to having a reader
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/`) · **Status:** **closed by
+`marketing-03-the-page-that-ran-four-changes-to-show-one`** — filed anyway,
+because the **shape** is not this field's and the test that now catches it is
+this lane's only
+
+`/how-it-works` printed a panel of the runtime's own event envelopes until
+26 September, when the page was rewritten and the panel went. The module
+behind it did not. `render.ts` went on calling `trailFor` on **every asked
+request**, `paperTrailFor` ran the whole composition sequence two more times
+inside it, and the `PaperTrail` it returned was handed to a builder that reads
+no such field.
+
+So an asked request ran the sequence **four times and rendered one**:
+
+| run | what it was for | read by |
+| --- | --- | --- |
+| 1 | the trail's own ask | nobody |
+| 2 | the trail's refusal contrast | nobody |
+| 3 | `askRunFor`'s probe pass | pass 4 |
+| 4 | `askRunFor`'s staged pass | the page |
+
+Measured at **28ms** per request for the two that were thrown away, against a
+page that is server-rendered on demand.
+
+**Both comments covering it argued that it was deliberate**, which is why it
+survived a fortnight of runs reading those files. `render.ts` said the trail
+*"is still printed, now of the same page it is on rather than of the front
+door."* The field's own docblock said it stays *"because `pageTreeFor`
+resolves it for the front door's notice"* — and the front door's context has
+never had the field. A wrong explanation reads exactly like a right one, and
+it is better camouflage than no explanation at all.
+
+**What no instrument here could see.** The type checker is content with an
+optional field nobody reads. The 1,400 tests in this route group assert what
+the page contains, and the page was correct. A screenshot of a correct page is
+a screenshot of a correct page. Every one of them was green for the entire
+fortnight.
+
+`pages/handed.test.ts` is the general version: **a context field is a promise
+that some page reads it.** The field list is `Record<keyof
+Required<MechanismContext>, true>`, so a field added and left out of it is a
+build error rather than an unchecked field, and the sweep looks for `.field`
+across the page builders, `chrome.ts` and `requested.ts`.
+
+**The first draft of that test passed against the bug it was written for**,
+which is the part worth copying. It looked for the field *name*, and a field's
+own declaration is in one of the files being swept — so `readonly trail?:
+PaperTrail` was read as a reader of `trail`. It was caught by putting the
+field back and watching the test stay green, rather than by watching it pass
+once the field was gone. A test that is green on the thing it is about is
+worse than no test, because it is also an argument that somebody checked.
+
+**Not asked for, and named because this lane cannot see it from here:** the
+same shape is available to every surface that hands a context to a builder,
+and three others do.
