@@ -39,7 +39,7 @@ import { applicationIdSchema } from "./application.js"
  * ([0263](../../decisions/0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md)
  * clause 5) in one migration rather than being moved twice. They take the
  * application alone instead:
- * [0270](../../decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+ * [0273](../../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
  * holds the argument, which is that 0263 is Proposed and the lane waiting on
  * this one is blocked today.
  *

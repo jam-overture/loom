@@ -73,7 +73,7 @@ a lane blocked for as long as a record sits unratified, which is a length nobody
 here can predict because ratifying it is the maintainer's. The cost accepted is
 five `ALTER TABLE` statements later, on a pattern this change has now proved.
 Recorded as
-[0270](../decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md).
+[0273](../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md).
 0263 is **not** superseded and clause 5 still stands; what moved is when its half
 arrives.
 
@@ -135,7 +135,7 @@ way to believe a red tree is green.
 
 ## Records
 
-- **Added:** [0270](../decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md),
+- **Added:** [0273](../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md),
   *The reader tables take the application now and the audience when it is
   ratified*.
 - **Superseded:** none. 0263 stays `Proposed` and stays whole.

@@ -52079,7 +52079,7 @@ fix the assertion reads `{ removed: 4, mine: 0 }`.
 for it and says both dimensions should land in one migration; 0263 is
 `Proposed`, so this landed the application alone rather than wait out a record
 nobody here can ratify.
-[0270](decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+[0273](decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
 holds that argument and the cost it accepts, which is one more migration if
 0263 is Accepted.
 

@@ -24,7 +24,7 @@ import {
  * index, on the same terms as the store's four: a reader is filed against the
  * application whose page they read, and no reading here spans two. The column
  * arrives alone rather than beside the audience dimension 0263 clause 5 asks
- * for, which is a decision with a cost — [0270](../../decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+ * for, which is a decision with a cost — [0273](../../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
  * holds the argument.
  */
 

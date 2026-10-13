@@ -1,8 +1,15 @@
-# 0270. The reader tables take the application now and the audience when it is ratified
+# 0273. The reader tables take the application now and the audience when it is ratified
 
 **Status:** Accepted
 **Date:** 2026-10-12
 **Section:** §5 (signals), §3 (portal)
+
+> **Renumbered on 2026-10-13**, from 0270, when the branch that carried it
+> (#614) was merged. `main` had meanwhile accepted a different 0270 — *a change
+> to the words a kind of part says is read over the words both windows say* —
+> and two records sharing a number is fatal (0097). This record was written on
+> 12 October and nothing in it changed but its number; references on the branch
+> were updated with it.
 
 ## Context
 

@@ -36,7 +36,7 @@ import { defineSpecimen, WIDE } from "./specimen.js"
  * leading with the application would change this image, which is the only
  * property that makes a screenshot worth putting in a report.
  *
- * The left column is the claim [0270](../../decisions/0270-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+ * The left column is the claim [0273](../../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
  * makes: all ten, one pattern. The right column is the two that do not follow
  * it and why — a picture that hid the exception would be the kind of evidence
  * that is worse than none, and looking for the second of them is what turned up
