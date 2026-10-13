@@ -4,6 +4,7 @@ import { DEFAULT_APPLICATION_ID, DEFAULT_PROJECT_ID } from "@jam-overture/loom/s
 import { appApplications, appProjects, appStore } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
+import { waitForSeeding } from "./seeding-wait"
 
 /**
  * The app's store, and the portal's own seeding of it.
@@ -59,14 +60,21 @@ const carrier = globalThis as unknown as Carrier
  * nobody has to know about.
  */
 export const ensureSeeded = async (): Promise<void> => {
-  carrier[SEEDING_KEY] ??= (async () => {
+  const work = (carrier[SEEDING_KEY] ??= (async () => {
     await placeTree(seedTree())
     await ensureSiteSeeded()
     await ensureDefaultProject()
     await ensureDefaultApplication()
-  })()
+  })())
 
-  await carrier[SEEDING_KEY]
+  const outcome = await waitForSeeding(work)
+
+  /**
+   * A seed that failed is forgotten, so the next request tries again rather
+   * than inheriting a rejected promise forever. One that is still going is
+   * kept: it is doing the work, and starting a second would be two.
+   */
+  if (outcome === "failed") delete carrier[SEEDING_KEY]
 }
 
 /**
