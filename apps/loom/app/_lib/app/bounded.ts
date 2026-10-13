@@ -1,5 +1,9 @@
 /**
- * Waiting for seeding, with a limit, and never twice for the same failure.
+ * Waiting for the database, with a limit.
+ *
+ * It lives beside the store rather than in a route group because both surfaces
+ * need it and neither owns it — `(marketing)` importing it from `(portal)` was
+ * a lane crossing I made and am undoing here.
  *
  * Both seeds memoise their promise so the work happens once per process. The
  * first version stored it with `??=` and never cleared it, which is correct
@@ -56,3 +60,50 @@ export const waitForSeeding = async (
     if (timer !== undefined) clearTimeout(timer)
   }
 }
+
+
+/**
+ * A read, or nothing, within the budget.
+ *
+ * The companion to the seeding budget and the more important half. Every
+ * surface that reads the store already handles a store that *refuses* — the
+ * marketing pages fall back to the page they were authored as, which is what
+ * [0262](../../../../../decisions/0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md)
+ * means by an unreachable control plane degrading to the authored page.
+ *
+ * **None of them handled a store that simply does not answer.** A refusal is a
+ * `Result`; a hang is nothing at all, so the fallback never ran and the page
+ * waited instead. On 12 October that was the difference between a site that
+ * serves what it was written as through a database outage and a site that
+ * serves nothing — Supabase was reporting *"multiple technical issues"*, and
+ * the right behaviour was available the whole time and unreachable.
+ *
+ * A caller that gets `undefined` cannot tell a slow store from a broken one.
+ * That is correct: at render time they are the same thing, and the one place
+ * the difference matters is the portal, where somebody is asking.
+ */
+export const within = async <T>(
+  work: Promise<T>,
+  budgetMs: number = STORE_BUDGET_MS
+): Promise<T | undefined> => {
+  let timer: ReturnType<typeof setTimeout> | undefined
+
+  const ranOut = new Promise<undefined>((resolve) => {
+    timer = setTimeout(() => resolve(undefined), budgetMs)
+  })
+
+  try {
+    return await Promise.race([work.catch(() => undefined), ranOut])
+  } finally {
+    if (timer !== undefined) clearTimeout(timer)
+  }
+}
+
+/**
+ * What a page waits for a store before serving what it already has.
+ *
+ * Longer than the seeding budget because this is the read the page is actually
+ * for, and short enough that a reader gets a page rather than a spinner. A
+ * healthy read here is a primary-key lookup in single-digit milliseconds.
+ */
+export const STORE_BUDGET_MS = 1_500

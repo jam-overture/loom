@@ -1,6 +1,6 @@
 import type { LoomTree, TreeId } from "@jam-overture/loom"
 
-import { waitForSeeding } from "@/app/(portal)/_lib/seeding-wait"
+import { waitForSeeding, within } from "@/app/_lib/app/bounded"
 
 import { appStore } from "@/app/_lib/app/store"
 
@@ -161,7 +161,14 @@ export const storedPageFor = async (route: SiteRoute): Promise<LoomTree | undefi
 
   await ensureSiteSeeded()
 
-  const head = await appStore.head(treeId)
+  /**
+   * Bounded, because the fallback this feeds was only ever reachable when the
+   * store *refused*. A store that does not answer returns no `Result` at all,
+   * so the authored page — the thing 0262 promises a reader when the control
+   * plane is unreachable — was unreachable itself. `within` turns a hang into
+   * the absence the caller already knows how to handle.
+   */
+  const head = await within(appStore.head(treeId))
 
-  return head.ok ? head.value : undefined
+  return head?.ok === true ? head.value : undefined
 }
