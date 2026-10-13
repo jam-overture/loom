@@ -172,14 +172,14 @@ notes:
 `pnpm install && pnpm verify`, status written to a file and read in a separate
 command.
 
-> **Numbers pending — this section is filled in from the gate's own output
-> before the pull request opens, and the pull request does not open on red.**
-> The targeted suites are already green: `src/patch.test.ts`,
-> `src/application/`, `src/project/`, `src/store/postgres-applications.test.ts`
-> and `src/store/postgres-projects.test.ts` — **7 files, 90 tests, exit 0**,
-> which includes the five new contract cases run twice, once against the `Map`
-> and once against Postgres. `pnpm typecheck` is clean across `src/` and
-> `tools/`.
+```
+Test Files  222 passed (222)      Tests  4970 passed (4970)    # root
+Test Files  445 passed (445)      Tests  8557 passed (8557)    # @loom/app
+EXIT=0
+```
+
+**13,527 tests across 667 files.** `prerender:check` reports 133 prerendered
+pages and 0 run together; `findings:check` reads 1,190 findings, 0 malformed.
 
 Nothing skipped, nothing weakened, no test deleted, no `.only`. The new root
 tests are 8 in `src/patch.test.ts` and 5 contract cases against each of the two
