@@ -8,6 +8,152 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-13 — every portal screenshot now needs a preload, because a store with no database behind it is a store with nothing in it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`apps/loom/instrumentation.ts`, which does not exist) · **Status:** open —
+**nothing is broken in production and no test is failing**; this is the
+screenshot cost of #623 landing, and the remedy is four lines in a file the
+framework forces to sit at the application root
+
+#623 moved seeding out of the request path and into `db:push`, for a reason
+that is right and is not in question: six round trips to learn nothing, on a
+pool of one connection, in front of every screen's own reads.
+
+**What it also did is make a local portal permanently empty.** With no
+`DATABASE_URL` the store falls back to `memoryTreeStore()`, nothing calls
+`seedDeployment()`, and `db:push` refuses to seed a store that is not durable —
+correctly, since writing this deployment's pages into a `Map` and reporting
+success is the trap that run closed. So `pnpm dev` and
+`pnpm shoot --serve apps/loom` both come up with no pages at all, and every
+portal screen photographs its empty state.
+
+This run wrote the **eleventh** hand-written preload to get round it, which is
+the 9 October entry below counting one higher. What is new is that it is no
+longer a convenience. The ten before this one staged a *particular* state — a
+proposal, a reader tally, seventy-two episodes of journal. This one staged
+**the deployment's own pages**, which is to say the thing every lane's
+screenshot of this surface needs before it can photograph anything, and which
+until 13 October a request did for you.
+
+**The ask, which is smaller than the staging harness that entry asks for and
+does not replace it.** An `instrumentation.ts` at `apps/loom/`, whose
+`register()` seeds when the app's store is **not durable**:
+
+```ts
+export const register = async (): Promise<void> => {
+  const { isDurable } = await import("./app/_lib/app/store")
+  if (isDurable) return
+
+  const { seedDeployment } = await import("./app/(portal)/_lib/store")
+  await seedDeployment()
+}
+```
+
+Three properties worth stating, because each is a reason this is the shape:
+
+- **It cannot run in production.** A deployment with `DATABASE_URL` set has a
+  durable store, and the guard is that fact rather than `NODE_ENV` — which is
+  the same test `db-push.ts` already makes before it seeds, so there is one
+  rule and not two.
+- **It costs the request path nothing**, which is the whole of #623's argument.
+  `register()` runs once per process before the first request, and on a memory
+  store every one of the six reads is a `Map` lookup.
+- **The import has to be dynamic and inside the function.** `db-push.ts`
+  learned this on the same branch: `app/_lib/app/database.ts` resolves the
+  connection string at module scope, so a static import at the top of an
+  instrumentation file reads the environment before Next has finished
+  assembling it.
+
+It is at the application root because Next requires it there, which is the case
+`docs/routines.md` already settles — *a file is another lane's because of what
+it decides, not where the framework makes it live* — and what this one decides
+is about the application's store rather than about any surface. Hence the owner.
+`isDurable` is the one thing it needs that `app/_lib/app/store.ts` does not
+export today; `portalDatabase !== undefined` is the whole of it.
+
+**Not done here**, because `instrumentation.ts` and `app/_lib/app/store.ts` are
+both outside this lane and an instrumentation file affects all seven surfaces
+rather than this one. The preload this run used was written, used and deleted
+before the commit, as the ten before it were.
+
+## 2026-10-13 — the pane that says what you picked is on the same screen now, and it is still the one thing on this screen that moves when you click
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**the distance is fixed and the jump is not**; recorded because they were one
+sentence in the audit and are two defects, and the second is the one left
+
+The audit of 12 October, on `/portal/pages/<a page>`:
+
+> **`Nothing picked yet` is 11,000 pixels below the thing you click.** […] and
+> because that panel is a small dashed box when nothing is picked and a tall one
+> when something is, the whole column jumps. That is the content jump — it is a
+> layout bug, not an animation one.
+
+Two causes in one sentence, and this run fixed the first. The address book is
+bounded and scrolls inside itself, so the pane under it is within a screen of
+the row that changes it rather than five screens down.
+
+**The second cause is untouched.** `SelectedNode` renders a dashed box when
+nothing is picked and one block per picked part when something is, and
+`PickedParts` above it renders nothing at all until something is picked and an
+excerpt per part afterwards. So the first click on a page still moves
+everything below both of them, and the sixth click moves it again — which is
+the reader's own column rearranging under a click they made somewhere else.
+
+The fix is to reserve the space rather than to animate the change: the empty
+state occupies what one picked part would, and a reader who picks six still
+gets a long rail, which is the honest consequence of picking six. It was left
+out of this run deliberately — it is a second component's layout and this one
+was already an address book, a search and a bound — and it is the next thing on
+this screen.
+
+## 2026-10-13 — the page inspector is 506px wider than the screen, because the preview is drawn at the width it is previewing
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`app/(portal)/portal/pages/[treeId]/_components/device-pane.tsx`) ·
+**Status:** open — **it is the reason `pnpm shoot` exits 1 on every shot of this
+screen**, and it predates this run
+
+Measured on `portal-62`, at 1280×900, signed in, on `/portal/pages/t_home1`:
+
+```
+scrollWidth 1786 / innerWidth 1280  ← overflows
+    iframe  x 457 y 336  1280x800
+```
+
+457 + 1280 is 1737, and the padding round it is the rest. **The preview iframe
+is laid out at the device width it is previewing** — 1280 for `Desktop` — inside
+a column that is 759px wide, and nothing clips it.
+
+`DevicePane` scales it: `setScale(Math.min(1, element.clientWidth / viewport.width))`
+off a `ResizeObserver`, with the wrapper given `width: viewport.width * scale`.
+The wrapper scales and **the iframe keeps its own `width={viewport.width}`
+attribute**, so the element the browser lays out is still 1280 CSS pixels wide.
+Whatever the transform draws, the box is the box.
+
+**Both halves of the harness's output say it is not this run's.** The same two
+lines come back byte-identical with this branch's four files reverted against
+the same build, and the figure is the same on all four shots including the one
+whose list is empty.
+
+**What it costs**, which is more than a scrollbar:
+
+- On a phone the controls column is measured at **1,314px wide** on a 390px
+  screen, because the row's other child has forced the parent that wide. Every
+  phone photograph of this screen is a photograph of a column nobody can read.
+- `pnpm shoot` exits 1 on every shot of this screen, since the exit code is the
+  overflow measurement alone (0117). A lane that photographs this screen cannot
+  tell its own regression from this one.
+
+**Not fixed here** because this run was already an address book, a search and a
+reserved height, and because the fix is a question rather than a line: either
+the iframe takes the scaled width and the page inside it is laid out narrower
+(which changes what the preview is *for* — it is a device emulator, and 0236's
+point is that a width is a device), or the wrapper clips with `overflow-hidden`
+and a horizontal scroller of its own. The second looks right and is this lane's
+to decide. Next on this screen after the pane heights.
+
 ## 2026-10-11 — thirty-two of the hundred and seven are judged entirely under props bags their own schemas refuse, and the library could hand the probe one each
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`

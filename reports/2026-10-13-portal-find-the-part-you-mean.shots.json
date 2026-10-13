@@ -1,0 +1,125 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "out": "2026-10-13-portal-find-the-part-folded-wide",
+      "path": "/portal/pages/t_home1",
+      "viewport": "wide",
+      "waitFor": "[data-outline=\"list\"]",
+      "fullPage": true,
+      "measure": [
+        "[data-outline=\"list\"]",
+        "[data-outline=\"find\"]",
+        "text=Showing",
+        "#page",
+        "[data-device]",
+        "main"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "waitFor": "#key",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=Your applications"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-13-portal-find-the-part-searched-wide",
+      "path": "/portal/pages/t_home1",
+      "viewport": "wide",
+      "waitFor": "[data-outline=\"list\"]",
+      "measure": [
+        "[data-outline=\"list\"]",
+        "text=parts match"
+      ],
+      "do": [
+        {
+          "fill": "[data-outline=\"find\"]",
+          "text": "action"
+        }
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "waitFor": "#key",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=Your applications"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-13-portal-find-the-part-nothing-wide",
+      "path": "/portal/pages/t_home1",
+      "viewport": "wide",
+      "waitFor": "[data-outline=\"list\"]",
+      "measure": [
+        "[data-outline=\"list\"]",
+        "text=No part of this page"
+      ],
+      "do": [
+        {
+          "fill": "[data-outline=\"find\"]",
+          "text": "trombone"
+        }
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "waitFor": "#key",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=Your applications"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-13-portal-find-the-part-folded-phone",
+      "path": "/portal/pages/t_home1",
+      "viewport": "phone",
+      "waitFor": "[data-outline=\"list\"]",
+      "measure": [
+        "[data-outline=\"list\"]"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "waitFor": "#key",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=Your applications"
+          }
+        ]
+      }
+    }
+  ]
+}
