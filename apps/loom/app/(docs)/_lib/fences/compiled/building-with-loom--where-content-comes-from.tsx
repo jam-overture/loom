@@ -54,17 +54,17 @@ if (!built.ok) throw new Error(describeDataRegistryError(built.error))
 
 const sources = built.value
 
-// page.mdx:145 — a program
+// page.mdx:154 — a program
 const data = await resolveTreeData(page, { registry: sources })
 
 const rendered = renderLoomTree(page, { resolver: primitives, validator: primitives, data })
 
-// page.mdx:265 — the inside of an object literal
-const objectAtLine265 = {
+// page.mdx:274 — the inside of an object literal
+const objectAtLine274 = {
 reads: [{ fromProp: "binding", default: "entries" }],
 }
 
-// page.mdx:359 — a program
+// page.mdx:368 — a program
 /** What this component can draw. The source promised something looser. */
 const service = z.object({ name: z.string().min(1), price: z.string().min(1) })
 
@@ -118,10 +118,10 @@ export const serviceList = definePrimitive({
   },
 })
 
-// page.mdx:452 — the inside of an object literal
-const objectAtLine452 = {
+// page.mdx:461 — the inside of an object literal
+const objectAtLine461 = {
 refusalFloor: "high",
 }
 
-export { objectAtLine41, services, built, sources, data, rendered, objectAtLine265, service, readServices, objectAtLine452, z, createDataRegistry, defineSource, describeDataRegistryError, resolveTreeData, renderLoomTree, createElement, definePrimitive }
+export { objectAtLine41, services, built, sources, data, rendered, objectAtLine274, service, readServices, objectAtLine461, z, createDataRegistry, defineSource, describeDataRegistryError, resolveTreeData, renderLoomTree, createElement, definePrimitive }
 export type { DataOutcome, LoomPrimitiveProps }

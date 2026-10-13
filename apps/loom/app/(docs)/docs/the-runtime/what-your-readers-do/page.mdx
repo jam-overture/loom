@@ -259,7 +259,11 @@ export const POST = async (request: Request): Promise<Response> => {
     return Response.json({ issues: read.error.issues }, { status: 400 })
   }
 
-  await store(read.value)
+  const received = await journal.receive([read.value])
+
+  if (!received.ok) {
+    return Response.json({ code: received.error.code }, { status: 503 })
+  }
 
   return new Response(null, { status: 204 })
 }
@@ -269,15 +273,70 @@ Invalid input is a **value, not a throw** — the same shape as every other refu
 in this runtime. The table further up is that function's real answers to five
 real inputs.
 
-## What this does not do yet
+`journal` is the one name in that block the page has not shown you, and it is
+the next section.
 
-This page documents a seam that shipped on 12 September 2026, and being straight
-about its edges is more useful than implying it is finished.
+## Where a batch goes after that
 
-**Nothing stores or interprets these.** Where batches live, how they are
-aggregated, how long they are kept, and how a signal becomes a proposed change
-are all explicitly undecided ([0136](/docs/architecture/decision-records)). The
-runtime broadcasts; everything after that is yours today.
+When this seam shipped, the answer was *wherever you put it*. The record that
+shipped it ([0136](/docs/architecture/decision-records)) left four things
+deliberately open: where batches live, how they are aggregated, how long they
+are kept, and how a signal becomes a proposed change. It also said each of the
+four would get a record of its own, and three of those have since been written.
+So three of the four now have an answer the runtime publishes.
+
+**A batch goes into a journal, which is an append-only log and nothing more.**
+`ReaderSignalJournal` is the interface, and it has exactly three methods:
+`receive` a batch, `read` a page of them by cursor, and `forget` everything
+below a point. No update, no delete by id, no query. That is the same shape as
+the tree store, for the same reason. A log you can edit is not evidence of
+anything.
+
+**Two are published.** `memoryReaderSignalJournal` keeps them in memory and is
+what a test wants. `postgresReaderSignalJournal`, from
+`@jam-overture/loom/signals/postgres`, is what a deployment wants, and
+`ensureReaderSignalsSchema` creates its table the same way the other stores
+create theirs.
+
+**Counting a window and forgetting it are one call**, which is also the answer
+to how long batches are kept:
+
+```ts
+import { collectReaderSignals } from "@jam-overture/loom/signals"
+
+/** Folds every batch old enough to be safe to count, adds it to the counters,
+ * and forgets exactly the batches it counted. */
+const collected = await collectReaderSignals(journal, tallies)
+```
+
+A rollup reports *what this window added*, so a batch counted twice is counted
+twice forever and nothing afterwards can tell. The only defence that needs no
+bookkeeping is for the set of batches counted and the set forgotten to be the
+same set, decided once, in one place. So there is no "apply retention" call
+beside this one: a function that forgets without counting loses data, and one
+that counts without forgetting double-counts.
+
+**Nothing schedules it.** When a deployment forgets is an operational choice, and
+a framework deleting your data on a timer it picked would be making that choice
+for you. Call it from a cron route, a deploy hook, or by hand.
+
+**What you ask the counters afterwards is the long half**, and it is bigger than
+this page: reach, readership, how far down a page people get, which page loses
+the most readers, whether a change made any difference. All of it lives behind
+`@jam-overture/loom/signals`, and the
+[reference for that door](/docs/api-reference/signals) is the current list.
+
+## What this still does not do
+
+Being straight about the edges is more useful than implying the seam is
+finished.
+
+**How a signal becomes a proposed change is the fourth, and it is still open.**
+Nothing in the runtime turns what readers did into an ask. The pipe exists from
+the other end: an ask may arrive marked `system-signal`, and the Gate gives that
+origin its own lower ceiling. What is missing is anything that produces one. A
+deployment that wants this reads its own counters and asks for the change
+itself, like any other author.
 
 **A broadcaster watches the nodes that were there when it started.** It finds the
 addressed elements under its root once. A band that streams in behind a Suspense

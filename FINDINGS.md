@@ -32881,6 +32881,16 @@ untouched**: `silentSource` in `_lib/data/shop.ts` and the inline endpoint in
 `_lib/ceiling/page.ts` are that lane's files, and both can now be deleted in
 favour of the import whenever `Loom docs` next has reason to touch them.
 
+> **Both adopted, 13 October 2026**, by `docs-54-the-measurement-behind-a-not-yet`
+> — and the reason it finally happened is worth more than the deletion.
+> *When nothing comes back* carried the sentence *"there is no published
+> equivalent for a source or an endpoint yet"* for the **fortnight** after this
+> entry was closed. The lane writing that sentence had working copies of both
+> doubles in its own files and therefore no reason to go and look. **The private
+> copy is what made the stale claim feel true.** `silentSource` is now
+> `hangingSource` under its old name, the inline endpoint is `hangingEndpoint`,
+> and the page shows a reader the import with a block that compiles.
+
 Original status below.
 
 **Status:** open —
@@ -52224,10 +52234,13 @@ seam already documents.
 ## 2026-10-12 — a sentence saying something does not exist yet is the one claim on this site no test can hold, and one of them had been false for weeks
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/`) · **Status:** **the instance is fixed on
-`docs-53-reading-the-answer`**; filed as the **hazard**, with the remedy named,
-because the class has no instrument and the next one will be written the same
-way
+(`apps/loom/app/(docs)/`) · **Status:** **closed, 13 October 2026** by
+`docs-54-the-measurement-behind-a-not-yet`. `_lib/absences.ts` is the remedy
+this entry named, built as a registry of every dated claim beside the
+measurement that will contradict it, plus a sweep that refuses an unregistered
+one. The sweep found **four more** false sentences, one of them held in place by
+a test asserting the page still said it — see the 13 October entry. The instance
+below was fixed on `docs-53-reading-the-answer`
 
 *Where the content comes from* carried this, in a warning callout, as of
 yesterday:
@@ -52906,3 +52919,84 @@ timing of a correct key distinguishable.
 
 Not decided here, because it is a security posture rather than a defect, and
 the lane that found it is not the one that gets to choose.
+
+---
+## 2026-10-13 — a sentence saying something does not exist now ships beside the measurement that says so, and four of them were already false
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/absences.ts`) · **Status:** **closed as the remedy
+the 12 October entry named**; filed again as what the sweep found, because the
+count is the argument
+
+The 12 October entry said the class had no instrument and named the remedy:
+*pair the sentence with the measurement that says so*. `_lib/absences.ts` is
+that, and `absences.test.ts` runs it on every `pnpm verify`.
+
+**Four sentences on written pages were false when it was built**, and three of
+them had been false for weeks:
+
+| the page said | false since |
+| --- | --- |
+| *nothing stores or interprets* reader signals, and all of 0136's four are undecided | **13 September**, when the deferral was lifted |
+| there is *no published double* for a source or an endpoint | **29 September**, when `hangingSource` and `hangingEndpoint` shipped |
+| a model is shown the primitives and the themes, *and not the sources* | **19 September**, when 0172 put `dataCatalogue` in the prompt — closing a finding **this lane filed** on 12 September, which the callout's last word (*"Filed."*) was pointing at |
+| there is *no upgrade path* for the store schema | `migrateApplicationIds` is published, so there is one named move and no general path |
+
+**The worst of the four was held in place by a test.**
+`_lib/signals/claims.test.ts` asserted
+`expect(flowed).toContain("Nothing stores or interprets these")`, with a comment
+saying a run that dropped the limitation would be *"the documentation drifting
+towards optimism, which is the direction that costs a reader most"*. The
+reasoning was right and the instrument was the wrong way round: it pinned the
+prose, so it enforced pessimism for a month after the pessimism stopped being
+true, while `@jam-overture/loom/signals` grew to three hundred published names.
+
+That is `theming-claims.test.ts`' own lesson one level up. **Pinning a sentence
+holds the sentence; only measuring the thing holds the truth.** A claim that
+something *is* so can be pinned safely, because the thing it is about will
+contradict it. A claim that something *is not* so cannot, because nothing can be
+asked whether it lacks something a page never named.
+
+**What the sweep cannot reach**, so the next run knows where to look rather than
+trusting it:
+
+- **Prose only, and written pages only.** A sentence a component renders is
+  reached by rendering, which is a different instrument.
+- **A doc comment is not swept, and two were stale.** `_lib/signals/page.ts`
+  said *"`completed` is approved and not built"* when the kind had landed, and
+  the fence context for the same page said a batch's destination was *"a
+  function nobody has written yet"*. Both are corrected; neither would have been
+  caught. A sweep over doc comments was not built because a module's notes are
+  allowed to be of their day (`counts.ts` states that exemption for the same
+  reason), and the honest answer is that substantive ones are not.
+- **A dated claim written without a dated word.** The sentence the 12 October
+  entry was filed about — *"the starter library has no primitive that reads
+  `loom.data`"* — carries no marker and this sweep would have let it through. The
+  habit is the instrument; the sweep is the net under it.
+
+---
+## 2026-10-13 — the site's own produced prompt has no sources block, so *Connecting a model* shows a reader less than the runtime sends
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/prompt/`) · **Status:** open — **deliberately
+deferred**, filed so the next run on either page starts from it
+
+Correcting *Where the content comes from* this run meant establishing that the
+prompt really does carry the registered sources: `dataCatalogue` projects each
+id, its description and its declared params, and `interpretation/prompt.ts`
+renders them with a closing paragraph about which ids may be used and which
+binding names may be bound under.
+
+**The site shows none of that.** `_lib/prompt/request.ts` produces the prompt
+block on *Connecting a model* from vocabularies that do not include a
+`dataCatalogue`, so the prompt a reader sees on this site has primitives and
+themes in it and no sources. Nothing is wrong and nothing is stale — a prompt
+without one is a real prompt, and the host decides — but it is the one place a
+reader could have *seen* the correction rather than been told it, and the page
+that teaches bindings now links to a page that does not show them.
+
+The fix is to pass a `dataCatalogue` built from the shop registry
+`_lib/data/shop.ts` already has, which is three lines and a produced block that
+grows. It was not done here because this run's unit is the instrument and the
+four claims it caught, and growing the model page's produced prompt changes what
+`prompt/claims.test.ts` measures.
