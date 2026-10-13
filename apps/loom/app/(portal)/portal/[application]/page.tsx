@@ -25,7 +25,7 @@ import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { applicationFromRoute } from "@/app/(portal)/_lib/scoped"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { isAuditable } from "@/app/(portal)/_lib/seeds"
-import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
+import { portalStore } from "@/app/(portal)/_lib/store"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 import { unattendedIn, unattendedSummary } from "@/app/(portal)/_lib/unattended"
 import {
@@ -131,7 +131,6 @@ const ApplicationHome = async ({
   if (applicationId === undefined) notFound()
 
   await requireActor(`/portal/${application}`)
-  await ensureSeeded()
 
   const listed = await portalStore.list({})
 
