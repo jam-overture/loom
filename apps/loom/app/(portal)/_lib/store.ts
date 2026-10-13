@@ -1,10 +1,18 @@
 import { ensureSiteSeeded } from "@/app/(marketing)/_lib/stored"
 import { DEFAULT_APPLICATION_ID, DEFAULT_PROJECT_ID } from "@jam-overture/loom/store"
 
-import { appApplications, appProjects, appStore } from "@/app/_lib/app/store"
+import {
+  appApplications,
+  appApplicationsForWriting,
+  appProjects,
+  appProjectsForWriting,
+  appStore,
+  appStoreForWriting,
+} from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
 import { waitForSeeding } from "@/app/_lib/app/bounded"
+import { absent } from "@/app/_lib/app/bounded-store"
 
 /**
  * The app's store, and the portal's own seeding of it.
@@ -112,17 +120,17 @@ export const ensureSeeded = async (): Promise<void> => {
  * which is every request after the first — no longer writes at all.
  */
 const placeTree = async (tree: ReturnType<typeof seedTree>): Promise<void> => {
-  const existing = await portalStore.head(tree.treeId)
-  if (existing.ok) return
+  const existing = await appStoreForWriting.head(tree.treeId)
+  if (!absent(existing)) return
 
-  await portalStore.create(tree)
+  await appStoreForWriting.create(tree)
 }
 
 const ensureDefaultProject = async (): Promise<void> => {
-  const existing = await appProjects.get(DEFAULT_PROJECT_ID)
-  if (existing.ok) return
+  const existing = await appProjectsForWriting.get(DEFAULT_PROJECT_ID)
+  if (!absent(existing)) return
 
-  await appProjects.create({
+  await appProjectsForWriting.create({
     projectId: DEFAULT_PROJECT_ID,
     name: "Your projects",
     createdAt: new Date(0).toISOString(),
@@ -141,10 +149,10 @@ const ensureDefaultProject = async (): Promise<void> => {
  * overwrites.
  */
 const ensureDefaultApplication = async (): Promise<void> => {
-  const existing = await appApplications.get(DEFAULT_APPLICATION_ID)
-  if (existing.ok) return
+  const existing = await appApplicationsForWriting.get(DEFAULT_APPLICATION_ID)
+  if (!absent(existing)) return
 
-  await appApplications.create({
+  await appApplicationsForWriting.create({
     applicationId: DEFAULT_APPLICATION_ID,
     projectId: DEFAULT_PROJECT_ID,
     name: "Your application",

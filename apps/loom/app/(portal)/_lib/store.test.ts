@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { sitePagesStored } from "@/app/(marketing)/_lib/stored"
+import { appStoreForWriting } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
 import { ensureSeeded, portalStore } from "./store"
@@ -86,13 +87,18 @@ describe("what the portal finds in the store", () => {
  *
  * What a memory store cannot reproduce is the lock. What it can hold is the
  * thing that removes it: **the steady state does not write.**
+ *
+ * The spy is on `appStoreForWriting` rather than on `portalStore`, which is
+ * not a detail. `portalStore` is the handle whose reads answer within a budget
+ * (13 October) and the seed takes the unbounded one — so a spy on the wrapper
+ * would never be called and this test would pass without asserting anything.
  */
 describe("seeding a store that is already seeded", () => {
   it("writes nothing the second time", async () => {
     await ensureSeeded()
 
     reset()
-    const wrote = vi.spyOn(portalStore, "create")
+    const wrote = vi.spyOn(appStoreForWriting, "create")
     await ensureSeeded()
 
     expect(wrote).not.toHaveBeenCalled()

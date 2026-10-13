@@ -1,8 +1,9 @@
 import type { LoomTree, TreeId } from "@jam-overture/loom"
 
-import { waitForSeeding, within } from "@/app/_lib/app/bounded"
+import { waitForSeeding } from "@/app/_lib/app/bounded"
+import { absent } from "@/app/_lib/app/bounded-store"
 
-import { appStore } from "@/app/_lib/app/store"
+import { appStore, appStoreForWriting } from "@/app/_lib/app/store"
 
 import { SITE_PAGES, treeFor } from "./builders"
 import { readersCountedHere } from "./readers/counting"
@@ -133,10 +134,10 @@ export const ensureSiteSeeded = async (): Promise<void> => {
   const work = (carrier[SEEDING_KEY] ??= (async () => {
     for (const { route } of sitePagesStored()) {
       const tree = treeFor(route, storedContext())
-      const existing = await appStore.head(tree.treeId)
-      if (existing.ok) continue
+      const existing = await appStoreForWriting.head(tree.treeId)
+      if (!absent(existing)) continue
 
-      await appStore.create(tree)
+      await appStoreForWriting.create(tree)
     }
   })())
 
@@ -162,13 +163,18 @@ export const storedPageFor = async (route: SiteRoute): Promise<LoomTree | undefi
   await ensureSiteSeeded()
 
   /**
-   * Bounded, because the fallback this feeds was only ever reachable when the
-   * store *refused*. A store that does not answer returns no `Result` at all,
-   * so the authored page — the thing 0262 promises a reader when the control
-   * plane is unreachable — was unreachable itself. `within` turns a hang into
-   * the absence the caller already knows how to handle.
+   * `appStore` reads within a budget, which is what makes the fallback below
+   * reachable at all. It was only ever reached when the store *refused*: a
+   * store that does not answer returns no `Result`, so the authored page — the
+   * thing 0262 promises a reader when the control plane is unreachable — was
+   * itself unreachable, and this site served a 504 instead.
+   *
+   * The budget moved from here to the handle on 13 October, so that the ten
+   * portal screens that never had one got it too. `_lib/app/bounded-store.ts`
+   * has the argument; what this line cares about is that a slow store now
+   * answers `unavailable`, which is a refusal, which is a page.
    */
-  const head = await within(appStore.head(treeId))
+  const head = await appStore.head(treeId)
 
-  return head?.ok === true ? head.value : undefined
+  return head.ok ? head.value : undefined
 }
