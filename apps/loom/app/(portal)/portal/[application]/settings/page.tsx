@@ -20,9 +20,16 @@ import { SettingsForm } from "./_components/settings-form"
  * The portal had three screens about an application and none of them was this
  * one. `/portal/app` says what it is built from, `/portal/[application]` says
  * what is waiting on you, and `/portal/pages` says what it has. None of them
- * would tell you its id, and the id is the one thing a person needs outside the
- * portal — it is what `/portal/new` sends them away with and what their own
- * configuration will carry.
+ * would tell you its identifier, which is the one thing about it a person needs
+ * outside the portal — it is what `/portal/new` sends them away with and what
+ * their own configuration will carry.
+ *
+ * **`identifier`, not `id`.** The portal bans the runtime's vocabulary from
+ * prose a reader meets before they have asked for any, and `id` is on that
+ * list; `every-screen.test.ts` caught this sentence's first draft. The escape
+ * hatch exists — `runtimeWordsIn(sentence, ["id"])` — and is for a bare id
+ * standing as identity rather than as a word, which is a page card, not a lede.
+ * `identifier` is what four of this portal's own components already call it.
  *
  * It is also the first screen in this portal that **changes** something that is
  * not a page. Registering writes an application; nothing could edit one
@@ -117,16 +124,16 @@ const SettingsPage = async ({ params }: { params: Promise<{ application: string 
         </Link>
         <h1 className="text-2xl tracking-tight">Settings</h1>
         <p className="text-ink-muted max-w-lg text-sm">
-          What this application is called, where it lives, and the id everything else refers to it
-          by.
+          What this application is called, where it lives, and the identifier your own
+          configuration points at it by.
         </p>
       </div>
 
       <section className="border-edge-subtle bg-surface-base mb-6 max-w-lg rounded-lg border p-4">
         <Line
-          label="Application id"
+          label="Identifier"
           value={applicationId}
-          hint="What your own configuration carries. Safe to commit."
+          hint="What your own configuration carries to say which application this is. Safe to commit."
         />
         <Line label="Project" value={projectName} hint="Projects group applications." />
         <Line label="Registered" value={new Date(createdAt).toISOString().slice(0, 10)} />
