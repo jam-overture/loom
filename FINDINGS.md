@@ -52298,6 +52298,46 @@ failure whose actual error was `Git information retrieval failed for this
 deployment`, a Vercel↔GitHub integration fault that no ignore file can affect.
 
 ---
+## 2026-10-12 — the plain-language sweep reads this lane's `.tsx` files, and the first words anybody meets are now in a `.ts` one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`app/(portal)/every-screen.test.ts`) · **Status:** open — **nothing is
+leaking**; the gap was closed locally for the one module that opened it, and
+the general version is a sweep nobody has costed
+
+`every-screen.test.ts` enforces *no sentence a screen shows unasked contains a
+word from the runtime's vocabulary* over the whole route group — and its
+`sourcesUnder` keeps only files ending `.tsx`. That was right while every
+reader-facing string was written in the component that drew it.
+
+It stopped being right in this change. The rail's labels are **data**, in
+`_components/shell/sections.ts`, which is the correct place for them — the two
+levels of the navigation are a table, not a component — and a `.ts` module is
+outside the sweep. So the first six words anybody meets on this surface were,
+for the length of one commit, the only reader-facing strings in the lane that
+nothing checked.
+
+`sections.test.ts` asserts `runtimeWordsIn` over every section label, group
+name and item label, which closes it where it was opened. **What is not closed
+is the class**: the next `.ts` module holding a label is in the same position,
+and the honest fix is for the sweep to read `.ts` as well as `.tsx`.
+
+It is filed rather than done because widening the sweep is not a one-line
+change in effect. `_lib/` holds ninety-odd modules, several of them
+deliberately carrying the runtime's vocabulary as *subject* rather than as
+speech — `vocabulary.ts` is a table of technical readings, `screen-names.ts`
+names what a screen used to be called so it cannot be written again — so the
+widened sweep needs an exemption mechanism those two can use honestly, and an
+exemption list invented in the same run as the rule it exempts from is the kind
+of rule this repository retires a week later. Costing that is a unit, and it is
+this lane's.
+
+**Why it is worth the entry at all:** the check exists because `did-not-apply`
+and `Allowed by nobody` were printed at people. A rule with a hole in exactly
+the file type a lane is moving its strings into is a rule on its way to being
+decorative.
+
+---
 ## 2026-10-12 — a branch opened before 0264 turns `main` red when it merges, and four open ones will
 
 **Filed by:** `Loom portal` · **Owned by:** every lane with a branch open on 12
@@ -52377,3 +52417,156 @@ something a row can point at.
 one's.** What this change buys is that the level is named, so the next run does
 not quietly build something else in its place — which is what happened to
 *application*, and is why this record exists.
+
+---
+## 2026-10-12 — a kind of part now has a words answer as well as a places answer, and the one to draw depends on a floor
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open
+
+[0270](decisions/0270-a-change-to-the-words-a-kind-of-part-says-is-read-over-the-words-both-windows-say-and-a-floor-costs-the-signed-figure.md)
+adds `libraryCopyChangeOf`, which answers *you rewrote the testimonial band and
+readers now reach two thirds of the words it kept.* It sits beside
+[0266](decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md),
+which answers the same change in **places**, and a screen about a changed
+component now has two readings of it rather than one.
+
+**Three things a surface has to get right, and one of them is new in this
+subsystem.**
+
+1. **The carried share is meaningless without the rewriting beside it.** Every
+   figure is over the words both windows say word for word, so a band whose
+   words are nine tenths rewritten has a share about the tenth it kept.
+   `rewritten` and `rewrittenWords` are on every row for exactly this, and a
+   card that printed the share alone would report a sentence about a tenth of a
+   component as a sentence about the component.
+2. **A floored row has shares and no verdict**, which is the first row in this
+   subsystem shaped that way: `words.change` is `null` and `movement` is
+   `unknown` while `readShareWas`, `readShareNow` and both masses are there and
+   true. The remedy is not *draw nothing* — it is draw the two shares, and point
+   at 0266 for the verdict, which a floor cannot reach. `silence` is `floored`
+   and the row says how many of its words are a floor.
+3. **There is a deployment-wide word figure, and it is the first one any reading
+   of a library has had.** `LibraryCopyChange.words` is the type rows added up,
+   sound because words partition a page (0212, 0235) where places do not (0257).
+   It is numbers and never a verdict — no movement and no silence at that scale —
+   so a headline drawn from it has to be written from the counts.
+
+**The two states to refuse to draw** are `unpaired` (the change left no sentence
+standing, so the places and the rewriting are the answer) and `unplaced` (a role
+nothing in the library plays). `wordless` is a third and is neither: the places
+are there and their words are a floor.
+
+**Where it goes:** the same card `/portal/pieces` draws, which already carries
+§23, §24 and §25, and the morning-after screen 0266 was filed for.
+
+---
+## 2026-10-12 — the word-weighted reader figure for a change to a kind of part is a third unit, and its weights move without a floor
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a question, not a defect**; filed for the reason 0256 was
+filed rather than shipped inside 0257's type, and the reason the reader-weighted
+places figure was filed yesterday rather than shipped inside 0266's
+
+0270 compares the carried words of a kind of part by **standing**: a word counts
+as read where at least one reader reached the part saying it. The figure
+everybody will ask for next is the per-reader one: *the typical reader reached
+two hundred of its words and reaches three hundred now.*
+
+**It is answerable and it is a third question.** Each page's term already exists
+— `copyChangeOf`'s `typical` is `Σ readers × words ÷ views` over the carried
+passages (0239) — so the unit is those per-page terms added across the placements
+of one kind.
+
+**Why it is not in 0270's type.** The terms are per-page means, so adding them
+across pages weights each page by its own traffic: the figure moves when one
+page grows and another shrinks with no reader reading differently. 0239 withholds
+`typical` for **one page** under a floor, because signed terms scaled by
+different factors can sum to the wrong sign; at the scale of a library the
+weights move with no floor involved at all. That needs its own argument about
+what is published and what is withheld, and it is the same argument the
+reader-weighted places figure needs — which suggests the two are one unit rather
+than two.
+
+**Nothing is lost by waiting.** The carried-word share is sound today and is not
+superseded by the weighted figure: it answers *of the words this kind kept, the
+share that is read anywhere*, which is the question an author who rewrote a
+primitive has.
+
+---
+## 2026-10-12 — the missing role declaration now costs a kind's word comparison as well, which is the eighth consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **a repeat with one new consequence**,
+and the consequence is why it is filed again rather than left to the standing
+entry
+
+Nothing in `src/primitives/` declares a role (0114), so every role row in every
+reading of a library is the `null` row. 0270 is the eighth reading to be thin for
+that reason, and in this one the role rows carry something the type rows cannot:
+a node whose **type** changed is a place one kind left and another took, and the
+role rows are where *to a reader it is the same place still standing* survives.
+
+So the role rows here are not a second view of the same number — they are the
+only place a recast component's words are compared at all, and today that
+comparison lands entirely in the row for *everything whose type said nothing*,
+which is the whole library and answers nothing.
+
+**One declaration per primitive and no migration.** The join is at read time
+(0212), so the day a type declares a role every counter already stored
+reinterprets and these rows start answering.
+## 2026-10-13 — one table is reached through two handles, and the intake's one is the only unbounded reader of it left in the app
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/_lib/reader-signals/`) · **Status:** open — **nothing is broken
+today**, because the handle in question only ever writes
+
+`loom_reader_signals` is composed twice in this app:
+
+- `(portal)/_lib/reader-signals.ts` — read by `/portal/readers`, and as of today
+  read through `boundedReaderSignalJournal`, so a buffer that does not answer
+  becomes a sentence rather than a 504.
+- `_lib/reader-signals/intake.ts` — built fresh from `portalDatabase` for the
+  `POST /api/reader-signals` endpoint.
+
+Both sit on the same `portalDatabase`, so this costs no second connection and is
+not a durability bug. What it costs is the thing today's change was about: a rule
+applied at a composition root is only applied to the roots somebody found. The
+intake's journal calls `receive` only, which is a **write**, and writes are
+deliberately unbounded — so there is nothing to fix right now and every reason
+to notice that the next method added there inherits no budget.
+
+The question for this lane is whether the intake should take the portal's handle
+rather than build its own. It probably should not — an endpoint anyone on the
+internet can POST to has different needs from a screen — in which case the
+honest fix is for its own composition to say so, rather than for the resemblance
+to go unremarked.
+
+---
+## 2026-10-13 — sign-in still fails closed when the throttle is unreachable, and that is now a decision somebody has to make rather than a thing nobody had looked at
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer · **Status:** open —
+**awaiting a policy decision, not a fix**
+
+`attempt-sign-in.ts` reads the attempt log **before** comparing the key:
+
+```ts
+const known = await log.recall(attempt.subject, cutoff)
+if (!known.ok) return { code: "unavailable", detail: known.error.detail }
+```
+
+Today's change bounds `recall`, so an unreachable throttle refuses in 1.5
+seconds instead of hanging a form anyone on the internet can reach. That is
+strictly better and it is not the whole question: **the refusal locks everybody
+out of the portal while the database is unwell**, which is exactly when somebody
+wants to get in and look at it.
+
+The alternatives are not close to equal and neither is obviously right. Failing
+open means a database wobble removes the brute-force throttle. Failing closed
+means a database wobble removes the portal. A third option — compare the key
+first and consult the throttle only on a *failed* comparison — keeps the
+throttle for the attacker and lets the maintainer in, at the cost of making the
+timing of a correct key distinguishable.
+
+Not decided here, because it is a security posture rather than a defect, and
+the lane that found it is not the one that gets to choose.

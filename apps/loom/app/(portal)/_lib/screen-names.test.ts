@@ -7,9 +7,10 @@ import { elsewhereFrom, namedScreens, screenHref, screenName } from "./screen-na
 const TREE = "t_seed1" as TreeId
 
 describe("the screens this portal names once", () => {
-  it("names the three screens the record group is made of", () => {
+  it("names the screens the record group is made of", () => {
     expect(namedScreens().map((screen) => screen.route)).toEqual([
       "/portal",
+      "/portal/[application]",
       "/portal/activity",
       "/portal/history",
     ])

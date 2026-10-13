@@ -10,7 +10,7 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { headsOf, nameFrom, namesIn } from "@/app/(portal)/_lib/page-name"
 import { inPageOrder, needsYouRank } from "@/app/(portal)/_lib/page-order"
-import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
+import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 import { pagesWaitingSummary } from "@/app/(portal)/_lib/unreadable-change"
 
@@ -39,7 +39,6 @@ import { pagesWaitingSummary } from "@/app/(portal)/_lib/unreadable-change"
 const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: string }> }) => {
   const { after } = await searchParams
   await requireActor("/portal/pages")
-  await ensureSeeded()
   /**
    * The cursor is passed straight back through the URL without being read. That
    * is the contract: a cursor is opaque to whoever holds it, so a consumer that
