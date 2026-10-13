@@ -53073,3 +53073,38 @@ The fix is to pass a `dataCatalogue` built from the shop registry
 grows. It was not done here because this run's unit is the instrument and the
 four claims it caught, and growing the model page's produced prompt changes what
 `prompt/claims.test.ts` measures.
+
+---
+## 2026-10-13 — `docs:api` reads `dist/` and does not build it, so it reports "no change" against a package that has moved
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom docs`
+(`apps/loom/package.json`, `app/(docs)/_lib/api/`) · **Status:** open — **a
+command that silently answers about the wrong source**
+
+```json
+"docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
+"db:push": "pnpm --filter @jam-overture/loom build && tsx scripts/db-push.ts",
+```
+
+The generator reads `dist/*.d.ts`, which is the right source — a published
+surface is what the build emits, not what the source says. What it does not do
+is build it first.
+
+So after merging a branch that brought four new `src/` modules in, running
+`docs:api` printed `wrote 17 entry points and 1599 exports` and changed
+nothing, because `dist/` still described the pre-merge package. The honest
+answer was 1634. The gate caught it a quarter of an hour later by building
+fresh and comparing — *"the runtime's published surface has moved"* — which is
+the test doing its job, after the command had already said there was nothing to
+do.
+
+`db:push` learned this on 12 October and says so at the top of its file: *"every
+import below comes from the built output, not its source, so this script is
+only ever as current as `dist/`"*. It builds first. `telemetry:prune` and
+`signals:collect` were changed with it. `docs:api` and `docs:fences` were not,
+and they are the two whose output is committed — so theirs is the failure mode
+that reaches a reviewer rather than a maintainer's terminal.
+
+The fix is the same four words in front of the command. Filed rather than taken
+here because a package script is not this change's business, and because
+somebody should decide whether `docs:fences` wants it too.
