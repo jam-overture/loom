@@ -85,6 +85,25 @@ several modules speak. A caller passing `null` needs no import at all.
 **I did not touch the portal screen.** See below; this is the one thing a reader
 of this report should check I was right about.
 
+## Cross-lane edits, declared
+
+**One file, generated rather than written:**
+`apps/loom/app/(docs)/_lib/api/reference.generated.json` — `Loom docs`' lane.
+
+It is the committed API reference, generated from the doc comments in `src/`.
+Adding three exports to the root barrel moved the runtime's published surface,
+so `extract.test.ts` and `offered.test.ts` went red with the remedy in the
+assertion message: *"the runtime's published surface has moved. Run `pnpm
+--filter @loom/app docs:api` and commit the result."* I ran it and committed
+what it printed — **1,634 → 1,637 exports, 97 → 98 files**. The whole diff is
+`Patch`, `PatchOf`, `applyPatch` and the counts that follow from them; no
+sentence in it was composed by me.
+
+`pnpm build` was run first, deliberately. `docs:api` reads `dist/` and does not
+build it, which is an open finding against this very script — a run that
+regenerates without building reports "no change" against a package that has
+moved.
+
 ## Records
 
 - Added **[0274](../decisions/0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)**
@@ -167,8 +186,7 @@ tests are 8 in `src/patch.test.ts` and 5 contract cases against each of the two
 application stores — 18 in all. The specimen adds none: nothing enumerates the
 specimen directory.
 
-Two rounds were red on the way in, both mine and both at the typechecker, both
-before anything was committed:
+Three rounds were red on the way in, all mine:
 
 1. `applyPatch`'s reduce seeded with `{ ...subject }` where `T extends object`
    has no index signature. Fixed by casting the seed rather than loosening the
@@ -177,6 +195,20 @@ before anything was committed:
    optional field away, which narrowed the type so that the field could no
    longer be patched back. The test was wrong, not the type: annotating the
    narrowed object as the full row is what a caller actually has.
+3. **The first full `pnpm verify` was red**, at the two `(docs)` tests above,
+   for the honest reason that three new public exports had moved the published
+   surface and the committed reference still described the old one. Regenerated,
+   not edited. Both tests pass on the regenerated file.
+
+**A note on reading that gate, since it nearly went the other way.** The
+harness reported the backgrounded verify as *exit code 0* while the status file
+beside it said `EXIT=1`. The wrapper was
+`(pnpm verify > log 2>&1; echo "EXIT=$?" > verify.exit)` and what the harness
+saw was the **last** command's status, which is the `echo`'s. This is the third
+instance of the mistake `docs/routines.md` names — *a rule naming one spelling
+of an act is a rule that stops working the moment somebody reaches for the other
+one* — and the only thing that caught it is that the file was read as well as
+the notification, which is exactly what that section tells a run to do.
 
 ## Open questions
 
