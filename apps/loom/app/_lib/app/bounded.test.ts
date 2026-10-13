@@ -1,36 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { waitForSeeding, within } from "./bounded"
+import { PORTAL_READ_BUDGET_MS, SITE_READ_BUDGET_MS, within } from "./bounded"
 
 const never = (): Promise<void> => new Promise<void>(() => undefined)
-
-describe("waiting for a seed", () => {
-  it("says so when it finished", async () => {
-    expect(await waitForSeeding(Promise.resolve())).toBe("seeded")
-  })
-
-  /**
-   * The case that took the portal down. Before this, a page awaited the seed
-   * with no limit, so one stuck query held every later request on that instance
-   * until it was recycled.
-   */
-  it("gives up on a seed that never finishes, rather than waiting forever", async () => {
-    const started = Date.now()
-
-    expect(await waitForSeeding(never(), 20)).toBe("still-going")
-    expect(Date.now() - started).toBeLessThan(1_000)
-  })
-
-  it("does not throw when the seed failed", async () => {
-    expect(await waitForSeeding(Promise.reject(new Error("no database")))).toBe("failed")
-  })
-
-  it("prefers the seed when it beats the budget", async () => {
-    const quick = new Promise<void>((resolve) => setTimeout(resolve, 1))
-
-    expect(await waitForSeeding(quick, 500)).toBe("seeded")
-  })
-})
 
 describe("a read that will not answer", () => {
   it("comes back as nothing rather than waiting", async () => {
@@ -58,5 +30,29 @@ describe("a read that will not answer", () => {
 
   it("does not mistake a falsy answer for an absent one", async () => {
     expect(await within(Promise.resolve(0), 500)).toBe(0)
+  })
+})
+
+/**
+ * The two numbers, held against each other rather than against themselves.
+ *
+ * What matters is not what either is but that the site gives up sooner than the
+ * portal, because the site has a page to fall back to and the portal has a
+ * sentence. A later change that made them equal would have quietly thrown that
+ * away, and nothing else in this repository would have noticed.
+ */
+describe("the two budgets", () => {
+  it("lets the site give up sooner than the portal", () => {
+    expect(SITE_READ_BUDGET_MS).toBeLessThan(PORTAL_READ_BUDGET_MS)
+  })
+
+  /**
+   * A cold serverless instance opens a TLS connection and authenticates before
+   * its first query, which is most of the 1.48 seconds a sign-in round trip
+   * took on 12 October. A portal budget at or under that reports an outage
+   * every time an instance is new, which is what 1500ms did.
+   */
+  it("gives the portal more than a cold connection costs", () => {
+    expect(PORTAL_READ_BUDGET_MS).toBeGreaterThan(1_500)
   })
 })

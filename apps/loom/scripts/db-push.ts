@@ -61,6 +61,33 @@ if (connectionString === undefined) {
   process.exit(1)
 }
 
+/**
+ * The seed and its connection, imported **here** rather than at the top of the
+ * file, and the position is load-bearing.
+ *
+ * `app/_lib/app/database.ts` resolves the connection string at module scope —
+ * correct in the app, where Next has already loaded the environment. In a
+ * script, static imports are evaluated before the first statement runs, so a
+ * top-level `import` of it would read `DATABASE_URL` **before**
+ * `loadEnvConfig` had put it there, find nothing, and fall back to the memory
+ * store. `seedDeployment()` would then write this deployment's pages into a
+ * `Map`, and the script would print that it had succeeded.
+ *
+ * The check below is the belt to this brace: a seed that is about to run
+ * against memory says so and stops, because a silent no-op here is a portal
+ * that comes up empty with nothing anywhere saying why.
+ */
+const { seedDeployment } = await import("../app/(portal)/_lib/store")
+const { endDatabase, storeIsDurable } = await import("../app/_lib/app/database")
+
+if (!storeIsDurable) {
+  console.error(
+    "loom: db:push resolved the schema's connection string but the app's store fell back to " +
+      "memory, which means seeding would write to a Map and vanish. Nothing has been seeded."
+  )
+  process.exit(1)
+}
+
 const client = postgres(connectionString, { prepare: false, max: 1 })
 
 try {
@@ -101,11 +128,30 @@ try {
    * already been carried or was never on the old value.
    */
   await migrateApplicationIds(db)
+  /**
+   * The rows this deployment should contain, after the columns to hold them.
+   *
+   * **This ran in a request until 13 October** — memoised per process,
+   * budgeted, and create-if-absent, which made it look free. It was not. The
+   * pool is `max: 1`, so six seeding reads are six round trips one after the
+   * other, and on a deployment seeded weeks ago all six answer *already there*
+   * before the screen's own reads can start. `/portal` drew *the application
+   * store is unavailable* on the back of it.
+   *
+   * It belongs here for the reason the schema does, and this file already said
+   * it: a migration that runs implicitly is a migration nobody decided to run.
+   *
+   * It goes through the app's own store handles rather than the `db` above, so
+   * what is seeded is what the app reads — which means a second connection, and
+   * `endDatabase` below is why the script still exits.
+   */
+  await seedDeployment()
   console.log(
     "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_projects, " +
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels " +
-      "and loom_signin_attempts are present"
+      "and loom_signin_attempts are present, and this deployment's pages are in them"
   )
 } finally {
   await client.end()
+  await endDatabase()
 }
