@@ -258,6 +258,23 @@ nothing at all.
 reads 133 prerendered pages and 1,832 text junctions, 0 run together.
 `pnpm reports:check` reads 1,807 visuals, none over 1.1MB.
 
+## The preview
+
+Deployed and green:
+<https://loom-git-docs-54-the-measure-144789-jpizzolato36-6341s-projects.vercel.app>
+
+The four corrected pages:
+
+- [/docs/the-runtime/what-your-readers-do](https://loom-git-docs-54-the-measure-144789-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-your-readers-do)
+- [/docs/the-runtime/when-nothing-comes-back](https://loom-git-docs-54-the-measure-144789-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/when-nothing-comes-back)
+- [/docs/building-with-loom/where-content-comes-from](https://loom-git-docs-54-the-measure-144789-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/where-content-comes-from)
+- [/docs/the-runtime/going-to-production](https://loom-git-docs-54-the-measure-144789-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/going-to-production)
+
+Not fetched from this container: `*.vercel.app` is denied by the environment's
+egress policy, which is the note the 10 October report made and is still true.
+The shots below were taken against `pnpm shoot --serve apps/loom` on the same
+build the deployment was made from.
+
 ## What the pictures say
 
 Six shots, `pnpm shoot --serve apps/loom`, stored with `pnpm reports:shrink`
