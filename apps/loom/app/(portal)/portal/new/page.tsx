@@ -4,7 +4,7 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
-import { ensureSeeded, portalProjects } from "@/app/(portal)/_lib/store"
+import { portalProjects } from "@/app/(portal)/_lib/store"
 
 import { RegistrationForm } from "./_components/registration-form"
 
@@ -28,7 +28,6 @@ import { RegistrationForm } from "./_components/registration-form"
 
 const RegisterApplication = async () => {
   await requireActor("/portal/new")
-  await ensureSeeded()
 
   const projects = await portalProjects.list()
 
