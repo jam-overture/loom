@@ -18,10 +18,12 @@ import {
   distinctSilences,
   KIND_ACTION_SILENCES,
   KIND_CHANGE_SILENCES,
+  KIND_COPY_CHANGE_SILENCES,
   KIND_REACH_SILENCES,
   KIND_SILENCES,
   libraryActionOf,
   libraryChangeOf,
+  libraryCopyChangeOf,
   libraryReachOf,
   libraryReadingOf,
   meaningOfActionChangeSilence,
@@ -31,6 +33,7 @@ import {
   meaningOfDeploymentSilence,
   meaningOfKindActionSilence,
   meaningOfKindChangeSilence,
+  meaningOfKindCopyChangeSilence,
   meaningOfKindReachSilence,
   meaningOfKindSilence,
   meaningOfPaceChangeSilence,
@@ -149,6 +152,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...KIND_SILENCES.map(meaningOfKindSilence),
   ...KIND_ACTION_SILENCES.map(meaningOfKindActionSilence),
   ...KIND_CHANGE_SILENCES.map(meaningOfKindChangeSilence),
+  ...KIND_COPY_CHANGE_SILENCES.map(meaningOfKindCopyChangeSilence),
   ...KIND_REACH_SILENCES.map(meaningOfKindReachSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
@@ -166,6 +170,7 @@ describe("what a reading means when it says nothing", () => {
         KIND_SILENCES.length +
         KIND_ACTION_SILENCES.length +
         KIND_CHANGE_SILENCES.length +
+        KIND_COPY_CHANGE_SILENCES.length +
         KIND_REACH_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
@@ -237,6 +242,11 @@ describe("what a reading means when it says nothing", () => {
           KIND_CHANGE_SILENCES.map((of) => meaningOfKindChangeSilence(of).condition),
           [],
         ],
+        [
+          "library-copy-change",
+          KIND_COPY_CHANGE_SILENCES.map((of) => meaningOfKindCopyChangeSilence(of).condition),
+          [],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -280,6 +290,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "kind",
       "kind",
       "kind",
       "kind",
@@ -830,5 +841,89 @@ describe("the mapping, against what the readings actually say", () => {
         heading?.silence ? meaningOfKindSilence(heading.silence) : null,
       ])
     ).toHaveLength(2)
+  })
+  /**
+   * The thirteenth set, and the first assembled out of three: the census's
+   * `unplaced`, the places comparison's `unpaired`, and the two states a change
+   * to one page's words already reports of that page.
+   */
+  it("maps a kind whose words were all rewritten to the change having carried nothing, of that kind", () => {
+    const before = treeOf(PAGE)
+    const after = treeOf(
+      element("page", "loom.stack", {}, [
+        element("intro", "loom.section", { body: words(11) }),
+        element("pricing", "loom.section", { body: words(31) }),
+      ]),
+      2
+    )
+    const change = libraryCopyChangeOf(
+      [readingOf(before, [tally("page", { views: 9, reached: 9 })])],
+      [readingOf(after, [tally("page", { views: 9, reached: 9, revision: 2 })])]
+    )
+    const section = change.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.rewritten).toBe(2)
+    expect(section?.silence).toBe("unpaired")
+    expect(meaningOfKindCopyChangeSilence("unpaired").condition).toBe("nothing-carried")
+    expect(meaningOfKindCopyChangeSilence("unpaired").subject).toBe("kind")
+    expect(
+      relateSilences(
+        meaningOfKindCopyChangeSilence("unpaired"),
+        meaningOfKindChangeSilence("unpaired")
+      )
+    ).toBe("one-state")
+  })
+
+  /**
+   * The pair that makes the thirteenth set worth the entry rather than a reuse:
+   * a floor is the same state of the world said of a page's words and of a
+   * kind's, which is `one-reason` and never `one-state` — and it is the only
+   * member of any set here whose reading withholds one figure and publishes the
+   * rest.
+   */
+  it("keeps a floor on one page's words and a floor on a kind's words as one reason", () => {
+    /* A declared prop holding something that is not a string, which is a word owed and not given (0122). */
+    const declarations: PartDeclarations = {
+      copyFor: () => ["body", "count"],
+      typesWithRole: () => [],
+    }
+    const tree = treeOf(
+      element("page", "loom.stack", {}, [
+        element("intro", "loom.section", { body: words(10), count: 3 }),
+      ])
+    )
+    const change = libraryCopyChangeOf(
+      [readingOf(tree, [tally("page", { views: 9, reached: 9 })], declarations)],
+      [
+        readingOf(
+          tree,
+          [
+            tally("page", { views: 9, reached: 9 }),
+            tally("intro", { views: 9, reached: 9 }),
+          ],
+          declarations
+        ),
+      ]
+    )
+    const section = change.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(meaningOfKindCopyChangeSilence("floored").condition).toBe("words-a-floor")
+    expect(
+      relateSilences(
+        meaningOfKindCopyChangeSilence("floored"),
+        meaningOfCopyChangeSilence("floored")
+      )
+    ).toBe("one-reason")
+    expect(
+      relateSilences(meaningOfKindCopyChangeSilence("floored"), meaningOfCopySilence("floored"))
+    ).toBe("one-reason")
+    /* The row is there, its shares are there, and only the subtraction is gone. */
+    expect(section?.silence).toBe("floored")
+    expect(section?.words.change).toBeNull()
+    expect(section?.words.readShareNow).toBe(1)
   })
 })

@@ -52368,6 +52368,102 @@ not quietly build something else in its place — which is what happened to
 *application*, and is why this record exists.
 
 ---
+## 2026-10-12 — a kind of part now has a words answer as well as a places answer, and the one to draw depends on a floor
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open
+
+[0270](decisions/0270-a-change-to-the-words-a-kind-of-part-says-is-read-over-the-words-both-windows-say-and-a-floor-costs-the-signed-figure.md)
+adds `libraryCopyChangeOf`, which answers *you rewrote the testimonial band and
+readers now reach two thirds of the words it kept.* It sits beside
+[0266](decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md),
+which answers the same change in **places**, and a screen about a changed
+component now has two readings of it rather than one.
+
+**Three things a surface has to get right, and one of them is new in this
+subsystem.**
+
+1. **The carried share is meaningless without the rewriting beside it.** Every
+   figure is over the words both windows say word for word, so a band whose
+   words are nine tenths rewritten has a share about the tenth it kept.
+   `rewritten` and `rewrittenWords` are on every row for exactly this, and a
+   card that printed the share alone would report a sentence about a tenth of a
+   component as a sentence about the component.
+2. **A floored row has shares and no verdict**, which is the first row in this
+   subsystem shaped that way: `words.change` is `null` and `movement` is
+   `unknown` while `readShareWas`, `readShareNow` and both masses are there and
+   true. The remedy is not *draw nothing* — it is draw the two shares, and point
+   at 0266 for the verdict, which a floor cannot reach. `silence` is `floored`
+   and the row says how many of its words are a floor.
+3. **There is a deployment-wide word figure, and it is the first one any reading
+   of a library has had.** `LibraryCopyChange.words` is the type rows added up,
+   sound because words partition a page (0212, 0235) where places do not (0257).
+   It is numbers and never a verdict — no movement and no silence at that scale —
+   so a headline drawn from it has to be written from the counts.
+
+**The two states to refuse to draw** are `unpaired` (the change left no sentence
+standing, so the places and the rewriting are the answer) and `unplaced` (a role
+nothing in the library plays). `wordless` is a third and is neither: the places
+are there and their words are a floor.
+
+**Where it goes:** the same card `/portal/pieces` draws, which already carries
+§23, §24 and §25, and the morning-after screen 0266 was filed for.
+
+---
+## 2026-10-12 — the word-weighted reader figure for a change to a kind of part is a third unit, and its weights move without a floor
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a question, not a defect**; filed for the reason 0256 was
+filed rather than shipped inside 0257's type, and the reason the reader-weighted
+places figure was filed yesterday rather than shipped inside 0266's
+
+0270 compares the carried words of a kind of part by **standing**: a word counts
+as read where at least one reader reached the part saying it. The figure
+everybody will ask for next is the per-reader one: *the typical reader reached
+two hundred of its words and reaches three hundred now.*
+
+**It is answerable and it is a third question.** Each page's term already exists
+— `copyChangeOf`'s `typical` is `Σ readers × words ÷ views` over the carried
+passages (0239) — so the unit is those per-page terms added across the placements
+of one kind.
+
+**Why it is not in 0270's type.** The terms are per-page means, so adding them
+across pages weights each page by its own traffic: the figure moves when one
+page grows and another shrinks with no reader reading differently. 0239 withholds
+`typical` for **one page** under a floor, because signed terms scaled by
+different factors can sum to the wrong sign; at the scale of a library the
+weights move with no floor involved at all. That needs its own argument about
+what is published and what is withheld, and it is the same argument the
+reader-weighted places figure needs — which suggests the two are one unit rather
+than two.
+
+**Nothing is lost by waiting.** The carried-word share is sound today and is not
+superseded by the weighted figure: it answers *of the words this kind kept, the
+share that is read anywhere*, which is the question an author who rewrote a
+primitive has.
+
+---
+## 2026-10-12 — the missing role declaration now costs a kind's word comparison as well, which is the eighth consumer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **a repeat with one new consequence**,
+and the consequence is why it is filed again rather than left to the standing
+entry
+
+Nothing in `src/primitives/` declares a role (0114), so every role row in every
+reading of a library is the `null` row. 0270 is the eighth reading to be thin for
+that reason, and in this one the role rows carry something the type rows cannot:
+a node whose **type** changed is a place one kind left and another took, and the
+role rows are where *to a reader it is the same place still standing* survives.
+
+So the role rows here are not a second view of the same number — they are the
+only place a recast component's words are compared at all, and today that
+comparison lands entirely in the row for *everything whose type said nothing*,
+which is the whole library and answers nothing.
+
+**One declaration per primitive and no migration.** The join is at read time
+(0212), so the day a type declares a role every counter already stored
+reinterprets and these rows start answering.
 ## 2026-10-13 — one table is reached through two handles, and the intake's one is the only unbounded reader of it left in the app
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`
