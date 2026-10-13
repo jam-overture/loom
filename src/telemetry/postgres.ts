@@ -248,7 +248,19 @@ export const postgresTelemetryJournal = (
     try {
       const removed = await db
         .delete(loomTelemetry)
-        .where(lt(loomTelemetry.seq, before))
+        /**
+         * Scoped like every read on this handle, which it was not when the
+         * application dimension landed (0269) — `forget` was the one statement
+         * in this file that did not go through `mine`.
+         *
+         * It matters more here than anywhere else in the file. `seq` is a
+         * `bigserial`, so it counts across every application the database
+         * holds: retention run for one application was deleting every other
+         * application's records below the same sequence number, and a deleted
+         * telemetry row is not recoverable from anything. Nothing had reached
+         * it, because nothing constructs a second handle yet.
+         */
+        .where(mine(lt(loomTelemetry.seq, before)))
         .returning({ seq: loomTelemetry.seq })
 
       return ok<ForgetOutcome>({ removed: removed.length })

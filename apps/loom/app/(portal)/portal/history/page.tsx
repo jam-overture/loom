@@ -24,7 +24,7 @@ import {
 } from "@/app/(portal)/_lib/history-link"
 import { previewReversal, type Reversal } from "@/app/(portal)/_lib/reversal"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
-import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
+import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 import { checkUndo } from "@/app/(portal)/_lib/undo-check"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 
@@ -75,7 +75,6 @@ const HistoryPage = async ({
 }) => {
   const { tree, older, newer, at } = await searchParams
   await requireActor("/portal/history")
-  await ensureSeeded()
 
   if (tree === undefined) {
     return (

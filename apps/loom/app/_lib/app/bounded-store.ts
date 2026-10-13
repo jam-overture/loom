@@ -4,7 +4,7 @@ import type { ReaderSignalJournal, ReaderTallyStore } from "@jam-overture/loom/s
 import type { TelemetryJournal } from "@jam-overture/loom/telemetry"
 import type { HoldStore } from "@jam-overture/loom/write"
 
-import { STORE_BUDGET_MS, within } from "./bounded"
+import { PORTAL_READ_BUDGET_MS, within } from "./bounded"
 
 /**
  * A handle whose **reads** answer within a budget, whatever the database does.
@@ -120,7 +120,7 @@ export const absent = <TValue, TError extends { readonly code: string }>(
 export const readWithin = async <TValue, TError>(
   read: () => Promise<Result<TValue, TError>>,
   unavailable: (detail: string) => TError,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): Promise<Result<TValue, TError>> => {
   const attempt = (async (): Promise<Result<TValue, TError>> => {
     try {
@@ -151,7 +151,7 @@ export const unavailable = (detail: string) => ({ code: "unavailable", detail })
  */
 export const boundedTreeStore = (
   store: TreeStore,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): TreeStore => ({
   create: (tree) => store.create(tree),
   append: (treeId, request) => store.append(treeId, request),
@@ -163,7 +163,7 @@ export const boundedTreeStore = (
 
 export const boundedHoldStore = (
   store: HoldStore,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): HoldStore => ({
   hold: (held) => store.hold(held),
   release: (proposalId) => store.release(proposalId),
@@ -174,7 +174,7 @@ export const boundedHoldStore = (
 
 export const boundedProjectStore = (
   store: ProjectStore,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): ProjectStore => ({
   create: (project) => store.create(project),
   rename: (projectId, to) => store.rename(projectId, to),
@@ -184,7 +184,7 @@ export const boundedProjectStore = (
 
 export const boundedApplicationStore = (
   store: ApplicationStore,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): ApplicationStore => ({
   create: (application) => store.create(application),
   rename: (applicationId, to) => store.rename(applicationId, to),
@@ -205,7 +205,7 @@ export const boundedApplicationStore = (
  */
 export const boundedTelemetryJournal = (
   journal: TelemetryJournal,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): TelemetryJournal => ({
   record: (records) => journal.record(records),
   forget: (request) => journal.forget(request),
@@ -223,7 +223,7 @@ export const boundedTelemetryJournal = (
  */
 export const boundedReaderSignalJournal = (
   journal: ReaderSignalJournal,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): ReaderSignalJournal => ({
   receive: (batches) => journal.receive(batches),
   forget: (request) => journal.forget(request),
@@ -238,7 +238,7 @@ export const boundedReaderSignalJournal = (
  */
 export const boundedReaderTallyStore = (
   store: ReaderTallyStore,
-  budgetMs: number = STORE_BUDGET_MS
+  budgetMs: number = PORTAL_READ_BUDGET_MS
 ): ReaderTallyStore => ({
   opened: (openings, at) => store.opened(openings, at),
   apply: (rollup, at) => store.apply(rollup, at),

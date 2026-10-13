@@ -11,7 +11,7 @@ import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { standingOf, sweepReading, type PageCheck } from "@/app/(portal)/_lib/checkup-sweep"
 import { namesOf } from "@/app/(portal)/_lib/page-name"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
-import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
+import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
 import { SweepRows } from "../_components/sweep-rows"
 import { SweepVerdict } from "../_components/sweep-verdict"
@@ -76,7 +76,6 @@ const checkOne = async (treeId: TreeId): Promise<PageCheck> => {
 
 const EverythingPage = async () => {
   await requireActor("/portal/checkup/everything")
-  await ensureSeeded()
 
   const listing = await portalStore.list({ limit: SWEEP_LIMIT })
 

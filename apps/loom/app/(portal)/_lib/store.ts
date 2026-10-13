@@ -1,4 +1,4 @@
-import { ensureSiteSeeded } from "@/app/(marketing)/_lib/stored"
+import { seedSitePages } from "@/app/(marketing)/_lib/stored"
 import { DEFAULT_APPLICATION_ID, DEFAULT_PROJECT_ID } from "@jam-overture/loom/store"
 
 import {
@@ -11,7 +11,6 @@ import {
 } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
-import { waitForSeeding } from "@/app/_lib/app/bounded"
 import { absent } from "@/app/_lib/app/bounded-store"
 
 /**
@@ -38,51 +37,52 @@ export const portalApplications = appApplications
 /** The projects those applications are grouped under. */
 export const portalProjects = appProjects
 
-const SEEDING_KEY = Symbol.for("loom.portal.seeding")
-
-type Carrier = { [SEEDING_KEY]?: Promise<void> }
-
-const carrier = globalThis as unknown as Carrier
-
 /**
- * Put this deployment's pages in the store, once per process.
+ * Put this deployment's pages in the store. **Run by `db:push`, not by a
+ * request.**
  *
- * ## Why the site's pages are seeded from here
+ * ## Why it left the request path on 13 October
  *
- * `(marketing)` seeds its three pages when one of them is requested, which is
- * correct and is not sufficient: **it means the portal shows an empty shelf
- * until somebody visits the public site.** A maintainer who deploys, signs in
- * and looks at *Your pages* is doing the one thing most likely to come first,
- * and what they would have seen is the demonstration page alone — which reads
- * as *the site is not hooked up*, not as *nobody has been to the site yet*.
+ * It used to run on every portal screen and every marketing page, memoised per
+ * process and budgeted at two seconds. On a warm instance that is free. On this
+ * deployment it was neither.
  *
- * That was found by photographing this screen rather than by reasoning about
- * it: every test passed, the site served from the store, and the portal
- * listing was still wrong, because no test and no type knows the order a
- * person does things in.
+ * The pool is `max: 1`, so every query on an instance is one round trip after
+ * the last. Seeding is six of them — the demonstration page, the site's three,
+ * the default project, the default application — and on a deployment that was
+ * seeded weeks ago **all six answer "already there"**. Six round trips to learn
+ * nothing, before the screen's own reads can start, on a connection that is
+ * also still being established.
  *
- * So both seeds run here, and `(marketing)` keeps its own call: whichever
- * surface is reached first seeds the store, and the other finds it done.
- * Neither overwrites anything — both are create-if-absent — so running both on
- * every portal screen costs one refused write per process and buys an order
- * nobody has to know about.
+ * What that looked like from outside, after the budgets landed: *Your
+ * applications* drawing `the application store is unavailable: the store did
+ * not answer within 1500ms`, while the projects read on the same line of the
+ * same `Promise.all` came back fine. Two reads issued in the same instant, one
+ * query apart in the queue, on opposite sides of the budget. A store that could
+ * not be reached would have failed the first one.
+ *
+ * ## What a deployment that has not run `db:push` sees
+ *
+ * The same thing it sees today if it has not run `db:push`: nothing, because
+ * there are no tables either. Seeding is DDL's neighbour, not a request's work
+ * — *a migration that runs implicitly is a migration nobody decided to run*,
+ * which is what `db-push.ts` already says about the schema it creates.
+ *
+ * The screens are honest about an empty store, and `(marketing)` serves the
+ * pages it was authored as, so a deployment between `db:push` runs degrades
+ * rather than breaks.
+ *
+ * ## It still never overwrites
+ *
+ * Every step is create-if-absent and asks before it writes, which is #615 and
+ * stays true here: a page in the store has been through whatever has happened
+ * to it since, and that history is the point of storing it at all.
  */
-export const ensureSeeded = async (): Promise<void> => {
-  const work = (carrier[SEEDING_KEY] ??= (async () => {
-    await placeTree(seedTree())
-    await ensureSiteSeeded()
-    await ensureDefaultProject()
-    await ensureDefaultApplication()
-  })())
-
-  const outcome = await waitForSeeding(work)
-
-  /**
-   * A seed that failed is forgotten, so the next request tries again rather
-   * than inheriting a rejected promise forever. One that is still going is
-   * kept: it is doing the work, and starting a second would be two.
-   */
-  if (outcome === "failed") delete carrier[SEEDING_KEY]
+export const seedDeployment = async (): Promise<void> => {
+  await placeTree(seedTree())
+  await seedSitePages()
+  await ensureDefaultProject()
+  await ensureDefaultApplication()
 }
 
 /**

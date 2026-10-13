@@ -1,14 +1,19 @@
 import type { NodeId, TreeId } from "../ids.js"
 import type { JsonObject, JsonValue } from "../json.js"
 import { err, ok, reduceResult, type Result } from "../result.js"
+import type { DiscardedWork } from "../runtime/proposal.js"
 import { applyOperation } from "../tree/apply.js"
 import { compareTrees, type NodeFacet, type TreeDifference } from "../tree/compare.js"
 import { configurationOf } from "../tree/configuration.js"
 import type { TreeOperation } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
+import { namedNodeIds } from "../tree/naming.js"
 import { collectNodeIds, findNode } from "../tree/navigation.js"
 import { isContainerNode, type ElementNode, type LoomNode } from "../tree/node.js"
 import { withRoot, type LoomTree } from "../tree/tree.js"
+
+import type { StoreError } from "./errors.js"
+import type { StoredRevision, TreeReader } from "./store.js"
 
 /**
  * Planning a reseed: what it would take to put a stored page back to the shape
@@ -498,4 +503,104 @@ export const describeReseedPlan = (plan: ReseedPlan): string => {
     case "unplannable":
       return `a planned ${plan.operation.op} was refused: ${plan.error.code}`
   }
+}
+
+/**
+ * What a reseed writes over: every entry in the log that touched a node the
+ * reseed is about to change.
+ *
+ * `planReseed` is pure and reads no log, which is right — it answers *can this
+ * page be carried back*, and two trees are enough to answer it. This answers the
+ * separate question the Gate needs: *whose work does carrying it back destroy*.
+ *
+ * It matters because of what the declaration buys. 0035 made discarded work a
+ * rule in the Gate rather than a level — a change that writes over work already
+ * in the log is never applied without a person, whatever latitude its origin
+ * has. So a reseed that declares its discards is **held for confirmation** by
+ * construction, and a reseed over a page nobody has edited since it was seeded
+ * declares nothing and applies straight through. That is the whole of the
+ * question `Loom marketing` filed as *who presses it*, answered by the Gate
+ * instead of by a new switch.
+ *
+ * Which makes the absence of this function the dangerous state rather than a
+ * missing nicety: a caller that proposed a reseed without it would be asking the
+ * Gate to weigh a change whose cost it declared nothing about, and 0035 is
+ * explicit that absence means *nobody looked at a log* rather than *the log was
+ * clean*. The proposal would have been auto-applied over somebody's accepted
+ * edit.
+ *
+ * Every entry is a candidate. There is no seed revision to skip past, unlike
+ * `planRevert`'s walk: revision 0 is the `create` and carries no delta, so every
+ * entry in the log is a change somebody accepted after the page was seeded.
+ */
+export type ReseedDiscardsRequest = {
+  readonly treeId: TreeId
+  /**
+   * The reseed's own operations, as `planReseed` produced them.
+   *
+   * The operations rather than the plan's `revives` and `retires`, because
+   * `namedNodeIds` already reaches every node any of the four operations names —
+   * so a reseed that only reconfigures a headline, naming no revival and no
+   * retirement, still declares the revision that last wrote that headline.
+   * Taking the two lists instead would have missed exactly the commonest reseed
+   * there is.
+   */
+  readonly operations: readonly TreeOperation[]
+}
+
+const overlapIn = (
+  entry: StoredRevision,
+  reseeding: ReadonlySet<NodeId>
+): DiscardedWork | null => {
+  const overlap = namedNodeIds(entry.delta.operations).filter((nodeId) => reseeding.has(nodeId))
+
+  return overlap.length === 0 ? null : { revision: entry.revision, nodeIds: overlap }
+}
+
+const walkForDiscards = async (
+  reader: TreeReader,
+  treeId: TreeId,
+  reseeding: ReadonlySet<NodeId>,
+  found: readonly DiscardedWork[],
+  cursor?: string
+): Promise<Result<readonly DiscardedWork[], StoreError>> => {
+  const page = await reader.revisions(treeId, cursor === undefined ? {} : { cursor })
+  if (!page.ok) return page
+
+  const walked = page.value.revisions.reduce<readonly DiscardedWork[]>((current, entry) => {
+    const discarded = overlapIn(entry, reseeding)
+
+    return discarded === null ? current : [...current, discarded]
+  }, found)
+
+  return page.value.newer === null
+    ? ok(walked)
+    : await walkForDiscards(reader, treeId, reseeding, walked, page.value.newer)
+}
+
+/**
+ * Reads the whole log once and reports the entries a reseed would write over.
+ *
+ * Ascending by revision, because `DiscardedWork` is read by a person answering a
+ * hold (0019) and *revisions 3, 7 and 8* is the sentence they can check against
+ * the history screen beside it.
+ *
+ * The walk is the whole log rather than a window, and that is the honest cost: a
+ * reseed's reach is every node it names, and a change from the page's first week
+ * is as discarded as one from this morning. It is the same walk `planRevert`
+ * takes and it is paid once per reseed, which is an operation a person presses.
+ *
+ * A `StoreError` means the log could not be read, so nothing is known about the
+ * cost — and a caller must not then propose the reseed with an empty
+ * declaration, which would read as *the log was clean*.
+ */
+export const reseedDiscards = async (
+  reader: TreeReader,
+  request: ReseedDiscardsRequest
+): Promise<Result<readonly DiscardedWork[], StoreError>> => {
+  const reseeding = new Set(namedNodeIds(request.operations))
+
+  return reseeding.size === 0
+    ? ok([])
+    : await walkForDiscards(reader, request.treeId, reseeding, [])
 }

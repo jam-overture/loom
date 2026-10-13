@@ -4,18 +4,22 @@ import { sitePagesStored } from "@/app/(marketing)/_lib/stored"
 import { appStoreForWriting } from "@/app/_lib/app/store"
 
 import { seedTree } from "./seed"
-import { ensureSeeded, portalStore } from "./store"
+import { portalStore, seedDeployment } from "./store"
 
 /**
  * What is on the shelf when somebody signs in, which is not what any other
  * test in this lane asks.
  *
- * Every portal screen awaits `ensureSeeded`, and until 12 October that put one
- * page in the store: this lane's demonstration tree. The site's three pages
- * were seeded by `(marketing)`, on the first request to one of them — correct,
- * and not enough. A maintainer who deploys, signs in and opens *Your pages*
- * before anybody has visited the public site saw the demonstration page alone,
- * which reads as *the site is not hooked up*.
+ * Every portal screen awaited the seed until 13 October, and until 12 October
+ * that put one page in the store: this lane's demonstration tree. The site's
+ * three pages were seeded by `(marketing)`, on the first request to one of them
+ * — correct, and not enough. A maintainer who deploys, signs in and opens *Your
+ * pages* before anybody has visited the public site saw the demonstration page
+ * alone, which reads as *the site is not hooked up*.
+ *
+ * The seed is `db:push`'s work now rather than a request's, so these tests call
+ * it the way the script does. What is being asked is unchanged: after it runs,
+ * the shelf has everything on it.
  *
  * **That is a bug no type and no unit test could have had an opinion about**,
  * because it is about the order a person does things in. It was found by
@@ -24,16 +28,12 @@ import { ensureSeeded, portalStore } from "./store"
  * the shelf, and the site is on it.
  */
 
-const reset = (): void => {
-  delete (globalThis as Record<symbol, unknown>)[Symbol.for("loom.portal.seeding")]
-  delete (globalThis as Record<symbol, unknown>)[Symbol.for("loom.site.seeding")]
-}
-
-beforeEach(reset)
+beforeEach(async () => {
+  await seedDeployment()
+})
 
 describe("what the portal finds in the store", () => {
   it("has the site's pages before anybody has visited the site", async () => {
-    await ensureSeeded()
 
     const listed = await portalStore.list({})
 
@@ -45,7 +45,6 @@ describe("what the portal finds in the store", () => {
   })
 
   it("still has this lane's demonstration page", async () => {
-    await ensureSeeded()
 
     const head = await portalStore.head(seedTree().treeId)
 
@@ -58,12 +57,9 @@ describe("what the portal finds in the store", () => {
    * and no change to anything.
    */
   it("writes over nothing on a second run", async () => {
-    await ensureSeeded()
-
     const before = await portalStore.list({})
 
-    reset()
-    await ensureSeeded()
+    await seedDeployment()
 
     const after = await portalStore.list({})
 
@@ -95,19 +91,15 @@ describe("what the portal finds in the store", () => {
  */
 describe("seeding a store that is already seeded", () => {
   it("writes nothing the second time", async () => {
-    await ensureSeeded()
-
-    reset()
     const wrote = vi.spyOn(appStoreForWriting, "create")
-    await ensureSeeded()
+
+    await seedDeployment()
 
     expect(wrote).not.toHaveBeenCalled()
     wrote.mockRestore()
   })
 
   it("still puts everything on the shelf the first time", async () => {
-    await ensureSeeded()
-
     const listed = await portalStore.list({})
     if (!listed.ok) throw new Error("loom: the store would not list")
 

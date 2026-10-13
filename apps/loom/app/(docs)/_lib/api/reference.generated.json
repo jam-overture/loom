@@ -8,7 +8,7 @@
       "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4734,7 +4734,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4780,7 +4780,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5770,7 +5770,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6298,7 +6298,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7477,7 +7477,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8117,7 +8117,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8345,7 +8345,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8833,6 +8833,20 @@
               "signature": "const describeReseedPlan: (plan: ReseedPlan) => string",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "ReseedDiscardsRequest",
+              "kind": "type",
+              "signature": "type ReseedDiscardsRequest = {\n    readonly treeId: TreeId;\n    /**\n     * The reseed's own operations, as `planReseed` produced them.\n     *\n     * The operations rather than the plan's `revives` and `retires`, because\n     * `namedNodeIds` already reaches every node any of the four operations names —\n     * so a reseed that only reconfigures a headline, naming no revival and no\n     * retirement, still declares the revision that last wrote that headline.\n     * Taking the two lists instead would have missed exactly the commonest reseed\n     * there is.\n     */\n    readonly operations: readonly TreeOperation[];\n};",
+              "truncated": false,
+              "summary": "What a reseed writes over: every entry in the log that touched a node the reseed is about to change."
+            },
+            {
+              "name": "reseedDiscards",
+              "kind": "function",
+              "signature": "const reseedDiscards: (reader: TreeReader, request: ReseedDiscardsRequest) => Promise<Result<readonly DiscardedWork[], StoreError>>",
+              "truncated": false,
+              "summary": "Reads the whole log once and reports the entries a reseed would write over."
             }
           ]
         },
@@ -9067,10 +9081,10 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
-      "files": 55,
+      "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9145,6 +9159,20 @@
               "signature": "const discardHeld: (path: WritePath, answer: ProposalAnswer) => Promise<Result<HeldProposal, HoldError>>",
               "truncated": false,
               "summary": "Answers a held proposal with no."
+            }
+          ]
+        },
+        {
+          "module": "write/computed",
+          "title": "Computed",
+          "summary": "The runtime a change the runtime computed is judged under.",
+          "symbols": [
+            {
+              "name": "computedChangeRuntime",
+              "kind": "function",
+              "signature": "const computedChangeRuntime: (runtime: CompositionRuntime, interpreter: ChangeInterpreter) => CompositionRuntime",
+              "truncated": false,
+              "summary": "The host's runtime, with every judging seam carried and the repairer dropped."
             }
           ]
         },
@@ -9352,6 +9380,69 @@
           ]
         },
         {
+          "module": "write/reseed",
+          "title": "Reseed",
+          "summary": "Putting a page back, as a change like any other — and the half that makes the operation pressable.",
+          "symbols": [
+            {
+              "name": "RESEED_INTERPRETER",
+              "kind": "value",
+              "signature": "const RESEED_INTERPRETER = \"loom/reseed\"",
+              "truncated": false,
+              "summary": "What produced the delta, for `Provenance.interpreter`. Not a model."
+            },
+            {
+              "name": "ReseedablePlan",
+              "kind": "type",
+              "signature": "type ReseedablePlan = Extract<ReseedPlan, {\n    readonly outcome: \"reseedable\";\n}>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "UnproposableReseed",
+              "kind": "type",
+              "signature": "type UnproposableReseed = Exclude<UnreseedablePlan, {\n    readonly outcome: \"already-authored\";\n}>;",
+              "truncated": false,
+              "summary": "Everything that stops a reseed being proposed. `already-authored` is not one — see `ReseedOutcome`."
+            },
+            {
+              "name": "reseedInterpreter",
+              "kind": "function",
+              "signature": "const reseedInterpreter: (plan: ReseedablePlan, discards: readonly DiscardedWork[], idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
+              "truncated": false,
+              "summary": "The same interpreter every reseed uses, with the plan's half filled in."
+            },
+            {
+              "name": "ReseedRequest",
+              "kind": "type",
+              "signature": "type ReseedRequest = {\n    readonly treeId: TreeId;\n    /**\n     * A fresh build of the page — what the builder in the repository produces now.\n     *\n     * The caller's rather than something this module could obtain, because a\n     * builder is the host's: §3 has no registry of pages and no way to run one.\n     * The surfaces hold theirs already, and both sides of the comparison being\n     * passed in is what keeps this testable without a build step.\n     */\n    readonly authored: LoomTree;\n    readonly origin: IntentOrigin;\n    readonly actor?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReseedOutcome",
+              "kind": "type",
+              "signature": "type ReseedOutcome = WriteOutcome\n/**\n * The stored page is already the tree the builder produces, so nothing was\n * proposed and nothing needed to be.\n *\n * Its own ending rather than one of the obstacles below, which is the\n * difference between this and `revertRevision`. A reseed is the kind of\n * operation that gets pressed twice — by a person who cannot see whether the\n * first took, and by a deploy that runs on every release — so *the page is\n * already right* is the healthy answer, and a caller that could not tell it\n * from *the page cannot be put back* would report a success as a failure on\n * every release after the first.\n */\n | {\n    readonly kind: \"already-authored\";\n    readonly headRevision: number;\n}\n/**\n * Nothing was proposed, because no reseed could be planned: the two trees are\n * different pages, or they differ by something no operation can express.\n * Writing over accepted work is not one of these — that is a proposal the Gate\n * holds, not a plan that failed.\n */\n | {\n    readonly kind: \"not-reseedable\";\n    readonly plan: UnproposableReseed;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeReseedOutcome",
+              "kind": "function",
+              "signature": "const describeReseedOutcome: (outcome: ReseedOutcome) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "reseedPage",
+              "kind": "function",
+              "signature": "const reseedPage: (path: WritePath, request: ReseedRequest) => Promise<ReseedOutcome>",
+              "truncated": false,
+              "summary": "Puts a page back to its authored shape, if it can be expressed and the Gate agrees."
+            }
+          ]
+        },
+        {
           "module": "write/revert",
           "title": "Revert",
           "summary": "Undo, as a change like any other.",
@@ -9424,7 +9515,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9663,7 +9754,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 52,
+      "files": 54,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9676,7 +9767,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10507,6 +10598,104 @@
           ]
         },
         {
+          "module": "signals/health",
+          "title": "Health",
+          "summary": "Whether what a deployment collected can be trusted, and which of its pages cannot.",
+          "symbols": [
+            {
+              "name": "COUNTS_INFLATED_ABOVE",
+              "kind": "value",
+              "signature": "const COUNTS_INFLATED_ABOVE = 0.5",
+              "truncated": false,
+              "summary": "How generous a revision's distinct counts may be before its absolute figures are not worth printing."
+            },
+            {
+              "name": "CollectionFault",
+              "kind": "type",
+              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n *\n * Every rate on the page is left with the view floor for a denominator, which\n * is short of the page views there were, and nothing on the page can be\n * put on the same scale as another page's.\n *\n * **Three causes and the rows cannot tell them apart:** the revision was\n * served by senders older than the opening marker, the door row has passed out\n * of the deployment's retention window while the counters it describes have\n * not, or the counters were assembled by something that is not a sender. So\n * the remedy is `undetermined` rather than one of the three guessed.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n *\n * An honest sender marks at most one batch of each page view as the one that\n * opened it, and a deployment whose senders do not is the deployment a\n * share-of-readers reading calls `unopened`: every rate\n * denominator-less while the counters look perfectly healthy. It is the one\n * fault here whose symptom is invisible on every screen that does not divide\n * by the door.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n *\n * Not a broken sender and not a broken rollup: a rollup window shorter than\n * the visits being measured, which is the one control a deployment has over\n * this error. The shares stay sound and the counts do not.\n */\n | \"counts-inflated\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no `engaged` at all. Taken from\n * {@link pageActionOf} rather than spelled a second time, so the two readings\n * cannot come to disagree about what it looks like.\n */\n | \"actions-uncredited\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n *\n * The two faults a **caller** can have rather than a deployment: a tree and a\n * window that do not belong together, which leaves most parts reading\n * `skipped` while the numbers stay plausible, and two reads\n * concatenated instead of one, which neither sums nor overwrites honestly\n *. Published as one fault because the hand it falls to is one hand and\n * the fix is one fix, with both counts on the row.\n */\n | \"rows-mishandled\";",
+              "truncated": false,
+              "summary": "Something wrong with what a deployment is collecting, rather than a quiet window."
+            },
+            {
+              "name": "COLLECTION_FAULTS",
+              "kind": "value",
+              "signature": "const COLLECTION_FAULTS: readonly CollectionFault[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeCollectionFault",
+              "kind": "function",
+              "signature": "const describeCollectionFault: (fault: CollectionFault) => string",
+              "truncated": false,
+              "summary": "One line per fault, for a surface naming what is wrong."
+            },
+            {
+              "name": "FaultRemedy",
+              "kind": "type",
+              "signature": "type FaultRemedy = \n/** The pages: a newer broadcaster, or one whose delegation walks the ancestry. */\n\"senders\"\n/** The deployment's own configuration: the rollup window. */\n | \"configuration\"\n/** The surface that asked: it handed in a tree and a window that do not match, or two reads. */\n | \"caller\"\n/**\n * Nothing the rows can name.\n *\n * One fault out of five, and it is the honest answer rather than a gap: a\n * missing door row is an old sender, an expired row or a hand-built counter,\n * and inventing one of the three is worse than naming none.\n */\n | \"undetermined\";",
+              "truncated": false,
+              "summary": "Whose hand a fault falls to."
+            },
+            {
+              "name": "FAULT_REMEDIES",
+              "kind": "value",
+              "signature": "const FAULT_REMEDIES: readonly FaultRemedy[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "remedyOf",
+              "kind": "function",
+              "signature": "const remedyOf: (fault: CollectionFault) => FaultRemedy",
+              "truncated": false,
+              "summary": "Whose hand this fault falls to, which is the half of a fault a person acts on."
+            },
+            {
+              "name": "HealthStanding",
+              "kind": "type",
+              "signature": "type HealthStanding =\n/** Measured, with nothing wrong that these rows can see. */\n\"sound\"\n/** At least one fault, named on the row. */\n | \"faulted\"\n/**\n * Nothing was collected about this revision at all.\n *\n * No counters and no page views at the door, which is a page nobody opened in\n * the window rather than anything wrong. Checked before the door is, so a page\n * nobody read is never reported as a page the door could not price.\n */\n | \"unmeasured\"\n/**\n * The door counted page views of this revision and no rollup has folded any of\n * them.\n *\n * A revision published minutes ago and a collection that has stopped look\n * exactly alike here, because the lag of the tallies behind the buffer is one\n * window by design and the row's one timestamp is written by both\n * writers. So this names the state and claims nothing about which it is.\n */\n | \"unfolded\";",
+              "truncated": false,
+              "summary": "Where one revision of one page stands."
+            },
+            {
+              "name": "HEALTH_STANDINGS",
+              "kind": "value",
+              "signature": "const HEALTH_STANDINGS: readonly HealthStanding[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeHealthStanding",
+              "kind": "function",
+              "signature": "const describeHealthStanding: (standing: HealthStanding) => string",
+              "truncated": false,
+              "summary": "One line per standing, for a surface saying why a page is where it is."
+            },
+            {
+              "name": "PageHealth",
+              "kind": "type",
+              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the three that are the deployment's, then the caller's.\n     *\n     * Empty on every standing but `faulted`.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     *\n     * A floor and not a count, which is why it is never ranked and never\n     * added to an arrival count here.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     *\n     * On a faulted page these are the readers whose measurement its faults\n     * affect, which is what makes one faulted page worse than another.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     *\n     * Zero where there is no door row, because an absent row reports no openings\n     * rather than none pending.\n     */\n    readonly pending: number;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n};",
+              "truncated": false,
+              "summary": "One revision of one page, and what is wrong with what was collected about it."
+            },
+            {
+              "name": "CollectionHealth",
+              "kind": "type",
+              "signature": "type CollectionHealth = {\n    /** Every revision read, by tree id and newest revision first. */\n    readonly pages: readonly PageHealth[];\n    /**\n     * Faulted revisions the door can price, worst first.\n     *\n     * Most arrivals, then the larger view floor, then tree id and newest revision\n     * first — so two pages costing the same do not reorder on a refresh. By\n     * headcount and never by a count of faults: one fault on a page nine thousand\n     * people read is worse than four on a page three did.\n     */\n    readonly faulted: readonly PageHealth[];\n    /**\n     * Faulted revisions with no exact arrival count, by tree id and newest\n     * revision first.\n     *\n     * Out of the ranking rather than in it at a guessed height, which is the\n     * refusal an order of pages makes about a page the door cannot scale,\n     * said about an order of faults.\n     */\n    readonly unpriced: readonly PageHealth[];\n    /** The faulted page costing the most readers, which is the one to look at first. */\n    readonly worst: PageHealth | null;\n    readonly standings: Readonly<Record<HealthStanding, number>>;\n    /**\n     * How many revisions carry each fault.\n     *\n     * A count of pages and never of readers, and it does **not** add to\n     * {@link standings}' `faulted`: a revision with three faults is one faulted\n     * page and is in three of these rows.\n     */\n    readonly faults: Readonly<Record<CollectionFault, number>>;\n    /**\n     * Page views at the door of every faulted revision the door can price, added\n     * — each revision once however many faults it has.\n     *\n     * The headline figure: *the measurement of eleven hundred of your readers is\n     * wrong in some way*. Exact and addable because a page view began on one\n     * revision of one tree and was counted once.\n     */\n    readonly readersAffected: number;\n    /**\n     * Page views at the door across every revision read, added.\n     *\n     * The weight behind `readersAffected` — a share of readers rather than a share\n     * of pages is what says whether a fault is marginal. This sees the pages its\n     * caller read and not the deployment's.\n     */\n    readonly arrivals: number;\n    /**\n     * Openings no rollup has folded, added across the revisions read.\n     *\n     * Published rather than judged, for the reason the module's own documentation\n     * gives: one timestamp written by two writers cannot tell a fresh revision\n     * from a stalled collection.\n     */\n    readonly pending: number;\n    /**\n     * Distinct trees across the revisions read, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand\n     * here, as they do in an order of pages and a census of a library\n     *.\n     */\n    readonly trees: number;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * The one lie this reading can be told: a caller holding one page twice would\n     * have its readers counted twice in `readersAffected`, and a count that has\n     * been added cannot be unadded.\n     */\n    readonly duplicated: number;\n};",
+              "truncated": false,
+              "summary": "What a deployment is collecting, and what is wrong with it."
+            },
+            {
+              "name": "collectionHealthOf",
+              "kind": "function",
+              "signature": "const collectionHealthOf: (readings: readonly PageReading[], rows: readonly StoredPageViews[]) => CollectionHealth",
+              "truncated": false,
+              "summary": "What a deployment is collecting, read off the page readings and the door rows it already has."
+            }
+          ]
+        },
+        {
           "module": "signals/ingest",
           "title": "Ingest",
           "summary": "The doorway a browser's batches come through.",
@@ -10916,6 +11105,83 @@
               "signature": "const libraryChangeOf: (was: readonly PageReading[], now: readonly PageReading[]) => LibraryChange",
               "truncated": false,
               "summary": "What a change did to a kind of part, across every page it stands on."
+            }
+          ]
+        },
+        {
+          "module": "signals/library-copy-change",
+          "title": "Library copy change",
+          "summary": "What a change did to the words a kind of part says, everywhere it stands.",
+          "symbols": [
+            {
+              "name": "KindCopyChangeSilence",
+              "kind": "type",
+              "signature": "type KindCopyChangeSilence =\n/**\n * Nothing in the pages read, in either window, is of this kind.\n *\n * Only ever a role row, and the reason a role row exists for every member of\n * the vocabulary: *nothing in this library is a heading* is a fact about the\n * library rather than a missing row.\n */\n\"unplaced\"\n/**\n * It stands in both windows and no place of it kept a word.\n *\n * Every placement was gained, lost, recast, or rewritten end to end. There is\n * no text held still, so there is nothing to read a change in — and that is\n * an answer about the **library** rather than about its readers, which\n * {@link KindCopyChange.rewritten}, `gained` and `lost` are the size of.\n *\n * A kind whose every word was rewritten is in this state, which is the\n * commonest way to reach it and the one worth naming: a change that left no\n * sentence standing cannot be read against the sentences it left standing.\n */\n | \"unpaired\"\n/**\n * The places it keeps say nothing that could have been read.\n *\n * A placement is kept where it says something on one side or hides something\n * on one side, so a row can hold places whose visible words are none:\n * a part whose type declares no `copy` says nothing this reading can see and\n * may say a great deal. There is no denominator, and the floor is why.\n */\n | \"wordless\"\n/**\n * It keeps words and none of them can be spoken for on both sides.\n *\n * Every carried word is in a window that measured nothing of its page, or in\n * a part that reported something other than coming into view — so `skipped`\n * would be a claim nobody made. The words are still counted; what is\n * withheld is the comparison.\n */\n | \"unread\"\n/**\n * Some of its carried words are a floor, so the signed movement could have\n * the wrong sign.\n *\n * The two shares survive this and the subtraction does not, which is the line\n * a change to one page's words is already read along. The places\n * version of this comparison is unaffected and is the one to read instead\n *.\n */\n | \"floored\";",
+              "truncated": false,
+              "summary": "Why a kind of part has no before and after of its words."
+            },
+            {
+              "name": "KIND_COPY_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const KIND_COPY_CHANGE_SILENCES: readonly KindCopyChangeSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindCopyChangeSilence",
+              "kind": "function",
+              "signature": "const describeKindCopyChangeSilence: (silence: KindCopyChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a kind has no before and after."
+            },
+            {
+              "name": "KindWordMovement",
+              "kind": "type",
+              "signature": "type KindWordMovement =\n/** More of the words it kept are read now than were. */\n\"taken-up\"\n/** Fewer are. */\n | \"abandoned\"\n/**\n * As many are, which includes words trading places: a passage taken up and\n * another of the same length fallen away is `held`, and both masses are\n * published so a surface can say so.\n */\n | \"held\"\n/**\n * No word it kept was read in either window.\n *\n * Kept apart from `held` for the reason a comparison of places keeps it\n * apart: *unread everywhere, and still unread everywhere* is the one\n * state here that is an instruction. There is deliberately no sibling for\n * *read everywhere and still read everywhere* — that is `held` at a share of\n * one, and it asks nobody to do anything.\n */\n | \"still-unread\"\n/** {@link KindCopyChange.silence} says why nothing can be said. */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to the reading of the words a kind of part kept."
+            },
+            {
+              "name": "KIND_WORD_MOVEMENTS",
+              "kind": "value",
+              "signature": "const KIND_WORD_MOVEMENTS: readonly KindWordMovement[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindWordMovement",
+              "kind": "function",
+              "signature": "const describeKindWordMovement: (movement: KindWordMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a kind's words in front of a person."
+            },
+            {
+              "name": "CarriedWords",
+              "kind": "type",
+              "signature": "type CarriedWords = {\n    /**\n     * Words both windows say, word for word, in the places both windows bear.\n     *\n     * The universe every figure below is about. A floor where\n     * {@link floored} is anything but nought: the words are there and there may\n     * be more.\n     */\n    readonly carried: number;\n    /**\n     * Of {@link carried}, the words with a verdict on **both** sides, which is\n     * the denominator of both shares.\n     *\n     * One number and not two, which is the whole of why the two shares are\n     * comparable: a word nothing can be said about in either window is in neither\n     * term, so the two sides are read over exactly the same text.\n     */\n    readonly comparable: number;\n    /**\n     * Carried words one window or the other cannot be spoken for.\n     *\n     * A window that measured nothing of their page, or a part that reported\n     * something other than coming into view. Counted and never read as unread,\n     * which is the one direction a reading of a quiet window must not be wrong in\n     *.\n     */\n    readonly unspoken: number;\n    /** Comparable words read in both windows. */\n    readonly keptRead: number;\n    /** Comparable words read in neither — the words a change did not fix. */\n    readonly keptSkipped: number;\n    /** Comparable words nobody reached before and somebody reaches now. */\n    readonly tookUp: number;\n    /** Comparable words somebody reached before and nobody reaches now. */\n    readonly fellAway: number;\n    /**\n     * The share of {@link comparable} words that was read in the earlier window;\n     * `null` where there are none.\n     *\n     * *At least one reader reached the part saying them*, which is what read\n     * means here and not what a person reads the word as. Short in both\n     * terms together under a floor, as a copy reading's own share is, and\n     * {@link floored} is the size of that.\n     */\n    readonly readShareWas: number | null;\n    /** The same share in the later window, over the same words. */\n    readonly readShareNow: number | null;\n    /**\n     * `tookUp − fellAway`: the words that changed hands, signed. `null` where a\n     * floor could have given it the wrong sign.\n     *\n     * It is exactly the movement in the two shares, since they have one\n     * denominator by construction — taken from the two masses so that no division\n     * is in a verdict.\n     */\n    readonly change: number | null;\n    /**\n     * Carried words that are a floor, because the type of the part saying them\n     * declares no `copy`.\n     *\n     * The direction the figures above are wrong in, handed over rather than\n     * summarised, as a copy reading hands over its own floored passages.\n     */\n    readonly floored: number;\n};",
+              "truncated": false,
+              "summary": "The words two windows say identically, and what happened to the reading of them."
+            },
+            {
+              "name": "KindCopyChange",
+              "kind": "type",
+              "signature": "type KindCopyChange = {\n    readonly kind: KindKey;\n    /**\n     * What part a type plays, or `null`. Always `null` on a role row,\n     * which carries it as its key.\n     *\n     * The later window's answer where it stands there, so that a surface reading\n     * a row and the role beside it is reading today's library.\n     */\n    readonly role: PrimitiveRole | null;\n    /** Places of this kind, in both windows, that say the same words in both. */\n    readonly placements: number;\n    /**\n     * Places of it in both windows whose words the change rewrote.\n     *\n     * In no share and in no word total above: two word counts cannot be a before\n     * and an after of one text. Published because it is the measure of how much\n     * of this kind the carried share is actually about.\n     */\n    readonly rewritten: number;\n    /** The words of those places, which is two numbers for the reason there are two texts. */\n    readonly rewrittenWords: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /** Places of it the later window bears and the earlier did not. */\n    readonly gained: number;\n    /** Places of it the earlier window bore and the later does not. */\n    readonly lost: number;\n    /** Words of the places it gained, as the later window says them. */\n    readonly wordsGained: number;\n    /**\n     * Of {@link wordsGained}, the words read in the window that has them.\n     *\n     * *Of the three hundred words this change put here, forty have been reached*\n     * — the one figure in this reading with no before, because the words did not\n     * exist to be read.\n     */\n    readonly wordsGainedRead: number;\n    /** Words of the places it lost, as the earlier window said them. */\n    readonly wordsLost: number;\n    /** Of {@link wordsLost}, the words that had been read in the window that had them. */\n    readonly wordsLostRead: number;\n    /** Places it keeps whose words are a floor, which the row's own words count. */\n    readonly flooredPlacements: number;\n    /** The carried words and what happened to the reading of them. */\n    readonly words: CarriedWords;\n    readonly movement: KindWordMovement;\n    /**\n     * Why there is no verdict, and `null` where there is one.\n     *\n     * About the comparison and not about the row: every count above is a count of\n     * parts of trees and of the words they say, and those are true whatever any\n     * window measured — which is how a census publishes a standing beside a\n     * withheld share.\n     */\n    readonly silence: KindCopyChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": "One kind of part's words, held against themselves across two windows."
+            },
+            {
+              "name": "LibraryCopyChange",
+              "kind": "type",
+              "signature": "type LibraryCopyChange = {\n    /**\n     * Every type that stands in either window, most words fallen away first.\n     *\n     * Then the lower read share in the later window, then by type, so two kinds\n     * that lost the same words do not reorder on a refresh.\n     */\n    readonly byType: readonly KindCopyChange[];\n    /**\n     * Every role in the vocabulary that stands in either window, then the row for\n     * parts whose type declared none, in the same order as {@link byType}.\n     *\n     * Thin today for the reason every role figure in this subsystem is thin:\n     * nothing in `src/primitives/` declares one, so nearly every part is in the\n     * `null` row — and in this reading that row is also the one that keeps the\n     * words of a node whose type changed. The join is at read time, so the\n     * day a role is declared these rows start answering without a migration.\n     */\n    readonly byRole: readonly KindCopyChange[];\n    /**\n     * The whole library's carried words, which is {@link byType} added up.\n     *\n     * The one whole-library figure in any reading of a library, and the reason is\n     * in the module documentation: words partition a page and places do not. It\n     * follows the **type** rows rather than the role rows, because the two\n     * disagree about a node whose type changed and a type is the thing an author\n     * replaces.\n     *\n     * No verdict and no silence of its own. Every reason this reading has to\n     * withhold something is a reason about one kind of part, and inventing a\n     * second subject for a figure that is a sum of rows would put *there is none\n     * of this in your library* over a number about all of it.\n     */\n    readonly words: CarriedWords;\n    /** Pages read in both windows, which is trees and not revisions. */\n    readonly pages: number;\n    /** Pages read in the later window only. */\n    readonly pagesGained: number;\n    /** Pages read in the earlier window only. */\n    readonly pagesLost: number;\n    /**\n     * Paired pages whose revision moved between the windows.\n     *\n     * What makes this reading worth more than the places one: a republished page\n     * is exactly where a paired placement's words may be two different sentences,\n     * and holding the **text** still rather than the node is what this module\n     * does about it. A reading where this is nought is two windows of one library\n     * and every placement's words are carried by construction.\n     */\n    readonly republished: number;\n    /** Places that say the same words in both windows, over every kind. */\n    readonly placements: number;\n    /** Places both windows bear whose words the change rewrote. */\n    readonly rewritten: number;\n    /** Places the later window bears and the earlier did not, counting a recast node once. */\n    readonly gained: number;\n    /** Places the earlier window bore and the later does not, counting a recast node once. */\n    readonly lost: number;\n    /**\n     * Paired nodes whose primitive type changed.\n     *\n     * A place one kind left and another took, so its words are in\n     * {@link wordsGained} and {@link wordsLost} both — the page did not gain or\n     * lose them and the two kinds did, which is what this number is here to say.\n     * Not an alarm: it is the commonest change an author makes to a library.\n     */\n    readonly recast: number;\n    /** Words of the places the library gained, as the later window says them. */\n    readonly wordsGained: number;\n    /** Of {@link wordsGained}, the words read in the window that has them. */\n    readonly wordsGainedRead: number;\n    /** Words of the places it lost, as the earlier window said them. */\n    readonly wordsLost: number;\n    /** Of {@link wordsLost}, the words that had been read in the window that had them. */\n    readonly wordsLostRead: number;\n    /**\n     * A floor on the page views of the earlier window, added over the paired\n     * pages.\n     *\n     * `PageReading.views` is the largest `views` any one part of a page reports,\n     * which is a floor and not a count. Published because every transition\n     * in this reading is confounded by it: a quieter window leaves more words\n     * unread with no reader behaving differently, and these two numbers are what\n     * let somebody see that before reading a movement as a finding.\n     *\n     * Not a count of readers, and not addable into one: a reader who read two\n     * pages is two page views here.\n     */\n    readonly viewsWas: number;\n    /** The same floor for the later window, over the same pages. */\n    readonly viewsNow: number;\n    /**\n     * The type whose kept words lost the most reading, which is the kind to look\n     * at first.\n     *\n     * By the **mass** of words and not by the share, for the reason a page's\n     * falls are ranked by the readers they lose and a library's kinds by\n     * the places they are skipped in: a label that lost its one reader is\n     * a perfect rate and a smaller problem than a band of four hundred words that\n     * lost half of them. `null` where nothing anywhere fell away.\n     *\n     * A type and never a role, because a type is the thing an author can replace.\n     */\n    readonly mostAbandoned: KindCopyChange | null;\n    /** The type whose kept words gained the most reading, by the same rule. */\n    readonly mostTakenUp: KindCopyChange | null;\n    /**\n     * Trees read at two revisions in one window, which are in nothing above.\n     *\n     * A page that is two live revisions in one window has no single counterpart\n     * in the other, and the comparison pairs by page: picking one would be a\n     * number nobody could account for.\n     */\n    readonly ambiguous: readonly TreeId[];\n    /**\n     * Readings of a revision beyond the first, on either side, which were\n     * dropped.\n     *\n     * A caller that concatenated two reads of one window holds a page twice, and\n     * a page twice is the one way a comparison of two libraries can\n…",
+              "truncated": true,
+              "summary": "What a change did to the words of a deployment's library, by kind of part."
+            },
+            {
+              "name": "libraryCopyChangeOf",
+              "kind": "function",
+              "signature": "const libraryCopyChangeOf: (was: readonly PageReading[], now: readonly PageReading[]) => LibraryCopyChange",
+              "truncated": false,
+              "summary": "What a change did to the words of a kind of part, across every page it stands on."
             }
           ]
         },
@@ -11893,7 +12159,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-change\" | \"library-reach\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -12001,6 +12267,13 @@
               "signature": "const meaningOfKindChangeSilence: (silence: KindChangeSilence) => SilenceMeaning",
               "truncated": false,
               "summary": "What a comparison of two windows of one library reports, of one kind."
+            },
+            {
+              "name": "meaningOfKindCopyChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfKindCopyChangeSilence: (silence: KindCopyChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two windows' words at the scale of a library reports."
             },
             {
               "name": "meaningOfPaceSilence",
@@ -12147,7 +12420,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12287,10 +12560,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 14,
+      "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12327,23 +12600,23 @@
             {
               "name": "postgresReaderSignalJournal",
               "kind": "function",
-              "signature": "const postgresReaderSignalJournal: (db: LoomDatabase) => ReaderSignalJournal",
+              "signature": "const postgresReaderSignalJournal: (db: LoomDatabase, scope?: StoreScope) => ReaderSignalJournal",
               "truncated": false,
-              "summary": ""
+              "summary": "Every read is filtered by the application this handle speaks for, and every write sets it."
             },
             {
               "name": "postgresReaderTallyStore",
               "kind": "function",
-              "signature": "const postgresReaderTallyStore: (db: LoomDatabase) => ReaderTallyStore",
+              "signature": "const postgresReaderTallyStore: (db: LoomDatabase, scope?: StoreScope) => ReaderTallyStore",
               "truncated": false,
-              "summary": ""
+              "summary": "Scoped on the same terms as the journal — see its note."
             },
             {
               "name": "postgresReaderRegionStore",
               "kind": "function",
-              "signature": "const postgresReaderRegionStore: (db: LoomDatabase) => ReaderRegionStore",
+              "signature": "const postgresReaderRegionStore: (db: LoomDatabase, scope?: StoreScope) => ReaderRegionStore",
               "truncated": false,
-              "summary": ""
+              "summary": "Scoped on the same terms as the journal — see its note."
             }
           ]
         }
@@ -12357,7 +12630,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12954,7 +13227,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13025,10 +13298,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 92,
+      "files": 97,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13507,7 +13780,7 @@
       "files": 77,
       "narrower": [],
       "standing": {
-        "packageNames": 1545,
+        "packageNames": 1580,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

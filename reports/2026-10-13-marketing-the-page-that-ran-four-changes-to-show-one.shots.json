@@ -1,0 +1,26 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    { "path": "/?theme=minimal", "out": "2026-10-13-marketing-four-changes-front-door-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels", "text=Try it yourself"] },
+    { "path": "/?theme=editorial", "out": "2026-10-13-marketing-four-changes-front-door-editorial-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels"] },
+    { "path": "/?theme=bold", "out": "2026-10-13-marketing-four-changes-front-door-bold-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels"] },
+    { "path": "/docs", "out": "2026-10-13-marketing-four-changes-docs-phone", "viewport": "phone", "waitFor": "body",
+      "measure": ["h1"] },
+    { "path": "/lessons", "out": "2026-10-13-marketing-four-changes-lessons-phone", "viewport": "phone", "waitFor": "body",
+      "measure": ["h1"] },
+    { "path": "/demo", "out": "2026-10-13-marketing-four-changes-demo-phone", "viewport": "phone", "waitFor": "body",
+      "measure": ["h1"] },
+    { "path": "/how-it-works?theme=minimal", "out": "2026-10-13-marketing-four-changes-how-it-works-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1"] },
+    { "path": "/what-you-run?theme=minimal", "out": "2026-10-13-marketing-four-changes-what-you-run-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1"] },
+    { "path": "/?theme=minimal", "out": "2026-10-13-marketing-four-changes-front-door-wide", "viewport": "wide", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels"] },
+    { "path": "/how-it-works?theme=minimal", "out": "2026-10-13-marketing-four-changes-how-it-works-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true },
+    { "path": "/how-it-works?ask=proof&theme=minimal", "out": "2026-10-13-marketing-four-changes-asked-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true }
+  ]
+}
