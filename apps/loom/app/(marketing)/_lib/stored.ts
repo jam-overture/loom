@@ -1,5 +1,7 @@
 import type { LoomTree, TreeId } from "@jam-overture/loom"
 
+import { waitForSeeding } from "@/app/(portal)/_lib/seeding-wait"
+
 import { appStore } from "@/app/_lib/app/store"
 
 import { SITE_PAGES, treeFor } from "./builders"
@@ -128,7 +130,7 @@ const carrier = globalThis as unknown as Carrier
  * result is deliberately not read for that reason.
  */
 export const ensureSiteSeeded = async (): Promise<void> => {
-  carrier[SEEDING_KEY] ??= (async () => {
+  const work = (carrier[SEEDING_KEY] ??= (async () => {
     for (const { route } of sitePagesStored()) {
       const tree = treeFor(route, storedContext())
       const existing = await appStore.head(tree.treeId)
@@ -136,9 +138,10 @@ export const ensureSiteSeeded = async (): Promise<void> => {
 
       await appStore.create(tree)
     }
-  })()
+  })())
 
-  await carrier[SEEDING_KEY]
+  /** Budgeted and forgotten on failure, for the reason `seeding-wait.ts` gives. */
+  if ((await waitForSeeding(work)) === "failed") delete carrier[SEEDING_KEY]
 }
 
 /**
