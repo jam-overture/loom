@@ -95,12 +95,30 @@ Each routine owns one part of the repository and does not edit another's.
 | Framework (`Loom daily build`) | `src/` **except `src/primitives/` and `src/signals/`**, and the application shell |
 | Signals (`Loom signals`) | `src/signals/`, the reader-signal intake under `apps/loom/app/`, and `docs/signals.md` |
 | Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
-| Portal (`Loom portal`) | `apps/loom/app/(portal)/` |
+| Portal (`Loom portal`) | `apps/loom/app/(portal)/` — **paused 13 October 2026** |
 | Documentation (`Loom docs`) | `apps/loom/app/(docs)/` |
 | Marketing (`Loom marketing`) | `apps/loom/app/(marketing)/` |
 | Lessons (`Loom lessons`) | `apps/loom/app/(lessons)/` and `lessons/` |
 | Demo (`Loom demo`) | `apps/loom/app/(demo)/` |
 | Merge (`Loom merge`) | No directory. Merge commits on open pull requests, and landing them on `main` |
+
+### A paused routine
+
+**`Loom portal` is paused as of 13 October 2026**, at the maintainer's
+instruction: *"I am pausing the current Loom portal routine, because we need a
+fresh start."* Paused is a state this table had no way to say until now, and it
+is worth a convention rather than a note somebody remembers.
+
+A paused routine **does not run**, and its directory is nobody else's — it is
+not reassigned and it is not open season. A finding against it is still filed
+and waits.
+
+It resumes when the maintainer says so, and what it may do on resuming is
+whatever [`docs/portal.md`](portal.md) says at that moment. That file now
+carries a build order where each unit is a pull request and **a run that cannot
+finish its unit files a finding and ships nothing** — written because six weeks
+of runs that each had to produce something produced twenty screens, seven of
+them on invented data, over a store two modules in the route group could reach.
 
 `Loom primitives` was split out of the framework routine on 16 August, once
 [0052](../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)

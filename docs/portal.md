@@ -1,209 +1,193 @@
-# The portal — what we are building
+# The portal — the fresh start
 
-**Rewritten on 12 October.** The previous version was the approved plan of 1
-October and it assumed one app per deployment throughout, which
-[0260](../decisions/0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md)
-refuses. It also described screens the maintainer has since read and rejected:
+**Written 13 October 2026**, the day the maintainer paused `Loom portal`:
 
-> *"The whole portal is geared toward one app… when I can have many."*
-> *"I can't even make heads or tails of what I should be looking at and
-> therefore can't give you any real direction."*
+> *"I am just absolutely disgusted with the portal. I thought we were moving in
+> the right direction, but it is just a big mess of shit. I am pausing the
+> current Loom portal routine, because we need a fresh start… This means we
+> likely have to scrap the whole thing."*
 
-That verdict was checked rather than taken on faith. All fourteen screens were
-photographed signed in: eight were exactly one viewport tall with nothing below
-the fold, three could not be scrolled to the bottom (`Your app` at 13,298px),
-and the whole route group held 32 interactive controls in 35,438 lines. The
-measurements are in
+This replaces the plan of 12 October. That one answered the same verdict —
+*"I can't even make heads or tails of what I should be looking at"* — with an
+audit, three records and a nine-unit build order, and **subtracted nothing**.
+Every screen behind the verdict is still served, with seven invented ones on
+top of them. That is the failure this document is built to stop, and it is the
+reason the first unit here is a deletion rather than a design.
+
+---
+
+## What is actually there
+
+Measured on `main`, 13 October:
+
+| | |
+| --- | --- |
+| Source | 39,610 lines in 379 files |
+| Tests | 40,768 lines |
+| Routes | 31 — 20 screens, 7 prototype screens on invented data, 4 redirect shims |
+| Screens that read a store | **one**, `/portal/[application]` |
+| Modules that open a database | **two**, `_lib/waiting.ts` and `_lib/write.ts` |
+| Worth keeping | **~9,700 lines**, listed under unit 0 |
+
+Four renames in six weeks — `trees → pages`, `calibration → trust`,
+`audit → checkup`, `primitives → pieces`. Each was careful, each kept a
+permanent redirect so no link broke, and together they are the symptom: what
+the portal *is* was never settled, so the thinking went into screens because
+screens were what a run could produce.
+
+**Nothing in the model is accepted.** 0220, 0260, 0261, 0262 and 0263 are all
+`Proposed` today. The 12 October plan records 0260 and 0261 as *merged*, which
+was true of the pull requests and not of the records. Five open proposals under
+six weeks of building is the structural reason careful work did not add up, and
+it is why **no unit below may start while the record it rests on is proposed.**
+
+The audit, with all fourteen screens photographed signed in, is
 [`reports/2026-10-12-portal-the-audit-before-the-overhaul.md`](../reports/2026-10-12-portal-the-audit-before-the-overhaul.md).
+Its findings stand: eight screens exactly one viewport tall with nothing below
+the fold, one 13,298px and unscrollable to its end, 32 interactive controls in
+35,438 lines.
 
-**This document is the direction.** It is written so that work can stop at any
-point and resume without re-deciding anything.
+## The decision, 13 October
+
+| | |
+| --- | --- |
+| **Depth of the cut** | Delete the screens, keep the seams |
+| **The one job** | Register an app and get signals flowing |
+| **The prototype** | Still the target shape, and it may not ship on invented data |
 
 ---
 
-## The model
+## Unit 0 · The demolition
 
-Loom splits along the line between **governing** a page and **serving** it
-([0262](../decisions/0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md)).
+**One pull request. Nothing else starts until it is on `main`.**
 
-| | runs where | an outage costs |
+### What dies — ~29,400 lines of source, ~38,000 of tests
+
+| Screen | source | tests |
 | --- | --- | --- |
-| **Control plane** — portal, signal intake, governance record, policy, every model call | Loom's machines, or the customer's if they self-host | governance; **no page stops** |
-| **Data plane** — resolve a request to a tree, draw it | always the customer's app | their site |
+| `/portal/pages` and its inspector, versions, proposals | 3,435 | 2,687 |
+| `/portal/readers` | 2,896 | 2,952 |
+| `/portal/trust` | 1,358 | 1,356 |
+| `/portal/history` | 1,104 | 706 |
+| `/portal/checkup` and `/checkup/everything` | 1,075 | 1,087 |
+| `/portal/pieces` | 901 | 841 |
+| `/portal/rules` and `/rules/what-if` | 843 | 663 |
+| `/portal/[application]` | 807 | — |
+| `/portal/activity` | 685 | 913 |
+| `/portal/app` | 614 | 406 |
+| `/portal` front door | 196 | — |
+| the four redirect shims | 165 | 134 |
+| the view models under `_lib/` that serve them | ~15,300 | ~27,000 |
 
-The property that makes this safe already exists and is already tested:
-`pageTreeFor` is `(await storedPageFor(route)) ?? treeFor(route, context)`, so
-an unreachable control plane degrades to the authored page rather than to an
-error.
+`/portal/app` is deleted rather than replaced: it is 0220's screen, and 0220 is
+refused. The shims go with their targets — the portal is invitation-only and has
+no public bookmark to keep.
 
-**Self-hosting is the same portal against the customer's own database.** One
-codebase, two operators.
+### What stays — ~9,700 lines
 
-## What a page is
+| | lines | why |
+| --- | --- | --- |
+| `_lib/auth/` | 1,763 | Sign-in, session, actor. Works, and the one job needs it |
+| `_lib/store.ts`, `write.ts`, `waiting.ts`, `database.ts`, `scoped.ts` | 782 | The only code in the route group that reads and writes anything |
+| `_lib/policy.ts`, `interpreter.ts`, `registry.ts`, `reader-signals.ts`, `telemetry.ts`, `addressing.ts` | 373 | The seams to the framework |
+| `_lib/vocabulary.ts` | 1,335 | One word per state. The best thing in here |
+| `_lib/screen-names.ts` | 212 | One name per screen, and the defect it closed is real |
+| `_lib/nav.ts`, `version.ts` | 92 | |
+| `_components/` | 2,736 | The shell |
+| `portal/preview/` | 1,916 | The target shape, behind its banner |
+| `portal/sign-in/`, `portal/sign-ins/` | 452 | The way in |
 
-One **base tree**, plus **deltas that apply when an audience matches**
-([0263](../decisions/0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md)).
+The prototype imports `_lib/auth` and its own `_lib/fixtures` and **nothing
+else** from the dying 19,853 lines, which is what makes this cut clean rather
+than a rewrite.
 
-- An audience is a predicate over the opaque render context — site, region,
-  locale, cohort, flag. Loom never learns what the values mean.
-- A variant is a delta, so it is held, judged, logged and inverted by the
-  machinery that already does that. A fix to the base reaches every audience.
-- Per-user means *rules mapping context to deltas*, not a tree per user.
-- Composition happens in the customer's process, per request, with nothing
-  about the reader leaving it.
+### The rules of the demolition
 
-## The flow we are building toward
-
-The maintainer's own sequence, 12 October:
-
-1. The customer **registers their app** → project id and an ingest key.
-2. Loom **reads its current state** → the governed copy of their trees.
-3. **Signals ingest** → what readers did, per page, per audience.
-4. A **link to their AI service**, for prompting from inside the portal.
-5. A **link to their model** to read signals and propose how the app evolves.
-6. **Responses are written back** to the tree and sync down to their app.
-
-Steps 4 and 5 run in the control plane. **Nothing that calls a model is in the
-render path.** Holding the customer's model credential is accepted; the runtime's
-existing in-app model adapter stays supported and may be deprecated later in
-favour of the portal rather than removed.
+1. **At the end of it the portal signs in and serves the prototype.** Nothing
+   half-deleted, nothing behind a flag.
+2. **`/portal` becomes the prototype's workspace**, banner and all, so the front
+   door is the shape being built instead of a screen being deleted.
+3. **A view model dies with its screen.** Where one is wanted again it is
+   rewritten against real data, never revived.
+4. **One commit a reviewer can read as one act**, and `pnpm verify` green.
 
 ---
 
-## Build order
+## The one job
 
-Each unit is one pull request. **Do not start a unit whose input is not on
+**A person registers an app and watches its readers arrive.** End to end:
+
+1. Sign in as an account that exists in a table, not in an environment variable.
+2. Create a project. It gets an id and an ingest key.
+3. Copy a snippet into an app. The marketing site is the first customer.
+4. Readers of that app produce signals. The intake authenticates the key, checks
+   the origin, and files them under the project.
+5. One screen shows them arriving: how many, when the last one came, how many
+   were refused.
+
+**Done is a demonstration, not a screenshot:** a signal sent from a second
+machine appears under its project within a minute; the same signal without a key
+is refused; a second project's signals are never visible from the first.
+
+### The units, in order
+
+Each is one pull request, and **do not start a unit whose input is not on
 `main`.**
 
-### 0 · The records · **three proposed, awaiting acceptance**
-
-| | what it settles | status |
+| # | Unit | Blocked on |
 | --- | --- | --- |
-| 0260 | a project is the unit Loom stores under | **merged** |
-| 0261 | a portal screen shows state, not explanation | **merged** |
-| 0262 | the control plane is hosted; the render path is theirs | proposed |
-| 0263 | a page is a base tree plus audience-scoped deltas | proposed |
+| 1 | **The signal tables take project and audience.** One migration over `loom_reader_signals`, `_tallies`, `_funnels`, `_regions`, `_page_views`, plus `project_id` on `loom_holds`, `loom_policy_revisions`, `loom_telemetry` | **0263 being accepted or refused** |
+| 2 | **Accounts.** The environment roster goes; the actor comes from the session and the scope from the route (0027) | unit 0 |
+| 3 | **The workspace.** The prototype's project list, wired: create, delete, switch | units 1, 2 |
+| 4 | **Registration and the key.** Project id, ingest key, a snippet to paste, and `/api/reader-signals` authenticating it. **It authenticates nobody today** | unit 3 |
+| 5 | **Arrival.** The prototype's logs screen against the project's own signals | unit 4 |
 
-### 1 · Project identity through the schema · **partly done**
+**Then stop and look at it.** The pages inspector, the rules screen, trust,
+checkup and readers are not in this sequence. They were the portal; they are now
+things to re-earn one at a time, each behind its own unit in this file.
 
-**Done** (#598): `loom_trees` and `loom_revisions` carry `project_id`, keys
-widened, isolation proved against PGlite, migration applied to production.
-
-**Remaining — seven tables, and they split in two:**
-
-| table | needs | may start |
-| --- | --- | --- |
-| `loom_holds` | project | **now** |
-| `loom_policy_revisions` | project | **now** |
-| `loom_telemetry` | project | **now** |
-| `loom_reader_signals` | project **and** audience | after 0263 |
-| `loom_reader_tallies` | project **and** audience | after 0263 |
-| `loom_reader_funnels` | project **and** audience | after 0263 |
-| `loom_reader_regions` | project **and** audience | after 0263 |
-| `loom_reader_page_views` | project **and** audience | after 0263 |
-
-**The signal tables should take both dimensions in one migration.** 0263
-clause 5: a signal that does not name its audience cannot be compared with the
-variant it was serving against, and two variants folded into one tally cannot
-be separated afterwards. Doing project now and audience later means migrating
-the same five tables twice and leaving a window where the data is already
-ambiguous.
-
-> **Standing constraint until this unit is finished: the portal must not offer
-> a second project.** A screen that lets somebody create one, over a signal
-> ledger that cannot tell two apart, mixes two customers' readers on the first
-> day, and the mixing is not recoverable from the rows.
-
-### 2 · The audience dimension · **after 0263**
-
-Base tree plus audience-scoped deltas in the store; a composing `TreeSource`
-beside `treeSourceFromStore`, which stays for deployments that want one tree per
-id.
-
-### 3 · Accounts, workspace, projects
-
-Accounts replacing the environment-variable roster. A workspace listing
-projects, with create and delete. A project switcher in the top bar. 0027's
-second half: **the actor comes from the session, the scope comes from the
-route.**
-
-### 4 · Registration, credentials, ingest authentication · *the stated purpose*
-
-Create a project → project id, ingest key, copy-paste snippet.
-`/api/reader-signals` learns to authenticate that key, check the origin, and
-file signals under the project and audience. **It authenticates nobody today** —
-one environment switch and nothing else — and the whole stated purpose rests on
-it.
-
-### 5 · The sync
-
-How an accepted change reaches the customer's app, and how the app's current
-state reaches the portal. Push, pull on an interval, or at build time. 0262
-names this as owed and deliberately does not design it; all three satisfy the
-degrade-to-authored property.
-
-### 6 · The AI links
-
-Their service, for prompting from the portal. Their model, for reading signals
-and proposing an evolution. Credentials held encrypted in the control plane.
-
-### 7 · Logs and signals
-
-Filter rail, timeline, dense table, right-hand detail pane. `Activity`,
-`History` and `Readers` fold into it. Per audience, once 0263 lands.
-
-### 8 · Policy as configuration
-
-What-if becomes the Rules screen. Each rule is a control with its current value;
-the prose moves behind an info affordance beside the setting it explains.
+> **Standing constraint until unit 1 is on `main`: the portal must not offer a
+> second project.** A create button over a ledger that cannot tell two apps
+> apart mixes two customers' readers on the first day, and the rows cannot be
+> separated afterwards.
 
 ---
 
-## Promoting the prototype
+## The rules, with teeth
 
-The maintainer approved the prototype on 12 October — *"I like the preview, so
-let's move that in as the actual portal"* — so its layout is the target shape
-rather than a proposal. It is at `/portal/preview` with invented data, and
-**promotion is a sequence, not a move**: a screen graduates when it is wired to
-something real, and the screen it replaces is deleted in the same change.
+Prose did not hold the line for six weeks. These are tests, and they go in with
+unit 0.
 
-| prototype screen | real when | replaces |
-| --- | --- | --- |
-| Pages, inspector, Pieces | **now** — the store, the outline and the registry all exist | `/portal/pages`, `/portal/pages/[treeId]`, `/portal/pieces` |
-| Rules | unit 8 — needs policy writes | `/portal/rules`, `/portal/rules/what-if` |
-| Logs | unit 7 | `/portal/activity`, `/portal/history`, `/portal/readers`, `/portal/trust`, `/portal/checkup` |
-| Project overview | unit 3 | `/portal` front door |
-| Workspace | unit 3 | nothing — no such screen exists |
-| Credentials | unit 4 | nothing |
-
-`/portal/app` — `Your app` — is deleted rather than replaced. It is 0220's
-screen and 0220 is refused.
-
-**A prototype screen may not ship on invented data.** Until its unit lands it
-stays under `/portal/preview`, behind the banner that says every number on it
-is made up.
+1. **No screen renders invented data.** Nothing outside `portal/preview/` may
+   import a fixture module; a test sweeps the route group for it.
+2. **No screen exists before its data.** The route list is held against the list
+   of store-backed readings. A screen with neither a reading nor a unit in this
+   file fails the sweep.
+3. **One name per screen, one word per state.** `screen-names.ts` and
+   `vocabulary.ts` stay, and they are the only two registries in the route group.
+4. **No surface without a unit.** A new route needs a line in the table above
+   first.
+5. **A run that cannot finish its unit files a finding and ships nothing.** It
+   may not invent a screen in order to have something to show. This is the rule
+   the last six weeks needed.
 
 ---
 
-## Settled
+## Blocked on the maintainer
 
-- Hosted control plane, local render path, self-hosting as the same codebase.
-- Base tree plus audience-scoped deltas; per-user is rules, not trees.
-- Loom holds the customer's model credential.
-- The runtime's in-app model adapter stays.
-- The prototype's layout is the portal's layout.
-- The plain-language brief is scoped out of `(portal)` and *nothing is ever
-  removed* is withdrawn as a screen rule (0261).
+1. **Accept or refuse 0260, 0261, 0262, 0263 — and 0220.** The whole model is
+   proposed. Unit 1 cannot start without 0263, and this plan deletes `Your app`
+   on the strength of 0220 staying refused.
+2. **Go-ahead for unit 0.** The manifest above is exact; the deletion is one
+   verified pass and is ready to run.
+3. **When `Loom portal` resumes, and under what charter.** `docs/routines.md`
+   now records it as paused.
 
-## Open
+## Not in scope, and one of them deserves naming
 
-- **The sync mechanism** (unit 5) — push, pull, or build-time.
-- **What an audience predicate looks like on the wire** — the shape a host
-  writes and the portal reads.
-- **Whether the portal becomes the only place a model is called**, or the
-  in-app adapter stays indefinitely.
-
-## Not in scope
-
-- Rewriting the marketing site. Under 0262 its claims stay true as written.
-- Governing the documentation. It is MDX; 0259 refuses prose as a tree.
+- **The proposal queue — a person deciding what the AI asked for.** This is the
+  thesis of the whole project and it is *deferred, not dropped*: the job after
+  this one. Said plainly here because a portal that registers apps and shows
+  arrivals is infrastructure, and the queue is the reason any of it exists.
+- **Governing the marketing site or the documentation.** 0259 settles both.
+- **A second app per deployment.** 0220 stays refused; a project is the unit.
