@@ -52419,6 +52419,80 @@ not quietly build something else in its place — which is what happened to
 *application*, and is why this record exists.
 
 ---
+## 2026-10-13 — a deployment can now be told its measurement is broken without first asking a question about reading, and the screen for it is about the collection rather than the readers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **a screen to build, with the
+reading already on `main`**
+
+`collectionHealthOf(readings, rows)` in `src/signals/health.ts`
+([0271](decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md),
+§28 of [`docs/signals.md`](docs/signals.md)) answers *what is wrong with what you
+are collecting, whose it is, and how many of your readers it costs.* Every reader
+screen so far is about readers; this is the first about the **collection**, and
+it is the one screen here an operator rather than an author opens.
+
+**The figure to lead with is `readersAffected ÷ arrivals`** — the share of a
+deployment's arrivals whose measurement is wrong in some way. Both are exact
+page-view counts off the door and both are addable (0219), so the share is sound;
+a count of faulted *pages* is not the headline, because one fault on the page nine
+thousand people read is worse than four on the page three did (0221).
+
+**Three things on it that must be drawn carefully:**
+
+- **`remedyOf(fault)` is what a row leads with, and `caller` must never be shown
+  to an operator.** It means the surface handed in a tree and a window that do
+  not match, or two reads concatenated — somebody else's bug, printed as the
+  deployment's. A portal that sees `caller` on its own reading has found a defect
+  in itself.
+- **`unpriced` is a list and not a rank.** Those pages have no exact arrival
+  count, so there is no height to draw them at; they belong beside the order and
+  never in it.
+- **`unfolded` is not a fault and `pending` is not an alarm.** A revision
+  published two minutes ago and a collection that has stopped look identical in
+  these rows, and the reading says so rather than guessing.
+
+What this does not need from the portal: a new store read. A screen that already
+builds `PageReading`s for its reader cards has everything this takes, and the
+door rows are the ones `/portal/readers` already reads.
+
+---
+## 2026-10-13 — a stalled rollup cannot be told from a freshly published revision, because the page-view row carries one timestamp written by two writers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/page-views.ts`, `src/signals/tally.ts`) · **Status:** open — **a
+limit written down with a shape to build**; nothing is wrong in what shipped
+
+`loom_reader_page_views` holds `opened`, counted at the door, and `appearances`,
+counted by the rollup (0219). `pending` is `opened − appearances`, and §8 says
+plainly what it is: *the other sign of the same subtraction, and what a stalled
+collection looks like.*
+
+**It is also what a revision published two minutes ago looks like**, because the
+lag of the tallies behind the buffer is one window by design (0158). The obvious
+discriminator is time — openings that have been pending for longer than a window
+are openings a collection run should have folded — and the row cannot supply it:
+`updatedAt` is written by **both** writers, so a busy page whose rollup has
+stopped keeps a fresh timestamp on every delivery while its appearances never
+move. A quiet page that is perfectly healthy looks stale by the same measure.
+
+So §28 publishes `pending` and raises no fault from it
+([0271](decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)),
+and a deployment whose collection has genuinely stopped is still only diagnosable
+by a person who knows when it last ran.
+
+**The shape that would answer it:** one more timestamp on the row, written only
+by the writer that folds — `foldedAt` beside `updatedAt` — and a fault that fires
+on `pending > 0` where `foldedAt` is older than the window a caller hands in (the
+window being per-deployment configuration, so it is handed in rather than
+assumed, as the straddle correction already is, 0230).
+
+**Why it is filed rather than built.** It is a column on a live counter table,
+so it is a migration and both store implementations and the contract suite move
+with it; and the fault it enables needs an instant handed in, which is the first
+option any reading here would take. That is a unit of work with a decision in it
+— *a counter row says when each of its writers last touched it* — and not a field
+added on the way past.
 ## 2026-10-12 — a kind of part now has a words answer as well as a places answer, and the one to draw depends on a floor
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
