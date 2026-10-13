@@ -370,6 +370,18 @@ const ApplicationHome = async ({
         <p className="text-ink-muted text-sm">
           Everything Loom stopped to ask you about, and everything it went ahead with on its own.
         </p>
+        {/*
+         * The way to this application's own settings, which is the only screen
+         * that carries its id — the one thing about it a person needs outside
+         * the portal. Here rather than in the rail because the rail is the
+         * deployment's and this is one application's.
+         */}
+        <Link
+          href={`/portal/${application}/settings`}
+          className="text-ink-muted self-start text-sm no-underline hover:underline"
+        >
+          Settings
+        </Link>
       </Measured>
 
       {/*

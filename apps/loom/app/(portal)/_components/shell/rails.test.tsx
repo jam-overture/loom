@@ -4,8 +4,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SECTIONS, sectionItems } from "./sections"
 
 let pathname = "/portal"
+/**
+ * The query, because `Pages` became two entries that are the same screen in
+ * two states and the rail now compares it (`_lib/nav.ts`). A `URLSearchParams`
+ * rather than a string, because that is what the hook hands back and a stub
+ * that returned the wrong shape would let `.toString()` pass here and fail in
+ * a browser.
+ */
+let search = ""
 
-vi.mock("next/navigation", () => ({ usePathname: () => pathname }))
+vi.mock("next/navigation", () => ({
+  usePathname: () => pathname,
+  useSearchParams: () => new URLSearchParams(search),
+}))
 
 const { Rails } = await import("./rails")
 
@@ -31,6 +42,7 @@ const railFor = (label: string): HTMLElement =>
 describe("the rails", () => {
   beforeEach(() => {
     pathname = "/portal"
+    search = ""
   })
 
   it("writes every section's name beside its glyph, with nothing to reveal first", () => {
@@ -200,5 +212,55 @@ describe("the rails", () => {
     expect(sections.className).toContain("flex-row")
     expect(sections.className).toContain("md:flex-col")
     expect(sections.className).toContain("md:w-16")
+  })
+})
+
+/**
+ * The second rail for a section whose entries differ only by a query.
+ *
+ * `Pages` is the first of those and the shape is easy to get subtly wrong in a
+ * way nothing else would notice: a rail comparing paths alone lights both
+ * entries on either one, and a reader is told they are in two places.
+ */
+describe("a section whose screens differ only by a filter", () => {
+  beforeEach(() => {
+    pathname = "/portal/pages"
+  })
+
+  it("lights only the unfiltered entry when no filter is on", () => {
+    search = ""
+    render(<Rails />)
+
+    const rail = railFor("Pages screens")
+    const lit = within(rail)
+      .getAllByRole("link")
+      .filter((link) => link.getAttribute("aria-current") === "page")
+
+    expect(lit.map((link) => link.textContent)).toEqual(["All pages"])
+  })
+
+  it("lights only the filtered entry when it is", () => {
+    search = "filter=waiting"
+    render(<Rails />)
+
+    const rail = railFor("Pages screens")
+    const lit = within(rail)
+      .getAllByRole("link")
+      .filter((link) => link.getAttribute("aria-current") === "page")
+
+    expect(lit.map((link) => link.textContent)).toEqual(["Waiting on you"])
+  })
+
+  /** A cursor is the screen's own, and the rail must not go dark when one arrives. */
+  it("is unmoved by a parameter that is not a filter", () => {
+    search = "after=t_abc"
+    render(<Rails />)
+
+    const rail = railFor("Pages screens")
+    const lit = within(rail)
+      .getAllByRole("link")
+      .filter((link) => link.getAttribute("aria-current") === "page")
+
+    expect(lit.map((link) => link.textContent)).toEqual(["All pages"])
   })
 })

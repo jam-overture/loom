@@ -38,8 +38,16 @@ const GROUPS = (): readonly string[] =>
     .filter((entry) => entry.isDirectory() && entry.name.startsWith("("))
     .map((entry) => join(APP, entry.name))
 
-const routeExists = (href: string): boolean =>
-  GROUPS().some((group) => existsSync(join(group, href.replace(/^\//, ""), "page.tsx")))
+/**
+ * The query is dropped before the filesystem is asked, because a rail entry
+ * carrying one is still a claim about a *route* — `/portal/pages?filter=waiting`
+ * is `/portal/pages` in a state, and there is no directory with a `?` in it.
+ */
+const routeExists = (href: string): boolean => {
+  const path = href.split("?")[0] ?? href
+
+  return GROUPS().some((group) => existsSync(join(group, path.replace(/^\//, ""), "page.tsx")))
+}
 
 const items = SECTIONS.flatMap((section) => sectionItems(section))
 const hrefs = [...SECTIONS.map((section) => section.href), ...items.map((item) => item.href)]

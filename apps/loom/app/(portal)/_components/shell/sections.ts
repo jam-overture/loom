@@ -1,4 +1,5 @@
 import { WHAT_IF_NAME } from "@/app/(portal)/_lib/levers"
+import { PAGE_FILTER_KEY, PAGE_FILTER_NAME } from "@/app/(portal)/_lib/page-filter"
 import type { NavItem } from "@/app/(portal)/_lib/nav"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 
@@ -48,8 +49,15 @@ import { screenName } from "@/app/(portal)/_lib/screen-names"
  * exists.
  *
  * **No submenu of one.** A section whose only screen is itself has no second
- * rail: `Pages`, `Pieces` and `Sign-ins` are each one screen, and inventing a
- * list of one to fill a rail is the same mistake as a portal geared to one app.
+ * rail: `Pieces` and `Sign-ins` are each one screen, and inventing a list of
+ * one to fill a rail is the same mistake as a portal geared to one app.
+ *
+ * `Pages` gained a submenu on 13 October and it is two entries rather than the
+ * prototype's four. The two that are missing are missing for reasons the data
+ * gives rather than the design: *the front door* is a bookmark, which this
+ * rail refuses, and *changed recently* cannot be computed from a listing that
+ * carries `{ treeId, revision }` and no time. `_lib/page-filter.ts` has both
+ * arguments.
  *
  * **No new names.** The section labels are new, because a section is a new
  * thing. Every *screen* in the second rail keeps the name it already had —
@@ -103,11 +111,46 @@ export const SECTIONS: readonly Section[] = [
            */
           { label: screenName("/portal"), href: "/portal", exact: true },
           { label: "Your app", href: "/portal/app" },
+          /*
+           * A verb among nouns, and it earns the place: registering an
+           * application is what the maintainer called this portal's primary
+           * purpose, and `/portal/new` is a route a reader can type. The
+           * workspace screen's own button is the path most people will take;
+           * a rail that omitted the screen anyway would be hiding the main
+           * thing this portal is for behind one button on one screen.
+           *
+           * The label is the screen's heading rather than a shorter invention,
+           * which is this file's rule for every item in a second rail.
+           */
+          { label: "Register an application", href: "/portal/new" },
         ],
       },
     ],
   },
-  { key: "pages", label: "Pages", icon: "pages", href: "/portal/pages" },
+  {
+    key: "pages",
+    label: "Pages",
+    icon: "pages",
+    href: "/portal/pages",
+    groups: [
+      {
+        name: "This deployment",
+        items: [
+          /*
+           * `exact` on the unfiltered one, because the two entries are the same
+           * screen in two states and the rail compares the query as well as the
+           * path (`_lib/nav.ts`). Without it `All pages` would be lit on both.
+           */
+          { label: "All pages", href: "/portal/pages", exact: true },
+          {
+            label: PAGE_FILTER_NAME.waiting,
+            href: `/portal/pages?${PAGE_FILTER_KEY}=waiting`,
+            exact: true,
+          },
+        ],
+      },
+    ],
+  },
   { key: "pieces", label: "Pieces", icon: "pieces", href: "/portal/pieces" },
   {
     key: "rules",

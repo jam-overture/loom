@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import type { ReactNode } from "react"
 
 import { isNavItemActive } from "@/app/(portal)/_lib/nav"
+import { PAGE_FILTER_KEY } from "@/app/(portal)/_lib/page-filter"
 
 import { SECTIONS, sectionFor, type Section, type SectionIcon } from "./sections"
 
@@ -148,7 +149,25 @@ const SectionRail = ({
  * rail had group names too, and they were behind the same hover as everything
  * else.
  */
-const ScreenRail = ({ section, pathname }: { readonly section: Section; readonly pathname: string }) => (
+/**
+ * The parameters the rail is answerable for.
+ *
+ * Named rather than *every parameter in the URL*, because a screen passes
+ * itself things the rail has no opinion about — `/portal/pages?after=…` is a
+ * cursor, and a rail that compared it would go dark the moment somebody turned
+ * a page.
+ */
+const RAIL_KEYS: readonly string[] = [PAGE_FILTER_KEY]
+
+const ScreenRail = ({
+  section,
+  pathname,
+  search,
+}: {
+  readonly section: Section
+  readonly pathname: string
+  readonly search: string
+}) => (
   <nav
     aria-label={`${section.label} screens`}
     data-rail="screens"
@@ -163,7 +182,10 @@ const ScreenRail = ({ section, pathname }: { readonly section: Section; readonly
           </p>
           <ul className="m-0 flex list-none flex-row gap-1 p-0 md:flex-col md:gap-0">
             {group.items.map((item) => {
-              const active = isNavItemActive(pathname, item.href, item.exact)
+              const active = isNavItemActive(pathname, item.href, item.exact, {
+                search,
+                keys: RAIL_KEYS,
+              })
 
               return (
                 <li key={item.href} className="shrink-0">
@@ -198,12 +220,21 @@ const ScreenRail = ({ section, pathname }: { readonly section: Section; readonly
  */
 export const Rails = () => {
   const pathname = usePathname()
+  /**
+   * `?? ""` because `useSearchParams` hands back `null` during a static render,
+   * and every screen under this shell is server-rendered on demand — so the
+   * null branch is the one that never runs here and would be the only one that
+   * mattered if that ever changed.
+   */
+  const search = useSearchParams()?.toString() ?? ""
   const current = sectionFor(pathname)
 
   return (
     <>
       <SectionRail current={current} pathname={pathname} />
-      {current?.groups !== undefined && <ScreenRail section={current} pathname={pathname} />}
+      {current?.groups !== undefined && (
+        <ScreenRail section={current} pathname={pathname} search={search} />
+      )}
     </>
   )
 }

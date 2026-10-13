@@ -17,6 +17,7 @@
 import { z } from "zod"
 
 import { idPattern } from "../grammar.js"
+import { randomIdBody } from "../ids.js"
 import { projectIdSchema } from "../project/project.js"
 
 /*
@@ -33,6 +34,17 @@ export const applicationIdSchema = z
   .brand<"ApplicationId">()
 
 export type ApplicationId = z.infer<typeof applicationIdSchema>
+
+/**
+ * A new application's id, minted when somebody registers one.
+ *
+ * Random rather than derived from the name: a name is editable and not unique,
+ * and an id that was derived from one would either change when it is renamed or
+ * preserve a name somebody wanted gone. It is also the value a person pastes
+ * into their own configuration, so it must not say anything about them.
+ */
+export const newApplicationId = (): ApplicationId =>
+  applicationIdSchema.parse(`app_${randomIdBody()}`)
 
 /**
  * The application every row written before applications existed belongs to.

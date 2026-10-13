@@ -52921,6 +52921,79 @@ Not decided here, because it is a security posture rather than a defect, and
 the lane that found it is not the one that gets to choose.
 
 ---
+## 2026-10-13 — `rename` cannot clear a field, so a host set once is a host forever
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/application/`,
+`src/project/`) · **Status:** open — **a settings screen is refusing half an
+edit it has no way to make**
+
+`ApplicationStore.rename` takes `{ name?, host? }` and both implementations
+read an absent field the same way:
+
+```ts
+const next = applicationSchema.safeParse({
+  ...found.value,
+  ...(to.name === undefined ? {} : { name: to.name }),
+  ...(to.host === undefined ? {} : { host: to.host }),
+})
+```
+
+Absent means *leave it alone*, which is the right reading for a partial update
+and leaves **no way to express "remove it"**. `ProjectStore.rename` has the same
+shape with one field, so it has the same gap waiting for its second.
+
+`/portal/[application]/settings` is the first screen that can edit an
+application, and it meets this immediately: it shows the host in a box, and a
+person who empties the box and presses save means *I do not have a host any
+more*. Today that submits an absent host, renames nothing, and would report
+success — the one outcome a settings screen must never produce. So the screen
+refuses that half of the edit and says why, which is honest and is not what
+anybody wants.
+
+What the fix is not: `host: ""`. An empty string is not absent and
+`applicationSchema` should go on refusing it, or every store gains a second
+spelling of nothing.
+
+What it probably is: a third state in the patch, so `to.host` can be `string`,
+`undefined` (unchanged) or `null` (cleared) — the shape every JSON patch
+eventually arrives at. That is a change to what `rename` *means* and a surface
+does not get to make it, which is why this is filed rather than worked around.
+
+---
+## 2026-10-13 — a listing says what a page is at, never when, so *changed recently* cannot be drawn
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`) ·
+**Status:** open — **a prototype entry that could not be built, and the reason
+is the contract rather than the screen**
+
+`TreeListing` is the whole of what a listing gives about a page:
+
+```ts
+export type TreeListing = {
+  readonly treeId: TreeId
+  readonly revision: number
+}
+```
+
+The prototype's `Pages` submenu offers four entries. Two of them are now on the
+real rail, one is a bookmark the rail refuses on purpose, and the fourth —
+**Changed recently** — is this finding.
+
+A revision number counts what has happened to *one* page. It does not compare
+across two: a page edited nine times last March outranks one edited twice this
+morning, which is the opposite of what the entry promises. `loom_revisions`
+carries `applied_at` per row, so the fact exists and the listing does not carry
+it.
+
+The comment above the type already anticipates this — *"only some
+implementations could fill honestly"* — which is the right instinct and is why
+this is filed rather than worked around. A memory store can answer *when was
+this last appended to*; whether every store can, and whether a listing should
+grow a second ordering, is §1's call.
+
+What a surface must not do meanwhile is fake it. `/portal/pages` reads
+`?filter=changed` as no filter at all, the same answer a typo gets, rather than
+sorting by a number that does not mean what the label says.
 ## 2026-10-13 — a sentence saying something does not exist now ships beside the measurement that says so, and four of them were already false
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
@@ -53000,3 +53073,38 @@ The fix is to pass a `dataCatalogue` built from the shop registry
 grows. It was not done here because this run's unit is the instrument and the
 four claims it caught, and growing the model page's produced prompt changes what
 `prompt/claims.test.ts` measures.
+
+---
+## 2026-10-13 — `docs:api` reads `dist/` and does not build it, so it reports "no change" against a package that has moved
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom docs`
+(`apps/loom/package.json`, `app/(docs)/_lib/api/`) · **Status:** open — **a
+command that silently answers about the wrong source**
+
+```json
+"docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
+"db:push": "pnpm --filter @jam-overture/loom build && tsx scripts/db-push.ts",
+```
+
+The generator reads `dist/*.d.ts`, which is the right source — a published
+surface is what the build emits, not what the source says. What it does not do
+is build it first.
+
+So after merging a branch that brought four new `src/` modules in, running
+`docs:api` printed `wrote 17 entry points and 1599 exports` and changed
+nothing, because `dist/` still described the pre-merge package. The honest
+answer was 1634. The gate caught it a quarter of an hour later by building
+fresh and comparing — *"the runtime's published surface has moved"* — which is
+the test doing its job, after the command had already said there was nothing to
+do.
+
+`db:push` learned this on 12 October and says so at the top of its file: *"every
+import below comes from the built output, not its source, so this script is
+only ever as current as `dist/`"*. It builds first. `telemetry:prune` and
+`signals:collect` were changed with it. `docs:api` and `docs:fences` were not,
+and they are the two whose output is committed — so theirs is the failure mode
+that reaches a reviewer rather than a maintainer's terminal.
+
+The fix is the same four words in front of the command. Filed rather than taken
+here because a package script is not this change's business, and because
+somebody should decide whether `docs:fences` wants it too.

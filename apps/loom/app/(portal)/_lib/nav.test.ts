@@ -46,3 +46,59 @@ describe("isNavItemActive", () => {
     expect(isNavItemActive("/portal/history", "/portal")).toBe(true)
   })
 })
+
+/**
+ * Two entries that are the same screen in two states, which is what `Pages`
+ * became on 13 October.
+ *
+ * A rail comparing paths alone lights both of them on either one, which is a
+ * rail saying *you are in two places* — worse than no highlight at all.
+ */
+describe("an href that carries a query", () => {
+  const keys = ["filter"]
+
+  it("lights the filtered entry when the filter is on", () => {
+    expect(
+      isNavItemActive("/portal/pages", "/portal/pages?filter=waiting", true, {
+        search: "filter=waiting",
+        keys,
+      })
+    ).toBe(true)
+  })
+
+  it("leaves the filtered entry dark when it is not", () => {
+    expect(
+      isNavItemActive("/portal/pages", "/portal/pages?filter=waiting", true, { search: "", keys })
+    ).toBe(false)
+  })
+
+  /** The half that is easy to forget: an unfiltered entry is not always active. */
+  it("leaves the unfiltered entry dark while a filter is on", () => {
+    expect(
+      isNavItemActive("/portal/pages", "/portal/pages", true, { search: "filter=waiting", keys })
+    ).toBe(false)
+  })
+
+  it("lights the unfiltered entry when no filter is on", () => {
+    expect(isNavItemActive("/portal/pages", "/portal/pages", true, { search: "", keys })).toBe(true)
+  })
+
+  /**
+   * A cursor is the screen's own business. A rail that compared it would go
+   * dark the moment somebody turned a page, which is why the keys it is
+   * answerable for are passed in rather than read off the URL.
+   */
+  it("ignores a parameter it was not given to compare", () => {
+    expect(
+      isNavItemActive("/portal/pages", "/portal/pages", true, { search: "after=t_abc", keys })
+    ).toBe(true)
+  })
+
+  /** Nothing changes for the rest of the rail, which passes no keys at all. */
+  it("compares paths alone when there are no keys to compare", () => {
+    expect(isNavItemActive("/portal/activity", "/portal/activity")).toBe(true)
+    expect(isNavItemActive("/portal/activity", "/portal/activity", false, { search: "kind=gate" })).toBe(
+      true
+    )
+  })
+})
