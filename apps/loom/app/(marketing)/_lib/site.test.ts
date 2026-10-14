@@ -373,8 +373,8 @@ describe("the page before and the page after", () => {
    * The guarantee the pager exists for, stated where the order is: **every page
    * of this site is somebody's neighbor.** On `main` two of the ten were the
    * destination of no page's body at all — `/putting-it-back` and
-   * `/what-readers-do`, both also off the bar — so the only way to either was
-   * to notice it in the footer's map.
+   * `/what-readers-do`, both since retired and both also off the bar — so the
+   * only way to either was to notice it in the footer's map.
    */
   it("leaves no page of this site off every other page's shoulder", () => {
     const reached = new Set(

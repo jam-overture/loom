@@ -8,12 +8,12 @@ import {
   type ActionStanding,
   type PartAction,
 } from "./action.js"
+import { doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import type { KindReachSilence, UnscaledPage } from "./library-reach.js"
 import {
   pageViewsFor,
   type RevisionOf,
-  type RevisionPageViews,
   type StoredPageViews,
 } from "./page-views.js"
 import type { PageReading } from "./parts.js"
@@ -463,55 +463,6 @@ export type LibraryAction = {
   readonly roleDisagreed: readonly PrimitiveType[]
 }
 
-/**
- * What one page contributes to every kind standing on it, worked out once.
- *
- * The scale is the page's and not the placement's, so it is computed per reading
- * rather than per part.
- */
-type Door = {
-  /** `min(appearances, opened)`: the folded page views at the door's scale. */
-  readonly counted: number
-  /** The row's openings, whatever the silence, because the reading's own arrivals is a count of page views the door made. */
-  readonly opened: number
-  readonly appearances: number
-  readonly drift: number
-  readonly pending: number
-  /** Set where this page cannot be scaled, in the page's own vocabulary. */
-  readonly silence: ReachSilence | null
-}
-
-/**
- * The page's door, with the three reasons tried in the order a page's own
- * reading tries them in: no row before nothing opened, because *there is no
- * row* is a state a deployment can be in without its senders being at fault.
- */
-const doorOf = (row: RevisionPageViews | null): Door => {
-  if (row === null) {
-    return {
-      counted: 0,
-      opened: 0,
-      appearances: 0,
-      drift: 0,
-      pending: 0,
-      silence: "unmeasured",
-    }
-  }
-
-  const of = {
-    counted: Math.min(row.appearances, row.opened),
-    opened: row.opened,
-    appearances: row.appearances,
-    drift: row.drift,
-    pending: row.pending,
-  }
-
-  if (row.opened === 0) return { ...of, silence: "unopened" }
-  if (row.appearances === 0) return { ...of, silence: "uncounted" }
-
-  return { ...of, silence: null }
-}
-
 /** The kind-level reason a page's reason causes, which is the same state at the other subject. */
 const KIND_ACTION_OF_REACH: Readonly<Record<ReachSilence, KindActionSilence>> =
   Object.freeze({
@@ -537,7 +488,7 @@ const NO_STANDINGS: Readonly<Record<ActionStanding, number>> = Object.freeze({
 type PageTerms = {
   reached: number
   within: number
-  readonly door: Door
+  readonly door: PageDoor
   readonly unwalked: boolean
 }
 
@@ -588,7 +539,7 @@ const add = (
   part: PartAction,
   page: {
     readonly revision: string
-    readonly door: Door
+    readonly door: PageDoor
     readonly unwalked: boolean
   },
 ): void => {

@@ -1,3 +1,4 @@
+import { applyPatch } from "../patch.js"
 import { err, ok, type Result } from "../result.js"
 
 import { applicationSchema, type Application, type ApplicationId } from "./application.js"
@@ -52,13 +53,10 @@ export const memoryApplicationStore = (seed: readonly Application[] = []): Appli
        * Parsed rather than spread, so a name this store would accept and the
        * database would refuse cannot be told apart by which one you used. The
        * two stores agree about what an application is because they both ask
-       * `applicationSchema`.
+       * `applicationSchema`, and they agree about what a patch means because
+       * they both apply it with `applyPatch`.
        */
-      const next = applicationSchema.safeParse({
-        ...found.value,
-        ...(to.name === undefined ? {} : { name: to.name }),
-        ...(to.host === undefined ? {} : { host: to.host }),
-      })
+      const next = applicationSchema.safeParse(applyPatch(found.value, to))
       if (!next.success) {
         return err({ code: "unreadable", applicationId, detail: next.error.issues[0]?.message ?? "invalid" })
       }

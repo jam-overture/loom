@@ -224,7 +224,52 @@ describe("the reader signal tables — Postgres specifics", () => {
     const rows = await store.pageViews()
 
     expect(rows.ok && rows.value).toHaveLength(1)
-    expect(rows.ok && rows.value[0]).toMatchObject({ opened: 2, appearances: 7 })
+    expect(rows.ok && rows.value[0]).toMatchObject({ opened: 2, appearances: 7, foldedAt: AT })
+  })
+
+  /**
+   * The migration this subsystem's first live column needs (0274).
+   *
+   * A deployment counting readers today has a `loom_reader_page_views` with no
+   * `folded_at` in it, and there is nothing to backfill it from: `updated_at` is
+   * written by the door as well, so reading it as a fold's age is exactly the
+   * mistake the column exists to stop. So the column arrives nullable and
+   * undefaulted, an existing row reads *nothing attests a fold*, and the first
+   * fold after the upgrade fills it in.
+   */
+  it("adds the fold's timestamp to a page-view table that predates it, without inventing one", async () => {
+    const db = drizzle(new PGlite())
+
+    await db.execute(
+      sql.raw(`CREATE TABLE loom_reader_page_views (
+        tree_id text NOT NULL,
+        revision integer NOT NULL,
+        opened bigint NOT NULL DEFAULT 0,
+        appearances bigint NOT NULL DEFAULT 0,
+        updated_at timestamptz NOT NULL,
+        PRIMARY KEY (tree_id, revision)
+      )`)
+    )
+    await db.execute(
+      sql.raw(`INSERT INTO loom_reader_page_views (tree_id, revision, opened, appearances, updated_at)
+        VALUES ('${TREE}', 1, 40, 10, now())`)
+    )
+    await ensureReaderSignalsSchema(db)
+
+    const store = postgresReaderTallyStore(db)
+    const before = await store.pageViews()
+
+    expect(before.ok && before.value[0]).toMatchObject({ opened: 40, appearances: 10 })
+    expect(before.ok && before.value[0]?.foldedAt).toBeUndefined()
+
+    await store.apply(
+      { tallies: [], funnels: [], appearances: [{ treeId: TREE, revision: 1, views: 5 }] },
+      AT
+    )
+
+    const after = await store.pageViews()
+
+    expect(after.ok && after.value[0]).toMatchObject({ appearances: 15, foldedAt: AT })
   })
 
   it("refuses to hand back a batch whose stored signals no longer parse", async () => {

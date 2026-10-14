@@ -3,11 +3,11 @@ import type { TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
+import { doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey, type KindSilence } from "./library.js"
 import {
   pageViewsFor,
   type RevisionOf,
-  type RevisionPageViews,
   type StoredPageViews,
 } from "./page-views.js"
 import type { PageReading, PartReading } from "./parts.js"
@@ -391,58 +391,6 @@ export type LibraryReach = {
   readonly roleDisagreed: readonly PrimitiveType[]
 }
 
-/**
- * What one page contributes to every kind standing on it, worked out once.
- *
- * The three numbers a placement needs are the page's, not the placement's, so
- * they are computed per reading rather than per part: a library of forty pages
- * is tens of thousands of placements and the door row lookup is a filter over
- * the rows.
- */
-type Door = {
-  /** `min(appearances, opened)`: the folded page views at the door's scale. */
-  readonly counted: number
-  /**
-   * The row's openings, whatever the silence.
-   *
-   * Carried even where this page cannot be scaled, because the reading's own
-   * `arrivals` is a count of page views the door made and not a count of the
-   * ones a share could be taken of.
-   */
-  readonly opened: number
-  readonly appearances: number
-  readonly drift: number
-  readonly pending: number
-  /** Set where this page cannot be scaled, in the page's own vocabulary. */
-  readonly silence: ReachSilence | null
-}
-
-/**
- * The page's door, with the three reasons tried in the order a page's own
- * reading tries them in.
- *
- * No row before nothing opened, because *there is no row* is the state a
- * deployment can be in without its senders being at fault.
- */
-const doorOf = (row: RevisionPageViews | null): Door => {
-  if (row === null) {
-    return { counted: 0, opened: 0, appearances: 0, drift: 0, pending: 0, silence: "unmeasured" }
-  }
-
-  const of = {
-    counted: Math.min(row.appearances, row.opened),
-    opened: row.opened,
-    appearances: row.appearances,
-    drift: row.drift,
-    pending: row.pending,
-  }
-
-  if (row.opened === 0) return { ...of, silence: "unopened" }
-  if (row.appearances === 0) return { ...of, silence: "uncounted" }
-
-  return { ...of, silence: null }
-}
-
 /** The kind-level reason a page's reason causes, which is the same state at the other subject. */
 const KIND_REACH_OF_REACH: Readonly<Record<ReachSilence, KindReachSilence>> = Object.freeze({
   unmeasured: "unscaled",
@@ -500,7 +448,7 @@ const tallying = (kind: KindKey): Tallying => ({
  * `unscaled`, because *nothing reported a view of it* is the better answer and
  * the door has nothing to scale either way.
  */
-const add = (into: Tallying, part: PartReading, door: Door, revision: string): void => {
+const add = (into: Tallying, part: PartReading, door: PageDoor, revision: string): void => {
   into.placements += 1
 
   if (part.standing === "unknown") {

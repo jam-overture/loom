@@ -419,9 +419,12 @@ export const siteReadingBand = (
    * third time and made worst.
    *
    * Nothing becomes unreachable by it. `/how-it-works` is offered by
-   * `/the-rules`' own *Before this* card, and the front door by
+   * `/what-you-run`'s own *Before this* card, and the front door by
    * `/how-it-works`' — `chrome.test.ts` holds every page of the site to being
-   * offered by some page's band, and that is this band's whole contract.
+   * offered by some page's band, and that is this band's whole contract. The
+   * first of those two was the retired `/the-rules`' card until 26 September,
+   * which is the kind of detail this sentence went on asserting for a fortnight
+   * after the page it named stopped existing.
    *
    * It is `before` rather than a path compared against `HOME`, so the rule is
    * read off the reading order like everything else here: whatever is first is

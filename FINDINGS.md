@@ -8,6 +8,149 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-14 — the mangling, measured by accident on one pull request body: 177 characters mangled, 121 clean, same body and same syntax
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 5 October entry *four links, one body, same syntax: the mangling
+is the URL and it is neither the branch name nor `decisions/`* · **Status:**
+open — **evidence for that entry's length hypothesis**, taken the same way it
+was: by writing a pull request rather than by testing one
+
+#634's body carried one image link. It came back with ``` `` ``` injected
+around the URL and after the closing paren, so the picture did not render —
+`![…](``https://…webp)```. The `!` survived this time; the 5 October entry
+records a round where it did not.
+
+| posted | URL | characters | came back |
+| --- | --- | --- | --- |
+| first | `…/marketing-04-the-pages-this-site-still-names/reports/2026-10-14-marketing-the-pages-this-site-still-names-front-door-wide.webp` | **177** | mangled |
+| second | `…/3a84545/reports/2026-10-14-marketing-still-named-front-door-wide.webp` | **121** | **clean** |
+
+Same body, same `![](…)` syntax, same repository, same file, about twenty
+minutes apart. The only things changed were the path to it — a short commit sha
+in place of the 44-character branch name, and a shorter visual name — and
+therefore the length.
+
+**It does not settle the threshold and it does narrow the bracket.** Collecting
+this entry's two readings with the 5 October entry's four:
+
+| characters | verdict |
+| --- | --- |
+| 121 | clean |
+| ~133 | clean |
+| ~141 | mangled |
+| ~152 | mangled |
+| ~177 | mangled (twice, on two different URLs) |
+
+So the boundary is still somewhere in **133–141**, and nothing yet contradicts
+length as the variable. What this adds is a second clean reading well below it
+and a second mangled reading at the top, from a lane that was not testing
+anything.
+
+**The cheap remedy, for any lane that wants its picture to render today.** Keep
+the raw URL short: a **short commit sha** rather than the branch name saves
+about 37 characters on this repository's branch names, and the visual slug need
+not repeat the report slug — `2026-10-13-marketing-four-changes-…` already sits
+beside a much longer report name, so the convention allows it. 121 characters is
+reachable without losing anything a reader needs.
+
+**Not proposed: a check.** A test that held every URL in a pull request body
+under a length nobody has established would be this repository asserting a
+guess, and the body is not a file in it. The remedy above is a habit, and this
+entry is where the next lane that loses a screenshot will find it.
+
+---
+## 2026-10-14 — the marketing site named seven retired pages forty times, eleven of them in the present tense, and every reader-facing path was derived and therefore correct
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
+row for `Loom docs`, `Loom lessons`, `Loom demo` and `Loom portal` ·
+**Status:** **closed by `marketing-04-the-pages-this-site-still-names`** for this
+route group. The row for the other four surfaces is **open** and is one file
+each.
+
+On 26 September the maintainer cut a ten-page marketing site to three. The seven
+pages that went had their *words* absorbed into bands of the two that stayed —
+`/the-rules`, `/the-record`, `/when-it-goes-wrong`, `/putting-it-back` and
+`/who-can-ask` into `/how-it-works`; `/your-components` and `/what-readers-do`
+into `/what-you-run`. Every module with a reason to mention one went on
+mentioning it.
+
+Swept on 14 October, this route group named those seven **forty times** across
+seventeen files. **Eleven of the forty were present tense** — a retired page
+described as doing a job now:
+
+| where | what it said |
+| --- | --- |
+| `readers/counting.ts` | *"`/what-readers-do` **has said** since 16 September that counting is off unless you turn it on"* |
+| `chrome.ts` | *"`/how-it-works` **is** offered by `/the-rules`' own *Before this* card"* |
+| `adapt/run.ts` | *"`/your-components` **has said** since 11 September that there are three things no request gets past"* |
+| `readers/asked.ts` ×3 | *"`/what-readers-do` **is** the page that says it in words"*, and two more |
+| `pages/home.ts` ×2 | *"the footer and `/what-readers-do` **tell** a reader…"*, *"`/your-components` **is** the page that says it in full"* |
+| `journey.ts`, `journey.test.ts` | *"`/who-can-ask` **is** the counter-example: its whole band **is** four requests…"* |
+| `pages/how-it-works.ts` | *"the one thing from `/who-can-ask` that **belongs** on a marketing site"* |
+
+The claim behind every one of them is still true. What was false is the page
+doing the saying — in the first row, a live promise about a reader's privacy
+credited to a page a visitor cannot open.
+
+**Nothing a reader ever saw was wrong, and that is why it lasted fifteen
+weeks.** The bar, the footer's map, the sitemap, `llms.txt` and the front door's
+cards are all derived from `SITE_ROUTES` and `PRODUCT_SURFACES`, so a retired
+page cannot leak into a link, a crawl or a map. It leaked into the explanations,
+where the only reader is the next run.
+
+**The finding of 7 October was the same thing and it was filed one comment too
+narrowly.** It named the fifty-line docblock above `SITE_ROUTES` that argued the
+order of ten pages; that was rewritten on `marketing-66`. Twenty-five more lines
+of the same cut's reasoning sat 750 lines further down the same file, on
+`readingNeighbors`, and survived — measuring *"the ten page builders on `main`"*
+when there were three, calling the footer's map *"ten links in a column"*, and
+closing on *"the page the front door's own closing band sends every visitor to —
+`/how-it-works` — ends without pointing anywhere"*, which stopped being true the
+day the cut made `/how-it-works` the middle of three. A finding against a comment
+closes a comment. This is what closes the class.
+
+### What shipped
+
+`RETIRED_ROUTES` in `_lib/site.ts` — the seven, each with the band that took its
+words — and `_lib/named.test.ts`, which sweeps every comment in the route group
+and holds three rules: a site path named in prose is one this application serves
+or one of the seven; **a retired page may be named only in a sentence that also
+says `retired`**; and an entry nothing names any more is removed.
+
+**The rule is deliberately blunt, and the reason is worth the paragraph.** The
+first draft looked for a past-tense marker in the sentence — `was`, `until`,
+`retired`, `became` — and it **passed the single worst sentence in the sweep**.
+`readers/counting.ts` reads *"`/what-readers-do` has said since 16 September
+that counting is off unless you turn it on, and **until** now that **was** a
+sentence about somebody else's deployment"*: two markers, both attached to the
+claim rather than to the page. The one mention crediting a retired page with a
+live promise about a reader's privacy is the one a tense-sniffer waves through.
+So the word is required rather than inferred. Checked by putting that sentence
+back and watching the test go red, then reverting — not by watching it pass once
+the sentence was gone.
+
+### The row for the other four surfaces
+
+The shape is not this lane's. **Any surface that retires a page keeps the
+reasoning that mentions it**, because the reasoning is in the file that still
+does the job and nothing in a build, a typecheck or a test reads a comment.
+`(docs)`, `(lessons)`, `(demo)` and `(portal)` all have route tables and all
+have had routes move; `(portal)` is mid-cut as of #631, which is the moment this
+costs the least to add.
+
+`named.test.ts` is about sixty lines and the only thing in it that is this
+lane's is `RETIRED_ROUTES` and the two constants it checks against. Copying it
+is cheaper than rediscovering the class, and **the blunt rule is the part to
+copy rather than improve** — the subtle version is the one that was tried and
+demonstrably failed.
+
+Not proposed as a shared tool. A sweep over one route group can be read in one
+sitting and needs no configuration; four lanes importing one checker would make
+every lane's prose a dependency of a module none of them owns, which is a worse
+trade than sixty duplicated lines.
+
+---
 ## 2026-10-13 — every portal screenshot now needs a preload, because a store with no database behind it is a store with nothing in it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
@@ -52164,6 +52307,21 @@ apart from the census's own.
 ## 2026-10-12 — the honest reader-weighted version of a change to a kind of part needs the door on both sides, and is its own unit
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-30-the-readers-who-met-it-before-and-after`** —
+built as `libraryReachChangeOf` in `src/signals/library-reach-change.ts`
+([0279](decisions/0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md),
+§30 of [`docs/signals.md`](docs/signals.md)), as this entry proposed it: 0266's
+pairing with 0256's arithmetic inside each side, and the door rows for both
+windows. **Two things the entry left open were decided in the building.** The
+moving weights are answered by sufficiency rather than by magnitude — two
+counterfactuals, one per side, each asked whether it carries the movement's own
+direction (0244's method), so no threshold decides anything; and **no additive
+split of the movement is published**, because there are two of them and they
+differ by the interaction term, so a figure a surface would quote as *this much
+was traffic* would depend on which factor the framework moved first. What is
+published instead is `weightMoved`, 0247's mix over places rather than regions,
+and it is published and never judged. Original status below.
+
 **Status:** open — **a question, not a defect**; filed rather than shipped
 inside 0266's type for the reason 0256 was filed rather than shipped inside
 0257's
@@ -52198,8 +52356,12 @@ replacing a primitive has.
 ## 2026-10-12 — a change to the words a kind of part says cannot be read across two windows without 0239's intersection, per placement
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
-**Status:** open — **a limit written down with a shape to build**; nothing is
-wrong in what shipped
+**Status:** closed by #613 — built as `libraryCopyChangeOf` in
+`src/signals/library-copy-change.ts`, which is §27 of the plan and 0270. Closed
+on 13 October, the day that pull request landed. Original status below.
+
+**Original status:** open — **a limit written down with a shape to build**;
+nothing is wrong in what shipped
 
 A census publishes a kind's words and the words readers reached, and both add
 across its placements because a page's words partition across its parts exactly
@@ -52959,8 +53121,12 @@ door rows are the ones `/portal/readers` already reads.
 ## 2026-10-13 — a stalled rollup cannot be told from a freshly published revision, because the page-view row carries one timestamp written by two writers
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`, `src/signals/tally.ts`) · **Status:** open — **a
-limit written down with a shape to build**; nothing is wrong in what shipped
+(`src/signals/page-views.ts`, `src/signals/tally.ts`) · **Status:** closed by
+`signals-29-when-the-fold-last-touched-the-row` — built as the shape below, with
+one addition: the window is not what a caller hands in. Original status below.
+
+**Original status:** open — **a limit written down with a shape to build**;
+nothing is wrong in what shipped
 
 `loom_reader_page_views` holds `opened`, counted at the door, and `appearances`,
 counted by the rollup (0219). `pending` is `opened − appearances`, and §8 says
@@ -53148,8 +53314,16 @@ the lane that found it is not the one that gets to choose.
 ## 2026-10-13 — `rename` cannot clear a field, so a host set once is a host forever
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/application/`,
-`src/project/`) · **Status:** open — **a settings screen is refusing half an
-edit it has no way to make**
+`src/project/`) · **Status:** **closed by
+`framework-71-the-field-a-rename-can-clear`** — the third state, as this entry
+proposed it. `host` on `ApplicationStore.rename` is now `Patch<string>`: a value
+sets it, `null` clears it, absent still leaves it alone, and `""` is refused by
+both stores as before. Recorded as
+[0276](decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md).
+`applyPatch` is the one place the three states are read, so the `Map` and the
+column cannot drift about what a patch means. **The settings screen itself is
+not changed** — `(portal)` is a paused lane, and the refusal that is now
+unnecessary is filed below for it
 
 `ApplicationStore.rename` takes `{ name?, host? }` and both implementations
 read an absent field the same way:
@@ -53379,3 +53553,164 @@ out of the one the site declares.
 *Where the content comes from* rather than an implementation detail of it, and
 rearranging them is a change to that page's evidence rather than to this one's.
 Filed so that whoever next has a reason to open that file does it then.
+## 2026-10-14 — a kind of part now has a third share, and the one beside it that is not about the library at all
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/.../pieces`) · **Status:** open — **a screen's
+worth of answer, with one field that must not be drawn as a number**
+
+§30 of [`docs/signals.md`](docs/signals.md) landed `libraryReachChangeOf(was,
+now)` in `src/signals/library-reach-change.ts`, published from
+`@jam-overture/loom/signals` and recorded as
+[0279](decisions/0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md).
+It is the third comparison of a library and the three answer different questions
+about one change: §26 says *in how many of the places this kind stands has it
+gained or lost its reading*, §27 says what became of the words it kept, and this
+one says what became of **its readers**.
+
+**The field to draw beside the share, not behind it, is `cause`.** A movement in
+a weighted mean is readers reading differently *or* the pages they were on
+changing, and `pages` is reachable with nobody having read anything differently
+— two pages swapping their traffic moves the figure by half its range. A card
+that printed `shareWas → shareNow` with the cause a tooltip would be printing a
+traffic report as a sentence about a component. The four values have a published
+sentence each (`describeReaderShareCause`).
+
+**Three things the screen must not do**, each of them a refusal in the record
+rather than an oversight here:
+
+- **Do not subtract two ceilings.** There is deliberately no `atMost` on either
+  side, because two ceilings do not bound a difference. A screen that wants a
+  bound has `drift`, `pending` and `unreconciled` per side, and `exact`.
+- **Do not print `readersMoved` as people.** It is page views at the door's
+  scale, which is what `met` has been since 0256, and it is the figure the rows
+  are ranked by.
+- **Do not add anything across kinds.** There is no reading-wide share here for
+  the reason there is none in the census (0257).
+
+`weightMoved` is the one figure on the row that is evidence rather than an
+answer: it is published and never judged, so a screen may show it beside the
+cause and must not turn it into a verdict.
+## 2026-10-13 — the host a settings screen refuses to remove can be removed now, and the sentence saying otherwise is the only thing left
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[application]/settings/actions.ts`) ·
+**Status:** open — **nothing is broken and one screen is now wrong on purpose**;
+the framework half of the 13 October entry above is closed and this is the half
+that was never the framework's to do
+
+`renameApplication` reads the host box, notices that the person emptied it, and
+returns a fault rather than saving:
+
+> A host cannot be removed yet — only changed. Nothing was saved. Put the old
+> one back, or type a new one.
+
+That was the right thing to ship. The comment above it says exactly why — *a
+surface does not get to decide what `rename` means* — and it filed the decision
+rather than taking it. The decision is taken:
+[0276](decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md),
+and `ApplicationStore.rename` now takes `host: null` for *remove it*.
+
+**What is left is this lane's and is small.** The guard block and its comment
+come out, and the call carries the third state through — an emptied box is
+`null`, an untouched one is still absent:
+
+```ts
+const renamed = await portalApplications.rename(applicationId, {
+  name: read.value.name,
+  host: read.value.host ?? null,
+})
+```
+
+That one line is not obviously right and is why this is filed rather than done
+from outside the lane: it turns on what `readRename` means by an absent host,
+which is `_lib/registering.ts`'s question and not the framework's. If the form
+cannot tell *the box was emptied* from *the field was not submitted*, the
+reading has to be settled before the call changes — and that is the kind of
+thing a screen's owner knows and a visitor guesses.
+
+**`Loom portal` is paused as of 13 October**, so this waits, which is what
+`docs/routines.md` says a finding against a paused lane does. Nothing regresses
+while it waits: the screen refuses an edit it could now make, which is the state
+it has been in since it shipped.
+
+**Why it was not done here anyway.** The lane boundary is the whole reason the
+framework half was worth doing — the entry above was filed rather than worked
+around, and answering it by reaching into `(portal)` would make the next lane's
+filing pointless. A paused routine's directory is nobody else's.
+## 2026-10-13 — a stalled collection is now a fault, and the collection screen has a timestamp to draw beside the figure it could not judge
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the collection
+screen) · **Status:** open
+
+[0274](decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)
+adds `folded_at` to the door row and a sixth fault to `collectionHealthOf`:
+`collection-stalled`, raised where page views are waiting to be folded and the
+last fold of that revision is older than the schedule the caller handed in. It
+is the fault [0271](decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)
+drafted and dropped, now answerable.
+
+**What changes on the screen that lane already has filed.**
+
+1. **`collectionHealthOf` takes a third argument now**, and it is optional. With
+   no `CollectionSchedule` the reading is exactly what it was yesterday — five
+   faults and an unjudged `pending`. With one it is six faults. The schedule is
+   two numbers: the instant the reading is taken, and `foldsWithinMs`, the
+   deployment's collection interval **plus** its rollup window. The second
+   number has nowhere to be configured today, which is the other finding filed
+   with this one.
+2. **`PageHealth.foldedAt` is the sentence to draw beside `pending`** — *the last
+   fold of this page was at nine this morning* reads before any verdict about
+   whether that is late, and it is published whether or not a schedule was handed
+   in.
+3. **`unattested` is the one state never to draw as *nothing is late*.** It
+   counts the revisions with openings waiting and no fold timestamp to judge the
+   wait by, which is every row of this deployment until its next collection run
+   after the migration. A card that printed `pending` with no fault beside it
+   would let a reader take *no fault* for *on time*, which is the one misreading
+   this reading exists to prevent.
+4. **The two configuration faults are alternatives and not an addition**, so an
+   errand card for `configuration` prints one of them and never both: `drift` and
+   `pending` are the two signs of one subtraction, so an inflated revision has
+   nothing pending to be late.
+
+**Where it goes:** the collection screen filed on 13 October, beside
+`readersAffected ÷ arrivals`. It needs no new store read — the fold timestamp
+arrives on the door rows a reader screen already holds.
+
+---
+## 2026-10-13 — a deployment can state how long its rollup window is and has nowhere at all to state how often it folds
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:** open
+— **nothing is broken**; it is the half of a new reading's input that lives
+outside this lane
+
+[0274](decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)
+judges a stalled collection against `foldsWithinMs`: how long a fold may honestly
+be behind, which is **the ripeness window plus the interval between runs**. A
+batch is not folded until it ripens, and then not until the next run, so the two
+add.
+
+**Loom knows the first number and not the second.** `LOOM_SIGNAL_WINDOW_MS` is
+read by `signals-collect.ts` and defaults to an hour. How often that script runs
+is whatever schedules it — a Vercel cron, a GitHub action, a person — and
+`apps/loom/vercel.json` schedules nothing at all, so the cadence is not in this
+repository in any form.
+
+The record refuses to guess it, and that refusal is the design: a default of one
+window would fault a deployment folding hourly behind a ten-minute window on
+every page it has. So the schedule is assembled by whoever calls the reading,
+and a portal screen has one of its two numbers.
+
+**The shape, which is small:** an operator-facing setting beside the window —
+`LOOM_SIGNAL_COLLECT_EVERY_MS` is the obvious spelling — read by nothing except
+the surfaces that need to say *this collection is late*, documented in
+`docs/deployment.md` next to the cron the operator is told to set up, and
+defaulted to nothing rather than to a number. Absent, the stall stays unjudged
+and `unattested` says so, which is the honest state and not a fault.
+
+**Why it is filed rather than taken.** `apps/loom/scripts/` and the deployment
+documentation are not this lane's, and the value that matters is the one the
+operator types rather than the plumbing that reads it. The reading already works
+the moment somebody hands the two numbers in.
