@@ -1849,12 +1849,11 @@ second number of the schedule — a deployment can state its rollup window in
 
 ### 30. The readers a kind of part had, before and after · `Loom signals` · **done, 14 October**
 
-> §29 is the fold's own timestamp and the stall it makes answerable, written on
-> the branch of #627 and not yet on `main` when this was built. Its number is
-> left for it rather than taken, since that pull request was opened first and
-> nothing here depends on it. It adds a column, so it is not one of the figures
-> this plan counts as taken out of what the subsystem already knows — which is
-> why this one is the twentieth of those with §29 still in flight.
+> §29 was in flight on the branch of #627 when this was built, so its number
+> was left for it rather than taken; #627 has since landed and §29 is above.
+> It adds a column, so it is not one of the figures this plan counts as taken
+> out of what the subsystem already knows — which is why this one is the
+> twentieth of those and §29 is not the nineteenth.
 
 §26 compares a kind of part over the places both windows bore, and says plainly
 what it is not: *of the readers who met your testimonial band, the share that

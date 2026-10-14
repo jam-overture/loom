@@ -53714,3 +53714,42 @@ and `unattested` says so, which is the honest state and not a fault.
 documentation are not this lane's, and the value that matters is the one the
 operator types rather than the plumbing that reads it. The reading already works
 the moment somebody hands the two numbers in.
+
+---
+## 2026-10-14 — three decision links in `src/primitives/` point at a directory that does not exist, and nothing reads a doc comment's links
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives` (`src/primitives/`)
+· **Status:** open — **three dead links on the published API reference**; found
+by a check written for a different reason and run over the whole of `src/`
+
+A doc comment's decision links are published: the API reference on the
+documentation site is generated from these comments
+([`src/documentation.test.ts`](src/documentation.test.ts)), so a link with the
+wrong number of `../` segments renders on the site and 404s.
+
+Three in this lane are one segment short — `../decisions/` from `src/primitives/`
+resolves to `src/decisions/`, which has never existed:
+
+| file | line | record it means |
+| --- | --- | --- |
+| `src/primitives/loom.perk-list.ts` | 18 | 0008 |
+| `src/primitives/loom.tier.ts` | 24 | 0001 |
+| `src/primitives/loom.tier.ts` | 30 | 0053 |
+
+The fix is `../../decisions/` in all three.
+
+**How it was found, which is the half worth keeping.** A renumber on this lane's
+own branch dropped a segment from one link, in a file whose other eight links
+were right — invisible in a diff that is mostly a four-digit number changing. So
+this run resolved **every** decision link in `src/` and `tools/` against the
+filesystem, which took five lines of Python and found two in `src/signals/`
+(both fixed on that branch) and these three.
+
+**`src/documentation.test.ts` is the natural home for the check**, and it
+already owns the other two things a doc comment can get wrong on the way to a
+page. It is excluded from `src/primitives/` today, with the exclusion documented
+as *the one-line change that follows these gaps being closed* — so a link check
+added there would not see these three until that exclusion goes. Whether to add
+the assertion is `Loom daily build`'s call, since the file is its lane; the
+three links above are this lane's to fix either way.
+
