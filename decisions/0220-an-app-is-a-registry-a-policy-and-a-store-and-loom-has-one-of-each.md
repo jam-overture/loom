@@ -1,6 +1,6 @@
 # 0220. An app is a registry, a policy and a store — and Loom has one of each
 
-**Status:** Proposed
+**Status:** Refused — [0260](0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md) holds instead
 **Date:** 2026-10-01
 **Section:** §1, §5
 
@@ -27,6 +27,17 @@
 >
 > **Why this number.** `0208` is the highest record on `main` at `7257ad2`, and
 > no open pull request adds one.
+>
+> **Refused on 13 October.** The maintainer refused it in favour of
+> [0260](0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md):
+> a project is the unit and a deployment holds many. The refusal costs nothing
+> this record established — 0260 clause 2 keeps the triple verbatim and says only
+> that the count was wrong. What it settles is a screen: `/portal/app` is deleted
+> rather than rebuilt, because there is no one app for it to show.
+>
+> **The first record to carry `Refused`.** Everything retired until now was
+> `Superseded by`, which implies it was once accepted. This one never was, and
+> its central claim is rejected rather than overtaken.
 
 ## Context
 

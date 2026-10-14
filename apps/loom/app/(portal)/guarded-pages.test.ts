@@ -37,28 +37,23 @@ const APP = join(process.cwd(), "app", "(portal)")
  * list to stay true. That is the property worth keeping: an exemption written
  * for a page that no longer exists is exactly the door this check is for.
  *
- * `/portal/demo` is where the demo lived until it moved to a public `/demo` of
- * its own. `/portal/trees`, `/portal/calibration`, `/portal/audit` and
- * `/portal/primitives` are the old names of routes renamed into a person's
- * words — `/portal/pages`, `/portal/trust`, `/portal/checkup` and
- * `/portal/pieces` — each kept alive as a 308 so a bookmark or a link written in
- * a report still lands somewhere.
+ * **The list is one page long as of 13 October**, and that is unit 0.
  *
- * The proxy still covers all five, since all are under `/portal`. That matters
- * for the demo's: a signed-out visitor following an old link is forwarded to
- * `/demo` rather than sent to sign in for a page that needs no account.
+ * It held four 308 shims — `/portal/trees`, `/portal/calibration`,
+ * `/portal/audit` and `/portal/primitives`, the old names of routes renamed
+ * into a person's words — and they were deleted with the screens they pointed
+ * at. The front door is not on the list either: it forwards to the workspace
+ * and calls `requireActor` first, so sign-in returns a visitor to the address
+ * they typed.
+ *
+ * What is left is the sign-in page itself, which cannot require an actor to
+ * ask for one.
  *
  * The list is allowed to grow with renames and must not grow with pages. An
  * exemption covering something that reads `portalStore` would be the failure it
  * exists to make visible, so the test below asserts that none of them does.
  */
-const UNGUARDED_BY_DESIGN: readonly string[] = [
-  "portal/sign-in/page.tsx",
-  "portal/trees/[[...rest]]/page.tsx",
-  "portal/calibration/[[...rest]]/page.tsx",
-  "portal/audit/[[...rest]]/page.tsx",
-  "portal/primitives/[[...rest]]/page.tsx",
-]
+const UNGUARDED_BY_DESIGN: readonly string[] = ["portal/sign-in/page.tsx"]
 
 const pagesUnder = (directory: string, prefix = ""): readonly string[] =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -85,19 +80,13 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts only the sign-in page and the five redirects", () => {
-    expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
-      "portal/audit/[[...rest]]/page.tsx",
-      "portal/calibration/[[...rest]]/page.tsx",
-      "portal/primitives/[[...rest]]/page.tsx",
-      "portal/sign-in/page.tsx",
-      "portal/trees/[[...rest]]/page.tsx",
-    ])
+  it("exempts the sign-in page and nothing else", () => {
+    expect([...UNGUARDED_BY_DESIGN].sort()).toEqual(["portal/sign-in/page.tsx"])
   })
 
   /**
-   * Every exemption still has to be the thing it was exempted for. All four
-   * redirects are exempt because they render nothing, and the front door was on
+   * Every exemption still has to be the thing it was exempted for. The four
+   * redirects were exempt because they rendered nothing, and the front door was on
    * this list for the same reason until it stopped being a redirect — so the
    * reason is asserted rather than remembered.
    */

@@ -15,13 +15,14 @@ import {
   writeCheckSchema,
   WRITE_CHECKS,
   type WriteCheck,
+  type WriteCheckSeams,
 } from "./checks.js"
 import { dispositionSchema, type Disposition } from "./disposition.js"
 import { gate } from "./gate.js"
 import type { CompositionRuntime } from "./pipeline.js"
 import { policyFingerprintOf, rulesetContinuityOf } from "./policy-fingerprint.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
-import { EVERY_TYPE_UNDECLARED, type PropsVocabulary } from "./vocabulary.js"
+import { EVERY_TYPE_UNDECLARED, NOTHING_PLACED, type PropsVocabulary } from "./vocabulary.js"
 
 const spare = sequentialIdFactory("checks")
 
@@ -62,6 +63,7 @@ const CHECK_OF: {
 } = {
   propsVocabulary: "props",
   bindingReader: "bindings",
+  slotPlacer: "regions",
 }
 
 describe("the vocabulary", () => {
@@ -70,7 +72,7 @@ describe("the vocabulary", () => {
   })
 
   it("publishes the checks in the order a composition root meets them", () => {
-    expect(WRITE_CHECKS).toEqual(["props", "bindings"])
+    expect(WRITE_CHECKS).toEqual(["props", "bindings", "regions"])
   })
 
   it("parses its own members and refuses anything else", () => {
@@ -88,16 +90,27 @@ describe("wiredChecksOf", () => {
   it("reports each seam on its own", () => {
     expect(wiredChecksOf({ propsVocabulary: everythingValid })).toEqual(["props"])
     expect(wiredChecksOf({ bindingReader: readsNothingNamed })).toEqual(["bindings"])
+    expect(wiredChecksOf({ slotPlacer: NOTHING_PLACED })).toEqual(["regions"])
   })
 
-  it("reports both in canonical order however the runtime was written", () => {
+  it("reports all three in canonical order however the runtime was written", () => {
     expect(
-      wiredChecksOf({ bindingReader: readsNothingNamed, propsVocabulary: everythingValid })
-    ).toEqual(["props", "bindings"])
+      wiredChecksOf({
+        slotPlacer: NOTHING_PLACED,
+        bindingReader: readsNothingNamed,
+        propsVocabulary: everythingValid,
+      })
+    ).toEqual(["props", "bindings", "regions"])
   })
 
   it("treats a key present and undefined as a seam nobody handed over", () => {
-    expect(wiredChecksOf({ propsVocabulary: undefined, bindingReader: undefined })).toEqual([])
+    expect(
+      wiredChecksOf({
+        propsVocabulary: undefined,
+        bindingReader: undefined,
+        slotPlacer: undefined,
+      })
+    ).toEqual([])
   })
 
   /**
@@ -176,8 +189,7 @@ describe("describeWiredChecks", () => {
 
 const judgedUnder = (
   policy: GatePolicy,
-  checkProps?: PropsVocabulary,
-  reads?: BindingReader
+  seams: WriteCheckSeams = {}
 ): { readonly assessment: ChangeAssessment } => {
   const { tree, ids } = sampleTree()
 
@@ -193,20 +205,17 @@ const judgedUnder = (
     buildProposal(spare, { intentId: spare.intentId(), delta }),
     policy,
     spare.deltaId(),
-    checkProps,
-    reads
+    seams
   )
   if (!assessed.ok) throw new Error(assessed.error.code)
 
-  expect(assessed.value.wiredChecks).toEqual(
-    wiredChecksOf({ propsVocabulary: checkProps, bindingReader: reads })
-  )
+  expect(assessed.value.wiredChecks).toEqual(wiredChecksOf(seams))
 
   return { assessment: assessed.value }
 }
 
-const judgedWith = (checkProps?: PropsVocabulary, reads?: BindingReader): Disposition =>
-  gate(judgedUnder(defaultGatePolicy, checkProps, reads).assessment, defaultGatePolicy)
+const judgedWith = (seams: WriteCheckSeams = {}): Disposition =>
+  gate(judgedUnder(defaultGatePolicy, seams).assessment, defaultGatePolicy)
 
 describe("what a judgment records", () => {
   it("stamps nothing wired as the empty list rather than leaving the field out", () => {
@@ -214,14 +223,18 @@ describe("what a judgment records", () => {
   })
 
   it("stamps the checks the assessment was handed, on an accepted judgment", () => {
-    const disposition = judgedWith(everythingValid, readsNothingNamed)
+    const disposition = judgedWith({
+      propsVocabulary: everythingValid,
+      bindingReader: readsNothingNamed,
+      slotPlacer: NOTHING_PLACED,
+    })
 
     expect(disposition.kind).toBe("accepted")
-    expect(disposition.wiredChecks).toEqual(["props", "bindings"])
+    expect(disposition.wiredChecks).toEqual(["props", "bindings", "regions"])
   })
 
   it("survives the schema a stored judgment is read back through", () => {
-    const parsed = dispositionSchema.parse(judgedWith(everythingValid))
+    const parsed = dispositionSchema.parse(judgedWith({ propsVocabulary: everythingValid }))
 
     expect(parsed.wiredChecks).toEqual(["props"])
   })
@@ -233,7 +246,7 @@ describe("what a judgment records", () => {
    * nobody wrote it down.
    */
   it("leaves the field absent on a record written before it existed", () => {
-    const { wiredChecks, ...before } = judgedWith(everythingValid)
+    const { wiredChecks, ...before } = judgedWith({ propsVocabulary: everythingValid })
 
     expect(wiredChecks).toBeDefined()
     expect(dispositionSchema.parse(before)).not.toHaveProperty("wiredChecks")
@@ -256,7 +269,7 @@ describe("what a judgment records", () => {
 describe("the week somebody wired a registry in", () => {
   it("reads as one unchanged ruleset, judged by two different write paths", () => {
     const monday = judgedWith()
-    const wednesday = judgedWith(everythingValid)
+    const wednesday = judgedWith({ propsVocabulary: everythingValid })
 
     expect(monday.policyFingerprint).toBe(wednesday.policyFingerprint)
     expect(rulesetContinuityOf([monday, wednesday].map((d) => d.policyFingerprint ?? ""))).toBe(
@@ -273,10 +286,13 @@ describe("the week somebody wired a registry in", () => {
   it("moves the fingerprint for an edited policy and the list for a rewired runtime, never the other way", () => {
     const stricter = gatePolicySchema.parse({ minimumConfidence: 0.99 })
     const underStricterRules = gate(
-      judgedUnder(defaultGatePolicy, everythingValid).assessment,
+      judgedUnder(defaultGatePolicy, { propsVocabulary: everythingValid }).assessment,
       stricter
     )
-    const sameRulesRewired = judgedWith(everythingValid, readsNothingNamed)
+    const sameRulesRewired = judgedWith({
+      propsVocabulary: everythingValid,
+      bindingReader: readsNothingNamed,
+    })
     const sameRulesBare = judgedWith()
 
     expect(underStricterRules.policyFingerprint).not.toBe(sameRulesBare.policyFingerprint)

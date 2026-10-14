@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 
-import { ProposalEffectView } from "@/app/(portal)/_components/proposal-effect"
+import { ProposalEffectView } from "./proposal-effect"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 

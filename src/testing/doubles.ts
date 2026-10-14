@@ -337,9 +337,9 @@ export const hangingEndpoint = (id: string, description: string): HangingSeam<En
  * The whole of why `buildAssessment` exists is in this one declaration: a field
  * added to `ChangeAnalysis` stops it compiling, here, in the lane that added
  * the field. A surface's fixture that spelled the record out itself would
- * instead keep compiling and start lying — ten of eighteen fields, the gap cast
+ * instead keep compiling and start lying — ten of nineteen fields, the gap cast
  * away, and the failure arriving later in whichever test is the next to narrow
- * one of the eight it left out.
+ * one of the nine it left out.
  */
 export const NOTHING_MEASURED: ChangeAnalysis = {
   operationCount: 0,
@@ -357,6 +357,7 @@ export const NOTHING_MEASURED: ChangeAnalysis = {
   unknownPrimitives: [],
   invalidProps: [],
   unreadBindings: [],
+  unplacedSlots: [],
   redirectedSubmissions: [],
   repointedBindings: [],
   shallowestAffectedDepth: 0,

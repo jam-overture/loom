@@ -4,9 +4,7 @@ import { headers } from "next/headers"
 
 import { PATH_HEADER } from "@/proxy"
 
-import { currentActor } from "@/app/(portal)/_lib/auth/identity"
 
-import { Rails } from "./_components/shell/rails"
 import { TopBar } from "./_components/shell/topbar"
 
 import "./globals.css"
@@ -67,7 +65,6 @@ export const dynamic = "force-dynamic"
 const BRINGS_ITS_OWN_CHROME = "/portal/preview"
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
-  const signedIn = (await currentActor()) !== null
   const path = (await headers()).get(PATH_HEADER) ?? ""
   const ownChrome =
     path === BRINGS_ITS_OWN_CHROME || path.startsWith(`${BRINGS_ITS_OWN_CHROME}/`)
@@ -107,21 +104,22 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         </a>
         <TopBar />
         {/*
-         * A row, rather than a fixed rail and a `pl-` on the page.
+         * A row that holds one child, which is what unit 0 left of it.
          *
-         * The rails used to be `fixed`, which meant the page had to be told how
-         * much room they took — one number in this file, matching a width in
-         * another. A second rail makes that two numbers and two files that have
-         * to agree, and the arithmetic is wrong on every screen where the
-         * second rail is absent. In a row there is no number: the rails take
-         * their own width, `flex-1` takes what is left, and a section with no
-         * submenu needs nothing said about it here.
+         * The rails were here until 13 October: a navigation listing the twenty
+         * screens this route group served, built as a row rather than a fixed
+         * rail so that no file had to be told how wide another one was. They
+         * went with the screens they pointed at — a rail naming routes that
+         * 404 is worse than no rail — and what replaces them is each surface's
+         * own shell, because the workspace and a project are different shapes
+         * and the prototype draws both ([`docs/portal.md`](../../../../docs/portal.md)).
          *
-         * `flex-col md:flex-row` is the phone, where the rails lie down above
-         * the page instead of eating 280 of 390 pixels — see `rails.tsx`.
+         * The row stays rather than collapsing to the `<main>` alone, because
+         * the navigation comes back at unit 3 and it comes back here. The
+         * column direction and the top padding are the only things it is
+         * currently doing, and both are still right.
          */}
         <div className="flex min-h-screen flex-col pt-14 md:flex-row">
-          {signedIn && <Rails />}
           {/*
            * `tabIndex={-1}` so the skip link moves real focus here rather than
            * only scrolling — a screen reader that was not moved is still reading

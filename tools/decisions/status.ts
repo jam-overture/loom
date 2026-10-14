@@ -25,13 +25,31 @@ import type { DecisionRecord } from "./record.js"
  * prose, and the README now says exactly that.
  */
 
-export type StatusOpener = "Proposed" | "Accepted" | "Superseded"
+/**
+ * `Refused` joined the three on 13 October 2026, with the first record to carry
+ * it (0220).
+ *
+ * Until that day the directory held 225 `Accepted` records, a handful of
+ * `Proposed` ones and two supersessions — **and no way at all to say that a
+ * proposal lost.** A record whose answer is no had two options, and both are
+ * lies of a kind: stay `Proposed` for ever, which reads as undecided rather
+ * than decided against, or be `Superseded by` a successor, which claims it was
+ * accepted first. The maintainer refused 0220 outright in favour of 0260, and
+ * neither word fits that.
+ *
+ * It is an opener rather than a clause on `Proposed` because the index's status
+ * column is read as a state, and *decided against* is a state. The successor,
+ * where there is one, goes in the free prose after it and is reciprocal like
+ * any other status reference (0193).
+ */
+export type StatusOpener = "Proposed" | "Accepted" | "Superseded" | "Refused"
 
 /** In the order `decisions/README.md` gives them. */
 export const STATUS_OPENERS: readonly StatusOpener[] = everyMemberOf<StatusOpener>()([
   "Proposed",
   "Accepted",
   "Superseded",
+  "Refused",
 ])
 
 export type StatusProblem = {

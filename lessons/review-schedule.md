@@ -1736,14 +1736,14 @@ Interleaved with 08, 09, 16, 17, 24 and 25. Heavy on 24, because the shape of th
 seam's answer is that lesson's rule applied to a record instead of a reading; and on
 09, because the partition cuts a list that lesson taught you to read as one thing.
 
-1. The Gate's stakes vocabulary has fourteen rules, cut into two kinds. Give the
+1. The Gate's stakes vocabulary has fifteen rules, cut into two kinds. Give the
    question each kind answers, and then say which kind can be re-run from a journalled
    record — making your answer about *what the rule reads* and not about what the
    record holds. *(09, 34)*
 2. A telemetry record holds shape and not content. Name two things an analysis
    carries that therefore never reach a record, and then say which of the Gate's
    rules stop being answerable as a result. *(17, 34)*
-3. A caller rebuilds an analysis from a record, passes six empty lists for the
+3. A caller rebuilds an analysis from a record, passes seven empty lists for the
    specifics it does not have, and re-runs `assessStakes`. Say what it gets right
    and what it gets wrong, and then say why *which* of the two it gets wrong is the
    whole objection. Your last sentence should be about populations. *(34)*
