@@ -168,16 +168,18 @@ record rather than an oversight in the filing.
 
 ## Tests
 
-`pnpm verify` was still running when this commit was written and its numbers are
-filled in below before the pull request opens. The suites this unit touches are
-green on their own, listed with their counts. Nothing skipped, nothing weakened,
-no `any`, no new `eslint-disable`.
+`pnpm verify` **green, exit 0** — **5,075 runtime tests across 225 files** and
+**5,797 app tests across 327 files**, 1,201 findings checked and none malformed,
+1,832 visuals none over 1.1MB, and 133 prerendered pages with 1,839 text
+junctions and none run together. Nothing skipped, nothing weakened, no `any`,
+no new `eslint-disable`.
 
 | suite | tests |
 | --- | --- |
 | `src/signals/library-word-reach-change.test.ts` | 22, new |
 | `src/signals/library-copy-change.test.ts` | 30, one new for the floor trigger |
 | `src/signals/silences.test.ts` | 46, the fifteenth vocabulary registered |
+| `src/signals/library-reach-change.test.ts` | 26, unchanged against the three rules it now exports |
 
 **Fourteen mutations were planted and two of them survived the first pass**,
 which is the useful half of the exercise. The twelve caught immediately: the
