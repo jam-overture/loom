@@ -23,13 +23,7 @@ Status, Date, Section, then Context, Decision, Consequences, Alternatives
 considered. Record what was rejected and why, not only what was chosen — the
 rejected options are the part a future reader cannot reconstruct.
 
-`Status` is one of `Proposed`, `Accepted`, `Superseded by NNNN`, or `Refused`.
-
-`Refused` is for a proposal that was decided against rather than overtaken. It
-says what `Proposed` for ever cannot — that somebody answered — and what
-`Superseded by NNNN` gets wrong, which is that the record was accepted first.
-Where a successor holds instead, name it after the opener; the reference is
-reciprocal like any other (0193). 0220 is the first.
+`Status` is one of `Proposed`, `Accepted`, or `Superseded by NNNN`.
 
 A record that answered several questions at once can be replaced in part. Then
 the status is `Accepted — partially superseded by NNNN`, and the replacement says
@@ -363,5 +357,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0271](0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md) | A fault in a deployment's collection is named by what it costs, with the hand it falls to, and a page's readers are counted once | Accepted | §4c (reader signals) |
 | [0272](0272-who-presses-a-reseed-is-the-gate-s-question-and-the-answer-is-what-the-reseed-costs.md) | Who presses a reseed is the Gate's question, and the answer is what the reseed costs | Accepted | §2 (the store), §4 (the Gate), §6 (the log) |
 | [0273](0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md) | The reader tables take the application now and the audience when it is ratified | Accepted | §5 (signals), §3 (portal) |
-| 0274 | *No record on this branch* | — | — |
+| [0274](0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md) | A page-view row says when the fold last touched it, and a stall is judged against a schedule the deployment hands in | Accepted | §4c (reader signals) |
 | [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Accepted | §1, §5 |
