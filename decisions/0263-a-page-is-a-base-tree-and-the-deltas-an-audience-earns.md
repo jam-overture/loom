@@ -1,6 +1,6 @@
 # 0263 — A page is a base tree and the deltas an audience earns
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-12
 **Section:** §1, §3, §5
 
@@ -13,6 +13,13 @@
 >
 > **Why this number.** `0262` is raised on the same branch and takes the number
 > below.
+>
+> **Accepted on 13 October** — *"Yes, I continue to like audience scoped
+> deltas."* It is the largest engineering commitment of the five accepted that
+> day: the store grows a dimension and a composing `TreeSource` joins
+> `treeSourceFromStore`. Clause 5 is what the adaptation plan's measurement rests
+> on, and it is why the five signal tables take both dimensions in one
+> migration.
 
 ## Context
 

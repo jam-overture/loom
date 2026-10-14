@@ -1,6 +1,6 @@
 # 0260 — A project is the unit Loom stores, governs and measures under
 
-**Status:** Proposed
+**Status:** Accepted — refuses 0220
 **Date:** 2026-10-12
 **Section:** §1, §5
 
@@ -16,6 +16,16 @@
 >
 > **Why this number.** `0259` is the highest record on `main` at `c93995d1`,
 > and no open pull request adds one.
+>
+> **Accepted on 13 October**, and **clause 4 corrected the same hour.** It said
+> `/api/reader-signals` *"authenticates a project-scoped key today and nothing
+> else"*. It authenticates nothing: there is no key check, no origin check, and
+> no middleware anywhere in the repository. Checked rather than assumed, because
+> it is the clause the portal's first unit rests on
+> ([`docs/portal.md`](../docs/portal.md)) and the plan and this record
+> contradicted each other about it. Corrected in place rather than by a
+> successor, since no decision moved and only a statement about the code was
+> wrong.
 
 ## Context
 
@@ -71,10 +81,13 @@ deployment holds many.**
    half: **the scope comes from the route, never from the body.** A reviewer is
    a reviewer *of* something.
 
-4. **A signal is filed against a project or it is refused.** `/api/reader-signals`
-   authenticates a project-scoped key today and nothing else — see 0261's
-   sibling finding. An unattributable batch is dropped rather than stored
-   against whatever tree id it happens to name.
+4. **A signal is filed against a project or it is refused.** An unattributable
+   batch is dropped rather than stored against whatever tree id it happens to
+   name. **Nothing authenticates the intake today** — no key, no origin check,
+   no middleware — so the only control a deployment has is whether the intake is
+   open at all, and this clause is therefore a unit of work rather than a
+   configuration change. Corrected on 13 October; the sentence here previously
+   said a project-scoped key was already being authenticated.
 
 5. **Nothing is migrated by guessing.** The rows that exist belong to the
    deployment that wrote them, so the migration puts them in one project named

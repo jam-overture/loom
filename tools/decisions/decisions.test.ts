@@ -241,9 +241,13 @@ describe("checkNumbering", () => {
  * Everything after the first word is a person writing, and several of the
  * records use it well — 0166 is accepted for one half and proposed for the
  * other. So the closed set is one word long.
+ *
+ * Four words since 13 October 2026: `Refused` was added with the first record
+ * decided against rather than overtaken, and this assertion is over the set
+ * rather than over a count, so it took the fourth without an edit.
  */
 describe("checkStatuses", () => {
-  it("takes each of the three openers bare", () => {
+  it("takes each opener bare", () => {
     const problems = checkStatuses(
       STATUS_OPENERS.map((opener, index) =>
         recordWith({
@@ -449,7 +453,7 @@ describe("collectDecisions", () => {
   const record = (heading: string, status: string) =>
     `${heading}\n\n**Status:** ${status}\n**Date:** 2026-09-26\n**Section:** §1\n\n## Context\n\n## Decision\n\n## Consequences\n\n## Alternatives considered\n`
 
-  it("fails the build for a status that does not begin with one of the three words", async () => {
+  it("fails the build for a status that does not begin with one of the openers", async () => {
     const directory = await withRecords(
       new Map([["0001-a.md", record("# 0001 — A", "Bananas")]])
     )
@@ -457,7 +461,7 @@ describe("collectDecisions", () => {
     const { problems } = await collectDecisions(directory)
 
     expect(blocking(problems).map((problem) => problem.message)).toEqual([
-      '0001-a.md has a status beginning "Bananas", and a status begins with one of Proposed, Accepted, Superseded',
+      '0001-a.md has a status beginning "Bananas", and a status begins with one of Proposed, Accepted, Superseded, Refused',
     ])
   })
 

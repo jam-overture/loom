@@ -1,6 +1,6 @@
 # 0275 — A connection is a read path and a write-back path, and Loom never writes into the customer's store
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-13
 **Section:** §1, §5
 
@@ -28,6 +28,8 @@
 > `0273` is the highest on `main` now, `0274` is claimed by **two** open pull
 > requests — #627 and #628, a clash of their own that neither can see — so this
 > is `0275`.
+>
+> **Accepted on 13 October**, with 0262, which it cannot precede.
 
 ## Context
 
