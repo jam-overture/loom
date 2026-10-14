@@ -357,3 +357,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0271](0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md) | A fault in a deployment's collection is named by what it costs, with the hand it falls to, and a page's readers are counted once | Accepted | §4c (reader signals) |
 | [0272](0272-who-presses-a-reseed-is-the-gate-s-question-and-the-answer-is-what-the-reseed-costs.md) | Who presses a reseed is the Gate's question, and the answer is what the reseed costs | Accepted | §2 (the store), §4 (the Gate), §6 (the log) |
 | [0273](0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md) | The reader tables take the application now and the audience when it is ratified | Accepted | §5 (signals), §3 (portal) |
+| 0274 | *No record on this branch* | — | — |
+| [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Proposed | §1, §5 |
