@@ -2,8 +2,8 @@
   "baseUrl": "http://localhost:3000",
   "outDir": "reports",
   "shots": [
-    { "path": "/", "out": "2026-10-14-marketing-the-pages-this-site-still-names-front-door-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true },
-    { "path": "/how-it-works", "out": "2026-10-14-marketing-the-pages-this-site-still-names-how-it-works-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true },
-    { "path": "/what-you-run", "out": "2026-10-14-marketing-the-pages-this-site-still-names-what-you-run-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true }
+    { "path": "/", "out": "2026-10-14-marketing-still-named-front-door-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true },
+    { "path": "/how-it-works", "out": "2026-10-14-marketing-still-named-how-it-works-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true },
+    { "path": "/what-you-run", "out": "2026-10-14-marketing-still-named-what-you-run-wide", "viewport": "wide", "waitFor": "h1", "fullPage": true }
   ]
 }

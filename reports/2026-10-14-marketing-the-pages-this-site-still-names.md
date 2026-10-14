@@ -152,14 +152,14 @@ e9462b877054cc544b1582122b9bf2e0  /               after  (this branch)
 565c707906083a5c17ed37db0f3f331f  /what-you-run    after  (this branch)
 ```
 
-![the front door, unchanged by this run](2026-10-14-marketing-the-pages-this-site-still-names-front-door-wide.webp)
+![the front door, unchanged by this run](2026-10-14-marketing-still-named-front-door-wide.webp)
 
 `/how-it-works` is the page whose module carried five of the forty mentions, and
 its `05f8745e…` is the same digest the 13 October report quoted — so this page
 has not moved in the two runs since, through a change that deleted a module and
 a change that rewrote fourteen docblocks.
 
-![the mechanism page, whose builder carried five of the forty](2026-10-14-marketing-the-pages-this-site-still-names-how-it-works-wide.webp)
+![the mechanism page, whose builder carried five of the forty](2026-10-14-marketing-still-named-how-it-works-wide.webp)
 
 ---
 
