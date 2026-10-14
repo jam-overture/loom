@@ -1,5 +1,6 @@
 import { asc, eq } from "drizzle-orm"
 
+import { applyPatch } from "../patch.js"
 import { projectSchema, type Project, type ProjectId } from "../project/project.js"
 import type { ProjectStore, ProjectStoreError } from "../project/store.js"
 import { err, ok, type Result } from "../result.js"
@@ -134,10 +135,7 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
       const current = toProject(row)
       if (!current.ok) return current
 
-      const next = projectSchema.safeParse({
-        ...current.value,
-        ...(to.name === undefined ? {} : { name: to.name }),
-      })
+      const next = projectSchema.safeParse(applyPatch(current.value, to))
       if (!next.success) {
         return err({
           code: "unreadable",

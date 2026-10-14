@@ -536,7 +536,7 @@ const worseOf = (one: KindChange, other: KindChange): number =>
  * counted apart.
  *
  * Published because the pairing is the method rather than a detail of it: a
- * reader-weighted comparison of the same kinds (0276) pairs its pages by exactly
+ * reader-weighted comparison of the same kinds (0279) pairs its pages by exactly
  * this rule, and a second hand-written copy of it would be two spellings of one
  * rule that agree today — which is what moved the counter tables' upsert keys
  * into `counters.ts` and the door's scale into `door.ts`.

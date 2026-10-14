@@ -627,6 +627,70 @@ export const describeReaderTallyStoreContract = (
         ).toEqual([4])
       })
 
+      /**
+       * The fold's own timestamp, which is the one field of this row a door
+       * write may not touch (0274).
+       *
+       * `updatedAt` cannot say when a revision was last folded, because the
+       * door writes it on every delivery — so a deployment whose rollup has
+       * stopped keeps a fresh timestamp on a row whose appearances never move
+       * again. These four facts are what make the fold's age readable instead.
+       */
+      describe("when the fold last touched the row", () => {
+        it("attests no fold on a row a door write created", async () => {
+          const store = await make()
+          await store.opened([opening({ views: 3 })], AT)
+
+          expect(unwrap(await store.pageViews())[0]?.foldedAt).toBeUndefined()
+        })
+
+        it("stamps the instant a window was folded", async () => {
+          const store = await make()
+          await store.apply({ tallies: [], funnels: [], appearances: [opening()] }, AT)
+
+          expect(unwrap(await store.pageViews())[0]?.foldedAt).toBe(AT)
+        })
+
+        /**
+         * The property the whole fault rests on: arrivals land on the request
+         * path, so if they moved this column a busy page would report a fresh
+         * fold for ever and a stalled collection would be undiagnosable.
+         */
+        it("leaves it where the fold left it when an arrival lands afterwards", async () => {
+          const store = await make()
+          await store.apply({ tallies: [], funnels: [], appearances: [opening()] }, AT)
+          await store.opened([opening({ views: 5 })], LATER)
+
+          expect(unwrap(await store.pageViews())[0]).toMatchObject({
+            opened: 5,
+            updatedAt: LATER,
+            foldedAt: AT,
+          })
+        })
+
+        it("moves it to the later of two folds", async () => {
+          const store = await make()
+          await store.apply({ tallies: [], funnels: [], appearances: [opening()] }, AT)
+          await store.apply({ tallies: [], funnels: [], appearances: [opening()] }, LATER)
+
+          expect(unwrap(await store.pageViews())[0]?.foldedAt).toBe(LATER)
+        })
+
+        /**
+         * A caller applying counters it composed itself reports no window
+         * (`tally.ts`), so it has folded nothing and may not say it has — a
+         * backfill that stamped a fold would make a stalled deployment look
+         * freshly collected.
+         */
+        it("attests no fold for a rollup that reported no window", async () => {
+          const store = await make()
+          await store.opened([opening({ views: 3 })], AT)
+          await store.apply({ tallies: [tally()], funnels: [] }, LATER)
+
+          expect(unwrap(await store.pageViews())[0]?.foldedAt).toBeUndefined()
+        })
+      })
+
       /** Two arrivals in one call are one row and one addition, not a row each. */
       it("adds up two openings of the same revision in one call", async () => {
         const store = await make()

@@ -28,7 +28,7 @@ readings of a library now stand on one list of `PageReading`s:
 | **those readers**, and how many acted inside it | §25, 0265 |
 | what a change did to those **places** | §26, 0266 |
 | what a change did to the **words** those places kept | §27, 0270 |
-| what a change did to **those readers** | §30, 0276 — new |
+| what a change did to **those readers** | §30, 0279 — new |
 
 ### The question the places comparison could not be asked
 
@@ -113,7 +113,7 @@ bitten by.
 
 ## Records
 
-- [0276](../decisions/0276-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md)
+- [0279](../decisions/0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md)
   — *A kind's share of the readers who met it is compared at each window's own
   weights, and a counterfactual says which side moved.* Accepted; nothing is
   superseded and nothing in it needs built code migrated.
@@ -123,6 +123,10 @@ requests — #627 (this lane's own, from last night) and #628 — so I took 0276
 the next number above the highest record on `main`. It leaves 0274 reported as a
 hole on this branch, which 0097 allows, and it means this record cannot be the
 third claimant of a number already being renumbered twice.
+
+**Renumbered on merge, 14 October.** #628 reached `main` first and its own
+record took 0276, so this one ships as **0279** — the next number free on `main`
+with 0277 and 0278 claimed by #633. Nothing in it changed but the number.
 
 ## Findings
 
@@ -141,7 +145,7 @@ figure (*the typical reader reached two hundred of its words and reaches three
 hundred now*). It is a third unit, it needs 0239's per-placement intersection
 first — which is the other open entry of 12 October — and its weights move for
 exactly the reason these do, so it now inherits this record's method rather than
-needing a new argument. That is written into 0276's consequences so the next run
+needing a new argument. That is written into 0279's consequences so the next run
 does not re-derive it.
 
 ## Tests

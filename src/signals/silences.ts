@@ -296,7 +296,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  *
  * **The fourteenth needed none either, and it is the first set assembled out of
  * two readings of its own question**
- * ([0276](../../decisions/0276-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md)).
+ * ([0279](../decisions/0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md)).
  * A reader-weighted comparison of a kind of part reports the census's
  * `unplaced`, the places comparison's `unpaired` and `unread`, and the three
  * states of the **door** said of a kind — which is the tenth set's five members
@@ -619,7 +619,7 @@ export const meaningOfKindReachSilence = (silence: KindReachSilence): SilenceMea
 
 /**
  * What a reader-weighted comparison of a kind of part reports, of one kind
- * (0276).
+ * (0279).
  *
  * **The fourteenth set, and the first assembled out of two readings of its own
  * question.** Five of its six members are the two it is built from — the
