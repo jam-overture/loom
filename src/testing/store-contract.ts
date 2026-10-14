@@ -329,8 +329,8 @@ export const describeTreeStoreContract = (
       })
 
       /**
-       * `changedAt` is the half of 0020's rejected recency ordering that 0277
-       * takes: the fact, not the order. These five cases are what make it a
+       * The half of the listing's rejected recency ordering that shipped: the
+       * fact, not the order (0020, 0277). These five cases are what make it a
        * fact rather than a convenience — the stamp has to be the log's own, and
        * the absence has to mean one thing.
        */

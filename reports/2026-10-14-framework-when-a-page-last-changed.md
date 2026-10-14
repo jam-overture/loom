@@ -186,6 +186,31 @@ command — the remedy the 13 October report names for the gate that reported ex
 GATE_PLACEHOLDER
 ```
 
+### The round it went red, which is the interesting one
+
+The first full run came back **`EXIT=1`, 2 failed of 4,987**, and both failures
+were this repository's own documentation rules catching this branch rather than
+anything about the store:
+
+- **`decisions.test.ts` — "are cited by a number that resolves".** 0277 linked
+  to **0276**, the record on the *other* open branch. It is a correct citation
+  and an unresolvable one, because this branch is cut from `main` and 0276 is
+  not on `main`. The cross-reference is now prose without a number: the property
+  is named, the record is not cited until it lands. This is the record-number
+  clash again, in its third costume this week.
+- **`documentation.test.ts` — "never makes a decision-record number part of a
+  published sentence".** An indented comment in `store-contract.ts` is published
+  *whole*, not first-paragraph-only, and mine read "the half of 0020's rejected
+  recency ordering that 0277 takes". Rewritten so the numbers sit in a
+  parenthetical the generator lifts — `(0020, 0277)` — which is the form the
+  maintainer's rule permits.
+
+Both are checks working. Neither was weakened to pass, and no test was skipped
+or deleted. Worth recording that the second one only fires on *indented*
+comments: the same numbers in `store.ts` sit in later paragraphs of a
+left-margin comment and are never published, so the rule is sharper than it
+looks and a run that moves a comment inward can trip it without changing a word.
+
 ## Open questions
 
 1. **0278 is the question.** Recency ordering supersedes an `Accepted` record, so

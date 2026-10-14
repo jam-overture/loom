@@ -76,11 +76,12 @@ is explicit that `create` takes no stamp the way `append` takes an `appliedAt`.
 A reader may depend on the biconditional: the stamp is present if and only if
 the revision is above zero.
 
-**3. The key is absent, not `undefined`.** The same property
-[0276](0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)
-forced on a patch, for the same reason: a `Map` and a `NULL` column reach an
-absence by different routes, and nothing downstream should be able to tell which
-route a row took.
+**3. The key is absent, not `undefined`.** The same property a patch field's
+cleared state was given on an open branch this week, for the same reason: a
+`Map` and a `NULL` column reach an absence by different routes, and nothing
+downstream should be able to tell which route a row took. Not cross-referenced
+by number here, because that record is not on `main` yet and a citation that
+does not resolve is the failure this repository already checks for.
 
 **4. This extends 0020 part 3 rather than contradicting it, and 0020 is left as
 it stands.** That part reads "a listing is a summary — `treeId` and `revision` —
