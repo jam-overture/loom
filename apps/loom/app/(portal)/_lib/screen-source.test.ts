@@ -9,14 +9,16 @@ describe("portalScreens", () => {
     const routes = screens.map((screen) => screen.route)
 
     expect(routes).toContain("/portal")
-    expect(routes).toContain("/portal/pages")
-    expect(routes).toContain("/portal/pages/[treeId]")
-    expect(routes).toContain("/portal/rules")
+    expect(routes).toContain("/portal/new")
+    expect(routes).toContain("/portal/preview")
+    expect(routes).toContain("/portal/preview/[project]")
     expect(routes).toContain("/portal/sign-in")
   })
 
   it("keeps a dynamic segment as Next writes it, rather than resolving it", () => {
-    expect(screens.map((screen) => screen.route)).toContain("/portal/trees/[[...rest]]")
+    expect(screens.map((screen) => screen.route)).toContain(
+      "/portal/preview/[project]/pages/[tree]"
+    )
   })
 
   it("returns each screen once, in route order", () => {
@@ -62,9 +64,14 @@ describe("isForwarding", () => {
    * The distinction above, asserted against the two real files rather than
    * against a string — this is the case a heuristic on `redirect(` got wrong,
    * and a fixture cannot go stale the way the source can.
+   *
+   * It read the `/portal/trees` shim until 13 October, when unit 0 deleted the
+   * four renamed-route shims with the screens they pointed at. The front door
+   * is the forward now: it sends a signed-in visitor to the workspace, renders
+   * no element, and will stop forwarding at unit 3.
    */
-  it("separates the portal's 308s from the one page a signed-out visitor lands on", () => {
-    const forward = screenSource(portalFile("portal", "trees", "[[...rest]]", "page.tsx"))
+  it("separates a forward from the one page a signed-out visitor lands on", () => {
+    const forward = screenSource(portalFile("portal", "page.tsx"))
     const landing = screenSource(portalFile("portal", "sign-in", "page.tsx"))
 
     expect(isForwarding(forward)).toBe(true)

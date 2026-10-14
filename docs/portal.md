@@ -153,9 +153,32 @@ a screen per concept · a second notion of *app* beside the project (0220).
 
 ---
 
-## Unit 0 · The demolition
+## Unit 0 · The demolition — **done 13 October**
 
-**One pull request. Nothing else starts until it is on `main`.**
+**One pull request, and it landed with three amendments to the manifest below.**
+Measured after: the route group is **13,213 lines of source and 12,454 of
+tests across 140 files, with 11 routes** — down from 39,610 / 40,768 / 379 / 31.
+~56,600 lines deleted.
+
+| What changed from the manifest | Why |
+| --- | --- |
+| **`/portal/new` is kept** | It landed on `main` after the audit and is a real, store-backed registration screen — it creates projects and applications through `@jam-overture/loom/store`. It is unit 4's subject, so deleting it would have meant rebuilding it |
+| **Sixteen readings are kept, not six** | `waiting`, `proposed-view`, `undoing`, `reversal`, `revision-view`, `delta-summary`, `effect-view`, `waiting-effect`, `unreadable-change`, `proposal-effect`, `part-name`, `piece-view`, `episode-view`, `outcome`, `refusal`, `signin-view` — the dependency closure of the keep-set, measured rather than guessed, and all of it the holds-and-undo family that units 6 and 7 are defined around |
+| **`_components/` was cut, not kept** | 2,736 lines of it was furniture for the deleted screens. What survives is what the surviving pages import: `form`, `screen`, `state-notice`, `technical-detail`, `under-construction`, and the shell's `topbar` and `signed-in-as`. The rails went with the screens they pointed at |
+
+**The audit was wrong about one number and it is corrected here.** It said one
+screen read a store. Ten screen directories read real data through `_lib` view
+models; what was invented was the prototype, not the portal. The verdict that
+drove this cut was never *it is fake* — it was *I cannot make heads or tails of
+what I should be looking at* — and twenty cross-linked screens over four
+vocabularies is that, whether the data behind them is real or not.
+
+`(preview)` — a separate route group holding one page,
+`/portal/pages/[treeId]/surface` — was not touched. It draws a governed tree out
+of the store with the portal's own registry, which makes it the only place in
+the repository where a stored tree is actually rendered.
+
+### The manifest, as approved
 
 ### What dies — ~29,400 lines of source, ~38,000 of tests
 
