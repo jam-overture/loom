@@ -54,6 +54,102 @@ the fold, one 13,298px and unscrollable to its end, 32 interactive controls in
 | **Depth of the cut** | Delete the screens, keep the seams |
 | **The one job** | Register an app and get signals flowing |
 | **The prototype** | Still the target shape, and it may not ship on invented data |
+| **The first connection** | A pull request against the customer's repository |
+| **Roles** | An acceptance ceiling on the Gate's own stake scale, not a second permission system |
+| **Primitives** | Read-only. The portal shows the registry and cannot change it |
+| **Personas** | Audience-scoped deltas (0263), which is the same object as a variant |
+
+---
+
+## The model
+
+Settled with the maintainer on 13 October, after he asked how a platform that
+hooks up other people's Loom pages should be organised.
+
+### A connection is a pair of adapters
+
+The one question everything else hangs off: **where the tree of record lives,
+and how an accepted change gets back to it.** Registration is not an account
+form; it is establishing a **read path** and a **write-back path** ([0275](../decisions/0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md)).
+
+| Connection | Loom reads state by | An accepted change returns by | Loom holds |
+| --- | --- | --- | --- |
+| A project on a machine | `loom push` from that machine | `loom pull` writes files; the developer commits | a key, nothing more |
+| **A project in a repository** | a GitHub App reading the tree, or CI uploading a snapshot | **a pull request against their repo** | a repo-scoped token |
+| An app serving from its own store | their app ships a snapshot | their app **pulls** accepted deltas and applies them | nothing into their database |
+
+**Write-back is taken, never pushed.** Loom holds no write credential into a
+customer's database and never calls their running app. That is what keeps an
+outage here out of their failure domain, and it is 0262 clause 2 made
+operational.
+
+**The repository connection is first**, because it is the most common one and
+because a pull request needs no runtime trust at all.
+
+Above the pair, every plane below is identical in all three shapes. That is what
+makes this one product rather than three integrations.
+
+### Six planes
+
+| Plane | Owns |
+| --- | --- |
+| **Identity** | accounts, projects, roles, keys |
+| **Connection** | the adapter pair, its credentials, its health |
+| **Observation** | signal ingest → tallies → readings |
+| **Governance** | the tree, revisions, policy, holds, proposals, the record |
+| **Reasoning** | model credentials, briefs, the pipeline from readings to proposals |
+| **Library** | what an app can be built from — read-only, synced from its registry |
+
+Three of these were screen families in the old portal and are not capabilities
+at all:
+
+- **There is no primitive management.** A primitive is a component in the
+  customer's repository. The portal shows the registry as synced data; *which*
+  of it the AI may use is a policy field.
+- **There is no tree editing.** Governance means reviewing the revisions that
+  are waiting on a person: what a proposal would change, accept, refuse, revert.
+  A hand edit, if ever offered, is a proposal with origin `human` through the
+  same Gate.
+- **There is no second logging story.** Everything that happens to a project is
+  one event stream — batch received, proposal raised, held, accepted, refused,
+  reverted, sync opened, key rotated. `Activity`, `History`, `Readers`, `Trust`
+  and `Checkup` were five views of that one table.
+
+### Roles are acceptance ceilings
+
+The only authority question Loom actually has is **who may release a held
+change**, and the Gate already carries the scale: four stake levels, and
+`autoApplyCeiling` as a per-origin ceiling over them. A role is the same shape
+with an actor where the origin is, so there is one vocabulary of authority
+rather than two that can disagree.
+
+| Role | May accept up to | Also |
+| --- | --- | --- |
+| Viewer | — | reads the record |
+| Approver | `medium` | |
+| Owner | `critical` | policy, credentials, creating and deleting projects |
+
+A held change above an actor's ceiling says **who can release it**, which is
+what the difference between *waiting on you* and *waiting on an owner* is made
+of on the workspace screen.
+
+### Three surfaces
+
+- **Workspace** — the projects, each saying whether it is receiving, how much,
+  how much went wrong, and what is waiting on you.
+- **Project** — connection, what is waiting, what happened. Tabs: Pages (trees
+  and audiences) · Pieces (the synced catalogue) · Rules (policy) · Logs (the
+  stream) · Settings (connection, keys, people).
+- **Sign-in.**
+
+This is approximately the prototype, which is the reason it reads better than
+what it replaces: it is the first version organised by plane rather than by
+concept. Every screen in the old portal was a noun somebody needed a page for.
+
+### Refused up front
+
+A write credential into a customer's store · a page builder · per-user trees ·
+a screen per concept · a second notion of *app* beside the project (0220).
 
 ---
 
@@ -134,17 +230,31 @@ is refused; a second project's signals are never visible from the first.
 Each is one pull request, and **do not start a unit whose input is not on
 `main`.**
 
-| # | Unit | Blocked on |
-| --- | --- | --- |
-| 1 | **The signal tables take project and audience.** One migration over `loom_reader_signals`, `_tallies`, `_funnels`, `_regions`, `_page_views`, plus `project_id` on `loom_holds`, `loom_policy_revisions`, `loom_telemetry` | **0263 being accepted or refused** |
-| 2 | **Accounts.** The environment roster goes; the actor comes from the session and the scope from the route (0027) | unit 0 |
-| 3 | **The workspace.** The prototype's project list, wired: create, delete, switch | units 1, 2 |
-| 4 | **Registration and the key.** Project id, ingest key, a snippet to paste, and `/api/reader-signals` authenticating it. **It authenticates nobody today** | unit 3 |
-| 5 | **Arrival.** The prototype's logs screen against the project's own signals | unit 4 |
+| # | Unit | Plane | Blocked on |
+| --- | --- | --- | --- |
+| 1 | **The signal tables take project and audience.** One migration over `loom_reader_signals`, `_tallies`, `_funnels`, `_regions`, `_page_views`, plus `project_id` on `loom_holds`, `loom_policy_revisions`, `loom_telemetry` | observation | **0263** |
+| 2 | **Accounts and roles.** The environment roster goes; the actor comes from the session, the scope from the route (0027), and a role is a ceiling on the stake scale | identity | unit 0 |
+| 3 | **The workspace.** The prototype's project list, wired: create, delete, switch | identity | units 1, 2 |
+| 4 | **Registration and the key.** Project id, ingest key, a snippet to paste, and `/api/reader-signals` authenticating it. **It authenticates nobody today** | connection | unit 3 |
+| 5 | **Arrival.** The prototype's logs screen against the project's own signals | observation | unit 4 |
 
-**Then stop and look at it.** The pages inspector, the rules screen, trust,
-checkup and readers are not in this sequence. They were the portal; they are now
-things to re-earn one at a time, each behind its own unit in this file.
+**That is the one job.** What follows it is already decided in shape and is not
+started until the five above are on `main`:
+
+| # | Unit | Plane | Blocked on |
+| --- | --- | --- | --- |
+| 6 | **The read path.** A repository hands Loom its current tree — snapshot artifact or evaluated module, shape still owed (0275) | connection | unit 5, **0275** |
+| 7 | **The queue.** Revisions waiting on a person: what the proposal would change, accept, refuse, revert, and who may release it | governance | unit 6 |
+| 8 | **The pull request.** An accepted revision becomes a PR against their repository. The loop closes here | connection | unit 7 |
+| 9 | **Audiences, then the model seam** | governance, reasoning | unit 8 |
+
+**Units 1–5 and unit 6 are independent of each other**, so the read path may run
+in parallel with the signal work if seeing a real tree sooner is worth more than
+finishing one thread.
+
+The pages inspector, the rules screen, trust, checkup and readers are not in
+either table. They were the portal; they are now things to re-earn one at a
+time, each behind a unit in this file.
 
 > **Standing constraint until unit 1 is on `main`: the portal must not offer a
 > second project.** A create button over a ledger that cannot tell two apps
@@ -175,9 +285,10 @@ unit 0.
 
 ## Blocked on the maintainer
 
-1. **Accept or refuse 0260, 0261, 0262, 0263 — and 0220.** The whole model is
-   proposed. Unit 1 cannot start without 0263, and this plan deletes `Your app`
-   on the strength of 0220 staying refused.
+1. **Accept or refuse 0260, 0261, 0262, 0263, 0275 — and 0220.** The whole model
+   is proposed, 0275 included, and 0275 cannot be accepted ahead of 0262. Unit 1
+   cannot start without 0263, unit 6 without 0275, and this plan deletes `Your
+   app` on the strength of 0220 staying refused. **One pass clears all six.**
 2. **Go-ahead for unit 0.** The manifest above is exact; the deletion is one
    verified pass and is ready to run.
 3. **When `Loom portal` resumes, and under what charter.** `docs/routines.md`
@@ -191,3 +302,4 @@ unit 0.
   arrivals is infrastructure, and the queue is the reason any of it exists.
 - **Governing the marketing site or the documentation.** 0259 settles both.
 - **A second app per deployment.** 0220 stays refused; a project is the unit.
+- Everything under *Refused up front* in the model above.
