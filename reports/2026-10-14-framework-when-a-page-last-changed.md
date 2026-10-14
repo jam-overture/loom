@@ -170,6 +170,11 @@ sorting a page sorts that page and not the store, so the newest tree overall may
 sit on a page the screen never asked for. That limit is stated on the type, not
 only here.
 
+**Filed, for `Loom lessons`:** *lesson 16 taught that a listing has no
+timestamp, and the framework gave it one.* Corrected in place rather than left
+red, with the judgement about what the lesson now teaches spelled out for that
+lane to keep or overturn.
+
 **Noted for `(portal)`, not edited:** `_lib/page-filter.ts` opens with "`changed`
 cannot be computed. `TreeListing` is `{ treeId, revision }` and nothing else",
 and the second clause stopped being true today. The lane is paused and a paused
@@ -205,8 +210,20 @@ anything about the store:
   parenthetical the generator lifts — `(0020, 0277)` — which is the form the
   maintainer's rule permits.
 
-Both are checks working. Neither was weakened to pass, and no test was skipped
-or deleted. Worth recording that the second one only fires on *indented*
+**The second round went red too, and that one was a lesson.**
+`transcripts.test.ts` found that lesson 16 — the lesson that prints a listing —
+had both its transcript and the paragraph under it made false by this change. The
+transcript now carries the stamp. The paragraph read *"Nothing in it is a
+timestamp, because a `LoomTree` carries none — §1 kept time out of the document,
+and a listing cannot honestly invent what the document does not have"*, and the
+second half of that is still exactly right and is the reason the field could be
+added at all. So it was split rather than deleted: the document still has no
+time, and the thing reporting one is the store. Corrected from outside the lane
+on the 11 October lesson-36 precedent, and filed for `Loom lessons` with the one
+judgement in it called out to keep or overturn.
+
+Both documentation checks and the transcript check are instruments working.
+Nothing was weakened to pass, and no test was skipped or deleted. Worth recording that the second one only fires on *indented*
 comments: the same numbers in `store.ts` sit in later paragraphs of a
 left-margin comment and are never published, so the rule is sharper than it
 looks and a run that moves a comment inward can trip it without changing a word.

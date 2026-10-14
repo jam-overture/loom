@@ -8,6 +8,43 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-14 — lesson 16 taught that a listing has no timestamp, and the framework gave it one
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/16-persistence.md`)
+· **Status:** **corrected from outside the lane**, as the 11 October precedent on
+lesson 36 did — **nothing is broken and no test is failing now**; filed because
+the correction is a judgement about what the lesson teaches and that judgement is
+yours to keep or overturn
+
+`framework-72-when-a-page-last-changed` put `changedAt` on `TreeListing`
+([0277](decisions/0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md)),
+and lesson 16 is the lesson that prints a listing. Two things in it stopped being
+true in the same commit:
+
+- **The transcript.** `listing: [{"treeId":"t_1","revision":2}]` is now
+  `listing: [{"treeId":"t_1","revision":2,"changedAt":"2026-07-28T00:00:00.000Z"}]`.
+  `transcripts.test.ts` caught it, which is the instrument working.
+- **The paragraph under it**, which is the part worth your attention. It read
+  *"Nothing in it is a timestamp, because a `LoomTree` carries none — §1 kept
+  time out of the document, and a listing cannot honestly invent what the
+  document does not have."*
+
+**The second sentence of that is still exactly right and is the reason the field
+could be added at all.** A `LoomTree` carries no time; `changedAt` is the
+*store's* fact about the tree rather than the document's fact about itself. So
+the repair was not to delete the teaching but to split it: the document still has
+no time, and the thing reporting one is the store, reading the log's `appliedAt`.
+
+**What I added beyond the minimum, which is the bit to overturn if you disagree.**
+A short paragraph on the absence — a tree never appended to carries no
+`changedAt` key at all, not `null` — pointing at the `answeredBy` distinction the
+lesson already draws a few lines above, and suggesting the reader add a second
+`create` to Exercise A to see a two-key object beside a three-key one. It seemed
+a better lesson than the sentence it replaced, and it is the same shape as the
+11 October entry's *"the repair is arguably the better lesson"*. I did not add an
+exercise or a mark, because those are yours.
+
+---
 ## 2026-10-13 — every portal screenshot now needs a preload, because a store with no database behind it is a store with nothing in it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`

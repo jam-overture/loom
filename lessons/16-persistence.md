@@ -598,7 +598,7 @@ at creation, revision: 0
 append returned revision: 1 2
  r1 p_1 remove base 0 by model (nobody had to approve it)
  r2 p_2 configure base 1 by model (nobody had to approve it)
-listing: [{"treeId":"t_1","revision":2}]
+listing: [{"treeId":"t_1","revision":2,"changedAt":"2026-07-28T00:00:00.000Z"}]
 log entries: 2
 ```
 
@@ -608,11 +608,24 @@ Three things worth naming.
 caller that renders next, and making it re-read would be an invitation to render
 a revision that is not the one it just produced.
 
-**The listing is one number, and one number is the whole summary.** Revision
-starts at 0 and increments once per accepted delta, so it is also the length of
-the log. Nothing in it is a timestamp, because a `LoomTree` carries none — §1
-kept time out of the document, and a listing cannot honestly invent what the
-document does not have.
+**The listing is a summary, and the revision is most of it.** Revision starts at
+0 and increments once per accepted delta, so it is also the length of the log.
+
+The stamp beside it is worth reading carefully, because it is *not* the document
+telling you when it changed. A `LoomTree` still carries no time at all — §1 kept
+time out of the document, and a listing cannot honestly invent what the document
+does not have. `changedAt` is the **store's** fact about the tree: it is the
+`appliedAt` of the newest entry in the log, which is why it reads
+`2026-07-28T00:00:00.000Z` here — the instant this exercise handed to `append`,
+not the instant the test ran.
+
+Which makes the absence worth as much as the presence. A tree that has never
+been appended to has no newest entry, so it carries **no `changedAt` key at
+all** — not `null`, not an empty string. Add a second `create` to Exercise A
+without appending to it, print the listing again, and you will see one object
+with three keys beside one with two. That is the same distinction this lesson
+draws about `answeredBy` a few lines up: a fact nobody observed is absent rather
+than invented.
 
 **`answeredBy` is absent, not `undefined`.** Nobody had to approve either of
 these, so the key is not there at all — which is the shape a Postgres row with a
