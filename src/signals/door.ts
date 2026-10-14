@@ -2,18 +2,19 @@ import type { RevisionPageViews } from "./page-views.js"
 import type { ReachSilence } from "./reach.js"
 
 /**
- * What one page's door contributes to every figure taken against its readers.
+ * The scale a page's door counts in, which three readings of a library share.
  *
  * A share of the readers who met something is a weighted mean of per-page
  * shares, and every term of it has to be put on the scale the door counts in
  * before two pages can be added together
  * ([0250](../../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md),
  * [0256](../../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)).
- * That scaling is one rule, and until now it was **three hand-written copies of
- * one rule**: a census of what readers do inside a kind of part
+ * That scaling is one rule, and until a third reading needed it, it was **two
+ * hand-written copies of one rule**: a kind's share of the readers who met it
+ * and a census of what readers do inside a kind of part
  * ([0265](../../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md))
- * and a kind's share of the readers who met it each carried their own, and a
- * comparison of two windows of the second would have carried a third.
+ * each carried their own, and a comparison of two windows of the first would
+ * have carried a third.
  *
  * Two spellings of one rule that agree today are a thing this subsystem has
  * been bitten by before — the upsert keys of the four counter tables, moved
@@ -27,6 +28,8 @@ import type { ReachSilence } from "./reach.js"
  * Pure, and the arithmetic is a minimum of two whole numbers. It reaches no
  * store, no clock and no DOM, and nothing in it survives into a browser bundle.
  */
+
+/** What one page's door contributes to every figure taken against its readers. */
 export type PageDoor = {
   /**
    * `min(appearances, opened)`: the page views a rollup folded, at the door's
@@ -34,9 +37,8 @@ export type PageDoor = {
    *
    * It is `appearances ÷ (1 + inflation)` and is **taken as that minimum of two
    * whole numbers**, because the division of three floats agrees with it to
-   * fifteen places and not to sixteen, and
-   * [0229](../../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)
-   * has already been bitten by exactly that.
+   * fifteen places and not to sixteen — which a share of readers has already
+   * been bitten by (0229).
    */
   readonly counted: number
   /**

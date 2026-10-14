@@ -191,8 +191,8 @@ export type KindReachChangeSilence =
    * It stands in both windows and in no place that is in both.
    *
    * Every placement was gained or lost, so there is nothing held still to
-   * compare — 0266's reason, and an answer about the **library** rather than
-   * about its readers.
+   * compare — which is an answer about the **library** rather than about its
+   * readers, and the places comparison's own reason (0266).
    */
   | "unpaired"
   /**
@@ -280,14 +280,15 @@ export type KindReachMovement =
    * compared against itself is in. A movement smaller than the last bit of a
    * float is reported as a movement rather than as this, and no threshold is
    * invented to prevent it: {@link KindReachChange.shift} is the number, and the
-   * comparison with no division in it is 0266's count of places.
+   * comparison with no division in it is the count of places (0266).
    */
   | "held"
   /**
    * No reader reached any comparable place of it in either window.
    *
-   * Kept apart from `held` for the reason 0266 and 0251 keep their own version
-   * of it apart: *met everywhere and read nowhere, and still read nowhere* is
+   * Kept apart from `held` for the reason the comparison of places and the
+   * comparison of what readers did keep their own version of it apart
+   * (0266, 0251): *met everywhere and read nowhere, and still read nowhere* is
    * the one state here that is an instruction.
    */
   | "still-unread"
@@ -467,9 +468,9 @@ export type KindReachChange = {
    * comparable place's share of its side's total weight, in `[0, 1]`.
    *
    * The share of the weight that would have to be somewhere else for the two
-   * sides to be weighted alike — 0247's arithmetic for a readership, over
-   * places rather than regions. 0 is a comparison weighted identically on both
-   * sides, and 1 is two sides with no weight in common.
+   * sides to be weighted alike — the arithmetic a comparison of two readerships
+   * uses (0247), over places rather than regions. 0 is a comparison weighted
+   * identically on both sides, and 1 is two sides with no weight in common.
    *
    * **Published and never judged.** A weighted mean whose weights barely moved
    * is a comparison of readers; one whose weights moved a long way may still be
@@ -758,8 +759,8 @@ const causeOf = (
 
 /**
  * Half the sum of the absolute movements in each place's share of its side's
- * weight, which is 0247's figure for a readership over places rather than
- * regions.
+ * weight, which is the figure a comparison of two readerships publishes
+ * (0247), over places rather than regions.
  *
  * Nought where either side has no weight at all, which a silence has already
  * accounted for.
@@ -890,10 +891,10 @@ const add = (
   into.countedWas += doors.was.counted
   into.countedNow += doors.now.counted
   /**
-   * `reached × counted ÷ appearances`, in that order, because it is the order
-   * 0256 publishes: a surface drawing one window's share beside this one's
-   * `shareNow` is drawing the same number, and three floats multiplied and
-   * divided in two orders agree to fifteen places and not to sixteen.
+   * `reached × counted ÷ appearances`, in that order, because it is the
+   * published order (0256): a surface drawing one window's share beside this
+   * one's `shareNow` is drawing the same number, and three floats multiplied
+   * and divided in two orders agree to fifteen places and not to sixteen.
    */
   into.metWas += (reachedWas * doors.was.counted) / doors.was.appearances
   into.metNow += (reachedNow * doors.now.counted) / doors.now.appearances
@@ -1104,10 +1105,10 @@ export const libraryReachChangeOf = (
 
       /**
        * A placement is paired under a key only where it is of that kind on both
-       * sides, which is 0266's rule and where the two keys answer differently: a
-       * node recast into another type is a place one type left and another took,
-       * while the role rows hold it still wherever the two types play the same
-       * part.
+       * sides, which is the places comparison's rule (0266) and where the two
+       * keys answer differently: a node recast into another type is a place one
+       * type left and another took, while the role rows hold it still wherever
+       * the two types play the same part.
        */
       const sameType: readonly KindKey[] =
         part.type === counterpart.type ? [{ by: "type", type: part.type }] : []

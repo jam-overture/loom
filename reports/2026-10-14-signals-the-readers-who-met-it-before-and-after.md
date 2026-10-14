@@ -177,6 +177,17 @@ The two that survived, and the tests they produced:
   two scales equal. The test now compares a window of 100 arrivals against one of
   200 and asserts `readersMoved` is 60 and not 30.
 
+**`src/documentation.test.ts` failed the first full run, twice, and both were
+mine.** `door.ts` opened with a paragraph *attached* to its first export rather
+than detached from it, which would have published the module's whole
+explanation as documentation for one type and left the module heading blank; and
+eight doc comments made a record number part of a published sentence —
+*0266's reason*, *0247's arithmetic* — where the site can only lift a number
+out of a parenthetical. Both are habits that are invisible in a source file and
+wrong on a page, which is what that check exists for. Fixed by restructuring
+`door.ts`'s opening and rewriting the eight sentences; the API reference was
+regenerated after.
+
 Every planted mutation was re-run after the arithmetic was reordered to match
 0256's published order of operations — `reached × counted ÷ appearances`, so that
 a surface drawing one window's share beside this comparison's `shareNow` is
