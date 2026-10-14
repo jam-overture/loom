@@ -8998,7 +8998,7 @@
             {
               "name": "TreeListing",
               "kind": "type",
-              "signature": "type TreeListing = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n};",
+              "signature": "type TreeListing = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** The newest log entry's `appliedAt`; absent when `revision` is 0. */\n    readonly changedAt?: string;\n};",
               "truncated": false,
               "summary": "What a listing says about a tree without loading it."
             },
@@ -13999,7 +13999,7 @@
             {
               "name": "appendOf",
               "kind": "function",
-              "signature": "const appendOf: (delta: TreeDelta, proposal?: string) => AppendRequest",
+              "signature": "const appendOf: (delta: TreeDelta, proposal?: string, \n/**\n * When the runtime applied it. Defaulted, because almost every case here is\n * about what a store does with a delta rather than when; named by the cases\n * that are, which cannot be written at all if every append shares one stamp.\n */\nappliedAt?: string) => AppendRequest",
               "truncated": false,
               "summary": ""
             },

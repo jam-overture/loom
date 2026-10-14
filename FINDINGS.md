@@ -53187,8 +53187,38 @@ does not get to make it, which is why this is filed rather than worked around.
 ## 2026-10-13 — a listing says what a page is at, never when, so *changed recently* cannot be drawn
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`) ·
-**Status:** open — **a prototype entry that could not be built, and the reason
-is the contract rather than the screen**
+**Status:** **half closed by `framework-72-when-a-page-last-changed`**, 14
+October — **the fact ships, the ordering is the maintainer's.** `TreeListing`
+now carries `changedAt`, the `appliedAt` of the newest entry in that tree's log,
+absent exactly when `revision` is 0; both stores fill it and five contract cases
+hold them to it, including one that compares the listing against what
+`revisions` itself hands back. Recorded as
+[0277](decisions/0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md).
+
+**What is still open is the half this entry correctly guessed was not mine
+alone.** Ordering by recency supersedes part 2 of
+[0020](decisions/0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md),
+which is `Accepted`, so it is written as
+[0278](decisions/0278-a-listing-ordered-by-recency-is-a-second-ordering-and-a-second-cursor.md)
+`Proposed` and **not implemented** — escalated rather than taken. 0278 also
+names a thing this entry did not separate and the prototype does not say: *changed
+recently* is a sort (*every page, newest first*) or a filter (*the pages touched
+in the last N days*), they want different contracts, and it proposes the sort.
+
+**What `(portal)` can do with what shipped, and the line it must not cross.** A
+deployment whose pages fit in one listing page — `MAX_LISTING_LIMIT` is 200 —
+can draw the entry honestly today by sorting the page it holds. Past that it
+cannot: sorting a page sorts that page and not the store, so the newest tree
+overall may sit on a page the screen never asked for. The type says so. Until
+0278 is answered, `?filter=changed` reading as no filter at all stays the right
+behaviour for a deployment of unknown size, and this entry stays open for that
+reason rather than because nothing happened.
+
+**One sentence in `(portal)` is now stale**, left for that lane rather than
+edited from outside it: `_lib/page-filter.ts` opens with "`changed` cannot be
+computed. `TreeListing` is `{ treeId, revision }` and nothing else", and the
+second clause stopped being true today. The reasoning around it is still right
+and is why this was filed rather than guessed at — only the premise moved.
 
 `TreeListing` is the whole of what a listing gives about a page:
 

@@ -66,6 +66,16 @@ const parseStored = (document: unknown, treeId: TreeId): Result<LoomTree, StoreE
 }
 
 /**
+ * What the log's stamp has to be to be read back.
+ *
+ * Named and shared because two reads now depend on it — a revision page and a
+ * tree listing's `changedAt` — and a column holding text is a column two
+ * readers could disagree about. One schema is what stops a listing publishing a
+ * string the revision it came from would have refused.
+ */
+const appliedAtSchema = z.string().datetime()
+
+/**
  * A log row, validated on the way out. The delta and the provenance were stored
  * as JSON by whatever version of the code was running at the time, so reading
  * them back is the same boundary `parseTree` guards — and the log is the one
@@ -77,7 +87,7 @@ const storedRevisionSchema = z.object({
   proposalId: proposalIdSchema,
   delta: treeDeltaSchema,
   provenance: provenanceSchema,
-  appliedAt: z.string().datetime(),
+  appliedAt: appliedAtSchema,
   /** Null on every row written before the column existed (0029), and on every change nobody had to allow. */
   answeredBy: z.string().nullable().optional(),
 })
@@ -235,8 +245,28 @@ export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): Tre
 
       try {
         const rows = await db
-          .select({ treeId: loomTrees.treeId, revision: loomTrees.revision })
+          .select({
+            treeId: loomTrees.treeId,
+            revision: loomTrees.revision,
+            changedAt: loomRevisions.appliedAt,
+          })
           .from(loomTrees)
+          /*
+           * The whole of the log's primary key, so this is a point lookup per
+           * listed tree rather than a scan: the row it finds is the one whose
+           * revision the snapshot is currently at, which is the newest entry by
+           * 0026's density. `leftJoin` rather than `innerJoin` because a tree at
+           * revision 0 has no entry at all, and an inner join would drop it from
+           * the listing — turning a missing stamp into a missing page.
+           */
+          .leftJoin(
+            loomRevisions,
+            and(
+              eq(loomRevisions.applicationId, loomTrees.applicationId),
+              eq(loomRevisions.treeId, loomTrees.treeId),
+              eq(loomRevisions.revision, loomTrees.revision)
+            )
+          )
           .where(
             and(
               eq(loomTrees.applicationId, project),
@@ -254,6 +284,14 @@ export const postgresTreeStore = (db: LoomDatabase, scope: StoreScope = {}): Tre
           trees: page.map((row) => ({
             treeId: treeIdSchema.parse(row.treeId),
             revision: row.revision,
+            /*
+             * Parsed rather than trusted, for the reason every other column
+             * read here is: the contract publishes this as a timestamp, and a
+             * column holding text can hold anything a writer put in it.
+             */
+            ...(row.changedAt === null
+              ? {}
+              : { changedAt: appliedAtSchema.parse(row.changedAt) }),
           })),
           cursor: rows.length > limit && last !== undefined ? last.treeId : null,
         }

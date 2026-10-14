@@ -63,15 +63,31 @@ export type AppendRequest = {
 /**
  * What a listing says about a tree without loading it.
  *
- * `revision` is the whole summary, and it is enough: it starts at 0 and
- * increments once per accepted delta, so it is also the number of entries in the
- * log. There is no timestamp because a `LoomTree` carries none — §1 kept time out
- * of the document deliberately, and a listing that invented one would be a field
- * only some implementations could fill honestly.
+ * `revision` starts at 0 and increments once per accepted delta, so it is also
+ * the number of entries in the log.
+ *
+ * `changedAt` is the stamped field 0020 named as the way out of its own
+ * ordering decision, and it is not invented here: it is the `appliedAt` of the
+ * newest entry in that tree's log, which is the same clock `StoredRevision`
+ * already publishes and the same value a caller reading `revisions` would see.
+ * A `LoomTree` still carries no time of its own — §1 kept time out of the
+ * document, and this is the store's fact about the tree rather than the
+ * document's fact about itself, which is why it can be told honestly here and
+ * could not be told there.
+ *
+ * **Absent means the tree has never been appended to**, which is exactly
+ * `revision === 0`: a tree is created without a log entry, and a store that
+ * filled this with the creation time would be answering a question nobody
+ * asked — *when did this appear* is not *when did this change*, and 0020 is
+ * explicit that `create` takes no stamp the way `append` takes an `appliedAt`.
+ * A reader may rely on the two agreeing: `changedAt` is present if and only if
+ * `revision` is greater than 0.
  */
 export type TreeListing = {
   readonly treeId: TreeId
   readonly revision: number
+  /** The newest log entry's `appliedAt`; absent when `revision` is 0. */
+  readonly changedAt?: string
 }
 
 export type ListRequest = {
@@ -237,7 +253,14 @@ export const clampListingLimit = (limit: number | undefined): number =>
  * **Pages are ordered by `treeId`, ascending.** Not by recency, however much a
  * portal would prefer it: ordering has to be total and stable for a cursor to
  * mean anything, and `treeId` is the only key every implementation is guaranteed
- * to have. Recency is a view over data the store does not hold.
+ * to have.
+ *
+ * Recency is no longer a view over data the store does not hold — every listing
+ * carries `changedAt` (0277) — but the *order* is still by id, and that half of
+ * 0020 stands until somebody decides the second one. A caller sorting a page it
+ * holds is sorting that page and not the store: beyond one page, the newest
+ * tree overall may sit on a page this caller never asked for. Ordering by
+ * recency is proposed in 0278 and is not implemented.
  */
 export interface TreeStore {
   readonly create: (tree: LoomTree) => Promise<Result<LoomTree, StoreError>>

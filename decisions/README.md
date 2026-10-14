@@ -365,3 +365,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0273](0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md) | The reader tables take the application now and the audience when it is ratified | Accepted | §5 (signals), §3 (portal) |
 | 0274 | *No record on this branch* | — | — |
 | [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Accepted | §1, §5 |
+| 0276 | *No record on this branch* | — | — |
+| [0277](0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md) | A listing carries when the page last changed, and an absent stamp means never | Accepted | §5 (the store), §3 (portal) |
+| [0278](0278-a-listing-ordered-by-recency-is-a-second-ordering-and-a-second-cursor.md) | A listing ordered by recency is a second ordering, and a second cursor | Proposed — ARCHITECTURAL, needs review | §5 (the store), §3 (portal) |
