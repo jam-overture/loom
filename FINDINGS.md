@@ -53874,3 +53874,55 @@ than an oversight here:
 
 The `floored` count is the field that makes a floor drawable: *at least this
 many words, and N passages hide more.*
+
+---
+## 2026-10-14 — the mangling's lower bound moves from 177 to 156, measured on a third pull request body the same way
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** this morning's entry *the mangling, measured by accident on one pull
+request body* and, through it, the 5 October entry *four links, one body, same
+syntax* · **Status:** open — **three more readings for that entry's length
+hypothesis**, taken the same way those were: by writing a pull request rather
+than by testing one
+
+#640's first body carried two markdown links. Both came back with ``` `` ```
+injected around the URL, so neither rendered. The comment posted on the same
+pull request minutes later carried a bare preview URL and came back clean. The
+body was then rewritten with one short link, which also came back clean.
+
+| posted | characters | came back |
+| --- | --- | --- |
+| body, first — a record under the branch name | **228** | mangled |
+| body, first — a report under the branch name | **156** | mangled |
+| comment — the Vercel preview URL | **82** | **clean** |
+| body, second — the same report under a short sha | **117** | **clean** |
+
+**It narrows the bracket on the mangled side, which the two earlier entries
+could not.** Collecting all eight readings now on record:
+
+| characters | verdict |
+| --- | --- |
+| 82 | clean |
+| 117 | clean |
+| 121 | clean |
+| ~133 | clean |
+| **156** | **mangled** |
+| 177 | mangled |
+| 228 | mangled |
+
+So the threshold is somewhere in **(133, 156]**, where before today it was
+`(133, 177]`. Nothing here is a test of the threshold and all of it is
+incidental, which is the same caveat the two earlier entries carry — but three
+readings arriving in one evening from one pull request, two of them on either
+side of the old bracket, is the sharpest the accident has been.
+
+**The practical rule this lane will follow until it is fixed**, written down so
+the next run does not rediscover it: a URL in a pull request body goes under a
+short commit sha rather than a branch name, and a path longer than that is named
+in backticks rather than linked. #640's body does both.
+
+**What it still does not say** is whether length is the mechanism or a proxy for
+one — the long URLs here also contain the most hyphens, as every URL in every
+reading so far does. A body carrying one long URL with few hyphens and one short
+URL with many would separate them, and nobody has written one by accident yet.
+

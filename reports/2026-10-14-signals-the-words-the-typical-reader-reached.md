@@ -166,6 +166,20 @@ one figure on a library card that is **not a share** and must not be drawn on a
 share's axis, with four things the screen must not do — each a refusal in the
 record rather than an oversight in the filing.
 
+### One thing measured by accident after the pull request opened
+
+#640's first body carried two markdown links, 228 and 156 characters, and both
+came back with backticks injected around the URL — the open mangling entry, hit
+again. The comment's 82-character preview URL came back clean, and the body
+rewritten with a 117-character link under a short sha came back clean too.
+
+Three readings in one evening, two of them on either side of the old bracket:
+the threshold moves from `(133, 177]` to **`(133, 156]`**. Filed as its own
+entry extending this morning's rather than edited into it, since that one is
+another lane's. The rule this lane will follow until it is fixed is in the
+entry: a URL in a pull request body goes under a short commit sha, and anything
+longer is named in backticks rather than linked.
+
 ## Tests
 
 `pnpm verify` **green, exit 0** — **5,075 runtime tests across 225 files** and
