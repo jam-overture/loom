@@ -28,9 +28,10 @@ import {
  * `share.test.ts` holds what a shared link *says* — the headline, the pill, the
  * address, the picture's own query — and it holds all of it against
  * `pageMetadata`, which is a function. **Nothing held that a page calls it**, and
- * on 14 September five of the nine did not: `/the-rules`, `/who-can-ask`,
- * `/when-it-goes-wrong`, `/what-you-run` and `/your-components` each exported a
- * static `metadata` with a title and a sentence, so an address on any of them
+ * on 14 September five of the nine did not: `/what-you-run`, and the four
+ * since retired — `/the-rules`, `/who-can-ask`, `/when-it-goes-wrong` and
+ * `/your-components`. Each exported a static `metadata` with a title and a
+ * sentence, so an address on any of them
  * unfurled with no picture at all. Every assertion about cards passed the whole
  * time, because every one of them was about the machinery rather than about the
  * pages.
