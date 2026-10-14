@@ -188,10 +188,16 @@ command — the remedy the 13 October report names for the gate that reported ex
 0 while its own status file said `EXIT=1`.
 
 ```
-GATE_PLACEHOLDER
+Test Files  221 passed (221)      Tests  4987 passed (4987)    # root
+Test Files  445 passed (445)      Tests  8563 passed (8563)    # @loom/app
+EXIT=0
 ```
 
-### The round it went red, which is the interesting one
+13,550 tests across 666 files. The root suite gained the five new contract
+cases; the app suite is unchanged in count, since lesson 16's correction moved
+what a transcript says rather than how many there are.
+
+### The rounds it went red, which are the interesting ones
 
 The first full run came back **`EXIT=1`, 2 failed of 4,987**, and both failures
 were this repository's own documentation rules catching this branch rather than
