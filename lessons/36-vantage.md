@@ -525,7 +525,9 @@ const chartTree = () => {
 }
 
 const judge = (tree: LoomTree, delta: TreeDelta) => {
-  const assessed = assessChange(tree, proposalOf(delta), POLICY, spare.deltaId(), propsVocabularyFor(registry))
+  const assessed = assessChange(tree, proposalOf(delta), POLICY, spare.deltaId(), {
+    propsVocabulary: propsVocabularyFor(registry),
+  })
   if (!assessed.ok) throw new Error(assessed.error.code)
 
   return gate(assessed.value, POLICY)

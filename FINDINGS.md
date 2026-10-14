@@ -660,7 +660,7 @@ as a perfectly clean verify.
 
 | number | claimed by | how it resolved |
 | --- | --- | --- |
-| 0250 | #565, #566 | unresolved — #566 is still open, still holding a number it will have to move off |
+| 0250 | #565, #566 | #565 merged first and kept it; #566's record renumbered to **0252** at merge on 14 October |
 | 0251 | #565, #568 | #568 renumbered to **0253** at merge; its run listed nine citation sites |
 | 0254 | #575, #576 | #575 merged 16:11 and kept it; #576's record renumbered to **0257** |
 | 0256 | #576, #578 | #576 kept it; #578's record renumbered to **0258** |
@@ -4381,8 +4381,12 @@ quotes only a binding name, which is a name in the tree and never content.
 ## 2026-09-30 — `analyzeDelta` is at the end of its parameter shape, and collecting them means editing two lesson transcripts
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — a stated limit, not a defect; nothing is broken and the next vocabulary is
-the one that cannot be added this way
+**closed** by #566 (0252) — the four vocabularies are one optional record,
+`ChangeVocabulary`, and `assessChange` takes `WriteCheckSeams`. The run that
+collected them was the run that rewrote the transcripts, exactly as this entry
+set out: lessons 22 and 23 for `analyzeDelta`, 30 and 31 for `assessChange`, 05
+and 34 for the shapes they print. The fifth vocabulary landed in the same unit,
+which is what made the collection worth its cross-lane cost
 
 `analyzeDelta` now takes **four** optional trailing vocabularies —
 `isInteractive`, `isRegistered`, `checkProps`, `reads` — and `assessChange` takes
@@ -50081,10 +50085,12 @@ It is the recommended next unit for this lane.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
 (`src/runtime/vocabulary.ts`, `src/runtime/analysis.ts`), with the blocking half
-for `Loom lessons` (`lessons/`) · **Status:** open — **nothing is broken and the
-render seam now catches it**; this is the second half of today's work, deferred
-deliberately so a one-seam change did not pull two published transcripts in
-with it
+for `Loom lessons` (`lessons/`) · **Status:** **closed** by #566 (0252) —
+`unplacedSlotsIn` is the walk, `ChangeAnalysis.unplacedSlots` the fact,
+`unplaced-slot` the stake factor at `critical`, and `regions` the third
+`WriteCheck`. The blocker above was closed in the same unit, so the ask to
+`Loom lessons` in the last paragraph is **withdrawn**: the transcripts were
+edited here rather than planned
 
 `slot-unplaced` landed today (0249): a tree that fills a region its primitive
 places nowhere is now a render diagnostic instead of silence. The write path
@@ -50382,6 +50388,78 @@ which is where the governing principle puts a technical record and not where it
 puts a finding.
 
 ---
+## 2026-10-09 — a fifteenth stake rule forced edits in seven files across three other lanes, and every one of them was predicted in writing two weeks ago
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/`, `apps/loom/app/(lessons)/_lib/`), `Loom portal`
+(`app/(portal)/_lib/vocabulary.ts`) and `Loom marketing`
+(`app/(marketing)/_lib/adapt/record.ts`) · **Status:** open — **everything is
+shipped and `pnpm verify` is green**; this is here so you review words written
+in your voice by somebody else, and so the pattern is on the record for the
+sixteenth rule
+
+[0252](decisions/0252-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)
+added `unplaced-slot` to `stakeFactorCodeSchema` and collected `analyzeDelta`'s
+vocabularies into one record. Both were forced into your files, and the second
+one is the reason the first waited two weeks: 0249 declined to build the write
+path's twin precisely because it would have dragged your transcripts in behind a
+one-seam diagnostic.
+
+### `Loom lessons` — six files
+
+| File | What moved | Forced by |
+| --- | --- | --- |
+| `lessons/05-purity-at-the-seams.md` | `slotPlacer?: SlotPlacer` added to the `CompositionRuntime` fence | `declarations.test.ts` prints that type **whole** |
+| `lessons/22-reach.md`, `lessons/23-anchors.md` | `analyzeDelta(tree, delta, { isInteractive: … })` | the call shape |
+| `lessons/30-rendezvous.md`, `lessons/31-behaviour.md` | `assessChange(…, { propsVocabulary: checkProps })` | the call shape |
+| `lessons/07-measuring-a-change.md` | two printed `ChangeAnalysis` JSON lines gained `"unplacedSlots":[]` | `transcripts.test.ts` |
+| `lessons/34-hindsight.md` | `EMPTY_ANALYSIS`, exercise A's fence and list, exercise G's fence, and nine prose counts | `run.test.ts`, `transcripts.test.ts`, `claims.test.ts` |
+| `lessons/review-schedule.md` | two review questions' counts | `claims.test.ts` |
+| `apps/loom/app/(lessons)/_lib/claims.test.ts` | `"fifteen"` in `NUMBER_WORDS`; the pins themselves did not move | the registry had no word for 15 |
+| `apps/loom/app/(lessons)/_lib/declarations.test.ts` | `CompositionRuntime` `members: 8` → `9` | the census |
+
+**One of those nine prose counts was already wrong and is now right**, which is
+worth a sentence of its own because it is the thing a count check cannot catch.
+Lesson 34 said *five of those six lists are the inputs to `critical` rules* and
+the critical list-readers were four — `nested-target`, `unknown-primitive`,
+`invalid-props`, `unread-binding`. With `unplaced-slot` there are five, and
+seven lists, so *five of those seven* is now true where *five of those six* was
+not. The neighbouring sentence, *four of the five rules that can refuse a change
+outright*, was right (the fifth is `protected-type-removed`, which reads a list
+of type names rather than one of the specifics lists) and is now *five of the
+six*. Nothing checked either, and nothing here now does.
+
+### `Loom portal` and `Loom marketing` — one clause each
+
+Both tables are `Record<StakeFactorCode, string>` and total over the union, so
+they stop compiling rather than going quietly — which is 0198's design and is
+why these two are the easy half of this entry. Each new clause is marked in the
+source with the record that forced it, the way 0208's was.
+
+- **Portal**: *"it would put something an author meant people to read into a
+  place the part in question has nowhere to put it, so none of it appears on the
+  page"*. It is the second clause in that table about a change that **works**,
+  and the first draft said *somebody wrote* — which your own
+  `never claims the change happened` test caught, correctly: the tense has to be
+  conditional even for an applied change.
+- **Marketing**: *"it puts words in a part of a piece that has no place to show
+  them"*, in the shorter register that table keeps.
+
+### The thing worth keeping
+
+**0198's consequences predicted this exactly, for the fourteenth rule, and it
+has now held twice.** *"A fourteenth rule is three edits, all of them forced:
+the schema, and two counted sentences … and the surfaces' tables, which are
+total over the union and stop compiling. Nothing about the fourteenth is
+silent."* Nothing about the fifteenth was silent either. A sixteenth will cost
+the same and it is the right price — the alternative is a count somewhere going
+stale without anything saying so, which is the failure both registries exist
+for.
+
+What is **not** covered, and is the honest other half: the prose *around* the
+counts. One sentence in lesson 34 had been wrong since 0208 and no check reached
+it, because it counts a relationship between two lists rather than the length of
+one.
 ## 2026-10-10 — a plain-words clause was true of the one cause that could reach it, and the sixth request reached it the other way
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
@@ -53075,7 +53153,7 @@ the lane that found it is not the one that gets to choose.
 proposed it. `host` on `ApplicationStore.rename` is now `Patch<string>`: a value
 sets it, `null` clears it, absent still leaves it alone, and `""` is refused by
 both stores as before. Recorded as
-[0274](decisions/0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md).
+[0276](decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md).
 `applyPatch` is the one place the three states are read, so the `Map` and the
 column cannot drift about what a patch means. **The settings screen itself is
 not changed** — `(portal)` is a paused lane, and the refusal that is now
@@ -53281,7 +53359,7 @@ returns a fault rather than saving:
 That was the right thing to ship. The comment above it says exactly why — *a
 surface does not get to decide what `rename` means* — and it filed the decision
 rather than taking it. The decision is taken:
-[0274](decisions/0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md),
+[0276](decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md),
 and `ApplicationStore.rename` now takes `host: null` for *remove it*.
 
 **What is left is this lane's and is small.** The guard block and its comment

@@ -1,6 +1,6 @@
 # 0261 — A portal screen shows state, and the record lives in one place
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-12
 **Section:** §5
 
@@ -17,6 +17,11 @@
 >
 > **Scope settled by the maintainer, 12 October:** *"The portal stands apart
 > from marketing, docs, lessons, etc."* Nothing here touches those three.
+>
+> **Accepted on 13 October.** The three surfaces in
+> [`docs/portal.md`](../docs/portal.md) rest on clause 3: one event stream in
+> place of five screens that each explain themselves is only honest because a
+> screen may drop a fact *to a place that keeps it*.
 
 ## Context
 

@@ -1,6 +1,6 @@
 # 0262 — The control plane is hosted and the render path stays in the customer's app
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-12
 **Section:** §1, §5
 
@@ -13,6 +13,11 @@
 >
 > **Why this number.** `0261` is the highest record on `main` at `6204f9e0`, and
 > no open pull request adds one.
+>
+> **Accepted on 13 October**, together with
+> [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md),
+> which takes the sync this record names as owed and deliberately leaves
+> undesigned.
 
 ## Context
 

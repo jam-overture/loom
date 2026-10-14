@@ -67,7 +67,7 @@ is the compiler making the same point.
 ## Decisions I took that were not specified
 
 **`null`, not `""`, and the entry that asked for this said so.** Recorded in
-[0274](../decisions/0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)
+[0276](../decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)
 with the three alternatives I rejected: an empty string, a `clearHost` method,
 and a separate list of fields to clear.
 
@@ -106,7 +106,7 @@ moved.
 
 ## Records
 
-- Added **[0274](../decisions/0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)**
+- Added **[0276](../decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)**
   — *A patch field says set, cleared or unchanged, and clearing removes the key.*
   `Accepted`. Nothing superseded. `pnpm decisions:index` run; it reports the
   usual holes for numbers claimed on unmerged branches, including **0252**,
@@ -116,7 +116,7 @@ moved.
 
 **Closed:** *`rename` cannot clear a field, so a host set once is a host
 forever* (13 October, filed by `Loom portal`). Closed by this branch and
-recorded as 0274.
+recorded as 0276.
 
 **Filed, for `Loom portal`:** *the host a settings screen refuses to remove can
 be removed now, and the sentence saying otherwise is the only thing left.* The

@@ -23,7 +23,13 @@ Status, Date, Section, then Context, Decision, Consequences, Alternatives
 considered. Record what was rejected and why, not only what was chosen — the
 rejected options are the part a future reader cannot reconstruct.
 
-`Status` is one of `Proposed`, `Accepted`, or `Superseded by NNNN`.
+`Status` is one of `Proposed`, `Accepted`, `Superseded by NNNN`, or `Refused`.
+
+`Refused` is for a proposal that was decided against rather than overtaken. It
+says what `Proposed` for ever cannot — that somebody answered — and what
+`Superseded by NNNN` gets wrong, which is that the record was accepted first.
+Where a successor holds instead, name it after the opener; the reference is
+reciprocal like any other (0193). 0220 is the first.
 
 A record that answered several questions at once can be replaced in part. Then
 the status is `Accepted — partially superseded by NNNN`, and the replacement says
@@ -303,7 +309,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0217](0217-choosing-a-two-region-primitive-is-itself-an-insert-decision.md) | Choosing a two-region primitive is itself an insert decision | Accepted | §4b |
 | [0218](0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md) | What a counter means is published, and the browser pays for the number and not its name | Accepted | §4c (reader signals) |
 | [0219](0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md) | A page view is counted once at the door, and the over-count in the node counters is a measurement | Accepted | §4c (reader signals) |
-| [0220](0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md) | An app is a registry, a policy and a store — and Loom has one of each | Proposed | §1, §5 |
+| [0220](0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md) | An app is a registry, a policy and a store — and Loom has one of each | Refused — [0260](0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md) holds instead | §1, §5 |
 | [0221](0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md) | Where reading stops is a fall between two siblings, and a ratio of two counts off one row set | Accepted | §4c (reader signals) |
 | [0222](0222-a-structured-reason-travels-with-the-judgment-and-the-prose-is-for-readers-only.md) | A structured reason travels with the judgment, and the prose is for readers only | Accepted | §2 |
 | [0223](0223-a-prop-is-copy-when-a-reader-could-quote-it.md) | A prop is copy when a reader could quote it, and a glyph is not a quote | Accepted | §1 |
@@ -335,7 +341,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0249](0249-a-region-the-primitive-does-not-place-is-a-diagnostic.md) | A region the primitive does not place is a diagnostic, and the declaration is the promise | Accepted | §3 (render seam) |
 | [0250](0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md) | A deployment is ordered by readers lost at the door's scale, and a page the door cannot scale is out of the order | Accepted | §4c (reader signals) |
 | [0251](0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md) | A change to what readers did is a ratio of two shares, and an inside a change gave a part is not a reader | Accepted | §4c (reader signals) |
-| 0252 | *No record on this branch* | — | — |
+| [0252](0252-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md) | The write path refuses a region nothing places, and the vocabularies arrive as one record | Accepted | §2 (the write path), binding on §3 |
 | [0253](0253-the-audit-reports-the-bound-primitives-it-was-not-handed-an-answer-for.md) | The audit reports the bound primitives it was not handed an answer for, and being answered under the wrong name is the same report | Accepted | §4, not the library |
 | [0254](0254-the-testing-door-publishes-one-primitive-broken-in-whichever-way-the-caller-names.md) | The testing door publishes one primitive broken in whichever way the caller names, and the fault is named for what the author did | Accepted | §1 (process), §3 (render seam) |
 | [0255](0255-a-primitive-is-blocked-by-what-its-schema-requires-and-not-by-what-its-description-pictures.md) | A primitive is blocked by what its schema requires, not by what its description pictures | Accepted | §5 |
@@ -343,10 +349,10 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0257](0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md) | A kind of part is read across the places it stands, and the unit is the placement and never the reader | Accepted | §4c (reader signals) |
 | [0258](0258-a-refusal-names-the-nearest-registered-ids-and-says-how-many-it-stands-in-for.md) | A refusal names the nearest registered ids and says how many it stands in for | Accepted | §3 (render seam), §4 (data and submission seams) |
 | [0259](0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md) | A surface the portal governs renders from the store, and a page built at render time is not one | Accepted | §1, §5 |
-| [0260](0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md) | A project is the unit Loom stores, governs and measures under | Proposed | §1, §5 |
-| [0261](0261-a-portal-screen-shows-state-and-the-record-lives-in-one-place.md) | A portal screen shows state, and the record lives in one place | Proposed | §5 |
-| [0262](0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md) | The control plane is hosted and the render path stays in the customer's app | Proposed | §1, §5 |
-| [0263](0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md) | A page is a base tree and the deltas an audience earns | Proposed | §1, §3, §5 |
+| [0260](0260-a-project-is-the-unit-loom-stores-governs-and-measures-under.md) | A project is the unit Loom stores, governs and measures under | Accepted — refuses 0220 | §1, §5 |
+| [0261](0261-a-portal-screen-shows-state-and-the-record-lives-in-one-place.md) | A portal screen shows state, and the record lives in one place | Accepted | §5 |
+| [0262](0262-the-control-plane-is-hosted-and-the-render-path-stays-in-the-customers-app.md) | The control plane is hosted and the render path stays in the customer's app | Accepted | §1, §5 |
+| [0263](0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md) | A page is a base tree and the deltas an audience earns | Accepted | §1, §3, §5 |
 | [0264](0264-a-report-s-visual-is-stored-at-the-size-the-page-was-laid-out-at.md) | A report's visual is stored at the size the page was laid out at | Accepted | §1 (process) |
 | [0265](0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md) | What readers do inside a kind of part is a share of the readers who met it, and the door is only a weight | Accepted | §4c (reader signals) |
 | [0266](0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md) | A change to a kind of part is read over the places both windows bore, and that is the one denominator here with no reader in it | Accepted | §4c (reader signals) |
@@ -357,4 +363,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0271](0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md) | A fault in a deployment's collection is named by what it costs, with the hand it falls to, and a page's readers are counted once | Accepted | §4c (reader signals) |
 | [0272](0272-who-presses-a-reseed-is-the-gate-s-question-and-the-answer-is-what-the-reseed-costs.md) | Who presses a reseed is the Gate's question, and the answer is what the reseed costs | Accepted | §2 (the store), §4 (the Gate), §6 (the log) |
 | [0273](0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md) | The reader tables take the application now and the audience when it is ratified | Accepted | §5 (signals), §3 (portal) |
-| [0274](0274-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md) | A patch field says set, cleared or unchanged, and clearing removes the key | Accepted | §2 (the store), §3 (portal) |
+| 0274 | *No record on this branch* | — | — |
+| [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Accepted | §1, §5 |
+| [0276](0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md) | A patch field says set, cleared or unchanged, and clearing removes the key | Accepted | §2 (the store), §3 (portal) |

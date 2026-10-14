@@ -1,4 +1,4 @@
-# 0274. A patch field says set, cleared or unchanged, and clearing removes the key
+# 0276. A patch field says set, cleared or unchanged, and clearing removes the key
 
 **Status:** Accepted
 **Date:** 2026-10-13
