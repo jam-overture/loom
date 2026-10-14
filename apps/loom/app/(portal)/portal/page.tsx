@@ -1,203 +1,162 @@
 import Link from "next/link"
 
-import {
-  describeApplicationStoreError,
-  describeProjectStoreError,
-} from "@jam-overture/loom/store"
-
 import { Screen } from "@/app/(portal)/_components/screen"
-import { StateNotice } from "@/app/(portal)/_components/state-notice"
-import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { screenName } from "@/app/(portal)/_lib/screen-names"
-import { portalApplications, portalProjects, portalStore } from "@/app/(portal)/_lib/store"
-import { portalHolds } from "@/app/(portal)/_lib/write"
-import {
-  workspaceOf,
-  workspaceTotals,
-  type ApplicationSummary,
-  type ProjectGroup,
-} from "@/app/(portal)/_lib/workspace"
+import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 
 /**
- * Every application this deployment governs, under the project it is in.
+ * The front door: what this deployment actually has, read out of the store.
  *
- * `_lib/workspace.ts` has the argument for why the project is a heading here
- * rather than a screen of its own. What this file does is read, and the reading
- * is deliberately shallow: a name, how many pages, and what is waiting. The
- * numbers a reader opens a portal for are on the row, so the row is worth
- * scanning and the screen below it is worth opening.
- */
-
-const Figure = ({
-  value,
-  label,
-  loud,
-}: {
-  value: number
-  label: string
-  loud?: boolean | undefined
-}) => (
-  <div className="flex flex-col gap-0.5">
-    <span className={`font-mono text-sm ${loud === true ? "text-awaiting-ink" : ""}`}>
-      {value.toLocaleString("en-GB")}
-    </span>
-    <span className="text-ink-muted text-[11px]">{label}</span>
-  </div>
-)
-
-const ApplicationRow = ({ summary }: { summary: ApplicationSummary }) => (
-  <li>
-    <Link
-      href={`/portal/${summary.application.applicationId}`}
-      className="border-edge-subtle bg-surface-base hover:border-edge flex flex-col gap-3 rounded-lg border p-4 no-underline"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium tracking-tight">{summary.application.name}</span>
-          <span className="text-ink-muted font-mono text-[11px]">
-            {summary.application.host ?? summary.application.applicationId}
-          </span>
-        </div>
-      </div>
-
-      <div className="border-edge-subtle flex gap-6 border-t pt-3">
-        <Figure value={summary.pages} label="pages" />
-        <Figure value={summary.waiting} label="waiting on you" loud={summary.waiting > 0} />
-        {summary.unreadable > 0 ? (
-          <Figure value={summary.unreadable} label="this build cannot read" />
-        ) : null}
-      </div>
-    </Link>
-  </li>
-)
-
-const Group = ({ name, applications }: { name: string; applications: readonly ApplicationSummary[] }) => (
-  <section className="flex flex-col gap-3">
-    <h2 className="text-ink-muted text-xs tracking-wide uppercase">{name}</h2>
-    {applications.length === 0 ? (
-      <p className="text-ink-muted text-sm">Nothing in here yet.</p>
-    ) : (
-      <ul className="grid list-none grid-cols-1 gap-3 p-0 lg:grid-cols-2">
-        {applications.map((summary) => (
-          <ApplicationRow key={summary.application.applicationId} summary={summary} />
-        ))}
-      </ul>
-    )}
-  </section>
-)
-
-/**
- * One application's numbers.
+ * ## It was a redirect for one day, and that was a mistake
  *
- * The tree store is unscoped here, which is correct and will not stay correct:
- * a deployment has one application today, so one listing is every page there
- * is. The day there are two, this reads a handle scoped to the row's
- * application — the seam is `StoreScope`, and it already exists.
+ * Unit 0 deleted the screen that stood here and left `redirect("/portal/preview")`
+ * in its place, reasoning that the front door should be the shape being built
+ * rather than a smaller version of what was removed. The maintainer signed in
+ * the next morning and landed in the prototype:
+ *
+ * > *"I noticed that the link in the marketing page is just to the preview. I
+ * > would like to still sign in to see the progress of the actual portal."*
+ *
+ * He is right, and the error is worth naming because it is the same one the
+ * whole cut was against. **A redirect into invented data is still invented data
+ * at the address a person typed.** The rule was *no screen ships numbers nobody
+ * produced*; forwarding to a screen that does satisfies the letter of it and
+ * none of the point. What a person who signs in is owed is the truth about
+ * their own deployment, however small that truth currently is.
+ *
+ * ## What it shows, and what it deliberately does not
+ *
+ * Every project and every application in the store, grouped, with the id and the
+ * host each one really carries. That is the whole of what this portal knows
+ * today, and saying so plainly is the honest version of *progress*.
+ *
+ * **There are no counts on this screen** — not pages, not what is waiting — and
+ * their absence is the design rather than a gap to fill in later.
+ * `workspace.ts` already shapes a summary that carries all three, and it is not
+ * used here, because a tree store handle speaks for exactly one application
+ * (0220's scoping, which 0260 keeps) and counting per application means a handle
+ * per application. Unit 1 gives the rows their project dimension and unit 3
+ * gives this screen the counts off it. A number assembled before then would be
+ * a number about the whole deployment wearing one application's name, which is
+ * the precise failure 0260 clause 1 exists to prevent.
+ *
+ * **The prototype is linked, and labelled.** It is where the portal is going and
+ * a person should be able to look at it; the link says it runs on invented data
+ * so that looking at it is never mistaken for reading this deployment.
  */
-const summaryFor = async (
-  application: ApplicationSummary["application"]
-): Promise<ApplicationSummary> => {
-  const listed = await portalStore.list({})
-  if (!listed.ok) return { application, pages: 0, waiting: 0, unreadable: 0 }
-
-  const perPage = await Promise.all(
-    listed.value.trees.map(async (listing) => await portalHolds.forTree(listing.treeId))
-  )
-
-  return {
-    application,
-    pages: listed.value.trees.length,
-    waiting: perPage.reduce((sum, holds) => sum + (holds.ok ? holds.value.held.length : 0), 0),
-    unreadable: perPage.filter((holds) => !holds.ok).length,
-  }
-}
-
-const Workspace = async () => {
+const PortalFrontDoor = async () => {
   await requireActor("/portal")
 
-  /**
-   * Both reads answer within a budget, for the reason
-   * `_lib/app/bounded-store.ts` gives: a store that refuses is a state this
-   * screen already draws, and a store that does not answer was a screen that
-   * never arrived. The budget is on the handle rather than written here, so the
-   * ten screens that never had one have one too — and a timeout arrives as
-   * `unavailable`, which the branch below was already able to say.
-   */
   const [projects, applications] = await Promise.all([
     portalProjects.list(),
     portalApplications.list(),
   ])
 
-  if (!projects.ok || !applications.ok) {
-    /**
-     * Written out rather than compressed into a ternary: the two stores have
-     * different error types, and a reader of this file should be able to see
-     * which sentence comes from which without resolving a conditional.
-     */
-    const detail = ((): string => {
-      if (!projects.ok) return describeProjectStoreError(projects.error)
-      if (!applications.ok) return describeApplicationStoreError(applications.error)
+  /**
+   * A store that cannot answer is said out loud rather than drawn as an empty
+   * deployment. *Nothing is registered* and *the database is unreachable* are
+   * different facts and a reader acts differently on each.
+   */
+  const unreadable = !projects.ok || !applications.ok
+  const everyProject = projects.ok ? projects.value : []
+  const everyApplication = applications.ok ? applications.value : []
 
-      return "the store could not be read"
-    })()
+  const grouped = everyProject.map((project) => ({
+    project,
+    applications: everyApplication.filter(
+      (application) => application.projectId === project.projectId
+    ),
+  }))
 
-    return (
-      <Screen>
-        <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
-        <StateNotice tone="failure" title="We couldn't list what you have.">
-          <p>
-            Nothing has been lost and nothing has been changed — listing only reads. Try again in a
-            moment.
-          </p>
-          <TechnicalDetail>
-            <p className="font-mono">{detail}</p>
-            <p>
-              This is the store declining to answer, not a deployment with nothing in it. The two
-              look alike on screen and are opposites.
-            </p>
-          </TechnicalDetail>
-        </StateNotice>
-      </Screen>
-    )
-  }
-
-  const summaries = await Promise.all(applications.value.map(summaryFor))
-  const workspace = workspaceOf(projects.value, summaries)
-  const totals = workspaceTotals(workspace)
+  const known = new Set(everyProject.map((project) => project.projectId))
+  const orphaned = everyApplication.filter((application) => !known.has(application.projectId))
 
   return (
     <Screen>
-      <div className="flex items-baseline justify-between gap-4 pb-6">
-        <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
-        <Link
-          href="/portal/new"
-          className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 text-sm no-underline"
-        >
-          Register an application
-        </Link>
+      <div className="flex flex-col gap-2 pb-2">
+        <h1 className="text-2xl tracking-tight">This deployment</h1>
+        <p className="text-ink-muted max-w-lg text-sm">
+          Everything Loom is holding for you, as it stands.
+        </p>
       </div>
 
-      <p className="text-ink-muted pb-6 text-sm">
-        {totals.applications === 0
-            ? "Nothing registered yet."
-          : `${totals.applications} application${totals.applications === 1 ? "" : "s"}, ${totals.pages} page${totals.pages === 1 ? "" : "s"}${totals.waiting > 0 ? `, ${totals.waiting} waiting on you` : ""}.`}
-      </p>
+      {unreadable ? (
+        <p className="border-edge text-ink-muted rounded-md border border-dashed p-6 text-sm">
+          The store did not answer. Nothing here is a statement about what is registered.
+        </p>
+      ) : grouped.length === 0 && orphaned.length === 0 ? (
+        <p className="border-edge text-ink-muted rounded-md border border-dashed p-6 text-sm">
+          Nothing is registered yet.{" "}
+          <Link href="/portal/new" className="text-ink underline">
+            Register an application
+          </Link>{" "}
+          to start.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-6">
+          {grouped.map(({ project, applications: inProject }) => (
+            <section key={project.projectId} className="flex flex-col gap-2">
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-lg tracking-tight">{project.name}</h2>
+                <span className="text-ink-muted font-mono text-xs">{project.projectId}</span>
+              </div>
+              {inProject.length === 0 ? (
+                <p className="text-ink-muted text-sm">No applications under it yet.</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {inProject.map((application) => (
+                    <li
+                      key={application.applicationId}
+                      className="border-edge flex flex-col gap-0.5 rounded-md border p-4"
+                    >
+                      <span className="text-sm">{application.name}</span>
+                      <span className="text-ink-muted font-mono text-xs">
+                        {application.applicationId}
+                      </span>
+                      {application.host !== undefined && (
+                        <span className="text-ink-muted text-xs">{application.host}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
 
-      <div className="flex flex-col gap-8">
-        {workspace.groups.map((group: ProjectGroup) => (
-          <Group
-            key={group.project.projectId}
-            name={group.project.name}
-            applications={group.applications}
-          />
-        ))}
-        {workspace.ungrouped.length > 0 ? (
-          <Group name="Not in a project" applications={workspace.ungrouped} />
-        ) : null}
+          {orphaned.length > 0 && (
+            <section className="flex flex-col gap-2">
+              <h2 className="text-lg tracking-tight">Under no project</h2>
+              <ul className="flex flex-col gap-2">
+                {orphaned.map((application) => (
+                  <li
+                    key={application.applicationId}
+                    className="border-edge flex flex-col gap-0.5 rounded-md border p-4"
+                  >
+                    <span className="text-sm">{application.name}</span>
+                    <span className="text-ink-muted font-mono text-xs">
+                      {application.applicationId}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      )}
+
+      <div className="border-edge flex flex-col gap-2 border-t pt-6 text-sm">
+        <Link href="/portal/new" className="text-ink no-underline hover:underline">
+          Register an application
+        </Link>
+        <Link href="/portal/sign-ins" className="text-ink no-underline hover:underline">
+          Who has signed in
+        </Link>
+        <Link href="/portal/preview" className="text-ink-muted no-underline hover:underline">
+          The workspace being built — every number on it is invented
+        </Link>
       </div>
     </Screen>
   )
 }
 
-export default Workspace
+export default PortalFrontDoor

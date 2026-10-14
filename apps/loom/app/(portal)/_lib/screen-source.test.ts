@@ -9,14 +9,16 @@ describe("portalScreens", () => {
     const routes = screens.map((screen) => screen.route)
 
     expect(routes).toContain("/portal")
-    expect(routes).toContain("/portal/pages")
-    expect(routes).toContain("/portal/pages/[treeId]")
-    expect(routes).toContain("/portal/rules")
+    expect(routes).toContain("/portal/new")
+    expect(routes).toContain("/portal/preview")
+    expect(routes).toContain("/portal/preview/[project]")
     expect(routes).toContain("/portal/sign-in")
   })
 
   it("keeps a dynamic segment as Next writes it, rather than resolving it", () => {
-    expect(screens.map((screen) => screen.route)).toContain("/portal/trees/[[...rest]]")
+    expect(screens.map((screen) => screen.route)).toContain(
+      "/portal/preview/[project]/pages/[tree]"
+    )
   })
 
   it("returns each screen once, in route order", () => {
@@ -59,17 +61,37 @@ describe("isForwarding", () => {
   })
 
   /**
-   * The distinction above, asserted against the two real files rather than
-   * against a string — this is the case a heuristic on `redirect(` got wrong,
-   * and a fixture cannot go stale the way the source can.
+   * The distinction above, asserted against a real file rather than a string —
+   * this is the case a heuristic on `redirect(` got wrong, and a fixture cannot
+   * go stale the way the source can.
+   *
+   * **It read a 308 shim and the front door in turn, and now reads neither.**
+   * Unit 0 deleted the four renamed-route shims on 13 October, which left the
+   * front door as the group's only forward; the morning after, the maintainer
+   * signed in and landed in the prototype, so the front door became a screen
+   * that reads the store. The surviving half of the pair is the one that was
+   * always the subtler claim: a page that calls `redirect` is still a screen.
    */
-  it("separates the portal's 308s from the one page a signed-out visitor lands on", () => {
-    const forward = screenSource(portalFile("portal", "trees", "[[...rest]]", "page.tsx"))
+  it("does not call the sign-in page a forward, though it redirects", () => {
     const landing = screenSource(portalFile("portal", "sign-in", "page.tsx"))
 
-    expect(isForwarding(forward)).toBe(true)
     expect(isForwarding(landing)).toBe(false)
-    /* Guards the guard: the second file really does call `redirect`. */
+    /* Guards the guard: the file really does call `redirect`. */
     expect(landing).toContain("redirect(")
+  })
+
+  /**
+   * The other half, as a fact about the group rather than about one file: every
+   * page here is a screen. The helper stays because `every-screen.test.ts`
+   * filters with it and unit 3 may well add a forward back; the day it does,
+   * this says so rather than letting a page quietly skip the sweeps that ask
+   * what a screen owes a reader.
+   */
+  it("finds no forwarding page in the group at all", () => {
+    const forwards = portalScreens()
+      .filter((screen) => isForwarding(screenSource(screen.file)))
+      .map((screen) => screen.route)
+
+    expect(forwards).toEqual([])
   })
 })

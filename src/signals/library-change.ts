@@ -531,8 +531,17 @@ const worseOf = (one: KindChange, other: KindChange): number =>
   (one.readShareNow ?? 2) - (other.readShareNow ?? 2) ||
   nameOf(one.kind).localeCompare(nameOf(other.kind))
 
-/** One window's pages, by tree, with the two ways a window can hold a page twice counted apart. */
-type Window = {
+/**
+ * One window's pages, by tree, with the two ways a window can hold a page twice
+ * counted apart.
+ *
+ * Published because the pairing is the method rather than a detail of it: a
+ * reader-weighted comparison of the same kinds (0279) pairs its pages by exactly
+ * this rule, and a second hand-written copy of it would be two spellings of one
+ * rule that agree today — which is what moved the counter tables' upsert keys
+ * into `counters.ts` and the door's scale into `door.ts`.
+ */
+export type PairedWindow = {
   readonly byTree: ReadonlyMap<TreeId, PageReading>
   /** Trees held at two revisions, which have no single counterpart in the other window. */
   readonly ambiguous: ReadonlySet<TreeId>
@@ -540,7 +549,14 @@ type Window = {
   readonly duplicated: number
 }
 
-const windowOf = (readings: readonly PageReading[]): Window => {
+/**
+ * One window's readings keyed by page, with a tree held at two revisions kept
+ * apart from the same revision handed in twice.
+ *
+ * The first has no single counterpart in the other window and is excluded and
+ * named; the second is the ordinary double count and is dropped (0158).
+ */
+export const pairedWindowOf = (readings: readonly PageReading[]): PairedWindow => {
   const byTree = new Map<TreeId, PageReading>()
   const ambiguous = new Set<TreeId>()
   let duplicated = 0
@@ -560,7 +576,14 @@ const windowOf = (readings: readonly PageReading[]): Window => {
   return { byTree, ambiguous, duplicated }
 }
 
-const partsByNode = (reading: PageReading): ReadonlyMap<NodeId, PartReading> =>
+/**
+ * One reading's parts by node, which is what a placement is paired on.
+ *
+ * Published with {@link pairedWindowOf} and for the same reason: pairing by node
+ * rather than by position is what makes a comparison about the part and not
+ * about where it sits (0224).
+ */
+export const partsByNodeIn = (reading: PageReading): ReadonlyMap<NodeId, PartReading> =>
   new Map(reading.parts.map((part) => [part.nodeId, part]))
 
 /**
@@ -583,8 +606,8 @@ export const libraryChangeOf = (
   was: readonly PageReading[],
   now: readonly PageReading[]
 ): LibraryChange => {
-  const earlier = windowOf(was)
-  const later = windowOf(now)
+  const earlier = pairedWindowOf(was)
+  const later = pairedWindowOf(now)
   const rows = new Map<string, Tallying>()
   const roleWas = new Map<PrimitiveType, PrimitiveRole | null>()
   const roleNow = new Map<PrimitiveType, PrimitiveRole | null>()
@@ -653,8 +676,8 @@ export const libraryChangeOf = (
 
     if (after === undefined || ambiguous.has(treeId)) continue
 
-    const beforeParts = partsByNode(before)
-    const afterParts = partsByNode(after)
+    const beforeParts = partsByNodeIn(before)
+    const afterParts = partsByNodeIn(after)
 
     pages += 1
     republished += before.revision === after.revision ? 0 : 1

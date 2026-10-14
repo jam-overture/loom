@@ -139,6 +139,93 @@ export const describeApplicationStoreContract = (
       expect(moved.ok && moved.value.host).toBe("shop.example.com")
     })
 
+    /**
+     * The three states of a patch, on the one field that has them.
+     *
+     * A host is the only thing about an application a person can be given and
+     * then want taken away, and until a patch could say so the call that meant
+     * *remove it* was the same call that meant *leave it alone* — so a settings
+     * screen that emptied the box renamed nothing and reported success. Both
+     * stores answer this the same way or neither is trustworthy: one holds a
+     * `Map` where a missing key is the absence, the other a column where it is
+     * `NULL`.
+     */
+    it("clears a host on null, leaving an application with none", async () => {
+      const store = await make()
+      const project = applicationFixture({ host: "old.example.com" })
+      await store.create(project)
+
+      const cleared = await store.rename(project.applicationId, { host: null })
+
+      expect(cleared.ok && cleared.value.host).toBeUndefined()
+      const read = await store.get(project.applicationId)
+      expect(read.ok && read.value.host).toBeUndefined()
+    })
+
+    /**
+     * A cleared host has to read back as the absence an application that never
+     * had one reads back as, rather than as a key holding `undefined`. The two
+     * are the same value to a reader and different objects to anything that
+     * walks the record — and only one of them is what `applicationSchema`
+     * produces.
+     */
+    it("clears a host to the same absence an application that never had one has", async () => {
+      const store = await make()
+      const never = applicationFixture({ applicationId: applicationIdSchema.parse("app_never") })
+      const cleared = applicationFixture({
+        applicationId: applicationIdSchema.parse("app_cleared"),
+        host: "old.example.com",
+      })
+      await store.create(never)
+      await store.create(cleared)
+
+      await store.rename(cleared.applicationId, { host: null })
+
+      const left = await store.get(never.applicationId)
+      const right = await store.get(cleared.applicationId)
+      expect(left.ok && Object.keys(left.value).sort()).toEqual(
+        right.ok && Object.keys(right.value).sort()
+      )
+    })
+
+    it("clears a host that was never there without failing", async () => {
+      const store = await make()
+      const project = applicationFixture()
+      await store.create(project)
+
+      const cleared = await store.rename(project.applicationId, { host: null })
+
+      expect(cleared.ok && cleared.value.host).toBeUndefined()
+    })
+
+    it("renames and clears the host in one call", async () => {
+      const store = await make()
+      const project = applicationFixture({ name: "Before", host: "old.example.com" })
+      await store.create(project)
+
+      const renamed = await store.rename(project.applicationId, { name: "After", host: null })
+
+      expect(renamed.ok && renamed.value.name).toBe("After")
+      expect(renamed.ok && renamed.value.host).toBeUndefined()
+    })
+
+    /**
+     * Clearing is `null` and nothing else. An empty string is a value the
+     * schema refuses, and a store that accepted it as the absence would be a
+     * second spelling of nothing for every later field to disagree about.
+     */
+    it("refuses an empty host rather than reading it as cleared", async () => {
+      const store = await make()
+      const project = applicationFixture({ host: "old.example.com" })
+      await store.create(project)
+
+      const refused = await store.rename(project.applicationId, { host: "" })
+
+      expect(refused.ok).toBe(false)
+      const read = await store.get(project.applicationId)
+      expect(read.ok && read.value.host).toBe("old.example.com")
+    })
+
     it("refuses to rename a project that is not there", async () => {
       const store = await make()
       const missing = applicationIdSchema.parse("app_nobody")
