@@ -49,9 +49,12 @@ describe("the portal's screens, enumerated from the filesystem", () => {
     const routes = screens.map((screen) => screen.route)
 
     expect(routes).toContain("/portal")
-    expect(routes).toContain("/portal/pages/[treeId]")
-    expect(routes).toContain("/portal/trust")
+    expect(routes).toContain("/portal/new")
+    expect(routes).toContain("/portal/preview/[project]/pages/[tree]")
     expect(routes).not.toContain("/portal/nowhere")
+    /* Deleted by unit 0, and a sweep that still found them would be reading a stale tree. */
+    expect(routes).not.toContain("/portal/pages")
+    expect(routes).not.toContain("/portal/trust")
   })
 
   /**
@@ -101,7 +104,14 @@ describe("the name of a screen", () => {
   const sources = everySource(GROUP)
 
   it("finds the lane to sweep, so an empty sweep cannot pass as clean", () => {
-    expect(sources.length).toBeGreaterThan(40)
+    /*
+     * Floors re-measured on 13 October: unit 0 took the route group from twenty
+     * screens to eleven, and a floor sized to the old surface fails on the new
+     * one for the opposite of the reason it exists. Each is set just under what
+     * the lane holds today, which is what makes it an alarm about a sweep that
+     * stopped finding things rather than a count somebody maintains.
+     */
+    expect(sources.length).toBeGreaterThan(20)
     expect(NAMED.length).toBeGreaterThan(2)
   })
 
@@ -223,7 +233,7 @@ describe("what every screen owes a reader", () => {
   )
 
   it("finds the disclosures this lane writes, so an empty sweep cannot pass as clean", () => {
-    expect(disclosures.length).toBeGreaterThan(20)
+    expect(disclosures.length).toBeGreaterThan(4)
   })
 
   it.each(disclosures.map(([label, block]) => [label, block]))(
@@ -390,7 +400,7 @@ describe("the words a reader meets before they have asked for any", () => {
   )
 
   it("finds the sentences this lane renders, so an empty sweep cannot pass as clean", () => {
-    expect(surface.length).toBeGreaterThan(200)
+    expect(surface.length).toBeGreaterThan(100)
   })
 
   /**
@@ -401,7 +411,7 @@ describe("the words a reader meets before they have asked for any", () => {
   it("reads the surface and skips the record", () => {
     const said = surface.map((entry) => entry.text)
 
-    expect(said).toContain("Jump to a version")
+    expect(said).toContain("Register your app")
     expect(said.some((text) => text.includes("What the record says"))).toBe(false)
   })
 

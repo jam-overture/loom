@@ -110,6 +110,12 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
    * A row created by either side starts the other column at nought, which is
    * what it is: openings a rollup has not reached yet, or a window of batches
    * whose opening went to an instance that has since gone away.
+   *
+   * **`foldedAt` is the one field only one of the two writers may touch**
+   * (0274). A fold stamps it; a door write carries forward whatever is there,
+   * including nothing — which is what makes it able to say that openings have
+   * been pending longer than a deployment's schedule allows, where `updatedAt`
+   * cannot.
    */
   const addPageViews = (
     counts: readonly RevisionViews[],
@@ -119,6 +125,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     for (const count of counts) {
       const key = pageViewKey(count)
       const existing = pageViews.get(key)
+      const foldedAt = counted === "appearances" ? at : existing?.foldedAt
 
       pageViews.set(key, {
         treeId: count.treeId,
@@ -126,6 +133,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
         opened: (existing?.opened ?? 0) + (counted === "opened" ? count.views : 0),
         appearances: (existing?.appearances ?? 0) + (counted === "appearances" ? count.views : 0),
         updatedAt: at,
+        ...(foldedAt === undefined ? {} : { foldedAt }),
       })
     }
   }
