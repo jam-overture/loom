@@ -285,10 +285,12 @@ unit 0.
 
 ## Blocked on the maintainer
 
-1. **Accept or refuse 0260, 0261, 0262, 0263, 0275 — and 0220.** The whole model
-   is proposed, 0275 included, and 0275 cannot be accepted ahead of 0262. Unit 1
-   cannot start without 0263, unit 6 without 0275, and this plan deletes `Your
-   app` on the strength of 0220 staying refused. **One pass clears all six.**
+1. ~~**Accept or refuse 0260, 0261, 0262, 0263, 0275 — and 0220.**~~ **Settled on
+   13 October.** 0260, 0261, 0262, 0263 and 0275 are `Accepted`; **0220 is
+   `Refused`**, which is the first refusal in the repository and is what deletes
+   `/portal/app` rather than rebuilding it. 0260's clause 4 was corrected on the
+   way in: nothing authenticates the signal intake today, which this plan said
+   and that record denied. Units 1 and 6 are unblocked.
 2. **Go-ahead for unit 0.** The manifest above is exact; the deletion is one
    verified pass and is ready to run.
 3. **When `Loom portal` resumes, and under what charter.** `docs/routines.md`
@@ -301,5 +303,5 @@ unit 0.
   this one. Said plainly here because a portal that registers apps and shows
   arrivals is infrastructure, and the queue is the reason any of it exists.
 - **Governing the marketing site or the documentation.** 0259 settles both.
-- **A second app per deployment.** 0220 stays refused; a project is the unit.
+- **A second app per deployment.** 0220 is refused; a project is the unit.
 - Everything under *Refused up front* in the model above.
