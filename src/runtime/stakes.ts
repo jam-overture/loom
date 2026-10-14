@@ -11,6 +11,7 @@ import { describeRepointedBinding } from "./repointing.js"
 import {
   describeInvalidProps,
   describeUnknownPrimitive,
+  describeUnplacedSlot,
   describeUnreadBinding,
 } from "./vocabulary.js"
 import { highestStake, type StakeLevel } from "./stake-level.js"
@@ -61,6 +62,7 @@ export const stakeFactorCodeSchema = z.enum([
   "unknown-primitive",
   "invalid-props",
   "unread-binding",
+  "unplaced-slot",
   "redirected-submission",
   "repointed-binding",
 ])
@@ -111,12 +113,13 @@ export type StakeInput = {
  * question it answers. Seven of them ask *how much of this deployment's page
  * does this touch* — how many nodes went, how broad it was, how shallow, which
  * of the types this host declared it cares about — so moving a field of the
- * policy moves the answer. The other seven ask *is this change coherent at all*:
+ * policy moves the answer. The other eight ask *is this change coherent at all*:
  * a target nobody can reach, a type nothing is registered for, props the
- * declaring primitive refuses, a question nothing reads, a form or a region
- * pointed somewhere else, work written over. None of those consults a policy
- * field. A host turns them off by declaring no vocabulary (0002) and cannot tune
- * them, so their level is a property of the rule itself.
+ * declaring primitive refuses, a question nothing reads, content put in a region
+ * nothing places, a form or a region pointed somewhere else, work written over.
+ * None of those consults a policy field. A host turns them off by declaring no
+ * vocabulary (0002) and cannot tune them, so their level is a property of the
+ * rule itself.
  *
  * Declared here rather than written into each factor because the level now has
  * two readers. The Gate computes it while it holds the delta, and
@@ -133,6 +136,7 @@ const FIXED_LEVELS = {
   "unknown-primitive": "critical",
   "invalid-props": "critical",
   "unread-binding": "critical",
+  "unplaced-slot": "critical",
   "redirected-submission": "high",
   "repointed-binding": "high",
 } as const satisfies Partial<Record<StakeFactorCode, StakeLevel>>
@@ -517,6 +521,42 @@ const unreadBinding = ({ analysis }: StakeInput): StakeFactor | null => {
 }
 
 /**
+ * Content put where nothing will draw it, as damage.
+ *
+ * `critical`, which is `unread-binding`'s level and the argument for it applies
+ * here with one word changed. The repair is one string and the registry holds
+ * it: *`loom.dialog` places `header` and `footer`, and this node filled `body`*
+ * is something a repairer can act on without being told anything else, so a
+ * refusal is worth more to it than a confirmation a person can only answer no
+ * to.
+ *
+ * Where it is a stronger case than the binding is in what is lost. A question
+ * nothing reads costs a round trip and draws an empty state; a region nothing
+ * places drops the content **and everything under it**, so an author's
+ * paragraph is simply not on the page. 0249 gave the renderer a diagnostic for
+ * that and this is the half that keeps it from being written in the first
+ * place.
+ *
+ * It fires only where a host has handed a placer, which is 0002's answer again:
+ * a deployment resolving primitives from a plain map has never been able to say
+ * what a primitive places, and nothing here invents the knowledge.
+ */
+const unplacedSlot = ({ analysis }: StakeInput): StakeFactor | null => {
+  const { unplacedSlots: unplaced } = analysis
+  if (unplaced.length === 0) return null
+
+  const one = unplaced.length === 1
+
+  return {
+    code: "unplaced-slot",
+    level: FIXED_LEVELS["unplaced-slot"],
+    detail: `fills ${one ? "a region" : `${unplaced.length} regions`} no primitive places, so the ${
+      one ? "content and everything under it is" : "contents and everything under them are"
+    } dropped: ${unplaced.map(describeUnplacedSlot).join("; ")}`,
+  }
+}
+
+/**
  * A form pointed somewhere else, as damage.
  *
  * `high` rather than `critical`, and the comparison with `nested-target` above
@@ -601,13 +641,14 @@ const MEASURED_FACTORS: readonly ((
   shallowStructuralChange,
 ]
 
-/** The seven fixed at their code, which read the specifics a record does not carry. */
+/** The eight fixed at their code, which read the specifics a record does not carry. */
 const FIXED_FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor | null)[] = [
   discardsLaterWork,
   nestedTarget,
   unknownPrimitive,
   invalidProps,
   unreadBinding,
+  unplacedSlot,
   redirectedSubmission,
   repointedBinding,
 ]

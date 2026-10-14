@@ -123,8 +123,7 @@ const judge = (reads: BindingReader | undefined): Verdict => {
     proposal,
     defaultGatePolicy,
     idFactory.deltaId(),
-    undefined,
-    reads
+    { bindingReader: reads }
   )
 
   if (!assessed.ok) return { kind: "not applicable", rule: assessed.error.code, detail: "" }

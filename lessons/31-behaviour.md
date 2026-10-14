@@ -689,7 +689,9 @@ describe("C", () => {
       console.log(`  ${wiring}`)
       for (const [label, delta] of changes) {
         const assessed = checkProps
-          ? assessChange(base, proposalOf(delta), policy, spare.deltaId(), checkProps)
+          ? assessChange(base, proposalOf(delta), policy, spare.deltaId(), {
+              propsVocabulary: checkProps,
+            })
           : assessChange(base, proposalOf(delta), policy, spare.deltaId())
         if (!assessed.ok) throw new Error("loom: the delta would not apply")
 

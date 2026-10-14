@@ -61,6 +61,7 @@ const NUMBER_WORDS = [
   "twelve",
   "thirteen",
   "fourteen",
+  "fifteen",
 ] as const
 
 const wordFor = (count: number): string => {

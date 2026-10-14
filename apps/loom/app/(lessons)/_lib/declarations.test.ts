@@ -67,7 +67,7 @@ const HELD: readonly Held[] = [
   { lesson: "02-ui-as-data.md", name: "SlotNode", members: 4, whole: true },
   { lesson: "02-ui-as-data.md", name: "LoomNode", members: 0, whole: true },
   { lesson: "05-purity-at-the-seams.md", name: "Result", members: 4, whole: true },
-  { lesson: "05-purity-at-the-seams.md", name: "CompositionRuntime", members: 8, whole: true },
+  { lesson: "05-purity-at-the-seams.md", name: "CompositionRuntime", members: 9, whole: true },
   { lesson: "09-the-gate.md", name: "GateRule", members: 3, whole: true },
   { lesson: "10-the-pipeline.md", name: "CompositionOutcome", members: 16, whole: false },
   { lesson: "11-the-model-seam.md", name: "ChangeInterpreter", members: 1, whole: true },
