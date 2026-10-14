@@ -98,7 +98,7 @@ illustrating it.
 
 ## Records
 
-- **Added: [0250](../decisions/0250-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)**
+- **Added: [0252](../decisions/0252-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)**
   — *The write path refuses a region nothing places, and the vocabularies arrive
   as one record.* `Accepted`: it contradicts no `Accepted` record, touches
   neither the tree schema nor the delta model, and is the step 0249 named and

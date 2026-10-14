@@ -1,8 +1,18 @@
-# 0250. The write path refuses a region nothing places, and the vocabularies arrive as one record
+# 0252. The write path refuses a region nothing places, and the vocabularies arrive as one record
 
 **Status:** Accepted
 **Date:** 2026-10-09
 **Section:** §2 (the write path), binding on §3
+
+> **Renumbered on 2026-10-14**, from 0250, when this branch was merged. #565
+> merged first and `main` accepted its 0250 — *a deployment is ordered by readers
+> lost at the door's scale* — and two records sharing a number is fatal (0097).
+> `0252` is the number free below `main`'s highest: nothing on `main` claims it,
+> and neither does either open branch, both of which claim the next number above
+> `main`'s highest rather than this hole. This record was written on 9 October
+> and nothing in it changed but its number; the citations that mean *this* record
+> were updated with it. The paragraph below is the reasoning as it stood when the
+> record was written, and is kept as written.
 
 > **Why this number.** `0249` is the highest record on `main`. Of the three open
 > pull requests only #548 adds a record, and it claims `0245`, which `main` does

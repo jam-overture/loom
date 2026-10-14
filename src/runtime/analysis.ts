@@ -457,7 +457,7 @@ const introducedUnplacedSlots = (
  * what it measured before this record existed.
  *
  * **A record rather than trailing parameters, which is a change of shape and
- * not of behaviour.** Until 0250 these were four positional optionals, and the
+ * not of behaviour.** Until 0252 these were four positional optionals, and the
  * function's own comment had predicted each of the last three arriving to find
  * the shape at its limit. The argument for leaving them positional was that
  * collecting them is a breaking change to a published function; the argument
@@ -483,7 +483,7 @@ export type ChangeVocabulary = {
   readonly checkProps?: PropsVocabulary | undefined
   /** What each primitive reads an answer under (0208). */
   readonly reads?: BindingReader | undefined
-  /** What each primitive places a named region for (0250). */
+  /** What each primitive places a named region for (0252). */
   readonly places?: SlotPlacer | undefined
 }
 

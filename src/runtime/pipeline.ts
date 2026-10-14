@@ -88,7 +88,7 @@ export type CompositionRuntime = {
    * `propsVocabulary` and `bindingReader` above give: a runtime handed none
    * cannot tell a region a primitive places from one it drops on the floor
    * (0051, 0249), and refusing on that ground is a choice made at the
-   * composition root rather than inherited (0179, 0250).
+   * composition root rather than inherited (0179, 0252).
    *
    * Deliberately the renderer's own `SlotPlacer` rather than a second shape, so
    * what the walk reports as `slot-unplaced` is what the write path refuses. An

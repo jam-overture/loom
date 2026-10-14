@@ -70,7 +70,7 @@ export const assessChange = (
    * `WriteCheckSeams` itself rather than a shape of this function's own, which
    * is what makes the two uses below one fact read twice: what is passed to the
    * analysis is, by construction, what is recorded as having been wired. These
-   * were two trailing parameters until the collection (0250), and the third
+   * were two trailing parameters until the collection (0252), and the third
    * would have been the one nobody could order — the same pressure that
    * collected `analyzeDelta`'s vocabularies, arriving at the caller that
    * assembles them.

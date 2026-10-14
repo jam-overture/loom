@@ -11,7 +11,7 @@
 > arithmetic in the prose agrees with the list in `src/`.
 >
 > **9 October 2026.** The same two counts moved again, to *fifteen*, when
-> [0250](0250-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)
+> [0252](0252-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)
 > added `unplaced-slot`. Maintained for the reason above, and the note is kept
 > rather than replaced: the second instance of a forced edit is evidence that the
 > consequence below predicted the right thing.

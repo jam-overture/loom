@@ -473,7 +473,7 @@ export const STAKE_FACTORS: Readonly<Record<StakeFactorCode, string>> = {
     "it would ask your data for something the part in question never looks at, so the answer is fetched and thrown away",
   /*
    * The page would draw, and something an author meant people to read would not
-   * be on it. Added by `Loom daily build` with 0250, in this table's voice and
+   * be on it. Added by `Loom daily build` with 0252, in this table's voice and
    * filed for review — the second clause here about a change that *works*, and
    * the one with the most at stake: what is missing is content rather than a
    * setting, so "nowhere on the page" is the fact a reader has to take away.
@@ -1283,7 +1283,7 @@ export const PACE_SILENCES_PLAIN: Readonly<Record<PaceSilence, PlainWord>> = {
 export const plainPaceSilence = (silence: PaceSilence): PlainWord => PACE_SILENCES_PLAIN[silence]
 
 /**
- * What Loom was checking before it let a change on — the two checks a
+ * What Loom was checking before it let a change on — the three checks a
  * deployment hands over itself, in words that say what each one protects.
  *
  * These are the one part of *what judged a change* that the rules cannot
@@ -1317,6 +1317,12 @@ export const WRITE_CHECKS_PLAIN: Readonly<Record<WriteCheck, PlainWord>> = {
     meaning:
       "Before a change goes on, Loom checks that the data a part is pointed at is something this deployment can really read.",
     technical: "bindings",
+  },
+  regions: {
+    label: "the layout check",
+    meaning:
+      "Before a change goes on, Loom checks that every part of the page a change puts words into has somewhere to show them.",
+    technical: "regions",
   },
 }
 

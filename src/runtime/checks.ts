@@ -19,7 +19,7 @@ import type { PropsVocabulary } from "./vocabulary.js"
  * That gap was filed on 21 September as a stated limit, and the thing that made
  * it worth closing arrived afterwards: 0208 wired a second seam the same way, so
  * there were two inputs that could turn an `accepted` into a `rejected` and
- * leave no trace of having been consulted — three since 0250. A refusal rate
+ * leave no trace of having been consulted — three since 0252. A refusal rate
  * that moved in the week somebody wired a registry into the write path is
  * either explained by that wiring or is a fault, and nothing in this repository
  * could tell those apart.
@@ -58,7 +58,7 @@ export const writeCheckSchema = z.enum(["props", "bindings", "regions"])
  *
  * - `props` — the node's own primitive accepts the props it would carry (0179).
  * - `bindings` — something will read the answer a bound node asks for (0208).
- * - `regions` — the primitive places the named region a node fills (0250).
+ * - `regions` — the primitive places the named region a node fills (0252).
  *
  * The type-name vocabulary is deliberately not here. *Which primitives exist at
  * all* is `registeredPrimitiveTypes`, a policy field, so it is already inside the

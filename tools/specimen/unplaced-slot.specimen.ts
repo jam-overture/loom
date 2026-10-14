@@ -20,7 +20,7 @@ import { createTree } from "../../src/tree/tree.js"
 import { defineSpecimen, WIDE } from "./specimen.js"
 
 /**
- * The same delta, twice — the picture of what 0250 adds, and the sibling of the
+ * The same delta, twice — the picture of what 0252 adds, and the sibling of the
  * `unread-binding` sheet beside it.
  *
  * A model is asked to put a paragraph in a panel. It writes a region correctly in

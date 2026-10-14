@@ -660,7 +660,7 @@ as a perfectly clean verify.
 
 | number | claimed by | how it resolved |
 | --- | --- | --- |
-| 0250 | #565, #566 | unresolved — #566 is still open, still holding a number it will have to move off |
+| 0250 | #565, #566 | #565 merged first and kept it; #566's record renumbered to **0252** at merge on 14 October |
 | 0251 | #565, #568 | #568 renumbered to **0253** at merge; its run listed nine citation sites |
 | 0254 | #575, #576 | #575 merged 16:11 and kept it; #576's record renumbered to **0257** |
 | 0256 | #576, #578 | #576 kept it; #578's record renumbered to **0258** |
@@ -4381,7 +4381,7 @@ quotes only a binding name, which is a name in the tree and never content.
 ## 2026-09-30 — `analyzeDelta` is at the end of its parameter shape, and collecting them means editing two lesson transcripts
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-**closed** by #566 (0250) — the four vocabularies are one optional record,
+**closed** by #566 (0252) — the four vocabularies are one optional record,
 `ChangeVocabulary`, and `assessChange` takes `WriteCheckSeams`. The run that
 collected them was the run that rewrote the transcripts, exactly as this entry
 set out: lessons 22 and 23 for `analyzeDelta`, 30 and 31 for `assessChange`, 05
@@ -50085,7 +50085,7 @@ It is the recommended next unit for this lane.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
 (`src/runtime/vocabulary.ts`, `src/runtime/analysis.ts`), with the blocking half
-for `Loom lessons` (`lessons/`) · **Status:** **closed** by #566 (0250) —
+for `Loom lessons` (`lessons/`) · **Status:** **closed** by #566 (0252) —
 `unplacedSlotsIn` is the walk, `ChangeAnalysis.unplacedSlots` the fact,
 `unplaced-slot` the stake factor at `critical`, and `regions` the third
 `WriteCheck`. The blocker above was closed in the same unit, so the ask to
@@ -50398,7 +50398,7 @@ shipped and `pnpm verify` is green**; this is here so you review words written
 in your voice by somebody else, and so the pattern is on the record for the
 sixteenth rule
 
-[0250](decisions/0250-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)
+[0252](decisions/0252-the-write-path-refuses-a-region-nothing-places-and-the-vocabularies-arrive-as-one-record.md)
 added `unplaced-slot` to `stakeFactorCodeSchema` and collected `analyzeDelta`'s
 vocabularies into one record. Both were forced into your files, and the second
 one is the reason the first waited two weeks: 0249 declined to build the write
