@@ -52,25 +52,73 @@ describe("what the page says about the reply schema", () => {
 
 describe("what the page says a request is made of", () => {
   /**
-   * The sentence is *"about two per cent"*, so this checks the claim rather
-   * than a decimal: what the reader asked about has to stay a small enough
-   * fraction of the request for that sentence to be fair, and the day it is not
-   * is the day somebody should rewrite the paragraph rather than the number.
+   * The sentence is *"under two per cent"*, and the bound in it is the bound
+   * checked here — which it was not until the sources block arrived.
+   *
+   * The page used to say *"about two per cent"* against a band of half a per
+   * cent to three, so a request whose question was really three per cent of it
+   * would have passed a test for a sentence it contradicted. A sentence with a
+   * number in it is worth only as much as the comparison behind it, and *under
+   * two* is the one a reader can check by reading the table above it.
+   *
+   * The lower bound stays, for the opposite failure: a share rounding to
+   * nothing would mean the vocabulary had grown past the point where this
+   * paragraph's argument is the right one to make.
    */
-  it("keeps the reader's own question a small fraction of what is sent", () => {
+  it("keeps the reader's own question under the share the page claims", () => {
     const { measurement } = docsModelRequest("first-tree")
     const asked = measurement.tree + measurement.request
 
-    expect(page).toContain("two per cent")
+    expect(page).toContain("under two per cent")
     expect(asked / measurement.total).toBeGreaterThan(0.005)
-    expect(asked / measurement.total).toBeLessThan(0.03)
+    expect(asked / measurement.total).toBeLessThan(0.02)
   })
 
   it("is honest that the vocabulary is the bulk of it", () => {
     const { measurement } = docsModelRequest("first-tree")
-    const vocabulary = measurement.primitives + measurement.themes
+    const vocabulary = measurement.primitives + measurement.themes + measurement.sources
 
     expect(vocabulary).toBeGreaterThan(measurement.total / 2)
     expect(docsBareRequest("first-tree").total).toBeLessThan(measurement.total / 2)
+  })
+})
+
+describe("what the page says about the sources block", () => {
+  /**
+   * *"the shortest block with the longest instructions"* — the one claim on
+   * that paragraph that could quietly stop being true, because it is about a
+   * ratio inside a block the runtime owns.
+   *
+   * It is the sources block and not the primitive one for a reason worth
+   * keeping: a catalogue of a hundred-odd primitives is almost entirely list,
+   * and a handful of sources are almost entirely the paragraph that comes after
+   * them. The instruction is the same length either way, so the shorter the
+   * list the more of the block is the explanation — and a reader shown four
+   * lines beside a four-figure character count would otherwise be left to
+   * wonder where the rest of it went.
+   */
+  it("is the shortest list and is mostly not the list", () => {
+    const { blocks, measurement, sourceListCharacters } = docsModelRequest("first-tree")
+    const shown = (id: string): number => {
+      const block = blocks.find((candidate) => candidate.id === id)
+
+      if (block === undefined) throw new Error(`no block called ${id}`)
+
+      return block.characters
+    }
+
+    expect(page).toContain("the shortest block with the longest instructions")
+    expect(sourceListCharacters).toBeLessThan(measurement.sources / 2)
+    expect(shown("sources")).toBeLessThan(shown("primitives"))
+    expect(shown("sources")).toBeLessThan(shown("themes"))
+  })
+
+  /**
+   * The two further ways a binding fails, which is why the paragraph is long:
+   * an id can be checked against the list and the other two cannot.
+   */
+  it("says what the list cannot show, in the prompt's own terms", () => {
+    expect(page).toContain("params the source never declared")
+    expect(page).toContain("read by nobody")
   })
 })

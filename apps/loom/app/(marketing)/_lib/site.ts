@@ -155,10 +155,9 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * list exists to prevent.
  *
  * > **The fifty lines that used to be here argued the order of ten pages, and
- * > seven of them do not exist.** They were real: `/the-rules`,
- * > `/who-can-ask`, `/the-record`, `/putting-it-back`, `/what-readers-do`,
- * > `/when-it-goes-wrong` and `/your-components`, each with a paragraph saying
- * > why it sat where it sat. The site was cut to three pages on 26 September
+ * > seven of them do not exist.** They were real pages, retired on 26
+ * > September, and `RETIRED_ROUTES` below is the list of them — each had a
+ * > paragraph here saying why it sat where it sat. The site was cut to three pages on 26 September
  * > and the reasoning stayed, so the one file that defines what this site *is*
  * > spent a fortnight explaining a site nobody can open. Filed by this lane on
  * > 7 October, and what is above is the rewrite it asked for: the order of the
@@ -168,6 +167,52 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * > reads to find out what this site has. They are in `git log`.
  */
 export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN]
+
+/**
+ * The pages this site used to have, and where each one went.
+ *
+ * **It is here because the prose of this route group kept naming them.** On
+ * 26 September the maintainer cut a ten-page site to three; the seven below
+ * went, and their *words* mostly did not — they were absorbed into bands of the
+ * two pages that survived. So every module that had a reason to mention one
+ * went on mentioning it, and nothing could tell. Swept on 14 October, the route
+ * group named these seven **forty times**, and **eleven** of those mentions put
+ * a retired page in the present tense — not as history, but as something doing
+ * a job now. `readers/counting.ts` credited the retired `/what-readers-do` with a
+ * live promise about whether this deployment counts anybody; `chrome.ts`
+ * argued that the mechanism page is reachable from the retired `/the-rules`'
+ * own card; `adapt/run.ts` attributed two of this site's three floors to the
+ * retired `/your-components`.
+ *
+ * **Nothing a reader sees was ever wrong**, which is why it lasted: the sitemap,
+ * `llms.txt`, the bar and the footer are all built from `SITE_ROUTES`, so a
+ * retired page could not leak into a link, a crawl or a map. It leaked into the
+ * explanations instead, where the only reader is the next run — and a wrong
+ * explanation reads exactly like a right one.
+ *
+ * `named.test.ts` is what holds it now, and the rule it holds is in that file.
+ * The list is data rather than a sentence so the test has something to check
+ * against; `absorbedBy` is what a run should follow when it finds the mention,
+ * because in every one of the seven cases the argument being made is still true
+ * of the band that took the words.
+ */
+export type RetiredRoute = {
+  /** The path it was served at, spelled the way the prose spells it. */
+  readonly path: string
+  /** The band that took its words, named by the page and the eyebrow. */
+  readonly absorbedBy: string
+}
+
+/** The seven, in the order the retired site read them. */
+export const RETIRED_ROUTES: readonly RetiredRoute[] = [
+  { path: "/the-rules", absorbedBy: "/how-it-works, 'Your rules'" },
+  { path: "/the-record", absorbedBy: "/how-it-works, 'The record'" },
+  { path: "/when-it-goes-wrong", absorbedBy: "/how-it-works, 'When the answer is no'" },
+  { path: "/putting-it-back", absorbedBy: "/how-it-works, 'Putting it back'" },
+  { path: "/who-can-ask", absorbedBy: "/how-it-works, 'Who is asking'" },
+  { path: "/your-components", absorbedBy: "/what-you-run, 'What you bring'" },
+  { path: "/what-readers-do", absorbedBy: "/what-you-run, 'What this page counts'" },
+]
 
 /**
  * The one page of this site a visitor can ask for a change to.
@@ -913,27 +958,26 @@ export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/dec
  * The page before this one and the page after it, in the order the site's own
  * argument is written in.
  *
- * `SITE_ROUTES` has been a **reading order** since the third page was written,
- * and the comment above it is the longest in this file: which page earns which,
- * why the objection arrives seventh rather than second, why the page about
- * counting readers closes a group instead of opening the site. Every one of
- * those sentences is a decision about what a stranger should read next.
- *
- * Until now the only thing that read the order was the footer's map, which
- * renders it as ten links in a column — where being third and being ninth look
- * exactly alike. So the order was an argument the site made to itself.
- *
- * It costs more than tidiness. Measured across the ten page builders on
- * `main`, the onward links each page hand-picks leave **`/putting-it-back` and
- * `/what-readers-do` linked from no other page's body at all**; both are also
- * off the bar, so the only way to either is to notice it in the footer. And the
- * page the front door's own closing band sends every visitor to —
- * `/how-it-works` — ends without pointing anywhere. A reader who follows the
- * front door's main call to action lands on a page with no way forward in it.
+ * `SITE_ROUTES` is a **reading order**, and this derives the pager from it: the
+ * front door, then how it works, then what you would be running.
  *
  * Neighbours are derived rather than written down, so a route inserted into
  * `SITE_ROUTES` is a route the pages before and after it start pointing at on
  * the same commit. There is no second list to keep in step.
+ *
+ * > **Twenty-five lines of this comment argued a ten-page site**, the same cut
+ * > of 26 September that `RETIRED_ROUTES` records, and they survived the 7
+ * > October rewrite 750 lines above because that finding was filed against the
+ * > comment on `SITE_ROUTES` and this one is a different comment in the same
+ * > file. Every claim in it was false by then and none of it read that way: it
+ * > measured *"the ten page builders on `main`"* when there were three, called
+ * > the footer's map *"ten links in a column"* when it was three, and named
+ * > two retired pages as the ones no page's body links to. Its best line was
+ * > the one that was hardest to doubt — *"the page the front door's own
+ * > closing band sends every visitor to — `/how-it-works` — ends without
+ * > pointing anywhere"* — which stopped being true the moment the site was cut
+ * > to three, because `/how-it-works` became the middle of three and the pager
+ * > below has pointed it onward ever since.
  */
 export type ReadingNeighbours = {
   /** The page before, absent on the first. */
@@ -951,7 +995,7 @@ export type ReadingNeighbours = {
    * rather than a way off the site.
    *
    * It is the way out and it is therefore on exactly one page. A pager whose
-   * `next` was *Docs* on all ten would be a menu item pretending to be a
+   * `next` was *Docs* on every page would be a menu item pretending to be a
    * sequence.
    */
   readonly onward?: Surface
@@ -961,8 +1005,8 @@ export type ReadingNeighbours = {
  * Where a route sits in the reading order, and what is on either side of it.
  *
  * A route that is not in `SITE_ROUTES` has no neighbors rather than throwing:
- * the only callers are the ten page builders, every one of which is looked up
- * out of that same list by `render.ts`, so an unknown route here is not a state
+ * the only callers are the page builders, every one of which is looked up out
+ * of that same list by `render.ts`, so an unknown route here is not a state
  * this site can reach. Returning an empty pair keeps the one function total.
  */
 export const readingNeighbors = (route: SiteRoute): ReadingNeighbours => {

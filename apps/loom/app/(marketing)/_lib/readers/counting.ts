@@ -3,11 +3,12 @@ import { INTAKE_KEY, readIntakeSwitch } from "@/app/_lib/reader-signals/settings
 /**
  * Whether this deployment counts the people reading this site.
  *
- * `/what-readers-do` has said since 16 September that *counting is off unless
- * you turn it on*, and until now that was a sentence about somebody else's
- * deployment: this surface broadcast nothing, so the claim was true of it by
- * doing nothing. Three things turn on this one answer now, and they have to
- * agree or the page lies:
+ * This site has said since 16 September that *counting is off unless you turn
+ * it on* — on the retired `/what-readers-do` then, in *What this page counts*
+ * on `/what-you-run` now. Until this module, that was a sentence about somebody
+ * else's deployment: this surface broadcast nothing, so the claim was true of
+ * it by doing nothing. Three things turn on this one answer now, and they have
+ * to agree or the page lies:
  *
  * | what reads it | what it does with it |
  * | --- | --- |

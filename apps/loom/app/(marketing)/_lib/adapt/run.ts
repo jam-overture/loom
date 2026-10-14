@@ -69,11 +69,12 @@ import { nothingHappened, recordOf, requestOf, type ChangeRecord } from "./recor
  * rules contains owes it a new name. `front-door` has never meant anything else.
  *
  * **Two floors were added under it on 23 September, and neither is a rule
- * anybody wrote.** `/your-components` has said since 11 September that there are
- * *three things no request gets past*, and two of the three were claims this
- * deployment was not in a position to make: a request naming a piece nobody
- * described, or setting one of ours to a value its own description does not
- * allow, reached the rules, passed them and was committed — and what the reader
+ * anybody wrote.** This site has said since 11 September that there are
+ * *three things no request gets past* — on the retired `/your-components`
+ * then, in *What you bring* on `/what-you-run` now. Two of the three were
+ * claims this deployment was not in a position to make: a request naming a
+ * piece nobody described, or setting one of ours to a value its own description
+ * does not allow, reached the rules, passed them and was committed — and what the reader
  * got was a hole where the piece should be, on every visit, until somebody
  * looked at a screen rather than at a test.
  *

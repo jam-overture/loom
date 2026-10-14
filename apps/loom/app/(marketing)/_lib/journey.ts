@@ -76,10 +76,10 @@ export const JOURNEY: readonly JourneyStep[] = [
  * is loading.
  *
  * **The bound was ten until 13 September**, on the reasoning that past ten a
- * marketing sentence should not be counting at all. `/who-can-ask` is the
- * counter-example: its whole band is four requests put by four askers, and
- * *sixteen answers* is the claim rather than an incidental tally. So it runs to
- * twenty — far enough for a page to count something it deliberately counted,
+ * marketing sentence should not be counting at all. The retired `/who-can-ask`
+ * was the counter-example: its whole band was four requests put by four askers,
+ * and *sixteen answers* was the claim rather than an incidental tally. So it
+ * runs to twenty — far enough for a page to count something it deliberately counted,
  * and short of the range where the reasoning above starts being right again.
  */
 const NUMBER_WORDS: readonly string[] = [

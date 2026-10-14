@@ -15,9 +15,9 @@ import appConfig from "../../../next.config"
  * > wrong announces itself: the route is missing, the build says so, `pnpm
  * > verify` goes red."*
  *
- * It does not. Measured rather than argued: with `LESSONS.path` moved to
- * `/the-course` — so that the bar, the footer's map, the front door's cards and
- * the closing band all point at nothing — `next build` finished at **exit 0**,
+ * It does not. Measured rather than argued: with `LESSONS.path` pointed at a
+ * path nothing serves — so that the bar, the footer's map, the front door's
+ * cards and the closing band all point at nothing — `next build` finished at **exit 0**,
  * prerendered every page and reported no error. Nothing in a Next build reads
  * an `href`. The first thing that reports a moved surface is a visitor landing
  * on the 404.

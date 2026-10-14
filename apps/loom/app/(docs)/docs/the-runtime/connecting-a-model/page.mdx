@@ -43,7 +43,7 @@ model never loads it.
 ```ts
 import Anthropic from "@anthropic-ai/sdk"
 
-import { modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
+import { dataCatalogue, modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
 import { anthropicModelClient } from "@jam-overture/loom/anthropic"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
@@ -55,6 +55,7 @@ export const interpreter = modelInterpreter({
   clock: systemClock,
   catalogue: catalogueOf(registry),
   themeCatalogue: themes.catalogue(),
+  dataCatalogue: dataCatalogue(sources),
 })
 ```
 
@@ -67,28 +68,34 @@ in the slot the preset was in, and **nothing downstream changes**.
   eight lines against `ModelClient` if you want a different provider.
 </Callout>
 
-### Two of those arguments are the interesting ones
+### Three of those arguments are the interesting ones
 
-`catalogue` and `themeCatalogue` are optional, and leaving them out is legal and
-usually wrong.
+`catalogue`, `themeCatalogue` and `dataCatalogue` are all optional, and leaving
+any of them out is legal and usually wrong. Each one is a list of names your
+deployment is willing to be asked for, and the model can only name what is on
+them.
 
 Without a catalogue the model is told nothing about what your deployment can
 build with, so the only primitives it knows are the ones already on the page.
 Without a theme catalogue, *"make it warmer"* has nowhere to go: the tree names
 one palette and nothing says another exists, so the model either leaves it alone
-or invents an id that fails to resolve.
+or invents an id that fails to resolve. Without a data catalogue, *"put our
+services here"* has the same problem one floor down — a model can tell that a
+node is able to ask a question and cannot tell which questions you answer, so it
+names a source you never registered and the seam refuses it.
 
-Give it both, and it is choosing from a list you wrote.
+Give it all three, and it is choosing from lists you wrote.
 
 ## What the model is actually shown
 
-Not a screenshot, and not your JSX. Five blocks of plain text, in this order —
+Not a screenshot, and not your JSX. Six blocks of plain text, in this order —
 generated below from the same functions the runtime calls, against the same
-registry the example above renders through, for the sentence on its first chip:
+registries the example above renders through, for the sentence on its first
+chip:
 
 <ModelRequest id="first-tree" />
 
-Four things are worth noticing before the detail.
+Five things are worth noticing before the detail.
 
 **The page is an outline, and every line starts with an id.** That is the whole
 addressing scheme. An operation says *remove `n_firsttree2`*, and it can only do
@@ -106,6 +113,16 @@ vocabulary bargain doing its work in the most literal way it ever does.
 **No colors appear anywhere.** Themes are given as ids and the sentence their
 author wrote about each. A model choosing between your registered palettes is
 the deal; a model choosing hex is the thing that deal rules out.
+
+**What your deployment can be asked about is a list as well, and it is the
+shortest block with the longest instructions.** The lines in that block are
+every source this site registered — the shop from
+[Where the content comes from](/docs/building-with-loom/where-content-comes-from),
+which is the only data vocabulary it has. Most of that block is not the list,
+though. It is the paragraph after it, because a list of ids can show a model
+which sources exist and cannot show it the two further ways a binding goes
+wrong: params the source never declared, and a binding **name** no primitive on
+the node reads, which is answered and then read by nobody.
 
 ## What it is allowed to say back
 
@@ -151,7 +168,7 @@ registering another twenty primitives cost me" a number instead of a feeling:
 
 <PromptCost id="first-tree" />
 
-The reader's question — the page and the sentence they typed — is about **two
+The reader's question — the page and the sentence they typed — is **under two
 per cent** of the request. Everything else is the vocabulary this deployment
 chose to offer, and it is re-sent on every proposal and again on every repair.
 

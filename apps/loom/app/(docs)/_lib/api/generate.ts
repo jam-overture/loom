@@ -8,10 +8,25 @@ import { apiSymbolCount } from "./model"
  *
  *     pnpm --filter @loom/app docs:api
  *
- * Run it after anything that changes the runtime's published surface — which is
- * to say, after `pnpm build` has produced the declarations it reads. The
+ * Run it after anything that changes the runtime's published surface. The
  * committed file is what the pages import, so the reference is data by the time
  * Next sees it and no page loads a compiler.
+ *
+ * **The script builds the package first, and that is not decoration.** Every
+ * name below comes from `dist/*.d.ts` — the published surface is what the build
+ * emits rather than what the source says — so this is only ever as current as
+ * `dist/`. It did not build, and on 13 October it printed *"wrote 17 entry
+ * points and 1599 exports"* and changed nothing after a merge brought four new
+ * modules in, because the declarations it read still described the package from
+ * before. The honest answer was 1634. `pnpm verify` caught it a quarter of an
+ * hour later by building fresh and comparing, which is the gate doing its job
+ * after the command had already said there was nothing to do.
+ *
+ * `docs:fences` is the other generator whose output is committed and it is
+ * deliberately left alone: it reads the pages' own code blocks and writes
+ * TypeScript, so there is nothing in `dist/` for it to be stale against. What
+ * needs the build is the `tsc` run that reads what it wrote, and that is
+ * `verify`'s to do.
  *
  * Committing a generated file earns two things worth the noise in a diff. A
  * pull request that adds an export shows what it added to the public surface,
