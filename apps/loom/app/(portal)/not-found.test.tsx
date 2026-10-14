@@ -21,13 +21,20 @@ describe("the not-found page", () => {
     expect(document.body.textContent).toContain("well-formed tree id")
   })
 
+  /**
+   * The way out has to be somewhere that exists, which is not a thing worth
+   * asserting until it is not true: this named `/portal/pages` and
+   * `/portal/activity` until 14 October, and unit 0 had deleted both, so the
+   * page a lost reader lands on offered two more 404s. `destinations.test.ts`
+   * holds every address in the group against the routes on disk now; this holds
+   * the narrower thing, which is that the page offers an exit at all.
+   */
   it("offers a way out, because a 404 with no exit is a dead end", () => {
     render(<NotFound />)
 
     const destinations = screen.getAllByRole("link").map((link) => link.getAttribute("href"))
 
-    expect(destinations).toContain("/portal/pages")
-    expect(destinations).toContain("/portal/activity")
+    expect(destinations).toContain("/portal")
   })
 
   it("does not dress a missing page as a failure", () => {

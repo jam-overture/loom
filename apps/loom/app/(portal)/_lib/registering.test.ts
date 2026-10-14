@@ -36,6 +36,60 @@ describe("what somebody filled in", () => {
     expect(read.ok && read.value).toEqual({ name: "The bakery", host: undefined, joining: undefined })
   })
 
+  /**
+   * The project's name, which is the application's unless somebody says
+   * otherwise (14 October). The default is expressed as `undefined` rather than
+   * by copying the application's name into the value, so that the one place
+   * deciding what a project is called is the caller that makes it — and so a
+   * blank field and a field nobody sent read identically.
+   */
+  it("leaves the project unnamed when the field is blank, which means name it after the application", () => {
+    const read = readRegistration({ name: "The bakery", host: "", project: "", projectName: "  " })
+
+    expect(read.ok && read.value.projectName).toBeUndefined()
+  })
+
+  it("takes a project name of its own, trimmed", () => {
+    const read = readRegistration({
+      name: "The bakery",
+      host: "",
+      project: "",
+      projectName: "  Storefronts  ",
+    })
+
+    expect(read.ok && read.value.projectName).toBe("Storefronts")
+  })
+
+  it("refuses a project name the list could not show, and says which field", () => {
+    const read = readRegistration({
+      name: "The bakery",
+      host: "",
+      project: "",
+      projectName: "x".repeat(201),
+    })
+
+    expect(read.ok).toBe(false)
+    expect(!read.ok && read.faults.map((fault) => fault.field)).toEqual(["projectName"])
+  })
+
+  /**
+   * A name for a project that is not being made is not a fault, it is noise —
+   * the form renders both controls at once and the select wins.
+   */
+  it("ignores a project name when an existing project was chosen", () => {
+    const read = readRegistration({
+      name: "The bakery",
+      host: "",
+      project: "prj_7h3r31sju5t0n3",
+      projectName: "Storefronts",
+    })
+
+    expect(read.ok && read.value).toMatchObject({
+      joining: "prj_7h3r31sju5t0n3",
+      projectName: undefined,
+    })
+  })
+
   it("trims the name, so a stray space is not part of it forever", () => {
     const read = readRegistration({ name: "  The bakery  ", host: "", project: "" })
 

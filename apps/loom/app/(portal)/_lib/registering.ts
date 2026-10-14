@@ -49,13 +49,33 @@ export type NamingFault =
   | { readonly field: "name"; readonly detail: string }
   | { readonly field: "host"; readonly detail: string }
 
-export type RegistrationFault = NamingFault | { readonly field: "project"; readonly detail: string }
+export type RegistrationFault =
+  | NamingFault
+  | { readonly field: "project"; readonly detail: string }
+  | { readonly field: "projectName"; readonly detail: string }
 
 export type Registration = {
   readonly name: string
   readonly host: string | undefined
-  /** An existing project to join, or `undefined` to make one named after the application. */
+  /** An existing project to join, or `undefined` to make one. */
   readonly joining: string | undefined
+  /**
+   * What to call the project being made, or `undefined` to use the
+   * application's own name.
+   *
+   * **The default is the application's name and the field is still offered**,
+   * which is the maintainer's instruction of 14 October. Before it, the first
+   * registration on a deployment made a project named after the application
+   * with no way to say otherwise, and the result reads oddly the moment anyone
+   * looks at it: a project called *Loom marketing site* holding one
+   * application called *Loom marketing site*. Naming is cheap to offer at the
+   * moment somebody is already typing a name, and expensive to go back for —
+   * there is no screen that renames a project.
+   *
+   * Blank means the default rather than an error, so the one-application
+   * deployment still registers in two fields.
+   */
+  readonly projectName: string | undefined
 }
 
 const nameSchema = z
@@ -83,6 +103,13 @@ export const readRegistration = (fields: {
   readonly name: unknown
   readonly host: unknown
   readonly project: unknown
+  /**
+   * Optional on the parameter rather than required, because a caller that does
+   * not send the field is a real one: the field arrived on 14 October and a
+   * form posted without it still registers an application under a project named
+   * after it, which is the behaviour it had before.
+   */
+  readonly projectName?: unknown
 }): { readonly ok: true; readonly value: Registration } | { readonly ok: false; readonly faults: readonly RegistrationFault[] } => {
   const faults: RegistrationFault[] = []
 
@@ -107,11 +134,32 @@ export const readRegistration = (fields: {
       ? fields.project
       : undefined
 
+  /**
+   * Checked against the same schema as the application's name, and only when
+   * there is something to check: blank is the default, not a fault. It is
+   * ignored outright when an existing project was chosen, because the field is
+   * about the project being made and there is none.
+   */
+  const typedProjectName =
+    typeof fields.projectName === "string" ? fields.projectName.trim() : ""
+  const projectName =
+    joining !== undefined || typedProjectName === "" ? undefined : typedProjectName
+
+  if (projectName !== undefined) {
+    const checked = nameSchema.safeParse(projectName)
+    if (!checked.success) {
+      faults.push({
+        field: "projectName",
+        detail: checked.error.issues[0]?.message ?? "That name will not do.",
+      })
+    }
+  }
+
   if (faults.length > 0) return { ok: false, faults }
 
   return {
     ok: true,
-    value: { name: name.success ? name.data : "", host, joining },
+    value: { name: name.success ? name.data : "", host, joining, projectName },
   }
 }
 
