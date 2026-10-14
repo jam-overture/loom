@@ -200,6 +200,15 @@ Not proposed as a shared tool, and the reason is in the entry: four lanes
 importing one checker would make every lane's prose a dependency of a module
 none of them owns.
 
+**Also filed** — the pull request body's image link came back mangled on the
+first post, which is the open 5 October entry's failure. Re-posting it at 121
+characters instead of 177 came back clean, same body and same syntax twenty
+minutes apart, so this run handed that entry the deliberate pair it says it did
+not spend the calls on. The bracket is still 133–141 and nothing contradicts
+length. The remedy a lane can use today is in the entry: a short commit sha
+rather than the branch name, and a visual slug that does not repeat the report
+slug.
+
 **Closed** — the 7 October entry's class, though not that entry: it was filed
 against one comment, that comment was rewritten on `marketing-66`, and it is
 correctly closed. This run closed the thing it was an instance of.

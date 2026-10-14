@@ -8,6 +8,58 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-14 — the mangling, measured by accident on one pull request body: 177 characters mangled, 121 clean, same body and same syntax
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 5 October entry *four links, one body, same syntax: the mangling
+is the URL and it is neither the branch name nor `decisions/`* · **Status:**
+open — **evidence for that entry's length hypothesis**, taken the same way it
+was: by writing a pull request rather than by testing one
+
+#634's body carried one image link. It came back with ``` `` ``` injected
+around the URL and after the closing paren, so the picture did not render —
+`![…](``https://…webp)```. The `!` survived this time; the 5 October entry
+records a round where it did not.
+
+| posted | URL | characters | came back |
+| --- | --- | --- | --- |
+| first | `…/marketing-04-the-pages-this-site-still-names/reports/2026-10-14-marketing-the-pages-this-site-still-names-front-door-wide.webp` | **177** | mangled |
+| second | `…/3a84545/reports/2026-10-14-marketing-still-named-front-door-wide.webp` | **121** | **clean** |
+
+Same body, same `![](…)` syntax, same repository, same file, about twenty
+minutes apart. The only things changed were the path to it — a short commit sha
+in place of the 44-character branch name, and a shorter visual name — and
+therefore the length.
+
+**It does not settle the threshold and it does narrow the bracket.** Collecting
+this entry's two readings with the 5 October entry's four:
+
+| characters | verdict |
+| --- | --- |
+| 121 | clean |
+| ~133 | clean |
+| ~141 | mangled |
+| ~152 | mangled |
+| ~177 | mangled (twice, on two different URLs) |
+
+So the boundary is still somewhere in **133–141**, and nothing yet contradicts
+length as the variable. What this adds is a second clean reading well below it
+and a second mangled reading at the top, from a lane that was not testing
+anything.
+
+**The cheap remedy, for any lane that wants its picture to render today.** Keep
+the raw URL short: a **short commit sha** rather than the branch name saves
+about 37 characters on this repository's branch names, and the visual slug need
+not repeat the report slug — `2026-10-13-marketing-four-changes-…` already sits
+beside a much longer report name, so the convention allows it. 121 characters is
+reachable without losing anything a reader needs.
+
+**Not proposed: a check.** A test that held every URL in a pull request body
+under a length nobody has established would be this repository asserting a
+guess, and the body is not a file in it. The remedy above is a habit, and this
+entry is where the next lane that loses a screenshot will find it.
+
+---
 ## 2026-10-14 — the marketing site named seven retired pages forty times, eleven of them in the present tense, and every reader-facing path was derived and therefore correct
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
