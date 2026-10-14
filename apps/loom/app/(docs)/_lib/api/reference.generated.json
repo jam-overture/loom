@@ -8,7 +8,7 @@
       "files": 99,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4804,7 +4804,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4850,7 +4850,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5840,7 +5840,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6368,7 +6368,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7547,7 +7547,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8187,7 +8187,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8415,7 +8415,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9168,7 +9168,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9599,7 +9599,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9838,7 +9838,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 56,
+      "files": 57,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9851,7 +9851,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -11492,11 +11492,130 @@
               "summary": "What a change did to a deployment's library among the readers who met it, by kind of part."
             },
             {
+              "name": "readerShareCauseOf",
+              "kind": "function",
+              "signature": "const readerShareCauseOf: (shareWas: number, shareNow: number, ifTrafficHeld: number, ifReadingHeld: number) => ReaderShareCause | null",
+              "truncated": false,
+              "summary": "Which side was sufficient, by the direction each counterfactual carries."
+            },
+            {
+              "name": "weightMovedOver",
+              "kind": "function",
+              "signature": "const weightMovedOver: (weights: readonly {\n    readonly was: number;\n    readonly now: number;\n}[], totals: {\n    readonly was: number;\n    readonly now: number;\n}) => number",
+              "truncated": false,
+              "summary": "Half the sum of the absolute movements in each place's share of its side's weight, which is the figure a comparison of two readerships publishes, over places rather than regions."
+            },
+            {
+              "name": "ScaledPage",
+              "kind": "type",
+              "signature": "type ScaledPage = {\n    readonly reading: PageReading;\n    readonly door: PageDoor;\n    readonly duplicatedRows: number;\n};",
+              "truncated": false,
+              "summary": "One side's pages, each with the door that scales it, worked out once per page."
+            },
+            {
+              "name": "scaledPageOf",
+              "kind": "function",
+              "signature": "const scaledPageOf: (reading: PageReading, rows: readonly StoredPageViews[]) => ScaledPage",
+              "truncated": false,
+              "summary": "One page with its door, picked out of the window's rows by the published matching rule."
+            },
+            {
+              "name": "LibrarySide",
+              "kind": "type",
+              "signature": "type LibrarySide = {\n    readonly pages: PairedWindow;\n    readonly scaled: ReadonlyMap<TreeId, ScaledPage>;\n    readonly duplicatedRows: number;\n};",
+              "truncated": false,
+              "summary": "One whole side: its pages keyed by tree, each page's door, and the rows a caller handed in twice."
+            },
+            {
+              "name": "librarySideOf",
+              "kind": "function",
+              "signature": "const librarySideOf: (window: LibraryWindow) => LibrarySide",
+              "truncated": false,
+              "summary": "The pages of one window, keyed by tree, with each page's door already worked out."
+            },
+            {
               "name": "libraryReachChangeOf",
               "kind": "function",
               "signature": "const libraryReachChangeOf: (was: LibraryWindow, now: LibraryWindow) => LibraryReachChange",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "signals/library-word-reach-change",
+          "title": "Library word reach change",
+          "summary": "The words of a kind of part the typical reader who met it reached — before and after.",
+          "symbols": [
+            {
+              "name": "KindWordReachChangeSilence",
+              "kind": "type",
+              "signature": "type KindWordReachChangeSilence =\n/**\n * Nothing in the pages read, in either window, is of this kind.\n *\n * Only ever a role row, and the census's own reason: *nothing in this\n * library is a heading* is a fact about the library rather than a missing row.\n */\n\"unplaced\"\n/**\n * It stands in both windows and in no place that is in both.\n *\n * Every placement was gained or lost, so there is no text to hold still —\n * which is an answer about the library rather than about its readers, and the\n * places comparison's own reason.\n */\n | \"unpaired\"\n/**\n * No place of it that stands in both windows carries a passage both revisions\n * say the same way.\n *\n * Either it says nothing at all, or every passage of it was rewritten. Both\n * are facts about the change, and a reading that called them *nobody read it*\n * would be answering a question nobody asked. Counted in passages and\n * not in words, so that a kind which says only what it hides is `floored`\n * rather than silent for the wrong reason.\n */\n | \"wordless\"\n/**\n * No carried word of it can be spoken for in both windows.\n *\n * Every carried passage is `unknown` in one window or the other, and\n * `unknown` is *nothing can be said* and never *nobody read it*.\n */\n | \"unread\"\n/**\n * A page bearing a comparable word of it has no page-view row at the door, on\n * one of the two sides.\n *\n * The page's own reading stands whole; what is missing is the one number that\n * makes two pages' masses comparable. {@link LibraryWordReachChange.unscaled}\n * says which page and which side.\n */\n | \"unscaled\"\n/**\n * A page bearing a comparable word of it has a row and nothing in it says a\n * page view began.\n *\n * Kept apart from `unscaled` because the remedy is the opposite: a missing\n * row is retention or an upgrade, and this is **senders that are not marking\n * their openings**.\n */\n | \"unopened\"\n/**\n * A page bearing a comparable word of it has openings and no rollup has\n * folded a window of them yet.\n *\n * The one reason here that resolves itself, and on a comparison it is the\n * commonest honest state of the later window.\n */\n | \"uncounted\"\n/**\n * Some comparable word of it is a floor, so the movement cannot be signed.\n *\n * The only member here that withholds some figures while the rest of the row\n * stands, which is what a reading whose unit is a count of words rather than\n * a share of readers can do. The two levels are published as\n * floors and every difference is withheld.\n */\n | \"floored\";",
+              "truncated": false,
+              "summary": "Why there is no before and after for the words a kind of part puts in front of a reader."
+            },
+            {
+              "name": "KIND_WORD_REACH_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const KIND_WORD_REACH_CHANGE_SILENCES: readonly KindWordReachChangeSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindWordReachChangeSilence",
+              "kind": "function",
+              "signature": "const describeKindWordReachChangeSilence: (silence: KindWordReachChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a kind has no before and after."
+            },
+            {
+              "name": "KindWordReachMovement",
+              "kind": "type",
+              "signature": "type KindWordReachMovement =\n/** The typical reader who met it reaches more of its words now. */\n\"taken-up\"\n/** They reach fewer. */\n | \"abandoned\"\n/**\n * They reach exactly as many.\n *\n * Two means that are the same number, which is the state a window compared\n * against itself is in. A movement smaller than the last bit of a float is\n * reported as a movement rather than as this, and no threshold is invented to\n * prevent it.\n */\n | \"held\"\n/**\n * No reader reached a word it kept, in either window.\n *\n * Kept apart from `held` for the reason every comparison here keeps it apart\n *: *read by nobody, and still read by nobody* is the one state\n * that is an instruction.\n */\n | \"still-unread\"\n/** {@link KindWordReachChange.silence} says why nothing can be said. */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to the words of a kind of part the typical reader reached."
+            },
+            {
+              "name": "KIND_WORD_REACH_MOVEMENTS",
+              "kind": "value",
+              "signature": "const KIND_WORD_REACH_MOVEMENTS: readonly KindWordReachMovement[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeKindWordReachMovement",
+              "kind": "function",
+              "signature": "const describeKindWordReachMovement: (movement: KindWordReachMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a kind's words in front of a person."
+            },
+            {
+              "name": "ReaderWords",
+              "kind": "type",
+              "signature": "type ReaderWords = {\n    /**\n     * Passages both revisions say word for word, across the places of this kind\n     * that stand in both windows.\n     *\n     * The count and not the word total is what says whether there is anything to\n     * compare, because a passage may hide every word it has.\n     */\n    readonly passages: number;\n    /** The words those passages say, which is the mass this reading is about. */\n    readonly carried: number;\n    /**\n     * Of {@link passages}, those with a verdict on **both** sides, which is the\n     * set every figure below is taken over.\n     *\n     * One number and not two, which is what makes the two levels comparable: a\n     * passage nothing can be said about in either window is in neither mass, so\n     * the two sides are read over exactly the same text.\n     */\n    readonly spoken: number;\n    /** The words those passages say: the universe of both masses. */\n    readonly comparable: number;\n    /** Carried words `unknown` on one side or the other, which are in no mass. */\n    readonly unspoken: number;\n    /**\n     * Comparable passages whose word count is a floor, because the part saying\n     * them declares no `copy`.\n     *\n     * Non-nought is what withholds every difference here and leaves the two\n     * levels standing as floors. **A count of passages and not of words**,\n     * because the commonest floor of all is a part that declares no `copy` at\n     * all and whose visible words are therefore nought: a trigger counted in\n     * words would miss exactly the case it exists for.\n     */\n    readonly floored: number;\n    /** The visible words in those passages, which is the part of the mass that is certain. */\n    readonly flooredWords: number;\n    /**\n     * Page views at the door's scale across the pages bearing a comparable word\n     * of it, in the earlier window, added **once per page**.\n     *\n     * The denominator of {@link typicalWas} and the weight behind it.\n     */\n    readonly countedWas: number | null;\n    /** The same for the later window. */\n    readonly countedNow: number | null;\n    /**\n     * Reader-words in the earlier window at the door's scale:\n     * `Σ readers × words` per page, scaled by `counted ÷ appearances`.\n     *\n     * **Not a count of people and deliberately not rounded into one**.\n     */\n    readonly reachedWas: number | null;\n    /** The same for the later window. */\n    readonly reachedNow: number | null;\n    /**\n     * `reachedWas ÷ countedWas` — the carried words the typical reader who met it\n     * reached, in the earlier window.\n     *\n     * A floor under a floor, and exact otherwise. `null` where a silence says why\n     * there is none.\n     */\n    readonly typicalWas: number | null;\n    /** The same in the later window, over the same words. */\n    readonly typicalNow: number | null;\n    /** `typicalNow − typicalWas`, in words per reader. Withheld under a floor. */\n    readonly shift: number | null;\n    /**\n     * The movement stated at the later window's scale: `shift × countedNow`.\n     *\n     * Reader-words and never people, exactly as {@link reachedNow} is — the\n     * figure this reading ranks by, for the reason a page's falls are ranked by\n     * the readers they lose.\n     */\n    readonly wordsMoved: number | null;\n    /**\n     * The later window's per-page rates at the earlier window's weights: the\n     * words there would have been if no page's traffic had moved.\n     *\n     * Isolates the readers. Withheld under a floor, because the only use of a\n     * counterfactual is a subtraction.\n     */\n    readonly ifTrafficHeld: number | null;\n    /**\n     * The earlier window's per-page rates at the later window's weights: the\n     * words there would have been if no reader had read differently.\n     *\n     * Isolates the mix of pages.\n     */\n    readonly ifReadingHeld: number | null;\n    /**\n     * How far the weights moved: half the sum of the absolute movements in each\n     * page's share of its side's total weight, in `[0, 1]`.\n     *\n     * The arithmetic a comparison of two readerships uses, over pages\n     * rather than regions. **Published and never judged**, and published under a\n     * floor as well, because there is no word in it.\n     */\n    readonly weightMoved: number | null;\n    /** Appearances in excess of openings in the earlier window, over the weighted pages. */\n    readonly driftWas: number;\n    /** The same for the later window. */\n    readonly driftNow: number;\n    /** Openings in the earlier window, over the weighted pages, whose reading no rollup has folded. */\n    readonly pendingWas: number;\n    /** The same for the later window. */\n    readonly pendingNow: number;\n    /**\n     * Comparable passages reporting more readers than their page had appearances,\n     * on either side, which no rollup produces.\n     *\n     * Node counters older than the page-view column, or a caller that\n     * concatenated two reads. A surface should show the words comparison\n     * instead where it is non-nought.\n     */\n    readonly unreconciled: number;\n    /**\n     * Nobody's visit spanned a window on either side, nothing is waiting to be\n     * folded, nothing is unreconciled and no word is a floor — so both levels are\n     * exact.\n     *\n     * False under any silence. It says nothing about the weights: a comparison\n     * can be exact on both sides and still be weighted differently, which is what\n     * {@link weightMoved} is for.\n     */\n    readonly exact: boolean;\n};",
+              "truncated": false,
+              "summary": "The words one reader got to, before and after, with the evidence behind both sides."
+            },
+            {
+              "name": "KindWordReachChange",
+              "kind": "type",
+              "signature": "type KindWordReachChange = {\n    readonly kind: KindKey;\n    /**\n     * What part a type plays, or `null`. Always `null` on a role row,\n     * which carries it as its key.\n     *\n     * The later window's answer where it stands there, so that a surface reading\n     * a row and the role beside it is reading today's library.\n     */\n    readonly role: PrimitiveRole | null;\n    /** Places of this kind that stand in both windows: the same node of the same page, of this kind on both sides. */\n    readonly places: number;\n    /** Places of it in the later window with no counterpart in the earlier one. */\n    readonly gained: number;\n    /** Places of it in the earlier window with no counterpart in the later one. */\n    readonly lost: number;\n    /**\n     * Places of it held still whose text the change rewrote, which are in no mass.\n     *\n     * A word-weighted figure needs one word count and these have two. Published\n     * rather than dropped, because *this kind was rewritten everywhere* is why a\n     * row is `wordless` and is the answer somebody most needs.\n     */\n    readonly rewritten: number;\n    /** Pages bearing a comparable word of it, which is trees and not revisions. */\n    readonly pages: number;\n    readonly words: ReaderWords;\n    readonly movement: KindWordReachMovement;\n    /** Which side was sufficient, or `null` where the figure did not move or is withheld. */\n    readonly cause: ReaderShareCause | null;\n    /**\n     * Why the figures are not there, and `null` where they are.\n     *\n     * About the comparison and not about the row: {@link places},\n     * {@link gained} and {@link lost} are counts of parts of trees and are true\n     * whatever any window measured, which is how a census publishes a standing\n     * beside a withheld share.\n     */\n    readonly silence: KindWordReachChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": "One kind of part, held against itself across two windows, by the words one reader got to."
+            },
+            {
+              "name": "LibraryWordReachChange",
+              "kind": "type",
+              "signature": "type LibraryWordReachChange = {\n    /**\n     * Every type that stands in either window, most reader-words lost first.\n     *\n     * Then the lower figure in the later window, then by type, so two kinds that\n     * lost the same do not reorder on a refresh.\n     */\n    readonly byType: readonly KindWordReachChange[];\n    /**\n     * Every role in the vocabulary, then the row for parts whose type declared\n     * none, in the same order as {@link byType}.\n     */\n    readonly byRole: readonly KindWordReachChange[];\n    /**\n     * The whole library's carried words, added across every kind exactly once.\n     *\n     * The figure a comparison of readers cannot have: a page's words\n     * partition across its parts exactly once, so adding every kind's words reads\n     * no sentence twice, while adding every kind's places would count a page once\n     * per element node. A recast place is in no kind's carried words and is in\n     * none of these either — it is a place one kind left and another took.\n     *\n     * There is no movement and no silence here on purpose. Every reason published\n     * by this reading is about one kind of part, and a reason about the whole\n     * would be a second subject on one vocabulary.\n     */\n    readonly words: ReaderWords;\n    /** Pages read in both windows, which is trees and not revisions. */\n    readonly pages: number;\n    /** Pages read in the later window only. */\n    readonly pagesGained: number;\n    /** Pages read in the earlier window only. */\n    readonly pagesLost: number;\n    /**\n     * Paired pages whose revision moved between the windows.\n     *\n     * The comparison still stands — a placement is paired by node and a passage\n     * by its text — but it says the pages changed as well as the window.\n     */\n    readonly republished: number;\n    /** Places that stand in both windows, of the same type on both sides. */\n    readonly placements: number;\n    /** Places in the later window only. */\n    readonly gained: number;\n    /** Places in the earlier window only. */\n    readonly lost: number;\n    /** Paired nodes whose primitive type changed: a place one kind left and another took. */\n    readonly recast: number;\n    /** Places held still whose text the change rewrote, across every kind once. */\n    readonly rewritten: number;\n    /**\n     * Page views counted at the door across the paired pages in the earlier\n     * window, added once per page.\n     *\n     * The weight behind the whole comparison — *this moved among six hundred\n     * readers rather than six* — and the denominator of nothing.\n     */\n    readonly arrivalsWas: number;\n    /** The same for the later window. */\n    readonly arrivalsNow: number;\n    /** Paired pages the door could scale in **both** windows, which is where every figure here comes from. */\n    readonly scaled: number;\n    /**\n     * The paired pages bearing a comparable word that the door could not scale,\n     * by tree, newest revision first, with the side they are on.\n     *\n     * The actionable half of every door silence on a row above. Empty is the\n     * healthy state.\n     */\n    readonly unscaled: readonly UnscaledSide[];\n    /**\n     * The type that lost the most reader-words, which is the kind to look at\n     * first.\n     *\n     * By {@link ReaderWords.wordsMoved} and not by the figure, which is this\n     * subsystem's ranking rule everywhere: a kind the typical reader\n     * reads two words less of across a thousand readers is a bigger fact than one\n     * they read fifty words less of across three. A type and never a role,\n     * because a type is the thing an author can replace.\n     */\n    readonly mostAbandoned: KindWordReachChange | null;\n    /** The type that gained the most reader-words, by the same rule. */\n    readonly mostTakenUp: KindWordReachChange | null;\n    /**\n     * Trees read at two revisions in one window, which are in nothing above.\n     *\n     * A page that is two live revisions in one window has no single counterpart\n     * in the other, and the comparison pairs by page.\n     */\n    readonly ambiguous: readonly TreeId[];\n    /** Readings of a revision beyond the first, on either side, which were dropped. */\n    readonly duplicated: number;\n    /**\n     * Door rows for one revision beyond the first, across the pages of both\n     * windows, which were ignored.\n     *\n     * A store keeps one row per revision, so this is a caller's two reads — and\n     * adding them would double a page's arrivals and halve every figure taken\n     * against it.\n     */\n    readonly duplicatedRows: number;\n    /** Types the two windows disagree about the role of, where the later window's answer stands. */\n    readonly roleDisagreed: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "What a change did to the words a deployment's library puts in front of one reader."
+            },
+            {
+              "name": "libraryWordReachChangeOf",
+              "kind": "function",
+              "signature": "const libraryWordReachChangeOf: (was: LibraryWindow, now: LibraryWindow) => LibraryWordReachChange",
+              "truncated": false,
+              "summary": "The words of a kind of part the typical reader who met it reached, before and after."
             }
           ]
         },
@@ -12418,7 +12537,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -12519,6 +12638,13 @@
               "signature": "const meaningOfKindReachChangeSilence: (silence: KindReachChangeSilence) => SilenceMeaning",
               "truncated": false,
               "summary": "What a reader-weighted comparison of a kind of part reports, of one kind."
+            },
+            {
+              "name": "meaningOfKindWordReachChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfKindWordReachChangeSilence: (silence: KindWordReachChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of the words one reader got to reports, of one kind."
             },
             {
               "name": "meaningOfKindActionSilence",
@@ -12686,7 +12812,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12829,7 +12955,7 @@
       "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12896,7 +13022,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13493,7 +13619,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13567,7 +13693,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14046,7 +14172,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1632,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
