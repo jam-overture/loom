@@ -1,4 +1,4 @@
-import { PartName } from "@/app/(portal)/_components/part-name"
+import { PartName } from "./part-name"
 import type { PlainLine } from "@/app/(portal)/_lib/vocabulary"
 
 /**
