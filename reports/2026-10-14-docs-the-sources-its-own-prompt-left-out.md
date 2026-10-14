@@ -173,3 +173,17 @@ above it, and that is the harness rather than the page: both are clipped to an
 element taller than the viewport, so the bar is photographed where it was parked
 when the crop was taken. The block-on-its-own shot at the top has no crop and no
 bar.
+
+## The preview
+
+<https://loom-git-docs-55-the-sources-282d8c-jpizzolato36-6341s-projects.vercel.app>
+
+The two pages this change touches, either end of one sentence:
+
+- [/docs/the-runtime/connecting-a-model](https://loom-git-docs-55-the-sources-282d8c-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/connecting-a-model)
+- [/docs/building-with-loom/where-content-comes-from](https://loom-git-docs-55-the-sources-282d8c-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/where-content-comes-from)
+
+Not fetched from this container: `*.vercel.app` is denied by the environment's
+egress policy, which is the open finding of 12 October and still true. The shots
+above were taken with `pnpm shoot` against `next start` on the build `pnpm
+verify` produced, on this commit.
