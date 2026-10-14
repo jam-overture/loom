@@ -146,15 +146,17 @@ does not re-derive it.
 
 ## Tests
 
-`pnpm verify` **green, exit 0** — nothing skipped, nothing weakened, no `any`,
-no new `eslint-disable`.
+`pnpm verify` **green, exit 0** — **5,008 runtime tests across 223 files** and
+**8,558 app tests across 445 files**, 1,191 findings checked and none malformed,
+133 prerendered pages with 1,833 text junctions and none run together. Nothing
+skipped, nothing weakened, no `any`, no new `eslint-disable`.
 
 | suite | tests |
 | --- | --- |
 | `src/signals/library-reach-change.test.ts` | 26, new |
 | `src/signals/door.test.ts` | 5, new |
 | `src/signals/silences.test.ts` | 46, the fourteenth vocabulary registered |
-| `src/signals` | 1,007 across 38 files |
+| `src/signals`, whole | 1,008 across 38 files |
 
 **Twelve mutations were planted and two of them survived the first pass**, which
 is the useful half of the exercise. The ten caught immediately: the
