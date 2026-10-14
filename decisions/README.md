@@ -365,3 +365,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0273](0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md) | The reader tables take the application now and the audience when it is ratified | Accepted | §5 (signals), §3 (portal) |
 | 0274 | *No record on this branch* | — | — |
 | [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Accepted | §1, §5 |
+| [0276](0276-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md) | A kind's share of the readers who met it is compared at each window's own weights, and a counterfactual says which side moved | Accepted | §4c (reader signals) |

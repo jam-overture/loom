@@ -19,6 +19,7 @@ import {
   KIND_ACTION_SILENCES,
   KIND_CHANGE_SILENCES,
   KIND_COPY_CHANGE_SILENCES,
+  KIND_REACH_CHANGE_SILENCES,
   KIND_REACH_SILENCES,
   KIND_SILENCES,
   libraryActionOf,
@@ -34,6 +35,7 @@ import {
   meaningOfKindActionSilence,
   meaningOfKindChangeSilence,
   meaningOfKindCopyChangeSilence,
+  meaningOfKindReachChangeSilence,
   meaningOfKindReachSilence,
   meaningOfKindSilence,
   meaningOfPaceChangeSilence,
@@ -154,6 +156,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...KIND_CHANGE_SILENCES.map(meaningOfKindChangeSilence),
   ...KIND_COPY_CHANGE_SILENCES.map(meaningOfKindCopyChangeSilence),
   ...KIND_REACH_SILENCES.map(meaningOfKindReachSilence),
+  ...KIND_REACH_CHANGE_SILENCES.map(meaningOfKindReachChangeSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
@@ -172,6 +175,7 @@ describe("what a reading means when it says nothing", () => {
         KIND_CHANGE_SILENCES.length +
         KIND_COPY_CHANGE_SILENCES.length +
         KIND_REACH_SILENCES.length +
+        KIND_REACH_CHANGE_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
@@ -247,6 +251,11 @@ describe("what a reading means when it says nothing", () => {
           KIND_COPY_CHANGE_SILENCES.map((of) => meaningOfKindCopyChangeSilence(of).condition),
           [],
         ],
+        [
+          "library-reach-change",
+          KIND_REACH_CHANGE_SILENCES.map((of) => meaningOfKindReachChangeSilence(of).condition),
+          [],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -290,6 +299,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "kind",
       "kind",
       "kind",
       "kind",

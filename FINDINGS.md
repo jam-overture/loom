@@ -52164,6 +52164,21 @@ apart from the census's own.
 ## 2026-10-12 — the honest reader-weighted version of a change to a kind of part needs the door on both sides, and is its own unit
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-30-the-readers-who-met-it-before-and-after`** —
+built as `libraryReachChangeOf` in `src/signals/library-reach-change.ts`
+([0276](decisions/0276-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md),
+§30 of [`docs/signals.md`](docs/signals.md)), as this entry proposed it: 0266's
+pairing with 0256's arithmetic inside each side, and the door rows for both
+windows. **Two things the entry left open were decided in the building.** The
+moving weights are answered by sufficiency rather than by magnitude — two
+counterfactuals, one per side, each asked whether it carries the movement's own
+direction (0244's method), so no threshold decides anything; and **no additive
+split of the movement is published**, because there are two of them and they
+differ by the interaction term, so a figure a surface would quote as *this much
+was traffic* would depend on which factor the framework moved first. What is
+published instead is `weightMoved`, 0247's mix over places rather than regions,
+and it is published and never judged. Original status below.
+
 **Status:** open — **a question, not a defect**; filed rather than shipped
 inside 0266's type for the reason 0256 was filed rather than shipped inside
 0257's
@@ -53332,3 +53347,43 @@ that reaches a reviewer rather than a maintainer's terminal.
 The fix is the same four words in front of the command. Filed rather than taken
 here because a package script is not this change's business, and because
 somebody should decide whether `docs:fences` wants it too.
+
+---
+## 2026-10-14 — a kind of part now has a third share, and the one beside it that is not about the library at all
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/.../pieces`) · **Status:** open — **a screen's
+worth of answer, with one field that must not be drawn as a number**
+
+§30 of [`docs/signals.md`](docs/signals.md) landed `libraryReachChangeOf(was,
+now)` in `src/signals/library-reach-change.ts`, published from
+`@jam-overture/loom/signals` and recorded as
+[0276](decisions/0276-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md).
+It is the third comparison of a library and the three answer different questions
+about one change: §26 says *in how many of the places this kind stands has it
+gained or lost its reading*, §27 says what became of the words it kept, and this
+one says what became of **its readers**.
+
+**The field to draw beside the share, not behind it, is `cause`.** A movement in
+a weighted mean is readers reading differently *or* the pages they were on
+changing, and `pages` is reachable with nobody having read anything differently
+— two pages swapping their traffic moves the figure by half its range. A card
+that printed `shareWas → shareNow` with the cause a tooltip would be printing a
+traffic report as a sentence about a component. The four values have a published
+sentence each (`describeReaderShareCause`).
+
+**Three things the screen must not do**, each of them a refusal in the record
+rather than an oversight here:
+
+- **Do not subtract two ceilings.** There is deliberately no `atMost` on either
+  side, because two ceilings do not bound a difference. A screen that wants a
+  bound has `drift`, `pending` and `unreconciled` per side, and `exact`.
+- **Do not print `readersMoved` as people.** It is page views at the door's
+  scale, which is what `met` has been since 0256, and it is the figure the rows
+  are ranked by.
+- **Do not add anything across kinds.** There is no reading-wide share here for
+  the reason there is none in the census (0257).
+
+`weightMoved` is the one figure on the row that is evidence rather than an
+answer: it is published and never judged, so a screen may show it beside the
+cause and must not turn it into a verdict.
