@@ -8,6 +8,149 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-14 — the mangling, measured by accident on one pull request body: 177 characters mangled, 121 clean, same body and same syntax
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 5 October entry *four links, one body, same syntax: the mangling
+is the URL and it is neither the branch name nor `decisions/`* · **Status:**
+open — **evidence for that entry's length hypothesis**, taken the same way it
+was: by writing a pull request rather than by testing one
+
+#634's body carried one image link. It came back with ``` `` ``` injected
+around the URL and after the closing paren, so the picture did not render —
+`![…](``https://…webp)```. The `!` survived this time; the 5 October entry
+records a round where it did not.
+
+| posted | URL | characters | came back |
+| --- | --- | --- | --- |
+| first | `…/marketing-04-the-pages-this-site-still-names/reports/2026-10-14-marketing-the-pages-this-site-still-names-front-door-wide.webp` | **177** | mangled |
+| second | `…/3a84545/reports/2026-10-14-marketing-still-named-front-door-wide.webp` | **121** | **clean** |
+
+Same body, same `![](…)` syntax, same repository, same file, about twenty
+minutes apart. The only things changed were the path to it — a short commit sha
+in place of the 44-character branch name, and a shorter visual name — and
+therefore the length.
+
+**It does not settle the threshold and it does narrow the bracket.** Collecting
+this entry's two readings with the 5 October entry's four:
+
+| characters | verdict |
+| --- | --- |
+| 121 | clean |
+| ~133 | clean |
+| ~141 | mangled |
+| ~152 | mangled |
+| ~177 | mangled (twice, on two different URLs) |
+
+So the boundary is still somewhere in **133–141**, and nothing yet contradicts
+length as the variable. What this adds is a second clean reading well below it
+and a second mangled reading at the top, from a lane that was not testing
+anything.
+
+**The cheap remedy, for any lane that wants its picture to render today.** Keep
+the raw URL short: a **short commit sha** rather than the branch name saves
+about 37 characters on this repository's branch names, and the visual slug need
+not repeat the report slug — `2026-10-13-marketing-four-changes-…` already sits
+beside a much longer report name, so the convention allows it. 121 characters is
+reachable without losing anything a reader needs.
+
+**Not proposed: a check.** A test that held every URL in a pull request body
+under a length nobody has established would be this repository asserting a
+guess, and the body is not a file in it. The remedy above is a habit, and this
+entry is where the next lane that loses a screenshot will find it.
+
+---
+## 2026-10-14 — the marketing site named seven retired pages forty times, eleven of them in the present tense, and every reader-facing path was derived and therefore correct
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
+row for `Loom docs`, `Loom lessons`, `Loom demo` and `Loom portal` ·
+**Status:** **closed by `marketing-04-the-pages-this-site-still-names`** for this
+route group. The row for the other four surfaces is **open** and is one file
+each.
+
+On 26 September the maintainer cut a ten-page marketing site to three. The seven
+pages that went had their *words* absorbed into bands of the two that stayed —
+`/the-rules`, `/the-record`, `/when-it-goes-wrong`, `/putting-it-back` and
+`/who-can-ask` into `/how-it-works`; `/your-components` and `/what-readers-do`
+into `/what-you-run`. Every module with a reason to mention one went on
+mentioning it.
+
+Swept on 14 October, this route group named those seven **forty times** across
+seventeen files. **Eleven of the forty were present tense** — a retired page
+described as doing a job now:
+
+| where | what it said |
+| --- | --- |
+| `readers/counting.ts` | *"`/what-readers-do` **has said** since 16 September that counting is off unless you turn it on"* |
+| `chrome.ts` | *"`/how-it-works` **is** offered by `/the-rules`' own *Before this* card"* |
+| `adapt/run.ts` | *"`/your-components` **has said** since 11 September that there are three things no request gets past"* |
+| `readers/asked.ts` ×3 | *"`/what-readers-do` **is** the page that says it in words"*, and two more |
+| `pages/home.ts` ×2 | *"the footer and `/what-readers-do` **tell** a reader…"*, *"`/your-components` **is** the page that says it in full"* |
+| `journey.ts`, `journey.test.ts` | *"`/who-can-ask` **is** the counter-example: its whole band **is** four requests…"* |
+| `pages/how-it-works.ts` | *"the one thing from `/who-can-ask` that **belongs** on a marketing site"* |
+
+The claim behind every one of them is still true. What was false is the page
+doing the saying — in the first row, a live promise about a reader's privacy
+credited to a page a visitor cannot open.
+
+**Nothing a reader ever saw was wrong, and that is why it lasted fifteen
+weeks.** The bar, the footer's map, the sitemap, `llms.txt` and the front door's
+cards are all derived from `SITE_ROUTES` and `PRODUCT_SURFACES`, so a retired
+page cannot leak into a link, a crawl or a map. It leaked into the explanations,
+where the only reader is the next run.
+
+**The finding of 7 October was the same thing and it was filed one comment too
+narrowly.** It named the fifty-line docblock above `SITE_ROUTES` that argued the
+order of ten pages; that was rewritten on `marketing-66`. Twenty-five more lines
+of the same cut's reasoning sat 750 lines further down the same file, on
+`readingNeighbors`, and survived — measuring *"the ten page builders on `main`"*
+when there were three, calling the footer's map *"ten links in a column"*, and
+closing on *"the page the front door's own closing band sends every visitor to —
+`/how-it-works` — ends without pointing anywhere"*, which stopped being true the
+day the cut made `/how-it-works` the middle of three. A finding against a comment
+closes a comment. This is what closes the class.
+
+### What shipped
+
+`RETIRED_ROUTES` in `_lib/site.ts` — the seven, each with the band that took its
+words — and `_lib/named.test.ts`, which sweeps every comment in the route group
+and holds three rules: a site path named in prose is one this application serves
+or one of the seven; **a retired page may be named only in a sentence that also
+says `retired`**; and an entry nothing names any more is removed.
+
+**The rule is deliberately blunt, and the reason is worth the paragraph.** The
+first draft looked for a past-tense marker in the sentence — `was`, `until`,
+`retired`, `became` — and it **passed the single worst sentence in the sweep**.
+`readers/counting.ts` reads *"`/what-readers-do` has said since 16 September
+that counting is off unless you turn it on, and **until** now that **was** a
+sentence about somebody else's deployment"*: two markers, both attached to the
+claim rather than to the page. The one mention crediting a retired page with a
+live promise about a reader's privacy is the one a tense-sniffer waves through.
+So the word is required rather than inferred. Checked by putting that sentence
+back and watching the test go red, then reverting — not by watching it pass once
+the sentence was gone.
+
+### The row for the other four surfaces
+
+The shape is not this lane's. **Any surface that retires a page keeps the
+reasoning that mentions it**, because the reasoning is in the file that still
+does the job and nothing in a build, a typecheck or a test reads a comment.
+`(docs)`, `(lessons)`, `(demo)` and `(portal)` all have route tables and all
+have had routes move; `(portal)` is mid-cut as of #631, which is the moment this
+costs the least to add.
+
+`named.test.ts` is about sixty lines and the only thing in it that is this
+lane's is `RETIRED_ROUTES` and the two constants it checks against. Copying it
+is cheaper than rediscovering the class, and **the blunt rule is the part to
+copy rather than improve** — the subtle version is the one that was tried and
+demonstrably failed.
+
+Not proposed as a shared tool. A sweep over one route group can be read in one
+sitting and needs no configuration; four lanes importing one checker would make
+every lane's prose a dependency of a module none of them owns, which is a worse
+trade than sixty duplicated lines.
+
+---
 ## 2026-10-13 — every portal screenshot now needs a preload, because a store with no database behind it is a store with nothing in it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`

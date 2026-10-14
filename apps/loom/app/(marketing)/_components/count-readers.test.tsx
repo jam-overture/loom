@@ -227,8 +227,8 @@ describe("counting the readers of this site", () => {
    * The broadcaster names the nearest addressed element to what was pressed,
    * and this site's buttons and links are addressed nodes of their own — so a
    * press inside a band is reported as *this button*, never as *that band*.
-   * That is the fact `asked.ts` records and `/what-readers-do` had to stop
-   * promising the other thing, and it is asserted here because it is the sort
+   * That is the fact `asked.ts` records and the since-retired
+   * `/what-readers-do` had to stop promising the other thing, and it is asserted here because it is the sort
    * of claim a page can go on making long after the machinery stopped agreeing
    * with it.
    */

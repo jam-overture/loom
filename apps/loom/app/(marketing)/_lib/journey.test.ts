@@ -129,8 +129,9 @@ describe("spelling a count", () => {
   })
 
   /**
-   * Raised from ten to twenty on 13 September for `/who-can-ask`, whose band is
-   * four requests put by four askers and whose claim is *sixteen answers*. The
+   * Raised from ten to twenty on 13 September for the retired `/who-can-ask`,
+   * whose band was four requests put by four askers and whose claim was
+   * *sixteen answers*. The
    * boundary is still asserted rather than removed — past twenty a marketing
    * sentence should not be counting, and a numeral is a better failure than a
    * wrong word.

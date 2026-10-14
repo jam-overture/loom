@@ -103,8 +103,9 @@ export type PageContext = {
    * readers has to be able to say so. `render.ts` reads it once per request
    * (`readersCountedHere`) and the same boolean decides three things: the
    * markup carries the addresses a signal names, the layout starts a
-   * broadcaster, and the footer and `/what-readers-do` tell a reader which of
-   * the two pages they are looking at.
+   * broadcaster, and the footer and *What this page counts* tell a reader which
+   * of the two pages they are looking at — the latter on `/what-you-run`, which
+   * absorbed the retired `/what-readers-do`.
    *
    * Absent means off, which is what a builder called without it — every test
    * that predates this, and every page tree built as a fixture — should get.
@@ -637,7 +638,8 @@ const facts = (ids: IdFactory): LoomNode =>
          * The old caption said that a piece takes its colors from the theme —
          * true, and the site demonstrates it in the footer with a switcher rather
          * than needing to claim it here. This one says the thing nothing else on
-         * the site says, and `/your-components` is the page that says it in full.
+         * the site says; the retired `/your-components` said it in full, and
+         * *What you bring* on `/what-you-run` does now.
          */
         buildElement(ids, {
           type: "loom.stat",

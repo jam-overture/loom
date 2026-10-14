@@ -30,7 +30,7 @@ import { seeItHappenBand } from "./see-it-happen"
  *
  * **Rewritten on 26 September at the maintainer's direction.** It was one of
  * four pages describing this mechanism — with `/the-rules`, `/the-record` and
- * `/when-it-goes-wrong` — and the four together ran to 5,398 words on a site
+ * `/when-it-goes-wrong`, all three retired that day — and the four together ran to 5,398 words on a site
  * whose visitor has never heard of any of it. His instruction was to combine
  * them here in cliff-notes form, to cut most of the length, and to leave the
  * minutiae to the documentation.
@@ -124,28 +124,28 @@ export type ShortAnswer = {
 
 export const SHORT_ANSWERS: readonly ShortAnswer[] = [
   {
-    /** Replaces `/the-rules`, which was 1,382 words. */
+    /** Replaces the retired `/the-rules`, which was 1,382 words. */
     eyebrow: "Your rules",
     heading: "You decide what may change, before anyone asks",
     body: "A rule is a line you write once: this part may be rearranged, that part may not, and anything bigger than this waits for a person. They are read the same way every time, whether or not somebody is watching.",
     example: "Say the price may never be edited, and then no request edits the price. Not yours, not a visitor's, not the AI's.",
   },
   {
-    /** Replaces `/the-record`, which was 951 words. */
+    /** Replaces the retired `/the-record`, which was 951 words. */
     eyebrow: "The record",
     heading: "Every change leaves a note you can read later",
     body: "The record holds who asked, what they asked for, what actually moved, which of your rules allowed it, and what putting it back would restore. Loom keeps it whether the change went through or not.",
     example: "Six months later you can ask why a section moved, and get an answer rather than a guess.",
   },
   {
-    /** Replaces `/when-it-goes-wrong`, which was 1,116 words. */
+    /** Replaces the retired `/when-it-goes-wrong`, which was 1,116 words. */
     eyebrow: "When the answer is no",
     heading: "A refused change leaves the page exactly as it was",
     body: "Nothing is half-applied. If an AI model asks for something your rules do not allow, or something that does not make sense, the page you are serving does not move. The attempt is still written down.",
     example: "A request to delete your contact details is refused, your page is untouched, and the refusal is in the record.",
   },
   {
-    /** Replaces `/putting-it-back`, which was 984 words. */
+    /** Replaces the retired `/putting-it-back`, which was 984 words. */
     eyebrow: "Putting it back",
     heading: "The undo is written at the same moment as the change",
     body: "Loom works out the change that reverses it at the moment the change is made, and saves it. It does not reconstruct it afterwards from how the page looks now.",
@@ -160,8 +160,8 @@ const shortAnswer = (ids: IdFactory, answer: ShortAnswer): LoomNode =>
   ])
 
 /**
- * Who is asking, which is the one thing from `/who-can-ask` that belongs on a
- * marketing site.
+ * Who is asking, which is the one thing from the retired `/who-can-ask` that
+ * belongs on a marketing site.
  *
  * That page put sixteen real runs side by side to show the same request
  * answered differently for four askers. The comparison was good and it was a
