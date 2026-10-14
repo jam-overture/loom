@@ -222,3 +222,42 @@ the notification, which is exactly what that section tells a run to do.
    It is roughly four lines plus whatever `readRename` needs, and it is the
    difference between a person being able to remove a host and a person being
    told they cannot.
+
+---
+
+## Addendum, 14 October — the base moved, and the number moved with it
+
+Fourteen commits landed on `main` after this branch was cut, and two of them
+collided with it. Resolved on 14 October without touching the change itself.
+
+**The conflicts were both generated files, and both were regenerated rather
+than merged by hand.** `decisions/README.md` and
+`apps/loom/app/(docs)/_lib/api/reference.generated.json` each took `main`'s side
+first and were then rebuilt by their own tooling: `pnpm decisions:index`, and
+`pnpm --filter @loom/app docs:api` after a `pnpm build`. The reference is now
+**1,642 exports across 17 entry points** — the three this branch adds, on top of
+what #566 landed.
+
+**The record is renumbered 0274 → 0276, and the reason is the clash this
+repository already has a finding about.** #627 claimed 0274 four minutes before
+this branch did, and `main` has since taken 0275 (#629). Re-reading `main` put
+the next free number at 0276, which is what
+[0276](../decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md)
+now is. Nothing in the record's substance changed — the file was moved, its
+heading renumbered, and the five references to it in this report and
+`FINDINGS.md` re-pointed. 0275's own text had already noted that 0274 was
+"claimed by **two** open pull requests", so the portal lane saw this coming and
+stepped over it; this is the other half of that.
+
+**The gate, re-run on the merge:**
+
+```
+Test Files  222 passed (222)      Tests  4995 passed (4995)    # root
+Test Files  445 passed (445)      Tests  8558 passed (8558)    # @loom/app
+EXIT=0
+```
+
+13,553 tests across 667 files. The root suite gained 25 tests and the app suite
+one against the figures above, all of them from `main`. Nothing skipped and no
+test weakened; the status file was read in a separate command, which is the
+remedy the section above names.
