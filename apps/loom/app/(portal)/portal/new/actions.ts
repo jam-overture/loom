@@ -59,6 +59,7 @@ export const registerApplication = async (
     name: form.get("name"),
     host: form.get("host"),
     project: form.get("project"),
+    projectName: form.get("projectName"),
   })
 
   if (!read.ok) return { faults: read.faults }
@@ -74,7 +75,7 @@ export const registerApplication = async (
     return { faults: [{ field: "project", detail: "That is not a project." }] }
   }
 
-  const projectId = chosen?.success === true ? chosen.data : await projectFor(read.value.name)
+  const projectId = chosen?.success === true ? chosen.data : await projectFor(read.value.projectName ?? read.value.name)
 
   if (projectId === undefined) {
     return {
@@ -97,5 +98,19 @@ export const registerApplication = async (
     return { faults: [], detail: describeApplicationStoreError(registered.error) }
   }
 
-  redirect(`/portal/${applicationId}?registered=1`)
+  /**
+   * The front door, because the screen this used to land on no longer exists.
+   *
+   * It redirected to `/portal/${applicationId}` until 14 October, and unit 0
+   * deleted `/portal/[application]` with nineteen other screens — so
+   * registering an application worked, wrote both rows, and then showed *Not
+   * found*. Nothing caught it: the action's destination is a string, no test
+   * asserted it was a route this portal serves, and the deletion sweep looked
+   * for imports rather than for addresses built out of template literals.
+   * `destinations.test.ts` asserts it now.
+   *
+   * `registered` is kept so the front door can say which one is new, when it
+   * learns to; the id goes with it rather than being the path.
+   */
+  redirect(`/portal?registered=${applicationId}`)
 }
