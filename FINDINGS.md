@@ -53275,8 +53275,17 @@ trusting it:
 ## 2026-10-13 — the site's own produced prompt has no sources block, so *Connecting a model* shows a reader less than the runtime sends
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/_lib/prompt/`) · **Status:** open — **deliberately
-deferred**, filed so the next run on either page starts from it
+(`apps/loom/app/(docs)/_lib/prompt/`) · **Status:** **closed, 14 October 2026**
+by `docs-55-the-sources-its-own-prompt-left-out`. `request.ts` now passes
+`dataCatalogue(shopRegistry())`, the printed prompt has a sixth block, and the
+recipe on the page hands a model all three catalogues rather than two. The
+deferral was the right call and the reason it was deferred is what the block
+turned out to be worth: growing the produced prompt moved what
+`prompt/claims.test.ts` measures, and the move exposed a looser instrument than
+anybody had noticed — *"about two per cent"* was held by a band of half a per
+cent to three, so a share that contradicted the sentence would have passed the
+test for it. The page says **under two per cent** and the bound in the sentence
+is now the bound in the test
 
 Correcting *Where the content comes from* this run meant establishing that the
 prompt really does carry the registered sources: `dataCatalogue` projects each
@@ -53302,8 +53311,14 @@ four claims it caught, and growing the model page's produced prompt changes what
 ## 2026-10-13 — `docs:api` reads `dist/` and does not build it, so it reports "no change" against a package that has moved
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom docs`
-(`apps/loom/package.json`, `app/(docs)/_lib/api/`) · **Status:** open — **a
-command that silently answers about the wrong source**
+(`apps/loom/package.json`, `app/(docs)/_lib/api/`) · **Status:** **closed, 14
+October 2026** by `docs-55-the-sources-its-own-prompt-left-out`. `docs:api`
+builds the package first, like the three scripts that learned this on 12
+October, and `generate.ts`' header now carries the failure rather than the
+commit message. **The open question is answered no:** `docs:fences` does not
+want the same four words, because it reads the pages' own code blocks and writes
+TypeScript — there is nothing in `dist/` for it to be stale against. What needs
+the build is the `tsc` run that reads what it wrote, and that is `verify`'s
 
 ```json
 "docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
@@ -53332,3 +53347,35 @@ that reaches a reviewer rather than a maintainer's terminal.
 The fix is the same four words in front of the command. Filed rather than taken
 here because a package script is not this change's business, and because
 somebody should decide whether `docs:fences` wants it too.
+
+---
+## 2026-10-14 — the site has one source registry, it belongs to a cake shop, and the prompt that prints it says "this deployment"
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/data/shop.ts`, `_lib/loom/registry.ts`) ·
+**Status:** open — **a stated oddity in what shipped today**, with the remedy
+named and deliberately not taken
+
+*Connecting a model* now prints the sources block the runtime really sends, and
+the block opens with the runtime's own sentence: *"Data this deployment can
+answer questions about."* What it then lists is `catalogue.services`,
+`profile.field`, `shop.opening-hours` and `catalogue.classes` — the cake shop
+from *Where the content comes from*.
+
+That is honest in the only sense that matters, which is that it is the real
+registry rather than a plausible one: those four sources are resolved for real
+as that page builds, and the catalogue printed here is the projection of the
+same `DataRegistry`. It is still a little odd to read. The primitive catalogue
+and the theme catalogue on that page are genuinely *this site's*, assembled once
+in `_lib/loom/registry.ts` with a comment explaining why there is one of each
+rather than one per example. The source catalogue is one example's, borrowed.
+
+The remedy is the symmetry: a `docsSources` beside `docsRegistry` and
+`docsThemes`, with `shop.ts` composing its three scenario registries — the
+working shop, the shop having a bad afternoon, the shop with a silent source —
+out of the one the site declares.
+
+**Not taken here**, because `shop.ts`' three registries are the subject of
+*Where the content comes from* rather than an implementation detail of it, and
+rearranging them is a change to that page's evidence rather than to this one's.
+Filed so that whoever next has a reason to open that file does it then.

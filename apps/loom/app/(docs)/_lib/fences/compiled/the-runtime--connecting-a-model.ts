@@ -9,11 +9,11 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk"
-import { modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
+import { dataCatalogue, modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
 import { anthropicModelClient } from "@jam-overture/loom/anthropic"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
-import { registry, themes } from "../context/the-runtime--connecting-a-model"
+import { registry, sources, themes } from "../context/the-runtime--connecting-a-model"
 import type {
   EditIntent,
   InterpretationError,
@@ -36,7 +36,8 @@ export const interpreter = modelInterpreter({
   clock: systemClock,
   catalogue: catalogueOf(registry),
   themeCatalogue: themes.catalogue(),
+  dataCatalogue: dataCatalogue(sources),
 })
 
-export { anthropic, Anthropic, modelInterpreter, randomIdFactory, systemClock, anthropicModelClient, catalogueOf }
+export { anthropic, Anthropic, dataCatalogue, modelInterpreter, randomIdFactory, systemClock, anthropicModelClient, catalogueOf }
 export type { ChangeInterpreter }
