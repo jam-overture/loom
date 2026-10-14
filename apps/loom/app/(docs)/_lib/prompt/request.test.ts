@@ -1,7 +1,9 @@
 import {
+  dataCatalogue,
   INTERPRETER_SYSTEM_PROMPT,
   measurePrompt,
   renderCatalogue,
+  renderSourceCatalogue,
   renderTree,
   sequentialIdFactory,
   type EditIntent,
@@ -9,6 +11,7 @@ import {
 import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
+import { shopRegistry } from "../data/shop"
 import { docsExamples } from "../examples/catalogue"
 import { docsRegistry, docsThemes } from "../loom/registry"
 
@@ -41,11 +44,12 @@ describe("the request the documentation prints", () => {
     expect(docsModelRequest(EXAMPLE)).toEqual(docsModelRequest(EXAMPLE))
   })
 
-  it("shows the five blocks in the order they are sent", () => {
+  it("shows the six blocks in the order they are sent", () => {
     expect(docsModelRequest(EXAMPLE).blocks.map((block) => block.id)).toEqual([
       "system",
       "primitives",
       "themes",
+      "sources",
       "tree",
       "request",
     ])
@@ -68,6 +72,7 @@ describe("the request the documentation prints", () => {
     const expected = measurePrompt(intent, tree, {
       catalogue: catalogueOf(docsRegistry),
       themeCatalogue: docsThemes.catalogue(),
+      dataCatalogue: dataCatalogue(shopRegistry()),
     })
     const { blocks, measurement } = docsModelRequest(EXAMPLE)
 
@@ -104,6 +109,25 @@ describe("the request the documentation prints", () => {
     )
   })
 
+  /**
+   * The block this page went a month without, and the one claim about it worth
+   * holding: a source this deployment registered is a source the printed prompt
+   * names. A fifth source added to the shop reaches the page by being
+   * registered, and the day it does not, this is red rather than the page being
+   * quietly short of one.
+   */
+  it("names every source this deployment registered", () => {
+    const sources = dataCatalogue(shopRegistry())
+    const block = blockOf("sources")
+
+    expect(sources.length).toBeGreaterThan(0)
+    expect(block.preview.length + (block.elided?.count ?? 0)).toBe(sources.length)
+    expect(block.preview.join("\n")).toBe(
+      renderSourceCatalogue(sources).split("\n").slice(0, block.preview.length).join("\n")
+    )
+    expect(block.characters).toBeGreaterThan(renderSourceCatalogue(sources).length)
+  })
+
   it("shows the head of the standing instructions rather than a paraphrase", () => {
     const system = blockOf("system")
 
@@ -119,6 +143,7 @@ describe("the request the documentation prints", () => {
     expect(registered.themeIds).toBe(
       themes.palettes.length + themes.fontPacks.length + themes.stylePresets.length
     )
+    expect(registered.sources).toBe(dataCatalogue(shopRegistry()).length)
   })
 
   it("costs far less with nothing registered, which is the comparison the page makes", () => {
@@ -127,6 +152,7 @@ describe("the request the documentation prints", () => {
 
     expect(bare.primitives).toBe(0)
     expect(bare.themes).toBe(0)
+    expect(bare.sources).toBe(0)
     expect(bare.tree).toBe(measurement.tree)
     expect(bare.total).toBeLessThan(measurement.total)
   })

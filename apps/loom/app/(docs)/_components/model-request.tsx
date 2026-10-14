@@ -90,8 +90,8 @@ export const PromptCost = ({ id }: { readonly id: string }) => {
 
           <tr className="border-edge bg-surface-sunken border-b">
             <td className="text-ink px-3 py-2 font-semibold">
-              One request, with {registered.primitives} primitives and {registered.themeIds}{" "}
-              theme ids registered
+              One request, with {registered.primitives} primitives, {registered.themeIds}{" "}
+              theme ids and {registered.sources} sources registered
             </td>
             <td className="text-ink px-3 py-2 text-right font-mono text-xs font-semibold">
               {COUNT.format(measurement.total)}
