@@ -23,7 +23,13 @@ Status, Date, Section, then Context, Decision, Consequences, Alternatives
 considered. Record what was rejected and why, not only what was chosen — the
 rejected options are the part a future reader cannot reconstruct.
 
-`Status` is one of `Proposed`, `Accepted`, or `Superseded by NNNN`.
+`Status` is one of `Proposed`, `Accepted`, `Superseded by NNNN`, or `Refused`.
+
+`Refused` is for a proposal that was decided against rather than overtaken. It
+says what `Proposed` for ever cannot — that somebody answered — and what
+`Superseded by NNNN` gets wrong, which is that the record was accepted first.
+Where a successor holds instead, name it after the opener; the reference is
+reciprocal like any other (0193). 0220 is the first.
 
 A record that answered several questions at once can be replaced in part. Then
 the status is `Accepted — partially superseded by NNNN`, and the replacement says
@@ -359,3 +365,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0273](0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md) | The reader tables take the application now and the audience when it is ratified | Accepted | §5 (signals), §3 (portal) |
 | [0274](0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md) | A page-view row says when the fold last touched it, and a stall is judged against a schedule the deployment hands in | Accepted | §4c (reader signals) |
 | [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Accepted | §1, §5 |
+| [0276](0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md) | A patch field says set, cleared or unchanged, and clearing removes the key | Accepted | §2 (the store), §3 (portal) |

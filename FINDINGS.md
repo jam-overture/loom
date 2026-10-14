@@ -53156,8 +53156,16 @@ the lane that found it is not the one that gets to choose.
 ## 2026-10-13 — `rename` cannot clear a field, so a host set once is a host forever
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/application/`,
-`src/project/`) · **Status:** open — **a settings screen is refusing half an
-edit it has no way to make**
+`src/project/`) · **Status:** **closed by
+`framework-71-the-field-a-rename-can-clear`** — the third state, as this entry
+proposed it. `host` on `ApplicationStore.rename` is now `Patch<string>`: a value
+sets it, `null` clears it, absent still leaves it alone, and `""` is refused by
+both stores as before. Recorded as
+[0276](decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md).
+`applyPatch` is the one place the three states are read, so the `Map` and the
+column cannot drift about what a patch means. **The settings screen itself is
+not changed** — `(portal)` is a paused lane, and the refusal that is now
+unnecessary is filed below for it
 
 `ApplicationStore.rename` takes `{ name?, host? }` and both implementations
 read an absent field the same way:
@@ -53342,6 +53350,53 @@ here because a package script is not this change's business, and because
 somebody should decide whether `docs:fences` wants it too.
 
 ---
+## 2026-10-13 — the host a settings screen refuses to remove can be removed now, and the sentence saying otherwise is the only thing left
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[application]/settings/actions.ts`) ·
+**Status:** open — **nothing is broken and one screen is now wrong on purpose**;
+the framework half of the 13 October entry above is closed and this is the half
+that was never the framework's to do
+
+`renameApplication` reads the host box, notices that the person emptied it, and
+returns a fault rather than saving:
+
+> A host cannot be removed yet — only changed. Nothing was saved. Put the old
+> one back, or type a new one.
+
+That was the right thing to ship. The comment above it says exactly why — *a
+surface does not get to decide what `rename` means* — and it filed the decision
+rather than taking it. The decision is taken:
+[0276](decisions/0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md),
+and `ApplicationStore.rename` now takes `host: null` for *remove it*.
+
+**What is left is this lane's and is small.** The guard block and its comment
+come out, and the call carries the third state through — an emptied box is
+`null`, an untouched one is still absent:
+
+```ts
+const renamed = await portalApplications.rename(applicationId, {
+  name: read.value.name,
+  host: read.value.host ?? null,
+})
+```
+
+That one line is not obviously right and is why this is filed rather than done
+from outside the lane: it turns on what `readRename` means by an absent host,
+which is `_lib/registering.ts`'s question and not the framework's. If the form
+cannot tell *the box was emptied* from *the field was not submitted*, the
+reading has to be settled before the call changes — and that is the kind of
+thing a screen's owner knows and a visitor guesses.
+
+**`Loom portal` is paused as of 13 October**, so this waits, which is what
+`docs/routines.md` says a finding against a paused lane does. Nothing regresses
+while it waits: the screen refuses an edit it could now make, which is the state
+it has been in since it shipped.
+
+**Why it was not done here anyway.** The lane boundary is the whole reason the
+framework half was worth doing — the entry above was filed rather than worked
+around, and answering it by reaching into `(portal)` would make the next lane's
+filing pointless. A paused routine's directory is nobody else's.
 ## 2026-10-13 — a stalled collection is now a fault, and the collection screen has a timestamp to draw beside the figure it could not judge
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the collection
