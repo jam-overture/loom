@@ -2,7 +2,7 @@
 
 **Build order section:** §5 — Portal. The chrome and the design system; the store-backed half follows.
 
-**Visuals:** [icon rail](2026-07-30-day-10-portal-shell-rail.png) · [expanded on hover](2026-07-30-day-10-portal-shell-expanded.png)
+**Visuals:** [icon rail](2026-07-30-day-10-portal-shell-rail.webp) · [expanded on hover](2026-07-30-day-10-portal-shell-expanded.webp)
 
 **Branch:** `day-10-portal-shell`, off `main` at `cce4eae`
 

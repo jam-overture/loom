@@ -4,6 +4,7 @@ import { type LoomTree } from "@jam-overture/loom"
 import { describeRenderDiagnostic, renderLoomTree } from "@jam-overture/loom/react"
 import { useState } from "react"
 
+import { uncarryAnswers, type CarriedAnswers } from "@/app/(docs)/_lib/data/carry"
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
 import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
 
@@ -30,6 +31,13 @@ import { ProposalBox } from "./proposal-box"
  * building a tree is deterministic: the same id factory, the same counters, the
  * same bytes. Nothing here reads a clock until a reader clicks something.
  *
+ * **The registry is usually the site's and is not always.** An example may
+ * carry its own, and exactly one does: the page whose subject is a primitive
+ * of your own renders through the starter library plus that primitive.
+ * `_lib/own/registry.ts` is where the argument for the exception lives, and
+ * `catalogue.test.tsx` mounts each example through whichever registry it named,
+ * so the pair cannot come apart.
+ *
  * An unknown id throws rather than rendering an empty frame. A page that names
  * an example nobody wrote is a broken page, and the build is the right place to
  * find that out; `content.test.ts` finds it earlier still.
@@ -39,7 +47,27 @@ import { ProposalBox } from "./proposal-box"
  * happens, and a documentation site that hid it would be teaching the reader
  * that it cannot happen.
  */
-export const Example = ({ id, interactive = true }: { readonly id: string; readonly interactive?: boolean }) => {
+export const Example = ({
+  id,
+  interactive = true,
+  answers,
+}: {
+  readonly id: string
+  readonly interactive?: boolean
+  /**
+   * The answers this example's questions were given, resolved on a server and
+   * sent here as data.
+   *
+   * Only `BoundExample` passes one, and only one example asks anything. The
+   * resolution is rebuilt rather than reconstructed: `uncarryAnswers` puts the
+   * real outcomes back behind the two accessors the walk reads, so an answer
+   * this frame could not use reports the same thing it would have reported on a
+   * server. Absent, the walk is given no resolution at all — which is correct
+   * for every tree that asks nothing, and is itself a diagnostic for one that
+   * does.
+   */
+  readonly answers?: CarriedAnswers
+}) => {
   const example = docsExamples.get(id)
 
   if (example === undefined) {
@@ -59,10 +87,13 @@ export const Example = ({ id, interactive = true }: { readonly id: string; reado
   const [seed] = useState<LoomTree>(example.build)
   const changed = tree.revision > 0
 
+  const registry = example.registry ?? docsRegistry
+
   const rendered = renderLoomTree(tree, {
-    resolver: docsRegistry,
-    validator: docsRegistry,
+    resolver: registry,
+    validator: registry,
     themes: docsThemes,
+    ...(answers === undefined ? {} : { data: uncarryAnswers(answers) }),
   })
 
   return (

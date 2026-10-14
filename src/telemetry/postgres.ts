@@ -1,7 +1,8 @@
-import { and, asc, desc, eq, gt, inArray, lt, sql } from "drizzle-orm"
+import { and, asc, desc, eq, gt, inArray, lt, sql, type SQL } from "drizzle-orm"
 import { z } from "zod"
 
 import { treeIdSchema } from "../ids.js"
+import { DEFAULT_APPLICATION_ID, type StoreScope } from "../application/application.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
@@ -78,13 +79,29 @@ const failure = (cause: unknown, detail: string): TelemetryError => ({
   detail: `${detail}: ${cause instanceof Error ? cause.message : String(cause)}`,
 })
 
-export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => ({
+/**
+ * Every query is filtered by the project this handle speaks for (0260), and
+ * every write sets it.
+ *
+ * `seq` is not scoped and does not need to be — see `schema.ts`. What is scoped
+ * is every row this handle will ever see, so one project's gate decisions
+ * cannot appear on another's screen.
+ */
+export const postgresTelemetryJournal = (
+  db: LoomDatabase,
+  scope: StoreScope = {}
+): TelemetryJournal => {
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
+  const mine = (...rest: (SQL | undefined)[]) => and(eq(loomTelemetry.applicationId, project), ...rest)
+
+  return {
   record: async (batch) => {
     if (batch.length === 0) return ok(undefined)
 
     try {
       await db.insert(loomTelemetry).values(
         batch.map((entry) => ({
+          applicationId: project,
           treeId: entry.treeId,
           occurredAt: entry.occurredAt,
           event: entry.event,
@@ -119,7 +136,7 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
         })
         .from(loomTelemetry)
         .where(
-          and(
+          mine(
             request?.treeId === undefined ? undefined : eq(loomTelemetry.treeId, request.treeId),
             from === undefined
               ? undefined
@@ -187,7 +204,7 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
         .selectDistinctOn([ASSESSED_PROPOSAL_ID], { assessment: ASSESSMENT })
         .from(loomTelemetry)
         .where(
-          and(
+          mine(
             eq(ASSESSED_TYPE, "change-assessed"),
             inArray(ASSESSED_PROPOSAL_ID, asked),
             treeId === undefined ? undefined : eq(loomTelemetry.treeId, treeId)
@@ -231,7 +248,19 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
     try {
       const removed = await db
         .delete(loomTelemetry)
-        .where(lt(loomTelemetry.seq, before))
+        /**
+         * Scoped like every read on this handle, which it was not when the
+         * application dimension landed (0269) — `forget` was the one statement
+         * in this file that did not go through `mine`.
+         *
+         * It matters more here than anywhere else in the file. `seq` is a
+         * `bigserial`, so it counts across every application the database
+         * holds: retention run for one application was deleting every other
+         * application's records below the same sequence number, and a deleted
+         * telemetry row is not recoverable from anything. Nothing had reached
+         * it, because nothing constructs a second handle yet.
+         */
+        .where(mine(lt(loomTelemetry.seq, before)))
         .returning({ seq: loomTelemetry.seq })
 
       return ok<ForgetOutcome>({ removed: removed.length })
@@ -239,4 +268,5 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
       return err(failure(cause, `could not forget telemetry below ${before}`))
     }
   },
-})
+  }
+}

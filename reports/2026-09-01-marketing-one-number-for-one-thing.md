@@ -4,7 +4,7 @@ The front door told a stranger there were **four steps**. The button directly
 above that sentence leads to a page headed **“Five steps, every time, in the
 same order”**.
 
-![The same band, the same geometry, one word changed](2026-09-01-marketing-one-number-for-one-thing.png)
+![The same band, the same geometry, one word changed](2026-09-01-marketing-one-number-for-one-thing.webp)
 
 Both of those sentences were true. The four words are the four nouns — proposal,
 gate, revision, inverse — put into plain English in August so that nobody would
@@ -58,7 +58,7 @@ defect. The geometry is unchanged — measured, not assumed: the band's box is
 
 ### A second contradiction, eighty pixels apart
 
-![The refusal band](2026-09-01-marketing-one-number-for-one-thing-refusal.png)
+![The refusal band](2026-09-01-marketing-one-number-for-one-thing-refusal.webp)
 
 Found while deriving the first. The refusal band was headed *“The same five
 lines, and then a different answer”* directly above a sentence reading *“the
@@ -157,9 +157,9 @@ occurrence; one is new.
   recommended on 25, 26, 30 and 31 August remains the cheapest open item in the
   repository and is not a routine's to write.
 
-![The front door, whole](2026-09-01-marketing-one-number-for-one-thing-home.png)
+![The front door, whole](2026-09-01-marketing-one-number-for-one-thing-home.webp)
 
-![At 390px](2026-09-01-marketing-one-number-for-one-thing-phone.png)
+![At 390px](2026-09-01-marketing-one-number-for-one-thing-phone.webp)
 
 `scrollWidth` is exactly 1280 at 1280 and exactly 390 at 390.
 

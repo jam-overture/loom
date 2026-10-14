@@ -74,12 +74,12 @@ that the landing also takes the way out with it.**
 
 | | |
 | --- | --- |
-| [**after the answer**](2026-10-05-demo-end-applied-wide.png) · [before](2026-10-05-demo-end-applied-wide-before.png) | **the picture worth opening** — the same card, and a rail that now ends somewhere |
-| [after *Re-theme the whole page*](2026-10-05-demo-end-retheme-wide.png) | the one-press path, where the whole ladder is in view |
-| [the phone, after the answer](2026-10-05-demo-end-applied-phone.png) | the same three steps, in the document's own scroll |
-| [the arrival screen](2026-10-05-demo-end-arrival-wide-unchanged.png) | **unchanged, byte for byte** |
-| [the question, one press later](2026-10-05-demo-end-held-unchanged.png) | **unchanged, byte for byte** |
-| [the embed at 348 × 465](2026-10-05-demo-end-embed-unchanged.png) | **unchanged, byte for byte** |
+| [**after the answer**](2026-10-05-demo-end-applied-wide.webp) · [before](2026-10-05-demo-end-applied-wide-before.webp) | **the picture worth opening** — the same card, and a rail that now ends somewhere |
+| [after *Re-theme the whole page*](2026-10-05-demo-end-retheme-wide.webp) | the one-press path, where the whole ladder is in view |
+| [the phone, after the answer](2026-10-05-demo-end-applied-phone.webp) | the same three steps, in the document's own scroll |
+| [the arrival screen](2026-10-05-demo-end-arrival-wide-unchanged.webp) | **unchanged, byte for byte** |
+| [the question, one press later](2026-10-05-demo-end-held-unchanged.webp) | **unchanged, byte for byte** |
+| [the embed at 348 × 465](2026-10-05-demo-end-embed-unchanged.webp) | **unchanged, byte for byte** |
 
 ## The change
 

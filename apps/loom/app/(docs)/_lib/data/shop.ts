@@ -14,6 +14,7 @@ import {
   type NodeId,
   type SourceEntry,
 } from "@jam-overture/loom"
+import { hangingSource } from "@jam-overture/loom/testing"
 import { z } from "zod"
 
 /**
@@ -107,6 +108,78 @@ const openingHours = defineSource({
   },
 })
 
+/**
+ * The shop's upcoming classes — the one source here whose rows are shaped for a
+ * **primitive** rather than for a table on this page.
+ *
+ * `loom.feed` is in the starter library and reads an answer under a name the
+ * tree gives it, so a page can show a list it never wrote. For that to be worth
+ * showing, something has to answer in the shape a feed entry has: a title, and
+ * optionally a line under it, something it is filed under, and somewhere to go.
+ *
+ * **One row has no title, and that is not a mistake in this file.** The shop
+ * never named the April class, and nothing stopped them: a `title` column that
+ * accepts an empty string is the ordinary state of somebody's database. This
+ * source's schema accepts it, because the schema at the seam describes *this
+ * deployment's rows* — and `loom.feed` refuses it, because its own schema
+ * describes *what it can draw*. The gap between those two schemas is the whole
+ * subject of the reading half of this page, and `data-unshown` is the runtime
+ * reporting it. Nothing in here fakes the condition; `limit` decides whether
+ * the unnamed row is asked for.
+ */
+/**
+ * `href` is `null` rather than absent on the two rows that have none, because a
+ * source answers JSON and `undefined` is not a JSON value — which is the same
+ * reason a column with nothing in it is `NULL` and not missing. `loom.feed`
+ * holds every address from a host's data to the library's scheme allowlist and
+ * draws an entry that fails it as words rather than a link, so a null costs the
+ * row nothing.
+ */
+const CLASSES: readonly { readonly title: string; readonly meta: string; readonly detail: string; readonly href: string | null }[] = [
+  {
+    title: "Buttercream basics",
+    meta: "Saturday 14 March",
+    detail: "Three hours, every tool provided, a cake each to take home.",
+    href: "https://example.com/classes/buttercream",
+  },
+  {
+    title: "Sourdough from a starter",
+    meta: "Sunday 22 March",
+    detail: "A morning at the bench, and a jar of starter to keep going with.",
+    href: null,
+  },
+  {
+    title: "Piping flowers",
+    meta: "Saturday 4 April",
+    detail: "Roses, peonies, and the one nobody gets right first time.",
+    href: "https://example.com/classes/piping",
+  },
+  { title: "", meta: "Sunday 12 April", detail: "Cupcakes, for small hands.", href: null },
+]
+
+const classes = defineSource({
+  id: "catalogue.classes",
+  description: "The classes this shop is running next, soonest first.",
+  params: z.object({ limit: z.number().int().min(1).max(12) }),
+  answers: z.array(
+    z.object({
+      title: z.string(),
+      meta: z.string(),
+      detail: z.string(),
+      href: z.string().url().nullable(),
+    })
+  ),
+  adapter: {
+    fetch: async ({ params }) => ({ ok: true, value: CLASSES.slice(0, params.limit) }),
+  },
+})
+
+/** How many rows this shop has, named so the page never writes the number. */
+export const CLASSES_HELD = CLASSES.length
+
+/** How many of them `loom.feed` can draw. The rest is the subject. */
+export const CLASSES_DRAWABLE = CLASSES.filter((row) => row.title.length > 0).length
+
 const registryOf = (entries: readonly SourceEntry[]): DataRegistry => {
   const built = createDataRegistry(entries)
 
@@ -118,7 +191,7 @@ const registryOf = (entries: readonly SourceEntry[]): DataRegistry => {
 }
 
 /** What this deployment can be asked about. The allowlist, and the page's subject. */
-export const shopRegistry = (): DataRegistry => registryOf([services, profileField, openingHours])
+export const shopRegistry = (): DataRegistry => registryOf([services, profileField, openingHours, classes])
 
 /**
  * The page, with its content taken out and questions left in its place.
@@ -296,16 +369,6 @@ const deliverySlots = defineSource({
   answers: z.array(z.string()),
 })
 
-export type SilentSource = {
-  readonly entry: SourceEntry
-  /**
-   * What the runtime's abort said once it gave up, or `undefined` while it is
-   * still waiting. An adapter hears this; it is how a deployment releases the
-   * connection nothing is going to read.
-   */
-  readonly abortedWith: () => string | undefined
-}
-
 /**
  * An integration that never answers — the failure a `try` cannot catch, because
  * nothing is thrown and nothing comes back.
@@ -316,34 +379,21 @@ export type SilentSource = {
  * open. The runtime's ceiling is what turns it into one of the ordinary values
  * in this table.
  *
- * The promise is deliberately one that never settles. A `setTimeout` long enough
- * to be interesting would make the documentation build wait for it, and a page
- * whose evidence costs ten seconds a build is a page somebody eventually
- * produces from a fixture instead.
+ * **It is the runtime's double rather than this lane's, and that is new.** This
+ * file carried its own `silentSource` for a month after `hangingSource` was
+ * published, which cost more than a duplicated function: *When nothing comes
+ * back* went on telling readers there was no published double for a source,
+ * because the lane writing that sentence had one of its own and no reason to
+ * look. The private copy is what made the page's claim feel true. Filed on 29
+ * September by the framework routine, which asked this lane to decide and left
+ * both copies alone; this is the decision.
+ *
+ * The promise behind it is deliberately one that never settles. A `setTimeout`
+ * long enough to be interesting would make the documentation build wait for it,
+ * and a page whose evidence costs ten seconds a build is a page somebody
+ * eventually produces from a fixture instead.
  */
-export const silentSource = (id: string, description: string): SilentSource => {
-  let aborted: string | undefined
-
-  return {
-    abortedWith: () => aborted,
-    entry: defineSource({
-      id,
-      description,
-      params: z.object({}),
-      answers: z.array(z.string()),
-      adapter: {
-        fetch: ({ signal }) =>
-          new Promise(() => {
-            signal?.addEventListener("abort", () => {
-              const { reason } = signal
-
-              aborted = reason instanceof Error ? reason.message : "unnamed"
-            })
-          }),
-      },
-    }),
-  }
-}
+export const silentSource = hangingSource
 
 /** The shop, plus five integrations having a bad afternoon. */
 export const troubleRegistry = (): DataRegistry =>

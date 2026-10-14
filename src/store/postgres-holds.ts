@@ -1,5 +1,6 @@
-import { asc, eq, sql } from "drizzle-orm"
+import { and, asc, eq, sql, type SQL } from "drizzle-orm"
 
+import { DEFAULT_APPLICATION_ID, type StoreScope } from "../application/application.js"
 import { err, ok, type Result } from "../result.js"
 import {
   clampHoldLimit,
@@ -115,10 +116,24 @@ const pageEnd = (rows: readonly (typeof loomHolds.$inferSelect)[]): HoldPosition
   return last === undefined ? undefined : holdPosition(last)
 }
 
-export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
+/**
+ * Every query is filtered by the project this handle speaks for (0260), and
+ * every write sets it.
+ *
+ * This is the table the failure was named for: *a hold listing that spanned
+ * two apps would put one app's changes in another's queue*, which is the one
+ * thing a review queue cannot do. `waiting` is that listing.
+ */
+export const postgresHoldStore = (db: LoomDatabase, scope: StoreScope = {}): HoldStore => {
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
+  /** Every read starts here, so a query cannot forget the project by omission. */
+  const mine = (...rest: (SQL | undefined)[]) => and(eq(loomHolds.applicationId, project), ...rest)
+
+  return {
   hold: async (held) => {
     try {
       await db.insert(loomHolds).values({
+        applicationId: project,
         proposalId: held.proposalId,
         treeId: held.treeId,
         baseRevision: held.baseRevision,
@@ -144,7 +159,7 @@ export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
 
   get: async (proposalId) => {
     try {
-      const rows = await db.select().from(loomHolds).where(eq(loomHolds.proposalId, proposalId)).limit(1)
+      const rows = await db.select().from(loomHolds).where(mine(eq(loomHolds.proposalId, proposalId))).limit(1)
 
       const row = rows[0]
 
@@ -159,7 +174,7 @@ export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
       const rows = await db
         .select()
         .from(loomHolds)
-        .where(eq(loomHolds.treeId, treeId))
+        .where(mine(eq(loomHolds.treeId, treeId)))
         .orderBy(...HOLD_ORDER)
 
       return parseAll(rows)
@@ -183,9 +198,11 @@ export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
          * three predicates one of which will eventually be wrong.
          */
         .where(
-          from === undefined
-            ? undefined
-            : sql`(${loomHolds.heldAt}, ${loomHolds.proposalId}) > (${from.heldAt}, ${from.proposalId})`
+          mine(
+            from === undefined
+              ? undefined
+              : sql`(${loomHolds.heldAt}, ${loomHolds.proposalId}) > (${from.heldAt}, ${from.proposalId})`
+          )
         )
         .orderBy(...HOLD_ORDER)
         /** One extra row answers "is there another page" without a count. */
@@ -217,7 +234,7 @@ export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
    */
   release: async (proposalId) => {
     try {
-      const rows = await db.delete(loomHolds).where(eq(loomHolds.proposalId, proposalId)).returning()
+      const rows = await db.delete(loomHolds).where(mine(eq(loomHolds.proposalId, proposalId))).returning()
 
       const row = rows[0]
 
@@ -226,4 +243,5 @@ export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
       return err(unavailable(cause, `could not release ${proposalId}`))
     }
   },
-})
+  }
+}

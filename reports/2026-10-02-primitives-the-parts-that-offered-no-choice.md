@@ -195,10 +195,10 @@ is the popover open.
 
 | | editorial | bold |
 | --- | --- | --- |
-| wide, shut | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-wide-shut.png) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-wide-shut.png) |
-| wide, the method | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-wide-the-method.png) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-wide-the-method.png) |
-| phone, shut | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-phone-shut.png) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-phone-shut.png) |
-| phone, the method | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-phone-the-method.png) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-phone-the-method.png) |
+| wide, shut | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-wide-shut.webp) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-wide-shut.webp) |
+| wide, the method | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-wide-the-method.webp) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-wide-the-method.webp) |
+| phone, shut | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-phone-shut.webp) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-phone-shut.webp) |
+| phone, the method | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-editorial-phone-the-method.webp) | ![](2026-10-02-primitives-the-parts-that-offered-no-choice-bold-phone-the-method.webp) |
 
 **Two things in those frames are the camera rather than the page.** The sticky
 bar is painted a second time partway down the `the method` shots: a full-page

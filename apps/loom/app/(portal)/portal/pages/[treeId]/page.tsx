@@ -17,8 +17,8 @@ import { outlineRows } from "@/app/(portal)/_lib/outline"
 import { pageNameOf } from "@/app/(portal)/_lib/page-name"
 import { describeProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { unreadableChangesIn } from "@/app/(portal)/_lib/unreadable-change"
-import { portalRegistry } from "@/app/(portal)/_lib/registry"
-import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
+import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry"
+import { portalStore } from "@/app/(portal)/_lib/store"
 import { viewportFrom } from "@/app/(portal)/_lib/viewports"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 
@@ -60,7 +60,6 @@ const TreePage = async ({
   const viewport = viewportFrom(as)
 
   await requireActor(`/portal/pages/${parsed.data}`)
-  await ensureSeeded()
 
   const rendered = await renderRequest(
     { treeId: parsed.data, editMode: true },
@@ -68,6 +67,7 @@ const TreePage = async ({
       source: treeSourceFromStore(portalStore),
       resolver: portalRegistry,
       validator: portalRegistry,
+      themes: portalThemes,
     }
   )
 

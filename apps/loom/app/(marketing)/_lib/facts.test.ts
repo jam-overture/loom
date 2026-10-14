@@ -2,13 +2,15 @@ import { readdirSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { TREE_OPERATIONS, type ElementNode, type LoomNode } from "@jam-overture/loom"
+
+import { manifest } from "../../../../../tools/package/manifest"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
-import { DECISIONS_AT_LEAST, FACTS } from "./copy"
+import { DECISIONS_AT_LEAST, FACTS, INSTALL_COMMAND, PACKAGES } from "./copy"
 import { siteRegistry } from "./registry"
 import { treeFor } from "./render"
-import { DEFAULT_THEME, HOME } from "./site"
+import { DEFAULT_THEME, HOME, NPM_PACKAGE_URL } from "./site"
 
 /**
  * The numbers on the page, held against the thing they are about.
@@ -148,5 +150,73 @@ describe("what the site says about the repository", () => {
       "decisions written down",
       "kinds of change Loom allows",
     ])
+  })
+})
+
+/**
+ * The ask, held against the two manifests the repository publishes from.
+ *
+ * The install band is the only place on this site where being out of date is
+ * not a wording problem: a reader who pastes a line naming a package that does
+ * not exist gets an error instead of a library, and nothing on the page or in
+ * this lane's own tests would have said so. The names are not typed twice for
+ * the reason none of the numbers above are — they are read off the manifests
+ * `pnpm publish` uses, so a rename, or a third package becoming required, is
+ * red here on the run that does it.
+ *
+ * It asserts the set rather than the order, because which name comes first in
+ * an `npm install` is this lane's call and npm's behavior does not depend on
+ * it.
+ */
+describe("what the site tells a stranger to install", () => {
+  const nameOf = (manifest: string): string =>
+    JSON.parse(readFileSync(fileURLToPath(new URL(manifest, import.meta.url)), "utf8")).name
+
+  /**
+   * The runtime's name is read off its manifest; the library's is read off the
+   * **module that authors** its manifest.
+   *
+   * This read `packages/primitives/package.json` until 12 October, which is
+   * gitignored — `.gitignore:23` ignores every package manifest under
+   * `packages/` — and assembled by
+   * `pnpm package:primitives`. So it passed on a machine that had run the
+   * packaging step at some point and failed on every fresh clone, with an
+   * `ENOENT` that names a path rather than the reason — and `pnpm verify` does
+   * not run that step, so `main` was red for anybody who had not.
+   *
+   * `tools/package/manifest.ts` is where the name is actually written, and its
+   * own comment says it exists to be *"data rather than a file somebody edits
+   * by hand"*. Reading it is what this test meant: still not typed twice, still
+   * red on the run that renames the package, and no longer dependent on what
+   * else the machine has done.
+   *
+   * `license` is a parameter of that manifest and nothing here asks about it,
+   * so the argument is a placeholder rather than a claim.
+   */
+  const published = (): readonly string[] => [
+    nameOf("../../../../../package.json"),
+    String(manifest("UNSET").name),
+  ]
+
+  it("names the packages this repository actually publishes", () => {
+    expect([...PACKAGES].sort()).toEqual([...published()].sort())
+  })
+
+  /**
+   * The half of an off-site address that can go wrong without anybody
+   * noticing. Whether `npmjs.com` serves the page is a person's check
+   * (`routes.test.ts` says why); whether the page it names is *this project's
+   * package* is a string this repository already states, so it is held here.
+   */
+  it("points at the package it publishes, not at a name that used to be ours", () => {
+    expect(NPM_PACKAGE_URL).toBe(`https://www.npmjs.com/package/${nameOf("../../../../../package.json")}`)
+  })
+
+  it("asks for both of them in one command a reader can paste", () => {
+    for (const name of published()) {
+      expect(INSTALL_COMMAND).toContain(` ${name}`)
+    }
+
+    expect(INSTALL_COMMAND.startsWith("npm install ")).toBe(true)
   })
 })

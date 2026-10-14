@@ -9,11 +9,16 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import type { PaperTrail } from "../adapt/paper-trail"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { JOURNEY, STEPS_CAPITALISED } from "../journey"
 import { action, heading, prose, section, splitSection, stack } from "../nodes"
-import { DEMO, DOCS, HOW_IT_WORKS, SITE_THEMES, surfaceHref } from "../site"
+import {
+  DEMO,
+  DOCS,
+  HOW_IT_WORKS,
+  SITE_THEMES,
+  surfacePath,
+} from "../site"
 
 import { answerBand } from "./answer"
 import type { PageContext } from "./home"
@@ -190,7 +195,7 @@ const whoAsks = (ids: IdFactory): LoomNode =>
  * losing an argument it used to win. The documentation is the answer, and this
  * band is the handover.
  */
-const closing = (ids: IdFactory, context: PageContext): LoomNode =>
+const closing = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { tone: "accent", width: "wide", eyebrow: "Going deeper" },
@@ -202,27 +207,31 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
         { measured: true }
       ),
       stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
-        action(ids, "Read the docs", surfaceHref(context.origin, DOCS), {
+        action(ids, "Read the docs", surfacePath(DOCS), {
           variant: "primary",
         }),
-        action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), {
+        action(ids, "Try it yourself", surfacePath(DEMO), {
           variant: "secondary",
         }),
       ]),
     ]
   )
 
-export type MechanismContext = PageContext & {
-  /**
-   * The record of a real run, still resolved and still unused by this page.
-   *
-   * It was the raw panel this page printed until 26 September. The field stays
-   * because `pageTreeFor` resolves it for the front door's notice, which links
-   * here carrying an `ask`; what this page does with it is nothing, and that is
-   * the point of the rewrite rather than an oversight.
-   */
-  readonly trail?: PaperTrail
-}
+/**
+ * **Nothing beyond what every page of this site gets**, as of 13 October.
+ *
+ * It carried a `trail` until today: the record of a real run, resolved by
+ * `pageTreeFor` on every asked request and read by nobody. The band that
+ * printed it was rewritten away on 26 September and the field outlived it by a
+ * fortnight, with a comment explaining that the resolution was deliberate and
+ * naming a reader — *"the front door's notice"* — that has no such field.
+ *
+ * The alias stays rather than collapsing to `PageContext` at every call site,
+ * because `SitePageContext` is spelled off it in `builders.ts` and the page
+ * that answers a request is the page most likely to want a field of its own
+ * again. What it must not be again is a field nothing reads.
+ */
+export type MechanismContext = PageContext
 
 export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
   const ids = sequentialIdFactory("how")
@@ -311,7 +320,7 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
           ...(context.record === undefined ? {} : { record: context.record }),
           ...(context.undone === undefined ? {} : { undone: context.undone }),
         }),
-        closing(ids, context),
+        closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],

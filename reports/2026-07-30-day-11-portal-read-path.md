@@ -2,7 +2,7 @@
 
 **Build order section:** §5 — Portal. The recommendation, and the first pane.
 
-**Visual:** [the portal rendering a stored tree](2026-07-30-day-11-portal-preview.png)
+**Visual:** [the portal rendering a stored tree](2026-07-30-day-11-portal-preview.webp)
 
 **Branch:** `day-11-portal-read-path`, off `main` at `b9e125c`
 

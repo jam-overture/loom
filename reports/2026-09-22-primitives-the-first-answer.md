@@ -9,7 +9,7 @@ https://loom-git-primitives-42-the-f-f18b7e-jpizzolato36-6341s-projects.vercel.a
 the standing 19 August limit. Everything below was driven against a local render
 and the screenshot harness.
 
-![loom.feed in five states and loom.tally in two, at 1280px, under bold](2026-09-22-primitives-the-first-answer-states-bold-wide.png)
+![loom.feed in five states and loom.tally in two, at 1280px, under bold](2026-09-22-primitives-the-first-answer-states-bold-wide.webp)
 
 ## What this run chose, and why that
 

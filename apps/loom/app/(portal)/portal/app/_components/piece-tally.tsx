@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
-import type { PieceUsage } from "@/app/(portal)/_lib/app-view"
+import { unusedReading, type PieceUsage } from "@/app/(portal)/_lib/app-view"
 
 /**
  * What the AI may build with, and how much of it your app has ever used.
@@ -55,6 +55,14 @@ export const PieceTally = ({
 }) => {
   const used = pieces.filter((piece) => piece.used > 0)
   const unused = pieces.filter((piece) => piece.used === 0)
+  /*
+   * `missing` is what Loom ships and this app has not registered, so an empty
+   * one *is* "this app declined nothing" — the fact that decides which way the
+   * unused pieces read. Derived here rather than passed as a second prop,
+   * because two props that must agree are two props that can disagree.
+   */
+  const wholeLibrary = missing.length === 0
+  const reading = unusedReading(unused.length, used.length, wholeLibrary)
 
   return (
     <section className="flex flex-col gap-3">
@@ -76,23 +84,34 @@ export const PieceTally = ({
         </ul>
       )}
 
-      {unused.length > 0 && (
+      {reading !== null && (
         <div className="bg-surface-hover flex flex-col gap-1 rounded-sm p-3 text-xs">
-          <strong className="font-medium">
-            {unused.length === 1
-              ? "One piece is registered and nothing uses it"
-              : `${unused.length} pieces are registered and nothing uses them`}
-          </strong>
-          <p className="text-ink-muted">
-            The AI is offered {unused.length === 1 ? "it" : "these"} every time you ask for a
-            change, and has never put {unused.length === 1 ? "it" : "one"} on a page. That is
-            either something your pages are missing, or something your project no longer needs.
-          </p>
-          <ul className="flex flex-wrap gap-x-3 gap-y-1 pt-0.5">
-            {unused.map((piece) => (
-              <li key={piece.type}>{piece.name}</li>
-            ))}
-          </ul>
+          <strong className="font-medium">{reading.title}</strong>
+          <p className="text-ink-muted">{reading.meaning}</p>
+          {/*
+           * **The names, on the reading where they are the news.**
+           *
+           * On a curated registry an unused piece is a finding and its name is
+           * the whole of it, so the list is on the surface. On a registry that
+           * is the whole library it is not a finding, and the first photograph
+           * after the swap showed what drawing it anyway looks like: a hundred
+           * and three names as an unbroken wall, under a sentence saying there
+           * is nothing to do about them.
+           *
+           * **Nothing is removed by leaving it out here.** Every piece is in
+           * the catalogue disclosure immediately below, with its description
+           * and its registered name — which is a better place for a hundred
+           * names than a panel, and is where a reader looking for one would
+           * already go. Plain language is the default; the record is one click
+           * away; nothing is ever removed.
+           */}
+          {!wholeLibrary && (
+            <ul className="flex flex-wrap gap-x-3 gap-y-1 pt-0.5">
+              {unused.map((piece) => (
+                <li key={piece.type}>{piece.name}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

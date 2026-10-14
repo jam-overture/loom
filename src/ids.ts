@@ -67,12 +67,23 @@ export interface IdFactory {
 const RANDOM_ID_LENGTH = 20
 const BASE36_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
 
-const randomBody = (): string => {
+/**
+ * The body of a random id, which is the part after the prefix.
+ *
+ * Exported because an application id and a project id are minted outside this
+ * module — by the control plane when somebody registers, rather than by an
+ * `IdFactory` during a render — and the alternative was either widening that
+ * interface with two members no renderer calls, or a second copy of this that
+ * drifts.
+ */
+export const randomIdBody = (): string => {
   const bytes = new Uint8Array(RANDOM_ID_LENGTH)
   globalThis.crypto.getRandomValues(bytes)
 
   return Array.from(bytes, (byte) => BASE36_ALPHABET[byte % BASE36_ALPHABET.length] ?? "0").join("")
 }
+
+const randomBody = randomIdBody
 
 export const randomIdFactory: IdFactory = {
   nodeId: () => nodeIdSchema.parse(`n_${randomBody()}`),

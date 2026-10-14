@@ -1,11 +1,16 @@
 import type { LoomTree } from "@jam-overture/loom"
 import { renderLoomTree } from "@jam-overture/loom/react"
 import { render } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
-import { THE_TOP_OF_IT, thePageItself, type PageItself } from "@/app/(demo)/_lib/the-page-itself"
+import {
+  THE_TOP_OF_IT,
+  THE_WINDOW,
+  thePageItself,
+  type PageItself,
+} from "@/app/(demo)/_lib/the-page-itself"
 
 import { ThePageItselfView } from "./the-page-itself"
 
@@ -25,11 +30,16 @@ const themeOf = (tree: LoomTree) =>
     .theme
 
 const windowOn = (tree: LoomTree): PageItself => {
-  const page = thePageItself({ tree, asked: false })
+  const page = thePageItself({ tree, shownElsewhere: false, landed: false })
   if (page === undefined) throw new Error("the demo's page has no top band")
 
   return page
 }
+
+afterEach(() => {
+  vi.restoreAllMocks()
+  vi.unstubAllGlobals()
+})
 
 describe("the page on the first screen", () => {
   /**
@@ -126,5 +136,107 @@ describe("the page on the first screen", () => {
 
     expect(section?.getAttribute("aria-label")).toBeNull()
     expect(section?.getAttribute("aria-labelledby")).toBeNull()
+  })
+
+  /**
+   * And the name the scroll finds it by, which is the one piece of this that is
+   * neither a style nor a sentence.
+   *
+   * `page-in-view.tsx` looks the window up on the document, because it is a
+   * client component and the window is rendered on the server through a
+   * registry that does not cross the boundary. An `id` that did not match is
+   * the quietest failure on this surface: nothing throws, nothing renders
+   * differently, and the only evidence is a photograph of a visitor who was
+   * never carried anywhere.
+   */
+  it("answers to the name the scroll looks it up by", () => {
+    const { container } = render(<ThePageItselfView page={windowOn(demoPageTree())} />)
+
+    expect(container.querySelector("section")?.id).toBe(THE_WINDOW)
+  })
+})
+
+/**
+ * **The join, which is the one thing neither side's own tests can see.**
+ *
+ * `page-in-view.test.tsx` holds what that component does with a box, and
+ * `_lib/the-page-itself.test.ts` holds when the reading sets `moved`. Between
+ * them is a wire — the window renders the scroll, and renders it with that
+ * field — and it can be cut with both files green. So these two assert it the
+ * only way it can be asserted from here: by letting the effect run and watching
+ * whether anything moves.
+ *
+ * **Written as the journey rather than as a mounted component**, because that
+ * is the only way to reach it. The window is rendered by the server and the
+ * scroll looks it up on the document, so there is no element to stub until the
+ * arrival screen has been rendered once. Which is what a visitor does: they
+ * arrive, and then they press something.
+ */
+describe("the visitor, once the page in the window has moved", () => {
+  /**
+   * The arrival screen, with the window's box stubbed to where `demo-44`
+   * measured it at the moment a visitor pressed **Put it back** on the record
+   * card: 922 pixels above a 390 x 844 screen.
+   *
+   * jsdom implements neither `matchMedia`, `scrollIntoView` nor layout, and all
+   * three carry a decision rather than a detail.
+   */
+  const arrived = () => {
+    const scrollIntoView = vi.fn()
+
+    vi.stubGlobal("matchMedia", (query: string) => ({ matches: false, media: query }))
+    vi.stubGlobal("innerHeight", 844)
+
+    const view = render(<ThePageItselfView page={windowOn(demoPageTree())} />)
+
+    const onto = document.getElementById(THE_WINDOW)
+    if (!(onto instanceof HTMLElement)) throw new Error("the window answers to no name")
+
+    onto.getBoundingClientRect = (): DOMRect => ({
+      top: -922,
+      bottom: -632,
+      height: 290,
+      y: -922,
+      left: 0,
+      right: 350,
+      width: 350,
+      x: 0,
+      toJSON: () => ({}),
+    })
+    onto.scrollIntoView = scrollIntoView
+
+    return { ...view, scrollIntoView }
+  }
+
+  /** Nothing moves while a visitor is reading a screen they have not pressed. */
+  it("is left where they are until a press of theirs moves the page", () => {
+    const { scrollIntoView } = arrived()
+
+    expect(scrollIntoView).not.toHaveBeenCalled()
+  })
+
+  it("is carried to the window when a press of theirs has moved the page in it", () => {
+    const { rerender, scrollIntoView } = arrived()
+    const moved = thePageItself({ tree: demoPageTree(), shownElsewhere: false, landed: true })
+    if (moved === undefined) throw new Error("the demo's page has no top band")
+
+    rerender(<ThePageItselfView page={moved} />)
+
+    expect(moved.moved).toBeDefined()
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "center" })
+  })
+
+  /**
+   * And a question the visitor declined moves nobody, which is the half that
+   * keeps this from being a surface that throws the screen of a stranger
+   * around. There is a record, nothing is held, nothing is marked, and the page
+   * is exactly where it started.
+   */
+  it("moves nobody for a press that left the page where it was", () => {
+    const { rerender, scrollIntoView } = arrived()
+
+    rerender(<ThePageItselfView page={windowOn(demoPageTree())} />)
+
+    expect(scrollIntoView).not.toHaveBeenCalled()
   })
 })

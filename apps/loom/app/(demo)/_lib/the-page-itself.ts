@@ -62,20 +62,62 @@ import { type ElementNode, type LoomNode, type LoomTree } from "@jam-overture/lo
  * theme the page render produced — so the first thing a stranger sees is the
  * real page, and re-theming it changes this too.
  *
- * ## One silence, and it is the whole of the condition
+ * ## The silence, and the premise under it that stopped being true
  *
- * **The visitor has asked for something.** From the first press onwards every
- * screen on this surface already brings the page to them: the question renders
- * the band it is about inside itself, answering carries them to the mark on the
- * page with `BackToTheRecord` pinned underneath, and a removal's content is in
- * the landed card. The arrival screen is the one screen with no page on it, and
- * it is the one screen this draws on.
+ * **The window went quiet at the first press, and the reason it gave was a
+ * fact about which press that was.** Written on 6 October:
  *
- * Said in terms of the records rather than of a flag, because a record is what
- * an ask produces (`session.ts`) — so *nothing has been asked* and *there are
- * no records* are one fact and not two that could disagree. What it buys is the
- * property this lane checks on every run: **every screen after the first is
- * byte-identical**, so none of the pixel work above is touched.
+ * > **The visitor has asked for something.** From the first press onwards every
+ * > screen on this surface already brings the page to them: the question
+ * > renders the band it is about inside itself, answering carries them to the
+ * > mark on the page with `BackToTheRecord` pinned underneath, and a removal's
+ * > content is in the landed card.
+ *
+ * Every clause of that was true of the surface it was written on, where the
+ * press a visitor was invited to make first raised a **question** about the
+ * stat grid. `demo-43` made the first press the **re-theme** — the one change
+ * on this surface whose subject is the page itself — and all three clauses are
+ * false of it at once: it is applied rather than held, so no band is rendered
+ * inside a question; it configures the root, so `spotFor` refuses to mark it
+ * and there is no mark to be carried to; and it removes nothing, so no card is
+ * holding any content.
+ *
+ * Measured on a production build of `main` at `39c6ef3`, 390 × 844, by pressing
+ * the green button the arrival screen offers:
+ *
+ * | | before the press | after it |
+ * | --- | --- | --- |
+ * | this window | `y 325`, 350 × 262 | **gone** |
+ * | the clinic's own `h1`, on the stage | `y 1,515` | `y 1,998` |
+ * | the record the press produced | — | `y 981` — 649 past the fold |
+ *
+ * So the press that turns every colour and typeface on the page over left a
+ * phone with **nothing on screen that is the page**, having just taken away the
+ * one thing that was. A stranger pressed the button, watched the window it sat
+ * under disappear, and read a new label on the same button.
+ *
+ * ## So the condition is about the screen rather than about the records
+ *
+ * The window is drawn when **nothing else on this rail is bringing the page to
+ * the visitor**, which is what the paragraph above was always claiming and what
+ * `asked` was a proxy for. Two things count, and both are things a card is
+ * already doing rather than predictions about what it might:
+ *
+ * - **a band rendered inside a card** — the part a question is about, or the
+ *   content a removal is holding (`in-question.ts`, `kept.ts`);
+ * - **a mark on the page** — any spotlight actually drawn, which is what
+ *   `SpotlightScroll` carries a phone down to.
+ *
+ * The leading ask's preview is deliberately not one of them: it arrives shut
+ * (`part-in-question.tsx`), and a window a visitor has not opened is not a page
+ * in front of them.
+ *
+ * **Every screen that had one of those keeps exactly what it had.** The arrival
+ * screen has neither and is unchanged; a question marks the page and renders
+ * its band; an answered removal is holding content and the gap it left is
+ * ringed; a repaint rings the band it repainted. The one state that changes is
+ * the state nothing was speaking for — a change whose subject is the whole page
+ * — and there the window stays where it was and turns over with it.
  */
 
 export type PageItself = {
@@ -104,6 +146,31 @@ export type PageItself = {
    * need to go: the press carries them.
    */
   readonly caption: string
+  /**
+   * Present when the page in this window has just moved under the visitor's
+   * own press, and it carries the revision that press produced.
+   *
+   * **The window being on the screen and the visitor being on the window are
+   * two different facts**, and until this run only the first of them was
+   * answered. The press this demo opens with is made with the window in front
+   * of the visitor, so it turns over where they are looking. Its inverse is
+   * pressed on the record card, 922 pixels down a phone's rail, and the page
+   * goes back in a window they are no longer anywhere near.
+   *
+   * So the window says who moved it as well as what it is, and
+   * `page-in-view.tsx` is what carries a visitor who is not looking at it. It
+   * is one field rather than a second boolean beside `landed` because the
+   * caption and the movement are the same fact read twice: a window that says
+   * *now* is a window a press has just changed, and the two can no longer
+   * disagree about which press that was.
+   *
+   * The revision rather than the record id, for the reason `SpotlightScroll`'s
+   * token gives: the effect must run again when a visitor asks for something
+   * new and must not run because the rail re-rendered. Every landing on this
+   * surface produces a revision, an undo included, and a question the visitor
+   * declined produces neither a revision nor a landing.
+   */
+  readonly moved?: string
 }
 
 /**
@@ -115,6 +182,39 @@ export type PageItself = {
  * thing, this one says that what is in the window is a part of it.
  */
 export const THE_TOP_OF_IT = "This is the top of it."
+
+/**
+ * What the window is called in the document.
+ *
+ * It exists because `page-in-view.tsx` has to find the window from a client
+ * component, which is the same thing `AnswerInView` does with a record id and
+ * for the same reason: the element is rendered on the server, through a
+ * registry that does not cross the boundary, so what crosses is a name.
+ *
+ * Here rather than in the markup so that the component looking it up and the
+ * section answering to it read one string. A name written twice is a name that
+ * goes quiet the first time one of the two is edited, and a scroll that does
+ * nothing is the quietest failure this surface has: nothing throws, nothing
+ * renders differently, and the only evidence is a photograph.
+ */
+export const THE_WINDOW = "the-page-itself"
+
+/**
+ * And what it says once a change the visitor pressed for is on the page.
+ *
+ * One word longer, because the window is doing a second job by then: on
+ * arrival it is the referent for *It's the page below*, and after a press it is
+ * also the evidence that the press did something. The word carries the
+ * comparison without describing it — a stranger reads *now* against the band
+ * they were looking at a second ago, which is the whole of what changed.
+ *
+ * **It does not say what happened.** That is the record card's sentence, forty
+ * pixels down and in Loom's own voice, and a caption competing with it would be
+ * the third place one change is narrated. This one keeps the window's own job:
+ * saying that what is in it is a part of the page, and that it is the part as
+ * it stands.
+ */
+export const THE_TOP_OF_IT_NOW = "This is the top of it, now."
 
 /**
  * The band at the top of the page.
@@ -137,26 +237,48 @@ const topBand = (root: LoomNode): ElementNode | undefined => {
 }
 
 /**
- * The window, or nothing — and `asked` is the only reason it is ever nothing
- * that a visitor can cause.
+ * The window, or nothing — and the one reason it is ever nothing that a visitor
+ * can cause is that something else on the rail is already showing them the
+ * page.
  *
- * Handed the rail's own count rather than reading the records itself, so the
- * silence and the records cannot come apart; and taken as a boolean rather
- * than as the list, because *whether anything has been asked for* is the whole
- * of what this needs and a list would invite a second opinion about which asks
- * count.
+ * Handed the rail's two answers rather than reading the records itself, for the
+ * reason the first version of this gave about `asked`: the silence and the
+ * screen cannot come apart if the screen is what decides it. Booleans rather
+ * than the readings and the spotlights, because *is the page in front of them*
+ * and *has a change of theirs landed* are the whole of what this needs, and a
+ * list would invite a second opinion here about which of them counts.
  */
 export const thePageItself = ({
   tree,
-  asked,
+  shownElsewhere,
+  landed,
 }: {
   readonly tree: LoomTree
-  readonly asked: boolean
+  /**
+   * Whether anything else on this rail is rendering the page: a band inside a
+   * card, or a mark drawn on the stage. `rail.ts` reads both off the values it
+   * has already built, so neither can be claimed here over a screen that does
+   * not have it.
+   */
+  readonly shownElsewhere: boolean
+  /**
+   * Whether a change the visitor pressed for is on the page — `rail.ts`'s
+   * `landing`, which is the same boolean the nomination turns on. It decides
+   * the caption and whether the visitor is carried to the window, and those are
+   * one decision: a question declined leaves the page where it was, so a window
+   * captioned *now* would claim a change nobody made, and carrying somebody to
+   * it would carry them to a page that has not moved.
+   */
+  readonly landed: boolean
 }): PageItself | undefined => {
-  if (asked) return undefined
+  if (shownElsewhere) return undefined
 
   const band = topBand(tree.root)
   if (band === undefined) return undefined
 
-  return { tree: { ...tree, root: band }, caption: THE_TOP_OF_IT }
+  return {
+    tree: { ...tree, root: band },
+    caption: landed ? THE_TOP_OF_IT_NOW : THE_TOP_OF_IT,
+    ...(landed ? { moved: String(tree.revision) } : {}),
+  }
 }

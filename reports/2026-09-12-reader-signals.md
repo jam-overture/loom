@@ -8,7 +8,7 @@
 `main` today outside the routines. This is what changed, what it means for each
 lane, and — as important — what the maintainer has said *not* to start yet.
 
-![The ski apparel prototype with its signal rail, captured in headless Chromium](2026-09-12-reader-signals-rail.png)
+![The ski apparel prototype with its signal rail, captured in headless Chromium](2026-09-12-reader-signals-rail.webp)
 
 *`prototypes/ski-apparel` with its rail, driven by the framework's own
 broadcaster and captured in headless Chromium: "the opening" viewed, seven

@@ -1,0 +1,128 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { Count } from "@/app/(docs)/_components/count"
+import {
+  NamedDiagnostics,
+  RenderDiagnostics,
+} from "@/app/(docs)/_components/render-diagnostics"
+
+export const metadata = pageMetadata("the-runtime", "what-a-render-reports")
+
+# What a render reports
+
+Your page came back. Something on it is not what you asked for: a card is
+missing, the colours are gone, a list is shorter than the one in the database.
+Nothing threw, nothing logged an error, and the page looks finished.
+
+Loom told you. It told you in the second thing every render hands back, and this
+page is the whole list of what it can say.
+
+## Rendering never fails, so it reports instead
+
+A render always returns an element. That is a promise rather than a happy
+accident, and it is the reason this list exists at all: a tree can name a card
+you have not registered, and blanking the whole page over one card serves
+nobody.
+
+So anything the render could not honour comes back **beside** the element:
+
+```ts
+const { element, diagnostics } = renderLoomTree(tree, options)
+```
+
+`diagnostics` is a list. On a healthy render it is empty. Every entry carries
+the id of the node it happened at, and most carry the primitive's type as well,
+so each one points at a place in the tree rather than at the page in general.
+
+There are <Count of="render-diagnostics" as="word" /> things it can say. Every
+one of them below was produced by a render that said it, as this page was built.
+
+## The first question is whose problem it is
+
+This is the part worth learning before the list. A diagnostic is addressed to
+somebody, and there are only three candidates:
+
+- **Whoever wrote the tree.** A node names a primitive, a prop, a region or an
+  anchor that the registry does not back up. These are the ones a proposal can
+  cause, which is exactly why you write a policy.
+- **Whoever wired the render.** The tree is fine and a seam around it is missing
+  something: a registry, a resolution, an allowlist, one dictionary entry. All
+  of these are fixed in the code that calls the render.
+- **Whoever wrote the primitive.** One code, and it is in a group of its own
+  because nothing a tree says and nothing you wire can cause it.
+
+The list below is grouped that way, because "which file do I open" is the
+question you actually have.
+
+## Read it as the render's first complaint
+
+A diagnostic list is not an audit. It is what this render ran into, and one
+mistake can hide another.
+
+Take one unregistered primitive, holding one text node, under two roots that
+differ only in their props:
+
+| the root | what came back |
+| --- | --- |
+| a valid `loom.page` | `["unknown-primitive"]` |
+| a `loom.page` whose props are refused | `["invalid-props"]` |
+
+Both trees contain the same unregistered node. The second does not mention it,
+because the node above it was never called, and a component that was not called
+renders no children for the walk to reach.
+
+That is the right behaviour and it has one consequence for you:
+
+```ts function-body
+expect(rendered.diagnostics).toEqual([])
+```
+
+An empty list means *nothing was wrong and everything was reached*. Nothing
+weaker than that has a single meaning, so this is the assertion to write rather
+than counting entries or checking for a particular code.
+
+## The four you will meet first
+
+These are the four a page runs into while somebody is still building it.
+
+<NamedDiagnostics
+  codes={["unknown-primitive", "invalid-props", "theme-unresolved", "data-unresolved"]}
+/>
+
+## All of them
+
+Grouped by who has to act, and each one produced by a render that reports it.
+The node ids are this page's own benches, so they are the ids a real render
+would hand you, from trees nobody will ever see.
+
+<RenderDiagnostics />
+
+## One of these needed a component written to be wrong
+
+`unshown-unreadable` is the only code in the list that neither a tree nor a
+deployment can cause, which means no page could demonstrate it with the starter
+library: every primitive in it that reports what it dropped works out the figure
+from the answer it was handed.
+
+So there is a component in this site's own test bench, called
+`bench.broken-reporter`, whose job is to throw while reporting. It is not
+registered anywhere a reader can reach and it is not part of the library you
+installed. It is here because the alternative was to describe this one in prose
+and leave it unproved, which is the thing every other row on this page is not.
+
+## What to do with them
+
+Three habits, and they are the same three on every deployment that has had this
+go wrong once.
+
+- **Show them in development.** Under every example on this site there is a list
+  of the diagnostics that example produced, which is empty. A render whose
+  diagnostics nobody looks at is a page that can degrade silently for weeks.
+- **Log them in production, with the node id.** The id is what makes a
+  diagnostic actionable six weeks later, and it is what joins one to the change
+  that introduced it.
+- **Fail a test on them.** An empty list is a cheap assertion with a strong
+  meaning, and it catches the whole class before a reader does.
+
+The one to treat differently is `slot-unplaced`. Everything else here costs
+appearance, latency or a check you did not get. That one costs **words somebody
+wrote**, on a page that still looks finished, and nothing a reader sees says so.

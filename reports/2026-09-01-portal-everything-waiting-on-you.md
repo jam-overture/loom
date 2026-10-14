@@ -9,11 +9,11 @@ live model actually changed five times during this run:
 
 | | |
 | --- | --- |
-| [The front door, with a change waiting](2026-09-01-portal-everything-waiting-on-you.png) | 1280px |
-| [The same card with the technical record open](2026-09-01-portal-everything-waiting-on-you-open.png) | 1280px |
-| [Nothing waiting, which is most days](2026-09-01-portal-everything-waiting-on-you-caught-up.png) | 1280px |
-| [The page screen the queue hands you to](2026-09-01-portal-everything-waiting-on-you-page.png) | 1280px |
-| [a phone](2026-09-01-portal-everything-waiting-on-you-phone.png) | 390px |
+| [The front door, with a change waiting](2026-09-01-portal-everything-waiting-on-you.webp) | 1280px |
+| [The same card with the technical record open](2026-09-01-portal-everything-waiting-on-you-open.webp) | 1280px |
+| [Nothing waiting, which is most days](2026-09-01-portal-everything-waiting-on-you-caught-up.webp) | 1280px |
+| [The page screen the queue hands you to](2026-09-01-portal-everything-waiting-on-you-page.webp) | 1280px |
+| [a phone](2026-09-01-portal-everything-waiting-on-you-phone.webp) | 390px |
 
 **How honest these are.** `LOOM_ANTHROPIC_API_KEY` is present in this
 environment, so nothing was staged. Five requests were typed into the real prompt

@@ -77,18 +77,34 @@ const NAMES_NO_ORDER: Readonly<Record<string, string>> = {
    */
   "_components/unreadable-pages.tsx":
     "a list where every row needs the same thing has no top to name",
+  /*
+   * The same argument exactly, one subject over. These are the pages with no
+   * count of how many readers arrived, which is why every reader share on
+   * `/portal/pieces` is withheld — and **one** of them is enough to withhold
+   * all of them, so none of these rows is more urgent than another and there is
+   * no top to name. The section they sit in already says what they are and what
+   * they cost; an order sentence above them would claim a priority this list
+   * does not have.
+   *
+   * It takes the shared tiebreak, which is the half that is not optional: 0256
+   * hands them over newest revision first, an order nothing else in this portal
+   * uses.
+   */
+  "portal/pieces/_components/which-piece-first.tsx":
+    "one page here is enough to withhold every figure, so no row is more urgent than another",
 }
 
 describe("every list of pages in this portal", () => {
   it("finds the lists that exist, so an empty sweep cannot pass as clean", () => {
     expect(lists.map((list) => list.where).sort()).toEqual([
       "_components/unreadable-pages.tsx",
+      "portal/[application]/page.tsx",
       "portal/app/_components/app-composition.tsx",
       "portal/checkup/_components/checkup-choices.tsx",
       "portal/checkup/_components/sweep-rows.tsx",
       "portal/history/_components/tree-chooser.tsx",
-      "portal/page.tsx",
       "portal/pages/page.tsx",
+      "portal/pieces/_components/which-piece-first.tsx",
       "portal/readers/page.tsx",
       "portal/trust/_components/wrong-pages.tsx",
     ])

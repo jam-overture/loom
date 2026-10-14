@@ -42,7 +42,7 @@ pull request, and sent a notification recommending the maintainer check the
 project's usage. That was a false alarm. The second status named the real cause,
 which was mine.
 
-![one hold from a later build, and the four it was taking down with it](2026-09-20-framework-one-row-it-could-not-read.png)
+![one hold from a later build, and the four it was taking down with it](2026-09-20-framework-one-row-it-could-not-read.webp)
 
 ## What this was
 

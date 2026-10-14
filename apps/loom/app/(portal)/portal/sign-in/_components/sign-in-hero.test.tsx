@@ -29,20 +29,22 @@ describe("SignInHero", () => {
     expect(back.getAttribute("href")).toBe("/")
   })
 
-  it("offers the live demo as the next-action for a visitor who does not hold a key", () => {
-    render(<SignInHero readout={okReadout} destination="/portal/pages" />)
+  /**
+   * The assertion, inverted on 12 October, and kept rather than deleted.
+   *
+   * This screen offered the demo as the next action for a visitor without a
+   * key, and the test said so. The maintainer asked for the demo gone from the
+   * portal — by his count, for about the twentieth time — so the useful thing
+   * to pin is the absence, not the removal: a test that is merely deleted
+   * leaves nothing standing between the link and whoever adds it back next.
+   */
+  it("offers a visitor without a key no demo, anywhere on the screen", () => {
+    const { container } = render(<SignInHero readout={okReadout} destination="/portal/pages" />)
 
-    const demo = screen.getByRole("link", { name: /see the live demo/i })
+    const hrefs = [...container.querySelectorAll("a")].map((link) => link.getAttribute("href"))
 
-    /*
-     * `/demo` is outside the proxy's matcher (`/portal` and below), so linking
-     * a signed-out visitor at it does not send them straight back through the
-     * redirector to this page. It was `/portal/demo` until the demo moved to a
-     * public route of its own; that path still answers, as a 308, and sending
-     * the one visitor on this page who is *guaranteed* not to be signed in
-     * through a redirect is the one place it is least worth doing.
-     */
-    expect(demo.getAttribute("href")).toBe("/demo")
+    expect(hrefs.filter((href) => href !== null && href.includes("demo"))).toEqual([])
+    expect(container.textContent).not.toMatch(/demo/i)
   })
 
   it("does not name environment variables in the prose a visitor reads first", () => {

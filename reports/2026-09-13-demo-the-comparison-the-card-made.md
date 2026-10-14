@@ -245,10 +245,10 @@ Nothing blocking. One new, three carried:
 
 | | |
 | --- | --- |
-| [before](2026-09-13-demo-the-comparison-the-card-made-before.png) | `main` at 1280×900, two seconds after **Take the numbers off**: *Some risk* in the box, *above Low risk* eight lines below, and nothing between them |
-| [after](2026-09-13-demo-the-comparison-the-card-made-after.png) | the same press on this branch — one sentence carrying both levels and the direction |
-| [applied](2026-09-13-demo-the-comparison-the-card-made-applied.png) | and after **Apply this change**, where the comparison sits above *"You said yes"* in the same person |
-| [phone](2026-09-13-demo-the-comparison-the-card-made-phone.png) | 390×844, the same card |
+| [before](2026-09-13-demo-the-comparison-the-card-made-before.webp) | `main` at 1280×900, two seconds after **Take the numbers off**: *Some risk* in the box, *above Low risk* eight lines below, and nothing between them |
+| [after](2026-09-13-demo-the-comparison-the-card-made-after.webp) | the same press on this branch — one sentence carrying both levels and the direction |
+| [applied](2026-09-13-demo-the-comparison-the-card-made-applied.webp) | and after **Apply this change**, where the comparison sits above *"You said yes"* in the same person |
+| [phone](2026-09-13-demo-the-comparison-the-card-made-phone.webp) | 390×844, the same card |
 
 Both wide frames are the same script driven against two real `next build`
 outputs — `main`'s and this branch's — so the only difference in the frame is

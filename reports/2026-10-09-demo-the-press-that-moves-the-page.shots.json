@@ -1,0 +1,83 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-09-demo-press-arrival-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "#ask",
+        "#ask > div:nth-child(1) > p",
+        "#ask ul li",
+        "aside details",
+        "aside footer",
+        "text=Pressing this changes the page straight away."
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-09-demo-press-arrival-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask", "#ask ul li", "aside details"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-09-demo-press-one-press-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "aside li[id]" }],
+      "measure": ["aside", "aside li[id]", "text=Put it back"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-09-demo-press-one-press-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "aside li[id]" }],
+      "measure": ["aside li[id]"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-09-demo-press-second-beat-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "aside li[id]" },
+        { "scrollTo": "#ask" }
+      ],
+      "measure": [
+        "#ask",
+        "#ask > div:nth-child(1) > p",
+        "#ask ul li",
+        "text=Pressing this raises a question, not a change.",
+        "text=Show what would come off the page"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-09-demo-press-question-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "aside li[id]" },
+        { "scrollTo": "#ask" },
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "li button.bg-refuse" }
+      ],
+      "measure": ["aside li[id]"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-09-demo-press-embed",
+      "viewport": { "width": 348, "height": 465, "label": "embed" },
+      "waitFor": "#ask",
+      "measure": ["#ask", "#ask > div:nth-child(1) > p"]
+    }
+  ]
+}

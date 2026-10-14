@@ -34,7 +34,14 @@ the portal every day.
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
 | How much of what it says gets read | words readers reached against the words the page says ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)), with the passages nobody saw |
+| Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
+| What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
+| Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
+| Whether the readers who met a kind of part read it | each place's own sound share, weighted by the arrivals at its page's door ([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)), so a shorter rollup window cannot move it |
+| Whether readers *do* anything inside a kind of part | each place's own `engaged ÷ reached`, weighted by the door ([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)), where the door is only the weight — so a kind borne by one page is answerable too |
+| Whether what it collects can be trusted | the faults in a deployment's own collection, with the hand each falls to and the readers each costs ([0271](../decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)), where a page is counted once however many faults it has |
+| What a change did to a kind of part | the places both windows bore, read before against read now ([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)), which is the one denominator here with no reader in it — so the movement is a count of places and a verdict needs no threshold |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
@@ -1131,6 +1138,644 @@ is §18's shape and is why §17 has sets to map rather than one more.
 sentence to put *above* a before-and-after card rather than one more row on it,
 the pair of numbers that must be drawn together or not at all, and `unplaced` as
 the one standing that is about the deployment rather than its readers.
+
+### 21. Which page to fix first · `Loom signals` · **done, 9 October**
+
+Everything above answers about **one revision of one page**. A deployment has
+forty, and nothing could put them in an order — so the first question anybody
+opening a portal asks, *where is the problem*, was the one question the counters
+could not be asked. Every answer available was *here is a page, and here is what
+is wrong with it*, which needs you to already know which page to look at.
+
+**Done.** `deploymentReadingOf(pages, rows)` in
+[`src/signals/deployment.ts`](../src/signals/deployment.ts) takes each page's
+`ReadingProgress` and the window of door rows and gives back the pages in one
+order, worst first, with the two bands each loses its readers between. It is the
+**twelfth** thing taken out of what this subsystem already knows rather than
+collected: **nothing was added to a payload, a browser, a column, a store or the
+vocabulary**, and the broadcaster was not touched.
+
+It is also the first thing here that can tell a **model** where to act without
+being told which page to look at. §9 named the band; this names the page, and
+the two together are an address a proposal can be written against.
+
+Three things decide the shape
+([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)):
+
+- **The over-count divides out inside a page and does not divide out across
+  two.** §9 rests on a fall being a ratio of two counts off the same rows, since
+  a reader who straddled a rollup window straddled it for the whole page. But
+  the straddle rate is each page's **own**: a page readers linger on for twenty
+  minutes, against a window of five, has every distinct count against it
+  inflated roughly fourfold, and a page read in ninety seconds does not. So an
+  order over the raw losses is partly an order over how long readers stay — and
+  it fails in the direction nobody checks, because the pages it floats to the
+  top are the ones readers spend the most time on, which reads as plausible. The
+  key is therefore the loss **scaled to the door**, `lost ÷ (1 + inflation)`,
+  off that page's own row by §11's published matching rule rather than another
+  hand-written copy of it. The figure is not a count of people and is not
+  rounded into one; `lost` is published beside it unscaled.
+- **A page the door cannot scale is reported out of the order, not placed in
+  it.** A page can be perfectly well measured and have no row at the door — one
+  whose rows expired, or a deployment that upgraded mid-window — and there is no
+  safe height to put it at: a long-dwell page would be over-ranked and a quick
+  one under-ranked. Four standings say why a page is out (nothing read it, no
+  row, the row has opened nothing, or it loses more readers at one fall than have
+  ever appeared) and two say where it stands when it is in or has no fall at all.
+  This is §7's refusal in another costume: the figure a surface could misread is
+  one the function never offers.
+- **No deployment-wide loss.** The artefact is an **order** and not a sum, which
+  is also what makes the double count structurally unavailable: nothing is added,
+  so the only error an order can make is one page standing in it twice. A
+  repeated reading is dropped and counted; a repeated door row neither doubles a
+  page's arrivals nor halves its scaled loss. The one figure that *is* added is
+  `arrivals`, addable for the reason no other counter here is — a page view began
+  on one revision of one tree and was counted once at the door (§8). The published
+  shape is pinned by a test, so a total added later has to argue with it first.
+
+Two more settled in the building. **Both revisions of one tree stay in the
+order**, because a revision shipped an hour ago with four readers does not
+supersede the one nine thousand people read — `trees` says the two rows are one
+page so a surface can group them. And §17's table gains a **seventh
+vocabulary**, with it the first reading whose silences are about something
+*smaller than itself*: an order is silent about one of its **members**. §17's
+claim holds — the subject is uniform across a set and is a property of the
+reading — and the thing it was easy to read into it, that a reading's silences
+are about the reading, was never true of anything but the first six. Nothing is
+superseded and the paragraph is written down.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+landing screen, which is the one screen the reader surfaces have never had — your
+pages, worst first, each with the band it loses readers at — and the rule that the
+unscaled pages are a diagnosis beside it rather than a second league table.
+
+### 22. What a change made readers do · `Loom signals` · **done, 10 October**
+
+> §21 is the deployment order, written on the branch of #565 and not yet on
+> `main` when this was built. This step is on the **same** branch rather than a
+> second one, per `routines.md`' procedure step 3, because both touch
+> `silences.ts`, `index.ts` and this file — the conflict a second branch would
+> have created is the one that rule exists to prevent.
+
+§18 answers *four in ten readers who got to the pricing band did something in
+it*, of **one window of one revision**. Four comparisons of two windows existed
+— §10 for where reading stops, §16 for the words that get reached, §19 for
+whether readers had time for them, §20 for who the readers were — and **every
+one of them is about attention.** None asked whether readers *did* anything
+differently.
+
+So the sentence a change to a band nobody uses is made for — *the band readers
+reached and touched nothing is used now* — had no answer, and it is the sentence
+closest to the commercial half of the premise: a deployment that can see which
+of its asks a change got answered has a reason to open the portal the morning
+after it ships one.
+
+**Done.** `actionChangeOf(was, now)` in
+[`src/signals/action-change.ts`](../src/signals/action-change.ts) answers it. It
+is the **thirteenth** thing taken out of what this subsystem already knows
+rather than collected: **nothing was added to a payload, a browser, a column, a
+store or the vocabulary**, and the broadcaster was not touched, so its weight is
+unchanged — measured both sides and byte-identical.
+
+Two things decide the shape, and the first is a **limit of §19's method** rather
+than an application of it
+([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)):
+
+- **The counterfactual that separates the readers from the change is not
+  available here, and no field will make it so.** §19 can run one because a pace
+  has an **exact, reader-free** side: the words a revision says are a property of
+  the tree, costed identically in any window, so one term holds still while the
+  other moves. A share of readers who acted is `within ÷ reached` — two distinct
+  view counts off one row — and has readers on **both** sides. A share that rose
+  because more readers acted and one that rose because fewer readers reached the
+  part are indistinguishable, and they are opposite findings. The decomposition
+  anybody would reach for is worse than none: two ratios whose terms sit in
+  different windows, each scaled by its own window's straddle (0147), so a rollup
+  window a deployment shortened moves both and moves no reader. That is §21's own
+  fact one level across — and where §21 could scale the count at the door, here
+  there is nothing to scale to, because a share **is** the scaled figure. So
+  `shareRatio` is the only ratio published and **no ratio or difference of two
+  windows' counts is published at all**; the counts travel as the weight behind
+  it, which is §20's rule for its two arrival totals.
+- **A share can appear where there was none without a reader doing anything.**
+  `engaged` counts readers who acted *strictly inside* a node (0167), so it is
+  structurally nought on a leaf and §18 withholds the share rather than printing
+  one. Whether a part has an inside is a fact about the **tree**, and a change may
+  move it: wrap a button in a band and the band has a share where one was
+  withheld. `InsideMovement` says so on every compared part, and it is the one
+  movement here that can be stated of a page nobody has read.
+
+Two of those turned out to be **provable rather than warned about**, which is the
+best outcome the second one could have had: a part the change gave an inside
+**cannot** be reported as `taken-up`, because `untouched` on the earlier side
+requires that side to have borne parts — so the movement vocabulary is immune to
+the shape change and only the share is exposed. And `shareRatio` is non-null only
+where the inside was `kept`, because a side without one withheld its share. Both
+are pinned by tests over every compared part of three comparisons.
+
+Four more settled in the building. **Five movements and not nine**, because
+`unknown` is *nothing can be said* rather than a third verdict (§18) and
+collapsing the five combinations it appears in is what keeps the other four as
+claims; `still-untouched` is kept from `held` for §19's reason. **`unwalked` is a
+silence over the reading and the occurrence figures survive it** — a window whose
+delegated signals carry no `within` makes every band read `untouched` with the
+counters looking healthy, so a comparison across it reports the whole page as
+abandoned, which is the most alarming sentence this module can print and is about
+a configuration change; it is refused once over the reading rather than part by
+part, because a per-part rule would be a second spelling of a standing §18
+already publishes, while `activations`, `opens`, `closes` and `completions` are
+filed against the part a reader used and need no ancestry. **The page's one
+headcount is the root against itself**, with no page-level total of readers who
+acted and the published keys pinned by a test (0147, 0167). And the rankings are
+by the readers the **later** window reached, which is a count inside one window
+and so not the ratio this step refuses.
+
+**A tenth silence condition, and the first that is not an absence.** §17's table
+gains `action-change` as an eighth vocabulary and `no-action-credited` as a tenth
+condition. 0240's evidence — that the sixth and seventh sets needed none — is
+**narrowed and not falsified**, and the reason is worth keeping: this is the
+first reading built on a counter whose *nought can be a filing rule rather than a
+measurement*, so it is the first that can be in a state nothing before it could.
+0240 is not superseded and not edited; the module carries the corrected counts,
+and its test now declares per later set which conditions that set brought, so a
+ninth adding one silently is still caught.
+
+**The thinness is §6's, in a third place.** A control whose presses began reports
+`unknown`, because a leaf with no uses on the earlier side has no verdict to move
+from — nothing in the tree says whether it could be pressed. Filed again for
+`Loom primitives`, now with a third consumer.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+sentence a reader screen can lead with the morning after a change ships, the
+member of `InsideMovement` that must be read before a share with no counterpart
+is drawn, and the one question to answer with a `FunnelPair` instead because this
+comparison cannot be made to answer it.
+
+### 23. Whether a kind of part gets read anywhere · `Loom signals` · **done, 10 October**
+
+Every one of the twenty-two steps above answers about **one page**, except §21,
+and §21 is an order *over* pages — the unit it ranks is a page and the sentence
+it gives is *fix this one next*.
+
+**Nothing could be asked about a kind of part.** A deployment builds forty pages
+out of the same two dozen primitives, and *do readers read the testimonial band
+anywhere* is a question about the **library** rather than about any one page. It
+is the first question this plan's own queue names — *which roles readers engage
+with and which they skip* — and it is the question a model proposing a change
+most wants answered before it proposes one. A type's placements were scattered
+across forty readings and nothing joined them.
+
+**Done.** `libraryReadingOf(readings)` in
+[`src/signals/library.ts`](../src/signals/library.ts) is the census, by primitive
+type and by role. It is the **fourteenth** thing taken out of what this subsystem
+already knows rather than collected: **nothing was added to a payload, a browser,
+a column, a store or the vocabulary**, and the broadcaster was not touched, so
+its weight is unchanged — measured both sides and byte-identical.
+
+Two things decide the shape, and the first is what makes the figure sound
+([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)):
+
+- **The unit is the placement, and a reader is never the unit.** `views`,
+  `reached` and `engaged` count distinct page views and are absent from every
+  row, which a `RoleReading` already refuses one level down (0212) — and across
+  pages the case is stronger, because each page's distinct counts are inflated by
+  *its own* straddle rate, which is the fact that forced every page's loss onto
+  the door's scale before it could be ranked (§21). So the headline is
+  `read ÷ (read + skipped)`: a ratio of two counts of **parts of trees**, with no
+  reader in either term and no rollup window in either term, which a deployment
+  that shortens its window cannot move. **What it costs is said on the reading
+  itself** — a placement on a page nine thousand people read counts the same as
+  one on a page three people read, so the share is about *places* and a surface
+  printing it as *readers skip this* is printing something it did not say. The
+  weighted figure everybody will ask for needs the door's correction and is a
+  second question; it is filed rather than shipped with a caveat.
+- **Words add, dwell adds within a kind, and there is no total of either across
+  kinds.** A part's words are its own and a page's words partition across its
+  parts exactly once (0212), so two placements' words are two sentences and
+  `wordsReached ÷ words` is honest. `dwellMs` is not: a part is on screen while
+  its children are, so a nested placement's seconds are its ancestors' too. It is
+  published per kind as a volume of attention with that said on the field, and
+  there is deliberately **no reading-wide dwell**.
+
+Three more settled in the building. `mostSkipped` is ranked by the **count** of
+places and not by the share, which is 0221's rule — a kind skipped in its one and
+only place is a perfect share and a smaller problem than one skipped in seven of
+nine — and it is a **type** and never a role, because a type is the thing an
+author can replace. A type whose readings **disagree about its role** is named
+rather than averaged: a type plays one part (0114), so a disagreement is two
+libraries read as one, and `roleDisagreed` is the alarm `PageReading.orphaned` is
+for the same class of caller error. And two revisions of one tree are two live
+versions of one page and stay two (§21), while the same revision handed in twice
+is the one lie a census can be told and is deduplicated.
+
+**A fourth subject in the silence table, and the first a set has ever added.**
+§17's table gains `library` as a ninth vocabulary, `kind` as a fourth subject and
+`nothing-of-the-kind` as an eleventh condition. The two arrived together for one
+reason worth keeping: a page, a part and a pair all exist because something was
+read, while a **kind comes from the vocabulary** — so this is the first reading
+that can be silent because there is none of the thing it is about, and a subject
+that comes from a vocabulary is exactly a subject that can be empty. 0240 is
+**not** superseded and not edited; its claim that the subject is uniform across a
+set and a property of the reading is exactly true of this set too.
+
+**The thinness is §6's, in a fourth place and for the first time as the whole of
+a figure.** Nothing in `src/primitives/` declares a role, so nearly every
+placement is in the `null` role row and the role census is a census of one row.
+The join is at read time (0212), so the day a role is declared every counter
+already stored reinterprets and these rows start answering with no migration.
+Filed again for `Loom primitives`, now with a fourth consumer.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the one
+screen in this subsystem that is about a deployment's **library** rather than its
+pages, the sentence to lead it with, and the one figure on it that must never be
+printed as a share of readers.
+
+### 24. The share of readers who met a kind of part · `Loom signals` · **done, 11 October**
+
+> §23 is the census of the library, written on the branch of #576 and not yet on
+> `main` when this was built. This step is on the **same** branch rather than a
+> second one, per `routines.md`' procedure step 3: it is the open finding that
+> pull request filed, and it imports the module that pull request adds.
+
+§23 publishes a kind's standing as a share of the **places** it stands, and is
+explicit about what it is not: *the testimonial band stands in nine places and
+readers reached two of them* counts a placement on a page nine thousand people
+read the same as one on a page three people read. A kind read in the one busy
+place and skipped in nine quiet ones reports a read share of one in ten, and
+*most of the readers who met it read it* would also have been true. The lane
+filed the honest version the same morning rather than putting a corrected number
+and an uncorrected one on one type with prose to tell them apart.
+
+**Done.** `libraryReachOf(readings, rows)` in
+[`src/signals/library-reach.ts`](../src/signals/library-reach.ts) answers *of the
+readers who met your testimonial band, six in ten read it.* It is the
+**fifteenth** thing taken out of what this subsystem already knows rather than
+collected: **nothing was added to a payload, a browser, a column, a store or the
+vocabulary**, and the broadcaster was not touched, so its weight is unchanged —
+measured both sides and byte-identical.
+
+Two things decide the shape
+([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)):
+
+- **The unit is one page view of one place, and a reader is never the unit.** Two
+  page views of two pages are two page views, with nothing saying whether one
+  person made both — rule 1 and 0146, not a gap — so the unit is the pair *(a
+  page view, a place this kind stands on that page)*, and that is what makes the
+  figure addable at all.
+- **Every term is put on the scale the door counts in, and that is what makes
+  the figure unmovable.** The arithmetic anybody writes first is a mean of
+  `reached ÷ views` weighted by the pages' readers, and each of those terms is
+  inflated by **its own page's** straddle rate (0147) — which is §21's fact one
+  level across. So the weight is `appearances ÷ (1 + inflation)`, which comes to
+  `min(appearances, opened)`, and the numerator is
+  `reached × weight ÷ appearances`: the result is a **weighted mean of each
+  page's own sound share with that page's exact arrivals behind it**. 0229's
+  cancellation has already happened inside each term before the pages meet, so a
+  deployment that shortens its rollup window cannot move the figure at all. A
+  test pins that against a fourfold straddle, with the figure the refused design
+  would have given published beside it.
+
+Four more settled in the building. **Nothing is withheld for a collection that is
+behind**, which is where this parts from §11: the weight keeps only the page
+views a rollup folded, so there is no projection onto an unmeasured reader to
+refuse — a lagging page weighs less than a caught-up one, which shifts the
+evidence and not the share, and `pending` says by how much. **A kind standing on
+a page the door cannot scale has no share at all**, not a share over the pages
+that could be priced, because a weighted mean over a subset is a figure whose
+denominator nobody named and *of the places we could price* is a caveat a surface
+reads past. **A placement nothing could speak for is in neither term**, which is
+§23's `read ÷ (read + skipped)` holding at the other unit. And **the page that
+could not be scaled is named in the page's own vocabulary**, not in this
+reading's — because a subject is published per vocabulary (0240), so the three
+door states are said twice at two subjects rather than reused.
+
+**A tenth silence vocabulary, and the first since the seventh to bring neither a
+condition nor a subject.** §17's table gains `library-reach`, five members, all
+mapping onto conditions already published — which is what a set that asks an old
+question of a new subject looks like. What it did add is a **limit on reuse**: a
+funnel answer reports a reach silence unchanged (§13) because a funnel is asked
+of a page and so is a reach reading, and this reading's subject is a kind. 0240
+is not superseded and not edited; the module carries the corrected counts and the
+paragraph. The test that pins which conditions each later set brought was
+comparing each set against **every other** one, so the tenth reusing the ninth's
+`nothing-of-the-kind` would have deleted the ninth's declaration and reported
+that nothing ever brought it; it now compares each set against the sets that came
+before it, which is what its own name always said.
+
+**The thinness is §6's, in a fifth place.** Every role row comes back under
+`role: null` until `src/primitives/` declares one. Filed again for
+`Loom primitives`, now with a fifth consumer.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the two
+shares of one kind side by side — *nine places in ten* and *nine readers in ten*
+are different sentences about the same primitive and can differ by an order of
+magnitude — and the one state to refuse to draw.
+
+### 25. What readers do inside a kind of part · `Loom signals` · **done, 12 October**
+
+§23 counts the places a kind stands and §24 the readers who met them. Both are
+about attention, and the third question about one primitive type is the one the
+person who wrote it actually has: *of the readers who met my pricing card, how
+many did something inside it?* `engaged` has been on a tally since the counters
+existed, §18 interpreted it for one page on 8 October, and nothing had ever asked
+it of a **component**.
+
+**Done.** `libraryActionOf(readings, rows)` in
+[`src/signals/library-action.ts`](../src/signals/library-action.ts) answers it,
+per type and per role, as the **sixteenth** thing taken out of what this
+subsystem already knows rather than collected: **nothing was added to a payload,
+a browser, a column, a store or the vocabulary**, the broadcaster was not touched
+and is byte-identical, and every rule about what a single counter means stays
+§18's and is applied by `pageActionOf`, whose rows this folds.
+
+What decides the shape
+([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)):
+
+- **The door is a weight here and nothing else, which is why this answers where
+  §24 must withhold.** A placement's own share is `engaged ÷ reached` — two
+  distinct counts off one row, so the straddle divides out (0242, 0221) — and
+  across pages the weight is put on the door's scale exactly as §24 does. But
+  **both terms are reaches off the same rows**, so a page's own scale cancels
+  inside its own contribution and only the relative weight of one page against
+  another needs the door. A kind borne by **one** page therefore needs no door
+  row at all, and a page nobody reached needs none either. Two or more weighing
+  pages with one unscalable is §24's refusal unchanged.
+- **A count is published only on the door's scale.** A scale-free row publishes
+  its share and not `met`, `acted` or `ignored`, because mixing two scales in one
+  column would misrank the one ordering that matters. `unranked` says how many
+  rows the ranking could not see.
+- **There is no nought share.** The denominator is the readers who got there, so
+  a kind nothing reached is a silence and never a nought — which is the one thing
+  the counters cannot tell apart from nobody ever seeing it.
+- **A kind that is only ever a page's root does not lead the reading.** A root's
+  figure is the page's own (§18), so it contains every row it would outrank; it is
+  kept out of the lead by the row's `roots` against its `placements` and never by
+  the type's name, because a type that is a root on one page and a band on another
+  is a fact about a component.
+
+**An eleventh silence vocabulary, and the first built on another's type rather
+than beside it.** `library-action`, seven members, subject `kind`. Five are §24's
+whole set taken as it stands — the affirmative use of the limit §24 found, since
+one state at one subject should be one word — and a test pins the pair as
+`one-state`. Two are added: `unwalked`, the eighth set's `no-action-credited`
+said of a kind, and `unenterable`, the **twelfth condition**. That one is the
+first in this subsystem about the **shape of a page** rather than about a window,
+a row, a vocabulary or a filing rule: a kind standing only in places with nothing
+inside them has no question to answer, and that would be exactly as true if
+everybody had read everything. Its sibling is `says-nothing`. 0240 is not
+superseded and not edited; the module carries the corrected counts and the
+paragraph.
+
+**The thinness is §6's, in a sixth place** — every role row is `role: null` until
+`src/primitives/` declares one. Filed again for `Loom primitives`.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: a third
+figure on the card `/portal/pieces` now draws, the two states to refuse to draw
+and their opposite remedies, and the two numbers on a row that are places rather
+than readers.
+
+### 26. What a change did to a kind of part · `Loom signals` · **done, 12 October**
+
+§23, §24 and §25 read a deployment's **library** and all three read one window.
+Six comparisons read two windows — §10, §15, §16, §19, §20 and §22 — and every
+one of them is asked of **one page**.
+
+So the question an author who changed a *component* has could not be asked.
+*I rewrote the testimonial band last week; is it read now?* is a question about a
+kind of part across forty pages, and the only thing available was two censuses on
+two screens with somebody subtracting one share from the other — **which is
+wrong, and not by a little.** The two censuses are over different sets of places:
+publish a page in between and every kind on it reports a worse share with no
+reader behaving differently.
+
+**Done.** `libraryChangeOf(was, now)` in
+[`src/signals/library-change.ts`](../src/signals/library-change.ts) answers *the
+band you rewrote was read in three of its nine places and is read in seven now.*
+It is the **seventeenth** thing taken out of what this subsystem already knows
+rather than collected: **nothing was added to a payload, a browser, a column, a
+store or the vocabulary**, and the broadcaster was not touched, so its weight is
+unchanged — measured both sides and byte-identical.
+
+Two things decide the shape
+([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)):
+
+- **Every figure is taken over the places both windows bore**, which is 0239's
+  rule at another unit: a change is read against the words both revisions say,
+  and a change to a library is read against the places both windows bore. A
+  placement only one side bears is in `gained` or `lost` and in no share.
+- **What holding the places still buys is the one denominator in this subsystem
+  with no reader in it.** All six comparisons above compare *shares*, because a
+  count of readers is inflated by its own window's straddle (0147) and nothing
+  divides out between two windows. Here the denominator is a count of **places**
+  and — once they are paired — it is the same number on both sides. So this is
+  the only comparison here that publishes the movement as **counts of places
+  that changed hands** (`tookUp`, `fellAway`) and whose verdict is the sign of a
+  subtraction of two whole numbers, with no threshold in it anywhere.
+
+Four more settled in the building.
+
+**What is confounded is published rather than corrected.** A placement is `read`
+where **at least one** reader reached it (0212, 0235), so a quiet window skips
+more places with nobody behaving differently. `viewsWas` and `viewsNow` travel on
+the reading as floors (0147) and say so; nothing is withheld for it and nothing
+is scaled by it, because a floor on a window's views is not a correction and a
+threshold on how much traffic counts as comparable would be a threshold about a
+deployment's own schedule.
+
+**The two keys answer differently about one change, and both are right.** A node
+whose type changed is a place one kind left and another took — `recast`, `lost`
+by the old type and `gained` by the new, because a type is what an author
+replaces. The role rows hold it still wherever the two types play the same part,
+because a role is what a part plays for a reader (0114).
+
+**A page held at two revisions in one window is excluded and named.** A census
+keeps two live revisions apart on purpose (§21, §23); a comparison pairs by page,
+so such a tree has no single counterpart and picking one would be a number nobody
+could account for. It is in `ambiguous`, which is §7's refusal in another costume.
+A paired page whose revision moved is compared and the fact is published as
+`republished`, so *your readers behave differently* can be told from *you changed
+your pages*.
+
+**A twelfth silence vocabulary that brings nothing** — `library-change`, three
+members, no new condition and no new subject. It is the first **comparison**
+whose subject is a `kind` rather than the pair, which is where 0240's claim was
+most exposed and where it holds: the rows are keyed by the vocabulary, so every
+reason is about one kind of part across both windows. `unpaired` is
+`nothing-carried`, the state a comparison of words reports of words and one of
+paces reports of parts, said of a place. 0240 is not superseded and not edited.
+
+**The thinness is §6's, in a seventh place** — every role row is `role: null`
+until `src/primitives/` declares one, and in this reading that row is also the one
+that treats a recast node as a place still standing. Filed again for
+`Loom primitives`.
+
+**Not built and filed:** the reader-weighted comparison (*of the readers who met
+it, the share that read it has gone from four in ten to seven*), which needs the
+door on both sides and is a weighted mean whose weights move when traffic does;
+and the library-scale version of §16's words, which needs 0239's intersection per
+placement because a paired placement's revision may have moved underneath it.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the screen
+an author opens the morning after changing a primitive, the two numbers that must
+be read before a movement is printed as a finding, and the one row where a type
+and a role deliberately disagree.
+
+### 27. What a change did to the words a kind of part says · `Loom signals` · **done, 12 October**
+
+§26 compares a kind of part across two windows and is explicit about the one
+thing it refuses: **words**. A paired placement there is paired by node, so the
+page's revision may have moved underneath it — the two sides' words are then two
+different sentences, and a share of one against a share of the other is not a
+before and an after. It filed the shape of the missing unit and shipped without
+it.
+
+That unit is the sentence an author who edited copy inside a primitive actually
+has: *you rewrote the testimonial band and readers now reach two thirds of the
+words it kept.* §14 publishes a kind's words and the words readers reached, of
+one window; §16 reads a change against the words both revisions say, of **one
+page**. Nothing joined the two.
+
+**Done.** `libraryCopyChangeOf(was, now)` in
+[`src/signals/library-copy-change.ts`](../src/signals/library-copy-change.ts)
+is §16's method taken per placement and added across the placements of one kind.
+It is the **eighteenth** thing taken out of what this subsystem already knows
+rather than collected: **nothing was added to a payload, a browser, a column, a
+store or the vocabulary**, the broadcaster was not touched and is byte-identical,
+and the text pairing and the words-per-part rule are both reused from the
+readings that publish them rather than spelled a second time.
+
+What decides the shape
+([0270](../decisions/0270-a-change-to-the-words-a-kind-of-part-says-is-read-over-the-words-both-windows-say-and-a-floor-costs-the-signed-figure.md)):
+
+- **Every figure is over the carried words** — the words both windows say word
+  for word, in the places both windows bear. A stronger hold than §26's: a count
+  of places is held still by pairing the places, and carried words are held still
+  by being *the same sentences*. A placement whose text changed is in `rewritten`
+  and in no share, and it is published beside the share because the share is
+  about what is left: a band nine tenths rewritten has a carried share about the
+  tenth it kept.
+- **The whole library gets a total, which no other reading of a library has.**
+  §23, §24, §25 and §26 all refuse a figure added across kinds, because a figure
+  over every kind at once counts a page once per element node. Words do not do
+  that — a part's own words partition its page exactly once (0212, 0235) — so the
+  rows add and the total *is* the type rows added up. It follows the types
+  because a recast node is a place one kind left and another took, and the role
+  rows hold it still: the two keys cannot both be the total. There is no verdict
+  and no silence at that scale, because every reason this reading withholds
+  something is a reason about one kind of part (0240).
+- **A floor costs the signed figure and nothing else.** A signed sum over
+  passages can have the wrong sign under a floor where a single passage's
+  movement cannot (0239), so `words.change` is withheld with `floored` as the
+  reason while both shares, both masses and every count stay. **The places
+  answer is never withheld for a floor** — §26 answers for every row silenced
+  here, which is where the silence points.
+- **The confound is published rather than corrected**, as §26's is: the two
+  windows' view floors travel on the reading, nothing is scaled by them, and no
+  threshold decides what counts as comparable traffic.
+
+**A thirteenth silence vocabulary that brings nothing, and the first assembled
+out of three sets** — `library-copy-change`, five members, subject `kind`:
+§23's `unplaced`, §26's `unpaired`, and §16's `wordless` and `floored` said of a
+kind rather than of a page. That last pair is the instructive half: `words-a-floor`
+arrived with a reading of one page's words and is reported here at another
+subject, which is `one-reason` and never `one-state`. `floored` is also the only
+member of any set in this subsystem whose reading withholds **one figure** while
+every other figure on its row stands. 0240 is not superseded and not edited; the
+module carries the corrected counts.
+
+**The thinness is §6's, in an eighth place** — every role row is `role: null`
+until `src/primitives/` declares one, and in this reading that row is also the
+one that keeps the words of a node whose type changed. Filed again for
+`Loom primitives`.
+
+**Not built and filed:** the word-weighted reader figure (*the typical reader
+reached this many of its words*), which adds signed per-page terms whose weights
+are each page's own views — §16 withholds it for one page under a floor, and at
+the scale of a library the weights move without one.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the two
+numbers that must be read together before a movement is printed (the carried
+share and the rewriting beside it), the first deployment-wide word figure any
+library reading has published, and the row whose verdict is withheld while its
+shares are drawable.
+
+### 28. Whether what a deployment collects can be trusted · `Loom signals` · **done, 13 October**
+
+> §27 is the words a change left standing, written on the branch of #613 and not
+> yet on `main` when this was built. Its number and its place in the count below
+> are left for it rather than taken, since that pull request was opened first and
+> nothing here depends on it.
+
+Twenty-seven readings answer questions about readers, and each publishes beside
+its answer the reasons the answer may be absent — twelve vocabularies of them by
+§24, mapped onto conditions and subjects by §17 so that a card drawing two
+readings can tell one state from two.
+
+**Three of those reasons are not quiet windows. They are faults in what the
+deployment is collecting, and each was written down where it was found and
+nowhere a person would look.** §11 named `unopened` — senders that never mark an
+opening, so every rate is denominator-less *while the counters look healthy*.
+§18 named `unwalked` — a page readers act on with every band reading *untouched*
+and, again, the counters looking healthy. §8's straddle becomes, past a point, a
+rollup window shorter than the visits it measures, with every count on every card
+half again the truth. All three are per page, on the screens a person opens to
+look at *readers* — so a deployment with forty pages and one served by an old
+broadcaster had no way to be told.
+
+**Done.** `collectionHealthOf(readings, rows)` in
+[`src/signals/health.ts`](../src/signals/health.ts) answers *the measurement of
+eleven hundred of your readers is wrong, here is where, and here is whose it is.*
+It is the **nineteenth** thing taken out of what this subsystem already knows
+rather than collected: **nothing was added to a payload, a browser, a column, a
+store or the vocabulary**, and the broadcaster was not touched, so its weight is
+unchanged — measured both sides and byte-identical.
+
+Three things decide the shape
+([0271](../decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)):
+
+- **A fault is named by what it costs and carries the hand it falls to.** Five
+  faults, four hands — `senders`, `configuration`, `caller`, `undetermined` —
+  because the half of a fault a person acts on is whose it is, and two faults
+  falling to one hand is one errand. `undetermined` is one fault in five and is
+  the honest answer rather than a gap: a missing door row is a sender older than
+  the opening marker, a row that has passed out of retention while its counters
+  have not, or counters no sender wrote, and the rows cannot tell the three
+  apart.
+- **What a fault costs is the page's arrivals, and a page is counted once
+  however many faults it has.** A sender not marking its openings spoils every
+  rate on that revision, so the cost is that revision's exact `opened` (§8) —
+  added once per **revision** over the faulted ones. `faults` counts revisions
+  per fault and so deliberately does not add to the number of faulted pages,
+  which is said on the field. The one double-count available here is a page
+  counted once per fault, and it is the thing the reading guards (0158).
+- **A page the door cannot price is published apart and never ranked.** The first
+  fault is the one revision whose cost cannot be stated, because it is the
+  absence of the count that would state it; ranking it by its view floor would
+  mix two scales in one column, which is §21's refusal for an order of pages and
+  §25's for a ranked library.
+
+Three more settled in the building. **`pending` is published and never judged**:
+openings no rollup has folded are what a stalled collection looks like *and*
+what a revision published two minutes ago looks like, the row carries one
+`updatedAt` written by both writers, so a busy page whose rollup has stopped
+keeps a fresh timestamp — the state is named `unfolded` and nothing is claimed
+about which cause it is. Filed with the shape that would answer it, which is a
+column and a migration. **The threshold is this subsystem's first for an
+error rather than a claim**: `COUNTS_INFLATED_ABOVE` is 0.5, where the
+appearances are more than one and a half times the openings and the window is
+therefore shorter than the reading it measures; ratios survive it and counts do
+not, and it is published and not overridable per 0218's rule while the remedy —
+a longer window — is the deployment's own configuration. And **no thirteenth
+silence vocabulary**: a fault says *go and do something* where a silence says
+*this figure is absent*, so the correspondences are documented the other way
+round — `openings-unmarked` is the fault whose consequence §11 reports as
+`unopened`, and `actions-uncredited` the one behind §18's `unwalked`.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the one
+screen here that is about the collection rather than the readers, the share of a
+deployment's arrivals whose measurement is wrong as the figure to lead it with,
+and the one remedy that must never be shown to an operator because it names
+somebody else's bug.
 
 ## Still not in scope
 

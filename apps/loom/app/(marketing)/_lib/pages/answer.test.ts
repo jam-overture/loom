@@ -5,7 +5,12 @@ import { ANCHOR } from "../bands"
 
 import { ASKS, type AskId } from "../adapt/asks"
 import { askRunFor, treeFor } from "../render"
-import { askHref, DEFAULT_THEME, HOW_IT_WORKS, type SiteThemeName } from "../site"
+import {
+  askPath,
+  DEFAULT_THEME,
+  HOW_IT_WORKS,
+  type SiteThemeName,
+} from "../site"
 import { wordsOf } from "../words"
 import type { PageContext } from "./home"
 
@@ -138,7 +143,7 @@ describe.each(ANSWERED)("%s", (_name, context) => {
     const run = await askRunFor(context)
     const record = (run as NonNullable<typeof run>).record
     const band = answerOf((run as NonNullable<typeof run>).page) as ElementNode
-    const approving = askHref(ORIGIN, { theme: THEME, ask: record.ask, approve: true })
+    const approving = askPath({ ask: record.ask, approve: true })
 
     expect(actionsOf(band).some((action) => hrefOf(action) === approving)).toBe(record.awaitingYou)
   })
@@ -192,7 +197,8 @@ describe.each(ANSWERED)("%s", (_name, context) => {
 
     expect(onward).toBeDefined()
 
-    const address = new URL(onward as string)
+    /* A base since 12 October: this site's own links carry no origin (0259). */
+    const address = new URL(onward as string, "https://site.invalid")
 
     expect(address.pathname).toBe(HOW_IT_WORKS.path)
     expect(address.searchParams.get("ask")).toBe(record.ask)

@@ -104,8 +104,8 @@ off and the steps inside it are unchanged.
 
 | | before — `main` | after — this branch |
 | --- | --- | --- |
-| the arrival screen, 1280 × 900 | [before](2026-09-26-demo-a-default-state-worth-looking-at-before-wide.png) | [after](2026-09-26-demo-a-default-state-worth-looking-at-after-wide.png) |
-| the same on a phone, 390 × 844 | [before](2026-09-26-demo-a-default-state-worth-looking-at-before-phone.png) | [after](2026-09-26-demo-a-default-state-worth-looking-at-after-phone.png) |
+| the arrival screen, 1280 × 900 | [before](2026-09-26-demo-a-default-state-worth-looking-at-before-wide.webp) | [after](2026-09-26-demo-a-default-state-worth-looking-at-after-wide.webp) |
+| the same on a phone, 390 × 844 | [before](2026-09-26-demo-a-default-state-worth-looking-at-before-phone.webp) | [after](2026-09-26-demo-a-default-state-worth-looking-at-after-phone.webp) |
 
 On the phone the whole instrument now fits one screen: the claim, the chips, the
 green button with its promise, and all four of the other asks. Before, the fold

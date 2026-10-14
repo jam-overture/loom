@@ -7,13 +7,13 @@ Five primitives — `loom.code`, `loom.kbd`, `loom.avatar`, `loom.avatar-row`,
 plus three findings closed and four filed. One of the three was closed on the way
 past because a screenshot showed it was still true.
 
-![The specimen under the house palette](2026-08-21-primitives-the-technical-vocabulary-minimal.png)
+![The specimen under the house palette](2026-08-21-primitives-the-technical-vocabulary-minimal.webp)
 
-![The same specimen under the bold palette](2026-08-21-primitives-the-technical-vocabulary-bold.png)
+![The same specimen under the bold palette](2026-08-21-primitives-the-technical-vocabulary-bold.webp)
 
-![And under editorial](2026-08-21-primitives-the-technical-vocabulary-editorial.png)
+![And under editorial](2026-08-21-primitives-the-technical-vocabulary-editorial.webp)
 
-![The house palette on a 390px phone — the mosaic collapses to one column and the headline fits](2026-08-21-primitives-the-technical-vocabulary-phone.png)
+![The house palette on a 390px phone — the mosaic collapses to one column and the headline fits](2026-08-21-primitives-the-technical-vocabulary-phone.webp)
 
 ## Which primitives, and why those
 

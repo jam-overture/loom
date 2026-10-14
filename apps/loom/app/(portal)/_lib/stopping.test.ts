@@ -287,6 +287,36 @@ describe("the sentences a person reads", () => {
   })
 
   /**
+   * **The population is the caller's and the rounding is not.**
+   *
+   * *The people* is right for a fall, where the parts either side of the phrase
+   * name the population. It is wrong for a kind of piece, whose share is of the
+   * readers who met it across every page it stands on — so `_lib/pieces-read.ts`
+   * passes its own noun rather than spelling the tenths a second time.
+   *
+   * Two phrasings of one reading is how a portal comes to round one number two
+   * ways: the day somebody changed a boundary in one of them, *7 in 10* and
+   * *almost all* would be printed about the same share on two screens, and a
+   * reader has no way to read that as anything but two measurements. Every end
+   * of the scale takes the noun, which is the half a caller passing a string to
+   * one branch would miss.
+   */
+  it.each([
+    [1, "almost all of the readers who met it"],
+    [0.9, "9 in 10 of the readers who met it"],
+    [0.02, "fewer than 1 in 10 of the readers who met it"],
+  ] as readonly [number, string][])(
+    "says a share of %s against the population it is a share of",
+    (share, said) => {
+      expect(plainShare(share, "readers who met it")).toBe(said)
+    }
+  )
+
+  it("keeps the people for every caller that was already saying them", () => {
+    expect(plainShare(0.4)).toBe(plainShare(0.4, "people"))
+  })
+
+  /**
    * The share leads and the counts do not, which is the reverse of every other
    * section on this card. `_lib/stopping.ts` has the argument: a reach is
    * generous by every visit that straddled a roll-up boundary and a ratio
@@ -475,5 +505,42 @@ describe("the sentences a person reads", () => {
 
     expect(arrivedPartWayDown(reading)).toBeUndefined()
     expect(notReporting(reading)).toBeUndefined()
+  })
+})
+
+/**
+ * The widening, pinned in the one direction a type cannot check.
+ *
+ * `fallSentence` took a `Fall` and now takes the least a fall has to carry to be
+ * read out loud, so that `_lib/fix-first.ts` — which holds the runtime's own
+ * `ReadingStop`, two node ids and no named part — gets the same sentence instead
+ * of a second phrasing of it. A `Fall` still satisfies it structurally, which is
+ * what the four assertions above already prove; this is the other half.
+ */
+describe("fallSentence takes the least a fall needs to be said", () => {
+  it("writes the same sentence for a caller holding only a share and two names", () => {
+    expect(
+      fallReading(
+        fallSentence({
+          share: 0.4,
+          after: { name: { name: "the card “What it costs”", nodeId: "n_price" } },
+          before: { name: { name: "the card “Questions”", nodeId: "n_ask" } },
+        })
+      )
+    ).toBe(
+      "4 in 10 of the people who got as far as the card “What it costs” n_price never went on to the card “Questions” n_ask."
+    )
+  })
+
+  it("keeps the phrasing English has for a share of one", () => {
+    expect(
+      fallReading(
+        fallSentence({
+          share: 1,
+          after: { name: { name: "the band “Pricing”", nodeId: "n_price" } },
+          before: { name: { name: "the band “Questions”", nodeId: "n_ask" } },
+        })
+      )
+    ).toBe("Nobody who got as far as the band “Pricing” n_price went on to the band “Questions” n_ask.")
   })
 })

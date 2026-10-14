@@ -74,10 +74,10 @@ repository.
 
 Full-page renders of both routes in both starter palettes are beside this report:
 
-- [`…-home-editorial.png`](2026-08-19-marketing-the-site-in-loom-home-editorial.png) ·
-  [`…-home-bold.png`](2026-08-19-marketing-the-site-in-loom-home-bold.png)
-- [`…-how-it-works-editorial.png`](2026-08-19-marketing-the-site-in-loom-how-it-works-editorial.png) ·
-  [`…-how-it-works-bold.png`](2026-08-19-marketing-the-site-in-loom-how-it-works-bold.png)
+- [`…-home-editorial.png`](2026-08-19-marketing-the-site-in-loom-home-editorial.webp) ·
+  [`…-home-bold.png`](2026-08-19-marketing-the-site-in-loom-home-bold.webp)
+- [`…-how-it-works-editorial.png`](2026-08-19-marketing-the-site-in-loom-how-it-works-editorial.webp) ·
+  [`…-how-it-works-bold.png`](2026-08-19-marketing-the-site-in-loom-how-it-works-bold.webp)
 
 Because the 16 August finding says an embedded image in a private repository
 never renders for anyone, the visual is also published as a **live page** rather

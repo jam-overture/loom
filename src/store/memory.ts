@@ -1,3 +1,4 @@
+import { DEFAULT_APPLICATION_ID, type StoreScope } from "../application/application.js"
 import type { TreeId } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok } from "../result.js"
@@ -35,18 +36,26 @@ type Entry = {
   readonly log: readonly StoredRevision[]
 }
 
-export const memoryTreeStore = (): TreeStore => {
+export const memoryTreeStore = (scope: StoreScope = {}): TreeStore => {
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
+  /*
+   * Keyed by project and tree even though a handle only ever sees one project,
+   * so that this store means the same thing the Postgres one does: a tree id
+   * is unique within a project and says nothing about any other. Without it a
+   * test that built one handle and expected two projects would quietly get one.
+   */
   const trees = new Map<string, Entry>()
+  const keyOf = (treeId: TreeId): string => `${project}\u0000${treeId}`
 
-  const entryOf = (treeId: TreeId): Entry | undefined => trees.get(treeId)
+  const entryOf = (treeId: TreeId): Entry | undefined => trees.get(keyOf(treeId))
 
   return {
     create: (tree) =>
       Promise.resolve(
-        trees.has(tree.treeId)
+        trees.has(keyOf(tree.treeId))
           ? err<StoreError>({ code: "already-exists", treeId: tree.treeId })
           : (() => {
-              trees.set(tree.treeId, { snapshot: tree, log: [] })
+              trees.set(keyOf(tree.treeId), { snapshot: tree, log: [] })
 
               return ok(tree)
             })()
@@ -112,14 +121,23 @@ export const memoryTreeStore = (): TreeStore => {
       const limit = clampListingLimit(request?.limit)
       const cursor = request?.cursor
 
-      const keys = Array.from(trees.keys())
+      /*
+       * Over tree ids rather than over the map's keys, which now carry the
+       * project in front of them. A cursor is opaque to whoever holds it, and
+       * a key would make it opaque *and* project-specific — so a page token
+       * from one handle, replayed against another, would silently return
+       * nothing instead of failing. The ids are what the caller was given and
+       * are what it gets back.
+       */
+      const ids = Array.from(trees.values())
+        .map((entry) => entry.snapshot.treeId)
         .sort()
-        .filter((key) => cursor === undefined || key > cursor)
+        .filter((treeId) => cursor === undefined || treeId > cursor)
 
-      const page = keys.slice(0, limit)
+      const page = ids.slice(0, limit)
 
-      const listings: readonly TreeListing[] = page.flatMap((key) => {
-        const entry = trees.get(key)
+      const listings: readonly TreeListing[] = page.flatMap((treeId) => {
+        const entry = entryOf(treeId)
 
         return entry ? [{ treeId: entry.snapshot.treeId, revision: entry.snapshot.revision }] : []
       })
@@ -129,7 +147,7 @@ export const memoryTreeStore = (): TreeStore => {
       return Promise.resolve(
         ok<TreeListPage>({
           trees: listings,
-          cursor: last !== undefined && keys.length > page.length ? last : null,
+          cursor: last !== undefined && ids.length > page.length ? last : null,
         })
       )
     },
@@ -176,7 +194,7 @@ export const memoryTreeStore = (): TreeStore => {
       }
 
       /** One write, so the log and the snapshot cannot be seen disagreeing. */
-      trees.set(treeId, { snapshot: applied.value, log: [...entry.log, revision] })
+      trees.set(keyOf(treeId), { snapshot: applied.value, log: [...entry.log, revision] })
 
       return Promise.resolve(ok(applied.value))
     },

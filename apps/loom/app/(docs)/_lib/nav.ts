@@ -243,6 +243,12 @@ const orderedSections: readonly DocsSection[] = [
           "A primitive is a name, a schema and a component. The registry is the allowlist of what a proposal may say.",
       },
       {
+        slug: "a-primitive-of-your-own",
+        title: "A primitive of your own",
+        summary:
+          "One worked primitive, end to end: the schema, the component, the registration, what a model is told about it, and the tests that prove a person can edit it.",
+      },
+      {
         slug: "composition",
         title: "Children and slots",
         summary:
@@ -350,6 +356,12 @@ const orderedSections: readonly DocsSection[] = [
         title: "Going to production",
         summary:
           "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
+      },
+      {
+        slug: "what-a-render-reports",
+        title: "What a render reports",
+        summary:
+          "Rendering never fails, so anything it could not honour comes back beside the page: every diagnostic a render can leave behind, what each one cost you, and which of three people has to fix it.",
       },
       {
         slug: "when-something-looks-wrong",

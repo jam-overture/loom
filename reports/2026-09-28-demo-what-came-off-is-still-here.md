@@ -47,10 +47,10 @@ that offers to put them back.**
 
 | | before (`main`) | after |
 | --- | --- | --- |
-| the payoff screen, wide | `reports/2026-09-28-demo-what-came-off-is-still-here-before-wide.png` | `reports/2026-09-28-demo-what-came-off-is-still-here-after-wide.png` |
-| the payoff screen, phone | `reports/2026-09-28-demo-what-came-off-is-still-here-before-phone.png` | `reports/2026-09-28-demo-what-came-off-is-still-here-after-phone.png` |
-| **the card itself**, clipped | `reports/2026-09-28-demo-what-came-off-is-still-here-before-card.png` | `reports/2026-09-28-demo-what-came-off-is-still-here-after-card.png` |
-| the card on a phone, after *Show the record* | — | `reports/2026-09-28-demo-what-came-off-is-still-here-after-phone-record.png` |
+| the payoff screen, wide | `reports/2026-09-28-demo-what-came-off-is-still-here-before-wide.webp` | `reports/2026-09-28-demo-what-came-off-is-still-here-after-wide.webp` |
+| the payoff screen, phone | `reports/2026-09-28-demo-what-came-off-is-still-here-before-phone.webp` | `reports/2026-09-28-demo-what-came-off-is-still-here-after-phone.webp` |
+| **the card itself**, clipped | `reports/2026-09-28-demo-what-came-off-is-still-here-before-card.webp` | `reports/2026-09-28-demo-what-came-off-is-still-here-after-card.webp` |
+| the card on a phone, after *Show the record* | — | `reports/2026-09-28-demo-what-came-off-is-still-here-after-phone-record.webp` |
 
 **The two card portraits are the whole of this run.** Same ask, same verdict,
 same words, same button. On one of them the sentence *"The 4 pieces it takes off

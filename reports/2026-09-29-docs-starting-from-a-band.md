@@ -18,7 +18,7 @@ typechecker, and the link past the first three steps — together with the
 sentence below it, *"Nothing below is needed to start."* The screenshot framed
 all of it from the rule downward, so all of it went.
 
-![The foot of the route, after](2026-09-29-docs-arrival-route-foot-after.png)
+![The foot of the route, after](2026-09-29-docs-arrival-route-foot-after.webp)
 
 *Step six, and then straight into the argument.*
 
@@ -72,7 +72,7 @@ answer the finding rather than a reason to reach into another lane.
 
 | collapsed | expanded |
 | --- | --- |
-| ![](2026-09-29-docs-quickstart-file-collapsed.png) | ![](2026-09-29-docs-quickstart-file-expanded.png) |
+| ![](2026-09-29-docs-quickstart-file-collapsed.webp) | ![](2026-09-29-docs-quickstart-file-expanded.webp) |
 
 306 lines, clamped to 26rem with a fade and a button that says how many lines it
 is holding back. **Clamped, never truncated** — and that is the whole design.
@@ -121,7 +121,7 @@ No maintainer comments were open on the lane's pull requests at the start of the
 run — #435 merged yesterday — so the planned work came off the findings queue.
 The four instructions above arrived while it was being built.
 
-![The page, at the top](2026-09-29-docs-starting-from-a-band-top.png)
+![The page, at the top](2026-09-29-docs-starting-from-a-band-top.webp)
 
 *The new page, and the thing it is about: the pricing band rendered live, built
 by the library rather than by this repository.*
@@ -158,7 +158,7 @@ So a band that stops building, or starts building a type the registry no longer
 has, takes the documentation red — the same guarantee every other example has,
 reaching one level further out into the library.
 
-![Three bands in the order a page uses them](2026-09-29-docs-starting-from-a-band-sequence.png)
+![Three bands in the order a page uses them](2026-09-29-docs-starting-from-a-band-sequence.webp)
 
 ## The page states no number of its own
 
@@ -173,7 +173,7 @@ whose whole job is that the page contains none of them, and it derives its
 forbidden set from the counts themselves — **as digits and as English words**,
 because *forty-four* is what the first draft of this page actually said.
 
-![Every part, in the order a page uses them](2026-09-29-docs-starting-from-a-band-parts.png)
+![Every part, in the order a page uses them](2026-09-29-docs-starting-from-a-band-parts.webp)
 
 *Twenty-two rows, filled in by the library: each part's canonical design's own
 sentence about what lands on the page, how many nodes that is, and how many ways
@@ -252,7 +252,7 @@ invisible to both the overflow measurement and the camera.
 
 | the page | the parts table |
 | --- | --- |
-| ![](2026-09-29-docs-starting-from-a-band-phone.png) | ![](2026-09-29-docs-starting-from-a-band-phone-parts.png) |
+| ![](2026-09-29-docs-starting-from-a-band-phone.webp) | ![](2026-09-29-docs-starting-from-a-band-phone-parts.webp) |
 
 ## Tests
 

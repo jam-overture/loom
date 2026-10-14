@@ -44,7 +44,7 @@ script's output against this checkout:
 The last row is the floor staying sovereign over the escalation, which is the
 property 0035 established and this rung inherits.
 
-![the docs comparison](2026-09-16-framework-the-other-end-of-the-pipe-docs.png)
+![the docs comparison](2026-09-16-framework-the-other-end-of-the-pipe-docs.webp)
 
 *`/docs/building-with-loom/where-content-comes-from`, 1280×900, served from a
 real `next build`. Both verdicts are computed as the page builds — the block

@@ -184,18 +184,59 @@ export const fallReading = (line: FallLine): string =>
  * reads as nobody, and *almost all* rather than a `10 in 10` that reads as
  * everybody — and everybody is a different sentence, below, because *nobody went
  * on* is how English says it.
+ *
+ * **Never a percentage**, which is the rule `reading-view.ts` states for every
+ * count on these screens: two of two is not the same news as two hundred of two
+ * hundred, and a surface printing `100%` for both makes the smallest sample in
+ * the portal look like the strongest evidence in it.
+ *
+ * ## Why the population is a parameter
+ *
+ * *The people* is right for a fall, where the population is the readers who got
+ * as far as the part above it and the sentence names that part either side of
+ * this phrase. It is wrong for a **kind of piece**, whose share is of the
+ * readers who met it across every page it stands on — and *7 in 10 of the
+ * people* there would be a share of a population nothing on the screen names.
+ *
+ * Widened rather than re-spelled, because a second tenths phrasing in
+ * `pieces-read.ts` is how one reading comes to be said in two voices: the two
+ * would round the same number differently the first time somebody changed one,
+ * and *7 in 10* beside *almost all* about the same share is two measurements as
+ * far as a reader can tell. Every existing caller is untouched by the default.
  */
-export const plainShare = (share: number): string => {
+export const plainShare = (share: number, population: string = "people"): string => {
   const tenths = Math.round(share * 10)
 
-  if (tenths <= 0) return "fewer than 1 in 10 of the people"
-  if (tenths >= 10) return "almost all of the people"
+  if (tenths <= 0) return `fewer than 1 in 10 of the ${population}`
+  if (tenths >= 10) return `almost all of the ${population}`
 
-  return `${tenths} in 10 of the people`
+  return `${tenths} in 10 of the ${population}`
 }
 
 /** Where the share is the whole of it: nobody at all went on. */
 const EVERYBODY = 0.995
+
+/**
+ * The least a fall has to carry to be read out loud: a share and the two names.
+ *
+ * `Fall` satisfies it structurally, so nothing changed at the call site that had
+ * it. It is written down because a **second** screen needs the sentence and
+ * holds no `Fall`: `_lib/fix-first.ts` ranks a deployment's pages off
+ * `deploymentReadingOf`, whose fall is the runtime's own `ReadingStop` — two
+ * node ids, a share and two counts, with no part named on it and no standing or
+ * reach to invent.
+ *
+ * The alternative was a second phrasing of one sentence in that module, and this
+ * lane has the scar: two spellings of one reading is how a portal comes to say
+ * the same arithmetic in two voices, which reads as two measurements.
+ */
+export type FallNaming = {
+  readonly share: number
+  /** The part they got to. */
+  readonly after: { readonly name: PartName }
+  /** The part fewer of them got to. */
+  readonly before: { readonly name: PartName }
+}
 
 /**
  * One fall, as a sentence.
@@ -205,7 +246,7 @@ const EVERYBODY = 0.995
  * and *everybody … never went on* is the sentence a single template would have
  * produced.
  */
-export const fallSentence = (fall: Fall): FallLine =>
+export const fallSentence = (fall: FallNaming): FallLine =>
   fall.share >= EVERYBODY
     ? {
         before: "Nobody who got as far as ",

@@ -1,12 +1,14 @@
 import type { ResolvedTheme } from "@jam-overture/loom"
 
-import type { PageItself } from "@/app/(demo)/_lib/the-page-itself"
+import { THE_WINDOW, type PageItself } from "@/app/(demo)/_lib/the-page-itself"
 
 import { PageBand } from "./page-band"
+import { PageInView } from "./page-in-view"
 
 /**
  * The top of the page, on the first screen, where a phone had no page on it at
- * all.
+ * all — and on the screen after the press, where `demo-43` gave it one that
+ * takes the page away again.
  *
  * `_lib/the-page-itself.ts` has the measurement — the stage begins 250px past
  * the fold at 390 × 844 — the one silence, and the three shapes that were
@@ -67,7 +69,7 @@ export const ThePageItselfView = ({
    * this window is the referent for, so a heading here would be a third voice
    * saying the same thing in the space of eighty pixels.
    */
-  <section className="demo-part demo-part--arrival">
+  <section id={THE_WINDOW} className="demo-part demo-part--arrival">
     <PageBand inert tree={page.tree} {...(theme ? { theme } : {})} />
 
     {/*
@@ -79,5 +81,18 @@ export const ThePageItselfView = ({
       * referent in the header.
       */}
     <p className="text-ink-muted text-xs">{page.caption}</p>
+
+    {/*
+      * And the visitor, when the page in this window moved under a press they
+      * made somewhere else.
+      *
+      * It is inside the section rather than beside it because the only thing
+      * it can do is bring this element onto the screen, and the only state it
+      * does it in is one `page.moved` already answers. `page-in-view.tsx` has
+      * the measurement: the press this demo opens with is made with the window
+      * in front of the visitor, and its inverse is pressed on a card 922
+      * pixels down a phone's rail.
+      */}
+    {page.moved && <PageInView token={page.moved} />}
   </section>
 )

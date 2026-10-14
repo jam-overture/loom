@@ -6,17 +6,36 @@ import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
 import {
+  ACTION_CHANGE_SILENCES,
   CHANGE_SILENCES,
   COPY_CHANGE_SILENCES,
   COPY_SILENCES,
   copyChangeOf,
   copyReadingOf,
+  DEPLOYMENT_SILENCES,
   describeSilenceCondition,
   describeSilenceSubject,
   distinctSilences,
+  KIND_ACTION_SILENCES,
+  KIND_CHANGE_SILENCES,
+  KIND_COPY_CHANGE_SILENCES,
+  KIND_REACH_SILENCES,
+  KIND_SILENCES,
+  libraryActionOf,
+  libraryChangeOf,
+  libraryCopyChangeOf,
+  libraryReachOf,
+  libraryReadingOf,
+  meaningOfActionChangeSilence,
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
+  meaningOfDeploymentSilence,
+  meaningOfKindActionSilence,
+  meaningOfKindChangeSilence,
+  meaningOfKindCopyChangeSilence,
+  meaningOfKindReachSilence,
+  meaningOfKindSilence,
   meaningOfPaceChangeSilence,
   meaningOfPaceSilence,
   meaningOfReachSilence,
@@ -36,6 +55,7 @@ import {
   type ReaderTally,
   type SilenceCondition,
   type SilenceMeaning,
+  type SilenceVocabulary,
   type StoredPageViews,
 } from "./index.js"
 
@@ -124,9 +144,16 @@ const readingOf = (
 ) => pageReadingOf(tree, counters, declarations)
 
 const EVERY_MEANING: readonly SilenceMeaning[] = [
+  ...ACTION_CHANGE_SILENCES.map(meaningOfActionChangeSilence),
   ...CHANGE_SILENCES.map(meaningOfChangeSilence),
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
+  ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
+  ...KIND_SILENCES.map(meaningOfKindSilence),
+  ...KIND_ACTION_SILENCES.map(meaningOfKindActionSilence),
+  ...KIND_CHANGE_SILENCES.map(meaningOfKindChangeSilence),
+  ...KIND_COPY_CHANGE_SILENCES.map(meaningOfKindCopyChangeSilence),
+  ...KIND_REACH_SILENCES.map(meaningOfKindReachSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
@@ -135,9 +162,16 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
 describe("what a reading means when it says nothing", () => {
   it("maps every member of every set, with no condition from outside the published list", () => {
     expect(EVERY_MEANING).toHaveLength(
-      CHANGE_SILENCES.length +
+      ACTION_CHANGE_SILENCES.length +
+        CHANGE_SILENCES.length +
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
+        DEPLOYMENT_SILENCES.length +
+        KIND_SILENCES.length +
+        KIND_ACTION_SILENCES.length +
+        KIND_CHANGE_SILENCES.length +
+        KIND_COPY_CHANGE_SILENCES.length +
+        KIND_REACH_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
@@ -151,21 +185,86 @@ describe("what a reading means when it says nothing", () => {
   })
 
   /**
-   * The other side of the same guard, from the direction a sixth set arrives
-   * from. 0244 added one and mapped it onto conditions that were already
-   * published, which is the evidence that these are states of the world rather
-   * than a list of the names five modules happened to use — and a seventh set
-   * adding conditions nobody else reports is the thing worth noticing.
+   * The other side of the same guard, from the direction a new set arrives from,
+   * and it now asserts in **both** directions rather than one.
+   *
+   * The sixth and the seventh mapped entirely onto conditions already published,
+   * which was the evidence that these are states of the world rather than a list
+   * of the names five modules happened to use. The eighth brought exactly one of
+   * its own, and *which* is the fact worth holding: a nought that is a filing
+   * rule rather than an absence (0242, 0251) is a state nothing before a reading
+   * of what readers did could be in.
+   *
+   * So each later set declares what it adds, and the test fails if a set adds a
+   * condition it did not declare **or** declares one it does not add. The
+   * original assertion is the `[]` rows; an eleventh set bringing a condition
+   * silently is still what this catches.
+   *
+   * **Each set is held against the sets that came before it and not against
+   * every other one**, which is what its own name has always said and what it
+   * now does. The two are the same assertion until a later set reuses an
+   * earlier one's condition — the tenth reuses the ninth's `nothing-of-the-kind`
+   * — and at that moment the all-others form would delete the ninth's
+   * declaration and report that nothing had ever brought it, which is the one
+   * fact this test exists to keep.
    */
-  it("maps the sixth set onto conditions the first five already reported", () => {
-    const others = new Set<SilenceCondition>(
-      EVERY_MEANING.filter((meaning) => meaning.vocabulary !== "pace-change").map(
+  it("declares, for each set added after the fifth, which conditions it brought that no earlier set reported", () => {
+    const later: readonly [SilenceVocabulary, readonly SilenceCondition[], readonly SilenceCondition[]][] =
+      [
+        [
+          "pace-change",
+          PACE_CHANGE_SILENCES.map((of) => meaningOfPaceChangeSilence(of).condition),
+          [],
+        ],
+        ["deployment", DEPLOYMENT_SILENCES.map((of) => meaningOfDeploymentSilence(of).condition), []],
+        [
+          "action-change",
+          ACTION_CHANGE_SILENCES.map((of) => meaningOfActionChangeSilence(of).condition),
+          ["no-action-credited"],
+        ],
+        [
+          "library",
+          KIND_SILENCES.map((of) => meaningOfKindSilence(of).condition),
+          ["nothing-of-the-kind"],
+        ],
+        [
+          "library-reach",
+          KIND_REACH_SILENCES.map((of) => meaningOfKindReachSilence(of).condition),
+          [],
+        ],
+        [
+          "library-action",
+          KIND_ACTION_SILENCES.map((of) => meaningOfKindActionSilence(of).condition),
+          ["nothing-inside"],
+        ],
+        [
+          "library-change",
+          KIND_CHANGE_SILENCES.map((of) => meaningOfKindChangeSilence(of).condition),
+          [],
+        ],
+        [
+          "library-copy-change",
+          KIND_COPY_CHANGE_SILENCES.map((of) => meaningOfKindCopyChangeSilence(of).condition),
+          [],
+        ],
+      ]
+
+    /** The five sets that were there before any of the above, in arrival order. */
+    const FIRST_FIVE: readonly SilenceVocabulary[] = ["change", "copy", "copy-change", "pace", "reach"]
+
+    const earlier = new Set<SilenceCondition>(
+      EVERY_MEANING.filter((meaning) => FIRST_FIVE.includes(meaning.vocabulary)).map(
         (meaning) => meaning.condition
       )
     )
 
-    for (const silence of PACE_CHANGE_SILENCES) {
-      expect(others).toContain(meaningOfPaceChangeSilence(silence).condition)
+    for (const [vocabulary, conditions, declared] of later) {
+      expect([...new Set(conditions.filter((condition) => !earlier.has(condition)))]).toEqual(
+        declared
+      )
+      expect(SILENCE_VOCABULARIES).toContain(vocabulary)
+
+      for (const condition of conditions) earlier.add(condition)
     }
   })
 
@@ -187,8 +286,15 @@ describe("what a reading means when it says nothing", () => {
 
     expect(SILENCE_VOCABULARIES.map((vocabulary) => SUBJECT_OF_VOCABULARY[vocabulary])).toEqual([
       "comparison",
+      "comparison",
       "page",
       "comparison",
+      "page",
+      "kind",
+      "kind",
+      "kind",
+      "kind",
+      "kind",
       "part",
       "comparison",
       "page",
@@ -539,5 +645,285 @@ describe("the mapping, against what the readings actually say", () => {
 
     expect(reading.silence).toBe("floored")
     expect(meaningOfCopySilence("floored").condition).toBe("words-a-floor")
+  })
+
+  it("maps a kind of part no view reported to nothing having been seen, of that kind", () => {
+    const library = libraryReadingOf([readingOf(treeOf(PAGE), [])])
+    const section = library.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.silence).toBe("unread")
+    expect(meaningOfKindSilence("unread").condition).toBe("no-view-reported")
+    expect(meaningOfKindSilence("unread").subject).toBe("kind")
+  })
+
+  /**
+   * The condition the ninth set brought, and the reason it could: the row is
+   * there because the vocabulary has the member, not because the library has
+   * one of them.
+   */
+  it("maps a role nothing in the library plays to there being none of the kind", () => {
+    const library = libraryReadingOf([
+      readingOf(treeOf(PAGE), [tally("page", { views: 4, reached: 4 })]),
+    ])
+    const heading = library.byRole.find(
+      (row) => row.kind.by === "role" && row.kind.role === "heading"
+    )
+
+    expect(heading?.placements).toBe(0)
+    expect(heading?.silence).toBe("unplaced")
+    expect(meaningOfKindSilence("unplaced").condition).toBe("nothing-of-the-kind")
+  })
+
+  /**
+   * The tenth set, which brought no condition of its own: a kind's share of the
+   * readers who met it is withheld for the states of the **door**, and those
+   * were all named the first time a share of readers was taken of anything.
+   */
+  it("maps a kind standing on a page with no door row to no arrivals counted, of that kind", () => {
+    const reading = readingOf(treeOf(PAGE), [tally("page", { views: 9, reached: 9 })])
+    const reach = libraryReachOf([reading], [])
+    const section = reach.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.silence).toBe("unscaled")
+    expect(meaningOfKindReachSilence("unscaled").condition).toBe("no-arrivals-counted")
+    expect(meaningOfKindReachSilence("unscaled").subject).toBe("kind")
+  })
+
+  /**
+   * The limit on reuse, which is the thing the tenth set is evidence for: one
+   * state of the world, published twice because the two readings are about
+   * different things. A funnel could reuse a reach silence outright because a
+   * funnel is asked of a page; a census of the library cannot, and a surface
+   * drawing both must print two sentences rather than collapsing them.
+   */
+  it("keeps a kind the door cannot scale and a page the door cannot scale as one reason and not one state", () => {
+    const reading = readingOf(treeOf(PAGE), [tally("page", { views: 9, reached: 9 })])
+    const reach = libraryReachOf([reading], [])
+    const page = pageReachOf(reading, [])
+
+    expect(page.silence).toBe("unmeasured")
+    expect(reach.unscaled).toEqual([{ treeId: TREE, revision: 1, silence: "unmeasured" }])
+    expect(
+      relateSilences(
+        meaningOfKindReachSilence("unscaled"),
+        meaningOfReachSilence(page.silence ?? "unmeasured")
+      )
+    ).toBe("one-reason")
+    expect(
+      distinctSilences([
+        meaningOfKindReachSilence("unscaled"),
+        meaningOfReachSilence("unmeasured"),
+      ])
+    ).toHaveLength(2)
+  })
+
+  /**
+   * The condition the eleventh set brought, and what makes it the first of its
+   * kind: nothing about the window, the rows or the vocabulary is involved. Both
+   * bands are leaves on the page they stand on, so no reader could have acted
+   * inside one — which would be exactly as true of a deployment everybody had
+   * read.
+   */
+  it("maps a kind of part with no inside anywhere to there being nothing inside it, of that kind", () => {
+    const reading = readingOf(treeOf(PAGE), [tally("page", { views: 9, reached: 9 })])
+    const action = libraryActionOf([reading], [])
+    const section = action.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.placements).toBe(2)
+    expect(section?.insides).toBe(0)
+    expect(section?.silence).toBe("unenterable")
+    expect(meaningOfKindActionSilence("unenterable").condition).toBe("nothing-inside")
+    expect(meaningOfKindActionSilence("unenterable").subject).toBe("kind")
+  })
+
+  /**
+   * The affirmative use of the tenth set's limit. Two readings of a kind, the
+   * same state of the door, the same subject — so one sentence serves both and a
+   * surface drawing the pair must not print two.
+   */
+  it("keeps a kind the door cannot scale as one state across the two readings asked of a kind", () => {
+    expect(
+      relateSilences(meaningOfKindActionSilence("unscaled"), meaningOfKindReachSilence("unscaled"))
+    ).toBe("one-state")
+    expect(
+      distinctSilences([
+        meaningOfKindActionSilence("unscaled"),
+        meaningOfKindReachSilence("unscaled"),
+      ])
+    ).toHaveLength(1)
+    expect(
+      relateSilences(meaningOfKindActionSilence("unscaled"), meaningOfReachSilence("unmeasured"))
+    ).toBe("one-reason")
+  })
+
+  /**
+   * The eleventh set's other addition, which brought no condition: a page
+   * holding actions and crediting nobody is the state the eighth set named, said
+   * of a kind rather than of a comparison.
+   */
+  it("keeps a kind whose pages credit nobody and a comparison of two such windows as one reason", () => {
+    expect(meaningOfKindActionSilence("unwalked").condition).toBe("no-action-credited")
+    expect(
+      relateSilences(
+        meaningOfKindActionSilence("unwalked"),
+        meaningOfActionChangeSilence("unwalked")
+      )
+    ).toBe("one-reason")
+  })
+
+  /**
+   * The twelfth set, and the one place 0240's claim looked most likely to break:
+   * a comparison whose subject is not the pair. Every reason this reading gives
+   * is about one kind of part, so the subject is the kind and not the two
+   * windows — which is the claim holding rather than an exception to it.
+   */
+  it("maps a kind whose places all moved to the change having carried nothing, of that kind", () => {
+    const here = readingOf(treeOf(PAGE), [tally("page", { views: 9, reached: 9 })])
+    const elsewhere = readingOf({ ...treeOf(PAGE), treeId: OTHER_TREE }, [
+      tally("page", { views: 9, reached: 9, treeId: OTHER_TREE }),
+    ])
+    const change = libraryChangeOf([here], [elsewhere])
+    const section = change.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.places).toBe(0)
+    expect(section?.silence).toBe("unpaired")
+    expect(meaningOfKindChangeSilence("unpaired").condition).toBe("nothing-carried")
+    expect(meaningOfKindChangeSilence("unpaired").subject).toBe("kind")
+    expect(
+      relateSilences(
+        meaningOfKindChangeSilence("unpaired"),
+        meaningOfCopyChangeSilence("dissolved")
+      )
+    ).toBe("one-reason")
+  })
+
+  /**
+   * The other half of the same set, which brings nothing: a kind nothing reported
+   * a view of is the census's own state, said of two windows instead of one.
+   */
+  it("keeps a kind unread in a census and unread across two windows as one state", () => {
+    expect(
+      relateSilences(meaningOfKindChangeSilence("unread"), meaningOfKindSilence("unread"))
+    ).toBe("one-state")
+    expect(
+      relateSilences(meaningOfKindChangeSilence("unplaced"), meaningOfKindSilence("unplaced"))
+    ).toBe("one-state")
+    expect(
+      relateSilences(meaningOfKindChangeSilence("unread"), meaningOfChangeSilence("nothing-measured"))
+    ).toBe("one-reason")
+  })
+
+  /**
+   * The pair this set exists to hold apart, and the one a surface would get
+   * wrong: both rows have no share, and the instructions they carry are
+   * opposite.
+   */
+  it("keeps a kind nobody read and a kind nothing is, as two states", () => {
+    const library = libraryReadingOf([readingOf(treeOf(PAGE), [])])
+    const section = library.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+    const heading = library.byRole.find(
+      (row) => row.kind.by === "role" && row.kind.role === "heading"
+    )
+
+    expect(
+      distinctSilences([
+        section?.silence ? meaningOfKindSilence(section.silence) : null,
+        heading?.silence ? meaningOfKindSilence(heading.silence) : null,
+      ])
+    ).toHaveLength(2)
+  })
+  /**
+   * The thirteenth set, and the first assembled out of three: the census's
+   * `unplaced`, the places comparison's `unpaired`, and the two states a change
+   * to one page's words already reports of that page.
+   */
+  it("maps a kind whose words were all rewritten to the change having carried nothing, of that kind", () => {
+    const before = treeOf(PAGE)
+    const after = treeOf(
+      element("page", "loom.stack", {}, [
+        element("intro", "loom.section", { body: words(11) }),
+        element("pricing", "loom.section", { body: words(31) }),
+      ]),
+      2
+    )
+    const change = libraryCopyChangeOf(
+      [readingOf(before, [tally("page", { views: 9, reached: 9 })])],
+      [readingOf(after, [tally("page", { views: 9, reached: 9, revision: 2 })])]
+    )
+    const section = change.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(section?.rewritten).toBe(2)
+    expect(section?.silence).toBe("unpaired")
+    expect(meaningOfKindCopyChangeSilence("unpaired").condition).toBe("nothing-carried")
+    expect(meaningOfKindCopyChangeSilence("unpaired").subject).toBe("kind")
+    expect(
+      relateSilences(
+        meaningOfKindCopyChangeSilence("unpaired"),
+        meaningOfKindChangeSilence("unpaired")
+      )
+    ).toBe("one-state")
+  })
+
+  /**
+   * The pair that makes the thirteenth set worth the entry rather than a reuse:
+   * a floor is the same state of the world said of a page's words and of a
+   * kind's, which is `one-reason` and never `one-state` — and it is the only
+   * member of any set here whose reading withholds one figure and publishes the
+   * rest.
+   */
+  it("keeps a floor on one page's words and a floor on a kind's words as one reason", () => {
+    /* A declared prop holding something that is not a string, which is a word owed and not given (0122). */
+    const declarations: PartDeclarations = {
+      copyFor: () => ["body", "count"],
+      typesWithRole: () => [],
+    }
+    const tree = treeOf(
+      element("page", "loom.stack", {}, [
+        element("intro", "loom.section", { body: words(10), count: 3 }),
+      ])
+    )
+    const change = libraryCopyChangeOf(
+      [readingOf(tree, [tally("page", { views: 9, reached: 9 })], declarations)],
+      [
+        readingOf(
+          tree,
+          [
+            tally("page", { views: 9, reached: 9 }),
+            tally("intro", { views: 9, reached: 9 }),
+          ],
+          declarations
+        ),
+      ]
+    )
+    const section = change.byType.find(
+      (row) => row.kind.by === "type" && row.kind.type === "loom.section"
+    )
+
+    expect(meaningOfKindCopyChangeSilence("floored").condition).toBe("words-a-floor")
+    expect(
+      relateSilences(
+        meaningOfKindCopyChangeSilence("floored"),
+        meaningOfCopyChangeSilence("floored")
+      )
+    ).toBe("one-reason")
+    expect(
+      relateSilences(meaningOfKindCopyChangeSilence("floored"), meaningOfCopySilence("floored"))
+    ).toBe("one-reason")
+    /* The row is there, its shares are there, and only the subtraction is gone. */
+    expect(section?.silence).toBe("floored")
+    expect(section?.words.change).toBeNull()
+    expect(section?.words.readShareNow).toBe(1)
   })
 })

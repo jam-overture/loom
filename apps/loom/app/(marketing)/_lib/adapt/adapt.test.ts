@@ -1,4 +1,12 @@
-import { applyDelta, type ElementNode, type LoomNode, type LoomTree } from "@jam-overture/loom"
+import { asRequested } from "../requested"
+
+import {
+  applyDelta,
+  sequentialIdFactory,
+  type ElementNode,
+  type LoomNode,
+  type LoomTree,
+} from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
@@ -8,9 +16,9 @@ import { RESERVED_VOCABULARY } from "../copy"
 import type { PageContext } from "../pages/home"
 import { askRunFor, renderTree, treeFor } from "../render"
 import {
+  askPath,
   HOW_IT_WORKS,
   SITE_THEME_NAMES,
-  askHref,
   type SiteThemeName,
 } from "../site"
 import { ASKS, askById, readAskId, type AskId } from "./asks"
@@ -84,8 +92,26 @@ describe("every choice the band offers", () => {
     expect(ask.label.length).toBeLessThan(ask.utterance.length)
   })
 
-  it("offers one choice per kind of change, and one the rules refuse", () => {
-    expect(ASKS).toHaveLength(5)
+  /**
+   * The claim the band makes about itself, asserted rather than counted.
+   *
+   * It was `toHaveLength(5)` and nothing else, which is a weaker check than its
+   * own title: five choices that all removed something would have satisfied it
+   * while the page three bands down said there are four kinds of change and
+   * *"this is the whole list"*. So the kinds are read off the plans the requests
+   * actually produce, and the literal stays beside them as the budget it always
+   * was — a sixth choice is a decision somebody makes here, not an afternoon.
+   */
+  it("offers every kind of change the page says exists, and one the rules refuse", () => {
+    const kinds = new Set(
+      ASKS.flatMap(
+        (ask) => ask.plan(basePage(), sequentialIdFactory("kinds"))?.map(({ op }) => op) ?? []
+      )
+    )
+
+    expect([...kinds].sort()).toEqual(["configure", "insert", "move", "remove"])
+    expect(ASKS.filter((ask) => ask.answer === "refused")).toHaveLength(1)
+    expect(ASKS).toHaveLength(6)
   })
 })
 
@@ -169,6 +195,40 @@ describe("what this site's rules do with each request", () => {
 })
 
 /**
+ * Two sentences of one card, held against each other.
+ *
+ * **A setting change rewrites nothing, and for one commit the panel said it
+ * did.** `unstick-menu` changes one value on the menu, its own line says *"no
+ * word of the page is rewritten"*, and the weighing two rungs below it said
+ * *"it rewrites something you marked as protected"* — the clause for a factor
+ * that covers both rewriting a protected piece and re-setting one, written when
+ * only the first was reachable from this page.
+ *
+ * It is asserted as the property rather than as the string, because the string
+ * is the thing that was wrong. A request whose whole plan is settings has not
+ * rewritten anything, so nothing in what the page says about it may claim it
+ * has, whatever words a later run reaches for.
+ */
+describe("a request that only changes settings", () => {
+  const settingsOnly = ASKS.filter((ask) => {
+    const ops = ask.plan(basePage(), sequentialIdFactory("settings"))
+
+    return ops !== undefined && ops.length > 0 && ops.every(({ op }) => op === "configure")
+  })
+
+  /** The sweep is not empty, which is the half an `ASKS` of nothing would pass. */
+  it("is a thing this band offers", () => {
+    expect(settingsOnly.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it.each(settingsOnly)("$id is never reported as having rewritten anything", async (ask) => {
+    const { record } = await runAsk(basePage(), ask, true)
+
+    expect(`${record.measured} ${record.weighed}`).not.toMatch(/rewrit/i)
+  })
+})
+
+/**
  * The claim the panel makes in as many words: *putting it back restores every
  * word rather than writing them out again.*
  *
@@ -224,8 +284,9 @@ describe("the record and the page it stands on", () => {
 
 describe("the address is the whole of the state", () => {
   it.each(ASKS)("$id survives being written into a link and read back", (ask) => {
-    const href = askHref(ORIGIN, { theme: THEME, ask: ask.id, approve: true })
-    const url = new URL(href)
+    const href = askPath({ ask: ask.id, approve: true })
+    /* A path since 12 October, so it needs a base to be read back (0259). */
+    const url = new URL(href, "https://site.invalid")
 
     expect(readAskId(url.searchParams.get("ask") ?? undefined)).toBe(ask.id)
     expect(url.searchParams.get("approve")).toBe("1")
@@ -250,14 +311,50 @@ describe("the address is the whole of the state", () => {
       }).element
     )
 
-    for (const palette of SITE_THEME_NAMES.filter((name) => name !== THEME)) {
-      /** As an attribute, so the query string's separators are escaped. */
-      const href = askHref(ORIGIN, { theme: palette, ask: ask.id, approve: true }).replaceAll(
-        "&",
-        "&amp;"
+    /*
+     * **The link is palette-free in the page and wears the palette at render**
+     * as of 12 October (0259, `_lib/requested.ts`), so the loop that used to
+     * build a different expected href per palette would now be asserting
+     * against a string the page no longer contains.
+     *
+     * What it was for still holds and is what is checked here, now as the
+     * whole of the page's own addresses rather than one of them: whichever
+     * palette a reader is wearing, every address the served page offers is
+     * the same address, differing in the palette alone. That is the failure
+     * the original guarded against — being handed a different page at the
+     * moment they are told a palette touches only the root (0049) — and it is
+     * a stronger reading of it, since a dropped `approve=1` anywhere on the
+     * page now fails rather than only on the one link that was named.
+     */
+    const kept = (markup: string): readonly string[] =>
+      [...markup.matchAll(/href="([^"]*)"/g)]
+        .map((match) => (match[1] ?? "").replaceAll("&amp;", "&"))
+        .filter((href) => href.startsWith("/"))
+        .map((href) => {
+          const url = new URL(href, "https://site.invalid")
+
+          url.searchParams.delete("theme")
+
+          return `${url.pathname}${url.search}${url.hash}`
+        })
+
+    const unworn = kept(markup)
+
+    /* The premise: this page is in the middle of the ask, and says so in its links. */
+    expect(unworn.filter((href) => href.includes(`ask=${ask.id}`)).length).toBeGreaterThan(0)
+
+    for (const palette of SITE_THEME_NAMES) {
+      const served = renderToStaticMarkup(
+        renderTree(
+          asRequested(
+            run === undefined ? treeFor(HOW_IT_WORKS, contextFor(ask.id, true)) : run.page,
+            { theme: palette }
+          ),
+          { origin: ORIGIN }
+        ).element
       )
 
-      expect(markup).toContain(`href="${href}"`)
+      expect(kept(served), palette).toEqual(unworn)
     }
   })
 

@@ -256,10 +256,10 @@ and the demonstration inside its frame.
 
 | | |
 | --- | --- |
-| [before](2026-09-18-demo-a-door-that-opens-into-the-box-before.png) | `main`, one click on the demonstration's wordmark: **the front door inside the front door's own embed**, two navigation bars, two *Sign in* buttons, and the caption underneath still saying *it belongs to a clinic that does not exist* |
-| [before, the other door](2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.png) | `main`, one click on *Read the docs*: **the whole documentation site in the box** — sidebar, search field, `Introduction` — under the same caption |
-| [after](2026-09-18-demo-a-door-that-opens-into-the-box-after.png) | this branch, the same frame on arrival: the bar, the mark and the numbers exactly where they were, and neither door there to be clicked |
-| [after, working](2026-09-18-demo-a-door-that-opens-into-the-box-working.png) | this branch, *Take the numbers off* pressed **inside the frame**: the amber ring on the stat band, *This would be removed*, the Gate's own words on damage and reversibility, and *Apply this change* — the demonstration's best moment, in a box with no doors |
+| [before](2026-09-18-demo-a-door-that-opens-into-the-box-before.webp) | `main`, one click on the demonstration's wordmark: **the front door inside the front door's own embed**, two navigation bars, two *Sign in* buttons, and the caption underneath still saying *it belongs to a clinic that does not exist* |
+| [before, the other door](2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.webp) | `main`, one click on *Read the docs*: **the whole documentation site in the box** — sidebar, search field, `Introduction` — under the same caption |
+| [after](2026-09-18-demo-a-door-that-opens-into-the-box-after.webp) | this branch, the same frame on arrival: the bar, the mark and the numbers exactly where they were, and neither door there to be clicked |
+| [after, working](2026-09-18-demo-a-door-that-opens-into-the-box-working.webp) | this branch, *Take the numbers off* pressed **inside the frame**: the amber ring on the stat band, *This would be removed*, the Gate's own words on damage and reversibility, and *Apply this change* — the demonstration's best moment, in a box with no doors |
 
 **To see it yourself:** open the preview at `/`, scroll to **Your turn**, and
 click the small `● Loom` at the top left *inside* the frame. On `main` the

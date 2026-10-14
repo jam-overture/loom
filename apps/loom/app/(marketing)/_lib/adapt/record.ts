@@ -143,16 +143,35 @@ export const NOT_A_RULE: DispositionReasonCode = "within-policy"
 /**
  * What raised the weight, one clause per code. Joined into the sentence below.
  *
- * **Exported since 23 September**, for the reason `BECAUSE` was: `floors.ts`
- * prints why two refused requests weighed what they did, and a second wording
- * kept beside that band would be one fact said two ways on one site. Two of the
- * clauses here — the piece nothing could draw and the setting nothing would
- * accept — described failures no request on this deployment could produce until
- * the floors were wired, and that band is what makes them reachable.
+ * **Not exported, unlike `BECAUSE`, and the difference is a consumer.** It was
+ * exported on 23 September for a band in a `floors.ts` that is not in this
+ * repository, and nothing outside this module has read it since. `BECAUSE` is
+ * exported because `/how-it-works` teaches the same sentences it reports with,
+ * and two copies of a sentence a reader meets on two screens would drift
+ * invisibly. There is no second reader of these clauses, so an export here is
+ * a door held open for one. `RECORD_VOCABULARY` below is what the register
+ * sweep reads, and it is this module's own.
  */
-export const RAISED_BY = {
+const RAISED_BY = {
   "protected-type-removed": "it destroys something you marked as protected",
-  "protected-type-touched": "it rewrites something you marked as protected",
+  /**
+   * **It said "rewrites" until a request reached it by changing a setting.**
+   *
+   * This factor covers every way of touching a protected piece except taking it
+   * away or moving it, which is two things rather than one: rewriting what is
+   * inside it, and changing how it is set. No request on this site could reach
+   * it by the second until `unstick-menu` existed, so "rewrites" was accurate
+   * for every record a visitor could actually draw.
+   *
+   * It stopped being accurate the moment one could. That request changes one
+   * setting on the menu and nothing else, and its own line two rungs above says
+   * *"no word of the page is rewritten"* — so the panel contradicted itself
+   * across three inches of one card, in the two sentences a reader is most
+   * likely to read together. "Changes" is true of both operations and gives up
+   * nothing: what the piece was is in the line above, and how much of it moved
+   * is in the line above that.
+   */
+  "protected-type-touched": "it changes something you marked as protected",
   "protected-type-relocated": "it moves something you marked as protected",
   "protected-prop-configured": "it changes a setting you marked as protected",
   "large-removal": "it takes a lot off the page at once",

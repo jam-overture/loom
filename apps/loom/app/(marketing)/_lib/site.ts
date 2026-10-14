@@ -22,13 +22,20 @@ export type SiteRoute = {
    * The same flag `Surface` has carried since 28 August, for the same reason and
    * with the same guarantee behind it. The maintainer asked on #166 whether
    * eight items in the bar was too many; it was, the surfaces answered it, and
-   * the count crept back to eight as this route group grew a fourth page. A
-   * ninth is the flagged problem made worse.
+   * the count crept back to eight as this route group grew a fourth page.
    *
    * So a page may be kept out of the bar — and `chrome.test.ts` holds *out of
    * the bar* to mean exactly that and never *off the site*: whatever is left out
    * is in the footer's map, and the footer marks it as the page the reader is on
    * so the site still says where they are.
+   *
+   * **The flag is a judgement and the ceiling is the rule.** Eight is the number
+   * the maintainer called too many, so `BAR_CEILING` in `./chrome.ts` is eight
+   * and `bar.test.ts` fails on a ninth. Below that the flag is each page's own
+   * call about ten seconds of a stranger's attention, re-read when the site
+   * changes shape rather than inherited: two of these three answered it against
+   * a six-page site that was cut to three, and one of the two was wrong by
+   * 12 October.
    */
   readonly inMenu: boolean
 }
@@ -96,11 +103,26 @@ export const HOW_IT_WORKS: SiteRoute = {
  * and it ends by handing them over. It uses no vocabulary the documentation
  * teaches and prints no code.
  *
- * **It is `inMenu: false`, and that is now true of two pages.** The bar is the
- * eight items the maintainer asked about on #166; a sixth page is not worth a
- * ninth. `chrome.test.ts` holds *off the bar* to mean *in the footer's map and
- * nowhere unreachable*, and this page is offered from the front door's band of
- * ways in and from the two pages either side of it in the argument.
+ * **It is `inMenu: true` as of 12 October, and the paragraph that used to be
+ * here is why the flag needs re-reading rather than inheriting.** It said:
+ * *"The bar is the eight items the maintainer asked about on #166; a sixth page
+ * is not worth a ninth."* Both numbers were true when they were written and
+ * neither is now. The site was cut from six pages to three on 26 September, and
+ * the bar carries **four things** — one page, two surfaces and the action — so
+ * the ninth item that argument was protecting the reader from does not exist.
+ *
+ * What the flag is actually weighing is ten seconds of a stranger's attention,
+ * and on that question this page wins its place: it answers *what would I be
+ * installing*, which is the question a developer asks before they will read an
+ * installation guide, and it was reachable only from the footer's map and from
+ * links inside two other pages. A visitor who wanted it had to already know it
+ * was there.
+ *
+ * `chrome.test.ts` still holds *off the bar* to mean *in the footer's map and
+ * nowhere unreachable*, which is what makes `inMenu: false` safe for the front
+ * door. `bar.test.ts` holds the other end: the bar has a ceiling, it is stated
+ * as a number, and a page or a surface that would be the ninth item fails
+ * rather than arriving.
  */
 export const WHAT_YOU_RUN: SiteRoute = {
   path: "/what-you-run",
@@ -116,63 +138,79 @@ export const WHAT_YOU_RUN: SiteRoute = {
   title: "What you run — in your own app, not in front of it",
   description:
     "You install a package into an application you already host. Your components stay in your repository, and the only thing that leaves is one request to a model you chose, when somebody asks for a change.",
-  inMenu: false,
+  inMenu: true,
 }
 
 /**
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
- * built: what this is, then how it works, then **what you control**, then what
- * you are left holding afterwards. The rules page sits before the record
- * because a record of decisions is only interesting to someone who knows the
- * decisions were theirs to set.
+ * built: **what this is, then how it works, then what you would be running.**
+ * A reader who does not yet believe the thing is worth having has no use for
+ * the news that it installs as a package.
  *
- * **`/who-can-ask` sits directly after the rules**, because it is not a subject
- * of its own — it is the second half of one question. The rules page says what
- * may change; this one says that *who wanted it* is an input to the same
- * decision, and shows the four askers being told four different things. A
- * reader who has not yet been told a change is weighed at all has no use for
- * the news that it is weighed differently for a timer.
+ * The footer renders this list in order, and the front door is first in it
+ * although the bar leaves it out, because the footer's map is a map of the site
+ * and a map that omitted the front door would be the navigation failure this
+ * list exists to prevent.
  *
- * **`/putting-it-back` sits directly after the record**, for the same reason and
- * in the same shape: it is the second half of one question rather than a subject
- * of its own. The record page says what you are left holding; this one says that
- * what you are holding includes the way back, and shows every request on the
- * front door being put through and returned. A reader who has not yet been told
- * that anything is written down has no use for the news that one of the things
- * written down is reversible.
- *
- * **`/what-readers-do` closes that group rather than opening the site**, and
- * the temptation was to put it first. It is the input half of the whole premise
- * — what would make anybody ask for a change — so it reads like a beginning.
- * It is not one: a reader who has not yet been told that a change is weighed,
- * recorded and reversible has no reason to care that the page can also count
- * who reached which band, and every sentence on it about *asking for something*
- * is a sentence the five pages above it have already earned. So it sits third
- * in *what you are left holding*, after the record and the way back: what you
- * end up with is a paper trail, an undo, and a page that can say what it did
- * for the people reading it.
- *
- * **Then the objection**, which arrives the moment a reader believes the six
- * above rather than before it: *and when it doesn't work?* It sits where it does
- * because a reader who has not yet understood that a change is weighed at all
- * has no use for the list of ways one can fail to happen.
- *
- * The last two are the questions that arrive after all five of those, from
- * somebody who has decided they might want this and is working out what it would
- * cost them to try: **what is the thing**, and then **what do I have to hand
- * it**. They are in that order because the second only makes sense once the
- * first is answered — nobody asks what to hand over to something they still
- * think might be a hosted service.
- *
- * The footer renders this list in order, and the end is where a reader meets
- * the two pages the bar does not carry. The front door is the third the bar
- * leaves out and it is first here, because the footer's map is a map of the
- * site and a map that omitted the front door would be the navigation failure
- * this list exists to prevent.
+ * > **The fifty lines that used to be here argued the order of ten pages, and
+ * > seven of them do not exist.** They were real: `/the-rules`,
+ * > `/who-can-ask`, `/the-record`, `/putting-it-back`, `/what-readers-do`,
+ * > `/when-it-goes-wrong` and `/your-components`, each with a paragraph saying
+ * > why it sat where it sat. The site was cut to three pages on 26 September
+ * > and the reasoning stayed, so the one file that defines what this site *is*
+ * > spent a fortnight explaining a site nobody can open. Filed by this lane on
+ * > 7 October, and what is above is the rewrite it asked for: the order of the
+ * > three that are left, in three sentences. The seven paragraphs went rather
+ * > than being updated, because an argument for an adjacency between two pages
+ * > that are both gone is not history worth keeping in the file the next run
+ * > reads to find out what this site has. They are in `git log`.
  */
 export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN]
+
+/**
+ * The one page of this site a visitor can ask for a change to.
+ *
+ * It is `/how-it-works` and it used to be the front door. The maintainer moved
+ * the band on 1 October — *"Remove the see it happen section from the main
+ * landing page and only let it exist in the How it works section"* — and this
+ * constant exists because that move has now been found half-applied twice:
+ *
+ * | found | what was still pointed at the front door |
+ * | --- | --- |
+ * | 9 October | the reading of the address, so *Put it back* did nothing for eight days |
+ * | 11 October | the card a shared link unfurls as, and the picture behind it |
+ *
+ * Neither was a hard thing to get right. Both were the same easy thing to get
+ * wrong: *which page runs a request* was written as `route.path === HOME.path`
+ * in one file and `HOW_IT_WORKS` in another, so moving the band meant finding
+ * every place that had quietly decided it already. A comparison spelled out at
+ * the point of use is a decision nobody can grep for.
+ *
+ * So it is one name, and the four things that need the answer read it: the
+ * renderer that runs the request, the writer of an address, the words a shared
+ * link unfurls with, and the picture it unfurls as. A fifth page taking the
+ * band is one line here.
+ *
+ * **It is deliberately not a field on `SiteRoute`.** `inMenu` is a choice each
+ * route makes and three routes answer differently; this is a fact about the
+ * site of which there is exactly one, and a boolean on every route would invite
+ * a second page to set it — which is a state this site has no meaning for,
+ * because the band is the demonstration and there is one of those.
+ */
+export const ASKED_ROUTE: SiteRoute = HOW_IT_WORKS
+
+/**
+ * Whether this is that page.
+ *
+ * A predicate rather than letting each caller write the comparison, because the
+ * comparison is the thing that was written four times and went stale in three
+ * of them. Compared by path and not by identity: a card is drawn from a route
+ * looked up out of a query string, and `SITE_ROUTES.find` hands back the same
+ * object only for as long as nobody passes a copy.
+ */
+export const isAskedRoute = (route: SiteRoute): boolean => route.path === ASKED_ROUTE.path
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -677,14 +715,17 @@ export const readYes = (given: string | readonly string[] | undefined): boolean 
   (typeof given === "string" ? given : given?.[0]) === "1"
 
 /**
- * The front door, with what the visitor has asked of it written into the address.
+ * `ASKED_ROUTE`, with what the visitor has asked of it written into the address.
  *
- * The band that lets a visitor rearrange this page keeps nothing: no session, no
- * cookie, nothing on the server between one request and the next. What the page
- * looks like is a function of its address, which is why `/?ask=costs` can be
- * copied, shared, bookmarked and reloaded a week later and still be the page it
- * was — and why two people looking at the site cannot rearrange it under each
- * other.
+ * The band that lets a visitor rearrange that page keeps nothing: no session,
+ * no cookie, nothing on the server between one request and the next. What the
+ * page looks like is a function of its address, which is why
+ * `/how-it-works?ask=costs` can be copied, shared, bookmarked and reloaded a
+ * week later and still be the page it was, and why two people looking at the
+ * site cannot rearrange it under each other.
+ *
+ * It said *the front door* and gave `/?ask=costs` as the example until
+ * 11 October, which was true until the band moved on 1 October.
  */
 export type AskedFor = {
   readonly theme?: SiteThemeName
@@ -705,8 +746,19 @@ export type AskedFor = {
  * runs running is a pair of individually correct things that had never been read
  * next to each other. So there is one spelling and the path is the argument.
  */
+/**
+ * The base a path is parsed against when there is no origin to parse it
+ * against.
+ *
+ * Never read and never in the output: `origin` is empty exactly when the
+ * caller wants a path, and a path is not a URL, so one has to be borrowed to
+ * get at `searchParams` at all. `.invalid` is reserved by RFC 2606 and resolves
+ * nowhere, so a leak would be loud rather than quietly pointing at a real host.
+ */
+const NO_ORIGIN = "https://site.invalid"
+
 const askedHref = (origin: string, path: string, options: AskedFor): string => {
-  const url = new URL(path, `${origin}/`)
+  const url = new URL(path, `${origin === "" ? NO_ORIGIN : origin}/`)
 
   if (options.theme !== undefined) url.searchParams.set(ADDRESS_PARAMS.theme, options.theme)
   if (options.ask !== undefined) url.searchParams.set(ADDRESS_PARAMS.ask, options.ask)
@@ -723,30 +775,44 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
   if (options.back === true) url.searchParams.set(ADDRESS_PARAMS.back, "1")
   if (options.backApprove === true) url.searchParams.set(ADDRESS_PARAMS.backApprove, "1")
 
-  return url.toString()
+  /*
+   * **A path when the caller gave no origin**, which is how the three site
+   * pages are seeded (`./stored.ts`): one stored row is served from every host
+   * this deployment answers on, so an absolute href in it would freeze
+   * whichever host wrote it. Metadata still passes an origin and still gets an
+   * absolute URL, which is what a canonical link and a share card are obliged
+   * to give.
+   */
+  return origin === "" ? `${url.pathname}${url.search}${url.hash}` : url.toString()
 }
 
-export const askHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, HOW_IT_WORKS.path, options)
-
 /**
- * The mechanism page, with the request whose record it should print.
+ * The page a request is run against, with the request in the address.
  *
- * Same property as `askHref` and for the same reason: the page keeps nothing,
- * so what it prints is a function of its address. `/how-it-works` on its own is
- * the page it has always been — the record of the quietest of the five choices,
- * chosen because it is the one whose lines fit on a screen. With an ask in the
- * address it prints the record of *that* request instead, run against the same
- * published front door, which is what lets the front door hand a visitor the raw
- * record of the change they just watched rather than of a different one.
+ * The page keeps nothing, so what it shows is a function of its address.
+ * `/how-it-works` on its own is the page it has always been. With an ask in the
+ * address it rearranges for that request and prints its record, which is what
+ * lets one visitor hand another the record of the change they just watched
+ * rather than of a different one.
  *
- * `approve` travels with it because the record does. A change the rules held and
- * the visitor then allowed has a line the held one does not, and a link that
- * dropped the approval would open a page whose record is one line shorter than
- * the panel the visitor followed it from.
+ * `approve` travels with it because the record does. A change the rules held
+ * and the visitor then allowed has a line the held one does not, and a link
+ * that dropped the approval would open a page whose record is one line shorter
+ * than the panel the visitor followed it from.
+ *
+ * **There were two of these until 12 October**, and the second was
+ * `mechanismHref`. They were different functions in September, when `askHref`
+ * wrote an address of the front door and `mechanismHref` wrote one of
+ * `/how-it-works`; the maintainer moved the band on 1 October and the two
+ * destinations became the same page, after which 19 call sites across 8 files
+ * were choosing between two names for one body. `ASKED_ROUTE` is now the single
+ * answer to *which page*, so the name that says what the address **carries** is
+ * the one that survived. Filed on 11 October, collapsed here, and the deletion
+ * is the point: a second name is a decision every later call site has to make
+ * again.
  */
-export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, HOW_IT_WORKS.path, options)
+export const askHref = (origin: string, options: AskedFor = {}): string =>
+  askedHref(origin, ASKED_ROUTE.path, options)
 
 /**
  * A link into another surface of the product.
@@ -760,8 +826,85 @@ export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
 export const surfaceHref = (origin: string, surface: Surface): string =>
   internalHref(origin, surface.path)
 
+/**
+ * The same destination, as a path this site can **store**.
+ *
+ * ## Why a second pair of these exists
+ *
+ * `internalHref` and `surfaceHref` build an absolute URL, because the things
+ * that needed one were the canonical link, the share card, the structured data
+ * and the sitemap — all of them metadata, and all of them obliged to say which
+ * host they mean. The page's own links were built the same way for no reason
+ * beyond their being to hand.
+ *
+ * That stopped being free on 12 October, when the three site pages became
+ * **stored trees** ([0259](../../../../../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+ * condition 1). A stored tree is written once and served from every host this
+ * deployment answers on, so an absolute href freezes whichever origin seeded
+ * it — and every preview deployment has its own. A stored `?theme=` freezes
+ * the look the seeder happened to be wearing.
+ *
+ * So the page's links are now paths: no origin, no theme. `linkUrlSchema`
+ * accepts *"a path beginning with / on this site"* and always has, so nothing
+ * about the primitive had to change.
+ *
+ * **The theme is put back at render**, from the address, by
+ * `_lib/stored.ts`' request pass — which is the line 0259 asked somebody to
+ * draw between what the page is and what the request is. A link's destination
+ * is the page's; the livery it is wearing is the request's.
+ *
+ * The absolute pair above is untouched and is still what metadata uses.
+ */
+/**
+ * The asked route, as a path this site can store.
+ *
+ * `askHref` keeps taking an origin because metadata still needs an absolute
+ * URL. A link **in a tree** never does: the invariant this change establishes
+ * is that no href in a stored page carries a host, so that one row serves
+ * every deployment of this site.
+ */
+export const askPath = (options: AskedFor = {}): string => askedHref("", ASKED_ROUTE.path, options)
+
+export const sitePath = (path: string): string => path
+
+/**
+ * A route wearing a named palette — the one href whose theme is **its own
+ * meaning** rather than the request's.
+ *
+ * Every other link on the site is stored theme-free and has the reader's
+ * palette put on it at render. A re-theme link is the exception by definition:
+ * *this* link means bold, whoever is looking at it, so the palette belongs in
+ * the stored href and the request pass leaves it alone.
+ */
+export const paletteHref = (path: string, palette: SiteThemeName): string =>
+  `${path}?${ADDRESS_PARAMS.theme}=${palette}`
+
+/** A surface of this deployment — the demo, the docs, the portal — as a path. */
+export const surfacePath = (surface: Surface): string => surface.path
+
 /** Where the site points when it points at the project itself. */
 export const REPOSITORY_URL = "https://github.com/jam-overture/loom"
+/**
+ * The package on npm, which is the one off-site link that is part of the ask.
+ *
+ * The install band prints a command and sends a reader to the documentation;
+ * this is the third thing somebody about to run that command wants, and it is
+ * a different want from either — **not how to use it, but whether it is real.**
+ * A published page with a version, a date and a readme answers that in a way a
+ * marketing site cannot answer about itself.
+ *
+ * It names the runtime rather than the starter library because the two package
+ * pages carry the same readme-shaped reassurance and a reader following one
+ * link does not want a choice. The command above it asks for both; this says
+ * what the first of them is.
+ *
+ * **Checked by a person, like every off-site link here** (`routes.test.ts`
+ * says why it cannot be checked by a test): loaded 11 October, `0.1.0`,
+ * public. `facts.test.ts` holds the package *name* in it against the manifest
+ * this repository publishes from, which is the half of the address that can go
+ * wrong silently.
+ */
+export const NPM_PACKAGE_URL = "https://www.npmjs.com/package/@jam-overture/loom"
 /** The licence itself, which the footer links to beside the sentence naming it. */
 export const LICENSE_URL = "https://github.com/jam-overture/loom/blob/main/LICENSE"
 export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/decisions"

@@ -9,10 +9,10 @@ browser, against a live server whose lockout was **driven rather than staged**:
 
 | | |
 | --- | --- |
-| [Nothing is happening — which is what a fresh deployment shows](2026-09-03-portal-is-anybody-trying-to-get-in-quiet.png) | 1280px |
-| [**Somebody is locked out** — the state this screen exists for](2026-09-03-portal-is-anybody-trying-to-get-in.png) | 1280px |
-| [The same screen, all three disclosures opened](2026-09-03-portal-is-anybody-trying-to-get-in-opened.png) | 1280px |
-| [a phone](2026-09-03-portal-is-anybody-trying-to-get-in-phone.png) | 390px |
+| [Nothing is happening — which is what a fresh deployment shows](2026-09-03-portal-is-anybody-trying-to-get-in-quiet.webp) | 1280px |
+| [**Somebody is locked out** — the state this screen exists for](2026-09-03-portal-is-anybody-trying-to-get-in.webp) | 1280px |
+| [The same screen, all three disclosures opened](2026-09-03-portal-is-anybody-trying-to-get-in-opened.webp) | 1280px |
+| [a phone](2026-09-03-portal-is-anybody-trying-to-get-in-phone.webp) | 390px |
 
 **How honest these are.** Nothing is mocked. `next start` was run against this
 commit with a real session secret and a one-entry reviewer roster; a browser

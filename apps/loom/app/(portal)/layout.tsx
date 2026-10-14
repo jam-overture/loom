@@ -1,9 +1,12 @@
 import { GeistSans } from "geist/font/sans"
 import type { Metadata, Viewport } from "next"
+import { headers } from "next/headers"
+
+import { PATH_HEADER } from "@/proxy"
 
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
 
-import { Sidebar } from "./_components/shell/sidebar"
+import { Rails } from "./_components/shell/rails"
 import { TopBar } from "./_components/shell/topbar"
 
 import "./globals.css"
@@ -50,12 +53,32 @@ export const viewport: Viewport = {
 export const dynamic = "force-dynamic"
 
 /**
- * The rail is hidden until there is someone to navigate as. It is not a guard —
- * the middleware is (0027) — it is that a nav offering four routes which all
- * redirect back to sign-in is a claim the portal cannot honour.
+ * The rails are hidden until there is someone to navigate as. It is not a
+ * guard — the middleware is (0027) — it is that a nav offering four routes
+ * which all redirect back to sign-in is a claim the portal cannot honour.
  */
+/**
+ * The shell prototype brings its own topbar and rails, and they are a proposal
+ * to replace the ones below. Mounting both would stack two chromes on top of
+ * each other, so this layout stands aside for that one subtree — see
+ * `PATH_HEADER` in `proxy.ts`. It is temporary in the same way the prototype
+ * is.
+ */
+const BRINGS_ITS_OWN_CHROME = "/portal/preview"
+
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const signedIn = (await currentActor()) !== null
+  const path = (await headers()).get(PATH_HEADER) ?? ""
+  const ownChrome =
+    path === BRINGS_ITS_OWN_CHROME || path.startsWith(`${BRINGS_ITS_OWN_CHROME}/`)
+
+  if (ownChrome) {
+    return (
+      <html lang="en" className={GeistSans.variable}>
+        <body className="min-h-screen">{children}</body>
+      </html>
+    )
+  }
 
   return (
     /*
@@ -75,28 +98,50 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
          * First in the tab order, and off-screen until it is focused. The
          * chrome above and beside every page is a topbar and a rail of six
          * routes, so without this the first thing a keyboard user does on
-         * every navigation is tab past the same nine stops again.
+         * every navigation is tab past the same stops again — and there are
+         * more of them since the rail grew a second level: six sections, and
+         * up to five screens of the one you are in.
          */}
         <a href="#page" className="loom-skip-link">
           skip to the page
         </a>
         <TopBar />
-        {signedIn && <Sidebar />}
         {/*
-         * `tabIndex={-1}` so the skip link moves real focus here rather than
-         * only scrolling — a screen reader that was not moved is still reading
-         * the rail. The ring is suppressed on this one element on purpose: it
-         * is the whole viewport, so a 2px outline around it is noise rather
-         * than the "you are here" a ring is for. Every focusable thing inside
-         * it still gets one.
+         * A row, rather than a fixed rail and a `pl-` on the page.
+         *
+         * The rails used to be `fixed`, which meant the page had to be told how
+         * much room they took — one number in this file, matching a width in
+         * another. A second rail makes that two numbers and two files that have
+         * to agree, and the arithmetic is wrong on every screen where the
+         * second rail is absent. In a row there is no number: the rails take
+         * their own width, `flex-1` takes what is left, and a section with no
+         * submenu needs nothing said about it here.
+         *
+         * `flex-col md:flex-row` is the phone, where the rails lie down above
+         * the page instead of eating 280 of 390 pixels — see `rails.tsx`.
          */}
-        <main
-          id="page"
-          tabIndex={-1}
-          className={`min-h-screen pt-14 focus-visible:outline-none ${signedIn ? "pl-14" : ""}`}
-        >
-          {children}
-        </main>
+        <div className="flex min-h-screen flex-col pt-14 md:flex-row">
+          {signedIn && <Rails />}
+          {/*
+           * `tabIndex={-1}` so the skip link moves real focus here rather than
+           * only scrolling — a screen reader that was not moved is still reading
+           * the rail. The ring is suppressed on this one element on purpose: it
+           * is the whole viewport, so a 2px outline around it is noise rather
+           * than the "you are here" a ring is for. Every focusable thing inside
+           * it still gets one.
+           *
+           * `min-w-0` because this is a flex child now: without it a wide table
+           * inside a screen sets the column's minimum and pushes the rails off
+           * the left of the display.
+           */}
+          <main
+            id="page"
+            tabIndex={-1}
+            className="flex min-w-0 flex-1 focus-visible:outline-none"
+          >
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   )

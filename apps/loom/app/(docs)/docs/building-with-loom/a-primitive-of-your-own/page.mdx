@@ -1,0 +1,310 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  OwnPrimitiveAudit,
+  OwnPrimitiveCatalogue,
+  OwnPrimitiveFile,
+  OwnPrimitiveRefusals,
+} from "@/app/(docs)/_components/own-primitive"
+
+export const metadata = pageMetadata("building-with-loom", "a-primitive-of-your-own")
+
+# A primitive of your own
+
+[Primitives and the registry](/docs/building-with-loom/primitives) says what a
+primitive is made of. This page writes one, all the way through, and then shows
+what you get for it.
+
+The thing we are building is a status row: one service, how it is doing right
+now, and the detail underneath. The starter library has no such thing, because
+"how is our checkout doing" is your business rather than a general shape, and
+that is the ordinary reason to write one.
+
+By the end of the page the row is on the screen, a change has been proposed to
+it, and three tests are holding it. Everything on this page below the file is
+produced by running that file, so if the primitive stops behaving this way the
+page stops building.
+
+## First, the one decision that is hard to undo
+
+Before any code: **what is a prop, and what is a child?**
+
+A status row has exactly one service name and exactly one state. There is never
+a second of either, and changing one is exactly one operation. So those are
+props.
+
+The detail underneath repeats. One row might say nothing, another might say
+three sentences, and somebody will want to add a fourth later. So that is
+children.
+
+Get it backwards and you pay either way. Fixed fields as children means a row
+whose service name was deleted is still a valid tree. Repeated content as props
+means "add a line to that row" is impossible to say without writing a new
+primitive.
+
+That rule is [Children and slots](/docs/building-with-loom/composition) in one
+sentence, and it is worth settling before you write the schema, because the
+schema is the part that is expensive to change once pages are stored against it.
+
+## The file
+
+Here it is, whole. It is one file in an ordinary project, and the filename is
+the primitive's type with the dots left in, which is the convention
+[the scaffolder follows](/docs/getting-started/scaffolding-a-project).
+
+<OwnPrimitiveFile />
+
+A few things in there are worth stopping on.
+
+### Every string has a maximum
+
+```ts
+import { z } from "zod"
+
+const props = z
+  .object({
+    service: z.string().min(1).max(60),
+    /**
+     * A closed set, which is the whole point of writing this primitive rather
+     * than a paragraph. A model may move a service from `operational` to
+     * `degraded`; it cannot invent `on fire`, and no schema anywhere has to be
+     * consulted to know that.
+     */
+    state: z.enum(["operational", "degraded", "offline"]),
+    /** When it started, as the author wrote it — "09:14 UTC", "Tuesday". */
+    since: z.string().min(1).max(40).optional(),
+  })
+  .strict()
+```
+
+`min(1)` keeps an empty string out. `max(60)` is the one that matters most and
+is the easiest to leave off: a name with no maximum is an invitation for
+something to write a sentence where a label belongs, and your layout is the
+thing that finds out.
+
+`state` is an enum rather than a string, and that is the sharpest version of the
+bargain this whole framework is making. A bounded vocabulary buys you
+reviewability. Nobody has to read your component to know that this row can say
+one of three things, and nobody has to write a rule forbidding the fourth.
+
+`.strict()` is what makes an unrecognised prop a refusal rather than a value
+that rides along unnoticed.
+
+### Behaviour lives in the component, not in the tree
+
+The tree says `offline`. It does not say what colour that is, how big the badge
+is, or whether the word is capitalised. All of that is in the component, which
+means you can change every one of them without touching a single stored page.
+
+This is the other half of the bargain. The tree is a small, reviewable thing
+precisely because it is not trying to be a rendering.
+
+### The state words are declared, not written inline
+
+The row shows the word "Offline", and that word is nowhere in the tree. It is
+declared beside the component and read back through `loom.text`, so a deployment
+can hand back its own set and get a translated page without anybody editing a
+component.
+
+### Nothing in it is a colour
+
+No hex, anywhere. The badge takes its two colours from the theme through the
+token helpers in `@jam-overture/loom-primitives`, which return `var()`
+references rather than values, so the component never learns which palette is
+mounted. [Making it look like yours](/docs/building-with-loom/theming) is the
+page about that, and the short version is that a literal colour in a component
+looks perfect under the palette its author had open and survives every re-theme
+unchanged.
+
+The states are told apart by the **word** rather than by green, amber and red,
+and that is not squeamishness. A Loom palette names a canvas, an accent and a
+set of borders, and it names nothing that means *bad*.
+
+## Registering it
+
+A primitive nobody registered is a primitive nothing can render. You register
+yours beside the library rather than instead of it:
+
+```ts
+import { STARTER_PRIMITIVES } from "@jam-overture/loom-primitives"
+import { createPrimitiveRegistry, describeRegistryError } from "@jam-overture/loom/sdk"
+
+const built = createPrimitiveRegistry([...STARTER_PRIMITIVES, serviceStatus])
+
+if (!built.ok) throw new Error(describeRegistryError(built.error))
+
+export const registry = built.value
+```
+
+That is the whole of it. The registry refuses rather than repairs: a duplicate
+type, or a declaration that names a prop the schema does not have, and you get
+an error at composition rather than a surprise at render.
+
+<Callout kind="note">
+  `selectPrimitives` is there if you want a slice of the library instead of all
+  of it. A smaller registry is a smaller prompt on every request, and it is also
+  a shorter list of things a model may propose.
+</Callout>
+
+## It renders
+
+The frame below is a real tree, rendered through a registry holding the whole
+starter library plus the primitive above. The heading, the sentence and the
+arrangement are the library's. The three rows are yours.
+
+The box under the frame is the runtime. Ask it to add a sentence and watch the
+new node land **inside** a row, which is the prop-or-child decision from the top
+of this page doing visible work.
+
+<Example id="a-primitive-of-your-own" />
+
+## What a model is told about it
+
+An interpreter hands a model a catalogue of what it may propose, and this is
+your primitive's row in it, read off the registry as this page built.
+
+<OwnPrimitiveCatalogue />
+
+Look at what is **not** in there. No types, no maximum lengths, no mention of
+what the component does with any of it. A model is told the names, which of them
+are required, and whatever you wrote in `description`.
+
+That is why `description` is worth more than it looks. It is not a comment. It
+is the most effective place on the whole primitive to say when **not** to use
+this thing, and it is read by the only reader who cannot go and look at your
+code.
+
+<Callout kind="note">
+  The catalogue is deliberately shallower than the schema. A structural
+  description of arbitrary Zod would be a second schema language to keep true,
+  and the model already sees real prop values in the outline of the page it is
+  being asked to change. What stops it writing nonsense is not the catalogue; it
+  is that the schema refuses the nonsense on the way back in.
+</Callout>
+
+## What it refuses
+
+Each block below is a real render that was refused, and the sentence in each one
+is the runtime's own rather than this page's paraphrase of it.
+
+<OwnPrimitiveRefusals />
+
+The first is the mistake everybody makes once, and it is the only one here that
+is not about the schema at all: the tree is perfect and the deployment has never
+heard of the type.
+
+The rest are the schema doing what you wrote it to do. Note that each render
+came back with **one** complaint rather than a list. A node whose props are
+refused is never called, so nothing underneath it is reached and nothing
+underneath it is reported.
+
+## Can a person edit it?
+
+There is one failure in this system that reports nothing at all. A primitive
+that forgets to spread `loom.editable` renders perfectly, passes every type
+check, looks right on the page, and cannot be selected in the portal. Nobody
+finds out until somebody tries to edit that part of a page and nothing happens.
+
+`auditRegistry` is what finds it. It walks a registry, calls each component with
+props built from that component's own schema, and reports what it saw. Here it
+is run on the registry this page renders through.
+
+<OwnPrimitiveAudit />
+
+It **reports** and never refuses, so it is worth nothing unless something runs
+it. [Scaffolding a project](/docs/getting-started/scaffolding-a-project) is where
+the scaffolder's own version of that test is explained, and this is that test's
+subject: a primitive somebody just wrote.
+
+## The three tests
+
+This is what [Testing what you built](/docs/building-with-loom/testing-what-you-built)
+means by *use your own tree and your own registry when the thing you are testing
+is your primitive*. Build the tree yourself:
+
+```ts
+import { buildElement, buildText, createTree, sequentialIdFactory } from "@jam-overture/loom"
+import type { LoomTree } from "@jam-overture/loom"
+
+const statusPage = (state: string): LoomTree => {
+  const ids = sequentialIdFactory("status")
+
+  const detail = buildText(ids, "Card payments are retrying.")
+  const row = buildElement(ids, {
+    type: "status.service",
+    props: { service: "Checkout", state },
+    children: [detail],
+  })
+
+  return createTree(buildElement(ids, { type: "loom.page", props: {}, children: [row] }), ids)
+}
+```
+
+Then three tests, and they are three different questions:
+
+```ts
+import { createThemeRegistry } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
+import { auditRegistry } from "@jam-overture/loom/sdk"
+import { expect, it } from "vitest"
+
+const themes = createThemeRegistry()
+
+it("renders a sound row with nothing to report", () => {
+  const rendered = renderLoomTree(statusPage("degraded"), {
+    resolver: registry,
+    validator: registry,
+    themes,
+  })
+
+  expect(rendered.diagnostics).toEqual([])
+})
+
+it("refuses a state nobody declared", () => {
+  const rendered = renderLoomTree(statusPage("on fire"), {
+    resolver: registry,
+    validator: registry,
+    themes,
+  })
+
+  expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["invalid-props"])
+})
+
+it("can be edited, and never throws on props its own schema accepts", () => {
+  const audit = auditRegistry(registry)
+
+  expect(audit.notDecorated).toEqual([])
+  expect(audit.throwsOnDeclaredProps).toEqual([])
+})
+```
+
+**The second one is the half that proves anything.** A test that only renders
+the sound tree passes just as well against a schema with no bounds in it at all.
+Writing the pair is what establishes that the enum you added is the thing doing
+the work.
+
+`toEqual([])` rather than a length, in the first and the third, for the reason
+above: a render reports its first complaint rather than all of them, so empty is
+the only count that means what you want it to mean.
+
+## Then decide what a model may change about it
+
+The primitive says what can be written. A policy says what may be written
+**without you**, and for a status row the answer is obvious once you see it:
+
+```ts
+import { gatePolicySchema } from "@jam-overture/loom"
+
+export const policy = gatePolicySchema.parse({
+  policyId: "status",
+  protectedPropKeys: ["state"],
+})
+```
+
+A model may rewrite the sentence under a row all day. It may not be the thing
+that declares a service back up. That is one line, and
+[What AI may change](/docs/building-with-loom/what-ai-may-change) is the rest of
+the settings.
+
+[Testing what you built](/docs/building-with-loom/testing-what-you-built) has
+the test that proves the line is doing something, and it is worth writing: a
+policy nobody has asked the Gate about is a list of good intentions.

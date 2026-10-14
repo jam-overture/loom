@@ -6,12 +6,12 @@
 
 | before — every phone shot ever taken here | after — this branch |
 | --- | --- |
-| ![no button](2026-10-06-framework-copy-button-phone-mouse.png) | ![the button](2026-10-06-framework-copy-button-phone-touch.png) |
+| ![no button](2026-10-06-framework-copy-button-phone-mouse.webp) | ![the button](2026-10-06-framework-copy-button-phone-touch.webp) |
 
 *One documentation code block, clipped, at 390×844. Same build, same page, same
 selector, same run — the only variable between them is the pointer. The left one
 came back **byte-identical to `Loom docs`' own committed
-`2026-10-06-docs-copy-button-phone.png`**, which is the control: it is not my
+`2026-10-06-docs-copy-button-phone.webp`**, which is the control: it is not my
 reconstruction of the old behaviour, it is the old behaviour.*
 
 ---

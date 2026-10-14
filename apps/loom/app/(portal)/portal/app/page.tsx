@@ -20,7 +20,7 @@ import { outlineRows } from "@/app/(portal)/_lib/outline"
 import { headsOf, namesIn } from "@/app/(portal)/_lib/page-name"
 import { portalPolicy } from "@/app/(portal)/_lib/policy"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
-import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
+import { portalStore } from "@/app/(portal)/_lib/store"
 
 import { AppComposition, type CompositionPage } from "./_components/app-composition"
 import { PieceTally } from "./_components/piece-tally"
@@ -70,7 +70,6 @@ import { PieceTally } from "./_components/piece-tally"
  */
 const AppPage = async () => {
   await requireActor("/portal/app")
-  await ensureSeeded()
 
   const listed = await portalStore.list({})
 

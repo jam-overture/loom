@@ -25,12 +25,15 @@ import type { LoomDatabase } from "./database.js"
  */
 export const TREE_STORE_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_trees (
-    tree_id text PRIMARY KEY,
+    application_id text NOT NULL DEFAULT 'app_default',
+    tree_id text NOT NULL,
     revision integer NOT NULL,
     document jsonb NOT NULL,
-    updated_at timestamptz NOT NULL DEFAULT now()
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (application_id, tree_id)
   )`,
   `CREATE TABLE IF NOT EXISTS loom_revisions (
+    application_id text NOT NULL DEFAULT 'app_default',
     tree_id text NOT NULL,
     revision integer NOT NULL,
     proposal_id text NOT NULL,
@@ -38,8 +41,33 @@ export const TREE_STORE_DDL: readonly string[] = [
     provenance jsonb NOT NULL,
     applied_at text NOT NULL,
     answered_by text,
-    PRIMARY KEY (tree_id, revision)
+    PRIMARY KEY (application_id, tree_id, revision)
   )`,
+  /*
+   * **The migration, for a database that predates projects (0260).**
+   *
+   * Two statements per table and both are needed. The column is additive and
+   * defaulted, so every row already written becomes the default project's —
+   * 0260 clause 5, *nothing is migrated by guessing*: those rows belong to the
+   * deployment that wrote them, and one project named for it is the honest
+   * answer rather than a distribution somebody invented.
+   *
+   * The key then has to widen, because a tree id is only unique **within** a
+   * project now and the old key says it is unique everywhere. Dropping by the
+   * name Postgres gives a primary key and re-adding is idempotent: after the
+   * first run the constraint exists again under the same name, so a second run
+   * drops and rebuilds an identical key. On a table created by the statements
+   * above it is already right and the pair is a no-op.
+   *
+   * Ordering matters and is why these are not beside their tables: the column
+   * must exist on both before either key can name it.
+   */
+  `ALTER TABLE loom_trees ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_revisions ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_trees DROP CONSTRAINT IF EXISTS loom_trees_pkey`,
+  `ALTER TABLE loom_trees ADD PRIMARY KEY (application_id, tree_id)`,
+  `ALTER TABLE loom_revisions DROP CONSTRAINT IF EXISTS loom_revisions_pkey`,
+  `ALTER TABLE loom_revisions ADD PRIMARY KEY (application_id, tree_id, revision)`,
   /**
    * For a database that already has the table: `CREATE TABLE IF NOT EXISTS`
    * silently leaves an existing table alone, columns and all, so a column added
@@ -88,16 +116,33 @@ export const TREE_STORE_DDL: readonly string[] = [
  */
 export const HOLD_STORE_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_holds (
-    proposal_id text PRIMARY KEY,
+    application_id text NOT NULL DEFAULT 'app_default',
+    proposal_id text NOT NULL,
     tree_id text NOT NULL,
     base_revision integer NOT NULL,
     intent jsonb NOT NULL,
     proposal jsonb NOT NULL,
     disposition jsonb NOT NULL,
-    held_at text NOT NULL
+    held_at text NOT NULL,
+    PRIMARY KEY (application_id, proposal_id)
   )`,
-  `CREATE INDEX IF NOT EXISTS loom_holds_tree_id_held_at_idx ON loom_holds (tree_id, held_at)`,
-  `CREATE INDEX IF NOT EXISTS loom_holds_held_at_proposal_id_idx ON loom_holds (held_at, proposal_id)`,
+  /*
+   * **The project, for a database that predates it (0260).** Same shape as the
+   * tree store's above: the column is additive and defaulted, then the key
+   * widens, then the indexes are rebuilt to lead with it.
+   *
+   * The indexes are dropped by name rather than created `IF NOT EXISTS`,
+   * because the names do not change — an existing index on the old columns
+   * would be left exactly as it was, and every read of this table would go on
+   * scanning across projects while appearing to be indexed.
+   */
+  `ALTER TABLE loom_holds ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_holds DROP CONSTRAINT IF EXISTS loom_holds_pkey`,
+  `ALTER TABLE loom_holds ADD PRIMARY KEY (application_id, proposal_id)`,
+  `DROP INDEX IF EXISTS loom_holds_tree_id_held_at_idx`,
+  `DROP INDEX IF EXISTS loom_holds_held_at_proposal_id_idx`,
+  `CREATE INDEX IF NOT EXISTS loom_holds_tree_id_held_at_idx ON loom_holds (application_id, tree_id, held_at)`,
+  `CREATE INDEX IF NOT EXISTS loom_holds_held_at_proposal_id_idx ON loom_holds (application_id, held_at, proposal_id)`,
   /** Locked on creation for the reason the tree store's tables are — see above. */
   `ALTER TABLE loom_holds ENABLE ROW LEVEL SECURITY`,
 ]
@@ -118,6 +163,7 @@ export const HOLD_STORE_DDL: readonly string[] = [
  */
 export const POLICY_LOG_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_policy_revisions (
+    application_id text NOT NULL DEFAULT 'app_default',
     policy_id text NOT NULL,
     revision integer NOT NULL,
     fingerprint text NOT NULL,
@@ -125,9 +171,14 @@ export const POLICY_LOG_DDL: readonly string[] = [
     actor text NOT NULL,
     recorded_at text NOT NULL,
     note text,
-    PRIMARY KEY (policy_id, revision)
+    PRIMARY KEY (application_id, policy_id, revision)
   )`,
-  `CREATE INDEX IF NOT EXISTS loom_policy_revisions_fingerprint_idx ON loom_policy_revisions (policy_id, fingerprint)`,
+  /* The project, for a database that predates it — see the hold store's note. */
+  `ALTER TABLE loom_policy_revisions ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
+  `ALTER TABLE loom_policy_revisions DROP CONSTRAINT IF EXISTS loom_policy_revisions_pkey`,
+  `ALTER TABLE loom_policy_revisions ADD PRIMARY KEY (application_id, policy_id, revision)`,
+  `DROP INDEX IF EXISTS loom_policy_revisions_fingerprint_idx`,
+  `CREATE INDEX IF NOT EXISTS loom_policy_revisions_fingerprint_idx ON loom_policy_revisions (application_id, policy_id, fingerprint)`,
   /** Locked on creation for the reason the tree store's tables are — see above. */
   `ALTER TABLE loom_policy_revisions ENABLE ROW LEVEL SECURITY`,
 ]
@@ -136,6 +187,122 @@ export const POLICY_LOG_DDL: readonly string[] = [
  * Creates the tables if they are absent. Every statement is `IF NOT EXISTS`, so
  * running it against a populated database is a no-op rather than a hazard.
  */
+/**
+ * The projects table.
+ *
+ * Carries no `application_id` default and no backfill, unlike every other statement
+ * here: the rows that already exist belong to `app_default` by the default on
+ * their own columns, and a row *for* `app_default` is seeded by the deployment
+ * rather than conjured by DDL — a migration that invented a project's name
+ * would be guessing, which 0260 refuses.
+ */
+export const APPLICATION_STORE_DDL: readonly string[] = [
+  /**
+   * The rename, first and guarded.
+   *
+   * `loom_applications` was created as `loom_projects` on 12 October and lived
+   * under that name for about an hour, because *project* was the wrong word for
+   * the thing with the pages — the maintainer's hierarchy is **account >
+   * project > application**, and this is the third. Postgres has no
+   * `RENAME … IF EXISTS`, so the catalogue is asked first; a database that never
+   * saw the old name skips it, and one that already renamed skips it too.
+   *
+   * It runs before the `CREATE TABLE IF NOT EXISTS` below rather than after, so
+   * a database holding the old table is renamed into the new one instead of
+   * ending up with both and the rows in the wrong one.
+   */
+  `DO $$
+     BEGIN
+       IF EXISTS (SELECT FROM pg_tables WHERE schemaname = current_schema() AND tablename = 'loom_projects')
+          AND EXISTS (SELECT FROM information_schema.columns
+                      WHERE table_name = 'loom_projects' AND column_name = 'host')
+          AND NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = current_schema() AND tablename = 'loom_applications')
+       THEN
+         ALTER TABLE loom_projects RENAME TO loom_applications;
+         ALTER TABLE loom_applications RENAME COLUMN project_id TO application_id;
+       END IF;
+     END
+   $$`,
+  `CREATE TABLE IF NOT EXISTS loom_applications (
+      application_id text PRIMARY KEY,
+      name text NOT NULL,
+      created_at text NOT NULL,
+      host text
+    )`,
+  /**
+   * The grouping an application belongs to. Defaulted so a row written before
+   * projects existed keeps answering, which is the device every scoped column
+   * in this file uses.
+   */
+  `ALTER TABLE loom_applications ADD COLUMN IF NOT EXISTS project_id text NOT NULL DEFAULT 'prj_default'`,
+  /**
+   * As every other table here does. It matters on a managed Postgres whose
+   * anon role can reach the schema: without it, the list of a deployment's
+   * applications — their names and the hosts they run on — is readable by
+   * anyone holding the publishable key.
+   */
+  `ALTER TABLE loom_applications ENABLE ROW LEVEL SECURITY`,
+]
+
+/**
+ * The projects the applications are grouped under.
+ *
+ * Its own list rather than a statement in the one above, on the terms this file
+ * already sets: a deployment adds a seam by adding its `ensure` call on
+ * purpose. They are run together by `db:push` because an application's
+ * `project_id` would otherwise point at nothing.
+ *
+ * **It must run after `ensureApplicationStoreSchema`, not before.** That one
+ * renames the `loom_projects` which briefly held applications; this one then
+ * creates a fresh table under the freed name. The other order silently loses
+ * the grouping table — `CREATE TABLE IF NOT EXISTS` sees the old one, skips,
+ * and the rename carries it off — with no error anywhere.
+ */
+export const PROJECT_STORE_DDL: readonly string[] = [
+  `CREATE TABLE IF NOT EXISTS loom_projects (
+      project_id text PRIMARY KEY,
+      name text NOT NULL,
+      created_at text NOT NULL
+    )`,
+  `ALTER TABLE loom_projects ENABLE ROW LEVEL SECURITY`,
+]
+
+/**
+ * Moving the ids themselves, which the rename above does not.
+ *
+ * Every row written before 12 October names `prj_default` in a column that now
+ * means an application, and `app_default` is what `DEFAULT_APPLICATION_ID`
+ * parses to. Six tables carry it, and each update is idempotent because it
+ * matches only the old value.
+ *
+ * **Each one is guarded on its table existing**, which the first draft was not
+ * and a test caught: a deployment adds a seam by adding its `ensure` call on
+ * purpose, so one that never switched telemetry or the policy log on has no
+ * such table, and an unguarded `UPDATE` took the whole migration down with
+ * `42P01` rather than skipping what was not there.
+ *
+ * Separate from the DDL because it is data: a host reading `db:push` can see
+ * exactly which rows are touched, rather than finding an `UPDATE` folded into a
+ * list called schema.
+ */
+export const APPLICATION_ID_MIGRATION: readonly string[] = [
+  "loom_trees",
+  "loom_revisions",
+  "loom_holds",
+  "loom_policy_revisions",
+  "loom_telemetry",
+  "loom_applications",
+].map(
+  (table) => `DO $$
+     BEGIN
+       IF EXISTS (SELECT FROM pg_tables WHERE schemaname = current_schema() AND tablename = '${table}')
+       THEN
+         UPDATE ${table} SET application_id = 'app_default' WHERE application_id = 'prj_default';
+       END IF;
+     END
+   $$`
+)
+
 export const ensureTreeStoreSchema = async (db: LoomDatabase): Promise<void> => {
   await runStatements(db, TREE_STORE_DDL)
 }
@@ -159,6 +326,31 @@ export const ensureHoldStoreSchema = async (db: LoomDatabase): Promise<void> => 
  */
 export const ensurePolicyLogSchema = async (db: LoomDatabase): Promise<void> => {
   await runStatements(db, POLICY_LOG_DDL)
+}
+
+/**
+ * Creates the projects table if it is absent. Idempotent, and separate for the
+ * same reason the other three are: a deployment that wants more than one
+ * project gets the table by adding this call on purpose.
+ */
+export const ensureApplicationStoreSchema = async (db: LoomDatabase): Promise<void> => {
+  await runStatements(db, APPLICATION_STORE_DDL)
+}
+
+/**
+ * Creates the projects table if it is absent. Idempotent on the same terms.
+ */
+export const ensureProjectStoreSchema = async (db: LoomDatabase): Promise<void> => {
+  await runStatements(db, PROJECT_STORE_DDL)
+}
+
+/**
+ * Carries `prj_default` to `app_default` across every table that names an
+ * application. Safe to run on a database that has already been carried, and on
+ * one that was never on the old value.
+ */
+export const migrateApplicationIds = async (db: LoomDatabase): Promise<void> => {
+  await runStatements(db, APPLICATION_ID_MIGRATION)
 }
 
 const runStatements = async (db: LoomDatabase, statements: readonly string[]): Promise<void> => {

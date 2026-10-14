@@ -2,17 +2,22 @@ import type { LoomTree } from "@jam-overture/loom"
 import { renderLoomTree, type RenderOutput } from "@jam-overture/loom/react"
 
 import { askById, type Ask } from "./adapt/asks"
-import { paperTrailFor, type PaperTrail } from "./adapt/paper-trail"
 import type { ChangeRecord } from "./adapt/record"
 import { runAsk, type AskRun } from "./adapt/run"
 import { runUndo } from "./adapt/undo"
 import { siteFrameOrigins } from "./frames"
-import { homePageTree } from "./pages/home"
-import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
-import { whatYouRunPageTree } from "./pages/what-you-run"
 import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
-import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, siteOrigin, type SiteRoute } from "./site"
+import { treeFor, type SitePageContext } from "./builders"
+import { asRequested } from "./requested"
+import { storedPageFor } from "./stored"
+
+import {
+  ASKED_ROUTE,
+  isAskedRoute,
+  siteOrigin,
+  type SiteRoute,
+} from "./site"
 
 /**
  * Route → tree → rendered page, in one place.
@@ -28,7 +33,7 @@ import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, siteOrigin, type SiteRoute } from "./
  *
  * One type rather than one per page, because the map below is keyed by path and
  * a builder is looked up rather than called by name. Every field past the origin
- * and the palette is optional — what the visitor asked the front door for, and
+ * and the palette is optional — what the visitor asked `ASKED_ROUTE` for, and
  * the record of the run the mechanism page prints — so a page that does not read
  * a field cannot be broken by one arriving.
  *
@@ -36,26 +41,18 @@ import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, siteOrigin, type SiteRoute } from "./
  * that wanted a field of its own. Five of those pages are gone and what is left
  * is the single field the mechanism page adds.
  */
-export type SitePageContext = MechanismContext
-
-export type PageBuilder = (context: SitePageContext) => LoomTree
-
-export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, PageBuilder>([
-  [HOME.path, homePageTree],
-  [HOW_IT_WORKS.path, howItWorksPageTree],
-  [WHAT_YOU_RUN.path, whatYouRunPageTree],
-])
-
-/** The page as it is written, before anything the visitor asked for. */
-export const treeFor = (route: SiteRoute, context: SitePageContext): LoomTree => {
-  const build = SITE_PAGES.get(route.path)
-
-  if (build === undefined) {
-    throw new Error(`loom: no page is built for ${route.path}`)
-  }
-
-  return build(context)
-}
+/**
+ * The map and the builder lookup moved to `./builders.ts` on 12 October, and are
+ * re-exported here under the names every caller already used.
+ *
+ * They moved to break a cycle rather than to tidy anything: `pageTreeFor` below
+ * reads the store through `./stored.ts`, and `./stored.ts` builds each page
+ * once to read its id off it. Two modules importing each other would leave
+ * whichever loaded second holding an undefined map while it initialised — a
+ * crash on the first request, in a file that is about neither of them.
+ */
+export type { PageBuilder, SitePageContext } from "./builders"
+export { SITE_PAGES, treeFor } from "./builders"
 
 /** One request, and the undo of it when the visitor asked for that too. */
 export type FrontDoorRun = AskRun & {
@@ -111,8 +108,8 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
   const ask = askById(context.ask)
   if (ask === undefined) return undefined
 
-  const probe = await walk(treeFor(HOW_IT_WORKS, context), ask, context)
-  const staged = treeFor(HOW_IT_WORKS, {
+  const probe = await walk(treeFor(ASKED_ROUTE, context), ask, context)
+  const staged = treeFor(ASKED_ROUTE, {
     ...context,
     record: probe.record,
     ...(probe.undone === undefined ? {} : { undone: probe.undone }),
@@ -120,29 +117,6 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
 
   return walk(staged, ask, context)
 }
-
-/**
- * The run the mechanism page prints, against the front door as it is published.
- *
- * Here rather than in the builder because a page builder is synchronous and a
- * request through the whole sequence is not — the same seam, and for the same
- * reason, as the ask the front door runs and the history the record page
- * replays. The front door is built fresh for it: the mechanism page's claim is
- * about *this site*, so a record of a fixture kept beside it would be a record
- * of nothing a reader can go and check.
- *
- * **The front door it runs against carries no ask**, and that is the whole of
- * the arrangement rather than an oversight. The request is made here, so the
- * page it is made against has to be the one this site publishes at `/` — not
- * that page with the answer already standing on it. What the visitor's `ask`
- * decides is *which request to run*, never which page to run it against.
- */
-export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
-  paperTrailFor(
-    treeFor(HOW_IT_WORKS, { origin: context.origin, theme: context.theme }),
-    context.ask,
-    context.approve === true
-  )
 
 export const pageTreeFor = async (
   route: SiteRoute,
@@ -154,24 +128,63 @@ export const pageTreeFor = async (
    * main landing page and only let it exist in the How it works section."*
    *
    * So this page does what the front door used to: it runs the visitor's
-   * request against **itself**, and renders the page the request produced. The
-   * paper trail it already printed is still printed, now of the same page it is
-   * on rather than of the front door.
+   * request against **itself**, and renders the page the request produced.
    *
-   * The trail is built against the page *as published* — without the ask
-   * applied — for the reason it always was: the request is made here, so the
-   * page it is made against has to be the one this site publishes. What the
-   * visitor's `ask` decides is which request to run, never which page to run it
-   * against.
+   * **It runs that request twice and nothing else**, as of 13 October. A third
+   * and a fourth run used to happen here: `trailFor` resolved a `PaperTrail`
+   * for every asked request, and the band that printed it was rewritten away on
+   * 26 September. The field stayed on the context, the resolution stayed on
+   * this path, and the comment that stood here said the trail was *"still
+   * printed"* of a page that had stopped printing it.
+   *
+   * `pages/handed.test.ts` is what now holds it, and it holds the general
+   * thing rather than this one: a field on the context is a promise that some
+   * page reads it.
    */
-  if (route.path === HOW_IT_WORKS.path) {
-    const trail = await trailFor(context)
-    const run = await askRunFor({ ...context, trail })
+  /**
+   * **The published page comes from the store as of 12 October**
+   * ([0259](../../../../../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+   * condition 1), and from the builder only when the store has nothing.
+   *
+   * The builder is the seed and the fallback, in that order. A store that has
+   * not been written yet, or one that cannot be read, serves the authored page
+   * rather than nothing — a site that refuses to load because a database is
+   * down would be a worse product than one that serves what it was written as,
+   * and the portal is where somebody finds out the store is unreachable.
+   *
+   * What comes back is stored **theme-free and origin-free**, because one row
+   * is served from every host this deployment answers on. `asRequested` puts
+   * the reader's palette back on the root and on the site's own links, which is
+   * the whole of what a request decides here. `./requested.ts` has the
+   * argument for where that line falls.
+   */
+  /**
+   * **A page being asked a question is built, and every other page is read.**
+   *
+   * This is the line 0259 said only this lane could draw, and the mechanism
+   * page is where it falls. Its demonstration panel is written from the record
+   * of the change that was *just run against it* — `askRunFor` builds the page
+   * twice for exactly that reason, so that what a visitor reads is the record
+   * of the page it is sitting on. A record of a run that has not happened yet
+   * is not a thing a store can hold, and a stored page with an empty panel in
+   * it would be a worse answer than building one.
+   *
+   * So an ask goes down the path it always did. **Unasked, the mechanism page
+   * is read from the store like the other two** — which is the state it is in
+   * for every visitor who has not pressed anything, and the state the portal
+   * governs.
+   */
+  if (isAskedRoute(route) && context.ask !== undefined) {
+    const run = await askRunFor(context)
 
-    return run === undefined ? treeFor(route, { ...context, trail }) : run.page
+    return asRequested(run === undefined ? treeFor(route, context) : run.page, {
+      theme: context.theme,
+    })
   }
 
-  return treeFor(route, context)
+  const published = (await storedPageFor(route)) ?? treeFor(route, context)
+
+  return asRequested(published, { theme: context.theme })
 }
 
 /**

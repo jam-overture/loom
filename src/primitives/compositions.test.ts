@@ -170,8 +170,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers fifty-nine bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(59)
+  it("offers sixty-seven bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(67)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -506,6 +506,53 @@ describe("what a band renders", () => {
           const magnitude = point.kind === "element" ? (point.props as Record<string, unknown>)["magnitude"] : undefined
 
           expect(typeof magnitude, `a point in ${composition.id} has no magnitude and would draw nothing`).toBe("number")
+        }
+      }
+    }
+  })
+
+  /**
+   * The other fact about the same pair, off the same walk, and the one that got
+   * written second because of what its failure looks like.
+   *
+   * A figure with **no** magnitude draws nothing — a gap in the series — and
+   * the check above has held that over every band since it was written. A
+   * figure **above** its chart's ceiling draws a *full column*, because the
+   * `min(1, max(0, …))` clamp in `stylesheet.ts` is right and has to be there:
+   * without it the bar is some multiple of the plot height and the page is
+   * destroyed. So the clamp turns a layout catastrophe into a plausible-looking
+   * chart, and three figures of 240 against a ceiling of 100 are three
+   * identical full columns in a band whose whole purpose is to show a number
+   * moving.
+   *
+   * That asymmetry is the reason this is here. **A fault that renders as a hole
+   * gets found and a fault that renders as a full column gets shipped** — the
+   * 10 October finding from `Loom lessons` put both facts side by side and
+   * observed that nobody chose which to assert; what chose was a property of
+   * the failures rather than anything about the checks.
+   *
+   * `loom.stat-chart`'s own header already names the band that breaks it, in
+   * the present tense, as the reason `max` is authored at all: *a band that
+   * plots revenue has to think about this.* It passes today — and
+   * `comparison-wipe` is the first band for which it is load-bearing rather
+   * than prospective, because two charts superimposed under one divider are
+   * only comparable if they are drawn to the same ceiling, and nothing but this
+   * says so.
+   */
+  it("plots no figure above the ceiling of the chart it is in", () => {
+    for (const composition of STARTER_COMPOSITIONS) {
+      for (const chart of elementsOfType(composition.build(sequentialIdFactory()), "loom.stat-chart")) {
+        const declared = (chart.props as Record<string, unknown>)["max"]
+        const ceiling = typeof declared === "number" ? declared : 100
+
+        for (const point of chart.children) {
+          const magnitude = point.kind === "element" ? (point.props as Record<string, unknown>)["magnitude"] : undefined
+          if (typeof magnitude !== "number") continue
+
+          expect(
+            magnitude,
+            `a point in ${composition.id} is plotted at ${String(magnitude)} against a ceiling of ${String(ceiling)}, so it would draw a full column and read as the top of the scale`
+          ).toBeLessThanOrEqual(ceiling)
         }
       }
     }
@@ -1342,16 +1389,41 @@ describe("the parts that offered no choice", () => {
    */
   it("gives the bar, the mosaic, the comparison and the footer a second design each", () => {
     /**
-     * **The bar has three as of 7 October**, and it is the one part in this
-     * assertion where that is worth a sentence rather than a longer array.
+     * **The bar has four as of 8 October**, and it is the one part in this
+     * assertion where the array is worth a sentence rather than a count.
      * `nav-menus` is the design the band beside it documented as *impossible*
-     * until 0234 let a tree name a control — so the third entry is a retraction
-     * landing, not a fourth taste.
+     * until 0234 let a tree name a control, so the third entry is a retraction
+     * landing rather than a fourth taste.
+     *
+     * The fourth is a different kind of addition again: `nav-docs` is the bar
+     * an **interior document** takes, and it exists because the canonical
+     * cannot be shared onto one. `navBand` points its menu at fragments of
+     * `PAGE_SEQUENCE` — correctly, by 0168 — and those are five links into
+     * bands a document has not got. It earns 0162's bar on a search field and
+     * a version badge rather than on its `href`s, which would have been a
+     * `configure`; the assertion two tests below that two designs of a part
+     * never build the same tree is what holds that honest.
      */
-    expect(designsOf("nav")).toEqual(["nav", "nav-centred", "nav-menus"])
+    expect(designsOf("nav")).toEqual(["nav", "nav-centred", "nav-menus", "nav-docs"])
     expect(designsOf("bento")).toEqual(["bento", "bento-mixed"])
-    expect(designsOf("comparison")).toEqual(["comparison", "comparison-ways"])
-    expect(designsOf("footer")).toEqual(["footer", "footer-signup"])
+    /**
+     * **The comparison has three as of 11 October**, and the third is the only
+     * one of them that compares a thing with *itself*. `comparison` and
+     * `comparison-ways` both lay rivals out side by side and permanently;
+     * `comparison-wipe` puts one measure in two states in the same box with the
+     * reader holding the edge between them, which is a region neither of the
+     * other two can reach by any `configure`.
+     */
+    expect(designsOf("comparison")).toEqual(["comparison", "comparison-ways", "comparison-wipe"])
+    /**
+     * **And the footer has three as of 10 October**, for the reason the bar's
+     * third exists rather than as a taste: `footer-status` is the first design
+     * of this part that says anything about the state of the product *now*
+     * rather than about what the site contains, and the thing carrying that is
+     * a `loom.badge` and the `loom.link` that backs it — nodes, so an incident
+     * is a `configure` on a text child.
+     */
+    expect(designsOf("footer")).toEqual(["footer", "footer-signup", "footer-status"])
   })
 
   /**
@@ -1364,7 +1436,7 @@ describe("the parts that offered no choice", () => {
    * be able to drop it silently.
    */
   it("gives the closing band a design whose second control opens a form over the page", () => {
-    expect(designsOf("cta")).toEqual(["cta", "cta-signup", "cta-booking"])
+    expect(designsOf("cta")).toEqual(["cta", "cta-signup", "cta-booking", "cta-overlay"])
 
     const band = bandOf("cta-booking")
     const dialogs = (function find(node: LoomNode): readonly ElementNode[] {
@@ -2477,5 +2549,347 @@ describe("what the second designs claim", () => {
     const alone = COMPOSITION_PARTS.filter((part) => compositionsForPart(part).length === 1)
 
     expect(alone).toEqual([])
+  })
+})
+
+/**
+ * The four third designs, and the claim each of them rests on.
+ *
+ * Every part named here had exactly two designs on 9 October, and two designs
+ * is a choice between two drawings rather than a vocabulary — so what these
+ * four add is not a third taste but, in each case, a region the part could not
+ * occupy at all. That region is the claim, and in all four cases it is
+ * invisible to every structural test in this file: `faq-aside` with its aside
+ * emptied renders as a narrow `faq` and passes the shape check against its
+ * canonical; `contact-split` with the form's own reply promise copied into the
+ * aside renders beautifully and is the two-figure failure the portal lane has
+ * now recorded twice.
+ *
+ * They are asserted here rather than beside each band for the reason the second
+ * designs' block gives: what is held is the **design**, and a design is a
+ * statement about what the subtree is *for*, which no walk of the subtree's
+ * types can recover.
+ */
+describe("what the third designs claim", () => {
+  const bandOf = (id: string): ElementNode => {
+    const band = compositionById(id)
+
+    expect(band, `${id} is not in the phrasebook`).toBeDefined()
+    if (band === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return band.build(sequentialIdFactory())
+  }
+
+  const slotIn = (node: LoomNode, name: string): readonly LoomNode[] => {
+    if (node.kind === "text") return []
+    if (node.kind === "slot" && node.name === name) return node.children
+
+    return node.children.flatMap((child) => slotIn(child, name))
+  }
+
+  /**
+   * The questions band's aside has to offer a way *out*, not more questions.
+   *
+   * The band exists because `faq` and `faq-grid` both end on the last answer,
+   * so a reader whose question is not there reaches the closing call to action
+   * having just failed to get one. The remedy is a control, and the thing that
+   * would silently undo it is an aside holding a sixth `loom.faq` — which is
+   * the edit that suggests itself, renders perfectly, and leaves the band
+   * saying exactly what the canonical already said.
+   *
+   * So: every question in the `start` region, no question in the `end` region,
+   * and a control in the `end` region. The third clause is what the band is;
+   * the second is what it must not become.
+   */
+  it("puts every question on the wide side of the questions band and a way out on the other", () => {
+    const band = bandOf("faq-aside")
+    const start = slotIn(band, "start")
+    const end = slotIn(band, "end")
+
+    const questionsIn = (nodes: readonly LoomNode[]): number =>
+      nodes.reduce((count, node) => count + elementsOfType(node, "loom.faq").length, 0)
+
+    expect(questionsIn(start), "the wide side carries no questions").toBeGreaterThan(1)
+    expect(questionsIn(end), "the aside carries questions, which is what the wide side is for").toBe(0)
+
+    const actions = end.flatMap((node) => elementsOfType(node, "loom.action"))
+
+    expect(actions, "the aside offers no way out, which is the only reason it is there").toHaveLength(1)
+    expect(typeof actions[0]?.props["href"]).toBe("string")
+  })
+
+  /**
+   * One marquee row, and the fade that makes it mean *this continues*.
+   *
+   * Both halves are props-and-counts rather than types, so the shape check
+   * against the canonical cannot see either. A second row would make this
+   * `integrations-grid` with the explanations removed and the stillness taken
+   * away — the band's own note argues it at length — and `edges: "hard"` would
+   * tell a reader the list ends where the viewport does, which is the opposite
+   * of the claim the band is drawn to make.
+   *
+   * The logos are asserted to carry no image because that is how this one reads
+   * as a ribbon of wordmarks rather than as a row of broken pictures: the
+   * catalogue ships no image source at all (asserted page-wide above), and this
+   * band is the design most likely to tempt the first one.
+   */
+  it("runs the integrations ribbon as one faded row of wordmarks", () => {
+    const band = bandOf("integrations-marquee")
+    const rows = elementsOfType(band, "loom.marquee")
+
+    expect(rows, "a ribbon of integrations is one row; two is a moving grid").toHaveLength(1)
+    expect(rows[0]?.props["edges"], "hard edges say the list ends where the band does").toBe("faded")
+
+    const logos = elementsOfType(band, "loom.logo")
+
+    expect(logos.length, "a ribbon with nothing on it").toBeGreaterThan(6)
+    for (const logo of logos) {
+      expect(logo.props["image"], `${String(logo.props["name"])} ships an image source`).toBeUndefined()
+    }
+
+    expect(elementsOfType(band, "loom.action"), "the ribbon cannot answer *is mine in there*").toHaveLength(1)
+  })
+
+  /**
+   * The contact band serves both readers once each.
+   *
+   * It is the two halves of `contact` and `contact-details` on the page
+   * together, and the failure it has to be held against is that it becomes the
+   * two *bands* concatenated: two headings, two reply promises, two eyebrows,
+   * the page saying *contact us* twice with different furniture.
+   *
+   * One `loom.perk` is the whole assertion — the reply promise lives in the
+   * form's `note` region and nowhere else — plus one heading at level 2 for the
+   * band and the direct ways present as links rather than as a second form. The
+   * `loom.option` check is the other direction: the team-size select is
+   * deliberately *gone* from this design, which is a node difference and the
+   * reason the band is not `contact` in a narrower column.
+   */
+  it("gives the split contact band one reply promise, one form and the addresses beside it", () => {
+    const band = bandOf("contact-split")
+
+    expect(elementsOfType(band, "loom.form"), "two forms is the band saying contact us twice").toHaveLength(1)
+    expect(elementsOfType(band, "loom.perk"), "a second reply promise is the two-figure failure").toHaveLength(1)
+    expect(
+      elementsOfType(band, "loom.option"),
+      "the team-size select is the question a reader beside an email address will not answer"
+    ).toHaveLength(0)
+
+    const headings = elementsOfType(band, "loom.heading").filter((heading) => heading.props["level"] === 2)
+
+    expect(headings, "a band has one level-two heading, however many halves it has").toHaveLength(1)
+
+    const end = slotIn(band, "end")
+    const schemes = end
+      .flatMap((node) => elementsOfType(node, "loom.link"))
+      .map((link) => String(link.props["href"]).split(":")[0])
+
+    expect(schemes, "the direct ways in are what the aside is for").toContain("mailto")
+    expect(schemes).toContain("tel")
+  })
+
+  /**
+   * The footer's live claim is two nodes in the brand region, and a node is the
+   * point.
+   *
+   * `footer-status` is the first design of this part that says anything about
+   * the state of the product now rather than about what the site contains. The
+   * thing that carries it is a `loom.badge` — which has no `href` and must not
+   * get one, because a badge that navigated would be a control drawn as a label
+   * — beside the `loom.link` that backs it.
+   *
+   * Both in the brand region rather than among the groups, for the reason the
+   * footer's own capture test gives about `footer-signup`: the groups region is
+   * an `auto-fit` grid sized for columns of links, and a badge dropped into it
+   * becomes a column.
+   *
+   * The single group is asserted as **one** because that is what makes this a
+   * row rather than a sitemap, and it is a count — so the shape check against
+   * the canonical's four would pass a second and a third arriving.
+   */
+  it("keeps the compact footer's status claim in its brand region, over one row of links", () => {
+    const band = bandOf("footer-status")
+    const brand = slotIn(band, "brand")
+
+    const badges = brand.flatMap((node) => elementsOfType(node, "loom.badge"))
+
+    expect(badges, "the live claim is not in the brand region").toHaveLength(1)
+    expect(badges[0]?.props["href"], "a badge that navigates is a control drawn as a label").toBeUndefined()
+
+    const backing = brand
+      .flatMap((node) => elementsOfType(node, "loom.link"))
+      .map((link) => String(link.props["href"]))
+
+    expect(backing, "the status claim is not backed by anywhere a reader can check it").toContain("/status")
+
+    expect(elementsOfType(band, "loom.badge"), "a badge among the groups becomes a column").toHaveLength(1)
+
+    const groups = band.children.filter((child): child is ElementNode => child.kind === "element")
+
+    expect(groups.map((group) => group.type), "a compact footer is one row of links, not a sitemap").toEqual([
+      "loom.link-list",
+    ])
+  })
+})
+
+/**
+ * The three bands that reached a primitive nothing could reach, and the claim
+ * each of them rests on.
+ *
+ * All three exist for one reason: `loom.before-after`, `loom.carousel` and
+ * `loom.overlay` had been registered and unreachable since they were written,
+ * carried in four consecutive reports under *needs an image source*. None of
+ * the three has a URL prop — `before`/`after`, `preview`/`full` and `ground`
+ * are **slots** (0051), and a carousel's children are whatever the band is made
+ * of. What was missing was not an asset.
+ *
+ * So the claim each band makes is about the *content it puts in those regions*,
+ * and in all three cases that claim is invisible to every structural test in
+ * this file. The shape check against the canonical passes on the container
+ * alone; the palette check passes because none of them names a colour; the
+ * `uses` rot check passes because the types are right. What none of them can
+ * see is a wipe whose two sides are drawn to different scales, a carousel short
+ * enough to have been a grid, or an overlay whose ground is a photograph the
+ * library is not allowed to ship.
+ */
+describe("what the bands that were never behind a photograph claim", () => {
+  const bandOf = (id: string): ElementNode => {
+    const band = compositionById(id)
+
+    expect(band, `${id} is not in the phrasebook`).toBeDefined()
+    if (band === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return band.build(sequentialIdFactory())
+  }
+
+  const slotIn = (node: LoomNode, name: string): readonly LoomNode[] => {
+    if (node.kind === "text") return []
+    if (node.kind === "slot" && node.name === name) return node.children
+
+    return node.children.flatMap((child) => slotIn(child, name))
+  }
+
+  /**
+   * The wipe's two sides must be drawn to the same ceiling, or the band's whole
+   * claim is false.
+   *
+   * This is the one assertion in this block that is not about taste. A
+   * `loom.before-after` clips one layer over the other so the two are compared
+   * *in place* — which means a bar on the left of the divider and a bar on the
+   * right are read against each other directly, by anybody looking at it. Give
+   * the two charts different `max` values and those bars are in different
+   * units, the band invites the comparison anyway, and nothing refuses it: both
+   * schemas are satisfied, the render is total and the diagnostics are empty.
+   *
+   * The catalogue-wide ceiling check above holds each figure against *its own*
+   * chart. It cannot see this, because two charts that each plot honestly can
+   * still be dishonest about each other. That is the pair one level up.
+   */
+  it("draws both sides of the wipe to one ceiling, so the bars either side of the divider are comparable", () => {
+    const band = bandOf("comparison-wipe")
+    const before = slotIn(band, "before")
+    const after = slotIn(band, "after")
+
+    const chartsIn = (nodes: readonly LoomNode[]): readonly ElementNode[] =>
+      nodes.flatMap((node) => elementsOfType(node, "loom.stat-chart"))
+
+    const [beforeChart] = chartsIn(before)
+    const [afterChart] = chartsIn(after)
+
+    expect(beforeChart, "the wipe's before region holds no chart").toBeDefined()
+    expect(afterChart, "the wipe's after region holds no chart").toBeDefined()
+    if (beforeChart === undefined || afterChart === undefined) return
+
+    expect(
+      beforeChart.props["max"],
+      "the two sides of the wipe are drawn to different ceilings, so the bars either side of the divider are in different units"
+    ).toBe(afterChart.props["max"])
+
+    /**
+     * And the same series on both sides, by label. A wipe of April-to-September
+     * against a different six months is two charts sharing a box rather than
+     * one measure in two states — and it is also what keeps the two layers the
+     * same height, since the `after` region is the one in the flow and the
+     * `before` region is absolute over it.
+     */
+    const labelsOf = (chart: ElementNode): readonly unknown[] =>
+      chart.children.map((child) => (child.kind === "element" ? child.props["label"] : undefined))
+
+    expect(labelsOf(beforeChart), "the wipe compares two different series rather than one measure twice").toEqual(
+      labelsOf(afterChart)
+    )
+  })
+
+  /**
+   * The pushable row has to hold more than a row.
+   *
+   * `testimonials` is three quotes in a grid and this band is a
+   * `loom.carousel`, so the structural check against the canonical passes on
+   * the container alone — a `comparison-wipe` of three quotes in a scroller is
+   * a grid that happens to scroll, and 0162 says the catalogue must not hold a
+   * design that is a `configure` of another in everything but its wrapper.
+   *
+   * What makes it a carousel is that the list is longer than the band, so the
+   * next card is cut off at the edge and the affordance is visible at rest.
+   * Four would technically scroll on a phone; the number asserted is the one
+   * that is more than a row at *both* widths the harness photographs.
+   */
+  it("puts more quotes in the pushable row than the grid beside it draws", () => {
+    const carouselQuotes = elementsOfType(bandOf("testimonials-carousel"), "loom.quote")
+    const gridQuotes = elementsOfType(bandOf("testimonials"), "loom.quote")
+
+    expect(carouselQuotes.length, "a carousel of three quotes is a grid that scrolls").toBeGreaterThan(
+      gridQuotes.length
+    )
+    expect(carouselQuotes.length).toBeGreaterThanOrEqual(6)
+  })
+
+  /**
+   * The panel's ground is a paint from the palette, and it has to be.
+   *
+   * `loom.overlay`'s own props document names the foot-gun this holds shut:
+   * `scrim: "none"` over a **photograph** is illegible under one of the two
+   * starter palettes whichever image is chosen, because the text colour is the
+   * page's and the picture is the author's. It stays in the vocabulary because
+   * an overlay over a *palette-derived* ground wants no wash and is safe — both
+   * sides coming from the palette.
+   *
+   * This band is the safe case, and the assertion is what keeps it the safe
+   * case: a ground that is a paint, and no wash. The edit that would undo it is
+   * swapping the `loom.backdrop` for a `loom.media` — which the catalogue's own
+   * *ships no image source at all* check would also catch today, and would stop
+   * catching the moment the asset seam opens. This one says why the ground is
+   * what it is rather than that the library has no pictures yet.
+   */
+  it("grounds the painted panel in the palette and leaves it unwashed", () => {
+    const band = bandOf("cta-overlay")
+    const [overlay] = elementsOfType(band, "loom.overlay")
+
+    expect(overlay, "the panelled closing band holds no overlay").toBeDefined()
+    if (overlay === undefined) return
+
+    const ground = slotIn(band, "ground")
+
+    expect(
+      ground.map((node) => (node.kind === "element" ? node.type : node.kind)),
+      "the panel's ground is not a paint, so an unwashed overlay is reading text against something the palette does not decide"
+    ).toEqual(["loom.backdrop"])
+
+    expect(
+      overlay.props["scrim"],
+      "a scrim over a palette-derived ground washes out a paint that was already safe"
+    ).toBe("none")
+
+    /**
+     * And the paint holds at this height. Two of the five are ruled at a stride
+     * in `rem` and need a few hundred pixels to read as a ground (0196); a
+     * closing panel is a heading, a sentence and two buttons. The band's
+     * reasoning is in its own file and this is the part of it a later edit
+     * could silently break.
+     */
+    const [backdrop] = elementsOfType(band, "loom.backdrop")
+
+    expect(backdrop?.props["paint"], "this paint needs more height than a closing panel has").not.toBe("grid")
+    expect(backdrop?.props["paint"], "this paint needs more height than a closing panel has").not.toBe("dots")
   })
 })

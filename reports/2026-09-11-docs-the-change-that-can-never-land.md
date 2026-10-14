@@ -8,7 +8,7 @@ taught a reader to build something, ship it, and read its history afterwards.
 None of them was written for the third answer — **ask a person** — from the point
 of view of the person being asked.
 
-![Two changes waiting, and the only difference that matters](2026-09-11-docs-the-change-that-can-never-land.png)
+![Two changes waiting, and the only difference that matters](2026-09-11-docs-the-change-that-can-never-land.webp)
 
 ## What shipped
 
@@ -53,7 +53,7 @@ documented workaround is harder to withdraw than an undocumented one.** From
 today, `staleHolds` landing means this page is rewritten rather than merely
 extended.
 
-![Three answers, and the second one is the surprise](2026-09-11-docs-the-change-that-can-never-land-answers.png)
+![Three answers, and the second one is the surprise](2026-09-11-docs-the-change-that-can-never-land-answers.webp)
 
 The second row of the answering table is why it matters. Saying yes to the older
 change does not apply it, does not put it back in the queue, and does not ask
@@ -84,7 +84,7 @@ prints both verdicts:
 | When it was held | `loom-docs` | asks a person | `stakes-above-ceiling` |
 | When somebody said yes | `loom-docs-tightened` | refused | `stakes-at-refusal-floor` |
 
-![The same change, judged twice, in dark](2026-09-11-docs-the-change-that-can-never-land-dark.png)
+![The same change, judged twice, in dark](2026-09-11-docs-the-change-that-can-never-land-dark.webp)
 
 **Both details are the same string** — `touches protected loom.heading` — because
 the detail describes the damage and the verdict is a separate field. A review
@@ -184,7 +184,7 @@ the page shows.
 inside its own box, which is what `overflow-x: auto` on a code block is there
 for.
 
-![The comparison a host has to write, at a true 390px](2026-09-11-docs-the-change-that-can-never-land-phone.png)
+![The comparison a host has to write, at a true 390px](2026-09-11-docs-the-change-that-can-never-land-phone.webp)
 
 ## Scope
 

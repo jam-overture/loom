@@ -2,7 +2,7 @@
   "outDir": "reports",
   "shots": [
     {
-      "out": "2026-10-03-portal-why-it-cannot-be-undone-wide.png",
+      "out": "2026-10-03-portal-why-it-cannot-be-undone-wide.webp",
       "path": "/portal/activity",
       "viewport": "wide",
       "fullPage": true,
@@ -24,7 +24,7 @@
       }
     },
     {
-      "out": "2026-10-03-portal-why-it-cannot-be-undone-phone.png",
+      "out": "2026-10-03-portal-why-it-cannot-be-undone-phone.webp",
       "path": "/portal/activity",
       "viewport": "phone",
       "fullPage": true,
@@ -46,7 +46,7 @@
       }
     },
     {
-      "out": "2026-10-03-portal-why-it-cannot-be-undone-record-wide.png",
+      "out": "2026-10-03-portal-why-it-cannot-be-undone-record-wide.webp",
       "path": "/portal/activity",
       "viewport": "wide",
       "fullPage": true,

@@ -1,4 +1,6 @@
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm"
+import { and, asc, desc, eq, gt, lt, type SQL } from "drizzle-orm"
+
+import { DEFAULT_APPLICATION_ID, type ApplicationId, type StoreScope } from "../application/application.js"
 
 import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok, type Result } from "../result.js"
@@ -69,13 +71,14 @@ const toRevision = (
  */
 const newest = async (
   db: LoomDatabase,
+  project: ApplicationId,
   policyId: string
 ): Promise<Result<PolicyRevision | undefined, PolicyLogError>> => {
   try {
     const rows = await db
       .select()
       .from(loomPolicyRevisions)
-      .where(eq(loomPolicyRevisions.policyId, policyId))
+      .where(and(eq(loomPolicyRevisions.applicationId, project), eq(loomPolicyRevisions.policyId, policyId)))
       .orderBy(desc(loomPolicyRevisions.revision))
       .limit(1)
 
@@ -87,7 +90,21 @@ const newest = async (
   }
 }
 
-export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
+/**
+ * Every query is filtered by the project this handle speaks for (0260), and
+ * every write sets it.
+ *
+ * Without it `judgedUnder` would resolve a fingerprint against every policy
+ * revision the deployment holds, and answer with another project's policy text
+ * whenever two happened to fingerprint alike — which is a change reported as
+ * judged under rules it was never judged under.
+ */
+export const postgresPolicyLog = (db: LoomDatabase, scope: StoreScope = {}): PolicyLog => {
+  const project = scope.application ?? DEFAULT_APPLICATION_ID
+  const mine = (...rest: (SQL | undefined)[]) =>
+    and(eq(loomPolicyRevisions.applicationId, project), ...rest)
+
+  return {
   record: async (request) => {
     const policyId = request.policy.policyId
 
@@ -97,7 +114,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
      * below say *a unique violation on this insert means somebody else recorded*
      * rather than guessing which of two statements threw.
      */
-    const head = await newest(db, policyId)
+    const head = await newest(db, project, policyId)
     if (!head.ok) return head
 
     const racedAgainst = head.value?.revision ?? 0
@@ -108,6 +125,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
 
     try {
       await db.insert(loomPolicyRevisions).values({
+        applicationId: project,
         policyId: revision.policyId,
         revision: revision.revision,
         fingerprint: revision.fingerprint,
@@ -132,7 +150,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
        * of no use to it.
        */
       if (isUniqueViolation(cause)) {
-        const current = await newest(db, policyId)
+        const current = await newest(db, project, policyId)
 
         return err<PolicyLogError>({
           code: "out-of-date",
@@ -148,7 +166,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
   },
 
   current: async (policyId) => {
-    const head = await newest(db, policyId)
+    const head = await newest(db, project, policyId)
     if (!head.ok) return head
 
     return head.value === undefined
@@ -166,7 +184,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
      * the head read is what separates them — a page that came back empty because
      * the cursor was at the end is not a name nobody has recorded.
      */
-    const head = await newest(db, policyId)
+    const head = await newest(db, project, policyId)
     if (!head.ok) return head
     if (head.value === undefined) return err<PolicyLogError>({ code: "no-such-policy", policyId })
 
@@ -181,7 +199,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
         .select()
         .from(loomPolicyRevisions)
         .where(
-          and(
+          mine(
             eq(loomPolicyRevisions.policyId, policyId),
             from === undefined
               ? undefined
@@ -233,7 +251,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
         .select()
         .from(loomPolicyRevisions)
         .where(
-          and(
+          mine(
             eq(loomPolicyRevisions.policyId, policyId),
             eq(loomPolicyRevisions.fingerprint, fingerprint)
           )
@@ -262,7 +280,7 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
       const held = await db
         .selectDistinct({ fingerprint: loomPolicyRevisions.fingerprint })
         .from(loomPolicyRevisions)
-        .where(eq(loomPolicyRevisions.policyId, policyId))
+        .where(and(eq(loomPolicyRevisions.applicationId, project), eq(loomPolicyRevisions.policyId, policyId)))
         /**
          * Bounded for the same reason, and again without cost to the answer:
          * `heldShapes` only has to separate *nothing was recorded under this
@@ -283,4 +301,5 @@ export const postgresPolicyLog = (db: LoomDatabase): PolicyLog => ({
       return err(unavailable(cause, `could not resolve a policy fingerprint for ${policyId}`))
     }
   },
-})
+  }
+}

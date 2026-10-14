@@ -3,7 +3,7 @@
 **Routine:** `Loom daily build` (framework) · **Date:** 2026-09-14
 **Branch:** `framework-35-the-window-that-empties` · **Section:** §4c — reader signals
 
-![The window that empties, and the set that cannot be two sets](2026-09-14-framework-the-window-that-empties.png)
+![The window that empties, and the set that cannot be two sets](2026-09-14-framework-the-window-that-empties.webp)
 
 ## Two standing corrections to my brief, repeated because they are still true
 

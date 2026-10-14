@@ -3,15 +3,24 @@ import type { Metadata } from "next"
 import { describe, expect, it } from "vitest"
 
 import { askById } from "./_lib/adapt/asks"
+import { askRunFor } from "./_lib/render"
 import { shareImageFor } from "./_lib/share-image"
 import {
   cardHeadlineOf,
   displayAddress,
   pageMetadata,
+  routeMetadata,
   shareImageHref,
   type PageSearchParams,
 } from "./_lib/share"
-import { HOME, SITE_ROUTES, SITE_THEME_NAMES, siteOrigin, type SiteRoute } from "./_lib/site"
+import {
+  ASKED_ROUTE,
+  HOME,
+  SITE_ROUTES,
+  SITE_THEME_NAMES,
+  siteOrigin,
+  type SiteRoute,
+} from "./_lib/site"
 
 /**
  * That every page of this site actually announces itself.
@@ -67,6 +76,16 @@ const PAGE_MODULES: Readonly<Record<string, () => Promise<PageModule>>> = {
 }
 
 const ORIGIN = siteOrigin()
+
+/**
+ * One request, named once.
+ *
+ * `shorter` because it is the quietest of the list — the rules let it through
+ * on its own — so an assertion about *whether a page reads a request at all*
+ * is not also an assertion about a verdict.
+ */
+const ask = "shorter"
+const utterance = askById(ask)!.utterance
 
 const announcedBy = async (
   route: SiteRoute,
@@ -139,32 +158,98 @@ describe.each(SITE_ROUTES)("$path", (route) => {
 })
 
 /**
- * Why the front door is the one page that may not take the shared factory.
+ * Why no page of this site may decide for itself what it unfurls as.
  *
- * Every other page unfurls as a function of its route and the palette, which is
- * all `routeMetadata` reads. This one also unfurls as a function of **what the
- * visitor asked it for** — `/?ask=shorter` is the front door with a band lifted
- * under the headline, it has an address, and a card that showed the published
- * page for both would be silent at the exact moment this site is making the
- * claim nothing else can make.
+ * **This block was the opposite assertion until 11 October**, and the comment
+ * above it is worth keeping because it was right and then quietly stopped
+ * being:
  *
- * So it is asserted rather than left as a comment on the exception: if the front
- * door is ever quietly converted to the one-liner beside it, this goes red and
- * says what was lost.
+ * > *"Every other page unfurls as a function of its route and the palette, which
+ * > is all `routeMetadata` reads. This one also unfurls as a function of what the
+ * > visitor asked it for — `/?ask=shorter` is the front door with a band lifted
+ * > under the headline, it has an address, and a card that showed the published
+ * > page for both would be silent at the exact moment this site is making the
+ * > claim nothing else can make."*
+ *
+ * Every word of it was true of the front door until 1 October, when the
+ * maintainer moved the band to `/how-it-works`. After that the exception
+ * pointed at the wrong page from both ends: `/` announced a request it does not
+ * act on, and the page that acts on one took the factory that reads none. The
+ * assertion written to protect the exception passed the whole time, because what
+ * it held was *the front door reads an ask* — which was still true, and no
+ * longer the property worth having.
+ *
+ * So the exception is gone rather than moved. `routeMetadata` reads the whole
+ * address and `pageMetadata` drops what the route cannot use, and the page that
+ * runs a request is `ASKED_ROUTE` — one constant, read by the renderer, the
+ * address writer, the words and the picture. A band that moves again moves one
+ * line, and the test below says so by naming the constant rather than a path.
  */
-describe("the front door, which is asked for things", () => {
-  const ask = askById("shorter")!
+describe("every page takes the one factory", () => {
+  /**
+   * Every address this site writes, as the five states a page can be asked for.
+   *
+   * The sweep is the assertion rather than a convenience, and it is what one
+   * address could not do: a page keeping a reader of its own agrees with the
+   * factory on `{}` whatever it reads, because there is nothing in `{}` to read
+   * differently. The one that was wrong before today — `/how-it-works` taking a
+   * factory that read the palette and nothing else — is only visible on an
+   * address carrying a request.
+   */
+  const ADDRESSES: readonly (readonly [string, Record<string, string>])[] = [
+    ["nothing asked", {}],
+    ["a palette", { theme: "bold" }],
+    ["a request", { ask }],
+    ["a request the visitor allowed", { ask, approve: "1" }],
+    ["an undo", { ask: "unstick-menu", approve: "1", back: "1" }],
+    ["an undo the visitor allowed", { ask: "unstick-menu", approve: "1", back: "1", "back-yes": "1" }],
+  ]
 
+  describe.each(SITE_ROUTES)("$path", (route) => {
+    it.each(ADDRESSES)("is announced by the shared factory, given %s", async (_what, params) => {
+      const module = await PAGE_MODULES[route.path]!()
+
+      expect(await module.generateMetadata!({ searchParams: Promise.resolve(params) })).toEqual(
+        await routeMetadata(route)({ searchParams: Promise.resolve(params) })
+      )
+    })
+  })
+
+  /**
+   * The half the shape above cannot catch. A page agreeing with the factory is
+   * a page announced the way the factory announces it, which says nothing about
+   * whether the factory lands a request on the right page; what this asks is
+   * that it lands on exactly one, and names the constant rather than the path.
+   */
+  it("announces a request on one page of this site and no other", async () => {
+    const titles = await Promise.all(
+      SITE_ROUTES.map(async (route) => [route.path, (await announcedBy(route, { ask })).title])
+    )
+
+    expect(titles.filter(([, title]) => title === utterance).map(([path]) => path)).toEqual([
+      ASKED_ROUTE.path,
+    ])
+  })
+})
+
+/**
+ * The page a visitor can ask for a change to, which is `/how-it-works`.
+ *
+ * These are the four assertions that used to be written against the front door,
+ * pointed at the constant instead of at a path — so the next time the band
+ * moves, the pages it moved between are not what has to be edited.
+ */
+describe("the page that is asked for things", () => {
   it("titles a rearranged address with the request that made it", async () => {
-    expect((await announcedBy(HOME, { ask: ask.id })).title).toBe(ask.utterance)
+    expect((await announcedBy(ASKED_ROUTE, { ask })).title).toBe(utterance)
   })
 
   it("draws the arrangement rather than the published page", async () => {
-    const plain = new URL(pictureIn(await announcedBy(HOME)))
-    const asked = new URL(pictureIn(await announcedBy(HOME, { ask: ask.id, approve: "1" })))
+    const plain = new URL(pictureIn(await announcedBy(ASKED_ROUTE)))
+    const asked = new URL(pictureIn(await announcedBy(ASKED_ROUTE, { ask, approve: "1" })))
 
     expect(plain.searchParams.get("ask")).toBeNull()
-    expect(asked.searchParams.get("ask")).toBe(ask.id)
+    expect(asked.searchParams.get("ask")).toBe(ask)
     expect(asked.searchParams.get("approve")).toBe("1")
   })
 
@@ -174,10 +259,71 @@ describe("the front door, which is asked for things", () => {
    * merely into the query string.
    */
   it("carries the request as far as the card", async () => {
-    const asked = new URL(pictureIn(await announcedBy(HOME, { ask: ask.id })))
+    const asked = new URL(pictureIn(await announcedBy(ASKED_ROUTE, { ask })))
     const { card } = await shareImageFor(asked.searchParams, ORIGIN)
 
-    expect(card.headline).toBe(`“${ask.utterance}”`)
+    expect(card.headline).toBe(`“${utterance}”`)
     expect(card.eyebrow).toBeDefined()
+  })
+
+  /**
+   * The published front door, which is what `/` now announces and did not until
+   * today. It is asserted from this side as well as from the sweep above,
+   * because *the page that does not rearrange says nothing about a request* is
+   * the half of this move a reader of the site would notice: a link to
+   * `/?ask=shorter&approve=1` unfurled as a request and opened a page that had
+   * not been asked anything.
+   */
+  it("is the only page a request changes the announcement of", async () => {
+    expect(await announcedBy(HOME, { ask, approve: "1" })).toEqual(await announcedBy(HOME))
+  })
+})
+
+/**
+ * The undo, which is the one state of this site a competitor cannot screenshot
+ * and the one that had no card.
+ *
+ * `ShareContext` carried `ask` and `approve` and not `back` or `back-yes` — the
+ * same two-of-four the routes carried for the eight days *Put it back* did
+ * nothing — so every address of a held or landed undo unfurled as the change
+ * going through. The request below is the one whose undo the rules hold:
+ * `unstick-menu` changes a setting on a protected piece, and the change that
+ * reverses a setting change is another setting change on the same piece, so it
+ * is weighed the same way and held the same way.
+ */
+describe("an address that carries an undo", () => {
+  const held = { ask: "unstick-menu", approve: "1", back: "1" } as const
+
+  it("asks the picture for the undo as well as the change", async () => {
+    const picture = new URL(pictureIn(await announcedBy(ASKED_ROUTE, held)))
+
+    expect(picture.searchParams.get("back")).toBe("1")
+    expect(picture.searchParams.get("back-yes")).toBeNull()
+  })
+
+  it("unfurls as the verdict on the putting-back, not on the change", async () => {
+    const picture = new URL(pictureIn(await announcedBy(ASKED_ROUTE, held)))
+    const { card } = await shareImageFor(picture.searchParams, ORIGIN)
+    const run = await askRunFor({
+      origin: ORIGIN,
+      theme: "minimal",
+      ask: "unstick-menu",
+      approve: true,
+      back: true,
+    })
+
+    expect(run?.undone).toBeDefined()
+    expect(card.eyebrow).toBe(run!.undone!.verdictLabel)
+    expect(card.supporting).toBe(run!.undone!.verdictLine)
+    expect(card.headline).toBe(`“${run!.undone!.asked}”`)
+  })
+
+  /**
+   * The card moved, and the title did not. What a link is *about* is what
+   * somebody asked for; what happened to it is the card's half to report, which
+   * is how one title covers all four states of an address.
+   */
+  it("still titles itself with the request, not with the undo", async () => {
+    expect((await announcedBy(ASKED_ROUTE, held)).title).toBe(askById("unstick-menu")!.utterance)
   })
 })

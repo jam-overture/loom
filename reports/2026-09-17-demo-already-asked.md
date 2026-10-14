@@ -231,11 +231,11 @@ this branch's for the rest — so the only difference in a pair is the change.
 
 | | |
 | --- | --- |
-| [before](2026-09-17-demo-already-asked-before.png) | `main`, two presses of one button: **“2 questions are still waiting on you”** over a page carrying one ring, and *Take the numbers off* still sitting in the list ready to make a third |
-| [after](2026-09-17-demo-already-asked-after.png) | this branch, one press: the ask is gone from the list, the four that remain are where they were, and the count matches the page |
-| [two questions](2026-09-17-demo-already-asked-two-questions.png) | the genuine plural — *Take the numbers off* then *Add the opening hours*: **2 questions**, **two** differently-worded marks on the page, two different cards. The plural is kept; only the copy of one question is gone |
-| [phone](2026-09-17-demo-already-asked-phone.png) | 390×844 after the press. `scrollWidth` 390 against `innerWidth` 390 — no horizontal overflow |
-| [arrival](2026-09-17-demo-already-asked-arrival.png) | the first screen, unchanged: `md5` identical to `main`'s |
+| [before](2026-09-17-demo-already-asked-before.webp) | `main`, two presses of one button: **“2 questions are still waiting on you”** over a page carrying one ring, and *Take the numbers off* still sitting in the list ready to make a third |
+| [after](2026-09-17-demo-already-asked-after.webp) | this branch, one press: the ask is gone from the list, the four that remain are where they were, and the count matches the page |
+| [two questions](2026-09-17-demo-already-asked-two-questions.webp) | the genuine plural — *Take the numbers off* then *Add the opening hours*: **2 questions**, **two** differently-worded marks on the page, two different cards. The plural is kept; only the copy of one question is gone |
+| [phone](2026-09-17-demo-already-asked-phone.webp) | 390×844 after the press. `scrollWidth` 390 against `innerWidth` 390 — no horizontal overflow |
+| [arrival](2026-09-17-demo-already-asked-arrival.webp) | the first screen, unchanged: `md5` identical to `main`'s |
 
 Not the preview deployment, which this environment cannot open (`vercel.app` is
 not on the sandbox's egress allowlist; the standing 19 August finding).

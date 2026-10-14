@@ -89,24 +89,17 @@ export const SignInHero = ({
     )}
 
     <div className="border-edge-subtle flex flex-col gap-3 border-t pt-6">
+      {/*
+       * **No demo link here either**, on the maintainer's instruction of 12
+       * October, which was to take it out of the portal. One stood in this
+       * block and the block was built around it — *don't have a key? see the
+       * demo* — so the copy went with it. What is left is the way back, which
+       * is what a person without a key actually needs from a sign-in screen.
+       */}
       <p className="text-ink-muted text-xs">
-        Don't have a key? You can still see what Loom does, no sign-in needed.
+        Don't have a key? Whoever set this deployment up can issue you one.
       </p>
       <div className="flex flex-wrap items-center gap-4">
-        {/*
-         * The single obvious next-action for a visitor who does not hold a
-         * key, which is now the largest population reaching this page — the
-         * marketing site's Sign-in action is what sends them here (0070).
-         * `/demo` is outside the proxy's matcher entirely (it matches
-         * `/portal` and nothing else), so this link does not send them back
-         * through the redirector.
-         */}
-        <Link
-          href="/demo"
-          className="border-edge-subtle bg-surface-base hover:bg-surface-hover rounded-md border px-3 py-2 text-sm"
-        >
-          See the live demo
-        </Link>
         {/*
          * The way out. `/` is the marketing home — the front door that sent
          * them here, so the loop closes. The topbar's wordmark now points at

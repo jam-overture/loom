@@ -12,8 +12,8 @@ reported it, and nothing connected the two.
 
 | the same address, `/?ask=drop-pitch` | |
 | --- | --- |
-| before — `main` | ![](2026-09-26-marketing-the-way-back-before-refused-wide.png) |
-| after — this branch | ![](2026-09-26-marketing-the-way-back-after-refused-wide.png) |
+| before — `main` | ![](2026-09-26-marketing-the-way-back-before-refused-wide.webp) |
+| after — this branch | ![](2026-09-26-marketing-the-way-back-after-refused-wide.webp) |
 
 ---
 
@@ -34,7 +34,7 @@ added. Outside `app/(marketing)/`: `FINDINGS.md` and this report.
 
 ### The notice, and where it now goes
 
-![the notice, 1280](2026-09-26-marketing-the-way-back-after-wide.png)
+![the notice, 1280](2026-09-26-marketing-the-way-back-after-wide.webp)
 
 Three controls where there were two: the decision, then the look that does not
 leave, then the record page. The new one is `quiet` and sits in the middle
@@ -44,9 +44,9 @@ another click should meet *stay here* before *go elsewhere*.
 Pressing it lands on the band that ran the change, with the panel of five lines
 already filled in:
 
-![where it lands, 1280](2026-09-26-marketing-the-way-back-lands-wide.png)
+![where it lands, 1280](2026-09-26-marketing-the-way-back-lands-wide.webp)
 
-![where it lands, 390](2026-09-26-marketing-the-way-back-lands-phone.png)
+![where it lands, 390](2026-09-26-marketing-the-way-back-lands-phone.webp)
 
 The clearance under the sticky header is not this composition's doing: an
 `anchor` brings `scrollMarginBlockStart` with it in the library, which is the

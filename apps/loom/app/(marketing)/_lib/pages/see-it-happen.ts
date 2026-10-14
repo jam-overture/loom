@@ -1,12 +1,12 @@
 import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
-import { whatTheChoicesDo, worthWatching } from "../adapt/answers"
+import { whatTheChoicesDo, whyTheyArePrepared, worthWatching } from "../adapt/answers"
 import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
 import { heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
-import { askHref, DEMO, mechanismHref, surfaceHref, type SiteThemeName } from "../site"
+import { askHref, askPath, DEMO, type SiteThemeName, surfacePath } from "../site"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -228,8 +228,7 @@ const readTheRecord = (
   buildElement(ids, {
     type: "loom.action",
     props: {
-      href: mechanismHref(context.origin, {
-        theme: context.theme,
+      href: askHref(context.origin, {
         ask: record.ask,
         approve: context.approve === true,
       }),
@@ -243,10 +242,9 @@ const panelActions = (
   context: SeeItHappenContext,
   record: ChangeRecord
 ): readonly LoomNode[] => {
-  const home = askHref(context.origin, { theme: context.theme })
+  const home = askPath()
   /** Everything the visitor has done so far, which every link from here must keep. */
   const sofar = {
-    theme: context.theme,
     ask: record.ask,
     ...(context.approve === true ? { approve: true } : {}),
   }
@@ -260,9 +258,7 @@ const panelActions = (
             buildElement(ids, {
               type: "loom.action",
               props: {
-                href: askHref(
-                  context.origin,
-                  record.putBack
+                href: askPath(record.putBack
                     ? { ...sofar, back: true, backApprove: true }
                     : { ...sofar, approve: true }
                 ),
@@ -287,7 +283,7 @@ const panelActions = (
       buildElement(ids, {
         type: "loom.action",
         props: {
-          href: reversible ? askHref(context.origin, { ...sofar, back: true }) : home,
+          href: reversible ? askPath({ ...sofar, back: true }) : home,
           variant: reversible ? "primary" : "secondary",
         },
         children: [buildText(ids, reversible ? "Put it back" : "Start again")],
@@ -443,11 +439,11 @@ const protectionNotice = (): string => {
 /**
  * The band's own limit, said out loud, with the way past it attached.
  *
- * Five prepared choices are the only affordable shape for this surface — a text
- * box on the most-loaded page the project has is a model call for every visitor
- * and a dead button for every deployment without a key — and that leaves a real
+ * Prepared choices are the only affordable shape for this surface — a text box
+ * on the most-loaded page the project has is a model call for every visitor and
+ * a dead button for every deployment without a key — and that leaves a real
  * gap: the hero two bands above promises *ask for a change in your own words*,
- * and this band offers five buttons.
+ * and this band offers a row of buttons.
  *
  * The gap has been the standing open question on this lane since 20 August, and
  * the recommendation each time was the same: send people somewhere built for
@@ -468,7 +464,7 @@ const protectionNotice = (): string => {
  * a link that rebuilt the address from scratch would throw away at the worst
  * possible moment.
  */
-const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly LoomNode[] => [
+const typeYourOwn = (ids: IdFactory): readonly LoomNode[] => [
   stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
     /**
      * Measured, so the sentence and the way out sit on one line rather than the
@@ -476,11 +472,7 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
      * of its own. The band is `wide`, and an unmeasured small line crosses all
      * of it.
      */
-    prose(
-      ids,
-      "These five are prepared, so the whole sequence runs here without calling an AI model. To ask for something in your own words, try the demo. It is a page you can type into.",
-      { tone: "muted", size: "small", measured: true }
-    ),
+    prose(ids, whyTheyArePrepared(), { tone: "muted", size: "small", measured: true }),
     buildElement(ids, {
       type: "loom.action",
       props: {
@@ -498,7 +490,7 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
          * handed a parameter that means nothing and looks like it means
          * something.
          */
-        href: surfaceHref(context.origin, DEMO),
+        href: surfacePath(DEMO),
         ...TERTIARY_CONTROL,
       },
       children: [buildText(ids, "Try the demo")],
@@ -516,7 +508,7 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
         buildElement(ids, {
           type: "loom.action",
           props: {
-            href: askHref(context.origin, { theme: context.theme, ask: ask.id }),
+            href: askPath({ ask: ask.id }),
             variant: context.ask === ask.id ? "primary" : "secondary",
           },
           children: [buildText(ids, ask.label)],
@@ -588,6 +580,6 @@ export const seeItHappenBand = (ids: IdFactory, context: SeeItHappenContext): Lo
        */
       choices(ids, context),
       ...panels(ids, context),
-      ...typeYourOwn(ids, context),
+      ...typeYourOwn(ids),
     ],
   })

@@ -1,27 +1,24 @@
 import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
 import type { AskId } from "./adapt/asks"
-import { COUNTED_ANCHOR } from "./bands"
 import { LICENSE_NOTICE } from "./copy"
 import { action, link, prose, stack } from "./nodes"
 import {
-  askHref,
   DECISIONS_URL,
   HOME,
-  HOW_IT_WORKS,
-  internalHref,
-  otherThemes,
+  LICENSE_URL,
+  paletteHref,
   PORTAL,
   PRODUCT_SURFACES,
   readingNeighbors,
   REPOSITORY_URL,
-  LICENSE_URL,
   SITE_ROUTES,
+  SITE_THEME_NAMES,
   SITE_THEMES,
-  surfaceHref,
-  WHAT_YOU_RUN,
+  sitePath,
   type SiteRoute,
   type SiteThemeName,
+  surfacePath,
 } from "./site"
 
 /**
@@ -105,12 +102,7 @@ export type ChromeContext = {
  * the *same* page underneath.
  */
 const inAnotherPalette = (context: ChromeContext, palette: SiteThemeName): string =>
-  context.current.path === HOW_IT_WORKS.path
-    ? askHref(context.origin, {
-        theme: palette,
-        ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
-      })
-    : internalHref(context.origin, context.current.path, palette)
+  paletteHref(context.current.path, palette)
 
 /**
  * A menu item, and the page the reader is already on says so.
@@ -121,7 +113,7 @@ const inAnotherPalette = (context: ChromeContext, palette: SiteThemeName): strin
  * is the accessible fact and the styling in one prop.
  */
 const menuLink = (ids: IdFactory, context: ChromeContext, route: SiteRoute): LoomNode =>
-  link(ids, route.label, internalHref(context.origin, route.path, context.theme), {
+  link(ids, route.label, sitePath(route.path), {
     scale: "medium",
     ...(route.path === context.current.path ? { current: true } : {}),
   })
@@ -145,13 +137,27 @@ const menuLink = (ids: IdFactory, context: ChromeContext, route: SiteRoute): Loo
  */
 export const MARK_PATH = "M5 5h14v6H5z M21 5h6v14H21z M13 21h14v6H13z M5 13h6v14H5z"
 
-const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
+/**
+ * The most things the bar across the top may carry, counting its action.
+ *
+ * Eight, because eight is the number the maintainer looked at on #166 and said
+ * was too many. It is written here as the one place that answers *how many*,
+ * and `bar.test.ts` is what makes it a rule rather than a note: a page or a
+ * surface flagged into a full bar fails the gate on the run that flags it,
+ * naming what the bar already holds.
+ *
+ * It does not say which items. That is each page's and each surface's own
+ * `inMenu`, argued where the thing being left in or out is defined.
+ */
+export const BAR_CEILING = 8
+
+const wordmark = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.brand",
     props: {
       name: "Loom",
       mark: MARK_PATH,
-      href: internalHref(context.origin, HOME.path, context.theme),
+      href: sitePath(HOME.path),
     },
   })
 
@@ -159,8 +165,8 @@ const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
  * The bar across the top: the mark, the menu, and the one thing the page wants
  * you to do.
  *
- * The menu is the pages and the surfaces marked `inMenu` — today three of this
- * site's five pages, the demonstration and the documentation. The portal is the
+ * The menu is the pages and the surfaces marked `inMenu` — today two of this
+ * site's three pages, the demonstration and the documentation. The portal is the
  * action rather than a menu item, and its word is **Sign in** rather than its
  * name: a stranger has no idea what a portal is, and the bar's right-hand action
  * is where every site they have used puts the way in.
@@ -188,19 +194,26 @@ const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
  * halves now, and the guarantee is the one the surfaces already had: what the
  * bar leaves out, the footer's map carries — marked as the page the reader is
  * on, so a page off the bar still says where you are.
+ *
+ * **What the flag could not do is say how many is too many**, which is the
+ * question #166 actually asked. Eight flags set one at a time are eight
+ * paragraphs each arguing that this page is worth its slot, and the ninth
+ * arrives in a run that reads none of them. So the ceiling is a number here
+ * rather than an argument in eight files, and `bar.test.ts` counts the bar
+ * against it.
  */
 export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
   buildElement(ids, {
     type: "loom.nav",
     props: { tone: "surface", position: "sticky", align: "end" },
     children: [
-      buildSlot(ids, "brand", [wordmark(ids, context)]),
+      buildSlot(ids, "brand", [wordmark(ids)]),
       ...SITE_ROUTES.filter((route) => route.inMenu).map((route) => menuLink(ids, context, route)),
       ...PRODUCT_SURFACES.filter((surface) => surface.inMenu).map((surface) =>
-        link(ids, surface.label, surfaceHref(context.origin, surface), { scale: "medium" })
+        link(ids, surface.label, surfacePath(surface), { scale: "medium" })
       ),
       buildSlot(ids, "actions", [
-        action(ids, SIGN_IN_LABEL, surfaceHref(context.origin, PORTAL), {
+        action(ids, SIGN_IN_LABEL, surfacePath(PORTAL), {
           variant: "secondary",
           scale: "small",
         }),
@@ -220,42 +233,6 @@ const linkGroup = (
   })
 
 /**
- * What the foot of the page says when this deployment is counting its readers,
- * and says nowhere when it is not.
- *
- * **It is here because it has to be on every page.** The broadcaster is started
- * by the layout, so whichever of the ten pages somebody landed on is counting
- * them, and the one page *about* counting cannot be the only page that mentions
- * it — a reader who never reaches `/what-readers-do` would never have been told.
- * The footer is the band every page ends with and the one that already carries
- * the things that are true of the whole site.
- *
- * **What it may promise is exactly what `asked.ts` asks for**, which is why the
- * sentence names parts rather than people: the bands a reader reached, how long
- * they were on screen, and what they pressed. The second half is the one worth
- * the words — there is nowhere in a signal to put a name, an account or
- * anything that joins one visit to another (0146), so *never who you are* is a
- * property of the record rather than a setting somebody left switched on.
- *
- * The link is the page that says the rest of it, labeled with its own route
- * label so the two cannot drift apart.
- */
-const countingNote = (ids: IdFactory, context: ChromeContext): LoomNode =>
-  stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
-    prose(
-      ids,
-      "This page counts which of its parts you reach, how long you stay and what you press. It never counts who you are.",
-      { size: "small", tone: "muted" }
-    ),
-    link(
-      ids,
-      "What is counted",
-      `${internalHref(context.origin, WHAT_YOU_RUN.path, context.theme)}#${COUNTED_ANCHOR}`,
-      { tone: "muted", scale: "small" }
-    ),
-  ])
-
-/**
  * The band that closes the page, and the only complete map of the product on
  * it.
  *
@@ -269,7 +246,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
     props: { tone: "plain", columns: "three" },
     children: [
       buildSlot(ids, "brand", [
-        wordmark(ids, context),
+        wordmark(ids),
         prose(ids, "Your AI can change this page. You can see exactly what it changed.", {
           size: "small",
           tone: "muted",
@@ -279,7 +256,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
         ids,
         "This site",
         SITE_ROUTES.map((route) =>
-          link(ids, route.label, internalHref(context.origin, route.path, context.theme), {
+          link(ids, route.label, sitePath(route.path), {
             tone: "muted",
             scale: "small",
             ...(route.path === context.current.path ? { current: true } : {}),
@@ -290,7 +267,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
         ids,
         "The product",
         PRODUCT_SURFACES.map((surface) =>
-          link(ids, surface.label, surfaceHref(context.origin, surface), {
+          link(ids, surface.label, surfacePath(surface), {
             tone: "muted",
             scale: "small",
           })
@@ -314,7 +291,6 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
             external: true,
           }),
         ]),
-        ...(context.counting === true ? [countingNote(ids, context)] : []),
         /**
          * The re-theme, offered rather than described. Each is an ordinary link
          * to the same route wearing another palette, and what comes back is the
@@ -323,7 +299,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
          */
         stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
           prose(ids, PALETTE_SWITCHER_LABEL, { size: "small", tone: "muted" }),
-          ...otherThemes(context.theme).map((name) =>
+          ...SITE_THEME_NAMES.map((name) =>
             link(
               ids,
               SITE_THEMES[name].label,
@@ -454,7 +430,7 @@ export const siteReadingBand = (
   if (before === undefined) return []
 
   const cards: readonly LoomNode[] = [
-    wayOn(ids, BEFORE_LABEL, before.label, internalHref(context.origin, before.path, context.theme)),
+    wayOn(ids, BEFORE_LABEL, before.label, sitePath(before.path)),
     ...(after === undefined
       ? []
       : [
@@ -462,7 +438,7 @@ export const siteReadingBand = (
             ids,
             NEXT_LABEL,
             after.label,
-            internalHref(context.origin, after.path, context.theme)
+            sitePath(after.path)
           ),
         ]),
     /**
@@ -473,7 +449,7 @@ export const siteReadingBand = (
      */
     ...(onward === undefined
       ? []
-      : [wayOn(ids, NEXT_LABEL, onward.label, surfaceHref(context.origin, onward))]),
+      : [wayOn(ids, NEXT_LABEL, onward.label, surfacePath(onward))]),
   ]
 
   return [

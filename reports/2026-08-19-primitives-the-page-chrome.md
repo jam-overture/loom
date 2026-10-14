@@ -8,9 +8,9 @@ been sitting in the findings queue for two days and
 [0068](../decisions/0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md),
 which is what it turned into once two of the six answers turned out to be wrong.
 
-![The chrome under the editorial palette](2026-08-19-primitives-the-page-chrome-editorial.png)
+![The chrome under the editorial palette](2026-08-19-primitives-the-page-chrome-editorial.webp)
 
-![The same specimen under the bold palette](2026-08-19-primitives-the-page-chrome-bold.png)
+![The same specimen under the bold palette](2026-08-19-primitives-the-page-chrome-bold.webp)
 
 ## Which primitives, and why those
 

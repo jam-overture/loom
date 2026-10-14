@@ -2,7 +2,7 @@ import { buildElement, buildSlot, buildText, createTree, sequentialIdFactory } f
 import { describe, expect, it } from "vitest"
 
 import { demoPageTree } from "./page-tree"
-import { THE_TOP_OF_IT, thePageItself } from "./the-page-itself"
+import { THE_TOP_OF_IT, THE_TOP_OF_IT_NOW, THE_WINDOW, thePageItself } from "./the-page-itself"
 
 /**
  * The reading on its own, over the demo's real tree and over three trees it
@@ -25,7 +25,7 @@ describe("thePageItself", () => {
     const tree = demoPageTree()
     const hero = tree.root.kind === "element" ? tree.root.children[0] : undefined
 
-    const window = thePageItself({ tree, asked: false })
+    const window = thePageItself({ tree, shownElsewhere: false, landed: false })
 
     expect(window?.tree.root.id).toBe(hero?.id)
     expect(window?.tree.treeId).toBe(tree.treeId)
@@ -44,7 +44,7 @@ describe("thePageItself", () => {
     const hero = tree.root.kind === "element" ? tree.root.children[0] : undefined
     const inside = hero?.kind === "element" ? hero.children[0] : undefined
 
-    const window = thePageItself({ tree, asked: false })
+    const window = thePageItself({ tree, shownElsewhere: false, landed: false })
 
     expect(inside).toBeDefined()
     expect(window?.tree.root.id).not.toBe(inside?.id)
@@ -56,14 +56,87 @@ describe("thePageItself", () => {
   /**
    * The one silence, and the whole of the condition.
    *
-   * From the first press onwards every screen on this surface already brings
-   * the page to the visitor — the question renders the band it is about inside
-   * itself, answering carries them to the mark on the page, and a removal's
-   * content is in the landed card. The arrival screen is the one screen with no
-   * page on it.
+   * A screen where a card is rendering a band, or the stage is carrying a mark,
+   * already has the page in front of the visitor — so a second window onto the
+   * top of it would be the surface talking for its own sake. That is what the
+   * condition was always claiming; until this run it was spelled *the visitor
+   * has asked for something*, which was the same thing only while the first
+   * press raised a question.
    */
-  it("says nothing once the visitor has asked for something", () => {
-    expect(thePageItself({ tree: demoPageTree(), asked: true })).toBeUndefined()
+  it("says nothing when something else is already showing the page", () => {
+    expect(
+      thePageItself({ tree: demoPageTree(), shownElsewhere: true, landed: false })
+    ).toBeUndefined()
+    expect(
+      thePageItself({ tree: demoPageTree(), shownElsewhere: true, landed: true })
+    ).toBeUndefined()
+  })
+
+  /**
+   * And the state this run exists for: a change has landed and nothing else is
+   * showing the page, which on this surface is a change to the page *itself* —
+   * applied rather than held, so no band is in a card, and a configure against
+   * the root, so `spotFor` draws no mark.
+   *
+   * Measured on `main` at `39c6ef3`, 390 × 844: after that press the window
+   * went, the record landed at `y 981`, and the clinic's own `h1` stood at
+   * `y 1,998`. The window is the only thing that can be on that screen.
+   */
+  it("stays, with the caption that says so, once a change of theirs is on the page", () => {
+    const window = thePageItself({ tree: demoPageTree(), shownElsewhere: false, landed: true })
+
+    expect(window?.caption).toBe(THE_TOP_OF_IT_NOW)
+  })
+
+  /**
+   * And it says which press moved it, which is the half of the answer the
+   * caption cannot carry: the window being on the screen and the visitor being
+   * on the window are two different facts.
+   *
+   * The press this demo opens with is made with the window in front of them.
+   * Its inverse is pressed on the record card, measured at 922 pixels down a
+   * phone's rail on a production build of `demo-44` — so the page went back in
+   * a window nobody was looking at. `page-in-view.tsx` reads this field and has
+   * the table.
+   *
+   * **The revision, and the same answer decides it as decides the caption.** A
+   * window captioned *now* is a window a press has just changed, so a run that
+   * made one of the two conditional on something else would be giving this one
+   * screen two opinions about who moved it.
+   */
+  it("carries the revision the press produced, so the visitor can be brought to it", () => {
+    const tree = demoPageTree()
+
+    const window = thePageItself({ tree, shownElsewhere: false, landed: true })
+
+    expect(window?.moved).toBe(String(tree.revision))
+    expect(window?.caption).toBe(THE_TOP_OF_IT_NOW)
+  })
+
+  /**
+   * And a declined question is not a change: the page is where it was, so the
+   * window comes back saying what it said on arrival. The two booleans are read
+   * off two different values in `rail.ts` (`landing`, and the marks and bands)
+   * exactly so this state can differ from the one above.
+   */
+  it("does not say *now* over a page the visitor left where it was", () => {
+    const window = thePageItself({ tree: demoPageTree(), shownElsewhere: false, landed: false })
+
+    expect(window?.caption).toBe(THE_TOP_OF_IT)
+  })
+
+  /**
+   * And it carries nobody to a page that has not moved, which is the same
+   * sentence read the other way. A visitor on the arrival screen has not
+   * pressed anything; a visitor who declined a question has pressed something
+   * and the page is where it started. Neither is a landing, and scrolling
+   * either of them would be the surface moving for its own reasons — which is
+   * the rule `AnswerInView` already states about not acting on arrival.
+   */
+  it("moves nobody on arrival, or after a question they declined", () => {
+    expect(
+      thePageItself({ tree: demoPageTree(), shownElsewhere: false, landed: false })?.moved
+    ).toBeUndefined()
   })
 
   /**
@@ -84,7 +157,7 @@ describe("thePageItself", () => {
       ids
     )
 
-    expect(thePageItself({ tree, asked: false })?.tree.root.id).toBe(band.id)
+    expect(thePageItself({ tree, shownElsewhere: false, landed: false })?.tree.root.id).toBe(band.id)
   })
 
   /**
@@ -104,7 +177,7 @@ describe("thePageItself", () => {
       ids
     )
 
-    expect(thePageItself({ tree, asked: false })).toBeUndefined()
+    expect(thePageItself({ tree, shownElsewhere: false, landed: false })).toBeUndefined()
   })
 
   /**
@@ -119,7 +192,37 @@ describe("thePageItself", () => {
    */
   it("says what the window is a part of, and tells nobody to scroll", () => {
     expect(THE_TOP_OF_IT).toBe("This is the top of it.")
-    expect(THE_TOP_OF_IT.toLowerCase()).not.toContain("scroll")
-    expect(THE_TOP_OF_IT.toLowerCase()).not.toContain("below")
+
+    for (const caption of [THE_TOP_OF_IT, THE_TOP_OF_IT_NOW]) {
+      expect(caption.toLowerCase()).not.toContain("scroll")
+      expect(caption.toLowerCase()).not.toContain("below")
+    }
+  })
+
+  /**
+   * And the second caption is the first one with a word on it, which is the
+   * claim worth holding: the window's job does not change when a change lands,
+   * so its line should not become a different sentence. What it must not do is
+   * narrate the change — that is the record card's, forty pixels down, and a
+   * caption competing with it is the third place one change is told about.
+   */
+  /**
+   * And the name the document knows the window by, pinned as a literal rather
+   * than compared against itself.
+   *
+   * `page-in-view.tsx` looks the window up by this and the section answers to
+   * it, which is the shape `AnswerInView` already has with a record id: the
+   * element is rendered on the server, so what crosses the boundary is a name.
+   * A test that interpolated the constant would be green on any misspelling,
+   * which this lane filed twice in three days in October.
+   */
+  it("names the window, so the lookup and the section read one string", () => {
+    expect(THE_WINDOW).toBe("the-page-itself")
+  })
+
+  it("says the same thing after a change, plus that it is the page as it stands", () => {
+    expect(THE_TOP_OF_IT_NOW).toBe("This is the top of it, now.")
+    expect(THE_TOP_OF_IT_NOW.startsWith(THE_TOP_OF_IT.replace(".", ""))).toBe(true)
+    expect(THE_TOP_OF_IT_NOW).not.toMatch(/loom|chang|re-theme|applied/i)
   })
 })

@@ -9,7 +9,7 @@ its own, "since it is scaffolding rather than a subject".
 
 Reading `src/cli/` changed my mind, and the reason is the third file it writes.
 
-![The page a stranger meets straight after Installation](2026-08-29-docs-scaffolding-a-project.png)
+![The page a stranger meets straight after Installation](2026-08-29-docs-scaffolding-a-project.webp)
 
 ## What shipped
 
@@ -48,7 +48,7 @@ does not fit in a paragraph under *Installation*.
 
 ## The registry rewrites itself, and the page shows it happening
 
-![Two commands, one directory, and the second one regenerating what the first wrote](2026-08-29-docs-scaffolding-a-project-registry.png)
+![Two commands, one directory, and the second one regenerating what the first wrote](2026-08-29-docs-scaffolding-a-project-registry.webp)
 
 The session runs `loom init` and then `loom add primitive commerce.product-card`
 against the **same** disk, in order — the second command's plan is a function of
@@ -64,7 +64,7 @@ about itself.
 
 ## Eight refusals, and a ninth would be a type error
 
-![What the command says no to, and what each refusal is protecting](2026-08-29-docs-scaffolding-a-project-refusals.png)
+![What the command says no to, and what each refusal is protecting](2026-08-29-docs-scaffolding-a-project-refusals.webp)
 
 The table is built from a `Record<CliError["code"], RefusalSpec>`. That is the
 whole guard: **a ninth refusal added to the runtime does not compile against
@@ -144,7 +144,7 @@ three other surfaces print flag-shaped text and no test can see this.
 sentence was written with `` `registry` `` in it and rendered with the backticks
 showing. Component props are not markdown; only MDX is. Rewritten as prose.
 
-![The band at a true 390px, where the terminal wraps and the header collapses to two controls](2026-08-29-docs-scaffolding-a-project-phone.png)
+![The band at a true 390px, where the terminal wraps and the header collapses to two controls](2026-08-29-docs-scaffolding-a-project-phone.webp)
 
 Dark and 390px were both checked before the pull request rather than after.
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport.

@@ -1,10 +1,10 @@
 import type { ResolvedTheme } from "@jam-overture/loom"
 
-import { readAskId } from "./adapt/asks"
+import { askedFor } from "./addressed"
 import { siteThemes } from "./registry"
 import { askRunFor } from "./render"
 import { askedCard, publishedCard, type ShareCard } from "./share"
-import { HOME, SITE_ROUTES, readThemeName, SITE_THEMES, type SiteRoute } from "./site"
+import { HOME, SITE_ROUTES, isAskedRoute, readThemeName, SITE_THEMES, type SiteRoute } from "./site"
 
 /**
  * An address, turned into the card that address should unfurl as.
@@ -55,22 +55,40 @@ export const shareImageFor = async (
 ): Promise<ShareImageRequest> => {
   const route = routeFor(params.get("page"))
   const theme = themeFor(params.get("theme"))
-  const ask = route.path === HOME.path ? readAskId(params.get("ask") ?? undefined) : undefined
 
-  if (ask === undefined) {
+  /**
+   * **The address is read by the function every page reads its own with**, and
+   * it was read by hand here until 11 October — four `params.get` calls, two of
+   * which were the two the page needed. So a link carrying an undo drew the
+   * picture of the change going through, and the state the whole band argues
+   * towards had no card at all.
+   *
+   * `URLSearchParams` is not the shape `askedFor` takes, which is the one line
+   * of glue between the two readers and the only honest place for it: the
+   * parameters a crawler sends are the parameters a visitor sends, and the
+   * names are `ADDRESS_PARAMS`' in both directions.
+   */
+  const state = askedFor(Object.fromEntries(params))
+
+  if (state.ask === undefined || !isAskedRoute(route)) {
     return { route, card: publishedCard(route, origin), theme }
   }
 
-  const run = await askRunFor({
-    origin,
-    theme: readThemeName(params.get("theme") ?? undefined),
-    ask,
-    approve: params.get("approve") === "1",
-  })
+  const run = await askRunFor({ ...state, origin })
+
+  /**
+   * **The undo when the address reached one**, and the change when it did not.
+   *
+   * `undone` is present only when the visitor had pressed *Put it back* and
+   * there was something to put back, so this is not a choice between two
+   * accounts of one event — it is the last verdict the address reaches, which
+   * is the state of the page the link opens.
+   */
+  const reached = run === undefined ? undefined : run.undone ?? run.record
 
   return {
     route,
-    card: run === undefined ? publishedCard(route, origin) : askedCard(run.record, origin),
+    card: reached === undefined ? publishedCard(route, origin) : askedCard(reached, origin),
     theme,
   }
 }

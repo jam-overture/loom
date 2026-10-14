@@ -58,7 +58,7 @@ into a team channel under *look at this*, and `docs/rollout.md` names this lane
 the conversion artefact for launch. The one surface built to be handed to a
 stranger was the one surface that could not be handed to anybody.
 
-[What a paste produced, and what it produces now.](2026-09-22-demo-a-link-worth-sending-unfurled.png)
+[What a paste produced, and what it produces now.](2026-09-22-demo-a-link-worth-sending-unfurled.webp)
 
 ## What a stranger can understand now
 
@@ -72,7 +72,7 @@ exists to make true —
 
 > **Loom will not make this change until you say yes.**
 
-[The card, at full size.](2026-09-22-demo-a-link-worth-sending-card.png)
+[The card, at full size.](2026-09-22-demo-a-link-worth-sending-card.webp)
 
 The split is the composition because the split is the argument. This surface's
 one structural decision is that the stage is light and the rail is dark, so a
@@ -81,7 +81,7 @@ visitor can tell the page being changed from the thing changing it
 than of a claim. It is also the only thing that survives the size these are
 actually seen at.
 
-[The same card at 280px and 180px](2026-09-22-demo-a-link-worth-sending-thumbnail.png)
+[The same card at 280px and 180px](2026-09-22-demo-a-link-worth-sending-thumbnail.webp)
 — a phone in a thread, and the smallest any client draws one. The split, the
 ring and the verdict all still read.
 
@@ -312,9 +312,9 @@ Nothing blocking.
 
 | | |
 | --- | --- |
-| [pasted into a channel, before and after](2026-09-22-demo-a-link-worth-sending-unfurled.png) | `main` draws the title and the sentence and no picture; X draws nothing at all |
-| [the card, full size](2026-09-22-demo-a-link-worth-sending-card.png) | 1200 × 630, the file `/demo/opengraph-image` serves |
-| [at 280px and 180px](2026-09-22-demo-a-link-worth-sending-thumbnail.png) | the sizes it is actually seen at |
+| [pasted into a channel, before and after](2026-09-22-demo-a-link-worth-sending-unfurled.webp) | `main` draws the title and the sentence and no picture; X draws nothing at all |
+| [the card, full size](2026-09-22-demo-a-link-worth-sending-card.webp) | 1200 × 630, the file `/demo/opengraph-image` serves |
+| [at 280px and 180px](2026-09-22-demo-a-link-worth-sending-thumbnail.webp) | the sizes it is actually seen at |
 
 **The page itself did not move by a pixel.** `/demo` at 1280 × 900, driven
 against a `next build` of `main` and of this branch, is the same file both

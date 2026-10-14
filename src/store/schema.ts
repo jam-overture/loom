@@ -15,14 +15,29 @@ import { index, integer, jsonb, pgTable, primaryKey, text, timestamp } from "dri
  * decomposed into node rows — the tree is read and written whole, and a schema
  * that shredded it would have to be migrated every time §1 changes the AST.
  */
-export const loomTrees = pgTable("loom_trees", {
-  treeId: text("tree_id").primaryKey(),
-  revision: integer("revision").notNull(),
-  document: jsonb("document").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
-})
+export const loomTrees = pgTable(
+  "loom_trees",
+  {
+    /**
+     * The project the tree belongs to (0260). First in the key rather than
+     * beside it: every read this store performs is already inside one project,
+     * so a composite key led by the project is the index those reads want, and
+     * a tree id only has to be unique within its own project.
+     *
+     * Defaulted so a database written before projects existed keeps answering.
+     * `DEFAULT_APPLICATION_ID` is the value, spelled out here because DDL cannot
+     * import it — `project.test.ts` holds the two together.
+     */
+    applicationId: text("application_id").notNull().default("app_default"),
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    document: jsonb("document").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [primaryKey({ columns: [table.applicationId, table.treeId] })]
+)
 
 /**
  * The log. The composite primary key is load-bearing rather than incidental: it
@@ -37,6 +52,8 @@ export const loomTrees = pgTable("loom_trees", {
 export const loomRevisions = pgTable(
   "loom_revisions",
   {
+    /** See `loomTrees.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     proposalId: text("proposal_id").notNull(),
@@ -51,7 +68,7 @@ export const loomRevisions = pgTable(
      */
     answeredBy: text("answered_by"),
   },
-  (table) => [primaryKey({ columns: [table.treeId, table.revision] })]
+  (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision] })]
 )
 
 /**
@@ -74,15 +91,31 @@ export const loomRevisions = pgTable(
  * both implementations read a queue oldest-first by the same comparison rather
  * than by two that happen to agree.
  */
-export const loomHolds = pgTable("loom_holds", {
-  proposalId: text("proposal_id").primaryKey(),
-  treeId: text("tree_id").notNull(),
-  baseRevision: integer("base_revision").notNull(),
-  intent: jsonb("intent").notNull(),
-  proposal: jsonb("proposal").notNull(),
-  disposition: jsonb("disposition").notNull(),
-  heldAt: text("held_at").notNull(),
-})
+export const loomHolds = pgTable(
+  "loom_holds",
+  {
+    /**
+     * The project the hold belongs to (0260). First in the key, as it is on
+     * the two tables above, because every read of this table is already inside
+     * one project.
+     *
+     * Widening the key does not weaken what it was doing. The note on `hold`
+     * in `postgres-holds.ts` is that the key is what makes *already held* a
+     * fact the database establishes rather than a check the code races
+     * against; within a project that is unchanged, and across projects two
+     * proposals that happen to share an id were never the same proposal.
+     */
+    applicationId: text("application_id").notNull().default("app_default"),
+    proposalId: text("proposal_id").notNull(),
+    treeId: text("tree_id").notNull(),
+    baseRevision: integer("base_revision").notNull(),
+    intent: jsonb("intent").notNull(),
+    proposal: jsonb("proposal").notNull(),
+    disposition: jsonb("disposition").notNull(),
+    heldAt: text("held_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.applicationId, table.proposalId] })]
+)
 
 /**
  * The policy's own log.
@@ -116,6 +149,8 @@ export const loomHolds = pgTable("loom_holds", {
 export const loomPolicyRevisions = pgTable(
   "loom_policy_revisions",
   {
+    /** The project whose policy this is (0260). See `loomTrees.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
     policyId: text("policy_id").notNull(),
     revision: integer("revision").notNull(),
     fingerprint: text("fingerprint").notNull(),
@@ -129,13 +164,61 @@ export const loomPolicyRevisions = pgTable(
     note: text("note"),
   },
   (table) => [
-    primaryKey({ columns: [table.policyId, table.revision] }),
+    primaryKey({ columns: [table.applicationId, table.policyId, table.revision] }),
     /**
      * The join `judgedUnder` is. Without it, resolving the fingerprint on a
      * disposition is a scan of every policy revision the deployment has ever
      * recorded — which is small today and is on the path of a screen that reads
      * it once per record on the page.
      */
-    index("loom_policy_revisions_fingerprint_idx").on(table.policyId, table.fingerprint),
+    index("loom_policy_revisions_fingerprint_idx").on(
+      table.applicationId,
+      table.policyId,
+      table.fingerprint
+    ),
   ]
 )
+
+/**
+ * The applications a deployment governs.
+ *
+ * The unit everything else is stored under: five tables carry `application_id`
+ * and none of them could say what that id named until this existed — the column
+ * was a foreign key to nothing.
+ *
+ * It carried the name *project* until 12 October, when the maintainer settled
+ * the hierarchy as **account > project > application** and the thing with the
+ * pages turned out to be the third of those rather than the second.
+ *
+ * `created_at` is text rather than `timestamptz` to match `applicationSchema`,
+ * which takes an ISO string — the same choice `loom_revisions.applied_at`
+ * makes, and for the same reason: what the row holds is what the type holds,
+ * so nothing has to agree about how a driver renders a timestamp.
+ */
+export const loomApplications = pgTable("loom_applications", {
+  applicationId: text("application_id").primaryKey(),
+  /**
+   * The project it is grouped under. Not null and not defaulted in the type,
+   * but defaulted in the DDL so a database written before projects existed
+   * keeps answering — the same device every scoped column here uses.
+   */
+  projectId: text("project_id").notNull().default("prj_default"),
+  name: text("name").notNull(),
+  createdAt: text("created_at").notNull(),
+  /** Absent until the application says where it lives. */
+  host: text("host"),
+})
+
+/**
+ * The projects a deployment has, which group the applications above.
+ *
+ * Three columns, because the grouping is organisational and owns nothing yet.
+ * No row anywhere is scoped by a project: the five scoped tables name their
+ * application and the application names its project, so there is one place a
+ * thing's project is recorded and nothing to disagree with.
+ */
+export const loomProjects = pgTable("loom_projects", {
+  projectId: text("project_id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: text("created_at").notNull(),
+})

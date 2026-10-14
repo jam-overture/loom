@@ -1,3 +1,5 @@
+import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
+
 import { portalDatabase } from "../database"
 
 import { memoryAttemptLog, type AttemptLog } from "./attempts"
@@ -29,8 +31,41 @@ type Carrier = { [CARRIER_KEY]?: AttemptLog }
 
 const carrier = globalThis as unknown as Carrier
 
-export const portalAttemptLog: AttemptLog = (carrier[CARRIER_KEY] ??=
+const custody: AttemptLog = (carrier[CARRIER_KEY] ??=
   portalDatabase === undefined ? memoryAttemptLog() : postgresAttemptLog(portalDatabase))
+
+/**
+ * The throttle, read with a budget.
+ *
+ * `AttemptLog` is this lane's own type rather than the framework's, so it is
+ * wrapped here beside where it is composed rather than in
+ * `_lib/app/bounded-store.ts` — which exports the rule (`readWithin`) and not a
+ * factory per type it cannot see.
+ *
+ * Both reads take the budget, and the one that matters is `recall`. It sits in
+ * front of the key comparison on a form anyone on the internet can reach
+ * (`attempt-sign-in.ts` reads the log **before** comparing), so a database that
+ * does not answer used to mean a sign-in button that never came back — which is
+ * what the maintainer was looking at on 12 October. It now fails in a second and
+ * a half and says why.
+ *
+ * **It still fails closed**, and that is deliberately unchanged here: whether an
+ * unreachable throttle should let somebody in is a policy question filed for the
+ * maintainer, not something to decide inside a timeout wrapper.
+ *
+ * `penalise` and `forgive` are writes and pass straight through. Giving up on
+ * `penalise` would silently stop counting failures, which is the one thing this
+ * table exists to do.
+ */
+export const boundedAttemptLog = (log: AttemptLog, budgetMs?: number): AttemptLog => ({
+  penalise: (subject, now, cutoff) => log.penalise(subject, now, cutoff),
+  forgive: (subject) => log.forgive(subject),
+  recall: (subject, cutoff) =>
+    readWithin(() => log.recall(subject, cutoff), unavailable, budgetMs),
+  survey: (cutoff, limit) => readWithin(() => log.survey(cutoff, limit), unavailable, budgetMs),
+})
+
+export const portalAttemptLog: AttemptLog = boundedAttemptLog(custody)
 
 /**
  * Whether the counting outlives this process — and, on a serverless host,

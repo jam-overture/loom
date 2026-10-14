@@ -11,7 +11,7 @@ import { Columns } from "@/app/(portal)/_components/screen";
 import { StateNotice } from "@/app/(portal)/_components/state-notice";
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail";
 import type { Version } from "@/app/(portal)/_lib/progression";
-import { portalRegistry } from "@/app/(portal)/_lib/registry";
+import { portalRegistry, portalThemes } from "@/app/(portal)/_lib/registry";
 import { versionHeading } from "@/app/(portal)/_lib/version";
 
 import { VersionNote } from "./version-note";
@@ -136,6 +136,7 @@ export const VersionPlayer = ({
   const drawn = renderLoomTree(showing.tree, {
     resolver: portalRegistry,
     validator: portalRegistry,
+    themes: portalThemes,
   });
 
   /**

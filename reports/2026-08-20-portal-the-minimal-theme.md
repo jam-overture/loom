@@ -5,8 +5,8 @@
 **Branch:** `portal-06-the-minimal-theme` (→ `main`).
 
 Visuals, both signed-in against a local production build:
-[the pages list](2026-08-20-portal-the-minimal-theme-pages.png) ·
-[a held change, with its verdict and buttons](2026-08-20-portal-the-minimal-theme-record.png).
+[the pages list](2026-08-20-portal-the-minimal-theme-pages.webp) ·
+[a held change, with its verdict and buttons](2026-08-20-portal-the-minimal-theme-record.webp).
 
 ---
 

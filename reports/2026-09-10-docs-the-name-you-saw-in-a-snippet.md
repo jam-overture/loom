@@ -3,7 +3,7 @@
 **Routine:** `Loom docs` · **Section:** §4c · **Date:** 10 September 2026
 **Branch:** `docs-21-the-code-on-the-page-compiles` (#243) · **Unit 8 on this branch**
 
-![The export first, then four sections that show it — each with the line it was found on](2026-09-10-docs-the-name-you-saw-in-a-snippet.png)
+![The export first, then four sections that show it — each with the line it was found on](2026-09-10-docs-the-name-you-saw-in-a-snippet.webp)
 
 ## What shipped
 
@@ -228,14 +228,14 @@ a static render: it needs a real browser, three `fetch` calls and a keystroke.
 These are this commit served by `next start` and driven with `playwright-core`
 against `/opt/pw-browsers/chromium-1194`.
 
-![pnpm add, in the dark theme, with the block it found behind it](2026-09-10-docs-the-name-you-saw-in-a-snippet-dark.png)
+![pnpm add, in the dark theme, with the block it found behind it](2026-09-10-docs-the-name-you-saw-in-a-snippet-dark.webp)
 
 The dark shot is the whole point of the unit in one frame: the query is
 `pnpm add`, the result is *Installation* with the exact command as its excerpt,
 and the block on the page behind the dialog is the same line. Before today that
 query returned nothing.
 
-![The same query at a true 390px](2026-09-10-docs-the-name-you-saw-in-a-snippet-phone.png)
+![The same query at a true 390px](2026-09-10-docs-the-name-you-saw-in-a-snippet-phone.webp)
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport and
 1280 at 1280.

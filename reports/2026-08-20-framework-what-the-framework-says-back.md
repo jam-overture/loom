@@ -105,7 +105,7 @@ lowering the bar — correctly, because it wanted a decision.
 | `bold` | `#6b6b6b` — 3.72:1 | `#8a8a8a` | 5.73 / 5.04 / 5.55 |
 | `minimal` | `#8a8a94` — 3.42:1 | `#6e6e78` | 5.04 / 5.04 / 4.59 |
 
-![fg-subtle before and after, in all three registered palettes](2026-08-20-framework-what-the-framework-says-back-contrast.png)
+![fg-subtle before and after, in all three registered palettes](2026-08-20-framework-what-the-framework-says-back-contrast.webp)
 
 *The same six pieces of real primitive text at the shipped colour and the
 corrected one. Left column is what has been shipping.*

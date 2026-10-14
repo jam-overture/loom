@@ -1,0 +1,48 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-13-docs-not-yet-batches-wide",
+      "viewport": "wide",
+      "waitFor": "#where-a-batch-goes-after-that",
+      "do": [{ "scrollTo": "#where-a-batch-goes-after-that" }]
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-13-docs-not-yet-still-wide",
+      "viewport": "wide",
+      "waitFor": "#what-this-still-does-not-do",
+      "do": [{ "scrollTo": "#what-this-still-does-not-do" }]
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-13-docs-not-yet-batches-phone",
+      "viewport": "phone",
+      "waitFor": "#where-a-batch-goes-after-that",
+      "do": [{ "scrollTo": "#where-a-batch-goes-after-that" }]
+    },
+    {
+      "path": "/docs/the-runtime/when-nothing-comes-back",
+      "out": "2026-10-13-docs-not-yet-doubles-wide",
+      "viewport": "wide",
+      "waitFor": "text=The other two seams have the same double.",
+      "do": [{ "scrollTo": "text=The other two seams have the same double." }]
+    },
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-10-13-docs-not-yet-bindings-wide",
+      "viewport": "wide",
+      "waitFor": "text=A model can write a binding, and it is shown what to point one at.",
+      "do": [{ "scrollTo": "text=A model can write a binding, and it is shown what to point one at." }]
+    },
+    {
+      "path": "/docs/the-runtime/going-to-production",
+      "out": "2026-10-13-docs-not-yet-migration-wide",
+      "viewport": "wide",
+      "waitFor": "text=The one thing a re-run cannot do is move data that is already there.",
+      "do": [{ "scrollTo": "text=The one thing a re-run cannot do is move data that is already there." }]
+    }
+  ]
+}

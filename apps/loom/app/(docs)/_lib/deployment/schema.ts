@@ -1,4 +1,9 @@
-import { HOLD_STORE_DDL, TREE_STORE_DDL } from "@jam-overture/loom/postgres"
+import {
+  APPLICATION_STORE_DDL,
+  HOLD_STORE_DDL,
+  PROJECT_STORE_DDL,
+  TREE_STORE_DDL,
+} from "@jam-overture/loom/postgres"
 import { TELEMETRY_DDL } from "@jam-overture/loom/telemetry/postgres"
 
 /**
@@ -66,8 +71,60 @@ export type SchemaTable = {
 }
 
 const CREATE_TABLE = /^CREATE TABLE IF NOT EXISTS (\w+) \(([\s\S]*)\)$/
-const ADD_COLUMN = /^ALTER TABLE (\w+) ADD COLUMN IF NOT EXISTS (\w+) (\w+)$/
+/**
+ * An added column, with the constraint and default it may carry.
+ *
+ * The trailing group was added on 12 October for `application_id`, which arrives
+ * `NOT NULL DEFAULT 'app_default'` — a column added to a populated table has
+ * to say what the rows already there should hold, so a migration that adds one
+ * after the fact will usually carry both.
+ */
+const ADD_COLUMN = /^ALTER TABLE (\w+) ADD COLUMN IF NOT EXISTS (\w+) (\w+)(?: (.+))?$/
+
+/**
+ * A key being taken off and put back, which is how a key widens.
+ *
+ * A primary key cannot be altered in place, so a migration that adds a column
+ * to one drops the constraint and adds the wider one. The pair is read as a
+ * single act: the drop records nothing by itself, and the add below is what
+ * moves the `key` flags.
+ */
+const DROP_CONSTRAINT = /^ALTER TABLE (\w+) DROP CONSTRAINT IF EXISTS (\w+)$/
+
+/**
+ * An index being taken off and put back, which is how an index widens.
+ *
+ * `CREATE INDEX IF NOT EXISTS` keys on the *name*, so an index whose columns
+ * change under the same name has to be dropped first — otherwise the old one
+ * is left exactly as it was and every read goes on scanning while appearing to
+ * be indexed. Read as a pair with the create below it, for the reason a
+ * dropped constraint is: the gap between them is not a state the database is
+ * ever observed in.
+ */
+const DROP_INDEX = /^DROP INDEX IF EXISTS (\w+)$/
+const ADD_PRIMARY_KEY = /^ALTER TABLE (\w+) ADD PRIMARY KEY \(([^)]*)\)$/
 const ENABLE_ROW_SECURITY = /^ALTER TABLE (\w+) ENABLE ROW LEVEL SECURITY$/
+
+/**
+ * A guarded block, which this page reads as *a step that leaves no trace in the
+ * shape*.
+ *
+ * Postgres has no `RENAME … IF EXISTS`, so a rename that must be safe to run
+ * twice asks the catalogue first and does its work inside `DO $$ … $$`. The
+ * block that carried `loom_projects` to `loom_applications`
+ * ([0269](../../../../../decisions/0269-an-application-is-the-unit-loom-governs-and-a-project-groups-them.md))
+ * is the first of them here.
+ *
+ * It is skipped rather than parsed, and that is the honest reading: the table it
+ * produces is declared by the `CREATE TABLE IF NOT EXISTS` after it, which this
+ * page already reads, so a database that ran the block and one that never
+ * needed it end up at the same shape. **What the page describes is where a host
+ * arrives, not the route they took.** A block that did something the following
+ * statements do not also declare would be invisible here, which is why this is a
+ * named shape rather than a catch-all: anything that is not a guarded block
+ * still throws.
+ */
+const GUARDED_BLOCK = /^DO \$\$[\s\S]*\$\$$/
 /**
  * An index on columns, on an expression, and partial or not.
  *
@@ -163,11 +220,17 @@ const tableFrom = (name: string, body: string): SchemaTable => {
 const withAddedColumn = (
   columns: readonly SchemaColumn[],
   name: string,
-  type: string
-): readonly SchemaColumn[] =>
-  columns.some((column) => column.name === name)
-    ? columns.map((column) => (column.name === name ? { ...column, addedLater: true } : column))
-    : [...columns, { name, type, required: false, key: false, addedLater: true }]
+  type: string,
+  constraint?: string
+): readonly SchemaColumn[] => {
+  const required = constraint !== undefined && constraint.includes("NOT NULL")
+
+  return columns.some((column) => column.name === name)
+    ? columns.map((column) =>
+        column.name === name ? { ...column, addedLater: true, required } : column
+      )
+    : [...columns, { name, type, required, key: false, addedLater: true }]
+}
 
 const requireTable = (
   tables: readonly SchemaTable[],
@@ -216,7 +279,45 @@ export const tablesIn = (ddl: readonly string[]): readonly SchemaTable[] => {
 
       tables = replacing(tables, {
         ...table,
-        columns: withAddedColumn(table.columns, added[2], added[3]),
+        columns: withAddedColumn(table.columns, added[2], added[3], added[4]),
+      })
+      continue
+    }
+
+    /*
+     * Recognised and deliberately recorded as nothing. What a dropped key
+     * means to a reader is whatever replaces it, and the statement after this
+     * one says so — reporting the gap in between would describe a state the
+     * database is never observed in.
+     */
+    if (DROP_CONSTRAINT.test(statement)) {
+      requireTable(tables, statement.match(DROP_CONSTRAINT)?.[1] ?? "", statement)
+      continue
+    }
+
+    const dropped = statement.match(DROP_INDEX)
+    if (dropped?.[1] !== undefined) {
+      const name = dropped[1]
+
+      tables = tables.map((table) => ({
+        ...table,
+        indexes: table.indexes.filter((index) => index.name !== name),
+      }))
+      continue
+    }
+
+    const keyed = statement.match(ADD_PRIMARY_KEY)
+    if (keyed?.[1] !== undefined && keyed[2] !== undefined) {
+      const table = requireTable(tables, keyed[1], statement)
+      const named = keyed[2].split(",").map((column) => column.trim())
+
+      tables = replacing(tables, {
+        ...table,
+        columns: table.columns.map((column) => ({
+          ...column,
+          key: named.includes(column.name),
+          required: named.includes(column.name) || column.required,
+        })),
       })
       continue
     }
@@ -247,6 +348,8 @@ export const tablesIn = (ddl: readonly string[]): readonly SchemaTable[] => {
       tables = replacing(tables, { ...table, rowLevelSecurity: true })
       continue
     }
+
+    if (GUARDED_BLOCK.test(statement)) continue
 
     throw new Error(`loom: this page does not know what "${statement}" does`)
   }
@@ -311,6 +414,32 @@ export const storageSeams: readonly StorageSeam[] = [
     tables: tablesIn(HOLD_STORE_DDL),
   },
   {
+    id: "applications",
+    title: "The applications you have registered",
+    keeps: "One row per application Loom governs for you, and what you call it.",
+    without:
+      "Everything you store belongs to one unnamed application, and nothing can tell you which pages are whose.",
+    specifier: "@jam-overture/loom/postgres",
+    ensure: "ensureApplicationStoreSchema",
+    postgres: "postgresApplicationStore",
+    memory: "memoryApplicationStore",
+    memorySpecifier: "@jam-overture/loom/store",
+    tables: tablesIn(APPLICATION_STORE_DDL),
+  },
+  {
+    id: "projects",
+    title: "The projects you group them under",
+    keeps: "One row per project, and what you call it. Applications name the project they are in.",
+    without:
+      "Every application sits in the same unnamed group, which is fine until you have enough of them to want folders.",
+    specifier: "@jam-overture/loom/postgres",
+    ensure: "ensureProjectStoreSchema",
+    postgres: "postgresProjectStore",
+    memory: "memoryProjectStore",
+    memorySpecifier: "@jam-overture/loom/store",
+    tables: tablesIn(PROJECT_STORE_DDL),
+  },
+  {
     id: "telemetry",
     title: "The account of what happened",
     keeps:
@@ -326,5 +455,5 @@ export const storageSeams: readonly StorageSeam[] = [
   },
 ]
 
-/** Every table a deployment that takes all three ends up with. */
+/** Every table a deployment that takes all of them ends up with. */
 export const storageTables: readonly SchemaTable[] = storageSeams.flatMap((seam) => seam.tables)

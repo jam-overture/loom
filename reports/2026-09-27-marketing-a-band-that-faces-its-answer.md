@@ -7,8 +7,8 @@ half of every band empty.**
 
 | `/how-it-works` at 1280 | |
 | --- | --- |
-| before — `main` | ![](2026-09-27-marketing-facing-how-before-wide.png) |
-| after — this branch | ![](2026-09-27-marketing-facing-how-after-wide.png) |
+| before — `main` | ![](2026-09-27-marketing-facing-how-before-wide.webp) |
+| after — this branch | ![](2026-09-27-marketing-facing-how-after-wide.webp) |
 
 Nothing was broken. Every band rendered correctly, emitted no diagnostic and
 passed every test this surface has. The page just looked like it had not
@@ -67,8 +67,8 @@ for, and each says so in its own comment.
 
 | `bold` | |
 | --- | --- |
-| before | ![](2026-09-27-marketing-facing-how-before-bold.png) |
-| after | ![](2026-09-27-marketing-facing-how-after-bold.png) |
+| before | ![](2026-09-27-marketing-facing-how-before-bold.webp) |
+| after | ![](2026-09-27-marketing-facing-how-after-bold.webp) |
 
 No literal colour is in the diff, and the `surface`-toned *Who is asking* band
 is the one that shows why a palette sweep was worth taking: it is invisible on
@@ -79,18 +79,18 @@ both.
 
 | | |
 | --- | --- |
-| before | ![](2026-09-27-marketing-facing-what-before-wide.png) |
-| after | ![](2026-09-27-marketing-facing-what-after-wide.png) |
+| before | ![](2026-09-27-marketing-facing-what-before-wide.webp) |
+| after | ![](2026-09-27-marketing-facing-what-after-wide.webp) |
 
 ### What it does at every other width
 
 | width | what happens |
 | --- | --- |
 | 1280 | two columns, `scrollWidth 1280 / innerWidth 1280` |
-| **820** | two columns, still ![](2026-09-27-marketing-facing-how-after-tablet.png) |
+| **820** | two columns, still ![](2026-09-27-marketing-facing-how-after-tablet.webp) |
 | 390 | **wraps to one column**, heading above the paragraphs, in the order it was |
 
-![the phone](2026-09-27-marketing-facing-what-after-phone.png)
+![the phone](2026-09-27-marketing-facing-what-after-phone.webp)
 
 **The phone is not byte-identical and the claim is not that it is.** Measured at
 390 against `main`, `/how-it-works` is **220px shorter** and `/what-you-run` is
@@ -162,7 +162,7 @@ Not fixed here, because it is the harness's and not this lane's.
 
 | `pnpm shoot --serve` | serving on port 3000 by hand |
 | --- | --- |
-| ![](2026-09-27-marketing-facing-embed-broken.png) | ![](2026-09-27-marketing-facing-embed-served.png) |
+| ![](2026-09-27-marketing-facing-embed-broken.webp) | ![](2026-09-27-marketing-facing-embed-served.webp) |
 
 The framed demonstration's `src` is absolute, built from `siteOrigin()`, which
 with no `LOOM_SITE_ORIGIN` and no `VERCEL_URL` is `http://localhost:3000`.

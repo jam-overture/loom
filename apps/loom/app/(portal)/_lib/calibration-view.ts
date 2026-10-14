@@ -1,4 +1,9 @@
-import { rulesetContinuityOf, UNATTRIBUTED_POLICY_ID } from "@jam-overture/loom"
+import {
+  checksContinuityOf,
+  describeWiredChecks,
+  rulesetContinuityOf,
+  UNATTRIBUTED_POLICY_ID,
+} from "@jam-overture/loom"
 import type {
   CalibrationReport,
   CalibrationScore,
@@ -8,6 +13,7 @@ import type {
 
 import type { MissCause } from "./calibration-misses"
 import type { OutcomeTone } from "./outcome"
+import { namedList } from "./vocabulary"
 
 /**
  * A calibration report, as something a page can render.
@@ -233,6 +239,73 @@ export const readRuleset = (segment: PolicyCalibration): GapReading | null => {
 }
 
 /**
+ * The rest of that sentence: what the write path under one policy name was doing
+ * while it judged (0248).
+ *
+ * `readRuleset` above is correct and is half of *what judged these claims*. A
+ * fingerprint proves which **rules** were consulted and cannot reach the two
+ * seams a composition root hands over separately — they are functions, and a
+ * policy is a serialisable value (0179, 0208) — so a deployment that wires a
+ * registry into the write path on Tuesday produces judgments whose rules are
+ * byte-identical to Monday's and whose outcomes are not. A row saying *one
+ * ruleset* across that week is saying something true and hearable as something
+ * false.
+ *
+ * Silent on the same terms as the ruleset note and for the same reason: one set
+ * of checks, all of it recorded, is the ordinary state and a caveat printed on
+ * every row every day is a caveat nobody reads on the day it matters. The empty
+ * set is part of that ordinary state — a deployment that has wired neither seam
+ * is not a deployment with something missing.
+ *
+ * The checks are named with the record's own spelling here rather than the
+ * portal's. This reading is only ever drawn inside the breakdown, which is the
+ * technical record, and a host matching a row against its own composition root
+ * wants the names it wrote there. The plain reading of each one is beside the
+ * table, where the legend explains it.
+ */
+export const readWritePath = (segment: PolicyCalibration): GapReading | null => {
+  const continuity = checksContinuityOf(segment.checkSets)
+  const unrecorded =
+    segment.unrecordedChecks === 0
+      ? ""
+      : ` ${segment.unrecordedChecks} of them recorded no checks at all, so those could have been judged with anything in place.`
+
+  if (continuity === "changed") {
+    const named = namedList(
+      segment.checkSets.map((checks) => `“${describeWiredChecks(checks)}”`)
+    )
+
+    return {
+      tone: "rejected",
+      label: "what Loom was checking changed under this name",
+      detail: `These claims were judged with ${segment.checkSets.length} different sets of checks in place — ${named} — so this row pools two write paths whether or not its rules ever moved.${unrecorded}`,
+    }
+  }
+
+  if (continuity === "unrecorded") {
+    return {
+      tone: "inapplicable",
+      label: "no checks recorded",
+      detail:
+        "None of these claims recorded which checks were in place when they were judged, so whether one write path judged them cannot be read from here.",
+    }
+  }
+
+  if (unrecorded === "") return null
+
+  /*
+   * Named apart from the ruleset note's "partly recorded" on purpose. A row can
+   * honestly carry both badges, and two identical words stacked one under the
+   * other would leave a reader unable to tell which half each was about.
+   */
+  return {
+    tone: "inapplicable",
+    label: "checks partly recorded",
+    detail: `This row is not shown to be one write path.${unrecorded}`,
+  }
+}
+
+/**
  * Whether the page is pooling gates that should not be pooled — two names, or
  * one name that stopped meaning one thing. The second case is why this is not
  * simply a length check: a single segment whose rules changed mid-window is
@@ -245,6 +318,25 @@ export const poolsMoreThanOneGate = (report: CalibrationReport): boolean =>
 
     return continuity === "changed" || continuity === "incomparable"
   })
+
+/**
+ * The same question about the write path: whether a single row was judged under
+ * two of them.
+ *
+ * Kept apart from `poolsMoreThanOneGate` rather than folded into it, because the
+ * two make different claims and the breakdown says which it is drawing for. A
+ * row whose rules moved is the host having edited a policy without renaming it
+ * (0048); a row whose checks moved is the host having changed what it hands the
+ * write path, with the policy untouched. A reader sent to the wrong one of those
+ * looks in the wrong place.
+ *
+ * `changed` only. A segment that recorded nothing is the ordinary state of a
+ * journal written before the field existed, and a disclosure headed *careful*
+ * that opened for every one of those would be a warning about the passage of
+ * time.
+ */
+export const poolsMoreThanOneWritePath = (report: CalibrationReport): boolean =>
+  report.byPolicy.some((segment) => checksContinuityOf(segment.checkSets) === "changed")
 
 export const UNJUDGED_LABELS: Readonly<Record<UnjudgedReason, string>> = {
   "awaiting-answer": "waiting on a human",
