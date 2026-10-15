@@ -369,3 +369,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0277 | *No record on this branch* | — | — |
 | 0278 | *No record on this branch* | — | — |
 | [0279](0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md) | A kind's share of the readers who met it is compared at each window's own weights, and a counterfactual says which side moved | Accepted | §4c (reader signals) |
+| [0280](0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md) | The words of a kind of part the typical reader reached are weighted once per page, and a floor withholds every difference | Accepted | §4c (reader signals) |

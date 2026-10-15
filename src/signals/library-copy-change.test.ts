@@ -291,6 +291,39 @@ describe("what a change did to the words a kind of part says", () => {
     })
 
     /**
+     * The floor a trigger counted in words cannot see, which is the commonest
+     * one there is: a part whose declared prop holds something that is not a
+     * string and which says no visible word at all. Its placement hides every
+     * word it has, so the signed figure is in exactly as much doubt as it is
+     * for a floor with words behind it — and a row that read the floor off the
+     * word total would publish *abandoned* with a hundred unseen words able to
+     * reverse it.
+     */
+    it("names the floor where the floored placement says no visible word at all", () => {
+      const tree = treeOf(
+        element("page", "loom.stack", {}, [
+          element("intro", "loom.section", { body: words(20) }),
+          element("badge", "loom.section", { count: 3 }),
+        ])
+      )
+
+      const change = libraryCopyChangeOf(
+        [read(tree, ["intro"], { declarations: BODY_AND_A_NUMBER })],
+        [read(tree, [], { declarations: BODY_AND_A_NUMBER })]
+      )
+      const sections = typeRow(change, "loom.section")
+
+      expect(sections?.flooredPlacements).toBe(1)
+      expect(sections?.words.floored).toBe(0)
+      expect(sections?.silence).toBe("floored")
+      expect(sections?.words.change).toBeNull()
+      expect(sections?.movement).toBe("unknown")
+      /* The masses that are certain stand, which is what the floor does not reach. */
+      expect(sections?.words.fellAway).toBe(20)
+      expect(change.words.change).toBeNull()
+    })
+
+    /**
      * Why it has to be withheld rather than published with a caveat: the
      * counted masses here say *abandoned* and the five floored words are five
      * words the reading can see of a part that may say a hundred. No figure
