@@ -101,9 +101,30 @@ export const worktreeAt = async (
   const changedFiles = async (branch: string): Promise<readonly string[]> =>
     linesOf(await git(["diff", "--name-only", `${base}...${branch}`]))
 
+  /**
+   * The directory first and `prune` after, rather than `worktree remove`.
+   *
+   * `worktree remove` arrived in git 2.17, and the floor this repository's
+   * tooling holds is 2.15 (`tools/git/portability.ts`). The two halves it does
+   * are the two halves here: the tree is deleted — which this had to do anyway,
+   * since `path` lives inside the temp directory — and `prune` drops the
+   * administrative entry under `.git/worktrees` that the deletion leaves
+   * dangling. Without the prune the repository accumulates a registration per
+   * run for a directory that is gone, which `worktree list` then reports
+   * forever.
+   *
+   * **One difference from `worktree remove`, which is repository-wide rather
+   * than ours.** `prune` drops every stale entry, not only the one this call
+   * made, so a worktree of the same repository whose directory is missing for
+   * some other reason is forgotten too. git offers no path filter for it. The
+   * exposure is small — this tool runs against a clone whose only other
+   * worktrees are the caller's own, and a worktree git has forgotten is
+   * recreated by `worktree add` rather than lost — and it is the price of a
+   * floor this repository has decided to hold.
+   */
   const close = async (): Promise<void> => {
-    await repo(["worktree", "remove", "--force", path]).catch(() => "")
     await rm(directory, { recursive: true, force: true })
+    await repo(["worktree", "prune"]).catch(() => "")
   }
 
   return { tree: { attempt, take, changedFiles }, close }
