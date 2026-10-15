@@ -51941,7 +51941,19 @@ state nobody had yet produced. Worth saying once rather than four times —
 state is worth naming in the code beside it.**
 ## 2026-10-11 — six specimen tests assume a git newer than the maintainer's, so `pnpm verify` cannot pass on his machine
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` ·
+**Status:** **closed by `framework-73-the-git-every-machine-has`** — the two
+call sites now read `git init -q` then `git symbolic-ref HEAD refs/heads/main`,
+which is the remedy below and not the skip guard. **A second live instance was
+found while closing it:** `tools/queue/git.ts` released its detached tree with
+`git worktree remove --force`, which needs git 2.17 — so the queue tool was
+broken on 2.15 as well, and the two halves it does are now done by hand
+(delete the directory, then `git worktree prune`), under the first test
+`worktreeAt` has ever had. The floor is a table in `tools/git/portability.ts`
+and `docs/routines.md` has the paragraph; the fourth instance fails on the
+branch that writes it. Original status below.
+
+**Status:** open
 
 `tools/specimen/against.test.ts` builds a scratch repository with `git init -q -b main`.
 The `-b` switch arrived in **git 2.28**; the maintainer's machine runs **2.15**, where it
@@ -51967,6 +51979,33 @@ shape, and the first that fails a test.
 which is portable to every git this decade and produces exactly the same repository. A skip
 guarded on the git version would also work and is worse: a test that silently does not run on
 the maintainer's machine is how the next portability gap goes unnoticed for a month.
+
+**What the closing branch added beyond the two lines asked for**, because *this
+is the third instance of one shape* is the sentence in this entry that cost the
+most to read. `tools/git/portability.ts` states the floor as a number and lists
+the invocations it lacks — `init -b` and `init --initial-branch` as separate
+rows, since a rule naming one spelling stops working the moment somebody reaches
+for the other. `portability.test.ts` sweeps every source under `tools/` and
+`src/` that names git and prints the file, the release needed and the
+replacement. Planting the original defect back reproduces exactly one failure:
+
+```
+tools/specimen/against.test.ts: git init -q -b main needs git 2.28;
+the floor is 2.15. Instead: git init -q, then git symbolic-ref HEAD refs/heads/<branch>
+```
+
+**Its limit, stated rather than implied.** The sweep reads argvs written as
+string literals, in files that name git; an argv assembled from variables is
+invisible to it. That is asserted in the test as the property the sweep rests
+on, and it holds today because every git invocation in this repository is
+written as literals.
+
+**Not verified on 2.15.** No container a routine runs in has a git that old —
+this one is 2.43 — so what is checked is that the new spellings are portable by
+construction (`symbolic-ref` and `worktree prune` both predate 2.15 by years)
+and that the repository's own sources no longer name anything the table holds.
+The reading that cannot be taken here is the maintainer's: a green
+`pnpm verify` on his machine.
 
 ---
 ## 2026-10-12 — a test reads a gitignored build artefact, so `pnpm verify` is red on `main` for anybody who has not run `pnpm package:primitives`
