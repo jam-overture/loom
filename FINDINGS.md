@@ -53570,9 +53570,9 @@ hold them to it, including one that compares the listing against what
 **What is still open is the half this entry correctly guessed was not mine
 alone.** Ordering by recency supersedes part 2 of
 [0020](decisions/0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md),
-which is `Accepted`, so it is written as
-[0278](decisions/0278-a-listing-ordered-by-recency-is-a-second-ordering-and-a-second-cursor.md)
-`Proposed` and **not implemented** — escalated rather than taken. 0278 also
+which is `Accepted`, so it is written as a `Proposed` record and **not
+implemented** — escalated rather than taken, and carried in a pull request of
+its own rather than beside the half that shipped. That record also
 names a thing this entry did not separate and the prototype does not say: *changed
 recently* is a sort (*every page, newest first*) or a filter (*the pages touched
 in the last N days*), they want different contracts, and it proposes the sort.
@@ -53582,7 +53582,7 @@ deployment whose pages fit in one listing page — `MAX_LISTING_LIMIT` is 200 �
 can draw the entry honestly today by sorting the page it holds. Past that it
 cannot: sorting a page sorts that page and not the store, so the newest tree
 overall may sit on a page the screen never asked for. The type says so. Until
-0278 is answered, `?filter=changed` reading as no filter at all stays the right
+the ordering proposal is answered, `?filter=changed` reading as no filter at all stays the right
 behaviour for a deployment of unknown size, and this entry stays open for that
 reason rather than because nothing happened.
 

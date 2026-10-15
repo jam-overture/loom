@@ -260,7 +260,7 @@ export const clampListingLimit = (limit: number | undefined): number =>
  * 0020 stands until somebody decides the second one. A caller sorting a page it
  * holds is sorting that page and not the store: beyond one page, the newest
  * tree overall may sit on a page this caller never asked for. Ordering by
- * recency is proposed in 0278 and is not implemented.
+ * recency is proposed separately and is not implemented.
  */
 export interface TreeStore {
   readonly create: (tree: LoomTree) => Promise<Result<LoomTree, StoreError>>

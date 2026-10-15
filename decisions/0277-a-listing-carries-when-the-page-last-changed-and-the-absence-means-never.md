@@ -94,9 +94,9 @@ reads the enumeration as the decision, this is the record to refuse; the change
 is one optional field and reversing it costs a line in each store.
 
 **5. The ordering does not change.** Pages still come back by `treeId`
-ascending. 0020's ordering decision stands, and whether to add a second one is
-[0278](0278-a-listing-ordered-by-recency-is-a-second-ordering-and-a-second-cursor.md),
-which is `Proposed` and not implemented.
+ascending. 0020's ordering decision stands, and whether to add a second one is a
+proposal of its own — written, `Proposed`, nothing implemented, and carried in a
+pull request of its own so that it holds no shipped work while it waits.
 
 ## Consequences
 
@@ -108,7 +108,8 @@ which is `Proposed` and not implemented.
   tree overall may sit on a page the caller never asked for.
 - **It does not close the finding it came from.** `/portal/pages` can order what
   it has; it cannot yet ask the store for the most recently changed pages across
-  a deployment of any size. That needs 0278.
+  a deployment of any size. That needs the second ordering, which is proposed
+  separately.
 - **No migration, and no DDL.** The value is derived from a column that already
   exists, by a join on the log's existing primary key — `(application_id,
   tree_id, revision)` — so it is a point lookup per listed tree rather than a
