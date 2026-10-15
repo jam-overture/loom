@@ -251,3 +251,48 @@ looks and a run that moves a comment inward can trip it without changing a word.
    The 11 October entry owns it and names the check that cannot see a clash until
    the branches meet; it is worth saying that the cost is being paid in full
    while it stays open.
+
+---
+
+## Addendum, 15 October — the base moved under it, and the gate's numbers moved with it
+
+`Loom merge` merged `main` into this branch overnight rather than landing it, and
+said why on the PR: this branch carries **0278**, which is
+`Proposed — ARCHITECTURAL, needs review`, so it is the maintainer's to accept or
+refuse and not a merge routine's to land. That is the right call and this run
+did not argue with it.
+
+**Its conflict resolution was checked rather than taken on trust.** The only
+conflict was `decisions/README.md`, which is generated; re-running
+`pnpm decisions:index` on the merged tree produced **no change**, so the
+resolution and the tooling agree.
+
+**0276 is on `main` now, so the citation this record wanted is restored.** #628
+merged as 0276 — the 0274 → 0276 renumber was correct and landed — so 0277's
+reference to it, which was prose-only because a branch cut from `main` cannot
+link a record that is not there, is a proper citation again. That workaround was
+the clash the 11 October entry owns, and this is it ending.
+
+### The gate, re-run on the merged head
+
+```
+Test Files  224 passed (224)      Tests  5062 passed (5062)    # root
+Test Files  327 passed (327)      Tests  5802 passed (5802)    # @loom/app
+EXIT=0
+```
+
+**10,864 tests across 551 files**, which is 2,686 fewer than the 13,550 this
+report quotes above, and the drop is worth stating plainly because a shrinking
+test count is normally the thing to be suspicious of.
+
+**It is entirely `main`'s, and this branch deletes nothing.**
+`git diff --name-status origin/main...HEAD` lists no deletion at all, and the
+diff touches no test file outside the five cases it adds. The app suite lost 118
+files to the portal lane's own decisions: **#631**, *"Unit 0: the portal loses
+twenty screens and keeps its seams"*, with **#634**, **#636** and **#638**
+removing more of the same — screens that were deleted on purpose, and their
+tests with them. The root suite meanwhile **grew**, 221 → 224 files and
+4,987 → 5,062 tests, which is this branch's five cases plus what `main` added.
+
+Nothing was skipped, weakened or deleted by this branch on any of the four gate
+runs it has now had.
