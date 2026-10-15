@@ -8,7 +8,7 @@
       "files": 99,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -348,6 +348,20 @@
               "summary": "One node's answers, built from a plain record."
             },
             {
+              "name": "DataAnswer",
+              "kind": "type",
+              "signature": "type DataAnswer = Result<JsonValue, DataUnavailable>;",
+              "truncated": false,
+              "summary": "One planned request's answer: what a source gave back, or the named reason there is none."
+            },
+            {
+              "name": "DataAnswers",
+              "kind": "type",
+              "signature": "type DataAnswers = readonly (readonly [RequestKey, DataAnswer])[];",
+              "truncated": false,
+              "summary": "Every answer a resolution was built from, as plain data."
+            },
+            {
               "name": "NodeDataProblem",
               "kind": "type",
               "signature": "type NodeDataProblem = {\n    readonly kind: \"misdeclared\";\n    readonly error: BindingError;\n} | {\n    readonly kind: \"unavailable\";\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n};",
@@ -371,7 +385,7 @@
             {
               "name": "buildDataResolution",
               "kind": "function",
-              "signature": "const buildDataResolution: (plan: DataPlan, answers: ReadonlyMap<RequestKey, Result<JsonValue, DataUnavailable>>) => DataResolution",
+              "signature": "const buildDataResolution: (plan: DataPlan, answers: ReadonlyMap<RequestKey, DataAnswer>) => DataResolution",
               "truncated": false,
               "summary": "Folds a plan and its answers into the two lookups the walk uses. Separated from `resolveDataPlan` because it is pure: given the same answers it builds the same resolution, which is what makes the failure paths testable without a fake adapter for each one."
             }
@@ -397,16 +411,23 @@
               "summary": "Ten seconds per source, which is already several times longer than a reader will wait for a page and generous for a query somebody has indexed."
             },
             {
+              "name": "ResolvedData",
+              "kind": "interface",
+              "signature": "interface ResolvedData extends DataResolution {\n    readonly answers: DataAnswers;\n}",
+              "truncated": false,
+              "summary": "A resolution, and the answers it was built from."
+            },
+            {
               "name": "resolveDataPlan",
               "kind": "function",
-              "signature": "const resolveDataPlan: (plan: DataPlan, options: ResolveDataOptions) => Promise<DataResolution>",
+              "signature": "const resolveDataPlan: (plan: DataPlan, options: ResolveDataOptions) => Promise<ResolvedData>",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "resolveTreeData",
               "kind": "function",
-              "signature": "const resolveTreeData: (tree: LoomTree, options: ResolveDataOptions) => Promise<DataResolution>",
+              "signature": "const resolveTreeData: (tree: LoomTree, options: ResolveDataOptions) => Promise<ResolvedData>",
               "truncated": false,
               "summary": "Plan and resolve in one step, for the ordinary caller that does both."
             }
@@ -4804,7 +4825,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4850,7 +4871,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5840,7 +5861,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6368,7 +6389,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7547,7 +7568,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8187,7 +8208,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8415,7 +8436,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9168,7 +9189,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9599,7 +9620,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9851,7 +9872,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12686,7 +12707,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12829,7 +12850,7 @@
       "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12896,7 +12917,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13493,7 +13514,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13567,7 +13588,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14046,7 +14067,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1615,
+        "packageNames": 1618,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
