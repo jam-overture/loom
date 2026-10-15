@@ -227,12 +227,12 @@ report as a measurement rather than as a claim.
 
 ## The preview
 
-<PREVIEW_URL>
+https://loom-git-docs-56-what-is-in-d5d28b-jpizzolato36-6341s-projects.vercel.app
 
 The two pages the pictures above are of:
 
-- [/docs/building-with-loom/theming](<PREVIEW_URL>/docs/building-with-loom/theming)
-- [/docs/architecture/what-it-costs-you](<PREVIEW_URL>/docs/architecture/what-it-costs-you)
+- [/docs/building-with-loom/theming](https://loom-git-docs-56-what-is-in-d5d28b-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/theming)
+- [/docs/architecture/what-it-costs-you](https://loom-git-docs-56-what-is-in-d5d28b-jpizzolato36-6341s-projects.vercel.app/docs/architecture/what-it-costs-you)
 
 Not fetched from this container: `*.vercel.app` is denied by the environment's
 egress policy, which is the open finding of 12 October and still true. The shots
