@@ -1,8 +1,15 @@
-# 0281 — A word nothing can be said about is in no mass, and a page that reports no reach has no mean
+# 0282 — A word nothing can be said about is in no mass, and a page that reports no reach has no mean
 
 **Status:** Accepted
 **Date:** 2026-10-15
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-15**, from 0281, when the branch that carried it
+> (#642) was merged. `main` had meanwhile accepted a different 0281 — *the
+> answers a resolution was built from are published as data, and the far side
+> re-plans* (#641, merged earlier the same run) — and two records sharing a
+> number is fatal (0097). This record was written on 15 October and nothing in
+> it changed but its number; references on the branch were updated with it.
 
 ## Context
 

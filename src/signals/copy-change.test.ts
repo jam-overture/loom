@@ -135,7 +135,7 @@ const NOW = {
 
 /**
  * Four readers, all of whom read the intro and two of whom reached the pricing
- * band — the earlier side of 0281's case.
+ * band — the earlier side of 0282's case.
  */
 const WAS_SPOKEN = {
   tree: pageOf(1, THREE_BANDS),
@@ -502,7 +502,7 @@ describe("copyChangeOf", () => {
     })
 
     /**
-     * The identity 0239 published and 0281 had to keep: the gains add to the
+     * The identity 0239 published and 0282 had to keep: the gains add to the
      * total, so a passage in no term of one is in no term of the other. A
      * passage dropped from the total while its gain stayed published would be a
      * word counted on one side and not the other.
@@ -549,7 +549,7 @@ describe("copyChangeOf", () => {
 
   describe("a passage neither window can speak for", () => {
     /**
-     * The defect 0281 closes, and the number is the point: nothing about the
+     * The defect 0282 closes, and the number is the point: nothing about the
      * reading of this page changed — two readers in four reached the pricing
      * band before and two do now — and the figure that was published said the
      * change had taken ten words away from the average reader.

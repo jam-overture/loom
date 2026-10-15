@@ -53,7 +53,7 @@ import { countWords } from "./words.js"
  * — the words the average reader got to — and the gap between the two is the
  * point of reporting both.
  *
- * **The mean is over the words this window can speak for** (0281). A part whose
+ * **The mean is over the words this window can speak for** (0282). A part whose
  * standing is `unknown` reported something other than coming into view, so a
  * reader plainly had it in front of them and the counter that would say so is
  * missing. Its words are in no term of {@link CopyReading.typical}, which makes
@@ -278,7 +278,7 @@ export type CopyReading = {
    * views there were, so the numerator leans up and the denominator leans down.
    *
    * **A ceiling over what was measured, which is a looser one than it looks**
-   * (0281). A passage whose standing is `unknown` is in no term, so the figure
+   * (0282). A passage whose standing is `unknown` is in no term, so the figure
    * is at most the spoken-for words — `wordsByStanding.read` plus
    * `wordsByStanding.skipped` — and not at most {@link words}. The gap is
    * `wordsByStanding.unknown`, published beside it, and a page where the gap is
@@ -478,7 +478,7 @@ export const copyReadingOf = (reading: PageReading): CopyReading => {
    * (`standingOf`), so its term is `0 x words` and the sum over every passage
    * and the sum over the spoken-for ones are the same number. The comparison of
    * two windows has to filter, because there a passage `unknown` on one side
-   * carries a real term on the other (0281).
+   * carries a real term on the other (0282).
    */
   const typical =
     silence === null

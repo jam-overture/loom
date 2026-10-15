@@ -8,7 +8,7 @@
 
 The open finding this lane filed yesterday evening, taken as its own unit over
 both of the page-scale figures it names:
-[0281](../decisions/0281-a-word-nothing-can-be-said-about-is-in-no-mass-and-a-page-that-reports-no-reach-has-no-mean.md).
+[0282](../decisions/0282-a-word-nothing-can-be-said-about-is-in-no-mass-and-a-page-that-reports-no-reach-has-no-mean.md).
 
 A part of a page has three standings and the third is *nothing can be said* —
 either the window held no views, or **the part reported something other than
@@ -115,7 +115,7 @@ was* is a fact about the change.
 
 ## Records added
 
-One: **0281**. `pnpm decisions:index` regenerated; `0277`, `0278` and `0280`
+One: **0282**. `pnpm decisions:index` regenerated; `0277`, `0278` and `0280`
 still print as holes, which is #633 and #640 holding them on open branches and
 is what 0097 allows.
 
@@ -200,7 +200,7 @@ have to work it out.
 
 **One thing failed on the way and is worth writing down**, because it will catch
 the next run that cites a record from an open branch. The first `pnpm verify`
-went red on `tools/decisions`: 0281 linked 0280 by filename, and 0280 is claimed
+went red on `tools/decisions`: 0282 linked 0280 by filename, and 0280 is claimed
 on #640's branch, so the link resolved to nothing and the citation check calls
 that blocking. It is cited by number and not linked now, and the record says so
 in the sentence where it happens.
@@ -208,12 +208,12 @@ in the sentence where it happens.
 ## Open questions
 
 Nothing blocking. Four things with a recommendation each are in the pull request
-comment: whether 0281 should have been `Proposed`, the share finding above, the
+comment: whether 0282 should have been `Proposed`, the share finding above, the
 thirteenth condition, and the three-way count collision with #640.
 
 ## The door this lane is keeping cheap
 
-Nothing here touches it. Per-reader identity stays deferred and nothing in 0281
+Nothing here touches it. Per-reader identity stays deferred and nothing in 0282
 makes it more expensive to add later: the restriction is on which passages a mean
 is taken over, and an identified batch would arrive with the same standings and
 the same three noughts to tell apart.

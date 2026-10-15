@@ -58,6 +58,30 @@ export const nodeDataOf = (answers: Readonly<Record<string, DataOutcome>>): Node
   return Object.freeze(bag)
 }
 
+/**
+ * One planned request's answer: what a source gave back, or the named reason
+ * there is none.
+ *
+ * Named rather than left as its structure because it is half of a seam a host
+ * has to carry, and a loader cannot write `Result<JsonValue, DataUnavailable>`
+ * into its own return type without reaching past the entry points it is meant
+ * to use.
+ */
+export type DataAnswer = Result<JsonValue, DataUnavailable>
+
+/**
+ * Every answer a resolution was built from, as plain data.
+ *
+ * Pairs and not a `ReadonlyMap`, because the only reason to publish these is
+ * that they travel. `JSON.stringify` turns a `Map` into `{}` and says nothing
+ * about it, so a host that serialised one would send an empty object, rebuild a
+ * resolution that answers nothing, and get a page of `data-unresolved`
+ * diagnostics with no hint that the answers were lost in transit rather than
+ * never fetched. An array of pairs is the shape every boundary already carries,
+ * and `new Map(answers)` is what `buildDataResolution` takes (0281).
+ */
+export type DataAnswers = readonly (readonly [RequestKey, DataAnswer])[]
+
 /** What a node's data could not do, in the seam's own vocabulary. */
 export type NodeDataProblem =
   | { readonly kind: "misdeclared"; readonly error: BindingError }
@@ -108,7 +132,7 @@ export const EMPTY_DATA_RESOLUTION: DataResolution = {
  */
 export const buildDataResolution = (
   plan: DataPlan,
-  answers: ReadonlyMap<RequestKey, Result<JsonValue, DataUnavailable>>
+  answers: ReadonlyMap<RequestKey, DataAnswer>
 ): DataResolution => {
   const data = new Map<NodeId, Record<string, DataOutcome>>()
   const problems = new Map<NodeId, NodeDataProblem[]>()

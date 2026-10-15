@@ -298,7 +298,7 @@ describe("copyReadingOf", () => {
     })
 
     /**
-     * The ceiling 0281 tightened. Every word of the pricing band reached every
+     * The ceiling 0282 tightened. Every word of the pricing band reached every
      * reader, so the mean is exactly the words this window can speak for — and
      * the ten words of the intro, which the window reports nothing about, are
      * neither in the figure nor in the ceiling it is under.

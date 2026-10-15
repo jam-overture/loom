@@ -44,6 +44,7 @@ the portal every day.
 | Whether the collection has stopped | the fold's own timestamp, judged against the schedule the deployment states ([0274](../decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)), with the waits nothing can judge counted apart |
 | What a change did to a kind of part | the places both windows bore, read before against read now ([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)), which is the one denominator here with no reader in it — so the movement is a count of places and a verdict needs no threshold |
 | What a change did to the readers a kind of part had | each window's own weighted share of the readers who met it, with a counterfactual per side ([0279](../decisions/0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md)), so a kind read better because its pages got busier is told from one read better by readers |
+| What a change did to the words a reader gets to | each window's own page-weighted mass of carried words, with a counterfactual per side ([0280](../decisions/0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md)), so *the typical reader reached two hundred of its words and reaches three hundred* is a sentence — and the whole library has one too, because words partition where places do not |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
@@ -1917,12 +1918,65 @@ than as a state of the world.
 is the field that belongs beside the share rather than behind it, since a `pages`
 verdict is not a sentence about the library at all.
 
+### 31. The words a kind of part puts in front of one reader · `Loom signals` · **done, 14 October**
+
+§27 compares the words a kind of part kept by **standing**: a word counts as
+read where at least one reader reached the part saying it. The figure everybody
+asks for next is the per-reader one, and this lane filed it the day 0270 landed
+rather than shipping it inside that type: *the typical reader reached two
+hundred of its words and reaches three hundred now.*
+
+**Done.** `libraryWordReachChangeOf(was, now)` in
+[`src/signals/library-word-reach-change.ts`](../src/signals/library-word-reach-change.ts)
+is that figure. It is the **twenty-first** thing taken out of what this
+subsystem already knows rather than collected: **nothing was added to a payload,
+a browser, a column, a store or the vocabulary of kinds**, and the broadcaster
+was not touched — measured both sides and byte-identical.
+
+Three things decide the shape
+([0280](../decisions/0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md)):
+
+- **The unit is the page, not the place, and that is the whole structural
+  difference from §30.** A share of readers is a weighted mean of per-place
+  shares, so its weight is added once per place. Words are not a share: a part's
+  own words partition its page exactly once (0212, 0235), so two placements of
+  one kind on one page **add**, and what a reader reached is their sum. The term
+  is a page's whole carried mass and the weight is added once per page. Adding
+  the door per placement would weight a page by how finely it was written.
+- **So a whole-library figure is publishable here and is not in §30.** Words
+  partition and places do not, so adding every kind's carried words reads no
+  sentence twice — down either key, with the same answer. It is the first
+  reading-wide number any library comparison publishes, and nothing about it
+  generalises to a reading whose unit is the place.
+- **A floor withholds every difference and leaves both levels standing**, which
+  is 0239's rule stated once rather than enumerated: a sum of non-negative terms
+  survives a floor as a floor, and every figure a surface would subtract —
+  `shift`, `wordsMoved`, the two counterfactuals and `cause` — does not. The
+  weights survive whole, because there is no word in them.
+
+The weights move for §30's reason and are answered by §30's method, imported
+rather than copied: the sufficiency verdict, the door-on-both-sides window and
+the weight-movement figure are now published from the module whose record owns
+them, so a fourth reading of a library needs none of them written again.
+
+**One fault was found in §27 and fixed in the same change.** Its floor was
+triggered on a count of **words**, and the commonest floor there is — a part
+that declares no `copy` at all — says nought visible words and hides all of
+them, so a kind whose floored placements all declared nothing published a signed
+figure and a verdict nobody could stand behind. Both readings now trigger on a
+count of placements. 0270 is not superseded; the rule it states is the rule, and
+what moved is the number the rule is read off.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: a second
+mass per kind, in words per reader rather than as a share, with `cause` beside
+it and the floor drawn as a floor rather than as a number.
+
 ### 32. A word nothing can be said about · `Loom signals` · **done, 15 October**
 
 > §31 was on the branch of #640 through this run, so its number was left for it
-> rather than taken. #640 reports §30 and §31 and is still open — which is also
-> why this is the twenty-second figure and not the twenty-first: §31 is the
-> twenty-first and lands with it.
+> rather than taken. #640 reported §30 and §31 and has since landed — which is
+> also why this is the twenty-second figure and not the twenty-first: §31 is the
+> twenty-first and came with it.
 
 A part has three standings and the third is *nothing can be said* — either the
 window held no views, or **the part reported something other than coming into
@@ -1945,7 +1999,7 @@ a browser, a column, a store or the vocabulary of kinds**, and the broadcaster
 was not touched — measured both sides and byte-identical.
 
 The cost was a number, and the case is in the suite
-([0281](../decisions/0281-a-word-nothing-can-be-said-about-is-in-no-mass-and-a-page-that-reports-no-reach-has-no-mean.md)).
+([0282](../decisions/0282-a-word-nothing-can-be-said-about-is-in-no-mass-and-a-page-that-reports-no-reach-has-no-mean.md)).
 Four readers, three bands, unchanged words; in the later window the intro's row
 reports no reach at all, which is what a primitive that stopped spreading its
 identity attributes looks like from the counters. Two readers reached the pricing

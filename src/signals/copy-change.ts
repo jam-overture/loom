@@ -88,7 +88,7 @@ import type { PageReading, PartStanding } from "./parts.js"
  *   safe claim, which is more than 0235 could say of one window.
  * - **A passage nothing can be said about is in neither.** A carried passage
  *   whose standing is `unknown` on one side or the other has no gain and is in
- *   no mass (0281): its reach of nought is a counter that is missing rather
+ *   no mass (0282): its reach of nought is a counter that is missing rather
  *   than a reader who did not arrive, and a subtraction against it would read
  *   as the change having taken the other side's whole reach away. Its words are
  *   in `wordsByMovement` under `unknown`, where they can be seen and not acted
@@ -311,7 +311,7 @@ export type ComparedPassage = {
    * `words × (now.reach − was.reach)`.
    *
    * Negative where readers lost ground, and `null` where either side held no
-   * views **or either side's standing is `unknown`** (0281) — a reach of nought
+   * views **or either side's standing is `unknown`** (0282) — a reach of nought
    * that is a missing counter is not a reader who did not arrive, and
    * subtracting against it would sign the other side's whole reach as something
    * the change did. It adds across passages — a part's own words partition the
@@ -479,7 +479,7 @@ export type CopyChange = {
    * a ceiling for the same two reasons, restricted to the words both revisions
    * say so that the page having grown or shrunk is not in it, and to the
    * passages neither window is `unknown` about so that a part that stopped
-   * reporting is not in it either (0281). One set of passages, so it is the
+   * reporting is not in it either (0282). One set of passages, so it is the
    * same set on both sides. `change` is the sum of every
    * {@link ComparedPassage.gain}.
    *
@@ -579,7 +579,7 @@ const saysSomething = (sides: readonly Passage[]): boolean =>
  * The words a passage newly put in front of the average reader, and `null`
  * where one of the two sides is not a measurement.
  *
- * Two refusals, and the second is 0281's. A side with no views has no `reach`
+ * Two refusals, and the second is 0282's. A side with no views has no `reach`
  * at all. A side whose standing is `unknown` has a `reach` of nought that is a
  * missing counter rather than a reader who did not arrive — so a subtraction
  * against it is the other side's whole reach, signed as though the change had
@@ -604,7 +604,7 @@ const gainOf = (
  * Whether both windows can say whether this passage was reached.
  *
  * The one test every signed figure here is taken over. A passage `unknown` on
- * either side is in the census, in `wordsByMovement` and in no mass (0281).
+ * either side is in the census, in `wordsByMovement` and in no mass (0282).
  */
 const spokenFor = (passage: ComparedPassage): boolean => passage.movement !== "unknown"
 
@@ -661,7 +661,7 @@ const passagesOf = (reading: PageReading): ReadonlyMap<NodeId, Passage> => {
  *
  * `dissolved` before `unspoken`, because *the change left no word as it was* is
  * a fact about the change and the stronger thing to say; and `unspoken` before
- * `floored`, for the reason a copy reading orders its own two that way (0281):
+ * `floored`, for the reason a copy reading orders its own two that way (0282):
  * a floor is a declaration a library has not made and a page where nothing
  * reports reach would still have no mean once every `copy` prop was declared.
  */
@@ -835,7 +835,7 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
 
   /**
    * Over the carried passages both windows can speak for, so neither the page
-   * having grown or shrunk nor a part that stopped reporting is in it (0281).
+   * having grown or shrunk nor a part that stopped reporting is in it (0282).
    * Guarded by the silence rather than clamped, for the reason a copy reading
    * guards its own mean (0235): a figure held back with a stated cause is one
    * somebody can act on.
