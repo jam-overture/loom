@@ -86,6 +86,13 @@ import type { PageReading, PartStanding } from "./parts.js"
  *   same words are on both sides, so an understated word count scales the gain
  *   toward zero and cannot flip its sign. *At least this many words moved* is a
  *   safe claim, which is more than 0235 could say of one window.
+ * - **A passage nothing can be said about is in neither.** A carried passage
+ *   whose standing is `unknown` on one side or the other has no gain and is in
+ *   no mass (0281): its reach of nought is a counter that is missing rather
+ *   than a reader who did not arrive, and a subtraction against it would read
+ *   as the change having taken the other side's whole reach away. Its words are
+ *   in `wordsByMovement` under `unknown`, where they can be seen and not acted
+ *   on, and a pair with no spoken-for carried word at all is `unspoken`.
  * - **The page's total does not.** {@link CopyChange.typical} adds signed terms
  *   that floors scale by **different** factors, so a floored passage that
  *   gained and an exact one that lost can sum to a regression where the truth
@@ -151,6 +158,20 @@ export type CopyChangeSilence =
    * {@link ComparedPassage.gain} is unaffected in sign and stays published.
    */
   | "floored"
+  /**
+   * No carried word of the page can be spoken for in both windows.
+   *
+   * Every carried passage is `unknown` on one side or the other, so not one of
+   * them has two reaches that are both a measurement and there is nothing to
+   * compare. `unknown` is *nothing can be said* and never *nobody reached it*
+   * (0212), so a figure taken over nought spoken-for words would publish a
+   * change of nought where the honest answer is that the pair cannot say.
+   *
+   * The words are in {@link CopyChange.wordsByMovement} under `unknown`, which
+   * is where a surface sees how much of the page is in this state without
+   * acting on it.
+   */
+  | "unspoken"
 
 /** The closed set, for a surface that has to account for every reason a figure is absent. */
 export const COPY_CHANGE_SILENCES: readonly CopyChangeSilence[] =
@@ -161,6 +182,7 @@ export const COPY_CHANGE_SILENCES: readonly CopyChangeSilence[] =
     "inconsistent",
     "dissolved",
     "floored",
+    "unspoken",
   ])
 
 /** One line per silence, for a surface saying why a figure is not there. */
@@ -178,6 +200,8 @@ export const describeCopyChangeSilence = (silence: CopyChangeSilence): string =>
       return "the change left no word of the page as it was, so there is nothing to compare"
     case "floored":
       return "some carried passage declares no copy, so a page-wide mean of its words would not be a ceiling"
+    case "unspoken":
+      return "no carried word of the page can be spoken for in both windows"
   }
 }
 
@@ -287,8 +311,12 @@ export type ComparedPassage = {
    * `words × (now.reach − was.reach)`.
    *
    * Negative where readers lost ground, and `null` where either side held no
-   * views. It adds across passages — a part's own words partition the page
-   * exactly once (0235) — and the sum is {@link CopyChange.typical}'s `change`.
+   * views **or either side's standing is `unknown`** (0281) — a reach of nought
+   * that is a missing counter is not a reader who did not arrive, and
+   * subtracting against it would sign the other side's whole reach as something
+   * the change did. It adds across passages — a part's own words partition the
+   * page exactly once (0235) — and the sum is {@link CopyChange.typical}'s
+   * `change`, over the same spoken-for passages.
    *
    * A floor on {@link words} scales it toward zero and cannot change its sign,
    * which is why it is published where the page total is withheld.
@@ -446,11 +474,18 @@ export type CopyChange = {
    * The carried words the average reader got to, before and after. `null` where
    * {@link silence} says why not.
    *
-   * Each side is `Σ(readers × words) ÷ views` over the carried passages of that
-   * side — the same arithmetic as `CopyReading.typical` and a ceiling for the
-   * same two reasons, restricted to the words both revisions say so that the
-   * page having grown or shrunk is not in it. `change` is the sum of every
+   * Each side is `Σ(readers × words) ÷ views` over the carried passages **both
+   * windows can speak for** — the same arithmetic as `CopyReading.typical` and
+   * a ceiling for the same two reasons, restricted to the words both revisions
+   * say so that the page having grown or shrunk is not in it, and to the
+   * passages neither window is `unknown` about so that a part that stopped
+   * reporting is not in it either (0281). One set of passages, so it is the
+   * same set on both sides. `change` is the sum of every
    * {@link ComparedPassage.gain}.
+   *
+   * The words left out are in {@link wordsByMovement} under `unknown`, and a
+   * pair with nothing but those gets the `unspoken` silence rather than a
+   * change of nought.
    *
    * Each side's own whole-page figure is on `readings.was.typical` and
    * `readings.now.typical`, and those two are **not** comparable: a page that
@@ -540,8 +575,38 @@ const movementOf = (was: PartStanding, now: PartStanding): PassageMovement => {
 const saysSomething = (sides: readonly Passage[]): boolean =>
   sides.some((passage) => passage.words > 0 || passage.floored)
 
-const gainOf = (words: number, was: PassageSide, now: PassageSide): number | null =>
-  was.reach === null || now.reach === null ? null : words * (now.reach - was.reach)
+/**
+ * The words a passage newly put in front of the average reader, and `null`
+ * where one of the two sides is not a measurement.
+ *
+ * Two refusals, and the second is 0281's. A side with no views has no `reach`
+ * at all. A side whose standing is `unknown` has a `reach` of nought that is a
+ * missing counter rather than a reader who did not arrive — so a subtraction
+ * against it is the other side's whole reach, signed as though the change had
+ * caused it, which is the one direction a reading of a quiet window must not be
+ * wrong in (0212).
+ *
+ * It is what keeps the sum of the gains equal to {@link CopyChange.typical}'s
+ * `change`: the total is over the same spoken-for passages this is published
+ * for, so a passage in no term of one is in no term of the other.
+ */
+const gainOf = (
+  words: number,
+  movement: PassageMovement,
+  was: PassageSide,
+  now: PassageSide
+): number | null =>
+  movement === "unknown" || was.reach === null || now.reach === null
+    ? null
+    : words * (now.reach - was.reach)
+
+/**
+ * Whether both windows can say whether this passage was reached.
+ *
+ * The one test every signed figure here is taken over. A passage `unknown` on
+ * either side is in the census, in `wordsByMovement` and in no mass (0281).
+ */
+const spokenFor = (passage: ComparedPassage): boolean => passage.movement !== "unknown"
 
 /** Descending by words, strictly, so equal passages keep the order they arrived in. */
 const byWordsUnread = (one: ComparedPassage, other: ComparedPassage): number =>
@@ -590,11 +655,22 @@ const passagesOf = (reading: PageReading): ReadonlyMap<NodeId, Passage> => {
   return byNode
 }
 
+/**
+ * Why there is no reader comparison, in the order a pair is in more than one of
+ * these.
+ *
+ * `dissolved` before `unspoken`, because *the change left no word as it was* is
+ * a fact about the change and the stronger thing to say; and `unspoken` before
+ * `floored`, for the reason a copy reading orders its own two that way (0281):
+ * a floor is a declaration a library has not made and a page where nothing
+ * reports reach would still have no mean once every `copy` prop was declared.
+ */
 const silenceOf = (
   words: WordCount,
   readings: { readonly was: CopyReading; readonly now: CopyReading },
   views: { readonly was: number; readonly now: number },
   carried: number,
+  spoken: number,
   floored: number
 ): CopyChangeSilence | null => {
   if (words.was === 0 && words.now === 0) return "wordless"
@@ -603,6 +679,7 @@ const silenceOf = (
     return "inconsistent"
   }
   if (carried === 0) return "dissolved"
+  if (spoken === 0) return "unspoken"
 
   return floored > 0 ? "floored" : null
 }
@@ -690,7 +767,7 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
         ...shared,
         words: passage.words,
         text: passage.text,
-        gain: gainOf(passage.words, shared.was, shared.now),
+        gain: gainOf(passage.words, shared.movement, shared.was, shared.now),
       })
       continue
     }
@@ -704,6 +781,18 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
   }
 
   const carried = compared.reduce((total, passage) => total + passage.words, 0)
+
+  /**
+   * The carried passages both windows can speak for, which every signed figure
+   * below is taken over.
+   *
+   * One set and therefore the same set on both sides, which is the property
+   * that makes the two levels comparable at all: a passage dropped from the
+   * later mass and kept in the earlier one would read as a loss of words
+   * nobody wrote.
+   */
+  const spoken = compared.filter(spokenFor)
+  const carriedSpoken = spoken.reduce((total, passage) => total + passage.words, 0)
 
   const wrote: WordsWritten = {
     carried,
@@ -740,22 +829,22 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
     readings,
     { was: was.views, now: now.views },
     carried,
+    carriedSpoken,
     floored
   )
 
   /**
-   * Over the carried passages only, so the page having grown or shrunk is not in
-   * it. Guarded by the silence rather than clamped, for the reason a copy reading
+   * Over the carried passages both windows can speak for, so neither the page
+   * having grown or shrunk nor a part that stopped reporting is in it (0281).
+   * Guarded by the silence rather than clamped, for the reason a copy reading
    * guards its own mean (0235): a figure held back with a stated cause is one
    * somebody can act on.
    */
   const typicalOf = (): WordCount => {
     const wasWords =
-      compared.reduce((total, passage) => total + passage.was.readers * passage.words, 0) /
-      was.views
+      spoken.reduce((total, passage) => total + passage.was.readers * passage.words, 0) / was.views
     const nowWords =
-      compared.reduce((total, passage) => total + passage.now.readers * passage.words, 0) /
-      now.views
+      spoken.reduce((total, passage) => total + passage.now.readers * passage.words, 0) / now.views
 
     return { was: wasWords, now: nowWords, change: nowWords - wasWords }
   }

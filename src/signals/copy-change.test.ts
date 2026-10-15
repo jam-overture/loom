@@ -133,6 +133,36 @@ const NOW = {
   ],
 }
 
+/**
+ * Four readers, all of whom read the intro and two of whom reached the pricing
+ * band — the earlier side of 0281's case.
+ */
+const WAS_SPOKEN = {
+  tree: pageOf(1, THREE_BANDS),
+  counters: [
+    tally("page", 1, { views: 4, reached: 4 }),
+    tally("intro", 1, { views: 4, reached: 4 }),
+    tally("pricing", 1, { views: 4, reached: 2 }),
+  ],
+}
+
+/**
+ * The same four readers and the same two reaching the pricing band, with the
+ * intro's row reporting no reach at all.
+ *
+ * What a primitive that stopped spreading its identity attributes looks like
+ * from the counters: the row is there, something was filed against it, and no
+ * `viewed` ever named it. Nothing about the reading of this page changed.
+ */
+const NOW_HALF_SILENT = {
+  tree: pageOf(2, THREE_BANDS),
+  counters: [
+    tally("page", 2, { views: 4, reached: 4 }),
+    tally("intro", 2, { views: 4, reached: 0 }),
+    tally("pricing", 2, { views: 4, reached: 2 }),
+  ],
+}
+
 const sum = (counted: Readonly<Record<string, number>>): number =>
   Object.values(counted).reduce((total, one) => total + one, 0)
 
@@ -471,6 +501,22 @@ describe("copyChangeOf", () => {
       expect(change.typical?.now).toBeLessThanOrEqual(change.wrote.carried)
     })
 
+    /**
+     * The identity 0239 published and 0281 had to keep: the gains add to the
+     * total, so a passage in no term of one is in no term of the other. A
+     * passage dropped from the total while its gain stayed published would be a
+     * word counted on one side and not the other.
+     */
+    it("adds the gains to exactly the change it publishes, with a passage nothing can speak for in neither", () => {
+      const change = changeOf(WAS_SPOKEN, NOW_HALF_SILENT)
+
+      const gains = change.compared.reduce((total, one) => total + (one.gain ?? 0), 0)
+
+      expect(passage(change, "intro")?.movement).toBe("unknown")
+      expect(passage(change, "intro")?.gain).toBeNull()
+      expect(change.typical?.change).toBe(gains)
+    })
+
     it("counts each carried passage in exactly one movement, by words and by passage", () => {
       const change = changeOf(WAS, NOW)
 
@@ -498,6 +544,131 @@ describe("copyChangeOf", () => {
       ]
 
       expect(new Set(named).size).toBe(named.length)
+    })
+  })
+
+  describe("a passage neither window can speak for", () => {
+    /**
+     * The defect 0281 closes, and the number is the point: nothing about the
+     * reading of this page changed — two readers in four reached the pricing
+     * band before and two do now — and the figure that was published said the
+     * change had taken ten words away from the average reader.
+     */
+    it("reports no movement where a part stopped reporting and the reading held", () => {
+      const change = changeOf(WAS_SPOKEN, NOW_HALF_SILENT)
+
+      expect(change.typical).toEqual({ was: 15, now: 15, change: 0 })
+      expect(change.mostLost).toBeNull()
+      expect(change.mostGained).toBeNull()
+    })
+
+    it("keeps its words in the census, so nothing is dropped to get there", () => {
+      const change = changeOf(WAS_SPOKEN, NOW_HALF_SILENT)
+
+      expect(change.wrote.carried).toBe(60)
+      expect(change.wordsByMovement.unknown).toBe(10)
+      expect(sum(change.wordsByMovement)).toBe(change.wrote.carried)
+      expect(change.passagesByMovement.unknown).toBe(1)
+    })
+
+    /**
+     * The ranking rule as well as the sum: a passage with no gain is not the
+     * passage that lost most, however large a subtraction against its missing
+     * counter would have been.
+     */
+    it("never names it as the passage the change gained or lost most", () => {
+      const change = changeOf(WAS_SPOKEN, {
+        tree: pageOf(2, THREE_BANDS),
+        counters: [
+          tally("page", 2, { views: 4, reached: 4 }),
+          tally("intro", 2, { views: 4, reached: 0 }),
+          tally("pricing", 2, { views: 4, reached: 4 }),
+        ],
+      })
+
+      expect(passage(change, "intro")?.gain).toBeNull()
+      expect(change.mostGained?.nodeId).toBe(nodeId("pricing"))
+      expect(change.mostLost).toBeNull()
+    })
+
+    /**
+     * Where every carried passage is in that state there is no spoken-for word
+     * to take a mean over, and a change of nought would be the plausible false
+     * number: the pair cannot say rather than nothing having happened.
+     */
+    it("withholds the comparison where no carried word can be spoken for in both windows", () => {
+      const change = changeOf(WAS_SPOKEN, {
+        tree: pageOf(2, THREE_BANDS),
+        counters: [
+          tally("page", 2, { views: 4, reached: 4 }),
+          tally("intro", 2, { views: 4, reached: 0 }),
+          tally("pricing", 2, { views: 4, reached: 0 }),
+          tally("footer", 2, { views: 4, reached: 0 }),
+        ],
+      })
+
+      expect(change.wrote.carried).toBe(60)
+      expect(change.wordsByMovement.unknown).toBe(60)
+      expect(change.typical).toBeNull()
+      expect(change.silence).toBe("unspoken")
+      expect(change.readings.now.silence).toBe("unspoken")
+    })
+
+    /**
+     * `dissolved` is the stronger thing to say where it is also true: a change
+     * that left no word as it was has nothing to speak for either way.
+     */
+    it("calls a page rewritten end to end dissolved rather than unspoken", () => {
+      const change = changeOf(
+        {
+          tree: pageOf(1, [band("intro", 10)]),
+          counters: [
+            tally("page", 1, { views: 4, reached: 4 }),
+            tally("intro", 1, { views: 4, reached: 0 }),
+          ],
+        },
+        {
+          tree: pageOf(2, [band("intro", 25)]),
+          counters: [
+            tally("page", 2, { views: 4, reached: 4 }),
+            tally("intro", 2, { views: 4, reached: 0 }),
+          ],
+        }
+      )
+
+      expect(change.silence).toBe("dissolved")
+    })
+
+    it("names the missing reach before the missing declaration", () => {
+      const floorable = (revision: number): LoomTree =>
+        treeOf(
+          element("page", "loom.stack", { body: words(10) }, [
+            element("pricing", "loom.undeclared", { body: words(30) }),
+          ]),
+          revision
+        )
+
+      const change = changeOf(
+        {
+          tree: floorable(1),
+          counters: [
+            tally("page", 1, { views: 4, reached: 4 }),
+            tally("pricing", 1, { views: 4, reached: 4 }),
+          ],
+        },
+        {
+          tree: floorable(2),
+          counters: [
+            tally("page", 2, { views: 4, reached: 0 }),
+            tally("pricing", 2, { views: 4, reached: 0 }),
+          ],
+        },
+        DECLARED_FOR(["loom.stack"])
+      )
+
+      expect(change.floored).toBeGreaterThan(0)
+      expect(change.silence).toBe("unspoken")
+      expect(describeCopyChangeSilence("unspoken")).toContain("spoken for")
     })
   })
 
@@ -660,7 +831,7 @@ describe("copyChangeOf", () => {
 
   describe("the closed sets", () => {
     it("describes every silence", () => {
-      expect(COPY_CHANGE_SILENCES).toHaveLength(6)
+      expect(COPY_CHANGE_SILENCES).toHaveLength(7)
       for (const silence of COPY_CHANGE_SILENCES) {
         expect(describeCopyChangeSilence(silence)).toMatch(/\S/)
       }

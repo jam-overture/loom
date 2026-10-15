@@ -361,6 +361,39 @@ describe("the two overlaps this mapping exists to state", () => {
     expect(relateSilences(copy, reach)).toBe("unrelated")
   })
 
+  /**
+   * The third nought, which 0281 had to keep apart from the other two. A page
+   * nobody opened, a page whose rows report no reach, and a window that credits
+   * no press to a reader are three different senders half-working, and a
+   * deployment handed the wrong one looks in the wrong place.
+   */
+  it("says that a page reporting no reach is not a page nobody read", () => {
+    const unspoken = meaningOfCopySilence("unspoken")
+    const empty = meaningOfCopySilence("unmeasured")
+
+    expect(unspoken.condition).toBe("no-reach-reported")
+    expect(empty.condition).toBe("no-view-reported")
+    expect(relateSilences(unspoken, empty)).toBe("unrelated")
+  })
+
+  it("keeps it apart from the other nought that is not a measurement", () => {
+    const unspoken = meaningOfCopySilence("unspoken")
+    const unwalked = meaningOfActionChangeSilence("unwalked")
+
+    expect(unwalked.condition).toBe("no-action-credited")
+    expect(relateSilences(unspoken, unwalked)).toBe("unrelated")
+  })
+
+  /**
+   * And the same state said of a page and of a pair is one reason at two
+   * subjects, which is the relation this module exists to publish.
+   */
+  it("relates a page's missing reach to the pair's as one reason at two subjects", () => {
+    expect(
+      relateSilences(meaningOfCopySilence("unspoken"), meaningOfCopyChangeSilence("unspoken"))
+    ).toBe("one-reason")
+  })
+
   it("relates a page's floor to a part's floor as one reason at two subjects", () => {
     expect(
       relateSilences(meaningOfCopySilence("floored"), meaningOfPaceSilence("unreadable"))

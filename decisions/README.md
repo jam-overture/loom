@@ -369,3 +369,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0277 | *No record on this branch* | — | — |
 | 0278 | *No record on this branch* | — | — |
 | [0279](0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md) | A kind's share of the readers who met it is compared at each window's own weights, and a counterfactual says which side moved | Accepted | §4c (reader signals) |
+| 0280 | *No record on this branch* | — | — |
+| [0281](0281-a-word-nothing-can-be-said-about-is-in-no-mass-and-a-page-that-reports-no-reach-has-no-mean.md) | A word nothing can be said about is in no mass, and a page that reports no reach has no mean | Accepted | §4c (reader signals) |
