@@ -53918,6 +53918,147 @@ three links above are this lane's to fix either way.
 
 
 ---
+## 2026-10-15 — a shot cannot photograph a press of a contents row, because the harness refuses every link and a fragment is not a navigation
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/specimen/playwright.ts`) · **Status:** open — **nothing is broken and
+one picture had to be taken another way**; the remedy is one comparison and the
+reason it was not taken here is lane rather than difficulty
+
+`pinNavigation` is run in the top document before the first step of a `do`
+list, and it prevents the default on **every** click that lands inside an
+`a[href]`. The reason it exists is sound and is written where it happens: a
+press on a real link navigates, every step after it then runs on a different
+page, and a three-step shot silently photographs somewhere else.
+
+A **same-page fragment** is not that. `<a href="#the-bar-above-your-page">` does
+not leave the document; it sets `location.hash` and scrolls. So the state a
+press of a contents row produces — the page moved, the heading parked under the
+header, the row for it marked — cannot be reached by `click`, and a shot that
+tries comes back byte-identical to one that did nothing. That is what this run
+got, twice, with a 400ms wait and then a 2,500ms one, before reading the
+harness:
+
+```
+nav[aria-label='On this page'] [aria-current='location']  no match
+h2#the-bar-above-your-page  x 304 y 14155  704x67  ← 13322 past the fold
+```
+
+The page had not moved at all. The same shot written with `{ "scrollTo": … }`
+reaches the state and the mark is in the picture, so **the run was not blocked**
+and the report's picture is of a reader scrolling rather than of a reader
+pressing. Those are the same state arrived at two ways, and the one the rail
+exists for is the press.
+
+**What would close it:** prevent the default only when the link would leave the
+document — compare `new URL(href, location.href)` with `location.href` ignoring
+the hash, and let a pure fragment change through. It keeps every property the
+pin was written for: a press that navigates is still refused, the listener is
+still capture-phase and still `preventDefault` rather than `stopPropagation`,
+and a delegated listener still sees the event.
+
+**Why not here.** `tools/` is not this lane's, and the behaviour is shared by
+`pnpm specimen` and `pnpm shoot` — it is the harness five lanes photograph with
+([0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)),
+and a change to what a `click` does belongs to a run looking at the harness.
+Worth knowing before it is taken: it makes `click` able to move the page, which
+is a thing the `do` table's one-line description does not currently say it can
+do.
+
+---
+## 2026-10-15 — the contents rail is a desktop rail, so the reader most likely to be lost in a long page is the one without it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/layout.tsx`) · **Status:** open — **a stated limit
+of what shipped today**, with the shape of the remedy named and deliberately
+not taken
+
+*On this page* is in the layout at `xl` and above, so it is in the picture at
+1280 and absent at 390. A phone reader of *Making it look like yours* gets
+24,944 pixels of article and no way to see that it has fourteen sections in it,
+which is the reader this rail would help most.
+
+It is not an oversight about width: there is no room beside the prose on a
+phone, and a rail is the wrong shape there. The remedy is a different
+presentation of the same rows — a disclosure above the article, closed, saying
+how many sections the page has — and the layout can render one without any page
+being edited, because it already renders the article's wrapper.
+
+**Not taken here** because it is a second presentation with its own shots, its
+own copy and its own collapsed-by-default question, and because it would be
+decided better beside the mobile menu than beside the rail: `mobile-nav.tsx`
+already owns the phone's answer to *where am I in the site*, and *where am I in
+the page* is the same reader's next question.
+
+---
+## 2026-10-15 — the reference pages carry the heading's id on the `<section>` around it, so nothing can land a reader on a band
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
+**nothing is broken**; this is the half of today's rail that could not be built
+and the reason it could not
+
+`_lib/on-this-page.ts` takes a heading with an `id` to be a place a reader can
+be sent to, which is `mdx.ts`' sentence applied to a document rather than to a
+page's source. On the seventeen generated pages nothing matches, because
+`GroupSection` puts the id on the `<section>` and leaves the `<h2>` inside it
+bare. The rail renders nothing there, which is correct today — those pages carry
+a contents list of their own, two columns wide because it holds sixty module
+names.
+
+The same gap is already recorded one level away, in `search/generated.ts`, as
+the reason a reference page's words are indexed under the page rather than cut
+up by heading: *"The bands have no `id` to land on either."* It is one fact with
+two consumers now.
+
+**What would close it:** the id on the `<h2>`, with `scroll-mt` moving to it.
+`Contents` already links to `#${apiGroupAnchor(group.module)}`, so the link it
+draws would land on the heading rather than on the top of the section — a better
+landing by a heading's own margin — and the search index would gain somewhere to
+send a reader for a sentence inside a band.
+
+**Not taken here** because it changes where every existing link into a reference
+page lands, which is a change to those pages' own anchors rather than to the
+rail beside them, and because the search half is the larger half of the win and
+is a different lane's file to read.
+
+---
+## 2026-10-15 — `nextjs.org` is in the allowlist twice and the gateway refuses it, so the one structural reference four briefs name cannot be read
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **a run worked around it**; this is the same class as the `*.vercel.app`
+entry of 12 October and is filed beside it rather than merged into it
+
+The documentation brief says the site is *"Modelled on **nextjs.org/docs**
+(WebFetch it)"*, and `docs/routines.md` lists `nextjs.org` as currently allowed
+under both mechanisms that gate the network. `.claude/settings.json` carries it
+in `permissions.allow` as `WebFetch(domain:nextjs.org)` and in
+`sandbox.network.allowedDomains`. Both are right and neither is what answers:
+
+```
+curl https://nextjs.org/docs
+curl: (56) CONNECT tunnel failed, response 403
+```
+
+```
+"recentRelayFailures": [{ "kind": "connect_rejected",
+  "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+  "host": "nextjs.org:443" }]
+```
+
+So the committed policy and the environment the session actually runs in
+disagree, and the committed one is the one a lane reads. **Nothing was blocked**:
+today's unit was built from the brief's own list of what that site has, from the
+contents list this site already ships on its generated pages, and from the
+conventions in this route group. What it cost is that a claim about what
+nextjs.org does could not be checked, so this report makes none.
+
+The remedy is the environment's rather than the repository's: the host is added
+under the cloud environment's **Network access**, or the access level widened,
+in the environment's settings. Filed here because `routines.md` says a domain
+that is listed is reachable, and until this is answered that sentence is
+wrong for one of the four hosts it names — which is worth a reader of that file
+knowing before they spend a run on it.
 ## 2026-10-15 — the passage nobody could speak for was counted as nought reader-words, and at two windows that is a movement that did not happen
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Closes** the
@@ -54327,3 +54468,102 @@ establish otherwise.
 > at 4,434 ms alone, and `docs/signals.md`'s own summary row was stale against
 > `silences.ts` on `main` for the same reason this entry exists — the table grew
 > and nothing recounted it.
+---
+## 2026-10-15 — the mangling bracket, measured on purpose this time: 144 clean and 155 mangled in one body, and the bracket the two open entries give is wrong
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 14 October entry *the mangling, measured by accident on one pull
+request body* and the 5 October entry it extends · **Status:** open —
+**two exact readings and one hypothesis killed**; the remedy both entries give
+still works and the number they give for it is too low
+
+The 14 October entry closes with *"the boundary is still somewhere in **133–141**,
+and nothing yet contradicts length as the variable."* This contradicts the first
+half and supports the second.
+
+#641's body carried two repository links in the same paragraph, same `[…](…)`
+syntax, same body, same minute. One came back clean and one came back with
+`` `` `` injected around the URL:
+
+| characters | link | came back |
+| --- | --- | --- |
+| 107 | the report's image, by short sha | **clean** |
+| 144 | `…/blob/<branch>/reports/2026-10-15-framework-the-answers-that-can-be-sent.md` | **clean** |
+| 155 | `…/blob/311fda4/decisions/0281-…-re-plans.md` | mangled |
+| 189 | the same record, by branch name rather than sha | mangled |
+
+**144 is clean and the 14 October table records ~141 as mangled.** Those cannot
+both be a length threshold. The tildes in that table suggest its middle rows were
+estimated rather than counted; these four were counted, with
+`len()` over the exact strings, before and after posting. On that basis the
+bracket is **144–155**, not 133–141, and the three estimated rows in the older
+table are worth re-counting before anybody trusts the narrower number.
+
+**A structural hypothesis, tested and dead.** The first mangling put the
+backticks around `URL),` with a backticked word later on the same line, which
+reads exactly like a tokeniser mis-pairing the inline-code span. So the second
+attempt moved the link to a line of its own, with nothing backticked after it,
+and shortened the branch name to a short sha — 189 to 155. **It was mangled
+again**, this time with the backticks wrapping the URL alone inside the parens.
+So it is not adjacency to an inline-code span, not the trailing comma, and not
+the branch name. Length is the surviving explanation and it now has a tighter
+bracket.
+
+**The remedy in both entries works and this adds a number to it.** 107 and 144
+came back clean in the same body that mangled 155. A short commit sha instead of
+a 41-character branch name saved 34 characters here and was not enough on its
+own, because `decisions/` filenames in this repository are long by convention —
+the 0281 record's own filename is **94 characters**, so no choice of ref gets
+that link under 144. For those, cite the path in backticks and link
+`decisions/README.md` (66 characters) instead; that is what #641's body does now.
+
+**Not proposed: a check.** Same reasoning as the 14 October entry — a test
+holding every URL in a pull request body under a number nobody has established
+would be this repository asserting a guess, and a body is not a file in it. What
+this entry adds is that the guess would have been **wrong**, since 141 is inside
+the clean range.
+
+---
+## 2026-10-15 — `merge=ours` protects two files and only after `pnpm install`, so a run that checks mergeability first resolves them by hand
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom daily build`
+(`.gitattributes`, `package.json`'s `prepare`, `docs/routines.md`) ·
+**Status:** open — **nothing is broken and the mechanism is documented where it
+lives**; filed because the order a run naturally works in defeats it, and the
+symptom is a hand-resolved generated file
+
+`.gitattributes` says it plainly, and the comment is right:
+
+```
+# Generated. Never resolved by hand — take the tree's copy and regenerate, which
+# `pnpm verify` forces by failing on drift. Needs `merge.ours.driver`, which the
+# `prepare` script sets on install; without it these conflict as before.
+decisions/README.md merge=ours
+*.generated.json merge=ours
+```
+
+**`prepare` runs on install, and a run's first act is usually not an install.**
+This morning's run opened by reading the tree and checking whether the open pull
+requests still merged — `git merge origin/main` on #633 — which is the cheapest
+useful thing to do first and happens before anything needs `node_modules`. The
+driver was not configured yet, so `decisions/README.md` conflicted exactly as the
+comment says it would. It was resolved by taking every row and then regenerating,
+which agreed, so nothing was lost; but the resolution was by hand, which is the
+one thing the attribute exists to prevent.
+
+0139 measured this attribute as worth 4 of 30 branches merging. That measurement
+holds for a machine that has installed. **It is worth nothing to a fresh session
+until it does**, and every routine in this repository starts as a fresh session.
+
+**Two remedies, and the cheap one is a sentence.** `docs/routines.md` could say
+*install before you merge* beside *Reading the merge gate*, which is the one line
+that makes the order explicit rather than incidental. The thorough one is for
+`prepare` not to be the only thing that sets the driver — a check in the merge
+gate, or a line in the session setup. **Recommendation: the sentence.** The
+thorough fix guards a case that only costs a careful hand-resolution, and this
+entry is where the next run that meets it will find out why.
+
+**Why it is filed rather than taken.** `.gitattributes`, `prepare` and
+`docs/routines.md` are `Loom daily build`'s; the framework lane met the symptom
+rather than owning the file. The hand-resolution it caused is recorded in #633's
+merge commit, which says the regenerated index agreed with it.
