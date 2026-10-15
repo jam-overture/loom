@@ -53,6 +53,14 @@ import { countWords } from "./words.js"
  * — the words the average reader got to — and the gap between the two is the
  * point of reporting both.
  *
+ * **The mean is over the words this window can speak for** (0282). A part whose
+ * standing is `unknown` reported something other than coming into view, so a
+ * reader plainly had it in front of them and the counter that would say so is
+ * missing. Its words are in no term of {@link CopyReading.typical}, which makes
+ * that figure a ceiling over the words that were measured rather than over the
+ * page — and a page where nothing at all reports reach gets `unspoken` and no
+ * mean, instead of a nought that reads as *nobody read any of this*.
+ *
  * **The word counts are floors and the floor is reported by standing.** A type
  * that declares no `copy` has words nothing here can see (0122). On the read
  * side that understates the numerator and on the skipped side it understates the
@@ -138,6 +146,23 @@ export type CopySilence =
    */
   | "floored"
   /**
+   * No word of the page is in a part this window can speak for, so there is no
+   * word to take a mean over.
+   *
+   * Every passage is `unknown` while the window holds views: rows name the
+   * parts and not one of them reports reach (`parts.ts`). A reader who pressed
+   * something inside a band no `viewed` ever named plainly had it in front of
+   * them, so the words are not words nobody reached — they are words nothing
+   * can be said about, and a mean of nought reader-words over them would print
+   * *the typical reader reached none of your page* as a measurement (0212).
+   *
+   * **It is the mean this withholds and not the standings.** The words stay in
+   * {@link CopyReading.wordsByStanding} under `unknown`, where they can be seen
+   * and not acted on, which is the rule {@link CopyReading.unseen} already
+   * applies to the same passages.
+   */
+  | "unspoken"
+  /**
    * A part reports more readers than the page has views, which no rollup
    * produces.
    *
@@ -155,6 +180,7 @@ export const COPY_SILENCES: readonly CopySilence[] = everyMemberOf<CopySilence>(
   "wordless",
   "unmeasured",
   "floored",
+  "unspoken",
   "inconsistent",
 ])
 
@@ -167,6 +193,8 @@ export const describeCopySilence = (silence: CopySilence): string => {
       return "the window held no page views of this revision"
     case "floored":
       return "some part of the page declares no copy, so a mean of its words would not be a ceiling"
+    case "unspoken":
+      return "no part of the page reports whether it was reached, so there is no word to take a mean over"
     case "inconsistent":
       return "a part reports more readers than the page has views, which no rollup produces"
   }
@@ -243,11 +271,18 @@ export type CopyReading = {
    * The words the typical reader reached, at most. `null` where {@link silence}
    * says why not.
    *
-   * Every word, weighted by the readers who reached the part saying it, over the
-   * page's views. Generous in both terms and therefore a ceiling: `reached` is
-   * over-counted by the page views that straddled a rollup window (0147), and
-   * {@link views} is a floor on the page views there were, so the numerator
-   * leans up and the denominator leans down.
+   * Every word **this window can speak for**, weighted by the readers who
+   * reached the part saying it, over the page's views. Generous in both terms
+   * and therefore a ceiling: `reached` is over-counted by the page views that
+   * straddled a rollup window (0147), and {@link views} is a floor on the page
+   * views there were, so the numerator leans up and the denominator leans down.
+   *
+   * **A ceiling over what was measured, which is a looser one than it looks**
+   * (0282). A passage whose standing is `unknown` is in no term, so the figure
+   * is at most the spoken-for words — `wordsByStanding.read` plus
+   * `wordsByStanding.skipped` — and not at most {@link words}. The gap is
+   * `wordsByStanding.unknown`, published beside it, and a page where the gap is
+   * everything has no figure at all rather than a nought.
    *
    * The straddle very nearly divides out, which is the only reason this is worth
    * publishing at all: the same inflation is in every `reached` here and in the
@@ -256,8 +291,8 @@ export type CopyReading = {
    * rests on (0221), taken one level up — a page against its own readers rather
    * than a part against its neighbour.
    *
-   * It cannot exceed {@link words}, and `inconsistent` is the input that would
-   * have made it.
+   * It cannot exceed the spoken-for words, and `inconsistent` is the input that
+   * would have made it.
    */
   readonly typical: number | null
   /** Why {@link typical} is not there, and `null` where it is. */
@@ -365,15 +400,27 @@ const roleRowsOf = (passages: readonly Passage[]): readonly RoleCopy[] => {
  */
 const byWordsLost = (one: Passage, other: Passage): number => other.words - one.words
 
+/**
+ * Why there is no mean, in the order a page is in more than one of these.
+ *
+ * `unspoken` sits above `floored` because the two are not the same kind of gap
+ * and only one of them has a remedy that produces a figure. A floor is a
+ * declaration a library has not made (0122), and a page where nothing reports
+ * reach would still have no mean once every `copy` prop was declared. A
+ * deployment told *some part declares no copy* would go and fix that and get
+ * the same silence back.
+ */
 const silenceOf = (
   words: number,
   views: number,
+  spoken: number,
   floored: boolean,
   inconsistent: boolean
 ): CopySilence | null => {
   if (words === 0) return "wordless"
   if (views === 0) return "unmeasured"
   if (inconsistent) return "inconsistent"
+  if (spoken === 0) return "unspoken"
 
   return floored ? "floored" : null
 }
@@ -406,9 +453,16 @@ export const copyReadingOf = (reading: PageReading): CopyReading => {
 
   const words = wordsByStanding.read + wordsByStanding.skipped + wordsByStanding.unknown
 
+  /**
+   * The words in parts this window can speak for either way, which is what the
+   * mean below is over and the only term `unknown` is kept out of.
+   */
+  const spoken = wordsByStanding.read + wordsByStanding.skipped
+
   const silence = silenceOf(
     words,
     reading.views,
+    spoken,
     floored.read + floored.skipped + floored.unknown > 0,
     passages.some((passage) => passage.readers > reading.views)
   )
@@ -418,6 +472,13 @@ export const copyReadingOf = (reading: PageReading): CopyReading => {
    * Guarded by the silence rather than by a clamp: a figure held back for a
    * stated reason is a reading somebody can act on, and one quietly cut to fit
    * its own ceiling is not.
+   *
+   * **It is already over the spoken-for passages and is not filtered to them.**
+   * A passage is `unknown` only where its row reports no reach at all
+   * (`standingOf`), so its term is `0 x words` and the sum over every passage
+   * and the sum over the spoken-for ones are the same number. The comparison of
+   * two windows has to filter, because there a passage `unknown` on one side
+   * carries a real term on the other (0282).
    */
   const typical =
     silence === null

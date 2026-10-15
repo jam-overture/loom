@@ -53843,6 +53843,91 @@ added there would not see these three until that exclusion goes. Whether to add
 the assertion is `Loom daily build`'s call, since the file is its lane; the
 three links above are this lane's to fix either way.
 
+
+---
+## 2026-10-15 — the passage nobody could speak for was counted as nought reader-words, and at two windows that is a movement that did not happen
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Closes** the
+14 October entry *a page's own word comparison counts a passage nobody can speak
+for as nought reader-words, and the library figure does not*, which is on the
+branch of #640 and not yet on `main` · **Status:** **closed by
+`signals-32-a-word-nothing-can-be-said-about-is-in-no-mass`**
+
+Built as 0282, §32 of [`docs/signals.md`](docs/signals.md), as that entry
+proposed it and as one unit over both published figures. **The entry's own
+reading of the cost was too kind, and that is the thing worth recording.** It
+judged both figures ceilings and the error a looser ceiling, which is the safe
+direction for a number published as *at most* — and said nothing was lost by
+waiting.
+
+That holds at one page and not at two windows. `CopyChange.typical.change` is a
+**difference** of two ceilings, so a term present on one side and absent on the
+other is not a loose ceiling: it is a movement nobody made, with a name attached
+to it by `mostLost`. The suite builds the case — four readers, three unchanged
+bands, two reaching the pricing band in both windows, and the intro's row
+reporting no reach in the later one. Published: `typical.change` of **−10** and
+*the intro is where you lost them*. Honest: nought, and no passage named.
+
+**Three things the entry left open were decided in the building.** The
+restriction is to the passages `unknown` on **neither** side, so it is one set
+and the same set on both — a passage dropped from one mass and kept in the other
+would carry the error with its sign intact. `ComparedPassage.gain` is `null`
+there too, which is what keeps 0239's published identity that the gains add to
+the total. And **no `unspoken` field was added**, which the entry's shape asked
+for: `wordsByStanding.unknown` and `wordsByMovement.unknown` are already exactly
+that number, and 0280 needed the field only because its rows carry no breakdown
+by movement.
+
+**The page-scale mean is unchanged in value**, because a passage is `unknown`
+only where its row reports no reach, so its term was already nought. What the
+entry asked for there was the description, and it is now a stated and tested
+ceiling over `read + skipped` rather than over the page's words.
+
+---
+## 2026-10-15 — a page where nothing reports reach publishes a share of nought beside an empty list of the words nobody saw
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/copy.ts`) · **Status:** open — **the half of 0282 that was left**,
+and a unit rather than a line
+
+0282 withholds `CopyReading.typical` where no word of the page is in a part the
+window can speak for: rows name every part, not one reports reach, and a mean
+over nought reader-words would print *the typical reader reached none of your
+page* as a measurement.
+
+**`CopyReading.share` publishes a nought on that same page.** It is
+`wordsByStanding.read ÷ words`, and with every word `unknown` the numerator is
+nought. So the reading hands a surface *0% of this page's words were reached*
+next to an `unseen` list that is **empty**, because `unseen` is `skipped` only
+(0235 §5). A card drawing both says nobody read any of it and cannot name one
+word nobody read.
+
+**It is not a false number**, which is why it was not taken inside 0282. Nought
+is exactly what a standing of `read` asserts of that page, the standings are
+published in the same object, and 0235 §4 already hands over the direction a
+share is wrong in rather than summarising it. The figure is defensible read
+carefully; the pair is incoherent read quickly.
+
+**Why it is a unit.** It is one decision over `CopyReading.share`, the same
+share on every `RoleCopy` row under it, and the `share` a comparison carries on
+each side — and the honest version is not a silence but a **second
+denominator**: a share over the words this window can speak for, with the
+unspoken words beside it, which is a different sentence from the one the field
+publishes now and may want a different name. Three published figures and a name,
+which is not a line to change.
+
+**The shape, if it is taken:** take every share over `read + skipped`, publish
+`unknown` beside it as the mass outside the question, and say in the record that
+a share is now *of the words this window can speak for* — which is the move
+0282 made to the means, one field across. The direction is the same one 0280
+took at the scale of a library.
+
+**Nothing is lost by waiting**, with the caveat 0282 earned: that sentence was
+true of the means at one page and false of them at two windows, so the first
+thing to check before taking this is whether any comparison **subtracts** two
+shares. `CopyChange` does not — it compares reaches per passage and never two
+page-wide shares — so the caveat does not bite here. It is worth re-checking
+against §26 and §30, whose figures are shares of readers and not of words.
 ---
 ## 2026-10-15 — the carrier that forced 0281 can now lose its node derivation, and the five lines it called a guess
 

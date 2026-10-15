@@ -205,7 +205,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Twelve of them against sixty-six members across the fifteen sets, which is
+ * Thirteen of them against sixty-eight members across the fifteen sets, which is
  * the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -330,6 +330,29 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * the same state of the world in all three and what it costs is not, which is
  * why what a silence withholds was never published here and belongs to the
  * reading that reports it.
+ *
+ * **The thirteenth condition arrived without a set of its own, which is the
+ * first time that has happened**
+ * ([0282](../../decisions/0282-a-word-nothing-can-be-said-about-is-in-no-mass-and-a-page-that-reports-no-reach-has-no-mean.md)).
+ * Two of the sets already here gained a member — the third and the fourth, the
+ * two readings of a page's words — and the state they report is one nothing
+ * else could: **the counters are there and not one of them reports being
+ * reached.** Every earlier condition about a reader being absent is an absence
+ * of rows or of readers, and this one is a window with readers in it whose
+ * every reach is a nought that is a missing counter rather than a measurement.
+ *
+ * So the pattern `no-action-credited` set is now a pair, which is the thing
+ * worth having written down. That condition is a nought that is a **filing
+ * rule** — a press credited to no ancestor because the sender sent no `within`
+ * (0167, 0242). This one is a nought that is a **missing report** — a part that
+ * reported something other than coming into view, so no `viewed` ever named it
+ * (0212). Two senders half-working in two different ways, and a deployment told
+ * the wrong one would go looking in the wrong place.
+ *
+ * It also narrows what the evidence above was ever evidence of. A new condition
+ * does not need a new reading; it needs a reading that can be in a state
+ * nothing else could, and a set that has been published for a month can turn
+ * out to have been in one all along.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -427,6 +450,25 @@ export type SilenceCondition =
    * none of them has an inside.
    */
   | "nothing-inside"
+  /**
+   * Its counters are there and not one of them reports being reached.
+   *
+   * Readers arrived — the window holds page views — and every part of what the
+   * figure is about has a row whose reach is nought. A part that reported
+   * something other than coming into view is `unknown` and never `skipped`
+   * (0212), because a reader who pressed something inside a band no `viewed`
+   * ever named plainly had it in front of them, and a mean taken over nought
+   * reader-words would print *nobody read any of this* as a measurement.
+   *
+   * **The sibling of `no-action-credited`, and the pair is the reason this is
+   * its own condition rather than a second spelling of `no-view-reported`.**
+   * That is a nought which is a filing rule, this is a nought which is a
+   * missing report, and `no-view-reported` is a nought which is a reader who
+   * was not there. A deployment handed the wrong one of the three looks in the
+   * wrong place: at its funnel pairs, at its senders, or at nothing, because
+   * quiet traffic is not a fault.
+   */
+  | "no-reach-reported"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -441,6 +483,7 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "no-action-credited",
   "nothing-of-the-kind",
   "nothing-inside",
+  "no-reach-reported",
 ])
 
 /**
@@ -477,6 +520,8 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "there is none of it in the pages that were read"
     case "nothing-inside":
       return "it has nothing inside it, so there is nothing a reader could act in"
+    case "no-reach-reported":
+      return "its counters are there and not one of them reports being reached"
   }
 }
 
@@ -527,7 +572,13 @@ export const meaningOfChangeSilence = (silence: ChangeSilence): SilenceMeaning =
   }
 }
 
-/** What a copy reading's silence reports (0235). */
+/**
+ * What a copy reading's silence reports (0235, 0282).
+ *
+ * `unspoken` is the newer of the two reasons there is no mean, and the one that
+ * brought this table its thirteenth condition: a page whose rows report no
+ * reach at all is not a page nobody read.
+ */
 export const meaningOfCopySilence = (silence: CopySilence): SilenceMeaning => {
   switch (silence) {
     case "wordless":
@@ -536,12 +587,19 @@ export const meaningOfCopySilence = (silence: CopySilence): SilenceMeaning => {
       return meaning("copy", "no-view-reported")
     case "floored":
       return meaning("copy", "words-a-floor")
+    case "unspoken":
+      return meaning("copy", "no-reach-reported")
     case "inconsistent":
       return meaning("copy", "readers-above-views")
   }
 }
 
-/** What a comparison of two windows' words reports (0239). */
+/**
+ * What a comparison of two windows' words reports (0239, 0282).
+ *
+ * Six of its seven reasons are states of the pair; `unspoken` is the same state
+ * a copy reading reports, said of the carried passages rather than of the page.
+ */
 export const meaningOfCopyChangeSilence = (silence: CopyChangeSilence): SilenceMeaning => {
   switch (silence) {
     case "different-trees":
@@ -556,6 +614,8 @@ export const meaningOfCopyChangeSilence = (silence: CopyChangeSilence): SilenceM
       return meaning("copy-change", "nothing-carried")
     case "floored":
       return meaning("copy-change", "words-a-floor")
+    case "unspoken":
+      return meaning("copy-change", "no-reach-reported")
   }
 }
 
