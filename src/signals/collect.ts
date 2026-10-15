@@ -55,6 +55,12 @@ import type { ReaderTallyStore } from "./tally.js"
  * difference between the two is what this setting actually cost
  * (`page-views.ts`).
  *
+ * **A run also writes down that it happened.** Applying a window stamps the
+ * fold's own timestamp on each revision's door row, which is what lets a
+ * deployment be told that nothing has folded for longer than its own schedule
+ * allows — the openings waiting are otherwise indistinguishable from the
+ * ordinary one-window lag this setting creates (0274).
+ *
  * **Shorter is more anonymous.** The raw window is the entire mechanism by
  * which a view key stops existing (0146). The key is opaque, random and
  * correlates nothing outside the buffer, but it correlates that, and the

@@ -15,6 +15,7 @@ import {
   HEALTH_STANDINGS,
   pageReadingOf,
   remedyOf,
+  type CollectionSchedule,
   type PageReading,
   type PartDeclarations,
   type ReaderTally,
@@ -126,6 +127,23 @@ const door = (
 /** A page whose readers never straddled a rollup window, so nothing needs scaling. */
 const exact = (treeId: TreeId, revision: number, views: number): StoredPageViews =>
   door(treeId, revision, views, views)
+
+const AN_HOUR = 60 * 60 * 1000
+
+/** When the reading is taken, which is handed in rather than read off a clock. */
+const NOW = "2026-10-13T12:00:00.000Z"
+
+const ago = (ms: number): string => new Date(Date.parse(NOW) - ms).toISOString()
+
+/** The same row, with the fold's own timestamp on it. */
+const foldedAt = (row: StoredPageViews, at: string): StoredPageViews => ({ ...row, foldedAt: at })
+
+/** A deployment that folds hourly behind a ten-minute window, give or take. */
+const schedule = (over: Partial<CollectionSchedule> = {}): CollectionSchedule => ({
+  at: NOW,
+  foldsWithinMs: AN_HOUR,
+  ...over,
+})
 
 const faultsOn = (
   health: ReturnType<typeof collectionHealthOf>,
@@ -362,6 +380,222 @@ describe("collectionHealthOf", () => {
     })
   })
 
+  /**
+   * The fault this reading could not raise until a page-view row said when the
+   * fold last touched it (0274). Every case here is about the same two numbers
+   * — openings waiting, and the age of the fold that should have cleared them —
+   * and most of them are the cases where nothing may be claimed.
+   */
+  describe("a collection that has stopped, judged against the schedule its deployment states", () => {
+    it("reports a revision whose openings have waited longer than a fold is meant to take", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [foldedAt(door(TREE, 1, 140, 100), ago(3 * AN_HOUR))],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual(["collection-stalled"])
+      expect(health.pages[0]?.standing).toBe("faulted")
+      expect(health.pages[0]?.pending).toBe(40)
+      expect(health.pages[0]?.foldedAt).toBe(ago(3 * AN_HOUR))
+      expect(health.readersAffected).toBe(140)
+      expect(remedyOf("collection-stalled")).toBe("configuration")
+    })
+
+    /** The allowance itself is sound, which is the boundary the threshold rule asks for. */
+    it("leaves a fold exactly as old as the allowance sound and faults the millisecond past it", () => {
+      const rows = (lag: number): readonly StoredPageViews[] => [
+        foldedAt(door(TREE, 1, 140, 100), ago(lag)),
+      ]
+
+      expect(
+        faultsOn(collectionHealthOf([reading(TREE, 1, [100])], rows(AN_HOUR), schedule()), TREE)
+      ).toEqual([])
+      expect(
+        faultsOn(collectionHealthOf([reading(TREE, 1, [100])], rows(AN_HOUR + 1), schedule()), TREE)
+      ).toEqual(["collection-stalled"])
+    })
+
+    /**
+     * The reading a caller with nothing to promise gets, which is every caller
+     * until a deployment states its own cron interval.
+     */
+    it("claims nothing where no schedule was handed in, however old the fold is", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [foldedAt(door(TREE, 1, 140, 100), ago(400 * AN_HOUR))]
+      )
+
+      expect(faultsOn(health, TREE)).toEqual([])
+      expect(health.pages[0]?.foldedAt).toBe(ago(400 * AN_HOUR))
+      expect(health.pending).toBe(40)
+      expect(health.unattested).toBe(0)
+    })
+
+    /**
+     * Every row of a deployment upgraded past the column, until its next fold.
+     * A stalled collection and a revision published two minutes ago read the
+     * same here, which is exactly the state the fault was dropped for in 0271.
+     */
+    it("claims nothing about a row no fold has ever touched, and counts the wait as unattested", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [door(TREE, 1, 140, 100)],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual([])
+      expect(health.pages[0]?.foldedAt).toBeNull()
+      expect(health.pages[0]?.pending).toBe(40)
+      expect(health.unattested).toBe(1)
+    })
+
+    it("counts an unattested wait whether or not a schedule was handed in", () => {
+      const rows = [door(TREE, 1, 140, 100)]
+
+      expect(collectionHealthOf([reading(TREE, 1, [100])], rows).unattested).toBe(1)
+      expect(collectionHealthOf([reading(TREE, 1, [100])], rows, schedule()).unattested).toBe(1)
+    })
+
+    /**
+     * A collection that stopped where nobody has arrived since is costing no
+     * reader's measurement anything, and there is nothing waiting for it.
+     */
+    it("leaves a page with nothing pending sound however long ago it was folded", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [foldedAt(exact(TREE, 1, 100), ago(900 * AN_HOUR))],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual([])
+      expect(health.pages[0]?.standing).toBe("sound")
+      expect(health.unattested).toBe(0)
+    })
+
+    /**
+     * A nought allowance would turn the lag the design *requires* — one window
+     * of batches waiting to ripen — into a fault on every live page.
+     */
+    it("judges nothing against an allowance that is not a positive number of milliseconds", () => {
+      const rows = [foldedAt(door(TREE, 1, 140, 100), ago(900 * AN_HOUR))]
+
+      for (const foldsWithinMs of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        expect(
+          faultsOn(
+            collectionHealthOf([reading(TREE, 1, [100])], rows, schedule({ foldsWithinMs })),
+            TREE
+          )
+        ).toEqual([])
+      }
+    })
+
+    it("judges nothing against an instant that does not parse", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [foldedAt(door(TREE, 1, 140, 100), ago(900 * AN_HOUR))],
+        schedule({ at: "the day before yesterday" })
+      )
+
+      expect(faultsOn(health, TREE)).toEqual([])
+    })
+
+    /** Two clocks disagreeing is not a stall, and it needs no case of its own. */
+    it("does not fault a fold the clocks put in the future", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [foldedAt(door(TREE, 1, 140, 100), new Date(Date.parse(NOW) + AN_HOUR).toISOString())],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual([])
+    })
+
+    /**
+     * A window of counters a caller read may hold nothing while the lifetime
+     * appearances hold something, so the page is `unfolded` by the counts and
+     * `faulted` by the clock — and the fault is the thing to act on.
+     */
+    it("faults a page whose window is empty rather than calling it merely unfolded", () => {
+      const health = collectionHealthOf(
+        [unread(TREE, 1)],
+        [foldedAt(door(TREE, 1, 80, 5), ago(5 * AN_HOUR))],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual(["collection-stalled"])
+      expect(health.pages[0]?.standing).toBe("faulted")
+      expect(health.standings.unfolded).toBe(0)
+    })
+
+    /**
+     * The double count this reading guards, with the new fault in it: a page
+     * with two things wrong is one page and its readers are added once (0158).
+     */
+    it("counts the readers of a page that has stalled and has an old sender exactly once", () => {
+      const health = collectionHealthOf(
+        [uncredited(TREE, 1, 100)],
+        [foldedAt(door(TREE, 1, 140, 100), ago(9 * AN_HOUR))],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual(["collection-stalled", "actions-uncredited"])
+      expect(health.standings.faulted).toBe(1)
+      expect(health.faults["collection-stalled"]).toBe(1)
+      expect(health.faults["actions-uncredited"]).toBe(1)
+      expect(health.readersAffected).toBe(140)
+      expect(health.arrivals).toBe(140)
+    })
+
+    /**
+     * The two faults one hand answers for cannot both be true of one row, and
+     * the reason is arithmetic rather than policy: `drift` and `pending` are the
+     * two signs of one subtraction (0219), so a revision whose appearances
+     * outrun its openings has nothing pending to be late. Pinned because a
+     * surface may draw the configuration errand once and the ordering of the
+     * two then decides which sentence it prints.
+     */
+    it("never reports an inflated count and a stalled fold on one revision", () => {
+      const inflated = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [foldedAt(door(TREE, 1, 100, 100 + 100 * COUNTS_INFLATED_ABOVE + 1), ago(9 * AN_HOUR))],
+        schedule()
+      )
+
+      expect(faultsOn(inflated, TREE)).toEqual(["counts-inflated"])
+      expect(inflated.pages[0]?.pending).toBe(0)
+    })
+
+    it("counts two stalled revisions of one tree as two faults and their readers once each", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100]), reading(TREE, 2, [40])],
+        [
+          foldedAt(door(TREE, 1, 140, 100), ago(9 * AN_HOUR)),
+          foldedAt(door(TREE, 2, 60, 40), ago(9 * AN_HOUR)),
+        ],
+        schedule()
+      )
+
+      expect(health.faults["collection-stalled"]).toBe(2)
+      expect(health.standings.faulted).toBe(2)
+      expect(health.readersAffected).toBe(200)
+      expect(health.trees).toBe(1)
+    })
+
+    it("drops a stalled revision handed in twice rather than counting its readers twice", () => {
+      const twice = reading(TREE, 1, [100])
+      const health = collectionHealthOf(
+        [twice, twice],
+        [foldedAt(door(TREE, 1, 140, 100), ago(9 * AN_HOUR))],
+        schedule()
+      )
+
+      expect(health.duplicated).toBe(1)
+      expect(health.faults["collection-stalled"]).toBe(1)
+      expect(health.readersAffected).toBe(140)
+    })
+  })
+
   describe("what is a quiet window rather than a fault", () => {
     it("calls a revision nothing was collected about unmeasured", () => {
       const health = collectionHealthOf([unread(TREE, 1)], [])
@@ -437,7 +671,7 @@ describe("collectionHealthOf", () => {
 
   describe("the vocabularies this reading publishes", () => {
     it("gives every fault a remedy, a sentence and a place in the published order", () => {
-      expect(COLLECTION_FAULTS).toHaveLength(5)
+      expect(COLLECTION_FAULTS).toHaveLength(6)
 
       for (const fault of COLLECTION_FAULTS) {
         expect(FAULT_REMEDIES).toContain(remedyOf(fault))
@@ -452,16 +686,27 @@ describe("collectionHealthOf", () => {
     })
 
     /**
-     * Four hands and five faults, and the point of the mapping is that two
+     * Four hands and six faults, and the point of the mapping is that two
      * faults falling to the same hand is one errand: a deployment told *your
      * senders are old* twice does not go twice.
      */
-    it("falls to the senders for two faults and names one hand it cannot determine", () => {
+    it("falls to two hands twice each and names one hand it cannot determine", () => {
       const remedies = COLLECTION_FAULTS.map(remedyOf)
 
       expect(remedies.filter((remedy) => remedy === "senders")).toHaveLength(2)
+      expect(remedies.filter((remedy) => remedy === "configuration")).toHaveLength(2)
       expect(remedies.filter((remedy) => remedy === "undetermined")).toHaveLength(1)
       expect(new Set(remedies).size).toBe(FAULT_REMEDIES.length)
+    })
+
+    /**
+     * The two configuration faults are adjacent in the published order because
+     * they are one errand — the rollup window is what both of them are about.
+     */
+    it("publishes the two faults one hand answers for next to each other", () => {
+      expect(COLLECTION_FAULTS.indexOf("collection-stalled")).toBe(
+        COLLECTION_FAULTS.indexOf("counts-inflated") + 1
+      )
     })
   })
 })

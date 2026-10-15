@@ -41,7 +41,9 @@ the portal every day.
 | Whether the readers who met a kind of part read it | each place's own sound share, weighted by the arrivals at its page's door ([0256](../decisions/0256-a-kinds-share-of-the-readers-who-met-it-is-a-weighted-mean-of-sound-shares-at-the-doors-scale.md)), so a shorter rollup window cannot move it |
 | Whether readers *do* anything inside a kind of part | each place's own `engaged ÷ reached`, weighted by the door ([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)), where the door is only the weight — so a kind borne by one page is answerable too |
 | Whether what it collects can be trusted | the faults in a deployment's own collection, with the hand each falls to and the readers each costs ([0271](../decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)), where a page is counted once however many faults it has |
+| Whether the collection has stopped | the fold's own timestamp, judged against the schedule the deployment states ([0274](../decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)), with the waits nothing can judge counted apart |
 | What a change did to a kind of part | the places both windows bore, read before against read now ([0266](../decisions/0266-a-change-to-a-kind-of-part-is-read-over-the-places-both-windows-bore.md)), which is the one denominator here with no reader in it — so the movement is a count of places and a verdict needs no threshold |
+| What a change did to the readers a kind of part had | each window's own weighted share of the readers who met it, with a counterfactual per side ([0279](../decisions/0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md)), so a kind read better because its pages got busier is told from one read better by readers |
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
@@ -1776,6 +1778,144 @@ screen here that is about the collection rather than the readers, the share of a
 deployment's arrivals whose measurement is wrong as the figure to lead it with,
 and the one remedy that must never be shown to an operator because it names
 somebody else's bug.
+
+> **A sixth fault, 13 October.** *Five faults* above was true on the morning it
+> was written. §29 adds `collection-stalled` — the one this step drafted and
+> dropped — so the vocabulary holds **six**, and the hand that answers for two of
+> them is now `configuration` as well as `senders`. Nothing else in this step
+> changed.
+
+### 29. When the fold last touched the row · `Loom signals` · **done, 13 October**
+
+§28 named five faults and refused a sixth. `pending` — openings no rollup has
+folded — is *the other sign of the same subtraction* (§8) and is what a stalled
+collection looks like; it is also what a revision published two minutes ago looks
+like, because the lag of the tallies behind the buffer is one window by design.
+The row's `updatedAt` cannot tell those apart, since the door writes it on every
+delivery: **a busy page whose rollup has stopped keeps the freshest timestamp in
+the table.** So the step published the figure, raised no fault from it, and filed
+the shape that would answer it.
+
+That shape is built. **Done**, and it is the first thing this plan has needed a
+**column** for since §8 — which is why it is a record rather than one more
+reading
+([0274](../decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)).
+`loom_reader_page_views.folded_at` is written by the fold and by nothing else,
+and `collectionHealthOf` takes an optional `CollectionSchedule` and raises
+`collection-stalled` where openings have waited longer than the deployment said a
+fold takes. **Nothing was added to a payload, a browser or the vocabulary of
+kinds**, the broadcaster was not touched and is byte-identical, and the marker
+this rests on has shipped since §7 at 31 bytes minified.
+
+Three things decide the shape:
+
+- **The door may not touch the column, and that is the whole mechanism.** The
+  door's upsert leaves `folded_at` out of its insert and out of its `set`, so an
+  arrival can never make a stalled collection look like a fresh one, and a row an
+  arrival creates attests no fold rather than attesting one at the moment a
+  reader arrived. The fold stamps it in the same transaction as the appearances
+  it explains. Four facts in the store contract hold it, so the two
+  implementations are one store rather than two that pass the same tests.
+- **How late is late is the deployment's, and it is handed in.** `foldsWithinMs`
+  is the collection interval **plus** the ripeness window — a batch is not folded
+  until it ripens and then not until the next run, so the two add — and nothing
+  in Loom schedules a fold. A default of one window would fault a deployment that
+  folds hourly behind a ten-minute window on every page it has. That is §12's
+  rule about published thresholds at the place where it does not hold: the
+  framework states how much error makes its *own* figures unfit to print, and
+  somebody's cron is not one of its figures.
+- **Absent is one state, and no fault is raised from it.** A row written before
+  the column existed and a row no fold has touched both say *nothing attests a
+  fold*, there is no backfill — the only timestamp those rows carry is the one
+  this record refuses — and `unattested` counts the waits that cannot be judged.
+  Publishing `pending` without it would let a reader take *no fault* for *nothing
+  is late*. It is the conservative direction, and it costs one collection run
+  after an upgrade.
+
+Two more settled in the building. **The two configuration faults cannot both be
+true of one revision**, and the reason is arithmetic rather than policy: `drift`
+and `pending` are the two signs of one subtraction (§8), so a revision whose
+appearances have outrun its openings has nothing pending to be late — they are
+alternatives rather than an addition, and a test pins it. And **a stall hides
+behind `openings-unmarked`**: senders that never mark an opening leave nothing
+pending by construction, so the marker is the first fault to fix and stays first
+in the published order.
+
+**What it leaves**, both filed: for `Loom portal`, the fold's own age beside
+`pending` on the collection screen, and the two states never to draw as *nothing
+is late*; and for the lane that owns the application's operator surface, the
+second number of the schedule — a deployment can state its rollup window in
+`LOOM_SIGNAL_WINDOW_MS` and has nowhere at all to state how often it folds.
+
+### 30. The readers a kind of part had, before and after · `Loom signals` · **done, 14 October**
+
+> §29 was in flight on the branch of #627 when this was built, so its number
+> was left for it rather than taken; #627 has since landed and §29 is above.
+> It adds a column, so it is not one of the figures this plan counts as taken
+> out of what the subsystem already knows — which is why this one is the
+> twentieth of those and §29 is not the nineteenth.
+
+§26 compares a kind of part over the places both windows bore, and says plainly
+what it is not: *of the readers who met your testimonial band, the share that
+read it has gone from four in ten to seven* needs the door on **both** sides and
+was filed the morning 0266 landed, for the reason §24 was filed rather than
+shipped inside §23's type.
+
+**Done.** `libraryReachChangeOf(was, now)` in
+[`src/signals/library-reach-change.ts`](../src/signals/library-reach-change.ts)
+is that figure. It is the **twentieth** thing taken out of what this subsystem
+already knows rather than collected: **nothing was added to a payload, a browser,
+a column, a store or the vocabulary of kinds**, and the broadcaster was not
+touched — measured both sides and byte-identical.
+
+The method is two held still for two different reasons: the **places** by §26's
+rule, and **each side's own scale** by §24's. What makes it a second unit rather
+than a field is the thing the filed entry named — **the weights move.** A
+weighted mean over the same places still moves when one page's traffic grows and
+another's shrinks, so a movement in it is readers reading differently *or* the
+pages they were on changing, which is 0251's counterfactual problem one level
+across.
+
+Three things decide the shape
+([0279](../decisions/0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md)):
+
+- **The attribution is a counterfactual and needs no threshold**, which is
+  0244's method at the scale of a library. `ifTrafficHeld` is the later window's
+  per-place shares at the earlier window's weights and isolates the readers;
+  `ifReadingHeld` is the earlier window's shares at the later window's weights
+  and isolates the mix of pages. Each is asked whether it carries the movement's
+  own direction, and the cause is `readers`, `pages`, `either` or `together`.
+  The `pages` verdict is reachable with nobody reading differently at all — two
+  pages swapping their traffic moves the figure by half its range — and it is
+  exactly the sentence a single weighted number hides.
+- **No additive split of the movement is published**, because there are two of
+  them and they disagree. The shift adds up exactly either way round, and the
+  two decompositions differ by the interaction term — weight moving toward the
+  places whose reading moved. A number a surface would quote as *this much was
+  traffic* must not depend on which factor the framework moved first.
+  `weightMoved` is published instead, as 0247's mix over places rather than
+  regions, and it is **published and never judged**.
+- **No ceiling is published on either side.** §24 publishes one beside its
+  share; two of them do not bound a difference, and a surface handed both would
+  print their subtraction as a movement nobody measured. Each side's `drift`,
+  `pending` and `unreconciled` travel instead, and `exact` is true only where
+  all six are nought.
+
+Two more settled in the building. The scale a door counts in was **two
+hand-written copies of one rule** (§24, §25) and this would have been a third,
+so it is written once in [`src/signals/door.ts`](../src/signals/door.ts) and the
+three readings import it — the remedy the counter tables' upsert keys got, for
+the same reason; the pairing of two windows is published from the module whose
+record owns it rather than copied. And the fourteenth silence vocabulary brings
+**no new condition and no new subject**: a comparison is withheld for every
+reason one side's figure is withheld and for none a window can be in alone. What
+it adds is a **side** — one page can be scalable in one window and not the other,
+and which window it is is the whole of the remedy — published on the page rather
+than as a state of the world.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the cause
+is the field that belongs beside the share rather than behind it, since a `pages`
+verdict is not a sentence about the library at all.
 
 ## Still not in scope
 

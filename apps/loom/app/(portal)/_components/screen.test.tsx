@@ -205,7 +205,8 @@ describe("the caps that are left", () => {
   )
 
   it("finds the lane to sweep, so an empty sweep cannot pass as clean", () => {
-    expect(sourcesUnder(GROUP).length).toBeGreaterThan(40)
+    /* Re-measured after unit 0 cut the group from twenty screens to eleven. */
+    expect(sourcesUnder(GROUP).length).toBeGreaterThan(20)
   })
 
   /**

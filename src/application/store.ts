@@ -1,3 +1,4 @@
+import type { Patch } from "../patch.js"
 import type { Result } from "../result.js"
 
 import type { Application, ApplicationId } from "./application.js"
@@ -88,9 +89,17 @@ export type ApplicationStore = {
    */
   readonly list: () => Promise<Result<readonly Application[], ApplicationStoreError>>
 
-  /** Change what a person calls it, and where they say it lives. */
+  /**
+   * Change what a person calls it, and where they say it lives.
+   *
+   * A field left out is left alone, and `host: null` removes it — the three
+   * states `Patch` spells, because an application that has been given a host
+   * has to be able to have it taken away. A name has no third state: it is
+   * required, so there is nothing for clearing it to mean and the type does not
+   * offer it.
+   */
   readonly rename: (
     applicationId: ApplicationId,
-    to: { readonly name?: string; readonly host?: string }
+    to: { readonly name?: string; readonly host?: Patch<string> }
   ) => Promise<Result<Application, ApplicationStoreError>>
 }

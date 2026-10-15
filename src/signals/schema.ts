@@ -207,6 +207,21 @@ export const loomReaderPageViews = pgTable(
     /** The same page views, once per rollup window each appeared in (0147). */
     appearances: bigint("appearances", { mode: "number" }).notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+    /**
+     * When a rollup last folded a window holding page views of this revision.
+     *
+     * The one column in this subsystem written by exactly one of a row's two
+     * writers, and that is its whole purpose: `updated_at` moves on every
+     * delivery the door counts *and* on every fold, so a deployment whose
+     * rollup has stopped keeps a fresh timestamp on a row whose appearances
+     * never move again. This one moves only when something folded.
+     *
+     * Nullable and undefaulted, which is the honest value for a row nothing
+     * has folded yet and for a row written before this column existed — those
+     * two are the same state, *nothing attests a fold*, and no fault is raised
+     * from it.
+     */
+    foldedAt: timestamp("folded_at", { withTimezone: true }),
   },
   (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision] })]
 )

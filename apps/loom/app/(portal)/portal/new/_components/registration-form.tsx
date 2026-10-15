@@ -43,6 +43,28 @@ export const RegistrationForm = ({
         fault={faultFor(faults, "host")}
       />
 
+      {/*
+       * Always offered, and blank means the application's name.
+       *
+       * The maintainer asked for this on 14 October after watching a
+       * registration produce a project and an application with identical names.
+       * It sits under the host rather than above it because the application is
+       * what somebody came here to register; the project is the shelf it goes
+       * on, and a shelf nobody has an opinion about should cost one glance and
+       * no keystrokes.
+       *
+       * It is rendered even when an existing project can be chosen below, and
+       * `readRegistration` ignores it in that case — the alternative is
+       * revealing a field when a select changes, which needs client state for a
+       * field whose default is already right.
+       */}
+      <Field
+        label="What should the project be called?"
+        name="projectName"
+        hint="Leave it blank to use the application's name. Projects group applications; nothing else hangs off one yet."
+        fault={faultFor(faults, "projectName")}
+      />
+
       {projects.length > 0 ? (
         <label className="flex flex-col gap-1.5">
           <span className="text-sm">Which project?</span>
@@ -60,7 +82,7 @@ export const RegistrationForm = ({
           </select>
           {faultFor(faults, "project") === undefined ? (
             <span className="text-ink-muted text-xs">
-              Projects group applications. Nothing else hangs off one yet.
+              Choosing one ignores the name above.
             </span>
           ) : (
             <span className="text-refuse-ink text-xs">{faultFor(faults, "project")}</span>

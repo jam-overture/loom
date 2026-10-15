@@ -1,3 +1,4 @@
+import { applyPatch } from "../patch.js"
 import { err, ok, type Result } from "../result.js"
 
 import { projectSchema, type Project, type ProjectId } from "./project.js"
@@ -52,12 +53,15 @@ export const memoryProjectStore = (seed: readonly Project[] = []): ProjectStore 
        * Parsed rather than spread, so a name this store would accept and the
        * database would refuse cannot be told apart by which one you used. The
        * two stores agree about what a project is because they both ask
-       * `projectSchema`.
+       * `projectSchema`, and they agree about what a patch means because they
+       * both apply it with `applyPatch`.
+       *
+       * Nothing here is clearable, and that is a property of the record rather
+       * than of this call: a project is an id, a name and a date, and all three
+       * are required. The first optional field it gains is clearable on the day
+       * it is added, with no second spelling of nothing to invent.
        */
-      const next = projectSchema.safeParse({
-        ...found.value,
-        ...(to.name === undefined ? {} : { name: to.name }),
-      })
+      const next = projectSchema.safeParse(applyPatch(found.value, to))
       if (!next.success) {
         return err({ code: "unreadable", projectId, detail: next.error.issues[0]?.message ?? "invalid" })
       }

@@ -1,16 +1,20 @@
 import {
+  dataCatalogue,
   INTERPRETER_SYSTEM_PROMPT,
   measurePrompt,
   renderCatalogue,
+  renderSourceCatalogue,
   renderThemeCatalogue,
   renderTree,
   sequentialIdFactory,
+  type DataCatalogue,
   type EditIntent,
   type LoomTree,
   type PromptMeasurement,
 } from "@jam-overture/loom"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
+import { shopRegistry } from "../data/shop"
 import { docsExamples } from "../examples/catalogue"
 import { docsRegistry, docsThemes } from "../loom/registry"
 
@@ -20,9 +24,9 @@ import { docsRegistry, docsThemes } from "../loom/registry"
  * Every page so far has shown the runtime being certain. This is the one step
  * that guesses, and the honest way to document it is to stop describing the
  * prompt and show it: the blocks below are built by `buildUserMessage`'s own
- * renderers — `renderCatalogue`, `renderThemeCatalogue`, `renderTree` — against
- * the same registry, the same theme registry and the same example tree the
- * reader has in front of them.
+ * renderers — `renderCatalogue`, `renderThemeCatalogue`, `renderSourceCatalogue`,
+ * `renderTree` — against the same registry, the same theme registry, the same
+ * source registry and the same example tree the reader has in front of them.
  *
  * **Nothing here calls a model, and nothing here needs a key.** A projection of
  * a request is a pure function of the deployment and the tree (0008), which is
@@ -35,6 +39,28 @@ import { docsRegistry, docsThemes } from "../loom/registry"
  * the sentences of instruction that make it usable — so a preview that elides a
  * list still reports what the whole list costs.
  */
+
+/**
+ * The sources this site can be asked about, which are the shop's.
+ *
+ * *Where the content comes from* registers them — a catalogue of services, one
+ * field of a profile, the opening hours and the classes — and resolves them as
+ * that page builds. They are this deployment's data vocabulary because they are
+ * the only one it has, so this is the same registry rather than a second one
+ * written to make a page look furnished.
+ *
+ * Until this shipped, the prompt printed below had primitives and themes in it
+ * and **no sources at all**, which made this page the one place on the site
+ * where a reader was told about bindings and then shown a request that could
+ * not have proposed one. The page that teaches the seam ends by saying
+ * *"Connecting a model is where the rest of that prompt is"*; this is the rest
+ * of it actually being there.
+ *
+ * Nothing is resolved to build this. A catalogue is a projection of what a
+ * registry declares — ids, descriptions and declared params — so the adapters
+ * are never called and no answer is fetched to print a prompt.
+ */
+const docsSources = (): DataCatalogue => dataCatalogue(shopRegistry())
 
 /** How many lines of a long block a reader sees before the elision. */
 const PREVIEW_LINES = 6
@@ -50,7 +76,7 @@ export const DOCS_PROMPT_UTTERANCE = "Add a closing line to the end of this page
 
 export type PromptBlock = {
   /** Stable, and what a heading and a `key` are made from. */
-  readonly id: "system" | "primitives" | "themes" | "tree" | "request"
+  readonly id: "system" | "primitives" | "themes" | "sources" | "tree" | "request"
   /** What this block is, in the site's voice. */
   readonly title: string
   /** One sentence: why the model is being told this. */
@@ -68,8 +94,21 @@ export type DocsModelRequest = {
   readonly utterance: string
   readonly blocks: readonly PromptBlock[]
   readonly measurement: PromptMeasurement
-  /** How many primitives and how many theme ids this deployment registered. */
-  readonly registered: { readonly primitives: number; readonly themeIds: number }
+  /** How many primitives, theme ids and sources this deployment registered. */
+  readonly registered: {
+    readonly primitives: number
+    readonly themeIds: number
+    readonly sources: number
+  }
+  /**
+   * What the sources block would be if it were only the list.
+   *
+   * Printed beside `measurement.sources` because the gap between the two is the
+   * page's claim: the list of ids is a small part of that block and the
+   * instruction around it is the rest, because the seam refuses a binding on
+   * three different grounds and only one of them is visible in a list.
+   */
+  readonly sourceListCharacters: number
 }
 
 const lines = (text: string): readonly string[] => text.split("\n")
@@ -134,8 +173,13 @@ export const docsModelRequest = (exampleId: string): DocsModelRequest => {
   const tree = example.build()
   const catalogue = catalogueOf(docsRegistry)
   const themes = docsThemes.catalogue()
+  const sources = docsSources()
   const intent = promptIntent(tree)
-  const measurement = measurePrompt(intent, tree, { catalogue, themeCatalogue: themes })
+  const measurement = measurePrompt(intent, tree, {
+    catalogue,
+    themeCatalogue: themes,
+    dataCatalogue: sources,
+  })
   const themeIds =
     themes.palettes.length + themes.fontPacks.length + themes.stylePresets.length
 
@@ -165,6 +209,14 @@ export const docsModelRequest = (exampleId: string): DocsModelRequest => {
       characters: measurement.themes,
     },
     {
+      id: "sources",
+      title: "What it may ask about",
+      summary:
+        "The sources this deployment registered, and the one instruction that turns a binding from a guess into a choice from your list.",
+      ...previewOf(renderSourceCatalogue(sources), "sources"),
+      characters: measurement.sources,
+    },
+    {
       id: "tree",
       title: "The page as it stands",
       summary:
@@ -186,7 +238,8 @@ export const docsModelRequest = (exampleId: string): DocsModelRequest => {
     utterance: intent.utterance,
     blocks,
     measurement,
-    registered: { primitives: catalogue.length, themeIds },
+    registered: { primitives: catalogue.length, themeIds, sources: sources.length },
+    sourceListCharacters: renderSourceCatalogue(sources).length,
   }
 }
 

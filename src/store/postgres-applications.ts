@@ -2,6 +2,7 @@ import { asc, eq } from "drizzle-orm"
 
 import { applicationSchema, type Application, type ApplicationId } from "../application/application.js"
 import type { ApplicationStore, ApplicationStoreError } from "../application/store.js"
+import { applyPatch } from "../patch.js"
 import { err, ok, type Result } from "../result.js"
 
 import type { LoomDatabase } from "./database.js"
@@ -123,6 +124,10 @@ export const postgresApplicationStore = (db: LoomDatabase): ApplicationStore => 
    * The read and the write are not in one transaction, which is a real race and
    * an acceptable one: two people renaming one project at the same instant get
    * last-write-wins on a display name. Nothing downstream keys on it.
+   *
+   * A cleared host reaches the column as `NULL` by the same route an absent one
+   * always did: `applyPatch` removes the key, so the parsed application has no
+   * host, and the write already coalesced a missing one.
    */
   rename: async (applicationId, to) => {
     try {
@@ -138,11 +143,7 @@ export const postgresApplicationStore = (db: LoomDatabase): ApplicationStore => 
       const current = toProject(row)
       if (!current.ok) return current
 
-      const next = applicationSchema.safeParse({
-        ...current.value,
-        ...(to.name === undefined ? {} : { name: to.name }),
-        ...(to.host === undefined ? {} : { host: to.host }),
-      })
+      const next = applicationSchema.safeParse(applyPatch(current.value, to))
       if (!next.success) {
         return err({
           code: "unreadable",

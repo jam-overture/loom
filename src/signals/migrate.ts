@@ -135,8 +135,21 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     opened bigint NOT NULL DEFAULT 0,
     appearances bigint NOT NULL DEFAULT 0,
     updated_at timestamptz NOT NULL,
+    folded_at timestamptz,
     PRIMARY KEY (application_id, tree_id, revision)
   )`,
+  /**
+   * **When the fold last touched the row**, for a deployment whose page-view
+   * table predates the question.
+   *
+   * Additive, nullable and undefaulted, which is the only honest value: no
+   * backfill exists, because nothing wrote down when those rows were folded
+   * and `updated_at` cannot be read as it — it is written by the door as well.
+   * An existing row therefore reads *nothing attests a fold*, which is a state
+   * the reading publishes and raises no fault from, and the first fold after
+   * the migration fills it in.
+   */
+  `ALTER TABLE loom_reader_page_views ADD COLUMN IF NOT EXISTS folded_at timestamptz`,
   /** The application, for a database that predates it — see the buffer's note above. */
   `ALTER TABLE loom_reader_page_views ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
   `ALTER TABLE loom_reader_page_views DROP CONSTRAINT IF EXISTS loom_reader_page_views_pkey`,

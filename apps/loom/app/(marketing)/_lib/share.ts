@@ -87,8 +87,9 @@ export type ShareCard = {
    *
    * It was the route's nav label first, and the picture said why that was wrong:
    * `/how-it-works` printed *How it works* in the pill and *How it works* as the
-   * headline, and `/the-record` opened its headline with the same three words as
-   * its pill. A label a card repeats is not a label, it is a stammer.
+   * headline, and the retired `/the-record` opened its headline with the same
+   * three words as its pill. A label a card repeats is not a label, it is a
+   * stammer.
    *
    * Leaving it off a published page is worth more than fixing the duplication
    * would have been. **A pill on this card now means the rules reached a verdict

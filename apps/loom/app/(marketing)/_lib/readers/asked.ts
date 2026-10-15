@@ -6,7 +6,8 @@ import type { ReaderSignalTypes } from "@jam-overture/loom/signals/broadcast"
  * The broadcaster reports every kind about every addressed primitive unless a
  * host narrows it, and a host narrowing it is not an optimisation — it is the
  * whole of what a deployment is promising. So the promise is written here, in
- * one object, and `/what-readers-do` is the page that says it in words.
+ * one object. The retired `/what-readers-do` was the page that said it in
+ * words; *What this page counts* on `/what-you-run` says it now.
  *
  * **Nothing in this module reaches anything at runtime.** The only import is a
  * type, which is erased, so it costs a browser bundle its own two dozen lines
@@ -106,8 +107,8 @@ export const CONTROL_TYPES = [
  * The one thing on this site that opens: a question in a questions band.
  *
  * Worth its own kind because opening something is a reader choosing to read
- * more, which is the argument `/what-readers-do` makes for the kind existing at
- * all.
+ * more, which is the argument the retired `/what-readers-do` made for the kind
+ * existing at all.
  */
 export const DISCLOSURE_TYPES = ["loom.faq"] as const
 
@@ -139,9 +140,9 @@ export const COMPLETION_TYPES = [] as const
  * **A new kind is a red test rather than a silent gap.** `asked.test.ts`
  * holds these keys against `READER_SIGNAL_KINDS`, so the day a kind is added to
  * the runtime somebody has to decide what this site asks of it — the same alarm
- * `/what-readers-do` already carries for the words it prints, and for the same
- * reason: a surface that describes what Loom counts should not quietly stop
- * asking for part of it.
+ * the retired `/what-readers-do` already carried for the words it printed, and
+ * for the same reason: a surface that describes what Loom counts should not
+ * quietly stop asking for part of it.
  */
 export const SITE_SIGNAL_TYPES: ReaderSignalTypes = {
   viewed: [...BAND_TYPES],
