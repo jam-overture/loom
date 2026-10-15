@@ -141,8 +141,11 @@ every `RoleCopy` row under it, and the `share` each side of a comparison carries
 
 ## Test numbers
 
-`pnpm verify` green at exit 0. Nothing failed, nothing was skipped, and no test
-was weakened to get there.
+`pnpm verify` green at exit 0 **on the pre-merge head**, `d9a0b02`, which is the
+commit this branch opened with. Nothing failed, nothing was skipped, and no test
+was weakened to get there. On the merged head one test fails, in another lane's
+file and on `main` as well — the section below establishes that and nothing in
+it is this branch's.
 
 - **5,067 runtime tests across 224 files**, and **5,797 app tests across 327
   files**. `prerender:check` reads 133 pages and 1,839 text junctions, none run
@@ -210,6 +213,113 @@ in the sentence where it happens.
 Nothing blocking. Four things with a recommendation each are in the pull request
 comment: whether 0282 should have been `Proposed`, the share finding above, the
 thirteenth condition, and the three-way count collision with #640.
+
+## After the merge, which happened while this branch was open
+
+#640 and #641 both landed on `main` during the evening, and another session
+merged `main` into this branch and resolved it. Three consequences, all of them
+now settled on this branch:
+
+**This record is 0282 and not 0281.** #641 took 0281 on `main` for the binding
+seam, so the record was renumbered with a dated note under its header and every
+citation that means it was updated. Checked: no citation of `0281` anywhere in
+this lane's files still means this record, and #641's own are untouched.
+
+**Two conflicts with #640, both resolved by keeping both sides.** `docs/signals.md`
+took §31 then §32, which is the order this branch's own numbering note had
+reserved. `silences.ts` took the fifteenth set's paragraph then the thirteenth
+condition's, and the count sentence was re-read off the code rather than guessed.
+
+**Three things the merge left stale, fixed here.**
+
+- `docs/signals.md`'s summary table still carried the count this branch had
+  corrected before the merge — *sixty names across fourteen sets* — while
+  `silences.ts` had correctly moved to sixty-eight across fifteen. Counted off
+  the code again on the merged head: **15 sets, 68 members, 13 conditions**, and
+  the table now says so. The one number in the one file this lane is told to
+  keep true was the one the merge could not have known to touch.
+- 0282's Context said 0280 was *cited by number and not linked because it is
+  claimed on the open branch of #640*. #640 merged first, so the link stands
+  now; it is a link, with a dated note saying why it was not one when the record
+  was written.
+- The 14 October finding this closes arrived on `main` with #640 and still read
+  **open** there, beside this branch's separate entry saying it was closed. It
+  is marked closed in place now, which is the convention and which was not
+  possible this morning: the entry was on a branch, so an append was the only
+  union-merge-safe shape. The append stays and says so.
+
+**One finding filed from reading the merge**, which no test would have found:
+0280 and 0282 apply the same rule and each decides for itself what *spoken for*
+means — `passage.movement !== "unknown"` in one module, both standings compared
+inline in the other. They are provably the same function of the same two
+fields, so no figure is wrong; the shape is the finding, and it is the one 0239
+published `passageOf` to avoid and §30 fixed in `door.ts`. Filed, not taken —
+#642 is about the figures, not about where a predicate lives.
+
+## `pnpm verify` is red on the merged head, and it is red on `main` too
+
+**Said plainly: the gate does not pass on this branch, and it does not pass on
+`main` either.** One test fails, in neither this lane's code nor its files:
+
+```
+app/(docs)/_components/architecture.test.tsx
+  the records index, rendered > links each row at the record itself
+  Error: Test timed out in 5000ms
+```
+
+**Established rather than assumed.** Reproduced at `4e7b9c3` — `main`'s head,
+with no commit of this branch's in the tree — in a clean worktree, same test,
+same line 157, same message. Reverting #642 would not clear it.
+
+It renders `<DecisionRecords />`, one row per record, and asserts one `href`.
+Run on its own it passes and reports its cost, which is the diagnosis:
+
+| | |
+| --- | --- |
+| records in the index | **262** |
+| the test, alone | **3,836 ms**, then **4,434 ms** on a second run |
+| its budget | **5,000 ms** |
+| per record | **~15 ms** |
+| headroom, at the worse reading | **~570 ms, about 39 records** |
+
+Under the full suite's parallel load the same render crosses five seconds. This
+lane's own verify was **green at 09:29 with 259 records** and red at 16:31 with
+262 — the three that landed today, 0280, 0281 and 0282, crossed it together, and
+the next record from any lane would have done it alone. One record of those
+three is this branch's, and it is ~15 ms of a 1,160 ms margin.
+
+**Not fixed here, and that is deliberate.** `apps/loom/app/(docs)/` belongs to
+`Loom docs`, and a timeout bump in another lane's test file is the cross-lane
+edit the routines document says to file rather than make. Filed, with both
+shapes of fix and the note that a sibling test in the same file is about a
+hundred records behind it.
+
+**What is green.** Everything this branch is about: the runtime suite, the
+decisions checks, `findings:check`, `reports:check`, `prerender:check`, and the
+app suite but for that one test. The signals suite alone is 1,049 tests across
+38 files.
+
+## A postscript, because the merge beat these fixes to it
+
+**#642 was merged at 16:19 UTC**, about half an hour before the post-merge fixes
+above were pushed to its branch — so the commit carrying them never landed. It
+was squash-merged, which means the branch head was not even an ancestor of
+`main` afterwards.
+
+So `main` carried the unit and carried the three stale things with it: the
+summary table claiming *sixty names across fourteen sets* while `silences.ts`
+beside it said sixty-eight across fifteen, 0282's aside explaining why 0280
+could not be linked when by then it could, and the 14 October finding reading
+`open` next to a separate entry saying it was closed. The two findings this run
+filed were not on `main` at all.
+
+**A merged pull request cannot carry follow-up work**, so this branch was
+restarted from `main` — the same name, off `0844047`, with the orphaned commit
+cherry-picked onto it — and the follow-up goes up as its own pull request rather
+than by reopening a finished one. The numbers were re-derived against the new
+base rather than reused: still 15 sets, 68 members, 13 conditions, still 262
+records, and the slow test re-timed at 4,434 ms, which is worse than this
+morning's reading and is why the headroom figure above moved.
 
 ## The door this lane is keeping cheap
 
