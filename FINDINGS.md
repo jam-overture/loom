@@ -8,6 +8,79 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-15 — the front door sold a surface that is still being built, and the only place that said so was on the far side of the link
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
+row for `Loom portal` · **Status:** **closed by
+`marketing-05-the-door-that-is-still-being-built`** for this route group. The
+row for `Loom portal` is **one line to delete, when it is finished.**
+
+`(portal)/_components/under-construction.tsx` has carried a banner since
+28 September, at the maintainer's instruction, and its own note names the half
+it could not fix:
+
+> *"The portal is reachable from the marketing site's menu and its footer — a
+> stranger who follows Portal from the front door arrives at a working screen
+> and has no way to know that most of what it will be is not built yet."*
+
+That is a sentence about this route group, written in another one. The lane that
+owns the door told the truth about it; the lane that **sends people there** went
+on offering it beside the demo, the documentation and the course as though the
+four were the same kind of thing. Photographed on 15 October, the card read
+*Where the changes are reviewed… **Needs an invitation*** and the page it opened
+read ***The portal is still being built.***
+
+The portal is offered four ways from this route group — the bar's *Sign in* on
+every page, the front door's band of four cards, the footer's map, and the
+questions band's answer about the door. None of the four said it was unfinished.
+
+### Why this was sayable when `GuardedSurface` says the door is not
+
+That type's note settles that this lane may not claim a door **opens**: whether
+sign-in is configured belongs to the deployment, `(marketing)` does not import
+`(portal)`'s auth config, and nothing here can see it. Still true, and this does
+not go near it.
+
+**Whether a surface has been finished is a different fact.** It is a property of
+this version of Loom rather than of the machine serving it, true wherever the
+application is deployed, and the lane that owns the surface has already
+committed it to the repository as a component. So it is read off the repository:
+`unfinished.test.ts` sweeps `(portal)` for `data-under-construction` rather than
+importing anything, inferring it from a screenshot, or retyping it.
+
+### The row for `Loom portal`
+
+**When the portal is finished and that banner comes down, nothing here needs
+remembering.** The test holds the pair in both directions and the failure names
+the field and the file:
+
+```
+/portal no longer carries data-under-construction, so delete notYet on it in site.ts
+```
+
+So the action for `Loom portal` is: **delete the banner in the same change that
+finishes the surface, and let this lane's build tell its next run to drop the
+caveat.** Nothing is owed before that. The lane is paused as of 13 October, which
+is why the marketing copy is honest about the state rather than waiting on it.
+
+One thing worth knowing if the marker is ever reworded: `data-under-construction`
+is the attribute, chosen over the sentence because the words are that lane's to
+reword and the attribute is what its own tests hold it to. Renaming it turns this
+file red rather than letting it pass silently, which is the right way round — but
+it is a cross-lane contract of one string, and this is where it is written down.
+
+### The shape, for any lane that offers another lane's surface
+
+A caveat is worth having only while it is true, and a caveat nobody removes is
+how a site ends up apologising for something it fixed a year ago. The rule that
+made this cheap is the pair rather than either half: a surface whose lane still
+says it is unfinished **must** be described that way, and one whose lane has
+stopped saying so **must not be**. It is the shape `named.test.ts` settled on for
+retired pages the day before, applied to the other direction of the same problem
+— there, a page that is gone and still named; here, a surface that is unfinished
+and not said to be.
+
+---
 ## 2026-10-14 — the mangling, measured by accident on one pull request body: 177 characters mangled, 121 clean, same body and same syntax
 
 **Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
@@ -51941,7 +52014,19 @@ state nobody had yet produced. Worth saying once rather than four times —
 state is worth naming in the code beside it.**
 ## 2026-10-11 — six specimen tests assume a git newer than the maintainer's, so `pnpm verify` cannot pass on his machine
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` ·
+**Status:** **closed by `framework-73-the-git-every-machine-has`** — the two
+call sites now read `git init -q` then `git symbolic-ref HEAD refs/heads/main`,
+which is the remedy below and not the skip guard. **A second live instance was
+found while closing it:** `tools/queue/git.ts` released its detached tree with
+`git worktree remove --force`, which needs git 2.17 — so the queue tool was
+broken on 2.15 as well, and the two halves it does are now done by hand
+(delete the directory, then `git worktree prune`), under the first test
+`worktreeAt` has ever had. The floor is a table in `tools/git/portability.ts`
+and `docs/routines.md` has the paragraph; the fourth instance fails on the
+branch that writes it. Original status below.
+
+**Status:** open
 
 `tools/specimen/against.test.ts` builds a scratch repository with `git init -q -b main`.
 The `-b` switch arrived in **git 2.28**; the maintainer's machine runs **2.15**, where it
@@ -51967,6 +52052,33 @@ shape, and the first that fails a test.
 which is portable to every git this decade and produces exactly the same repository. A skip
 guarded on the git version would also work and is worse: a test that silently does not run on
 the maintainer's machine is how the next portability gap goes unnoticed for a month.
+
+**What the closing branch added beyond the two lines asked for**, because *this
+is the third instance of one shape* is the sentence in this entry that cost the
+most to read. `tools/git/portability.ts` states the floor as a number and lists
+the invocations it lacks — `init -b` and `init --initial-branch` as separate
+rows, since a rule naming one spelling stops working the moment somebody reaches
+for the other. `portability.test.ts` sweeps every source under `tools/` and
+`src/` that names git and prints the file, the release needed and the
+replacement. Planting the original defect back reproduces exactly one failure:
+
+```
+tools/specimen/against.test.ts: git init -q -b main needs git 2.28;
+the floor is 2.15. Instead: git init -q, then git symbolic-ref HEAD refs/heads/<branch>
+```
+
+**Its limit, stated rather than implied.** The sweep reads argvs written as
+string literals, in files that name git; an argv assembled from variables is
+invisible to it. That is asserted in the test as the property the sweep rests
+on, and it holds today because every git invocation in this repository is
+written as literals.
+
+**Not verified on 2.15.** No container a routine runs in has a git that old —
+this one is 2.43 — so what is checked is that the new spellings are portable by
+construction (`symbolic-ref` and `worktree prune` both predate 2.15 by years)
+and that the repository's own sources no longer name anything the table holds.
+The reading that cannot be taken here is the maintainer's: a green
+`pnpm verify` on his machine.
 
 ---
 ## 2026-10-12 — a test reads a gitignored build artefact, so `pnpm verify` is red on `main` for anybody who has not run `pnpm package:primitives`
@@ -52544,10 +52656,43 @@ assertion bites.
 ## 2026-10-12 — a resolution is two closures, so the answers cannot be sent to the browser that renders them, and nothing public can hand them over
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/data/`) ·
-**Status:** open — **nothing is blocked**; the documentation site has a
-thirty-line carrier of its own and it works, filed because every host that
-fetches on a server and renders in a browser has to write the same file, and
-five of its lines are a guess a published seam should not be leaving to a caller
+**Status:** **closed by `framework-74-the-answers-that-can-be-sent`**,
+15 October — recorded as
+[0281](decisions/0281-the-answers-a-resolution-was-built-from-are-published-as-data-and-the-far-side-re-plans.md)
+
+`resolveDataPlan` and `resolveTreeData` return `ResolvedData`, which extends
+`DataResolution` with one field: `answers`, as
+`readonly (readonly [RequestKey, DataAnswer])[]`. The round trip is the tree and
+the answers —
+`buildDataResolution(planTreeData(tree), new Map(answers))` — and `DataAnswer`
+is named so a loader can write it into its own return type.
+
+**Taken as the extension rather than as shape (1).** The recommendation was
+`{ resolution, answers }`, and it was refused for a reason that is in your
+favour: it breaks every caller of both functions to serve the few that need the
+answers, and `resolveTreeData` has about twenty call sites — including the
+compiled fences this site publishes as teaching code. Extending the interface
+gives the same field and migrates nobody. Shapes (2) and (3) are recorded as
+rejected with their reasons.
+
+**The guess is gone rather than easier, which was the part of the filing that
+mattered.** Nodes are not what travels, so there is no node list to derive. The
+test that says so asserts your discovery directly: a misdeclared node is in
+`plan.problems` and never in `plan.bindings`, and the rebuilt resolution still
+carries its problem.
+
+Your note about keys was taken as written and is preserved rather than fixed:
+re-planning a repointed binding produces a key the answers do not hold, and the
+walk reports `data-unresolved`. There is a test for it.
+
+**One correction, and it is to the owner line rather than to the reading.** This
+is filed against `Loom daily build` and `src/data/` is `Loom framework`'s lane —
+`src/` except `src/primitives/`. Nothing was blocked by the mislabel, since the
+work is the same either way, but the entry sat for three days in a queue whose
+owner could not act on it.
+
+**`app/(docs)/_lib/data/carry.ts` is yours and is untouched here.** Filed back to
+you below: it can lose `askedAbout` and both of its node lists.
 
 `resolveDataPlan` hands back a `DataResolution`, which is
 `{ lookup, problemsFor }` — two functions. That is the right shape for the walk
@@ -53203,9 +53348,27 @@ are there and their words are a floor.
 ## 2026-10-12 — the word-weighted reader figure for a change to a kind of part is a third unit, and its weights move without a floor
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
-**Status:** open — **a question, not a defect**; filed for the reason 0256 was
-filed rather than shipped inside 0257's type, and the reason the reader-weighted
-places figure was filed yesterday rather than shipped inside 0266's
+**Status:** **closed by `signals-31-the-words-the-typical-reader-reached`** —
+built as `libraryWordReachChangeOf` in
+`src/signals/library-word-reach-change.ts`
+([0280](decisions/0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md),
+§31 of [`docs/signals.md`](docs/signals.md)), as this entry proposed it and as
+one unit rather than two: the weights are answered by 0279's counterfactuals,
+imported rather than restated, which is the entry's own guess that *the two are
+one unit* holding. **Three things the entry left open were decided in the
+building.** The weight is added **once per page and not once per placement**,
+because words add across the placements of one kind on one page where shares do
+not — which is the structural difference from 0279 and the reason the figure
+needed its own type. A floor withholds **every difference** and leaves both
+levels standing as floors, which is 0239's rule stated once rather than
+enumerated. And a **whole-library** figure is published, which 0279 refuses:
+words partition a page exactly once, so adding the kinds reads no sentence
+twice. Original status below.
+
+**Original status:** open — **a question, not a defect**; filed for the reason
+0256 was filed rather than shipped inside 0257's type, and the reason the
+reader-weighted places figure was filed yesterday rather than shipped inside
+0266's
 
 0270 compares the carried words of a kind of part by **standing**: a word counts
 as read where at least one reader reached the part saying it. The figure
@@ -53896,3 +54059,285 @@ in the environment's settings. Filed here because `routines.md` says a domain
 that is listed is reachable, and until this is answered that sentence is
 wrong for one of the four hosts it names — which is worth a reader of that file
 knowing before they spend a run on it.
+## 2026-10-15 — the passage nobody could speak for was counted as nought reader-words, and at two windows that is a movement that did not happen
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Closes** the
+14 October entry *a page's own word comparison counts a passage nobody can speak
+for as nought reader-words, and the library figure does not*, which is on the
+branch of #640 and not yet on `main` · **Status:** **closed by
+`signals-32-a-word-nothing-can-be-said-about-is-in-no-mass`**
+
+Built as 0282, §32 of [`docs/signals.md`](docs/signals.md), as that entry
+proposed it and as one unit over both published figures. **The entry's own
+reading of the cost was too kind, and that is the thing worth recording.** It
+judged both figures ceilings and the error a looser ceiling, which is the safe
+direction for a number published as *at most* — and said nothing was lost by
+waiting.
+
+That holds at one page and not at two windows. `CopyChange.typical.change` is a
+**difference** of two ceilings, so a term present on one side and absent on the
+other is not a loose ceiling: it is a movement nobody made, with a name attached
+to it by `mostLost`. The suite builds the case — four readers, three unchanged
+bands, two reaching the pricing band in both windows, and the intro's row
+reporting no reach in the later one. Published: `typical.change` of **−10** and
+*the intro is where you lost them*. Honest: nought, and no passage named.
+
+**Three things the entry left open were decided in the building.** The
+restriction is to the passages `unknown` on **neither** side, so it is one set
+and the same set on both — a passage dropped from one mass and kept in the other
+would carry the error with its sign intact. `ComparedPassage.gain` is `null`
+there too, which is what keeps 0239's published identity that the gains add to
+the total. And **no `unspoken` field was added**, which the entry's shape asked
+for: `wordsByStanding.unknown` and `wordsByMovement.unknown` are already exactly
+that number, and 0280 needed the field only because its rows carry no breakdown
+by movement.
+
+**The page-scale mean is unchanged in value**, because a passage is `unknown`
+only where its row reports no reach, so its term was already nought. What the
+entry asked for there was the description, and it is now a stated and tested
+ceiling over `read + skipped` rather than over the page's words.
+
+---
+## 2026-10-15 — a page where nothing reports reach publishes a share of nought beside an empty list of the words nobody saw
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/copy.ts`) · **Status:** open — **the half of 0282 that was left**,
+and a unit rather than a line
+
+0282 withholds `CopyReading.typical` where no word of the page is in a part the
+window can speak for: rows name every part, not one reports reach, and a mean
+over nought reader-words would print *the typical reader reached none of your
+page* as a measurement.
+
+**`CopyReading.share` publishes a nought on that same page.** It is
+`wordsByStanding.read ÷ words`, and with every word `unknown` the numerator is
+nought. So the reading hands a surface *0% of this page's words were reached*
+next to an `unseen` list that is **empty**, because `unseen` is `skipped` only
+(0235 §5). A card drawing both says nobody read any of it and cannot name one
+word nobody read.
+
+**It is not a false number**, which is why it was not taken inside 0282. Nought
+is exactly what a standing of `read` asserts of that page, the standings are
+published in the same object, and 0235 §4 already hands over the direction a
+share is wrong in rather than summarising it. The figure is defensible read
+carefully; the pair is incoherent read quickly.
+
+**Why it is a unit.** It is one decision over `CopyReading.share`, the same
+share on every `RoleCopy` row under it, and the `share` a comparison carries on
+each side — and the honest version is not a silence but a **second
+denominator**: a share over the words this window can speak for, with the
+unspoken words beside it, which is a different sentence from the one the field
+publishes now and may want a different name. Three published figures and a name,
+which is not a line to change.
+
+**The shape, if it is taken:** take every share over `read + skipped`, publish
+`unknown` beside it as the mass outside the question, and say in the record that
+a share is now *of the words this window can speak for* — which is the move
+0282 made to the means, one field across. The direction is the same one 0280
+took at the scale of a library.
+
+**Nothing is lost by waiting**, with the caveat 0282 earned: that sentence was
+true of the means at one page and false of them at two windows, so the first
+thing to check before taking this is whether any comparison **subtracts** two
+shares. `CopyChange` does not — it compares reaches per passage and never two
+page-wide shares — so the caveat does not bite here. It is worth re-checking
+against §26 and §30, whose figures are shares of readers and not of words.
+---
+## 2026-10-15 — the carrier that forced 0281 can now lose its node derivation, and the five lines it called a guess
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/data/carry.ts`) · **Status:** open — **nothing is
+broken and nothing is urgent**; the carrier is correct today and the seam it
+asked for shipped, so the file can get smaller whenever the lane is next in there
+
+Your 12 October finding is closed above.
+[0281](decisions/0281-the-answers-a-resolution-was-built-from-are-published-as-data-and-the-far-side-re-plans.md)
+publishes the answers a resolution was built from, so the round trip no longer
+goes through nodes at all:
+
+```ts
+// where the fetching happens
+const { answers } = await resolveTreeData(tree, { registry })
+// wherever the walk happens, given the same tree
+const data = buildDataResolution(planTreeData(tree), new Map(answers))
+```
+
+**What that deletes.** `askedAbout`, both of the node lists it unions, and the
+`CarriedAnswers` shape itself — `answers` is already the plain, sendable thing
+`carryAnswers` was building by hand. `uncarryAnswers` becomes
+`buildDataResolution(planTreeData(tree), new Map(answers))`, which needs the
+tree on the far side; the examples are rendering it, so they have it.
+
+**What to keep, because it is the part that was sound.** The carrier's own
+comment says the readings are real and nothing invents an outcome, and that is
+exactly what the new path preserves: a node that asked and whose answer did not
+travel earns a `data-unresolved` diagnostic rather than drawing empty. The
+difference is that it now comes from the runtime's own `not-resolved` rather
+than from this file using the same constant the runtime does.
+
+**One behaviour to know about before you swap it.** The new path keys on
+requests and not on nodes, so a tree whose binding was repointed between the
+fetch and the walk reports `data-unresolved` — correctly, because the answer in
+hand is the answer to a question that tree no longer asks. The old carrier keyed
+on node ids and would have handed over the stale answer. Both are tested on this
+side; the second is the one your examples would have hit first, since the
+propose-a-change box is how a tree gets repointed.
+
+**Not proposed: doing it for you.** `carry.ts` and `carry.test.ts` are this
+lane's files and the old path still works, so nothing forced a cross-lane edit
+and none was made. The test that would change is `carry.test.ts`'s round trip,
+which asserts against a real resolution and should go on doing so.
+## 2026-10-14 — a kind of part whose floored placements say nothing visible published a signed figure, because the floor was counted in words
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-copy-change.ts`) · **Status:** **closed by
+`signals-31-the-words-the-typical-reader-reached`** — filed and fixed in the
+same run, and written down because it is a published figure that was wrong
+rather than thin
+
+0270 withholds a kind's signed word movement under a floor, and the rule is
+right: a floor scales each passage's contribution toward zero by **its own**
+factor, so a sum of signed terms can come back with the wrong sign. What it
+read the rule off was `flooredWords`, the visible words in the floored
+placements.
+
+**The commonest floor there is has none.** A part whose type declares no `copy`
+at all (0122) says nought visible words and hides every word it has, so
+`flooredWords` stayed nought for exactly the case the rule exists for, and the
+row published `change`, a `taken-up` or `abandoned` verdict and no silence —
+with a hundred unseen words able to reverse all three.
+
+The trigger is now `flooredPlacements`, which the row already published and
+which counts one per floored placement whatever it says. Both the kind rows and
+the library-wide total read it. 0239 was right the first time and counts
+passages; this is that rule carried up, and `library-word-reach-change.ts`
+counts passages for the same reason.
+
+**Nothing is superseded.** 0270's rule is unchanged and so is its record; what
+moved is the number the rule is read off. One test in
+`src/signals/library-copy-change.test.ts` now builds the case — a floored
+placement with no visible word beside a carried placement with twenty — and
+fails against the old trigger.
+
+---
+## 2026-10-14 — a page's own word comparison counts a passage nobody can speak for as nought reader-words, and the library figure does not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/copy-change.ts`) · **Status:** open — **a limit written down with
+a shape to build**; nothing in what shipped is wrong for the question it is
+asked
+
+`CopyChange.typical` is `Σ readers × words ÷ views` over the carried passages,
+and it reduces over **every** one of them. A passage whose standing is `unknown`
+contributes `0 × words`.
+
+`unknown` with views in the window is not *nobody reached it* — it is *the part
+reported something other than coming into view* (`parts.ts`): a press delegated
+to a band that no `viewed` ever named, so a reader plainly had it in front of
+them and the counter that would say so is missing. Counting that as nought
+reader-words understates the figure, and it understates it in the direction
+nobody checks.
+
+**0280 refuses it at the library scale** and publishes the words as `unspoken`
+instead, taking every figure over the passages both windows can speak for. The
+two agree exactly where every carried passage is spoken for on both sides, which
+that suite asserts with `toBe`.
+
+**Why it is filed rather than fixed.** At one page the figure is already
+withheld wholesale for a window with no views, so the case is narrower there,
+and `CopyReading.typical` (0235) has the same shape and the same question to
+answer — so this is one decision about two published figures and a third that
+quotes them, not a line to change. The shape, if it is taken: restrict both
+means to the passages with a verdict, publish the unspoken words beside them,
+and say in 0235 that the ceiling is now a ceiling over what was measured.
+
+**Nothing is lost by waiting.** The figure is a ceiling and this makes it a
+looser one, which is the safe direction for a number published as *at most*.
+
+---
+## 2026-10-14 — the third mass a kind of part now has is words per reader, and it is the one figure on the screen that is not a share
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**a surface to build on a reading that is on `main`**, with the refusals it
+must not undo
+
+[0280](decisions/0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md)
+publishes `libraryWordReachChangeOf`: per kind of part, the carried words the
+typical reader who met it reached in each window, and the same for the whole
+library.
+
+**It is not a share and must not be drawn as one.** Every other figure on a
+library card is in `[0, 1]`; this one is a count of words per page view and has
+no ceiling. A card that puts it on the same axis as a share will be read as a
+percentage that went past a hundred.
+
+**Four things the screen must not do**, each a refusal in the record rather
+than an oversight here:
+
+- **Do not subtract two levels under a floor.** Where `silence` is `floored`,
+  `typicalWas` and `typicalNow` are published and every difference is `null` on
+  purpose. A screen that computes the difference itself puts back exactly the
+  number the reading refuses.
+- **Do not print `wordsMoved` as people or as words a person read.** It is
+  reader-words at the later window's scale — a mass for ranking, like every
+  other `…Moved` figure in this subsystem.
+- **Draw `cause` beside the figure and not behind it.** A `pages` verdict means
+  the figure moved because the traffic moved, which is not a sentence about the
+  library at all.
+- **Do not add the kind rows yourself.** The reading publishes the library's own
+  figure (`words`), which is the only one taken over each passage exactly once.
+
+The `floored` count is the field that makes a floor drawable: *at least this
+many words, and N passages hide more.*
+
+---
+## 2026-10-14 — the mangling's lower bound moves from 177 to 156, measured on a third pull request body the same way
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** this morning's entry *the mangling, measured by accident on one pull
+request body* and, through it, the 5 October entry *four links, one body, same
+syntax* · **Status:** open — **three more readings for that entry's length
+hypothesis**, taken the same way those were: by writing a pull request rather
+than by testing one
+
+#640's first body carried two markdown links. Both came back with ``` `` ```
+injected around the URL, so neither rendered. The comment posted on the same
+pull request minutes later carried a bare preview URL and came back clean. The
+body was then rewritten with one short link, which also came back clean.
+
+| posted | characters | came back |
+| --- | --- | --- |
+| body, first — a record under the branch name | **228** | mangled |
+| body, first — a report under the branch name | **156** | mangled |
+| comment — the Vercel preview URL | **82** | **clean** |
+| body, second — the same report under a short sha | **117** | **clean** |
+
+**It narrows the bracket on the mangled side, which the two earlier entries
+could not.** Collecting all eight readings now on record:
+
+| characters | verdict |
+| --- | --- |
+| 82 | clean |
+| 117 | clean |
+| 121 | clean |
+| ~133 | clean |
+| **156** | **mangled** |
+| 177 | mangled |
+| 228 | mangled |
+
+So the threshold is somewhere in **(133, 156]**, where before today it was
+`(133, 177]`. Nothing here is a test of the threshold and all of it is
+incidental, which is the same caveat the two earlier entries carry — but three
+readings arriving in one evening from one pull request, two of them on either
+side of the old bracket, is the sharpest the accident has been.
+
+**The practical rule this lane will follow until it is fixed**, written down so
+the next run does not rediscover it: a URL in a pull request body goes under a
+short commit sha rather than a branch name, and a path longer than that is named
+in backticks rather than linked. #640's body does both.
+
+**What it still does not say** is whether length is the mechanism or a proxy for
+one — the long URLs here also contain the most hyphens, as every URL in every
+reading so far does. A body carrying one long URL with few hyphens and one short
+URL with many would separate them, and nobody has written one by accident yet.
+

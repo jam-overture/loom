@@ -873,12 +873,23 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * reading this site can obtain one by deciding to — so the card had not merely
  * gone quiet about the door, it had started describing it wrongly.
  *
- * **What says it now is the cost line, and it is four words rather than a
- * paragraph.** *Costs you an invitation* is the honest word for a door somebody
- * else opens, it sits on the one line a reader compares the four destinations
- * along, and `site.test.ts` holds it there. `PORTAL.door` says the rest — who
- * writes the list — in the questions band two bands above, which is where a
- * reader who wants that answer goes looking for it.
+ * **What says it now is the cost line, and it is three words rather than a
+ * paragraph.** It sits on the one line a reader compares the four destinations
+ * along, and `site.test.ts` holds it there. `PORTAL.door` says who writes the
+ * list, in the questions band two bands above, which is where a reader who
+ * wants that answer goes looking for it.
+ *
+ * **The three words are *Still being built* and not *Needs an invitation*, as
+ * of 15 October, and that is the same guarantee failing a third way.** The
+ * invitation was the honest word for a door somebody else opens, and it
+ * answered a question this reader does not get to ask yet: the portal is
+ * unfinished, its own lane has said so on the far side of this link since
+ * 28 September, and the card went on offering it beside three finished
+ * surfaces. Each card is honest about what is behind it — so the one whose
+ * answer is *not much, yet* says that. `PORTAL.notYet` carries the longer
+ * sentence into the questions band, and `unfinished.test.ts` ties both to the
+ * banner in `(portal)`, so the day that comes down this prose goes red with
+ * the copy rather than quietly outliving it for the fourth time.
  *
  * **It is the four surfaces and nothing else**, as of 22 August. A fifth card
  * pointed at the repository, which was fine while there were three of them and

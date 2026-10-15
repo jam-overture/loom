@@ -737,7 +737,7 @@ const movementOf = (
  * `null` where nothing moved: a verdict that did not move has nothing to
  * attribute, which is `PaceCause`'s rule (0244).
  */
-const causeOf = (
+export const readerShareCauseOf = (
   shareWas: number,
   shareNow: number,
   ifTrafficHeld: number,
@@ -765,12 +765,15 @@ const causeOf = (
  * Nought where either side has no weight at all, which a silence has already
  * accounted for.
  */
-const weightMovedIn = (of: Tallying): number => {
-  if (of.countedWas === 0 || of.countedNow === 0) return 0
+export const weightMovedOver = (
+  weights: readonly { readonly was: number; readonly now: number }[],
+  totals: { readonly was: number; readonly now: number }
+): number => {
+  if (totals.was === 0 || totals.now === 0) return 0
 
   return (
-    of.weights.reduce(
-      (sum, weight) => sum + Math.abs(weight.now / of.countedNow - weight.was / of.countedWas),
+    weights.reduce(
+      (sum, weight) => sum + Math.abs(weight.now / totals.now - weight.was / totals.was),
       0
     ) / 2
   )
@@ -803,8 +806,10 @@ const rowOf = (of: Tallying): KindReachChange => {
     ifTrafficHeld: measured ? ifTrafficHeld : null,
     ifReadingHeld: measured ? ifReadingHeld : null,
     movement: movementOf(of, silence, shareWas, shareNow),
-    cause: measured ? causeOf(shareWas, shareNow, ifTrafficHeld, ifReadingHeld) : null,
-    weightMoved: measured ? weightMovedIn(of) : null,
+    cause: measured ? readerShareCauseOf(shareWas, shareNow, ifTrafficHeld, ifReadingHeld) : null,
+    weightMoved: measured
+      ? weightMovedOver(of.weights, { was: of.countedWas, now: of.countedNow })
+      : null,
     driftWas: of.driftWas,
     driftNow: of.driftNow,
     pendingWas: of.pendingWas,
@@ -844,14 +849,24 @@ const bySide = (one: UnscaledSide, other: UnscaledSide): number =>
   other.revision - one.revision ||
   one.side.localeCompare(other.side)
 
-/** One side's pages, each with the door that scales it, worked out once per page. */
-type Scaled = {
+/**
+ * One side's pages, each with the door that scales it, worked out once per
+ * page.
+ *
+ * Published rather than private because a second reading needs the same window
+ * — the words the typical reader of a kind of part reached, which is weighted
+ * by the same doors on the same pairing (0280). Two spellings of one rule that
+ * agree today are what moved the door's own scale into its own module, so the
+ * window is written once here, in the module whose record owns it.
+ */
+export type ScaledPage = {
   readonly reading: PageReading
   readonly door: PageDoor
   readonly duplicatedRows: number
 }
 
-const scaledOf = (reading: PageReading, rows: readonly StoredPageViews[]): Scaled => {
+/** One page with its door, picked out of the window's rows by the published matching rule. */
+export const scaledPageOf = (reading: PageReading, rows: readonly StoredPageViews[]): ScaledPage => {
   const found = pageViewsFor(reading, rows)
 
   return { reading, door: doorOf(found.measured), duplicatedRows: found.duplicated }
@@ -911,19 +926,19 @@ const add = (
 }
 
 /** One whole side: its pages keyed by tree, each page's door, and the rows a caller handed in twice. */
-type Side = {
+export type LibrarySide = {
   readonly pages: PairedWindow
-  readonly scaled: ReadonlyMap<TreeId, Scaled>
+  readonly scaled: ReadonlyMap<TreeId, ScaledPage>
   readonly duplicatedRows: number
 }
 
 /** The pages of one window, keyed by tree, with each page's door already worked out. */
-const sideOf = (window: LibraryWindow): Side => {
+export const librarySideOf = (window: LibraryWindow): LibrarySide => {
   const pages = pairedWindowOf(window.readings)
   const scaled = new Map(
-    [...pages.byTree].map(([treeId, reading]): [TreeId, Scaled] => [
+    [...pages.byTree].map(([treeId, reading]): [TreeId, ScaledPage] => [
       treeId,
-      scaledOf(reading, window.rows),
+      scaledPageOf(reading, window.rows),
     ])
   )
 
@@ -956,8 +971,8 @@ export const libraryReachChangeOf = (
   was: LibraryWindow,
   now: LibraryWindow
 ): LibraryReachChange => {
-  const earlier = sideOf(was)
-  const later = sideOf(now)
+  const earlier = librarySideOf(was)
+  const later = librarySideOf(now)
   const rows = new Map<string, Tallying>()
   const roleWas = new Map<PrimitiveType, PrimitiveRole | null>()
   const roleNow = new Map<PrimitiveType, PrimitiveRole | null>()

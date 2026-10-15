@@ -303,6 +303,22 @@ const git = (cwd: string, args: readonly string[]): void => {
   execFileSync("git", [...args], { cwd, stdio: "ignore" })
 }
 
+/**
+ * A repository whose first branch is named, without `git init -b`.
+ *
+ * `-b` arrived in git 2.28 and the floor this repository's tooling holds is
+ * 2.15 (`tools/git/portability.ts`), where it is `unknown switch 'b'` and all
+ * six cases below fail — on the one machine that runs `pnpm verify` by hand
+ * and nowhere a routine runs. `symbolic-ref` on a repository with no commits
+ * yet repoints `HEAD` before there is anything for it to move, so the first
+ * commit creates the branch under the name asked for and the repository is
+ * byte-identical to what `-b` would have built.
+ */
+const initAt = (cwd: string, branch: string): void => {
+  git(cwd, ["init", "-q"])
+  git(cwd, ["symbolic-ref", "HEAD", `refs/heads/${branch}`])
+}
+
 const aRepository = async (): Promise<string> => {
   const repo = await mkdtemp(join(tmpdir(), "loom-against-repo-"))
 
@@ -312,7 +328,7 @@ const aRepository = async (): Promise<string> => {
   await writeFile(join(repo, "src", "subject.ts"), `export const WORD = "before"\n`)
   await writeFile(join(repo, "tools", "specimen", "main.ts"), `throw new Error("the harness at the ref")\n`)
 
-  git(repo, ["init", "-q", "-b", "main"])
+  initAt(repo, "main")
   git(repo, ["config", "user.email", "harness@example.com"])
   git(repo, ["config", "user.name", "harness"])
   git(repo, ["add", "-A"])
@@ -473,7 +489,7 @@ describe("photographing the same sheet against a revision", () => {
 
     try {
       await writeFile(join(repo, "README.md"), "nothing here\n")
-      git(repo, ["init", "-q", "-b", "main"])
+      initAt(repo, "main")
       git(repo, ["config", "user.email", "harness@example.com"])
       git(repo, ["config", "user.name", "harness"])
       git(repo, ["add", "-A"])

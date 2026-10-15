@@ -86,6 +86,37 @@ author-flag entry's, and this is its third instance. Written here rather than in
 any lane's code because it is a thing a **run** does, not a thing the repository
 contains.
 
+## The git every machine has
+
+**The floor is git 2.15**, and it is the maintainer's machine. A routine runs in
+a cloud container with a current git, so a tool that reaches for a newer switch
+is green on all three scheduled runs and red in exactly one place: the tree of
+the one person who runs `pnpm verify` by hand before merging. His suite goes red
+for a reason that has nothing to do with his change, every time, and telling a
+real failure from that one costs him a second run on `main` to compare.
+
+Three instances arrived before anything checked. `git switch` and
+`git worktree remove` were both met from interactive sessions and worked around
+there. `git init -b` reached `main` inside `tools/specimen/against.test.ts` and
+failed all six cases of *photographing the same sheet against a revision* — for
+nineteen days, found by the maintainer and not by any check.
+
+The floor and the invocations it lacks are a table in
+[`tools/git/portability.ts`](../tools/git/portability.ts), and
+`portability.test.ts` sweeps every source under `tools/` and `src/` that names
+git, so the fourth instance fails on the branch that writes it rather than on
+his machine. Raising the floor is a line in that file and this paragraph.
+
+**A skip guarded on the installed version is the wrong remedy**, and the
+maintainer's own finding says why: a test that silently does not run on his
+machine is how the next portability gap goes unnoticed for a month. Write the
+portable spelling instead — the table names one for every row it holds.
+
+The sweep reads argvs written as string literals, in files that name git. An
+argv assembled from variables is invisible to it, which is stated in the test
+rather than implied; every git invocation in this repository is written as
+literals today, and one that is not wants a reader who knows that.
+
 ## Lanes
 
 Each routine owns one part of the repository and does not edit another's.
