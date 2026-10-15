@@ -5,8 +5,9 @@ import { sequentialIdFactory, type NodeId } from "../ids.js"
 import { DATA_PROP_KEY } from "../reserved-props.js"
 import { err, ok } from "../result.js"
 import { hangingSource } from "../testing/doubles.js"
+import { walkTree } from "../tree/navigation.js"
 import { buildElement } from "../tree/builders.js"
-import { createTree } from "../tree/tree.js"
+import { createTree, type LoomTree } from "../tree/tree.js"
 
 import {
   createDataRegistry,
@@ -15,7 +16,7 @@ import {
   type DataRegistry,
   type SourceEntry,
 } from "./adapter.js"
-import { buildDataResolution } from "./resolution.js"
+import { buildDataResolution, type DataAnswers, type DataResolution } from "./resolution.js"
 import { planTreeData } from "./plan.js"
 import { resolveDataPlan, resolveTreeData } from "./resolve.js"
 import type { BindingName, SourceId } from "./source.js"
@@ -348,5 +349,152 @@ describe("buildDataResolution", () => {
     )
 
     expect(resolution.lookup("n_absent" as NodeId)["toString"]).toBeUndefined()
+  })
+})
+
+/**
+ * The answers as something that can be sent (0281).
+ *
+ * Every case here serves one claim: a host that fetches in one place and renders
+ * in another can rebuild the readings it would have had, and cannot quietly
+ * rebuild thinner ones. The comparison is against a live resolution rather than
+ * against literals, so a field that began to be filled from somewhere else would
+ * fail these without anybody editing them.
+ */
+describe("the answers a resolution was built from", () => {
+  /** The far side: the same tree, the answers as they arrived, nothing else. */
+  const rebuilt = (tree: LoomTree, answers: DataAnswers): DataResolution =>
+    buildDataResolution(planTreeData(tree), new Map(answers))
+
+  /** What a boundary actually does to them on the way. */
+  const posted = (answers: DataAnswers): DataAnswers =>
+    JSON.parse(JSON.stringify(answers)) as DataAnswers
+
+  /** Both accessors, at every node in the tree. */
+  const readingsOf = (tree: LoomTree, resolution: DataResolution) =>
+    [...walkTree(tree.root)].map(
+      (node) => [node.id, resolution.lookup(node.id), resolution.problemsFor(node.id)] as const
+    )
+
+  it("hands back one answer per request asked, under the plan's own keys", async () => {
+    const tree = boundTree(
+      { bio: { source: "profile" }, again: { source: "profile" } },
+      { note: { source: "other" } }
+    )
+
+    const { answers } = await resolveTreeData(tree, {
+      registry: registryOf(countingSource("profile", "Ada"), countingSource("other", "Grace")),
+    })
+
+    expect(answers.map(([key]) => key)).toEqual(planTreeData(tree).requests.map((r) => r.key))
+    expect(answers).toHaveLength(2)
+  })
+
+  it("rebuilds every reading the resolution gave, after a trip through JSON", async () => {
+    const tree = boundTree({ bio: { source: "profile" } }, { note: { source: "other" } })
+
+    const live = await resolveTreeData(tree, {
+      registry: registryOf(countingSource("profile", "Ada"), countingSource("other", "Grace")),
+    })
+
+    const far = rebuilt(tree, posted(live.answers))
+
+    expect(readingsOf(tree, far)).toEqual(readingsOf(tree, live))
+    expect(far.lookup(tree.root.id)["bio"]).toEqual({ status: "ready", value: "Ada" })
+  })
+
+  /**
+   * A request key is a source id, a NUL byte and canonical params. The byte is
+   * the reason this is asserted rather than assumed: it is legal in a JSON
+   * string and it is exactly the kind of character a seam loses quietly.
+   */
+  it("carries a request key through JSON intact, including the NUL byte it is built around", async () => {
+    const tree = boundTree({ bio: { source: "profile", params: { of: "ada" } } })
+
+    const { answers } = await resolveTreeData(tree, {
+      registry: registryOf(countingSource("profile", "Ada")),
+    })
+
+    expect(answers[0]?.[0]).toContain("\u0000")
+    expect(posted(answers).map(([key]) => key)).toEqual(answers.map(([key]) => key))
+  })
+
+  /**
+   * The defect this field exists to make unreachable. Deriving the nodes to
+   * carry from `plan.bindings` is the obvious thing to reach for and it drops
+   * every node whose declaration could not be read at all — which is the one
+   * class of node whose only output is a diagnostic.
+   */
+  it("carries a misdeclared node's problem, which deriving nodes from plan.bindings drops", async () => {
+    const tree = boundTree(
+      { bio: { source: "profile" } },
+      "note" as unknown as Record<string, unknown>
+    )
+
+    const live = await resolveTreeData(tree, {
+      registry: registryOf(countingSource("profile", "Ada")),
+    })
+
+    const plan = planTreeData(tree)
+    const misdeclared = plan.problems[0]?.nodeId
+
+    expect(misdeclared).toBeDefined()
+    expect(plan.bindings.some((binding) => binding.nodeId === misdeclared)).toBe(false)
+
+    expect(rebuilt(tree, posted(live.answers)).problemsFor(misdeclared as NodeId)[0]?.kind).toBe(
+      "misdeclared"
+    )
+  })
+
+  it("carries a source that never answered as unavailable, not as a region with nothing in it", async () => {
+    const tree = boundTree({ bio: { source: "slow" } })
+
+    const live = await resolveTreeData(tree, {
+      registry: registryOf(hangingSource("slow", "never answers").entry),
+      ceilingMs: 5,
+    })
+
+    const outcome = rebuilt(tree, posted(live.answers)).lookup(tree.root.id)["bio"]
+
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable.reason).toBe("unavailable")
+  })
+
+  it("asked nothing, and says so, for a tree that binds nothing", async () => {
+    const tree = createTree(
+      buildElement(sequentialIdFactory(), { type: "loom.page" }),
+      sequentialIdFactory()
+    )
+
+    const { answers } = await resolveTreeData(tree, {
+      registry: registryOf(countingSource("profile", "Ada")),
+    })
+
+    expect(answers).toEqual([])
+    expect(rebuilt(tree, posted(answers)).lookup(tree.root.id)).toEqual({})
+  })
+
+  /**
+   * The behaviour to preserve rather than to fix. Keys are canonicalised params,
+   * so re-planning a tree whose binding was repointed produces a key the answers
+   * do not hold, and the walk says `data-unresolved` instead of drawing the
+   * answer to a question this tree no longer asks.
+   */
+  it("reports a binding the answers do not hold as not-resolved, so a repointed binding draws nothing stale", async () => {
+    const before = boundTree({ bio: { source: "profile", params: { of: "ada" } } })
+
+    const { answers } = await resolveTreeData(before, {
+      registry: registryOf(countingSource("profile", "Ada")),
+    })
+
+    const after = boundTree({ bio: { source: "profile", params: { of: "grace" } } })
+    const outcome = rebuilt(after, posted(answers)).lookup(after.root.id)["bio"]
+
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable.reason).toBe("not-resolved")
   })
 })

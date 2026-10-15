@@ -9,6 +9,7 @@ import { planTreeData, planIsEmpty, type DataPlan, type RequestKey } from "./pla
 import {
   buildDataResolution,
   EMPTY_DATA_RESOLUTION,
+  type DataAnswers,
   type DataResolution,
 } from "./resolution.js"
 import type { SourceId } from "./source.js"
@@ -80,11 +81,47 @@ const askOne = async (
   )
 }
 
+/**
+ * A resolution, and the answers it was built from.
+ *
+ * It *is* a `DataResolution`, so a caller that only renders reads nothing new
+ * and changes nothing. The extra field is for the host that fetches in one
+ * place and renders in another — the arrangement every React framework pushes a
+ * host towards, and the one this package could not serve: a resolution is two
+ * closures, and a closure cannot cross from a server component to a client one.
+ * The answers can, so the far side rebuilds from them:
+ *
+ * ```ts
+ * // where the fetching happens
+ * const { answers } = await resolveTreeData(tree, { registry })
+ * // wherever the walk happens, given the same tree
+ * const data = buildDataResolution(planTreeData(tree), new Map(answers))
+ * ```
+ *
+ * Re-planning rather than carrying the resolution is what keeps the one thing a
+ * caller must not get wrong inside the package: *which requests were asked*.
+ * Read off the plan it is a guess, and the obvious guess is wrong — a node whose
+ * declaration could not be read at all appears in `plan.problems` and never in
+ * `plan.bindings`, so a carrier built from the bindings drops exactly the nodes
+ * whose diagnostics matter most (0281).
+ */
+export interface ResolvedData extends DataResolution {
+  readonly answers: DataAnswers
+}
+
+const NO_ANSWERS: DataAnswers = Object.freeze([])
+
+/** The resolution of a plan that asks nothing, which asked nothing. */
+const EMPTY_RESOLVED_DATA: ResolvedData = Object.freeze({
+  ...EMPTY_DATA_RESOLUTION,
+  answers: NO_ANSWERS,
+})
+
 export const resolveDataPlan = async (
   plan: DataPlan,
   options: ResolveDataOptions
-): Promise<DataResolution> => {
-  if (planIsEmpty(plan)) return EMPTY_DATA_RESOLUTION
+): Promise<ResolvedData> => {
+  if (planIsEmpty(plan)) return EMPTY_RESOLVED_DATA
 
   const answered = await Promise.all(
     plan.requests.map(
@@ -95,11 +132,13 @@ export const resolveDataPlan = async (
     )
   )
 
-  return buildDataResolution(plan, new Map(answered))
+  const answers: DataAnswers = Object.freeze(answered)
+
+  return { ...buildDataResolution(plan, new Map(answers)), answers }
 }
 
 /** Plan and resolve in one step, for the ordinary caller that does both. */
 export const resolveTreeData = async (
   tree: LoomTree,
   options: ResolveDataOptions
-): Promise<DataResolution> => resolveDataPlan(planTreeData(tree), options)
+): Promise<ResolvedData> => resolveDataPlan(planTreeData(tree), options)

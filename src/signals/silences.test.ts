@@ -20,6 +20,7 @@ import {
   KIND_CHANGE_SILENCES,
   KIND_COPY_CHANGE_SILENCES,
   KIND_REACH_CHANGE_SILENCES,
+  KIND_WORD_REACH_CHANGE_SILENCES,
   KIND_REACH_SILENCES,
   KIND_SILENCES,
   libraryActionOf,
@@ -36,6 +37,7 @@ import {
   meaningOfKindChangeSilence,
   meaningOfKindCopyChangeSilence,
   meaningOfKindReachChangeSilence,
+  meaningOfKindWordReachChangeSilence,
   meaningOfKindReachSilence,
   meaningOfKindSilence,
   meaningOfPaceChangeSilence,
@@ -157,6 +159,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...KIND_COPY_CHANGE_SILENCES.map(meaningOfKindCopyChangeSilence),
   ...KIND_REACH_SILENCES.map(meaningOfKindReachSilence),
   ...KIND_REACH_CHANGE_SILENCES.map(meaningOfKindReachChangeSilence),
+  ...KIND_WORD_REACH_CHANGE_SILENCES.map(meaningOfKindWordReachChangeSilence),
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
@@ -176,6 +179,7 @@ describe("what a reading means when it says nothing", () => {
         KIND_COPY_CHANGE_SILENCES.length +
         KIND_REACH_SILENCES.length +
         KIND_REACH_CHANGE_SILENCES.length +
+        KIND_WORD_REACH_CHANGE_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
         REACH_SILENCES.length
@@ -256,6 +260,13 @@ describe("what a reading means when it says nothing", () => {
           KIND_REACH_CHANGE_SILENCES.map((of) => meaningOfKindReachChangeSilence(of).condition),
           [],
         ],
+        [
+          "library-word-reach-change",
+          KIND_WORD_REACH_CHANGE_SILENCES.map(
+            (of) => meaningOfKindWordReachChangeSilence(of).condition
+          ),
+          [],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -299,6 +310,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "kind",
       "kind",
       "kind",
       "kind",
@@ -359,6 +371,39 @@ describe("the two overlaps this mapping exists to state", () => {
     expect(copy.condition).toBe("no-view-reported")
     expect(reach.condition).toBe("no-arrivals-counted")
     expect(relateSilences(copy, reach)).toBe("unrelated")
+  })
+
+  /**
+   * The third nought, which 0282 had to keep apart from the other two. A page
+   * nobody opened, a page whose rows report no reach, and a window that credits
+   * no press to a reader are three different senders half-working, and a
+   * deployment handed the wrong one looks in the wrong place.
+   */
+  it("says that a page reporting no reach is not a page nobody read", () => {
+    const unspoken = meaningOfCopySilence("unspoken")
+    const empty = meaningOfCopySilence("unmeasured")
+
+    expect(unspoken.condition).toBe("no-reach-reported")
+    expect(empty.condition).toBe("no-view-reported")
+    expect(relateSilences(unspoken, empty)).toBe("unrelated")
+  })
+
+  it("keeps it apart from the other nought that is not a measurement", () => {
+    const unspoken = meaningOfCopySilence("unspoken")
+    const unwalked = meaningOfActionChangeSilence("unwalked")
+
+    expect(unwalked.condition).toBe("no-action-credited")
+    expect(relateSilences(unspoken, unwalked)).toBe("unrelated")
+  })
+
+  /**
+   * And the same state said of a page and of a pair is one reason at two
+   * subjects, which is the relation this module exists to publish.
+   */
+  it("relates a page's missing reach to the pair's as one reason at two subjects", () => {
+    expect(
+      relateSilences(meaningOfCopySilence("unspoken"), meaningOfCopyChangeSilence("unspoken"))
+    ).toBe("one-reason")
   })
 
   it("relates a page's floor to a part's floor as one reason at two subjects", () => {
