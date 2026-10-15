@@ -8,6 +8,79 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-15 — the front door sold a surface that is still being built, and the only place that said so was on the far side of the link
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
+row for `Loom portal` · **Status:** **closed by
+`marketing-05-the-door-that-is-still-being-built`** for this route group. The
+row for `Loom portal` is **one line to delete, when it is finished.**
+
+`(portal)/_components/under-construction.tsx` has carried a banner since
+28 September, at the maintainer's instruction, and its own note names the half
+it could not fix:
+
+> *"The portal is reachable from the marketing site's menu and its footer — a
+> stranger who follows Portal from the front door arrives at a working screen
+> and has no way to know that most of what it will be is not built yet."*
+
+That is a sentence about this route group, written in another one. The lane that
+owns the door told the truth about it; the lane that **sends people there** went
+on offering it beside the demo, the documentation and the course as though the
+four were the same kind of thing. Photographed on 15 October, the card read
+*Where the changes are reviewed… **Needs an invitation*** and the page it opened
+read ***The portal is still being built.***
+
+The portal is offered four ways from this route group — the bar's *Sign in* on
+every page, the front door's band of four cards, the footer's map, and the
+questions band's answer about the door. None of the four said it was unfinished.
+
+### Why this was sayable when `GuardedSurface` says the door is not
+
+That type's note settles that this lane may not claim a door **opens**: whether
+sign-in is configured belongs to the deployment, `(marketing)` does not import
+`(portal)`'s auth config, and nothing here can see it. Still true, and this does
+not go near it.
+
+**Whether a surface has been finished is a different fact.** It is a property of
+this version of Loom rather than of the machine serving it, true wherever the
+application is deployed, and the lane that owns the surface has already
+committed it to the repository as a component. So it is read off the repository:
+`unfinished.test.ts` sweeps `(portal)` for `data-under-construction` rather than
+importing anything, inferring it from a screenshot, or retyping it.
+
+### The row for `Loom portal`
+
+**When the portal is finished and that banner comes down, nothing here needs
+remembering.** The test holds the pair in both directions and the failure names
+the field and the file:
+
+```
+/portal no longer carries data-under-construction, so delete notYet on it in site.ts
+```
+
+So the action for `Loom portal` is: **delete the banner in the same change that
+finishes the surface, and let this lane's build tell its next run to drop the
+caveat.** Nothing is owed before that. The lane is paused as of 13 October, which
+is why the marketing copy is honest about the state rather than waiting on it.
+
+One thing worth knowing if the marker is ever reworded: `data-under-construction`
+is the attribute, chosen over the sentence because the words are that lane's to
+reword and the attribute is what its own tests hold it to. Renaming it turns this
+file red rather than letting it pass silently, which is the right way round — but
+it is a cross-lane contract of one string, and this is where it is written down.
+
+### The shape, for any lane that offers another lane's surface
+
+A caveat is worth having only while it is true, and a caveat nobody removes is
+how a site ends up apologising for something it fixed a year ago. The rule that
+made this cheap is the pair rather than either half: a surface whose lane still
+says it is unfinished **must** be described that way, and one whose lane has
+stopped saying so **must not be**. It is the shape `named.test.ts` settled on for
+retired pages the day before, applied to the other direction of the same problem
+— there, a page that is gone and still named; here, a surface that is unfinished
+and not said to be.
+
+---
 ## 2026-10-14 — the mangling, measured by accident on one pull request body: 177 characters mangled, 121 clean, same body and same syntax
 
 **Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·

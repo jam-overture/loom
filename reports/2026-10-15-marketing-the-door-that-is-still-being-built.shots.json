@@ -1,0 +1,28 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/",
+      "out": "2026-10-15-marketing-still-being-built-cards",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true,
+      "measure": ["text=Still being built", "text=Needs an invitation", "text=Takes one click"]
+    },
+    {
+      "path": "/",
+      "out": "2026-10-15-marketing-still-being-built-cards-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-10-15-marketing-still-being-built-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    }
+  ]
+}

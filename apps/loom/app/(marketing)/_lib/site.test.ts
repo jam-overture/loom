@@ -213,8 +213,18 @@ describe("the rest of the product", () => {
    * The band offers them in ascending order of what they ask of a visitor and
    * a reader compares them along one line, so a cost naming somebody else's
    * decision is not a smaller cost — it is a different kind of thing wearing
-   * the same shape. *An invitation* is the honest word for the portal's, and it
-   * is still something the reader can go and seek.
+   * the same shape. *An invitation* was the honest word for the portal's, and
+   * it is still something the reader can go and seek.
+   *
+   * **It is not what that line says today**, and the reason is a different
+   * failure in the same three words. An invitation is what the *finished*
+   * portal will ask for; what a visitor pressing that card in October meets is
+   * a surface that says it is still being built. So the cost says that instead,
+   * the invitation moved to `door` where somebody asking *can I get in* reads
+   * it, and `unfinished.test.ts` holds the swap to exactly as long as it is
+   * true. This assertion is unchanged and still the one that matters for the
+   * other three: whatever an unfinished surface says, no cost here prices a
+   * destination in something only somebody else can grant.
    */
   it("does not price a surface in something only somebody else can grant", () => {
     for (const surface of PRODUCT_SURFACES) {

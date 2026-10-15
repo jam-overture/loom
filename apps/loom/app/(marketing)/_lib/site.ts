@@ -323,6 +323,27 @@ type SurfaceFacts = {
    * want in the first ten seconds, which is the only span the top bar is for.
    */
   readonly inMenu: boolean
+  /**
+   * What is not built yet behind this link, for a visitor deciding to press it.
+   *
+   * **A fact about the product, not about this deployment**, and the difference
+   * is what makes it sayable at all. `GuardedSurface`'s note settles that this
+   * lane cannot claim a door opens: whether sign-in is configured is the
+   * deployment's business and nothing here can see it. *Whether a surface has
+   * been finished* is a different question with a different answer — it is true
+   * of this version of Loom wherever it is served, the lane that owns the
+   * surface has already written it down, and `unfinished.test.ts` reads it off
+   * the repository rather than guessing.
+   *
+   * Set only while that is true, and the test holds it in both directions: a
+   * surface still carrying its own under-construction banner must say so here,
+   * and one that has stopped carrying it must stop saying so. So this is a
+   * record of a surface being unfinished rather than a caveat that outlives it.
+   *
+   * It is one sentence because it is read in two places that have room for one:
+   * the questions band's answer about the door, and this file's own `cost`.
+   */
+  readonly notYet?: string
 }
 
 /** A surface a visitor can simply open. Most of them. */
@@ -451,8 +472,8 @@ export const PORTAL: GuardedSurface = {
   blurb:
     "Where the changes are reviewed: what was asked for, what was allowed, and the button that puts any of it back.",
   /**
-   * *"Costs you an account"* until this run, and it is the half of the mistake
-   * a reader could act on.
+   * *"Costs you an account"* until 10 September, and it is the half of the
+   * mistake a reader could act on.
    *
    * The four costs are read along one line by somebody choosing where to spend
    * their afternoon, and three of them name something the reader can spend. An
@@ -460,9 +481,36 @@ export const PORTAL: GuardedSurface = {
    * Whoever runs a Loom site writes the list of who may sign in to its portal,
    * so the thing being asked for is somebody else's decision — which is what
    * *an invitation* says in the same four words and the same shape.
+   *
+   * **It is not what this card should say today, and that is this run's
+   * change.** An invitation is what the finished portal will ask for and the
+   * reasoning above still holds for the day it is finished. What a visitor
+   * pressing this card in October actually meets is a surface that says, in its
+   * own words, that it is still being built — so *an invitation* answered a
+   * question the reader does not get to ask yet, in the one place on the page
+   * where four destinations are compared. The invitation survives in `door`,
+   * which is where somebody asking *can I get in* reads it.
    */
-  cost: "Needs an invitation",
+  cost: "Still being built",
   guarded: true,
+  /**
+   * The portal is the only unfinished surface this site offers, and until this
+   * run the only place that said so was on the far side of the link.
+   *
+   * `(portal)/_components/under-construction.tsx` has carried a banner since
+   * 28 September, at the maintainer's instruction, and its own note gives the
+   * reason: *"a stranger who follows Portal from the front door arrives at a
+   * working screen and has no way to know that most of what it will be is not
+   * built yet."* That fixed the far half. This is the near half — the front
+   * door sends the stranger, so the front door is where the sentence is worth
+   * something, and a visitor who reads it here does not spend a click finding
+   * out.
+   *
+   * Worded as what is missing rather than as an apology. A reader deciding
+   * where to go next wants to know what they will find, and *coming soon* is
+   * the one phrasing that tells them nothing.
+   */
+  notYet: "Most of it is still being built, so there is not much behind the door yet.",
   /**
    * Deliberately about every Loom site and not only this one.
    *
