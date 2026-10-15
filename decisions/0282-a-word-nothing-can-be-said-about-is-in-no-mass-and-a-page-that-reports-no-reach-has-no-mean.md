@@ -64,13 +64,16 @@ A screen drawing that says *your change took ten words away from the average
 reader, and the intro is where you lost them*. The intro is the one part of that
 page nothing can be said about.
 
-The same error has a floor at the scale of a library, where it was caught first.
-0280 takes every figure over the passages both windows can speak for and
-publishes the rest as `unspoken`; this is that rule carried down to the two
-readings it was derived from, which is the direction a rule should travel. It is
-cited by number and not linked throughout, because 0280 is claimed on the open
-branch of #640 and a link to a record that is not here yet is a blocking fault
-(`pnpm verify`).
+The same error has a floor at the scale of a library, where it was caught first:
+[0280](0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md)
+takes every figure over the passages both windows can speak for and publishes
+the rest as `unspoken`. This is that rule carried down to the two readings it
+was derived from, which is the direction a rule should travel.
+
+> Written while 0280 was still on the open branch of #640, so it was first cited
+> by number alone — a link to a record that is not here yet is a blocking fault.
+> #640 merged before this branch did, so the link stands and the rest of this
+> record cites it by number as prose rather than as a reference.
 
 ## Decision
 

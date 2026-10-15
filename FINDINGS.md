@@ -53922,8 +53922,9 @@ three links above are this lane's to fix either way.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Closes** the
 14 October entry *a page's own word comparison counts a passage nobody can speak
-for as nought reader-words, and the library figure does not*, which is on the
-branch of #640 and not yet on `main` · **Status:** **closed by
+for as nought reader-words, and the library figure does not*, which arrived on
+`main` with #640 while this branch was open and is marked closed there too ·
+**Status:** **closed by
 `signals-32-a-word-nothing-can-be-said-about-is-in-no-mass`**
 
 Built as 0282, §32 of [`docs/signals.md`](docs/signals.md), as that entry
@@ -54082,9 +54083,21 @@ fails against the old trigger.
 ## 2026-10-14 — a page's own word comparison counts a passage nobody can speak for as nought reader-words, and the library figure does not
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/copy-change.ts`) · **Status:** open — **a limit written down with
-a shape to build**; nothing in what shipped is wrong for the question it is
-asked
+(`src/signals/copy-change.ts`) · **Status:** **closed by
+`signals-32-a-word-nothing-can-be-said-about-is-in-no-mass`** — built as 0282,
+§32 of [`docs/signals.md`](docs/signals.md), over both of the figures this entry
+names. **This entry's own reading of the cost was too kind**, which is the part
+worth reading: it judged the error a looser ceiling and said nothing was lost by
+waiting, and that is true of one page and false of two windows, because
+`CopyChange.typical.change` is a *difference* of two ceilings and a term on one
+side only is a movement nobody made with a name attached to it. The entry for
+15 October above has the number and the three things decided in the building.
+Closed here and not only there because #640 landed this entry onto `main`
+before #642 merged; while it was on that branch it could only be closed by an
+append. Original status below.
+
+**Original status:** open — **a limit written down with a shape to build**;
+nothing in what shipped is wrong for the question it is asked
 
 `CopyChange.typical` is `Σ readers × words ÷ views` over the carried passages,
 and it reduces over **every** one of them. A passage whose standing is `unknown`
@@ -54200,3 +54213,117 @@ one — the long URLs here also contain the most hyphens, as every URL in every
 reading so far does. A body carrying one long URL with few hyphens and one short
 URL with many would separate them, and nobody has written one by accident yet.
 
+
+---
+## 2026-10-15 — whether a passage can be spoken for is now written twice, in two modules that merged on the same day
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/copy-change.ts`, `src/signals/library-word-reach-change.ts`) ·
+**Status:** open — **two spellings of one projection**, found by reading the
+merge rather than by a test, and filed rather than taken because it is not what
+#642 is about
+
+0280 and 0282 landed within hours of each other and apply the same rule — a
+carried passage `unknown` on either side is in no mass — and each decides for
+itself what *spoken for* means:
+
+| module | the test |
+| --- | --- |
+| `copy-change.ts` (0282) | `passage.movement !== "unknown"`, as `spokenFor`, private |
+| `library-word-reach-change.ts` (0280) | `passage.was.standing !== "unknown" && passage.now.standing !== "unknown"`, inline |
+
+**They agree exactly, today, and the agreement is a proof rather than a
+coincidence.** `movementOf` returns `unknown` if and only if either standing is
+`unknown`, so the two predicates are the same function of the same two fields.
+Nothing is wrong with either figure.
+
+**It is the shape that is the finding**, and this repository has paid for it
+twice already. 0239 publishes `passageOf` from `copy.ts` rather than letting the
+comparison re-derive it, and says why: *two spellings of that projection is what
+the counter keys were before they were published once.* §30 wrote the door's
+scale once in `door.ts` after finding it hand-copied in two readings and about
+to be hand-copied into a third. This is the same pattern at the same scale, and
+the third copy is the one that will not agree — a sixth `PartStanding` is the
+obvious way it breaks, because one spelling enumerates the standing and the
+other enumerates the movement, and only one of them has to be revisited.
+
+**The shape, if it is taken:** export `spokenFor` from `copy-change.ts` beside
+`passageOf`'s precedent and have 0280's reading import it, which is the same
+move and the same reason. It is small — one export, one import, one inline
+predicate deleted — and it is deliberately not in #642, which is about the
+figures and not about where a predicate lives. It also wants a test that the two
+readings agree on a passage neither can speak for, which neither suite has
+because neither reading knows the other exists.
+
+**Both records stand.** Nothing here contradicts 0280 or 0282; what is proposed
+is that the sentence they both state be stated once.
+
+---
+## 2026-10-15 — the records index render test has about eighty records of headroom left, and the table grew past its budget today
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Status:** open —
+**`pnpm verify` is red on `main`**, reproduced there with nothing of this lane's
+in the tree
+
+`the records index, rendered > links each row at the record itself` renders
+`<DecisionRecords />` — one row per decision record — and asserts one `href`.
+It fails with `Test timed out in 5000ms` at line 157.
+
+**It is red on `main`.** Reproduced at `4e7b9c3` in a clean worktree, same test,
+same line, same message, with no commit of #642's in the tree. It is not a
+branch's failure and reverting anything merged today would not clear it.
+
+**The arithmetic, which is the whole of the diagnosis.** Run on its own the test
+passes and reports its own time. **Measured twice, and the spread is itself the
+finding:**
+
+| | first reading | second reading |
+| --- | --- | --- |
+| records in the index | 262 | 262 |
+| the test, run alone | **3,836 ms** | **4,434 ms** |
+| its budget | 5,000 ms | 5,000 ms |
+| headroom | ~1,160 ms (~80 records) | **~570 ms (~39 records)** |
+| the sibling test | 3,095 ms | 3,491 ms |
+
+Same tree, same record count, 600 ms apart — so the figure to plan against is
+the worse one, and the headroom is **under forty records** rather than eighty.
+At ~15 ms a record that is a fortnight of this repository's rate. Under the full
+suite's parallel load the same render crosses 5,000 ms, which is no longer
+surprising at a 4.4-second solo time. There is
+no per-row re-render and nothing pathological in the test — the cost is one
+jsdom render of a table that gains a row every time anybody writes a record.
+
+**When it crossed.** This lane's full `pnpm verify` was green at 09:29 today
+with 259 records in the index, and red at 16:31 with 262. Three records landed
+between those two runs — 0280 (#640), 0281 (#641) and 0282 (#642) — so the
+crossing is today's three together, and the next record from any lane would have
+done it alone. **A sibling test in the same file is next:** *says once that the
+whole table leaves, and marks every row* runs at 3,095–3,491 ms on the same
+render and queries every link, so it is one or two months behind this one rather
+than the year it looks like.
+
+**Why this lane filed it rather than fixed it.** `apps/loom/app/(docs)/` is not
+this lane's, and a one-line timeout bump in somebody else's test file is exactly
+the cross-lane edit the routines document says to file. Two shapes, and the
+second is the one worth the work:
+
+- **Give the test a budget**, `{ timeout: 20_000 }` or a `testTimeout` for the
+  file. One line, buys a few years of records, and leaves a four-second render
+  inside the suite for ever.
+- **Stop rendering every row to check one.** Both slow tests assert a property
+  of the rows rather than of the table, so a fixture of a handful of records
+  would test the same claims in milliseconds, with one full render left to
+  assert that every record appears once — which is a different test and already
+  exists (*shows every record the repository has, once*, 675 ms, and cheap
+  because it counts rather than queries).
+
+**What it costs until then:** every lane's `pnpm verify` is red, on a failure
+none of them caused, and the obvious reading of a red gate is that your own
+branch did it. This lane spent a worktree and a full suite run on `main` to
+establish otherwise.
+
+> **Still true on `0844047`**, after #642 and #643 landed: 262 records, the test
+> at 4,434 ms alone, and `docs/signals.md`'s own summary row was stale against
+> `silences.ts` on `main` for the same reason this entry exists — the table grew
+> and nothing recounted it.
