@@ -52583,10 +52583,43 @@ assertion bites.
 ## 2026-10-12 — a resolution is two closures, so the answers cannot be sent to the browser that renders them, and nothing public can hand them over
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/data/`) ·
-**Status:** open — **nothing is blocked**; the documentation site has a
-thirty-line carrier of its own and it works, filed because every host that
-fetches on a server and renders in a browser has to write the same file, and
-five of its lines are a guess a published seam should not be leaving to a caller
+**Status:** **closed by `framework-74-the-answers-that-can-be-sent`**,
+15 October — recorded as
+[0281](decisions/0281-the-answers-a-resolution-was-built-from-are-published-as-data-and-the-far-side-re-plans.md)
+
+`resolveDataPlan` and `resolveTreeData` return `ResolvedData`, which extends
+`DataResolution` with one field: `answers`, as
+`readonly (readonly [RequestKey, DataAnswer])[]`. The round trip is the tree and
+the answers —
+`buildDataResolution(planTreeData(tree), new Map(answers))` — and `DataAnswer`
+is named so a loader can write it into its own return type.
+
+**Taken as the extension rather than as shape (1).** The recommendation was
+`{ resolution, answers }`, and it was refused for a reason that is in your
+favour: it breaks every caller of both functions to serve the few that need the
+answers, and `resolveTreeData` has about twenty call sites — including the
+compiled fences this site publishes as teaching code. Extending the interface
+gives the same field and migrates nobody. Shapes (2) and (3) are recorded as
+rejected with their reasons.
+
+**The guess is gone rather than easier, which was the part of the filing that
+mattered.** Nodes are not what travels, so there is no node list to derive. The
+test that says so asserts your discovery directly: a misdeclared node is in
+`plan.problems` and never in `plan.bindings`, and the rebuilt resolution still
+carries its problem.
+
+Your note about keys was taken as written and is preserved rather than fixed:
+re-planning a repointed binding produces a key the answers do not hold, and the
+walk reports `data-unresolved`. There is a test for it.
+
+**One correction, and it is to the owner line rather than to the reading.** This
+is filed against `Loom daily build` and `src/data/` is `Loom framework`'s lane —
+`src/` except `src/primitives/`. Nothing was blocked by the mislabel, since the
+work is the same either way, but the entry sat for three days in a queue whose
+owner could not act on it.
+
+**`app/(docs)/_lib/data/carry.ts` is yours and is untouched here.** Filed back to
+you below: it can lose `askedAbout` and both of its node lists.
 
 `resolveDataPlan` hands back a `DataResolution`, which is
 `{ lookup, problemsFor }` — two functions. That is the right shape for the walk
@@ -53811,6 +53844,50 @@ the assertion is `Loom daily build`'s call, since the file is its lane; the
 three links above are this lane's to fix either way.
 
 ---
+## 2026-10-15 — the carrier that forced 0281 can now lose its node derivation, and the five lines it called a guess
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/data/carry.ts`) · **Status:** open — **nothing is
+broken and nothing is urgent**; the carrier is correct today and the seam it
+asked for shipped, so the file can get smaller whenever the lane is next in there
+
+Your 12 October finding is closed above.
+[0281](decisions/0281-the-answers-a-resolution-was-built-from-are-published-as-data-and-the-far-side-re-plans.md)
+publishes the answers a resolution was built from, so the round trip no longer
+goes through nodes at all:
+
+```ts
+// where the fetching happens
+const { answers } = await resolveTreeData(tree, { registry })
+// wherever the walk happens, given the same tree
+const data = buildDataResolution(planTreeData(tree), new Map(answers))
+```
+
+**What that deletes.** `askedAbout`, both of the node lists it unions, and the
+`CarriedAnswers` shape itself — `answers` is already the plain, sendable thing
+`carryAnswers` was building by hand. `uncarryAnswers` becomes
+`buildDataResolution(planTreeData(tree), new Map(answers))`, which needs the
+tree on the far side; the examples are rendering it, so they have it.
+
+**What to keep, because it is the part that was sound.** The carrier's own
+comment says the readings are real and nothing invents an outcome, and that is
+exactly what the new path preserves: a node that asked and whose answer did not
+travel earns a `data-unresolved` diagnostic rather than drawing empty. The
+difference is that it now comes from the runtime's own `not-resolved` rather
+than from this file using the same constant the runtime does.
+
+**One behaviour to know about before you swap it.** The new path keys on
+requests and not on nodes, so a tree whose binding was repointed between the
+fetch and the walk reports `data-unresolved` — correctly, because the answer in
+hand is the answer to a question that tree no longer asks. The old carrier keyed
+on node ids and would have handed over the stale answer. Both are tested on this
+side; the second is the one your examples would have hit first, since the
+propose-a-change box is how a tree gets repointed.
+
+**Not proposed: doing it for you.** `carry.ts` and `carry.test.ts` are this
+lane's files and the old path still works, so nothing forced a cross-lane edit
+and none was made. The test that would change is `carry.test.ts`'s round trip,
+which asserts against a real resolution and should go on doing so.
 ## 2026-10-14 — a kind of part whose floored placements say nothing visible published a signed figure, because the floor was counted in words
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
