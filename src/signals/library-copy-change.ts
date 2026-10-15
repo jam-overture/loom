@@ -599,6 +599,12 @@ const shareOf = (read: number, comparable: number): number | null =>
  * would otherwise be reported as nobody having read it. Then the floor, last,
  * because it is the only one of the five that withholds a single figure rather
  * than the comparison.
+ *
+ * The floor is tried on the **placements** and not on their words. A part that
+ * declares no `copy` at all says nought visible words and hides all of them,
+ * which is the commonest floor there is — so a trigger counted in words would
+ * stay nought for exactly the case it exists for and publish a signed figure
+ * nobody can stand behind (0122, 0239).
  */
 const silenceOf = (of: Counting, comparable: number): KindCopyChangeSilence | null => {
   if (of.placements + of.rewritten + of.gained + of.lost === 0) return "unplaced"
@@ -606,7 +612,7 @@ const silenceOf = (of: Counting, comparable: number): KindCopyChangeSilence | nu
   if (of.carried === 0) return "wordless"
   if (comparable === 0) return "unread"
 
-  return of.flooredWords > 0 ? "floored" : null
+  return of.flooredPlacements > 0 ? "floored" : null
 }
 
 /**
@@ -659,7 +665,7 @@ const rowOf = (of: Tallying): KindCopyChange => {
     wordsLost: of.wordsLost,
     wordsLostRead: of.wordsLostRead,
     flooredPlacements: of.flooredPlacements,
-    words: carriedOf(of, of.flooredWords === 0 && comparable > 0),
+    words: carriedOf(of, of.flooredPlacements === 0 && comparable > 0),
     movement: movementOf(of, silence),
     silence,
   }
@@ -1039,7 +1045,7 @@ export const libraryCopyChangeOf = (
   return {
     byType,
     byRole: built.filter((row) => row.kind.by === "role").sort(worseOf),
-    words: carriedOf(whole, whole.flooredWords === 0 && comparable > 0),
+    words: carriedOf(whole, whole.flooredPlacements === 0 && comparable > 0),
     pages,
     pagesGained,
     pagesLost,

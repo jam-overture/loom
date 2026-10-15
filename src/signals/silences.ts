@@ -10,6 +10,7 @@ import type { KindChangeSilence } from "./library-change.js"
 import type { KindCopyChangeSilence } from "./library-copy-change.js"
 import type { KindReachChangeSilence } from "./library-reach-change.js"
 import type { KindReachSilence } from "./library-reach.js"
+import type { KindWordReachChangeSilence } from "./library-word-reach-change.js"
 import type { KindSilence } from "./library.js"
 import type { PaceChangeSilence } from "./pace-change.js"
 import type { PaceSilence } from "./pace.js"
@@ -20,7 +21,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are fourteen of them. Each set's names are right in its own
+ * absent, and there are fifteen of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -150,6 +151,7 @@ export type SilenceVocabulary =
   | "library-copy-change"
   | "library-reach"
   | "library-reach-change"
+  | "library-word-reach-change"
   | "pace"
   | "pace-change"
   | "reach"
@@ -167,6 +169,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "library-copy-change",
     "library-reach",
     "library-reach-change",
+    "library-word-reach-change",
     "pace",
     "pace-change",
     "reach",
@@ -193,6 +196,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     "library-copy-change": "kind",
     "library-reach": "kind",
     "library-reach-change": "kind",
+    "library-word-reach-change": "kind",
     pace: "part",
     "pace-change": "comparison",
     reach: "page",
@@ -201,7 +205,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Twelve of them against fifty-eight members across the fourteen sets, which is
+ * Twelve of them against sixty-six members across the fifteen sets, which is
  * the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -309,6 +313,23 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * publishes which window each unscalable page is on — a fact about the page and
  * not about the state, exactly as the pages that cause a tenth-set silence are
  * published with a reach silence on them rather than a fourth spelling of it.
+ *
+ * **The fifteenth needed none either, and it is the first set assembled out of
+ * four**
+ * ([0280](../../decisions/0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md)).
+ * A comparison of the words one reader got to reports the census's `unplaced`,
+ * the places comparison's `unpaired`, the door's three said of a kind, and the
+ * two a comparison of a library's words already reports — `wordless` and
+ * `floored`. Eight members, four sources, and no state of the world that was
+ * not already here.
+ *
+ * What it does settle is the reach of `words-a-floor`. That condition arrived
+ * with a reading of one page's words, which withholds one figure for it; the
+ * thirteenth said it of a kind, withholding one figure again; and this one
+ * withholds **five** — every figure a surface would subtract. The condition is
+ * the same state of the world in all three and what it costs is not, which is
+ * why what a silence withholds was never published here and belongs to the
+ * reading that reports it.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -651,6 +672,46 @@ export const meaningOfKindReachChangeSilence = (
       return meaning("library-reach-change", "no-openings-marked")
     case "uncounted":
       return meaning("library-reach-change", "no-window-folded")
+  }
+}
+
+/**
+ * What a comparison of the words one reader got to reports, of one kind (0280).
+ *
+ * **The fifteenth set, and the first assembled out of four.** The census's
+ * `unplaced`, the places comparison's `unpaired`, the door's three states said
+ * of a kind, and the pair a comparison of a library's words already reports of
+ * one — `wordless` and `floored`. Nothing is new because nothing can be: a
+ * comparison is withheld for every reason one side's figure is withheld and
+ * for nothing a window could be in on its own.
+ *
+ * `floored` is the member worth reading twice. It is the same condition the
+ * thirteenth set reports, said at the same subject, and it withholds five
+ * figures here where it withholds one there — because every figure this
+ * reading would have a surface subtract is a sum of signed terms that floors
+ * scale by different factors. One state of the world, two costs, and the cost
+ * belongs to the reading.
+ */
+export const meaningOfKindWordReachChangeSilence = (
+  silence: KindWordReachChangeSilence
+): SilenceMeaning => {
+  switch (silence) {
+    case "unplaced":
+      return meaning("library-word-reach-change", "nothing-of-the-kind")
+    case "unpaired":
+      return meaning("library-word-reach-change", "nothing-carried")
+    case "wordless":
+      return meaning("library-word-reach-change", "says-nothing")
+    case "unread":
+      return meaning("library-word-reach-change", "no-view-reported")
+    case "unscaled":
+      return meaning("library-word-reach-change", "no-arrivals-counted")
+    case "unopened":
+      return meaning("library-word-reach-change", "no-openings-marked")
+    case "uncounted":
+      return meaning("library-word-reach-change", "no-window-folded")
+    case "floored":
+      return meaning("library-word-reach-change", "words-a-floor")
   }
 }
 
