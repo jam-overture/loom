@@ -106,6 +106,22 @@ describe("themeVariables", () => {
     expect(variables[`--loom-scale-${editorialSerifFontPack.scaleRamp.length + 1}`]).toBeUndefined()
   })
 
+  /**
+   * The ramps are the only variables here that are not one value, and the mode
+   * is the only argument this function takes. Both are asserted at the top
+   * step, which is the one every registered pack sets above the hold.
+   */
+  it("mounts the ramps fluid by default and fixed when a caller asks", () => {
+    const top = editorialSerifFontPack.scaleRamp.length
+    const declared = Number(editorialSerifFontPack.scaleRamp[top - 1])
+
+    expect(themeVariables(resolved())[`--loom-scale-${top}`]).toContain("clamp(")
+    expect(themeVariables(resolved())[`--loom-scale-${top}`]).toContain(`${declared}px)`)
+    expect(themeVariables(resolved(), { ramp: "fixed" })[`--loom-scale-${top}`]).toBe(
+      `${declared}px`
+    )
+  })
+
   it("emits radii, motion and density", () => {
     const variables = themeVariables(resolved())
 

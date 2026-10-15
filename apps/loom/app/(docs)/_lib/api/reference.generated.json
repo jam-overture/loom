@@ -5,10 +5,10 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
-      "files": 99,
+      "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -3043,9 +3043,16 @@
               "summary": ""
             },
             {
+              "name": "ThemeVariableOptions",
+              "kind": "type",
+              "signature": "type ThemeVariableOptions = {\n    /**\n     * Whether the two ramps may read the width they are rendered at.\n     *\n     * `\"fluid\"` is the default and is what a page in a browser wants: a declared\n     * step is a maximum, reached at `48rem` and held above it, so a tree built\n     * for a laptop is legible on a phone without the tree knowing a phone exists\n     *. `\"fixed\"` emits the pack's numbers as the plain pixel lengths they\n     * were before that record, for a medium with no cascade to substitute — see\n     * `ramp.ts` for why a `clamp()` is worse than a pixel there.\n     */\n    readonly ramp?: RampMode;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
               "name": "themeVariables",
               "kind": "function",
-              "signature": "const themeVariables: (theme: ResolvedTheme) => ThemeVariables",
+              "signature": "const themeVariables: (theme: ResolvedTheme, options?: ThemeVariableOptions) => ThemeVariables",
               "truncated": false,
               "summary": ""
             }
@@ -3783,6 +3790,20 @@
               "signature": "const DERIVED_PALETTES: readonly Palette[]",
               "truncated": false,
               "summary": "In the order a catalogue reads best: the light palettes, then the dark ones, each run from the most neutral to the most committed. A model reading down this list meets `paper` and `slate` before `plum`, which is the order a person would offer them in."
+            }
+          ]
+        },
+        {
+          "module": "theme/ramp",
+          "title": "Ramp",
+          "summary": "A ramp step as a CSS length, and the width at which it is what the pack said.",
+          "symbols": [
+            {
+              "name": "RampMode",
+              "kind": "type",
+              "signature": "type RampMode = \"fluid\" | \"fixed\";",
+              "truncated": false,
+              "summary": "Whether the emitted length may read the width."
             }
           ]
         },
@@ -4825,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4868,10 +4889,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 60,
+      "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5719,7 +5740,7 @@
             {
               "name": "themeStyle",
               "kind": "function",
-              "signature": "const themeStyle: (theme: ResolvedTheme) => CSSProperties",
+              "signature": "const themeStyle: (theme: ResolvedTheme, ramp?: RampMode) => CSSProperties",
               "truncated": false,
               "summary": "A resolved theme as a style object the root primitive applies."
             },
@@ -5861,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6389,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7568,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8208,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8436,7 +8457,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9189,7 +9210,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9620,7 +9641,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9872,7 +9893,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12833,7 +12854,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12976,7 +12997,7 @@
       "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13043,7 +13064,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13640,7 +13661,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13714,7 +13735,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14193,7 +14214,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1635,
+        "packageNames": 1637,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
