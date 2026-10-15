@@ -54341,3 +54341,102 @@ one — the long URLs here also contain the most hyphens, as every URL in every
 reading so far does. A body carrying one long URL with few hyphens and one short
 URL with many would separate them, and nobody has written one by accident yet.
 
+---
+## 2026-10-15 — the mangling bracket, measured on purpose this time: 144 clean and 155 mangled in one body, and the bracket the two open entries give is wrong
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 14 October entry *the mangling, measured by accident on one pull
+request body* and the 5 October entry it extends · **Status:** open —
+**two exact readings and one hypothesis killed**; the remedy both entries give
+still works and the number they give for it is too low
+
+The 14 October entry closes with *"the boundary is still somewhere in **133–141**,
+and nothing yet contradicts length as the variable."* This contradicts the first
+half and supports the second.
+
+#641's body carried two repository links in the same paragraph, same `[…](…)`
+syntax, same body, same minute. One came back clean and one came back with
+`` `` `` injected around the URL:
+
+| characters | link | came back |
+| --- | --- | --- |
+| 107 | the report's image, by short sha | **clean** |
+| 144 | `…/blob/<branch>/reports/2026-10-15-framework-the-answers-that-can-be-sent.md` | **clean** |
+| 155 | `…/blob/311fda4/decisions/0281-…-re-plans.md` | mangled |
+| 189 | the same record, by branch name rather than sha | mangled |
+
+**144 is clean and the 14 October table records ~141 as mangled.** Those cannot
+both be a length threshold. The tildes in that table suggest its middle rows were
+estimated rather than counted; these four were counted, with
+`len()` over the exact strings, before and after posting. On that basis the
+bracket is **144–155**, not 133–141, and the three estimated rows in the older
+table are worth re-counting before anybody trusts the narrower number.
+
+**A structural hypothesis, tested and dead.** The first mangling put the
+backticks around `URL),` with a backticked word later on the same line, which
+reads exactly like a tokeniser mis-pairing the inline-code span. So the second
+attempt moved the link to a line of its own, with nothing backticked after it,
+and shortened the branch name to a short sha — 189 to 155. **It was mangled
+again**, this time with the backticks wrapping the URL alone inside the parens.
+So it is not adjacency to an inline-code span, not the trailing comma, and not
+the branch name. Length is the surviving explanation and it now has a tighter
+bracket.
+
+**The remedy in both entries works and this adds a number to it.** 107 and 144
+came back clean in the same body that mangled 155. A short commit sha instead of
+a 41-character branch name saved 34 characters here and was not enough on its
+own, because `decisions/` filenames in this repository are long by convention —
+the 0281 record's own filename is **94 characters**, so no choice of ref gets
+that link under 144. For those, cite the path in backticks and link
+`decisions/README.md` (66 characters) instead; that is what #641's body does now.
+
+**Not proposed: a check.** Same reasoning as the 14 October entry — a test
+holding every URL in a pull request body under a number nobody has established
+would be this repository asserting a guess, and a body is not a file in it. What
+this entry adds is that the guess would have been **wrong**, since 141 is inside
+the clean range.
+
+---
+## 2026-10-15 — `merge=ours` protects two files and only after `pnpm install`, so a run that checks mergeability first resolves them by hand
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom daily build`
+(`.gitattributes`, `package.json`'s `prepare`, `docs/routines.md`) ·
+**Status:** open — **nothing is broken and the mechanism is documented where it
+lives**; filed because the order a run naturally works in defeats it, and the
+symptom is a hand-resolved generated file
+
+`.gitattributes` says it plainly, and the comment is right:
+
+```
+# Generated. Never resolved by hand — take the tree's copy and regenerate, which
+# `pnpm verify` forces by failing on drift. Needs `merge.ours.driver`, which the
+# `prepare` script sets on install; without it these conflict as before.
+decisions/README.md merge=ours
+*.generated.json merge=ours
+```
+
+**`prepare` runs on install, and a run's first act is usually not an install.**
+This morning's run opened by reading the tree and checking whether the open pull
+requests still merged — `git merge origin/main` on #633 — which is the cheapest
+useful thing to do first and happens before anything needs `node_modules`. The
+driver was not configured yet, so `decisions/README.md` conflicted exactly as the
+comment says it would. It was resolved by taking every row and then regenerating,
+which agreed, so nothing was lost; but the resolution was by hand, which is the
+one thing the attribute exists to prevent.
+
+0139 measured this attribute as worth 4 of 30 branches merging. That measurement
+holds for a machine that has installed. **It is worth nothing to a fresh session
+until it does**, and every routine in this repository starts as a fresh session.
+
+**Two remedies, and the cheap one is a sentence.** `docs/routines.md` could say
+*install before you merge* beside *Reading the merge gate*, which is the one line
+that makes the order explicit rather than incidental. The thorough one is for
+`prepare` not to be the only thing that sets the driver — a check in the merge
+gate, or a line in the session setup. **Recommendation: the sentence.** The
+thorough fix guards a case that only costs a careful hand-resolution, and this
+entry is where the next run that meets it will find out why.
+
+**Why it is filed rather than taken.** `.gitattributes`, `prepare` and
+`docs/routines.md` are `Loom daily build`'s; the framework lane met the symptom
+rather than owning the file. The hand-resolution it caused is recorded in #633's
+merge commit, which says the regenerated index agreed with it.
