@@ -297,6 +297,103 @@ describe("copyReadingOf", () => {
       expect(reading.typical).toBe((10 * 10 + 1 * 30) / 10)
     })
 
+    /**
+     * The ceiling 0282 tightened. Every word of the pricing band reached every
+     * reader, so the mean is exactly the words this window can speak for — and
+     * the ten words of the intro, which the window reports nothing about, are
+     * neither in the figure nor in the ceiling it is under.
+     */
+    it("is a ceiling over the words this window can speak for, and not over the page", () => {
+      const reading = copyOf(treeOf(PAGE), [
+        tally("page", { views: 4, reached: 4 }),
+        tally("intro", { views: 4, reached: 0 }),
+        tally("pricing", { views: 4, reached: 4 }),
+      ])
+
+      const { read, skipped, unknown } = reading.wordsByStanding
+
+      expect(unknown).toBe(10)
+      expect(reading.typical).toBe(30)
+      expect(reading.typical).toBe(read + skipped)
+      expect(reading.typical).toBeLessThan(reading.words)
+      expect(reading.silence).toBeNull()
+    })
+
+    /**
+     * The claim the module makes about its own arithmetic: a passage is
+     * `unknown` only where its row reports no reach at all, so its term is
+     * nought and the mean is over the spoken-for passages without being
+     * filtered to them. If `standingOf` ever let a reached part read as
+     * `unknown`, this is the test that would say so.
+     */
+    it("adds nothing to the mean for a passage the window cannot speak for", () => {
+      const spoken = copyOf(treeOf(PAGE), [
+        tally("page", { views: 4, reached: 4 }),
+        tally("pricing", { views: 4, reached: 4 }),
+      ])
+
+      const withUnknown = copyOf(treeOf(PAGE), [
+        tally("page", { views: 4, reached: 4 }),
+        tally("intro", { views: 4, reached: 0 }),
+        tally("pricing", { views: 4, reached: 4 }),
+      ])
+
+      expect(spoken.wordsByStanding.skipped).toBe(10)
+      expect(withUnknown.wordsByStanding.unknown).toBe(10)
+      expect(withUnknown.typical).toBe(spoken.typical)
+    })
+
+    /**
+     * The state `parts.ts` calls the reachable neighbour: rows name every part
+     * and not one of them reports reach. A primitive that stopped spreading its
+     * identity attributes looks exactly like this, and the figure the old
+     * reading published was a nought that read as *nobody read any of your
+     * page*.
+     */
+    it("withholds the mean where the rows are there and none reports reach", () => {
+      const reading = copyOf(treeOf(PAGE), [
+        tally("page", { views: 4, reached: 4 }),
+        tally("intro", { views: 4, reached: 0 }),
+        tally("pricing", { views: 4, reached: 0 }),
+      ])
+
+      expect(reading.views).toBe(4)
+      expect(reading.wordsByStanding).toEqual({ read: 0, skipped: 0, unknown: 40 })
+      expect(reading.typical).toBeNull()
+      expect(reading.silence).toBe("unspoken")
+      expect(describeCopySilence("unspoken")).toContain("no part of the page reports")
+    })
+
+    /**
+     * Said of a page with no views, `unmeasured` is the truer sentence: there is
+     * no reader to be typical of, rather than readers nothing reports on.
+     */
+    it("calls a window with no views unmeasured rather than unspoken", () => {
+      const reading = copyOf(treeOf(PAGE), [])
+
+      expect(reading.silence).toBe("unmeasured")
+    })
+
+    /**
+     * A floor is a declaration the library has not made, and fixing every one of
+     * them would leave this page with no mean all the same, so the fault is the
+     * one to name.
+     */
+    it("names the missing reach before the missing declaration", () => {
+      const reading = copyOf(
+        treeOf(
+          element("page", "loom.stack", { body: words(10) }, [
+            element("pricing", "loom.undeclared", { body: words(30) }),
+          ])
+        ),
+        [tally("page", { views: 4, reached: 0 }), tally("pricing", { views: 4, reached: 0 })],
+        DECLARED_FOR(["loom.stack"])
+      )
+
+      expect(reading.floored.unknown).toBeGreaterThan(0)
+      expect(reading.silence).toBe("unspoken")
+    })
+
     it("cannot report a typical reader reaching more words than the page says", () => {
       const reading = copyOf(treeOf(PAGE), [
         tally("page", { views: 6, reached: 6 }),
@@ -489,6 +586,7 @@ describe("copyReadingOf", () => {
 
 describe("describeCopySilence", () => {
   it("has a line for every silence", () => {
+    expect(COPY_SILENCES).toHaveLength(5)
     for (const silence of COPY_SILENCES) {
       expect(describeCopySilence(silence)).not.toBe("")
     }

@@ -49,6 +49,13 @@ export type SiteQuestion = {
  * The front door's band of cards carried it as well, and carrying it there cost
  * the other three cards a third of their height each — see the note on
  * `waysIn`. An answer is where somebody who wants it looks.
+ *
+ * `PORTAL.notYet` joins it on the same answer for the same reason, and is
+ * appended rather than written in: it is set only while the portal is
+ * unfinished (`site.ts`), so a sentence typed into this string would outlive
+ * the thing it describes and this answer would start telling a reader the
+ * opposite of what the card beside it says. The conditional is what lets
+ * `unfinished.test.ts` hold the pair in both directions.
  */
 export const siteQuestions = (): readonly SiteQuestion[] => [
   {
@@ -74,6 +81,6 @@ export const siteQuestions = (): readonly SiteQuestion[] => [
   },
   {
     question: "Do I need an account to use this?",
-    answer: `No. Loom runs inside your own application, and the portal comes with it rather than being a service you sign up for. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page opens this site's own portal. On a site of yours it would be your portal, and your list.`,
+    answer: `No. Loom runs inside your own application, and the portal comes with it rather than being a service you sign up for. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page opens this site's own portal. On a site of yours it would be your portal, and your list.${PORTAL.notYet === undefined ? "" : ` ${PORTAL.notYet}`}`,
   },
 ]

@@ -8,6 +8,79 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-15 — the front door sold a surface that is still being built, and the only place that said so was on the far side of the link
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
+row for `Loom portal` · **Status:** **closed by
+`marketing-05-the-door-that-is-still-being-built`** for this route group. The
+row for `Loom portal` is **one line to delete, when it is finished.**
+
+`(portal)/_components/under-construction.tsx` has carried a banner since
+28 September, at the maintainer's instruction, and its own note names the half
+it could not fix:
+
+> *"The portal is reachable from the marketing site's menu and its footer — a
+> stranger who follows Portal from the front door arrives at a working screen
+> and has no way to know that most of what it will be is not built yet."*
+
+That is a sentence about this route group, written in another one. The lane that
+owns the door told the truth about it; the lane that **sends people there** went
+on offering it beside the demo, the documentation and the course as though the
+four were the same kind of thing. Photographed on 15 October, the card read
+*Where the changes are reviewed… **Needs an invitation*** and the page it opened
+read ***The portal is still being built.***
+
+The portal is offered four ways from this route group — the bar's *Sign in* on
+every page, the front door's band of four cards, the footer's map, and the
+questions band's answer about the door. None of the four said it was unfinished.
+
+### Why this was sayable when `GuardedSurface` says the door is not
+
+That type's note settles that this lane may not claim a door **opens**: whether
+sign-in is configured belongs to the deployment, `(marketing)` does not import
+`(portal)`'s auth config, and nothing here can see it. Still true, and this does
+not go near it.
+
+**Whether a surface has been finished is a different fact.** It is a property of
+this version of Loom rather than of the machine serving it, true wherever the
+application is deployed, and the lane that owns the surface has already
+committed it to the repository as a component. So it is read off the repository:
+`unfinished.test.ts` sweeps `(portal)` for `data-under-construction` rather than
+importing anything, inferring it from a screenshot, or retyping it.
+
+### The row for `Loom portal`
+
+**When the portal is finished and that banner comes down, nothing here needs
+remembering.** The test holds the pair in both directions and the failure names
+the field and the file:
+
+```
+/portal no longer carries data-under-construction, so delete notYet on it in site.ts
+```
+
+So the action for `Loom portal` is: **delete the banner in the same change that
+finishes the surface, and let this lane's build tell its next run to drop the
+caveat.** Nothing is owed before that. The lane is paused as of 13 October, which
+is why the marketing copy is honest about the state rather than waiting on it.
+
+One thing worth knowing if the marker is ever reworded: `data-under-construction`
+is the attribute, chosen over the sentence because the words are that lane's to
+reword and the attribute is what its own tests hold it to. Renaming it turns this
+file red rather than letting it pass silently, which is the right way round — but
+it is a cross-lane contract of one string, and this is where it is written down.
+
+### The shape, for any lane that offers another lane's surface
+
+A caveat is worth having only while it is true, and a caveat nobody removes is
+how a site ends up apologising for something it fixed a year ago. The rule that
+made this cheap is the pair rather than either half: a surface whose lane still
+says it is unfinished **must** be described that way, and one whose lane has
+stopped saying so **must not be**. It is the shape `named.test.ts` settled on for
+retired pages the day before, applied to the other direction of the same problem
+— there, a page that is gone and still named; here, a surface that is unfinished
+and not said to be.
+
+---
 ## 2026-10-14 — the mangling, measured by accident on one pull request body: 177 characters mangled, 121 clean, same body and same syntax
 
 **Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
@@ -53843,6 +53916,232 @@ added there would not see these three until that exclusion goes. Whether to add
 the assertion is `Loom daily build`'s call, since the file is its lane; the
 three links above are this lane's to fix either way.
 
+
+---
+## 2026-10-15 — a shot cannot photograph a press of a contents row, because the harness refuses every link and a fragment is not a navigation
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/specimen/playwright.ts`) · **Status:** open — **nothing is broken and
+one picture had to be taken another way**; the remedy is one comparison and the
+reason it was not taken here is lane rather than difficulty
+
+`pinNavigation` is run in the top document before the first step of a `do`
+list, and it prevents the default on **every** click that lands inside an
+`a[href]`. The reason it exists is sound and is written where it happens: a
+press on a real link navigates, every step after it then runs on a different
+page, and a three-step shot silently photographs somewhere else.
+
+A **same-page fragment** is not that. `<a href="#the-bar-above-your-page">` does
+not leave the document; it sets `location.hash` and scrolls. So the state a
+press of a contents row produces — the page moved, the heading parked under the
+header, the row for it marked — cannot be reached by `click`, and a shot that
+tries comes back byte-identical to one that did nothing. That is what this run
+got, twice, with a 400ms wait and then a 2,500ms one, before reading the
+harness:
+
+```
+nav[aria-label='On this page'] [aria-current='location']  no match
+h2#the-bar-above-your-page  x 304 y 14155  704x67  ← 13322 past the fold
+```
+
+The page had not moved at all. The same shot written with `{ "scrollTo": … }`
+reaches the state and the mark is in the picture, so **the run was not blocked**
+and the report's picture is of a reader scrolling rather than of a reader
+pressing. Those are the same state arrived at two ways, and the one the rail
+exists for is the press.
+
+**What would close it:** prevent the default only when the link would leave the
+document — compare `new URL(href, location.href)` with `location.href` ignoring
+the hash, and let a pure fragment change through. It keeps every property the
+pin was written for: a press that navigates is still refused, the listener is
+still capture-phase and still `preventDefault` rather than `stopPropagation`,
+and a delegated listener still sees the event.
+
+**Why not here.** `tools/` is not this lane's, and the behaviour is shared by
+`pnpm specimen` and `pnpm shoot` — it is the harness five lanes photograph with
+([0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)),
+and a change to what a `click` does belongs to a run looking at the harness.
+Worth knowing before it is taken: it makes `click` able to move the page, which
+is a thing the `do` table's one-line description does not currently say it can
+do.
+
+---
+## 2026-10-15 — the contents rail is a desktop rail, so the reader most likely to be lost in a long page is the one without it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/layout.tsx`) · **Status:** open — **a stated limit
+of what shipped today**, with the shape of the remedy named and deliberately
+not taken
+
+*On this page* is in the layout at `xl` and above, so it is in the picture at
+1280 and absent at 390. A phone reader of *Making it look like yours* gets
+24,944 pixels of article and no way to see that it has fourteen sections in it,
+which is the reader this rail would help most.
+
+It is not an oversight about width: there is no room beside the prose on a
+phone, and a rail is the wrong shape there. The remedy is a different
+presentation of the same rows — a disclosure above the article, closed, saying
+how many sections the page has — and the layout can render one without any page
+being edited, because it already renders the article's wrapper.
+
+**Not taken here** because it is a second presentation with its own shots, its
+own copy and its own collapsed-by-default question, and because it would be
+decided better beside the mobile menu than beside the rail: `mobile-nav.tsx`
+already owns the phone's answer to *where am I in the site*, and *where am I in
+the page* is the same reader's next question.
+
+---
+## 2026-10-15 — the reference pages carry the heading's id on the `<section>` around it, so nothing can land a reader on a band
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
+**nothing is broken**; this is the half of today's rail that could not be built
+and the reason it could not
+
+`_lib/on-this-page.ts` takes a heading with an `id` to be a place a reader can
+be sent to, which is `mdx.ts`' sentence applied to a document rather than to a
+page's source. On the seventeen generated pages nothing matches, because
+`GroupSection` puts the id on the `<section>` and leaves the `<h2>` inside it
+bare. The rail renders nothing there, which is correct today — those pages carry
+a contents list of their own, two columns wide because it holds sixty module
+names.
+
+The same gap is already recorded one level away, in `search/generated.ts`, as
+the reason a reference page's words are indexed under the page rather than cut
+up by heading: *"The bands have no `id` to land on either."* It is one fact with
+two consumers now.
+
+**What would close it:** the id on the `<h2>`, with `scroll-mt` moving to it.
+`Contents` already links to `#${apiGroupAnchor(group.module)}`, so the link it
+draws would land on the heading rather than on the top of the section — a better
+landing by a heading's own margin — and the search index would gain somewhere to
+send a reader for a sentence inside a band.
+
+**Not taken here** because it changes where every existing link into a reference
+page lands, which is a change to those pages' own anchors rather than to the
+rail beside them, and because the search half is the larger half of the win and
+is a different lane's file to read.
+
+---
+## 2026-10-15 — `nextjs.org` is in the allowlist twice and the gateway refuses it, so the one structural reference four briefs name cannot be read
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **a run worked around it**; this is the same class as the `*.vercel.app`
+entry of 12 October and is filed beside it rather than merged into it
+
+The documentation brief says the site is *"Modelled on **nextjs.org/docs**
+(WebFetch it)"*, and `docs/routines.md` lists `nextjs.org` as currently allowed
+under both mechanisms that gate the network. `.claude/settings.json` carries it
+in `permissions.allow` as `WebFetch(domain:nextjs.org)` and in
+`sandbox.network.allowedDomains`. Both are right and neither is what answers:
+
+```
+curl https://nextjs.org/docs
+curl: (56) CONNECT tunnel failed, response 403
+```
+
+```
+"recentRelayFailures": [{ "kind": "connect_rejected",
+  "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+  "host": "nextjs.org:443" }]
+```
+
+So the committed policy and the environment the session actually runs in
+disagree, and the committed one is the one a lane reads. **Nothing was blocked**:
+today's unit was built from the brief's own list of what that site has, from the
+contents list this site already ships on its generated pages, and from the
+conventions in this route group. What it cost is that a claim about what
+nextjs.org does could not be checked, so this report makes none.
+
+The remedy is the environment's rather than the repository's: the host is added
+under the cloud environment's **Network access**, or the access level widened,
+in the environment's settings. Filed here because `routines.md` says a domain
+that is listed is reachable, and until this is answered that sentence is
+wrong for one of the four hosts it names — which is worth a reader of that file
+knowing before they spend a run on it.
+## 2026-10-15 — the passage nobody could speak for was counted as nought reader-words, and at two windows that is a movement that did not happen
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Closes** the
+14 October entry *a page's own word comparison counts a passage nobody can speak
+for as nought reader-words, and the library figure does not*, which is on the
+branch of #640 and not yet on `main` · **Status:** **closed by
+`signals-32-a-word-nothing-can-be-said-about-is-in-no-mass`**
+
+Built as 0282, §32 of [`docs/signals.md`](docs/signals.md), as that entry
+proposed it and as one unit over both published figures. **The entry's own
+reading of the cost was too kind, and that is the thing worth recording.** It
+judged both figures ceilings and the error a looser ceiling, which is the safe
+direction for a number published as *at most* — and said nothing was lost by
+waiting.
+
+That holds at one page and not at two windows. `CopyChange.typical.change` is a
+**difference** of two ceilings, so a term present on one side and absent on the
+other is not a loose ceiling: it is a movement nobody made, with a name attached
+to it by `mostLost`. The suite builds the case — four readers, three unchanged
+bands, two reaching the pricing band in both windows, and the intro's row
+reporting no reach in the later one. Published: `typical.change` of **−10** and
+*the intro is where you lost them*. Honest: nought, and no passage named.
+
+**Three things the entry left open were decided in the building.** The
+restriction is to the passages `unknown` on **neither** side, so it is one set
+and the same set on both — a passage dropped from one mass and kept in the other
+would carry the error with its sign intact. `ComparedPassage.gain` is `null`
+there too, which is what keeps 0239's published identity that the gains add to
+the total. And **no `unspoken` field was added**, which the entry's shape asked
+for: `wordsByStanding.unknown` and `wordsByMovement.unknown` are already exactly
+that number, and 0280 needed the field only because its rows carry no breakdown
+by movement.
+
+**The page-scale mean is unchanged in value**, because a passage is `unknown`
+only where its row reports no reach, so its term was already nought. What the
+entry asked for there was the description, and it is now a stated and tested
+ceiling over `read + skipped` rather than over the page's words.
+
+---
+## 2026-10-15 — a page where nothing reports reach publishes a share of nought beside an empty list of the words nobody saw
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/copy.ts`) · **Status:** open — **the half of 0282 that was left**,
+and a unit rather than a line
+
+0282 withholds `CopyReading.typical` where no word of the page is in a part the
+window can speak for: rows name every part, not one reports reach, and a mean
+over nought reader-words would print *the typical reader reached none of your
+page* as a measurement.
+
+**`CopyReading.share` publishes a nought on that same page.** It is
+`wordsByStanding.read ÷ words`, and with every word `unknown` the numerator is
+nought. So the reading hands a surface *0% of this page's words were reached*
+next to an `unseen` list that is **empty**, because `unseen` is `skipped` only
+(0235 §5). A card drawing both says nobody read any of it and cannot name one
+word nobody read.
+
+**It is not a false number**, which is why it was not taken inside 0282. Nought
+is exactly what a standing of `read` asserts of that page, the standings are
+published in the same object, and 0235 §4 already hands over the direction a
+share is wrong in rather than summarising it. The figure is defensible read
+carefully; the pair is incoherent read quickly.
+
+**Why it is a unit.** It is one decision over `CopyReading.share`, the same
+share on every `RoleCopy` row under it, and the `share` a comparison carries on
+each side — and the honest version is not a silence but a **second
+denominator**: a share over the words this window can speak for, with the
+unspoken words beside it, which is a different sentence from the one the field
+publishes now and may want a different name. Three published figures and a name,
+which is not a line to change.
+
+**The shape, if it is taken:** take every share over `read + skipped`, publish
+`unknown` beside it as the mass outside the question, and say in the record that
+a share is now *of the words this window can speak for* — which is the move
+0282 made to the means, one field across. The direction is the same one 0280
+took at the scale of a library.
+
+**Nothing is lost by waiting**, with the caveat 0282 earned: that sentence was
+true of the means at one page and false of them at two windows, so the first
+thing to check before taking this is whether any comparison **subtracts** two
+shares. `CopyChange` does not — it compares reaches per passage and never two
+page-wide shares — so the caveat does not bite here. It is worth re-checking
+against §26 and §30, whose figures are shares of readers and not of words.
 ---
 ## 2026-10-15 — the carrier that forced 0281 can now lose its node derivation, and the five lines it called a guess
 
