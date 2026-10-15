@@ -4,7 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
 import { copyReadingOf, passageOf, type CopyReading, type Passage } from "./copy.js"
-import type { PageReading, PartStanding } from "./parts.js"
+import { spokenFor, type PageReading, type PartStanding } from "./parts.js"
 
 /**
  * What a change did to what a page says, and to how much of it gets read.
@@ -558,7 +558,7 @@ const sideOf = (passage: Passage, views: number): PassageSide => ({
  * (0212).
  */
 const movementOf = (was: PartStanding, now: PartStanding): PassageMovement => {
-  if (was === "unknown" || now === "unknown") return "unknown"
+  if (!spokenFor(was) || !spokenFor(now)) return "unknown"
   if (was === "read") return now === "read" ? "held" : "lost"
 
   return now === "read" ? "gained" : "unread"
@@ -605,8 +605,14 @@ const gainOf = (
  *
  * The one test every signed figure here is taken over. A passage `unknown` on
  * either side is in the census, in `wordsByMovement` and in no mass (0282).
+ *
+ * **Published, because a reading of a library asks the same question of the
+ * same passages** (0280) and spelled it a second way until 0283. It is read
+ * off the movement, which `movementOf` derives from the same `spokenFor` the
+ * page-scale figures use — so the two are one rule rather than two that agree.
  */
-const spokenFor = (passage: ComparedPassage): boolean => passage.movement !== "unknown"
+export const spokenForOnBothSides = (passage: ComparedPassage): boolean =>
+  passage.movement !== "unknown"
 
 /** Descending by words, strictly, so equal passages keep the order they arrived in. */
 const byWordsUnread = (one: ComparedPassage, other: ComparedPassage): number =>
@@ -791,7 +797,7 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
    * later mass and kept in the earlier one would read as a loss of words
    * nobody wrote.
    */
-  const spoken = compared.filter(spokenFor)
+  const spoken = compared.filter(spokenForOnBothSides)
   const carriedSpoken = spoken.reduce((total, passage) => total + passage.words, 0)
 
   const wrote: WordsWritten = {

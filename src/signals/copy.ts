@@ -3,7 +3,7 @@ import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
-import type { PageReading, PartReading, PartStanding } from "./parts.js"
+import { spokenFor, type PageReading, type PartReading, type PartStanding } from "./parts.js"
 import { countWords } from "./words.js"
 
 /**
@@ -46,20 +46,23 @@ import { countWords } from "./words.js"
  * ## What each figure is worth
  *
  * **A share of the words is not a share of the readers.** {@link
- * CopyReading.share} is the share of the page's words that *at least one* reader
+ * CopyReading.share} is the share of the words that *at least one* reader
  * reached, because that is what a standing of `read` says (0212). On a page with
  * three hundred readers it will usually be near 1 and it is not a lie: somebody
  * did reach nearly all of it. {@link CopyReading.typical} is the other sentence
  * — the words the average reader got to — and the gap between the two is the
  * point of reporting both.
  *
- * **The mean is over the words this window can speak for** (0282). A part whose
- * standing is `unknown` reported something other than coming into view, so a
- * reader plainly had it in front of them and the counter that would say so is
- * missing. Its words are in no term of {@link CopyReading.typical}, which makes
- * that figure a ceiling over the words that were measured rather than over the
- * page — and a page where nothing at all reports reach gets `unspoken` and no
- * mean, instead of a nought that reads as *nobody read any of this*.
+ * **Both are over the words this window can speak for, and neither is over the
+ * page** (0282, 0283). A part whose standing is `unknown` reported something
+ * other than coming into view, so a reader plainly had it in front of them and
+ * the counter that would say so is missing. Its words are in no term of {@link
+ * CopyReading.typical} and in neither term of {@link CopyReading.share}: the
+ * denominator of the share is {@link CopyReading.spoken}, published beside it,
+ * and the mass outside the question is `wordsByStanding.unknown`. A page where
+ * nothing at all reports reach gets `unspoken` and **no figure of either
+ * kind**, instead of a nought that reads as *nobody read any of this* beside an
+ * `unseen` list that is empty.
  *
  * **The word counts are floors and the floor is reported by standing.** A type
  * that declares no `copy` has words nothing here can see (0122). On the read
@@ -117,8 +120,17 @@ export type RoleCopy = {
    */
   readonly wordsByStanding: Readonly<Record<PartStanding, number>>
   /**
-   * The share of this role's words at least one reader reached. `null` where the
-   * role says nothing.
+   * This role's words in parts the window can speak for, which is the
+   * denominator of {@link share} (0283).
+   *
+   * Addable across roles, like {@link words} and for the same reason. The rest
+   * of the role's words are `wordsByStanding.unknown`, which is the mass
+   * outside the question rather than words nobody read.
+   */
+  readonly spoken: number
+  /**
+   * The share of this role's **spoken-for** words at least one reader reached.
+   * `null` where the window can speak for none of them (0283).
    *
    * Addable across roles — unlike every view count on a `RoleReading`, which is
    * absent there because distinctness cannot be added (0147). Words can: they
@@ -156,10 +168,12 @@ export type CopySilence =
    * can be said about, and a mean of nought reader-words over them would print
    * *the typical reader reached none of your page* as a measurement (0212).
    *
-   * **It is the mean this withholds and not the standings.** The words stay in
-   * {@link CopyReading.wordsByStanding} under `unknown`, where they can be seen
-   * and not acted on, which is the rule {@link CopyReading.unseen} already
-   * applies to the same passages.
+   * **It is the two figures this withholds and not the standings.** Both the
+   * mean and {@link CopyReading.share} are absent, because a share of nought
+   * beside an `unseen` list that is empty is the same sentence in a different
+   * shape (0283). The words stay in {@link CopyReading.wordsByStanding} under
+   * `unknown`, where they can be seen and not acted on, which is the rule
+   * {@link CopyReading.unseen} already applies to the same passages.
    */
   | "unspoken"
   /**
@@ -223,11 +237,30 @@ export type CopyReading = {
   /** Words by the standing of the part saying them. The three add to {@link words}. */
   readonly wordsByStanding: Readonly<Record<PartStanding, number>>
   /**
-   * The share of the page's words at least one reader reached. `null` where the
-   * page says nothing.
+   * The page's words in parts this window can speak for, which is the
+   * denominator of {@link share} (0283).
+   *
+   * Published rather than left to a consumer to subtract, because a surface
+   * that works out what a share is of by taking `words` less
+   * `wordsByStanding.unknown` is re-deriving the universe the figure is about —
+   * which is how two screens come to disagree. The difference is the mass
+   * outside the question and is `wordsByStanding.unknown` itself.
+   */
+  readonly spoken: number
+  /**
+   * The share of the words **this window can speak for** that at least one
+   * reader reached. `null` where there are none of them (0283).
    *
    * *At least one*, which is what a standing of `read` means and not what a
    * person reads this sentence as. {@link typical} is the per-reader figure.
+   *
+   * **It is over {@link spoken} and not over {@link words}.** A part whose
+   * standing is `unknown` has a `read` of nought that is a missing counter
+   * rather than a reader who did not arrive, so a page of them published a
+   * share of nought — *none of this page was reached* — beside an {@link
+   * unseen} list that is empty, because `unseen` is `skipped` only. The
+   * commonest page in that state is one nobody opened. Both figures are now
+   * absent there and {@link silence} says which state it is.
    */
   readonly share: number | null
   /** Every part that says something, in reading order. */
@@ -295,7 +328,19 @@ export type CopyReading = {
    * would have made it.
    */
   readonly typical: number | null
-  /** Why {@link typical} is not there, and `null` where it is. */
+  /**
+   * Why a figure is not there, and `null` where both are.
+   *
+   * **It covers {@link share} as well as {@link typical}, and the two are not
+   * absent in the same states.** `wordless`, `unmeasured` and `unspoken`
+   * withhold both — there is no word, no reader, or no word this window can
+   * speak for. `floored` and `inconsistent` withhold the mean and leave the
+   * share standing, because a share survives a floor and says so.
+   *
+   * So `share === null` holds exactly where this is one of the first three,
+   * which the suite pins over the closed set rather than leaving to this
+   * sentence.
+   */
   readonly silence: CopySilence | null
 }
 
@@ -338,7 +383,16 @@ export const passageOf = (part: PartReading): Passage => ({
  */
 const saysSomething = (passage: Passage): boolean => passage.words > 0 || passage.floored
 
-const shareOf = (read: number, words: number): number | null => (words === 0 ? null : read / words)
+/**
+ * The share of the spoken-for words that were read, and `null` where there are
+ * none of them (0283).
+ *
+ * The denominator is never {@link CopyReading.words}: a word nothing can be
+ * said about is outside the question rather than in the half of it that went
+ * unread.
+ */
+const shareOf = (read: number, spoken: number): number | null =>
+  spoken === 0 ? null : read / spoken
 
 /**
  * Every role's row, in one pass over the passages.
@@ -356,6 +410,7 @@ const roleRowsOf = (passages: readonly Passage[]): readonly RoleCopy[] => {
         passages: 0,
         words: 0,
         wordsByStanding: { ...ZERO_BY_STANDING },
+        spoken: 0,
         share: null,
         floored: 0,
       },
@@ -380,6 +435,7 @@ const roleRowsOf = (passages: readonly Passage[]): readonly RoleCopy[] => {
         ...row.wordsByStanding,
         [passage.standing]: row.wordsByStanding[passage.standing] + passage.words,
       },
+      spoken: row.spoken + (spokenFor(passage.standing) ? passage.words : 0),
       share: null,
       floored: row.floored + (passage.floored ? 1 : 0),
     })
@@ -387,7 +443,7 @@ const roleRowsOf = (passages: readonly Passage[]): readonly RoleCopy[] => {
 
   return [...rows.values()].map((row) => ({
     ...row,
-    share: shareOf(row.wordsByStanding.read, row.words),
+    share: shareOf(row.wordsByStanding.read, row.spoken),
   }))
 }
 
@@ -455,9 +511,16 @@ export const copyReadingOf = (reading: PageReading): CopyReading => {
 
   /**
    * The words in parts this window can speak for either way, which is what the
-   * mean below is over and the only term `unknown` is kept out of.
+   * mean and the share below are both over (0282, 0283).
+   *
+   * Taken with the published predicate rather than as `read + skipped`, which
+   * is the same number today and is the spelling that would go on agreeing
+   * with a three-member vocabulary after a fourth standing arrived.
    */
-  const spoken = wordsByStanding.read + wordsByStanding.skipped
+  const spoken = passages.reduce(
+    (total, passage) => total + (spokenFor(passage.standing) ? passage.words : 0),
+    0
+  )
 
   const silence = silenceOf(
     words,
@@ -492,7 +555,8 @@ export const copyReadingOf = (reading: PageReading): CopyReading => {
     views: reading.views,
     words,
     wordsByStanding,
-    share: shareOf(wordsByStanding.read, words),
+    spoken,
+    share: shareOf(wordsByStanding.read, spoken),
     passages,
     silent: reading.parts.length - passages.length,
     unseen: passages.filter((passage) => passage.standing === "skipped").sort(byWordsLost),
