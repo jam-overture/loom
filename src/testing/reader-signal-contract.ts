@@ -48,7 +48,7 @@ export const region = (code: string): ReaderRegion => code as ReaderRegion
  * Named rather than reusing `aud_everyone` for one side, because a test whose
  * two audiences are *everyone* and *somebody* passes on a store that quietly
  * files everything under the default — which is exactly the failure these are
- * here to catch (0283).
+ * here to catch (0284).
  */
 export const SKIERS = audienceIdSchema.parse("aud_skiers") as AudienceId
 export const RIDERS = audienceIdSchema.parse("aud_riders") as AudienceId
@@ -231,7 +231,7 @@ export const describeReaderSignalJournalContract = (
 
     /**
      * The dimension this record is about, at the point it enters the system
-     * (0283). A buffer that dropped it would make every counter below it one
+     * (0284). A buffer that dropped it would make every counter below it one
      * population rather than two, and nothing afterwards could tell.
      */
     it("files a batch under the audience it names", async () => {
@@ -421,7 +421,7 @@ export const describeReaderTallyStoreContract = (
     })
 
     /**
-     * ## The audience (0283)
+     * ## The audience (0284)
      *
      * The dimension is in the key, and these are the three things that makes
      * true: two audiences never fold into one row, a reading may name one, and
@@ -672,7 +672,7 @@ export const describeReaderTallyStoreContract = (
 
       /**
        * The door's half of the dimension, on the counter it matters most on
-       * (0283): page views are the denominator every rate on a screen is taken
+       * (0284): page views are the denominator every rate on a screen is taken
        * of, so two audiences summed here would make both variants' rates wrong
        * in the same invisible direction.
        */
@@ -940,7 +940,7 @@ export const describeReaderRegionStoreContract = (
       expect(unwrap(await store.regions())).toEqual([])
     })
 
-    /** The regions' half of the dimension — see the tally contract's note (0283). */
+    /** The regions' half of the dimension — see the tally contract's note (0284). */
     it("keeps two audiences' buckets apart", async () => {
       const store = await make()
       await store.count([count({ views: 3 })], AT, SKIERS)

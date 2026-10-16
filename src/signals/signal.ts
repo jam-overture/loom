@@ -147,7 +147,7 @@ export const readerSignalBatchSchema = z
     sentAt: instantSchema,
     /**
      * Which audience this page was served under, when the host served one
-     * (0283).
+     * (0284).
      *
      * On the batch rather than on each signal for the same reason the tree and
      * the revision are: one rendered page was one form of one revision, so they

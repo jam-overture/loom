@@ -1,14 +1,21 @@
-# 0283. A signal names the audience it was collected under, and the predicate stays in the control plane
+# 0284. A signal names the audience it was collected under, and the predicate stays in the control plane
 
 **Status:** Accepted
 **Date:** 2026-10-15
 **Section:** §5 (signals), §1 (schema)
 
-> **Renumbered on 2026-10-15**, from 0280, before this branch was opened for
-> review. `main` had meanwhile accepted a different 0280 — *the words of a kind
-> of part the typical reader reached are weighted once per page* (#640) — and
-> two records sharing a number is fatal (0097). Nothing in this record changed
-> but its number, and 0281 and 0282 were taken by the same interval.
+> **Renumbered twice on 2026-10-15**, from 0280 to 0283 before this branch was
+> opened for review, and from 0283 to 0284 when `main` was merged into it. Each
+> time, `main` had meanwhile accepted a record on the number this one was
+> holding — *the words of a kind of part the typical reader reached are
+> weighted once per page* (#640) on 0280, and *a declared ramp step is a
+> maximum* on 0283 — and two records sharing a number is fatal (0097). Nothing
+> in this record changed but its number, either time.
+>
+> Twice in one day is worth stating rather than tidying away: the numbering is
+> claimed at merge, so a record written on a branch that takes a day to land is
+> a record whose number is a guess. 0273 was renumbered for the same reason on
+> 13 October.
 
 ## Context
 

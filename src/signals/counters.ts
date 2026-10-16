@@ -55,7 +55,7 @@ export const regionKey = (count: ReaderRegionCount): string =>
   `${revisionKey(count)} ${count.region}`
 
 /**
- * The same counter, in one audience (0283).
+ * The same counter, in one audience (0284).
  *
  * The four keys above identify a counter *within* one audience, which is all a
  * fold in front of the driver needs: `apply` and `count` are handed one

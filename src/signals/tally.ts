@@ -43,7 +43,7 @@ import type { FunnelAnswer, ReaderTally } from "./rollup.js"
  * was collected under and when it last changed.
  *
  * `audienceId` is on the stored row and not on `ReaderTally` deliberately
- * (0283). A rollup folds one audience's window, so the counters it produces are
+ * (0284). A rollup folds one audience's window, so the counters it produces are
  * already all one audience's and a field on each would be the same value
  * repeated; a row read back may sit beside another audience's, so it has to say
  * which it is. It is also what lets a screen compare two without a reading
@@ -64,7 +64,7 @@ export type TallyReadRequest = {
   /** Absent reads every tree the handle can see, which is the scope rule (0020). */
   readonly treeId?: TreeId
   /**
-   * Absent reads every audience (0283).
+   * Absent reads every audience (0284).
    *
    * A filter rather than a requirement, on the terms `revision` below is one:
    * comparing two audiences is the point of serving two, so a reading that
@@ -107,7 +107,7 @@ export interface ReaderOpeningCounter {
     openings: readonly RevisionViews[],
     at: string,
     /**
-     * The audience the delivery was served under (0283). Omitted is
+     * The audience the delivery was served under (0284). Omitted is
      * `aud_everyone`, so a door that serves one form of every page calls this
      * exactly as it did.
      *
@@ -150,7 +150,7 @@ export interface ReaderTallyStore extends ReaderOpeningCounter {
     },
     at: string,
     /**
-     * The audience whose window this is (0283). Omitted is `aud_everyone`.
+     * The audience whose window this is (0284). Omitted is `aud_everyone`.
      *
      * One audience per call, which is what keeps `ReaderTally` free of the
      * dimension: a window holding two audiences is folded once per audience and

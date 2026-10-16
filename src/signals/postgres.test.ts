@@ -276,7 +276,7 @@ describe("the reader signal tables — Postgres specifics", () => {
 
   /**
    * The second of the two migrations 0273 owed, against a database in the state
-   * the first one left (0283).
+   * the first one left (0284).
    *
    * A deployment counting readers today has five tables with `application_id`
    * and no `audience_id`, holding rows collected when there was one form of

@@ -12,7 +12,7 @@ list and it is not a report.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:** open
 
-[0283](decisions/0283-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
+[0284](decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
 put `audience` on `ReaderSignalBatch` and `audienceId` on every stored counter
 row. Both are branded types — `AudienceId`, from `src/audience/audience.ts` —
 and **neither that type nor its schema is exported from any entry point in
@@ -53064,7 +53064,7 @@ not quietly build something else in its place — which is what happened to
 **Status:** **closed by
 `framework-73-the-ramp-a-phone-can-hold`** — shape 1, the fluid ramp, taken in
 `src/theme/ramp.ts` and recorded as
-[0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md).
+[0284](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md).
 **The row for `Loom primitives` is now a removal rather than a fix**; shape 3,
 the padding, is not needed and should not be taken.
 
@@ -54740,7 +54740,7 @@ merge commit, which says the regenerated index agreed with it.
 (`src/primitives/loom.heading.ts`) · **Status:** open — **nothing is broken,
 nothing renders differently, and this is a deletion rather than a repair**
 
-[0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
+[0284](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
 makes a declared ramp step a maximum: `--loom-scale-8` is now
 `clamp(42.84px, 9.38cqi, 72px)` on a pack whose top step is 72, instead of
 `72px`.

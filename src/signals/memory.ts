@@ -47,7 +47,7 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
     ...batch,
     seq: nextSeq++,
     receivedAt: clock.now(),
-    /** Resolved on the way in, as the Postgres buffer resolves it (0283). */
+    /** Resolved on the way in, as the Postgres buffer resolves it (0284). */
     audienceId: batch.audience ?? DEFAULT_AUDIENCE_ID,
   })
 

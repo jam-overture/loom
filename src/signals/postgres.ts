@@ -218,7 +218,7 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
           /**
            * Resolved here rather than defaulted by the column, so the row a
            * fold reads says what it was filed under whichever sender wrote it
-           * (0283).
+           * (0284).
            */
           audienceId: batch.audience ?? DEFAULT_AUDIENCE_ID,
           treeId: batch.treeId,
@@ -326,7 +326,7 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
  * here rather than at each call site is what stops a counter query being
  * written without it.
  *
- * **The audience is one of the optional three** (0283), which is the difference
+ * **The audience is one of the optional three** (0284), which is the difference
  * between the two dimensions in one line: no reading spans two applications,
  * and a reading that compares two audiences is the point of serving two.
  */

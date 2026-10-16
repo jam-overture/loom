@@ -49,7 +49,7 @@ export type ReceivedBatch = ReaderSignalBatch & {
   readonly receivedAt: string
   /**
    * The audience it was **filed** under, which is resolved rather than
-   * optional (0283).
+   * optional (0284).
    *
    * `audience` is what the sender said and may be absent; this is what the
    * buffer stored, and a stored row always names one — `aud_everyone` where the

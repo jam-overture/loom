@@ -248,7 +248,7 @@ describe("how many page views began", () => {
   })
 
   /**
-   * The door's half of 0283. A delivery is normally one page's worth and so one
+   * The door's half of 0284. A delivery is normally one page's worth and so one
    * audience's, but nothing in the wire format says it must be — and openings
    * are the denominator every rate is taken of, so two audiences filed into one
    * row would make both variants' rates wrong in the same invisible direction.

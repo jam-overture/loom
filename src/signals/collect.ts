@@ -281,7 +281,7 @@ export const collectReaderSignals = async (
   if (plan.before === null) return { outcome: "nothing-ripe", waiting: plan.waiting }
 
   /**
-   * **One fold per audience, not one per window** (0283).
+   * **One fold per audience, not one per window** (0284).
    *
    * A window holds whatever arrived in it, and once a deployment serves two
    * forms of a page that is two audiences' batches interleaved. Folding them

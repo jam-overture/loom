@@ -118,7 +118,7 @@ export type ReaderRegionCount = {
 
 /**
  * A region count as the store keeps it: the count, the audience it was
- * collected under, and when it last moved. See `StoredTally.audienceId` (0283).
+ * collected under, and when it last moved. See `StoredTally.audienceId` (0284).
  */
 export type StoredRegionCount = ReaderRegionCount & {
   readonly audienceId: AudienceId
@@ -142,7 +142,7 @@ export interface ReaderRegionStore {
   readonly count: (
     counts: readonly ReaderRegionCount[],
     at: string,
-    /** The audience the delivery was served under (0283). Omitted is `aud_everyone`. */
+    /** The audience the delivery was served under (0284). Omitted is `aud_everyone`. */
     audience?: AudienceId
   ) => Promise<Result<void, ReaderSignalStoreError>>
   readonly regions: (

@@ -8,7 +8,7 @@
  *
  * **None of that predicate is here.** What this module holds is the *name* a
  * signal carries once the deciding is done: an opaque id, on the terms
- * [0283](../../decisions/0283-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
+ * [0284](../../decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
  * settles. What an `aud_` means is the control plane's to say, exactly as what
  * an `app_` means is — so this file is an identity and a default, which is the
  * whole of what a dimension needs to be measurable.
@@ -42,6 +42,6 @@ export const newAudienceId = (): AudienceId => audienceIdSchema.parse(`aud_${ran
  * **It is not a null.** Every read filters on it and every write sets it; what
  * makes it the default is only that it is the one a sender gets by saying
  * nothing. A nullable dimension would make every counter read a two-case
- * question, one of whose cases no sender can produce (0283).
+ * question, one of whose cases no sender can produce (0284).
  */
 export const DEFAULT_AUDIENCE_ID: AudienceId = audienceIdSchema.parse("aud_everyone")

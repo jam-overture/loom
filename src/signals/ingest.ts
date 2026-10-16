@@ -142,7 +142,7 @@ const moved = (
     : { views: counts.reduce((total, count) => total + count.views, 0) }
 
 /**
- * A delivery's batches, by the audience each was served under (0283).
+ * A delivery's batches, by the audience each was served under (0284).
  *
  * `ReaderSignalBatch.audience` is what the sender said and may be absent, so it
  * is resolved here the way the buffer resolves it — one spelling of *this batch
@@ -206,7 +206,7 @@ export const ingestReaderSignals = async (
    * arrived (`page-views.ts`).
    */
   /**
-   * **Per audience, because a counter row belongs to one** (0283).
+   * **Per audience, because a counter row belongs to one** (0284).
    *
    * A delivery is normally one page's worth and so one audience's, but nothing
    * in the wire format says it has to be — and filing two audiences' arrivals

@@ -23,7 +23,7 @@ import type { LoomDatabase } from "../store/database.js"
  * that wrote them, which is what `app_default` names.
  *
  * Every table then carries `audience_id`, the second migration 0273 owed and
- * [0283](../../decisions/0283-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
+ * [0284](../../decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
  * settles. Backfilled by its default for the stronger version of the same
  * reason: a row written before the dimension existed was collected when there
  * was one form of every page, so `aud_everyone` is what was true of it rather
@@ -70,7 +70,7 @@ export const READER_SIGNALS_DDL: readonly string[] = [
    */
   `ALTER TABLE loom_reader_signals ADD COLUMN IF NOT EXISTS application_id text NOT NULL DEFAULT 'app_default'`,
   /**
-   * **The audience, for a database that predates it (0283).** Additive and
+   * **The audience, for a database that predates it (0284).** Additive and
    * defaulted, and here the index is *not* rebuilt around it — the one place
    * this dimension departs from the shape the application took.
    *

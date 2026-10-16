@@ -167,7 +167,7 @@ describe("collectReaderSignals", () => {
   }
 
   /**
-   * ## One fold per audience (0283)
+   * ## One fold per audience (0284)
    *
    * A window holds whatever arrived in it, so once a deployment serves two
    * forms of a page it holds two audiences interleaved. Folding the window

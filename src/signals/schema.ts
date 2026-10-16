@@ -25,7 +25,7 @@ import {
  * application whose page they read, and no reading here spans two.
  *
  * All five then carry `audience_id` immediately after it
- * ([0283](../../decisions/0283-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)),
+ * ([0284](../../decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)),
  * which is the second of the two migrations
  * [0273](../../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
  * chose to take rather than wait for. The two dimensions differ in kind, and
@@ -64,7 +64,7 @@ export const loomReaderSignals = pgTable(
      */
     applicationId: text("application_id").notNull().default("app_default"),
     /**
-     * The audience this batch's reader was served under (0283). Second in the
+     * The audience this batch's reader was served under (0284). Second in the
      * key and in every index, immediately after the application.
      *
      * Defaulted for the same reason the application is, and to the same effect:
@@ -90,7 +90,7 @@ export const loomReaderSignals = pgTable(
   (table) => [
     /**
      * Unchanged by the audience dimension, which is not the shape the
-     * application took (0283).
+     * application took (0284).
      *
      * The index was widened to lead with the application because every read of
      * the buffer is inside one (0273), so it belongs in the prefix. Nothing reads the
