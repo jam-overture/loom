@@ -14,7 +14,8 @@
     "docs:fences": "tsx \"app/(docs)/_lib/fences/generate.ts\"",
     "db:push": "pnpm --filter @jam-overture/loom build && tsx scripts/db-push.ts",
     "telemetry:prune": "pnpm --filter @jam-overture/loom build && tsx scripts/telemetry-prune.ts",
-    "signals:collect": "pnpm --filter @jam-overture/loom build && tsx scripts/signals-collect.ts"
+    "signals:collect": "pnpm --filter @jam-overture/loom build && tsx scripts/signals-collect.ts",
+    "portal:account": "pnpm --filter @jam-overture/loom build && tsx scripts/portal-account.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

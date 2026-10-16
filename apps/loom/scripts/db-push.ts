@@ -22,6 +22,7 @@ import {
 import { ensureReaderSignalsSchema } from "@jam-overture/loom/signals/postgres"
 import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
+import { ensurePortalAccountsSchema } from "../app/(portal)/_lib/auth/accounts-postgres"
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
@@ -122,6 +123,13 @@ try {
   /** The portal's own table, not the runtime's — see `lib/auth/attempts-postgres.ts`. */
   await ensureSignInAttemptsSchema(db)
   /**
+   * The portal's other two, and the ones without which nobody signs in at all
+   * (0285). An account is a row now, so a deployment that has not run this has
+   * no way to admit anybody — which the sign-in page says in those words rather
+   * than as a rejected key.
+   */
+  await ensurePortalAccountsSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -148,8 +156,9 @@ try {
   await seedDeployment()
   console.log(
     "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_projects, " +
-      "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels " +
-      "and loom_signin_attempts are present, and this deployment's pages are in them"
+      "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
+      "loom_signin_attempts, loom_portal_accounts and loom_portal_memberships are present, " +
+      "and this deployment's pages are in them"
   )
 } finally {
   await client.end()

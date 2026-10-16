@@ -1,22 +1,14 @@
 import { describe, expect, it } from "vitest"
 
 import { describeAuthProblem, MINIMUM_SECRET_LENGTH, resolveAuthConfig } from "./config"
-import { MINIMUM_KEY_LENGTH } from "./roster"
 
 const SECRET = "s".repeat(MINIMUM_SECRET_LENGTH)
-const KEY = "k".repeat(MINIMUM_KEY_LENGTH)
 
 describe("resolveAuthConfig", () => {
-  it("resolves a secret and a roster", () => {
-    const resolved = resolveAuthConfig({
-      LOOM_PORTAL_SESSION_SECRET: SECRET,
-      LOOM_PORTAL_REVIEWERS: `ana:${KEY}`,
-    })
+  it("resolves the one variable it still reads", () => {
+    const resolved = resolveAuthConfig({ LOOM_PORTAL_SESSION_SECRET: SECRET })
 
-    expect(resolved.ok && resolved.value).toEqual({
-      secret: SECRET,
-      reviewers: [{ actor: "ana", key: KEY }],
-    })
+    expect(resolved.ok && resolved.value).toEqual({ secret: SECRET })
   })
 
   /**
@@ -34,35 +26,28 @@ describe("resolveAuthConfig", () => {
   it("refuses a secret short enough to guess", () => {
     const resolved = resolveAuthConfig({
       LOOM_PORTAL_SESSION_SECRET: "s".repeat(MINIMUM_SECRET_LENGTH - 1),
-      LOOM_PORTAL_REVIEWERS: `ana:${KEY}`,
     })
 
     expect(!resolved.ok && resolved.error.code).toBe("no-secret")
   })
 
-  it("refuses a secret configured with a secret and no reviewers", () => {
-    const resolved = resolveAuthConfig({ LOOM_PORTAL_SESSION_SECRET: SECRET })
-
-    expect(!resolved.ok && resolved.error.code).toBe("bad-roster")
-  })
-
-  it("carries the roster's own problem through rather than flattening it", () => {
+  /**
+   * What 0285 removed, held so it stays removed. Who may sign in is a table,
+   * and a deployment that still has the old variable set must not be able to
+   * get anybody in with it — a half-migrated portal where configuration still
+   * worked would be the roster surviving its own deletion.
+   */
+  it("reads nothing from the roster variable it replaced", () => {
     const resolved = resolveAuthConfig({
       LOOM_PORTAL_SESSION_SECRET: SECRET,
-      LOOM_PORTAL_REVIEWERS: "ana:short",
+      LOOM_PORTAL_REVIEWERS: `ana:${"k".repeat(32)}`,
     })
 
-    expect(!resolved.ok && resolved.error).toEqual({
-      code: "bad-roster",
-      problem: { code: "weak-key", actor: "ana" },
-    })
+    expect(resolved.ok && resolved.value).toEqual({ secret: SECRET })
   })
 
   it("ignores whitespace around a secret pasted from a terminal", () => {
-    const resolved = resolveAuthConfig({
-      LOOM_PORTAL_SESSION_SECRET: `  ${SECRET}\n`,
-      LOOM_PORTAL_REVIEWERS: `ana:${KEY}`,
-    })
+    const resolved = resolveAuthConfig({ LOOM_PORTAL_SESSION_SECRET: `  ${SECRET}\n` })
 
     expect(resolved.ok && resolved.value.secret).toBe(SECRET)
   })
@@ -74,11 +59,5 @@ describe("describeAuthProblem", () => {
 
     expect(detail).toContain("LOOM_PORTAL_SESSION_SECRET")
     expect(detail).toContain("openssl rand -hex 32")
-  })
-
-  it("defers to the roster's own message", () => {
-    expect(describeAuthProblem({ code: "bad-roster", problem: { code: "no-entries" } })).toContain(
-      "LOOM_PORTAL_REVIEWERS"
-    )
   })
 })

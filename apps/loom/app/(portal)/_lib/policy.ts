@@ -19,7 +19,7 @@ import { portalRegistry } from "./registry"
  *
  * ## The floor this deployment had left open for a month
  *
- * [0173](../../../../../decisions/0173-a-change-may-not-add-a-primitive-the-deployment-cannot-draw.md)
+ * [0173](../../../../../decisions/0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md)
  * gave the Gate the ability to refuse a change that adds a kind of part nothing
  * here can draw, and made it **opt-in** — a host that declares nothing is a host
  * that has not spoken, and a default reading of "I can draw nothing" would refuse

@@ -5,15 +5,16 @@ import { assess, forgetBefore, type ThrottlePolicy } from "./throttle"
  * One sign-in attempt, from "may they try" to "what happened".
  *
  * Everything that decides the outcome is here, and everything that makes it a
- * *web* sign-in — the cookie, the headers, the roster in the environment — is
- * in `identity.ts`. So the order of operations, which is the part with security
+ * *web* sign-in — the cookie, the headers, the account store — is in
+ * `identity.ts`. So the order of operations, which is the part with security
  * consequences, is testable against a real log and a fake credential check.
  *
  * The order:
  *
- * 1. **Ask the log first.** A locked-out caller never reaches the comparison, so
- *    a lockout costs them the oracle as well as the time. Checking afterwards
- *    would leave the roster answering questions it has refused to answer.
+ * 1. **Ask the log first.** A locked-out caller never reaches the lookup, so a
+ *    lockout costs them the oracle as well as the time — and costs the database
+ *    the query. Checking afterwards would leave the accounts table answering
+ *    questions this portal has refused to answer.
  * 2. **Compare.** `verify` is the only thing here that knows what a valid key
  *    is, and it is handed in rather than imported — this module cannot be made
  *    to leak a credential it has no way to read.
@@ -38,11 +39,15 @@ export type Attempt = {
 /**
  * Whether a presented key belongs to somebody, as an actor id or `null`.
  *
- * Synchronous and total: it is a comparison against a roster already in memory,
- * and giving it room to fail would give this module a second failure mode that
- * looks like a rejection.
+ * It was synchronous and total while a roster lived in memory. An account is a
+ * row now (0285), so the lookup can be slow and can fail — and the failure is
+ * reported rather than folded into `null`, because *the accounts table could
+ * not answer* and *that key belongs to nobody* are the same sentence only to a
+ * caller who is already in.
  */
-export type VerifyKey = () => string | null
+export type VerifyKey = () => Promise<
+  { readonly ok: true; readonly actor: string | null } | { readonly ok: false; readonly detail: string }
+>
 
 export const attemptSignIn = async (
   log: AttemptLog,
@@ -58,12 +63,24 @@ export const attemptSignIn = async (
   const standing = assess(known.value, attempt.now, policy)
   if (standing.code === "locked") return { code: "locked", retryAfterMs: standing.retryAfterMs }
 
-  const actor = verify()
+  const verified = await verify()
+
+  /**
+   * **A store that cannot answer is not a failed attempt.**
+   *
+   * Penalising here would turn an unreachable database into a lockout: every
+   * caller who tried during the outage would arrive afterwards with failures
+   * counted against them for something they did not do. Nobody signs in — 0034
+   * — and nobody is charged for it either.
+   */
+  if (!verified.ok) return { code: "unavailable", detail: verified.detail }
+
+  const actor = verified.actor
 
   if (actor !== null) {
     /**
      * A failure to forget is not a failure to sign in. The key was right, the
-     * caller is on the roster, and refusing them because a row could not be
+     * caller has an account, and refusing them because a row could not be
      * deleted would turn a housekeeping error into a lockout — the record simply
      * expires on its own instead.
      */

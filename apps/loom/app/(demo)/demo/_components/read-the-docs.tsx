@@ -11,7 +11,7 @@ import { useFramed } from "./use-framed"
  * watched a few changes land, and the honest destination for it.
  *
  * `/docs` rather than the portal, which is a review queue behind a sign-in
- * ([0019](../../../../../decisions/0019-the-portal-is-a-review-queue-not-a-cms.md))
+ * ([0019](../../../../../decisions/0019-the-portal-is-a-review-queue-not-a-design-tool.md))
  * — sending somebody who has just been told *no account, nothing kept* to a
  * sign-in page is a dead end. That argument is unchanged and it is why this
  * link exists.
