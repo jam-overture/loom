@@ -9880,7 +9880,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 57,
+      "files": 58,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -10997,7 +10997,7 @@
             {
               "name": "ReceivedBatch",
               "kind": "type",
-              "signature": "type ReceivedBatch = ReaderSignalBatch & {\n    readonly seq: number;\n    readonly receivedAt: string;\n};",
+              "signature": "type ReceivedBatch = ReaderSignalBatch & {\n    readonly seq: number;\n    readonly receivedAt: string;\n    /**\n     * The audience it was **filed** under, which is resolved rather than\n     * optional.\n     *\n     * `audience` is what the sender said and may be absent; this is what the\n     * buffer stored, and a stored row always names one — `aud_everyone` where the\n     * sender named nothing. A fold reads this, so that a window holding two\n     * audiences folds into two sets of counters rather than one.\n     */\n    readonly audienceId: AudienceId;\n};",
               "truncated": false,
               "summary": "A batch as it comes back out, with the position the buffer gave it."
             },
@@ -11928,7 +11928,7 @@
             {
               "name": "StoredPageViews",
               "kind": "type",
-              "signature": "type StoredPageViews = ReaderPageViews & {\n    /**\n     * When either writer last moved this row.\n     *\n     * Written by the door on every delivery that opened a page view *and* by\n     * every rollup that folded one, which is what makes it useless for telling a\n     * stalled collection from a quiet one: a busy page whose rollup has stopped\n     * keeps a fresh timestamp while its appearances never move again.\n     */\n    readonly updatedAt: string;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * absent where nothing attests a fold.\n     *\n     * **Absent is not *never folded*.** It is *nothing here can say*: a row\n     * written before the column existed, a store a caller built by hand, a\n     * fixture. The two cases are one state, no reading claims anything from it,\n     * and the first fold after an upgrade fills it in.\n     *\n     * Where it *is* there, it is the one timestamp in this subsystem written by a\n     * single writer, and therefore the only thing that can say an opening has\n     * been pending longer than it should be.\n     */\n    readonly foldedAt?: string;\n};",
+              "signature": "type StoredPageViews = ReaderPageViews & {\n    /** The audience these page views were served under. See `StoredTally.audienceId`. */\n    readonly audienceId: AudienceId;\n    /**\n     * When either writer last moved this row.\n     *\n     * Written by the door on every delivery that opened a page view *and* by\n     * every rollup that folded one, which is what makes it useless for telling a\n     * stalled collection from a quiet one: a busy page whose rollup has stopped\n     * keeps a fresh timestamp while its appearances never move again.\n     */\n    readonly updatedAt: string;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * absent where nothing attests a fold.\n     *\n     * **Absent is not *never folded*.** It is *nothing here can say*: a row\n     * written before the column existed, a store a caller built by hand, a\n     * fixture. The two cases are one state, no reading claims anything from it,\n     * and the first fold after an upgrade fills it in.\n     *\n     * Where it *is* there, it is the one timestamp in this subsystem written by a\n     * single writer, and therefore the only thing that can say an opening has\n     * been pending longer than it should be.\n     */\n    readonly foldedAt?: string;\n};",
               "truncated": false,
               "summary": "A page-view row as the store keeps it, which is the pair, when it last moved, and when the fold last touched it."
             },
@@ -12327,14 +12327,14 @@
             {
               "name": "StoredRegionCount",
               "kind": "type",
-              "signature": "type StoredRegionCount = ReaderRegionCount & {\n    readonly updatedAt: string;\n};",
+              "signature": "type StoredRegionCount = ReaderRegionCount & {\n    readonly audienceId: AudienceId;\n    readonly updatedAt: string;\n};",
               "truncated": false,
-              "summary": "A region count as the store keeps it, which is the count plus when it last moved."
+              "summary": "A region count as the store keeps it: the count, the audience it was collected under, and when it last moved. See `StoredTally.audienceId`."
             },
             {
               "name": "ReaderRegionStore",
               "kind": "interface",
-              "signature": "interface ReaderRegionStore {\n    /**\n     * Add views to the buckets they belong in, creating rows that do not exist\n     * yet. Additive for the same reason applying a rollup is: every call reports\n     * what just arrived rather than what is true so far.\n     */\n    readonly count: (counts: readonly ReaderRegionCount[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly regions: (request?: TallyReadRequest) => Promise<Result<readonly StoredRegionCount[], ReaderSignalStoreError>>;\n}",
+              "signature": "interface ReaderRegionStore {\n    /**\n     * Add views to the buckets they belong in, creating rows that do not exist\n     * yet. Additive for the same reason applying a rollup is: every call reports\n     * what just arrived rather than what is true so far.\n     */\n    readonly count: (counts: readonly ReaderRegionCount[], at: string,\n    /** The audience the delivery was served under. Omitted is `aud_everyone`. */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly regions: (request?: TallyReadRequest) => Promise<Result<readonly StoredRegionCount[], ReaderSignalStoreError>>;\n}",
               "truncated": false,
               "summary": "The durable half, and the only one there is — a region has no raw form to expire, because it was never written down as an observation."
             },
@@ -12768,35 +12768,35 @@
             {
               "name": "StoredTally",
               "kind": "type",
-              "signature": "type StoredTally = ReaderTally & {\n    readonly updatedAt: string;\n};",
+              "signature": "type StoredTally = ReaderTally & {\n    readonly audienceId: AudienceId;\n    readonly updatedAt: string;\n};",
               "truncated": false,
-              "summary": "One node's line as the store keeps it, which is a tally plus when it last changed."
+              "summary": "One node's line as the store keeps it, which is a tally plus the audience it was collected under and when it last changed."
             },
             {
               "name": "StoredFunnel",
               "kind": "type",
-              "signature": "type StoredFunnel = FunnelAnswer & {\n    readonly updatedAt: string;\n};",
+              "signature": "type StoredFunnel = FunnelAnswer & {\n    readonly audienceId: AudienceId;\n    readonly updatedAt: string;\n};",
               "truncated": false,
-              "summary": "One funnel answer as the store keeps it."
+              "summary": "One funnel answer as the store keeps it. See `StoredTally.audienceId`."
             },
             {
               "name": "TallyReadRequest",
               "kind": "type",
-              "signature": "type TallyReadRequest = {\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /**\n     * Absent reads every revision.\n     *\n     * Almost every question the portal asks is about one revision or about two\n     * being compared, and *before versus after a change* is the second of those —\n     * so this is a filter rather than a requirement, and a caller comparing\n     * revisions reads them all and groups.\n     */\n    readonly revision?: number;\n};",
+              "signature": "type TallyReadRequest = {\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /**\n     * Absent reads every audience.\n     *\n     * A filter rather than a requirement, on the terms `revision` below is one:\n     * comparing two audiences is the point of serving two, so a reading that\n     * could not span them would make the comparison the measurement rests on\n     * unreadable. Each row names its own audience, so a caller that wants them\n     * apart groups rather than summing — and a caller that sums two has asked\n     * for one number about two populations.\n     */\n    readonly audience?: AudienceId;\n    /**\n     * Absent reads every revision.\n     *\n     * Almost every question the portal asks is about one revision or about two\n     * being compared, and *before versus after a change* is the second of those —\n     * so this is a filter rather than a requirement, and a caller comparing\n     * revisions reads them all and groups.\n     */\n    readonly revision?: number;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "ReaderOpeningCounter",
               "kind": "interface",
-              "signature": "interface ReaderOpeningCounter {\n    /**\n     * Add the page views a delivery opened, creating rows that do not exist yet.\n     *\n     * Additive like everything else in this file, and for the sharpest reason of\n     * any of them: every call is one delivery's worth of arrivals, so a store\n     * that replaced would report the last reader rather than the readership.\n     */\n    readonly opened: (openings: readonly RevisionViews[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n}",
+              "signature": "interface ReaderOpeningCounter {\n    /**\n     * Add the page views a delivery opened, creating rows that do not exist yet.\n     *\n     * Additive like everything else in this file, and for the sharpest reason of\n     * any of them: every call is one delivery's worth of arrivals, so a store\n     * that replaced would report the last reader rather than the readership.\n     */\n    readonly opened: (openings: readonly RevisionViews[], at: string,\n    /**\n     * The audience the delivery was served under. Omitted is\n     * `aud_everyone`, so a door that serves one form of every page calls this\n     * exactly as it did.\n     *\n     * One audience per call rather than one per opening, because a delivery is\n     * one page view of one form of one page — the same reason the batch carries\n     * it and a signal does not.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n}",
               "truncated": false,
               "summary": "The one write the door makes into the durable counters."
             },
             {
               "name": "ReaderTallyStore",
               "kind": "interface",
-              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a rollup's counters to what is already there, creating rows that do not\n     * exist yet. Atomic over the whole rollup where the backend can be: a partly\n     * applied window is counters that disagree with each other.\n     */\n    readonly apply: (rollup: {\n        readonly tallies: readonly ReaderTally[];\n        readonly funnels: readonly FunnelAnswer[];\n        /**\n         * The window's page views, per revision, for the counter the exact count\n         * is compared against.\n         *\n         * Optional, and absent is not none: a caller applying counters it\n         * composed itself — a backfill, a fixture, a test — has no window to\n         * report, and a nought written there would read as *no page views* and\n         * make a reading claim the node counters were exact.\n         */\n        readonly appearances?: readonly RevisionViews[];\n    }, at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
+              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a rollup's counters to what is already there, creating rows that do not\n     * exist yet. Atomic over the whole rollup where the backend can be: a partly\n     * applied window is counters that disagree with each other.\n     */\n    readonly apply: (rollup: {\n        readonly tallies: readonly ReaderTally[];\n        readonly funnels: readonly FunnelAnswer[];\n        /**\n         * The window's page views, per revision, for the counter the exact count\n         * is compared against.\n         *\n         * Optional, and absent is not none: a caller applying counters it\n         * composed itself — a backfill, a fixture, a test — has no window to\n         * report, and a nought written there would read as *no page views* and\n         * make a reading claim the node counters were exact.\n         */\n        readonly appearances?: readonly RevisionViews[];\n    }, at: string,\n    /**\n     * The audience whose window this is. Omitted is `aud_everyone`.\n     *\n     * One audience per call, which is what keeps `ReaderTally` free of the\n     * dimension: a window holding two audiences is folded once per audience and\n     * applied twice, so every row in one call belongs to one of them.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
               "truncated": false,
               "summary": "Counters are not paged."
             }
@@ -12994,7 +12994,7 @@
           "reach": "loaded"
         }
       ],
-      "files": 16,
+      "files": 17,
       "narrower": [],
       "standing": {
         "packageNames": 1637,

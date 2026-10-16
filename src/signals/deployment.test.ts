@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode } from "../tree/node.js"
@@ -99,6 +100,7 @@ const door = (
   opened: number,
   appearances: number
 ): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId,
   revision,
   opened,

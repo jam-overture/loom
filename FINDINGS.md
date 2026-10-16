@@ -8,6 +8,40 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-15 — the audience dimension is in the schema and its type is not reachable from any published entry point
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:** open
+
+[0284](decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
+put `audience` on `ReaderSignalBatch` and `audienceId` on every stored counter
+row. Both are branded types — `AudienceId`, from `src/audience/audience.ts` —
+and **neither that type nor its schema is exported from any entry point in
+`package.json`.**
+
+So a host can read the field (the row hands it over, structurally typed) and
+cannot **write** one: setting `audience` on a batch means producing a branded
+string, which needs `audienceIdSchema`, which is not published. The same is
+true of `ApplicationId` today, and that is exactly why this is filed rather
+than fixed in passing: the two dimensions should be reachable the same way or
+neither should, and deciding which is not this unit's to take alone.
+
+The portal's own note on `(portal)/_lib/reader-signals.ts` names the rule this
+sits under:
+
+> *"Nothing here reaches into `src/`, and a gap in what those entry points
+> expose is a finding rather than a deep import."*
+
+**What acting on it looks like:** either publish the two identity modules
+(`application`, `audience`) through an entry point, or decide that minting these
+ids is the control plane's job and that a host only ever echoes back a value it
+was given — in which case the batch field's type should say so, and the
+documentation should show where the value comes from.
+
+**Not urgent, and it has a deadline anyway.** Nothing can serve a second
+audience until the composing `TreeSource` exists (0263), so no host needs to
+write the field yet. It needs answering before one does.
+
+---
 ## 2026-10-14 — lesson 16 taught that a listing has no timestamp, and the framework gave it one
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/16-persistence.md`)
@@ -53030,7 +53064,7 @@ not quietly build something else in its place — which is what happened to
 **Status:** **closed by
 `framework-73-the-ramp-a-phone-can-hold`** — shape 1, the fluid ramp, taken in
 `src/theme/ramp.ts` and recorded as
-[0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md).
+[0284](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md).
 **The row for `Loom primitives` is now a removal rather than a fix**; shape 3,
 the padding, is not needed and should not be taken.
 
@@ -54706,7 +54740,7 @@ merge commit, which says the regenerated index agreed with it.
 (`src/primitives/loom.heading.ts`) · **Status:** open — **nothing is broken,
 nothing renders differently, and this is a deletion rather than a repair**
 
-[0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
+[0284](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
 makes a declared ramp step a maximum: `--loom-scale-8` is now
 `clamp(42.84px, 9.38cqi, 72px)` on a pack whose top step is 72, instead of
 `72px`.

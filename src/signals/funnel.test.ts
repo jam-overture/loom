@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { nodeId, primitiveType, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION } from "../tree/tree.js"
@@ -85,6 +86,7 @@ const funnel = (
   converted: number,
   where: { treeId: typeof TREE; revision: number } = WHERE
 ): StoredFunnel => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: where.treeId,
   revision: where.revision,
   pair: pair(from, to),
@@ -98,6 +100,7 @@ const views = (
   appearances: number,
   where: { treeId: typeof TREE; revision: number } = WHERE
 ): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: where.treeId,
   revision: where.revision,
   opened,

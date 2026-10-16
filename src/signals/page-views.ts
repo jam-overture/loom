@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 
 import type { ReaderSignalBatch } from "./signal.js"
@@ -92,6 +93,8 @@ export type ReaderPageViews = {
  * and when the fold last touched it.
  */
 export type StoredPageViews = ReaderPageViews & {
+  /** The audience these page views were served under. See `StoredTally.audienceId` (0284). */
+  readonly audienceId: AudienceId
   /**
    * When either writer last moved this row.
    *

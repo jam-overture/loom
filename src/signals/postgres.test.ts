@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import type { LoomDatabase } from "../store/database.js"
 import {
   batchOf,
@@ -12,6 +13,7 @@ import {
   nodeId,
   primitiveType,
   region,
+  SKIERS,
   TREE,
   viewed,
   viewKey,
@@ -270,6 +272,71 @@ describe("the reader signal tables — Postgres specifics", () => {
     const after = await store.pageViews()
 
     expect(after.ok && after.value[0]).toMatchObject({ appearances: 15, foldedAt: AT })
+  })
+
+  /**
+   * The second of the two migrations 0273 owed, against a database in the state
+   * the first one left (0284).
+   *
+   * A deployment counting readers today has five tables with `application_id`
+   * and no `audience_id`, holding rows collected when there was one form of
+   * every page. `aud_everyone` is therefore a backfill that states what was
+   * true of them rather than a value somebody chose — which is why the column
+   * default is the whole of the migration and no `UPDATE` runs.
+   *
+   * The key widening is the part worth proving rather than reading: the rows
+   * have to survive a primary key being dropped and rebuilt around a column
+   * they did not have, and then still add to rather than collide with a fold
+   * that names the same audience.
+   */
+  it("adds the audience to tables that predate it, filing their rows under everyone", async () => {
+    const db = drizzle(new PGlite())
+
+    await db.execute(
+      sql.raw(`CREATE TABLE loom_reader_tallies (
+        application_id text NOT NULL DEFAULT 'app_default',
+        tree_id text NOT NULL,
+        revision integer NOT NULL,
+        node_id text NOT NULL,
+        type text NOT NULL,
+        views bigint NOT NULL,
+        reached bigint NOT NULL,
+        engaged bigint NOT NULL DEFAULT 0,
+        dwell_ms bigint NOT NULL,
+        activations bigint NOT NULL,
+        opens bigint NOT NULL,
+        closes bigint NOT NULL,
+        completions bigint NOT NULL DEFAULT 0,
+        updated_at timestamptz NOT NULL,
+        PRIMARY KEY (application_id, tree_id, revision, node_id)
+      )`)
+    )
+    await db.execute(
+      sql.raw(`INSERT INTO loom_reader_tallies
+        (tree_id, revision, node_id, type, views, reached, dwell_ms, activations, opens, closes, updated_at)
+        VALUES ('${TREE}', 1, 'n_hero', 'loom.section', 40, 40, 9000, 2, 0, 0, now())`)
+    )
+    await ensureReaderSignalsSchema(db)
+
+    const store = postgresReaderTallyStore(db)
+    const before = await store.tallies()
+
+    expect(before.ok && before.value[0]).toMatchObject({
+      audienceId: DEFAULT_AUDIENCE_ID,
+      views: 40,
+      dwellMs: 9000,
+    })
+
+    /** The widened key holds: the same node in another audience is another row. */
+    await store.apply({ tallies: [tally({ views: 5 })], funnels: [] }, AT, SKIERS)
+
+    const after = await store.tallies()
+
+    expect(after.ok && after.value).toHaveLength(2)
+    expect(
+      after.ok &&
+        Object.fromEntries(after.value.map((row) => [row.audienceId, row.views]))
+    ).toEqual({ [DEFAULT_AUDIENCE_ID]: 40, [SKIERS]: 5 })
   })
 
   it("refuses to hand back a batch whose stored signals no longer parse", async () => {

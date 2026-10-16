@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { err, ok, type Result } from "../result.js"
 import {
   activated,
   batchOf,
   dwelled,
   nodeId,
+  RIDERS,
+  SKIERS,
   TREE,
   viewed,
   viewKey,
@@ -51,6 +54,7 @@ const received = (seq: number, offsetMs: number): ReceivedBatch => ({
   ...batchOf([viewed("hero")], { view: viewKey(seq) }),
   seq,
   receivedAt: at(offsetMs),
+  audienceId: DEFAULT_AUDIENCE_ID,
 })
 
 const unwrap = <TValue>(result: Result<TValue, ReaderSignalStoreError>): TValue => {
@@ -161,6 +165,67 @@ describe("collectReaderSignals", () => {
 
     return { journal, store, time }
   }
+
+  /**
+   * ## One fold per audience (0284)
+   *
+   * A window holds whatever arrived in it, so once a deployment serves two
+   * forms of a page it holds two audiences interleaved. Folding the window
+   * whole would add two populations into one counter — and the rows that would
+   * say which form each reader saw are the rows being summed, so nothing
+   * afterwards could separate them again.
+   *
+   * The dwell numbers are deliberately different per audience: a fold that
+   * merged them would report 1,000 against one row, which is a plausible
+   * number and the reason this needs a test rather than a reading.
+   */
+  it("folds two audiences into two sets of counters rather than one", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    await journal.receive([
+      batchOf([viewed("pricing"), dwelled("pricing", 400)], { view: viewKey(1), audience: SKIERS }),
+      batchOf([viewed("pricing"), dwelled("pricing", 600)], { view: viewKey(2), audience: RIDERS }),
+    ])
+    time.moveTo(0)
+
+    const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(outcome).toMatchObject({ outcome: "collected", summary: { counted: 2, views: 2 } })
+
+    const rows = unwrap(await store.tallies({ treeId: TREE }))
+
+    expect(rows).toHaveLength(2)
+    expect(Object.fromEntries(rows.map((row) => [row.audienceId, row.dwellMs]))).toEqual({
+      [SKIERS]: 400,
+      [RIDERS]: 600,
+    })
+  })
+
+  /**
+   * The summary describes the run, not a population, so it adds up across the
+   * audiences the window held — two folds of one tally each is two tallies.
+   */
+  it("reports the whole run in one summary across audiences", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    await journal.receive([
+      batchOf([viewed("hero")], { view: viewKey(1), audience: SKIERS }),
+      batchOf([viewed("hero")], { view: viewKey(2), audience: RIDERS }),
+    ])
+    time.moveTo(0)
+
+    const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(outcome).toMatchObject({
+      outcome: "collected",
+      removed: 2,
+      summary: { counted: 2, tallies: 2, views: 2, uncorrelated: 0 },
+    })
+  })
 
   it("counts a ripe window into the counters and empties the buffer", async () => {
     const { journal, store, time } = await ripeBuffer()

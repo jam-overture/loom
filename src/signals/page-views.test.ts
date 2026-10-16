@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { batchOf, OTHER_TREE, TREE, viewed, viewKey } from "../testing/reader-signal-contract.js"
 
 import { openingsOf, pageViewReadingOf, type StoredPageViews } from "./page-views.js"
@@ -7,6 +8,7 @@ import { openingsOf, pageViewReadingOf, type StoredPageViews } from "./page-view
 const AT = "2026-10-03T00:00:00.000Z"
 
 const row = (over: Partial<StoredPageViews> = {}): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: TREE,
   revision: 1,
   opened: 0,

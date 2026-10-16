@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
@@ -83,6 +84,7 @@ const tally = (
 })
 
 const row = (counts: Partial<StoredPageViews> = {}): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: TREE,
   revision: 1,
   opened: 0,

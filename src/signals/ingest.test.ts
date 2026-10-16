@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest"
 
-import { batchOf, dwelled, region, viewed, viewKey } from "../testing/reader-signal-contract.js"
+import {
+  batchOf,
+  dwelled,
+  region,
+  RIDERS,
+  SKIERS,
+  viewed,
+  viewKey,
+} from "../testing/reader-signal-contract.js"
 
 import { describeIngestError, ingestReaderSignals, MAX_BATCHES_PER_DELIVERY } from "./ingest.js"
 import type { ReaderSignalJournal } from "./journal.js"
@@ -237,6 +245,34 @@ describe("how many page views began", () => {
 
     expect(outcome.ok && outcome.value.opened).toBe(2)
     expect(await openedIn(openings)).toEqual(["1:2:0"])
+  })
+
+  /**
+   * The door's half of 0284. A delivery is normally one page's worth and so one
+   * audience's, but nothing in the wire format says it must be — and openings
+   * are the denominator every rate is taken of, so two audiences filed into one
+   * row would make both variants' rates wrong in the same invisible direction.
+   */
+  it("files two audiences' arrivals under their own audiences", async () => {
+    const openings = memoryReaderTallyStore()
+
+    const outcome = await ingestReaderSignals(
+      memoryReaderSignalJournal(),
+      asSent([
+        batchOf([viewed("a")], { view: viewKey(1), first: true, audience: SKIERS }),
+        batchOf([viewed("a")], { view: viewKey(2), first: true, audience: RIDERS }),
+        batchOf([viewed("a")], { view: viewKey(3), first: true, audience: RIDERS }),
+      ]),
+      { at: AT, openings }
+    )
+
+    expect(outcome.ok && outcome.value.opened).toBe(3)
+
+    const rows = await openings.pageViews()
+
+    expect(rows.ok && Object.fromEntries(rows.value.map((row) => [row.audienceId, row.opened]))).toEqual(
+      { [SKIERS]: 1, [RIDERS]: 2 }
+    )
   })
 
   it("counts nothing for a caller that keeps no such counter", async () => {
