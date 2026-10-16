@@ -366,7 +366,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0274](0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md) | A page-view row says when the fold last touched it, and a stall is judged against a schedule the deployment hands in | Accepted | §4c (reader signals) |
 | [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Accepted | §1, §5 |
 | [0276](0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md) | A patch field says set, cleared or unchanged, and clearing removes the key | Accepted | §2 (the store), §3 (portal) |
-| 0277 | *No record on this branch* | — | — |
+| [0277](0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md) | A listing carries when the page last changed, and an absent stamp means never | Accepted | §5 (the store), §3 (portal) |
 | 0278 | *No record on this branch* | — | — |
 | [0279](0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md) | A kind's share of the readers who met it is compared at each window's own weights, and a counterfactual says which side moved | Accepted | §4c (reader signals) |
 | [0280](0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md) | The words of a kind of part the typical reader reached are weighted once per page, and a floor withholds every difference | Accepted | §4c (reader signals) |

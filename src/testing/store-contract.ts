@@ -25,7 +25,16 @@ import { sampleTree } from "./fixtures.js"
  * the interface — stays in that implementation's own test file.
  */
 
-export const appendOf = (delta: TreeDelta, proposal = "p_1"): AppendRequest => ({
+export const appendOf = (
+  delta: TreeDelta,
+  proposal = "p_1",
+  /**
+   * When the runtime applied it. Defaulted, because almost every case here is
+   * about what a store does with a delta rather than when; named by the cases
+   * that are, which cannot be written at all if every append shares one stamp.
+   */
+  appliedAt = FIXED_INSTANT
+): AppendRequest => ({
   proposalId: proposal as ProposalId,
   delta,
   provenance: {
@@ -35,7 +44,7 @@ export const appendOf = (delta: TreeDelta, proposal = "p_1"): AppendRequest => (
     confidence: 0.9,
     interpretedAt: FIXED_INSTANT,
   },
-  appliedAt: FIXED_INSTANT,
+  appliedAt,
 })
 
 export const removalOf = (
@@ -256,7 +265,10 @@ export const describeTreeStoreContract = (
 
         expect((await store.list()).ok && (await store.list())).toEqual({
           ok: true,
-          value: { trees: [{ treeId: tree.treeId, revision: 1 }], cursor: null },
+          value: {
+            trees: [{ treeId: tree.treeId, revision: 1, changedAt: FIXED_INSTANT }],
+            cursor: null,
+          },
         })
       })
 
@@ -314,6 +326,107 @@ export const describeTreeStoreContract = (
         const page = await store.list({ limit: 0 })
 
         expect(page.ok && page.value.trees).toHaveLength(1)
+      })
+
+      /**
+       * The half of the listing's rejected recency ordering that shipped: the
+       * fact, not the order (0020, 0277). These five cases are what make it a
+       * fact rather than a convenience — the stamp has to be the log's own, and
+       * the absence has to mean one thing.
+       */
+      describe("when each page last changed", () => {
+        it("says nothing about a tree that has never been changed", async () => {
+          const store = await freshStore()
+          await store.create(treeNamed("a"))
+
+          const page = await store.list()
+          const listing = page.ok ? page.value.trees[0] : undefined
+
+          expect(listing?.revision).toBe(0)
+          expect(listing && "changedAt" in listing).toBe(false)
+        })
+
+        it("reports the stamp the append was given, not the time of the read", async () => {
+          const { tree, ids } = sampleTree()
+          const store = await freshStore()
+          await store.create(tree)
+          await store.append(
+            tree.treeId,
+            appendOf(removalOf(tree, ids.footer), "p_1", "2026-03-02T11:12:13.000Z")
+          )
+
+          const page = await store.list()
+
+          expect(page.ok && page.value.trees[0]?.changedAt).toBe("2026-03-02T11:12:13.000Z")
+        })
+
+        it("moves to the newest entry's stamp as the log grows", async () => {
+          const { tree, ids } = sampleTree()
+          const store = await freshStore()
+          await store.create(tree)
+          await store.append(
+            tree.treeId,
+            appendOf(removalOf(tree, ids.footer), "p_1", "2026-03-02T11:12:13.000Z")
+          )
+
+          const first = await store.list()
+          expect(first.ok && first.value.trees[0]?.changedAt).toBe("2026-03-02T11:12:13.000Z")
+
+          await store.append(
+            tree.treeId,
+            appendOf(removalOf(tree, ids.header, 1), "p_2", "2026-09-09T07:00:00.000Z")
+          )
+
+          const second = await store.list()
+
+          expect(second.ok && second.value.trees[0]?.revision).toBe(2)
+          expect(second.ok && second.value.trees[0]?.changedAt).toBe("2026-09-09T07:00:00.000Z")
+        })
+
+        /**
+         * The reading a surface is allowed to depend on, asserted rather than
+         * written down: a stamp is present exactly when there is an entry to
+         * take one from. A store that filled this with a creation time would
+         * pass every case above and fail this one.
+         */
+        it("carries a stamp for exactly the trees whose revision is above zero", async () => {
+          const { tree, ids } = sampleTree()
+          const store = await freshStore()
+          await store.create(tree)
+          await store.create(treeNamed("z"))
+          await store.append(tree.treeId, appendOf(removalOf(tree, ids.footer)))
+
+          const page = await store.list()
+          const trees = page.ok ? page.value.trees : []
+
+          expect(trees).toHaveLength(2)
+          for (const listing of trees) {
+            expect("changedAt" in listing).toBe(listing.revision > 0)
+          }
+        })
+
+        /**
+         * The listing and the log are two reads of one fact, so the one thing
+         * that must never happen is that they disagree. This compares the
+         * listing against what `revisions` says, rather than against a literal
+         * the test typed in — the same stamp, reached two ways.
+         */
+        it("agrees with the newest entry the log itself hands back", async () => {
+          const { tree, ids } = sampleTree()
+          const store = await freshStore()
+          await store.create(tree)
+          await store.append(
+            tree.treeId,
+            appendOf(removalOf(tree, ids.footer), "p_1", "2026-05-05T05:05:05.000Z")
+          )
+
+          const page = await store.list()
+          const log = await store.revisions(tree.treeId, { direction: "older" })
+          const newest = log.ok ? log.value.revisions.at(-1) : undefined
+
+          expect(newest?.appliedAt).toBeDefined()
+          expect(page.ok && page.value.trees[0]?.changedAt).toBe(newest?.appliedAt)
+        })
       })
     })
 

@@ -8,6 +8,41 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-14 — lesson 16 taught that a listing has no timestamp, and the framework gave it one
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/16-persistence.md`)
+· **Status:** **corrected from outside the lane**, as the 11 October precedent on
+lesson 36 did — **nothing is broken and no test is failing now**; filed because
+the correction is a judgement about what the lesson teaches and that judgement is
+yours to keep or overturn
+
+`framework-72-when-a-page-last-changed` put `changedAt` on `TreeListing`
+([0277](decisions/0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md)),
+and lesson 16 is the lesson that prints a listing. Two things in it stopped being
+true in the same commit:
+
+- **The transcript.** `listing: [{"treeId":"t_1","revision":2}]` is now
+  `listing: [{"treeId":"t_1","revision":2,"changedAt":"2026-07-28T00:00:00.000Z"}]`.
+  `transcripts.test.ts` caught it, which is the instrument working.
+- **The paragraph under it**, which is the part worth your attention. It read
+  *"Nothing in it is a timestamp, because a `LoomTree` carries none — §1 kept
+  time out of the document, and a listing cannot honestly invent what the
+  document does not have."*
+
+**The second sentence of that is still exactly right and is the reason the field
+could be added at all.** A `LoomTree` carries no time; `changedAt` is the
+*store's* fact about the tree rather than the document's fact about itself. So
+the repair was not to delete the teaching but to split it: the document still has
+no time, and the thing reporting one is the store, reading the log's `appliedAt`.
+
+**What I added beyond the minimum, which is the bit to overturn if you disagree.**
+A short paragraph on the absence — a tree never appended to carries no
+`changedAt` key at all, not `null` — pointing at the `answeredBy` distinction the
+lesson already draws a few lines above, and suggesting the reader add a second
+`create` to Exercise A to see a two-key object beside a three-key one. It seemed
+a better lesson than the sentence it replaced, and it is the same shape as the
+11 October entry's *"the repair is arguably the better lesson"*. I did not add an
+exercise or a mark, because those are yours.
 ## 2026-10-15 — the front door sold a surface that is still being built, and the only place that said so was on the far side of the link
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
@@ -53524,8 +53559,38 @@ does not get to make it, which is why this is filed rather than worked around.
 ## 2026-10-13 — a listing says what a page is at, never when, so *changed recently* cannot be drawn
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`) ·
-**Status:** open — **a prototype entry that could not be built, and the reason
-is the contract rather than the screen**
+**Status:** **half closed by `framework-72-when-a-page-last-changed`**, 14
+October — **the fact ships, the ordering is the maintainer's.** `TreeListing`
+now carries `changedAt`, the `appliedAt` of the newest entry in that tree's log,
+absent exactly when `revision` is 0; both stores fill it and five contract cases
+hold them to it, including one that compares the listing against what
+`revisions` itself hands back. Recorded as
+[0277](decisions/0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md).
+
+**What is still open is the half this entry correctly guessed was not mine
+alone.** Ordering by recency supersedes part 2 of
+[0020](decisions/0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md),
+which is `Accepted`, so it is written as a `Proposed` record and **not
+implemented** — escalated rather than taken, and carried in a pull request of
+its own rather than beside the half that shipped. That record also
+names a thing this entry did not separate and the prototype does not say: *changed
+recently* is a sort (*every page, newest first*) or a filter (*the pages touched
+in the last N days*), they want different contracts, and it proposes the sort.
+
+**What `(portal)` can do with what shipped, and the line it must not cross.** A
+deployment whose pages fit in one listing page — `MAX_LISTING_LIMIT` is 200 —
+can draw the entry honestly today by sorting the page it holds. Past that it
+cannot: sorting a page sorts that page and not the store, so the newest tree
+overall may sit on a page the screen never asked for. The type says so. Until
+the ordering proposal is answered, `?filter=changed` reading as no filter at all stays the right
+behaviour for a deployment of unknown size, and this entry stays open for that
+reason rather than because nothing happened.
+
+**One sentence in `(portal)` is now stale**, left for that lane rather than
+edited from outside it: `_lib/page-filter.ts` opens with "`changed` cannot be
+computed. `TreeListing` is `{ treeId, revision }` and nothing else", and the
+second clause stopped being true today. The reasoning around it is still right
+and is why this was filed rather than guessed at — only the premise moved.
 
 `TreeListing` is the whole of what a listing gives about a page:
 
