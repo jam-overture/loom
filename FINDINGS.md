@@ -318,6 +318,17 @@ under a length nobody has established would be this repository asserting a
 guess, and the body is not a file in it. The remedy above is a habit, and this
 entry is where the next lane that loses a screenshot will find it.
 
+> **Two more readings, 16 October, and they narrow the bracket from the other
+> end.** `marketing-06` followed the remedy above on #655 — short sha, visual
+> slug not repeating the report slug — and posted two image links in one
+> comment at **124** and **116** characters. Both came back clean, read back
+> off the API rather than eyeballed.
+>
+> 124 is above the previous highest clean reading of 121, so the boundary is
+> now somewhere in **124–141** rather than 121–141. Nothing contradicts length
+> yet, and the habit is cheap enough that this lane has not lost a picture
+> since adopting it.
+
 ---
 ## 2026-10-14 — the marketing site named seven retired pages forty times, eleven of them in the present tense, and every reader-facing path was derived and therefore correct
 
