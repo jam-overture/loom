@@ -5,6 +5,7 @@ import {
   READING_LINE_PX,
   sectionBeingRead,
   sectionsIn,
+  sectionsSummary,
   SECTION_SCOPE_SELECTOR,
   SECTION_SELECTOR,
   type HeadingFound,
@@ -163,5 +164,25 @@ describe("the selectors", () => {
      browser cannot scroll to. */
   it("ask for an id on both levels", () => {
     expect(SECTION_SELECTOR).toBe("h2[id], h3[id]")
+  })
+})
+
+/**
+ * The words on the closed disclosure, which is the only thing a reader on a
+ * phone has to go on before pressing it.
+ */
+describe("how many sections a page has, in words", () => {
+  it("says the number and the noun, which together are a reason to press it", () => {
+    expect(sectionsSummary(14)).toBe("14 sections")
+  })
+
+  /* The pages with one `##` in them are real — several *Getting started* pages
+     are a single section — so the plural is a case and not a hypothetical. */
+  it("says it in the singular for the pages that have one section", () => {
+    expect(sectionsSummary(1)).toBe("1 section")
+  })
+
+  it("is plural for none, which is a phrase no reader sees because the line does not render", () => {
+    expect(sectionsSummary(0)).toBe("0 sections")
   })
 })

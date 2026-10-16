@@ -186,3 +186,18 @@ export const sectionBeingRead = ({ tops, line, atEnd }: Reading): string | undef
  */
 export const atEndOfPage = (scrollY: number, viewportHeight: number, documentHeight: number): boolean =>
   scrollY + viewportHeight >= documentHeight - 1
+
+/**
+ * How many sections a page has, as the words on a closed disclosure.
+ *
+ * The rail beside the prose shows the rows themselves, so it never has to say
+ * how many there are. On a phone there is no room beside the prose and the
+ * list starts closed, which means the only thing a reader has to decide
+ * whether to press it is this phrase. *Fourteen sections* is a reason to open
+ * it; *On this page* on its own is a label with nothing in it.
+ *
+ * It is a function rather than a template in the component for the one reason
+ * a plural ever is: the site has pages with a single section in them, and
+ * *1 sections* is the kind of thing a reader notices and nothing reports.
+ */
+export const sectionsSummary = (count: number): string => `${count} section${count === 1 ? "" : "s"}`

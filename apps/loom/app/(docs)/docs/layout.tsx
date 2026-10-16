@@ -1,13 +1,15 @@
 import { MobileNav } from "@/app/(docs)/_components/mobile-nav"
 import { OnThisPage } from "@/app/(docs)/_components/on-this-page"
+import { PageContents } from "@/app/(docs)/_components/page-contents"
 import { Pager } from "@/app/(docs)/_components/pager"
 import { Sidebar } from "@/app/(docs)/_components/sidebar"
 import { ARTICLE_ID, railScrollerAttr } from "@/app/(docs)/_lib/chrome"
 
 /**
  * The chrome every documentation page shares: a rail that does not move, an
- * article that does, the pager at the foot of it, and a second rail saying what
- * is in the page.
+ * article that does, the pager at the foot of it, and what is in the page —
+ * beside the prose where there is room for a second rail, and above it as a
+ * closed disclosure where there is not.
  *
  * The pager lives here rather than at the bottom of each page for the same
  * reason the rail does — a page that forgot to include it would be a dead end,
@@ -34,6 +36,21 @@ const DocsLayout = ({ children }: { readonly children: React.ReactNode }) => (
     </aside>
 
     <main id={ARTICLE_ID} tabIndex={-1} className="min-w-0 flex-1 px-5 py-10 focus-visible:outline-none sm:px-8 lg:px-12">
+      {/*
+       * The contents, in the shape a screen with no room beside the prose can
+       * hold. `xl:hidden` against the rail's `xl:block` below is one decision
+       * written twice: a reader gets the rail or the disclosure, never both and
+       * never neither, and the two lines are in this file so that moving the
+       * breakpoint moves both.
+       *
+       * Inside `main` and outside `article`, which puts it after the skip link's
+       * target and before the prose — so a reader who skipped to the page is
+       * offered what is in it first — without `prose` styling a nav.
+       */}
+      <div className="mx-auto w-full max-w-3xl xl:hidden">
+        <PageContents />
+      </div>
+
       <article className="prose mx-auto w-full max-w-3xl">{children}</article>
       <div className="mx-auto w-full max-w-3xl">
         <Pager />
