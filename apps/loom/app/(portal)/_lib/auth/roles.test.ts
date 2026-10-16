@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest"
 
 import { STAKE_ORDER, type StakeLevel } from "@jam-overture/loom"
 
-import { ceilingOf, mayAccept, mayAdminister, roleThatCanAccept, type Role } from "./roles"
+import {
+  ceilingOf,
+  mayAccept,
+  mayAddApplicationTo,
+  mayAdminister,
+  roleThatCanAccept,
+  type Role,
+} from "./roles"
 
 /**
  * A role is an acceptance ceiling, and these are the sentences the workspace
@@ -113,5 +120,23 @@ describe("the scale this is built on", () => {
    */
   it("is the four levels the roles were written against", () => {
     expect(STAKE_ORDER).toEqual<readonly StakeLevel[]>(["low", "medium", "high", "critical"])
+  })
+})
+
+describe("mayAddApplicationTo", () => {
+  it("is the owner's alone, as administering is", () => {
+    expect(mayAddApplicationTo("owner")).toBe(true)
+    expect(mayAddApplicationTo("approver")).toBe(false)
+    expect(mayAddApplicationTo("viewer")).toBe(false)
+  })
+
+  /**
+   * The case this function exists for. Holding no role at all arrives as
+   * `null`, and a call site that checked only the role would read `null` as
+   * *not an owner* in one branch and as *nothing to refuse* in another — which
+   * is how somebody puts an application in a project they were never added to.
+   */
+  it("refuses an actor who holds no role in the project", () => {
+    expect(mayAddApplicationTo(null)).toBe(false)
   })
 })
