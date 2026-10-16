@@ -10,8 +10,22 @@ import {
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
+import {
+  WHAT_A_RULE_CAN_SAY,
+  WHAT_THE_RECORD_HOLDS,
+  WHAT_YOUR_APP_DOES,
+} from "../docs-pages"
 import { JOURNEY, STEPS_CAPITALISED } from "../journey"
-import { action, heading, prose, section, splitSection, stack } from "../nodes"
+import {
+  action,
+  heading,
+  inlineLink,
+  prose,
+  proseParts,
+  section,
+  splitSection,
+  stack,
+} from "../nodes"
 import {
   DEMO,
   DOCS,
@@ -201,9 +215,44 @@ const closing = (ids: IdFactory): LoomNode =>
     { tone: "accent", width: "wide", eyebrow: "Going deeper" },
     "That is the short version",
     [
-      prose(
+      /**
+       * The three things this sentence has promised since 26 September, each
+       * one now the way to the page that has it.
+       *
+       * **Not one word of the sentence changed.** It already named three
+       * specific pages' worth of documentation and offered one button to the
+       * front of all of it — which is a redirect to *Introduction*, so a reader
+       * who wanted the third clause arrived at the first page of a
+       * thirty-three page site and started looking. The clauses were already
+       * the phrases a reader would press. They are pressable now.
+       *
+       * The labels are the pages' own headings where they fit the sentence, so
+       * somebody who presses *what a rule can say* lands on a page headed
+       * *What AI may change* and can tell they got there. `docs-pages.test.ts`
+       * holds all three to the heading and to the thing this clause claims is
+       * on them, read off `(docs)` rather than retyped.
+       *
+       * **The parts carry their own spaces** and the commas sit outside the
+       * links, because `proseParts` joins nothing: a separator here would put a
+       * space in front of every comma that follows a phrase.
+       *
+       * *Read the docs* stays under it, and it is not a leftover. The sentence
+       * names the documentation, so `naming.test.ts` requires this band to
+       * offer the way to `/docs` itself — and a reader who would rather start
+       * at the beginning than at one of three middles should not have to press
+       * a clause to get there.
+       */
+      proseParts(
         ids,
-        "This page is the short version on purpose. The documentation has the long one: what a rule can say, what the record holds field by field, and how to wire it into a page you already have.",
+        [
+          "This page is the short version on purpose. The documentation has the long one: ",
+          inlineLink(ids, "what a rule can say", WHAT_A_RULE_CAN_SAY.path),
+          ", ",
+          inlineLink(ids, "what the record holds", WHAT_THE_RECORD_HOLDS.path),
+          " field by field, and ",
+          inlineLink(ids, "how to wire it", WHAT_YOUR_APP_DOES.path),
+          " into a page you already have.",
+        ],
         { measured: true }
       ),
       stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
