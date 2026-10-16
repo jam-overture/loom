@@ -802,15 +802,20 @@ The output:
   palette slots:             17
   changed by the palette id: 23
   --loom-accent:             #4a5b78 -> #ffd400
-  --loom-scale-5:            24px -> 24px
+  --loom-scale-5:            clamp(20.76px, 3.13cqi, 24px) -> clamp(20.76px, 3.13cqi, 24px)
   the two documents are identical:          false
   ... once one style attribute is removed: true
   occurrences of --loom-accent in a page:   1
 ```
 
 Twenty-three of fifty-two, which is the orthogonality claim in numbers: the
-palette id moves every colour and no type or spacing value, so `--loom-scale-5` is
-24px in both. Twenty-three rather than seventeen because a palette's variables are
+palette id moves every colour and no type or spacing value, so `--loom-scale-5`
+is byte-identical in both. It is a `clamp()` rather than a plain `24px` because a
+declared ramp step is a *maximum* the browser reads a width against
+([0283](../decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)) —
+which changes nothing here, and is worth noticing for what it does not change:
+the font pack owns that length at every width, and swapping the palette moves no
+part of it. Twenty-three rather than seventeen because a palette's variables are
 not only its seventeen slots — the runtime also measures a chroma for five of them
 and derives a scrim pair from its body copy
 ([0131](../decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md)),

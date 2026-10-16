@@ -36,6 +36,24 @@ type Entry = {
   readonly log: readonly StoredRevision[]
 }
 
+/**
+ * The summary, read off the log rather than assembled beside it.
+ *
+ * `changedAt` is the newest entry's `appliedAt`, and taking it from the log is
+ * what makes the contract's promise true here by construction: an empty log is
+ * revision 0 and yields no stamp, so the two cannot disagree without `append`
+ * having broken the invariant that advances them together.
+ */
+const listingOf = (entry: Entry): TreeListing => {
+  const newest = entry.log.at(-1)
+
+  return {
+    treeId: entry.snapshot.treeId,
+    revision: entry.snapshot.revision,
+    ...(newest === undefined ? {} : { changedAt: newest.appliedAt }),
+  }
+}
+
 export const memoryTreeStore = (scope: StoreScope = {}): TreeStore => {
   const project = scope.application ?? DEFAULT_APPLICATION_ID
   /*
@@ -138,8 +156,9 @@ export const memoryTreeStore = (scope: StoreScope = {}): TreeStore => {
 
       const listings: readonly TreeListing[] = page.flatMap((treeId) => {
         const entry = entryOf(treeId)
+        if (!entry) return []
 
-        return entry ? [{ treeId: entry.snapshot.treeId, revision: entry.snapshot.revision }] : []
+        return [listingOf(entry)]
       })
 
       const last = page.at(-1)

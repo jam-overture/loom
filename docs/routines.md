@@ -60,6 +60,18 @@ pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit
 and then read `verify.exit` in a separate command. Writing the status to a file
 has to be the *last thing the line does*.
 
+**Install before you merge, and regenerate after you merge.** `.gitattributes`
+gives `decisions/README.md` and `*.generated.json` a `merge=ours` driver, and
+`prepare` sets that driver up **on install** — so a run that checks whether its
+branch still merges before it installs anything, which is the cheapest useful
+first act, resolves those files by hand instead. That is the half that costs a
+careful hand-resolution. The other half costs a confusing red: `merge=ours`
+keeps *the branch's* copy, so a clean merge leaves the generated file stale, and
+`pnpm verify` then fails somewhere that names neither the merge nor the file —
+on 15 October, as two failures in `(docs)` about `src/signals/` exports that no
+page mentions. `pnpm decisions:index` and `pnpm docs:api` are the two
+regenerators. Both filed, both met, both by the framework lane in one day.
+
 This is the second spelling of one mistake and the reason the rule now names the
 act. `Loom primitives` filed the first on 12 September, after
 `pnpm verify 2>&1 | tail -35` cost that run fifteen minutes: the exit code of a
