@@ -55233,3 +55233,62 @@ true of the clamp — it would be a loss to delete with the constant. And the
 derived from it, and this entry is where somebody changing one will find the
 other.
 
+
+---
+## 2026-10-16 — the before-and-after funnel card, and the one figure on it that is an interval rather than a number
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a surface to build on a reading that is on `main`**, with
+the four refusals it must not undo
+
+[0288](decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)
+publishes `funnelChangeOf(was, now)`: two windows of one page's funnels held
+against each other, per question, with what moved and which half of the funnel
+moved it. It takes the two `FunnelReach`es a funnel card already builds — no
+store read, no second join — and answers *we shipped a change, did more readers
+buy*, which is the sentence the whole subsystem has been building toward.
+
+**Four things the screen must not do**, each a refusal in the record rather
+than an oversight here:
+
+- **Do not draw `rateRatio` as a number on its own.** It is the only figure in
+  this subsystem built out of two *floors*: `rate` leans down by the
+  conversions a rollup boundary split (0231), by an amount the deployment's own
+  `windowMs` sets. `rateRatioAtLeast` and `rateRatioAtMost` bracket the true
+  ratio and `rateMoved` says whether the bracket clears 1. **`rateMoved: false`
+  is a thing to draw and not to hide** — *the rate fell by a third and your
+  rollup window can explain all of it* is a sentence about configuration, and a
+  card showing the bare ratio prints it as a collapse. `FunnelChange.undecided`
+  is how many of the pairs on the screen are in that state.
+- **Do not print `readersMoved` as people.** It is the movement in the
+  conversion share at the later window's scale — a mass for ranking, like every
+  other `…Moved` figure here (0280). `mostGained` and `mostLost` are already
+  ranked by it, by headcount rather than by share, so a screen that re-ranks by
+  `rateRatio` will lead with whichever funnel has four readers in it.
+- **Do not draw a `broken` question as readers who stopped buying.** It is the
+  most useful row this reading has and the most alarming if it is drawn as a
+  funnel: the change removed a part the question names (0238), every later-side
+  figure is withheld, and the thing to fix is the deployment's configuration.
+  `QuestionMovement` answers under every silence, because it is a fact about
+  two trees.
+- **Do not refuse the row under a silence.** This is the first silence set here
+  that costs half a reading rather than a figure or a row: the door's three
+  states withhold every share of the arrivals and leave the rates, the
+  movements and the questions standing, because a rate is two counts off one
+  row. A deployment whose page-view rows have expired still has a funnel
+  comparison worth drawing.
+
+**The one state worth a design decision rather than a rule.** Where a window is
+`unopened` or `uncounted` there is no drift to bracket with, so `rateRatio` is
+given and `rateMoved` is `null` — a ratio with no interval, in exactly the state
+where the straddle is least knowable. A card drawing it as though it were
+`rateMoved: true` would be wrong in the worst direction. The honest treatment is
+probably the ratio in the same weight as an estimate elsewhere on your screens,
+with the silence's own sentence under it.
+
+`cause` is the sentence to lead the card with where it is not `null`: *more
+readers reached the ask and the same share bought*, or *the same readers reached
+it and more bought*. It has three members and never a fourth, so a surface that
+handles `entry`, `closing` and `either` has handled all of it.
+
+---

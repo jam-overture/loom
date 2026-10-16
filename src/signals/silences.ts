@@ -4,6 +4,7 @@ import type { ActionChangeSilence } from "./action-change.js"
 import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
+import type { FunnelChangeSilence } from "./funnel-change.js"
 import type { DeploymentSilence } from "./deployment.js"
 import type { KindActionSilence } from "./library-action.js"
 import type { KindChangeSilence } from "./library-change.js"
@@ -21,7 +22,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are fifteen of them. Each set's names are right in its own
+ * absent, and there are sixteen of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -145,6 +146,7 @@ export type SilenceVocabulary =
   | "copy"
   | "copy-change"
   | "deployment"
+  | "funnel-change"
   | "library"
   | "library-action"
   | "library-change"
@@ -163,6 +165,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "copy",
     "copy-change",
     "deployment",
+    "funnel-change",
     "library",
     "library-action",
     "library-change",
@@ -190,6 +193,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     copy: "page",
     "copy-change": "comparison",
     deployment: "page",
+    "funnel-change": "comparison",
     library: "kind",
     "library-action": "kind",
     "library-change": "kind",
@@ -205,8 +209,8 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Thirteen of them against sixty-eight members across the fifteen sets, which is
- * the overlap this module exists to state. None of them replaces a set's own name:
+ * Thirteen of them against seventy-three members across the sixteen sets, which
+ * is the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
  *
@@ -353,6 +357,21 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * does not need a new reading; it needs a reading that can be in a state
  * nothing else could, and a set that has been published for a month can turn
  * out to have been in one all along.
+ *
+ * **The sixteenth needed none either, and it is the first set whose members
+ * withhold half of their reading**
+ * ([0288](../../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)).
+ * A comparison of two windows' funnels reports the state every comparison here
+ * reports, the door's three said of a pair, and `nothing-carried` said of a
+ * **question** a deployment wrote rather than of a word or of a place.
+ *
+ * What it shows is that the cost of a condition belongs to the reading and not
+ * to the condition, which 0280 found at one figure and this finds at half a
+ * screen. The door's three leave a funnel comparison's rates, its movements and
+ * what a change did to its questions standing, and withhold only its shares of
+ * the arrivals — because a rate is two counts off one row and needs no count of
+ * the readers who arrived. A surface reading any condition as *this row says
+ * nothing* would throw away the half that still answers.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -920,6 +939,35 @@ export const meaningOfReachSilence = (silence: ReachSilence): SilenceMeaning => 
       return meaning("reach", "no-openings-marked")
     case "uncounted":
       return meaning("reach", "no-window-folded")
+  }
+}
+
+/**
+ * What a comparison of two windows' funnels reports (0288).
+ *
+ * **The sixteenth set, and the first assembled out of the door's three said of
+ * a pair.** `different-trees` is the state every comparison here reports;
+ * `unscaled`, `unopened` and `uncounted` are the door's three (0229) at the
+ * `comparison` subject rather than the `page` subject a funnel answer reports
+ * them at; and `unasked` is `nothing-carried` said of a question.
+ *
+ * Nothing is new because nothing can be: a comparison is withheld for every
+ * reason one side's figure is withheld and for nothing a window could be in on
+ * its own. What the set does add is written up with the conditions above — the
+ * door's three cost this reading half of itself and not all of it.
+ */
+export const meaningOfFunnelChangeSilence = (silence: FunnelChangeSilence): SilenceMeaning => {
+  switch (silence) {
+    case "different-trees":
+      return meaning("funnel-change", "two-pages")
+    case "unscaled":
+      return meaning("funnel-change", "no-arrivals-counted")
+    case "unopened":
+      return meaning("funnel-change", "no-openings-marked")
+    case "uncounted":
+      return meaning("funnel-change", "no-window-folded")
+    case "unasked":
+      return meaning("funnel-change", "nothing-carried")
   }
 }
 
