@@ -128,19 +128,34 @@ export type SectionTop = {
 /**
  * How far down the viewport a heading has to come before the reader is in it.
  *
- * 7.5rem, and the number is **chosen against where a press of a row lands**
- * rather than by eye. `globals.css` gives every prose heading
- * `scroll-margin-top: 5rem`, so a reader who presses a row gets that heading 80
- * pixels down the window — clear of the 3.5rem header that would otherwise sit
- * on top of it. The line has to be below that point, or the section a reader
- * just asked for would arrive unmarked, and the 40 pixels between the two are
- * what makes that hold through a browser's own rounding and a scroll that
- * stops a fraction short.
+ * 11.5rem, and the number is **chosen against where a press of a row lands**
+ * rather than by eye. The line has to be below that point, or the section a
+ * reader just asked for arrives unmarked and the mark sits on the section
+ * above it.
+ *
+ * **Two declarations decide where a press lands, and they add up.** `globals.css`
+ * gives `html` a `scroll-padding-top: 5rem`, which insets the top of the
+ * scrollport for every in-page scroll, and it gives every prose heading a
+ * `scroll-margin-top: 5rem`, which grows the box the browser is scrolling to.
+ * A press therefore lands a heading **160 pixels** down the window, not 80.
+ *
+ * That was measured rather than reasoned, and it had already cost something:
+ * this constant was 120 until 16 October, chosen against the heading's 5rem
+ * alone, and 120 is *above* 80 and *below* 160 — so pressing a row on the rail
+ * marked the section above the one the reader had asked for, on every page.
+ * `pnpm shoot`' `measure` printed the landing as `y 160` on a press of a
+ * contents row at 390 pixels wide, which is the first time anything in this
+ * repository looked. The test beside this now reads **both** declarations and
+ * sums them, which is the half that was missing: a test that reads one of two
+ * numbers is a test that passes while the thing it guards is wrong.
+ *
+ * The 24 pixels between 160 and 184 are what makes it hold through a browser's
+ * own rounding and a smooth scroll that stops a fraction short.
  *
  * It also has to be near the top of the window. A line halfway down would mean
  * the mark moved on while the heading it names was still being read.
  */
-export const READING_LINE_PX = 120
+export const READING_LINE_PX = 184
 
 export type Reading = {
   /** Each section's top, in document order, in viewport coordinates. */
@@ -186,3 +201,18 @@ export const sectionBeingRead = ({ tops, line, atEnd }: Reading): string | undef
  */
 export const atEndOfPage = (scrollY: number, viewportHeight: number, documentHeight: number): boolean =>
   scrollY + viewportHeight >= documentHeight - 1
+
+/**
+ * How many sections a page has, as the words on a closed disclosure.
+ *
+ * The rail beside the prose shows the rows themselves, so it never has to say
+ * how many there are. On a phone there is no room beside the prose and the
+ * list starts closed, which means the only thing a reader has to decide
+ * whether to press it is this phrase. *Fourteen sections* is a reason to open
+ * it; *On this page* on its own is a label with nothing in it.
+ *
+ * It is a function rather than a template in the component for the one reason
+ * a plural ever is: the site has pages with a single section in them, and
+ * *1 sections* is the kind of thing a reader notices and nothing reports.
+ */
+export const sectionsSummary = (count: number): string => `${count} section${count === 1 ? "" : "s"}`

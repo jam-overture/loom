@@ -54278,9 +54278,12 @@ do.
 ## 2026-10-15 — the contents rail is a desktop rail, so the reader most likely to be lost in a long page is the one without it
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/docs/layout.tsx`) · **Status:** open — **a stated limit
-of what shipped today**, with the shape of the remedy named and deliberately
-not taken
+(`apps/loom/app/(docs)/docs/layout.tsx`) · **Status:** **closed by
+`docs-57-the-contents-a-phone-can-open`, 16 October 2026** — a closed disclosure
+above the article at every width below 1280, from the same walk as the rail.
+What it did **not** take is the reachability half, which is filed again below as
+its own entry: the list is above the article, so it serves a reader arriving at
+a page rather than one already deep in it
 
 *On this page* is in the layout at `xl` and above, so it is in the picture at
 1280 and absent at 390. A phone reader of *Making it look like yours* gets
@@ -55233,6 +55236,122 @@ true of the clamp — it would be a loss to delete with the constant. And the
 derived from it, and this entry is where somebody changing one will find the
 other.
 
+---
+## 2026-10-16 — both of a phone's navigations sit at the top of the document, so a reader 15,000 pixels into a page scrolls back to the top to use either
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/mobile-nav.tsx`,
+`_components/page-contents.tsx`, `docs/layout.tsx`) · **Status:** open — **the
+stated limit of what shipped today**, with the remedy's shape named and
+deliberately not taken
+
+`page-contents.tsx` gives a narrow screen the contents of the page it is on,
+which closes the 15 October entry *the contents rail is a desktop rail*. It
+sits above the article, which is where that entry said to put it and is the
+right place for a reader **arriving** at a page: they land at the top, the line
+says the page has fourteen sections, and one press lists them.
+
+**It is the wrong place for a reader already in the page.** *Making it look
+like yours* is 24,944 pixels of article. A reader two thirds of the way down it
+who wants another section has to scroll to the top of the document to reach the
+list, and the measurement that makes this certain rather than likely is in
+`page-contents.tsx`: the line's foot is at `y 188` with the page at the top, so 188
+pixels of scroll put it off the screen, and a press of a row leaves it `y -20605`
+above the window.
+
+**`mobile-nav.tsx` has exactly the same property**, and that is why this is one
+finding rather than two. *Browse the documentation* is in the layout above
+`main` and is not sticky either, so the phone's answer to *where am I in the
+site* scrolls away at the same rate as its answer to *what is in this page*.
+The site's header is sticky; neither navigation is in it.
+
+**The remedy is one bar that stays with the reader and holds both questions**,
+under the sticky header, at the widths with no rail. It is a unit of its own
+because it is a restructuring of `mobile-nav.tsx` rather than an addition
+beside it, it costs vertical space on every scroll on the screen with least of
+it, and the two disclosures then have to agree about which of them is open.
+Taking it today would have meant shipping that argument inside a unit about a
+contents list.
+
+---
+## 2026-10-16 — the line appears when the page's script runs, so the prose below it moves down by 85 pixels after the first paint
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/page-contents.tsx`, `docs/layout.tsx`) ·
+**Status:** open — **measured and shipped as it is**, with three remedies
+named and the reason none was taken today
+
+The rows of a contents list are read off the rendered page in the browser, for
+the reason `_lib/on-this-page.ts` gives at length: two *Architecture* pages get
+most of their headings from a component, so a list compiled from the markdown
+would show five rows for a page with thirteen places to land. The cost of that
+choice is stated there too — **the list is not in the server's HTML** — and on
+the rail it costs nothing visible, because `docs/layout.tsx` reserves the
+column whether or not a rail arrives in it.
+
+**The narrow presentation has no column to reserve.** It is a line in the
+document above the article, so the server sends the page without it and the
+prose moves down when it appears. The line measures 46 pixels and carries a
+40-pixel margin, so the shift is **86 pixels**, every page, at every width
+below 1280. It is derived from the box the harness measured rather than
+photographed: a shot cannot be taken between hydration and the effect.
+
+Three remedies, none of them free:
+
+1. **Reserve 85 pixels in the layout**, which is what the column beside the
+   prose already does and the same argument — *prose that shifts under them
+   costs them their place*. It leaves a permanent empty band above the title on
+   the seventeen generated reference pages, which have no sections to list, at
+   the width where vertical space is scarcest.
+2. **Render the line on the server without its count**, and fill the count in
+   after the walk. The height is then right from the first paint on the
+   thirty-one written pages, and the seventeen reference pages get a line that
+   says *On this page* and then vanishes.
+3. **Tell the layout which pages have no sections.** The search index is
+   generated at build time and already holds each page's headings
+   (`_lib/search/`), so the set of pages with nothing to list is knowable
+   without reading the document. That makes 1 exact rather than a compromise,
+   and it is a second source for a list this lane deliberately reads from one.
+
+**Recommendation: 3, then 1.** Not taken today because the unit was the
+presentation, and because 1 on its own trades a shift on 31 pages for a blank
+band on 17 — which is a different reader's loss rather than a smaller one, and
+not a trade to make without the maintainer or the index behind it.
+
+---
+## 2026-10-16 — the contents list is now two elements with one accessible name, and a shot-list selector naming it matches the hidden one too
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/on-this-page.tsx`,
+`_components/page-contents.tsx`) · **Status:** open — **a hazard an instrument
+meets rather than a defect a reader meets**, worked around in today's shot list
+and written down for the next run
+
+`nav[aria-label="On this page"]` was one element until today and is now two: the
+rail beside the prose, and the disclosure above it. Only one is ever
+**displayed** — the layout's `xl:block` and `xl:hidden` are one decision written
+twice — so a reader and a screen reader are each offered exactly one navigation
+with that name, which is the property that matters and is held by the
+breakpoints.
+
+**Both are in the DOM at every width**, because `display: none` is how the other
+one is put away. So a shot list that names the list by that label is naming two
+elements, and the harness refuses a `click` whose selector matches more than
+one. `pnpm shoot`'s `measure` does not refuse: it prints `(1 of 2)` and the box
+of the first match, which is the disclosure, because `main` comes before the
+trailing `aside` in the layout. A wide shot asking for the rail's box gets the
+disclosure's, which at 1280 is `0x0`.
+
+Today's shot list scopes every selector with `#article`, which is the one thing
+that tells them apart without adding anything to the markup: the disclosure is
+inside the article's landmark and the rail is outside it. That works and is
+worth knowing; what it is not is discoverable, which is what this entry is for.
+
+The alternative is a `data-` attribute on one of them, as `railScrollerAttr`
+already does for the other rail's scroller, and `_lib/chrome.ts` is where it
+would live. It is not taken yet because `#article` is free and because a second
+name for a thing that already has one is the kind of addition this route group
+keeps declining.
 
 ---
 ## 2026-10-16 — the before-and-after funnel card, and the one figure on it that is an interval rather than a number

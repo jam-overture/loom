@@ -1,18 +1,8 @@
 "use client"
 
-import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import {
-  atEndOfPage,
-  READING_LINE_PX,
-  sectionBeingRead,
-  sectionsIn,
-  SECTION_SCOPE_SELECTOR,
-  SECTION_SELECTOR,
-  type PageSection,
-  type SectionTop,
-} from "@/app/(docs)/_lib/on-this-page"
+import { sectionBeingReadNow, usePageSections } from "./use-page-sections"
 
 /**
  * The page's own sections, beside the page, with the one being read marked.
@@ -22,64 +12,24 @@ import {
  * pages that run to fourteen headings. `_lib/on-this-page.ts` is the whole of
  * the reasoning: what counts as a section, why the rows are read out of the
  * document rather than compiled from the markdown, and which row is marked.
+ * `use-page-sections.ts` is the browser work.
  *
- * Everything in here is the three pieces of browser that reasoning needs — the
- * walk, the measurement, and the two listeners — and no judgement of its own.
+ * This is the **wide** presentation of that list, and `page-contents.tsx` is
+ * the narrow one. What is left in here is the two listeners, because a rail a
+ * reader can see while they scroll is a rail that has to keep up with them.
  */
-
-/** The headings on the page, in document order, as the rows they become. */
-const sectionsOnPage = (): readonly PageSection[] => {
-  const article = document.querySelector(SECTION_SCOPE_SELECTOR)
-
-  if (article === null) return []
-
-  return sectionsIn(
-    [...article.querySelectorAll(SECTION_SELECTOR)].map((heading) => ({
-      level: Number(heading.tagName.slice(1)),
-      id: heading.id,
-      /* `textContent` rather than `innerText`: a heading holding a name in
-         backticks is a `<code>` inside it, and both report the same words — but
-         `innerText` asks for a layout of an element that may be off screen. */
-      text: heading.textContent ?? "",
-    }))
-  )
-}
-
-/** Where each row's heading currently is, which changes with every scroll. */
-const topsOf = (sections: readonly PageSection[]): readonly SectionTop[] =>
-  sections.flatMap((section) => {
-    const heading = document.getElementById(section.id)
-
-    return heading === null ? [] : [{ id: section.id, top: heading.getBoundingClientRect().top }]
-  })
-
 export const OnThisPage = () => {
-  const pathname = usePathname()
-  const [sections, setSections] = useState<readonly PageSection[]>([])
+  const sections = usePageSections()
   const [current, setCurrent] = useState<string | undefined>(undefined)
 
-  /*
-   * Read on the address rather than on mount alone. This is mounted by the
-   * layout and survives every navigation inside the documentation, so a page
-   * change replaces the article underneath it without remounting anything —
-   * the same fact the rail on the left answers the same way.
-   */
   useEffect(() => {
-    setSections(sectionsOnPage())
-    setCurrent(undefined)
-  }, [pathname])
+    if (sections.length === 0) {
+      setCurrent(undefined)
 
-  useEffect(() => {
-    if (sections.length === 0) return
+      return
+    }
 
-    const mark = () =>
-      setCurrent(
-        sectionBeingRead({
-          tops: topsOf(sections),
-          line: READING_LINE_PX,
-          atEnd: atEndOfPage(window.scrollY, window.innerHeight, document.documentElement.scrollHeight),
-        })
-      )
+    const mark = () => setCurrent(sectionBeingReadNow(sections))
 
     mark()
 
