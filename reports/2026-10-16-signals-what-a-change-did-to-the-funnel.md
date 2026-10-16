@@ -138,7 +138,30 @@ is least knowable.
 
 ## Test numbers
 
-TEST_NUMBERS_PLACEHOLDER
+`pnpm verify` **green, exit 0**, on the tree this pull request carries. Nothing
+failed, nothing was skipped, and no test was given a longer budget or weakened
+to get there.
+
+- **5,200 runtime tests across 229 files**, and **5,879 app tests across 333
+  files**. `findings:check` reads 1,218 entries with none malformed;
+  `reports:check` 1,855 visuals at 130.7MB with none over budget;
+  `prerender:check` 133 pages and 1,840 text junctions, none run together.
+- `src/signals` alone: **1,139 tests across 40 files**, all passing.
+- The unit itself is **35 tests** in a new file, and the two files it touched
+  are unchanged in count but for the silence set: `funnel.test.ts` 48 and
+  `silences.test.ts` 49.
+
+**One thing failed on the way and is worth writing down**, because it will
+catch the next run that documents a published declaration. The first full
+verify went red on `src/documentation.test.ts` — *never makes a decision-record
+number part of a published sentence* — with four offences, all mine. The rule
+is the maintainer's and the enforcement is exact: a record number may appear in
+a **parenthetical citation** and nowhere else, because the site strips the
+parenthetical and whatever is left is what a stranger reads. *"which is 0221's
+rule"*, *"the error 0158 made permanent"*, *"(0274 says which)"* and *"the
+sufficiency rule 0244 and 0279 publish"* all survive that strip and all read as
+gibberish to somebody who has never seen this repository. Reworded; the gate is
+green and the sentences are better.
 
 **Four planted mutations, each caught**, which is what I checked before
 believing the suite:
