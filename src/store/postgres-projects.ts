@@ -1,8 +1,8 @@
-import { asc, eq } from "drizzle-orm"
+import { and, asc, eq, isNull } from "drizzle-orm"
 
 import { applyPatch } from "../patch.js"
 import { projectSchema, type Project, type ProjectId } from "../project/project.js"
-import type { ProjectStore, ProjectStoreError } from "../project/store.js"
+import { matchesListing, type Listing, type ProjectStore, type ProjectStoreError } from "../project/store.js"
 import { err, ok, type Result } from "../result.js"
 
 import type { LoomDatabase } from "./database.js"
@@ -26,15 +26,16 @@ import { loomProjects } from "./schema.js"
 /**
  * A row on the way out, checked rather than cast.
  *
- * Three columns and no nullable one, which is the whole difference from the
- * application store next door: a project has an identity and a name, and
- * nothing that can be absent.
+ * `closed_at` is the one nullable column, and it comes out **absent rather than
+ * `null`** so that *this is open* has one spelling rather than two for every
+ * caller to check (0289, and 0274 made the same choice about `folded_at`).
  */
 const toProject = (row: typeof loomProjects.$inferSelect): Result<Project, ProjectStoreError> => {
   const parsed = projectSchema.safeParse({
     projectId: row.projectId,
     name: row.name,
     createdAt: row.createdAt,
+    ...(row.closedAt === null ? {} : { closedAt: row.closedAt }),
   })
 
   return parsed.success
@@ -85,7 +86,7 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
     }
   },
 
-  list: async () => {
+  list: async (listing?: Listing) => {
     try {
       /**
        * Ordered in the statement rather than after it, so the order is the
@@ -99,7 +100,12 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
       for (const row of rows) {
         const project = toProject(row)
         if (!project.ok) return project
-        projects.push(project.value)
+        /**
+         * Filtered here rather than in the statement, so that the one rule
+         * about what `closed` means is the one function both stores call. A
+         * `WHERE` would be a second copy of a three-case rule.
+         */
+        if (matchesListing(project.value.closedAt, listing)) projects.push(project.value)
       }
       return ok(projects)
     } catch (cause) {
@@ -152,6 +158,50 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
       return ok(next.data)
     } catch (cause) {
       return err(unavailable(cause, `could not rename project ${projectId}`))
+    }
+  },
+
+  /**
+   * Idempotent in the statement: the `WHERE` refuses a row that is already
+   * closed, so the instant cannot move because somebody pressed twice (0289).
+   */
+  close: async (projectId, at) => {
+    try {
+      await db
+        .update(loomProjects)
+        .set({ closedAt: at })
+        .where(and(eq(loomProjects.projectId, projectId), isNull(loomProjects.closedAt)))
+
+      const rows = await db
+        .select()
+        .from(loomProjects)
+        .where(eq(loomProjects.projectId, projectId))
+        .limit(1)
+
+      const row = rows[0]
+      return row === undefined ? err({ code: "not-found", projectId }) : toProject(row)
+    } catch (cause) {
+      return err(unavailable(cause, `could not close project ${projectId}`))
+    }
+  },
+
+  reopen: async (projectId) => {
+    try {
+      await db
+        .update(loomProjects)
+        .set({ closedAt: null })
+        .where(eq(loomProjects.projectId, projectId))
+
+      const rows = await db
+        .select()
+        .from(loomProjects)
+        .where(eq(loomProjects.projectId, projectId))
+        .limit(1)
+
+      const row = rows[0]
+      return row === undefined ? err({ code: "not-found", projectId }) : toProject(row)
+    } catch (cause) {
+      return err(unavailable(cause, `could not reopen project ${projectId}`))
     }
   },
 })

@@ -253,5 +253,96 @@ export const describeApplicationStoreContract = (
       const read = await store.get(project.applicationId)
       expect(read.ok && read.value.name).toBe(project.name)
     })
+
+    /**
+     * ## Closing (0289)
+     *
+     * The same shape the project store takes, held here too — an application is
+     * closed by its own id or by its project closing, and the two must not be
+     * able to disagree about what closed means.
+     */
+    describe("closing", () => {
+      const AT = "2026-10-16T09:00:00.000Z"
+      const LATER = "2026-10-16T10:00:00.000Z"
+
+      it("stamps when it was closed", async () => {
+        const store = await make()
+        const application = applicationFixture()
+        await store.create(application)
+
+        const closed = await store.close(application.applicationId, AT)
+
+        expect(closed.ok && closed.value.closedAt).toBe(AT)
+      })
+
+      it("still answers for it by id", async () => {
+        const store = await make()
+        const application = applicationFixture()
+        await store.create(application)
+        await store.close(application.applicationId, AT)
+
+        const read = await store.get(application.applicationId)
+
+        expect(read.ok && read.value.closedAt).toBe(AT)
+      })
+
+      it("leaves it out of a listing that did not ask for it", async () => {
+        const store = await make()
+        const application = applicationFixture()
+        await store.create(application)
+        await store.close(application.applicationId, AT)
+
+        const listed = await store.list()
+
+        expect(listed.ok && listed.value).toEqual([])
+      })
+
+      it("does not move the instant when it is closed again", async () => {
+        const store = await make()
+        const application = applicationFixture()
+        await store.create(application)
+        await store.close(application.applicationId, AT)
+
+        const again = await store.close(application.applicationId, LATER)
+
+        expect(again.ok && again.value.closedAt).toBe(AT)
+      })
+
+      /**
+       * A closed application keeps its host. Closing says it has stopped, not
+       * that it was never anywhere — and the host is what a person needs to
+       * recognise it by when they come looking for it to reopen.
+       */
+      it("keeps the rest of the row exactly as it was", async () => {
+        const store = await make()
+        const application = applicationFixture({ host: "shop.example.com" })
+        await store.create(application)
+
+        const closed = await store.close(application.applicationId, AT)
+
+        expect(closed.ok && closed.value.host).toBe("shop.example.com")
+        expect(closed.ok && closed.value.name).toBe(application.name)
+      })
+
+      it("opens it again, and the stamp goes rather than emptying", async () => {
+        const store = await make()
+        const application = applicationFixture()
+        await store.create(application)
+        await store.close(application.applicationId, AT)
+
+        const reopened = await store.reopen(application.applicationId)
+
+        expect(reopened.ok && reopened.value.closedAt).toBeUndefined()
+      })
+
+      it("says so when there is no such application to close", async () => {
+        const store = await make()
+
+        const closed = await store.close(applicationIdSchema.parse("app_nothing"), AT)
+
+        expect(closed.ok).toBe(false)
+        expect(!closed.ok && closed.error.code).toBe("not-found")
+      })
+    })
   })
 }

@@ -178,8 +178,15 @@ export const boundedProjectStore = (
 ): ProjectStore => ({
   create: (project) => store.create(project),
   rename: (projectId, to) => store.rename(projectId, to),
+  /**
+   * Writes pass straight through, closing among them (0289): a close that gave
+   * up on a budget would leave the cascade half done, which is the one state
+   * `closeProject` reports rather than produces.
+   */
+  close: (projectId, at) => store.close(projectId, at),
+  reopen: (projectId) => store.reopen(projectId),
   get: (projectId) => readWithin(() => store.get(projectId), unavailable, budgetMs),
-  list: () => readWithin(() => store.list(), unavailable, budgetMs),
+  list: (listing) => readWithin(() => store.list(listing), unavailable, budgetMs),
 })
 
 export const boundedApplicationStore = (
@@ -188,8 +195,11 @@ export const boundedApplicationStore = (
 ): ApplicationStore => ({
   create: (application) => store.create(application),
   rename: (applicationId, to) => store.rename(applicationId, to),
+  /** Writes pass straight through — see `boundedProjectStore`. */
+  close: (applicationId, at) => store.close(applicationId, at),
+  reopen: (applicationId) => store.reopen(applicationId),
   get: (applicationId) => readWithin(() => store.get(applicationId), unavailable, budgetMs),
-  list: () => readWithin(() => store.list(), unavailable, budgetMs),
+  list: (listing) => readWithin(() => store.list(listing), unavailable, budgetMs),
 })
 
 /**

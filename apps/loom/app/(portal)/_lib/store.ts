@@ -38,6 +38,20 @@ export const portalApplications = appApplications
 export const portalProjects = appProjects
 
 /**
+ * The unbounded handles, for the one write that must not be cut off part-way.
+ *
+ * Closing a project closes the applications in it (0289), and that is several
+ * writes rather than one. A budget that expired in the middle would leave a
+ * project closed with some of its applications still open — the partial state
+ * `closeProject` is built to *report* rather than to produce. Every read a
+ * screen makes still goes through the bounded pair above.
+ */
+export const portalProjectsForWriting = appProjectsForWriting
+
+/** See `portalProjectsForWriting`. */
+export const portalApplicationsForWriting = appApplicationsForWriting
+
+/**
  * Put this deployment's pages in the store. **Run by `db:push`, not by a
  * request.**
  *

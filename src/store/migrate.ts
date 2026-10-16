@@ -227,7 +227,8 @@ export const APPLICATION_STORE_DDL: readonly string[] = [
       application_id text PRIMARY KEY,
       name text NOT NULL,
       created_at text NOT NULL,
-      host text
+      host text,
+      closed_at text
     )`,
   /**
    * The grouping an application belongs to. Defaulted so a row written before
@@ -241,6 +242,16 @@ export const APPLICATION_STORE_DDL: readonly string[] = [
    * applications — their names and the hosts they run on — is readable by
    * anyone holding the publishable key.
    */
+  /**
+   * **Closing, for a database that predates it (0289).** Additive, nullable and
+   * undefaulted, which is the only honest value: every row written before this
+   * column existed belonged to an application that was open, and still does.
+   *
+   * This store has no delete, so there is no earlier spelling of *gone* to
+   * carry across — nothing was ever removed, which is what makes the backfill
+   * no backfill at all.
+   */
+  `ALTER TABLE loom_applications ADD COLUMN IF NOT EXISTS closed_at text`,
   `ALTER TABLE loom_applications ENABLE ROW LEVEL SECURITY`,
 ]
 
@@ -262,8 +273,11 @@ export const PROJECT_STORE_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_projects (
       project_id text PRIMARY KEY,
       name text NOT NULL,
-      created_at text NOT NULL
+      created_at text NOT NULL,
+      closed_at text
     )`,
+  /** Closing, for a database that predates it — see the applications' note above. */
+  `ALTER TABLE loom_projects ADD COLUMN IF NOT EXISTS closed_at text`,
   `ALTER TABLE loom_projects ENABLE ROW LEVEL SECURITY`,
 ]
 

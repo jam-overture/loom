@@ -87,6 +87,13 @@ describe("the rename, on a database that has the old table", () => {
         name: "Your application",
         created_at: "1970-01-01T00:00:00.000Z",
         host: "shop.example.com",
+        /**
+         * A row carried across from before closing existed is **open**, which
+         * is what it was (0289). The column arrives nullable and undefaulted
+         * and there is nothing to backfill from: this store never deleted, so
+         * there is no earlier spelling of *gone* for a row to have been in.
+         */
+        closed_at: null,
       },
     ])
   })
@@ -110,6 +117,8 @@ describe("the rename, on a database that has the old table", () => {
       "project_id",
       "name",
       "created_at",
+      /** Closing, which is what this store has instead of a delete (0289). */
+      "closed_at",
     ])
   })
 })

@@ -57,6 +57,19 @@ export const projectSchema = z
     /** What a person calls it. Not unique, not an identifier, and editable. */
     name: z.string().min(1).max(200),
     createdAt: z.string().datetime(),
+    /**
+     * When it was closed, or absent while it is open (0289).
+     *
+     * Closing is what this store has instead of deleting: a project's rows are
+     * its applications' trees, revisions, holds and policy history, and a
+     * delete would either orphan them or cascade through the governance record
+     * Loom exists to keep.
+     *
+     * **An instant rather than a flag**, because *when* is the question anybody
+     * asks about a closed project — did this stop before or after the thing I
+     * am looking at — and a boolean cannot answer it for the same storage.
+     */
+    closedAt: z.string().datetime().optional(),
   })
   .strict()
 
