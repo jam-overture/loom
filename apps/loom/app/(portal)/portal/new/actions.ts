@@ -10,7 +10,10 @@ import {
   type ApplicationId,
 } from "@jam-overture/loom/store"
 
+import { portalMemberships } from "@/app/(portal)/_lib/auth/account-store"
+import { actorSchema } from "@/app/(portal)/_lib/auth/accounts"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { mayAddApplicationTo } from "@/app/(portal)/_lib/auth/roles"
 import { readRegistration, type RegistrationFault } from "@/app/(portal)/_lib/registering"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 
@@ -37,7 +40,7 @@ export type RegistrationReport = {
  * to a question they have not been given a reason to care about. They can rename
  * it, and the second application is when grouping starts to mean something.
  */
-const projectFor = async (name: string): Promise<string | undefined> => {
+const projectFor = async (name: string, actor: string): Promise<string | undefined> => {
   const project = {
     projectId: newProjectId(),
     name,
@@ -45,15 +48,37 @@ const projectFor = async (name: string): Promise<string | undefined> => {
   }
 
   const made = await portalProjects.create(project)
+  if (!made.ok) return undefined
 
-  return made.ok ? made.value.projectId : undefined
+  /**
+   * **Whoever makes a project owns it** (0285 clause 5), and this is the line
+   * that makes the workspace work at all: it lists the projects you hold a role
+   * in, so a project created without one is a project its own author cannot
+   * see. There is no screen to grant the first role from, because the screen
+   * that would do it is behind the project you cannot reach.
+   *
+   * Creating a project is not governed by a project role — there is no project
+   * to hold one in yet — so nothing is checked here beyond being signed in.
+   */
+  const owned = await portalMemberships.put({
+    actor: actorSchema.parse(actor),
+    projectId: made.value.projectId,
+    role: "owner",
+  })
+
+  /**
+   * A project nobody can see is worse than no project: it holds the name, so
+   * the next attempt under the same name succeeds and is equally invisible.
+   * Reported as the failure it is rather than carried on from.
+   */
+  return owned.ok ? made.value.projectId : undefined
 }
 
 export const registerApplication = async (
   _previous: RegistrationReport | null,
   form: FormData
 ): Promise<RegistrationReport> => {
-  await requireActor("/portal/new")
+  const actor = await requireActor("/portal/new")
 
   const read = readRegistration({
     name: form.get("name"),
@@ -75,7 +100,44 @@ export const registerApplication = async (
     return { faults: [{ field: "project", detail: "That is not a project." }] }
   }
 
-  const projectId = chosen?.success === true ? chosen.data : await projectFor(read.value.projectName ?? read.value.name)
+  /**
+   * **Being signed in is not permission to put an application in somebody
+   * else's project** (0285).
+   *
+   * The select above offers only the projects this actor holds, which is where
+   * the leak was: posting any `prj_` id attached an application to a project
+   * the poster had never been added to, and the owner would find it there with
+   * no record of who did it. The options a screen renders are a convenience;
+   * this is the check.
+   *
+   * `owner` rather than any role, because adding an application changes what
+   * the project *contains*, which is the administering half of a role rather
+   * than the acceptance ceiling.
+   */
+  if (chosen?.success === true) {
+    const held = await portalMemberships.roleIn(actorSchema.parse(actor), chosen.data)
+
+    if (!held.ok) {
+      return {
+        faults: [],
+        detail: "We could not check whether that project is yours. Nothing was registered.",
+      }
+    }
+
+    /**
+     * One message for *not yours* and *no such project*, which is the same
+     * rule the sign-in form follows: a distinct "no such project" would turn
+     * this field into a way to ask which project ids exist.
+     */
+    if (!mayAddApplicationTo(held.value)) {
+      return { faults: [{ field: "project", detail: "That is not a project you can add to." }] }
+    }
+  }
+
+  const projectId =
+    chosen?.success === true
+      ? chosen.data
+      : await projectFor(read.value.projectName ?? read.value.name, actor)
 
   if (projectId === undefined) {
     return {

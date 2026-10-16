@@ -7,7 +7,9 @@ import {
   type Project,
 } from "@jam-overture/loom/store"
 
-import { workspaceOf, workspaceTotals, type ApplicationSummary } from "./workspace"
+import { actorSchema } from "./auth/accounts"
+import type { Membership, Role } from "./auth/roles"
+import { workspaceFor, workspaceOf, workspaceTotals, type ApplicationSummary } from "./workspace"
 
 const projectOf = (id: string, name: string): Project => ({
   projectId: projectIdSchema.parse(id),
@@ -128,5 +130,107 @@ describe("the totals above the list", () => {
 
   it("is all zeroes on a deployment with nothing in it", () => {
     expect(workspaceTotals(workspaceOf([], []))).toEqual({ applications: 0, waiting: 0, pages: 0 })
+  })
+})
+
+const ANA = actorSchema.parse("ana@example.com")
+
+const holds = (projectId: string, role: Role): Membership => ({
+  actor: ANA,
+  projectId: projectIdSchema.parse(projectId),
+  role,
+})
+
+/**
+ * The scoped workspace — what one person has, rather than what the deployment
+ * holds.
+ *
+ * The failure these guard is the one 0285 exists to prevent arriving on a
+ * screen: somebody seeing a project they were never added to. It is invisible
+ * when it happens, because a workspace with an extra card on it looks exactly
+ * like a workspace.
+ */
+describe("workspaceFor", () => {
+  it("shows a project the actor holds a role in", () => {
+    const workspace = workspaceFor(
+      [holds("prj_a", "owner")],
+      [projectOf("prj_a", "Alpha")],
+      [summaryOf("app_1", "prj_a")]
+    )
+
+    expect(workspace.groups).toHaveLength(1)
+    expect(workspace.groups[0]?.project.name).toBe("Alpha")
+    expect(workspace.groups[0]?.applications).toHaveLength(1)
+  })
+
+  it("leaves out a project the actor holds no role in", () => {
+    const workspace = workspaceFor(
+      [holds("prj_a", "owner")],
+      [projectOf("prj_a", "Alpha"), projectOf("prj_b", "Beta")],
+      [summaryOf("app_1", "prj_a"), summaryOf("app_2", "prj_b")]
+    )
+
+    expect(workspace.groups.map((group) => group.project.name)).toEqual(["Alpha"])
+  })
+
+  /**
+   * The half that is easy to get wrong: filtering the projects and forgetting
+   * the applications would put another project's application on your screen
+   * under no heading at all.
+   */
+  it("leaves out the applications of a project it left out", () => {
+    const workspace = workspaceFor(
+      [holds("prj_a", "owner")],
+      [projectOf("prj_a", "Alpha"), projectOf("prj_b", "Beta")],
+      [summaryOf("app_2", "prj_b")]
+    )
+
+    expect(workspace.groups[0]?.applications).toEqual([])
+    expect(workspace.ungrouped).toEqual([])
+  })
+
+  /**
+   * `workspaceOf` reports orphans so a deployment-wide view cannot silently
+   * drop one. Here the same list would be every application whose project row
+   * is missing, shown to everybody — so it is empty by construction.
+   */
+  it("never shows an orphaned application to somebody who holds no role in it", () => {
+    const workspace = workspaceFor(
+      [holds("prj_a", "owner")],
+      [projectOf("prj_a", "Alpha")],
+      [summaryOf("app_lost", "prj_gone")]
+    )
+
+    expect(workspace.ungrouped).toEqual([])
+    expect(workspace.groups[0]?.applications).toEqual([])
+  })
+
+  it("carries the role, so a card can say who can release what", () => {
+    const workspace = workspaceFor(
+      [holds("prj_a", "viewer"), holds("prj_b", "approver")],
+      [projectOf("prj_a", "Alpha"), projectOf("prj_b", "Beta")],
+      []
+    )
+
+    expect(workspace.groups.map((group) => group.role)).toEqual(["viewer", "approver"])
+  })
+
+  it("shows nothing to an actor who holds nothing", () => {
+    const workspace = workspaceFor([], [projectOf("prj_a", "Alpha")], [summaryOf("app_1", "prj_a")])
+
+    expect(workspace.groups).toEqual([])
+    expect(workspace.ungrouped).toEqual([])
+  })
+
+  /**
+   * A membership naming a project the store does not have. It cannot put a
+   * card on the screen, because there is no project to draw — and it must not
+   * throw, because a row somewhere else being missing is not a reason for
+   * somebody's whole workspace to fail.
+   */
+  it("survives a membership whose project is not in the store", () => {
+    const workspace = workspaceFor([holds("prj_gone", "owner")], [projectOf("prj_a", "Alpha")], [])
+
+    expect(workspace.groups).toEqual([])
   })
 })

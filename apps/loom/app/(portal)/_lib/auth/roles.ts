@@ -78,6 +78,23 @@ export const roleThatCanAccept = (stake: StakeLevel): Role =>
  */
 export const mayAdminister = (role: Role): boolean => role === "owner"
 
+/**
+ * Whether this actor may put an application into a project they named.
+ *
+ * Takes the role **or its absence**, because *you hold nothing here* and *you
+ * hold a role that cannot do this* are the same refusal to the person asking
+ * and two different states to the code — and folding them together at the call
+ * site is how a `null` becomes a permission. A screen that offers only the
+ * projects somebody administers still has to answer this, because a select is
+ * a text field somebody can post anything to.
+ *
+ * `owner`, not any role: adding an application changes what the project
+ * *contains*, which is the administering half of a role rather than the
+ * acceptance ceiling.
+ */
+export const mayAddApplicationTo = (role: Role | null): boolean =>
+  role !== null && mayAdminister(role)
+
 export type Membership = {
   readonly actor: Actor
   readonly projectId: ProjectId

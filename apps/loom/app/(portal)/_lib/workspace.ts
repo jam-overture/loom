@@ -1,5 +1,7 @@
 import type { Application, Project } from "@jam-overture/loom/store"
 
+import type { Membership, Role } from "./auth/roles"
+
 /**
  * The first screen: every application this deployment governs, under the
  * project it is grouped in.
@@ -46,6 +48,14 @@ export type ApplicationSummary = {
 
 export type ProjectGroup = {
   readonly project: Project
+  /**
+   * What the person looking at it may do here (0285).
+   *
+   * On the group rather than looked up again by the screen, because a card that
+   * said *waiting on you* to somebody who cannot release anything would be a
+   * screen telling a viewer to do something the Gate will not let them do.
+   */
+  readonly role: Role
   readonly applications: readonly ApplicationSummary[]
 }
 
@@ -83,6 +93,49 @@ const byUrgency = (applications: readonly ApplicationSummary[]): readonly Applic
       right.waiting - left.waiting || left.application.name.localeCompare(right.application.name)
   )
 
+/**
+ * The workspace one person has, which is the only kind there is now.
+ *
+ * `workspaceOf` below answers *what does this deployment hold*. This answers
+ * *what is mine*, and the difference is the whole of 0285 arriving on a screen:
+ * a project you hold no role in is not a project you are shown.
+ *
+ * **Projects are filtered by membership, not by ownership of their rows.** An
+ * application whose project is not in the list does not appear, and there is no
+ * `ungrouped` escape hatch here — the one on `workspaceOf` exists so a
+ * deployment-wide view cannot silently drop an orphan, and reusing it here
+ * would show somebody every application whose project row is missing.
+ *
+ * Order follows the memberships, which arrive oldest first.
+ */
+export const workspaceFor = (
+  memberships: readonly Membership[],
+  projects: readonly Project[],
+  applications: readonly ApplicationSummary[]
+): Workspace => {
+  const roles = new Map(memberships.map((membership) => [membership.projectId, membership.role]))
+  const mine = projects.filter((project) => roles.has(project.projectId))
+
+  const inProject = (projectId: string): readonly ApplicationSummary[] =>
+    byUrgency(applications.filter((summary) => summary.application.projectId === projectId))
+
+  return {
+    groups: mine.flatMap((project) => {
+      const role = roles.get(project.projectId)
+
+      /**
+       * Unreachable — `mine` is filtered by the same map — and spelled as a
+       * skip rather than a cast so that a future caller which builds `mine`
+       * some other way cannot land a group with no role on a screen.
+       */
+      return role === undefined
+        ? []
+        : [{ project, role, applications: inProject(project.projectId) }]
+    }),
+    ungrouped: [],
+  }
+}
+
 export const workspaceOf = (
   projects: readonly Project[],
   applications: readonly ApplicationSummary[]
@@ -95,6 +148,12 @@ export const workspaceOf = (
   return {
     groups: projects.map((project) => ({
       project,
+      /**
+       * The deployment-wide view is not somebody's workspace, so there is no
+       * role to carry — `owner` is what a screen that shows everything is
+       * already assuming about its reader.
+       */
+      role: "owner" as Role,
       applications: inProject(project.projectId),
     })),
     ungrouped: byUrgency(applications.filter((summary) => !known.has(summary.application.projectId))),
