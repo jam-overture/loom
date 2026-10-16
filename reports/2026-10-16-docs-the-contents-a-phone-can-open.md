@@ -272,7 +272,18 @@ it exists.
 
 ## The preview
 
-PLACEHOLDER_PREVIEW
+https://loom-git-docs-57-the-content-0851ba-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the pictures above are of:
+
+- [/docs/building-with-loom/theming](https://loom-git-docs-57-the-content-0851ba-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/theming)
+- [/docs/api-reference](https://loom-git-docs-57-the-content-0851ba-jpizzolato36-6341s-projects.vercel.app/docs/api-reference)
+
+**Taken from the `vercel[bot]` comment after opening the pull request, not
+composed from the branch name**, which is the remedy the 16 October finding
+*the composed preview URL, fifth instance* asks every lane to follow. It earns
+its sentence here: the hash segment is `0851ba`, the branch segment truncates at
+`docs-57-the-content`, and a guess would have had neither.
 
 Not fetched from this container: `*.vercel.app` is denied by the environment's
 egress policy, which is the open finding of 12 October and still true. Every
