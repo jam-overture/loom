@@ -276,7 +276,7 @@ describe("describePolicy", () => {
  * and a `technical` field that carries the operator's message unaltered.
  */
 describe("authReadout", () => {
-  const okAuth: AuthResult = { ok: true, value: { secret: "x".repeat(32), reviewers: [] } }
+  const okAuth: AuthResult = { ok: true, value: { secret: "x".repeat(32) } }
 
   it("passes an ok config through as ok — nothing to show, nothing to explain", () => {
     expect(authReadout(okAuth)).toEqual({ ok: true })
@@ -299,19 +299,20 @@ describe("authReadout", () => {
     expect(readout.technical).toContain("openssl rand -hex 32")
   })
 
-  it("leads a malformed roster the same way, with the roster problem behind the disclosure", () => {
-    const readout = authReadout({
-      ok: false,
-      error: { code: "bad-roster", problem: { code: "malformed-entry", entry: "no-colon" } },
-    })
+  /**
+   * There is one configuration problem left, since who may sign in became a
+   * table (0285). What this still pins is the split that outlived the second
+   * problem: the visitor's sentence does not name a variable, and the
+   * operator's is carried through unaltered behind the disclosure.
+   */
+  it("keeps the visitor's sentence free of the variable that is wrong", () => {
+    const readout = authReadout({ ok: false, error: { code: "no-secret" } })
 
     expect(readout.ok).toBe(false)
     if (readout.ok) return
 
-    /* A visitor's next move is identical to the missing-secret case, so the
-     * headline is identical. The rule that is really being enforced is: the
-     * visitor's sentence does not depend on which variable is wrong. */
     expect(readout.headline).toBe("This portal isn't set up yet.")
-    expect(readout.technical).toContain("no-colon")
+    expect(readout.headline).not.toContain("LOOM_PORTAL")
+    expect(readout.detail).not.toContain("LOOM_PORTAL")
   })
 })

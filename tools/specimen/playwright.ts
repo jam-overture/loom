@@ -15,6 +15,7 @@ import {
   type SpecimenPage,
   type StartState,
 } from "./capture.js"
+import { pinNavigation, readPinnedPresses } from "./pin.js"
 import { scriptFor } from "./start-state.js"
 import type { SpecimenViewport } from "./specimen.js"
 
@@ -384,38 +385,6 @@ const readBoxes = (elements: Element[]): readonly ElementBox[] => {
   return boxes
 }
 
-/**
- * Run in the top document before the first step of a `do` list: hold it still.
- *
- * A click on a real `a[href]` in the starter library navigates, and every step
- * after it then runs on a different page — so a three-step shot silently
- * photographs somewhere else, which is the single failure mode this harness
- * exists to prevent. A `do` list is a sequence against *one* page by
- * construction, so the navigation is refused rather than the lane being asked
- * to remember.
- *
- * It is the **top** document, and that is stated rather than glossed: a
- * listener added here does not reach inside a frame, so a link pressed in a
- * framed approach still navigates that frame. A `waitFor` step is how such a
- * shot re-synchronises with the document it landed in.
- *
- * Capture phase, and `preventDefault` rather than `stopPropagation`: the page's
- * own delegated listeners must still see the click. A reader-signal broadcaster
- * is precisely a delegated listener on the root, and suppressing the event
- * would make the picture a photograph of the instrument rather than of the
- * page.
- */
-const pinNavigation = (): void => {
-  document.addEventListener(
-    "click",
-    (event) => {
-      const target = event.target
-      if (target instanceof Element && target.closest("a[href]")) event.preventDefault()
-    },
-    true
-  )
-}
-
 export const chromiumBrowser = async (
   launcher: ChromiumLauncher,
   executablePath: string
@@ -446,6 +415,13 @@ export const chromiumBrowser = async (
           await page.goto(url, { waitUntil: "load" })
           if (waitFor !== undefined) await locatorFor(frame)(waitFor).first().waitFor()
         },
+        /**
+         * The pin goes on first and is read last, and both ends are here
+         * rather than in the loop: what the page refused is a property of the
+         * whole list, and a reading between steps would cost a round trip on
+         * every press in the repository to learn a selector the address
+         * already identifies.
+         */
         act: async (steps, frame) => {
           await page.evaluate(pinNavigation)
           const at = locatorFor(frame)
@@ -457,6 +433,7 @@ export const chromiumBrowser = async (
             else if ("key" in step) await page.keyboard.press(step.key)
             else await page.waitForTimeout(step.wait)
           }
+          return page.evaluate(readPinnedPresses)
         },
         measure: async (): Promise<Overflow> => ({
           ...(await page.evaluate(measureDocument)),

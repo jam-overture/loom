@@ -406,7 +406,7 @@ The directory boundary *is* the line this lesson is about.
 
 Seven exercises. **Predict every output in writing, then run.** Exercise B is
 Predict 2's other half and is the one to commit to hardest; in exercise G the lines
-to predict hardest are the four that say what each function handed to the page
+to predict hardest are the three that say what each function handed to the page
 takes as an argument.
 
 Put each snippet into `src/scratch.test.ts` and run
@@ -938,12 +938,11 @@ describe("G", () => {
   createRange            capture.ts no       playwright.ts in code  specimen.test.ts no
   clientWidth            capture.ts in prose playwright.ts in code  specimen.test.ts no
   querySelectorAll       capture.ts no       playwright.ts in code  specimen.test.ts in prose
-  top-level consts in playwright.ts: 11
-  of those, handed to the page: 4
+  top-level consts in playwright.ts: 10
+  of those, handed to the page: 3
     measureDocument    evaluate     takes nothing                  named in the suite false
     readClippingBoxes  evaluate     takes nothing                  named in the suite false
     readBoxes          evaluateAll  takes elements: Element[]      named in the suite false
-    pinNavigation      evaluate     takes nothing                  named in the suite true
   what the suite's two doubles do with the function they are handed:
     evaluate     return { scrollWidth: 390, innerWidth: 390, clipped: [] } as TValue
     evaluateAll  return body((matched[where] ?? []).map(elementOf))

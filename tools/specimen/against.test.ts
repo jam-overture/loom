@@ -176,6 +176,7 @@ describe("what the command prints under its shot lines", () => {
       overflowed: false,
       clipped: false,
       measured: [],
+      pinned: [],
     })
 
     expect(shotFiles([result("z.png"), result("a.png")])).toEqual(["z.png", "a.png"])

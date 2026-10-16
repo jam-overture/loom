@@ -119,7 +119,8 @@
     "specimen": "tsx tools/specimen/main.ts",
     "prepack": "pnpm build",
     "reports:check": "tsx tools/reports/main.ts",
-    "reports:shrink": "tsx tools/reports/shrink.ts"
+    "reports:shrink": "tsx tools/reports/shrink.ts",
+    "portal:account": "pnpm --filter @loom/app portal:account"
   },
   "dependencies": {
     "zod": "^3.24.1"
@@ -147,6 +148,7 @@
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
     "@electric-sql/pglite": "^0.5.4",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

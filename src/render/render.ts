@@ -8,7 +8,7 @@ import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { ANCHOR_PROP_KEY, DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { assertNever } from "../result.js"
-import { themeVariables, type ThemeVariables } from "../theme/apply.js"
+import { themeVariables, type RampMode, type ThemeVariables } from "../theme/apply.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
 import type { SubmissionOutcome, SubmissionResolution } from "../submit/resolution.js"
@@ -166,6 +166,17 @@ export type RenderOptions = {
    */
   readonly themeValues?: "variables" | "literals"
 }
+
+/**
+ * Whether this render's ramps may read the width they are laid out at.
+ *
+ * A caller asking for literals is feeding a medium with no cascade, which
+ * resolves a container unit exactly as poorly as it resolves a `var()` — so the
+ * ramps mount as the pack's declared pixels and the root's declarations agree
+ * with the values substituted beneath them (0283).
+ */
+const rampFor = (options: RenderOptions): RampMode =>
+  options.themeValues === "literals" ? "fixed" : "fluid"
 
 export type RenderOutput = {
   readonly element: ReactNode
@@ -968,7 +979,7 @@ const renderFrom = (
     addressed: options.addressed ?? false,
     slots: options.slots ?? {},
     tree,
-    theme: theme ? themeStyle(theme) : undefined,
+    theme: theme ? themeStyle(theme, rampFor(options)) : undefined,
     data: options.data,
     submissions: options.submissions,
     origins: options.origins,
@@ -981,7 +992,9 @@ const renderFrom = (
     anchors: createAnchorLedger(),
     decorative: false,
     literals:
-      options.themeValues === "literals" && theme ? themeVariables(theme) : undefined,
+      options.themeValues === "literals" && theme
+        ? themeVariables(theme, { ramp: rampFor(options) })
+        : undefined,
     collect,
   })
 
@@ -1060,7 +1073,7 @@ export const renderLoomExcerpt = (
   return {
     element: createElement(
       "div",
-      { style: theme ? themeStyle(theme) : undefined },
+      { style: theme ? themeStyle(theme, rampFor(options)) : undefined },
       element
     ),
     diagnostics,

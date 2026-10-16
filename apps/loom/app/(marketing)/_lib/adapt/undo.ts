@@ -45,7 +45,7 @@ import { FRONT_DOOR_POLICY, SITE_PROPS_VOCABULARY } from "./run"
  * `@jam-overture/loom/write` already assembles this and the demonstration at `/demo`
  * uses it. It plans an undo by replaying a **store**: given a revision number it
  * finds the delta, inverts it, and reports what has been built on top since
- * ([0035](../../../../../../decisions/0035-an-undo-whose-target-was-built-on-is-offered-rather-than-refused.md)).
+ * ([0035](../../../../../../decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md)).
  * The front door has no store and is not going to get one
  * ([0081](../../../../../../decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)):
  * a session per visitor on the most-crawled surface the project has is a memory

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { OTHER_TREE, region, TREE } from "../testing/reader-signal-contract.js"
 
 import {
@@ -16,6 +17,7 @@ import {
 const AT = "2026-10-02T00:00:00.000Z"
 
 const row = (over: Partial<StoredRegionCount> = {}): StoredRegionCount => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: TREE,
   revision: 1,
   region: region("GB"),

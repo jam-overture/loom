@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { audienceIdSchema } from "../audience/audience.js"
 import { nodeIdSchema, treeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
@@ -144,6 +145,24 @@ export const readerSignalBatchSchema = z
     treeId: treeIdSchema,
     revision: z.number().int().nonnegative(),
     sentAt: instantSchema,
+    /**
+     * Which audience this page was served under, when the host served one
+     * (0284).
+     *
+     * On the batch rather than on each signal for the same reason the tree and
+     * the revision are: one rendered page was one form of one revision, so they
+     * cannot differ inside a batch.
+     *
+     * **Optional, and absent means `aud_everyone`** — the audience that matches
+     * every reader. A sender that serves one form of every page has nothing to
+     * say here, and requiring it would make every existing page, fixture and
+     * worked example wrong about something it was right about.
+     *
+     * Opaque to Loom. It is a name the host chose for a predicate the host
+     * evaluated, and nothing about the reader it matched travels with it
+     * (0263).
+     */
+    audience: audienceIdSchema.optional(),
     /**
      * Which page view these signals came from, when the sender minted one.
      *

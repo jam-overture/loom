@@ -1,5 +1,3 @@
-import { describeRosterProblem, parseRoster, type Reviewer, type RosterProblem } from "./roster"
-
 /**
  * What this deployment needs before anyone can sign in — and what it does when
  * that is missing, which is the decision worth reading.
@@ -13,16 +11,19 @@ import { describeRosterProblem, parseRoster, type Reviewer, type RosterProblem }
  *
  * So absence here fails closed: nobody signs in, and the sign-in page says which
  * variable is missing rather than making an operator guess.
+ *
+ * **One variable, since 0285.** `LOOM_PORTAL_REVIEWERS` is gone — who may sign
+ * in is a table now, and the only thing left that an environment can get wrong
+ * is the secret every session is signed with. An accounts table with no rows in
+ * it fails closed the same way an empty roster did, but it is not a
+ * configuration problem and is not reported as one: it is answered by a command.
  */
 
 export type AuthConfig = {
   readonly secret: string
-  readonly reviewers: readonly Reviewer[]
 }
 
-export type AuthProblem =
-  | { readonly code: "no-secret" }
-  | { readonly code: "bad-roster"; readonly problem: RosterProblem }
+export type AuthProblem = { readonly code: "no-secret" }
 
 export type AuthResult =
   | { readonly ok: true; readonly value: AuthConfig }
@@ -30,8 +31,8 @@ export type AuthResult =
 
 /**
  * The signing secret has to be long enough that guessing it is not cheaper than
- * stealing a session, since forging one is equivalent to holding every key on
- * the roster at once.
+ * stealing a session, since forging one is equivalent to holding every key the
+ * accounts table stores at once.
  */
 export const MINIMUM_SECRET_LENGTH = 32
 
@@ -39,17 +40,12 @@ export const resolveAuthConfig = (env: Record<string, string | undefined>): Auth
   const secret = env["LOOM_PORTAL_SESSION_SECRET"]?.trim() ?? ""
   if (secret.length < MINIMUM_SECRET_LENGTH) return { ok: false, error: { code: "no-secret" } }
 
-  const roster = parseRoster(env["LOOM_PORTAL_REVIEWERS"])
-  if (!roster.ok) return { ok: false, error: { code: "bad-roster", problem: roster.error } }
-
-  return { ok: true, value: { secret, reviewers: roster.value } }
+  return { ok: true, value: { secret } }
 }
 
-export const describeAuthProblem = (problem: AuthProblem): string =>
-  problem.code === "no-secret"
-    ? `LOOM_PORTAL_SESSION_SECRET is unset or shorter than ${MINIMUM_SECRET_LENGTH} characters, ` +
-      `so no session can be signed. Generate one with: openssl rand -hex 32`
-    : describeRosterProblem(problem.problem)
+export const describeAuthProblem = (_problem: AuthProblem): string =>
+  `LOOM_PORTAL_SESSION_SECRET is unset or shorter than ${MINIMUM_SECRET_LENGTH} characters, ` +
+  `so no session can be signed. Generate one with: openssl rand -hex 32`
 
 /**
  * Read through static property access rather than by indexing `process.env`.
@@ -64,5 +60,4 @@ export const describeAuthProblem = (problem: AuthProblem): string =>
  */
 export const portalAuth: AuthResult = resolveAuthConfig({
   LOOM_PORTAL_SESSION_SECRET: process.env.LOOM_PORTAL_SESSION_SECRET,
-  LOOM_PORTAL_REVIEWERS: process.env.LOOM_PORTAL_REVIEWERS,
 })

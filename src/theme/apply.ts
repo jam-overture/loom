@@ -1,4 +1,5 @@
 import { chromaValue, paletteMeasures } from "./measure.js"
+import { rampLength, type RampMode } from "./ramp.js"
 import { PALETTE_SLOTS, type ResolvedTheme } from "./theme.js"
 
 /**
@@ -15,10 +16,34 @@ import { PALETTE_SLOTS, type ResolvedTheme } from "./theme.js"
  * root, and every node below re-reads through the cascade.
  */
 
+/**
+ * Re-exported rather than published whole: a host selecting a mode needs to
+ * name it, and nothing outside this package needs `rampLength` itself.
+ */
+export type { RampMode } from "./ramp.js"
+
 export type ThemeVariables = Readonly<Record<string, string>>
 
-export const themeVariables = (theme: ResolvedTheme): ThemeVariables => {
+export type ThemeVariableOptions = {
+  /**
+   * Whether the two ramps may read the width they are rendered at.
+   *
+   * `"fluid"` is the default and is what a page in a browser wants: a declared
+   * step is a maximum, reached at `48rem` and held above it, so a tree built
+   * for a laptop is legible on a phone without the tree knowing a phone exists
+   * (0283). `"fixed"` emits the pack's numbers as the plain pixel lengths they
+   * were before that record, for a medium with no cascade to substitute — see
+   * `ramp.ts` for why a `clamp()` is worse than a pixel there.
+   */
+  readonly ramp?: RampMode
+}
+
+export const themeVariables = (
+  theme: ResolvedTheme,
+  options: ThemeVariableOptions = {}
+): ThemeVariables => {
   const variables: Record<string, string> = {}
+  const ramp = options.ramp ?? "fluid"
 
   for (const slot of PALETTE_SLOTS) {
     const value = theme.palette.slots[slot]
@@ -64,7 +89,7 @@ export const themeVariables = (theme: ResolvedTheme): ThemeVariables => {
   variables["--loom-body-weight"] = String(theme.fontPack.bodyWeight)
 
   theme.fontPack.scaleRamp.forEach((step, index) => {
-    variables[`--loom-scale-${index + 1}`] = `${step}px`
+    variables[`--loom-scale-${index + 1}`] = rampLength(step, "type", ramp)
   })
 
   const { radii, spacingScale, motion, density } = theme.stylePreset
@@ -74,7 +99,7 @@ export const themeVariables = (theme: ResolvedTheme): ThemeVariables => {
   variables["--loom-radius-full"] = `${radii.full}px`
 
   spacingScale.forEach((step, index) => {
-    variables[`--loom-spacing-${index + 1}`] = `${step}px`
+    variables[`--loom-spacing-${index + 1}`] = rampLength(step, "space", ramp)
   })
 
   variables["--loom-motion-fast"] = `${motion.fast}ms`
