@@ -12,6 +12,16 @@
 export const SIGN_IN_PATH = "/portal/sign-in"
 
 /**
+ * Where a signed-in person goes when a page will not have them.
+ *
+ * `/portal` is the workspace — the list of the projects they hold a role in —
+ * so it is the one screen that is right for somebody who is authenticated and
+ * is not entitled to what they asked for. Sending them to sign in instead would
+ * invite them to present the same key and arrive in the same place.
+ */
+export const WORKSPACE_PATH = "/portal"
+
+/**
  * The demo is the second public path, and it is public by design rather than by
  * omission: it exists to be looked at by somebody who has not been given an
  * account, and §4d's marketing site cannot embed a surface behind a sign-in.

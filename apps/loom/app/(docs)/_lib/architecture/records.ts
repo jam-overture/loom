@@ -16,7 +16,15 @@ import { plainText, readDecisionsFile, repositoryHref } from "./source"
  * about the records, and says in its first paragraph what they are.
  */
 
-/** `| [0001](0001-slug.md) | Title | Status | Section |` */
+/**
+ * The shape of an index row:
+ * `| [NNNN](NNNN-slug.md) | Title | Status | Section |`
+ *
+ * Spelled `NNNN` rather than with a real number, because a citation checker
+ * reads this file like any other and an illustration that parses as a citation
+ * is a fixture in its population — it was read as a link to `0001-slug.md`,
+ * which is a record that has never existed.
+ */
 const ROW = /^\|\s*\[(\d{4})\]\(([^)]+)\)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|/
 
 /**

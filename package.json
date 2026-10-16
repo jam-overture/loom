@@ -119,7 +119,8 @@
     "specimen": "tsx tools/specimen/main.ts",
     "prepack": "pnpm build",
     "reports:check": "tsx tools/reports/main.ts",
-    "reports:shrink": "tsx tools/reports/shrink.ts"
+    "reports:shrink": "tsx tools/reports/shrink.ts",
+    "portal:account": "pnpm --filter @loom/app portal:account"
   },
   "dependencies": {
     "zod": "^3.24.1"
