@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8454,10 +8454,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 36,
+      "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8574,6 +8574,41 @@
               "signature": "type ApplicationStore = {\n    /**\n     * Record an application. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (application: Application) => Promise<Result<Application, ApplicationStoreError>>;\n    /** One application. */\n    readonly get: (applicationId: ApplicationId) => Promise<Result<Application, ApplicationStoreError>>;\n    /**\n     * Every application, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose application count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way applications are not.\n     */\n    readonly list: () => Promise<Result<readonly Application[], ApplicationStoreError>>;\n    /**\n     * Change what a person calls it, and where they say it lives.\n     *\n     * A field left out is left alone, and `host: null` removes it — the three\n     * states `Patch` spells, because an application that has been given a host\n     * has to be able to have it taken away. A name has no third state: it is\n     * required, so there is nothing for clearing it to mean and the type does not\n     * offer it.\n     */\n    readonly rename: (applicationId: ApplicationId, to: {\n        readonly name?: string;\n        readonly host?: Patch<string>;\n    }) => Promise<Result<Application, ApplicationStoreError>>;\n};",
               "truncated": false,
               "summary": "Four methods, and **no delete**."
+            }
+          ]
+        },
+        {
+          "module": "audience/audience",
+          "title": "Audience",
+          "summary": "The group of readers a form of a page was served to.",
+          "symbols": [
+            {
+              "name": "audienceIdSchema",
+              "kind": "schema",
+              "signature": "const audienceIdSchema: z.ZodBranded<…>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "AudienceId",
+              "kind": "type",
+              "signature": "type AudienceId = z.infer<typeof audienceIdSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "newAudienceId",
+              "kind": "function",
+              "signature": "const newAudienceId: () => AudienceId",
+              "truncated": false,
+              "summary": "A new audience's id, minted when somebody defines one. Random, as every other is."
+            },
+            {
+              "name": "DEFAULT_AUDIENCE_ID",
+              "kind": "value",
+              "signature": "const DEFAULT_AUDIENCE_ID: AudienceId",
+              "truncated": false,
+              "summary": "The audience that matches every reader."
             }
           ]
         },
@@ -9210,7 +9245,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9641,7 +9676,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9893,7 +9928,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12854,7 +12889,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12997,7 +13032,7 @@
       "files": 17,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13064,7 +13099,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13661,7 +13696,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13735,7 +13770,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14214,7 +14249,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1637,
+        "packageNames": 1641,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
