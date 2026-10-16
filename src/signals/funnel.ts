@@ -483,7 +483,24 @@ const silenceOf = (opened: number, appearances: number): ReachSilence | null => 
 
 const endKey = (end: FunnelPair["from"]): string => `${end.nodeId} ${end.kind}`
 
-const pairKey = (pair: FunnelPair): string => `${endKey(pair.from)} ${endKey(pair.to)}`
+/**
+ * What makes two funnel rows the same question: the two nodes a deployment
+ * named, in the two kinds it named them with.
+ *
+ * Published rather than private because a second reading needs the same rule —
+ * a comparison of two windows pairs its rows by it — and two spellings of one
+ * identity is what the counter keys were before `counters.ts` wrote them once,
+ * and what the door's scale was before `door.ts` did. It is also the rule that
+ * decides what a **duplicate** row is, which 0158 makes permanent if it is got
+ * wrong in either place.
+ *
+ * Deliberately not the node ids alone: a pair asking `viewed → completed` and
+ * one asking `viewed → activated` over the same two nodes are two questions,
+ * and a reading that collapsed them would hold one window's conversions
+ * against another window's presses.
+ */
+export const funnelPairKey = (pair: FunnelPair): string =>
+  `${endKey(pair.from)} ${endKey(pair.to)}`
 
 type Measured = {
   readonly opened: number
@@ -609,13 +626,13 @@ export const funnelReachOf = (
   const seen = new Set<string>()
   const pairs = matching
     .filter((row) => {
-      const key = pairKey(row.pair)
+      const key = funnelPairKey(row.pair)
       if (seen.has(key)) return false
       seen.add(key)
 
       return true
     })
-    .sort((one, other) => pairKey(one.pair).localeCompare(pairKey(other.pair)))
+    .sort((one, other) => funnelPairKey(one.pair).localeCompare(funnelPairKey(other.pair)))
     .map((row) =>
       reachOf(row, of, silence !== null, {
         from: standingIn(present, row.pair.from),

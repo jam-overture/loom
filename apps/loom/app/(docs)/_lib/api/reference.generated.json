@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8457,7 +8457,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9245,7 +9245,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9676,7 +9676,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9915,7 +9915,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 58,
+      "files": 59,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9928,7 +9928,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10771,11 +10771,137 @@
               "summary": "A revision's funnels, read against the exact number of readers that revision had."
             },
             {
+              "name": "funnelPairKey",
+              "kind": "function",
+              "signature": "const funnelPairKey: (pair: FunnelPair) => string",
+              "truncated": false,
+              "summary": "What makes two funnel rows the same question: the two nodes a deployment named, in the two kinds it named them with."
+            },
+            {
               "name": "funnelReachOf",
               "kind": "function",
               "signature": "const funnelReachOf: (reading: PageReading, funnels: readonly StoredFunnel[], rows: readonly StoredPageViews[]) => FunnelReach",
               "truncated": false,
               "summary": "Read a revision's funnels against the readers that revision had, and against the tree that revision is."
+            }
+          ]
+        },
+        {
+          "module": "signals/funnel-change",
+          "title": "Funnel change",
+          "summary": "What a change did to the funnel.",
+          "symbols": [
+            {
+              "name": "FunnelChangeSilence",
+              "kind": "type",
+              "signature": "type FunnelChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Spelled as every other comparison here spells it, because a surface drawing\n * five comparisons of one change should not meet five names for one state\n *.\n */\n\"different-trees\"\n/**\n * One of the two windows has no page-view row at the door.\n *\n * The door's first state, said of the pair. The rates and the\n * movements stand; every share of the arrivals is withheld, because the\n * number to divide by is missing on one side.\n */\n | \"unscaled\"\n/**\n * One of the two windows has a row and nothing in it says a page view began.\n *\n * The state worth catching: senders that are not marking their openings leave\n * every share here without a denominator while the counters look healthy.\n */\n | \"unopened\"\n/**\n * One of the two windows holds arrivals no rollup has folded yet.\n *\n * The first minutes of a deployment, and what a stalled collection looks like\n * for ever; the fold's own timestamp is what tells the two apart.\n */\n | \"uncounted\"\n/**\n * No pair is asked of both windows.\n *\n * The state `CopyChangeSilence.dissolved` reports of words and\n * `KindReachChangeSilence.unpaired` of places, said of a question: the two\n * windows have funnels and share none, so there is nothing to hold against\n * anything. {@link FunnelChange.added} and {@link FunnelChange.removed}\n * answer in full and are the whole of what can be said.\n */\n | \"unasked\";",
+              "truncated": false,
+              "summary": "Why a comparison of two windows' funnels left a figure out."
+            },
+            {
+              "name": "FUNNEL_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const FUNNEL_CHANGE_SILENCES: readonly FunnelChangeSilence[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface that has to account for every absent figure."
+            },
+            {
+              "name": "describeFunnelChangeSilence",
+              "kind": "function",
+              "signature": "const describeFunnelChangeSilence: (silence: FunnelChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a figure is not there."
+            },
+            {
+              "name": "FunnelMovement",
+              "kind": "type",
+              "signature": "type FunnelMovement =\n/**\n * Readers reached the first end and none of them finished, and now some do —\n * the sentence a change to an ask nobody answers is made for.\n */\n\"taken-up\"\n/** Readers finished it and now they reach the first end and do not. */\n | \"abandoned\"\n/**\n * Reached and unfinished before, reached and unfinished now — the asks a\n * change did not fix.\n *\n * Kept apart from `held` because both are *the verdict did not move* and they\n * are opposite findings about a page, which is how a pace comparison keeps\n * `still-skimmed` from `held`.\n */\n | \"still-unconverted\"\n/** Readers finished it before and after. */\n | \"held\"\n/**\n * One of the two windows cannot say whether readers finished it.\n *\n * Nothing reached the first end on that side, so there is no rate rather than\n * a rate of nought, or an end of the pair is one that revision does not have\n *, so there is no question rather than an unanswered one.\n * {@link ComparedFunnel.question} tells the two apart outright.\n */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to whether readers finish a funnel."
+            },
+            {
+              "name": "FUNNEL_MOVEMENTS",
+              "kind": "value",
+              "signature": "const FUNNEL_MOVEMENTS: readonly FunnelMovement[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface accounting for every pair it was handed."
+            },
+            {
+              "name": "describeFunnelMovement",
+              "kind": "function",
+              "signature": "const describeFunnelMovement: (movement: FunnelMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a funnel in front of a person."
+            },
+            {
+              "name": "QuestionMovement",
+              "kind": "type",
+              "signature": "type QuestionMovement = \n/** Both ends are in both revisions, so the two sides answer the same question. */\n\"asked\"\n/**\n * The earlier revision had both ends and the later one is missing one.\n *\n * **The row to lead with when it is not nought.** The counters cannot move\n * again and every figure on the later side is withheld, so a funnel that\n * looks abandoned is a question to re-point rather than readers who stopped\n * buying. The change broke it, and nothing about readers is wrong.\n */\n | \"broken\"\n/** The earlier revision was missing an end and the later one has both: the change put it back. */\n | \"restored\"\n/** An end is missing from both revisions, so neither side was ever answering. */\n | \"stale\";",
+              "truncated": false,
+              "summary": "What the change did to the question itself."
+            },
+            {
+              "name": "QUESTION_MOVEMENTS",
+              "kind": "value",
+              "signature": "const QUESTION_MOVEMENTS: readonly QuestionMovement[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface accounting for every compared pair."
+            },
+            {
+              "name": "describeQuestionMovement",
+              "kind": "function",
+              "signature": "const describeQuestionMovement: (movement: QuestionMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface saying what a change did to a question."
+            },
+            {
+              "name": "ConversionCause",
+              "kind": "type",
+              "signature": "type ConversionCause = \n/**\n * Getting there alone was enough: the later window's reach at the earlier\n * window's closing rate would have moved it the same way.\n *\n * The attribution worth leading with, and the one a conversion rate hides.\n * *More readers finish because more readers arrive at the ask, and not\n * because the ask got better.*\n */\n\"entry\"\n/**\n * Finishing alone was enough: the earlier window's reach at the later\n * window's closing rate would have moved it the same way.\n */\n | \"closing\"\n/**\n * Either alone would have been enough, so the movement is over-determined.\n *\n * The two moved the same way, which is the ordinary shape of a change that\n * worked.\n */\n | \"either\";",
+              "truncated": false,
+              "summary": "Which of the two things a funnel is made of moved the share of arrivals that finished."
+            },
+            {
+              "name": "CONVERSION_CAUSES",
+              "kind": "value",
+              "signature": "const CONVERSION_CAUSES: readonly ConversionCause[]",
+              "truncated": false,
+              "summary": "The closed set, and it is **one member shorter than every other counterfactual here**, which is a property of the arithmetic rather than a decision."
+            },
+            {
+              "name": "describeConversionCause",
+              "kind": "function",
+              "signature": "const describeConversionCause: (cause: ConversionCause) => string",
+              "truncated": false,
+              "summary": "One line per cause, for a surface saying what moved a conversion share."
+            },
+            {
+              "name": "ComparedFunnel",
+              "kind": "type",
+              "signature": "type ComparedFunnel = {\n    /** The pair as the later window holds it, which is the same question either way. */\n    readonly pair: FunnelPair;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PairReach;\n    /** The whole of what the later window said about it. */\n    readonly now: PairReach;\n    readonly movement: FunnelMovement;\n    /** What the change did to whether the question names anything. */\n    readonly question: QuestionMovement;\n    /**\n     * `now.rate ÷ was.rate` — of the readers who got to the first end, how much\n     * likelier they are to finish.\n     *\n     * Each side is two counts off one row, so each window's straddle has very\n     * nearly divided out before the two meet. **It is still a ratio\n     * of two figures that lean down** by an amount the deployment's rollup window\n     * sets, which is what the bracket is for.\n     *\n     * `null` where either side has no rate, and where the earlier one is nought:\n     * *nobody finished and now somebody does* is {@link movement}'s answer, and a\n     * ratio is a figure a surface divides and ranks by.\n     */\n    readonly rateRatio: number | null;\n    /**\n     * The least the true ratio could be: `now.rate ÷ was.rateAtMost`.\n     *\n     * `null` wherever {@link rateRatio} is, and wherever either side's ceiling is\n     * withheld — the ceiling is built from the door's drift, so it goes when the\n     * door does.\n     */\n    readonly rateRatioAtLeast: number | null;\n    /** The most the true ratio could be: `now.rateAtMost ÷ was.rate`. `null` on the same terms. */\n    readonly rateRatioAtMost: number | null;\n    /**\n     * The bracket clears 1, so the rate moved by more than the straddle alone\n     * could account for.\n     *\n     * `false` is the figure to draw rather than suppress: *the rate fell by a\n     * third and the rollup window can explain all of it* is a sentence about the\n     * deployment's configuration, and it is the one a card showing a bare ratio\n     * prints as a collapse. `null` where there is no bracket.\n     */\n    readonly rateMoved: boolean | null;\n    /**\n     * `now.entry.share ÷ was.entry.share` — how much likelier an arrival is to\n     * get to the first end.\n     *\n     * `null` under any silence, where either side withheld the share, and where\n     * the earlier one is nought.\n     */\n    readonly entryRatio: number | null;\n    /**\n     * `now.conversion.share ÷ was.conversion.share` — how much likelier an\n     * arrival is to finish, which is the figure a deployment means by *did the\n     * change work*.\n     *\n     * `null` on the same terms as {@link entryRatio}.\n     */\n    readonly conversionRatio: number | null;\n    /**\n     * The later window's reach at the earlier window's closing rate, as a share\n     * of arrivals: the conversion share if only getting there had moved.\n     */\n    readonly ifOnlyEntryMoved: number | null;\n    /** The other diagonal: the conversion share if only the closing had moved. */\n    readonly ifOnlyClosingMoved: number | null;\n    /** Which side was enough on its own. `null` where the conversion share did not move. */\n    readonly cause: ConversionCause | null;\n    /**\n     * The movement in the conversion share, put on the later window's scale:\n     * `(now.conversion.share − was.conversion.share) × now.opened`.\n     *\n     * **A mass for ranking and not a count of people**, as every `…Moved` figure\n     * in this subsystem is. A difference of two windows' conversion counts\n     * is refused here and nowhere published: both are generous by their own\n     * window's straddle, and the inflation does not divide out of a difference\n     * whose two terms are in different windows.\n     *\n     * `null` under any silence and wherever either share is withheld.\n     */\n    readonly readersMoved: number | null;\n};",
+              "truncated": false,
+              "summary": "One funnel question both windows were asked, as two windows answer it."
+            },
+            {
+              "name": "FunnelChange",
+              "kind": "type",
+              "signature": "type FunnelChange = {\n    /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */\n    readonly treeId: TreeId;\n    readonly revisions: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /** The two funnel readings this comparison is made of. */\n    readonly readings: {\n        readonly was: FunnelReach;\n        readonly now: FunnelReach;\n    };\n    /**\n     * Every question both windows were asked, ordered by the pair's two ends so a\n     * screen does not reorder on a refresh.\n     *\n     * Deliberately not ranked, as the readings it is made of are not: two pairs\n     * are two questions about different nodes, and the pair that moved the most\n     * readers is reliably whichever first end is shallowest in the page.\n     * {@link mostGained} and {@link mostLost} are the two a surface leads with.\n     */\n    readonly compared: readonly ComparedFunnel[];\n    /**\n     * Questions only the later window was asked, as it answered them.\n     *\n     * A deployment that added a pair, and the window before it was added has\n     * nothing to say — which is a fact about the configuration rather than about\n     * the change, and the reason this is a list and not a movement.\n     */\n    readonly added: readonly PairReach[];\n    /** Questions only the earlier window was asked, as it answered them. */\n    readonly removed: readonly PairReach[];\n    /** Compared pairs by what happened to the verdict. The five add to {@link compared}'s length. */\n    readonly movements: Readonly<Record<FunnelMovement, number>>;\n    /** Compared pairs by what the change did to the question. The four add to {@link compared}'s length. */\n    readonly questions: Readonly<Record<QuestionMovement, number>>;\n    /**\n     * The compared pair whose conversion share gained the most readers at the\n     * later window's scale, or `null` where none gained.\n     *\n     * Ranked by {@link ComparedFunnel.readersMoved} — by headcount rather than by\n     * share, which is the rule a fall between two siblings is ranked by: a\n     * funnel two readers in three now finish is a better rate and a smaller win\n     * than one four hundred in a thousand do.\n     */\n    readonly mostGained: ComparedFunnel | null;\n    /** The compared pair that lost the most, by the same rule. `null` where none lost. */\n    readonly mostLost: ComparedFunnel | null;\n    /**\n     * Compared pairs whose rate ratio is given and whose bracket contains 1, so\n     * the straddle alone could account for the whole movement.\n     *\n     * The figure that says how much of this screen to believe: a reading where\n     * most of the pairs are in here is a reading of the deployment's rollup\n     * window.\n     */\n    readonly undecided: number;\n    /**\n     * Neither window had a page view that spanned a rollup boundary, so every\n     * rate on both sides is exact and every bracket is a point.\n     *\n     * False wherever either window's drift is unknown, which is every state of\n     * the door: there is nothing to measure the straddle with.\n     */\n    readonly exact: boolean;\n    /**\n     * Pairs naming a question already seen on that side, where every one after\n     * the first was ignored.\n     *\n     * A reading built by `funnelReachOf` holds one row per question, so this is a\n     * caller that concatenated two readings. Counting the second occurrence would\n     * put one window's funnel in a comparison twice, which is the error that is\n     * permanent once the counters hold it and the one this subsystem\n     * checks for by habit.\n     */\n    readonly duplicated: number;\n    /** Set where a figure is missing and why. `null` where nothing is. */\n    readonly silence: FunnelChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": "What a change did to a page's funnels."
+            },
+            {
+              "name": "conversionCauseOf",
+              "kind": "function",
+              "signature": "const conversionCauseOf: (was: number, now: number, ifOnlyEntryMoved: number, ifOnlyClosingMoved: number) => ConversionCause | null",
+              "truncated": false,
+              "summary": "Which side was enough on its own, by the direction each counterfactual carries — the sufficiency rule the two earlier counterfactuals here publish, asked of a product."
+            },
+            {
+              "name": "funnelChangeOf",
+              "kind": "function",
+              "signature": "const funnelChangeOf: (was: FunnelReach, now: FunnelReach) => FunnelChange",
+              "truncated": false,
+              "summary": "Hold two windows of one page's funnels against each other."
             }
           ]
         },
@@ -12614,7 +12740,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -12766,6 +12892,13 @@
               "summary": "What a share-of-readers silence reports, which is also a funnel's."
             },
             {
+              "name": "meaningOfFunnelChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfFunnelChangeSilence: (silence: FunnelChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two windows' funnels reports."
+            },
+            {
               "name": "SilenceRelation",
               "kind": "type",
               "signature": "type SilenceRelation = \n/**\n * One condition about one subject: the two readings are silent for the same\n * reason about the same thing, and one sentence serves both.\n */\n\"one-state\"\n/**\n * One condition about two subjects.\n *\n * The same thing is true of a page and of one of its parts, or of a pair of\n * readings and of one side of it. Worth two sentences and never one: the\n * narrower is not evidence for the wider, and the wider does not say which\n * side it is about.\n */\n | \"one-reason\"\n/** Two conditions, which a surface has to print separately or choose between. */\n | \"unrelated\";",
@@ -12889,7 +13022,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13032,7 +13165,7 @@
       "files": 17,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13099,7 +13232,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13696,7 +13829,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13770,7 +13903,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14249,7 +14382,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1641,
+        "packageNames": 1659,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
