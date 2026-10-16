@@ -8,6 +8,40 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-15 — the audience dimension is in the schema and its type is not reachable from any published entry point
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:** open
+
+[0283](decisions/0283-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
+put `audience` on `ReaderSignalBatch` and `audienceId` on every stored counter
+row. Both are branded types — `AudienceId`, from `src/audience/audience.ts` —
+and **neither that type nor its schema is exported from any entry point in
+`package.json`.**
+
+So a host can read the field (the row hands it over, structurally typed) and
+cannot **write** one: setting `audience` on a batch means producing a branded
+string, which needs `audienceIdSchema`, which is not published. The same is
+true of `ApplicationId` today, and that is exactly why this is filed rather
+than fixed in passing: the two dimensions should be reachable the same way or
+neither should, and deciding which is not this unit's to take alone.
+
+The portal's own note on `(portal)/_lib/reader-signals.ts` names the rule this
+sits under:
+
+> *"Nothing here reaches into `src/`, and a gap in what those entry points
+> expose is a finding rather than a deep import."*
+
+**What acting on it looks like:** either publish the two identity modules
+(`application`, `audience`) through an entry point, or decide that minting these
+ids is the control plane's job and that a host only ever echoes back a value it
+was given — in which case the batch field's type should say so, and the
+documentation should show where the value comes from.
+
+**Not urgent, and it has a deadline anyway.** Nothing can serve a second
+audience until the composing `TreeSource` exists (0263), so no host needs to
+write the field yet. It needs answering before one does.
+
+---
 ## 2026-10-15 — the front door sold a surface that is still being built, and the only place that said so was on the far side of the link
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
