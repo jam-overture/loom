@@ -360,7 +360,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  *
  * **The sixteenth needed none either, and it is the first set whose members
  * withhold half of their reading**
- * ([0286](../../decisions/0286-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)).
+ * ([0288](../../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)).
  * A comparison of two windows' funnels reports the state every comparison here
  * reports, the door's three said of a pair, and `nothing-carried` said of a
  * **question** a deployment wrote rather than of a word or of a place.
@@ -943,7 +943,7 @@ export const meaningOfReachSilence = (silence: ReachSilence): SilenceMeaning => 
 }
 
 /**
- * What a comparison of two windows' funnels reports (0286).
+ * What a comparison of two windows' funnels reports (0288).
  *
  * **The sixteenth set, and the first assembled out of the door's three said of
  * a pair.** `different-trees` is the state every comparison here reports;

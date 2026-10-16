@@ -7,7 +7,7 @@
 ## What I completed
 
 The comparison the funnel never had:
-[0286](../decisions/0286-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md),
+[0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md),
 `funnelChangeOf(was, now)` in
 [`src/signals/funnel-change.ts`](../src/signals/funnel-change.ts).
 
@@ -116,7 +116,7 @@ anywhere on the type.
 
 ## Records added
 
-One: **0286**. `pnpm decisions:index` regenerated; `0151`–`0154` and `0278`
+One: **0288**. `pnpm decisions:index` regenerated; `0151`–`0154` and `0278`
 still print as holes, which is #647 holding 0278 and the older gaps 0097 allows.
 `0283` is on `main` as *a declared ramp step is a maximum* and is also claimed by
 #649 — that clash is the merge's to renumber, and nothing in this branch cites
@@ -213,7 +213,7 @@ appends survive).
 
 ## The door this lane is keeping cheap
 
-Nothing here touches it. Per-reader identity stays deferred and nothing in 0286
+Nothing here touches it. Per-reader identity stays deferred and nothing in 0288
 makes it dearer to add later: both sides of this comparison are counters already
 stored, and an identified batch would arrive with the same two factors and the
 same straddle to bound.

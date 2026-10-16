@@ -1,10 +1,18 @@
-# 0286 — A change to a funnel is two shares that factor, and a difference of two floors is a bracket
+# 0288 — A change to a funnel is two shares that factor, and a difference of two floors is a bracket
 
 **Status:** Accepted
 
 **Date:** 16 October 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-16**, from 0286, when `main` was merged into the
+> branch that carried it (#654). `main` had meanwhile accepted a different
+> 0286 — *a pinned press is one that leaves the document, and the harness says
+> which presses it refused* — and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> This record was written on 16 October and nothing in it changed but its
+> number; the citations of it on this branch were updated with it.
 
 ## Context
 

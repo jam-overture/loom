@@ -8,6 +8,107 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-16 — the button offering the install guide landed on the introduction, and the four links into the documentation were held to nothing
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (the `/docs`
+half is **closed**), with a row for `Loom docs` and an open `/demo` half ·
+**Status:** **the `/docs` half is closed by
+`marketing-06-the-install-guide-the-button-missed`.** The `/demo` half of the
+4 October finding is still open and is a different shape, described at the foot
+of this entry.
+
+Closes the `/docs` half of **4 October — *a claim about another surface can be
+held to the link beside it and never to what is on the page***, which named two
+uncovered claims and asked for a shape rather than a fix.
+
+### The reader-visible half, which nothing was ever going to catch
+
+The front door's install band prints `pnpm add @jam-overture/loom …` and then
+offers **Follow the install guide**. That control pointed at `/docs`.
+
+`(docs)/docs/page.tsx` is not a landing page — by that lane's own decision,
+*"a second front door written in MDX would be a second place to keep the same
+sentences true"* — so it redirects to the first page of the documentation in
+reading order. That is **Introduction**, and *Installation* is the third page
+after it. A reader who had just been shown a command and pressed the button
+promising the longer version of it arrived on a page about what Loom is, and
+had to find their way.
+
+Nothing about it was red and nothing was broken. The link worked, the page it
+opened is a good page, and it was not the page the button named. The same was
+true of `/how-it-works`'s closing paragraph, which has named three specific
+pages' worth of documentation since 26 September — *"what a rule can say, what
+the record holds field by field, and how to wire it into a page you already
+have"* — under one button to the front of all of it.
+
+**Four controls on this site pointed into the documentation and every one of
+them pointed at the same door.**
+
+### Why there was nothing to catch it, which is the 4 October finding
+
+That entry stopped at the route group boundary and said so:
+
+> *"A link to `/docs#something` is checked for nothing… Both are true today and
+> both were checked by a person. Nothing would say so if either stopped being."*
+
+It also recorded what would close it: *"a surface publishing the list of things
+it promises to carry — a few strings, exported from its own route group — for
+anybody pointing at it to assert against."*
+
+**That is still the better shape and it is still `Loom docs`' to build.** What
+shipped instead is the shape the 15 October run settled on for the portal's
+under-construction banner: **read the other lane's page off the repository.** A
+documentation page is an MDX file with its own heading at the top of it, so both
+things this site has been promising about those pages — that they exist, and
+that a particular thing is on them — are in that file. Nothing in
+`(marketing)` imports `(docs)`, renders it, or asserts over its chrome.
+
+`_lib/docs-pages.ts` is the list, `_lib/docs-pages.test.ts` holds four rules
+over it, and the third is the one with teeth: **no link on this site goes into
+the documentation at an address that is not on the list.** Without it the other
+three check a list rather than the site, and the next run to type a path into a
+band gets no check at all.
+
+### The row for `Loom docs`
+
+**Nothing is owed, and two things are worth knowing.**
+
+- **Four of your pages are now quoted by name on the marketing site**, and a
+  phrase out of each is asserted against your source: the `pnpm add` command in
+  *Installation*, *"a small object called a policy"* and *"the second list you
+  write"* in *What AI may change*, *"what it remembers"* in *What every ask
+  leaves behind*, and *"one function that changes a page"* in *What your app has
+  to do*. If you rewrite one of those sentences this file goes red in your run,
+  and **it is this lane's to fix, not yours** — the honest answers are to point
+  the link somewhere else or to reword the promise, and both of those are in
+  `(marketing)`. The failure says so in as many words.
+- **The headings are held too**, so a page renamed is also red here. Same
+  remedy and same owner.
+- If you would rather publish the list the 4 October entry asked for, this file
+  is four constants and a sweep, and it should be deleted the day you do.
+
+### What is still open, and it is the `/demo` half
+
+The 4 October finding named two uncovered claims. The second is on
+`/what-you-run`: *"To ask for something in your own words, try the demo. It is a
+page you can type into."*
+
+**It is not in this unit, and that is deliberate.** It is not a claim
+about a named page, it is a claim about a *behaviour* — that there is somewhere
+on `/demo` to type. The shape above cannot carry it: a phrase quoted out of
+another lane's prose is a claim about words, and *you can type into this* is a
+claim about a control. Checking it would mean this lane asserting that `(demo)`
+renders a text input, which is nearer to testing another lane's work than
+quoting its page is.
+
+So it is left open with the question stated rather than answered: **is a claim
+about another surface's behaviour one this lane may hold at all, or is it the
+first thing that genuinely needs the publishing shape the 4 October entry
+asked for?** My recommendation is the second, and it is the argument for
+`Loom docs` and `Loom demo` each exporting a short list of what their surface
+promises — at which point the file this run added becomes four constants to
+delete.
+---
 ## 2026-10-15 — the audience dimension is in the schema and its type is not reachable from any published entry point
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:**
@@ -216,6 +317,25 @@ reachable without losing anything a reader needs.
 under a length nobody has established would be this repository asserting a
 guess, and the body is not a file in it. The remedy above is a habit, and this
 entry is where the next lane that loses a screenshot will find it.
+
+> **Two more readings, 16 October, and they narrow the bracket from the other
+> end.** `marketing-06` followed the remedy above on #655 — short sha, visual
+> slug not repeating the report slug — and posted two image links in one
+> comment at **124** and **116** characters. Both came back clean, read back
+> off the API rather than eyeballed.
+>
+> 124 is above the previous highest clean reading of 121, so the boundary is
+> now somewhere in **124–141** rather than 121–141. Nothing contradicts length
+> yet.
+>
+> **And the same run lost a link anyway, which is the part worth carrying.**
+> #655's *body* linked the report by branch name rather than by sha — 158
+> characters — and came back ``` `` ``` -wrapped exactly as #634 did. The
+> remedy had been applied to the comment and not to the body, in the same
+> twenty minutes, by a run that had read this entry. So the habit is **per
+> URL and not per pull request**: the body, every comment and every review
+> reply each need the short sha, and the body is the one written first and
+> therefore the one written before the lesson is fresh.
 
 ---
 ## 2026-10-14 — the marketing site named seven retired pages forty times, eleven of them in the present tense, and every reader-facing path was derived and therefore correct
@@ -47179,8 +47299,23 @@ on all three palettes, and it is photographed in the 4 October report.
 ## 2026-10-04 — a claim about another surface can be held to the link beside it and never to what is on the page
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
-line from `Loom docs` · **Status:** open — a stated limit of what shipped on
-4 October, not a defect today
+line from `Loom docs` · **Status:** **the `/docs` half is closed** by
+`marketing-06-the-install-guide-the-button-missed` on 16 October, which also
+found that the claim it names was costing a reader a click; the **`/demo` half
+is still open** and is a different shape. The 16 October entry at the top of
+this file has both halves.
+
+> **Closed for `/docs`, 16 October.** `_lib/docs-pages.ts` is the list of
+> documentation pages this site names and `docs-pages.test.ts` holds each one
+> to being served, to its own heading, and to a phrase out of its own source —
+> read off the repository rather than imported, which is the route the
+> 15 October run took for the portal's banner. The publishing shape this entry
+> asked for is still the better one and is still `Loom docs`' to build.
+>
+> The uncovered claim about the documentation named below was not merely
+> unchecked, it was **misdirected**: `/docs` is a redirect to the first page in
+> reading order, so *Follow the install guide* on the front door landed on
+> *Introduction* three pages above the command the band had just printed.
 
 `naming.ts` holds three rules over what this site says about its own pages, and
 the third one stops at the route group boundary. A link from `/what-you-run` to
@@ -47639,9 +47774,24 @@ here so the judgement is made rather than inherited.
 `tools/screenshot` and `tools/specimen/playwright.ts`) ·
 **Extends:** the closed 13 September entry *the screenshot harness cannot
 photograph a block that only exists once you press it*, whose own closing note
-is the sentence that became this limit · **Status:** open — **a stated limit of
-an `Accepted` record ([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)),
-not a defect**; what it cost this run is one visual, and the report says so
+is the sentence that became this limit · **Status:** **open for the `goTo`
+step; half closed by `framework-75-the-press-that-does-not-leave-the-page`**,
+16 October — **the smaller half is done and the `goTo` half is still a stated
+limit of an `Accepted` record
+([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md))
+rather than a defect.** The line this entry
+called *smaller and free* exists: a press the pin refused prints
+`pinned  <address>  ← press refused, it leaves the page` beside the shot, the
+`before`'s refusals ahead of the shot's own, and no lane has to infer a refusal
+from a `no match` two lines down again. The same branch narrowed the pin to
+presses that **leave the document**
+([0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md)),
+which does not reach this entry's subject: your pager press is a navigation and
+is still refused. **`{ "goTo": … }` is the open half**, it is still
+`ARCHITECTURAL — needs review` for the reason this entry gives — 0159 would want
+a line — and this lane did not take it in the same unit as a pin that is not
+architectural, because the two would have travelled in one pull request and only
+one of them can merge
 
 A `do` list runs `pinNavigation` before its first step: a capture-phase listener
 that calls `preventDefault` on any click whose target is inside an `a[href]`,
@@ -54069,9 +54219,20 @@ three links above are this lane's to fix either way.
 ## 2026-10-15 — a shot cannot photograph a press of a contents row, because the harness refuses every link and a fragment is not a navigation
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/specimen/playwright.ts`) · **Status:** open — **nothing is broken and
-one picture had to be taken another way**; the remedy is one comparison and the
-reason it was not taken here is lane rather than difficulty
+(`tools/specimen/playwright.ts`) · **Status:** **closed by
+`framework-75-the-press-that-does-not-leave-the-page`** — the comparison this
+entry wrote out, taken as written. A press is pinned when
+`new URL(href, location.href)` differs from `location.href` on origin, path or
+query, and a pure fragment change is let through; an `href` that will not
+resolve is refused, which is the one case the entry did not name. Recorded as
+[0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md),
+which refines 0159's pin clause rather than superseding it: every property the
+pin was written for is stated there and kept. The pin moved to
+`tools/specimen/pin.ts` so the shipped string could be compiled with esbuild and
+`keepNames` and tested as the artefact — fifteen cases, five of which fail
+against the predicate that shipped yesterday. **Your `(docs)` shot is retakeable
+as a press**; the picture of a reader scrolling is a correct record of the limit
+and the retake is yours rather than this lane's
 
 `pinNavigation` is run in the top document before the first step of a `do`
 list, and it prevents the default on **every** click that lands inside an
@@ -54250,7 +54411,7 @@ ceiling over `read + skipped` rather than over the page's words.
 ## 2026-10-15 — a page where nothing reports reach publishes a share of nought beside an empty list of the words nobody saw
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/copy.ts`) · **Status:** open — **the half of 0282 that was left**,
+(`src/signals/copy.ts`) · **Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken as 0287, §33, over all four places the quotient is read. Original status: open — **the half of 0282 that was left**,
 and a unit rather than a line
 
 0282 withholds `CopyReading.typical` where no word of the page is in a part the
@@ -54508,7 +54669,7 @@ URL with many would separate them, and nobody has written one by accident yet.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/copy-change.ts`, `src/signals/library-word-reach-change.ts`) ·
-**Status:** open — **two spellings of one projection**, found by reading the
+**Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken with 0287, and the predicate is published from `parts.ts` rather than from `copy-change.ts`, since a third module and the page-scale share read it too. Original status: open — **two spellings of one projection**, found by reading the
 merge rather than by a test, and filed rather than taken because it is not what
 #642 is about
 
@@ -54750,6 +54911,290 @@ rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
 
 ---
+## 2026-10-15 — a share of a page's words is now a share of the words the window can speak for, and the field kept its name
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a published figure whose denominator moved under a name
+that did not**, with the one pair it must never draw again
+
+[0287](decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md),
+§33 of [`docs/signals.md`](docs/signals.md). `CopyReading.share` and
+`RoleCopy.share` were `read ÷ words` and are now `read ÷ spoken`, where
+`spoken` is a new published field: the words in parts whose standing is not
+`unknown`.
+
+**Nothing on a screen breaks and one thing on it changes value.** A page every
+part of which reports reach is unaffected — `spoken` is `words` there, which is
+the ordinary state. Where a page has `unknown` words the figure goes **up**,
+because those words were in the denominator and in neither half of the sentence
+above it.
+
+**Three things worth knowing before the card is drawn:**
+
+- **`share` can now be `null`, and it could not before.** It is absent in
+  exactly the three states `silence` names as `wordless`, `unmeasured` or
+  `unspoken`. The second of those is the common one: **every window with no
+  page views used to publish a share of exactly 0**, which drew as *none of
+  this page was reached* for a page nobody had opened.
+- **Do not put `share` and `unseen` on one card without `spoken` beside
+  them.** That pair is what the finding this closes was about: a nought share
+  over an empty list of the words nobody saw, because `unseen` is `skipped`
+  only. It cannot happen now, and the way to re-create it is to compute a
+  share from `wordsByStanding.read ÷ words` on the surface.
+- **`words` is unchanged and still partitions the page.** `spoken` plus
+  `wordsByStanding.unknown` is `words`, and the gap is the mass outside the
+  question rather than words nobody read.
+
+**The sentence to put under it** is *of the words this window can speak for*.
+The field's name is unchanged on purpose: its claim — the share of words at
+least one reader reached — did not move, only the universe did, and a rename
+would have cost a migration to say the same thing.
+
+---
+## 2026-10-15 — `pnpm verify` was green on `main` this evening, and the records-index render test passed at 13.4 seconds
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/architecture.test.tsx`) ·
+**Extends** this afternoon's entry *the records index render test has about
+eighty records of headroom left* · **Status:** open — **the failure did not
+reproduce, and the headroom reading it rests on still stands**
+
+Run on `4ce00d0` with nothing of this lane's in the tree, before branching:
+`pnpm verify` exited **0**, 557 test files and 10,948 tests, with
+`app/(docs)/_components/architecture.test.tsx` passing — 21 tests in
+**13,365 ms** for the file.
+
+**That is not a contradiction of the entry it extends and should not be read as
+one.** That entry measured the one test at 3,836 ms and 4,434 ms *run alone*
+against a 5,000 ms budget, and said the crossing happens under the full suite's
+parallel load. A machine with more of it to spare does not cross; this one did
+not. The arithmetic — 262 records, ~15 ms a record, under forty records of
+headroom — is untouched by a green run, and so is the remedy.
+
+**What it adds is that the gate is load-dependent**, which is the worst shape
+for a failure this repository's routines read as a branch's own doing. The
+remedy that entry recommends is still the one to take, and until it is, a red
+`architecture.test.tsx` should be re-run before anybody reverts anything.
+
+---
+## 2026-10-15 — the API reference truncates a long signature mid-comment, and a citation past the cut is never lifted
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a hole in a
+check that is otherwise airtight**, met by a change that was nowhere near it
+
+`readerFacingSignature` lifts citations out of the comments inside a published
+declaration, and drops whole any comment whose grammar needs the number. The
+test beside it holds every signature on the site to carrying none. Both are
+right and the reasoning in them is right.
+
+**A signature is truncated before that runs, and the cut lands inside a
+comment.** `CopyReading`'s signature is about 6,000 characters and ends `…no
+word this\n * wind\n…`. The `/**` that comment opened with has no `*/` in what
+is left, so `COMMENT_IN_CODE` — `/\/\*\*[\s\S]*?\*\//g` — never matches it, the
+citations in it are never lifted, and the whole-comment fallback never fires
+either. Everything above the cut is cleaned correctly; the tail is published
+raw.
+
+**How it was found.** This lane added a paragraph to the last field of
+`CopyReading`, which pushed that field's comment across the cut. `pnpm verify`
+then failed on *never puts a decision-record number in front of a reader*,
+naming `CopyReading's signature`, while `readerFacingSignature` run by hand
+over the same declaration out of `dist/` returned it clean — because by hand it
+was handed the whole thing. The remedy taken in this branch was to drop the two
+numbers from that one comment, which is right for the page and does nothing
+about the hole.
+
+**Why it is worth fixing rather than leaving to the gate.** The check does
+catch it, which is the good news, and the diagnosis costs an hour: the test
+names a symbol, the source comment looks exactly like fifty others that pass,
+and the stripper demonstrably works on it. The failure is **positional** — the
+same comment is fine a hundred characters earlier in the file — so the next
+lane to meet it will be a lane that did not touch the comment at all. One field
+added above a cited one is enough.
+
+**Two shapes, and the first is nearly free:**
+
+- **Truncate after cleaning, not before.** `readerFacingSignature` then always
+  sees balanced comments, and what is cut is already reader-facing.
+- **Or close the cut**: drop a trailing partial comment rather than publishing
+  it, since half a sentence of documentation under an ellipsis is not worth
+  reading anyway.
+
+**Not proposed: relaxing the test.** It is correct, it caught this, and the
+rule it enforces is the maintainer's.
+## 2026-10-16 — the composed preview URL, fifth instance, and the remedy is now free in a way it was not when it was written
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 27 September entry *the preview deploys and a routine cannot
+reach it: `*.vercel.app` is denied by the environment's network policy* and its
+2 October section · **Status:** open — **the body was corrected the way that
+entry prescribes and cost nothing; filed for the count and for one sentence
+that is now stronger than when it was written**
+
+#653's first body carried a preview URL composed from the branch name:
+
+```
+loom-git-framework-75-the-pr-jpizzolato36-6341s-projects.vercel.app
+```
+
+The one Vercel assigned, from the `vercel[bot]` comment:
+
+```
+loom-git-framework-75-the-pr-362b31-jpizzolato36-6341s-projects.vercel.app
+```
+
+Same shape as the 2 October reading and the same cause: Vercel truncates the
+branch segment and appends a hash of the rest, and this lane's branch names are
+long. `framework-75-the-press-that-does-not-leave-the-page` is 51 characters and
+15 of them survive. The guess has **no hash segment at all**, which is the tell
+and is invisible to the run that wrote it.
+
+**Confirmed again that a run cannot check its own guess.** Both URLs return
+`000` from this container — not 404, no connection. `https://vercel.com` and
+`https://vercel.app` return `000` as well while `https://github.com` connects,
+so it is the egress policy and not the deployment. That is the 27 September
+entry's claim, unchanged, re-measured today because a run that reports an
+unverifiable link should say which kind of unverifiable.
+
+**The sentence worth updating is the remedy's, and it is this entry's whole
+reason for existing.** The 2 October section says *"open the pull request, let
+the `vercel[bot]` comment arrive with the real URL in it, then correct the
+body — on a subscribed pull request that comment is an event the session is
+already woken by, so it is not a poll."* When that was written it was an
+argument. Today it is simply what happens: this run was woken four times by that
+one comment being edited through its deployment lifecycle, with the real URL in
+each. **The correction cost one API call inside a turn that was already open**,
+no wait, no schedule, and no check that the token-discipline rule forbids.
+
+So the remedy is not merely available, it is **cheaper than composing the
+URL**, and the only reason this instance happened is that a run which had read
+`FINDINGS.md` had not read this entry before writing its body. Which is the
+argument for the one line this cannot write itself: the procedure in
+`docs/routines.md` says *"include the deployed preview URL"* and does not say
+where to get it. **A clause there — *take it from the `vercel[bot]` comment
+after opening, never from the branch name* — would have cost this run nothing
+and would have cost the four before it nothing.** That file is governance and a
+routine cannot write the governance it is bound by, which is why this is filed
+rather than done.
+
+---
+## 2026-10-16 — two more counted readings for the mangling, and a 152-character URL that came back clean in the body that mangled a 164
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 15 October entry *the mangling bracket, measured on purpose this
+time: 144 clean and 155 mangled in one body* and the two entries it extends ·
+**Status:** open — **two readings, one new variable, and the first test of the
+remedy on a whole body rather than one link**
+
+#653's first body carried five URLs. Counted with `len()` over the exact
+strings, before and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 75 | the preview deployment | bare | **clean** |
+| 121 | 0159, by `main` | `[…](…)` | **clean** |
+| 152 | the report's two images, by branch name | `<img src="…">` | **clean** |
+| 164 | the report, by branch name | `[…](…)` | mangled |
+| 204 | 0286, by branch name | `[…](…)` | mangled |
+
+The two mangled ones came back with `` `` `` injected around the URL inside the
+parens, which is the same injection the three previous entries record.
+
+**Nothing here narrows the bracket on length alone, and one row widens the
+question.** 164 and 204 are both above 155 and are consistent with every
+previous reading. The row that is not is the **152**: if length were the only
+variable it should have mangled, since 152 sits inside the 144–155 bracket's
+upper half and above the highest clean `[…](…)` reading ever taken. It is in an
+HTML `src` attribute rather than a markdown link.
+
+So **the structural hypothesis is not dead, it was killed in the wrong
+place.** The 15 October entry tested adjacency to an inline-code span, a
+trailing comma, and the branch name, and all three are genuinely dead. It did
+not test *the syntax the URL is written in*, because every link it measured was
+a markdown link. Two readings now say the two syntaxes behave differently at a
+length where one of them breaks. Either:
+
+- the bracket for a markdown link is **155–164** and an HTML attribute has a
+  different one, or none at all; or
+- length is a proxy and what actually matters is the `[…](…)` construct, which
+  would make every previous reading a measurement of how long a link has to be
+  before something gives up parsing it.
+
+**A remedy tested on a whole body for the first time.** The three earlier
+entries each shortened one link and watched it. This body was re-posted with
+**every** URL under 144 — the two images and the report by short sha
+(`a5482a3`: 108, 108, 120), and 0286 not linked at all, because its filename is
+103 characters and no choice of ref gets it under 144, so the path is in
+backticks and `decisions/README.md` (69) carries the link. **The whole body came
+back verbatim**, every link included. That is the first evidence that the
+remedy holds for a body rather than for a link, and it is why there is a
+correction to look at rather than a second mangled body.
+
+**Still not proposed: a check.** The 14 and 15 October entries both reject one
+and the reasoning is unchanged — and this entry adds the sharper reason. A check
+holding every URL in a pull request body under 144 would have failed this body's
+two **clean** image attributes, which are 152 and which nothing was wrong with.
+The number is not established and the variable may not be the number.
+
+---
+## 2026-10-16 — lesson 32's census lost its fourth row, and four paragraphs under it are about that row
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/32-layout.md`)
+· **Status:** open — **the transcript is correct and the prose under it is not.**
+The fence was re-run and pasted from this lane, which is what its own `moves:`
+mark asks for and the only reason the gate is green; the paragraphs are prose
+and no check reads prose, which is the cost that mark was written to warn about
+
+Exercise G reads `tools/specimen/playwright.ts` and prints, among other things,
+every top-level const in it that is handed to the page. It printed four.
+`framework-75-the-press-that-does-not-leave-the-page` moved `pinNavigation` into
+`tools/specimen/pin.ts` — so the exercise, which reads one file, now prints
+three:
+
+```
+  top-level consts in playwright.ts: 11 → 10
+  of those, handed to the page: 4 → 3
+    pinNavigation      evaluate     takes nothing                  named in the suite true   (gone)
+```
+
+**Why it moved, because the reason is the lesson's own subject.** Both functions
+the pin is made of are serialised with `Function.prototype.toString` and run in
+a page, so the string that ships is the artefact and the module Vitest compiles
+is not it. The test that can see the difference compiles the module with esbuild
+and `keepNames` and asks *that* module its questions, and it can only do so for
+a module with no imports to resolve — `playwright.ts` has four. The file split
+is the testability, which is the thing this lesson is about.
+
+**What is now stale, in the order a reader meets it.** Four paragraphs under the
+fence, and one of them is load-bearing:
+
+- *"`measureDocument`, `readClippingBoxes` and `pinNavigation` take **nothing**:
+  each reaches for `document` or `window` itself, so a double has nothing to
+  hand them and the only thing it can do is answer in their place."* Still true
+  of the first two. The third is no longer in the census.
+- *"**And the function the suite names is not the function it runs.**"* The whole
+  paragraph is about `pinNavigation` being the one row with `named in the suite
+  true`, and no row says `true` any more. The point it makes — *is it named* and
+  *is it run* are independent and were distributed opposite ways round — is
+  still a real point about `readBoxes` and has lost its other half.
+- **The sentence the lesson rests on is now false as written**: *"a function
+  that fetches its own subject cannot be run anywhere but a page."*
+  `tools/specimen/pin.test.ts` runs `pinNavigation` — the compiled artefact, not
+  the module — against a `JSDOM` built by hand, in fifteen cases, five of which
+  fail against the predicate that shipped on 15 October. A function that reaches
+  for `document` can be run wherever a `document` can be *handed to the process*
+  rather than to the function. That is a third category beside *passed in* and
+  *reached for*, it is more interesting than the sentence it breaks, and it is
+  this lesson's to make rather than this lane's.
+
+**What this lane did not do.** It did not touch the exercise program, which
+would be editing another lane's lesson rather than re-running it, and it did not
+rewrite the paragraphs. Widening the exercise to read `pin.ts` beside
+`playwright.ts` is one obvious remedy and is yours; so is leaving the census at
+one file and saying why, which the lesson is well placed to do.
+
+---
 ## 2026-10-15 — `loom.heading`'s two per-step caps are now redundant, and the file predicted it in writing
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
@@ -54796,7 +55241,7 @@ other.
 **Status:** open — **a surface to build on a reading that is on `main`**, with
 the four refusals it must not undo
 
-[0286](decisions/0286-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)
+[0288](decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)
 publishes `funnelChangeOf(was, now)`: two windows of one page's funnels held
 against each other, per question, with what moved and which half of the funnel
 moved it. It takes the two `FunnelReach`es a funnel card already builds — no

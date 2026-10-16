@@ -19,6 +19,7 @@ import {
   type ChromeContext,
 } from "../chrome"
 import { FACTS, INSTALL_COMMAND } from "../copy"
+import { INSTALLATION } from "../docs-pages"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import {
@@ -797,7 +798,24 @@ const install = (ids: IdFactory): LoomNode =>
         wrap: false,
       }),
       stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
-        action(ids, "Follow the install guide", surfacePath(DOCS), {
+        /**
+         * The install guide, and until this run it was not where this went.
+         *
+         * `surfacePath(DOCS)` is `/docs`, which is a redirect to the first page
+         * of the documentation in reading order — *Introduction*. So a reader
+         * who had just been shown `pnpm add` and pressed the button offering
+         * the longer version of it landed three pages above the command, on a
+         * page about what Loom is. Nothing was broken and nothing was red: the
+         * link worked, the page it opened was good, and it was not the page the
+         * button named.
+         *
+         * `INSTALLATION` is that page, and `docs-pages.test.ts` holds it to
+         * carrying the command this band prints. The front of the documentation
+         * is still offered twice on this page — the card in the band of four and
+         * the footer's map — so nothing was taken away from a reader who wants
+         * to start at the beginning.
+         */
+        action(ids, "Follow the install guide", INSTALLATION.path, {
           variant: "primary",
           scale: "large",
         }),
