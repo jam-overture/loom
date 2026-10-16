@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
@@ -115,8 +116,12 @@ export type ReaderRegionCount = {
   readonly views: number
 }
 
-/** A region count as the store keeps it, which is the count plus when it last moved. */
+/**
+ * A region count as the store keeps it: the count, the audience it was
+ * collected under, and when it last moved. See `StoredTally.audienceId` (0283).
+ */
 export type StoredRegionCount = ReaderRegionCount & {
+  readonly audienceId: AudienceId
   readonly updatedAt: string
 }
 
@@ -136,7 +141,9 @@ export interface ReaderRegionStore {
    */
   readonly count: (
     counts: readonly ReaderRegionCount[],
-    at: string
+    at: string,
+    /** The audience the delivery was served under (0283). Omitted is `aud_everyone`. */
+    audience?: AudienceId
   ) => Promise<Result<void, ReaderSignalStoreError>>
   readonly regions: (
     request?: TallyReadRequest

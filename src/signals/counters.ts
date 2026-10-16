@@ -1,3 +1,5 @@
+import type { AudienceId } from "../audience/audience.js"
+
 import type { ReaderRegionCount } from "./region.js"
 import type { FunnelAnswer, FunnelPair, ReaderTally } from "./rollup.js"
 
@@ -51,6 +53,23 @@ export const funnelKey = (answer: FunnelAnswer): string =>
 
 export const regionKey = (count: ReaderRegionCount): string =>
   `${revisionKey(count)} ${count.region}`
+
+/**
+ * The same counter, in one audience (0283).
+ *
+ * The four keys above identify a counter *within* one audience, which is all a
+ * fold in front of the driver needs: `apply` and `count` are handed one
+ * audience's rows per call, so two entries sharing a key in one call are the
+ * same row however many audiences the window held.
+ *
+ * A store that keeps its rows across calls needs more than that, and only the
+ * memory one does — Postgres has the audience in the primary key, so the
+ * database is already holding two audiences apart. This is the memory store's
+ * half of that same identity, and it is **here rather than beside it** for the
+ * reason the rest of this file is: two spellings of a key that agree today are
+ * the shape this subsystem has already been bitten by.
+ */
+export const inAudience = (audience: AudienceId, key: string): string => `${audience} ${key}`
 
 /**
  * Rows that name the same counter, added together, in the order they arrived.

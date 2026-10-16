@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { OTHER_TREE, region, TREE } from "../testing/reader-signal-contract.js"
 
 import {
@@ -29,6 +30,7 @@ const reading = (
   regionReadingOf(
     Object.entries(counts).map(
       ([code, views]): StoredRegionCount => ({
+        audienceId: DEFAULT_AUDIENCE_ID,
         treeId: TREE,
         revision: options.revision ?? 1,
         region: code === UNKNOWN_REGION ? UNKNOWN_REGION : region(code),

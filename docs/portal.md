@@ -255,7 +255,7 @@ Each is one pull request, and **do not start a unit whose input is not on
 
 | # | Unit | Plane | Blocked on |
 | --- | --- | --- | --- |
-| 1 | **The signal tables take project and audience.** One migration over `loom_reader_signals`, `_tallies`, `_funnels`, `_regions`, `_page_views`, plus `project_id` on `loom_holds`, `loom_policy_revisions`, `loom_telemetry` | observation | **0263** |
+| 1 | ~~**The signal tables take the application and the audience.**~~ **Done, in two migrations rather than one.** The dimension is the *application*, not the project (0269): the finer grain, matching `loom_trees`, with the project as the grouping above it. `application_id` landed on all five reader tables with 0273, and `audience_id` with [0283](../decisions/0283-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md) once 0263 was accepted | observation | — |
 | 2 | **Accounts and roles.** The environment roster goes; the actor comes from the session, the scope from the route (0027), and a role is a ceiling on the stake scale | identity | unit 0 |
 | 3 | **The workspace.** The prototype's project list, wired: create, delete, switch | identity | units 1, 2 |
 | 4 | **Registration and the key.** Project id, ingest key, a snippet to paste, and `/api/reader-signals` authenticating it. **It authenticates nobody today** | connection | unit 3 |

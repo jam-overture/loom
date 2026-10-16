@@ -2,6 +2,7 @@ import { and, asc, desc, eq, gt, lt, sql } from "drizzle-orm"
 import type { PgColumn } from "drizzle-orm/pg-core"
 import { z } from "zod"
 
+import { DEFAULT_AUDIENCE_ID, audienceIdSchema } from "../audience/audience.js"
 import { nodeIdSchema, treeIdSchema } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
@@ -101,6 +102,8 @@ const instantSchema = z
 
 const receivedSchema = z.object({
   seq: z.number().int().nonnegative(),
+  /** What the batch was filed under, which is always a value — see `ReceivedBatch.audienceId`. */
+  audienceId: audienceIdSchema,
   treeId: treeIdSchema,
   revision: z.number().int().nonnegative(),
   sentAt: z.number().int().nonnegative(),
@@ -118,6 +121,7 @@ const receivedSchema = z.object({
 const countSchema = z.coerce.number().int().nonnegative()
 
 const storedTallySchema = z.object({
+  audienceId: audienceIdSchema,
   treeId: treeIdSchema,
   revision: z.number().int().nonnegative(),
   nodeId: nodeIdSchema,
@@ -135,6 +139,7 @@ const storedTallySchema = z.object({
 
 const storedFunnelSchema = z
   .object({
+    audienceId: audienceIdSchema,
     treeId: treeIdSchema,
     revision: z.number().int().nonnegative(),
     fromNodeId: nodeIdSchema,
@@ -147,6 +152,7 @@ const storedFunnelSchema = z
   })
   .transform(
     (row): StoredFunnel => ({
+      audienceId: row.audienceId,
       treeId: row.treeId,
       revision: row.revision,
       pair: {
@@ -167,6 +173,7 @@ const storedFunnelSchema = z
  */
 const storedPageViewsSchema = z
   .object({
+    audienceId: audienceIdSchema,
     treeId: treeIdSchema,
     revision: z.number().int().nonnegative(),
     opened: countSchema,
@@ -176,6 +183,7 @@ const storedPageViewsSchema = z
   })
   .transform(
     (row): StoredPageViews => ({
+      audienceId: row.audienceId,
       treeId: row.treeId,
       revision: row.revision,
       opened: row.opened,
@@ -207,6 +215,12 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
       await db.insert(loomReaderSignals).values(
         batches.map((batch) => ({
           applicationId: application,
+          /**
+           * Resolved here rather than defaulted by the column, so the row a
+           * fold reads says what it was filed under whichever sender wrote it
+           * (0283).
+           */
+          audienceId: batch.audience ?? DEFAULT_AUDIENCE_ID,
           treeId: batch.treeId,
           revision: batch.revision,
           sentAt: batch.sentAt,
@@ -231,6 +245,7 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
       const rows = await db
         .select({
           seq: loomReaderSignals.seq,
+          audienceId: loomReaderSignals.audienceId,
           treeId: loomReaderSignals.treeId,
           revision: loomReaderSignals.revision,
           sentAt: loomReaderSignals.sentAt,
@@ -303,17 +318,22 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
 })
 
 /**
- * Every counter table is filtered the same way, on the three columns they all
+ * Every counter table is filtered the same way, on the four columns they all
  * share.
  *
- * The application is first and is not optional, unlike the two a request may
+ * The application is first and is not optional, unlike the three a request may
  * narrow by: a reading always happens inside one application, and taking it
  * here rather than at each call site is what stops a counter query being
  * written without it.
+ *
+ * **The audience is one of the optional three** (0283), which is the difference
+ * between the two dimensions in one line: no reading spans two applications,
+ * and a reading that compares two audiences is the point of serving two.
  */
 const within = (
   columns: {
     readonly applicationId: PgColumn
+    readonly audienceId: PgColumn
     readonly treeId: PgColumn
     readonly revision: PgColumn
   },
@@ -322,6 +342,7 @@ const within = (
 ) =>
   and(
     eq(columns.applicationId, application),
+    request?.audience === undefined ? undefined : eq(columns.audienceId, request.audience),
     request?.treeId === undefined ? undefined : eq(columns.treeId, request.treeId),
     request?.revision === undefined ? undefined : eq(columns.revision, request.revision)
   )
@@ -342,7 +363,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
    * hypothetical — a scheduled one and a manual one is the ordinary way it
    * happens — and this is the version that is correct when they do.
    */
-  apply: async ({ tallies, funnels, appearances = [] }, at) => {
+  apply: async ({ tallies, funnels, appearances = [] }, at, audience = DEFAULT_AUDIENCE_ID) => {
     if (tallies.length === 0 && funnels.length === 0 && appearances.length === 0) return ok(undefined)
 
     const updatedAt = new Date(at)
@@ -355,6 +376,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
             .values(
               foldedBy(tallies, tallyKey, addTallies).map((tally) => ({
                 applicationId: application,
+                audienceId: audience,
                 treeId: tally.treeId,
                 revision: tally.revision,
                 nodeId: tally.nodeId,
@@ -373,6 +395,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
             .onConflictDoUpdate({
               target: [
                 loomReaderTallies.applicationId,
+                loomReaderTallies.audienceId,
                 loomReaderTallies.treeId,
                 loomReaderTallies.revision,
                 loomReaderTallies.nodeId,
@@ -404,6 +427,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
             .values(
               foldedBy(appearances, pageViewKey, addPageViewCounts).map((count) => ({
                 applicationId: application,
+                audienceId: audience,
                 treeId: count.treeId,
                 revision: count.revision,
                 appearances: count.views,
@@ -414,6 +438,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
             .onConflictDoUpdate({
               target: [
             loomReaderPageViews.applicationId,
+            loomReaderPageViews.audienceId,
             loomReaderPageViews.treeId,
             loomReaderPageViews.revision,
           ],
@@ -437,6 +462,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
             .values(
               foldedBy(funnels, funnelKey, addFunnelAnswers).map((answer) => ({
                 applicationId: application,
+                audienceId: audience,
                 treeId: answer.treeId,
                 revision: answer.revision,
                 fromNodeId: answer.pair.from.nodeId,
@@ -451,6 +477,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
             .onConflictDoUpdate({
               target: [
                 loomReaderFunnels.applicationId,
+                loomReaderFunnels.audienceId,
                 loomReaderFunnels.treeId,
                 loomReaderFunnels.revision,
                 loomReaderFunnels.fromNodeId,
@@ -487,7 +514,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
    * never move it, and a row this write creates attests no fold rather than
    * attesting one at the moment a reader arrived.
    */
-  opened: async (openings, at) => {
+  opened: async (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
     if (openings.length === 0) return ok(undefined)
 
     const updatedAt = new Date(at)
@@ -498,6 +525,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
         .values(
           foldedBy(openings, pageViewKey, addPageViewCounts).map((count) => ({
             applicationId: application,
+            audienceId: audience,
             treeId: count.treeId,
             revision: count.revision,
             opened: count.views,
@@ -507,6 +535,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
         .onConflictDoUpdate({
           target: [
                 loomReaderPageViews.applicationId,
+                loomReaderPageViews.audienceId,
                 loomReaderPageViews.treeId,
                 loomReaderPageViews.revision,
               ],
@@ -577,6 +606,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
 })
 
 const storedRegionSchema = z.object({
+  audienceId: audienceIdSchema,
   treeId: treeIdSchema,
   revision: z.number().int().nonnegative(),
   /**
@@ -601,7 +631,7 @@ const regionStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderRegi
    * runs on the request path and two deliveries arriving together is the
    * ordinary case rather than the unlucky one.
    */
-  count: async (counts, at) => {
+  count: async (counts, at, audience = DEFAULT_AUDIENCE_ID) => {
     if (counts.length === 0) return ok(undefined)
 
     const updatedAt = new Date(at)
@@ -612,6 +642,7 @@ const regionStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderRegi
         .values(
           foldedBy(counts, regionKey, addRegionCounts).map((count) => ({
             applicationId: application,
+            audienceId: audience,
             treeId: count.treeId,
             revision: count.revision,
             region: count.region,
@@ -622,6 +653,7 @@ const regionStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderRegi
         .onConflictDoUpdate({
           target: [
             loomReaderRegions.applicationId,
+            loomReaderRegions.audienceId,
             loomReaderRegions.treeId,
             loomReaderRegions.revision,
             loomReaderRegions.region,

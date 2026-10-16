@@ -22,10 +22,16 @@ import {
  *
  * All five carry `application_id` (0269), led by it in every key and every
  * index, on the same terms as the store's four: a reader is filed against the
- * application whose page they read, and no reading here spans two. The column
- * arrives alone rather than beside the audience dimension 0263 clause 5 asks
- * for, which is a decision with a cost — [0273](../../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
- * holds the argument.
+ * application whose page they read, and no reading here spans two.
+ *
+ * All five then carry `audience_id` immediately after it
+ * ([0283](../../decisions/0283-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)),
+ * which is the second of the two migrations
+ * [0273](../../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
+ * chose to take rather than wait for. The two dimensions differ in kind, and
+ * the difference is why one is a handle's scope and the other is a column: no
+ * reading spans two applications, where comparing two audiences is the whole
+ * point of serving two.
  */
 
 /**
@@ -57,6 +63,20 @@ export const loomReaderSignals = pgTable(
      * holds the two together.
      */
     applicationId: text("application_id").notNull().default("app_default"),
+    /**
+     * The audience this batch's reader was served under (0283). Second in the
+     * key and in every index, immediately after the application.
+     *
+     * Defaulted for the same reason the application is, and to the same effect:
+     * a batch that names no audience, and every row written before the
+     * dimension existed, reads as `aud_everyone` — the audience that matches
+     * every reader. `DEFAULT_AUDIENCE_ID` is the value, spelled out because DDL
+     * cannot import it; `scoped.test.ts` holds the two together.
+     *
+     * Opaque. What an `aud_` means is the control plane's to say, and no column
+     * here holds the predicate that selected it.
+     */
+    audienceId: text("audience_id").notNull().default("aud_everyone"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     /** What the page said the time was, which is a number a page said. */
@@ -68,6 +88,17 @@ export const loomReaderSignals = pgTable(
       .default(sql`now()`),
   },
   (table) => [
+    /**
+     * Unchanged by the audience dimension, which is not the shape the
+     * application took (0283).
+     *
+     * The index was widened to lead with the application because every read of
+     * the buffer is inside one (0273), so it belongs in the prefix. Nothing reads the
+     * buffer by audience: a rollup folds a whole window and groups by the
+     * column, so putting the audience second here would displace `tree_id` and
+     * `seq` from the prefix and make every read that exists scan wider, to
+     * serve a filter no caller expresses.
+     */
     index("loom_reader_signals_tree_seq_idx").on(table.applicationId, table.treeId, table.seq),
   ]
 )
@@ -84,6 +115,8 @@ export const loomReaderTallies = pgTable(
   {
     /** See `loomReaderSignals.applicationId`. */
     applicationId: text("application_id").notNull().default("app_default"),
+    /** See `loomReaderSignals.audienceId`. In the key here, unlike the buffer's. */
+    audienceId: text("audience_id").notNull().default("aud_everyone"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     nodeId: text("node_id").notNull(),
@@ -108,7 +141,17 @@ export const loomReaderTallies = pgTable(
     completions: bigint("completions", { mode: "number" }).notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
-  (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision, table.nodeId] })]
+  (table) => [
+    primaryKey({
+      columns: [
+        table.applicationId,
+        table.audienceId,
+        table.treeId,
+        table.revision,
+        table.nodeId,
+      ],
+    }),
+  ]
 )
 
 /**
@@ -123,6 +166,8 @@ export const loomReaderFunnels = pgTable(
   {
     /** See `loomReaderSignals.applicationId`. */
     applicationId: text("application_id").notNull().default("app_default"),
+    /** See `loomReaderSignals.audienceId`. In the key here, unlike the buffer's. */
+    audienceId: text("audience_id").notNull().default("aud_everyone"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     fromNodeId: text("from_node_id").notNull(),
@@ -137,6 +182,7 @@ export const loomReaderFunnels = pgTable(
     primaryKey({
       columns: [
         table.applicationId,
+        table.audienceId,
         table.treeId,
         table.revision,
         table.fromNodeId,
@@ -166,6 +212,8 @@ export const loomReaderRegions = pgTable(
   {
     /** See `loomReaderSignals.applicationId`. */
     applicationId: text("application_id").notNull().default("app_default"),
+    /** See `loomReaderSignals.audienceId`. In the key here, unlike the buffer's. */
+    audienceId: text("audience_id").notNull().default("aud_everyone"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     /** A country code, or the word for not knowing. A closed set, so this column cannot be written freely. */
@@ -174,7 +222,7 @@ export const loomReaderRegions = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [primaryKey({
-      columns: [table.applicationId, table.treeId, table.revision, table.region],
+      columns: [table.applicationId, table.audienceId, table.treeId, table.revision, table.region],
     })]
 )
 
@@ -200,6 +248,8 @@ export const loomReaderPageViews = pgTable(
   {
     /** See `loomReaderSignals.applicationId`. */
     applicationId: text("application_id").notNull().default("app_default"),
+    /** See `loomReaderSignals.audienceId`. In the key here, unlike the buffer's. */
+    audienceId: text("audience_id").notNull().default("aud_everyone"),
     treeId: text("tree_id").notNull(),
     revision: integer("revision").notNull(),
     /** Page views that began. Counted once, at the door, never recounted. */
@@ -223,5 +273,9 @@ export const loomReaderPageViews = pgTable(
      */
     foldedAt: timestamp("folded_at", { withTimezone: true }),
   },
-  (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision] })]
+  (table) => [
+    primaryKey({
+      columns: [table.applicationId, table.audienceId, table.treeId, table.revision],
+    }),
+  ]
 )

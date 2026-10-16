@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import { clampLimit, type PageDirection, type PageEnds } from "../paging.js"
 import type { Result } from "../result.js"
@@ -46,6 +47,16 @@ export const describeReaderSignalStoreError = (error: ReaderSignalStoreError): s
 export type ReceivedBatch = ReaderSignalBatch & {
   readonly seq: number
   readonly receivedAt: string
+  /**
+   * The audience it was **filed** under, which is resolved rather than
+   * optional (0283).
+   *
+   * `audience` is what the sender said and may be absent; this is what the
+   * buffer stored, and a stored row always names one — `aud_everyone` where the
+   * sender named nothing. A fold reads this, so that a window holding two
+   * audiences folds into two sets of counters rather than one.
+   */
+  readonly audienceId: AudienceId
 }
 
 export type ReaderSignalReadRequest = {

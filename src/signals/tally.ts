@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
@@ -37,19 +38,42 @@ import type { FunnelAnswer, ReaderTally } from "./rollup.js"
  * it is not.
  */
 
-/** One node's line as the store keeps it, which is a tally plus when it last changed. */
+/**
+ * One node's line as the store keeps it, which is a tally plus the audience it
+ * was collected under and when it last changed.
+ *
+ * `audienceId` is on the stored row and not on `ReaderTally` deliberately
+ * (0283). A rollup folds one audience's window, so the counters it produces are
+ * already all one audience's and a field on each would be the same value
+ * repeated; a row read back may sit beside another audience's, so it has to say
+ * which it is. It is also what lets a screen compare two without a reading
+ * having to remember what it asked for.
+ */
 export type StoredTally = ReaderTally & {
+  readonly audienceId: AudienceId
   readonly updatedAt: string
 }
 
-/** One funnel answer as the store keeps it. */
+/** One funnel answer as the store keeps it. See `StoredTally.audienceId`. */
 export type StoredFunnel = FunnelAnswer & {
+  readonly audienceId: AudienceId
   readonly updatedAt: string
 }
 
 export type TallyReadRequest = {
   /** Absent reads every tree the handle can see, which is the scope rule (0020). */
   readonly treeId?: TreeId
+  /**
+   * Absent reads every audience (0283).
+   *
+   * A filter rather than a requirement, on the terms `revision` below is one:
+   * comparing two audiences is the point of serving two, so a reading that
+   * could not span them would make the comparison the measurement rests on
+   * unreadable (0263). Each row names its own audience, so a caller that wants them
+   * apart groups rather than summing — and a caller that sums two has asked
+   * for one number about two populations.
+   */
+  readonly audience?: AudienceId
   /**
    * Absent reads every revision.
    *
@@ -81,7 +105,17 @@ export interface ReaderOpeningCounter {
    */
   readonly opened: (
     openings: readonly RevisionViews[],
-    at: string
+    at: string,
+    /**
+     * The audience the delivery was served under (0283). Omitted is
+     * `aud_everyone`, so a door that serves one form of every page calls this
+     * exactly as it did.
+     *
+     * One audience per call rather than one per opening, because a delivery is
+     * one page view of one form of one page — the same reason the batch carries
+     * it and a signal does not.
+     */
+    audience?: AudienceId
   ) => Promise<Result<void, ReaderSignalStoreError>>
 }
 
@@ -114,7 +148,15 @@ export interface ReaderTallyStore extends ReaderOpeningCounter {
        */
       readonly appearances?: readonly RevisionViews[]
     },
-    at: string
+    at: string,
+    /**
+     * The audience whose window this is (0283). Omitted is `aud_everyone`.
+     *
+     * One audience per call, which is what keeps `ReaderTally` free of the
+     * dimension: a window holding two audiences is folded once per audience and
+     * applied twice, so every row in one call belongs to one of them.
+     */
+    audience?: AudienceId
   ) => Promise<Result<void, ReaderSignalStoreError>>
   readonly tallies: (
     request?: TallyReadRequest

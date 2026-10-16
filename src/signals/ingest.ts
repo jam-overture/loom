@@ -1,3 +1,4 @@
+import { DEFAULT_AUDIENCE_ID, type AudienceId } from "../audience/audience.js"
 import { err, ok, type Result } from "../result.js"
 
 import type { ReaderSignalJournal, ReaderSignalStoreError } from "./journal.js"
@@ -141,6 +142,29 @@ const moved = (
     : { views: counts.reduce((total, count) => total + count.views, 0) }
 
 /**
+ * A delivery's batches, by the audience each was served under (0283).
+ *
+ * `ReaderSignalBatch.audience` is what the sender said and may be absent, so it
+ * is resolved here the way the buffer resolves it — one spelling of *this batch
+ * named no audience* rather than two.
+ */
+const byAudience = (
+  batches: readonly ReaderSignalBatch[]
+): ReadonlyMap<AudienceId, readonly ReaderSignalBatch[]> => {
+  const grouped = new Map<AudienceId, ReaderSignalBatch[]>()
+
+  for (const batch of batches) {
+    const audience = batch.audience ?? DEFAULT_AUDIENCE_ID
+    const group = grouped.get(audience)
+
+    if (group === undefined) grouped.set(audience, [batch])
+    else group.push(batch)
+  }
+
+  return grouped
+}
+
+/**
  * Parse a delivery and keep it.
  *
  * **Nothing is kept unless all of it parses.** A partial accept would mean a
@@ -181,18 +205,60 @@ export const ingestReaderSignals = async (
    * a stamp on them, so the two can never disagree about how many readers
    * arrived (`page-views.ts`).
    */
-  const openings = counters === undefined ? [] : openingsOf(batches)
-  const counting = counters?.openings === undefined ? [] : openings
-  const counted = counters?.region === undefined ? [] : regionCountsOf(openings, counters.region.region)
+  /**
+   * **Per audience, because a counter row belongs to one** (0283).
+   *
+   * A delivery is normally one page's worth and so one audience's, but nothing
+   * in the wire format says it has to be — and filing two audiences' arrivals
+   * under one would be the same unrecoverable addition at the door that
+   * `collect.ts` avoids at the fold. The walk is still one walk **per
+   * audience**, which is what keeps a region a stamp on an opening somebody
+   * already counted rather than a second opinion about how many arrived.
+   */
+  const arrivals =
+    counters === undefined
+      ? []
+      : [...byAudience(batches)].map(([audience, group]) => {
+          const openings = openingsOf(group)
 
-  const openingsKept =
-    counters?.openings === undefined || counting.length === 0
-      ? undefined
-      : await counters.openings.opened(counting, counters.at)
-  const regionsKept =
-    counters?.region === undefined || counted.length === 0
-      ? undefined
-      : await counters.region.store.count(counted, counters.at)
+          return {
+            audience,
+            counting: counters.openings === undefined ? [] : openings,
+            counted:
+              counters.region === undefined
+                ? []
+                : regionCountsOf(openings, counters.region.region),
+          }
+        })
+
+  const counting = arrivals.flatMap((arrival) => arrival.counting)
+  const counted = arrivals.flatMap((arrival) => arrival.counted)
+
+  /**
+   * The first failure of each counter is the one reported, and the audiences
+   * after it are not attempted: the outcome has room for one error per counter,
+   * and a door that went on writing after a store said it was unavailable would
+   * be reporting a number it has no reason to believe.
+   */
+  let openingsKept: Result<void, ReaderSignalStoreError> | undefined
+  let regionsKept: Result<void, ReaderSignalStoreError> | undefined
+
+  for (const arrival of arrivals) {
+    if (
+      counters?.openings !== undefined &&
+      arrival.counting.length > 0 &&
+      openingsKept?.ok !== false
+    ) {
+      openingsKept = await counters.openings.opened(arrival.counting, counters.at, arrival.audience)
+    }
+    if (counters?.region !== undefined && arrival.counted.length > 0 && regionsKept?.ok !== false) {
+      regionsKept = await counters.region.store.count(
+        arrival.counted,
+        counters.at,
+        arrival.audience
+      )
+    }
+  }
 
   const opened = moved(counting, openingsKept)
   const regions = moved(counted, regionsKept)

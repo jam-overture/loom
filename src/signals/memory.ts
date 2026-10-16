@@ -1,3 +1,4 @@
+import { DEFAULT_AUDIENCE_ID, type AudienceId } from "../audience/audience.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { ok } from "../result.js"
 import { systemClock, type Clock } from "../runtime/events.js"
@@ -10,7 +11,7 @@ import {
   type ReaderSignalReadRequest,
   type ReceivedBatch,
 } from "./journal.js"
-import { funnelKey, pageViewKey, regionKey, tallyKey } from "./counters.js"
+import { funnelKey, inAudience, pageViewKey, regionKey, tallyKey } from "./counters.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { ReaderRegionStore, StoredRegionCount } from "./region.js"
 import type { FunnelAnswer, ReaderTally } from "./rollup.js"
@@ -46,6 +47,8 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
     ...batch,
     seq: nextSeq++,
     receivedAt: clock.now(),
+    /** Resolved on the way in, as the Postgres buffer resolves it (0283). */
+    audienceId: batch.audience ?? DEFAULT_AUDIENCE_ID,
   })
 
   return {
@@ -92,9 +95,14 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
 }
 
 const matches = (
-  row: { readonly treeId: string; readonly revision: number },
+  row: {
+    readonly audienceId: AudienceId
+    readonly treeId: string
+    readonly revision: number
+  },
   request: TallyReadRequest | undefined
 ): boolean =>
+  (request?.audience === undefined || row.audienceId === request.audience) &&
   (request?.treeId === undefined || row.treeId === request.treeId) &&
   (request?.revision === undefined || row.revision === request.revision)
 
@@ -120,14 +128,16 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
   const addPageViews = (
     counts: readonly RevisionViews[],
     counted: "opened" | "appearances",
-    at: string
+    at: string,
+    audience: AudienceId
   ): void => {
     for (const count of counts) {
-      const key = pageViewKey(count)
+      const key = inAudience(audience, pageViewKey(count))
       const existing = pageViews.get(key)
       const foldedAt = counted === "appearances" ? at : existing?.foldedAt
 
       pageViews.set(key, {
+        audienceId: audience,
         treeId: count.treeId,
         revision: count.revision,
         opened: (existing?.opened ?? 0) + (counted === "opened" ? count.views : 0),
@@ -138,12 +148,13 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     }
   }
 
-  const addTally = (tally: ReaderTally, at: string): void => {
-    const key = tallyKey(tally)
+  const addTally = (tally: ReaderTally, at: string, audience: AudienceId): void => {
+    const key = inAudience(audience, tallyKey(tally))
     const existing = tallies.get(key)
 
     tallies.set(key, {
       ...tally,
+      audienceId: audience,
       views: (existing?.views ?? 0) + tally.views,
       reached: (existing?.reached ?? 0) + tally.reached,
       engaged: (existing?.engaged ?? 0) + tally.engaged,
@@ -156,12 +167,13 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     })
   }
 
-  const addFunnel = (answer: FunnelAnswer, at: string): void => {
-    const key = funnelKey(answer)
+  const addFunnel = (answer: FunnelAnswer, at: string, audience: AudienceId): void => {
+    const key = inAudience(audience, funnelKey(answer))
     const existing = funnels.get(key)
 
     funnels.set(key, {
       ...answer,
+      audienceId: audience,
       reached: (existing?.reached ?? 0) + answer.reached,
       converted: (existing?.converted ?? 0) + answer.converted,
       updatedAt: at,
@@ -169,16 +181,16 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
   }
 
   return {
-    apply: (rollup, at) => {
-      for (const tally of rollup.tallies) addTally(tally, at)
-      for (const answer of rollup.funnels) addFunnel(answer, at)
-      addPageViews(rollup.appearances ?? [], "appearances", at)
+    apply: (rollup, at, audience = DEFAULT_AUDIENCE_ID) => {
+      for (const tally of rollup.tallies) addTally(tally, at, audience)
+      for (const answer of rollup.funnels) addFunnel(answer, at, audience)
+      addPageViews(rollup.appearances ?? [], "appearances", at, audience)
 
       return Promise.resolve(ok(undefined))
     },
 
-    opened: (openings, at) => {
-      addPageViews(openings, "opened", at)
+    opened: (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
+      addPageViews(openings, "opened", at, audience)
 
       return Promise.resolve(ok(undefined))
     },
@@ -205,12 +217,17 @@ export const memoryReaderRegionStore = (): ReaderRegionStore => {
   const regions = new Map<string, StoredRegionCount>()
 
   return {
-    count: (counts, at) => {
+    count: (counts, at, audience = DEFAULT_AUDIENCE_ID) => {
       for (const count of counts) {
-        const key = regionKey(count)
+        const key = inAudience(audience, regionKey(count))
         const existing = regions.get(key)
 
-        regions.set(key, { ...count, views: (existing?.views ?? 0) + count.views, updatedAt: at })
+        regions.set(key, {
+          ...count,
+          audienceId: audience,
+          views: (existing?.views ?? 0) + count.views,
+          updatedAt: at,
+        })
       }
 
       return Promise.resolve(ok(undefined))
