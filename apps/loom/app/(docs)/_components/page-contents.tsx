@@ -64,15 +64,17 @@ import { usePageSections } from "./use-page-sections"
  * an omission: **a mark here is a mark that could never light up.**
  *
  * The rule the rail uses is *the last section whose heading has gone past the
- * reading line*, and the line is 120 pixels from the top of the window. For a
- * row to be marked, some `h2` has to be in the top 120 pixels of the screen.
+ * reading line*, and the line is 184 pixels from the top of the window. For a
+ * row to be marked, some `h2` has to be in the top 184 pixels of the screen.
  * For a reader to press this line, this line has to be on the screen — and it
  * sits above the page's title, so the first `h2` is below the title and below
- * the opening paragraph, which on a phone is several hundred pixels further
- * down. The two cannot both be true. Measured on *Making it look like yours*:
- * with the line on screen at the top of the page the first heading is 695
- * pixels down, and by the time that heading reaches 120 the line is 575 pixels
- * above the window.
+ * the opening paragraph. The two cannot both be true, and the gap is not
+ * narrow. Measured on *Making it look like yours* at 390×844:
+ *
+ * - at the top of the page this line is at `y 142` and the first heading is at
+ *   `y 881`, which is already 95 pixels **below the fold** of the screen;
+ * - by the time that heading has come up to 184, the line is 573 pixels above
+ *   the top of the window.
  *
  * So a mark was built, and taken out again rather than shipped. The same
  * arithmetic is what `sectionBeingRead`'s second clause exists for on the rail,

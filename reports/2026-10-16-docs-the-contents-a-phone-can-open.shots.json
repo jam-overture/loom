@@ -1,0 +1,135 @@
+{
+  "baseUrl": "http://127.0.0.1:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-phone-closed",
+      "viewport": "phone",
+      "waitFor": "#article nav[aria-label='On this page'] button",
+      "measure": [
+        "#article nav[aria-label='On this page']",
+        "article.prose h1",
+        "article.prose h2"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-phone-open",
+      "viewport": "phone",
+      "waitFor": "#article nav[aria-label='On this page'] button",
+      "do": [
+        {
+          "click": "#article nav[aria-label='On this page'] button"
+        },
+        {
+          "wait": 400
+        }
+      ],
+      "measure": [
+        "#article nav[aria-label='On this page']",
+        "#article nav[aria-label='On this page'] a",
+        "article.prose h1",
+        "article.prose h2"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-phone-pressed",
+      "viewport": "phone",
+      "waitFor": "#article nav[aria-label='On this page'] button",
+      "do": [
+        {
+          "click": "#article nav[aria-label='On this page'] button"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "#article nav[aria-label='On this page'] a[href='#the-bar-above-your-page']"
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "measure": [
+        "h2#the-bar-above-your-page",
+        "#article nav[aria-label='On this page']"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-phone-dark",
+      "viewport": "phone",
+      "waitFor": "#article nav[aria-label='On this page'] button",
+      "start": {
+        "storage": {
+          "loom-docs-theme": "dark"
+        }
+      },
+      "do": [
+        {
+          "click": "#article nav[aria-label='On this page'] button"
+        },
+        {
+          "wait": 400
+        }
+      ],
+      "measure": [
+        "#article nav[aria-label='On this page']"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-laptop",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "waitFor": "#article nav[aria-label='On this page'] button",
+      "measure": [
+        "#article nav[aria-label='On this page']",
+        "article.prose"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-wide",
+      "viewport": "wide",
+      "waitFor": "nav[aria-label='On this page'] a",
+      "measure": [
+        "#article nav[aria-label='On this page']",
+        "nav[aria-label='On this page']",
+        "article.prose"
+      ]
+    },
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-reference",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "measure": [
+        "#article nav[aria-label='On this page']",
+        "article.prose"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-16-docs-the-contents-a-phone-can-open-wide-pressed",
+      "viewport": "wide",
+      "waitFor": "nav[aria-label='On this page'] a",
+      "do": [
+        {
+          "click": "nav[aria-label='On this page'] a[href='#the-bar-above-your-page']"
+        },
+        {
+          "wait": 900
+        }
+      ],
+      "measure": [
+        "h2#the-bar-above-your-page",
+        "nav[aria-label='On this page'] [aria-current='location']"
+      ]
+    }
+  ]
+}
