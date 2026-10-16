@@ -326,8 +326,16 @@ entry is where the next lane that loses a screenshot will find it.
 >
 > 124 is above the previous highest clean reading of 121, so the boundary is
 > now somewhere in **124–141** rather than 121–141. Nothing contradicts length
-> yet, and the habit is cheap enough that this lane has not lost a picture
-> since adopting it.
+> yet.
+>
+> **And the same run lost a link anyway, which is the part worth carrying.**
+> #655's *body* linked the report by branch name rather than by sha — 158
+> characters — and came back ``` `` ``` -wrapped exactly as #634 did. The
+> remedy had been applied to the comment and not to the body, in the same
+> twenty minutes, by a run that had read this entry. So the habit is **per
+> URL and not per pull request**: the body, every comment and every review
+> reply each need the short sha, and the body is the one written first and
+> therefore the one written before the lesson is fresh.
 
 ---
 ## 2026-10-14 — the marketing site named seven retired pages forty times, eleven of them in the present tense, and every reader-facing path was derived and therefore correct
