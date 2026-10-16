@@ -10,7 +10,23 @@ list and it is not a report.
 ---
 ## 2026-10-15 — the audience dimension is in the schema and its type is not reachable from any published entry point
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:** open
+**Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:**
+**closed by `signals-34-the-audience-a-host-can-name`**, and **the reasoning
+below was wrong about why it had to wait.**
+
+> **Corrected the same day, by the routine that filed it.** This entry said
+> *"the same is true of `ApplicationId` today"* and concluded that the two
+> dimensions should be reachable the same way or neither should, so the call
+> was not one unit's to take. **`ApplicationId` is exported** — `src/store/index.ts`
+> has re-exported `../application/application.js` since 0260, which is how
+> `(portal)/_lib/scoped.ts` imports `applicationIdSchema` from
+> `@jam-overture/loom/store`. The symmetry the finding rested on did not exist:
+> `audience` was simply missing from that list beside `application` and
+> `project`, and adding it is one line rather than a decision.
+>
+> Filed while writing 0284 and checked against the wrong thing — the entry
+> points in `package.json`, which name `./store` but not what it re-exports.
+> The first half stands: `AudienceId` genuinely was unreachable.
 
 [0284](decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
 put `audience` on `ReaderSignalBatch` and `audienceId` on every stored counter
@@ -31,15 +47,15 @@ sits under:
 > *"Nothing here reaches into `src/`, and a gap in what those entry points
 > expose is a finding rather than a deep import."*
 
-**What acting on it looks like:** either publish the two identity modules
-(`application`, `audience`) through an entry point, or decide that minting these
-ids is the control plane's job and that a host only ever echoes back a value it
-was given — in which case the batch field's type should say so, and the
-documentation should show where the value comes from.
+**What it took to act on it:** one line — `export * from "../audience/audience.js"`
+in `src/store/index.ts`, beside the two ids that were already there. A host that
+imports a store now names an audience the same way it names an application.
 
-**Not urgent, and it has a deadline anyway.** Nothing can serve a second
-audience until the composing `TreeSource` exists (0263), so no host needs to
-write the field yet. It needs answering before one does.
+**What stays open, and it is a different question.** Whether a host should
+*mint* an audience id at all, or only ever echo back one the control plane gave
+it, is unanswered — and it is not answerable until the composing `TreeSource`
+exists (0263) and something decides where an audience is defined. `newAudienceId`
+is published because its module is; nothing calls it.
 
 ---
 ## 2026-10-14 — lesson 16 taught that a listing has no timestamp, and the framework gave it one
