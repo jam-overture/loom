@@ -5,6 +5,7 @@ import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
 import type { FunnelChangeSilence } from "./funnel-change.js"
+import type { DeploymentChangeSilence } from "./deployment-change.js"
 import type { DeploymentSilence } from "./deployment.js"
 import type { KindActionSilence } from "./library-action.js"
 import type { KindChangeSilence } from "./library-change.js"
@@ -22,7 +23,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are sixteen of them. Each set's names are right in its own
+ * absent, and there are seventeen of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -146,6 +147,7 @@ export type SilenceVocabulary =
   | "copy"
   | "copy-change"
   | "deployment"
+  | "deployment-change"
   | "funnel-change"
   | "library"
   | "library-action"
@@ -165,6 +167,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "copy",
     "copy-change",
     "deployment",
+    "deployment-change",
     "funnel-change",
     "library",
     "library-action",
@@ -193,6 +196,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     copy: "page",
     "copy-change": "comparison",
     deployment: "page",
+    "deployment-change": "comparison",
     "funnel-change": "comparison",
     library: "kind",
     "library-action": "kind",
@@ -209,7 +213,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Thirteen of them against seventy-three members across the sixteen sets, which
+ * Thirteen of them against seventy-eight members across the seventeen sets, which
  * is the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -364,6 +368,22 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * A comparison of two windows' funnels reports the state every comparison here
  * reports, the door's three said of a pair, and `nothing-carried` said of a
  * **question** a deployment wrote rather than of a word or of a place.
+ *
+ * **The seventeenth needed none either, and its subject is the one combination
+ * this table had not held**
+ * ([0289](../../decisions/0289-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)).
+ * Its reading is of a deployment and every reason it gives is about one
+ * **comparison** — the seventh set's observation at one more remove: an order
+ * is silent about its members rather than about itself, and here a member is
+ * itself a pair of windows. So the subject is not the page the order is over
+ * and not the deployment the order is of, and it is still uniform across the
+ * set, which is the claim this table rests on.
+ *
+ * `mispaired` is also the second name for the state a before-and-after reading
+ * calls `different-trees`, and the two are deliberately not spelled alike: a
+ * comparison handed two pages has nothing to say at all, while an order holding
+ * such a comparison has thirty-nine other pages and one row to print a reason
+ * against.
  *
  * What it shows is that the cost of a condition belongs to the reading and not
  * to the condition, which 0280 found at one figure and this finds at half a
@@ -663,6 +683,36 @@ export const meaningOfDeploymentSilence = (silence: DeploymentSilence): SilenceM
       return meaning("deployment", "no-openings-marked")
     case "inconsistent":
       return meaning("deployment", "readers-above-views")
+  }
+}
+
+/**
+ * What an order over what a change did to a deployment reports, of one page's
+ * comparison (0289).
+ *
+ * The seventeenth set. Every reason is a fact about one comparison, so the
+ * subject is the pair even though the reading is of a deployment — which is the
+ * combination this table did not have, and the only thing about it that is new.
+ *
+ * `unread` is the condition a before-and-after reading reports as
+ * `nothing-measured`, said here of the comparison that is not in the order
+ * rather than of the order; `mispaired` is that reading's `different-trees` for
+ * the same reason.
+ */
+export const meaningOfDeploymentChangeSilence = (
+  silence: DeploymentChangeSilence
+): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("deployment-change", "no-view-reported")
+    case "mispaired":
+      return meaning("deployment-change", "two-pages")
+    case "unscaled":
+      return meaning("deployment-change", "no-arrivals-counted")
+    case "unopened":
+      return meaning("deployment-change", "no-openings-marked")
+    case "inconsistent":
+      return meaning("deployment-change", "readers-above-views")
   }
 }
 
