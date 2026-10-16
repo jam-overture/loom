@@ -47639,9 +47639,24 @@ here so the judgement is made rather than inherited.
 `tools/screenshot` and `tools/specimen/playwright.ts`) ·
 **Extends:** the closed 13 September entry *the screenshot harness cannot
 photograph a block that only exists once you press it*, whose own closing note
-is the sentence that became this limit · **Status:** open — **a stated limit of
-an `Accepted` record ([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)),
-not a defect**; what it cost this run is one visual, and the report says so
+is the sentence that became this limit · **Status:** **open for the `goTo`
+step; half closed by `framework-75-the-press-that-does-not-leave-the-page`**,
+16 October — **the smaller half is done and the `goTo` half is still a stated
+limit of an `Accepted` record
+([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md))
+rather than a defect.** The line this entry
+called *smaller and free* exists: a press the pin refused prints
+`pinned  <address>  ← press refused, it leaves the page` beside the shot, the
+`before`'s refusals ahead of the shot's own, and no lane has to infer a refusal
+from a `no match` two lines down again. The same branch narrowed the pin to
+presses that **leave the document**
+([0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md)),
+which does not reach this entry's subject: your pager press is a navigation and
+is still refused. **`{ "goTo": … }` is the open half**, it is still
+`ARCHITECTURAL — needs review` for the reason this entry gives — 0159 would want
+a line — and this lane did not take it in the same unit as a pin that is not
+architectural, because the two would have travelled in one pull request and only
+one of them can merge
 
 A `do` list runs `pinNavigation` before its first step: a capture-phase listener
 that calls `preventDefault` on any click whose target is inside an `a[href]`,
@@ -54069,9 +54084,20 @@ three links above are this lane's to fix either way.
 ## 2026-10-15 — a shot cannot photograph a press of a contents row, because the harness refuses every link and a fragment is not a navigation
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/specimen/playwright.ts`) · **Status:** open — **nothing is broken and
-one picture had to be taken another way**; the remedy is one comparison and the
-reason it was not taken here is lane rather than difficulty
+(`tools/specimen/playwright.ts`) · **Status:** **closed by
+`framework-75-the-press-that-does-not-leave-the-page`** — the comparison this
+entry wrote out, taken as written. A press is pinned when
+`new URL(href, location.href)` differs from `location.href` on origin, path or
+query, and a pure fragment change is let through; an `href` that will not
+resolve is refused, which is the one case the entry did not name. Recorded as
+[0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md),
+which refines 0159's pin clause rather than superseding it: every property the
+pin was written for is stated there and kept. The pin moved to
+`tools/specimen/pin.ts` so the shipped string could be compiled with esbuild and
+`keepNames` and tested as the artefact — fifteen cases, five of which fail
+against the predicate that shipped yesterday. **Your `(docs)` shot is retakeable
+as a press**; the picture of a reader scrolling is a correct record of the limit
+and the retake is yours rather than this lane's
 
 `pinNavigation` is run in the top document before the first step of a `do`
 list, and it prevents the default on **every** click that lands inside an
@@ -54748,6 +54774,178 @@ entry is where the next run that meets it will find out why.
 `docs/routines.md` are `Loom daily build`'s; the framework lane met the symptom
 rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
+
+---
+## 2026-10-16 — the composed preview URL, fifth instance, and the remedy is now free in a way it was not when it was written
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 27 September entry *the preview deploys and a routine cannot
+reach it: `*.vercel.app` is denied by the environment's network policy* and its
+2 October section · **Status:** open — **the body was corrected the way that
+entry prescribes and cost nothing; filed for the count and for one sentence
+that is now stronger than when it was written**
+
+#653's first body carried a preview URL composed from the branch name:
+
+```
+loom-git-framework-75-the-pr-jpizzolato36-6341s-projects.vercel.app
+```
+
+The one Vercel assigned, from the `vercel[bot]` comment:
+
+```
+loom-git-framework-75-the-pr-362b31-jpizzolato36-6341s-projects.vercel.app
+```
+
+Same shape as the 2 October reading and the same cause: Vercel truncates the
+branch segment and appends a hash of the rest, and this lane's branch names are
+long. `framework-75-the-press-that-does-not-leave-the-page` is 51 characters and
+15 of them survive. The guess has **no hash segment at all**, which is the tell
+and is invisible to the run that wrote it.
+
+**Confirmed again that a run cannot check its own guess.** Both URLs return
+`000` from this container — not 404, no connection. `https://vercel.com` and
+`https://vercel.app` return `000` as well while `https://github.com` connects,
+so it is the egress policy and not the deployment. That is the 27 September
+entry's claim, unchanged, re-measured today because a run that reports an
+unverifiable link should say which kind of unverifiable.
+
+**The sentence worth updating is the remedy's, and it is this entry's whole
+reason for existing.** The 2 October section says *"open the pull request, let
+the `vercel[bot]` comment arrive with the real URL in it, then correct the
+body — on a subscribed pull request that comment is an event the session is
+already woken by, so it is not a poll."* When that was written it was an
+argument. Today it is simply what happens: this run was woken four times by that
+one comment being edited through its deployment lifecycle, with the real URL in
+each. **The correction cost one API call inside a turn that was already open**,
+no wait, no schedule, and no check that the token-discipline rule forbids.
+
+So the remedy is not merely available, it is **cheaper than composing the
+URL**, and the only reason this instance happened is that a run which had read
+`FINDINGS.md` had not read this entry before writing its body. Which is the
+argument for the one line this cannot write itself: the procedure in
+`docs/routines.md` says *"include the deployed preview URL"* and does not say
+where to get it. **A clause there — *take it from the `vercel[bot]` comment
+after opening, never from the branch name* — would have cost this run nothing
+and would have cost the four before it nothing.** That file is governance and a
+routine cannot write the governance it is bound by, which is why this is filed
+rather than done.
+
+---
+## 2026-10-16 — two more counted readings for the mangling, and a 152-character URL that came back clean in the body that mangled a 164
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 15 October entry *the mangling bracket, measured on purpose this
+time: 144 clean and 155 mangled in one body* and the two entries it extends ·
+**Status:** open — **two readings, one new variable, and the first test of the
+remedy on a whole body rather than one link**
+
+#653's first body carried five URLs. Counted with `len()` over the exact
+strings, before and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 75 | the preview deployment | bare | **clean** |
+| 121 | 0159, by `main` | `[…](…)` | **clean** |
+| 152 | the report's two images, by branch name | `<img src="…">` | **clean** |
+| 164 | the report, by branch name | `[…](…)` | mangled |
+| 204 | 0286, by branch name | `[…](…)` | mangled |
+
+The two mangled ones came back with `` `` `` injected around the URL inside the
+parens, which is the same injection the three previous entries record.
+
+**Nothing here narrows the bracket on length alone, and one row widens the
+question.** 164 and 204 are both above 155 and are consistent with every
+previous reading. The row that is not is the **152**: if length were the only
+variable it should have mangled, since 152 sits inside the 144–155 bracket's
+upper half and above the highest clean `[…](…)` reading ever taken. It is in an
+HTML `src` attribute rather than a markdown link.
+
+So **the structural hypothesis is not dead, it was killed in the wrong
+place.** The 15 October entry tested adjacency to an inline-code span, a
+trailing comma, and the branch name, and all three are genuinely dead. It did
+not test *the syntax the URL is written in*, because every link it measured was
+a markdown link. Two readings now say the two syntaxes behave differently at a
+length where one of them breaks. Either:
+
+- the bracket for a markdown link is **155–164** and an HTML attribute has a
+  different one, or none at all; or
+- length is a proxy and what actually matters is the `[…](…)` construct, which
+  would make every previous reading a measurement of how long a link has to be
+  before something gives up parsing it.
+
+**A remedy tested on a whole body for the first time.** The three earlier
+entries each shortened one link and watched it. This body was re-posted with
+**every** URL under 144 — the two images and the report by short sha
+(`a5482a3`: 108, 108, 120), and 0286 not linked at all, because its filename is
+103 characters and no choice of ref gets it under 144, so the path is in
+backticks and `decisions/README.md` (69) carries the link. **The whole body came
+back verbatim**, every link included. That is the first evidence that the
+remedy holds for a body rather than for a link, and it is why there is a
+correction to look at rather than a second mangled body.
+
+**Still not proposed: a check.** The 14 and 15 October entries both reject one
+and the reasoning is unchanged — and this entry adds the sharper reason. A check
+holding every URL in a pull request body under 144 would have failed this body's
+two **clean** image attributes, which are 152 and which nothing was wrong with.
+The number is not established and the variable may not be the number.
+
+---
+## 2026-10-16 — lesson 32's census lost its fourth row, and four paragraphs under it are about that row
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/32-layout.md`)
+· **Status:** open — **the transcript is correct and the prose under it is not.**
+The fence was re-run and pasted from this lane, which is what its own `moves:`
+mark asks for and the only reason the gate is green; the paragraphs are prose
+and no check reads prose, which is the cost that mark was written to warn about
+
+Exercise G reads `tools/specimen/playwright.ts` and prints, among other things,
+every top-level const in it that is handed to the page. It printed four.
+`framework-75-the-press-that-does-not-leave-the-page` moved `pinNavigation` into
+`tools/specimen/pin.ts` — so the exercise, which reads one file, now prints
+three:
+
+```
+  top-level consts in playwright.ts: 11 → 10
+  of those, handed to the page: 4 → 3
+    pinNavigation      evaluate     takes nothing                  named in the suite true   (gone)
+```
+
+**Why it moved, because the reason is the lesson's own subject.** Both functions
+the pin is made of are serialised with `Function.prototype.toString` and run in
+a page, so the string that ships is the artefact and the module Vitest compiles
+is not it. The test that can see the difference compiles the module with esbuild
+and `keepNames` and asks *that* module its questions, and it can only do so for
+a module with no imports to resolve — `playwright.ts` has four. The file split
+is the testability, which is the thing this lesson is about.
+
+**What is now stale, in the order a reader meets it.** Four paragraphs under the
+fence, and one of them is load-bearing:
+
+- *"`measureDocument`, `readClippingBoxes` and `pinNavigation` take **nothing**:
+  each reaches for `document` or `window` itself, so a double has nothing to
+  hand them and the only thing it can do is answer in their place."* Still true
+  of the first two. The third is no longer in the census.
+- *"**And the function the suite names is not the function it runs.**"* The whole
+  paragraph is about `pinNavigation` being the one row with `named in the suite
+  true`, and no row says `true` any more. The point it makes — *is it named* and
+  *is it run* are independent and were distributed opposite ways round — is
+  still a real point about `readBoxes` and has lost its other half.
+- **The sentence the lesson rests on is now false as written**: *"a function
+  that fetches its own subject cannot be run anywhere but a page."*
+  `tools/specimen/pin.test.ts` runs `pinNavigation` — the compiled artefact, not
+  the module — against a `JSDOM` built by hand, in fifteen cases, five of which
+  fail against the predicate that shipped on 15 October. A function that reaches
+  for `document` can be run wherever a `document` can be *handed to the process*
+  rather than to the function. That is a third category beside *passed in* and
+  *reached for*, it is more interesting than the sentence it breaks, and it is
+  this lesson's to make rather than this lane's.
+
+**What this lane did not do.** It did not touch the exercise program, which
+would be editing another lane's lesson rather than re-running it, and it did not
+rewrite the paragraphs. Widening the exercise to read `pin.ts` beside
+`playwright.ts` is one obvious remedy and is yours; so is leaving the census at
+one file and saying why, which the lesson is well placed to do.
 
 ---
 ## 2026-10-15 — `loom.heading`'s two per-step caps are now redundant, and the file predicted it in writing

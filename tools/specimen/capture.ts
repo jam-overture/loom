@@ -376,8 +376,16 @@ export type SpecimenPage = {
    */
   readonly start: (state: StartState) => Promise<void>
   readonly goto: (url: string, waitFor?: string, frame?: string) => Promise<void>
-  /** Runs the steps in order. Anchor navigation is pinned; see `playwright.ts`. */
-  readonly act: (steps: readonly ShotStep[], frame?: string) => Promise<void>
+  /**
+   * Runs the steps in order, and hands back every press the pin refused.
+   *
+   * Anchor navigation is pinned for the duration, and a press that would not
+   * leave the document is not pinned — `pin.ts` is where that comparison lives
+   * and why. The return is the addresses that *were* refused, which is the one
+   * thing a lane could previously only infer from a selector reading `no
+   * match` two lines below the shot.
+   */
+  readonly act: (steps: readonly ShotStep[], frame?: string) => Promise<readonly string[]>
   readonly measure: () => Promise<Overflow>
   /**
    * Read the rectangle of every element the shot named, in the document the
@@ -517,6 +525,16 @@ export type ShotResult = {
   readonly clipped: boolean
   /** One entry per selector the shot asked about, in the order it asked. */
   readonly measured: readonly MeasuredSelector[]
+  /**
+   * Every press the pin refused, the `before`'s and the shot's own in that
+   * order, as the address each one would have gone to.
+   *
+   * Both approaches rather than only the shot's, because a `before` that
+   * presses its way to a state is where the refusal is most expensive: the
+   * state is never reached, the shot is of the page the `before` started on,
+   * and nothing else in the output is wrong.
+   */
+  readonly pinned: readonly string[]
 }
 
 /**
@@ -534,8 +552,9 @@ export type ShotResult = {
  * true, neither side has to be weakened to the other, and the one place that
  * reads the field is where the absence is handled.
  */
-export type DescribableShot = Omit<ShotResult, "measured"> & {
+export type DescribableShot = Omit<ShotResult, "measured" | "pinned"> & {
   readonly measured?: readonly MeasuredSelector[]
+  readonly pinned?: readonly string[]
 }
 
 export type CaptureOptions = {
@@ -549,9 +568,10 @@ export type CaptureOptions = {
  * the same thing done twice: the only difference between them is that one ends
  * in a photograph.
  */
-const reach = async (page: SpecimenPage, approach: Approach): Promise<void> => {
+const reach = async (page: SpecimenPage, approach: Approach): Promise<readonly string[]> => {
   await page.goto(approach.url, approach.waitFor, approach.frame)
-  if (approach.do.length > 0) await page.act(approach.do, approach.frame)
+  if (approach.do.length === 0) return []
+  return page.act(approach.do, approach.frame)
 }
 
 /**
@@ -578,8 +598,8 @@ export const captureShots = async (
        * gives it that is this one.
        */
       if (shot.start !== undefined) await page.start(shot.start)
-      if (shot.before !== undefined) await reach(page, shot.before)
-      await reach(page, shot)
+      const before = shot.before === undefined ? [] : await reach(page, shot.before)
+      const pinned = [...before, ...(await reach(page, shot))]
       /**
        * After the steps, not before. The steps are what produce the state being
        * photographed, and a disclosure that opens or a list that grows is
@@ -614,6 +634,7 @@ export const captureShots = async (
         overflowed: overflows(overflow),
         clipped: clips(overflow),
         measured,
+        pinned,
       })
     } finally {
       await page.close()
@@ -728,6 +749,12 @@ export const describeShot = (result: DescribableShot): string => {
     clipped.length === 0
       ? head
       : `${head}  ← ${clipped.length} clipping ${clipped.length === 1 ? "box hides" : "boxes hide"} content`,
+    /**
+     * First among the indented lines, because the steps happened before
+     * everything else on them: a refused press is why the page the other two
+     * readings describe is the page it is.
+     */
+    ...(result.pinned ?? []).map((href) => `    pinned  ${href}  ← press refused, it leaves the page`),
     ...shown.map((box) => `    ${box.element}  content reaches ${box.reach} in ${box.width}`),
     ...(rest > 0 ? [`    …and ${rest} more`] : []),
     ...(result.measured ?? []).flatMap((entry) => describeSelector(entry, result.viewport)),

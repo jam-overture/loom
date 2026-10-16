@@ -282,7 +282,13 @@ const fakeBrowser = (
    * What a selector matches, by selector. Absent means no match, which is a
    * reading the loop has to carry rather than an error.
    */
-  boxes: Readonly<Record<string, readonly ElementBox[]>> = {}
+  boxes: Readonly<Record<string, readonly ElementBox[]>> = {},
+  /**
+   * What the pin refused, per `act` call in the order the loop makes them —
+   * so a `before` with steps and a shot with steps can be given different
+   * answers, which is the only way to assert the order they arrive in.
+   */
+  pinned: readonly (readonly string[])[] = []
 ): {
   browser: SpecimenBrowser
   /** Every address opened, and every start state applied before one. */
@@ -295,6 +301,7 @@ const fakeBrowser = (
   const written: string[] = []
   const journal: string[] = []
   let opened = 0
+  let acted = 0
 
   const browser: SpecimenBrowser = {
     open: async (): Promise<SpecimenPage> => {
@@ -329,6 +336,16 @@ const fakeBrowser = (
             else if ("key" in step) journal.push(`key ${step.key}`)
             else journal.push(`wait ${step.wait}`)
           }
+
+          /**
+           * Whatever this call was told to refuse, defaulting to nothing. The
+           * refusals themselves are `pin.test.ts`'s subject; what this double
+           * holds is that the loop carries what `act` hands back through to
+           * the result, in the order the calls were made.
+           */
+          const refused = pinned[acted] ?? []
+          acted += 1
+          return refused
         },
         measure: async () => {
           journal.push("measure")
@@ -407,7 +424,7 @@ describe("taking the shots", () => {
         goto: async () => {
           throw new Error("net::ERR_CONNECTION_REFUSED")
         },
-        act: async () => {},
+        act: async () => [],
         measure: async () => ({ scrollWidth: 0, innerWidth: 0, clipped: [] }),
         boxes: async () => [],
         capture: async () => {},
@@ -915,6 +932,99 @@ describe("the boxes a page hides content inside", () => {
 })
 
 /**
+ * What the harness knew and the lane running it had to infer.
+ *
+ * Filed twice by `Loom docs`, on 5 and 15 October. A press the pin refused is
+ * a press that did not happen, and the only tell in the output was a selector
+ * reading `no match` two lines below the shot — so one run spent two shots and
+ * a 2,500ms wait on a press that was never going to work, and a second lost a
+ * picture of a menu closing across a navigation to the same silence.
+ */
+describe("the presses the pin refused", () => {
+  it("carries what a shot's steps had refused through to its result", async () => {
+    const { browser } = fakeBrowser([], {}, [["https://loom.test/elsewhere"]])
+
+    const results = await captureShots([shotAt({ do: [{ click: "a[rel=next]" }] })], browser, {
+      outDir: "reports",
+    })
+
+    expect(results[0]?.pinned).toEqual(["https://loom.test/elsewhere"])
+  })
+
+  /**
+   * The `before`'s first, and that order is the point rather than a detail: a
+   * `before` that presses its way to a state is where a refusal costs the
+   * most, because the state is never reached and nothing else in the output
+   * is wrong.
+   */
+  it("puts the presses a `before` had refused ahead of the shot's own", async () => {
+    const { browser } = fakeBrowser([], {}, [["https://loom.test/sign-in"], ["mailto:nobody@a.test"]])
+
+    const results = await captureShots(
+      [
+        shotAt({
+          do: [{ click: "[data-cta]" }],
+          before: { url: "https://loom.test/portal", do: [{ click: "a[href]" }] },
+        }),
+      ],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(results[0]?.pinned).toEqual(["https://loom.test/sign-in", "mailto:nobody@a.test"])
+  })
+
+  /** A shot with no steps never asks, so the absence is a list and not a gap. */
+  it("reports nothing refused for a shot that presses nothing", async () => {
+    const { browser } = fakeBrowser([], {}, [["https://loom.test/elsewhere"]])
+
+    const results = await captureShots([shotAt()], browser, { outDir: "reports" })
+
+    expect(results[0]?.pinned).toEqual([])
+  })
+
+  it("prints one line per refused press, above the readings about the page", () => {
+    expect(
+      describeShot({
+        name: "the-contents-rail",
+        file: "reports/the-contents-rail.png",
+        viewport: WIDE,
+        overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+        overflowed: false,
+        clipped: false,
+        pinned: ["https://loom.test/docs/elsewhere", "mailto:nobody@loom.test"],
+        measured: [{ selector: "aside", found: [] }],
+      })
+    ).toBe(
+      "the-contents-rail  1280x900@2x  scrollWidth 1280 / innerWidth 1280\n" +
+        "    pinned  https://loom.test/docs/elsewhere  ← press refused, it leaves the page\n" +
+        "    pinned  mailto:nobody@loom.test  ← press refused, it leaves the page\n" +
+        "    aside  no match"
+    )
+  })
+
+  /**
+   * The line every report in this repository already quotes, unchanged. A shot
+   * whose presses all landed says nothing about them, and the hand-built shape
+   * a lesson passes `describeShot` does not have to learn the field.
+   */
+  it("says nothing at all when no press was refused, and when none was asked about", () => {
+    const head = "a-page  1280x900@2x  scrollWidth 1280 / innerWidth 1280"
+    const shot = {
+      name: "a-page",
+      file: "reports/a-page.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+    } as const
+
+    expect(describeShot({ ...shot, pinned: [] })).toBe(head)
+    expect(describeShot(shot)).toBe(head)
+  })
+})
+
+/**
  * The reading nothing in this repository could take.
  *
  * Filed by `Loom demo` on 30 September, after four consecutive runs of three
@@ -1301,6 +1411,16 @@ describe("the two named viewports", () => {
   })
 })
 
+/**
+ * The steps, between the pin going on and the reading coming off.
+ *
+ * Every `act` call brackets its steps with two `evaluate`s — `pinNavigation`
+ * before the first and `readPinnedPresses` after the last — so a test about
+ * what the steps did says so by excluding both ends. The two tests whose
+ * subject *is* the bracket assert the whole journal instead.
+ */
+const stepsOf = (journal: readonly string[]): readonly string[] => journal.slice(1, -1)
+
 describe("the browser adapter", () => {
   /**
    * One element as the only six numbers `readBoxes` reads off one.
@@ -1414,8 +1534,16 @@ describe("the browser adapter", () => {
                     goto: async (_url: string, options: { waitUntil: "load" }) => {
                       waits.push(options.waitUntil)
                     },
+                    /**
+                     * Journalled by name, and answered by name for the one
+                     * reading whose shape is not a measurement: the pin's
+                     * reader hands back a list, and a double that returned the
+                     * overflow object to everything would make `act` spread an
+                     * object into an array of presses.
+                     */
                     evaluate: async <TValue,>(body: () => TValue): Promise<TValue> => {
                       journal.push(`evaluate ${body.name}`)
+                      if (body.name === "readPinnedPresses") return [] as TValue
                       return { scrollWidth: 390, innerWidth: 390, clipped: [] } as TValue
                     },
                     /**
@@ -1613,7 +1741,7 @@ describe("the browser adapter", () => {
 
     await page.act([{ scrollTo: "[data-controls]" }])
 
-    expect(recorder.journal.slice(1)).toEqual(["scrollTo [data-controls]"])
+    expect(stepsOf(recorder.journal)).toEqual(["scrollTo [data-controls]"])
     expect(recorder.selectors).toEqual([])
   })
 
@@ -1630,7 +1758,7 @@ describe("the browser adapter", () => {
 
     await page.act([{ key: "Escape" }], "iframe#demo")
 
-    expect(recorder.journal.slice(1)).toEqual(["key Escape"])
+    expect(stepsOf(recorder.journal)).toEqual(["key Escape"])
     expect(recorder.selectors).toEqual([])
   })
 
@@ -1641,7 +1769,7 @@ describe("the browser adapter", () => {
 
     await page.act([{ scrollTo: "[data-controls]" }], "iframe#demo")
 
-    expect(recorder.journal.slice(1)).toEqual(["scrollTo [data-controls] in iframe#demo"])
+    expect(stepsOf(recorder.journal)).toEqual(["scrollTo [data-controls] in iframe#demo"])
   })
 
   /**
@@ -1656,7 +1784,11 @@ describe("the browser adapter", () => {
 
     await page.act([{ scrollTo: "[data-controls]" }])
 
-    expect(recorder.journal).toEqual(["evaluate pinNavigation", "scrollTo [data-controls]"])
+    expect(recorder.journal).toEqual([
+      "evaluate pinNavigation",
+      "scrollTo [data-controls]",
+      "evaluate readPinnedPresses",
+    ])
   })
 
   it("drives the steps in the order they were written", async () => {
@@ -1666,7 +1798,7 @@ describe("the browser adapter", () => {
 
     await page.act([{ click: "[data-cta]" }, { wait: 250 }, { click: "[data-question]" }])
 
-    expect(recorder.journal.slice(1)).toEqual([
+    expect(stepsOf(recorder.journal)).toEqual([
       "click [data-cta]",
       "wait 250",
       "click [data-question]",
@@ -1684,7 +1816,11 @@ describe("the browser adapter", () => {
 
     await page.act([{ click: "[data-cta]" }])
 
-    expect(recorder.journal).toEqual(["evaluate pinNavigation", "click [data-cta]"])
+    expect(recorder.journal).toEqual([
+      "evaluate pinNavigation",
+      "click [data-cta]",
+      "evaluate readPinnedPresses",
+    ])
   })
 
   it("types into the field a step names, with the text it was given", async () => {
@@ -1698,7 +1834,7 @@ describe("the browser adapter", () => {
       { click: "button[type=submit]" },
     ])
 
-    expect(recorder.journal.slice(1)).toEqual([
+    expect(stepsOf(recorder.journal)).toEqual([
       'fill #email "reviewer@example.com"',
       'fill #password ""',
       "click button[type=submit]",
@@ -1717,7 +1853,7 @@ describe("the browser adapter", () => {
 
     await page.act([{ click: "button[type=submit]" }, { waitFor: "[data-signed-in]" }])
 
-    expect(recorder.journal.slice(1)).toEqual([
+    expect(stepsOf(recorder.journal)).toEqual([
       "click button[type=submit]",
       "waitFor [data-signed-in] (first)",
     ])
@@ -1737,7 +1873,7 @@ describe("the browser adapter", () => {
 
     await page.act([{ waitFor: "#results li" }, { click: "#results li:first-child" }])
 
-    expect(recorder.journal.slice(1)).toEqual([
+    expect(stepsOf(recorder.journal)).toEqual([
       "waitFor #results li (first)",
       "click #results li:first-child",
     ])
@@ -1755,7 +1891,7 @@ describe("the browser adapter", () => {
 
     await page.act([{ click: "[data-yes]" }, { fill: "#note", text: "smaller" }], "iframe#demo")
 
-    expect(recorder.journal.slice(1)).toEqual([
+    expect(stepsOf(recorder.journal)).toEqual([
       "click [data-yes] in iframe#demo",
       'fill #note in iframe#demo "smaller"',
     ])
