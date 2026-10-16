@@ -316,12 +316,32 @@ describe("a render asked for values rather than references", () => {
       themeValues: "literals",
     })
     const markup = renderToStaticMarkup(rendered.element)
-    const variables = rendered.theme ? themeVariables(rendered.theme) : {}
+    const variables = rendered.theme ? themeVariables(rendered.theme, { ramp: "fixed" }) : {}
 
     expect(rendered.diagnostics).toEqual([])
     expect(markup).not.toContain("var(--loom-")
     expect(markup).toContain(`background:${variables["--loom-bg-surface"]}`)
     expect(markup).toContain(`padding:${variables["--loom-spacing-3"]}`)
+  })
+
+  /**
+   * The ramps read the width they are rendered at (0283), and a container unit
+   * is exactly as unresolvable here as the `var()` above it: an image renderer
+   * and an email body resolve neither. So a render asked for values gets the
+   * pack's declared numbers, and this is the assertion that keeps it that way
+   * — the failure it guards against is silent, and looks like a design choice.
+   */
+  it("leaves no container unit either, because nothing in that medium resolves one", () => {
+    const markup = renderToStaticMarkup(
+      renderLoomTree(pageWearing({ [THEME_PROP_KEY]: editorial }), {
+        resolver,
+        themes,
+        themeValues: "literals",
+      }).element
+    )
+
+    expect(markup).not.toContain("cqi")
+    expect(markup).not.toContain("clamp(")
   })
 
   it("still wears the palette the tree named, so a re-theme is still one configure", () => {

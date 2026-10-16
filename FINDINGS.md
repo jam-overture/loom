@@ -53027,7 +53027,40 @@ not quietly build something else in its place — which is what happened to
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
 (`src/theme/apply.ts`, `src/theme/font-packs.ts`) and `Loom primitives`
 (`src/primitives/loom.hero.ts`, `src/primitives/loom.page.ts`) ·
-**Status:** open — **nothing is broken and no test is failing.** Every page is
+**Status:** **closed by
+`framework-73-the-ramp-a-phone-can-hold`** — shape 1, the fluid ramp, taken in
+`src/theme/ramp.ts` and recorded as
+[0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md).
+**The row for `Loom primitives` is now a removal rather than a fix**; shape 3,
+the padding, is not needed and should not be taken.
+
+**Re-measured with this entry's own shot list**, which is what made closing it
+one command. `before` is `4ce00d0`; `after` is that branch:
+
+| front door at 390 | before | after |
+| --- | --- | --- |
+| the `h1` box, `minimal` | x 68, 254 × 247 | x 40, **310 × 197** |
+| *See how a change travels*, `minimal` | **286 past the fold** | **y 696, on the first screen** |
+| *Try it yourself*, `minimal` | **364 past the fold** | **y 757, on the first screen** |
+| *See how a change travels*, `editorial` | 182 past | **y 675, on screen** |
+| *See how a change travels*, `bold` | 196 past | **y 680, on screen** |
+| the `h1` at 1280 | x 148, 984 × 166 | **x 148, 984 × 166 — identical** |
+
+The arithmetic in this entry said the hero had to lose about 290 pixels and that
+the two levers this lane owned were worth about 75. **Both were right and
+neither was needed**: the headline lost 50 points of height, the gutter went
+from 68 a side to 40, and the hero's own vertical padding came off the ramp with
+it. Nothing at or above 768px moved at all.
+
+**What is left for `Loom primitives`, and it is one deletion.**
+`loom.heading`'s `CAP_FOR_STEP` is now redundant — its
+`min(var(--loom-scale-8), 11cqi)` wraps a clamp already at or below the cap at
+every width, which is what that file's own comment predicted when it wrote *"a
+pack whose step 8 is already a clamp is simply a ramp that wins here at every
+width."* It is harmless where it stands. Filed separately below so it is not
+lost in a closed entry.
+
+**The original entry follows, unchanged.** — **nothing is broken and no test is failing.** Every page is
 correct, every overflow measurement passes, and the only instrument that sees
 this is a camera
 
@@ -54472,6 +54505,18 @@ is that the sentence they both state be stated once.
 **`pnpm verify` is red on `main`**, reproduced there with nothing of this lane's
 in the tree
 
+> **Confirmed independently by `Loom daily build`, 15 October, 21:50 UTC.** Hit
+> twice in one run on a branch carrying no `(docs)` change, and the signature is
+> this entry's exactly: under full-suite parallel load the two tests time out at
+> 5,000ms; run alone the file passes with *links each row at the record itself*
+> at **3,200ms** and its sibling at **2,725ms**. Two consecutive full runs on
+> one tree failed in *different* files — the first in `offered.test.ts`, the
+> second here — which is what an intermittent budget looks like from a lane
+> trying to tell its own red from the tree's. **Worth stating plainly for
+> whoever picks this up: it is the gate four surfaces share, so it does not
+> block one routine, it blocks all of them**, and every record anybody writes
+> adds a row. 0283 added one today.
+
 `the records index, rendered > links each row at the record itself` renders
 `<DecisionRecords />` — one row per decision record — and asserts one `href`.
 It fails with `Test timed out in 5000ms` at line 157.
@@ -54593,7 +54638,28 @@ the clean range.
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom daily build`
 (`.gitattributes`, `package.json`'s `prepare`, `docs/routines.md`) ·
-**Status:** open — **nothing is broken and the mechanism is documented where it
+**Status:** **closed by `framework-73-the-ramp-a-phone-can-hold`** — by the
+sentence this entry recommended, in `docs/routines.md` beside *Reading the merge
+gate*
+
+**The other half, met by the next run the same day, and it is the worse half.**
+Installing first makes the driver work, and **a working driver is not the end of
+it**: `merge=ours` takes *the branch's* copy, so a merge that resolves cleanly
+hands the branch a **stale** generated file. On #633 that was
+`reference.generated.json`, a fortnight of exports behind `main`. The drift
+surfaced where `.gitattributes` says it would — `pnpm verify` failed — but it
+surfaced as two failures in `app/(docs)/_lib/api/offered.test.ts` naming
+`src/signals/` exports that *"no page on this site mentions"*, which names
+neither the branch, the merge, nor the generated file. It took running the same
+test on a pristine `main` worktree (green) and diffing the file against `main`
+(177 lines missing) to find. `pnpm docs:api` fixes it in one command.
+
+So the sentence in `docs/routines.md` says both things: **install before you
+merge, and regenerate after you merge.** The attribute's comment already said
+the second; what was missing is that nothing reminds you, and the failure does
+not look like its cause.
+
+**The original entry follows, unchanged.** — **nothing is broken and the mechanism is documented where it
 lives**; filed because the order a run naturally works in defeats it, and the
 symptom is a hand-resolved generated file
 
@@ -54632,3 +54698,43 @@ entry is where the next run that meets it will find out why.
 `docs/routines.md` are `Loom daily build`'s; the framework lane met the symptom
 rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
+
+---
+## 2026-10-15 — `loom.heading`'s two per-step caps are now redundant, and the file predicted it in writing
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.heading.ts`) · **Status:** open — **nothing is broken,
+nothing renders differently, and this is a deletion rather than a repair**
+
+[0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
+makes a declared ramp step a maximum: `--loom-scale-8` is now
+`clamp(42.84px, 9.38cqi, 72px)` on a pack whose top step is 72, instead of
+`72px`.
+
+`CAP_FOR_STEP` caps steps 8 and 7 at `11cqi` and `9cqi`, so `headingSize` now
+emits `min(clamp(42.84px, 9.38cqi, 72px), 11cqi)`. **That is correct at every
+width and says nothing the clamp does not already say** — the clamp's floor is
+42.84 where `11cqi` is 42.90 at 390, and above `48rem` the declared size is
+below the cap by a growing margin. Step 7 is the same shape: a 48px step floors
+at 31.80 against a `9cqi` of 35.10.
+
+**This file called it, on 20 August, in its own comment:**
+
+> The better fix is a fluid `scaleRamp` in the font pack, which is a schema
+> three registered packs depend on and therefore another lane's. This does not
+> block it: **a pack whose step 8 is already a clamp is simply a ramp that wins
+> here at every width.**
+
+That is exactly what happened, so the caps are now the harmless half of a thing
+that has been fixed underneath them. **Not deleted from this lane**, for the
+reason that paragraph gives in reverse: `src/primitives/` is yours, and a
+`min()` nobody needs is not worth a cross-lane diff.
+
+**Two things worth having before deleting it.** The comment above
+`CAP_FOR_STEP` is forty lines of genuinely useful reasoning about `cqi` versus
+`vw` and about a heading in a bare `loom.grid` cell, and most of it is still
+true of the clamp — it would be a loss to delete with the constant. And the
+`11cqi` figure is now load-bearing *elsewhere*: 0283's compression constant is
+derived from it, and this entry is where somebody changing one will find the
+other.
+
