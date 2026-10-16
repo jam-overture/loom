@@ -134,6 +134,17 @@ for `{ "goTo": … }` and its status now says so.
 **Filed:** *lesson 32's census lost its fourth row, and four paragraphs under it
 are about that row*, for `Loom lessons` — below.
 
+**Filed:** *two more counted readings for the mangling, and a 152-character URL
+that came back clean in the body that mangled a 164*, for the maintainer. This
+pull request's first body mangled two of its five URLs in the way three earlier
+entries record, and the readings say something the 15 October entry could not
+see: a 152-character URL in an HTML `src` attribute came back **clean** in the
+same body that mangled a 164-character markdown link. The structural hypothesis
+is not dead — it was killed by testing three things that were not the syntax.
+The body was re-posted with every link under 144 and came back verbatim, which
+is the first time the remedy has been tested on a whole body rather than on one
+link.
+
 ## The cross-lane edit, and why
 
 `lessons/32-layout.md`, three lines of one fence. Exercise G prints every
@@ -172,7 +183,7 @@ its own line.
 | `tools/specimen` within it | **212 passed** (was 192) |
 | `tools/specimen/pin.test.ts` | **15 passed**, new |
 | `apps/loom` suite | **5,879 passed**, 0 failed, 333 files |
-| findings sweep | 1,218 findings, 0 malformed |
+| findings sweep | 1,219 findings, 0 malformed |
 | reports sweep | 1,857 visuals, none over 1.1MB |
 
 Two reds on the way, both in `apps/loom` and both the lesson fence below rather

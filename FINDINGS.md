@@ -54776,6 +54776,65 @@ rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
 
 ---
+## 2026-10-16 — two more counted readings for the mangling, and a 152-character URL that came back clean in the body that mangled a 164
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 15 October entry *the mangling bracket, measured on purpose this
+time: 144 clean and 155 mangled in one body* and the two entries it extends ·
+**Status:** open — **two readings, one new variable, and the first test of the
+remedy on a whole body rather than one link**
+
+#653's first body carried five URLs. Counted with `len()` over the exact
+strings, before and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 75 | the preview deployment | bare | **clean** |
+| 121 | 0159, by `main` | `[…](…)` | **clean** |
+| 152 | the report's two images, by branch name | `<img src="…">` | **clean** |
+| 164 | the report, by branch name | `[…](…)` | mangled |
+| 204 | 0286, by branch name | `[…](…)` | mangled |
+
+The two mangled ones came back with `` `` `` injected around the URL inside the
+parens, which is the same injection the three previous entries record.
+
+**Nothing here narrows the bracket on length alone, and one row widens the
+question.** 164 and 204 are both above 155 and are consistent with every
+previous reading. The row that is not is the **152**: if length were the only
+variable it should have mangled, since 152 sits inside the 144–155 bracket's
+upper half and above the highest clean `[…](…)` reading ever taken. It is in an
+HTML `src` attribute rather than a markdown link.
+
+So **the structural hypothesis is not dead, it was killed in the wrong
+place.** The 15 October entry tested adjacency to an inline-code span, a
+trailing comma, and the branch name, and all three are genuinely dead. It did
+not test *the syntax the URL is written in*, because every link it measured was
+a markdown link. Two readings now say the two syntaxes behave differently at a
+length where one of them breaks. Either:
+
+- the bracket for a markdown link is **155–164** and an HTML attribute has a
+  different one, or none at all; or
+- length is a proxy and what actually matters is the `[…](…)` construct, which
+  would make every previous reading a measurement of how long a link has to be
+  before something gives up parsing it.
+
+**A remedy tested on a whole body for the first time.** The three earlier
+entries each shortened one link and watched it. This body was re-posted with
+**every** URL under 144 — the two images and the report by short sha
+(`a5482a3`: 108, 108, 120), and 0286 not linked at all, because its filename is
+103 characters and no choice of ref gets it under 144, so the path is in
+backticks and `decisions/README.md` (69) carries the link. **The whole body came
+back verbatim**, every link included. That is the first evidence that the
+remedy holds for a body rather than for a link, and it is why there is a
+correction to look at rather than a second mangled body.
+
+**Still not proposed: a check.** The 14 and 15 October entries both reject one
+and the reasoning is unchanged — and this entry adds the sharper reason. A check
+holding every URL in a pull request body under 144 would have failed this body's
+two **clean** image attributes, which are 152 and which nothing was wrong with.
+The number is not established and the variable may not be the number.
+
+---
 ## 2026-10-16 — lesson 32's census lost its fourth row, and four paragraphs under it are about that row
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/32-layout.md`)
