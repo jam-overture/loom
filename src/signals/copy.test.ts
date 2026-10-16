@@ -200,7 +200,7 @@ describe("copyReadingOf", () => {
   })
 
   /**
-   * The commonest form of the pair 0283 refuses, and the one with the most
+   * The commonest form of the pair 0287 refuses, and the one with the most
    * rows behind it: a window that held no views makes every part `unknown`,
    * so the share published a nought over a whole page of words that nobody
    * had said anything about either way.
@@ -374,7 +374,7 @@ describe("copyReadingOf", () => {
     })
 
     /**
-     * The pair 0283 exists for, on the same page as the test above. The old
+     * The pair 0287 exists for, on the same page as the test above. The old
      * reading published *none of this page's words were reached* beside a list
      * of the words nobody reached that is **empty**, because `unseen` is
      * `skipped` only (0235 §5) and nothing on that page is skipped. One of the
@@ -652,7 +652,7 @@ describe("copyReadingOf", () => {
      * The same row, read as a share: one heading was reached and the other
      * reported nothing either way, so of the heading words this window can
      * speak for **all** were read. Over the role's words it was 0.4, which is
-     * the figure 0283 moved — six words nothing can be said about were in the
+     * the figure 0287 moved — six words nothing can be said about were in the
      * denominator and in neither half of the sentence above it.
      */
     it("takes a role's share over the role's words the window can speak for", () => {

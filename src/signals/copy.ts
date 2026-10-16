@@ -54,7 +54,7 @@ import { countWords } from "./words.js"
  * point of reporting both.
  *
  * **Both are over the words this window can speak for, and neither is over the
- * page** (0282, 0283). A part whose standing is `unknown` reported something
+ * page** (0282, 0287). A part whose standing is `unknown` reported something
  * other than coming into view, so a reader plainly had it in front of them and
  * the counter that would say so is missing. Its words are in no term of {@link
  * CopyReading.typical} and in neither term of {@link CopyReading.share}: the
@@ -121,7 +121,7 @@ export type RoleCopy = {
   readonly wordsByStanding: Readonly<Record<PartStanding, number>>
   /**
    * This role's words in parts the window can speak for, which is the
-   * denominator of {@link share} (0283).
+   * denominator of {@link share} (0287).
    *
    * Addable across roles, like {@link words} and for the same reason. The rest
    * of the role's words are `wordsByStanding.unknown`, which is the mass
@@ -130,7 +130,7 @@ export type RoleCopy = {
   readonly spoken: number
   /**
    * The share of this role's **spoken-for** words at least one reader reached.
-   * `null` where the window can speak for none of them (0283).
+   * `null` where the window can speak for none of them (0287).
    *
    * Addable across roles — unlike every view count on a `RoleReading`, which is
    * absent there because distinctness cannot be added (0147). Words can: they
@@ -171,7 +171,7 @@ export type CopySilence =
    * **It is the two figures this withholds and not the standings.** Both the
    * mean and {@link CopyReading.share} are absent, because a share of nought
    * beside an `unseen` list that is empty is the same sentence in a different
-   * shape (0283). The words stay in {@link CopyReading.wordsByStanding} under
+   * shape (0287). The words stay in {@link CopyReading.wordsByStanding} under
    * `unknown`, where they can be seen and not acted on, which is the rule
    * {@link CopyReading.unseen} already applies to the same passages.
    */
@@ -238,7 +238,7 @@ export type CopyReading = {
   readonly wordsByStanding: Readonly<Record<PartStanding, number>>
   /**
    * The page's words in parts this window can speak for, which is the
-   * denominator of {@link share} (0283).
+   * denominator of {@link share} (0287).
    *
    * Published rather than left to a consumer to subtract, because a surface
    * that works out what a share is of by taking `words` less
@@ -249,7 +249,7 @@ export type CopyReading = {
   readonly spoken: number
   /**
    * The share of the words **this window can speak for** that at least one
-   * reader reached. `null` where there are none of them (0283).
+   * reader reached. `null` where there are none of them (0287).
    *
    * *At least one*, which is what a standing of `read` means and not what a
    * person reads this sentence as. {@link typical} is the per-reader figure.
@@ -385,7 +385,7 @@ const saysSomething = (passage: Passage): boolean => passage.words > 0 || passag
 
 /**
  * The share of the spoken-for words that were read, and `null` where there are
- * none of them (0283).
+ * none of them (0287).
  *
  * The denominator is never {@link CopyReading.words}: a word nothing can be
  * said about is outside the question rather than in the half of it that went
@@ -511,7 +511,7 @@ export const copyReadingOf = (reading: PageReading): CopyReading => {
 
   /**
    * The words in parts this window can speak for either way, which is what the
-   * mean and the share below are both over (0282, 0283).
+   * mean and the share below are both over (0282, 0287).
    *
    * Taken with the published predicate rather than as `read + skipped`, which
    * is the same number today and is the spelling that would go on agreeing

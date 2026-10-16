@@ -522,7 +522,7 @@ describe("copyChangeOf", () => {
     /**
      * The predicate is published so that a reading of a library asks this
      * question with the same function rather than with its own spelling of it
-     * (0283). The claim is that reading the movement and reading the two
+     * (0287). The claim is that reading the movement and reading the two
      * standings are one rule: `movementOf` derives the movement from
      * `spokenFor` itself, so they cannot drift, and this is the case that
      * would have caught it if they could.

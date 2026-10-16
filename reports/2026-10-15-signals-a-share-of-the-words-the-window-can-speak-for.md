@@ -8,7 +8,7 @@
 
 The open finding this lane filed this morning — **the half of 0282 that was
 left** — taken as one unit over all four places the quotient is read:
-[0283](../decisions/0283-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md).
+[0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md).
 
 0282 took every signed figure over a page's words over the passages the window
 can speak for, and said in its own consequences what it had not touched:
@@ -68,14 +68,14 @@ The suite had that case pinned the old way; the assertion it carried was
 
 **Four, and the first is the one to disagree with if you are going to.**
 
-**1. 0283 is `Accepted` and nothing is superseded.** 0235 §2 says in so many
+**1. 0287 is `Accepted` and nothing is superseded.** 0235 §2 says in so many
 words that `share` is *the share of the page's words*, and this changes that,
 so the governance question is real. I read §2's **decision** as *two shares,
 because the words somebody read and the words a reader reads are two
 sentences*, and the denominator as its description — which is exactly the
 reading 0282 took of the same clause this morning when it moved `typical`'s
 universe without superseding anything. **If you read the enumeration as the
-decision, 0283 is the record to refuse**; the reversal is one argument in
+decision, 0287 is the record to refuse**; the reversal is one argument in
 `copy.ts` and two fields. This is in the record, in §33 and in the pull request
 comment, because it is the one thing here that is a judgement rather than
 arithmetic.
@@ -101,7 +101,7 @@ place, and I was not going to make it in another in the same change.
 
 ## Records added
 
-- **0283** — *A share of a page's words is a share of the words the window can
+- **0287** — *A share of a page's words is a share of the words the window can
   speak for, and `spoken for` is one predicate.* `Accepted`. Index regenerated;
   0277 and 0278 are still held by #633 and were skipped, as this week's records
   have been.

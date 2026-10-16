@@ -607,7 +607,7 @@ const gainOf = (
  * either side is in the census, in `wordsByMovement` and in no mass (0282).
  *
  * **Published, because a reading of a library asks the same question of the
- * same passages** (0280) and spelled it a second way until 0283. It is read
+ * same passages** (0280) and spelled it a second way until 0287. It is read
  * off the movement, which `movementOf` derives from the same `spokenFor` the
  * page-scale figures use — so the two are one rule rather than two that agree.
  */

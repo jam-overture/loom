@@ -54411,7 +54411,7 @@ ceiling over `read + skipped` rather than over the page's words.
 ## 2026-10-15 — a page where nothing reports reach publishes a share of nought beside an empty list of the words nobody saw
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/copy.ts`) · **Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken as 0283, §33, over all four places the quotient is read. Original status: open — **the half of 0282 that was left**,
+(`src/signals/copy.ts`) · **Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken as 0287, §33, over all four places the quotient is read. Original status: open — **the half of 0282 that was left**,
 and a unit rather than a line
 
 0282 withholds `CopyReading.typical` where no word of the page is in a part the
@@ -54669,7 +54669,7 @@ URL with many would separate them, and nobody has written one by accident yet.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/copy-change.ts`, `src/signals/library-word-reach-change.ts`) ·
-**Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken with 0283, and the predicate is published from `parts.ts` rather than from `copy-change.ts`, since a third module and the page-scale share read it too. Original status: open — **two spellings of one projection**, found by reading the
+**Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken with 0287, and the predicate is published from `parts.ts` rather than from `copy-change.ts`, since a third module and the page-scale share read it too. Original status: open — **two spellings of one projection**, found by reading the
 merge rather than by a test, and filed rather than taken because it is not what
 #642 is about
 
@@ -54917,7 +54917,7 @@ merge commit, which says the regenerated index agreed with it.
 **Status:** open — **a published figure whose denominator moved under a name
 that did not**, with the one pair it must never draw again
 
-[0283](decisions/0283-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md),
+[0287](decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md),
 §33 of [`docs/signals.md`](docs/signals.md). `CopyReading.share` and
 `RoleCopy.share` were `read ÷ words` and are now `read ÷ spoken`, where
 `spoken` is a new published field: the words in parts whose standing is not

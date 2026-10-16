@@ -1,8 +1,16 @@
-# 0283 — A share of a page's words is a share of the words the window can speak for, and *spoken for* is one predicate
+# 0287 — A share of a page's words is a share of the words the window can speak for, and *spoken for* is one predicate
 
 **Status:** Accepted
 **Date:** 2026-10-15
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-16**, from 0283, when `main` was merged into the
+> branch that carried it (#649). `main` had meanwhile accepted a different
+> 0283 — *a declared ramp step is a maximum and the browser reads the width* —
+> and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> This record was written on 15 October and nothing in it changed but its
+> number; the citations of it on this branch were updated with it.
 
 ## Context
 

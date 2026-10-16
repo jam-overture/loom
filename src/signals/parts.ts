@@ -125,7 +125,7 @@ export const PART_STANDINGS: readonly PartStanding[] = everyMemberOf<PartStandin
  * `read` and `skipped` are claims about readers; `unknown` is the absence of
  * one (0282). A passage nothing can be said about is in no mass, out of every
  * list a person acts on, and outside the denominator of every share
- * ([0283](../../decisions/0283-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)).
+ * ([0287](../../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)).
  *
  * **Published here rather than spelled where it is asked.** Three modules
  * enumerated the standing by hand and a fourth was about to, and the way that
