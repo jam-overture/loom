@@ -8,7 +8,7 @@ import { kindKeyOf, type KindKey } from "./library.js"
 import { pairedWindowOf, partsByNodeIn, type PairedWindow } from "./library-change.js"
 import type { UnscaledPage } from "./library-reach.js"
 import { pageViewsFor, type StoredPageViews } from "./page-views.js"
-import type { PageReading, PartReading } from "./parts.js"
+import { spokenFor, type PageReading, type PartReading } from "./parts.js"
 import type { ReachSilence } from "./reach.js"
 
 /**
@@ -1062,17 +1062,15 @@ export const libraryReachChangeOf = (
      * and listing it would put the commonest healthy state on the one list here
      * that is meant to be empty.
      */
-    const spokenFor = before.parts.some((part) => {
+    const spoken = before.parts.some((part) => {
       const counterpart = afterParts.get(part.nodeId)
 
       return (
-        part.standing !== "unknown" &&
-        counterpart !== undefined &&
-        counterpart.standing !== "unknown"
+        spokenFor(part.standing) && counterpart !== undefined && spokenFor(counterpart.standing)
       )
     })
 
-    if (spokenFor) {
+    if (spoken) {
       if (doors.was.silence !== null) {
         unscaled.push({
           treeId,
