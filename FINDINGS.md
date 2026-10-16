@@ -54414,7 +54414,7 @@ ceiling over `read + skipped` rather than over the page's words.
 ## 2026-10-15 — a page where nothing reports reach publishes a share of nought beside an empty list of the words nobody saw
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/copy.ts`) · **Status:** open — **the half of 0282 that was left**,
+(`src/signals/copy.ts`) · **Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken as 0287, §33, over all four places the quotient is read. Original status: open — **the half of 0282 that was left**,
 and a unit rather than a line
 
 0282 withholds `CopyReading.typical` where no word of the page is in a part the
@@ -54672,7 +54672,7 @@ URL with many would separate them, and nobody has written one by accident yet.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/copy-change.ts`, `src/signals/library-word-reach-change.ts`) ·
-**Status:** open — **two spellings of one projection**, found by reading the
+**Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken with 0287, and the predicate is published from `parts.ts` rather than from `copy-change.ts`, since a third module and the page-scale share read it too. Original status: open — **two spellings of one projection**, found by reading the
 merge rather than by a test, and filed rather than taken because it is not what
 #642 is about
 
@@ -54914,6 +54914,118 @@ rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
 
 ---
+## 2026-10-15 — a share of a page's words is now a share of the words the window can speak for, and the field kept its name
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a published figure whose denominator moved under a name
+that did not**, with the one pair it must never draw again
+
+[0287](decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md),
+§33 of [`docs/signals.md`](docs/signals.md). `CopyReading.share` and
+`RoleCopy.share` were `read ÷ words` and are now `read ÷ spoken`, where
+`spoken` is a new published field: the words in parts whose standing is not
+`unknown`.
+
+**Nothing on a screen breaks and one thing on it changes value.** A page every
+part of which reports reach is unaffected — `spoken` is `words` there, which is
+the ordinary state. Where a page has `unknown` words the figure goes **up**,
+because those words were in the denominator and in neither half of the sentence
+above it.
+
+**Three things worth knowing before the card is drawn:**
+
+- **`share` can now be `null`, and it could not before.** It is absent in
+  exactly the three states `silence` names as `wordless`, `unmeasured` or
+  `unspoken`. The second of those is the common one: **every window with no
+  page views used to publish a share of exactly 0**, which drew as *none of
+  this page was reached* for a page nobody had opened.
+- **Do not put `share` and `unseen` on one card without `spoken` beside
+  them.** That pair is what the finding this closes was about: a nought share
+  over an empty list of the words nobody saw, because `unseen` is `skipped`
+  only. It cannot happen now, and the way to re-create it is to compute a
+  share from `wordsByStanding.read ÷ words` on the surface.
+- **`words` is unchanged and still partitions the page.** `spoken` plus
+  `wordsByStanding.unknown` is `words`, and the gap is the mass outside the
+  question rather than words nobody read.
+
+**The sentence to put under it** is *of the words this window can speak for*.
+The field's name is unchanged on purpose: its claim — the share of words at
+least one reader reached — did not move, only the universe did, and a rename
+would have cost a migration to say the same thing.
+
+---
+## 2026-10-15 — `pnpm verify` was green on `main` this evening, and the records-index render test passed at 13.4 seconds
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/architecture.test.tsx`) ·
+**Extends** this afternoon's entry *the records index render test has about
+eighty records of headroom left* · **Status:** open — **the failure did not
+reproduce, and the headroom reading it rests on still stands**
+
+Run on `4ce00d0` with nothing of this lane's in the tree, before branching:
+`pnpm verify` exited **0**, 557 test files and 10,948 tests, with
+`app/(docs)/_components/architecture.test.tsx` passing — 21 tests in
+**13,365 ms** for the file.
+
+**That is not a contradiction of the entry it extends and should not be read as
+one.** That entry measured the one test at 3,836 ms and 4,434 ms *run alone*
+against a 5,000 ms budget, and said the crossing happens under the full suite's
+parallel load. A machine with more of it to spare does not cross; this one did
+not. The arithmetic — 262 records, ~15 ms a record, under forty records of
+headroom — is untouched by a green run, and so is the remedy.
+
+**What it adds is that the gate is load-dependent**, which is the worst shape
+for a failure this repository's routines read as a branch's own doing. The
+remedy that entry recommends is still the one to take, and until it is, a red
+`architecture.test.tsx` should be re-run before anybody reverts anything.
+
+---
+## 2026-10-15 — the API reference truncates a long signature mid-comment, and a citation past the cut is never lifted
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a hole in a
+check that is otherwise airtight**, met by a change that was nowhere near it
+
+`readerFacingSignature` lifts citations out of the comments inside a published
+declaration, and drops whole any comment whose grammar needs the number. The
+test beside it holds every signature on the site to carrying none. Both are
+right and the reasoning in them is right.
+
+**A signature is truncated before that runs, and the cut lands inside a
+comment.** `CopyReading`'s signature is about 6,000 characters and ends `…no
+word this\n * wind\n…`. The `/**` that comment opened with has no `*/` in what
+is left, so `COMMENT_IN_CODE` — `/\/\*\*[\s\S]*?\*\//g` — never matches it, the
+citations in it are never lifted, and the whole-comment fallback never fires
+either. Everything above the cut is cleaned correctly; the tail is published
+raw.
+
+**How it was found.** This lane added a paragraph to the last field of
+`CopyReading`, which pushed that field's comment across the cut. `pnpm verify`
+then failed on *never puts a decision-record number in front of a reader*,
+naming `CopyReading's signature`, while `readerFacingSignature` run by hand
+over the same declaration out of `dist/` returned it clean — because by hand it
+was handed the whole thing. The remedy taken in this branch was to drop the two
+numbers from that one comment, which is right for the page and does nothing
+about the hole.
+
+**Why it is worth fixing rather than leaving to the gate.** The check does
+catch it, which is the good news, and the diagnosis costs an hour: the test
+names a symbol, the source comment looks exactly like fifty others that pass,
+and the stripper demonstrably works on it. The failure is **positional** — the
+same comment is fine a hundred characters earlier in the file — so the next
+lane to meet it will be a lane that did not touch the comment at all. One field
+added above a cited one is enough.
+
+**Two shapes, and the first is nearly free:**
+
+- **Truncate after cleaning, not before.** `readerFacingSignature` then always
+  sees balanced comments, and what is cut is already reader-facing.
+- **Or close the cut**: drop a trailing partial comment rather than publishing
+  it, since half a sentence of documentation under an ellipsis is not worth
+  reading anyway.
+
+**Not proposed: relaxing the test.** It is correct, it caught this, and the
+rule it enforces is the maintainer's.
 ## 2026-10-16 — the composed preview URL, fifth instance, and the remedy is now free in a way it was not when it was written
 
 **Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
@@ -55240,3 +55352,62 @@ already does for the other rail's scroller, and `_lib/chrome.ts` is where it
 would live. It is not taken yet because `#article` is free and because a second
 name for a thing that already has one is the kind of addition this route group
 keeps declining.
+
+---
+## 2026-10-16 — the before-and-after funnel card, and the one figure on it that is an interval rather than a number
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a surface to build on a reading that is on `main`**, with
+the four refusals it must not undo
+
+[0288](decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)
+publishes `funnelChangeOf(was, now)`: two windows of one page's funnels held
+against each other, per question, with what moved and which half of the funnel
+moved it. It takes the two `FunnelReach`es a funnel card already builds — no
+store read, no second join — and answers *we shipped a change, did more readers
+buy*, which is the sentence the whole subsystem has been building toward.
+
+**Four things the screen must not do**, each a refusal in the record rather
+than an oversight here:
+
+- **Do not draw `rateRatio` as a number on its own.** It is the only figure in
+  this subsystem built out of two *floors*: `rate` leans down by the
+  conversions a rollup boundary split (0231), by an amount the deployment's own
+  `windowMs` sets. `rateRatioAtLeast` and `rateRatioAtMost` bracket the true
+  ratio and `rateMoved` says whether the bracket clears 1. **`rateMoved: false`
+  is a thing to draw and not to hide** — *the rate fell by a third and your
+  rollup window can explain all of it* is a sentence about configuration, and a
+  card showing the bare ratio prints it as a collapse. `FunnelChange.undecided`
+  is how many of the pairs on the screen are in that state.
+- **Do not print `readersMoved` as people.** It is the movement in the
+  conversion share at the later window's scale — a mass for ranking, like every
+  other `…Moved` figure here (0280). `mostGained` and `mostLost` are already
+  ranked by it, by headcount rather than by share, so a screen that re-ranks by
+  `rateRatio` will lead with whichever funnel has four readers in it.
+- **Do not draw a `broken` question as readers who stopped buying.** It is the
+  most useful row this reading has and the most alarming if it is drawn as a
+  funnel: the change removed a part the question names (0238), every later-side
+  figure is withheld, and the thing to fix is the deployment's configuration.
+  `QuestionMovement` answers under every silence, because it is a fact about
+  two trees.
+- **Do not refuse the row under a silence.** This is the first silence set here
+  that costs half a reading rather than a figure or a row: the door's three
+  states withhold every share of the arrivals and leave the rates, the
+  movements and the questions standing, because a rate is two counts off one
+  row. A deployment whose page-view rows have expired still has a funnel
+  comparison worth drawing.
+
+**The one state worth a design decision rather than a rule.** Where a window is
+`unopened` or `uncounted` there is no drift to bracket with, so `rateRatio` is
+given and `rateMoved` is `null` — a ratio with no interval, in exactly the state
+where the straddle is least knowable. A card drawing it as though it were
+`rateMoved: true` would be wrong in the worst direction. The honest treatment is
+probably the ratio in the same weight as an estimate elsewhere on your screens,
+with the silence's own sentence under it.
+
+`cause` is the sentence to lead the card with where it is not `null`: *more
+readers reached the ask and the same share bought*, or *the same readers reached
+it and more bought*. It has three members and never a fourth, so a surface that
+handles `entry`, `closing` and `either` has handled all of it.
+
+---

@@ -12,6 +12,8 @@ import {
   describePassageMovement,
   pageReadingOf,
   PASSAGE_MOVEMENTS,
+  spokenFor,
+  spokenForOnBothSides,
   type ComparedPassage,
   type CopyChange,
   type PartDeclarations,
@@ -515,6 +517,30 @@ describe("copyChangeOf", () => {
       expect(passage(change, "intro")?.movement).toBe("unknown")
       expect(passage(change, "intro")?.gain).toBeNull()
       expect(change.typical?.change).toBe(gains)
+    })
+
+    /**
+     * The predicate is published so that a reading of a library asks this
+     * question with the same function rather than with its own spelling of it
+     * (0287). The claim is that reading the movement and reading the two
+     * standings are one rule: `movementOf` derives the movement from
+     * `spokenFor` itself, so they cannot drift, and this is the case that
+     * would have caught it if they could.
+     */
+    it("says a passage is spoken for exactly where both sides' standings are", () => {
+      for (const change of [changeOf(WAS, NOW), changeOf(WAS_SPOKEN, NOW_HALF_SILENT)]) {
+        for (const one of change.compared) {
+          expect(spokenForOnBothSides(one)).toBe(
+            spokenFor(one.was.standing) && spokenFor(one.now.standing)
+          )
+        }
+      }
+
+      const half = changeOf(WAS_SPOKEN, NOW_HALF_SILENT)
+      const intro = passage(half, "intro")
+
+      expect(intro).toBeDefined()
+      expect(intro === undefined ? true : spokenForOnBothSides(intro)).toBe(false)
     })
 
     it("counts each carried passage in exactly one movement, by words and by passage", () => {

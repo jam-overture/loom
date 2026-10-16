@@ -118,6 +118,29 @@ export const PART_STANDINGS: readonly PartStanding[] = everyMemberOf<PartStandin
   "unknown",
 ])
 
+/**
+ * Whether the window can say either way, which is the one question every
+ * figure over a page's words is restricted by.
+ *
+ * `read` and `skipped` are claims about readers; `unknown` is the absence of
+ * one (0282). A passage nothing can be said about is in no mass, out of every
+ * list a person acts on, and outside the denominator of every share
+ * ([0287](../../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)).
+ *
+ * **Published here rather than spelled where it is asked.** Three modules
+ * enumerated the standing by hand and a fourth was about to, and the way that
+ * breaks is a sixth `PartStanding`: one spelling has to be revisited and the
+ * others go on agreeing with the version of the vocabulary they were written
+ * against. Two spellings of a projection that agree today are what the counter
+ * keys were before they were published once.
+ *
+ * **It is not `anchors`.** `change.ts` and `progress.ts` ask the same question
+ * of a part under a different name, because what 0221 needs is *can this part
+ * anchor a stop* and the answer coincides. A predicate shared because two
+ * rules agree is the thing this is fixing.
+ */
+export const spokenFor = (standing: PartStanding): boolean => standing !== "unknown"
+
 /** One line per standing, for a surface putting the reading in front of a person. */
 export const describePartStanding = (standing: PartStanding): string => {
   switch (standing) {

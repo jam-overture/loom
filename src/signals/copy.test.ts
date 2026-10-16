@@ -12,6 +12,7 @@ import {
   describeCopySilence,
   pageReadingOf,
   type CopyReading,
+  type CopySilence,
   type PartDeclarations,
   type ReaderTally,
 } from "./index.js"
@@ -198,13 +199,21 @@ describe("copyReadingOf", () => {
     expect(reading.wordsByStanding.unknown).toBe(10)
   })
 
-  it("calls nothing skipped in a window that held no views", () => {
+  /**
+   * The commonest form of the pair 0287 refuses, and the one with the most
+   * rows behind it: a window that held no views makes every part `unknown`,
+   * so the share published a nought over a whole page of words that nobody
+   * had said anything about either way.
+   */
+  it("calls nothing skipped in a window that held no views, and has no share of it", () => {
     const reading = copyOf(treeOf(PAGE), [])
 
     expect(reading.views).toBe(0)
     expect(reading.wordsByStanding).toEqual({ read: 0, skipped: 0, unknown: 40 })
     expect(reading.unseen).toEqual([])
-    expect(reading.share).toBe(0)
+    expect(reading.words).toBe(40)
+    expect(reading.spoken).toBe(0)
+    expect(reading.share).toBeNull()
     expect(reading.typical).toBeNull()
     expect(reading.silence).toBe("unmeasured")
   })
@@ -362,6 +371,120 @@ describe("copyReadingOf", () => {
       expect(reading.typical).toBeNull()
       expect(reading.silence).toBe("unspoken")
       expect(describeCopySilence("unspoken")).toContain("no part of the page reports")
+    })
+
+    /**
+     * The pair 0287 exists for, on the same page as the test above. The old
+     * reading published *none of this page's words were reached* beside a list
+     * of the words nobody reached that is **empty**, because `unseen` is
+     * `skipped` only (0235 §5) and nothing on that page is skipped. One of the
+     * two had to go, and it is the number rather than the list.
+     */
+    it("withholds the share too, rather than publishing a nought beside an empty unseen list", () => {
+      const reading = copyOf(treeOf(PAGE), [
+        tally("page", { views: 4, reached: 4 }),
+        tally("intro", { views: 4, reached: 0 }),
+        tally("pricing", { views: 4, reached: 0 }),
+      ])
+
+      expect(reading.words).toBe(40)
+      expect(reading.spoken).toBe(0)
+      expect(reading.share).toBeNull()
+      expect(reading.unseen).toEqual([])
+    })
+
+    /**
+     * The share's universe, where the page is in more than one standing at
+     * once: ten words read, thirty nothing can be said about, and the share is
+     * of the ten. Over the page's words it would be 0.25 — three quarters of
+     * the denominator being words nobody has said anything about either way.
+     */
+    it("takes the share over the words the window can speak for", () => {
+      const reading = copyOf(
+        treeOf(
+          element("page", "loom.stack", {}, [
+            element("intro", "loom.section", { body: words(10) }),
+            element("pricing", "loom.section", { body: words(30) }),
+          ])
+        ),
+        [
+          tally("page", { views: 4, reached: 4 }),
+          tally("intro", { views: 4, reached: 4 }),
+          tally("pricing", { views: 4, reached: 0 }),
+        ]
+      )
+
+      expect(reading.wordsByStanding).toEqual({ read: 10, skipped: 0, unknown: 30 })
+      expect(reading.spoken).toBe(10)
+      expect(reading.share).toBe(1)
+    })
+
+    it("leaves the census whole, so the words outside the share are still counted", () => {
+      const reading = copyOf(treeOf(PAGE), [
+        tally("page", { views: 4, reached: 4 }),
+        tally("intro", { views: 4, reached: 0 }),
+      ])
+
+      expect(reading.spoken + reading.wordsByStanding.unknown).toBe(reading.words)
+      expect(reading.words).toBe(40)
+      expect(reading.spoken).toBe(30)
+      expect(reading.share).toBe(0)
+    })
+
+    /**
+     * The rule stated once rather than per case, over the whole closed set: a
+     * share is absent in exactly the three states where there is no word, no
+     * reader, or no word this window can speak for, and present in the two
+     * that withhold the mean for reasons of precision rather than of absence.
+     *
+     * The `inconsistent` row is the one worth having in the table. It is
+     * reachable only with a spoken-for word in the page — a part whose
+     * standing is `unknown` has a `reached` of nought by construction, so it
+     * can never be the row reporting more readers than the page has views —
+     * which is why the first list cannot grow a fourth member by accident.
+     */
+    it("publishes a share in exactly the states that are not about a measurement being absent", () => {
+      const WITHOUT_A_SHARE: readonly CopySilence[] = ["wordless", "unmeasured", "unspoken"]
+
+      const readings: Readonly<Record<CopySilence | "none", CopyReading>> = {
+        wordless: copyOf(
+          treeOf(element("page", "loom.stack", {}, [element("rule", "loom.divider")])),
+          [tally("page", { views: 3, reached: 3 })]
+        ),
+        unmeasured: copyOf(treeOf(PAGE), []),
+        unspoken: copyOf(treeOf(PAGE), [
+          tally("page", { views: 4, reached: 4 }),
+          tally("intro", { views: 4, reached: 0 }),
+          tally("pricing", { views: 4, reached: 0 }),
+        ]),
+        floored: copyOf(
+          treeOf(
+            element("page", "loom.stack", { body: words(10) }, [
+              element("pricing", "loom.undeclared", { body: words(30) }),
+            ])
+          ),
+          [tally("page", { views: 4, reached: 4 })],
+          DECLARED_FOR(["loom.stack"])
+        ),
+        inconsistent: copyOf(treeOf(PAGE), [
+          tally("page", { views: 1, reached: 1 }),
+          tally("intro", { views: 1, reached: 4 }),
+        ]),
+        none: copyOf(treeOf(PAGE), [
+          tally("page", { views: 4, reached: 4 }),
+          tally("intro", { views: 4, reached: 4 }),
+        ]),
+      }
+
+      for (const silence of COPY_SILENCES) {
+        const reading = readings[silence]
+
+        expect(reading.silence).toBe(silence)
+        expect(reading.share === null).toBe(WITHOUT_A_SHARE.includes(silence))
+      }
+
+      expect(readings.none.silence).toBeNull()
+      expect(readings.none.share).not.toBeNull()
     })
 
     /**
@@ -523,7 +646,59 @@ describe("copyReadingOf", () => {
       expect(headings?.passages).toBe(2)
       expect(headings?.words).toBe(10)
       expect(headings?.wordsByStanding).toEqual({ read: 4, skipped: 0, unknown: 6 })
-      expect(headings?.share).toBe(0.4)
+    })
+
+    /**
+     * The same row, read as a share: one heading was reached and the other
+     * reported nothing either way, so of the heading words this window can
+     * speak for **all** were read. Over the role's words it was 0.4, which is
+     * the figure 0287 moved — six words nothing can be said about were in the
+     * denominator and in neither half of the sentence above it.
+     */
+    it("takes a role's share over the role's words the window can speak for", () => {
+      const reading = copyOf(
+        treeOf(
+          element("page", "loom.stack", {}, [
+            element("one", "loom.heading", { body: words(4) }),
+            element("two", "loom.heading", { body: words(6) }),
+            element("body", "loom.section", { body: words(30) }),
+          ])
+        ),
+        [
+          tally("page", { views: 5, reached: 5 }),
+          tally("one", { views: 5, reached: 5 }),
+          tally("two", { views: 5, reached: 0 }),
+        ],
+        ROLE_FOR("heading", ["loom.heading"])
+      )
+
+      const headings = roleRow(reading, "heading")
+
+      expect(headings?.spoken).toBe(4)
+      expect(headings?.share).toBe(1)
+    })
+
+    it("says nothing rather than nought for a role the window can speak for no word of", () => {
+      const reading = copyOf(
+        treeOf(
+          element("page", "loom.stack", {}, [
+            element("one", "loom.heading", { body: words(4) }),
+            element("body", "loom.section", { body: words(30) }),
+          ])
+        ),
+        [
+          tally("page", { views: 5, reached: 5 }),
+          tally("one", { views: 5, reached: 0 }),
+          tally("body", { views: 5, reached: 5 }),
+        ],
+        ROLE_FOR("heading", ["loom.heading"])
+      )
+
+      const headings = roleRow(reading, "heading")
+
+      expect(headings?.words).toBe(4)
+      expect(headings?.spoken).toBe(0)
+      expect(headings?.share).toBeNull()
     })
 
     /**

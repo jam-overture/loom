@@ -3,7 +3,7 @@ import type { TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
-import { copyChangeOf, type ComparedPassage } from "./copy-change.js"
+import { copyChangeOf, spokenForOnBothSides, type ComparedPassage } from "./copy-change.js"
 import type { PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import { partsByNodeIn } from "./library-change.js"
@@ -1124,8 +1124,7 @@ export const libraryWordReachChangeOf = (
 
       if (part === undefined) continue
 
-      const spoken =
-        passage.was.standing !== "unknown" && passage.now.standing !== "unknown"
+      const spoken = spokenForOnBothSides(passage)
       const unreconciled =
         passage.was.readers > doors.was.appearances ||
         passage.now.readers > doors.now.appearances

@@ -33,7 +33,8 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
-| How much of what it says gets read | words readers reached against the words the page says ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)), with the passages nobody saw |
+| What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
+| How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
@@ -55,7 +56,7 @@ the portal every day.
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
-| What a reading means when it says nothing | the condition and the subject behind all sixty-eight names, across fifteen sets and thirteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
+| What a reading means when it says nothing | the condition and the subject behind all seventy-three names, across sixteen sets and thirteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -2043,6 +2044,140 @@ in three ways, and a deployment handed the wrong one looks in the wrong place.
 published next to it, so it is not a false number — but it is one question about
 two published shares and every role row under them, which is a unit and not a
 line.
+
+### 33. A share of the words the window can speak for · `Loom signals` · **done, 15 October**
+
+§32 took every signed figure over a page's words over the passages the window
+can speak for, and said in its own record what it had left: `CopyReading.share`
+is `read ÷ words`, so **a page where nothing reports reach publishes a share of
+nought beside an `unseen` list that is empty.** *None of this page was reached*,
+and underneath it no word it could name. The number is not false — nought is
+exactly what a standing of `read` asserts of those words, and the standings are
+published next to it — which makes it the worst thing a figure can be:
+incoherent read quickly and defensible read carefully.
+
+**Done.** It is the **twenty-third** thing taken out of what this subsystem
+already knows rather than collected, and the second of them that is a published
+figure corrected rather than a new one added. **Nothing was added to a payload,
+a browser, a column, a store or the vocabulary of kinds**, and the broadcaster
+was not touched — measured both sides and byte-identical.
+
+Four things decide the shape
+([0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)):
+
+- **The denominator is published, not derivable.** `CopyReading.spoken` and
+  `RoleCopy.spoken` are the words in parts the window can speak for, and
+  `share` is `read ÷ spoken`. A surface working out what a share is of by
+  taking `words` less `wordsByStanding.unknown` would be re-deriving the
+  universe the figure is about, which is how two screens come to disagree.
+  `words` is untouched and the census stays whole.
+- **The commonest case is not the one it was filed for.** A window with no page
+  views makes every part `unknown`, so **every unmeasured window in this
+  subsystem has been publishing a share of exactly 0** beside a `typical` of
+  `null`. That is far more rows than the broken-sender state §32 found, and it
+  reads the same way on a card.
+- **No fifteenth silence vocabulary.** `share` is absent in exactly three
+  states and all three are already `CopySilence` members — `wordless`,
+  `unmeasured`, `unspoken` — while `floored` and `inconsistent` leave it
+  standing, which is 0235's own rule that a share survives a floor and says so.
+  `silence` is now the reason either figure is absent, and the equivalence is
+  pinned over the closed set rather than by a sentence. That the three cannot
+  become four is arithmetic: `unknown` is the one standing whose `reached` is
+  nought by construction, so a page with no spoken-for word can never also be
+  `inconsistent`.
+- **And *spoken for* is written once.** `spokenFor(standing)` is published from
+  `parts.ts`; `movementOf` reads it, so `copy-change.ts`'s
+  `spokenForOnBothSides` is the same rule twice rather than two that agree;
+  `library-word-reach-change.ts` imports that instead of spelling it inline,
+  and `library-reach-change.ts`'s two-sided test over parts reads the base one.
+  Three modules enumerated the standing by hand and a fourth was about to,
+  which is the finding this lane filed on reading #640 and #642 merge hours
+  apart. `anchors` in `change.ts` and `progress.ts` is deliberately **not**
+  folded in: it asks the same question for 0221's reasons and a predicate
+  shared because two rules agree is the mistake being fixed.
+
+**Nothing is superseded.** 0235 §2's decision — two shares, because *the words
+somebody read* and *the words a reader reads* are two sentences — is unchanged;
+what moved is the universe the first of them is a share of, which is the move
+0282 made to the second of them on the same clause. **If the enumeration in
+0235 §2 is read as the decision rather than as its description, 0287 is the
+record to refuse**: the reversal is one argument and two fields.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: a share
+whose denominator moved under a field that kept its name, and a page that now
+has no share where it had a nought.
+
+### 34. What a change did to the funnel · `Loom signals` · **done, 16 October**
+
+> §33 was on the branch of #649 through this run, so its number was left for it
+> rather than taken, and that branch has since landed. It takes every share of a
+> page's words over the words the window can speak for; nothing in it and
+> nothing here touches the other's files except `docs/signals.md`,
+> `decisions/README.md` and `FINDINGS.md`, in the places two additions always
+> collide.
+
+§13 reads a revision's funnels against the readers who arrived, and §10 onward
+compares two windows of everything else: where reading stops, how much gets
+read, whether readers had time for it, who the readers were, what readers did
+inside a part, and four readings of a library. **The funnel had no comparison**,
+and it is the one counter here a deployment opens the portal for. *We shipped a
+change — did more readers buy?* was two screens and a subtraction done by eye.
+
+**Done.** `funnelChangeOf(was, now)` in
+[`src/signals/funnel-change.ts`](../src/signals/funnel-change.ts) is the
+**twenty-fourth** thing taken out of what this subsystem already knows rather
+than collected. #649 landed first, and §33 counts itself the twenty-third the
+way §32 counted itself, which settles the one number here that depended on the
+merge order. **Nothing was added to a payload, a browser, a column, a store
+or the vocabulary of kinds**; the broadcaster was not touched and is
+byte-identical at 6,477 bytes minified and 2,935 gzipped, measured both sides
+with `cmp`.
+
+Two things decided the shape
+([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)),
+and the second is a rule this subsystem now has in general:
+
+- **A funnel's two factors are separable, so this comparison gets the
+  counterfactual §18's could not have.** Of the readers who arrived, the share
+  that finished is the share that got to the first end multiplied by the share
+  of *those* who finished — an exact identity, with each factor's numerator and
+  denominator inside one window, which is the test 0251 set for any ratio
+  across two windows. So the later window's reach at the earlier window's
+  closing rate isolates one side and the other diagonal isolates the other, and
+  the reading answers *your change did not sell more; it got more readers to the
+  pricing band and the same share of them bought.* The cause has **three**
+  members where 0244's and 0279's have four, and the missing one is unreachable
+  rather than unwanted: a product's two counterfactuals multiply to the product
+  of its two levels, so one of them always carries the movement. A sum's do not,
+  which is why these two rules are deliberately not one function.
+- **A difference of two floors is not a floor, so the rate movement is a
+  bracket.** 0231 found `rate` the one figure here biased *downward* — a page
+  view that straddles a rollup boundary contributes `reached 1, converted 0` to
+  the first window and nothing to the second, so the conversion is lost — and
+  published `rateAtMost` as its ceiling. Nobody had subtracted two of them. The
+  size of the bias is set by the deployment's own rollup window, so **shortening
+  `windowMs` between two readings makes a funnel read as a collapse with no
+  reader behaving differently**. The true ratio is bracketed by each side's own
+  ceiling, and `rateMoved` says whether that interval clears 1. It is 0282's
+  lesson one reading across and at larger stakes: a figure safe to publish as
+  *at most* on one page is a movement nobody made when two of them are held
+  against each other.
+
+Three more settled in the building. **A silence costs this reading half of
+itself and never a row** — a share of the arrivals needs the door on both sides,
+and a rate is two counts off one row, so a deployment whose page-view rows have
+expired still gets its rates, its movements and its questions. **What a change
+did to the question is its own movement**: a funnel pair is the one thing read
+here that a deployment *wrote*, and `broken` — both ends present before and one
+of them gone now — is a thing to fix in the configuration rather than in the
+page, answered under every silence because it is a fact about two trees. And
+**the pairing rule is published once**, as `funnelPairKey`, because what counts
+as one question is what decides what a duplicate is, which 0158 makes permanent
+if the two places disagree.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+before-and-after card the whole subsystem has been building toward, with the one
+figure on it that must be drawn as an interval rather than a number.
 
 ## Still not in scope
 

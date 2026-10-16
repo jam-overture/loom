@@ -7,7 +7,14 @@ import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signa
 import type { ElementNode, LoomNode, SlotNode, TextNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
-import { pageReadingOf, wordsReadIn, type PartDeclarations, type ReaderTally } from "./index.js"
+import {
+  pageReadingOf,
+  PART_STANDINGS,
+  spokenFor,
+  wordsReadIn,
+  type PartDeclarations,
+  type ReaderTally,
+} from "./index.js"
 
 /**
  * The join is a pure function of three things a server holds, so the fixtures
@@ -447,5 +454,33 @@ describe("counters that do not belong to the tree they were handed with", () => 
     expect(reading.duplicated).toEqual([nodeId("hero")])
     expect(partFor(reading, "hero")?.counters?.dwellMs).toBe(1_000)
     expect(reading.views).toBe(3)
+  })
+})
+
+describe("spokenFor", () => {
+  /**
+   * The predicate every figure over a page's words is restricted by, held to
+   * the closed set rather than to the two names it happens to be true of
+   * today: a fourth standing has to be decided about here, where it is one
+   * line, rather than in the four modules that used to spell it out.
+   */
+  it("can speak for every standing but the one that means nothing can be said", () => {
+    expect(PART_STANDINGS.filter(spokenFor)).toEqual(["read", "skipped"])
+    expect(spokenFor("unknown")).toBe(false)
+  })
+
+  it("reads the standings of a real page, and leaves out the part reporting no reach", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [
+        tally("page", "loom.stack", { views: 4, reached: 4 }),
+        tally("hero", "loom.heading", { views: 4, reached: 0 }),
+      ],
+      NOTHING_DECLARED
+    )
+
+    expect(
+      reading.parts.filter((part) => !spokenFor(part.standing)).map((part) => part.nodeId)
+    ).toEqual([nodeId("hero")])
   })
 })
