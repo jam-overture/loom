@@ -1,0 +1,48 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/how-it-works",
+      "out": "2026-10-16-marketing-three-clauses-three-pages-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "do": [{ "scrollTo": "text=That is the short version" }],
+      "measure": [
+        "a[href=\"/docs/building-with-loom/what-ai-may-change\"]",
+        "a[href=\"/docs/the-runtime/what-every-ask-leaves-behind\"]",
+        "a[href=\"/docs/the-runtime/what-your-app-has-to-do\"]",
+        "a[href=\"/docs\"]"
+      ]
+    },
+    {
+      "path": "/how-it-works",
+      "out": "2026-10-16-marketing-three-clauses-three-pages-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "do": [{ "scrollTo": "text=That is the short version" }],
+      "measure": [
+        "a[href=\"/docs/building-with-loom/what-ai-may-change\"]",
+        "a[href=\"/docs/the-runtime/what-your-app-has-to-do\"]"
+      ]
+    },
+    {
+      "path": "/how-it-works?theme=bold",
+      "out": "2026-10-16-marketing-three-clauses-three-pages-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "do": [{ "scrollTo": "text=That is the short version" }]
+    },
+    {
+      "path": "/",
+      "out": "2026-10-16-marketing-the-install-guide-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "do": [{ "scrollTo": "text=Put it in a project you already have" }],
+      "measure": [
+        "a[href=\"/docs/getting-started/installation\"]",
+        "a[href=\"/docs\"]"
+      ]
+    }
+  ]
+}

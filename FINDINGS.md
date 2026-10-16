@@ -8,6 +8,107 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-16 — the button offering the install guide landed on the introduction, and the four links into the documentation were held to nothing
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (the `/docs`
+half is **closed**), with a row for `Loom docs` and an open `/demo` half ·
+**Status:** **the `/docs` half is closed by
+`marketing-06-the-install-guide-the-button-missed`.** The `/demo` half of the
+4 October finding is still open and is a different shape, described at the foot
+of this entry.
+
+Closes the `/docs` half of **4 October — *a claim about another surface can be
+held to the link beside it and never to what is on the page***, which named two
+uncovered claims and asked for a shape rather than a fix.
+
+### The reader-visible half, which nothing was ever going to catch
+
+The front door's install band prints `pnpm add @jam-overture/loom …` and then
+offers **Follow the install guide**. That control pointed at `/docs`.
+
+`(docs)/docs/page.tsx` is not a landing page — by that lane's own decision,
+*"a second front door written in MDX would be a second place to keep the same
+sentences true"* — so it redirects to the first page of the documentation in
+reading order. That is **Introduction**, and *Installation* is the third page
+after it. A reader who had just been shown a command and pressed the button
+promising the longer version of it arrived on a page about what Loom is, and
+had to find their way.
+
+Nothing about it was red and nothing was broken. The link worked, the page it
+opened is a good page, and it was not the page the button named. The same was
+true of `/how-it-works`'s closing paragraph, which has named three specific
+pages' worth of documentation since 26 September — *"what a rule can say, what
+the record holds field by field, and how to wire it into a page you already
+have"* — under one button to the front of all of it.
+
+**Four controls on this site pointed into the documentation and every one of
+them pointed at the same door.**
+
+### Why there was nothing to catch it, which is the 4 October finding
+
+That entry stopped at the route group boundary and said so:
+
+> *"A link to `/docs#something` is checked for nothing… Both are true today and
+> both were checked by a person. Nothing would say so if either stopped being."*
+
+It also recorded what would close it: *"a surface publishing the list of things
+it promises to carry — a few strings, exported from its own route group — for
+anybody pointing at it to assert against."*
+
+**That is still the better shape and it is still `Loom docs`' to build.** What
+shipped instead is the shape the 15 October run settled on for the portal's
+under-construction banner: **read the other lane's page off the repository.** A
+documentation page is an MDX file with its own heading at the top of it, so both
+things this site has been promising about those pages — that they exist, and
+that a particular thing is on them — are in that file. Nothing in
+`(marketing)` imports `(docs)`, renders it, or asserts over its chrome.
+
+`_lib/docs-pages.ts` is the list, `_lib/docs-pages.test.ts` holds four rules
+over it, and the third is the one with teeth: **no link on this site goes into
+the documentation at an address that is not on the list.** Without it the other
+three check a list rather than the site, and the next run to type a path into a
+band gets no check at all.
+
+### The row for `Loom docs`
+
+**Nothing is owed, and two things are worth knowing.**
+
+- **Four of your pages are now quoted by name on the marketing site**, and a
+  phrase out of each is asserted against your source: the `pnpm add` command in
+  *Installation*, *"a small object called a policy"* and *"the second list you
+  write"* in *What AI may change*, *"what it remembers"* in *What every ask
+  leaves behind*, and *"one function that changes a page"* in *What your app has
+  to do*. If you rewrite one of those sentences this file goes red in your run,
+  and **it is this lane's to fix, not yours** — the honest answers are to point
+  the link somewhere else or to reword the promise, and both of those are in
+  `(marketing)`. The failure says so in as many words.
+- **The headings are held too**, so a page renamed is also red here. Same
+  remedy and same owner.
+- If you would rather publish the list the 4 October entry asked for, this file
+  is four constants and a sweep, and it should be deleted the day you do.
+
+### What is still open, and it is the `/demo` half
+
+The 4 October finding named two uncovered claims. The second is on
+`/what-you-run`: *"To ask for something in your own words, try the demo. It is a
+page you can type into."*
+
+**It is not in this unit, and that is deliberate.** It is not a claim
+about a named page, it is a claim about a *behaviour* — that there is somewhere
+on `/demo` to type. The shape above cannot carry it: a phrase quoted out of
+another lane's prose is a claim about words, and *you can type into this* is a
+claim about a control. Checking it would mean this lane asserting that `(demo)`
+renders a text input, which is nearer to testing another lane's work than
+quoting its page is.
+
+So it is left open with the question stated rather than answered: **is a claim
+about another surface's behaviour one this lane may hold at all, or is it the
+first thing that genuinely needs the publishing shape the 4 October entry
+asked for?** My recommendation is the second, and it is the argument for
+`Loom docs` and `Loom demo` each exporting a short list of what their surface
+promises — at which point the file this run added becomes four constants to
+delete.
+---
 ## 2026-10-15 — the audience dimension is in the schema and its type is not reachable from any published entry point
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:**
@@ -47179,8 +47280,23 @@ on all three palettes, and it is photographed in the 4 October report.
 ## 2026-10-04 — a claim about another surface can be held to the link beside it and never to what is on the page
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
-line from `Loom docs` · **Status:** open — a stated limit of what shipped on
-4 October, not a defect today
+line from `Loom docs` · **Status:** **the `/docs` half is closed** by
+`marketing-06-the-install-guide-the-button-missed` on 16 October, which also
+found that the claim it names was costing a reader a click; the **`/demo` half
+is still open** and is a different shape. The 16 October entry at the top of
+this file has both halves.
+
+> **Closed for `/docs`, 16 October.** `_lib/docs-pages.ts` is the list of
+> documentation pages this site names and `docs-pages.test.ts` holds each one
+> to being served, to its own heading, and to a phrase out of its own source —
+> read off the repository rather than imported, which is the route the
+> 15 October run took for the portal's banner. The publishing shape this entry
+> asked for is still the better one and is still `Loom docs`' to build.
+>
+> The uncovered claim about the documentation named below was not merely
+> unchecked, it was **misdirected**: `/docs` is a redirect to the first page in
+> reading order, so *Follow the install guide* on the front door landed on
+> *Introduction* three pages above the command the band had just printed.
 
 `naming.ts` holds three rules over what this site says about its own pages, and
 the third one stops at the route group boundary. A link from `/what-you-run` to
