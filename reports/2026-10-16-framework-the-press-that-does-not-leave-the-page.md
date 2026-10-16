@@ -145,6 +145,18 @@ The body was re-posted with every link under 144 and came back verbatim, which
 is the first time the remedy has been tested on a whole body rather than on one
 link.
 
+**Filed:** *the composed preview URL, fifth instance, and the remedy is now free
+in a way it was not when it was written*, for the maintainer. This run composed
+the pull request's preview URL from the branch name, which is the 2 October trap
+on the 27 September entry: Vercel truncates the branch segment and appends a
+hash of the rest, so the guess carried no hash and would have 404'd for the one
+person who can click it. Corrected from the `vercel[bot]` comment. What is new
+is the cost of the remedy — that comment is an event a subscribed session is
+woken by anyway, so the correction was one call inside a turn already open,
+which makes taking the URL from the bot **cheaper** than composing it. The
+missing line is in `docs/routines.md`, which requires the preview URL and does
+not say where it comes from, and which a routine cannot write for itself.
+
 ## The cross-lane edit, and why
 
 `lessons/32-layout.md`, three lines of one fence. Exercise G prints every
@@ -183,7 +195,7 @@ its own line.
 | `tools/specimen` within it | **212 passed** (was 192) |
 | `tools/specimen/pin.test.ts` | **15 passed**, new |
 | `apps/loom` suite | **5,879 passed**, 0 failed, 333 files |
-| findings sweep | 1,219 findings, 0 malformed |
+| findings sweep | 1,220 findings, 0 malformed |
 | reports sweep | 1,857 visuals, none over 1.1MB |
 
 Two reds on the way, both in `apps/loom` and both the lesson fence below rather
@@ -219,3 +231,7 @@ already a devDependency and only its types were missing.
 3. **Two pictures in this repository are of a reader scrolling where their lane
    wanted a reader pressing.** Both are retakeable now and neither is this
    lane's.
+4. **Where does a preview URL come from?** `docs/routines.md` requires one and
+   does not say. Five runs have now composed one from a branch name and been
+   wrong, and the bot's comment is free to read. One clause would end it, and it
+   is governance rather than code.

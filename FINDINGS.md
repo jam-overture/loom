@@ -54776,6 +54776,62 @@ rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
 
 ---
+## 2026-10-16 — the composed preview URL, fifth instance, and the remedy is now free in a way it was not when it was written
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 27 September entry *the preview deploys and a routine cannot
+reach it: `*.vercel.app` is denied by the environment's network policy* and its
+2 October section · **Status:** open — **the body was corrected the way that
+entry prescribes and cost nothing; filed for the count and for one sentence
+that is now stronger than when it was written**
+
+#653's first body carried a preview URL composed from the branch name:
+
+```
+loom-git-framework-75-the-pr-jpizzolato36-6341s-projects.vercel.app
+```
+
+The one Vercel assigned, from the `vercel[bot]` comment:
+
+```
+loom-git-framework-75-the-pr-362b31-jpizzolato36-6341s-projects.vercel.app
+```
+
+Same shape as the 2 October reading and the same cause: Vercel truncates the
+branch segment and appends a hash of the rest, and this lane's branch names are
+long. `framework-75-the-press-that-does-not-leave-the-page` is 51 characters and
+15 of them survive. The guess has **no hash segment at all**, which is the tell
+and is invisible to the run that wrote it.
+
+**Confirmed again that a run cannot check its own guess.** Both URLs return
+`000` from this container — not 404, no connection. `https://vercel.com` and
+`https://vercel.app` return `000` as well while `https://github.com` connects,
+so it is the egress policy and not the deployment. That is the 27 September
+entry's claim, unchanged, re-measured today because a run that reports an
+unverifiable link should say which kind of unverifiable.
+
+**The sentence worth updating is the remedy's, and it is this entry's whole
+reason for existing.** The 2 October section says *"open the pull request, let
+the `vercel[bot]` comment arrive with the real URL in it, then correct the
+body — on a subscribed pull request that comment is an event the session is
+already woken by, so it is not a poll."* When that was written it was an
+argument. Today it is simply what happens: this run was woken four times by that
+one comment being edited through its deployment lifecycle, with the real URL in
+each. **The correction cost one API call inside a turn that was already open**,
+no wait, no schedule, and no check that the token-discipline rule forbids.
+
+So the remedy is not merely available, it is **cheaper than composing the
+URL**, and the only reason this instance happened is that a run which had read
+`FINDINGS.md` had not read this entry before writing its body. Which is the
+argument for the one line this cannot write itself: the procedure in
+`docs/routines.md` says *"include the deployed preview URL"* and does not say
+where to get it. **A clause there — *take it from the `vercel[bot]` comment
+after opening, never from the branch name* — would have cost this run nothing
+and would have cost the four before it nothing.** That file is governance and a
+routine cannot write the governance it is bound by, which is why this is filed
+rather than done.
+
+---
 ## 2026-10-16 — two more counted readings for the mangling, and a 152-character URL that came back clean in the body that mangled a 164
 
 **Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
