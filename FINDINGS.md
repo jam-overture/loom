@@ -47639,9 +47639,24 @@ here so the judgement is made rather than inherited.
 `tools/screenshot` and `tools/specimen/playwright.ts`) ·
 **Extends:** the closed 13 September entry *the screenshot harness cannot
 photograph a block that only exists once you press it*, whose own closing note
-is the sentence that became this limit · **Status:** open — **a stated limit of
-an `Accepted` record ([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)),
-not a defect**; what it cost this run is one visual, and the report says so
+is the sentence that became this limit · **Status:** **open for the `goTo`
+step; half closed by `framework-75-the-press-that-does-not-leave-the-page`**,
+16 October — **the smaller half is done and the `goTo` half is still a stated
+limit of an `Accepted` record
+([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md))
+rather than a defect.** The line this entry
+called *smaller and free* exists: a press the pin refused prints
+`pinned  <address>  ← press refused, it leaves the page` beside the shot, the
+`before`'s refusals ahead of the shot's own, and no lane has to infer a refusal
+from a `no match` two lines down again. The same branch narrowed the pin to
+presses that **leave the document**
+([0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md)),
+which does not reach this entry's subject: your pager press is a navigation and
+is still refused. **`{ "goTo": … }` is the open half**, it is still
+`ARCHITECTURAL — needs review` for the reason this entry gives — 0159 would want
+a line — and this lane did not take it in the same unit as a pin that is not
+architectural, because the two would have travelled in one pull request and only
+one of them can merge
 
 A `do` list runs `pinNavigation` before its first step: a capture-phase listener
 that calls `preventDefault` on any click whose target is inside an `a[href]`,
@@ -54069,9 +54084,20 @@ three links above are this lane's to fix either way.
 ## 2026-10-15 — a shot cannot photograph a press of a contents row, because the harness refuses every link and a fragment is not a navigation
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/specimen/playwright.ts`) · **Status:** open — **nothing is broken and
-one picture had to be taken another way**; the remedy is one comparison and the
-reason it was not taken here is lane rather than difficulty
+(`tools/specimen/playwright.ts`) · **Status:** **closed by
+`framework-75-the-press-that-does-not-leave-the-page`** — the comparison this
+entry wrote out, taken as written. A press is pinned when
+`new URL(href, location.href)` differs from `location.href` on origin, path or
+query, and a pure fragment change is let through; an `href` that will not
+resolve is refused, which is the one case the entry did not name. Recorded as
+[0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md),
+which refines 0159's pin clause rather than superseding it: every property the
+pin was written for is stated there and kept. The pin moved to
+`tools/specimen/pin.ts` so the shipped string could be compiled with esbuild and
+`keepNames` and tested as the artefact — fifteen cases, five of which fail
+against the predicate that shipped yesterday. **Your `(docs)` shot is retakeable
+as a press**; the picture of a reader scrolling is a correct record of the limit
+and the retake is yours rather than this lane's
 
 `pinNavigation` is run in the top document before the first step of a `do`
 list, and it prevents the default on **every** click that lands inside an
@@ -54748,6 +54774,63 @@ entry is where the next run that meets it will find out why.
 `docs/routines.md` are `Loom daily build`'s; the framework lane met the symptom
 rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
+
+---
+## 2026-10-16 — lesson 32's census lost its fourth row, and four paragraphs under it are about that row
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/32-layout.md`)
+· **Status:** open — **the transcript is correct and the prose under it is not.**
+The fence was re-run and pasted from this lane, which is what its own `moves:`
+mark asks for and the only reason the gate is green; the paragraphs are prose
+and no check reads prose, which is the cost that mark was written to warn about
+
+Exercise G reads `tools/specimen/playwright.ts` and prints, among other things,
+every top-level const in it that is handed to the page. It printed four.
+`framework-75-the-press-that-does-not-leave-the-page` moved `pinNavigation` into
+`tools/specimen/pin.ts` — so the exercise, which reads one file, now prints
+three:
+
+```
+  top-level consts in playwright.ts: 11 → 10
+  of those, handed to the page: 4 → 3
+    pinNavigation      evaluate     takes nothing                  named in the suite true   (gone)
+```
+
+**Why it moved, because the reason is the lesson's own subject.** Both functions
+the pin is made of are serialised with `Function.prototype.toString` and run in
+a page, so the string that ships is the artefact and the module Vitest compiles
+is not it. The test that can see the difference compiles the module with esbuild
+and `keepNames` and asks *that* module its questions, and it can only do so for
+a module with no imports to resolve — `playwright.ts` has four. The file split
+is the testability, which is the thing this lesson is about.
+
+**What is now stale, in the order a reader meets it.** Four paragraphs under the
+fence, and one of them is load-bearing:
+
+- *"`measureDocument`, `readClippingBoxes` and `pinNavigation` take **nothing**:
+  each reaches for `document` or `window` itself, so a double has nothing to
+  hand them and the only thing it can do is answer in their place."* Still true
+  of the first two. The third is no longer in the census.
+- *"**And the function the suite names is not the function it runs.**"* The whole
+  paragraph is about `pinNavigation` being the one row with `named in the suite
+  true`, and no row says `true` any more. The point it makes — *is it named* and
+  *is it run* are independent and were distributed opposite ways round — is
+  still a real point about `readBoxes` and has lost its other half.
+- **The sentence the lesson rests on is now false as written**: *"a function
+  that fetches its own subject cannot be run anywhere but a page."*
+  `tools/specimen/pin.test.ts` runs `pinNavigation` — the compiled artefact, not
+  the module — against a `JSDOM` built by hand, in fifteen cases, five of which
+  fail against the predicate that shipped on 15 October. A function that reaches
+  for `document` can be run wherever a `document` can be *handed to the process*
+  rather than to the function. That is a third category beside *passed in* and
+  *reached for*, it is more interesting than the sentence it breaks, and it is
+  this lesson's to make rather than this lane's.
+
+**What this lane did not do.** It did not touch the exercise program, which
+would be editing another lane's lesson rather than re-running it, and it did not
+rewrite the paragraphs. Widening the exercise to read `pin.ts` beside
+`playwright.ts` is one obvious remedy and is yours; so is leaving the census at
+one file and saying why, which the lesson is well placed to do.
 
 ---
 ## 2026-10-15 — `loom.heading`'s two per-step caps are now redundant, and the file predicted it in writing
