@@ -55508,4 +55508,37 @@ every reading ever taken. Naming a record and linking a short path costs a
 reader one click and costs a routine nothing, and it is available today without
 knowing what the rewriter matches on.
 
+### A sixth reading, taken on this entry's own pull request, and it is not about length at all
+
+The body of #664 — the pull request carrying this entry — was written to avoid
+long link targets, and something in it was rewritten anyway. The two readings
+below are from **one body**, in **one syntax**, and they differ in one
+character class:
+
+| sent | characters | came back |
+| --- | --- | --- |
+| an inline-code span holding an HTML image tag with a quoted `src` attribute | 13 | **rewritten**: HTML-escaped to entity text, wrapped in single quotes, and the span's own backticks doubled |
+| an inline-code span holding a relative path with angle-bracketed placeholder | 38 | clean |
+
+**So length is not the variable, and the hypothesis at the head of this entry
+is wrong.** A 13-character span was rewritten while a 38-character one four
+paragraphs below it was not. Both are inline-code spans, both contain angle
+brackets, and the only difference between them is that the rewritten one
+contains **double quotes**.
+
+The signature is the same one all five earlier readings record — backticks
+doubled around the content — with two parts nobody had seen before: the content
+was **HTML-escaped into entity text**, which a reader sees as `&lt;` rather
+than as a bracket, and it was **wrapped in single quotes** that nothing sent.
+That is not an escaping bug at the edges of a long URL; it reads like content
+being parsed and re-serialised by something that quotes and escapes on the way
+out.
+
+**What that means for the remedy.** Naming a record rather than linking it is
+still worth doing and still cheap, but it is no longer sufficient, because the
+thing being rewritten here is not a link. The narrowest safe rule this reading
+supports is: **do not put double quotes inside an inline-code span in a pull
+request body.** A routine that needs to show an attribute can name it in prose
+instead, which is what #664's corrected body does.
+
 ---
