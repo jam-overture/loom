@@ -6,14 +6,20 @@
 
 **Section:** §4c (reader signals)
 
-> **The number may move.** `main` carries 0289 (*a project is closed rather
-> than deleted*, #658) and #659 holds a second 0289 awaiting its merge, so this
-> took the next number free on `main` at the time of writing. Two records
-> sharing a number is fatal
+> **The number held.** This took the next number free on `main` while #659 was
+> holding a second 0289; #659 then merged as **0291**, leaving 0290 to this
+> record, so nothing here was renumbered. Two records sharing a number is fatal
 > ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)) and
-> the numbering is claimed at merge, so a renumbering here changes nothing but
-> the number — as it did twice in one day for
+> the numbering is claimed at merge, which is why a record written on a branch
+> that takes a day to land is a record whose number is a guess — it moved twice
+> in one day for
 > [0284](0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md).
+
+> **Clause 7 was added after #659 merged into this branch**, which brought a
+> reading written against the behaviour this record changes. It is the same
+> decision applied to one more file rather than a second decision, and it is
+> here rather than in a follow-up because the merge made that file part of this
+> diff.
 
 ## Context
 
@@ -118,6 +124,20 @@ revision and an audience, and that rule is published once.**
    never sees (0284), so grouping on it is grouping rows by a column the host
    wrote and rule 1 of [`docs/signals.md`](../docs/signals.md) is untouched.
 
+7. **A comparison is of one form, and what makes two of them one is a second
+   rule rather than a sixth spelling of the first.** `formKeyOf` in
+   `deployment-change.ts` is *a page in one of its forms* — the tree and the
+   audience, **with no revision in it** — and `pairKeyOf` is that plus the two
+   revisions compared. The two rules are deliberately separate:
+   `readingKeyOf` answers *what is one reading*, where the revision is part of
+   the identity, and `formKeyOf` answers *what is one page in one form*, where
+   the revision is the thing being compared across. Collapsing them would have
+   meant keying an ambiguity gate on a revision the gate exists to range over.
+   The order over a deployment's changed pages therefore groups its ambiguity
+   by form: two forms compared over *different* revision pairs are two
+   independent readings, not one page nobody can read, and `MovedPage` carries
+   the audience as `RankedPage` and `PageHealth` do.
+
 ## Consequences
 
 - **A deployment may now serve two forms of a page and be measured.** Each form
@@ -150,6 +170,19 @@ revision and an audience, and that rule is published once.**
   a wrong one.** That is a behaviour change, and it is safe to make now because
   no screen reads the dimension yet (0284) and because the alternative is the
   number that looks right forever.
+- **The order over a deployment's changed pages (0291) was wrong in two shapes
+  and is fixed here.** Its comparison key was the page and two revisions, so the
+  second form's comparison was dropped as a repeat; and its ambiguity gate
+  grouped by tree, so two forms compared over different revision pairs made the
+  page ambiguous and **both** were lost. It also discarded the audience when it
+  rebuilt the door's asking, so a movement could be scaled by the other form's
+  arrival count. 0291 is **not superseded** — nothing it decided was wrong, and
+  it was written against a reading that did not yet carry an audience.
+- **The lesson for whoever lands the next dimension.** This record's own gap
+  was a reading written on a branch that predated the rule, merged after it. A
+  published key stops two places disagreeing only once both places import it,
+  and a branch open across the landing of the other is exactly where that fails
+  quietly.
 
 ## Alternatives considered
 

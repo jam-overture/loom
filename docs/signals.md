@@ -2245,11 +2245,13 @@ three figures on a row that a card must not add.
 
 ### 36. A reading is of one audience · `Loom signals` · **done, 17 October**
 
-> §35 was on the branch of #659 through this run — the two orders a change makes
-> over a deployment's pages — so its number was left for it rather than taken.
-> It touches `deployment-change.ts`, `silences.ts` and `index.ts`; this touches
-> `index.ts` too, and otherwise nothing of its. The three files that always
-> collide are the three that always do.
+> §35 was on the branch of #659 when this was built — the two orders a change
+> makes over a deployment's pages — so its number was left for it rather than
+> taken. **It then merged while this branch was open, as 0291 rather than the
+> 0289 it was written as**, and `main` was merged in here. That brought
+> `deployment-change.ts` into this diff, written against the reading this
+> section changes, and it is brought into line below: the merge is part of this
+> unit rather than a thing left for the next run.
 
 [0263](../decisions/0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md)
 made a page one base tree plus the deltas an audience earns, composed per
@@ -2322,6 +2324,26 @@ audience comparison varies the readership **by construction** and holds the tree
 still, so the confounder §20 detects is permanently true and the movement
 carries two causes nothing in the counters separates. It is a record of its own
 when it is built.
+
+**§35 was brought into line in the same unit, because the merge made it part of
+this one.** `deployment-change.ts` landed on `main` from #659 while this branch
+was open, written against the readings as they were, and it had the defect this
+section exists to remove in two shapes. Its comparison key was the page and two
+revisions, so the second form's comparison was the first one handed in twice;
+and its ambiguity gate grouped by **tree**, so two forms compared over
+*different* revision pairs made the page `ambiguous` and **both** forms were
+dropped from both orders. It also rebuilt the door's asking from tree and
+revision alone, discarding the audience the progress reading now carries, so a
+movement could be scaled by the other form's arrivals.
+
+What it needed was one more rule beside `readingKeyOf` rather than a sixth
+spelling of it: **`formKeyOf` — a page in one of its forms, with no revision in
+it**, because a comparison spans two revisions and the ambiguity being gated is
+about one form holding two of those pairs. The two rules are deliberately not
+one: `readingKeyOf` answers *what is one reading*, where a revision is part of
+the identity, and `formKeyOf` answers *what is one page in one form*, where the
+revision is the thing compared across. `MovedPage` now carries the audience, as
+`RankedPage` and `PageHealth` do.
 
 **What it leaves for the portal**, which is `Loom portal`'s and filed: a
 dimension on every screen that reads these counters, the two rows that are one

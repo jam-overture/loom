@@ -1,7 +1,9 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
 import type { ChangeSilence, ComparedStop, ReadingChange } from "./change.js"
+import { readingKeyOf } from "./audiences.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 
 /**
@@ -232,6 +234,17 @@ export type MovedPage = {
   readonly treeId: TreeId
   /** The two revisions compared, which may be the same one read in two windows. */
   readonly revisions: { readonly was: number; readonly now: number }
+  /**
+   * The audience the later window was collected under, or `null` where the
+   * reading named none.
+   *
+   * Taken from the later side for the reason only the later window's rows are
+   * asked for: the figure being scaled is that window's own. Two forms of one
+   * page are two rows here, as they are in every other order this subsystem
+   * publishes (0290), and nothing is summed across them — a reader of one form
+   * is not a reader of the other.
+   */
+  readonly audienceId: AudienceId | null
   readonly standing: MovementStanding
   /**
    * Each window's view floor, carried through from its own reading unchanged.
@@ -338,14 +351,19 @@ export type DeploymentChange = {
    */
   readonly duplicatedRows: number
   /**
-   * Pages handed in with two different comparisons, of which **neither** was
-   * read.
+   * Pages one of whose **forms** was handed in with two different comparisons,
+   * of which neither was read.
    *
    * A tree live at two revisions is two live versions of one page, and both
-   * belong in an order over one window; a comparison pairs by page, so such a
-   * tree has two movements and no single one that is the page's. Picking either
+   * belong in an order over one window; a comparison pairs by form, so such a
+   * form has two movements and no single one that is its own. Picking either
    * would publish a number nobody could account for, so the page is named here
-   * and is in no order, in no standing and in no total.
+   * and that form is in no order, in no standing and in no total.
+   *
+   * **Two forms of one page are not this** (0290). A deployment serving two
+   * audiences hands in one comparison per form, which is two movements that
+   * are each somebody's; both are read and both stand. Before the audience was
+   * part of the pairing, that deployment's page landed here and lost both.
    */
   readonly ambiguous: readonly TreeId[]
 }
@@ -357,9 +375,33 @@ const EMPTY_STANDINGS: Readonly<Record<MovementStanding, number>> = Object.freez
   >
 )
 
-/** The two revisions a comparison compared, which is what makes two reads of it the same read. */
+/**
+ * A page in one of its forms: the tree and the audience, with no revision in
+ * it.
+ *
+ * Deliberately **not** `readingKeyOf`, and the difference is the point. That
+ * rule answers *what is one reading*, and a revision is part of what one
+ * reading is (0290). This answers *what is one page in one form*, which a
+ * comparison spans two revisions of — so the revision is absent here because
+ * it is the thing being compared across.
+ *
+ * The audience is the later window's, for the reason only the later window's
+ * rows are asked for.
+ */
+const formKeyOf = (change: ReadingChange): string =>
+  `${change.treeId}\u0000${change.progress.now.audienceId ?? ""}`
+
+/**
+ * What makes two reads of a comparison the same read: the form, and the two
+ * revisions it compared.
+ *
+ * The form carries the audience, for the reason `readingKeyOf` does (0290): a
+ * page is one base tree and the deltas an audience earns, so two forms of it
+ * are compared over the same two revisions, and a key without the audience
+ * makes the second form's comparison the first one handed in twice.
+ */
 const pairKeyOf = (change: ReadingChange): string =>
-  `${change.treeId}\u0000${change.revisions.was}\u0000${change.revisions.now}`
+  `${formKeyOf(change)}\u0000${change.revisions.was}\u0000${change.revisions.now}`
 
 /**
  * One direction's movement, scaled where the page has a scale.
@@ -391,6 +433,7 @@ const rowOf = (change: ReadingChange, door: RevisionPageViews | null): MovedPage
   const where = {
     treeId: change.treeId,
     revisions: change.revisions,
+    audienceId: change.progress.now.audienceId,
     views: { was: change.progress.was.views, now: change.progress.now.views },
     opened: door?.opened ?? null,
     inflation: door?.inflation ?? null,
@@ -441,7 +484,9 @@ const rowOf = (change: ReadingChange, door: RevisionPageViews | null): MovedPage
 
 /** Tree id, then newest later revision first, which is the order a page's rows are read in. */
 const byPage = (one: MovedPage, other: MovedPage): number =>
-  one.treeId.localeCompare(other.treeId) || other.revisions.now - one.revisions.now
+  one.treeId.localeCompare(other.treeId) ||
+  other.revisions.now - one.revisions.now ||
+  (one.audienceId ?? "").localeCompare(other.audienceId ?? "")
 
 /**
  * The sharper of two movements in one direction, which is the ranking rule
@@ -476,21 +521,38 @@ export const deploymentChangeOf = (
   changes: readonly ReadingChange[],
   rows: readonly StoredPageViews[]
 ): DeploymentChange => {
-  const pairsByTree = new Map<TreeId, Set<string>>()
+  /**
+   * Grouped by **form** rather than by page. Two forms of one page are two live
+   * things with two movements of their own (0290), so a tree handed in with one
+   * comparison per form is not the ambiguity this gate exists for — it is a
+   * deployment serving two audiences. What is still ambiguous is one *form*
+   * handed in with two different revision pairs, which is the state the
+   * one-window order deliberately keeps as two rows and which a comparison
+   * cannot reduce to one.
+   */
+  const pairsByForm = new Map<string, Set<string>>()
 
   for (const change of changes) {
-    const pairs = pairsByTree.get(change.treeId) ?? new Set<string>()
+    const pairs = pairsByForm.get(formKeyOf(change)) ?? new Set<string>()
 
     pairs.add(pairKeyOf(change))
-    pairsByTree.set(change.treeId, pairs)
+    pairsByForm.set(formKeyOf(change), pairs)
   }
 
-  const ambiguous = [...pairsByTree]
-    .filter(([, pairs]) => pairs.size > 1)
-    .map(([treeId]) => treeId)
-    .sort((one, other) => one.localeCompare(other))
+  const unsettled = (change: ReadingChange): boolean =>
+    (pairsByForm.get(formKeyOf(change))?.size ?? 0) > 1
 
-  const unreadable = new Set<TreeId>(ambiguous)
+  /**
+   * Named by tree, because a page is what a surface draws and the tree id is
+   * what it has. A deployment whose two forms are *each* ambiguous names the
+   * tree once, and a tree one of whose forms is sound still names it — that
+   * form is read, and the name says a reading of this page is incomplete.
+   */
+  const ambiguous = [...new Set(changes.filter(unsettled).map((change) => change.treeId))].sort(
+    (one, other) => one.localeCompare(other)
+  )
+
+  const unreadable = new Set<string>(changes.filter(unsettled).map(formKeyOf))
   const seen = new Set<string>()
   const counted = new Set<string>()
   const read: MovedPage[] = []
@@ -499,7 +561,7 @@ export const deploymentChangeOf = (
   let arrivals = 0
 
   for (const change of changes) {
-    if (unreadable.has(change.treeId)) continue
+    if (unreadable.has(formKeyOf(change))) continue
 
     const key = pairKeyOf(change)
 
@@ -510,9 +572,18 @@ export const deploymentChangeOf = (
 
     seen.add(key)
 
-    const later = { treeId: change.progress.now.treeId, revision: change.revisions.now }
+    /**
+     * The audience travels with the asking, so the door row picked is this
+     * form's own (0290). Dropping it here would divide one form's movement by
+     * a row that may be the other form's, chosen by the caller's array order.
+     */
+    const later = {
+      treeId: change.progress.now.treeId,
+      revision: change.revisions.now,
+      audienceId: change.progress.now.audienceId,
+    }
     const door = pageViewsFor(later, rows)
-    const doorKey = `${later.treeId}\u0000${later.revision}`
+    const doorKey = readingKeyOf(later)
 
     duplicatedRows += door.duplicated
 
