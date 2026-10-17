@@ -55892,3 +55892,95 @@ evidence of a sender that is not one, and a card that ranks it by share puts a
 fault at the top of a list of pages to fix.
 
 ---
+
+## 2026-10-17 — the records index crossed its budget under the full suite between 270 and 272 records, and the gate is now red on a branch that changes one markdown file
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Extends** the two
+15 October entries, *the records index render test has about eighty records of
+headroom left* and *`pnpm verify` was green on `main` this evening* ·
+**Status:** open — **the full-suite crossing happened today between 270 and 272
+records, measured on one machine in one session**, and the shared gate is now
+red on a branch whose entire diff is one markdown file
+
+### What was measured, and it is the only part that matters
+
+Seven readings — three of the whole gate and four of the test alone — all on
+one machine in one session this afternoon.
+
+**Under the full suite, which is how the gate runs it:**
+
+| tree | records | the gate |
+| --- | --- | --- |
+| `marketing-07` before merging `main` | **270** | **passed** |
+| `marketing-07` after merging `main` | **272** | **timed out** at 5,691 ms |
+| `marketing-08`, whose whole diff is one markdown file | **272** | **timed out** |
+
+**That is the crossing, on one machine, in one session.** The gate passed at 270
+records and has failed on every full-suite run since the index reached 272. The
+two records between those runs are **0290** and **0291**, which arrived on
+`main` this afternoon.
+
+The third row is the one to read twice. `marketing-08` adds **79 lines to
+`FINDINGS.md` and a report**. No code, no test, no record, nothing a jsdom render
+of the decisions index could see. The shared gate is red on it.
+
+**Run alone, the same test on the same 272 records:**
+
+| tree | the test |
+| --- | --- |
+| `origin/main` at `d8a3bcc` | 4,894 ms — passed |
+| `marketing-07` at `84f7dda` | **5,550 ms — timed out** |
+| `marketing-08` | 4,206 ms — passed |
+| `marketing-08` | 4,866 ms — passed |
+
+Four solo readings of identical work on one machine: **4,206, 4,866, 4,894 and
+5,550 ms**, against a 5,000 ms budget. A spread of 1,344 ms, which is 27% of the
+budget, straddling it.
+
+### The correction to the entry this extends
+
+That entry put the headroom at *"under forty records"* at ~15 ms a record, and
+called it *"a fortnight of this repository's rate."* It is a fortnight later in
+records — 262 then, 272 now — and the prediction has come true to the record.
+
+**Do not read a per-record cost out of these numbers.** The 15 October figures
+were taken on another machine on another day, and this entry's own solo spread
+on one machine — 1,344 ms across four runs of identical work — is larger than
+ten records' worth at any rate either entry proposes. That arithmetic is not
+worth defending and nothing here rests on it.
+
+**What does not need a rate.** The gate passed at 270 records and has failed at
+272 on both runs since, on one machine in one session. Run alone, the
+headroom in the best of four readings is 794 ms and in the worst it is negative.
+There is no longer a number of records to plan against.
+
+### What it cost today, which is the shape the entry predicted
+
+This lane met it on a branch whose pull request had **already merged**, and
+spent a full diagnosis cycle on it: reproducing on the base, comparing record
+counts, diffing the two trees, and running the file on both branches to
+establish that an identical workload passes on one and times out on the other.
+
+The entry predicted exactly this — *"what an intermittent budget looks like from
+a lane trying to tell its own red from the tree's"* — and added *"it is the gate
+four surfaces share, so it does not block one routine, it blocks all of them."*
+Both are now observed rather than forecast. The second 15 October entry's advice
+is the one that saved this run from reverting something: **a red
+`architecture.test.tsx` should be re-run, and checked against the base, before
+anybody treats it as their own.**
+
+### What this lane did not do
+
+**Nothing.** `architecture.test.tsx` is `Loom docs`' file and this lane does not
+edit another route group, so the three obvious moves — raising the timeout,
+splitting the render, or asserting over a sample rather than every row — are all
+yours. No fix is in flight: neither open pull request (#647, #665) touches the
+file, so there was nothing to port into a branch either.
+
+The one thing worth saying about the remedy from outside the lane: **raising the
+timeout buys time and does not stop the clock**, and the sibling test *says once
+that the whole table leaves, and marks every row* was measured at 4,291 ms in
+today's full-suite run, so it is close behind rather than a year behind.
+
+---
