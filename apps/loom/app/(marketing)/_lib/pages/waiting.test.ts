@@ -89,9 +89,21 @@ describe("the panel before the visitor has asked for anything", () => {
   /**
    * The accent is a claim, and 26 August settled which one: a band wears it if
    * and only if it hands the visitor something to do. A waiting panel hands them
-   * nothing, so its badge is the outline — which also keeps it from reading as a
-   * verdict beside the four accented ones the same badge wears once there is a
-   * record.
+   * nothing, so its badge does not wear it.
+   *
+   * **It stopped naming the treatment on 17 October**, and the reason is the
+   * second half of what this used to say — *which also keeps it from reading as
+   * a verdict beside the ones the same badge wears once there is a record.* That
+   * is the property worth holding, and pinning one spelling here was not holding
+   * it: `outline` was also what the panel wore for *Waiting for you* and for
+   * *Refused*, so this assertion was green on the very arrangement it describes
+   * itself as preventing. It is the shape this lane filed on 8 October — a test
+   * that names a constant instead of the rule behind it passes on the one state
+   * of the world it was written to rule out.
+   *
+   * So the rule this file states is what this file now asserts, and the
+   * distinctness is held in `verdict.test.ts` against **every** answer the panel
+   * can give rather than against one guessed spelling.
    */
   it("wears no accent, because it is not offering the visitor a decision", () => {
     const badges = elementsOf(bandOf(arrival())).filter(
@@ -99,7 +111,7 @@ describe("the panel before the visitor has asked for anything", () => {
     )
 
     expect(badges.length).toBe(1)
-    expect(badges[0]?.props["tone"]).toBe("outline")
+    expect(badges[0]?.props["tone"]).not.toBe("accent")
   })
 
   /**
