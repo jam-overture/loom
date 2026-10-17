@@ -211,6 +211,31 @@ segment was truncated to `signals-36-a-readin` and a `1ffff7` hash appended,
 which is why a guessed host has been wrong six times; this container cannot
 reach `*.vercel.app` to check one either way.
 
+## A reading for the mangling findings, taken by accident and then on purpose
+
+The first version of #661's body cited 0290 and 0284 as markdown links by
+branch name, at 167 and 161 characters, and GitHub mangled both. Rewriting them
+against the head commit's short sha took them to 135 and 129 — and **both
+mangled again**, each keeping its own injection style, while a 120-character
+markdown link in the same body came back clean in both postings. A third
+posting put 0290 in as a **bare** absolute URL alone on its own line, 169
+characters, and that was mangled too.
+
+That is nine counted readings in one body. It kills the 16 October entry's
+`[…](…)` hypothesis outright, and it puts this body's bracket at **120–129** —
+below the 144 and 152 that two other entries counted clean. Since every entry
+in that file measured a different body and got a different bracket (133–141,
+144–155, 155–164, now 120–129), the hypothesis I filed for whoever picks this
+up is that **the bound is a property of the body rather than of the URL** — a
+budget, so a longer body mangles at a lower per-URL length. It would reconcile
+every reading in the file instead of making four of them errors, and it is
+falsifiable in one posting.
+
+**My entry was wrong twice before it was right**, and the corrections are in it:
+the first version claimed the sha remedy worked, which I wrote before reading
+the body back, and the second blamed the link syntax. Only the counted table
+survived.
+
 ## Open questions
 
 Nothing blocking. Three with a recommendation each are in the pull request

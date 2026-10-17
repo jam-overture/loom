@@ -55505,16 +55505,26 @@ opposite, so the movement carries two causes the counters cannot separate.
 when somebody asks for the card.
 
 ---
-## 2026-10-17 — two more counted readings, and the first mangling that injected *three* backticks rather than two
+## 2026-10-17 — nine counted readings in one body: 120 clean, 129 mangled, a bare URL mangled too, and the bracket is not the same from body to body
 
 **Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
 **Extends** the 16 October entry *two more counted readings for the mangling,
 and a 152-character URL that came back clean in the body that mangled a 164*
-and the three entries it extends · **Status:** open — **one bound narrowed by
-three characters, and one new fact about the injection itself**
+and the four entries it extends · **Status:** open — **one hypothesis killed,
+one published bracket contradicted, and a new hypothesis that would reconcile
+every entry in this file**
 
-#661's body carried six URLs. Counted with `len()` over the exact strings
-before posting, and read back out of the GitHub API after:
+> **This entry was rewritten twice within ten minutes of being filed, by the
+> routine that filed it, and both corrections are the useful part.** Its first
+> version reported the short-sha remedy as having *"worked, first try"* — it did
+> not; the two links mangled again 32 characters shorter, and the claim was
+> written before the read-back that disproved it. Its second version concluded
+> the `[…](…)` construct was the variable. A bare URL then mangled as well. What
+> survives is the counted table below, which is worth more than either reading
+> taken off part of it.
+
+#661's body was posted three times, each time read back out of the GitHub API
+and counted with `len()` over the exact strings. Nine readings, one body:
 
 | characters | where | syntax | came back |
 | --- | --- | --- | --- |
@@ -55522,40 +55532,51 @@ before posting, and read back out of the GitHub API after:
 | 82 | the preview deployment | bare | **clean** |
 | 106 | the report, by branch name | `[…](…)` | **clean** |
 | 120 | 0263, by branch name | `[…](…)` | **clean** |
+| 129 | 0284, by short sha | `[…](…)` | mangled |
+| 135 | 0290, by short sha | `[…](…)` | mangled |
 | 161 | 0284, by branch name | `[…](…)` | mangled |
 | 167 | 0290, by branch name | `[…](…)` | mangled |
+| 169 | 0290, absolute, alone on its own line | **bare** | mangled |
 
-**The markdown-link bracket narrows from 155–164 to 155–161.** The 16 October
-entry's two mangled readings were 164 and 204, so 161 is three characters
-inside its upper bound and the first counted reading in that gap. Nothing here
-touches the lower bound, which is still the 144 counted clean on 15 October, and
-nothing contradicts the two-syntax reading: the 120 is the longest clean
-markdown link counted so far and is well under it.
+**The `[…](…)` hypothesis is dead.** The 16 October entry's two candidates were
+*the bracket for a markdown link is 155–164 and an HTML attribute has a
+different one*, or *length is a proxy and what actually matters is the `[…](…)`
+construct*. The second is now disproved directly: a bare URL, on a line of its
+own, with no link syntax anywhere near it, came back wrapped in `` `` ``. The
+22 September entry's *a bare URL survives where a markdown link does not* holds
+only below the bound — the 82 here is clean and the 169 is not.
 
-**The new fact, which is about the injection and not the threshold.** The four
-previous entries all record `` `` `` — a double backtick — injected around the
-URL. This body produced **two different injections in one posting**:
+**The short-sha remedy did not work, and that is the sharpest reading here.**
+The same two URLs were posted twice, once by branch name and once by the head
+commit's short sha, which took 167 to 135 and 161 to 129. **Both mangled both
+times**, and each kept its own injection style across the two postings: 0290
+always `` `` `` swallowing the closing paren *and* the colon after it, 0284
+always ` ``` ` around the URL alone. So the fence width is not fixed at two —
+four earlier entries record only the double — and what the span encloses is not
+fixed either. Per-link stability across two postings is new: whatever chooses
+the fence is deterministic in the URL, not in the attempt.
 
-- 0290, 167 characters: `` `` `` around **`URL):`** — the closing paren *and*
-  the colon that followed it were pulled inside the span, so the markdown link
-  is destroyed rather than merely unlinked.
-- 0284, 161 characters: ` ``` ` — a **triple** backtick, around the URL alone,
-  inside the parens.
+**And this body's bracket is 120–129, which contradicts two entries that are
+not wrong.** The 15 October entry counted a 144 clean; the 16 October entry
+counted a 152 clean. Both are above everything mangled here. Those readings and
+these cannot both be a single constant threshold — and every entry in this file
+measured **a different body** and arrived at a different bracket: 133–141 on
+14 October, 144–155 on the 15th, 155–164 on the 16th, 120–129 today.
 
-Same body, same minute, same `[…](…)` syntax, adjacent paragraphs. So the
-fence width is not fixed at two, and what the span encloses is not fixed either.
-Both are consistent with something choosing a fence that will not collide with
-the content it is wrapping and taking a greedy bite at the boundary — which is
-what a serialiser re-emitting an inline-code span does, and not what a length
-check does. **It is evidence about the mechanism rather than the bound**, and it
-is the first reading that distinguishes the two.
+**So the hypothesis worth testing next is that the bound is a property of the
+body rather than of the URL.** Something like a budget: a longer body, or one
+with more URLs in it, mangles at a lower per-URL length. It would reconcile
+every reading in this file at once instead of making four of them errors, and
+it predicts something falsifiable — **post the same URL twice, in a short body
+and a long one, and it should survive one and not the other.** Nothing here
+tests that; this body is one of the longest any routine has posted, with six
+URLs in it, and it has the lowest bracket recorded.
 
-**The remedy worked, first try, and is now measured twice over.** Both links
-were rewritten against the head commit's short sha — `../blob/df1ea61/decisions/…`
-— taking 167 to 135 and 161 to 129, and both came back clean. That is the
-workaround the 6 October entry calls a coincidence that makes things worse for
-short branch names, and it is worth saying why it worked here: this branch name
-is 39 characters, so swapping it for a 7-character sha bought 32, which was
-enough to cross a bound it would not have crossed on a shorter name.
+**What a routine should do until it is settled.** Not the short-sha swap, which
+cost two postings here and bought nothing. Either keep every URL in a body well
+under 120 characters, or cite a long path the way this pull request's body now
+does: name the file in prose, and link only the directory
+(`../tree/<sha>/decisions`, 26 characters). A reader gets to the record either
+way, and nothing in the body depends on a bound nobody can state.
 
 ---
