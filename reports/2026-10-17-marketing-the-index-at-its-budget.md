@@ -74,21 +74,23 @@ rather than the notification.
 ## What was filed
 
 One entry, extending the two 15 October entries on the same test, both owned by
-`Loom docs`. Eight readings went into it — four of the whole gate, four of the
+`Loom docs`. Nine readings went into it — five of the whole gate, four of the
 test alone — all taken on one machine in one session.
 
-**At 272 records: four passes and four failures of identical work**, running
+**At 272 records: five passes and four failures of identical work**, running
 4,206 ms to 5,550 ms against a 5,000 ms budget. A spread of 1,344 ms, 27% of
-the budget, centred almost exactly on the line.
+the budget, centred almost exactly on the line. The two passing full-suite runs
+came in at 4,621 ms and 4,848 ms — 379 ms and 152 ms of headroom, which are near
+misses rather than comfortable passes.
 
 ### A claim this report made and withdraws
 
 An earlier draft of this report and of the finding said the gate *"crossed
 between 270 and 272 records"* and had *"failed on every full-suite run since."*
 **That was wrong, and it was wrong because I wrote it after three full-suite
-runs rather than four.** The fourth passed, at 4,621 ms, on the same tree as the
-third, with nothing changed but how busy the machine was. The crossing is
-withdrawn from both.
+runs rather than five.** The fourth and fifth passed, at 4,621 ms and 4,848 ms,
+with nothing changed but how busy the machine was. The crossing is withdrawn
+from both.
 
 I had already sent the crossing to the maintainer before the fourth run. The
 correction is in the finding, in the pull request body and in a comment on it.
@@ -119,25 +121,38 @@ in one of today's full suites.
 
 ## Real numbers
 
-`pnpm install && pnpm verify` on this branch, after merging `main` in, exit code
-read out of a file written as the last thing on its line:
+`pnpm install && pnpm verify` on the branch's final head, after merging `main`
+in twice as it moved, exit code read out of a file written as the last thing on
+its line:
 
 ```
-Test Files  233 passed (233)      Tests  5328 passed (5328)    # framework
+Test Files  233 passed (233)      Tests  5332 passed (5332)    # framework
 Test Files  336 passed (336)      Tests  5951 passed (5951)    # @loom/app
-1237 findings, 0 malformed
+1239 findings, 0 malformed
 1885 visuals in reports/, 132.2MB, none over 1.1MB
-the records index, rendered > links each row at the record itself   4,621 ms ✓
+133 prerendered pages, 1843 text junctions, 0 run together
+the records index, rendered > links each row at the record itself   4,848 ms ✓
 EXIT=0
 ```
 
-**Green, and that is the fourth reading rather than a clean bill of health.**
-The same gate on the same branch timed out on this test an hour earlier. Nothing
-between the two runs changed except a base merge that touched no code this test
-reads, and how busy the machine was.
+**Green, and that is the fifth full-suite reading rather than a clean bill of
+health.** The same gate on this branch timed out on this test earlier in the
+afternoon. Nothing between those runs changed except base merges that touched no
+code this test reads, and how busy the machine was. 4,848 ms is 152 ms of
+headroom.
 
 This branch changes one markdown file and adds a report. No test was added,
 because there is nothing here to test; no test was changed, skipped or weakened.
+
+### On chasing the base branch
+
+GitHub reported this pull request `dirty` three times while `main` moved under
+it, and twice a local `git merge-tree` against the same `main` came back clean —
+so the first reading looked like a stale computation and was not. The branch was
+simply behind. **Bringing the base in cleared it**, which is what
+`docs/routines.md` prescribes; the lesson for the next run is that `dirty` on a
+branch behind a fast-moving `main` means *behind*, and the remedy is a merge
+rather than a diagnosis.
 
 ## Findings
 

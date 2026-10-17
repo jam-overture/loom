@@ -55894,20 +55894,20 @@ fault at the top of a list of pages to fix.
 
 ---
 
-## 2026-10-17 — the records index test is now a coin flip: eight readings of identical work, four each side of its budget, on one machine in one session
+## 2026-10-17 — the records index test is now a coin flip: nine readings of identical work, four of them failures, on one machine in one session
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Extends** the two
 15 October entries, *the records index render test has about eighty records of
 headroom left* and *`pnpm verify` was green on `main` this evening* ·
-**Status:** open — **at 272 records this test passes or fails at random**: four
+**Status:** open — **at 272 records this test passes or fails at random**: five
 passes and four failures of the same work on one machine in one session,
 including a full-suite failure on a branch whose entire diff is one markdown
 file
 
 ### What was measured, and it is the only part that matters
 
-Eight readings, all on one machine in one session this afternoon. All on **272
+Nine readings, all on one machine in one session this afternoon. All on **272
 decision records** except the first.
 
 **Under the full suite, which is how the gate runs it:**
@@ -55918,6 +55918,7 @@ decision records** except the first.
 | `marketing-07` after merging `main` | 272 | **timed out** at 5,691 ms |
 | `marketing-08`, whose whole diff is one markdown file | 272 | **timed out** |
 | `marketing-08`, after merging `main`, machine idle | 272 | passed at **4,621 ms** |
+| `marketing-08`, after merging `main` again, idle | 272 | passed at **4,848 ms** |
 
 **Run alone, the same test on the same 272 records:**
 
@@ -55928,9 +55929,11 @@ decision records** except the first.
 | `marketing-08` | 4,206 ms — passed |
 | `marketing-08` | 4,866 ms — passed |
 
-**At 272 records: four passes and four failures of identical work.** The
+**At 272 records: five passes and four failures of identical work.** The
 readings run 4,206 ms to 5,550 ms against a 5,000 ms budget — a spread of
-1,344 ms, 27% of the budget, centred almost exactly on the line.
+1,344 ms, 27% of the budget, centred almost exactly on the line. The three
+passing full-suite runs came in at 4,621 ms and 4,848 ms, which is 379 ms and
+152 ms of headroom; the passes are not comfortable, they are near misses.
 
 ### A claim this entry made and withdraws
 
@@ -55963,7 +55966,7 @@ machine — 1,344 ms across eight runs of identical work — is larger than ten
 records' worth at any rate either entry proposes. That arithmetic is not worth
 defending and nothing here rests on it.
 
-**What does not need a rate.** Eight runs, four each side of the line. Whatever
+**What does not need a rate.** Nine runs, four of them failures. Whatever
 the per-record cost is, there is no longer a number of records to plan against,
 and the next record makes a coin flip a little more weighted rather than
 crossing anything.
