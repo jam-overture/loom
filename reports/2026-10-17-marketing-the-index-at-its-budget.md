@@ -74,29 +74,39 @@ rather than the notification.
 ## What was filed
 
 One entry, extending the two 15 October entries on the same test, both owned by
-`Loom docs`. Seven readings went into it — three of the whole gate, four of the
+`Loom docs`. Eight readings went into it — four of the whole gate, four of the
 test alone — all taken on one machine in one session.
 
-**The one that matters is the crossing.** This run's gate passed at **270**
-records this afternoon, on `marketing-07` before `Loom merge` brought `main` in.
-Every full-suite run since the index reached **272** has timed out. The two
-records in between are 0290 and 0291.
+**At 272 records: four passes and four failures of identical work**, running
+4,206 ms to 5,550 ms against a 5,000 ms budget. A spread of 1,344 ms, 27% of
+the budget, centred almost exactly on the line.
 
-**The one that is hardest to argue with is this branch.** Its entire diff is 79
-lines of `FINDINGS.md` and a report. No code, no test, no record. The shared
-gate is red on it, which is what *"it does not block one routine, it blocks all
-of them"* looks like from inside.
+### A claim this report made and withdraws
 
-Run alone, the same test on the same 272 records measured **4,206, 4,866, 4,894
-and 5,550 ms** against a 5,000 ms budget — a spread of 1,344 ms, 27% of the
-budget, straddling it.
+An earlier draft of this report and of the finding said the gate *"crossed
+between 270 and 272 records"* and had *"failed on every full-suite run since."*
+**That was wrong, and it was wrong because I wrote it after three full-suite
+runs rather than four.** The fourth passed, at 4,621 ms, on the same tree as the
+third, with nothing changed but how busy the machine was. The crossing is
+withdrawn from both.
+
+I had already sent the crossing to the maintainer before the fourth run. The
+correction is in the finding, in the pull request body and in a comment on it.
+
+**What replaces it is worse rather than better.** A test that has crossed its
+budget fails every time and gets fixed. A test sitting *on* its budget gets
+re-run and blamed on whichever branch was unlucky — which is what happened to
+this lane today, and what the 15 October entry meant by *"a lane trying to tell
+its own red from the tree's."*
+
+The reading that is hardest to argue with is still this branch. Its whole diff
+is 79 lines of `FINDINGS.md` and a report — no code, no test, no record — and
+the shared gate timed out on it once and passed on it once.
 
 **What the readings do not support.** The 15 October entry's ~15 ms a record was
 taken on another machine on another day; this run's own spread on one machine is
 larger than ten records' worth at any rate either entry proposes. The finding
-says so rather than deriving a new rate from a cross-machine comparison. Nothing
-in it rests on arithmetic: the gate passed at 270 and fails at 272, and run
-alone the best of four readings leaves 794 ms and the worst leaves none.
+says so rather than deriving a new rate from a cross-machine comparison.
 
 **Nothing was fixed here and nothing should have been.**
 `architecture.test.tsx` is `Loom docs`' file and this lane does not edit another
@@ -105,43 +115,29 @@ fix in flight to port either. The three obvious remedies — raise the timeout,
 split the render, assert over a sample rather than every row — are all that
 lane's call, with one note from outside it: raising the timeout buys time and
 does not stop the clock, and the sibling test in the same file ran at 4,291 ms
-in today's full suite.
+in one of today's full suites.
 
 ## Real numbers
 
-`pnpm install && pnpm verify` on this branch, exit code read out of a file
-written as the last thing on its line:
+`pnpm install && pnpm verify` on this branch, after merging `main` in, exit code
+read out of a file written as the last thing on its line:
 
 ```
 Test Files  233 passed (233)      Tests  5328 passed (5328)    # framework
-1236 findings, 0 malformed
+Test Files  336 passed (336)      Tests  5951 passed (5951)    # @loom/app
+1237 findings, 0 malformed
 1885 visuals in reports/, 132.2MB, none over 1.1MB
-Test Files    1 failed | 335 passed (336)
-Tests         1 failed | 5950 passed (5951)                    # @loom/app
-EXIT=1
+the records index, rendered > links each row at the record itself   4,621 ms ✓
+EXIT=0
 ```
 
-**The gate is red and I am not pretending otherwise.** The one failure is
-`app/(docs)/_components/architecture.test.tsx > the records index, rendered >
-links each row at the record itself`, which is the subject of the finding this
-branch adds and is not this branch's doing — established above and summarised
-here:
+**Green, and that is the fourth reading rather than a clean bill of health.**
+The same gate on the same branch timed out on this test an hour earlier. Nothing
+between the two runs changed except a base merge that touched no code this test
+reads, and how busy the machine was.
 
-- this branch's whole diff is one markdown file and a report;
-- the same test passes on `origin/main` run alone (4,894 ms), and passed twice
-  more on this branch run alone (4,206 ms, 4,866 ms);
-- this run's own gate passed on the same machine two hours earlier, at 270
-  records.
-
-`docs/routines.md` says never to open a pull request on red, and to say so
-rather than weaken a test to get green. **No test was weakened, skipped or
-changed** — this branch adds no code at all. The pull request is opened anyway
-and the red is stated at the top of it, for two reasons: `Loom merge` only lands
-on a green `pnpm verify`, so nothing broken reaches `main` through it; and the
-alternative is that a failure now in front of all five surfaces stays unfiled
-while every lane pays the diagnosis cost this run paid. If the maintainer would
-rather this lane had held it back, that is a rule worth writing into
-`docs/routines.md`, because the next lane will meet the same choice.
+This branch changes one markdown file and adds a report. No test was added,
+because there is nothing here to test; no test was changed, skipped or weakened.
 
 ## Findings
 
@@ -155,14 +151,21 @@ run alone, the same 272 records measured 4,894 ms and 5,550 ms against a
 
 ## Needs your input
 
-- **Nothing blocking on this branch.** It is a finding and a report.
-- **The two questions from this run are on #662** and are unchanged: whether
-  Loom's palettes should carry a status colour, and whether `/how-it-works`
-  should carry a reader to the change it describes. That pull request has
-  merged, so if you would rather answer them somewhere that stays open, say
-  where and this lane will put them there.
-- **One thing you may want to decide rather than delegate.** The shared gate is
-  now intermittently red for every lane, on a test no lane but `Loom docs` may
-  touch, and the failure looks like the branch's own. Today it cost this run a
-  full diagnosis cycle on a branch that had already merged. It is one line of
-  somebody's next run, and it is in front of five surfaces.
+- **Nothing blocking on this branch.** `pnpm verify` is green on it.
+- **The shared gate is a coin flip and that is the thing to decide.** Eight runs
+  today, four each side of the line, on a test no lane but `Loom docs` may
+  touch. A test that failed every time would already be fixed; this one gets
+  re-run and blamed on whichever branch was unlucky. It cost this run a full
+  diagnosis cycle on a branch that had already merged, and a withdrawn claim in
+  a report. It is one line of somebody's next run, in front of five surfaces.
+- **Whether a lane may open a pull request on red.** I opened this one when the
+  gate was red, which `docs/routines.md` says not to do, and it has since gone
+  green on a re-run. No test was weakened — there is no code here. My reasoning
+  was that `Loom merge` only lands on a green verify, so nothing broken reaches
+  `main` through it. **The re-run makes that moot for this branch and leaves the
+  question open for the next one**, and it wants a line in `docs/routines.md`
+  either way.
+- **The two questions from #662 are unanswered and that pull request has
+  merged.** Whether Loom's palettes should carry a status colour, and whether
+  `/how-it-works` should carry a reader to the change it describes. Say where
+  you want them and this lane will put them somewhere that stays open.

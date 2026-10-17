@@ -55893,37 +55893,30 @@ fault at the top of a list of pages to fix.
 
 ---
 
-## 2026-10-17 — the records index crossed its budget under the full suite between 270 and 272 records, and the gate is now red on a branch that changes one markdown file
+## 2026-10-17 — the records index test is now a coin flip: eight readings of identical work, four each side of its budget, on one machine in one session
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Extends** the two
 15 October entries, *the records index render test has about eighty records of
 headroom left* and *`pnpm verify` was green on `main` this evening* ·
-**Status:** open — **the full-suite crossing happened today between 270 and 272
-records, measured on one machine in one session**, and the shared gate is now
-red on a branch whose entire diff is one markdown file
+**Status:** open — **at 272 records this test passes or fails at random**: four
+passes and four failures of the same work on one machine in one session,
+including a full-suite failure on a branch whose entire diff is one markdown
+file
 
 ### What was measured, and it is the only part that matters
 
-Seven readings — three of the whole gate and four of the test alone — all on
-one machine in one session this afternoon.
+Eight readings, all on one machine in one session this afternoon. All on **272
+decision records** except the first.
 
 **Under the full suite, which is how the gate runs it:**
 
 | tree | records | the gate |
 | --- | --- | --- |
-| `marketing-07` before merging `main` | **270** | **passed** |
-| `marketing-07` after merging `main` | **272** | **timed out** at 5,691 ms |
-| `marketing-08`, whose whole diff is one markdown file | **272** | **timed out** |
-
-**That is the crossing, on one machine, in one session.** The gate passed at 270
-records and has failed on every full-suite run since the index reached 272. The
-two records between those runs are **0290** and **0291**, which arrived on
-`main` this afternoon.
-
-The third row is the one to read twice. `marketing-08` adds **79 lines to
-`FINDINGS.md` and a report**. No code, no test, no record, nothing a jsdom render
-of the decisions index could see. The shared gate is red on it.
+| `marketing-07` before merging `main` | 270 | passed |
+| `marketing-07` after merging `main` | 272 | **timed out** at 5,691 ms |
+| `marketing-08`, whose whole diff is one markdown file | 272 | **timed out** |
+| `marketing-08`, after merging `main`, machine idle | 272 | passed at **4,621 ms** |
 
 **Run alone, the same test on the same 272 records:**
 
@@ -55934,26 +55927,45 @@ of the decisions index could see. The shared gate is red on it.
 | `marketing-08` | 4,206 ms — passed |
 | `marketing-08` | 4,866 ms — passed |
 
-Four solo readings of identical work on one machine: **4,206, 4,866, 4,894 and
-5,550 ms**, against a 5,000 ms budget. A spread of 1,344 ms, which is 27% of the
-budget, straddling it.
+**At 272 records: four passes and four failures of identical work.** The
+readings run 4,206 ms to 5,550 ms against a 5,000 ms budget — a spread of
+1,344 ms, 27% of the budget, centred almost exactly on the line.
+
+### A claim this entry made and withdraws
+
+An earlier version of this entry said the gate *"crossed between 270 and 272
+records"* and had *"failed on every full-suite run since."* **That was wrong,
+and it was wrong because it was written after three full-suite runs rather than
+four.** The fourth passed, on the same tree as the third, with nothing changed
+but how busy the machine was. The crossing framing is withdrawn.
+
+What replaces it is worse rather than better. **A test that has crossed its
+budget gets fixed, because it fails every time and nobody can ignore it. A test
+sitting on its budget gets re-run and blamed on whichever branch was unlucky** —
+which is what happened to this lane today, and what the 15 October entry meant
+by *"a lane trying to tell its own red from the tree's."*
+
+The third row of the first table is still the one to read twice. `marketing-08`
+adds **79 lines to `FINDINGS.md` and a report** — no code, no test, no record,
+nothing a jsdom render of the decisions index could see — and the shared gate
+timed out on it once and passed on it once.
 
 ### The correction to the entry this extends
 
 That entry put the headroom at *"under forty records"* at ~15 ms a record, and
 called it *"a fortnight of this repository's rate."* It is a fortnight later in
-records — 262 then, 272 now — and the prediction has come true to the record.
+records — 262 then, 272 now — and the test now fails half the time it is run.
 
 **Do not read a per-record cost out of these numbers.** The 15 October figures
-were taken on another machine on another day, and this entry's own solo spread
-on one machine — 1,344 ms across four runs of identical work — is larger than
-ten records' worth at any rate either entry proposes. That arithmetic is not
-worth defending and nothing here rests on it.
+were taken on another machine on another day, and this entry's own spread on one
+machine — 1,344 ms across eight runs of identical work — is larger than ten
+records' worth at any rate either entry proposes. That arithmetic is not worth
+defending and nothing here rests on it.
 
-**What does not need a rate.** The gate passed at 270 records and has failed at
-272 on both runs since, on one machine in one session. Run alone, the
-headroom in the best of four readings is 794 ms and in the worst it is negative.
-There is no longer a number of records to plan against.
+**What does not need a rate.** Eight runs, four each side of the line. Whatever
+the per-record cost is, there is no longer a number of records to plan against,
+and the next record makes a coin flip a little more weighted rather than
+crossing anything.
 
 ### What it cost today, which is the shape the entry predicted
 
