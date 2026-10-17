@@ -445,12 +445,20 @@ export type FunnelReach = {
    */
   readonly foreignPairs: number
   /**
+   * Funnel rows for this revision in another audience, and ignored.
+   *
+   * The same question, answered for the other form of the page. Not foreign —
+   * it is this page's — and not a duplicate: two populations answering one
+   * question is two answers, and the one this reading wants is its own.
+   */
+  readonly otherAudiencePairs: number
+  /**
    * Funnel rows naming a pair already seen, where every one after the first was
    * ignored.
    *
-   * A store keeps one row per pair per revision, so this is a caller who
-   * concatenated two reads. Adding them would double a total that is already
-   * one.
+   * A store keeps one row per pair per revision per audience, and the audience
+   * is picked before this is counted, so this is a caller who concatenated two
+   * reads. Adding them would double a total that is already one.
    */
   readonly duplicatedPairs: number
   /**
@@ -607,7 +615,11 @@ export const funnelReachOf = (
   funnels: readonly StoredFunnel[],
   rows: readonly StoredPageViews[]
 ): FunnelReach => {
-  const where = { treeId: reading.treeId, revision: reading.revision }
+  const where = {
+    treeId: reading.treeId,
+    revision: reading.revision,
+    audienceId: reading.audienceId,
+  }
   const { measured, foreign, duplicated } = pageViewsFor(where, rows)
 
   const { opened, appearances, drift, pending, inflation, updatedAt } = measured ?? NOTHING_MEASURED
@@ -617,9 +629,21 @@ export const funnelReachOf = (
 
   const of: Measured = { opened, appearances, drift, pending }
 
-  const matching = funnels.filter(
+  const here = funnels.filter(
     (row) => row.treeId === where.treeId && row.revision === where.revision
   )
+  /**
+   * A funnel pair is asked of a page, and a page served in two forms answers
+   * it twice — one row per audience (0284), the same two ends, two different
+   * populations. Scoped to the reading's own audience so the other form's
+   * answer is neither taken as this one's nor counted as the same question
+   * asked twice, which is what `duplicatedPairs` means and what a double count
+   * makes permanent (0158) if the two are confused.
+   */
+  const matching =
+    where.audienceId === null
+      ? here
+      : here.filter((row) => row.audienceId === where.audienceId)
 
   const present = new Set<NodeId>(reading.parts.map((part) => part.nodeId))
 
@@ -654,7 +678,8 @@ export const funnelReachOf = (
     pairs,
     foreign,
     duplicated,
-    foreignPairs: funnels.length - matching.length,
+    foreignPairs: funnels.length - here.length,
+    otherAudiencePairs: here.length - matching.length,
     duplicatedPairs: matching.length - pairs.length,
     stalePairs: pairs.filter((pair) => pair.stale).length,
     orphanedPairs: pairs.filter((pair) => pair.orphaned).length,

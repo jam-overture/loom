@@ -3,6 +3,7 @@ import type { TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
+import { readingKeyOf } from "./audiences.js"
 import { doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey, type KindSilence } from "./library.js"
 import {
@@ -577,7 +578,7 @@ export const libraryReachOf = (
   }
 
   for (const reading of readings) {
-    const revision = `${reading.treeId}\u0000${reading.revision}`
+    const revision = readingKeyOf(reading)
 
     if (seen.has(revision)) {
       duplicated += 1

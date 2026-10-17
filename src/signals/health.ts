@@ -1,7 +1,9 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
 import { pageActionOf } from "./action.js"
+import { readingKeyOf } from "./audiences.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 import type { PageReading } from "./parts.js"
 
@@ -255,6 +257,25 @@ export type CollectionFault =
    * the fix is one fix, with both counts on the row.
    */
   | "rows-mishandled"
+  /**
+   * The window holds two audiences' counters for this page and the reading was
+   * taken of neither.
+   *
+   * A page is one base tree and the deltas an audience earns (0263), so two
+   * forms of it produce two sets of counters over one tree at one revision,
+   * told apart by one column (0284) and by nothing else. A reading handed
+   * both without being told which was wanted has two answers and no way to
+   * choose: summing them is one number about two populations — *the portal
+   * gains a dimension it must not silently collapse* — and picking one is
+   * picking by row order.
+   *
+   * **It is the caller's, like `rows-mishandled`, and it is not that fault.**
+   * Nothing is wrong with the rows, nothing was handed in twice and nothing is
+   * unaccounted for; the window is simply of more than the reading is. The fix
+   * is `byAudience` and one reading per form, and the remedy says so rather
+   * than sending anybody looking for a bad row.
+   */
+  | "audiences-mixed"
 
 export const COLLECTION_FAULTS: readonly CollectionFault[] =
   everyMemberOf<CollectionFault>()([
@@ -264,6 +285,7 @@ export const COLLECTION_FAULTS: readonly CollectionFault[] =
     "collection-stalled",
     "actions-uncredited",
     "rows-mishandled",
+    "audiences-mixed",
   ])
 
 /** One line per fault, for a surface naming what is wrong. */
@@ -281,6 +303,8 @@ export const describeCollectionFault = (fault: CollectionFault): string => {
       return "readers acted on this page and no reader was credited with acting inside anything"
     case "rows-mishandled":
       return "rows were handed in that this version cannot account for, or handed in twice"
+    case "audiences-mixed":
+      return "this page was served to more than one audience and the window holding both was read as one"
   }
 }
 
@@ -295,7 +319,7 @@ export type FaultRemedy =
   /**
    * Nothing the rows can name.
    *
-   * One fault out of six, and it is the honest answer rather than a gap: a
+   * One fault out of seven, and it is the honest answer rather than a gap: a
    * missing door row is an old sender, an expired row or a hand-built counter,
    * and inventing one of the three is worse than naming none.
    */
@@ -322,6 +346,8 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
     case "actions-uncredited":
       return "senders"
     case "rows-mishandled":
+      return "caller"
+    case "audiences-mixed":
       return "caller"
   }
 }
@@ -378,6 +404,15 @@ export const describeHealthStanding = (standing: HealthStanding): string => {
 export type PageHealth = {
   readonly treeId: TreeId
   readonly revision: number
+  /**
+   * The audience this row is about, or `null` where the reading named none.
+   *
+   * Two forms of one page are two rows here and not one page counted twice
+   * (`readingKeyOf`), for the reason two revisions of one tree are two rows: a
+   * deployment serving both is running both, and a health screen that showed
+   * one of them would be hiding a live form of a live page.
+   */
+  readonly audienceId: AudienceId | null
   readonly standing: HealthStanding
   /**
    * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is
@@ -599,6 +634,7 @@ const healthOf = (
   if (stalled(door, schedule)) faults.push("collection-stalled")
   if (pageActionOf(reading).unwalked) faults.push("actions-uncredited")
   if (reading.orphaned.length > 0 || doubled > 0) faults.push("rows-mishandled")
+  if (reading.audienceId === null && reading.audiences.length > 1) faults.push("audiences-mixed")
 
   const standing: HealthStanding =
     faults.length > 0
@@ -612,6 +648,7 @@ const healthOf = (
   return {
     treeId: reading.treeId,
     revision: reading.revision,
+    audienceId: reading.audienceId,
     standing,
     faults,
     views: reading.views,
@@ -637,9 +674,16 @@ const worseOf = (one: PageHealth, other: PageHealth): number =>
   one.treeId.localeCompare(other.treeId) ||
   other.revision - one.revision
 
-/** Tree id, then newest revision first, which is the order the door rows are read in. */
+/**
+ * Tree id, then newest revision first, which is the order the door rows are
+ * read in, then the audience — which only separates two rows that are the same
+ * page in two forms, and is there so the order is total rather than left to
+ * the input's.
+ */
 const byPage = (one: PageHealth, other: PageHealth): number =>
-  one.treeId.localeCompare(other.treeId) || other.revision - one.revision
+  one.treeId.localeCompare(other.treeId) ||
+  other.revision - one.revision ||
+  (one.audienceId ?? "").localeCompare(other.audienceId ?? "")
 
 /**
  * What a deployment is collecting, read off the page readings and the door rows
@@ -669,7 +713,7 @@ export const collectionHealthOf = (
   let duplicated = 0
 
   for (const reading of readings) {
-    const key = `${reading.treeId}\u0000${reading.revision}`
+    const key = readingKeyOf(reading)
 
     if (seen.has(key)) {
       duplicated += 1

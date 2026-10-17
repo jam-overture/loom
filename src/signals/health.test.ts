@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest"
 
 import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import {
+  nodeId,
+  OTHER_TREE,
+  primitiveType,
+  RIDERS,
+  SKIERS,
+  TREE,
+} from "../testing/reader-signal-contract.js"
 import type { ElementNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -383,6 +390,78 @@ describe("collectionHealthOf", () => {
   })
 
   /**
+   * A page is one base tree and the deltas an audience earns (0263), so a
+   * deployment serving two forms holds two readings of one tree at one
+   * revision. Before the audience was in the key they were one page handed in
+   * twice: the second form's reading was dropped, its readers were in no
+   * figure here, and the deployment was told its caller had made a mistake.
+   */
+  describe("a page served in two forms", () => {
+    const inAudience = (audienceId: typeof SKIERS, row: StoredPageViews): StoredPageViews => ({
+      ...row,
+      audienceId,
+    })
+
+    const servedTo = (audienceId: typeof SKIERS, reached: readonly number[]): PageReading =>
+      pageReadingOf(
+        treeOf(TREE, 1, reached.length),
+        reached.flatMap((count, at) =>
+          count > 0
+            ? [
+                {
+                  ...tally(TREE, 1, `band${at + 1}`, { views: count, reached: count }),
+                  audienceId,
+                },
+              ]
+            : []
+        ),
+        NOTHING_DECLARED,
+        audienceId
+      )
+
+    it("stands as two rows rather than one page counted twice", () => {
+      const health = collectionHealthOf(
+        [servedTo(SKIERS, [100, 80]), servedTo(RIDERS, [40, 30])],
+        [inAudience(SKIERS, exact(TREE, 1, 100)), inAudience(RIDERS, exact(TREE, 1, 40))]
+      )
+
+      expect(health.duplicated).toBe(0)
+      expect(health.pages).toHaveLength(2)
+      expect(health.pages.map((page) => page.audienceId)).toEqual([RIDERS, SKIERS])
+      expect(health.trees).toBe(1)
+      expect(health.arrivals).toBe(140)
+    })
+
+    it("has nothing wrong with either form, where before both were a mishandled row", () => {
+      const health = collectionHealthOf(
+        [servedTo(SKIERS, [100, 80]), servedTo(RIDERS, [40, 30])],
+        [inAudience(SKIERS, exact(TREE, 1, 100)), inAudience(RIDERS, exact(TREE, 1, 40))]
+      )
+
+      expect(health.standings.sound).toBe(2)
+      expect(health.standings.faulted).toBe(0)
+      expect(health.faults["rows-mishandled"]).toBe(0)
+      expect(health.faults["audiences-mixed"]).toBe(0)
+    })
+
+    it("faults the caller that handed both forms in as one window, and says which fault it is", () => {
+      const mixed = pageReadingOf(
+        treeOf(TREE, 1, 2),
+        [
+          { ...tally(TREE, 1, "band1", { views: 100, reached: 100 }), audienceId: SKIERS },
+          { ...tally(TREE, 1, "band1", { views: 40, reached: 40 }), audienceId: RIDERS },
+        ],
+        NOTHING_DECLARED
+      )
+      const health = collectionHealthOf([mixed], [inAudience(SKIERS, exact(TREE, 1, 100))])
+
+      expect(faultsOn(health, TREE)).toEqual(["audiences-mixed"])
+      expect(remedyOf("audiences-mixed")).toBe("caller")
+      expect(health.faults["rows-mishandled"]).toBe(0)
+    })
+  })
+
+  /**
    * The fault this reading could not raise until a page-view row said when the
    * fold last touched it (0274). Every case here is about the same two numbers
    * — openings waiting, and the age of the fold that should have cleared them —
@@ -673,7 +752,7 @@ describe("collectionHealthOf", () => {
 
   describe("the vocabularies this reading publishes", () => {
     it("gives every fault a remedy, a sentence and a place in the published order", () => {
-      expect(COLLECTION_FAULTS).toHaveLength(6)
+      expect(COLLECTION_FAULTS).toHaveLength(7)
 
       for (const fault of COLLECTION_FAULTS) {
         expect(FAULT_REMEDIES).toContain(remedyOf(fault))

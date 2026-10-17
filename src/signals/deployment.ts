@@ -1,6 +1,8 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
+import { readingKeyOf } from "./audiences.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 import type { ReadingProgress, ReadingStop } from "./progress.js"
 
@@ -158,6 +160,16 @@ export const describeRankStanding = (standing: RankStanding): string => {
 export type RankedPage = {
   readonly treeId: TreeId
   readonly revision: number
+  /**
+   * The audience this row is about, or `null` where the reading named none.
+   *
+   * Two forms of one page stand here as two rows, for the reason two revisions
+   * of one tree do (0250): both are live, both have readers, and an order that
+   * showed one of them would be hiding a page a deployment is serving. Nothing
+   * is summed across them — a reader of one form is not a reader of the other,
+   * and the two rows' losses are losses from two populations.
+   */
+  readonly audienceId: AudienceId | null
   readonly standing: RankStanding
   /**
    * The window's view floor, carried through from the reading unchanged.
@@ -268,6 +280,7 @@ const rowOf = (page: ReadingProgress, door: RevisionPageViews | null): RankedPag
   const where = {
     treeId: page.treeId,
     revision: page.revision,
+    audienceId: page.audienceId,
     views: page.views,
     opened: door?.opened ?? null,
     inflation: door?.inflation ?? null,
@@ -317,7 +330,9 @@ const worseOf = (one: RankedPage, other: RankedPage): number =>
 
 /** Tree id, then newest revision first, which is the order the page-view rows are read in. */
 const byPage = (one: RankedPage, other: RankedPage): number =>
-  one.treeId.localeCompare(other.treeId) || other.revision - one.revision
+  one.treeId.localeCompare(other.treeId) ||
+  other.revision - one.revision ||
+  (one.audienceId ?? "").localeCompare(other.audienceId ?? "")
 
 /**
  * A deployment's pages, in the order they should be looked at.
@@ -341,7 +356,7 @@ export const deploymentReadingOf = (
   let duplicatedRows = 0
 
   for (const page of pages) {
-    const key = `${page.treeId}\u0000${page.revision}`
+    const key = readingKeyOf(page)
 
     if (seen.has(key)) {
       duplicated += 1
