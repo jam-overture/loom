@@ -292,7 +292,18 @@ own notification, which is `docs/routines.md`' rule and the reason it exists.
 
 ## The preview
 
-PREVIEW_URL
+https://loom-git-docs-58-the-bar-tha-557866-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the pictures above are of:
+
+- [/docs/building-with-loom/theming](https://loom-git-docs-58-the-bar-tha-557866-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/theming)
+- [/docs/api-reference/runtime](https://loom-git-docs-58-the-bar-tha-557866-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/runtime)
+
+**Taken from the `vercel[bot]` comment after opening the pull request, not
+composed from the branch name**, which is the remedy the 16 October finding
+*the composed preview URL, fifth instance* asks every lane to follow. The hash
+segment is `557866` and the branch segment truncates at `docs-58-the-bar-tha`;
+a guess would have had neither.
 
 Every picture above was taken with `pnpm shoot --serve apps/loom` against a
 build of this commit — `built 2026-10-17T14:22:13.003Z`. Not fetched from this
