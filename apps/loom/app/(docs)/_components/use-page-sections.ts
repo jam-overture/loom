@@ -27,9 +27,15 @@ import {
  * One walk, two callers, for the reason `in-view.ts` gives for the same shape:
  * two lists that answered *what is in this page* by each reading it their own
  * way would be two answers to one question, and the day one of them learned a
- * new rule about headings the other would go on applying the old one. The
- * measurement is the rail's alone and stays here beside the walk, because it is
- * the same subject read with the same selectors.
+ * new rule about headings the other would go on applying the old one.
+ *
+ * **The measurement is shared too, as of 17 October.** It used to be the rail's
+ * alone, because the narrow presentation was a line in the document above the
+ * page's title and could not be on screen at the same time as a heading near
+ * the top of the window. The bar that replaced it stays with the reader, so
+ * both presentations now say which section is being read — and they say it from
+ * one listener pair written once, rather than from two that could drift apart
+ * about what a scroll means.
  *
  * Everything here is a read of the document and none of it is a judgement.
  */
@@ -63,11 +69,13 @@ const topsOf = (sections: readonly PageSection[]): readonly SectionTop[] =>
 /**
  * Which section the reader is in, measured now.
  *
- * The rail asks this on every scroll, and it is the rail's alone. The
- * disclosure marks nothing, for a reason that is a measurement rather than a
- * preference — `page-contents.tsx` has it, and the short version is that the
- * line a reader presses and the top 120 pixels of the window are never on
- * screen together.
+ * Both presentations ask this, and until 17 October only the rail did. The
+ * disclosure above the article could not: it sat in the document above the
+ * page's title, so a reader who could see it was a reader with no heading
+ * anywhere near the top of the window, and a mark on it was a mark that could
+ * never light up. The bar that replaced it stays under the header at every
+ * scroll position, so the two are on screen together by construction and the
+ * measurement means something there.
  */
 export const sectionBeingReadNow = (sections: readonly PageSection[]): string | undefined =>
   sectionBeingRead({
@@ -94,4 +102,45 @@ export const usePageSections = (): readonly PageSection[] => {
   }, [pathname])
 
   return sections
+}
+
+/**
+ * The section the reader is in, kept up to date while they scroll.
+ *
+ * `sectionBeingReadNow` is the reading; this is the two listeners that take it
+ * again whenever it could have changed, and it is here rather than in either
+ * component because both of them now want it.
+ *
+ * **`resize` as well as `scroll`**, because the headings move without the page
+ * scrolling: a window narrowed enough to rewrap a paragraph moves every heading
+ * under it, and on a phone the address bar collapsing is a resize.
+ *
+ * Passive, and the work is two reads and a `setState` per event. A frame budget
+ * would matter if this measured layout and then wrote to it; it measures, and
+ * React does the writing afterwards.
+ */
+export const useSectionBeingRead = (sections: readonly PageSection[]): string | undefined => {
+  const [current, setCurrent] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (sections.length === 0) {
+      setCurrent(undefined)
+
+      return
+    }
+
+    const mark = () => setCurrent(sectionBeingReadNow(sections))
+
+    mark()
+
+    window.addEventListener("scroll", mark, { passive: true })
+    window.addEventListener("resize", mark, { passive: true })
+
+    return () => {
+      window.removeEventListener("scroll", mark)
+      window.removeEventListener("resize", mark)
+    }
+  }, [sections])
+
+  return current
 }

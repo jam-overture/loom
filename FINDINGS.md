@@ -52066,7 +52066,32 @@ read. It is still worth a sentence in `docs/routines.md`, which is
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
 (`apps/loom/app/(marketing)/`) · **Raised by:** the maintainer, 11 October ·
-**Status:** open — **nothing is broken and nothing is blocked**; this is the one
+**Status:** **closed for this lane**, and it has been since 13 October.
+
+> **Closing note, 17 October**, by `Loom marketing` on
+> `marketing-07-the-refused-chip`. **Condition 1 is met and
+> this entry had been stale for five days**, which matters because this is the
+> file every run reads before choosing work.
+>
+> `_lib/stored.ts` seeds the three pages through the published
+> `TreeStore.create`, guarded so that a page already in the store is never
+> written over; `pageTreeFor` reads the store and falls back to the builder when
+> it is empty or unreachable; and `_lib/requested.ts` is the line this entry
+> said only this lane could draw — a stored page holds its words, its
+> arrangement and its destinations, and a request puts back the host and the
+> palette. The rearrangement was unaffected, exactly as predicted.
+>
+> **The other two conditions are not this lane's and are not claimed.**
+> Condition 2 (the portal's registry) is `Loom portal`'s and has the registry
+> clash in front of it; condition 3 (`DATABASE_URL`) is the maintainer's.
+>
+> It is the second instance of a shape this lane filed on 1 October — *a finding
+> named the remedy, said the branch had added it, and the branch had not* — in
+> the opposite direction: a finding whose remedy shipped and whose status never
+> said so. Both cost the same thing, which is a later run planning against a
+> queue that is wrong.
+
+**Original status:** open — **nothing is broken and nothing is blocked**; this is the one
 change that turns a surface into a governed one
 
 The maintainer asked for the marketing and docs surfaces to be *"hooked up to
@@ -55241,9 +55266,11 @@ other.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/mobile-nav.tsx`,
-`_components/page-contents.tsx`, `docs/layout.tsx`) · **Status:** open — **the
-stated limit of what shipped today**, with the remedy's shape named and
-deliberately not taken
+`_components/page-contents.tsx`, `docs/layout.tsx`) · **Status:** **closed by
+`docs-58-the-bar-that-stays-with-the-reader`**, 17 October, as the remedy below
+describes it — one bar under the header, at every width with no contents rail,
+holding both questions. Both components named above are gone; `_components/docs-bar.tsx`
+is the one that replaced them.
 
 `page-contents.tsx` gives a narrow screen the contents of the page it is on,
 which closes the 15 October entry *the contents rail is a desktop rail*. It
@@ -55278,8 +55305,15 @@ contents list.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/page-contents.tsx`, `docs/layout.tsx`) ·
-**Status:** open — **measured and shipped as it is**, with three remedies
-named and the reason none was taken today
+**Status:** **closed by `docs-58-the-bar-that-stays-with-the-reader`**,
+17 October, by remedy 3 and then remedy 1 — which is the recommendation this
+entry made. `_lib/contents/pages.ts` is the set of addresses with sections, read
+off the pages at build time, so the layout knows whether there is a control
+before the browser runs and the bar is at its final height in the HTML the
+server sends. The 17 reference pages get no empty band, because the set does not
+hold them. One thing is **not** closed and is filed separately below: the
+right-hand label gains the section count when the walk finishes, which changes
+that label's width and nothing else.
 
 The rows of a contents list are read off the rendered page in the browser, for
 the reason `_lib/on-this-page.ts` gives at length: two *Architecture* pages get
@@ -55411,6 +55445,232 @@ it and more bought*. It has three members and never a fourth, so a surface that
 handles `entry`, `closing` and `either` has handled all of it.
 
 ---
+
+## 2026-10-17 — the chrome is 102 pixels tall and the only thing that knows so is a number typed into a test
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/globals.css`, `_lib/on-this-page.test.ts`,
+`_components/docs-bar.tsx`) · **Status:** open — **nothing is wrong today and
+the number is right**; it is a measurement held by hand, in a place where the
+same shape has already cost this lane one live defect
+
+`scroll-padding-top` is what keeps the thing a reader asked for from arriving
+behind whatever is stuck to the top of the window. It was `5rem` — 80 pixels,
+against a 57-pixel header — and the bar that landed today puts 45 more pixels
+there at every width below 1280. So it is `7rem` now, 112 against 102, and the
+heading's own `scroll-margin-top` came down from `5rem` to `3rem` so that the
+two still add to the 160 the reading line is chosen against.
+
+All three numbers are right. **What is missing is anything that would notice
+them stop being right.** The guard added beside them asserts the inset is at
+least 102, and 102 is a figure read off a screenshot and typed in by hand: the
+header's 57 is `h-14` plus a border in a layout and the bar's 45 is `py-3` plus
+a line of `text-sm`, none of which any test converts to pixels. A run that
+gives the bar a second line, or a larger control, or a taller header, makes the
+inset too small and nothing anywhere goes red. The symptom would be quiet and
+specific: a keyboard reader tabbing down a long page gets the link they focused
+half-hidden behind the bar, and a reader pressing a search result lands on a
+heading tucked under it.
+
+**This is the shape that already cost this lane a live defect**, which is why it
+is worth an entry rather than a line in a report. The reading line was 120 for a
+day while a press landed a heading at 160, and the test written to prevent
+exactly that read one of the two declarations it needed. The lesson then was *a
+test that reads one of two numbers passes while the thing it guards is wrong*.
+This is the next instance of the same genus: a test that reads a number the
+markup does not supply passes while the markup moves away from it.
+
+**The remedy is a measurement rather than a parse**, and it is why this is filed
+instead of fixed. `pnpm shoot`' `measure` already prints the bar's box — the run
+that shipped it read `x 0 y 57 390x45` off a phone — so the number exists in the
+right units at the only moment anything can know it, which is with a browser
+open. What does not exist is a way for a shot to **fail**, and 0213 is deliberate
+about that: the harness prints and never asserts, and the judgement stays in the
+report. So the remedy is one of:
+
+1. a check that reads the Tailwind classes out of the layout and the bar and
+   converts them to pixels, which is a second implementation of Tailwind's scale
+   and would be wrong the first time somebody writes an arbitrary value;
+2. a declared constant — the chrome's height, in one module, read by the
+   stylesheet through a custom property and by the components through a class
+   they share — so that the inset and the thing it clears are one number;
+3. accepting the hand-held number and keeping the guard as a floor.
+
+**Recommendation: 2**, as a unit of its own, and not today: it touches the
+header, which is the route group's root layout, and the bar, and the stylesheet,
+and it is a different argument from the one this unit is about. 3 is what
+shipped.
+
+---
+## 2026-10-17 — the bar's height is settled before the browser runs and its right-hand label's width is not
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/docs-bar.tsx`) · **Status:** open — **the
+stated limit of what shipped today**, and the half of the 16 October shift
+finding that a build-time list cannot reach
+
+The 86-pixel shift the contents line had is gone, and the reason it is gone is
+that the **layout** now knows whether a page has sections at all, from its
+markdown, before anything renders. So the bar is one row high in the HTML the
+server sends and one row high a moment later, and the prose under it does not
+move.
+
+What the server cannot know is **how many** sections there are. Two
+*Architecture* pages get most of their headings from a component as the page
+builds, which is the whole reason the rows are read off the rendered document,
+and a count taken from the markdown would be wrong on exactly those two pages.
+So the closed control is sent as *On this page* and the count — *14 sections* —
+joins it when the walk finishes.
+
+**That changes the label's width and nothing else.** The count is a `text-xs`
+span in a row whose height is set by the taller label beside it, so nothing
+above or below it moves; on a phone the control is right-aligned, so the label
+grows leftward and the site-section label beside it truncates a little sooner
+than it did a frame earlier. It is the last visible difference between the bar
+the server sends and the bar a reader ends up with.
+
+Three ways out, in the order they are worth considering:
+
+1. **Leave it.** A label that gets more informative after a frame is a different
+   thing from prose that moves under a reader, and the second is what the rule
+   is about.
+2. **Reserve the count's width** with a fixed-width span, which trades a width
+   change for a permanent gap on the seventeen pages where the count never
+   arrives and on every page for the frame before it does.
+3. **Drop the count** and let the control say *On this page* until the reader has
+   reached a heading, which is the state the count was written for in the first
+   place.
+
+**Recommendation: 1**, and it is what shipped. Recorded because it is the part
+of the 16 October entry that this unit did not close, and a later run reading
+that entry as closed should know which half.
+## 2026-10-17 — nothing in this library can say *no*, so a refusal and a page nobody has touched wear the same chip
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.badge.ts`, and the tone vocabulary generally), with the
+slot half for `Loom daily build` (`src/theme/theme.ts`) · **Status:** open —
+**the composition half is fixed on this site by
+`marketing-07-the-refused-chip`**, which uses the three tones
+there are and says in writing why that leaves one pair undistinguished
+
+### What a visitor met
+
+`/how-it-works` is where this site stops describing the product and runs it. A
+visitor picks one of six requests, the page rearranges itself, and a panel
+beside it prints what was asked, what was worked out, how much moved, which rule
+decided and what putting it back would restore. The panel's headline is a
+`loom.badge` carrying the verdict in two or three words.
+
+There are five verdicts and the badge had two treatments, because it was asked a
+boolean. Read off the built page on `main` at `c446b12`:
+
+| the page is in this state | the chip says | and wears |
+| --- | --- | --- |
+| nothing asked yet | Nothing yet | `outline` |
+| `problem`, `proof`, `calmer` | Allowed | `accent` |
+| `shorter`, `unstick-menu` | **Waiting for you** | **`outline`** |
+| the same two, approved | You said yes | `accent` |
+| `drop-pitch` | **Refused** | **`outline`** |
+
+So *your rules said no*, *your rules are waiting for you to decide* and *nobody
+has asked this page anything* were one plain pill with a different word at the
+end of it. The one that costs something is **Refused**: saying no, and saying
+which rule said it, is the thing this product has that the others do not, and at
+a glance it read as the page having done nothing.
+
+It is worse than a flat chip, because the same screen contradicts itself. On
+`/how-it-works?ask=shorter` the callout at `y 176` is the accent band — *Waiting
+for you*, with **I say yes, go ahead** in it — and the badge at `y 3436` is the
+plain pill, *Waiting for you*. One request, one verdict, two controls, opposite
+dressings, 3,260px apart.
+
+### Why this lane could not finish it
+
+**There is no tone in this library that means no.** Counted on `main`:
+
+- `loom.badge` registers `accent`, `neutral`, `outline` — and its own definition
+  says what they are for: *"an accent badge claims attention, a neutral one
+  classifies quietly, and an outline one sits on a coloured surface where a
+  filled badge would fight it."* None of the three is a refusal.
+- **Seventeen `tone`, `state` and `variant` enums across seventeen primitives,
+  twenty-three distinct members between them, and not one of the
+  twenty-three means no.** The whole vocabulary is `accent`, `canvas`, `coming`,
+  `current`, `default`, `done`, `excluded`, `floating`, `highlight`, `included`,
+  `marked`, `muted`, `neutral`, `outline`, `panel`, `plain`, `planned`,
+  `source`, `strong`, `subtle`, `surface`, `terminal`, `washed`. There is no
+  `critical`, `danger`, `warning`, `caution` or `negative` anywhere in the
+  library. The nearest thing is `loom.perk-list-item`'s `excluded`, and its own
+  comment says what it is for — a tier showing what it *lacks* — which is an
+  absence rather than a refusal.
+- **And a primitive could not paint one if it wanted to.** `paletteSlotSchema`
+  in `src/theme/theme.ts` declares seventeen slots — four surface, four
+  foreground, three accent, two brand-secondary, four border — and **not one is
+  a status colour.** Every palette must declare every slot, so this is a schema
+  change that reaches every registered palette rather than one primitive's
+  prop list.
+
+`toneFor` in `(marketing)/_lib/pages/answer.ts` recorded the same wall in its
+own words months ago — *"the library has no red and that is a recorded
+decision, so a refusal cannot be painted as a refusal"* — and settled for
+painting by whether the visitor can still act. This lane has now hit it from the
+second direction and the answer was the same both times.
+
+### What shipped here, so you can see the shape of the gap
+
+The badge is now a table over the verdict rather than a question asked of
+`record.landed`, and it spends the three treatments on the three answers a
+reader is actually asking for:
+
+| the answer | verdicts | treatment |
+| --- | --- | --- |
+| the page changed | `landed`, `approved` | `accent` |
+| your rules stepped in | `held`, `refused` | `outline` |
+| the page is as it was | `nothing-to-do`, and no request at all | `neutral` |
+
+A refusal no longer wears the chip that means *nothing has happened*, which is
+the half that was misleading a reader. **`held` and `refused` are still one
+treatment**, and that is the whole of what is being asked for here: they are
+opposite answers — one is a door held open for the visitor, the other is a door
+that does not open — and this lane has run out of ways to say so without a
+component of its own, which 0067 does not allow it.
+
+### What would close it
+
+Not necessarily red, and that is the point of filing it rather than asking for a
+colour. Three shapes, cheapest first, and the judgement is yours:
+
+1. **A fourth badge tone built from slots that already exist** — `fg-default` on
+   `bg-surface-muted` with `border-strong`, say, or any pairing the two starter
+   palettes are already held to. It separates *stopped* from *waiting* without
+   touching the palette schema, and it is one enum member plus a row in `TONES`.
+   It is also the weakest: two greys are a difference a reader has to be told
+   about.
+2. **A status slot in the palette** — one or two members on
+   `paletteSlotSchema`, declared by every registered palette, with a tone on
+   `loom.badge` and `loom.callout` that reads it. This is the honest version and
+   it is **`Loom daily build`'s**: it changes a published schema and every
+   palette has to answer for it. It is also the one that makes a refusal
+   paintable everywhere rather than on one badge.
+3. **A mark rather than a colour** — `loom.badge` is already `inline-flex` with
+   `gap: space(1)`, so it composes a `loom.icon` beside its word today and no
+   primitive has to change at all. Rejected here rather than built, because a
+   glyph chosen by one surface is a vocabulary nobody else shares, and a mark
+   that means *refused* is exactly the kind of thing that should be the
+   library's rather than this site's.
+
+**This lane's recommendation is (2), and not today.** It is a palette schema
+change and it wants the maintainer's eye on what a status colour does to two
+starter palettes whose whole argument is that they are not decorative.
+
+### Where it is held
+
+`(marketing)/_lib/pages/verdict.test.ts` holds the site's half: every answer the
+panel can give is a treatment this deployment's registry actually validates, an
+answered page is never dressed like one that was asked nothing, and a change
+that landed is never dressed like one that did not. It is deliberately silent
+about *which* treatment a verdict wears, because that is a judgement rather than
+a rule — so a fourth tone arriving in `loom.badge` is a one-line change here and
+nothing goes red on the way.
 ## 2026-10-17 — every reading of the counters was audience-blind, and the first deployment to serve two forms of a page would have been told its surface was at fault
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
@@ -55711,5 +55971,80 @@ its own side, so a silence naming the mismatch may be enough. Worth checking
 whether `copy-change`, `pace-change`, `action-change` and the four library
 comparisons take their pairs the same way; they likely do, which would make this
 one decision over eight functions rather than one.
+## 2026-10-17 — the mangling happens to a link with no scheme and no host at all, which the structural hypothesis has to account for
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling,
+and a 152-character URL that came back clean in the body that mangled a 164*
+and the three entries it extends · **Status:** open — **one reading, and the
+one variable it changes is that the mangled target is not a URL**
+
+#659's body carried four link targets. Counted with `len()` over the exact
+strings, before and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 74 | `docs/signals.md`, relative by branch name | `[…](…)` | **clean** |
+| 82 | the preview deployment | bare | **clean** |
+| 113 | the report, relative by branch name | `[…](…)` | **clean** |
+| 165 | the record, relative by branch name | `[…](…)` | mangled |
+
+The mangled one came back with `` `` `` injected around the target inside the
+parens, which is the injection all four previous entries record, and the
+sentence after it was swallowed into the code span — so the first paragraph of
+the body reads as gibberish and the record link does not resolve.
+
+**On length it narrows nothing** — 165 is above 155 and 113 is below 144, so
+every reading here sits outside the standing bracket and agrees with it.
+
+**The variable it changes is what the target is.** Every mangled reading until
+now has been an absolute `https://` URL. This one has **no scheme and no host**:
+it is `../blob/<branch>/decisions/0291-….md`, a relative path. Whatever is
+rewriting these bodies is therefore not matching on a URL, on a hostname or on a
+scheme, and the 152-character `<img src="…">` row that came back clean is not
+explained by *attribute rather than link* alone either. The shortest hypothesis
+left standing is **length of the parenthesised target in a markdown link**,
+whatever that target is.
+
+**What this run did about it, which is also a vote for the cheap remedy.** The
+body was corrected by hand within the same turn, and the record is now named
+rather than linked: `**0291** — *a deployment's change is two orders at the
+door's scale*`, with the path in an inline-code span short enough to be below
+every reading ever taken. Naming a record and linking a short path costs a
+reader one click and costs a routine nothing, and it is available today without
+knowing what the rewriter matches on.
+
+### A sixth reading, taken on this entry's own pull request, and it is not about length at all
+
+The body of #664 — the pull request carrying this entry — was written to avoid
+long link targets, and something in it was rewritten anyway. The two readings
+below are from **one body**, in **one syntax**, and they differ in one
+character class:
+
+| sent | characters | came back |
+| --- | --- | --- |
+| an inline-code span holding an HTML image tag with a quoted `src` attribute | 13 | **rewritten**: HTML-escaped to entity text, wrapped in single quotes, and the span's own backticks doubled |
+| an inline-code span holding a relative path with angle-bracketed placeholder | 38 | clean |
+
+**So length is not the variable, and the hypothesis at the head of this entry
+is wrong.** A 13-character span was rewritten while a 38-character one four
+paragraphs below it was not. Both are inline-code spans, both contain angle
+brackets, and the only difference between them is that the rewritten one
+contains **double quotes**.
+
+The signature is the same one all five earlier readings record — backticks
+doubled around the content — with two parts nobody had seen before: the content
+was **HTML-escaped into entity text**, which a reader sees as `&lt;` rather
+than as a bracket, and it was **wrapped in single quotes** that nothing sent.
+That is not an escaping bug at the edges of a long URL; it reads like content
+being parsed and re-serialised by something that quotes and escapes on the way
+out.
+
+**What that means for the remedy.** Naming a record rather than linking it is
+still worth doing and still cheap, but it is no longer sufficient, because the
+thing being rewritten here is not a link. The narrowest safe rule this reading
+supports is: **do not put double quotes inside an inline-code span in a pull
+request body.** A routine that needs to show an attribute can name it in prose
+instead, which is what #664's corrected body does.
 
 ---
