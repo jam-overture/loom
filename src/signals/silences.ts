@@ -371,7 +371,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  *
  * **The seventeenth needed none either, and its subject is the one combination
  * this table had not held**
- * ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)).
+ * ([0291](../../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)).
  * Its reading is of a deployment and every reason it gives is about one
  * **comparison** — the seventh set's observation at one more remove: an order
  * is silent about its members rather than about itself, and here a member is
