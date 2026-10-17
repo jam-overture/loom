@@ -55465,3 +55465,47 @@ evidence of a sender that is not one, and a card that ranks it by share puts a
 fault at the top of a list of pages to fix.
 
 ---
+## 2026-10-17 — the mangling happens to a link with no scheme and no host at all, which the structural hypothesis has to account for
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling,
+and a 152-character URL that came back clean in the body that mangled a 164*
+and the three entries it extends · **Status:** open — **one reading, and the
+one variable it changes is that the mangled target is not a URL**
+
+#659's body carried four link targets. Counted with `len()` over the exact
+strings, before and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 74 | `docs/signals.md`, relative by branch name | `[…](…)` | **clean** |
+| 82 | the preview deployment | bare | **clean** |
+| 113 | the report, relative by branch name | `[…](…)` | **clean** |
+| 165 | the record, relative by branch name | `[…](…)` | mangled |
+
+The mangled one came back with `` `` `` injected around the target inside the
+parens, which is the injection all four previous entries record, and the
+sentence after it was swallowed into the code span — so the first paragraph of
+the body reads as gibberish and the record link does not resolve.
+
+**On length it narrows nothing** — 165 is above 155 and 113 is below 144, so
+every reading here sits outside the standing bracket and agrees with it.
+
+**The variable it changes is what the target is.** Every mangled reading until
+now has been an absolute `https://` URL. This one has **no scheme and no host**:
+it is `../blob/<branch>/decisions/0291-….md`, a relative path. Whatever is
+rewriting these bodies is therefore not matching on a URL, on a hostname or on a
+scheme, and the 152-character `<img src="…">` row that came back clean is not
+explained by *attribute rather than link* alone either. The shortest hypothesis
+left standing is **length of the parenthesised target in a markdown link**,
+whatever that target is.
+
+**What this run did about it, which is also a vote for the cheap remedy.** The
+body was corrected by hand within the same turn, and the record is now named
+rather than linked: `**0291** — *a deployment's change is two orders at the
+door's scale*`, with the path in an inline-code span short enough to be below
+every reading ever taken. Naming a record and linking a short path costs a
+reader one click and costs a routine nothing, and it is available today without
+knowing what the rewriter matches on.
+
+---
