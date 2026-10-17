@@ -243,3 +243,14 @@ comparison that matters is the one taken either side of this diff.) The
 import-graph guard in `src/signals/browser-weight.test.ts` passes: `audiences.ts`
 is reached only from `parts.ts` and the four comparisons, none of which the
 broadcaster imports.
+
+## Preview
+
+https://loom-git-signals-37-a-compar-c0580c-jpizzolato36-6341s-projects.vercel.app
+— taken from the `vercel[bot]` comment on #668 rather than composed, as the
+15 October finding requires: the branch segment is truncated to
+`signals-37-a-compar` with a `c0580c` hash appended, which no rule derives from
+the branch name. **There is nothing on it to look at.** This unit is server-side
+arithmetic with no surface, and the one generated file it touches is the API
+reference, where the change is the two `pages` doc comments and the `ambiguous`
+field's type on four exported types.
