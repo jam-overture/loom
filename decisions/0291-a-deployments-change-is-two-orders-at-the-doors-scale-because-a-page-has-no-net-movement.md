@@ -1,10 +1,18 @@
-# 0289 — A deployment's change is two orders at the door's scale, because a page has no net movement
+# 0291 — A deployment's change is two orders at the door's scale, because a page has no net movement
 
 **Status:** Accepted
 
 **Date:** 16 October 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-17**, from 0289, when `Loom merge` landed this branch.
+> `main` had meanwhile accepted a different 0289 — *a project is closed rather
+> than deleted*, #658 — and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> 0290 was already claimed by #661, so this took the next number free on `main`
+> and on the open branches. Nothing in this record changed but its number;
+> the references to it on this branch were updated with it.
 
 ## Context
 

@@ -7,7 +7,7 @@
 ## What I completed
 
 The comparison that is about a **deployment** rather than a page:
-[0289](../decisions/0289-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md),
+[0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md),
 `deploymentChangeOf(changes, rows)` in
 [`src/signals/deployment-change.ts`](../src/signals/deployment-change.ts).
 
@@ -106,7 +106,7 @@ by.
 
 ## Records added
 
-One: **0289**. `pnpm decisions:index` regenerated; `0151`–`0154` and `0278`
+One: **0291** (renumbered from 0289 at merge). `pnpm decisions:index` regenerated; `0151`–`0154` and `0278`
 still print as holes — `0278` is held by #647, which is `Loom daily build`'s and
 open, and the older gaps are the ones the numbering record allows.
 
@@ -209,7 +209,7 @@ generated: regenerate it, never hand-resolve.
 
 ## The door this lane is keeping cheap
 
-Nothing here touches it. Per-reader identity stays deferred, and nothing in 0289
+Nothing here touches it. Per-reader identity stays deferred, and nothing in 0291
 makes it dearer to add later: every figure in both orders is built out of
 counters that are already stored and already anonymous, and an identified batch
 would arrive with the same stops, the same share movements and the same door to

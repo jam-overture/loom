@@ -55420,7 +55420,7 @@ the reading is on this branch
 `deploymentChangeOf(changes, rows)` answers, for the first time, *which of my
 pages did this change help and which did it hurt* — §35 of
 [`docs/signals.md`](docs/signals.md),
-[0289](decisions/0289-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md).
+[0291](decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md).
 It is the deployment-scale twin of the order the portal already has from 0250:
 that one says where the problem is in one window, this one says what the change
 did across every page, and both rank in the same unit, so they can sit on one
