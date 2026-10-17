@@ -55411,3 +55411,97 @@ it and more bought*. It has three members and never a fourth, so a surface that
 handles `entry`, `closing` and `either` has handled all of it.
 
 ---
+## 2026-10-17 — every reading of the counters was audience-blind, and the first deployment to serve two forms of a page would have been told its surface was at fault
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-36-a-reading-is-of-one-audience`** — filed and fixed in the
+same run, and written down because it is a published verdict that was wrong
+rather than a figure that was thin
+
+0284 landed the audience on all five reader tables on 15 October and said, in
+its own consequences, that *the portal gains a dimension it must not silently
+collapse* and that *no screen reads this yet*. The store was told: `counters.ts`
+publishes `inAudience` so the memory store cannot merge two rows Postgres holds
+apart. **Nothing above the store was**, and the hole was not that the reading was
+missing — it was that every reading was confidently wrong in the same way.
+
+A page is one base tree and the deltas an audience earns (0263), so two forms
+share a tree **and** a revision, which is exactly the key every reading here
+identified a page by. For the first deployment to serve two:
+
+- `pageReadingOf` keyed its window by node id, so the second form's row for a
+  node went into `duplicated` — the one condition 0158 makes permanent — and
+  `health.ts` published `rows-mishandled`, whose remedy is **`caller`**. The
+  loudest fault in this subsystem would have fired on every page of a deployment
+  doing what it was built to do.
+- `pageViewsFor` matched on tree and revision and took `matching[0]`, so a rate
+  could be one form's `reached` over the other form's `opened`, with the pairing
+  decided by the caller's array order.
+- `funnelReachOf` dropped the other form's answer to each question as the same
+  question asked twice.
+- the order over a deployment's pages and all three library censuses deduped by
+  the same key, so the second form was in no order, no standing and no arrival
+  count.
+
+Taken as 0290 and §36: `readingKeyOf` published once and imported by the five
+places that decide what a duplicate is, `byAudience` for the split, the audience
+carried on a reading and matched in both joins, and a seventh collection fault
+for a caller that hands both forms in as one window. **Nothing was added to a
+payload, a browser, a column, a store or the vocabulary of kinds.**
+
+**The lesson, which is the half worth keeping.** A dimension added to a schema
+is not added to a subsystem. 0284's consequences named the portal as the thing
+that must not collapse the dimension, and the collapse was already five levels
+below any screen — in the readings the portal would have been reading. The next
+dimension to land on these tables should be checked against every place that
+keys a page, not against the surfaces that draw one.
+
+---
+## 2026-10-17 — every screen that reads these counters now has a dimension on it, and two of its rows are one page in two forms
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens)
+· **Status:** open — **nothing is broken and nothing is urgent**; no screen
+reads the dimension yet (0284), so this is a shape to build to rather than a fix
+
+0290 and §36 made every reading in `src/signals/` audience-aware. What that
+hands the portal, in the order it will meet it:
+
+- **Read one form at a time.** `byAudience` splits a window a deployment read
+  into one window per audience; hand each one to the readings as before and
+  every figure is correct. A screen that hands in an unsplit window gets a
+  reading of **neither** form — `PageReading.audiences` names both, every part
+  is `unknown`, and `collectionHealthOf` publishes the fault `audiences-mixed`,
+  whose remedy is `caller` and whose sentence says to split. **That fault means
+  the surface, not the deployment**, and it is the one fault here a screen
+  should fix in its own code rather than report.
+- **Two rows that are one page.** In the order over a deployment's pages
+  (`RankedPage`) and in the health reading (`PageHealth`), two forms of one page
+  are two rows with the same `treeId` and `revision` and different
+  `audienceId` — exactly as two revisions of one tree already are (0250).
+  `trees` counts the tree once. A screen keying a row by tree and revision will
+  draw one over the other; key on all three.
+- **Nothing is summed across forms and nothing should be.** A reader of one
+  form is not a reader of the other, so the two rows' losses are losses from
+  two populations. There is no net figure over them anywhere in these readings,
+  which is deliberate.
+- **`otherAudience` is not a fault.** Three readings now publish it —
+  `PageReading.otherAudience`, `PageViewsFor.otherAudience`,
+  `FunnelReach.otherAudiencePairs` — and it is *how much of the window belonged
+  to the page's other form*. It is neither `foreign` (another page) nor
+  `duplicated` (a row handed in twice), and drawing it as either would report a
+  working deployment as a broken one.
+- **An `aud_` is opaque and the portal has no name for it.** 0284 keeps the
+  predicate in the control plane, so a screen can show `aud_skiers` and nothing
+  more. Whether the control plane should carry a label for one is the control
+  plane's question and not this lane's; until it does, a screen showing two rows
+  of one page can say only *two audiences* and their ids.
+
+**What is deliberately not here**, so a screen does not wait for it: the
+comparison of two audiences. The arithmetic a change comparison uses is right
+for it and the sentence is wrong — a before-and-after holds the readership still
+and varies the tree, which is what §20 checks; an audience comparison does the
+opposite, so the movement carries two causes the counters cannot separate.
+0290's *Alternatives considered* has the argument, and it is a record of its own
+when somebody asks for the card.
+
+---
