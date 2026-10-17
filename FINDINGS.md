@@ -55411,6 +55411,173 @@ it and more bought*. It has three members and never a fourth, so a surface that
 handles `entry`, `closing` and `either` has handled all of it.
 
 ---
+## 2026-10-17 — every reading of the counters was audience-blind, and the first deployment to serve two forms of a page would have been told its surface was at fault
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-36-a-reading-is-of-one-audience`** — filed and fixed in the
+same run, and written down because it is a published verdict that was wrong
+rather than a figure that was thin
+
+0284 landed the audience on all five reader tables on 15 October and said, in
+its own consequences, that *the portal gains a dimension it must not silently
+collapse* and that *no screen reads this yet*. The store was told: `counters.ts`
+publishes `inAudience` so the memory store cannot merge two rows Postgres holds
+apart. **Nothing above the store was**, and the hole was not that the reading was
+missing — it was that every reading was confidently wrong in the same way.
+
+A page is one base tree and the deltas an audience earns (0263), so two forms
+share a tree **and** a revision, which is exactly the key every reading here
+identified a page by. For the first deployment to serve two:
+
+- `pageReadingOf` keyed its window by node id, so the second form's row for a
+  node went into `duplicated` — the one condition 0158 makes permanent — and
+  `health.ts` published `rows-mishandled`, whose remedy is **`caller`**. The
+  loudest fault in this subsystem would have fired on every page of a deployment
+  doing what it was built to do.
+- `pageViewsFor` matched on tree and revision and took `matching[0]`, so a rate
+  could be one form's `reached` over the other form's `opened`, with the pairing
+  decided by the caller's array order.
+- `funnelReachOf` dropped the other form's answer to each question as the same
+  question asked twice.
+- the order over a deployment's pages and all three library censuses deduped by
+  the same key, so the second form was in no order, no standing and no arrival
+  count.
+
+Taken as 0290 and §36: `readingKeyOf` published once and imported by the five
+places that decide what a duplicate is, `byAudience` for the split, the audience
+carried on a reading and matched in both joins, and a seventh collection fault
+for a caller that hands both forms in as one window. **Nothing was added to a
+payload, a browser, a column, a store or the vocabulary of kinds.**
+
+**The lesson, which is the half worth keeping.** A dimension added to a schema
+is not added to a subsystem. 0284's consequences named the portal as the thing
+that must not collapse the dimension, and the collapse was already five levels
+below any screen — in the readings the portal would have been reading. The next
+dimension to land on these tables should be checked against every place that
+keys a page, not against the surfaces that draw one.
+
+---
+## 2026-10-17 — every screen that reads these counters now has a dimension on it, and two of its rows are one page in two forms
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens)
+· **Status:** open — **nothing is broken and nothing is urgent**; no screen
+reads the dimension yet (0284), so this is a shape to build to rather than a fix
+
+0290 and §36 made every reading in `src/signals/` audience-aware. What that
+hands the portal, in the order it will meet it:
+
+- **Read one form at a time.** `byAudience` splits a window a deployment read
+  into one window per audience; hand each one to the readings as before and
+  every figure is correct. A screen that hands in an unsplit window gets a
+  reading of **neither** form — `PageReading.audiences` names both, every part
+  is `unknown`, and `collectionHealthOf` publishes the fault `audiences-mixed`,
+  whose remedy is `caller` and whose sentence says to split. **That fault means
+  the surface, not the deployment**, and it is the one fault here a screen
+  should fix in its own code rather than report.
+- **Two rows that are one page.** In the order over a deployment's pages
+  (`RankedPage`) and in the health reading (`PageHealth`), two forms of one page
+  are two rows with the same `treeId` and `revision` and different
+  `audienceId` — exactly as two revisions of one tree already are (0250).
+  `trees` counts the tree once. A screen keying a row by tree and revision will
+  draw one over the other; key on all three.
+- **Nothing is summed across forms and nothing should be.** A reader of one
+  form is not a reader of the other, so the two rows' losses are losses from
+  two populations. There is no net figure over them anywhere in these readings,
+  which is deliberate.
+- **`otherAudience` is not a fault.** Three readings now publish it —
+  `PageReading.otherAudience`, `PageViewsFor.otherAudience`,
+  `FunnelReach.otherAudiencePairs` — and it is *how much of the window belonged
+  to the page's other form*. It is neither `foreign` (another page) nor
+  `duplicated` (a row handed in twice), and drawing it as either would report a
+  working deployment as a broken one.
+- **An `aud_` is opaque and the portal has no name for it.** 0284 keeps the
+  predicate in the control plane, so a screen can show `aud_skiers` and nothing
+  more. Whether the control plane should carry a label for one is the control
+  plane's question and not this lane's; until it does, a screen showing two rows
+  of one page can say only *two audiences* and their ids.
+
+**What is deliberately not here**, so a screen does not wait for it: the
+comparison of two audiences. The arithmetic a change comparison uses is right
+for it and the sentence is wrong — a before-and-after holds the readership still
+and varies the tree, which is what §20 checks; an audience comparison does the
+opposite, so the movement carries two causes the counters cannot separate.
+0290's *Alternatives considered* has the argument, and it is a record of its own
+when somebody asks for the card.
+
+---
+## 2026-10-17 — nine counted readings in one body: 120 clean, 129 mangled, a bare URL mangled too, and the bracket is not the same from body to body
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling,
+and a 152-character URL that came back clean in the body that mangled a 164*
+and the four entries it extends · **Status:** open — **one hypothesis killed,
+one published bracket contradicted, and a new hypothesis that would reconcile
+every entry in this file**
+
+> **This entry was rewritten twice within ten minutes of being filed, by the
+> routine that filed it, and both corrections are the useful part.** Its first
+> version reported the short-sha remedy as having *"worked, first try"* — it did
+> not; the two links mangled again 32 characters shorter, and the claim was
+> written before the read-back that disproved it. Its second version concluded
+> the `[…](…)` construct was the variable. A bare URL then mangled as well. What
+> survives is the counted table below, which is worth more than either reading
+> taken off part of it.
+
+#661's body was posted three times, each time read back out of the GitHub API
+and counted with `len()` over the exact strings. Nine readings, one body:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 63 | `docs/signals.md`, by branch name | `[…](…)` | **clean** |
+| 82 | the preview deployment | bare | **clean** |
+| 106 | the report, by branch name | `[…](…)` | **clean** |
+| 120 | 0263, by branch name | `[…](…)` | **clean** |
+| 129 | 0284, by short sha | `[…](…)` | mangled |
+| 135 | 0290, by short sha | `[…](…)` | mangled |
+| 161 | 0284, by branch name | `[…](…)` | mangled |
+| 167 | 0290, by branch name | `[…](…)` | mangled |
+| 169 | 0290, absolute, alone on its own line | **bare** | mangled |
+
+**The `[…](…)` hypothesis is dead.** The 16 October entry's two candidates were
+*the bracket for a markdown link is 155–164 and an HTML attribute has a
+different one*, or *length is a proxy and what actually matters is the `[…](…)`
+construct*. The second is now disproved directly: a bare URL, on a line of its
+own, with no link syntax anywhere near it, came back wrapped in `` `` ``. The
+22 September entry's *a bare URL survives where a markdown link does not* holds
+only below the bound — the 82 here is clean and the 169 is not.
+
+**The short-sha remedy did not work, and that is the sharpest reading here.**
+The same two URLs were posted twice, once by branch name and once by the head
+commit's short sha, which took 167 to 135 and 161 to 129. **Both mangled both
+times**, and each kept its own injection style across the two postings: 0290
+always `` `` `` swallowing the closing paren *and* the colon after it, 0284
+always ` ``` ` around the URL alone. So the fence width is not fixed at two —
+four earlier entries record only the double — and what the span encloses is not
+fixed either. Per-link stability across two postings is new: whatever chooses
+the fence is deterministic in the URL, not in the attempt.
+
+**And this body's bracket is 120–129, which contradicts two entries that are
+not wrong.** The 15 October entry counted a 144 clean; the 16 October entry
+counted a 152 clean. Both are above everything mangled here. Those readings and
+these cannot both be a single constant threshold — and every entry in this file
+measured **a different body** and arrived at a different bracket: 133–141 on
+14 October, 144–155 on the 15th, 155–164 on the 16th, 120–129 today.
+
+**So the hypothesis worth testing next is that the bound is a property of the
+body rather than of the URL.** Something like a budget: a longer body, or one
+with more URLs in it, mangles at a lower per-URL length. It would reconcile
+every reading in this file at once instead of making four of them errors, and
+it predicts something falsifiable — **post the same URL twice, in a short body
+and a long one, and it should survive one and not the other.** Nothing here
+tests that; this body is one of the longest any routine has posted, with six
+URLs in it, and it has the lowest bracket recorded.
+
+**What a routine should do until it is settled.** Not the short-sha swap, which
+cost two postings here and bought nothing. Either keep every URL in a body well
+under 120 characters, or cite a long path the way this pull request's body now
+does: name the file in prose, and link only the directory
+(`../tree/<sha>/decisions`, 26 characters). A reader gets to the record either
+way, and nothing in the body depends on a bound nobody can state.
 ## 2026-10-16 — the morning-after screen, where two orders must not be netted into one
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —

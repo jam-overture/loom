@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest"
 import type { JsonObject } from "../json.js"
 import type { PrimitiveRole } from "../role.js"
 import { copyIn } from "../sdk/copy.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import {
+  nodeId,
+  OTHER_TREE,
+  primitiveType,
+  RIDERS,
+  SKIERS,
+  TREE,
+} from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode, SlotNode, TextNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -454,6 +461,135 @@ describe("counters that do not belong to the tree they were handed with", () => 
     expect(reading.duplicated).toEqual([nodeId("hero")])
     expect(partFor(reading, "hero")?.counters?.dwellMs).toBe(1_000)
     expect(reading.views).toBe(3)
+  })
+})
+
+describe("the audience a reading is of", () => {
+  /**
+   * A page is one base tree and the deltas an audience earns (0263), so two
+   * forms of it are two sets of counters over one tree at one revision. Every
+   * case below was, before this, the second form's rows arriving as the first
+   * form's node handed in twice.
+   */
+  const inAudience = (audienceId: typeof SKIERS, row: ReaderTally) => ({ ...row, audienceId })
+
+  it("names the audience of a window that holds one, without being asked", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [inAudience(SKIERS, tally("hero", "loom.heading", { views: 4, reached: 4 }))],
+      NOTHING_DECLARED
+    )
+
+    expect(reading.audienceId).toBe(SKIERS)
+    expect(reading.audiences).toEqual([SKIERS])
+    expect(reading.otherAudience).toBe(0)
+    expect(partFor(reading, "hero")?.standing).toBe("read")
+  })
+
+  it("names no audience for a window whose rows never carried one, and reads it whole", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [tally("hero", "loom.heading", { views: 4, reached: 4 })],
+      NOTHING_DECLARED
+    )
+
+    expect(reading.audienceId).toBeNull()
+    expect(reading.audiences).toEqual([])
+    expect(reading.otherAudience).toBe(0)
+    expect(reading.views).toBe(4)
+  })
+
+  it("reads the audience it was asked for and counts the other form's rows apart", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [
+        inAudience(SKIERS, tally("hero", "loom.heading", { views: 4, reached: 4 })),
+        inAudience(RIDERS, tally("hero", "loom.heading", { views: 9, reached: 9 })),
+        inAudience(RIDERS, tally("pricing", "loom.section", { views: 9, reached: 9 })),
+      ],
+      NOTHING_DECLARED,
+      SKIERS
+    )
+
+    expect(reading.audienceId).toBe(SKIERS)
+    expect(reading.audiences).toEqual([RIDERS, SKIERS])
+    expect(reading.otherAudience).toBe(2)
+    expect(reading.duplicated).toEqual([])
+    expect(reading.views).toBe(4)
+    expect(partFor(reading, "pricing")?.standing).toBe("skipped")
+  })
+
+  /**
+   * The two populations are not one, so the two answers are not one answer.
+   * Summing is the collapse 0284 names and picking is picking by row order, so
+   * neither is read and the caller is told what it was holding.
+   */
+  it("reads neither of two audiences handed in with none asked for", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [
+        inAudience(SKIERS, tally("hero", "loom.heading", { views: 4, reached: 4 })),
+        inAudience(RIDERS, tally("hero", "loom.heading", { views: 9, reached: 9 })),
+      ],
+      NOTHING_DECLARED
+    )
+
+    expect(reading.audienceId).toBeNull()
+    expect(reading.audiences).toEqual([RIDERS, SKIERS])
+    expect(reading.otherAudience).toBe(2)
+    expect(reading.views).toBe(0)
+    expect(reading.duplicated).toEqual([])
+    expect(partFor(reading, "hero")?.standing).toBe("unknown")
+  })
+
+  /**
+   * The guard that has to survive this change: a row handed in twice is still a
+   * row handed in twice, and 0158 makes a count that has been added permanent.
+   */
+  it("still keeps the first of one audience's two rows for a node, and names it duplicated", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [
+        inAudience(SKIERS, tally("hero", "loom.heading", { views: 3, reached: 3, dwellMs: 1_000 })),
+        inAudience(SKIERS, tally("hero", "loom.heading", { views: 2, reached: 2, dwellMs: 500 })),
+      ],
+      NOTHING_DECLARED
+    )
+
+    expect(reading.duplicated).toEqual([nodeId("hero")])
+    expect(reading.otherAudience).toBe(0)
+    expect(partFor(reading, "hero")?.counters?.dwellMs).toBe(1_000)
+  })
+
+  it("reads an audience that is in the window's column nowhere as an empty window", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [inAudience(RIDERS, tally("hero", "loom.heading", { views: 4, reached: 4 }))],
+      NOTHING_DECLARED,
+      SKIERS
+    )
+
+    expect(reading.audienceId).toBe(SKIERS)
+    expect(reading.otherAudience).toBe(1)
+    expect(reading.views).toBe(0)
+  })
+
+  it("counts another tree's row as foreign before it is anybody's audience", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [
+        {
+          ...inAudience(RIDERS, tally("hero", "loom.heading", { views: 4, reached: 4 })),
+          treeId: OTHER_TREE,
+        },
+      ],
+      NOTHING_DECLARED,
+      SKIERS
+    )
+
+    expect(reading.foreign).toBe(1)
+    expect(reading.otherAudience).toBe(0)
+    expect(reading.audiences).toEqual([])
   })
 })
 

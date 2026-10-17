@@ -3,6 +3,7 @@ import type { TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
+import { readingKeyOf } from "./audiences.js"
 import { PART_STANDINGS, type PageReading, type PartReading, type PartStanding } from "./parts.js"
 import { countWords } from "./words.js"
 
@@ -463,7 +464,7 @@ export const libraryReadingOf = (readings: readonly PageReading[]): LibraryReadi
   }
 
   for (const reading of readings) {
-    const revision = `${reading.treeId}\u0000${reading.revision}`
+    const revision = readingKeyOf(reading)
 
     if (seen.has(revision)) {
       duplicated += 1
