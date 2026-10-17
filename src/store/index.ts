@@ -20,6 +20,7 @@ export * from "../application/memory.js"
 export * from "../audience/audience.js"
 export * from "../project/project.js"
 export * from "../project/memory.js"
+export * from "../project/closing.js"
 export * from "../project/store.js"
 export * from "../application/store.js"
 

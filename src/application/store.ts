@@ -1,4 +1,5 @@
 import type { Patch } from "../patch.js"
+import type { Listing } from "../project/store.js"
 import type { Result } from "../result.js"
 
 import type { Application, ApplicationId } from "./application.js"
@@ -59,7 +60,7 @@ export const describeApplicationStoreError = (error: ApplicationStoreError): str
 }
 
 /**
- * Four methods, and **no delete**.
+ * Six methods, and still **no delete**.
  *
  * That is the same refusal `TreeStore` makes and for a stronger reason here: a
  * application's rows are its trees, its revisions, its holds, its policy history
@@ -87,7 +88,9 @@ export type ApplicationStore = {
    * needs a cursor has a different screen's problem. `TreeStore.list` takes a
    * limit because pages are unbounded in a way applications are not.
    */
-  readonly list: () => Promise<Result<readonly Application[], ApplicationStoreError>>
+  readonly list: (
+    listing?: Listing
+  ) => Promise<Result<readonly Application[], ApplicationStoreError>>
 
   /**
    * Change what a person calls it, and where they say it lives.
@@ -101,5 +104,21 @@ export type ApplicationStore = {
   readonly rename: (
     applicationId: ApplicationId,
     to: { readonly name?: string; readonly host?: Patch<string> }
+  ) => Promise<Result<Application, ApplicationStoreError>>
+
+  /**
+   * Stop it, without losing it (0289). Closed by its own id, or by its project
+   * closing — `ProjectStore.close` does this to every application it holds.
+   *
+   * Idempotent on one already closed: the instant stays where it was.
+   */
+  readonly close: (
+    applicationId: ApplicationId,
+    at: string
+  ) => Promise<Result<Application, ApplicationStoreError>>
+
+  /** The inverse, one application at a time. See `ProjectStore.reopen`. */
+  readonly reopen: (
+    applicationId: ApplicationId
   ) => Promise<Result<Application, ApplicationStoreError>>
 }

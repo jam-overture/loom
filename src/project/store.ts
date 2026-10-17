@@ -55,7 +55,34 @@ export const describeProjectStoreError = (error: ProjectStoreError): string => {
 }
 
 /**
- * Four methods, and **no delete**.
+ * What a listing is asked for (0289).
+ *
+ * Absent means **open only**, which is what every caller written before closing
+ * existed already meant. A listing that defaulted to everything would put a
+ * closed row back on the screen that closed it, and a caller that genuinely
+ * wants the audit — everything, open or not — says so.
+ */
+export type Listing = {
+  /** `true` for closed only, `false` or absent for open only, `"all"` for both. */
+  readonly closed?: boolean | "all"
+}
+
+/**
+ * Whether a row belongs in this listing, as one function both stores and both
+ * implementations use.
+ *
+ * Here rather than in each of the four, because *what `closed` means* is the
+ * kind of three-case rule that two copies agree about until somebody adds the
+ * third case to one of them.
+ */
+export const matchesListing = (closedAt: string | undefined, listing?: Listing): boolean => {
+  if (listing?.closed === "all") return true
+
+  return listing?.closed === true ? closedAt !== undefined : closedAt === undefined
+}
+
+/**
+ * Six methods, and still **no delete**.
  *
  * That is the same refusal `TreeStore` makes and for a stronger reason here: a
  * project's rows are its trees, its revisions, its holds, its policy history
@@ -83,11 +110,37 @@ export type ProjectStore = {
    * needs a cursor has a different screen's problem. `TreeStore.list` takes a
    * limit because pages are unbounded in a way projects are not.
    */
-  readonly list: () => Promise<Result<readonly Project[], ProjectStoreError>>
+  readonly list: (listing?: Listing) => Promise<Result<readonly Project[], ProjectStoreError>>
 
   /** Change what a person calls it. */
   readonly rename: (
     projectId: ProjectId,
     to: { readonly name: string }
   ) => Promise<Result<Project, ProjectStoreError>>
+
+  /**
+   * Stop it, without losing it (0289).
+   *
+   * **This closes the project row and nothing else.** Closing a project also
+   * closes the applications in it, and that cascade is `closeProject` in
+   * `src/project/closing.ts` rather than a line in here: this store knows
+   * nothing about applications, and a store that reached into another one to
+   * finish a write would be the coupling both of them are shaped to avoid.
+   *
+   * Idempotent on a project already closed — the instant is not moved, because
+   * the answer to *when did this stop* must not change because somebody pressed
+   * the button twice.
+   */
+  readonly close: (projectId: ProjectId, at: string) => Promise<Result<Project, ProjectStoreError>>
+
+  /**
+   * The inverse, and **not symmetric**: reopening a project does not reopen its
+   * applications.
+   *
+   * Closing is a statement about the project; reopening one of its applications
+   * is a decision about that application. A reopen that revived everything
+   * would turn *I want that one back* into *start collecting on all nine
+   * again*.
+   */
+  readonly reopen: (projectId: ProjectId) => Promise<Result<Project, ProjectStoreError>>
 }

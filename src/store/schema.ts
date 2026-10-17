@@ -207,6 +207,8 @@ export const loomApplications = pgTable("loom_applications", {
   createdAt: text("created_at").notNull(),
   /** Absent until the application says where it lives. */
   host: text("host"),
+  /** When it was closed, absent while it is open (0289). See `loomProjects.closedAt`. */
+  closedAt: text("closed_at"),
 })
 
 /**
@@ -221,4 +223,12 @@ export const loomProjects = pgTable("loom_projects", {
   projectId: text("project_id").primaryKey(),
   name: text("name").notNull(),
   createdAt: text("created_at").notNull(),
+  /**
+   * When it was closed, absent while it is open (0289).
+   *
+   * This store has no delete and this is what it has instead. Nullable and
+   * undefaulted, which is the honest value for every row written before closing
+   * existed: they were open, and they still are.
+   */
+  closedAt: text("closed_at"),
 })

@@ -1,6 +1,8 @@
 import { applyPatch } from "../patch.js"
 import { err, ok, type Result } from "../result.js"
 
+import { matchesListing, type Listing } from "../project/store.js"
+
 import { applicationSchema, type Application, type ApplicationId } from "./application.js"
 import type { ApplicationStore, ApplicationStoreError } from "./store.js"
 
@@ -40,9 +42,11 @@ export const memoryApplicationStore = (seed: readonly Application[] = []): Appli
 
     get: async (applicationId) => read(applicationId),
 
-    list: async () =>
+    list: async (listing?: Listing) =>
       ok(
-        [...applications.values()].sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+        [...applications.values()]
+          .filter((application) => matchesListing(application.closedAt, listing))
+          .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
       ),
 
     rename: async (applicationId, to) => {
@@ -63,6 +67,29 @@ export const memoryApplicationStore = (seed: readonly Application[] = []): Appli
 
       applications.set(applicationId, next.data)
       return ok(next.data)
+    },
+
+    /** Idempotent, and the instant does not move (0289). */
+    close: async (applicationId, at) => {
+      const found = read(applicationId)
+      if (!found.ok) return found
+      if (found.value.closedAt !== undefined) return ok(found.value)
+
+      const next = { ...found.value, closedAt: at }
+      applications.set(applicationId, next)
+
+      return ok(next)
+    },
+
+    reopen: async (applicationId) => {
+      const found = read(applicationId)
+      if (!found.ok) return found
+
+      /** Spelled as a removal rather than `closedAt: undefined`, which a strict parse refuses. */
+      const { closedAt: _was, ...open } = found.value
+      applications.set(applicationId, open)
+
+      return ok(open)
     },
   }
 }
