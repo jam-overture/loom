@@ -52066,7 +52066,32 @@ read. It is still worth a sentence in `docs/routines.md`, which is
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
 (`apps/loom/app/(marketing)/`) · **Raised by:** the maintainer, 11 October ·
-**Status:** open — **nothing is broken and nothing is blocked**; this is the one
+**Status:** **closed for this lane**, and it has been since 13 October.
+
+> **Closing note, 17 October**, by `Loom marketing` on
+> `marketing-07-the-refused-chip`. **Condition 1 is met and
+> this entry had been stale for five days**, which matters because this is the
+> file every run reads before choosing work.
+>
+> `_lib/stored.ts` seeds the three pages through the published
+> `TreeStore.create`, guarded so that a page already in the store is never
+> written over; `pageTreeFor` reads the store and falls back to the builder when
+> it is empty or unreachable; and `_lib/requested.ts` is the line this entry
+> said only this lane could draw — a stored page holds its words, its
+> arrangement and its destinations, and a request puts back the host and the
+> palette. The rearrangement was unaffected, exactly as predicted.
+>
+> **The other two conditions are not this lane's and are not claimed.**
+> Condition 2 (the portal's registry) is `Loom portal`'s and has the registry
+> clash in front of it; condition 3 (`DATABASE_URL`) is the maintainer's.
+>
+> It is the second instance of a shape this lane filed on 1 October — *a finding
+> named the remedy, said the branch had added it, and the branch had not* — in
+> the opposite direction: a finding whose remedy shipped and whose status never
+> said so. Both cost the same thing, which is a later run planning against a
+> queue that is wrong.
+
+**Original status:** open — **nothing is broken and nothing is blocked**; this is the one
 change that turns a surface into a governed one
 
 The maintainer asked for the marketing and docs surfaces to be *"hooked up to
@@ -55409,5 +55434,135 @@ with the silence's own sentence under it.
 readers reached the ask and the same share bought*, or *the same readers reached
 it and more bought*. It has three members and never a fourth, so a surface that
 handles `entry`, `closing` and `either` has handled all of it.
+
+---
+
+## 2026-10-17 — nothing in this library can say *no*, so a refusal and a page nobody has touched wear the same chip
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.badge.ts`, and the tone vocabulary generally), with the
+slot half for `Loom daily build` (`src/theme/theme.ts`) · **Status:** open —
+**the composition half is fixed on this site by
+`marketing-07-the-refused-chip`**, which uses the three tones
+there are and says in writing why that leaves one pair undistinguished
+
+### What a visitor met
+
+`/how-it-works` is where this site stops describing the product and runs it. A
+visitor picks one of six requests, the page rearranges itself, and a panel
+beside it prints what was asked, what was worked out, how much moved, which rule
+decided and what putting it back would restore. The panel's headline is a
+`loom.badge` carrying the verdict in two or three words.
+
+There are five verdicts and the badge had two treatments, because it was asked a
+boolean. Read off the built page on `main` at `c446b12`:
+
+| the page is in this state | the chip says | and wears |
+| --- | --- | --- |
+| nothing asked yet | Nothing yet | `outline` |
+| `problem`, `proof`, `calmer` | Allowed | `accent` |
+| `shorter`, `unstick-menu` | **Waiting for you** | **`outline`** |
+| the same two, approved | You said yes | `accent` |
+| `drop-pitch` | **Refused** | **`outline`** |
+
+So *your rules said no*, *your rules are waiting for you to decide* and *nobody
+has asked this page anything* were one plain pill with a different word at the
+end of it. The one that costs something is **Refused**: saying no, and saying
+which rule said it, is the thing this product has that the others do not, and at
+a glance it read as the page having done nothing.
+
+It is worse than a flat chip, because the same screen contradicts itself. On
+`/how-it-works?ask=shorter` the callout at `y 176` is the accent band — *Waiting
+for you*, with **I say yes, go ahead** in it — and the badge at `y 3436` is the
+plain pill, *Waiting for you*. One request, one verdict, two controls, opposite
+dressings, 3,260px apart.
+
+### Why this lane could not finish it
+
+**There is no tone in this library that means no.** Counted on `main`:
+
+- `loom.badge` registers `accent`, `neutral`, `outline` — and its own definition
+  says what they are for: *"an accent badge claims attention, a neutral one
+  classifies quietly, and an outline one sits on a coloured surface where a
+  filled badge would fight it."* None of the three is a refusal.
+- **Seventeen `tone`, `state` and `variant` enums across seventeen primitives,
+  twenty-three distinct members between them, and not one of the
+  twenty-three means no.** The whole vocabulary is `accent`, `canvas`, `coming`,
+  `current`, `default`, `done`, `excluded`, `floating`, `highlight`, `included`,
+  `marked`, `muted`, `neutral`, `outline`, `panel`, `plain`, `planned`,
+  `source`, `strong`, `subtle`, `surface`, `terminal`, `washed`. There is no
+  `critical`, `danger`, `warning`, `caution` or `negative` anywhere in the
+  library. The nearest thing is `loom.perk-list-item`'s `excluded`, and its own
+  comment says what it is for — a tier showing what it *lacks* — which is an
+  absence rather than a refusal.
+- **And a primitive could not paint one if it wanted to.** `paletteSlotSchema`
+  in `src/theme/theme.ts` declares seventeen slots — four surface, four
+  foreground, three accent, two brand-secondary, four border — and **not one is
+  a status colour.** Every palette must declare every slot, so this is a schema
+  change that reaches every registered palette rather than one primitive's
+  prop list.
+
+`toneFor` in `(marketing)/_lib/pages/answer.ts` recorded the same wall in its
+own words months ago — *"the library has no red and that is a recorded
+decision, so a refusal cannot be painted as a refusal"* — and settled for
+painting by whether the visitor can still act. This lane has now hit it from the
+second direction and the answer was the same both times.
+
+### What shipped here, so you can see the shape of the gap
+
+The badge is now a table over the verdict rather than a question asked of
+`record.landed`, and it spends the three treatments on the three answers a
+reader is actually asking for:
+
+| the answer | verdicts | treatment |
+| --- | --- | --- |
+| the page changed | `landed`, `approved` | `accent` |
+| your rules stepped in | `held`, `refused` | `outline` |
+| the page is as it was | `nothing-to-do`, and no request at all | `neutral` |
+
+A refusal no longer wears the chip that means *nothing has happened*, which is
+the half that was misleading a reader. **`held` and `refused` are still one
+treatment**, and that is the whole of what is being asked for here: they are
+opposite answers — one is a door held open for the visitor, the other is a door
+that does not open — and this lane has run out of ways to say so without a
+component of its own, which 0067 does not allow it.
+
+### What would close it
+
+Not necessarily red, and that is the point of filing it rather than asking for a
+colour. Three shapes, cheapest first, and the judgement is yours:
+
+1. **A fourth badge tone built from slots that already exist** — `fg-default` on
+   `bg-surface-muted` with `border-strong`, say, or any pairing the two starter
+   palettes are already held to. It separates *stopped* from *waiting* without
+   touching the palette schema, and it is one enum member plus a row in `TONES`.
+   It is also the weakest: two greys are a difference a reader has to be told
+   about.
+2. **A status slot in the palette** — one or two members on
+   `paletteSlotSchema`, declared by every registered palette, with a tone on
+   `loom.badge` and `loom.callout` that reads it. This is the honest version and
+   it is **`Loom daily build`'s**: it changes a published schema and every
+   palette has to answer for it. It is also the one that makes a refusal
+   paintable everywhere rather than on one badge.
+3. **A mark rather than a colour** — `loom.badge` is already `inline-flex` with
+   `gap: space(1)`, so it composes a `loom.icon` beside its word today and no
+   primitive has to change at all. Rejected here rather than built, because a
+   glyph chosen by one surface is a vocabulary nobody else shares, and a mark
+   that means *refused* is exactly the kind of thing that should be the
+   library's rather than this site's.
+
+**This lane's recommendation is (2), and not today.** It is a palette schema
+change and it wants the maintainer's eye on what a status colour does to two
+starter palettes whose whole argument is that they are not decorative.
+
+### Where it is held
+
+`(marketing)/_lib/pages/verdict.test.ts` holds the site's half: every answer the
+panel can give is a treatment this deployment's registry actually validates, an
+answered page is never dressed like one that was asked nothing, and a change
+that landed is never dressed like one that did not. It is deliberately silent
+about *which* treatment a verdict wears, because that is a judgement rather than
+a rule — so a fourth tone arriving in `loom.badge` is a one-line change here and
+nothing goes red on the way.
 
 ---
