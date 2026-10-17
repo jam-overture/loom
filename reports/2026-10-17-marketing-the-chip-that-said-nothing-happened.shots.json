@@ -1,0 +1,54 @@
+{
+ "baseUrl": "http://localhost:3000",
+ "outDir": "/tmp/claude-0/-home-user-loom/51c5658d-d778-5b5e-9d9a-59ba591697b5/scratchpad/shots",
+ "shots": [
+  {
+   "path": "/how-it-works#see-it-happen",
+   "out": "after-nothing-yet",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": [
+    "text=Nothing yet"
+   ]
+  },
+  {
+   "path": "/how-it-works?ask=shorter#see-it-happen",
+   "out": "after-held",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": [
+    "text=Waiting for you"
+   ]
+  },
+  {
+   "path": "/how-it-works?ask=drop-pitch#see-it-happen",
+   "out": "after-refused",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": [
+    "text=Refused"
+   ]
+  },
+  {
+   "path": "/how-it-works?ask=problem&approve=1#see-it-happen",
+   "out": "after-allowed",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": [
+    "text=Allowed"
+   ]
+  },
+  {
+   "path": "/how-it-works?ask=drop-pitch&theme=bold#see-it-happen",
+   "out": "after-refused-bold",
+   "viewport": "wide",
+   "waitFor": "h1"
+  },
+  {
+   "path": "/how-it-works?ask=drop-pitch#see-it-happen",
+   "out": "after-refused-phone",
+   "viewport": "phone",
+   "waitFor": "h1"
+  }
+ ]
+}

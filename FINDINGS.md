@@ -52066,7 +52066,32 @@ read. It is still worth a sentence in `docs/routines.md`, which is
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
 (`apps/loom/app/(marketing)/`) · **Raised by:** the maintainer, 11 October ·
-**Status:** open — **nothing is broken and nothing is blocked**; this is the one
+**Status:** **closed for this lane**, and it has been since 13 October.
+
+> **Closing note, 17 October**, by `Loom marketing` on
+> `marketing-07-the-refused-chip`. **Condition 1 is met and
+> this entry had been stale for five days**, which matters because this is the
+> file every run reads before choosing work.
+>
+> `_lib/stored.ts` seeds the three pages through the published
+> `TreeStore.create`, guarded so that a page already in the store is never
+> written over; `pageTreeFor` reads the store and falls back to the builder when
+> it is empty or unreachable; and `_lib/requested.ts` is the line this entry
+> said only this lane could draw — a stored page holds its words, its
+> arrangement and its destinations, and a request puts back the host and the
+> palette. The rearrangement was unaffected, exactly as predicted.
+>
+> **The other two conditions are not this lane's and are not claimed.**
+> Condition 2 (the portal's registry) is `Loom portal`'s and has the registry
+> clash in front of it; condition 3 (`DATABASE_URL`) is the maintainer's.
+>
+> It is the second instance of a shape this lane filed on 1 October — *a finding
+> named the remedy, said the branch had added it, and the branch had not* — in
+> the opposite direction: a finding whose remedy shipped and whose status never
+> said so. Both cost the same thing, which is a later run planning against a
+> queue that is wrong.
+
+**Original status:** open — **nothing is broken and nothing is blocked**; this is the one
 change that turns a surface into a governed one
 
 The maintainer asked for the marketing and docs surfaces to be *"hooked up to
@@ -55519,5 +55544,351 @@ Three ways out, in the order they are worth considering:
 **Recommendation: 1**, and it is what shipped. Recorded because it is the part
 of the 16 October entry that this unit did not close, and a later run reading
 that entry as closed should know which half.
+## 2026-10-17 — nothing in this library can say *no*, so a refusal and a page nobody has touched wear the same chip
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.badge.ts`, and the tone vocabulary generally), with the
+slot half for `Loom daily build` (`src/theme/theme.ts`) · **Status:** open —
+**the composition half is fixed on this site by
+`marketing-07-the-refused-chip`**, which uses the three tones
+there are and says in writing why that leaves one pair undistinguished
+
+### What a visitor met
+
+`/how-it-works` is where this site stops describing the product and runs it. A
+visitor picks one of six requests, the page rearranges itself, and a panel
+beside it prints what was asked, what was worked out, how much moved, which rule
+decided and what putting it back would restore. The panel's headline is a
+`loom.badge` carrying the verdict in two or three words.
+
+There are five verdicts and the badge had two treatments, because it was asked a
+boolean. Read off the built page on `main` at `c446b12`:
+
+| the page is in this state | the chip says | and wears |
+| --- | --- | --- |
+| nothing asked yet | Nothing yet | `outline` |
+| `problem`, `proof`, `calmer` | Allowed | `accent` |
+| `shorter`, `unstick-menu` | **Waiting for you** | **`outline`** |
+| the same two, approved | You said yes | `accent` |
+| `drop-pitch` | **Refused** | **`outline`** |
+
+So *your rules said no*, *your rules are waiting for you to decide* and *nobody
+has asked this page anything* were one plain pill with a different word at the
+end of it. The one that costs something is **Refused**: saying no, and saying
+which rule said it, is the thing this product has that the others do not, and at
+a glance it read as the page having done nothing.
+
+It is worse than a flat chip, because the same screen contradicts itself. On
+`/how-it-works?ask=shorter` the callout at `y 176` is the accent band — *Waiting
+for you*, with **I say yes, go ahead** in it — and the badge at `y 3436` is the
+plain pill, *Waiting for you*. One request, one verdict, two controls, opposite
+dressings, 3,260px apart.
+
+### Why this lane could not finish it
+
+**There is no tone in this library that means no.** Counted on `main`:
+
+- `loom.badge` registers `accent`, `neutral`, `outline` — and its own definition
+  says what they are for: *"an accent badge claims attention, a neutral one
+  classifies quietly, and an outline one sits on a coloured surface where a
+  filled badge would fight it."* None of the three is a refusal.
+- **Seventeen `tone`, `state` and `variant` enums across seventeen primitives,
+  twenty-three distinct members between them, and not one of the
+  twenty-three means no.** The whole vocabulary is `accent`, `canvas`, `coming`,
+  `current`, `default`, `done`, `excluded`, `floating`, `highlight`, `included`,
+  `marked`, `muted`, `neutral`, `outline`, `panel`, `plain`, `planned`,
+  `source`, `strong`, `subtle`, `surface`, `terminal`, `washed`. There is no
+  `critical`, `danger`, `warning`, `caution` or `negative` anywhere in the
+  library. The nearest thing is `loom.perk-list-item`'s `excluded`, and its own
+  comment says what it is for — a tier showing what it *lacks* — which is an
+  absence rather than a refusal.
+- **And a primitive could not paint one if it wanted to.** `paletteSlotSchema`
+  in `src/theme/theme.ts` declares seventeen slots — four surface, four
+  foreground, three accent, two brand-secondary, four border — and **not one is
+  a status colour.** Every palette must declare every slot, so this is a schema
+  change that reaches every registered palette rather than one primitive's
+  prop list.
+
+`toneFor` in `(marketing)/_lib/pages/answer.ts` recorded the same wall in its
+own words months ago — *"the library has no red and that is a recorded
+decision, so a refusal cannot be painted as a refusal"* — and settled for
+painting by whether the visitor can still act. This lane has now hit it from the
+second direction and the answer was the same both times.
+
+### What shipped here, so you can see the shape of the gap
+
+The badge is now a table over the verdict rather than a question asked of
+`record.landed`, and it spends the three treatments on the three answers a
+reader is actually asking for:
+
+| the answer | verdicts | treatment |
+| --- | --- | --- |
+| the page changed | `landed`, `approved` | `accent` |
+| your rules stepped in | `held`, `refused` | `outline` |
+| the page is as it was | `nothing-to-do`, and no request at all | `neutral` |
+
+A refusal no longer wears the chip that means *nothing has happened*, which is
+the half that was misleading a reader. **`held` and `refused` are still one
+treatment**, and that is the whole of what is being asked for here: they are
+opposite answers — one is a door held open for the visitor, the other is a door
+that does not open — and this lane has run out of ways to say so without a
+component of its own, which 0067 does not allow it.
+
+### What would close it
+
+Not necessarily red, and that is the point of filing it rather than asking for a
+colour. Three shapes, cheapest first, and the judgement is yours:
+
+1. **A fourth badge tone built from slots that already exist** — `fg-default` on
+   `bg-surface-muted` with `border-strong`, say, or any pairing the two starter
+   palettes are already held to. It separates *stopped* from *waiting* without
+   touching the palette schema, and it is one enum member plus a row in `TONES`.
+   It is also the weakest: two greys are a difference a reader has to be told
+   about.
+2. **A status slot in the palette** — one or two members on
+   `paletteSlotSchema`, declared by every registered palette, with a tone on
+   `loom.badge` and `loom.callout` that reads it. This is the honest version and
+   it is **`Loom daily build`'s**: it changes a published schema and every
+   palette has to answer for it. It is also the one that makes a refusal
+   paintable everywhere rather than on one badge.
+3. **A mark rather than a colour** — `loom.badge` is already `inline-flex` with
+   `gap: space(1)`, so it composes a `loom.icon` beside its word today and no
+   primitive has to change at all. Rejected here rather than built, because a
+   glyph chosen by one surface is a vocabulary nobody else shares, and a mark
+   that means *refused* is exactly the kind of thing that should be the
+   library's rather than this site's.
+
+**This lane's recommendation is (2), and not today.** It is a palette schema
+change and it wants the maintainer's eye on what a status colour does to two
+starter palettes whose whole argument is that they are not decorative.
+
+### Where it is held
+
+`(marketing)/_lib/pages/verdict.test.ts` holds the site's half: every answer the
+panel can give is a treatment this deployment's registry actually validates, an
+answered page is never dressed like one that was asked nothing, and a change
+that landed is never dressed like one that did not. It is deliberately silent
+about *which* treatment a verdict wears, because that is a judgement rather than
+a rule — so a fourth tone arriving in `loom.badge` is a one-line change here and
+nothing goes red on the way.
+## 2026-10-17 — every reading of the counters was audience-blind, and the first deployment to serve two forms of a page would have been told its surface was at fault
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-36-a-reading-is-of-one-audience`** — filed and fixed in the
+same run, and written down because it is a published verdict that was wrong
+rather than a figure that was thin
+
+0284 landed the audience on all five reader tables on 15 October and said, in
+its own consequences, that *the portal gains a dimension it must not silently
+collapse* and that *no screen reads this yet*. The store was told: `counters.ts`
+publishes `inAudience` so the memory store cannot merge two rows Postgres holds
+apart. **Nothing above the store was**, and the hole was not that the reading was
+missing — it was that every reading was confidently wrong in the same way.
+
+A page is one base tree and the deltas an audience earns (0263), so two forms
+share a tree **and** a revision, which is exactly the key every reading here
+identified a page by. For the first deployment to serve two:
+
+- `pageReadingOf` keyed its window by node id, so the second form's row for a
+  node went into `duplicated` — the one condition 0158 makes permanent — and
+  `health.ts` published `rows-mishandled`, whose remedy is **`caller`**. The
+  loudest fault in this subsystem would have fired on every page of a deployment
+  doing what it was built to do.
+- `pageViewsFor` matched on tree and revision and took `matching[0]`, so a rate
+  could be one form's `reached` over the other form's `opened`, with the pairing
+  decided by the caller's array order.
+- `funnelReachOf` dropped the other form's answer to each question as the same
+  question asked twice.
+- the order over a deployment's pages and all three library censuses deduped by
+  the same key, so the second form was in no order, no standing and no arrival
+  count.
+
+Taken as 0290 and §36: `readingKeyOf` published once and imported by the five
+places that decide what a duplicate is, `byAudience` for the split, the audience
+carried on a reading and matched in both joins, and a seventh collection fault
+for a caller that hands both forms in as one window. **Nothing was added to a
+payload, a browser, a column, a store or the vocabulary of kinds.**
+
+**The lesson, which is the half worth keeping.** A dimension added to a schema
+is not added to a subsystem. 0284's consequences named the portal as the thing
+that must not collapse the dimension, and the collapse was already five levels
+below any screen — in the readings the portal would have been reading. The next
+dimension to land on these tables should be checked against every place that
+keys a page, not against the surfaces that draw one.
+
+---
+## 2026-10-17 — every screen that reads these counters now has a dimension on it, and two of its rows are one page in two forms
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens)
+· **Status:** open — **nothing is broken and nothing is urgent**; no screen
+reads the dimension yet (0284), so this is a shape to build to rather than a fix
+
+0290 and §36 made every reading in `src/signals/` audience-aware. What that
+hands the portal, in the order it will meet it:
+
+- **Read one form at a time.** `byAudience` splits a window a deployment read
+  into one window per audience; hand each one to the readings as before and
+  every figure is correct. A screen that hands in an unsplit window gets a
+  reading of **neither** form — `PageReading.audiences` names both, every part
+  is `unknown`, and `collectionHealthOf` publishes the fault `audiences-mixed`,
+  whose remedy is `caller` and whose sentence says to split. **That fault means
+  the surface, not the deployment**, and it is the one fault here a screen
+  should fix in its own code rather than report.
+- **Two rows that are one page.** In the order over a deployment's pages
+  (`RankedPage`) and in the health reading (`PageHealth`), two forms of one page
+  are two rows with the same `treeId` and `revision` and different
+  `audienceId` — exactly as two revisions of one tree already are (0250).
+  `trees` counts the tree once. A screen keying a row by tree and revision will
+  draw one over the other; key on all three.
+- **Nothing is summed across forms and nothing should be.** A reader of one
+  form is not a reader of the other, so the two rows' losses are losses from
+  two populations. There is no net figure over them anywhere in these readings,
+  which is deliberate.
+- **`otherAudience` is not a fault.** Three readings now publish it —
+  `PageReading.otherAudience`, `PageViewsFor.otherAudience`,
+  `FunnelReach.otherAudiencePairs` — and it is *how much of the window belonged
+  to the page's other form*. It is neither `foreign` (another page) nor
+  `duplicated` (a row handed in twice), and drawing it as either would report a
+  working deployment as a broken one.
+- **An `aud_` is opaque and the portal has no name for it.** 0284 keeps the
+  predicate in the control plane, so a screen can show `aud_skiers` and nothing
+  more. Whether the control plane should carry a label for one is the control
+  plane's question and not this lane's; until it does, a screen showing two rows
+  of one page can say only *two audiences* and their ids.
+
+**What is deliberately not here**, so a screen does not wait for it: the
+comparison of two audiences. The arithmetic a change comparison uses is right
+for it and the sentence is wrong — a before-and-after holds the readership still
+and varies the tree, which is what §20 checks; an audience comparison does the
+opposite, so the movement carries two causes the counters cannot separate.
+0290's *Alternatives considered* has the argument, and it is a record of its own
+when somebody asks for the card.
+
+---
+## 2026-10-17 — nine counted readings in one body: 120 clean, 129 mangled, a bare URL mangled too, and the bracket is not the same from body to body
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling,
+and a 152-character URL that came back clean in the body that mangled a 164*
+and the four entries it extends · **Status:** open — **one hypothesis killed,
+one published bracket contradicted, and a new hypothesis that would reconcile
+every entry in this file**
+
+> **This entry was rewritten twice within ten minutes of being filed, by the
+> routine that filed it, and both corrections are the useful part.** Its first
+> version reported the short-sha remedy as having *"worked, first try"* — it did
+> not; the two links mangled again 32 characters shorter, and the claim was
+> written before the read-back that disproved it. Its second version concluded
+> the `[…](…)` construct was the variable. A bare URL then mangled as well. What
+> survives is the counted table below, which is worth more than either reading
+> taken off part of it.
+
+#661's body was posted three times, each time read back out of the GitHub API
+and counted with `len()` over the exact strings. Nine readings, one body:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 63 | `docs/signals.md`, by branch name | `[…](…)` | **clean** |
+| 82 | the preview deployment | bare | **clean** |
+| 106 | the report, by branch name | `[…](…)` | **clean** |
+| 120 | 0263, by branch name | `[…](…)` | **clean** |
+| 129 | 0284, by short sha | `[…](…)` | mangled |
+| 135 | 0290, by short sha | `[…](…)` | mangled |
+| 161 | 0284, by branch name | `[…](…)` | mangled |
+| 167 | 0290, by branch name | `[…](…)` | mangled |
+| 169 | 0290, absolute, alone on its own line | **bare** | mangled |
+
+**The `[…](…)` hypothesis is dead.** The 16 October entry's two candidates were
+*the bracket for a markdown link is 155–164 and an HTML attribute has a
+different one*, or *length is a proxy and what actually matters is the `[…](…)`
+construct*. The second is now disproved directly: a bare URL, on a line of its
+own, with no link syntax anywhere near it, came back wrapped in `` `` ``. The
+22 September entry's *a bare URL survives where a markdown link does not* holds
+only below the bound — the 82 here is clean and the 169 is not.
+
+**The short-sha remedy did not work, and that is the sharpest reading here.**
+The same two URLs were posted twice, once by branch name and once by the head
+commit's short sha, which took 167 to 135 and 161 to 129. **Both mangled both
+times**, and each kept its own injection style across the two postings: 0290
+always `` `` `` swallowing the closing paren *and* the colon after it, 0284
+always ` ``` ` around the URL alone. So the fence width is not fixed at two —
+four earlier entries record only the double — and what the span encloses is not
+fixed either. Per-link stability across two postings is new: whatever chooses
+the fence is deterministic in the URL, not in the attempt.
+
+**And this body's bracket is 120–129, which contradicts two entries that are
+not wrong.** The 15 October entry counted a 144 clean; the 16 October entry
+counted a 152 clean. Both are above everything mangled here. Those readings and
+these cannot both be a single constant threshold — and every entry in this file
+measured **a different body** and arrived at a different bracket: 133–141 on
+14 October, 144–155 on the 15th, 155–164 on the 16th, 120–129 today.
+
+**So the hypothesis worth testing next is that the bound is a property of the
+body rather than of the URL.** Something like a budget: a longer body, or one
+with more URLs in it, mangles at a lower per-URL length. It would reconcile
+every reading in this file at once instead of making four of them errors, and
+it predicts something falsifiable — **post the same URL twice, in a short body
+and a long one, and it should survive one and not the other.** Nothing here
+tests that; this body is one of the longest any routine has posted, with six
+URLs in it, and it has the lowest bracket recorded.
+
+**What a routine should do until it is settled.** Not the short-sha swap, which
+cost two postings here and bought nothing. Either keep every URL in a body well
+under 120 characters, or cite a long path the way this pull request's body now
+does: name the file in prose, and link only the directory
+(`../tree/<sha>/decisions`, 26 characters). A reader gets to the record either
+way, and nothing in the body depends on a bound nobody can state.
+## 2026-10-16 — the morning-after screen, where two orders must not be netted into one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+the reading is on this branch
+(`signals-35-what-a-change-did-across-the-deployment`), the screen is not built
+
+`deploymentChangeOf(changes, rows)` answers, for the first time, *which of my
+pages did this change help and which did it hurt* — §35 of
+[`docs/signals.md`](docs/signals.md),
+[0291](decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md).
+It is the deployment-scale twin of the order the portal already has from 0250:
+that one says where the problem is in one window, this one says what the change
+did across every page, and both rank in the same unit, so they can sit on one
+screen without a reader converting between two kinds of number.
+
+A caller holds each page's `ReadingChange` and the **later** window's page-view
+rows, and gets back `harmed` and `helped` — two orders, worst and best first —
+plus `unranked`, `worst`, `best`, the standings, and the counts of what it
+dropped.
+
+### The four refusals a card must not undo
+
+- **There is no net movement per page, and the two orders are not two halves of
+  one.** A page the change both helped and hurt stands in both, because its harm
+  and its help are two different bands; the figures are never added, subtracted
+  or netted, and `standings.ranked` counts such a page once. A card with one
+  signed arrow per page would report *nothing happened* for the commonest shape
+  a real change has — a band rewritten and a band pushed below the fold.
+- **`PageMovement.readers` is not people.** It is a share movement at the later
+  window's door scale, which is what makes two pages' movements the same kind of
+  figure (0250's rule, at the one place it bites hardest: the comparison's own
+  ranking figure looks corrected and carries a straddle). Do not round it into a
+  headcount and do not add it across pages.
+- **`unmoved` is an answer and the five silences are not.** A page nothing moved
+  is a page the change landed on without moving a reader — the cheerful answer
+  and the too-thin-window answer both, and `views.was` / `views.now` are what
+  tell them apart. `unscaled`, `unopened`, `unread`, `mispaired` and
+  `inconsistent` each name something a deployment can act on, and
+  `describeMovementStanding` has the sentence for each.
+- **A page in `ambiguous` is not a page with no movement.** It is a page handed
+  in with two comparisons — a tree live at two revisions, which the one-window
+  order deliberately keeps as two rows — and neither is this page's movement.
+  The honest row says *this page is live at two revisions; pick one*, never a
+  blank.
+
+### The one state worth a design decision rather than a rule
+
+An `inconsistent` row publishes its share movements and withholds the scaled
+ones. It is the alarm, not a page to rank, and the share beside it is still true
+of whatever assembled the reading — so a card that hides the row loses the only
+evidence of a sender that is not one, and a card that ranks it by share puts a
+fault at the top of a list of pages to fix.
 
 ---

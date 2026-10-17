@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest"
 
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import {
+  nodeId,
+  OTHER_TREE,
+  primitiveType,
+  RIDERS,
+  SKIERS,
+  TREE,
+} from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -455,6 +462,37 @@ describe("the ways a census can be handed the same thing twice", () => {
     expect(typeRow(library, "loom.section")?.placements).toBe(4)
     expect(typeRow(library, "loom.section")?.revisions).toBe(2)
     expect(typeRow(library, "loom.section")?.trees).toBe(1)
+  })
+
+  /**
+   * Two forms of one page are not a duplicate either, and for the same reason
+   * two revisions are not: a page is one base tree and the deltas an audience
+   * earns (0263), so both forms are live, both have readers, and a kind stands
+   * in each of them. Before the audience went into the key the second form was
+   * the first handed in twice, and its placements were in no census.
+   */
+  it("keeps both forms of one page as two, while counting the tree and the revision once", () => {
+    const tree = page()
+
+    const library = libraryReadingOf([
+      pageReadingOf(
+        tree,
+        [{ ...tally("page", { views: 4, reached: 4 }, tree), audienceId: SKIERS }],
+        BODY_IS_COPY,
+        SKIERS
+      ),
+      pageReadingOf(
+        tree,
+        [{ ...tally("page", { views: 9, reached: 9 }, tree), audienceId: RIDERS }],
+        BODY_IS_COPY,
+        RIDERS
+      ),
+    ])
+
+    expect(library.duplicated).toBe(0)
+    expect(library.pages).toBe(2)
+    expect(library.trees).toBe(1)
+    expect(typeRow(library, "loom.section")?.placements).toBe(4)
   })
 
   /**

@@ -423,6 +423,9 @@ describe("pageActionOf", () => {
       const page = pageActionOf({
         treeId: TREE,
         revision: 1,
+        audienceId: null,
+        audiences: [],
+        otherAudience: 0,
         views: 0,
         parts: [],
         roles: [],

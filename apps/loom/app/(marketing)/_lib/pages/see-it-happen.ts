@@ -2,7 +2,7 @@ import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } fro
 
 import { whatTheChoicesDo, whyTheyArePrepared, worthWatching } from "../adapt/answers"
 import { ASKS, type AskId } from "../adapt/asks"
-import type { ChangeRecord } from "../adapt/record"
+import type { ChangeRecord, Verdict } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
 import { heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
@@ -135,6 +135,90 @@ const stepsOf = (ids: IdFactory, record: ChangeRecord): readonly LoomNode[] =>
   )
 
 /**
+ * How the panel dresses each answer, and why it is a table over the verdict
+ * rather than a question asked of one boolean.
+ *
+ * ## What a visitor saw before this
+ *
+ * The badge was `record.landed ? "accent" : "outline"`. `landed` is true for two
+ * of the five verdicts, so the other three — *Waiting for you*, *Refused* and
+ * *Nothing to do* — came out as one chip, and that chip is also the one the
+ * panel wears before anybody has asked for anything. Four of the six things
+ * this panel can say were the same plain outline pill with a different word in
+ * it.
+ *
+ * The one that costs something is **Refused**. A refusal is the thing this
+ * product can do that the others cannot, and it was dressed exactly like
+ * *nothing has happened yet* — so the strongest moment on the site read, at a
+ * glance, as the page having done nothing.
+ *
+ * Photographed on `/how-it-works?ask=shorter` on 17 October, which is one
+ * request, one verdict and one screen: the callout at `y 176` is the accent
+ * band, *Waiting for you*, with a primary control in it; the badge at `y 3436`
+ * is the plain pill, *Waiting for you*, indistinguishable from the one three
+ * screens up that means nothing was asked.
+ *
+ * ## The three answers, and the three treatments
+ *
+ * A reader at this badge is asking one question — *what happened?* — and there
+ * are three answers to it. `loom.badge` registers three treatments, and its own
+ * definition says what each is: an accent badge claims attention, a neutral one
+ * classifies quietly, and an outline one is for a coloured surface. The panel
+ * is not a coloured surface, so `outline` here is free to mean the one thing it
+ * is doing: **your rules stepped in.**
+ *
+ * | the answer | verdicts | treatment |
+ * | --- | --- | --- |
+ * | the page changed | `landed`, `approved` | `accent` |
+ * | your rules stepped in | `held`, `refused` | `outline` |
+ * | the page is as it was | `nothing-to-do`, and no request at all | `neutral` |
+ *
+ * **`held` and `refused` are still one treatment, and that is a library gap
+ * rather than a judgement.** Nothing in this repository can say *no* in a
+ * colour: `loom.badge` has three tones, no primitive anywhere has a fourth
+ * meaning refusal, and the palette's eighteen slots do not include a status
+ * colour, so a primitive could not paint one if it wanted to. `toneFor` in
+ * `./answer.ts` records the same limit in its own words — *the library has no
+ * red* — and settled for the same thing. Filed for `Loom primitives`, with the
+ * slot half for `Loom daily build`; not worked around here, because the
+ * workaround is a component of this lane's own and 0067 does not allow one.
+ *
+ * ## Why this is not `toneFor`
+ *
+ * `./answer.ts` exports `toneFor` and argues it at length, and it would be a
+ * reasonable mistake to reach for it here. It answers a different question:
+ * *can the visitor still act on this?* — which is why it paints a held change
+ * the accent, the same as one that landed. On the band it dresses that is
+ * right, because that band is where the *I say yes, go ahead* button is and the
+ * accent is what carries the eye to it.
+ *
+ * This badge is not offering a control. It is the panel's headline, read before
+ * the five lines under it, and the thing it has to get across is what the rules
+ * did. A held change and a landed one are opposite answers to that, so painting
+ * them alike is the one thing it must not do. `verdict.test.ts` holds both
+ * predicates and asserts that they disagree about `held`, so neither can be
+ * collapsed into the other by a run that notices they look similar.
+ */
+const BADGE_TONE = {
+  landed: "accent",
+  approved: "accent",
+  held: "outline",
+  refused: "outline",
+  "nothing-to-do": "neutral",
+} as const satisfies Record<Verdict, "accent" | "neutral" | "outline">
+
+/**
+ * What the panel wears before a request has been made.
+ *
+ * Not a sixth row of the table above, because it is not a verdict: no request
+ * has been assessed and there is nothing for the rules to have decided. It is
+ * the same treatment as `nothing-to-do` on purpose — both say *the page is as
+ * it was* — and `verdict.test.ts` holds it to being unlike every verdict where
+ * something did happen.
+ */
+const NOTHING_YET_TONE = "neutral"
+
+/**
  * What the panel says before the visitor has asked for anything — which is the
  * state every visitor, every crawler and every share preview meets first.
  *
@@ -172,7 +256,7 @@ const waiting = (ids: IdFactory): readonly LoomNode[] => [
   stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
     buildElement(ids, {
       type: "loom.badge",
-      props: { tone: "outline" },
+      props: { tone: NOTHING_YET_TONE },
       children: [buildText(ids, "Nothing yet")],
     }),
     prose(ids, "What the page will write down", { size: "small", tone: "muted" }),
@@ -188,7 +272,7 @@ const waiting = (ids: IdFactory): readonly LoomNode[] => [
 const verdictBadge = (ids: IdFactory, record: ChangeRecord): LoomNode =>
   buildElement(ids, {
     type: "loom.badge",
-    props: { tone: record.landed ? "accent" : "outline" },
+    props: { tone: BADGE_TONE[record.verdict] },
     children: [buildText(ids, record.verdictLabel)],
   })
 
