@@ -167,13 +167,12 @@ itself, in the format a machine reads as fact, as this product.
 
 ## Environment
 
-`apps/loom/.env.example` is the full list with the commentary. Five variables,
-two of which are required:
+`apps/loom/.env.example` is the full list with the commentary. Six variables,
+**one** of which is required:
 
 | Variable                         | Required | Notes                                   |
 | -------------------------------- | -------- | --------------------------------------- |
 | `LOOM_PORTAL_SESSION_SECRET`     | **yes**  | Signs sessions. ≥ 32 chars              |
-| `LOOM_PORTAL_REVIEWERS`          | **yes**  | `actor:key` pairs. Keys ≥ 24 chars      |
 | `LOOM_ANTHROPIC_API_KEY`         | no       | Falls back to `ANTHROPIC_API_KEY`       |
 | `DATABASE_URL`                   | no       | Absent means memory — see below         |
 | `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
@@ -194,39 +193,72 @@ not show a tree to someone it cannot name.
 
 ```bash
 openssl rand -hex 32   # LOOM_PORTAL_SESSION_SECRET
-openssl rand -hex 24   # one key per reviewer
 ```
 
-```
-LOOM_PORTAL_REVIEWERS=ana@example.com:2f4c…,bo@example.com:9ab1…
+**An account is a row, not a variable**
+([0285](../decisions/0285-an-account-is-a-row-with-a-minted-key-and-a-role-is-a-ceiling-on-the-gates-own-scale.md)),
+so there is a second step and it is a command rather than an edit:
+
+```bash
+pnpm db:push                               # once, so the tables exist
+pnpm portal:account ana@example.com        # prints a key, once
 ```
 
-The key **is** the identity. A reviewer pastes a key at `/portal/sign-in` and the roster
-says who that is — there is no name field, because a name that can be typed is a
-name anyone can type. The actor lands in `Provenance.actor` and is what
-`/portal/history` and `/portal/activity` show, so pick something a reader will recognise.
+The key **is** the identity. Somebody pastes it at `/portal/sign-in` and the
+accounts table says who that is — there is no name field, because a name that
+can be typed is a name anyone can type. The actor lands in `Provenance.actor`,
+so pick something a reader will recognise.
 
-**Set both, or the portal admits nobody.** This is the one place where absent
-configuration does not degrade gracefully, and that is deliberate: an empty
-`DATABASE_URL` announces itself the moment a write vanishes, whereas a portal
-that fell back to open access would look exactly like one that is working. The
-sign-in page names whichever variable is missing.
+**It is printed once and stored as a digest**, which means there is nowhere to
+read it back from. Somebody who loses one is given another, and the one they
+lost stops working — run the same command again with the same actor, which is
+the whole of what rotation is here.
+
+Add a role at the same time, when you already know the project:
+
+```bash
+pnpm portal:account ana@example.com prj_a1b2c3 owner
+```
+
+`viewer`, `approver` or `owner` — an acceptance ceiling on the Gate's own stake
+scale rather than a second permission system. Whoever registers a project is
+made its owner without this.
+
+**Set the secret, or the portal admits nobody.** This is the one place where
+absent configuration does not degrade gracefully, and that is deliberate: an
+empty `DATABASE_URL` announces itself the moment a write vanishes, whereas a
+portal that fell back to open access would look exactly like one that is
+working. The sign-in page names the variable when it is missing.
 
 Consequences worth knowing before you rely on it:
 
-- **Adding or removing a reviewer is a redeploy.** The roster is configuration.
-- **Rotating the session secret signs everyone out.** It is the only way to
-  invalidate an outstanding session; there is no per-session revocation.
-- **A leaked key is a leaked identity** until you rotate that key. Treat pasting
-  one anywhere as a rotation trigger, exactly like the database password.
+- **The portal needs a database to admit anybody.** An account is a row and the
+  command that mints one writes to Postgres, so a deployment with no
+  `DATABASE_URL` has an accounts table nothing can put a row in. It says so in
+  those words rather than answering *that key was not recognised*. This is the
+  one thing that changed when the roster went: it used to work without one,
+  because it was configuration.
+- **Adding or removing somebody is a command, not a redeploy.** That is the
+  other thing that changed.
+- **Rotating the session secret signs everyone out** — and no longer locks
+  anyone out. Keys are digested unkeyed precisely so that rotating the secret
+  ends every session rather than every account.
+- **A leaked key is a leaked identity** until you mint a new one for that actor.
+  Treat pasting one anywhere as a rotation trigger, exactly like the database
+  password.
 - **Sessions last twelve hours** and do not renew themselves by being used.
 
 ### The sign-in throttle
 
 Five failures from one caller inside an hour, and the sixth is refused for a
 minute — doubling to a quarter of an hour, and forgotten after an hour of
-silence (0034). A correct key clears the count, so a reviewer who mistypes and
+silence (0034). A correct key clears the count, so somebody who mistypes and
 then gets it right starts clean.
+
+**An unreachable accounts table is not a failed attempt.** The lookup can fail
+now that it is a table, and a failure refuses the sign-in without counting
+against the caller — otherwise an outage would leave everyone who tried during
+it part-way to a lockout for something they did not do.
 
 Two things to know before you rely on it:
 
@@ -246,7 +278,7 @@ clears every outstanding lockout as well as every session.
 
 A caller who rotates addresses evades it, which is why the deliberate
 non-decision in 0034 is worth knowing: there is no global cap, because a global
-cap is a lockout of every reviewer that any anonymous caller could trigger.
+cap is a lockout of everybody that any anonymous caller could trigger.
 Vercel's Deployment Protection in front of this is still worth having.
 
 ## The database
@@ -320,9 +352,14 @@ Three so far, and the last two are the ones to get right:
   proposal writes.
 - `loom_signin_attempts` (0034). **Miss this one and nobody can sign in.** The
   throttle fails closed by design — an attempt it cannot count is refused rather
-  than allowed uncounted — so a database configured without this table admits no
-  reviewer at all. The sign-in page says as much and names `db:push`; running it
+  than allowed uncounted — so a database configured without this table admits
+  nobody at all. The sign-in page says as much and names `db:push`; running it
   fixes it in seconds.
+- `loom_portal_accounts` and `loom_portal_memberships` (0285). **Miss these and
+  nobody can sign in either**, for a different reason: who may sign in is a
+  table now rather than a variable, and there is nowhere to put the row that
+  `pnpm portal:account` writes. These two are the portal's own, like the attempt
+  log above and unlike everything else on this list.
 - `loom_holds` (0088), which is where a change the Gate held back waits for the
   human who answers it. **Only a deployment that uses `postgresHoldStore` needs
   it**, and one that stays on the in-memory store keeps working without it — but
