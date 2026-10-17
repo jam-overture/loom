@@ -243,11 +243,46 @@ comment: whether refusing a mixed window is too strong for a pre-production
 alpha, whether two forms of a page should stand as two rows in the order over a
 deployment's pages, and whether the audience comparison is wanted next.
 
+## §35 merged into this branch mid-run, and brought the same defect with it
+
+**This is the part of the run worth reading twice.** #659 — the two orders a
+change makes over a deployment's pages, 0291 — merged into `main` while this
+branch was open, and `main` was merged in here. That brought
+`deployment-change.ts`, written against the readings as they were before this
+unit, and it had the defect this unit exists to remove **in two shapes**:
+
+- its comparison key was the page and the two revisions, so two forms of a page
+  compared over the same pair made the second form's comparison *the first one
+  handed in twice*;
+- its ambiguity gate grouped by **tree**, so two forms compared over
+  *different* revision pairs made the page `ambiguous` and **both** forms were
+  dropped from both orders, from the standings and from the arrivals;
+- and it rebuilt the door's asking from the tree and revision alone, discarding
+  the audience the progress reading now carries, so a movement could be scaled
+  by the other form's arrival count.
+
+The fix needed **one more rule beside `readingKeyOf` rather than a sixth
+spelling of it**, and that distinction is clause 7 of 0290. `formKeyOf` is *a
+page in one of its forms* — tree and audience, **no revision** — because a
+comparison spans two revisions and the ambiguity being gated is about one form
+holding two of those pairs. `readingKeyOf` answers *what is one reading*, where
+the revision is part of the identity; collapsing the two would have keyed an
+ambiguity gate on the very thing the gate ranges over. Four more tests, and two
+planted mutations (the form key dropping the audience, the door's asking
+dropping it) each caught by three of them.
+
+**The lesson, which I have put in 0290's consequences.** A published key stops
+two places disagreeing only once both import it, and a branch open across the
+landing of another is exactly where that fails quietly. My own PR body claimed
+the rule was published once and imported by every place that decides what a
+duplicate is; for about five hours, after #659 landed, that claim was false.
+
 ## Beside the framework lane
 
-**#659 is this lane's own and was open through this run** — §35, the two orders
-a change makes over a deployment's pages. It took that number, so this took §36
-rather than racing it. It touches `src/signals/deployment-change.ts`,
+**#659 was this lane's own and has since merged**, as 0291 rather than the 0289
+it was written as — which left 0290 to this record, so nothing here was
+renumbered. It took §35, so this took §36 rather than racing it. The section
+above has what its merge cost. It touches `src/signals/deployment-change.ts`,
 `silences.ts`, `silences.test.ts` and `index.ts`; this branch touches
 `index.ts` too — one export line in a sorted list — and nothing else of its.
 No new silence vocabulary is added here, deliberately: `audiences-mixed` is a

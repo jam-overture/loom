@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest"
 
 import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { treeIdSchema, type TreeId } from "../ids.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import {
+  nodeId,
+  OTHER_TREE,
+  primitiveType,
+  RIDERS,
+  SKIERS,
+  TREE,
+} from "../testing/reader-signal-contract.js"
 import type { ElementNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -431,6 +438,111 @@ describe("deploymentChangeOf", () => {
     expect(reading.unranked).toEqual([])
     expect(reading.arrivals).toBe(100)
     expect(reading.duplicated).toBe(0)
+  })
+
+  /**
+   * A page is one base tree and the deltas an audience earns (0263), so two
+   * forms of it are compared over the same two revisions and each movement is
+   * somebody's. Before the audience was part of the pairing, the second form's
+   * comparison was the first one handed in twice — or, where the two forms were
+   * compared over different revision pairs, the tree was `ambiguous` and both
+   * forms were lost.
+   */
+  describe("a page served in two forms", () => {
+    const servedTo = (audienceId: typeof SKIERS, treeId: TreeId, reached: readonly number[], revision: number) =>
+      pageReadingOf(
+        treeOf(treeId, revision, reached.length),
+        reached.flatMap((count, at) =>
+          count > 0 ? [{ ...tally(treeId, revision, `band${at + 1}`, count), audienceId }] : []
+        ),
+        NOTHING_DECLARED,
+        audienceId
+      )
+
+    const changeFor = (
+      audienceId: typeof SKIERS,
+      treeId: TreeId,
+      was: readonly number[],
+      now: readonly number[],
+      revisions: { readonly was: number; readonly now: number } = { was: 1, now: 2 }
+    ): ReadingChange =>
+      readingChangeOf(
+        servedTo(audienceId, treeId, was, revisions.was),
+        servedTo(audienceId, treeId, now, revisions.now)
+      )
+
+    const inAudience = (audienceId: typeof SKIERS, row: StoredPageViews): StoredPageViews => ({
+      ...row,
+      audienceId,
+    })
+
+    it("ranks both forms, each scaled by its own door row, and counts neither as a repeat", () => {
+      const reading = deploymentChangeOf(
+        [
+          changeFor(SKIERS, TREE, [100, 100], [100, 40]),
+          changeFor(RIDERS, TREE, [100, 20], [100, 90]),
+        ],
+        [inAudience(SKIERS, exact(TREE, 2, 100)), inAudience(RIDERS, exact(TREE, 2, 200))]
+      )
+
+      expect(reading.duplicated).toBe(0)
+      expect(reading.duplicatedRows).toBe(0)
+      expect(reading.ambiguous).toEqual([])
+      expect(reading.compared).toBe(2)
+      expect(reading.harmed.map((row) => row.audienceId)).toEqual([SKIERS])
+      expect(reading.helped.map((row) => row.audienceId)).toEqual([RIDERS])
+    })
+
+    /**
+     * The door row is the sharpest of these: the two forms' rows carry
+     * different arrival counts, so taking the wrong one scales a movement by a
+     * readership that is not its own.
+     */
+    it("adds each form's arrivals, rather than one form's row twice", () => {
+      const reading = deploymentChangeOf(
+        [
+          changeFor(SKIERS, TREE, [100, 100], [100, 40]),
+          changeFor(RIDERS, TREE, [100, 20], [100, 90]),
+        ],
+        [inAudience(SKIERS, exact(TREE, 2, 100)), inAudience(RIDERS, exact(TREE, 2, 200))]
+      )
+
+      expect(reading.arrivals).toBe(300)
+      expect(reading.harmed[0]?.opened).toBe(100)
+      expect(reading.helped[0]?.opened).toBe(200)
+    })
+
+    it("holds one form ambiguous without losing the other, and names the page once", () => {
+      const reading = deploymentChangeOf(
+        [
+          changeFor(SKIERS, TREE, [100, 100], [100, 40], { was: 1, now: 2 }),
+          changeFor(SKIERS, TREE, [100, 100], [100, 90], { was: 1, now: 3 }),
+          changeFor(RIDERS, TREE, [100, 20], [100, 90], { was: 1, now: 2 }),
+        ],
+        [
+          inAudience(SKIERS, exact(TREE, 2, 100)),
+          inAudience(SKIERS, exact(TREE, 3, 100)),
+          inAudience(RIDERS, exact(TREE, 2, 200)),
+        ]
+      )
+
+      expect(reading.ambiguous).toEqual([TREE])
+      expect(reading.compared).toBe(1)
+      expect(reading.helped.map((row) => row.audienceId)).toEqual([RIDERS])
+      expect(reading.arrivals).toBe(200)
+    })
+
+    it("still reads one form handed in twice as one comparison", () => {
+      const once = changeFor(SKIERS, TREE, [100, 100], [100, 40])
+      const reading = deploymentChangeOf(
+        [once, once],
+        [inAudience(SKIERS, exact(TREE, 2, 100))]
+      )
+
+      expect(reading.duplicated).toBe(1)
+      expect(reading.compared).toBe(1)
+      expect(reading.arrivals).toBe(100)
+    })
   })
 
   describe("the standings this order publishes", () => {

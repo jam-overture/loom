@@ -55475,7 +55475,8 @@ hands the portal, in the order it will meet it:
   the surface, not the deployment**, and it is the one fault here a screen
   should fix in its own code rather than report.
 - **Two rows that are one page.** In the order over a deployment's pages
-  (`RankedPage`) and in the health reading (`PageHealth`), two forms of one page
+  (`RankedPage`), in the order over its *changed* pages (`MovedPage`, both of
+  0291's orders) and in the health reading (`PageHealth`), two forms of one page
   are two rows with the same `treeId` and `revision` and different
   `audienceId` — exactly as two revisions of one tree already are (0250).
   `trees` counts the tree once. A screen keying a row by tree and revision will
@@ -55630,5 +55631,85 @@ ones. It is the alarm, not a page to rank, and the share beside it is still true
 of whatever assembled the reading — so a card that hides the row loses the only
 evidence of a sender that is not one, and a card that ranks it by share puts a
 fault at the top of a list of pages to fix.
+
+---
+## 2026-10-17 — the published key was imported by five readings and a sixth landed on `main` the same day without it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-36-a-reading-is-of-one-audience`** — found when `main` was
+merged into that branch, fixed in the same unit as clause 7 of 0290, and written
+down because the failure mode is about *process* rather than about audiences
+
+0290 publishes `readingKeyOf` once and has five readings import it, on the
+argument that five spellings of what makes two readings one page are five places
+to drift. **While that branch was open, #659 merged a sixth** —
+`deployment-change.ts`, the order over a deployment's changed pages (0291) —
+written against the readings as they were, with its own key and its own
+ambiguity gate.
+
+It was wrong in two shapes, and the second is worse than anything 0290 found:
+
+- the comparison key was the page and the two revisions, so two forms of a page
+  compared over the same pair made the second form's comparison the first one
+  handed in twice;
+- the ambiguity gate grouped by **tree**, so two forms compared over *different*
+  revision pairs made the page `ambiguous` and **both** were dropped — out of
+  both orders, the standings and the arrivals;
+- and the door's asking was rebuilt from tree and revision alone, discarding the
+  audience the progress reading carries, so a movement could be scaled by the
+  other form's arrival count.
+
+Fixed with `formKeyOf` beside `readingKeyOf` rather than a sixth spelling of it,
+for a reason worth keeping: the two answer different questions. `readingKeyOf`
+is *what is one reading*, where a revision is part of the identity.  `formKeyOf`
+is *what is one page in one form*, with no revision in it, because a comparison
+spans two revisions and the ambiguity being gated is about one form holding two
+of those pairs. 0291 is **not superseded**; nothing it decided was wrong.
+
+**The lesson, which is why this is filed rather than quietly fixed.** A
+published key stops two places disagreeing only once both places import it, and
+**a branch open across the landing of another branch is exactly where that
+fails quietly** — the new file typechecked, its 25 tests passed, and nothing in
+either diff touched the other's lines. Nothing but reading the merged head would
+have caught it. A routine whose branch outlives another's merge should re-read
+its own record's claims against what arrived, not just re-run the suite.
+
+---
+## 2026-10-17 — a change comparison whose two sides name different audiences is a cross-population comparison wearing a before-and-after's clothes
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/change.ts`)
+· **Status:** open — **nothing is broken today and nothing is urgent**; a guard
+worth adding the next time that file is open, with the argument already written
+
+`readingChangeOf(was, now)` takes two readings and compares them. Since 0290
+each reading names the audience it is of, which makes a new caller error
+expressible and undetected: **handing in one form's earlier window and another
+form's later one.** The arithmetic runs, every figure is produced, and what
+comes back is labelled as what a change did.
+
+It is the exact confusion 0290's *Alternatives considered* argues about from the
+other direction. A before-and-after holds the readership still and varies the
+tree, which is why §20's readership reading exists to check that assumption; a
+comparison across two audiences varies the readership **by construction**. A
+mismatched pair is the second thing presented as the first, with no `null` and
+no silence anywhere on it.
+
+**Why it was not fixed in 0290's unit.** `change.ts` is upstream of everything
+this unit touched and nothing in the unit needed it: the order over a
+deployment's changed pages keys on the *later* side's audience, so a mismatched
+pair is at worst mis-filed there rather than mis-read. Adding a silence to
+`change.ts` means a member in a published vocabulary and a decision about
+whether a mismatch is a silence or a refusal, which is a unit rather than a
+line.
+
+**The shape, if it is taken:** a mismatch is probably a **refusal** rather than
+a silence, on the reasoning 0290 used for a mixed window — both available
+answers (pick one side's audience, or publish the comparison unlabelled) hand a
+surface a number about two populations. The counter-argument is that `changeOf`
+has no concept of refusing today and every one of its figures is honest about
+its own side, so a silence naming the mismatch may be enough. Worth checking
+whether `copy-change`, `pace-change`, `action-change` and the four library
+comparisons take their pairs the same way; they likely do, which would make this
+one decision over eight functions rather than one.
 
 ---
