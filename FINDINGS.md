@@ -55411,3 +55411,57 @@ it and more bought*. It has three members and never a fourth, so a surface that
 handles `entry`, `closing` and `either` has handled all of it.
 
 ---
+## 2026-10-16 — the morning-after screen, where two orders must not be netted into one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+the reading is on this branch
+(`signals-35-what-a-change-did-across-the-deployment`), the screen is not built
+
+`deploymentChangeOf(changes, rows)` answers, for the first time, *which of my
+pages did this change help and which did it hurt* — §35 of
+[`docs/signals.md`](docs/signals.md),
+[0291](decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md).
+It is the deployment-scale twin of the order the portal already has from 0250:
+that one says where the problem is in one window, this one says what the change
+did across every page, and both rank in the same unit, so they can sit on one
+screen without a reader converting between two kinds of number.
+
+A caller holds each page's `ReadingChange` and the **later** window's page-view
+rows, and gets back `harmed` and `helped` — two orders, worst and best first —
+plus `unranked`, `worst`, `best`, the standings, and the counts of what it
+dropped.
+
+### The four refusals a card must not undo
+
+- **There is no net movement per page, and the two orders are not two halves of
+  one.** A page the change both helped and hurt stands in both, because its harm
+  and its help are two different bands; the figures are never added, subtracted
+  or netted, and `standings.ranked` counts such a page once. A card with one
+  signed arrow per page would report *nothing happened* for the commonest shape
+  a real change has — a band rewritten and a band pushed below the fold.
+- **`PageMovement.readers` is not people.** It is a share movement at the later
+  window's door scale, which is what makes two pages' movements the same kind of
+  figure (0250's rule, at the one place it bites hardest: the comparison's own
+  ranking figure looks corrected and carries a straddle). Do not round it into a
+  headcount and do not add it across pages.
+- **`unmoved` is an answer and the five silences are not.** A page nothing moved
+  is a page the change landed on without moving a reader — the cheerful answer
+  and the too-thin-window answer both, and `views.was` / `views.now` are what
+  tell them apart. `unscaled`, `unopened`, `unread`, `mispaired` and
+  `inconsistent` each name something a deployment can act on, and
+  `describeMovementStanding` has the sentence for each.
+- **A page in `ambiguous` is not a page with no movement.** It is a page handed
+  in with two comparisons — a tree live at two revisions, which the one-window
+  order deliberately keeps as two rows — and neither is this page's movement.
+  The honest row says *this page is live at two revisions; pick one*, never a
+  blank.
+
+### The one state worth a design decision rather than a rule
+
+An `inconsistent` row publishes its share movements and withholds the scaled
+ones. It is the alarm, not a page to rank, and the share beside it is still true
+of whatever assembled the reading — so a card that hides the row loses the only
+evidence of a sender that is not one, and a card that ranks it by share puts a
+fault at the top of a list of pages to fix.
+
+---

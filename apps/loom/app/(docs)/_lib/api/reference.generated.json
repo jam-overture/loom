@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8457,7 +8457,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9287,7 +9287,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9718,7 +9718,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9957,7 +9957,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 59,
+      "files": 60,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9970,7 +9970,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10671,6 +10671,76 @@
               "signature": "const deploymentReadingOf: (pages: readonly ReadingProgress[], rows: readonly StoredPageViews[]) => DeploymentReading",
               "truncated": false,
               "summary": "A deployment's pages, in the order they should be looked at."
+            }
+          ]
+        },
+        {
+          "module": "signals/deployment-change",
+          "title": "Deployment change",
+          "summary": "Which of a deployment's pages a change helped, and which it hurt.",
+          "symbols": [
+            {
+              "name": "DeploymentChangeSilence",
+              "kind": "type",
+              "signature": "type DeploymentChangeSilence = \n/**\n * One of the two windows reported no view of its revision, so there was\n * nothing to compare.\n *\n * The comparison's own reason, carried through on the row rather than\n * restated: a surface that wants to say which window was quiet reads the\n * floors beside it.\n */\n\"unread\"\n/**\n * The two readings are of two different pages, so the comparison is not a\n * movement of anything.\n *\n * A caller's pairing fault and never a state of a deployment's readers. It is\n * in the standings rather than dropped, because an order that silently shed a\n * mispaired comparison would answer *your deployment has thirty-nine pages*.\n */\n | \"mispaired\"\n/**\n * There is no page-view row at the door for the later revision, so this\n * page's movement cannot be put on the same scale as another's.\n *\n * Not a page that was not measured. Its comparison is as good as any other's\n * and every share in it stands; what is missing is the one number that makes\n * two pages' movements the same kind of figure.\n */\n | \"unscaled\"\n/**\n * The later window's door row is there and nothing in it says a page view\n * ever began.\n *\n * Either nobody read the new revision, or the senders are not marking their\n * openings — and the page-view reading publishes both numbers, so the\n * diagnosis is a subtraction a surface can make.\n */\n | \"unopened\"\n/**\n * A stop reports more readers in the later window than the door has ever seen\n * appear, which no rollup produces.\n *\n * A reading assembled by hand or by a sender that is not one. The share\n * movements are published and the scaled figures are withheld, because they\n * are the ones the disagreement makes absurd.\n */\n | \"inconsistent\";",
+              "truncated": false,
+              "summary": "A reason a page is in neither order."
+            },
+            {
+              "name": "DEPLOYMENT_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const DEPLOYMENT_CHANGE_SILENCES: readonly DeploymentChangeSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "MovementStanding",
+              "kind": "type",
+              "signature": "type MovementStanding = \n/** In at least one of the orders, with a movement and a scale for it. */\n\"ranked\"\n/**\n * Compared, scalable, and no stop moved by as much as one reader.\n *\n * The answer a change that landed on nothing gives, and the answer a window\n * too thin to show a movement gives as well. The two view floors on the row\n * are what tell them apart.\n */\n | \"unmoved\" | DeploymentChangeSilence;",
+              "truncated": false,
+              "summary": "Where one page stands in the two orders, or why it is in neither."
+            },
+            {
+              "name": "MOVEMENT_STANDINGS",
+              "kind": "value",
+              "signature": "const MOVEMENT_STANDINGS: readonly MovementStanding[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeMovementStanding",
+              "kind": "function",
+              "signature": "const describeMovementStanding: (standing: MovementStanding) => string",
+              "truncated": false,
+              "summary": "One line per standing, for a surface naming why a page is where it is."
+            },
+            {
+              "name": "PageMovement",
+              "kind": "type",
+              "signature": "type PageMovement = {\n    /**\n     * The pair of siblings it happened at, carried through from the comparison\n     * unchanged.\n     *\n     * Both of its sides are there, so a surface naming the band can also print\n     * what each window measured without a second lookup.\n     */\n    readonly at: ComparedStop;\n    /**\n     * How much of the page's readers moved, as a share, with the direction in the\n     * name rather than in the sign.\n     *\n     * The magnitude of the comparison's own share movement, which is sound\n     * on its own: each side is a fall off its own rows, so each window's straddle\n     * divided out before the two met. Published even where the scaled figure is\n     * withheld.\n     */\n    readonly share: number;\n    /**\n     * The same movement as readers, at the later window's door scale, or `null`\n     * where this page has no scale.\n     *\n     * The key the orders are on. A magnitude and not a count of people: it is a\n     * share times a count of views, restated at the scale the door counts in, and\n     * it is deliberately not rounded. **Never added across pages or across the\n     * two orders** — one reader is in every stop they walked past.\n     */\n    readonly readers: number | null;\n};",
+              "truncated": false,
+              "summary": "One page's sharpest movement in one direction."
+            },
+            {
+              "name": "MovedPage",
+              "kind": "type",
+              "signature": "type MovedPage = {\n    /** The page, which is the earlier reading's tree. */\n    readonly treeId: TreeId;\n    /** The two revisions compared, which may be the same one read in two windows. */\n    readonly revisions: {\n        readonly was: number;\n        readonly now: number;\n    };\n    readonly standing: MovementStanding;\n    /**\n     * Each window's view floor, carried through from its own reading unchanged.\n     *\n     * Floors and not counts, which is why neither is the denominator of anything\n     * here. They are what tells a steady page from a window too quiet to have\n     * shown a movement.\n     */\n    readonly views: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /**\n     * Page views counted at the later door, exact, or `null` where that revision\n     * has no row.\n     *\n     * The weight behind the row: *of the eleven hundred readers this revision\n     * had*, where the figures beside it are stated at this number's scale.\n     */\n    readonly opened: number | null;\n    /** The later window's own straddle rate, which is what scales the movements. */\n    readonly inflation: number | null;\n    /**\n     * The comparison's own reason for saying nothing, where it gave one.\n     *\n     * Carried rather than translated, because a standing says what this order\n     * does with the page and the comparison's silence says what the comparison\n     * found. A surface printing one sentence prints this one.\n     */\n    readonly silence: ChangeSilence | null;\n    /** The stop the change costs most readers at, where it worsened one. */\n    readonly worsened: PageMovement | null;\n    /** The stop it keeps most readers at, where it improved one. */\n    readonly improved: PageMovement | null;\n};",
+              "truncated": false,
+              "summary": "One page of a deployment, as a change left it."
+            },
+            {
+              "name": "DeploymentChange",
+              "kind": "type",
+              "signature": "type DeploymentChange = {\n    /**\n     * Every page the change cost readers, worst first.\n     *\n     * Most readers lost at the door's scale, then the larger share, then by tree\n     * id and newest later revision first — so two pages the change cost the same\n     * do not reorder on a refresh.\n     */\n    readonly harmed: readonly MovedPage[];\n    /** Every page it kept readers on, best first, by the same rule. */\n    readonly helped: readonly MovedPage[];\n    /**\n     * Every page in neither order, by tree id and newest later revision first.\n     *\n     * A page in neither is not a page nothing is known about: `unmoved` is an\n     * answer, and the four silences each name something a surface can act on.\n     */\n    readonly unranked: readonly MovedPage[];\n    /** The head of the harm order, which is the page to look at first. `null` where nothing worsened. */\n    readonly worst: MovedPage | null;\n    /** The head of the help order. `null` where nothing improved. */\n    readonly best: MovedPage | null;\n    /**\n     * How many pages stand in each state, counting a page once however many\n     * orders it is in.\n     *\n     * A page the change both helped and hurt is one `ranked` page and not two,\n     * which is the one place these two orders could have been made to look like\n     * more pages than a deployment has.\n     */\n    readonly standings: Readonly<Record<MovementStanding, number>>;\n    /**\n     * Comparisons read, which is pages: one comparison stands per page.\n     *\n     * Not the comparisons handed in. The duplicated and the ambiguous are not in\n     * it, and the two numbers beside it say how many of each there were.\n     */\n    readonly compared: number;\n    /**\n     * Page views counted at the later door across the pages read, added once per\n     * revision.\n     *\n     * Exact and addable, for the reason no other figure here is: a page view\n     * began on one revision of one tree and was counted once. It is a weight\n     * rather than a deployment total — this sees the pages its caller compared,\n     * not the deployment's.\n     *\n     * Once per revision and not once per row, because two comparisons can name\n     * one later revision while being two rows: a mispaired comparison is filed\n     * under the earlier reading's page and scaled at the later one's door, so a\n     * caller that handed in both would otherwise have that revision's openings\n     * counted twice.\n     */\n    readonly arrivals: number;\n    /**\n     * Comparisons of a page beyond the first that compared the same two\n     * revisions, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page's movement twice, and a\n     * page twice in an order is the one way an order can lie about how much there\n     * is to fix. The first stands and the rest are counted here.\n     */\n    readonly duplicated: number;\n    /**\n     * Door rows for the later revision beyond the first, which were ignored.\n     *\n     * A store keeps one row per revision, so this is a caller's two reads again —\n     * and adding them would double a page's arrivals and halve every movement\n     * scaled by them.\n     */\n    readonly duplicatedRows: number;\n    /**\n     * Pages handed in with two different comparisons, of which **neither** was\n     * read.\n     *\n     * A tree live at two revisions is two live versions of one page, and both\n     * belong in an order over one window; a comparison pairs by page, so such a\n     * tree has two movements and no single one that is the page's. Picking either\n     * would publish a number nobody could account for, so the page is named here\n     * and is in no order, in no standing and in no total.\n     */\n    readonly ambiguous: readonly TreeId[];\n};",
+              "truncated": false,
+              "summary": "A deployment's pages, as a change left them."
+            },
+            {
+              "name": "deploymentChangeOf",
+              "kind": "function",
+              "signature": "const deploymentChangeOf: (changes: readonly ReadingChange[], rows: readonly StoredPageViews[]) => DeploymentChange",
+              "truncated": false,
+              "summary": "What a change did across a deployment's pages, as two orders."
             }
           ]
         },
@@ -12796,7 +12866,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -12876,6 +12946,13 @@
               "signature": "const meaningOfDeploymentSilence: (silence: DeploymentSilence) => SilenceMeaning",
               "truncated": false,
               "summary": "What an order over a deployment's pages reports, of one of them."
+            },
+            {
+              "name": "meaningOfDeploymentChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfDeploymentChangeSilence: (silence: DeploymentChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What an order over what a change did to a deployment reports, of one page's comparison."
             },
             {
               "name": "meaningOfKindSilence",
@@ -13078,7 +13155,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13221,7 +13298,7 @@
       "files": 17,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13288,7 +13365,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13885,7 +13962,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13959,7 +14036,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14438,7 +14515,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1666,
+        "packageNames": 1676,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
