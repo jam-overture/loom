@@ -379,5 +379,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0287](0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md) | A share of a page's words is a share of the words the window can speak for, and *spoken for* is one predicate | Accepted | §4c (reader signals) |
 | [0288](0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md) | A change to a funnel is two shares that factor, and a difference of two floors is a bracket | Accepted | §4c (reader signals) |
 | [0289](0289-a-project-is-closed-rather-than-deleted-and-closing-is-a-column-and-a-filter.md) | A project is closed rather than deleted, and closing is a column and a filter | Accepted | §5 (the store), §3 (portal) |
-| 0290 | *No record on this branch* | — | — |
+| [0290](0290-a-reading-is-of-one-audience-and-two-forms-of-a-page-are-two-readings-rather-than-one-handed-in-twice.md) | A reading is of one audience, and two forms of a page are two readings rather than one handed in twice | Accepted | §4c (reader signals) |
 | [0291](0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md) | A deployment's change is two orders at the door's scale, because a page has no net movement | Accepted | §4c (reader signals) |

@@ -259,7 +259,7 @@ describe("a page named after something a reader types", () => {
 /**
  * Being dismissed.
  *
- * On a phone this rail lives inside `MobileNav`, which hands it a callback and
+ * On a phone this rail lives inside `DocsBar`, which hands it a callback and
  * depends on every link in it calling that callback: a reader who taps a link
  * and is left with an open menu over the page they asked for has navigated and
  * cannot see that they did. The handler is spread in **two** places in this

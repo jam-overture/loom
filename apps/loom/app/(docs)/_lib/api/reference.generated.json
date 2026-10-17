@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8457,7 +8457,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9287,7 +9287,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9718,7 +9718,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9957,7 +9957,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 60,
+      "files": 61,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9970,7 +9970,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10132,6 +10132,69 @@
               "signature": "const actionChangeOf: (was: PageReading, now: PageReading) => ActionChange",
               "truncated": false,
               "summary": "What a change did to what readers do on a page, off two `PageReading`s and nothing else."
+            }
+          ]
+        },
+        {
+          "module": "signals/audiences",
+          "title": "Audiences",
+          "summary": "Which audience a window of counters is of, and what that makes one reading.",
+          "symbols": [
+            {
+              "name": "AudienceScoped",
+              "kind": "type",
+              "signature": "type AudienceScoped = {\n    readonly audienceId: AudienceId;\n};",
+              "truncated": false,
+              "summary": "A row the store keeps one of per audience."
+            },
+            {
+              "name": "MaybeAudienceScoped",
+              "kind": "type",
+              "signature": "type MaybeAudienceScoped = {\n    readonly audienceId?: AudienceId;\n};",
+              "truncated": false,
+              "summary": "A row that may or may not name its audience."
+            },
+            {
+              "name": "ReadingOfAudience",
+              "kind": "type",
+              "signature": "type ReadingOfAudience = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** `null` or absent where nothing recorded which audience the window was of. */\n    readonly audienceId?: AudienceId | null;\n};",
+              "truncated": false,
+              "summary": "A reading, or a row, as the key rule below needs to see it."
+            },
+            {
+              "name": "audiencesIn",
+              "kind": "function",
+              "signature": "const audiencesIn: <R extends MaybeAudienceScoped>(rows: readonly R[]) => readonly AudienceId[]",
+              "truncated": false,
+              "summary": "The audiences a window names, deduplicated and in a stable order."
+            },
+            {
+              "name": "forAudience",
+              "kind": "function",
+              "signature": "const forAudience: <R extends MaybeAudienceScoped>(audience: AudienceId, rows: readonly R[]) => readonly R[]",
+              "truncated": false,
+              "summary": "The rows of one audience, and nothing else."
+            },
+            {
+              "name": "AudienceWindow",
+              "kind": "type",
+              "signature": "type AudienceWindow<R> = {\n    readonly audience: AudienceId;\n    readonly rows: readonly R[];\n};",
+              "truncated": false,
+              "summary": "One audience's window, as {@link byAudience} hands it over."
+            },
+            {
+              "name": "byAudience",
+              "kind": "function",
+              "signature": "const byAudience: <R extends AudienceScoped>(rows: readonly R[]) => readonly AudienceWindow<R>[]",
+              "truncated": false,
+              "summary": "A window a deployment read, split into the populations it actually holds."
+            },
+            {
+              "name": "readingKeyOf",
+              "kind": "function",
+              "signature": "const readingKeyOf: (reading: ReadingOfAudience) => string",
+              "truncated": false,
+              "summary": "What makes two readings one page: the tree, the revision and the audience."
             }
           ]
         },
@@ -10654,7 +10717,7 @@
             {
               "name": "RankedPage",
               "kind": "type",
-              "signature": "type RankedPage = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly standing: RankStanding;\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     *\n     * A floor and not a count, which is why it is never the denominator of\n     * anything here.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     *\n     * The weight behind the row: *three hundred and forty of twelve hundred\n     * readers*, where the second number is this and the first is scaled to it.\n     */\n    readonly opened: number | null;\n    /** This page's own straddle rate, which is what scales its loss. */\n    readonly inflation: number | null;\n    /** The sharpest fall on the page, where it has one. */\n    readonly at: ReadingStop | null;\n    /** Readers lost at that fall, as the window's counters have it. */\n    readonly lost: number | null;\n    /**\n     * The same loss on the door's scale, which is the key the order is on.\n     *\n     * Not a count of people and not rounded into one. Withheld where the page has\n     * no fall, no reading, or no row to scale it by.\n     */\n    readonly readers: number | null;\n    /**\n     * The fall as a share of the readers who reached the part before it, carried\n     * through unchanged.\n     *\n     * Sound without any correction, because both of its counts come off the same\n     * rows — so it is published even for a page whose scaled figure is withheld\n     * as inconsistent.\n     */\n    readonly share: number | null;\n};",
+              "signature": "type RankedPage = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     *\n     * Two forms of one page stand here as two rows, for the reason two revisions\n     * of one tree do: both are live, both have readers, and an order that\n     * showed one of them would be hiding a page a deployment is serving. Nothing\n     * is summed across them — a reader of one form is not a reader of the other,\n     * and the two rows' losses are losses from two populations.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: RankStanding;\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     *\n     * A floor and not a count, which is why it is never the denominator of\n     * anything here.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     *\n     * The weight behind the row: *three hundred and forty of twelve hundred\n     * readers*, where the second number is this and the first is scaled to it.\n     */\n    readonly opened: number | null;\n    /** This page's own straddle rate, which is what scales its loss. */\n    readonly inflation: number | null;\n    /** The sharpest fall on the page, where it has one. */\n    readonly at: ReadingStop | null;\n    /** Readers lost at that fall, as the window's counters have it. */\n    readonly lost: number | null;\n    /**\n     * The same loss on the door's scale, which is the key the order is on.\n     *\n     * Not a count of people and not rounded into one. Withheld where the page has\n     * no fall, no reading, or no row to scale it by.\n     */\n    readonly readers: number | null;\n    /**\n     * The fall as a share of the readers who reached the part before it, carried\n     * through unchanged.\n     *\n     * Sound without any correction, because both of its counts come off the same\n     * rows — so it is published even for a page whose scaled figure is withheld\n     * as inconsistent.\n     */\n    readonly share: number | null;\n};",
               "truncated": false,
               "summary": "One revision of one page, as the order has it."
             },
@@ -10885,7 +10948,7 @@
             {
               "name": "FunnelReach",
               "kind": "type",
-              "signature": "type FunnelReach = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** Page views that began on this revision. Exact, and addable. */\n    readonly opened: number;\n    /** The same page views as the rollups counted them: once per window each appeared in. */\n    readonly appearances: number;\n    /** Appearances in excess of openings — the straddle, measured. Never negative. */\n    readonly drift: number;\n    /** Openings whose reading no rollup has folded yet. The other sign of the same subtraction. */\n    readonly pending: number;\n    /** `drift ÷ opened`: how generous every distinct count here is. `null` when nothing opened. */\n    readonly inflation: number | null;\n    /** When the page-view row last moved, or `null` where there is no row. */\n    readonly updatedAt: string | null;\n    /** Set where no share can be given, and the reason. `null` where they can. */\n    readonly silence: ReachSilence | null;\n    /**\n     * Nobody's visit spanned two windows, so there is nothing to divide out: the\n     * rates are exact and each `rateAtMost` equals its `rate`.\n     *\n     * False under a silence, and false while any opening is pending.\n     */\n    readonly exact: boolean;\n    /**\n     * The revision's pairs, ordered by their two ends so a screen does not\n     * reorder on a refresh. Deliberately not ranked — see the module note.\n     */\n    readonly pairs: readonly PairReach[];\n    /** Page-view rows for another tree or revision, and ignored. */\n    readonly foreign: number;\n    /** Page-view rows for this revision beyond the first, where the first stands. */\n    readonly duplicated: number;\n    /**\n     * Funnel rows for another tree or revision, and ignored.\n     *\n     * Filtered rather than trusted for the same reason the page-view rows are:\n     * answering one revision's question with another revision's counters is a\n     * figure nothing downstream could catch.\n     */\n    readonly foreignPairs: number;\n    /**\n     * Funnel rows naming a pair already seen, where every one after the first was\n     * ignored.\n     *\n     * A store keeps one row per pair per revision, so this is a caller who\n     * concatenated two reads. Adding them would double a total that is already\n     * one.\n     */\n    readonly duplicatedPairs: number;\n    /**\n     * Pairs with an end this revision does not have, counted off\n     * {@link FunnelReach.pairs} and therefore once each.\n     *\n     * The figure a screen leads with when it is not nought: *three of your five\n     * funnel questions are about parts this version of the page no longer has.*\n     */\n    readonly stalePairs: number;\n    /** Of those, the ones with a count against the missing end. Counted off the same list. */\n    readonly orphanedPairs: number;\n};",
+              "signature": "type FunnelReach = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** Page views that began on this revision. Exact, and addable. */\n    readonly opened: number;\n    /** The same page views as the rollups counted them: once per window each appeared in. */\n    readonly appearances: number;\n    /** Appearances in excess of openings — the straddle, measured. Never negative. */\n    readonly drift: number;\n    /** Openings whose reading no rollup has folded yet. The other sign of the same subtraction. */\n    readonly pending: number;\n    /** `drift ÷ opened`: how generous every distinct count here is. `null` when nothing opened. */\n    readonly inflation: number | null;\n    /** When the page-view row last moved, or `null` where there is no row. */\n    readonly updatedAt: string | null;\n    /** Set where no share can be given, and the reason. `null` where they can. */\n    readonly silence: ReachSilence | null;\n    /**\n     * Nobody's visit spanned two windows, so there is nothing to divide out: the\n     * rates are exact and each `rateAtMost` equals its `rate`.\n     *\n     * False under a silence, and false while any opening is pending.\n     */\n    readonly exact: boolean;\n    /**\n     * The revision's pairs, ordered by their two ends so a screen does not\n     * reorder on a refresh. Deliberately not ranked — see the module note.\n     */\n    readonly pairs: readonly PairReach[];\n    /** Page-view rows for another tree or revision, and ignored. */\n    readonly foreign: number;\n    /** Page-view rows for this revision beyond the first, where the first stands. */\n    readonly duplicated: number;\n    /**\n     * Funnel rows for another tree or revision, and ignored.\n     *\n     * Filtered rather than trusted for the same reason the page-view rows are:\n     * answering one revision's question with another revision's counters is a\n     * figure nothing downstream could catch.\n     */\n    readonly foreignPairs: number;\n    /**\n     * Funnel rows for this revision in another audience, and ignored.\n     *\n     * The same question, answered for the other form of the page. Not foreign —\n     * it is this page's — and not a duplicate: two populations answering one\n     * question is two answers, and the one this reading wants is its own.\n     */\n    readonly otherAudiencePairs: number;\n    /**\n     * Funnel rows naming a pair already seen, where every one after the first was\n     * ignored.\n     *\n     * A store keeps one row per pair per revision per audience, and the audience\n     * is picked before this is counted, so this is a caller who concatenated two\n     * reads. Adding them would double a total that is already one.\n     */\n    readonly duplicatedPairs: number;\n    /**\n     * Pairs with an end this revision does not have, counted off\n     * {@link FunnelReach.pairs} and therefore once each.\n     *\n     * The figure a screen leads with when it is not nought: *three of your five\n     * funnel questions are about parts this version of the page no longer has.*\n     */\n    readonly stalePairs: number;\n    /** Of those, the ones with a count against the missing end. Counted off the same list. */\n    readonly orphanedPairs: number;\n};",
               "truncated": false,
               "summary": "A revision's funnels, read against the exact number of readers that revision had."
             },
@@ -11046,7 +11109,7 @@
             {
               "name": "CollectionFault",
               "kind": "type",
-              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n *\n * Every rate on the page is left with the view floor for a denominator, which\n * is short of the page views there were, and nothing on the page can be\n * put on the same scale as another page's.\n *\n * **Three causes and the rows cannot tell them apart:** the revision was\n * served by senders older than the opening marker, the door row has passed out\n * of the deployment's retention window while the counters it describes have\n * not, or the counters were assembled by something that is not a sender. So\n * the remedy is `undetermined` rather than one of the three guessed.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n *\n * An honest sender marks at most one batch of each page view as the one that\n * opened it, and a deployment whose senders do not is the deployment a\n * share-of-readers reading calls `unopened`: every rate\n * denominator-less while the counters look perfectly healthy. It is the one\n * fault here whose symptom is invisible on every screen that does not divide\n * by the door.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n *\n * Not a broken sender and not a broken rollup: a rollup window shorter than\n * the visits being measured, which is the one control a deployment has over\n * this error. The shares stay sound and the counts do not.\n */\n | \"counts-inflated\"\n/**\n * Page views of this revision are waiting to be folded and the last fold of\n * it was longer ago than the deployment said its collection takes.\n *\n * `pending` openings are the ordinary state of a live page — the lag of the\n * tallies behind the buffer is one window by design — so the fault is\n * never the pending count itself. It is the **age** of the fold that should\n * have cleared it, read off `foldedAt` and judged against the\n * {@link CollectionSchedule} the caller handed in. Nothing is raised without\n * one, and nothing is raised on a row no fold has ever touched, which is\n * every row of a deployment upgraded past this column until its next run.\n *\n * What it costs is every count on the page: a fold that never comes is\n * counters frozen where they were while the door goes on counting arrivals,\n * so each rate reads lower than the truth by however much reading has\n * happened since. It falls to the same hand as a window that is too short —\n * the deployment's own configuration — because what has stopped is the thing\n * it schedules.\n *\n * **It can hide behind `openings-unmarked`.** A deployment whose senders\n * never mark an opening has nothing pending by construction, so a stall there\n * is invisible until the door is counting again — which is why the marker is\n * the first fault to fix and is published first.\n *\n * **It cannot be true at the same time as `counts-inflated`**, and the reason\n * is arithmetic rather than policy: `drift` and `pending` are the two signs of\n * one subtraction, so a revision whose appearances have outrun its\n * openings has nothing pending to be late. The two faults the same hand\n * answers for are therefore alternatives, which is why they are adjacent in\n * {@link COLLECTION_FAULTS} rather than additive.\n */\n | \"collection-stalled\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no `engaged` at all. Taken from\n * {@link pageActionOf} rather than spelled a second time, so the two readings\n * cannot come to disagree about what it looks like.\n */\n | \"actions-uncredited\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n *\n * The two faults a **caller** can have rather than a deployment: a tree and a\n * window that do not belong together, which leaves most parts reading\n * `skipped` while the numbers stay plausible, and two reads\n * concatenated instead of one, which neither sums nor overwrites honestly\n *. Published as one fault because the hand it falls to is one hand and\n * the fix is one fix, with both counts on the row.\n */\n | \"rows-mishandled\";",
+              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n *\n * Every rate on the page is left with the view floor for a denominator, which\n * is short of the page views there were, and nothing on the page can be\n * put on the same scale as another page's.\n *\n * **Three causes and the rows cannot tell them apart:** the revision was\n * served by senders older than the opening marker, the door row has passed out\n * of the deployment's retention window while the counters it describes have\n * not, or the counters were assembled by something that is not a sender. So\n * the remedy is `undetermined` rather than one of the three guessed.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n *\n * An honest sender marks at most one batch of each page view as the one that\n * opened it, and a deployment whose senders do not is the deployment a\n * share-of-readers reading calls `unopened`: every rate\n * denominator-less while the counters look perfectly healthy. It is the one\n * fault here whose symptom is invisible on every screen that does not divide\n * by the door.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n *\n * Not a broken sender and not a broken rollup: a rollup window shorter than\n * the visits being measured, which is the one control a deployment has over\n * this error. The shares stay sound and the counts do not.\n */\n | \"counts-inflated\"\n/**\n * Page views of this revision are waiting to be folded and the last fold of\n * it was longer ago than the deployment said its collection takes.\n *\n * `pending` openings are the ordinary state of a live page — the lag of the\n * tallies behind the buffer is one window by design — so the fault is\n * never the pending count itself. It is the **age** of the fold that should\n * have cleared it, read off `foldedAt` and judged against the\n * {@link CollectionSchedule} the caller handed in. Nothing is raised without\n * one, and nothing is raised on a row no fold has ever touched, which is\n * every row of a deployment upgraded past this column until its next run.\n *\n * What it costs is every count on the page: a fold that never comes is\n * counters frozen where they were while the door goes on counting arrivals,\n * so each rate reads lower than the truth by however much reading has\n * happened since. It falls to the same hand as a window that is too short —\n * the deployment's own configuration — because what has stopped is the thing\n * it schedules.\n *\n * **It can hide behind `openings-unmarked`.** A deployment whose senders\n * never mark an opening has nothing pending by construction, so a stall there\n * is invisible until the door is counting again — which is why the marker is\n * the first fault to fix and is published first.\n *\n * **It cannot be true at the same time as `counts-inflated`**, and the reason\n * is arithmetic rather than policy: `drift` and `pending` are the two signs of\n * one subtraction, so a revision whose appearances have outrun its\n * openings has nothing pending to be late. The two faults the same hand\n * answers for are therefore alternatives, which is why they are adjacent in\n * {@link COLLECTION_FAULTS} rather than additive.\n */\n | \"collection-stalled\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no `engaged` at all. Taken from\n * {@link pageActionOf} rather than spelled a second time, so the two readings\n * cannot come to disagree about what it looks like.\n */\n | \"actions-uncredited\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n *\n * The two faults a **caller** can have rather than a deployment: a tree and a\n * window that do not belong together, which leaves most parts reading\n * `skipped` while the numbers stay plausible, and two reads\n * concatenated instead of one, which neither sums nor overwrites honestly\n *. Published as one fault because the hand it falls to is one hand and\n * the fix is one fix, with both counts on the row.\n */\n | \"rows-mishandled\"\n/**\n * The window holds two audiences' counters for this page and the reading was\n * taken of neither.\n *\n * A page is one base tree and the deltas an audience earns, so two\n * forms of it produce two sets of counters over one tree at one revision,\n * told apart by one column and by nothing else. A reading handed\n * both without being told which was wanted has two answers and no way to\n * choose: summing them is one number about two populations — *the portal\n * gains a dimension it must not silently collapse* — and picking one is\n * picking by row order.\n *\n * **It is the caller's, like `rows-mishandled`, and it is not that fault.**\n * Nothing is wrong with the rows, nothing was handed in twice and nothing is\n * unaccounted for; the window is simply of more than the reading is. The fix\n * is `byAudience` and one reading per form, and the remedy says so rather\n * than sending anybody looking for a bad row.\n */\n | \"audiences-mixed\";",
               "truncated": false,
               "summary": "Something wrong with what a deployment is collecting, rather than a quiet window."
             },
@@ -11067,7 +11130,7 @@
             {
               "name": "FaultRemedy",
               "kind": "type",
-              "signature": "type FaultRemedy = \n/** The pages: a newer broadcaster, or one whose delegation walks the ancestry. */\n\"senders\"\n/** The deployment's own configuration: the rollup window. */\n | \"configuration\"\n/** The surface that asked: it handed in a tree and a window that do not match, or two reads. */\n | \"caller\"\n/**\n * Nothing the rows can name.\n *\n * One fault out of six, and it is the honest answer rather than a gap: a\n * missing door row is an old sender, an expired row or a hand-built counter,\n * and inventing one of the three is worse than naming none.\n */\n | \"undetermined\";",
+              "signature": "type FaultRemedy = \n/** The pages: a newer broadcaster, or one whose delegation walks the ancestry. */\n\"senders\"\n/** The deployment's own configuration: the rollup window. */\n | \"configuration\"\n/** The surface that asked: it handed in a tree and a window that do not match, or two reads. */\n | \"caller\"\n/**\n * Nothing the rows can name.\n *\n * One fault out of seven, and it is the honest answer rather than a gap: a\n * missing door row is an old sender, an expired row or a hand-built counter,\n * and inventing one of the three is worse than naming none.\n */\n | \"undetermined\";",
               "truncated": false,
               "summary": "Whose hand a fault falls to."
             },
@@ -11109,7 +11172,7 @@
             {
               "name": "PageHealth",
               "kind": "type",
-              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the three that are the deployment's, then the caller's.\n     *\n     * Empty on every standing but `faulted`.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     *\n     * A floor and not a count, which is why it is never ranked and never\n     * added to an arrival count here.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     *\n     * On a faulted page these are the readers whose measurement its faults\n     * affect, which is what makes one faulted page worse than another.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     *\n     * Zero where there is no door row, because an absent row reports no openings\n     * rather than none pending.\n     */\n    readonly pending: number;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * `null` where nothing attests one — including every revision with no door\n     * row at all.\n     *\n     * Published whether or not a schedule was handed in, because *the last fold\n     * of this page was at nine this morning* is the sentence an operator reads\n     * before any verdict about it. `null` is not *never folded*: a row\n     * written before the column existed says the same thing, and the first fold\n     * after an upgrade fills it in.\n     */\n    readonly foldedAt: string | null;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n};",
+              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     *\n     * Two forms of one page are two rows here and not one page counted twice\n     * (`readingKeyOf`), for the reason two revisions of one tree are two rows: a\n     * deployment serving both is running both, and a health screen that showed\n     * one of them would be hiding a live form of a live page.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the three that are the deployment's, then the caller's.\n     *\n     * Empty on every standing but `faulted`.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     *\n     * A floor and not a count, which is why it is never ranked and never\n     * added to an arrival count here.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     *\n     * On a faulted page these are the readers whose measurement its faults\n     * affect, which is what makes one faulted page worse than another.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     *\n     * Zero where there is no door row, because an absent row reports no openings\n     * rather than none pending.\n     */\n    readonly pending: number;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * `null` where nothing attests one — including every revision with no door\n     * row at all.\n     *\n     * Published whether or not a schedule was handed in, because *the last fold\n     * of this page was at nine this morning* is the sentence an operator reads\n     * before any verdict about it. `null` is not *never folded*: a row\n     * written before the column existed says the same thing, and the first fold\n     * after an upgrade fills it in.\n     */\n    readonly foldedAt: string | null;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n};",
               "truncated": false,
               "summary": "One revision of one page, and what is wrong with what was collected about it."
             },
@@ -12243,16 +12306,16 @@
             {
               "name": "PageViewsFor",
               "kind": "type",
-              "signature": "type PageViewsFor = {\n    /**\n     * The row, read through {@link pageViewReadingOf}, or `null` where this\n     * revision has none.\n     *\n     * Read through the reading rather than subtracted again, because one\n     * definition of drift, pending and inflation is the point: a second would be\n     * a second place for them to disagree with the counter they describe.\n     */\n    readonly measured: RevisionPageViews | null;\n    /**\n     * Rows for another tree or another revision, and ignored.\n     *\n     * Dividing one revision's counters by another's readers is the mistake that\n     * would make every rate taken off them quietly wrong.\n     */\n    readonly foreign: number;\n    /**\n     * Rows for this tree and revision beyond the first, where every one after it\n     * was ignored.\n     *\n     * A store keeps one row per revision, so this cannot happen from one read —\n     * it happens when a caller concatenates two. Adding them is wrong, because\n     * the openings are already a total and would double; taking the last is\n     * wrong, because it is not the truer one. So the first row stands and the\n     * fact is reported.\n     */\n    readonly duplicated: number;\n};",
+              "signature": "type PageViewsFor = {\n    /**\n     * The row, read through {@link pageViewReadingOf}, or `null` where this\n     * revision has none.\n     *\n     * Read through the reading rather than subtracted again, because one\n     * definition of drift, pending and inflation is the point: a second would be\n     * a second place for them to disagree with the counter they describe.\n     */\n    readonly measured: RevisionPageViews | null;\n    /**\n     * Rows for another tree or another revision, and ignored.\n     *\n     * Dividing one revision's counters by another's readers is the mistake that\n     * would make every rate taken off them quietly wrong.\n     */\n    readonly foreign: number;\n    /**\n     * Rows for this tree and revision, in another audience, and ignored.\n     *\n     * A page is served in as many forms as it has audiences and the door\n     * counts each one's arrivals on its own row, so a window holding two\n     * of them is a deployment doing what it was built to do. It is `foreign` to\n     * nothing and `duplicated` to nothing: the other form's readers are real and\n     * are simply not the ones this reading is of.\n     */\n    readonly otherAudience: number;\n    /**\n     * Rows for this tree, revision and audience beyond the first, where every one\n     * after it was ignored.\n     *\n     * A store keeps one row per revision per audience, so this cannot happen from\n     * one read — it happens when a caller concatenates two. Adding them is wrong,\n     * because the openings are already a total and would double; taking the last\n     * is wrong, because it is not the truer one. So the first row stands and the\n     * fact is reported.\n     */\n    readonly duplicated: number;\n};",
               "truncated": false,
               "summary": "The page-view row a reading of one revision should be divided by, picked out of a window of rows."
             },
             {
               "name": "RevisionOf",
               "kind": "type",
-              "signature": "type RevisionOf = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n};",
+              "signature": "type RevisionOf = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly audienceId?: AudienceId | null;\n};",
               "truncated": false,
-              "summary": "A revision of a tree, which is all this rule needs to be asked."
+              "summary": "A revision of a tree, and the audience the asking is about."
             },
             {
               "name": "pageViewsFor",
@@ -12334,14 +12397,14 @@
             {
               "name": "PageReading",
               "kind": "type",
-              "signature": "type PageReading = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * A floor on the page views the window held, not a count of them.\n     *\n     * The largest `views` any single part reports. A view that produced no signal\n     * about any part is in no row at all, and distinct view counts cannot be added\n     * across rows, so the largest row is the most that can be said from\n     * counters alone. It is a good floor in practice because a page root is an\n     * addressed node and a root is in the viewport of every view that renders.\n     *\n     * Zero is what makes every standing `unknown`: nothing was measured, so\n     * nothing was skipped.\n     */\n    readonly views: number;\n    /** Every element node, in reading order. */\n    readonly parts: readonly PartReading[];\n    /** Every role in the vocabulary, then the row for parts that declared none. */\n    readonly roles: readonly RoleReading[];\n    readonly standings: Readonly<Record<PartStanding, number>>;\n    /**\n     * Counters handed in that are filed under another tree or another revision,\n     * and were ignored.\n     *\n     * Adding two revisions of a node together is the mistake that makes *before\n     * versus after a change* unreadable, so this filters rather than trusts its\n     * caller — and says how much it dropped, because a caller who passed a whole\n     * store's rows and a caller who passed the wrong revision's look identical\n     * from the inside.\n     */\n    readonly foreign: number;\n    /**\n     * Counters filed under this tree and revision, naming a node this tree does\n     * not contain.\n     *\n     * The alarm for the one failure this join can have that nothing else would\n     * catch: a tree and a window that do not belong together. Pass revision 7's\n     * counters with revision 6's tree and most parts read `skipped` while the\n     * numbers stay plausible. A non-empty list here says the pair is wrong, and\n     * names the rows that prove it.\n     */\n    readonly orphaned: readonly NodeId[];\n    /**\n     * Nodes handed in more than once, where every row but the first was ignored.\n     *\n     * A store keeps one row per node per revision, so this cannot happen from one\n     * read — it happens when a caller concatenates two windows instead of letting\n     * the store add them. Neither available answer is right: summing is wrong\n     * because `views`, `reached` and `engaged` count distinct views and\n     * distinctness cannot be added, and overwriting is wrong because the\n     * later row is not the truer one. So the first row stands, the rest are\n     * dropped, and the fact is reported rather than being a quiet halving of\n     * somebody's dwell time.\n     */\n    readonly duplicated: readonly NodeId[];\n};",
+              "signature": "type PageReading = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience whose counters this reading is of, or `null` where nothing\n     * said.\n     *\n     * `null` has two causes and they are a long way apart. A window whose rows\n     * never named an audience is one population by construction and is read\n     * whole — which is every window written before the column existed and\n     * every one a test builds by hand. A window naming **two**, handed in without a caller saying\n     * which was wanted, is two populations and is read as neither: see\n     * {@link PageReading.audiences}.\n     */\n    readonly audienceId: AudienceId | null;\n    /**\n     * Every audience the window named, whether or not it was the one read.\n     *\n     * More than one member with {@link PageReading.audienceId} `null` is the\n     * refusal: a page served in two forms has two sets of counters over\n     * one tree at one revision, and adding them is one number about two\n     * populations, which is the collapse a dimension on the rows exists to\n     * prevent. Nothing is read, every part is\n     * `unknown`, and the caller is told what it was holding so it can split\n     * (`byAudience`) and read twice.\n     */\n    readonly audiences: readonly AudienceId[];\n    /**\n     * Counters filed under this tree and revision, in an audience other than the\n     * one read, and ignored.\n     *\n     * Not `foreign`, which is about a page, and not `duplicated`, which is about\n     * a row handed in twice. A deployment reading one form's counters out of a\n     * window holding both of them is doing the right thing, and this is how much\n     * of that window belonged to the other form.\n     */\n    readonly otherAudience: number;\n    /**\n     * A floor on the page views the window held, not a count of them.\n     *\n     * The largest `views` any single part reports. A view that produced no signal\n     * about any part is in no row at all, and distinct view counts cannot be added\n     * across rows, so the largest row is the most that can be said from\n     * counters alone. It is a good floor in practice because a page root is an\n     * addressed node and a root is in the viewport of every view that renders.\n     *\n     * Zero is what makes every standing `unknown`: nothing was measured, so\n     * nothing was skipped.\n     */\n    readonly views: number;\n    /** Every element node, in reading order. */\n    readonly parts: readonly PartReading[];\n    /** Every role in the vocabulary, then the row for parts that declared none. */\n    readonly roles: readonly RoleReading[];\n    readonly standings: Readonly<Record<PartStanding, number>>;\n    /**\n     * Counters handed in that are filed under another tree or another revision,\n     * and were ignored.\n     *\n     * Adding two revisions of a node together is the mistake that makes *before\n     * versus after a change* unreadable, so this filters rather than trusts its\n     * caller — and says how much it dropped, because a caller who passed a whole\n     * store's rows and a caller who passed the wrong revision's look identical\n     * from the inside.\n     */\n    readonly foreign: number;\n    /**\n     * Counters filed under this tree and revision, naming a node this tree does\n     * not contain.\n     *\n     * The alarm for the one failure this join can have that nothing else would\n     * catch: a tree and a window that do not belong together. Pass revision 7's\n     * counters with revision 6's tree and most parts read `skipped` while the\n     * numbers stay plausible. A non-empty list here says the pair is wrong, and\n     * names the rows that prove it.\n     */\n    readonly orphaned: readonly NodeId[];\n    /**\n     * Nodes handed in more than once, where every row but the first was ignored.\n     *\n     * A store keeps one row per node per revision per audience and the\n     * audience is picked before this is counted, so this cannot happen from one\n     * read — it happens when a caller concatenates two windows instead of letting\n     * the store add them. Neither available answer is right: summing is wrong\n     * because `views`, `reached` and `engaged` count distinct views and\n     * distinctness cannot be added, and overwriting is wrong because the\n     * later row is not the truer one. So the first row stands, the rest are\n     * dropped, and the fact is reported rather than being a quiet halving of\n     * somebody's dwell time.\n     */\n    readonly duplicated: readonly NodeId[];\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "pageReadingOf",
               "kind": "function",
-              "signature": "const pageReadingOf: (tree: LoomTree, tallies: readonly ReaderTally[], declarations: PartDeclarations) => PageReading",
+              "signature": "const pageReadingOf: (tree: LoomTree, tallies: readonly (ReaderTally & MaybeAudienceScoped)[], declarations: PartDeclarations, audience?: AudienceId) => PageReading",
               "truncated": false,
               "summary": "Join a window's counters to the tree and registry they were filed against."
             },
@@ -12383,7 +12446,7 @@
             {
               "name": "ReadingProgress",
               "kind": "type",
-              "signature": "type ReadingProgress = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The page's view floor, carried through from the reading unchanged.\n     *\n     * Zero is the whole answer: nothing was measured, so nothing stopped\n     * anywhere, and `runs` is empty rather than a page of parts that all look\n     * skipped.\n     */\n    readonly views: number;\n    /**\n     * Every run of two or more children, in reading order.\n     *\n     * A run of one is left out: a stop is between two parts, and an only child has\n     * nowhere for reading to stop. Every part of the page is a step in at most one\n     * run — its parent's — so no reader's progress is counted at two depths.\n     */\n    readonly runs: readonly ReadingRun[];\n    /**\n     * The sharpest fall on the page: most views lost, then largest share, then\n     * first in reading order.\n     *\n     * By views lost rather than by share, because *where does this page lose\n     * readers* is a question about readers. A band two readers out of three\n     * abandoned is a worse rate and a smaller problem than one four hundred out of\n     * a thousand did, and ranking by share would put the former at the top of\n     * every screen for ever.\n     */\n    readonly steepest: ReadingStop | null;\n    /**\n     * Parts that could not anchor a stop, because they reported something other\n     * than coming into view.\n     *\n     * Empty on an ordinary page. A long list is a diagnosis: presses are being\n     * delegated to regions that no `viewed` names, which is a sender or a\n     * primitive not reporting what it is, rather than a page nobody read.\n     */\n    readonly unanchored: readonly NodeId[];\n    /** Every run's {@link ReadingRun.gained}, added. */\n    readonly gained: number;\n};",
+              "signature": "type ReadingProgress = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience the reading was of, carried through unchanged.\n     *\n     * Carried rather than derived, and carried for one reason: an order over a\n     * deployment's pages picks each page's door row by this trio and refuses to\n     * count a page twice by it (`readingKeyOf`), and a progress reading that\n     * dropped the audience would hand that order two forms of one page it could\n     * not tell apart.\n     */\n    readonly audienceId: AudienceId | null;\n    /**\n     * The page's view floor, carried through from the reading unchanged.\n     *\n     * Zero is the whole answer: nothing was measured, so nothing stopped\n     * anywhere, and `runs` is empty rather than a page of parts that all look\n     * skipped.\n     */\n    readonly views: number;\n    /**\n     * Every run of two or more children, in reading order.\n     *\n     * A run of one is left out: a stop is between two parts, and an only child has\n     * nowhere for reading to stop. Every part of the page is a step in at most one\n     * run — its parent's — so no reader's progress is counted at two depths.\n     */\n    readonly runs: readonly ReadingRun[];\n    /**\n     * The sharpest fall on the page: most views lost, then largest share, then\n     * first in reading order.\n     *\n     * By views lost rather than by share, because *where does this page lose\n     * readers* is a question about readers. A band two readers out of three\n     * abandoned is a worse rate and a smaller problem than one four hundred out of\n     * a thousand did, and ranking by share would put the former at the top of\n     * every screen for ever.\n     */\n    readonly steepest: ReadingStop | null;\n    /**\n     * Parts that could not anchor a stop, because they reported something other\n     * than coming into view.\n     *\n     * Empty on an ordinary page. A long list is a diagnosis: presses are being\n     * delegated to regions that no `viewed` names, which is a sender or a\n     * primitive not reporting what it is, rather than a page nobody read.\n     */\n    readonly unanchored: readonly NodeId[];\n    /** Every run's {@link ReadingRun.gained}, added. */\n    readonly gained: number;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -12677,7 +12740,7 @@
             {
               "name": "RegionReadingFor",
               "kind": "type",
-              "signature": "type RegionReadingFor = {\n    /** The revision's own map, floored. */\n    readonly reading: RegionReading;\n    /**\n     * Rows for another tree or another revision, and ignored.\n     *\n     * Counting another revision's arrivals into this one's map is the mistake\n     * that would make a readership comparison compare a revision with itself.\n     */\n    readonly foreign: number;\n    /**\n     * Rows naming a region this revision already had a row for, beyond the first,\n     * every one of which was ignored.\n     *\n     * A store keeps one row per tree, revision and region, so this cannot come\n     * out of one read — it happens when a caller concatenates two windows of\n     * rows, and the store's counts are already running totals rather than a\n     * window's. Adding them would double a bucket, which is the one error in this\n     * subsystem that cannot be undone afterwards, so the first row stands\n     * and the fact is reported.\n     */\n    readonly duplicated: number;\n};",
+              "signature": "type RegionReadingFor = {\n    /** The revision's own map, floored. */\n    readonly reading: RegionReading;\n    /**\n     * Rows for another tree or another revision, and ignored.\n     *\n     * Counting another revision's arrivals into this one's map is the mistake\n     * that would make a readership comparison compare a revision with itself.\n     */\n    readonly foreign: number;\n    /**\n     * Rows for this revision in another audience, and ignored.\n     *\n     * A page served in two forms counts each form's arrivals on its own row\n     *, and both forms' readers are real readers of the page — so this is\n     * neither foreign nor a doubled bucket. It is the other form's readership,\n     * which is a different map and not part of this one: a mix taken over both\n     * is one composition of two populations, and a comparison beside it would be\n     * comparing neither form with itself.\n     */\n    readonly otherAudience: number;\n    /**\n     * Rows naming a region this revision already had a row for, beyond the first,\n     * every one of which was ignored.\n     *\n     * A store keeps one row per tree, revision, audience and region, and the\n     * audience is picked before this is counted, so this cannot come\n     * out of one read — it happens when a caller concatenates two windows of\n     * rows, and the store's counts are already running totals rather than a\n     * window's. Adding them would double a bucket, which is the one error in this\n     * subsystem that cannot be undone afterwards, so the first row stands\n     * and the fact is reported.\n     */\n    readonly duplicated: number;\n};",
               "truncated": false,
               "summary": "One revision's region rows, read as a map, without the caller writing the filter."
             },
@@ -13155,7 +13218,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13298,7 +13361,7 @@
       "files": 17,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13365,7 +13428,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13962,7 +14025,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14036,7 +14099,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14515,7 +14578,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1676,
+        "packageNames": 1684,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
