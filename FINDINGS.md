@@ -55505,3 +55505,57 @@ opposite, so the movement carries two causes the counters cannot separate.
 when somebody asks for the card.
 
 ---
+## 2026-10-17 — two more counted readings, and the first mangling that injected *three* backticks rather than two
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling,
+and a 152-character URL that came back clean in the body that mangled a 164*
+and the three entries it extends · **Status:** open — **one bound narrowed by
+three characters, and one new fact about the injection itself**
+
+#661's body carried six URLs. Counted with `len()` over the exact strings
+before posting, and read back out of the GitHub API after:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 63 | `docs/signals.md`, by branch name | `[…](…)` | **clean** |
+| 82 | the preview deployment | bare | **clean** |
+| 106 | the report, by branch name | `[…](…)` | **clean** |
+| 120 | 0263, by branch name | `[…](…)` | **clean** |
+| 161 | 0284, by branch name | `[…](…)` | mangled |
+| 167 | 0290, by branch name | `[…](…)` | mangled |
+
+**The markdown-link bracket narrows from 155–164 to 155–161.** The 16 October
+entry's two mangled readings were 164 and 204, so 161 is three characters
+inside its upper bound and the first counted reading in that gap. Nothing here
+touches the lower bound, which is still the 144 counted clean on 15 October, and
+nothing contradicts the two-syntax reading: the 120 is the longest clean
+markdown link counted so far and is well under it.
+
+**The new fact, which is about the injection and not the threshold.** The four
+previous entries all record `` `` `` — a double backtick — injected around the
+URL. This body produced **two different injections in one posting**:
+
+- 0290, 167 characters: `` `` `` around **`URL):`** — the closing paren *and*
+  the colon that followed it were pulled inside the span, so the markdown link
+  is destroyed rather than merely unlinked.
+- 0284, 161 characters: ` ``` ` — a **triple** backtick, around the URL alone,
+  inside the parens.
+
+Same body, same minute, same `[…](…)` syntax, adjacent paragraphs. So the
+fence width is not fixed at two, and what the span encloses is not fixed either.
+Both are consistent with something choosing a fence that will not collide with
+the content it is wrapping and taking a greedy bite at the boundary — which is
+what a serialiser re-emitting an inline-code span does, and not what a length
+check does. **It is evidence about the mechanism rather than the bound**, and it
+is the first reading that distinguishes the two.
+
+**The remedy worked, first try, and is now measured twice over.** Both links
+were rewritten against the head commit's short sha — `../blob/df1ea61/decisions/…`
+— taking 167 to 135 and 161 to 129, and both came back clean. That is the
+workaround the 6 October entry calls a coincidence that makes things worse for
+short branch names, and it is worth saying why it worked here: this branch name
+is 39 characters, so swapping it for a 7-character sha bought 32, which was
+enough to cross a bound it would not have crossed on a shorter name.
+
+---
