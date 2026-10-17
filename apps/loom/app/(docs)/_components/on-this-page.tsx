@@ -1,8 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-
-import { sectionBeingReadNow, usePageSections } from "./use-page-sections"
+import { usePageSections, useSectionBeingRead } from "./use-page-sections"
 
 /**
  * The page's own sections, beside the page, with the one being read marked.
@@ -14,42 +12,13 @@ import { sectionBeingReadNow, usePageSections } from "./use-page-sections"
  * document rather than compiled from the markdown, and which row is marked.
  * `use-page-sections.ts` is the browser work.
  *
- * This is the **wide** presentation of that list, and `page-contents.tsx` is
- * the narrow one. What is left in here is the two listeners, because a rail a
- * reader can see while they scroll is a rail that has to keep up with them.
+ * This is the **wide** presentation of that list, and `docs-bar.tsx` is the
+ * narrow one. Both the walk and the measurement are shared, so what is left in
+ * here is the rows and how they are drawn beside the prose.
  */
 export const OnThisPage = () => {
   const sections = usePageSections()
-  const [current, setCurrent] = useState<string | undefined>(undefined)
-
-  useEffect(() => {
-    if (sections.length === 0) {
-      setCurrent(undefined)
-
-      return
-    }
-
-    const mark = () => setCurrent(sectionBeingReadNow(sections))
-
-    mark()
-
-    /*
-     * `resize` as well as `scroll`, because the headings move without the page
-     * scrolling: a window narrowed enough to rewrap a paragraph moves every
-     * heading under it, and on a phone the address bar collapsing is a resize.
-     *
-     * Passive, and the work is two reads and a `setState` per event. A frame
-     * budget would matter if this measured layout and then wrote to it; it
-     * measures, and React does the writing afterwards.
-     */
-    window.addEventListener("scroll", mark, { passive: true })
-    window.addEventListener("resize", mark, { passive: true })
-
-    return () => {
-      window.removeEventListener("scroll", mark)
-      window.removeEventListener("resize", mark)
-    }
-  }, [sections])
+  const current = useSectionBeingRead(sections)
 
   /*
    * A page with no sections gets no rail rather than an empty one. The

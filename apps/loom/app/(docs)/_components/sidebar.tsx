@@ -68,7 +68,7 @@ const SectionTitle = ({
  *
  * It runs on the address rather than on mount alone, because the rail is
  * mounted by a layout and survives every navigation inside the documentation —
- * which is the same fact `mobile-nav.tsx` turns into its open state. A
+ * which is the same fact `docs-bar.tsx` turns into its open state. A
  * navigation this rail did not cause is exactly the case it has to answer.
  */
 export const Sidebar = ({ onNavigate }: { readonly onNavigate?: () => void }) => {

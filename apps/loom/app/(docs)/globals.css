@@ -229,9 +229,32 @@
     color-scheme: dark;
   }
 
+  /*
+   * `scroll-padding-top` is the chrome, and the chrome grew.
+   *
+   * It insets the top of the scrollport for every scroll the browser performs
+   * itself: a fragment in the address bar, a press of a contents row, a search
+   * result, and — the one that is easy to forget — moving focus to something
+   * off screen with the keyboard. Anything less than the height of what is
+   * stuck to the top of the window puts the thing a reader just asked for
+   * behind it.
+   *
+   * 7rem is 112 pixels against 102 of chrome, measured rather than reasoned:
+   * `pnpm shoot` reads the bar at `x 0 y 57 390x45` on a phone at the top of a
+   * page, and 57 is the header's `h-14` plus its border. It was 5rem while the
+   * header was the only sticky thing on the page, which cleared 57 and would
+   * not have cleared the bar.
+   *
+   * **The heading's own `scroll-margin-top` came down by the same 2rem**, so a
+   * press still lands a heading 160 pixels down and the reading line that marks
+   * the row is still one number for every width. The two add — that is what the
+   * guard in `_lib/on-this-page.test.ts` reads — so moving one of them without
+   * the other is how the mark lands on the wrong section, which has happened
+   * once already.
+   */
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 5rem;
+    scroll-padding-top: 7rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -398,7 +421,11 @@
     color: var(--ink);
     font-weight: 700;
     letter-spacing: -0.02em;
-    scroll-margin-top: 5rem;
+    /* 3rem, and `html`'s `scroll-padding-top` is 7rem: the two add, and 160 is
+       where a press of a contents row lands a heading. Read as a pair by the
+       reading-line guard, which is the test that would otherwise let the mark
+       sit on the section above the one a reader asked for. */
+    scroll-margin-top: 3rem;
   }
 
   .prose h1:not(.not-prose *) {
