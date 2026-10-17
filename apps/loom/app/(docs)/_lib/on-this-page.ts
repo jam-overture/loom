@@ -40,11 +40,20 @@ import { ARTICLE_ID } from "./chrome"
  * fall out of step — the day a component starts or stops rendering a heading,
  * the rail says so without anybody adding a line here.
  *
- * It costs one thing, stated rather than discovered: **the rail is not in the
- * server's HTML.** It appears when the page's script runs. That is the right
+ * It costs one thing, stated rather than discovered: **the rows are not in the
+ * server's HTML.** They appear when the page's script runs. That is the right
  * trade for navigation furniture and would be the wrong one for a sentence a
  * reader came to read — the pager and the rail on the left are already client
  * components for the same reason, and no content is in here.
+ *
+ * What it must not cost is a reader's place on the page, and for a while it
+ * did. Beside the prose the layout reserves the column, so a rail that arrives
+ * late arrives into a space already held for it. The narrow presentation had no
+ * column to reserve, so the prose moved down 86 pixels when the walk finished —
+ * which is why **whether a page has sections at all** is now answered before
+ * the browser is involved, by `contents/pages.ts`, from the page's own markdown.
+ * That is a different question from *what are they*, and the only one a layout
+ * needs in order to be the right height.
  *
  * ## What counts as a section
  *
@@ -203,13 +212,14 @@ export const atEndOfPage = (scrollY: number, viewportHeight: number, documentHei
   scrollY + viewportHeight >= documentHeight - 1
 
 /**
- * How many sections a page has, as the words on a closed disclosure.
+ * How many sections a page has, as the words on a closed control.
  *
  * The rail beside the prose shows the rows themselves, so it never has to say
- * how many there are. On a phone there is no room beside the prose and the
- * list starts closed, which means the only thing a reader has to decide
- * whether to press it is this phrase. *Fourteen sections* is a reason to open
- * it; *On this page* on its own is a label with nothing in it.
+ * how many there are. On a narrow screen the list is closed, and the control
+ * says which section the reader is in — except at the top of a page, where
+ * they are in none yet. That is the state this phrase is for, and it is the
+ * state a reader arrives in: *fourteen sections* is a reason to open it, where
+ * *On this page* on its own is a label with nothing in it.
  *
  * It is a function rather than a template in the component for the one reason
  * a plural ever is: the site has pages with a single section in them, and

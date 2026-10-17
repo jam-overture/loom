@@ -55241,9 +55241,11 @@ other.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/mobile-nav.tsx`,
-`_components/page-contents.tsx`, `docs/layout.tsx`) · **Status:** open — **the
-stated limit of what shipped today**, with the remedy's shape named and
-deliberately not taken
+`_components/page-contents.tsx`, `docs/layout.tsx`) · **Status:** **closed by
+`docs-58-the-bar-that-stays-with-the-reader`**, 17 October, as the remedy below
+describes it — one bar under the header, at every width with no contents rail,
+holding both questions. Both components named above are gone; `_components/docs-bar.tsx`
+is the one that replaced them.
 
 `page-contents.tsx` gives a narrow screen the contents of the page it is on,
 which closes the 15 October entry *the contents rail is a desktop rail*. It
@@ -55278,8 +55280,15 @@ contents list.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/page-contents.tsx`, `docs/layout.tsx`) ·
-**Status:** open — **measured and shipped as it is**, with three remedies
-named and the reason none was taken today
+**Status:** **closed by `docs-58-the-bar-that-stays-with-the-reader`**,
+17 October, by remedy 3 and then remedy 1 — which is the recommendation this
+entry made. `_lib/contents/pages.ts` is the set of addresses with sections, read
+off the pages at build time, so the layout knows whether there is a control
+before the browser runs and the bar is at its final height in the HTML the
+server sends. The 17 reference pages get no empty band, because the set does not
+hold them. One thing is **not** closed and is filed separately below: the
+right-hand label gains the section count when the walk finishes, which changes
+that label's width and nothing else.
 
 The rows of a contents list are read off the rendered page in the browser, for
 the reason `_lib/on-this-page.ts` gives at length: two *Architecture* pages get
@@ -55409,5 +55418,106 @@ with the silence's own sentence under it.
 readers reached the ask and the same share bought*, or *the same readers reached
 it and more bought*. It has three members and never a fourth, so a surface that
 handles `entry`, `closing` and `either` has handled all of it.
+
+---
+
+## 2026-10-17 — the chrome is 102 pixels tall and the only thing that knows so is a number typed into a test
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/globals.css`, `_lib/on-this-page.test.ts`,
+`_components/docs-bar.tsx`) · **Status:** open — **nothing is wrong today and
+the number is right**; it is a measurement held by hand, in a place where the
+same shape has already cost this lane one live defect
+
+`scroll-padding-top` is what keeps the thing a reader asked for from arriving
+behind whatever is stuck to the top of the window. It was `5rem` — 80 pixels,
+against a 57-pixel header — and the bar that landed today puts 45 more pixels
+there at every width below 1280. So it is `7rem` now, 112 against 102, and the
+heading's own `scroll-margin-top` came down from `5rem` to `3rem` so that the
+two still add to the 160 the reading line is chosen against.
+
+All three numbers are right. **What is missing is anything that would notice
+them stop being right.** The guard added beside them asserts the inset is at
+least 102, and 102 is a figure read off a screenshot and typed in by hand: the
+header's 57 is `h-14` plus a border in a layout and the bar's 45 is `py-3` plus
+a line of `text-sm`, none of which any test converts to pixels. A run that
+gives the bar a second line, or a larger control, or a taller header, makes the
+inset too small and nothing anywhere goes red. The symptom would be quiet and
+specific: a keyboard reader tabbing down a long page gets the link they focused
+half-hidden behind the bar, and a reader pressing a search result lands on a
+heading tucked under it.
+
+**This is the shape that already cost this lane a live defect**, which is why it
+is worth an entry rather than a line in a report. The reading line was 120 for a
+day while a press landed a heading at 160, and the test written to prevent
+exactly that read one of the two declarations it needed. The lesson then was *a
+test that reads one of two numbers passes while the thing it guards is wrong*.
+This is the next instance of the same genus: a test that reads a number the
+markup does not supply passes while the markup moves away from it.
+
+**The remedy is a measurement rather than a parse**, and it is why this is filed
+instead of fixed. `pnpm shoot`' `measure` already prints the bar's box — the run
+that shipped it read `x 0 y 57 390x45` off a phone — so the number exists in the
+right units at the only moment anything can know it, which is with a browser
+open. What does not exist is a way for a shot to **fail**, and 0213 is deliberate
+about that: the harness prints and never asserts, and the judgement stays in the
+report. So the remedy is one of:
+
+1. a check that reads the Tailwind classes out of the layout and the bar and
+   converts them to pixels, which is a second implementation of Tailwind's scale
+   and would be wrong the first time somebody writes an arbitrary value;
+2. a declared constant — the chrome's height, in one module, read by the
+   stylesheet through a custom property and by the components through a class
+   they share — so that the inset and the thing it clears are one number;
+3. accepting the hand-held number and keeping the guard as a floor.
+
+**Recommendation: 2**, as a unit of its own, and not today: it touches the
+header, which is the route group's root layout, and the bar, and the stylesheet,
+and it is a different argument from the one this unit is about. 3 is what
+shipped.
+
+---
+## 2026-10-17 — the bar's height is settled before the browser runs and its right-hand label's width is not
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/docs-bar.tsx`) · **Status:** open — **the
+stated limit of what shipped today**, and the half of the 16 October shift
+finding that a build-time list cannot reach
+
+The 86-pixel shift the contents line had is gone, and the reason it is gone is
+that the **layout** now knows whether a page has sections at all, from its
+markdown, before anything renders. So the bar is one row high in the HTML the
+server sends and one row high a moment later, and the prose under it does not
+move.
+
+What the server cannot know is **how many** sections there are. Two
+*Architecture* pages get most of their headings from a component as the page
+builds, which is the whole reason the rows are read off the rendered document,
+and a count taken from the markdown would be wrong on exactly those two pages.
+So the closed control is sent as *On this page* and the count — *14 sections* —
+joins it when the walk finishes.
+
+**That changes the label's width and nothing else.** The count is a `text-xs`
+span in a row whose height is set by the taller label beside it, so nothing
+above or below it moves; on a phone the control is right-aligned, so the label
+grows leftward and the site-section label beside it truncates a little sooner
+than it did a frame earlier. It is the last visible difference between the bar
+the server sends and the bar a reader ends up with.
+
+Three ways out, in the order they are worth considering:
+
+1. **Leave it.** A label that gets more informative after a frame is a different
+   thing from prose that moves under a reader, and the second is what the rule
+   is about.
+2. **Reserve the count's width** with a fixed-width span, which trades a width
+   change for a permanent gap on the seventeen pages where the count never
+   arrives and on every page for the frame before it does.
+3. **Drop the count** and let the control say *On this page* until the reader has
+   reached a heading, which is the state the count was written for in the first
+   place.
+
+**Recommendation: 1**, and it is what shipped. Recorded because it is the part
+of the 16 October entry that this unit did not close, and a later run reading
+that entry as closed should know which half.
 
 ---

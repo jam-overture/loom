@@ -170,6 +170,32 @@ describe("the reading line and where a press lands a heading", () => {
   it("keeps the line near the top of a window rather than halfway down it", () => {
     expect(READING_LINE_PX).toBeLessThan(300)
   })
+
+  /**
+   * The other half of the inset, and the half the sum above cannot see.
+   *
+   * `scroll-padding-top` is what keeps the thing a reader asked for out from
+   * behind whatever is stuck to the top of the window, and it is the only one
+   * of these numbers a **keyboard** reader depends on: moving focus to
+   * something off screen scrolls by the padding alone, with no heading and no
+   * `scroll-margin-top` involved.
+   *
+   * The chrome is 102 pixels under 1280 — the header's `h-14` and its border,
+   * which the harness reads as 57, and 45 of the bar that holds both
+   * navigations — so the padding has to clear 102. It was 5rem, or 80, while
+   * the header was the only sticky thing on the page. The sum is held at 160 by
+   * the heading's margin coming down as this went up, so the two tests above
+   * are both still about a press and this one is about everything else that
+   * scrolls.
+   *
+   * **102 is a number read off a screenshot and typed in here**, which is the
+   * open finding of 17 October and the stated weakness of this test: nothing
+   * converts `h-14` or `py-3` into pixels, so a run that makes the bar taller
+   * passes this and ships the defect.
+   */
+  it("insets the scrollport past the chrome, which is what a keyboard reader scrolls by", () => {
+    expect(soleRemValue("scroll-padding-top")).toBeGreaterThanOrEqual(102)
+  })
 })
 
 describe("the selectors", () => {

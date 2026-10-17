@@ -67,7 +67,7 @@ describe("the names the chrome agrees on", () => {
    * be lost in.
    */
   it("is declared by the two elements that scroll the rail", () => {
-    const declared = ["docs/layout.tsx", "_components/mobile-nav.tsx"].filter((file) =>
+    const declared = ["docs/layout.tsx", "_components/docs-bar.tsx"].filter((file) =>
       source(file).includes("{...railScrollerAttr}")
     )
 

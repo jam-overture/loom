@@ -1,15 +1,15 @@
-import { MobileNav } from "@/app/(docs)/_components/mobile-nav"
+import { DocsBar } from "@/app/(docs)/_components/docs-bar"
 import { OnThisPage } from "@/app/(docs)/_components/on-this-page"
-import { PageContents } from "@/app/(docs)/_components/page-contents"
 import { Pager } from "@/app/(docs)/_components/pager"
 import { Sidebar } from "@/app/(docs)/_components/sidebar"
 import { ARTICLE_ID, railScrollerAttr } from "@/app/(docs)/_lib/chrome"
+import { HREFS_WITH_SECTIONS } from "@/app/(docs)/_lib/contents/pages"
 
 /**
  * The chrome every documentation page shares: a rail that does not move, an
  * article that does, the pager at the foot of it, and what is in the page —
- * beside the prose where there is room for a second rail, and above it as a
- * closed disclosure where there is not.
+ * beside the prose where there is room for a second rail, and in a bar that
+ * stays with the reader where there is not.
  *
  * The pager lives here rather than at the bottom of each page for the same
  * reason the rail does — a page that forgot to include it would be a dead end,
@@ -20,8 +20,6 @@ import { ARTICLE_ID, railScrollerAttr } from "@/app/(docs)/_lib/chrome"
  */
 const DocsLayout = ({ children }: { readonly children: React.ReactNode }) => (
   <div className="mx-auto flex max-w-[100rem] flex-col lg:flex-row">
-    <MobileNav />
-
     {/*
      * The rail's scroller, and it says so: 45 pages of links do not fit in
      * `100vh - 3.5rem`, so the rail scrolls itself to the page a reader is on
@@ -35,25 +33,34 @@ const DocsLayout = ({ children }: { readonly children: React.ReactNode }) => (
       <Sidebar />
     </aside>
 
-    <main id={ARTICLE_ID} tabIndex={-1} className="min-w-0 flex-1 px-5 py-10 focus-visible:outline-none sm:px-8 lg:px-12">
+    <main id={ARTICLE_ID} tabIndex={-1} className="min-w-0 flex-1 focus-visible:outline-none">
       {/*
-       * The contents, in the shape a screen with no room beside the prose can
-       * hold. `xl:hidden` against the rail's `xl:block` below is one decision
-       * written twice: a reader gets the rail or the disclosure, never both and
-       * never neither, and the two lines are in this file so that moving the
-       * breakpoint moves both.
+       * Both navigations a narrow screen has, in one bar that does not scroll
+       * away. `docs-bar.tsx` is the argument; what this file decides is the two
+       * things only a layout can.
        *
-       * Inside `main` and outside `article`, which puts it after the skip link's
-       * target and before the prose — so a reader who skipped to the page is
-       * offered what is in it first — without `prose` styling a nav.
+       * **Where it sits.** Inside `main` rather than above the whole row, so
+       * that it spans the page and not the rail: it is shown at every width
+       * below 1280, and from 1024 the site's own rail is beside it. It sticks
+       * at `top-14`, which is the header's height, because the header is sticky
+       * too and two sticky bars have to be told the order they stack in.
+       *
+       * It is also after the skip link's target and before the prose, so a
+       * reader who skipped to the page is offered what is in it first.
+       *
+       * **Which pages have contents to offer**, read off the pages at build
+       * time (`_lib/contents/pages.ts`). The rows themselves still come from
+       * the rendered document, as they must; this is only whether there is a
+       * control, and knowing it here is what keeps the bar the same height in
+       * the server's HTML as it is a moment later.
        */}
-      <div className="mx-auto w-full max-w-3xl xl:hidden">
-        <PageContents />
-      </div>
+      <DocsBar pagesWithSections={HREFS_WITH_SECTIONS} />
 
-      <article className="prose mx-auto w-full max-w-3xl">{children}</article>
-      <div className="mx-auto w-full max-w-3xl">
-        <Pager />
+      <div className="px-5 py-10 sm:px-8 lg:px-12">
+        <article className="prose mx-auto w-full max-w-3xl">{children}</article>
+        <div className="mx-auto w-full max-w-3xl">
+          <Pager />
+        </div>
       </div>
     </main>
 
