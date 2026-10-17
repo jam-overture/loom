@@ -203,6 +203,14 @@ running, so it is in this unit rather than filed: it is the same defect in the
 same shape, and leaving it would have published one form's readership as the
 page's on the one counter here whose rows cannot be un-doubled.
 
+## Preview
+
+https://loom-git-signals-36-a-readin-1ffff7-jpizzolato36-6341s-projects.vercel.app
+— taken from the `vercel[bot]` comment on #661 rather than composed. The branch
+segment was truncated to `signals-36-a-readin` and a `1ffff7` hash appended,
+which is why a guessed host has been wrong six times; this container cannot
+reach `*.vercel.app` to check one either way.
+
 ## Open questions
 
 Nothing blocking. Three with a recommendation each are in the pull request
