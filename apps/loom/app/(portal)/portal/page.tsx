@@ -5,7 +5,10 @@ import { portalMemberships } from "@/app/(portal)/_lib/auth/account-store"
 import { actorSchema } from "@/app/(portal)/_lib/auth/accounts"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
+import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
 import { workspaceFor, type ProjectGroup } from "@/app/(portal)/_lib/workspace"
+
+import { ClosingControls } from "./_components/closing-controls"
 
 /**
  * The workspace: the projects you hold a role in, and what is in them.
@@ -47,6 +50,15 @@ import { workspaceFor, type ProjectGroup } from "@/app/(portal)/_lib/workspace"
  *
  * So the card says what is true: the project, who you are in it, and the
  * applications under it with the ids and hosts they really carry.
+ *
+ * ## Closed projects are below, not hidden
+ *
+ * Closing is what this portal has instead of deleting
+ * ([0289](../../../../decisions/0289-a-project-is-closed-rather-than-deleted-and-closing-is-a-column-and-a-filter.md)),
+ * and a closed project is still yours — so it sits in its own section after the
+ * open ones rather than behind a toggle somebody has to know about. Hiding it
+ * entirely would make *closed* indistinguishable from *gone* on the one screen
+ * where the difference is the whole point.
  */
 
 const RoleBadge = ({ role }: { role: ProjectGroup["role"] }) => (
@@ -55,9 +67,11 @@ const RoleBadge = ({ role }: { role: ProjectGroup["role"] }) => (
   </span>
 )
 
-const ProjectCard = ({ group }: { group: ProjectGroup }) => (
+const ProjectCard = ({ group, closed }: { group: ProjectGroup; closed?: boolean }) => (
   <li>
-    <div className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
+    <div
+      className={`border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4 ${closed === true ? "opacity-60" : ""}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-medium tracking-tight">{group.project.name}</span>
@@ -89,6 +103,16 @@ const ProjectCard = ({ group }: { group: ProjectGroup }) => (
           ))}
         </ul>
       )}
+
+      {mayAdminister(group.role) && (
+        <div className="border-edge-subtle border-t pt-3">
+          <ClosingControls
+            projectId={group.project.projectId}
+            name={group.project.name}
+            closedAt={group.project.closedAt}
+          />
+        </div>
+      )}
     </div>
   </li>
 )
@@ -98,8 +122,13 @@ const PortalWorkspace = async () => {
 
   const [held, projects, applications] = await Promise.all([
     portalMemberships.projectsOf(actorSchema.parse(actor)),
-    portalProjects.list(),
-    portalApplications.list(),
+    /**
+     * Everything, because this screen draws the closed ones too — in their own
+     * section below (0289). The default is open-only, which is what every
+     * other caller means.
+     */
+    portalProjects.list({ closed: "all" }),
+    portalApplications.list({ closed: "all" }),
   ])
 
   /**
@@ -110,16 +139,26 @@ const PortalWorkspace = async () => {
    */
   const unreadable = !held.ok || !projects.ok || !applications.ok
 
+  /**
+   * Everything, open and closed, and separated here rather than by two reads.
+   * Two listings would be two round trips and a window between them in which a
+   * project could close and appear in neither.
+   */
+  const summaries = (applications.ok ? applications.value : []).map((application) => ({
+    application,
+    pages: 0,
+    waiting: 0,
+    unreadable: 0,
+  }))
+
   const workspace = workspaceFor(
     held.ok ? held.value : [],
     projects.ok ? projects.value : [],
-    (applications.ok ? applications.value : []).map((application) => ({
-      application,
-      pages: 0,
-      waiting: 0,
-      unreadable: 0,
-    }))
+    summaries
   )
+
+  const open = workspace.groups.filter((group) => group.project.closedAt === undefined)
+  const closed = workspace.groups.filter((group) => group.project.closedAt !== undefined)
 
   return (
     <Screen>
@@ -147,10 +186,27 @@ const PortalWorkspace = async () => {
         </p>
       ) : (
         <ul className="grid list-none grid-cols-1 gap-3 p-0 lg:grid-cols-2">
-          {workspace.groups.map((group) => (
+          {open.map((group) => (
             <ProjectCard key={group.project.projectId} group={group} />
           ))}
         </ul>
+      )}
+
+      {closed.length > 0 && (
+        <section className="flex flex-col gap-3 pt-8">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-ink-muted text-sm tracking-tight">Closed</h2>
+            <p className="text-ink-muted max-w-lg text-xs">
+              Closed projects keep everything they held — their pages, their history and what their
+              readers did. Nothing was deleted, and reopening one brings it back.
+            </p>
+          </div>
+          <ul className="grid list-none grid-cols-1 gap-3 p-0 lg:grid-cols-2">
+            {closed.map((group) => (
+              <ProjectCard key={group.project.projectId} group={group} closed />
+            ))}
+          </ul>
+        </section>
       )}
 
       <div className="border-edge flex flex-col gap-2 border-t pt-6 text-sm">

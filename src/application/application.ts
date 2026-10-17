@@ -90,6 +90,16 @@ export const applicationSchema = z
      * decide which origins may post to it.
      */
     host: z.string().min(1).max(253).optional(),
+    /**
+     * When it was closed, or absent while it is open (0289). See
+     * `Project.closedAt`, which this follows in every respect but one: an
+     * application is closed *by* its project closing, and is not reopened by
+     * its project reopening.
+     *
+     * A closed application takes no signals. That is enforced where ingest
+     * learns which application is posting, which is not here and not yet.
+     */
+    closedAt: z.string().datetime().optional(),
   })
   .strict()
 

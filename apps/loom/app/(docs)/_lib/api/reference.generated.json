@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8454,10 +8454,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 37,
+      "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8571,9 +8571,9 @@
             {
               "name": "ApplicationStore",
               "kind": "type",
-              "signature": "type ApplicationStore = {\n    /**\n     * Record an application. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (application: Application) => Promise<Result<Application, ApplicationStoreError>>;\n    /** One application. */\n    readonly get: (applicationId: ApplicationId) => Promise<Result<Application, ApplicationStoreError>>;\n    /**\n     * Every application, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose application count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way applications are not.\n     */\n    readonly list: () => Promise<Result<readonly Application[], ApplicationStoreError>>;\n    /**\n     * Change what a person calls it, and where they say it lives.\n     *\n     * A field left out is left alone, and `host: null` removes it — the three\n     * states `Patch` spells, because an application that has been given a host\n     * has to be able to have it taken away. A name has no third state: it is\n     * required, so there is nothing for clearing it to mean and the type does not\n     * offer it.\n     */\n    readonly rename: (applicationId: ApplicationId, to: {\n        readonly name?: string;\n        readonly host?: Patch<string>;\n    }) => Promise<Result<Application, ApplicationStoreError>>;\n};",
+              "signature": "type ApplicationStore = {\n    /**\n     * Record an application. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (application: Application) => Promise<Result<Application, ApplicationStoreError>>;\n    /** One application. */\n    readonly get: (applicationId: ApplicationId) => Promise<Result<Application, ApplicationStoreError>>;\n    /**\n     * Every application, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose application count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way applications are not.\n     */\n    readonly list: (listing?: Listing) => Promise<Result<readonly Application[], ApplicationStoreError>>;\n    /**\n     * Change what a person calls it, and where they say it lives.\n     *\n     * A field left out is left alone, and `host: null` removes it — the three\n     * states `Patch` spells, because an application that has been given a host\n     * has to be able to have it taken away. A name has no third state: it is\n     * required, so there is nothing for clearing it to mean and the type does not\n     * offer it.\n     */\n    readonly rename: (applicationId: ApplicationId, to: {\n        readonly name?: string;\n        readonly host?: Patch<string>;\n    }) => Promise<Result<Application, ApplicationStoreError>>;\n    /**\n     * Stop it, without losing it. Closed by its own id, or by its project\n     * closing — `ProjectStore.close` does this to every application it holds.\n     *\n     * Idempotent on one already closed: the instant stays where it was.\n     */\n    readonly close: (applicationId: ApplicationId, at: string) => Promise<Result<Application, ApplicationStoreError>>;\n    /** The inverse, one application at a time. See `ProjectStore.reopen`. */\n    readonly reopen: (applicationId: ApplicationId) => Promise<Result<Application, ApplicationStoreError>>;\n};",
               "truncated": false,
-              "summary": "Four methods, and **no delete**."
+              "summary": "Six methods, and still **no delete**."
             }
           ]
         },
@@ -8609,6 +8609,34 @@
               "signature": "const DEFAULT_AUDIENCE_ID: AudienceId",
               "truncated": false,
               "summary": "The audience that matches every reader."
+            }
+          ]
+        },
+        {
+          "module": "project/closing",
+          "title": "Closing",
+          "summary": "Closing a project, and the applications it holds.",
+          "symbols": [
+            {
+              "name": "ClosingError",
+              "kind": "type",
+              "signature": "type ClosingError = ProjectStoreError\n/**\n * The project closed and an application under it did not.\n *\n * Reported rather than swallowed, and **the project stays closed**: a partial\n * close is recoverable by running it again, where rolling the project back\n * open would make the failure invisible and leave somebody believing their\n * project is still collecting when most of it has stopped.\n */\n | {\n    readonly code: \"partly-closed\";\n    readonly projectId: ProjectId;\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeClosingError",
+              "kind": "function",
+              "signature": "const describeClosingError: (error: ClosingError) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "closeProject",
+              "kind": "function",
+              "signature": "const closeProject: (projects: ProjectStore, applications: ApplicationStore, projectId: ProjectId, at: string) => Promise<Result<undefined, ClosingError>>",
+              "truncated": false,
+              "summary": "Close the project, then every application in it."
             }
           ]
         },
@@ -8709,11 +8737,25 @@
               "summary": ""
             },
             {
+              "name": "Listing",
+              "kind": "type",
+              "signature": "type Listing = {\n    /** `true` for closed only, `false` or absent for open only, `\"all\"` for both. */\n    readonly closed?: boolean | \"all\";\n};",
+              "truncated": false,
+              "summary": "What a listing is asked for."
+            },
+            {
+              "name": "matchesListing",
+              "kind": "function",
+              "signature": "const matchesListing: (closedAt: string | undefined, listing?: Listing) => boolean",
+              "truncated": false,
+              "summary": "Whether a row belongs in this listing, as one function both stores and both implementations use."
+            },
+            {
               "name": "ProjectStore",
               "kind": "type",
-              "signature": "type ProjectStore = {\n    /**\n     * Record a project. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (project: Project) => Promise<Result<Project, ProjectStoreError>>;\n    /** One project. */\n    readonly get: (projectId: ProjectId) => Promise<Result<Project, ProjectStoreError>>;\n    /**\n     * Every project, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose project count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way projects are not.\n     */\n    readonly list: () => Promise<Result<readonly Project[], ProjectStoreError>>;\n    /** Change what a person calls it. */\n    readonly rename: (projectId: ProjectId, to: {\n        readonly name: string;\n    }) => Promise<Result<Project, ProjectStoreError>>;\n};",
+              "signature": "type ProjectStore = {\n    /**\n     * Record a project. Refuses an id already taken rather than overwriting,\n     * because the thing under that id owns rows.\n     */\n    readonly create: (project: Project) => Promise<Result<Project, ProjectStoreError>>;\n    /** One project. */\n    readonly get: (projectId: ProjectId) => Promise<Result<Project, ProjectStoreError>>;\n    /**\n     * Every project, oldest first.\n     *\n     * Unpaginated, and that is a judgement rather than an oversight: this is the\n     * list a person scans on one screen, and a deployment whose project count\n     * needs a cursor has a different screen's problem. `TreeStore.list` takes a\n     * limit because pages are unbounded in a way projects are not.\n     */\n    readonly list: (listing?: Listing) => Promise<Result<readonly Project[], ProjectStoreError>>;\n    /** Change what a person calls it. */\n    readonly rename: (projectId: ProjectId, to: {\n        readonly name: string;\n    }) => Promise<Result<Project, ProjectStoreError>>;\n    /**\n     * Stop it, without losing it.\n     *\n     * **This closes the project row and nothing else.** Closing a project also\n     * closes the applications in it, and that cascade is `closeProject` in\n     * `src/project/closing.ts` rather than a line in here: this store knows\n     * nothing about applications, and a store that reached into another one to\n     * finish a write would be the coupling both of them are shaped to avoid.\n     *\n     * Idempotent on a project already closed — the instant is not moved, because\n     * the answer to *when did this stop* must not change because somebody pressed\n     * the button twice.\n     */\n    readonly close: (projectId: ProjectId, at: string) => Promise<Result<Project, ProjectStoreError>>;\n    /**\n     * The inverse, and **not symmetric**: reopening a project does not reopen its\n     * applications.\n     *\n     * Closing is a statement about the project; reopening one of its applications\n     * is a decision about that application. A reopen that revived everything\n     * would turn *I want that one back* into *start collecting on all nine\n     * again*.\n     */\n    readonly reopen: (projectId: ProjectId) => Promise<Result<Project, ProjectStoreError>>;\n};",
               "truncated": false,
-              "summary": "Four methods, and **no delete**."
+              "summary": "Six methods, and still **no delete**."
             }
           ]
         },
@@ -9245,7 +9287,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9673,10 +9715,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 40,
+      "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9895,14 +9937,14 @@
             {
               "name": "loomApplications",
               "kind": "value",
-              "signature": "const loomApplications: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_applications\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        host: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"host\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomApplications: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_applications\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        host: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"host\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        closedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"closed_at\";\n            tableName: \"loom_applications\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The applications a deployment governs."
             },
             {
               "name": "loomProjects",
               "kind": "value",
-              "signature": "const loomProjects: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_projects\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "signature": "const loomProjects: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_projects\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        closedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"closed_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The projects a deployment has, which group the applications above."
             }
@@ -9928,7 +9970,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -13036,7 +13078,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13179,7 +13221,7 @@
       "files": 17,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13246,7 +13288,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13843,7 +13885,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13917,7 +13959,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14396,7 +14438,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1661,
+        "packageNames": 1666,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
