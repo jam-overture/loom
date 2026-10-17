@@ -13,6 +13,8 @@ import {
   COPY_SILENCES,
   copyChangeOf,
   copyReadingOf,
+  DEPLOYMENT_CHANGE_SILENCES,
+  deploymentChangeOf,
   DEPLOYMENT_SILENCES,
   describeSilenceCondition,
   describeSilenceSubject,
@@ -34,6 +36,7 @@ import {
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
+  meaningOfDeploymentChangeSilence,
   meaningOfDeploymentSilence,
   meaningOfFunnelChangeSilence,
   meaningOfKindActionSilence,
@@ -157,6 +160,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
   ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
+  ...DEPLOYMENT_CHANGE_SILENCES.map(meaningOfDeploymentChangeSilence),
   ...FUNNEL_CHANGE_SILENCES.map(meaningOfFunnelChangeSilence),
   ...KIND_SILENCES.map(meaningOfKindSilence),
   ...KIND_ACTION_SILENCES.map(meaningOfKindActionSilence),
@@ -178,6 +182,7 @@ describe("what a reading means when it says nothing", () => {
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
         DEPLOYMENT_SILENCES.length +
+        DEPLOYMENT_CHANGE_SILENCES.length +
         FUNNEL_CHANGE_SILENCES.length +
         KIND_SILENCES.length +
         KIND_ACTION_SILENCES.length +
@@ -278,6 +283,11 @@ describe("what a reading means when it says nothing", () => {
           FUNNEL_CHANGE_SILENCES.map((of) => meaningOfFunnelChangeSilence(of).condition),
           [],
         ],
+        [
+          "deployment-change",
+          DEPLOYMENT_CHANGE_SILENCES.map((of) => meaningOfDeploymentChangeSilence(of).condition),
+          [],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -321,6 +331,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "comparison",
       "comparison",
       "kind",
       "kind",
@@ -604,6 +615,25 @@ describe("the mapping, against what the readings actually say", () => {
 
     expect(change.silence).toBe("different-trees")
     expect(meaningOfChangeSilence("different-trees").condition).toBe("two-pages")
+  })
+
+  /**
+   * The two spellings of one state, in the one place a surface meets both at
+   * once: a comparison handed two pages says `different-trees`, and an order
+   * holding that comparison says `mispaired` of the page it could not place. One
+   * condition, one subject, two sentences worth printing.
+   */
+  it("maps an order holding a mispaired comparison to the state the comparison itself reports", () => {
+    const change = readingChangeOf(readingOf(treeOf(PAGE), []), readingOf(ANOTHER_PAGE, []))
+    const order = deploymentChangeOf([change], [])
+
+    expect(order.unranked.map((page) => page.standing)).toEqual(["mispaired"])
+    expect(
+      relateSilences(
+        meaningOfDeploymentChangeSilence("mispaired"),
+        meaningOfChangeSilence("different-trees")
+      )
+    ).toBe("one-state")
   })
 
   it("maps a comparison with one empty window to nothing having been seen, of the pair", () => {
