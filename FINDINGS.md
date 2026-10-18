@@ -56153,3 +56153,118 @@ request body.** A routine that needs to show an attribute can name it in prose
 instead, which is what #664's corrected body does.
 
 ---
+
+---
+## 2026-10-17 — four comparisons paired a page by its tree, in two spellings of one rule, and the key that would have fixed it was private in a fifth
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-37-a-comparison-pairs-pages-by-form`** — found while
+reading the comparison layer for the open `change.ts` entry below, fixed as 0293
+in the same run, and written down because it is the **same defect** the morning
+run fixed in one module and because the shape of how it survived is the useful
+half
+
+0290 gave every reading of these counters the audience dimension and published
+`readingKeyOf` on the argument that five spellings of *what makes two readings
+one page* are five places to drift. Clause 7 of it, added when #659 merged mid
+branch, found the identical defect in a **comparison** and fixed it with
+`formKeyOf` — *a page in one of its forms, with no revision in it* — as a
+`const` in `deployment-change.ts`.
+
+**Four other comparisons had the same defect and nothing to import.** The
+library comparisons of places (0266), words (0270), readers (0279) and
+reader-words (0280) pair each page in the earlier window with its counterpart in
+the later one, and `pairedWindowOf` keyed that pairing by `TreeId`. Two forms of
+a page share a tree, so:
+
+- **two forms at one revision** — the second was `duplicated`, dropped as the
+  first one handed in twice, which 0158 makes permanent and which `health.ts`
+  reports with **`caller`** as the remedy, on a deployment doing exactly what
+  0263 built;
+- **two forms at two revisions** — the tree went into `ambiguous` and **both**
+  forms left every row, every total and every ranking;
+- **a kind's `pages`** is a set, so two forms counted as one page, understating
+  the places a kind stands by exactly the pages a deployment serves twice;
+- **`LibrarySide.scaled`** keyed each paired page's door by its tree, so
+  whichever form the map held scaled the **other** form's readers — and
+  `pageViewsFor` scopes a door row to the reading's own audience (0290), so the
+  two doors were real and one of them was being used for both.
+
+**And `library-copy-change.ts` carried a second hand-written copy of the rule**,
+150 lines from an export whose own doc comment says *"a second hand-written copy
+of it would be two spellings of one rule that agree today."* There was one, and
+it was wrong in the same two ways. It is deleted; that module imports the
+published rule, as its three siblings do.
+
+**The lesson, which is the morning entry's lesson arriving a second time.** That
+entry said *a published key stops two places disagreeing only once both places
+import it*. The case it had in mind was a branch open across another's merge.
+This case is narrower and more avoidable: the key was published **to one
+module**. A `const` at the top of the file that needs it is the cheapest
+possible thing to write and the most expensive to find, because nothing about it
+is wrong — `deployment-change.ts`'s copy was correct. What was wrong is that
+four other modules could not reach it, and the grep that would have shown so is
+`grep -c formKeyOf src/signals/*.ts` returning 1.
+
+**So the rule this lane should hold itself to:** a key that decides what counts
+as one of something goes in `audiences.ts` (or the module whose record owns the
+concept) the first time it is written, not the second time it is needed. `0293`
+publishes both keys with the difference between them written down, which is the
+form that argument should take from here.
+
+---
+## 2026-10-17 — the comparison layer still does not check that its two sides are of one form, and the loud half and the quiet half want one decision
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/change.ts`, `copy-change.ts`, `pace-change.ts`,
+`action-change.ts`, `funnel-change.ts`, and the four library comparisons) ·
+**Extends** the 17 October entry *a change comparison whose two sides name
+different audiences is a cross-population comparison wearing a before-and-after's
+clothes*, which stays open · **Status:** open — **nothing is broken today**; the
+shape is now settled by having read all nine, and three questions in it are
+answerable without writing code
+
+0293 made each comparison pair the **pages inside one window** by form. It did
+not make any comparison check that its **two windows** are of one form, and
+reading all nine functions for it settled three things the earlier entry left
+open.
+
+**It is nine functions and not eight, and they take their pairs identically.**
+`readingChangeOf`, `copyChangeOf`, `paceChangeOf`, `actionChangeOf` and the four
+library comparisons take two `PageReading`s or two windows of them;
+`funnelChangeOf` takes two `FunnelReach`es, each of which was built from a
+reading and carries its tree and revision. Every one of them guards
+`was.treeId !== now.treeId` and returns a `different-trees` silence, and **none
+of them looks at the audience**. So it is one guard beside an existing guard, in
+nine places, and a member in nine published silence vocabularies plus a
+condition in `silences.ts` (0240).
+
+**The loud half and the quiet half are not the same severity, and that is an
+argument for doing them together rather than for doing one.** A library
+comparison handed `aud_pro`'s window and `aud_free`'s finds no counterpart for
+any page: every page reads gained, every page reads lost, `pages` is nought and
+every kind row is `unpaired`. Wrong, and loud enough that somebody would ask. A
+page's own `readingChangeOf` handed one form's earlier window and another form's
+later one produces every stop, every share and every `improvement`, with no
+`null` and no silence anywhere on it, labelled as what a change did. That one is
+the 0284 collapse at the comparison layer — *a number that looks right forever*.
+Fixing the quiet one and not the loud one leaves two spellings of one guard,
+which is what 0293 is about.
+
+**The `null` side is a third state and probably wants a field rather than a
+refusal.** `PageReading.audienceId` is `null` both for a window whose rows never
+carried the column — every window written before 0284, and every one a test
+builds by hand — and for a window naming two with none asked for. Comparing
+`null` with `aud_pro` is therefore unprovable either way: a deployment serving
+one form across the 0284 migration is an honest before-and-after, and a
+deployment that began serving two forms is a cross-population comparison, and
+nothing in the two readings tells them apart. Refusing both would withhold every
+comparison that spans the upgrade; allowing both silently is the collapse.
+
+**The shape, if it is taken:** refuse only where the two sides **prove** two
+populations — both name an audience and the two differ — which is 0290's
+treatment of its third state applied here, and carry `audiences: { was, now }`
+on every comparison so a surface can see an unprovable pair for itself. One
+helper published from `audiences.ts` beside the two keys, imported nine times,
+rather than nine spellings of `was.audienceId !== now.audienceId`.
+

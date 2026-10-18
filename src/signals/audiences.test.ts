@@ -3,7 +3,15 @@ import { describe, expect, it } from "vitest"
 import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { OTHER_TREE, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 
-import { audiencesIn, byAudience, forAudience, readingKeyOf } from "./audiences.js"
+import {
+  audiencesIn,
+  byAudience,
+  forAudience,
+  formKeyOf,
+  formOf,
+  inFormOrder,
+  readingKeyOf,
+} from "./audiences.js"
 
 /**
  * The split and the key, tested on plain rows: what is being decided here is
@@ -122,5 +130,64 @@ describe("readingKeyOf", () => {
     expect(readingKeyOf({ treeId: TREE, revision: 1 })).not.toBe(
       readingKeyOf({ treeId: TREE, revision: 1, audienceId: DEFAULT_AUDIENCE_ID })
     )
+  })
+})
+
+describe("formKeyOf", () => {
+  /**
+   * The assertion the second rule exists for. Four library comparisons keyed a
+   * paired page by its tree, so two forms of it were one key — and the two
+   * ways a window can hold them both came out as *the first one handed in
+   * twice* and *this page is ambiguous*, neither of which is what happened.
+   */
+  it("makes two forms of one page two pages rather than one", () => {
+    expect(formKeyOf({ treeId: TREE, audienceId: SKIERS })).not.toBe(
+      formKeyOf({ treeId: TREE, audienceId: RIDERS })
+    )
+  })
+
+  /**
+   * What makes it a second rule rather than a second spelling of the first: a
+   * comparison spans two revisions of one page, so the revision cannot be in
+   * the key that pairs them.
+   */
+  it("holds one form still across two revisions, where a reading key does not", () => {
+    const was = { treeId: TREE, revision: 1, audienceId: SKIERS }
+    const now = { treeId: TREE, revision: 2, audienceId: SKIERS }
+
+    expect(formKeyOf(formOf(was))).toBe(formKeyOf(formOf(now)))
+    expect(readingKeyOf(was)).not.toBe(readingKeyOf(now))
+  })
+
+  it("goes on telling two trees apart", () => {
+    expect(formKeyOf({ treeId: OTHER_TREE, audienceId: SKIERS })).not.toBe(
+      formKeyOf({ treeId: TREE, audienceId: SKIERS })
+    )
+  })
+
+  /** 0290's third state, kept: a window that never carried the column is not `aud_everyone`. */
+  it("keys a form that names no audience as itself, and never as the default", () => {
+    expect(formKeyOf(formOf({ treeId: TREE, revision: 1 }))).toBe(
+      formKeyOf({ treeId: TREE, audienceId: null })
+    )
+    expect(formKeyOf({ treeId: TREE, audienceId: null })).not.toBe(
+      formKeyOf({ treeId: TREE, audienceId: DEFAULT_AUDIENCE_ID })
+    )
+  })
+
+  it("normalises an absent audience to the null it means", () => {
+    expect(formOf({ treeId: TREE, revision: 1 })).toEqual({ treeId: TREE, audienceId: null })
+    expect(formOf({ treeId: TREE, revision: 2, audienceId: SKIERS })).toEqual({
+      treeId: TREE,
+      audienceId: SKIERS,
+    })
+  })
+
+  it("orders two forms of one page the same way whatever order they arrived in", () => {
+    const skiers = { treeId: TREE, audienceId: SKIERS }
+    const riders = { treeId: TREE, audienceId: RIDERS }
+
+    expect([skiers, riders].sort(inFormOrder)).toEqual([riders, skiers])
+    expect([riders, skiers].sort(inFormOrder)).toEqual([riders, skiers])
   })
 })
