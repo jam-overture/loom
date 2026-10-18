@@ -2480,6 +2480,60 @@ the head of this section; and the readership comparison's honest limit, which is
 that two maps read whole over a window holding two audiences name none, so the
 pair is unprovable and is compared.
 
+### 39. A library gained a form, not a page · `Loom signals` · **done, 18 October**
+
+§38 left four comparisons out and filed them, and the filed proposal was to lift
+its `different-audiences` refusal onto them — probably refusing a **mixed**
+window first, since a library window is a set of readings rather than one. The
+branch holding those files has merged and **the proposal does not survive
+reading them.**
+
+What it was written before is
+[0293](../decisions/0293-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md).
+All four now pair by **form**, so a form meets only the identical form in the
+other window: every placement held still is one form's against its own, and no
+share in any of the four has a denominator spanning two populations. The fault
+0294 refuses cannot be built through these entry points. Two windows of two
+disjoint audiences do not come back as a plausible wrong number — they come back
+as every form unpaired, every movement `unknown` and `pages` of nought.
+
+**What they do get wrong is a count of pages, in the loud direction.** After
+0293 `pagesGained` is forms, and three of the four still documented it as trees.
+A deployment that began serving `aud_pro` on five pages it already served is told
+its library gained five pages. It published nothing — and the fact that separates
+the two readings, the tree behind each form, was already in hand on both sides.
+
+**Done**
+([0295](../decisions/0295-a-library-comparison-reports-the-populations-it-was-taken-over-and-refuses-none-of-them.md)):
+
+- **No refusal, on either count.** Not a `different-audiences` member, because
+  there is no wrong number to withhold; and not a refusal of a mixed window,
+  because after 0263 a deployment serving two audiences has a mixed window for
+  every library comparison it ever takes, and refusing it would withhold this
+  reading from exactly the deployments 0263 was built for.
+- **`formsGained` and `formsLost`** on all four: the subset of the gained or
+  lost forms whose page the other window already held. `pagesGained −
+  formsGained` is pages published and `pagesLost − formsLost` is pages that left
+  the library, so both sentences come out of one subtraction.
+- **`audiences: ComparedPopulations`** on all four — a *set* per side, because a
+  window holds every form a deployment served. Published and never refused;
+  deliberately not `ComparedAudiences`, which is one audience per side and is
+  what a refusal keys on.
+- **`audiencesOf` and `pagesOf`** published from
+  [`audiences.ts`](../src/signals/audiences.ts) beside the two key rules, so the
+  form census is one spelling rather than four.
+- **Three stale doc comments corrected.** `pages`, `pagesGained` and `pagesLost`
+  say forms, which is what they have counted since 0293.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the twenty-eighth thing taken out of what this subsystem already
+knows. The broadcaster was not touched and is byte-identical at 6,477 bytes
+minified and 2,941 gzipped.
+
+**What is left and is filed:** the placements are not decomposed the same way
+and the reason is written down; and no screen reads either new number, which is
+`Loom portal`'s.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

@@ -9,9 +9,11 @@ import {
   comparedAudiencesOf,
   crossesAudiences,
   forAudience,
+  audiencesOf,
   formKeyOf,
   formOf,
   inFormOrder,
+  pagesOf,
   readingKeyOf,
 } from "./audiences.js"
 
@@ -244,5 +246,61 @@ describe("crossesAudiences", () => {
     expect(
       comparedAudiencesOf(unscoped(1), { audienceId: DEFAULT_AUDIENCE_ID })
     ).not.toMatchObject({ was: DEFAULT_AUDIENCE_ID })
+  })
+})
+
+/**
+ * The two form rules a comparison of whole windows is built on. Both are
+ * questions about a set of forms rather than about one, which is what makes a
+ * library window different from a reading (0295).
+ */
+describe("what a window of forms is of", () => {
+  it("names each audience once however many forms of it the window holds", () => {
+    expect(
+      audiencesOf([
+        { treeId: TREE, audienceId: SKIERS },
+        { treeId: OTHER_TREE, audienceId: SKIERS },
+        { treeId: TREE, audienceId: RIDERS },
+      ])
+    ).toEqual([RIDERS, SKIERS])
+  })
+
+  /** `[]` is *nothing here said*, which is not an audience and is not `aud_everyone`. */
+  it("names no audience for forms that named none", () => {
+    expect(audiencesOf([{ treeId: TREE, audienceId: null }])).toEqual([])
+    expect(audiencesOf([])).toEqual([])
+  })
+
+  it("leaves out the forms that named none and keeps the ones that did", () => {
+    expect(
+      audiencesOf([
+        { treeId: TREE, audienceId: null },
+        { treeId: TREE, audienceId: SKIERS },
+      ])
+    ).toEqual([SKIERS])
+  })
+
+  /** Two forms of one page share a tree (0263), so a page is counted once. */
+  it("counts two forms of one page as one page", () => {
+    expect([
+      ...pagesOf([
+        { treeId: TREE, audienceId: SKIERS },
+        { treeId: TREE, audienceId: RIDERS },
+      ]),
+    ]).toEqual([TREE])
+  })
+
+  it("counts one form handed in twice as one page", () => {
+    expect(
+      pagesOf([
+        { treeId: TREE, audienceId: SKIERS },
+        { treeId: TREE, audienceId: SKIERS },
+        { treeId: OTHER_TREE, audienceId: SKIERS },
+      ]).size
+    ).toBe(2)
+  })
+
+  it("counts a form that named no audience as the page it is of", () => {
+    expect([...pagesOf([{ treeId: TREE, audienceId: null }])]).toEqual([TREE])
   })
 })

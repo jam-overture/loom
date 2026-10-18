@@ -56381,9 +56381,19 @@ rows would be a good first subject for it.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/library-change.ts`,
 `src/signals/library-copy-change.ts`, `src/signals/library-reach-change.ts`,
-`src/signals/library-word-reach-change.ts`) · **Status:** open — **the decision
-is taken and the rule is published; what is left is applying it to four
-functions**, and it was left because another branch held those files
+`src/signals/library-word-reach-change.ts`) · **Status:** **closed by
+`signals-39-a-library-gained-a-form-not-a-page`** — answered as 0295 rather than
+built, and **the answer is no on both halves.** The four files were opened and
+read with #668 merged, and the guard this entry asks for does not fit them:
+pairing by form (0293) means no share in any of the four has a denominator
+spanning two populations, so there is no wrong number to withhold. The second
+half — *refuse a mixed window first* — is the costlier of the two, because after
+0263 a deployment serving two audiences has a mixed window for every library
+comparison it ever takes. What the four got instead is a census: `audiences` as
+a set per side, and `formsGained`/`formsLost`, which answer the fault that **is**
+real there and is not this one (see the entry filed below the same day).
+Original status: open — the decision is taken and the rule is published; what is
+left is applying it to four functions
 
 0294 refuses a comparison whose two sides prove two populations, and publishes
 `crossesAudiences` once so that nine comparisons do not each decide it. It was
@@ -56538,6 +56548,48 @@ longest published signatures in the subsystem are now close to the line:
 `SilenceCondition` at 5,732 characters cleaned and `CopyChange` at 5,550, both
 against a 6,000-character cap applied to the uncleaned text. Whoever hits it next
 will read the same misleading failure.
+
+### It fired again the same day, and this time there was no fix in the source at all
+
+**Filed by:** `Loom signals`, 18 October, evening run
+
+The prediction above was right and the timing was eight hours. §39 added doc
+comments to four published result types and **two of them failed**:
+`LibraryCopyChange` and `LibraryWordReachChange`, on `(0147)` and `(0266)` — two
+citations in two comments written by earlier runs, correctly parenthesised,
+clean in every generation before this one.
+
+**The new fact is that this time the source could not be fixed.** The workaround
+above worked because one declaration could be brought back under the cap. These
+cannot be: the four declarations are **8,559, 7,219, 6,814 and 6,382 characters**
+against a 6,000 cap, and three of the four were already over it before this
+branch. Shortening a comment does not bring them under — **it moves the cut**,
+and whether the new cut lands inside a comment holding a number is luck. On this
+branch the long version lost that coin flip twice and the short version won it
+four times, and nothing about either version is more correct than the other.
+
+**So the number of truncated published signatures is the size of the exposure,
+and it is fourteen**, across at least six lanes: `LIBRARY_CLASS` and
+`PrimitiveDefinition` (both at the cap exactly), `RenderDiagnostic`,
+`LoomRenderContext`, `RegistryAudit`, `PairReach`, `KindAction`,
+`KindReachChange`, `CopyReading`, `ChangeAnalysis` and the four library
+comparisons. Every one of them fails the decision-number check the day somebody
+adds or removes enough text to shift its cut into a cited comment, and the
+failure names the type rather than the member, so the first minutes of reading
+it are spent looking for a citation nobody added.
+
+**The remedy is unchanged and is three lines in `extract.ts`.** `extractSymbol`
+calls `readerFacingSignature(truncated ? full.slice(0, CAP) + "…" : full)`. Clean
+first and truncate the cleaned text, or keep the cap on the source and drop a
+trailing unterminated comment before the ellipsis. The second keeps `truncated`
+meaning exactly what it means today.
+
+**This lane did not take it**, because `extract.ts` is `Loom docs`' file and the
+brief files cross-lane work rather than doing it. What §39 did instead is the
+same workaround a second time — the member doc comments were written as
+one-liners with the argument in 0295 — which is better reference prose and is
+**not a fix**. The next lane to touch any of those fourteen types gets the coin
+flip.
 ## 2026-10-17 — four comparisons paired a page by its tree, in two spellings of one rule, and the key that would have fixed it was private in a fifth
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
@@ -56650,4 +56702,102 @@ treatment of its third state applied here, and carry `audiences: { was, now }`
 on every comparison so a surface can see an unprovable pair for itself. One
 helper published from `audiences.ts` beside the two keys, imported nine times,
 rather than nine spellings of `was.audienceId !== now.audienceId`.
+
+---
+## 2026-10-18 — a library comparison counted a second form begun as a page published, and three of the four documented its forms as trees
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed on filing by `signals-39-a-library-gained-a-form-not-a-page`** (0295) —
+written down because it is what closing the entry above actually found, and the
+entry above was looking for something else
+
+The four library comparisons were opened to take 0294's `different-audiences`
+guard. The guard does not belong there (see above). **What was there instead is
+a number a deployment would read and act on.**
+
+After 0293 all four pair their pages by **form** — a tree and an audience. So
+`pagesGained`, documented in three of the four as *pages read in the later window
+only, which is trees and not revisions*, has counted **forms** since the day that
+landed. A deployment that began serving `aud_pro` on five pages it already
+served reads:
+
+> your library gained 5 pages
+
+It published nothing. The same figure also means *five pages were published*, and
+nothing in the output told them apart — while the fact that separates them, the
+tree behind each form, was already on both sides of the comparison.
+
+**What shipped:** `formsGained` and `formsLost` on all four, each the subset of
+the gained or lost forms whose page the other window already held, so
+`pagesGained − formsGained` is pages published and `pagesLost − formsLost` is
+pages that left the library. Plus `audiences` as a set per side, and the three
+stale doc comments corrected. Nothing was collected: `audiencesOf` and `pagesOf`
+are published from `audiences.ts` beside the two key rules, and both read the
+forms the pairing already built.
+
+**The ambiguous forms are counted as pages the window held**, deliberately: the
+question is what the deployment served and not what could be compared, and a form
+excluded as ambiguous is named in `ambiguous` already. It is a clause of 0295
+rather than a loose end.
+
+---
+## 2026-10-18 — a place gained in a second form is counted as a place gained, and that is a decision rather than an oversight
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-change.ts` and the three beside it) · **Status:** open —
+**a limit written down, nothing broken and nothing asked of anybody**; the
+symmetrical half of 0295 clause 4, left undone on purpose
+
+0295 decomposes `pagesGained` into pages published and forms begun. It does not
+decompose `gained` and `lost`, which are counts of **placements**, and the two
+are not obviously different.
+
+**Why it was left.** A place in a second form is a place a reader can really
+reach, and it really was not in the other window — so `gained` is true as it
+stands in a way `pagesGained` was not. The figure a person misreads is the one
+they read as *documents I own*, and that is the page count. Decomposing the
+placements would be four more counters on four published types to separate
+places that are all genuinely reachable.
+
+**What would close it, if a surface finds it needs it.** The fact is derivable
+from exactly the two sets 0295 already publishes — `pagesHeld` on each side —
+with no new input: a placement is *in a form begun* if its form is in
+`pagesGained`'s set and its tree was already held. It is counters and tests, not
+a decision.
+
+**The honest reason to leave it open rather than call it settled:** nobody has
+yet drawn either number on a screen, so which of the two confusions actually
+bites is not known. The page one was provable from the sentence a card would
+print; this one is not.
+
+---
+## 2026-10-18 — a library comparison now says how much of its growth was a second form, and no screen reads it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**two numbers and one set on four readings**, filed the way 0294's own surface
+gap was filed
+
+0295 puts `formsGained`, `formsLost` and `audiences: { was, now }` on all four
+library comparisons. A card that prints `pagesGained` alone now has a strictly
+better sentence available, and printing both operands without the subtraction
+would be worse than printing one.
+
+**The three sentences, and only the first is the one that was there before.**
+
+- **`formsGained` is nought.** *You published 5 pages.* The ordinary case, and
+  what every deployment serving one form of everything always sees.
+- **`formsGained` equals `pagesGained`.** *5 pages began being served to a
+  second audience. You published none.* A deployment taking up 0263 across part
+  of its library, which before this read as growth it did not have.
+- **Neither.** *You published 3 pages, and 2 more began being served to a second
+  audience.* One subtraction, two facts, and a card showing one number can show
+  neither.
+
+`audiences` is the dimension beside it: `[]` is a window that named none — every
+one written before 0284 — and two members is a deployment serving two forms.
+**Nothing here is refused**, which is the difference from the gap filed against
+0294: there is no *different-audiences* state to draw on these four, and a
+surface that drew one would be inventing a fault.
+
+Nothing needs a new call: all three are on the object the screen already holds.
 

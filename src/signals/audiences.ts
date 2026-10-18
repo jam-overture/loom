@@ -60,6 +60,18 @@ import type { TreeId } from "../ids.js"
  * column existed names no audience, and refusing every pair that spans the
  * migration would withhold the comparison a deployment most wants.
  *
+ * ## Comparing two **windows** is a fourth question, and it refuses nothing
+ *
+ * {@link ComparedPopulations} is for the four library comparisons, whose two
+ * sides are whole windows of a deployment's library rather than one reading
+ * each. A window holds every form the deployment served, so a side naming two
+ * audiences is the ordinary case after 0263 and not a fault — and because
+ * those comparisons pair their pages by {@link formKeyOf}, every placement
+ * held still is one form's against its own. There is nothing to refuse, and
+ * what there is instead is a census: {@link audiencesOf} says whose library
+ * each side was, and {@link pagesOf} is what lets a form gained be told from a
+ * page published (0295).
+ *
  * Nothing here is about a reader. An `aud_` is a name the host chose for a
  * predicate Loom never sees, and splitting on it is grouping rows by a column
  * the host wrote — no payload, no browser, no column and no kind (rule 1).
@@ -281,4 +293,62 @@ export const crossesAudiences = (was: SideOfAudience, now: SideOfAudience): bool
   const pair = comparedAudiencesOf(was, now)
 
   return pair.was !== null && pair.now !== null && pair.was !== pair.now
+}
+
+/**
+ * The audiences a set of forms names, deduplicated and in a stable order.
+ *
+ * The form-level counterpart of {@link audiencesIn}, which answers the same
+ * question over rows. A form whose `audienceId` is `null` is not an audience
+ * and is not counted as one, so a window of forms that never carried the
+ * column answers `[]` — *nothing here says* rather than *one audience*.
+ */
+export const audiencesOf = (forms: Iterable<PageForm>): readonly AudienceId[] => {
+  const found = new Set<AudienceId>()
+
+  for (const form of forms) {
+    if (form.audienceId !== null) found.add(form.audienceId)
+  }
+
+  return sorted(found)
+}
+
+/**
+ * The pages behind a set of forms, which two forms of one page share.
+ *
+ * A page is one base tree plus the deltas an audience earns (0263), so the
+ * tree is the page and the form is the page as one audience meets it. A window
+ * of four forms over three trees is three pages, one of them served twice.
+ */
+export const pagesOf = (forms: Iterable<PageForm>): ReadonlySet<TreeId> => {
+  const pages = new Set<TreeId>()
+
+  for (const form of forms) pages.add(form.treeId)
+
+  return pages
+}
+
+/**
+ * The audiences each side of a **window** comparison was of.
+ *
+ * Deliberately not {@link ComparedAudiences}, and the difference is the whole
+ * reason there are two types. That one is for a comparison whose two sides are
+ * one reading each, so each side is of one audience or of none, and a pair
+ * naming two is refused ({@link crossesAudiences}). This one is for a
+ * comparison whose two sides are whole **windows** of a deployment's library:
+ * a window holds every form the deployment served, so after 0263 a side naming
+ * two audiences is the ordinary case rather than a fault.
+ *
+ * Nothing is refused on it. A library comparison pairs its pages by form
+ * ({@link formKeyOf}), so every placement held still is one form's measured
+ * against its own and no share in such a reading has a denominator spanning two
+ * populations. What the two sets are for is the sentence printed over the
+ * figures: *this is your library* is a different claim when the window held
+ * `aud_skiers` and `aud_riders` than when it held one of them.
+ */
+export type ComparedPopulations = {
+  /** The audiences the earlier window's forms named. `[]` where none did. */
+  readonly was: readonly AudienceId[]
+  /** The audiences the later window's forms named, by the same rule. */
+  readonly now: readonly AudienceId[]
 }
