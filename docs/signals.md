@@ -2410,6 +2410,76 @@ window with another form's later one, produces every figure, and labels it as
 what a change did. That is a decision about four published silence vocabularies
 and the same question in eight more functions, which is a unit of its own.
 
+### 38. A comparison is of one readership · `Loom signals` · **done, 18 October**
+
+> §36 shipped yesterday morning and its own clause 7 was built in the same unit;
+> the pull request that followed it (#668, *a comparison pairs pages by form*)
+> was still open when this was built, so the four library comparisons it touches
+> are **deliberately left out of this unit** rather than stacked on its branch.
+> They are filed, and the rule they need is published and waiting.
+
+§36 gave every *reading* of the reader counters the audience dimension. Its own
+*Alternatives considered* named what it left standing, and an open finding of
+17 October named it again: **ten comparisons take their pair from a caller and
+not one of them could tell that the two were of two populations.**
+
+Nine of them already refuse a pair of two *trees*; the tenth, the readership
+comparison, states the same requirement in prose and cannot check it, because a
+region map names no tree. The two faults are the
+same kind of mistake with opposite visibility: two pages make every figure
+absurd and a reviewer sees it at a glance, while **two forms of one page compare
+cleanly** — they share a tree id, so the join matches, the shares divide, the
+signs are right and the ranking is in the right order. What is wrong is the
+sentence over them, *this is what your change did*, when the readership was
+varied by construction and the tree may not have changed at all.
+
+**Done.** `crossesAudiences` and `comparedAudiencesOf` in
+[`src/signals/audiences.ts`](../src/signals/audiences.ts), with a
+`different-audiences` refusal on the five page-scale comparisons — where reading
+stops, the words a change put in front of readers, whether readers had time, what
+readers did, and what a change did to the funnel — and a seventh
+`ReadershipComparability` on the readership comparison. **Nothing was added to a
+payload, a browser, a column, a store or the vocabulary of kinds** — the audience
+column has been on the rows since 0284 and this is the reading of it. The
+broadcaster was not touched and is byte-identical at 6,477 bytes minified and
+2,941 gzipped.
+
+Four things decided the shape
+([0294](../decisions/0294-a-comparison-is-of-one-readership-and-a-pair-that-proves-two-audiences-is-refused.md)):
+
+- **It refuses what it can prove, and publishes the rest.** Both sides name an
+  audience and the two differ is the only provable case. A window whose rows
+  never carried the column names none, so a pair spanning the migration is
+  either an honest before-and-after across the upgrade or a cross-population
+  comparison and nothing in the counters tells them apart — refusing both would
+  withhold the comparison a deployment most wants. So every comparison now
+  carries `audiences: { was, now }`, under a silence and under none, and a
+  `null` on either side is the whole of why an unrefused pair may still be two
+  populations.
+- **A refusal rather than a partial silence, and the census goes with it.** Six
+  of the nine leave their tree half standing when a window is empty, because what
+  a change did to the tree is a fact about the tree. That does not reach here: a
+  page is one base tree plus the deltas an audience earns, so the two sides are
+  two trees wearing one tree id, and *three bands moved and one was reworded*
+  read across two forms is the other form's deltas reported as the change.
+- **A reading that scoped itself to an audience now says so.** `FunnelReach` and
+  `RegionReading` filtered their rows to one audience and discarded which one,
+  so two of the nine comparisons could not have been guarded at all. Both now
+  carry `audienceId`, derived from what they already filtered on.
+  `regionReadingOf` leaves it `null` deliberately — it groups whatever it is
+  handed, and a deployment's whole window is *a readership* rather than one
+  form's.
+- **One condition for the whole subsystem.** `two-audiences` in
+  [`silences.ts`](../src/signals/silences.ts), reported by all five vocabularies
+  and held apart from `two-pages`, because the two send a reader to fix two
+  different things: one caller is holding two unrelated readings and the other is
+  holding two forms of one page.
+
+**What is left and is filed:** the four library comparisons, for the reason at
+the head of this section; and the readership comparison's honest limit, which is
+that two maps read whole over a window holding two audiences name none, so the
+pair is unprovable and is compared.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

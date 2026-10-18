@@ -218,6 +218,25 @@ describe("the audience a door row and a funnel row belong to", () => {
     expect(reach.otherAudiencePairs).toBe(0)
   })
 
+  /**
+   * Carried rather than consumed and dropped: a comparison of two readings
+   * cannot refuse a pair of two populations unless each reading still says
+   * which population it was of.
+   */
+  it("names the audience the reading was of, so a comparison can refuse a pair of two", () => {
+    const reach = funnelReachOf(
+      SKIER_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 40, 10))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.audienceId).toBe(SKIERS)
+  })
+
+  it("names none where the reading named none, which is every window without the column", () => {
+    expect(funnelReachOf(WHERE, [funnel("a", "b", 40, 10)], [views(100, 100)]).audienceId).toBeNull()
+  })
+
   it("counts another revision's funnel row as foreign before it is anybody's audience", () => {
     const reach = funnelReachOf(
       SKIER_PAGE,

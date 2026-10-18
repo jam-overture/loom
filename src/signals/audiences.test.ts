@@ -6,6 +6,8 @@ import { OTHER_TREE, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contr
 import {
   audiencesIn,
   byAudience,
+  comparedAudiencesOf,
+  crossesAudiences,
   forAudience,
   formKeyOf,
   formOf,
@@ -189,5 +191,58 @@ describe("formKeyOf", () => {
 
     expect([skiers, riders].sort(inFormOrder)).toEqual([riders, skiers])
     expect([riders, skiers].sort(inFormOrder)).toEqual([riders, skiers])
+  })
+})
+
+describe("comparedAudiencesOf", () => {
+  it("names the population each side of a comparison was of", () => {
+    expect(comparedAudiencesOf({ audienceId: SKIERS }, { audienceId: RIDERS })).toEqual({
+      was: SKIERS,
+      now: RIDERS,
+    })
+  })
+
+  it("reads a side that named none as null rather than as the default", () => {
+    expect(comparedAudiencesOf(unscoped(1), { audienceId: SKIERS })).toEqual({
+      was: null,
+      now: SKIERS,
+    })
+    expect(comparedAudiencesOf({ audienceId: null }, unscoped(1))).toEqual({
+      was: null,
+      now: null,
+    })
+  })
+})
+
+describe("crossesAudiences", () => {
+  /**
+   * The assertion this half of the module exists for: a pair of two forms of
+   * one page is the comparison that produces every figure and means none of
+   * them.
+   */
+  it("refuses a pair that proves two populations", () => {
+    expect(crossesAudiences({ audienceId: SKIERS }, { audienceId: RIDERS })).toBe(true)
+  })
+
+  it("allows a pair of one audience, which is every comparison a deployment takes", () => {
+    expect(crossesAudiences({ audienceId: SKIERS }, { audienceId: SKIERS })).toBe(false)
+  })
+
+  /**
+   * A window written before the column existed names no audience, so a pair
+   * spanning the migration is unprovable rather than proven alike — and
+   * refusing it would withhold the before-and-after across the upgrade, which
+   * is the one a deployment most wants.
+   */
+  it("allows a pair it cannot prove, whichever side named nothing", () => {
+    expect(crossesAudiences(unscoped(1), { audienceId: SKIERS })).toBe(false)
+    expect(crossesAudiences({ audienceId: SKIERS }, unscoped(1))).toBe(false)
+    expect(crossesAudiences({ audienceId: null }, { audienceId: null })).toBe(false)
+  })
+
+  it("does not read a named audience against an unnamed one as a match", () => {
+    expect(
+      comparedAudiencesOf(unscoped(1), { audienceId: DEFAULT_AUDIENCE_ID })
+    ).not.toMatchObject({ was: DEFAULT_AUDIENCE_ID })
   })
 })

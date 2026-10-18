@@ -49,6 +49,17 @@ import type { TreeId } from "../ids.js"
  * a number over two populations: `pageReadingOf` reads neither and says which
  * audiences it was handed (`audiences-mixed` in `health.ts`).
  *
+ * ## Comparing is a third question, and the answer it needs is narrower
+ *
+ * {@link crossesAudiences} is for the comparisons rather than the readings. A
+ * before-and-after holds the readership still and varies the tree; a pair whose
+ * two sides are of two audiences varies the readership by construction, so the
+ * movement it reports carries two causes and nothing in the counters separates
+ * them. The rule refuses only a pair that **proves** two populations, because
+ * the third state above is real on this side too: a window written before the
+ * column existed names no audience, and refusing every pair that spans the
+ * migration would withhold the comparison a deployment most wants.
+ *
  * Nothing here is about a reader. An `aud_` is a name the host chose for a
  * predicate Loom never sees, and splitting on it is grouping rows by a column
  * the host wrote — no payload, no browser, no column and no kind (rule 1).
@@ -74,12 +85,23 @@ export type MaybeAudienceScoped = {
   readonly audienceId?: AudienceId
 }
 
-/** A reading, or a row, as the key rule below needs to see it. */
-export type ReadingOfAudience = {
-  readonly treeId: TreeId
-  readonly revision: number
+/**
+ * One side of a comparison, as the population rule below needs to see it.
+ *
+ * Narrower than a reading on purpose: what a comparison has to decide is about
+ * the two populations and not about the two pages, so the rule that decides it
+ * can be handed a page reading, a funnel reading or a region map without any of
+ * them being made to look like the others.
+ */
+export type SideOfAudience = {
   /** `null` or absent where nothing recorded which audience the window was of. */
   readonly audienceId?: AudienceId | null
+}
+
+/** A reading, or a row, as the key rule below needs to see it. */
+export type ReadingOfAudience = SideOfAudience & {
+  readonly treeId: TreeId
+  readonly revision: number
 }
 
 /** Sorted so a split is in the same order whatever order the rows arrived in. */
@@ -213,3 +235,50 @@ export const formKeyOf = (form: PageForm): string =>
 /** Sorted so a list of forms reads the same whatever order they arrived in. */
 export const inFormOrder = (one: PageForm, other: PageForm): number =>
   formKeyOf(one).localeCompare(formKeyOf(other))
+
+/** The audience each side of a comparison was of, as a comparison carries it. */
+export type ComparedAudiences = {
+  readonly was: AudienceId | null
+  readonly now: AudienceId | null
+}
+
+/**
+ * The two populations a comparison was handed, published once rather than
+ * spelled on each comparison.
+ *
+ * Carried whether or not the pair was refused, because a `null` on either side
+ * is the whole of why a mismatched pair can go unrefused: it is what a surface
+ * reads to say *this comparison spans a window that named no audience* rather
+ * than being told nothing at all.
+ */
+export const comparedAudiencesOf = (
+  was: SideOfAudience,
+  now: SideOfAudience
+): ComparedAudiences => ({ was: was.audienceId ?? null, now: now.audienceId ?? null })
+
+/**
+ * Whether two sides of a comparison prove they are of two populations.
+ *
+ * The one place that decides it, for the reason {@link readingKeyOf} is one
+ * place: ten comparisons here take their pair from a caller, nine of them
+ * refuse a pair of different trees, and a pair of different audiences is the
+ * same kind of error with none of the same visibility. Two trees are two pages and every figure comes back absurd; two
+ * forms of one page (0263) compare cleanly and the arithmetic is right. What is
+ * wrong is the sentence on top of it — *this is what your change did* — when
+ * the readership was varied by construction and the tree may not have changed
+ * at all.
+ *
+ * **False where either side names none, and that is not an oversight.** A row
+ * written before the column existed (0284) names no audience, so a pair of such
+ * a window and an `aud_pro` one is either an honest before-and-after across the
+ * migration or a cross-population comparison, and nothing in the counters tells
+ * them apart. Refusing both would withhold every comparison spanning the day a
+ * deployment upgraded, which is the comparison it most wants; refusing neither
+ * would publish a cross-population movement as a change. So the rule refuses
+ * what is provable and {@link comparedAudiencesOf} makes the rest visible.
+ */
+export const crossesAudiences = (was: SideOfAudience, now: SideOfAudience): boolean => {
+  const pair = comparedAudiencesOf(was, now)
+
+  return pair.was !== null && pair.now !== null && pair.was !== pair.now
+}

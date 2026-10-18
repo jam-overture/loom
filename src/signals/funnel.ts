@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 
@@ -406,6 +407,16 @@ export type PairReach = {
 export type FunnelReach = {
   readonly treeId: TreeId
   readonly revision: number
+  /**
+   * The audience whose answers this reading is of, or `null` where the reading
+   * it was taken from named none.
+   *
+   * Carried rather than consumed and dropped. The rows are already scoped to it
+   * below, so this adds nothing to what is read — what it adds is the ability
+   * of a comparison to refuse a pair of two populations, which it cannot do
+   * from two readings that have forgotten which population each was of (0284).
+   */
+  readonly audienceId: AudienceId | null
   /** Page views that began on this revision. Exact, and addable (0219). */
   readonly opened: number
   /** The same page views as the rollups counted them: once per window each appeared in. */
@@ -667,6 +678,7 @@ export const funnelReachOf = (
   return {
     treeId: where.treeId,
     revision: where.revision,
+    audienceId: where.audienceId,
     opened,
     appearances,
     drift,

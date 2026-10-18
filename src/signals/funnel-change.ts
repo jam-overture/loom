@@ -1,6 +1,11 @@
 import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
+import {
+  comparedAudiencesOf,
+  crossesAudiences,
+  type ComparedAudiences,
+} from "./audiences.js"
 import { funnelPairKey, type FunnelReach, type PairReach } from "./funnel.js"
 import type { FunnelPair } from "./rollup.js"
 
@@ -137,6 +142,21 @@ export type FunnelChangeSilence =
    */
   | "different-trees"
   /**
+   * The two readings are of two audiences, and so of two populations.
+   *
+   * Spelled and refused as the other comparisons spell and refuse it (0240). A
+   * funnel question is asked of a page and a page served in two forms answers
+   * it twice, one row per audience (0284) — the same two ends and two different
+   * populations. So a pair of them is two answers to one question held against
+   * each other as though one of them had moved, and the arithmetic is right all
+   * the way through it.
+   *
+   * Refused only where both sides name an audience and the two differ; a pair
+   * spanning the migration that added the column is in
+   * {@link FunnelChange.audiences} instead.
+   */
+  | "different-audiences"
+  /**
    * One of the two windows has no page-view row at the door.
    *
    * The door's first state (0229), said of the pair. The rates and the
@@ -173,6 +193,7 @@ export type FunnelChangeSilence =
 export const FUNNEL_CHANGE_SILENCES: readonly FunnelChangeSilence[] =
   everyMemberOf<FunnelChangeSilence>()([
     "different-trees",
+    "different-audiences",
     "unscaled",
     "unopened",
     "uncounted",
@@ -184,6 +205,8 @@ export const describeFunnelChangeSilence = (silence: FunnelChangeSilence): strin
   switch (silence) {
     case "different-trees":
       return "the two readings are of different pages"
+    case "different-audiences":
+      return "the two readings are of different audiences, and so of different readers"
     case "unscaled":
       return "one of the two windows has no count of the readers who arrived"
     case "unopened":
@@ -483,6 +506,14 @@ export type FunnelChange = {
   /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */
   readonly treeId: TreeId
   readonly revisions: { readonly was: number; readonly now: number }
+  /**
+   * The audience each side was of, where its reading named one.
+   *
+   * As `ReadingChange.audiences` carries it, and for the same reason: a `null`
+   * on either side is why an unprovable pair of populations is compared rather
+   * than refused.
+   */
+  readonly audiences: ComparedAudiences
   /** The two funnel readings this comparison is made of. */
   readonly readings: { readonly was: FunnelReach; readonly now: FunnelReach }
   /**
@@ -770,6 +801,7 @@ export const funnelChangeOf = (was: FunnelReach, now: FunnelReach): FunnelChange
   const empty = {
     treeId: was.treeId,
     revisions: { was: was.revision, now: now.revision },
+    audiences: comparedAudiencesOf(was, now),
     readings: { was, now },
     movements: NO_MOVEMENTS,
     questions: NO_QUESTIONS,
@@ -780,15 +812,17 @@ export const funnelChangeOf = (was: FunnelReach, now: FunnelReach): FunnelChange
     duplicated,
   }
 
-  if (was.treeId !== now.treeId) {
-    return {
-      ...empty,
-      compared: [],
-      added: [],
-      removed: [],
-      silence: "different-trees",
-    }
-  }
+  /** The two states in which no question is held against any other. */
+  const refusing = (silence: FunnelChangeSilence): FunnelChange => ({
+    ...empty,
+    compared: [],
+    added: [],
+    removed: [],
+    silence,
+  })
+
+  if (was.treeId !== now.treeId) return refusing("different-trees")
+  if (crossesAudiences(was, now)) return refusing("different-audiences")
 
   const keys = [...earlier.pairs.keys(), ...later.pairs.keys()].sort((one, other) =>
     one.localeCompare(other)
