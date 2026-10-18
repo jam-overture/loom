@@ -68,16 +68,52 @@ export type DocPage = {
 /**
  * The page a reader who has just been shown a command wants next.
  *
- * The front door's install band prints `pnpm add` and then offers *Follow the
- * install guide*. This is that guide: the same two packages, what each one is,
- * and the warning that neither is stable yet. `carries` is the command rather
- * than the word *install*, because the command is the thing the band promised
- * the longer version of.
+ * The front door's install band prints a command naming two packages and then
+ * offers *Follow the install guide*. This is that guide: the same two
+ * packages, what each one is, and the warning that neither is stable yet.
+ *
+ * ## What this entry held until today, and what it did not
+ *
+ * `carries` was `"pnpm add @jam-overture/loom"`, and the 16 October report that
+ * shipped it said the file *"holds it to carrying the command this band
+ * prints."* **It did not, in two ways**, and both of them were in the string:
+ *
+ * - **It is not the command this band prints.** The front door prints
+ *   `npm install …`; that is `pnpm add …`, out of the documentation's own code
+ *   fence. The docblock above this one said the band printed `pnpm add` as
+ *   well, which is where the belief came from.
+ * - **It names one of the two packages.** This site asks a stranger to install
+ *   `@jam-overture/loom` *and* `@jam-overture/loom-primitives`, and the page
+ *   the button opens says, in as many words, *"You can skip the second one."*
+ *   The starter library going out of that page's command is the likeliest
+ *   future break of this promise, and it was the half nothing held.
+ *
+ * ## So the two halves are held separately, and only one of them is a quotation
+ *
+ * **The packages are a derivation**, in `docs-pages.test.ts`, off `PACKAGES` —
+ * every package this site's own command installs has to be named on the page
+ * the button opens, matched as a whole name so that `@jam-overture/loom` is not
+ * satisfied by `@jam-overture/loom-primitives` standing where it should be.
+ * Add a third package to the front door and the guide is asserted to teach it,
+ * without anybody coming here to type it twice.
+ *
+ * **The tool is deliberately not held.** `npm install` here and `pnpm add`
+ * there is not a defect: they are two ways to run the same instruction, a
+ * reader pastes whichever is in front of them, and holding the documentation to
+ * this site's package manager would turn this lane red over a choice that
+ * belongs to `Loom docs` and that no reader is misled by. If a run arrives
+ * meaning to make the two agree, that is the sentence to read first.
+ *
+ * **`carries` keeps the claim the band actually makes**, which is now the band's
+ * own: the paragraph above the panel names each package and says what each one
+ * is for, and *Loom is two packages* is that same claim in the guide's words.
+ * A guide that stopped being about two packages would be the wrong page to send
+ * this reader to whatever its command said.
  */
 export const INSTALLATION: DocPage = {
   path: "/docs/getting-started/installation",
   heading: "Installation",
-  carries: ["pnpm add @jam-overture/loom"],
+  carries: ["Loom is two packages"],
 }
 
 /**

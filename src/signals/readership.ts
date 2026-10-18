@@ -1,5 +1,10 @@
 import { everyMemberOf } from "../closed-set.js"
 
+import {
+  comparedAudiencesOf,
+  crossesAudiences,
+  type ComparedAudiences,
+} from "./audiences.js"
 import type { ReaderRegion, RegionReading } from "./region.js"
 import { UNKNOWN_REGION } from "./region.js"
 
@@ -256,6 +261,23 @@ export type ReadershipComparability =
    * the two, since a floor is raise-only.
    */
   | "incomparable"
+  /**
+   * The two maps are of two audiences, so nothing was compared.
+   *
+   * This reading exists to say whether the comparison beside it is of like with
+   * like, and a pair of two populations is the one case where the answer is
+   * known in advance and is *no*. Two forms of a page (0263) are served to two
+   * sets of readers by construction, so every shift here would be the
+   * difference between two audiences' geographies reported as a readership that
+   * moved — and reported by the one reading a surface trusts to catch exactly
+   * that.
+   *
+   * Refused only where both maps name an audience and the two differ; a pair
+   * spanning the migration that added the column (0284), or one built by
+   * `regionReadingOf` over a whole window, names none and is compared with the
+   * two names in {@link ReadershipChange.audiences}.
+   */
+  | "different-audiences"
 
 export const READERSHIP_COMPARABILITIES: readonly ReadershipComparability[] =
   everyMemberOf<ReadershipComparability>()([
@@ -265,6 +287,7 @@ export const READERSHIP_COMPARABILITIES: readonly ReadershipComparability[] =
     "unsettled",
     "unmeasured",
     "incomparable",
+    "different-audiences",
   ])
 
 /** One line per standing, for a surface putting the comparison in front of a person. */
@@ -284,6 +307,8 @@ export const describeReadershipComparability = (
       return "One of the two windows counted no page views."
     case "incomparable":
       return "The two maps were read at different floors and were not compared."
+    case "different-audiences":
+      return "The two maps are of different audiences, and so of different readers, and were not compared."
   }
 }
 
@@ -307,6 +332,14 @@ export type ReadershipChange = {
    */
   readonly floor: number | undefined
   readonly comparability: ReadershipComparability
+  /**
+   * The audience each map was of, where it named one.
+   *
+   * As every comparison in this subsystem carries it, and for the same reason: a
+   * `null` on either side is why a pair of two populations can be compared here
+   * rather than refused, and a surface saying so needs the field to say it.
+   */
+  readonly audiences: ComparedAudiences
   /**
    * Half the sum of the absolute share movements over the regions both maps
    * name, in `[0, 1]`, or `undefined` where nothing was compared.
@@ -412,6 +445,14 @@ const magnitudeOf = (row: ComparedRegion): number =>
  * [`region.ts`](region.ts) rather than writing the filter.
  */
 export const readershipChangeOf = (was: RegionReading, now: RegionReading): ReadershipChange => {
+  const audiences = comparedAudiencesOf(was, now)
+  /**
+   * Checked ahead of the floor, because it is not a floor fault and no floor
+   * fixes it: two maps of two populations read at one floor are still two
+   * populations, and this is the reading a surface leans on to decide whether a
+   * before-and-after is of like with like.
+   */
+  const crossAudience = crossesAudiences(was, now)
   const incomparable = was.floor !== now.floor
   const unmeasured = was.views === 0 || now.views === 0
   const wasNamed = namedIn(was)
@@ -440,15 +481,27 @@ export const readershipChangeOf = (was: RegionReading, now: RegionReading): Read
 
   const arrivals = { was: was.views, now: now.views }
 
-  if (incomparable || unmeasured) {
+  const withheld: ReadershipComparability | null = crossAudience
+    ? "different-audiences"
+    : incomparable
+      ? "incomparable"
+      : unmeasured
+        ? "unmeasured"
+        : null
+
+  if (withheld !== null) {
     return {
       floor: incomparable ? undefined : was.floor,
-      comparability: incomparable ? "incomparable" : "unmeasured",
+      comparability: withheld,
+      audiences,
       moved: undefined,
       movedAtMost: undefined,
       // Two differently floored maps publish nothing, because every row of the
-      // join would be an artefact of the two floors rather than a movement.
-      regions: incomparable ? [] : ranked(regions),
+      // join would be an artefact of the two floors rather than a movement; two
+      // audiences' maps publish nothing because every row would be two
+      // populations' buckets held against each other. A window with no views
+      // keeps its rows: they are the other side's, and they are true of it.
+      regions: withheld === "unmeasured" ? ranked(regions) : [],
       loudest: undefined,
       // Nothing was compared, so neither window's views are accounted for.
       unaccounted: { was: 1, now: 1 },
@@ -478,6 +531,7 @@ export const readershipChangeOf = (was: RegionReading, now: RegionReading): Read
   return {
     floor: was.floor,
     comparability: comparabilityOf(moved, movedAtMost, loudest),
+    audiences,
     moved,
     movedAtMost,
     regions: ranked(regions),

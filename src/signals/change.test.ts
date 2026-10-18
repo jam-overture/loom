@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
+import type { AudienceId } from "../audience/audience.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -87,6 +88,21 @@ const changeOf = (
   readingChangeOf(
     pageReadingOf(was.tree, was.counters, declarations),
     pageReadingOf(now.tree, now.counters, declarations)
+  )
+
+/**
+ * One side of a comparison as a deployment serving two forms of a page holds
+ * it: the counters carry the column the store writes, so the reading names the
+ * one audience in its window without a caller saying which.
+ */
+const formOf = (
+  side: { readonly tree: LoomTree; readonly counters: readonly ReaderTally[] },
+  audience: AudienceId
+) =>
+  pageReadingOf(
+    side.tree,
+    side.counters.map((counter) => ({ ...counter, audienceId: audience })),
+    NOTHING_DECLARED
   )
 
 const stopBetween = (change: ReadingChange, after: string, before: string) =>
@@ -497,6 +513,75 @@ describe("readingChangeOf", () => {
 
       expect(change.parts.reworded).toEqual([])
       expect(change.parts.unreadable).toBe(1)
+    })
+  })
+
+  describe("one readership, held still", () => {
+    /**
+     * The assertion the guard exists for. Two forms of one page share a tree
+     * id, so every figure below was produced and the sentence on top of them —
+     * *this is what your change did* — was about a readership that was varied
+     * by construction rather than held still.
+     */
+    it("refuses a pair whose two readings are of two audiences", () => {
+      const change = readingChangeOf(formOf(BEFORE, SKIERS), formOf(AFTER, RIDERS))
+
+      expect(change.silence).toBe("different-audiences")
+      expect(change.stops).toEqual([])
+      expect(change.incomparable).toEqual([])
+      expect(change.mostKept).toBeNull()
+    })
+
+    /**
+     * Withheld with the stops rather than left standing, because a page is one
+     * base tree plus the deltas an audience earns: *three bands moved* read
+     * across two forms is the other form's deltas reported as the change.
+     */
+    it("withholds the parts census too, as it does for two pages", () => {
+      const change = readingChangeOf(formOf(BEFORE, SKIERS), formOf(AFTER, RIDERS))
+
+      expect(change.parts).toMatchObject({ shared: 0, added: [], removed: [] })
+    })
+
+    it("compares one audience's two windows exactly as it always did", () => {
+      const scoped = readingChangeOf(formOf(BEFORE, SKIERS), formOf(AFTER, SKIERS))
+
+      expect(scoped.silence).toBeNull()
+      expect(stopBetween(scoped, "two", "three")?.improvement).toBeCloseTo(0.2)
+      expect(scoped.audiences).toEqual({ was: SKIERS, now: SKIERS })
+    })
+
+    /**
+     * A window whose rows never carried the column names no audience, so this
+     * pair is unprovable rather than proven alike — and refusing it would
+     * withhold the comparison spanning the day a deployment upgraded.
+     */
+    it("compares a pair it cannot prove, and names what it compared across", () => {
+      const change = readingChangeOf(
+        pageReadingOf(BEFORE.tree, BEFORE.counters, NOTHING_DECLARED),
+        formOf(AFTER, SKIERS)
+      )
+
+      expect(change.silence).toBeNull()
+      expect(change.audiences).toEqual({ was: null, now: SKIERS })
+    })
+
+    it("carries the two audiences under a silence as well as under none", () => {
+      const refused = readingChangeOf(formOf(BEFORE, SKIERS), formOf(AFTER, RIDERS))
+
+      expect(refused.audiences).toEqual({ was: SKIERS, now: RIDERS })
+    })
+
+    /** Two unrelated pages are not made comparable by one audience. */
+    it("says two pages before it says two audiences", () => {
+      const other: LoomTree = { ...treeOf(THREE, 5), treeId: OTHER_TREE }
+      const change = readingChangeOf(
+        formOf(BEFORE, SKIERS),
+        pageReadingOf(other, [], NOTHING_DECLARED, RIDERS)
+      )
+
+      expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+      expect(change.silence).toBe("different-trees")
     })
   })
 

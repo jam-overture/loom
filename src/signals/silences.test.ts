@@ -362,6 +362,42 @@ describe("what a reading means when it says nothing", () => {
   })
 })
 
+/**
+ * The condition the comparisons gained together, which is the shape this table
+ * exists for: one state, reported by five readings, named once.
+ */
+describe("a pair of two populations", () => {
+  it("is one condition however many comparisons report it", () => {
+    const conditions = [
+      meaningOfChangeSilence("different-audiences"),
+      meaningOfCopyChangeSilence("different-audiences"),
+      meaningOfPaceChangeSilence("different-audiences"),
+      meaningOfActionChangeSilence("different-audiences"),
+      meaningOfFunnelChangeSilence("different-audiences"),
+    ]
+
+    expect(new Set(conditions.map((meaning) => meaning.condition))).toEqual(
+      new Set(["two-audiences"])
+    )
+    expect(new Set(conditions.map((meaning) => meaning.vocabulary)).size).toBe(conditions.length)
+  })
+
+  /**
+   * Held apart from two pages, because they are two different things to go and
+   * fix: one caller is holding two unrelated readings and the other is holding
+   * two forms of one page.
+   */
+  it("is not the condition two pages report", () => {
+    expect(meaningOfChangeSilence("different-audiences").condition).not.toBe(
+      meaningOfChangeSilence("different-trees").condition
+    )
+    expect(relateSilences(
+      meaningOfChangeSilence("different-audiences"),
+      meaningOfCopyChangeSilence("different-trees")
+    )).toBe("unrelated")
+  })
+})
+
 describe("the two overlaps this mapping exists to state", () => {
   /**
    * The finding of 7 October, in one assertion: a window with no page views is
