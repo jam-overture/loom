@@ -8,6 +8,110 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-18 — `loom.code` contains its overflow and never admits to it, so a line too wide for a phone ends mid-word with nothing on the screen saying there is more
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.code.ts`) · **Status:** **open** — nothing is broken, no
+test is failing, and the only instrument that sees it is a camera
+
+The front door's install band prints the one line on this site a stranger is
+meant to paste. Measured on a production build at 390×844, on `minimal` and on
+`bold`:
+
+```
+pre        x 15 y 5658  361x41
+pre code   x 24 y 5670  504x16
+```
+
+**504 pixels of command in a 361-pixel panel.** 143 of them are off the end, and
+the page itself does not overflow — `scrollWidth 390 / innerWidth 390` — so
+every check this repository has passes. What a reader sees is:
+
+```
+npm install @jam-overture/loom @jam-overtu
+```
+
+and nothing beside it, under it or around it that says the line continues. The
+likeliest reading of that screen is that the second package is called
+`@jam-overtu`.
+
+### The affordance the primitive believes it has
+
+`loom.code` sets `overflowX: "auto"` on the `pre`, and the comment beside it is
+right about what that buys:
+
+> *"The scroll is the `pre`'s and never the page's… It is what contains the
+> overflow to this panel."*
+
+Containing it is exactly what it does, and that is the whole of what it does.
+**`overflow-x: auto` is not a visible affordance on a touch viewport** — the
+scrollbar is an overlay drawn while a finger is moving and absent at rest, which
+is the state a reader is in when they look at the panel. On a desktop, where the
+line fits at 719 pixels, the question never arises.
+
+This lane believed otherwise in writing. The install band's own docblock has
+said since 11 October that the panel *"shows 348 of the line's 530px, so 182px
+of it is behind a horizontal scroll **with a track under it saying so**."* Both
+numbers were wrong and the track does not exist; the paragraph is corrected on
+`marketing-09-the-package-names-a-phone-never-sees`.
+
+### Why it is not worked around here
+
+The three things this lane could do are each worse than the gap:
+
+- **`wrap: true`.** `loom.code`'s wrapping mode is `pre-wrap` plus
+  `overflow-wrap: anywhere`, which breaks at the space first — so the panel
+  would read `npm install @jam-overture/loom` and, under it,
+  `@jam-overture/loom-primitives`. That is the *"a shell line broken across two
+  visual rows reads as two commands"* failure the band's own note keeps
+  `wrap: false` to avoid, and the second row is a plausible-looking command in
+  its own right.
+- **A continuation.** `npm install @jam-overture/loom \` and the rest on a
+  second line fits at 390 and is what a README would do. It is refused because
+  **Copy is the one path that is correct for every reader today** — a backslash
+  continuation is not a continuation in PowerShell or `cmd`, so making the
+  panel readable for some readers would make the button wrong for others. A fix
+  that trades a reading problem for a running problem is not a fix.
+- **A sentence saying so.** A tree has no viewport
+  ([0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
+  made the ramps fluid, not the nodes conditional), so *"scroll to see the rest
+  of the line"* would be a sentence this page tells a desktop reader about a
+  line they can see whole.
+
+**What this lane did instead is the half that was genuinely its own**, and it
+does not close this entry: the two package names are now in the paragraph above
+the panel as `loom.code-span`, which wraps. A reader who cannot finish the
+command can at least read what they are installing. The command itself is still
+cut off and still silent about it.
+
+### Three shapes, costed
+
+1. **A fade at the trailing edge when the content overflows**, and nothing when
+   it does not. Pure CSS — a `mask-image` on the `pre` driven by a scroll
+   position — so it needs no prop, no new slot and no palette slot (a mask is
+   transparency rather than colour, which is the property that keeps it clear of
+   the status-colour finding of 17 October). It is the convention a reader has
+   met on every table on a phone. **This is the recommendation.**
+2. **A persistent track.** `overflow-x: scroll` plus
+   `scrollbar-width`/`::-webkit-scrollbar` styling. Honest, cheap, and it costs
+   the panel a few pixels of chrome on desktops where nothing is hidden, which
+   is where most of the readings of a code panel happen.
+3. **A prop.** `overflow: "fade" | "plain"` on `loom.code`, so a caller decides.
+   Refused in the costing rather than offered: the caller cannot know, because
+   the caller does not know the viewport, and a prop whose correct value depends
+   on something the caller cannot see is a prop that will be set wrong.
+
+Nothing here is an argument about `wrap`, which is a different question and is
+answered correctly today.
+
+### The row for `Loom daily build`
+
+**None, and that is worth saying because the neighbouring finding has one.** The
+17 October entry on a refusal tone needed a palette slot and therefore a schema
+change reaching every registered palette. This needs neither: shapes 1 and 2 are
+`loom.code`'s own stylesheet, and shape 1 deliberately uses transparency so that
+it is not waiting on a colour decision.
+---
 ## 2026-10-16 — the button offering the install guide landed on the introduction, and the four links into the documentation were held to nothing
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (the `/docs`

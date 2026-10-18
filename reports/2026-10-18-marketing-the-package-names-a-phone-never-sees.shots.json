@@ -1,0 +1,75 @@
+{
+ "baseUrl": "http://localhost:3000",
+ "outDir": "./shots",
+ "shots": [
+  {
+   "path": "/",
+   "out": "install-phone",
+   "viewport": "phone",
+   "waitFor": "pre",
+   "do": [
+    {
+     "scrollTo": "pre"
+    }
+   ],
+   "measure": [
+    "pre",
+    "pre code",
+    "code",
+    "text=Copy"
+   ]
+  },
+  {
+   "path": "/?theme=bold",
+   "out": "install-phone-bold",
+   "viewport": "phone",
+   "waitFor": "pre",
+   "do": [
+    {
+     "scrollTo": "pre"
+    }
+   ],
+   "measure": [
+    "pre",
+    "pre code"
+   ]
+  },
+  {
+   "path": "/?theme=editorial",
+   "out": "install-phone-editorial",
+   "viewport": "phone",
+   "waitFor": "pre",
+   "do": [
+    {
+     "scrollTo": "pre"
+    }
+   ],
+   "measure": [
+    "pre",
+    "pre code"
+   ]
+  },
+  {
+   "path": "/",
+   "out": "install-wide",
+   "viewport": "wide",
+   "waitFor": "pre",
+   "do": [
+    {
+     "scrollTo": "pre"
+    }
+   ],
+   "measure": [
+    "pre",
+    "pre code"
+   ]
+  },
+  {
+   "path": "/",
+   "out": "home-wide-full",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "fullPage": true
+  }
+ ]
+}
