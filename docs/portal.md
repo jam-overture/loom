@@ -258,7 +258,7 @@ Each is one pull request, and **do not start a unit whose input is not on
 | 1 | ~~**The signal tables take the application and the audience.**~~ **Done, in two migrations rather than one.** The dimension is the *application*, not the project (0269): the finer grain, matching `loom_trees`, with the project as the grouping above it. `application_id` landed on all five reader tables with 0273, and `audience_id` with [0284](../decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md) once 0263 was accepted | observation | — |
 | 2 | **Accounts and roles.** The environment roster goes; the actor comes from the session, the scope from the route (0027), and a role is a ceiling on the stake scale | identity | unit 0 |
 | 3 | **The workspace.** The prototype's project list, wired: create, delete, switch | identity | units 1, 2 |
-| 4 | **Registration and the key.** Project id, ingest key, a snippet to paste, and `/api/reader-signals` authenticating it. **It authenticates nobody today** | connection | unit 3 |
+| 4 | **Registration and the key.** The repository first, then the project it names, then the ingest key, a snippet to paste, and `/api/reader-signals` authenticating it. **It authenticates nobody today.** The order is [0292](../decisions/0292-a-project-holds-at-most-one-repository-and-a-repository-belongs-to-at-most-one-project.md)'s, and it is the reverse of what `/portal/new` does — a project is named after its repository rather than after the first application in it | connection | unit 3 |
 | 5 | **Arrival.** The prototype's logs screen against the project's own signals | observation | unit 4 |
 
 **That is the one job.** What follows it is already decided in shape and is not
