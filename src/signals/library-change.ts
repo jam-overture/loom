@@ -1,8 +1,9 @@
 import { everyMemberOf } from "../closed-set.js"
-import type { NodeId, TreeId } from "../ids.js"
+import type { NodeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
+import { formKeyOf, formOf, inFormOrder, type PageForm } from "./audiences.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import type { PageReading, PartReading } from "./parts.js"
 
@@ -390,13 +391,17 @@ export type LibraryChange = {
   /** The type that gained its reading in the most places, by the same rule. */
   readonly mostTakenUp: KindChange | null
   /**
-   * Trees read at two revisions in one window, which are in nothing above.
+   * Forms read at two revisions in one window, which are in nothing above.
    *
    * A page that is two live revisions in one window has no single counterpart in
-   * the other, and the comparison pairs by page. See the module documentation:
-   * excluded and named rather than picked between.
+   * the other, and the comparison pairs by page in its form. See the module
+   * documentation: excluded and named rather than picked between.
+   *
+   * A **form** and not a tree, because a page served in two forms (0263) is two
+   * paired pages here: one of them held at two revisions says nothing about the
+   * other, and a screen naming the exclusion needs to say which form it was.
    */
-  readonly ambiguous: readonly TreeId[]
+  readonly ambiguous: readonly PageForm[]
   /**
    * Readings of a revision beyond the first, on either side, which were dropped.
    *
@@ -542,38 +547,58 @@ const worseOf = (one: KindChange, other: KindChange): number =>
  * into `counters.ts` and the door's scale into `door.ts`.
  */
 export type PairedWindow = {
-  readonly byTree: ReadonlyMap<TreeId, PageReading>
-  /** Trees held at two revisions, which have no single counterpart in the other window. */
-  readonly ambiguous: ReadonlySet<TreeId>
-  /** The same revision of the same tree handed in again. */
+  /**
+   * The window's readings, one per form, keyed by the published form rule.
+   *
+   * Keyed by the **form** and not by the tree, because two forms of one page
+   * (0263) share a tree and have separate counterparts in the other window.
+   * Keyed by a tree, the second form of a page at one revision was dropped as
+   * the first one handed in twice, which is the double count nothing can notice
+   * afterwards (0158), and two forms at two revisions gated **both** out as
+   * ambiguous.
+   */
+  readonly byForm: ReadonlyMap<string, PageReading>
+  /**
+   * Forms held at two revisions, which have no single counterpart in the other
+   * window.
+   *
+   * A map rather than a set so that the form can be published back to a surface
+   * that has to name the page it excluded: the key is opaque and a screen needs
+   * the tree and the audience.
+   */
+  readonly ambiguous: ReadonlyMap<string, PageForm>
+  /** The same revision of the same form handed in again. */
   readonly duplicated: number
 }
 
 /**
- * One window's readings keyed by page, with a tree held at two revisions kept
- * apart from the same revision handed in twice.
+ * One window's readings keyed by page in its form, with a form held at two
+ * revisions kept apart from the same revision handed in twice.
  *
  * The first has no single counterpart in the other window and is excluded and
- * named; the second is the ordinary double count and is dropped (0158).
+ * named; the second is the ordinary double count and is dropped (0158). **Both
+ * are decided per form**, so a page served in two forms is two paired pages and
+ * one of them being ambiguous leaves the other standing.
  */
 export const pairedWindowOf = (readings: readonly PageReading[]): PairedWindow => {
-  const byTree = new Map<TreeId, PageReading>()
-  const ambiguous = new Set<TreeId>()
+  const byForm = new Map<string, PageReading>()
+  const ambiguous = new Map<string, PageForm>()
   let duplicated = 0
 
   for (const reading of readings) {
-    const standing = byTree.get(reading.treeId)
+    const key = formKeyOf(formOf(reading))
+    const standing = byForm.get(key)
 
     if (standing === undefined) {
-      byTree.set(reading.treeId, reading)
+      byForm.set(key, reading)
       continue
     }
 
     if (standing.revision === reading.revision) duplicated += 1
-    else ambiguous.add(reading.treeId)
+    else ambiguous.set(key, formOf(reading))
   }
 
-  return { byTree, ambiguous, duplicated }
+  return { byForm, ambiguous, duplicated }
 }
 
 /**
@@ -611,7 +636,7 @@ export const libraryChangeOf = (
   const rows = new Map<string, Tallying>()
   const roleWas = new Map<PrimitiveType, PrimitiveRole | null>()
   const roleNow = new Map<PrimitiveType, PrimitiveRole | null>()
-  const ambiguous = new Set([...earlier.ambiguous, ...later.ambiguous])
+  const ambiguous = new Map([...earlier.ambiguous, ...later.ambiguous])
   let pages = 0
   let pagesGained = 0
   let pagesLost = 0
@@ -631,15 +656,15 @@ export const libraryChangeOf = (
    */
   for (const role of [...PRIMITIVE_ROLES, null]) rowFor(rows, { by: "role", role })
 
-  for (const [treeId, reading] of earlier.byTree) {
-    if (ambiguous.has(treeId)) continue
+  for (const [form, reading] of earlier.byForm) {
+    if (ambiguous.has(form)) continue
 
     for (const part of reading.parts) {
       roleWas.set(part.type, part.role)
       rowFor(rows, { by: "type", type: part.type }).role = part.role
     }
 
-    if (later.byTree.has(treeId)) continue
+    if (later.byForm.has(form)) continue
 
     pagesLost += 1
 
@@ -650,8 +675,8 @@ export const libraryChangeOf = (
     }
   }
 
-  for (const [treeId, reading] of later.byTree) {
-    if (ambiguous.has(treeId)) continue
+  for (const [form, reading] of later.byForm) {
+    if (ambiguous.has(form)) continue
 
     for (const part of reading.parts) {
       const row = rowFor(rows, { by: "type", type: part.type })
@@ -660,7 +685,7 @@ export const libraryChangeOf = (
       row.role = part.role
     }
 
-    if (earlier.byTree.has(treeId)) continue
+    if (earlier.byForm.has(form)) continue
 
     pagesGained += 1
 
@@ -671,10 +696,10 @@ export const libraryChangeOf = (
     }
   }
 
-  for (const [treeId, before] of earlier.byTree) {
-    const after = later.byTree.get(treeId)
+  for (const [form, before] of earlier.byForm) {
+    const after = later.byForm.get(form)
 
-    if (after === undefined || ambiguous.has(treeId)) continue
+    if (after === undefined || ambiguous.has(form)) continue
 
     const beforeParts = partsByNodeIn(before)
     const afterParts = partsByNodeIn(after)
@@ -769,7 +794,7 @@ export const libraryChangeOf = (
           (one, other) =>
             other.tookUp - one.tookUp || nameOf(one.kind).localeCompare(nameOf(other.kind))
         )[0] ?? null,
-    ambiguous: [...ambiguous].sort((one, other) => one.localeCompare(other)),
+    ambiguous: [...ambiguous.values()].sort(inFormOrder),
     duplicated: earlier.duplicated + later.duplicated,
     roleDisagreed: disagreed,
   }

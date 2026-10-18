@@ -1,12 +1,13 @@
 import { everyMemberOf } from "../closed-set.js"
-import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
+import { inFormOrder, type PageForm } from "./audiences.js"
 import { copyReadingOf, type Passage } from "./copy.js"
 import { copyChangeOf, type ComparedPassage } from "./copy-change.js"
 import { kindKeyOf, type KindKey } from "./library.js"
-import type { PageReading, PartReading, PartStanding } from "./parts.js"
+import { pairedWindowOf, partsByNodeIn } from "./library-change.js"
+import type { PageReading, PartStanding } from "./parts.js"
 
 /**
  * What a change did to the words a kind of part says, everywhere it stands.
@@ -487,13 +488,15 @@ export type LibraryCopyChange = {
   /** The type whose kept words gained the most reading, by the same rule. */
   readonly mostTakenUp: KindCopyChange | null
   /**
-   * Trees read at two revisions in one window, which are in nothing above.
+   * Forms read at two revisions in one window, which are in nothing above.
    *
    * A page that is two live revisions in one window has no single counterpart
-   * in the other, and the comparison pairs by page: picking one would be a
-   * number nobody could account for (0266).
+   * in the other, and the comparison pairs by page in its form: picking one
+   * would be a number nobody could account for (0266). A form and not a tree,
+   * because two forms of a page (0263) are two paired pages and one of them
+   * being ambiguous says nothing about the other.
    */
-  readonly ambiguous: readonly TreeId[]
+  readonly ambiguous: readonly PageForm[]
   /**
    * Readings of a revision beyond the first, on either side, which were
    * dropped.
@@ -686,38 +689,6 @@ const worseOf = (one: KindCopyChange, other: KindCopyChange): number =>
   (one.words.readShareNow ?? 2) - (other.words.readShareNow ?? 2) ||
   nameOf(one.kind).localeCompare(nameOf(other.kind))
 
-/** One window's pages, by tree, with the two ways a window can hold a page twice counted apart. */
-type Window = {
-  readonly byTree: ReadonlyMap<TreeId, PageReading>
-  /** Trees held at two revisions, which have no single counterpart in the other window. */
-  readonly ambiguous: ReadonlySet<TreeId>
-  /** The same revision of the same tree handed in again. */
-  readonly duplicated: number
-}
-
-const windowOf = (readings: readonly PageReading[]): Window => {
-  const byTree = new Map<TreeId, PageReading>()
-  const ambiguous = new Set<TreeId>()
-  let duplicated = 0
-
-  for (const reading of readings) {
-    const standing = byTree.get(reading.treeId)
-
-    if (standing === undefined) {
-      byTree.set(reading.treeId, reading)
-      continue
-    }
-
-    if (standing.revision === reading.revision) duplicated += 1
-    else ambiguous.add(reading.treeId)
-  }
-
-  return { byTree, ambiguous, duplicated }
-}
-
-const partsByNode = (reading: PageReading): ReadonlyMap<NodeId, PartReading> =>
-  new Map(reading.parts.map((part) => [part.nodeId, part]))
-
 /**
  * The passages of a page only one window holds, by the published rule for
  * whether a part says anything at all.
@@ -845,12 +816,12 @@ export const libraryCopyChangeOf = (
   was: readonly PageReading[],
   now: readonly PageReading[]
 ): LibraryCopyChange => {
-  const earlier = windowOf(was)
-  const later = windowOf(now)
+  const earlier = pairedWindowOf(was)
+  const later = pairedWindowOf(now)
   const rows = new Map<string, Tallying>()
   const roleWas = new Map<PrimitiveType, PrimitiveRole | null>()
   const roleNow = new Map<PrimitiveType, PrimitiveRole | null>()
-  const ambiguous = new Set([...earlier.ambiguous, ...later.ambiguous])
+  const ambiguous = new Map([...earlier.ambiguous, ...later.ambiguous])
   const whole = counting()
   let pages = 0
   let pagesGained = 0
@@ -868,15 +839,15 @@ export const libraryCopyChangeOf = (
    */
   for (const role of [...PRIMITIVE_ROLES, null]) rowFor(rows, { by: "role", role })
 
-  for (const [treeId, reading] of earlier.byTree) {
-    if (ambiguous.has(treeId)) continue
+  for (const [form, reading] of earlier.byForm) {
+    if (ambiguous.has(form)) continue
 
     for (const part of reading.parts) {
       roleWas.set(part.type, part.role)
       rowFor(rows, { by: "type", type: part.type }).role = part.role
     }
 
-    if (later.byTree.has(treeId)) continue
+    if (later.byForm.has(form)) continue
 
     pagesLost += 1
 
@@ -895,15 +866,15 @@ export const libraryCopyChangeOf = (
     }
   }
 
-  for (const [treeId, reading] of later.byTree) {
-    if (ambiguous.has(treeId)) continue
+  for (const [form, reading] of later.byForm) {
+    if (ambiguous.has(form)) continue
 
     for (const part of reading.parts) {
       roleNow.set(part.type, part.role)
       rowFor(rows, { by: "type", type: part.type }).role = part.role
     }
 
-    if (earlier.byTree.has(treeId)) continue
+    if (earlier.byForm.has(form)) continue
 
     pagesGained += 1
 
@@ -922,13 +893,13 @@ export const libraryCopyChangeOf = (
     }
   }
 
-  for (const [treeId, before] of earlier.byTree) {
-    const after = later.byTree.get(treeId)
+  for (const [form, before] of earlier.byForm) {
+    const after = later.byForm.get(form)
 
-    if (after === undefined || ambiguous.has(treeId)) continue
+    if (after === undefined || ambiguous.has(form)) continue
 
     const change = copyChangeOf(before, after)
-    const beforeParts = partsByNode(before)
+    const beforeParts = partsByNodeIn(before)
 
     pages += 1
     republished += before.revision === after.revision ? 0 : 1
@@ -1070,7 +1041,7 @@ export const libraryCopyChangeOf = (
             other.words.tookUp - one.words.tookUp ||
             nameOf(one.kind).localeCompare(nameOf(other.kind))
         )[0] ?? null,
-    ambiguous: [...ambiguous].sort((one, other) => one.localeCompare(other)),
+    ambiguous: [...ambiguous.values()].sort(inFormOrder),
     duplicated: earlier.duplicated + later.duplicated,
     roleDisagreed: disagreed,
   }

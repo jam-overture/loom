@@ -21,14 +21,24 @@ import type { TreeId } from "../ids.js"
  * twice* — the one thing 0158 makes permanent, reported as a fault on a
  * deployment doing exactly what 0263 built.
  *
- * ## One rule, because a duplicate is whatever the key says it is
+ * ## Two rules, because a duplicate is whatever the key says it is
  *
- * {@link readingKeyOf} is the whole of this module's argument. Five readings
- * decide, each in its own loop, whether two readings handed in are one page
- * counted twice; what makes them one is a tree, a revision **and** an audience,
- * and five spellings of that which agree today are the shape this subsystem has
- * been bitten by before (`counters.ts`, `funnelPairKey`). It is published once
- * and imported five times.
+ * {@link readingKeyOf} is the first and is the whole of this module's original
+ * argument. Readings decide, each in its own loop, whether two readings handed
+ * in are one page counted twice; what makes them one is a tree, a revision
+ * **and** an audience, and several spellings of that which agree today are the
+ * shape this subsystem has been bitten by before (`counters.ts`,
+ * `funnelPairKey`). It is published once and imported by every reading that
+ * refuses to count a page twice.
+ *
+ * {@link formKeyOf} is the second, and it is the rule a **comparison** pairs
+ * on: a page in one of its forms, with no revision in it, because a comparison
+ * spans two revisions of one page. The two are deliberately not one, and the
+ * difference is written on {@link PageForm}. It was written in the module that
+ * first needed it and kept there, while four other comparisons went on spelling
+ * the pairing by tree alone with no key to import (0293) — which is the drift
+ * both of these exist to stop, arriving through the one gap a published rule
+ * leaves: being published to a single caller.
  *
  * ## Splitting is the caller's, and it is a filter rather than a sum
  *
@@ -180,6 +190,51 @@ export const byAudience = <R extends AudienceScoped>(
  */
 export const readingKeyOf = (reading: ReadingOfAudience): string =>
   `${reading.treeId}\u0000${reading.revision}\u0000${reading.audienceId ?? ""}`
+
+/**
+ * A page in one of its forms: the tree and the audience, with no revision in
+ * it.
+ *
+ * Deliberately **not** what {@link readingKeyOf} answers, and the difference is
+ * the whole of why there are two rules. That one answers *what is one reading*,
+ * and a revision is part of what one reading is (0290). This answers *what is
+ * one page in one form*, which a comparison spans two revisions of — so the
+ * revision is absent here because it is the thing being compared across.
+ *
+ * `null` is *nothing recorded which audience this was of*, kept as the third
+ * state it is: a window of rows that never carried the column is one population
+ * by construction, and keying it as `aud_everyone` would assert what no row
+ * said.
+ */
+export type PageForm = {
+  readonly treeId: TreeId
+  readonly audienceId: AudienceId | null
+}
+
+/** The form a reading is of, with an absent audience normalised to the `null` it means. */
+export const formOf = (reading: ReadingOfAudience): PageForm => ({
+  treeId: reading.treeId,
+  audienceId: reading.audienceId ?? null,
+})
+
+/**
+ * What makes two readings one page in one form, which is what a comparison
+ * pairs on.
+ *
+ * The second of this module's two keys, published for the reason the first is:
+ * every comparison in this subsystem decides, in its own loop, whether two
+ * readings handed in are one page to be paired or one page handed in twice, and
+ * **a tree alone is not that page**. Two forms of it (0263) share a tree, so a
+ * comparison keyed by the tree drops the second form as a duplicate where the
+ * two sit at one revision and gates **both** out as ambiguous where they do
+ * not — which is 0158-permanent in the first case and silent in both.
+ */
+export const formKeyOf = (form: PageForm): string =>
+  `${form.treeId}\u0000${form.audienceId ?? ""}`
+
+/** Sorted so a list of forms reads the same whatever order they arrived in. */
+export const inFormOrder = (one: PageForm, other: PageForm): number =>
+  formKeyOf(one).localeCompare(formKeyOf(other))
 
 /** The audience each side of a comparison was of, as a comparison carries it. */
 export type ComparedAudiences = {

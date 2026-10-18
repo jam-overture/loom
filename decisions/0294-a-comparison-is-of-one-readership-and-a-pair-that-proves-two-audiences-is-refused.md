@@ -1,4 +1,4 @@
-# 0292 — A comparison is of one readership, and a pair that proves two audiences is refused
+# 0294 — A comparison is of one readership, and a pair that proves two audiences is refused
 
 **Status:** Accepted
 
@@ -6,12 +6,14 @@
 
 **Section:** §4c (reader signals)
 
-> **The number may move.** Two other branches were open with a record numbered
-> 0292 when this was written — #667 and #668, both claiming the next number free
-> on `main` as this does. Two records sharing a number is fatal
-> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)) and
-> the numbering is claimed at merge, so whichever of the three lands second and
-> third is renumbered there. Nothing in this record depends on its own number.
+> **Renumbered on 2026-10-18**, from 0292, when this branch (#669) was merged.
+> It is the third of the three branches this record's own note anticipated:
+> `main` took #667's 0292 — *a project holds at most one repository* — and then
+> #668's record as 0293, so this one takes the next free. Two records sharing a
+> number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> Nothing in this record changed but its number; references on the branch were
+> updated with it.
 
 ## Context
 

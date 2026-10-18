@@ -2350,7 +2350,67 @@ dimension on every screen that reads these counters, the two rows that are one
 page in two forms, and the one fault whose remedy is a line of the surface's own
 code.
 
-### 37. A comparison is of one readership · `Loom signals` · **done, 18 October**
+### 37. A comparison pairs pages by form · `Loom signals` · **done, 17 October**
+
+[0290](../decisions/0290-a-reading-is-of-one-audience-and-two-forms-of-a-page-are-two-readings-rather-than-one-handed-in-twice.md)
+gave every **reading** of these counters the audience dimension and published
+`readingKeyOf` so that five of them would stop spelling it. **The comparisons
+were not in that unit**, and the four comparisons of two windows of a library
+paired each page with its counterpart by tree alone — so two forms of a page
+(0263), which share a tree, were one key. In the two cases a window can hold
+them both:
+
+- **at one revision**, the second form was dropped as the first one handed in
+  twice, which is the one condition
+  [0158](../decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+  makes permanent and which `health.ts` reports with the **caller** as the
+  remedy;
+- **at two revisions**, the tree went into `ambiguous` and **both** forms left
+  every row, every total and every ranking — a page the deployment serves twice,
+  absent from a census of its library because one of its forms was republished.
+
+Two quieter consequences rode along. A kind's `pages` is a set, so two forms
+counted as one page, understating the places a kind stands by exactly the pages
+a deployment serves twice; and `LibrarySide.scaled` keyed each paired page's
+**door** by its tree, so whichever form the map held scaled the other form's
+readers — `pageViewsFor` scopes a door row to the reading's own audience (0290),
+so the two forms have two doors and one of them was being used for both.
+
+And `library-copy-change.ts` carried a **second hand-written copy** of
+`pairedWindowOf`, 150 lines from the export whose own doc comment says why there
+should not be one. It was wrong in the same two ways.
+
+**Done.** `formKeyOf`, `formOf`, `PageForm` and `inFormOrder` published from
+[`audiences.ts`](../src/signals/audiences.ts) beside `readingKeyOf`, and
+`pairedWindowOf` keyed by the form
+([0293](../decisions/0293-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md)).
+`formKeyOf` was written for 0290 clause 7 and kept private in
+`deployment-change.ts`; it now lives where `readingKeyOf` does and that module
+imports it, which is the lesson of the finding filed the same day: *a published
+key stops two places disagreeing only once both places import it*, and one of
+them did not exist to import it. **Nothing was added to a payload, a browser, a
+column, a store or the vocabulary of kinds** — the audience column has been on
+the rows since 0284. The broadcaster was not touched and is byte-identical at
+6,477 bytes minified and 2,935 gzipped.
+
+The two keys are deliberately two, and the difference is now written where they
+are published: `readingKeyOf` answers *what is one reading*, where a revision is
+part of the identity; `formKeyOf` answers *what is one page in one form*, where
+the revision is absent because it is the thing being compared across.
+`ambiguous` is published as `readonly PageForm[]` on all four comparisons, for
+the reason `MovedPage`, `RankedPage` and `PageHealth` carry the audience after
+0290 — a list of trees cannot say *one of these two forms*.
+
+**What is left, and it is an open finding rather than a gap here.** None of the
+comparisons checks that its **two sides** are of one form. For a library
+comparison the failure is loud — `aud_pro`'s pages pair with none of
+`aud_free`'s, so every page reads gained and every page reads lost. For a page's
+own before-and-after it is quiet: `readingChangeOf` compares one form's earlier
+window with another form's later one, produces every figure, and labels it as
+what a change did. That is a decision about four published silence vocabularies
+and the same question in eight more functions, which is a unit of its own.
+
+### 38. A comparison is of one readership · `Loom signals` · **done, 18 October**
 
 > §36 shipped yesterday morning and its own clause 7 was built in the same unit;
 > the pull request that followed it (#668, *a comparison pairs pages by form*)
@@ -2385,7 +2445,7 @@ broadcaster was not touched and is byte-identical at 6,477 bytes minified and
 2,941 gzipped.
 
 Four things decided the shape
-([0292](../decisions/0292-a-comparison-is-of-one-readership-and-a-pair-that-proves-two-audiences-is-refused.md)):
+([0294](../decisions/0294-a-comparison-is-of-one-readership-and-a-pair-that-proves-two-audiences-is-refused.md)):
 
 - **It refuses what it can prove, and publishes the rest.** Both sides name an
   audience and the two differ is the only provable case. A window whose rows

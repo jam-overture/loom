@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { PRIMITIVE_ROLES } from "../role.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -114,6 +114,29 @@ const read = (
       ...reached.map((name) => tally(name, { views, reached: views }, tree)),
     ],
     declarations
+  )
+
+/**
+ * One form of one page: the same window as {@link read}, with the audience the
+ * store keeps the rows under (0284) and the reading scoped to it.
+ */
+const inAudience = (
+  audienceId: typeof SKIERS,
+  tree: LoomTree,
+  reached: readonly string[],
+  views = 10
+): PageReading =>
+  pageReadingOf(
+    tree,
+    [
+      { ...tally("page", { views, reached: views }, tree), audienceId },
+      ...reached.map((name) => ({
+        ...tally(name, { views, reached: views }, tree),
+        audienceId,
+      })),
+    ],
+    BODY_IS_COPY,
+    audienceId
   )
 
 /** A window that measured nothing of a page, which is what makes every standing unknown. */
@@ -325,13 +348,13 @@ describe("what a comparison of two libraries refuses to say", () => {
     expect(roleRow(change, null)?.silence).toBeNull()
   })
 
-  it("excludes a page held at two revisions in one window, and names the tree it left out", () => {
+  it("excludes a page held at two revisions in one window, and names the form it left out", () => {
     const tree = page()
     const second = page({ revision: 2 })
 
     const change = libraryChangeOf([read(tree, ["intro"]), read(second, ["intro"])], [read(tree, [])])
 
-    expect(change.ambiguous).toEqual([TREE])
+    expect(change.ambiguous).toEqual([{ treeId: TREE, audienceId: null }])
     expect(change.pages).toBe(0)
     expect(change.placements).toBe(0)
     expect(change.duplicated).toBe(0)
@@ -433,6 +456,76 @@ describe("the double counts a comparison of two libraries can be told", () => {
     expect(twice.duplicated).toBe(2)
     expect(twice.pages).toBe(1)
     expect(typeRow(twice, "loom.section")).toEqual(typeRow(once, "loom.section"))
+  })
+
+  /**
+   * The whole of 0293, from the side that was 0158-permanent. Two forms of a
+   * page (0263) sit at one revision with one tree between them, so a pairing
+   * keyed by the tree dropped the second as the first handed in twice — a count
+   * that was never added, which nothing can notice.
+   */
+  it("pairs two forms of one page as two pages, and reports no double count", () => {
+    const tree = page()
+    const change = libraryChangeOf(
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(RIDERS, tree, ["intro"])],
+      [
+        inAudience(SKIERS, tree, ["intro", "pricing"]),
+        inAudience(RIDERS, tree, ["intro", "pricing"]),
+      ]
+    )
+
+    expect(change.duplicated).toBe(0)
+    expect(change.ambiguous).toEqual([])
+    expect(change.pages).toBe(2)
+    expect(typeRow(change, "loom.section")?.places).toBe(4)
+    expect(typeRow(change, "loom.section")?.tookUp).toBe(2)
+  })
+
+  /**
+   * The other side of the same narrowing, which is the one that could quietly
+   * stop catching a real repeat: *the same form handed in twice* is still a
+   * double count, and it is told apart from the page above by one column.
+   */
+  it("still drops one form handed in twice, with the other form standing", () => {
+    const tree = page()
+    const change = libraryChangeOf(
+      [
+        inAudience(SKIERS, tree, ["intro"]),
+        inAudience(SKIERS, tree, ["intro"]),
+        inAudience(RIDERS, tree, ["intro"]),
+      ],
+      [
+        inAudience(SKIERS, tree, ["intro", "pricing"]),
+        inAudience(RIDERS, tree, ["intro", "pricing"]),
+      ]
+    )
+
+    expect(change.duplicated).toBe(1)
+    expect(change.pages).toBe(2)
+    expect(typeRow(change, "loom.section")?.places).toBe(4)
+  })
+
+  /**
+   * A form held at two revisions says nothing about the other form, which is
+   * what a pairing keyed by the tree could not express: before this, both were
+   * excluded from every row, every total and every ranking.
+   */
+  it("excludes the ambiguous form alone and leaves the other form in the comparison", () => {
+    const tree = page()
+    const second = page({ revision: 2 })
+    const change = libraryChangeOf(
+      [
+        inAudience(SKIERS, tree, ["intro"]),
+        inAudience(SKIERS, second, ["intro"]),
+        inAudience(RIDERS, tree, ["intro"]),
+      ],
+      [inAudience(RIDERS, tree, ["intro", "pricing"])]
+    )
+
+    expect(change.ambiguous).toEqual([{ treeId: TREE, audienceId: SKIERS }])
+    expect(change.pages).toBe(1)
+    expect(typeRow(change, "loom.section")?.places).toBe(2)
+    expect(typeRow(change, "loom.section")?.tookUp).toBe(1)
   })
 
   it("counts one page on both sides as one paired page and never as two", () => {

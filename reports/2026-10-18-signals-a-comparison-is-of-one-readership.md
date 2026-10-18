@@ -125,22 +125,24 @@ is filed.
 
 ## Records added
 
-**0292** — *a comparison is of one readership, and a pair that proves two
+**0294** — *a comparison is of one readership, and a pair that proves two
 audiences is refused*, Accepted. Eight clauses, six alternatives recorded with
 the reason each was rejected. **Nothing is superseded**: 0263, 0284, 0290 and
 0291 are unchanged and all right. This is the guard 0290's alternatives said
 would be needed, built where it said it would be needed.
 
-**The number may move.** Two other branches were open with a record numbered
-0292 when this was written — #667 and #668, both having taken the next number
-free on `main` exactly as the brief says to. Whichever of the three lands second
-and third is renumbered at merge. Nothing in the record depends on its number.
+**The number moved, and it is 0294.** Two other branches were open with a
+record numbered 0292 when this was written — #667 and #668, both having taken
+the next number free on `main` exactly as the brief says to. All three landed on
+18 October: #667 kept 0292, #668 became 0293, and this one became 0294, each
+renumbered at merge with a dated note under its header. Nothing in the record
+depends on its number.
 
 ## Findings filed or closed
 
 **Closed:** the 17 October entry — *a change comparison whose two sides name
 different audiences is a cross-population comparison wearing a
-before-and-after's clothes*. Taken as 0292 over six comparisons rather than one,
+before-and-after's clothes*. Taken as 0294 over six comparisons rather than one,
 as a refusal rather than a silence, with the census withheld.
 
 **Filed, three:**
@@ -228,7 +230,7 @@ comment pattern no longer matches. Adding one member to `SilenceCondition` took
 it past the cap for the first time.
 
 **I worked around it in my own file rather than fixing it in theirs**: the new
-member's doc comment is short, with its argument in 0292 where it belongs
+member's doc comment is short, with its argument in 0294 where it belongs
 anyway. That is a change to `src/signals/silences.ts` made for a reason that has
 nothing to do with that file, and **the next member added to that union will put
 it back over** — the two longest published signatures in this subsystem are now
@@ -288,7 +290,7 @@ changes except `ReadingOfAudience`, which this branch rewrites as
 `SideOfAudience & { treeId, revision }` — the same type, stated as a side plus a
 page. **Whichever merges second should expect a conflict there and resolve it by
 keeping both sets of exports**; nothing in either decision contradicts the other,
-and 0292 says so explicitly.
+and 0294 says so explicitly.
 
 Yesterday's own lesson is the reason I am writing this down: *a published key
 stops two places disagreeing only once both places import it, and a branch open
@@ -305,6 +307,6 @@ A side of a comparison here is an `aud_` and nothing else — a name the host ch
 for a predicate Loom never sees. Nothing keys on a reader, nothing persists,
 nothing new reaches a payload or a browser, and `null` stays *nothing recorded*
 rather than defaulting to anything. If a consented per-reader id ever arrives
-behind a gate and a record, nothing in 0292 would need unpicking: a comparison
+behind a gate and a record, nothing in 0294 would need unpicking: a comparison
 would still be of one population, and the population would still be named by a
 column the host wrote.

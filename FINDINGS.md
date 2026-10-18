@@ -55893,6 +55893,111 @@ evidence of a sender that is not one, and a card that ranks it by share puts a
 fault at the top of a list of pages to fix.
 
 ---
+
+## 2026-10-17 — the records index test is now a coin flip: nine readings of identical work, four of them failures, on one machine in one session
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Extends** the two
+15 October entries, *the records index render test has about eighty records of
+headroom left* and *`pnpm verify` was green on `main` this evening* ·
+**Status:** open — **at 272 records this test passes or fails at random**: five
+passes and four failures of the same work on one machine in one session,
+including a full-suite failure on a branch whose entire diff is one markdown
+file
+
+### What was measured, and it is the only part that matters
+
+Nine readings, all on one machine in one session this afternoon. All on **272
+decision records** except the first.
+
+**Under the full suite, which is how the gate runs it:**
+
+| tree | records | the gate |
+| --- | --- | --- |
+| `marketing-07` before merging `main` | 270 | passed |
+| `marketing-07` after merging `main` | 272 | **timed out** at 5,691 ms |
+| `marketing-08`, whose whole diff is one markdown file | 272 | **timed out** |
+| `marketing-08`, after merging `main`, machine idle | 272 | passed at **4,621 ms** |
+| `marketing-08`, after merging `main` again, idle | 272 | passed at **4,848 ms** |
+
+**Run alone, the same test on the same 272 records:**
+
+| tree | the test |
+| --- | --- |
+| `origin/main` at `d8a3bcc` | 4,894 ms — passed |
+| `marketing-07` at `84f7dda` | **5,550 ms — timed out** |
+| `marketing-08` | 4,206 ms — passed |
+| `marketing-08` | 4,866 ms — passed |
+
+**At 272 records: five passes and four failures of identical work.** The
+readings run 4,206 ms to 5,550 ms against a 5,000 ms budget — a spread of
+1,344 ms, 27% of the budget, centred almost exactly on the line. The three
+passing full-suite runs came in at 4,621 ms and 4,848 ms, which is 379 ms and
+152 ms of headroom; the passes are not comfortable, they are near misses.
+
+### A claim this entry made and withdraws
+
+An earlier version of this entry said the gate *"crossed between 270 and 272
+records"* and had *"failed on every full-suite run since."* **That was wrong,
+and it was wrong because it was written after three full-suite runs rather than
+four.** The fourth passed, on the same tree as the third, with nothing changed
+but how busy the machine was. The crossing framing is withdrawn.
+
+What replaces it is worse rather than better. **A test that has crossed its
+budget gets fixed, because it fails every time and nobody can ignore it. A test
+sitting on its budget gets re-run and blamed on whichever branch was unlucky** —
+which is what happened to this lane today, and what the 15 October entry meant
+by *"a lane trying to tell its own red from the tree's."*
+
+The third row of the first table is still the one to read twice. `marketing-08`
+adds **79 lines to `FINDINGS.md` and a report** — no code, no test, no record,
+nothing a jsdom render of the decisions index could see — and the shared gate
+timed out on it once and passed on it once.
+
+### The correction to the entry this extends
+
+That entry put the headroom at *"under forty records"* at ~15 ms a record, and
+called it *"a fortnight of this repository's rate."* It is a fortnight later in
+records — 262 then, 272 now — and the test now fails half the time it is run.
+
+**Do not read a per-record cost out of these numbers.** The 15 October figures
+were taken on another machine on another day, and this entry's own spread on one
+machine — 1,344 ms across eight runs of identical work — is larger than ten
+records' worth at any rate either entry proposes. That arithmetic is not worth
+defending and nothing here rests on it.
+
+**What does not need a rate.** Nine runs, four of them failures. Whatever
+the per-record cost is, there is no longer a number of records to plan against,
+and the next record makes a coin flip a little more weighted rather than
+crossing anything.
+
+### What it cost today, which is the shape the entry predicted
+
+This lane met it on a branch whose pull request had **already merged**, and
+spent a full diagnosis cycle on it: reproducing on the base, comparing record
+counts, diffing the two trees, and running the file on both branches to
+establish that an identical workload passes on one and times out on the other.
+
+The entry predicted exactly this — *"what an intermittent budget looks like from
+a lane trying to tell its own red from the tree's"* — and added *"it is the gate
+four surfaces share, so it does not block one routine, it blocks all of them."*
+Both are now observed rather than forecast. The second 15 October entry's advice
+is the one that saved this run from reverting something: **a red
+`architecture.test.tsx` should be re-run, and checked against the base, before
+anybody treats it as their own.**
+
+### What this lane did not do
+
+**Nothing.** `architecture.test.tsx` is `Loom docs`' file and this lane does not
+edit another route group, so the three obvious moves — raising the timeout,
+splitting the render, or asserting over a sample rather than every row — are all
+yours. No fix is in flight: neither open pull request (#647, #665) touches the
+file, so there was nothing to port into a branch either.
+
+The one thing worth saying about the remedy from outside the lane: **raising the
+timeout buys time and does not stop the clock**, and the sibling test *says once
+that the whole table leaves, and marks every row* was measured at 4,291 ms in
+today's full-suite run, so it is close behind rather than a year behind.
 ## 2026-10-17 — the published key was imported by five readings and a sixth landed on `main` the same day without it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
@@ -55939,7 +56044,7 @@ its own record's claims against what arrived, not just re-run the suite.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/change.ts`)
 · **Status:** **closed by `signals-38-a-comparison-is-of-one-population`** —
-taken as 0292, §37, as a **refusal** over five page-scale comparisons and the
+taken as 0294, §37, as a **refusal** over five page-scale comparisons and the
 readership comparison, with the census withheld rather than left standing; the
 four library comparisons are left out and refiled below, because #668 was open
 on them. Original status: open — **nothing is broken today and nothing is
@@ -56063,7 +56168,7 @@ instead, which is what #664's corrected body does.
 is taken and the rule is published; what is left is applying it to four
 functions**, and it was left because another branch held those files
 
-0292 refuses a comparison whose two sides prove two populations, and publishes
+0294 refuses a comparison whose two sides prove two populations, and publishes
 `crossesAudiences` once so that nine comparisons do not each decide it. It was
 applied to six: the five page-scale comparisons that publish a silence
 vocabulary, and the readership comparison.
@@ -56098,10 +56203,10 @@ reading.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/region.ts`)
 · **Status:** open — **a limit written down, nothing superseded and nothing
-asked of anybody**; it is the one honest gap 0292 leaves and it is better
+asked of anybody**; it is the one honest gap 0294 leaves and it is better
 published than guessed at
 
-0292 gives `RegionReading` an `audienceId` so that `readershipChangeOf` can
+0294 gives `RegionReading` an `audienceId` so that `readershipChangeOf` can
 refuse a pair of two populations. `regionReadingFor` names it, because it picked
 one audience's rows. **`regionReadingOf` leaves it `null`, and that is
 deliberate**: it groups whatever it is handed, across revisions by design — *ten
@@ -56137,7 +56242,7 @@ It is a field and a sentence, not a decision.
 **one field and one refusal on six readings**, filed the way 0284 filed the
 dimension itself
 
-0292 puts `audiences: { was, now }` on six comparisons — where reading stops,
+0294 puts `audiences: { was, now }` on six comparisons — where reading stops,
 the words a change put in front of readers, whether readers had time for it,
 what readers did, what a change did to the funnel, and who the readers were. It
 is carried under a silence and under none.
@@ -56210,9 +56315,122 @@ measuring what it was written to measure.
 **What this branch did instead, and why it is a workaround.** The new member's
 doc comment was shortened until the declaration fit under the cap again, which
 is a change to `src/signals/silences.ts` made for a reason that has nothing to do
-with that file. The argument it carried is in 0292 and is not lost, but **the
+with that file. The argument it carried is in 0294 and is not lost, but **the
 next member added to `SilenceCondition` will put it back over**, and the two
 longest published signatures in the subsystem are now close to the line:
 `SilenceCondition` at 5,732 characters cleaned and `CopyChange` at 5,550, both
 against a 6,000-character cap applied to the uncleaned text. Whoever hits it next
 will read the same misleading failure.
+## 2026-10-17 — four comparisons paired a page by its tree, in two spellings of one rule, and the key that would have fixed it was private in a fifth
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-37-a-comparison-pairs-pages-by-form`** — found while
+reading the comparison layer for the open `change.ts` entry below, fixed as 0293
+in the same run, and written down because it is the **same defect** the morning
+run fixed in one module and because the shape of how it survived is the useful
+half
+
+0290 gave every reading of these counters the audience dimension and published
+`readingKeyOf` on the argument that five spellings of *what makes two readings
+one page* are five places to drift. Clause 7 of it, added when #659 merged mid
+branch, found the identical defect in a **comparison** and fixed it with
+`formKeyOf` — *a page in one of its forms, with no revision in it* — as a
+`const` in `deployment-change.ts`.
+
+**Four other comparisons had the same defect and nothing to import.** The
+library comparisons of places (0266), words (0270), readers (0279) and
+reader-words (0280) pair each page in the earlier window with its counterpart in
+the later one, and `pairedWindowOf` keyed that pairing by `TreeId`. Two forms of
+a page share a tree, so:
+
+- **two forms at one revision** — the second was `duplicated`, dropped as the
+  first one handed in twice, which 0158 makes permanent and which `health.ts`
+  reports with **`caller`** as the remedy, on a deployment doing exactly what
+  0263 built;
+- **two forms at two revisions** — the tree went into `ambiguous` and **both**
+  forms left every row, every total and every ranking;
+- **a kind's `pages`** is a set, so two forms counted as one page, understating
+  the places a kind stands by exactly the pages a deployment serves twice;
+- **`LibrarySide.scaled`** keyed each paired page's door by its tree, so
+  whichever form the map held scaled the **other** form's readers — and
+  `pageViewsFor` scopes a door row to the reading's own audience (0290), so the
+  two doors were real and one of them was being used for both.
+
+**And `library-copy-change.ts` carried a second hand-written copy of the rule**,
+150 lines from an export whose own doc comment says *"a second hand-written copy
+of it would be two spellings of one rule that agree today."* There was one, and
+it was wrong in the same two ways. It is deleted; that module imports the
+published rule, as its three siblings do.
+
+**The lesson, which is the morning entry's lesson arriving a second time.** That
+entry said *a published key stops two places disagreeing only once both places
+import it*. The case it had in mind was a branch open across another's merge.
+This case is narrower and more avoidable: the key was published **to one
+module**. A `const` at the top of the file that needs it is the cheapest
+possible thing to write and the most expensive to find, because nothing about it
+is wrong — `deployment-change.ts`'s copy was correct. What was wrong is that
+four other modules could not reach it, and the grep that would have shown so is
+`grep -c formKeyOf src/signals/*.ts` returning 1.
+
+**So the rule this lane should hold itself to:** a key that decides what counts
+as one of something goes in `audiences.ts` (or the module whose record owns the
+concept) the first time it is written, not the second time it is needed. `0293`
+publishes both keys with the difference between them written down, which is the
+form that argument should take from here.
+
+---
+## 2026-10-17 — the comparison layer still does not check that its two sides are of one form, and the loud half and the quiet half want one decision
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/change.ts`, `copy-change.ts`, `pace-change.ts`,
+`action-change.ts`, `funnel-change.ts`, and the four library comparisons) ·
+**Extends** the 17 October entry *a change comparison whose two sides name
+different audiences is a cross-population comparison wearing a before-and-after's
+clothes*, which stays open · **Status:** open — **nothing is broken today**; the
+shape is now settled by having read all nine, and three questions in it are
+answerable without writing code
+
+0293 made each comparison pair the **pages inside one window** by form. It did
+not make any comparison check that its **two windows** are of one form, and
+reading all nine functions for it settled three things the earlier entry left
+open.
+
+**It is nine functions and not eight, and they take their pairs identically.**
+`readingChangeOf`, `copyChangeOf`, `paceChangeOf`, `actionChangeOf` and the four
+library comparisons take two `PageReading`s or two windows of them;
+`funnelChangeOf` takes two `FunnelReach`es, each of which was built from a
+reading and carries its tree and revision. Every one of them guards
+`was.treeId !== now.treeId` and returns a `different-trees` silence, and **none
+of them looks at the audience**. So it is one guard beside an existing guard, in
+nine places, and a member in nine published silence vocabularies plus a
+condition in `silences.ts` (0240).
+
+**The loud half and the quiet half are not the same severity, and that is an
+argument for doing them together rather than for doing one.** A library
+comparison handed `aud_pro`'s window and `aud_free`'s finds no counterpart for
+any page: every page reads gained, every page reads lost, `pages` is nought and
+every kind row is `unpaired`. Wrong, and loud enough that somebody would ask. A
+page's own `readingChangeOf` handed one form's earlier window and another form's
+later one produces every stop, every share and every `improvement`, with no
+`null` and no silence anywhere on it, labelled as what a change did. That one is
+the 0284 collapse at the comparison layer — *a number that looks right forever*.
+Fixing the quiet one and not the loud one leaves two spellings of one guard,
+which is what 0293 is about.
+
+**The `null` side is a third state and probably wants a field rather than a
+refusal.** `PageReading.audienceId` is `null` both for a window whose rows never
+carried the column — every window written before 0284, and every one a test
+builds by hand — and for a window naming two with none asked for. Comparing
+`null` with `aud_pro` is therefore unprovable either way: a deployment serving
+one form across the 0284 migration is an honest before-and-after, and a
+deployment that began serving two forms is a cross-population comparison, and
+nothing in the two readings tells them apart. Refusing both would withhold every
+comparison that spans the upgrade; allowing both silently is the collapse.
+
+**The shape, if it is taken:** refuse only where the two sides **prove** two
+populations — both name an audience and the two differ — which is 0290's
+treatment of its third state applied here, and carry `audiences: { was, now }`
+on every comparison so a surface can see an unprovable pair for itself. One
+helper published from `audiences.ts` beside the two keys, imported nine times,
+rather than nine spellings of `was.audienceId !== now.audienceId`.
+
