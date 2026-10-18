@@ -2,7 +2,12 @@ import { DocsBar } from "@/app/(docs)/_components/docs-bar"
 import { OnThisPage } from "@/app/(docs)/_components/on-this-page"
 import { Pager } from "@/app/(docs)/_components/pager"
 import { Sidebar } from "@/app/(docs)/_components/sidebar"
-import { ARTICLE_ID, railScrollerAttr } from "@/app/(docs)/_lib/chrome"
+import {
+  ARTICLE_ID,
+  PAGE_RAIL_CLASS,
+  railScrollerAttr,
+  SITE_RAIL_CLASS,
+} from "@/app/(docs)/_lib/chrome"
 import { HREFS_WITH_SECTIONS } from "@/app/(docs)/_lib/contents/pages"
 
 /**
@@ -21,14 +26,16 @@ import { HREFS_WITH_SECTIONS } from "@/app/(docs)/_lib/contents/pages"
 const DocsLayout = ({ children }: { readonly children: React.ReactNode }) => (
   <div className="mx-auto flex max-w-[100rem] flex-col lg:flex-row">
     {/*
-     * The rail's scroller, and it says so: 45 pages of links do not fit in
-     * `100vh - 3.5rem`, so the rail scrolls itself to the page a reader is on
-     * and needs to be told which element to move. `_lib/chrome.ts` is why that
-     * is an attribute rather than something script works out.
+     * The rail's scroller, and it says so: 45 pages of links do not fit in what
+     * is left of a window under the header, so the rail scrolls itself to the
+     * page a reader is on and needs to be told which element to move.
+     * `_lib/chrome.ts` is why that is an attribute rather than something script
+     * works out — and it is also where *under the header* and *what is left* are
+     * now written, instead of a `top-14` and a `100vh - 3.5rem` here.
      */}
     <aside
       {...railScrollerAttr}
-      className="border-edge hidden w-64 shrink-0 lg:sticky lg:top-14 lg:block lg:h-[calc(100vh-3.5rem)] lg:overflow-y-auto lg:border-r"
+      className={`border-edge hidden w-64 shrink-0 lg:sticky lg:block lg:overflow-y-auto lg:border-r ${SITE_RAIL_CLASS}`}
     >
       <Sidebar />
     </aside>
@@ -42,8 +49,10 @@ const DocsLayout = ({ children }: { readonly children: React.ReactNode }) => (
        * **Where it sits.** Inside `main` rather than above the whole row, so
        * that it spans the page and not the rail: it is shown at every width
        * below 1280, and from 1024 the site's own rail is beside it. It sticks
-       * at `top-14`, which is the header's height, because the header is sticky
-       * too and two sticky bars have to be told the order they stack in.
+       * under the header, because the header is sticky too and two sticky bars
+       * have to be told the order they stack in — at the header's height plus
+       * its hairline, which `_lib/chrome.ts` names and this file no longer
+       * spells.
        *
        * It is also after the skip link's target and before the prose, so a
        * reader who skipped to the page is offered what is in it first.
@@ -79,7 +88,7 @@ const DocsLayout = ({ children }: { readonly children: React.ReactNode }) => (
      * each rather than page titles, and because what it takes it takes off the
      * measure of the prose.
      */}
-    <aside className="hidden w-56 shrink-0 xl:sticky xl:top-14 xl:block xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto">
+    <aside className={`hidden w-56 shrink-0 xl:sticky xl:block xl:overflow-y-auto ${PAGE_RAIL_CLASS}`}>
       <OnThisPage />
     </aside>
   </div>

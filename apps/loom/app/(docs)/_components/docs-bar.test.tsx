@@ -1,7 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { ARTICLE_ID, RAIL_SCROLLER_SELECTOR } from "@/app/(docs)/_lib/chrome"
+import {
+  ARTICLE_ID,
+  BAR_CONTROL_CLASS,
+  RAIL_SCROLLER_SELECTOR,
+  UNDER_HEADER_CLASS,
+} from "@/app/(docs)/_lib/chrome"
 import { docsOrder } from "@/app/(docs)/_lib/nav"
 
 import { DocsBar } from "./docs-bar"
@@ -188,6 +193,44 @@ describe("whether there is a contents control at all", () => {
     const { container } = bar()
 
     expect(container.firstElementChild?.className).not.toContain("lg:border-b-0")
+  })
+})
+
+/**
+ * Where the bar sits and how tall it is, on the rendered element.
+ *
+ * `chrome.test.ts` already says the file wears these classes and spells
+ * neither; what it cannot say is that the class reaches the element, and a
+ * class on the wrong div is a bar that scrolls away or has no height. Both
+ * numbers are the stylesheet's (`globals.css`), which is what makes the
+ * scrollport's inset a function of this control rather than a figure that
+ * agreed with it on the day it was typed.
+ */
+describe("where the bar sits, and how tall its row is", () => {
+  it("sticks under the header, at an offset it does not spell itself", () => {
+    article(WRITTEN_PAGE)
+    const { container } = bar()
+
+    expect(container.firstElementChild?.className).toContain(UNDER_HEADER_CLASS)
+  })
+
+  /* The row is as tall as the controls in it and no taller, which is what lets
+     it collapse to nothing where both have stood down. So the height is on the
+     control. */
+  it("takes its height from the controls, which take theirs from the chrome", () => {
+    article(WRITTEN_PAGE)
+    bar()
+
+    expect(browse().className).toContain(BAR_CONTROL_CLASS)
+    expect(contents().className).toContain(BAR_CONTROL_CLASS)
+  })
+
+  it("gives the row itself no height, so a width with no controls leaves no band", () => {
+    pathname.current = GENERATED
+    article(`<h1 id="loom">loom</h1>`)
+    const { container } = bar([WRITTEN])
+
+    expect(container.firstElementChild?.className).not.toContain(BAR_CONTROL_CLASS)
   })
 })
 
