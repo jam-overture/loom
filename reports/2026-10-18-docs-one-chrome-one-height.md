@@ -335,3 +335,50 @@ Three standing entries this run met again and did not duplicate:
   (15 October), which is still why those seventeen pages have no contents
   control. Unchanged, and it is the reason a reference page is in the pictures
   above: it is the one shape where both of the bar's controls stand down.
+
+## Test numbers
+
+`pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
+last thing on its line, with nothing else running beside it.
+
+- framework: **233 files, 5,332 tests passed**
+- application: **337 files, 5,974 tests passed**
+- `findings:check`: 1,240 findings, 0 malformed
+- `reports:check`: 1,891 visuals, none over 1.1MB
+- `prerender:check`: 133 prerendered pages, 1,843 text junctions, 0 run
+  together; 3 metadata conventions, 0 unserved
+
+Nothing failed, nothing was skipped, and no test was weakened. **Twenty-four
+tests are new**: 13 in `_lib/chrome-css.test.ts`, 8 in `_lib/chrome.test.ts`,
+3 in `_components/docs-bar.test.tsx`. **One was removed**, and it is the one
+this unit exists to remove: the floor asserting `scroll-padding-top` clears a
+`102` somebody had typed. There is nothing left for it to guard, because the
+inset is arithmetic over the two bands' own heights and cannot stop clearing
+them. **One was rewritten** — the reading line is now held against the landing
+the stylesheet declares, rather than against a sum of two declarations the test
+had to add up for itself.
+
+**On reading the gate.** Three runs. The first was red and usefully so: five
+`TS6133` errors, because the first draft of the class-wearing test asserted the
+*interpolation text* in the source and so imported five constants it never
+used. That is the test asking a weaker question than it looks like it is
+asking, and the fix made it stronger — each file is now held twice, that it
+reads the constant and that it does not contain the constant's own value. The
+second was green. The third is the one quoted above and is on this commit's
+tree; the only thing written after it is this paragraph and the two sentences
+below it. Every exit code here was read out of a file written as the last thing
+on its line rather than off the session's own notification, which is
+`docs/routines.md`' rule and the reason it exists.
+
+## The preview
+
+Taken from the `vercel[bot]` comment after opening the pull request, not
+composed from the branch name, which is the remedy the 16 October finding
+*the composed preview URL, fifth instance* asks every lane to follow.
+
+PREVIEW_URL_PLACEHOLDER
+
+Every picture above was taken with `pnpm shoot --serve apps/loom` against a
+build of this commit — `built 2026-10-18T14:03:15.668Z`. Not fetched from this
+container: `*.vercel.app` is denied by the environment's egress policy, which
+is the open finding of 12 October and still true.
