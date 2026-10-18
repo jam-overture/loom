@@ -255,6 +255,14 @@ empty `git diff`), and nothing this unit touched is in the import graph
 rather than to reason: bundled and minified with esbuild it is **6,477 bytes**,
 **2,941 gzipped**.
 
+## Preview
+
+https://loom-git-signals-38-a-compar-218fd3-jpizzolato36-6341s-projects.vercel.app
+
+Nothing to look at on it. This unit is server-side arithmetic with no surface:
+the portal screens that would read these counters are `Loom portal`'s and are
+filed, which is the third of the findings above.
+
 ## Open questions
 
 **Nothing blocking.** One for later, and it is already filed rather than waiting
