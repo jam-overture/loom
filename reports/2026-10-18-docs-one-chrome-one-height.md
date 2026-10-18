@@ -376,7 +376,16 @@ Taken from the `vercel[bot]` comment after opening the pull request, not
 composed from the branch name, which is the remedy the 16 October finding
 *the composed preview URL, fifth instance* asks every lane to follow.
 
-PREVIEW_URL_PLACEHOLDER
+https://loom-git-docs-59-one-chrome-8cc42b-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the pictures above are of:
+
+- [/docs/building-with-loom/theming](https://loom-git-docs-59-one-chrome-8cc42b-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/theming)
+- [/docs/api-reference/runtime](https://loom-git-docs-59-one-chrome-8cc42b-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/runtime)
+
+The hash segment is `8cc42b` and the branch segment truncates at
+`docs-59-one-chrome`; a guess composed from the branch name would have had
+neither.
 
 Every picture above was taken with `pnpm shoot --serve apps/loom` against a
 build of this commit — `built 2026-10-18T14:03:15.668Z`. Not fetched from this
