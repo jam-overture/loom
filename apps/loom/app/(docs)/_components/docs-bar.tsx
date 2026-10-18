@@ -3,7 +3,11 @@
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 
-import { railScrollerAttr } from "@/app/(docs)/_lib/chrome"
+import {
+  BAR_CONTROL_CLASS,
+  railScrollerAttr,
+  UNDER_HEADER_CLASS,
+} from "@/app/(docs)/_lib/chrome"
 import { docsEntryAt } from "@/app/(docs)/_lib/nav"
 import { sectionsSummary } from "@/app/(docs)/_lib/on-this-page"
 
@@ -104,6 +108,12 @@ import { usePageSections, useSectionBeingRead } from "./use-page-sections"
  * below 1280. The left-hand control stands down from 1024, where the site's own
  * rail is on screen and a second way to reach it would be furniture.
  *
+ * It sticks **under** the header rather than at its height: the header's row
+ * and the hairline it draws are two declarations, and taking only the first of
+ * them left the bar covering that hairline by a pixel. `_lib/chrome.ts` names
+ * the sum, so the bar, the site's rail and the page's rail all start in the
+ * same place and none of them says where that is.
+ *
  * **Whether there is a right-hand control is decided before the browser runs**,
  * from `_lib/contents/pages.ts`, and that is what closes the 86-pixel shift the
  * line above the article had. The rows still come from the document walk, so
@@ -140,7 +150,14 @@ export const DocsBar = ({ pagesWithSections }: { readonly pagesWithSections: rea
 
   const reading = sections.find((candidate) => candidate.id === current)
 
-  const control = "text-ink-muted hover:text-ink flex min-w-0 items-center gap-2 py-3 text-sm transition-colors"
+  /*
+   * The row's height is the control's height, declared rather than left to
+   * `py-3` and a line of `text-sm` adding up to 44 — which they did, and which
+   * nothing could read. `_lib/chrome.ts` names the class and `globals.css` has
+   * the number, and the scrollport's inset is arithmetic over the same
+   * declaration, so a taller control moves what clears it.
+   */
+  const control = `text-ink-muted hover:text-ink flex min-w-0 items-center gap-2 text-sm transition-colors ${BAR_CONTROL_CLASS}`
 
   /*
    * The bar has no height of its own: its row is as tall as the controls in it
@@ -154,7 +171,9 @@ export const DocsBar = ({ pagesWithSections }: { readonly pagesWithSections: rea
   const edge = hasContents ? "border-b" : "border-b lg:border-b-0"
 
   return (
-    <div className={`bg-surface-page/85 border-edge sticky top-14 z-30 backdrop-blur xl:hidden ${edge}`}>
+    <div
+      className={`bg-surface-page/85 border-edge sticky z-30 backdrop-blur xl:hidden ${UNDER_HEADER_CLASS} ${edge}`}
+    >
       <div className="flex items-center gap-4 px-5 sm:px-8 lg:px-12">
         {/*
          * `lg:hidden`: from 1024 the site's rail is on screen beside the page.

@@ -229,8 +229,67 @@
     color-scheme: dark;
   }
 
+  /* ── The chrome, and the one place its height is written ────────
+     Two things are stuck to the top of a reader's window — the
+     header, and under 1280 the bar that holds both navigations — and
+     seven other measurements are taken against them: where the bar
+     sticks, where each of the two rails sticks and how tall it can
+     be, and the two offsets a browser scrolls by. Until today every
+     one of them spelled the numbers itself. The header said `h-14`; the bar
+     stuck at `top-14`; each of the two rails stuck at `top-14` and
+     stood `calc(100vh - 3.5rem)` tall; the scrollport's inset said
+     `7rem`, the heading's margin said `3rem`, and a test asserting
+     the inset clears the chrome said `102` — a figure read off a
+     screenshot and typed in.
+
+     Every one of those was right. None of them was *connected* to any
+     other, and the cost of that is specific rather than theoretical:
+     a run that gives the bar a second line makes the inset too small
+     and nothing goes red. What a reader gets is the heading they
+     asked for tucked behind the bar; what a keyboard reader gets is
+     the link they just focused half-hidden by it.
+
+     So the three parts are declared here and everything else is
+     arithmetic over them. `_lib/chrome.ts` names the classes that
+     read them back, the header, the bar and both rails wear those
+     classes, and `chrome.test.ts` holds the chain: a class naming a
+     property this block does not declare resolves to nothing, which
+     is a height of zero and a silent one.
+     ────────────────────────────────────────────────────────── */
+  :root {
+    /** The hairline a sticky band draws under itself. Both draw one. */
+    --chrome-edge: 1px;
+    /** The header's own row: the wordmark, the search, the toggle. */
+    --chrome-header: 3.5rem;
+    /**
+     * A control in the bar, which is the only thing that gives the bar a
+     * height — so where both controls have stood down, the row is nothing
+     * tall rather than an empty band. `docs-bar.tsx` is that argument.
+     */
+    --chrome-bar: 2.75rem;
+
+    /** Where a second sticky band starts, and where a rail's height begins. */
+    --chrome-under-header: calc(var(--chrome-header) + var(--chrome-edge));
+    /** Everything stuck to the top of the window, at the widths with a bar. */
+    --chrome: calc(var(--chrome-under-header) + var(--chrome-bar) + var(--chrome-edge));
+    /** What is left of the window for a rail that starts under the header. */
+    --chrome-rail: calc(100vh - var(--chrome-under-header));
+
+    /** Air between the chrome and whatever the browser has just scrolled to. */
+    --chrome-clearance: 0.625rem;
+    /** The scrollport's inset: the chrome, cleared, by construction. */
+    --chrome-inset: calc(var(--chrome) + var(--chrome-clearance));
+    /**
+     * Where a press of a contents row puts a heading. **Chosen rather than
+     * derived**, and the one number here a reader would notice moving: the
+     * reading line that decides which row is marked is picked against it
+     * (`_lib/on-this-page.ts`), and the two have to stay in that order.
+     */
+    --press-landing: 10rem;
+  }
+
   /*
-   * `scroll-padding-top` is the chrome, and the chrome grew.
+   * `scroll-padding-top` is the chrome, cleared, and it is now arithmetic.
    *
    * It insets the top of the scrollport for every scroll the browser performs
    * itself: a fragment in the address bar, a press of a contents row, a search
@@ -239,22 +298,14 @@
    * stuck to the top of the window puts the thing a reader just asked for
    * behind it.
    *
-   * 7rem is 112 pixels against 102 of chrome, measured rather than reasoned:
-   * `pnpm shoot` reads the bar at `x 0 y 57 390x45` on a phone at the top of a
-   * page, and 57 is the header's `h-14` plus its border. It was 5rem while the
-   * header was the only sticky thing on the page, which cleared 57 and would
-   * not have cleared the bar.
-   *
-   * **The heading's own `scroll-margin-top` came down by the same 2rem**, so a
-   * press still lands a heading 160 pixels down and the reading line that marks
-   * the row is still one number for every width. The two add — that is what the
-   * guard in `_lib/on-this-page.test.ts` reads — so moving one of them without
-   * the other is how the mark lands on the wrong section, which has happened
-   * once already.
+   * It was `7rem`, which is 112 against 102 of chrome and was correct on the
+   * day it was written. What it was not was *a function of* the 102. The bar's
+   * own row is `--chrome-bar` now, so a taller bar moves this too and nobody
+   * has to remember that it should.
    */
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 7rem;
+    scroll-padding-top: var(--chrome-inset);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -421,11 +472,15 @@
     color: var(--ink);
     font-weight: 700;
     letter-spacing: -0.02em;
-    /* 3rem, and `html`'s `scroll-padding-top` is 7rem: the two add, and 160 is
-       where a press of a contents row lands a heading. Read as a pair by the
-       reading-line guard, which is the test that would otherwise let the mark
-       sit on the section above the one a reader asked for. */
-    scroll-margin-top: 3rem;
+    /* A press of a contents row lands a heading at `--press-landing`, and the
+       browser gets there by adding the scrollport's inset to this margin. So
+       this is the difference between them, which keeps the landing one number
+       while the chrome above it moves — and keeps the reading line that marks
+       the row chosen against a figure that is declared rather than emergent.
+       `chrome.test.ts` reads this expression; getting it wrong is how the mark
+       sits on the section above the one a reader asked for, which has happened
+       once already. */
+    scroll-margin-top: calc(var(--press-landing) - var(--chrome-inset));
   }
 
   .prose h1:not(.not-prose *) {

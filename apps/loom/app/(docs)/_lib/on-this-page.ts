@@ -142,21 +142,23 @@ export type SectionTop = {
  * reader just asked for arrives unmarked and the mark sits on the section
  * above it.
  *
- * **Two declarations decide where a press lands, and they add up.** `globals.css`
- * gives `html` a `scroll-padding-top: 5rem`, which insets the top of the
- * scrollport for every in-page scroll, and it gives every prose heading a
- * `scroll-margin-top: 5rem`, which grows the box the browser is scrolling to.
- * A press therefore lands a heading **160 pixels** down the window, not 80.
+ * **Where a press lands is one declared number**, `--press-landing` in
+ * `globals.css`, and it is 10rem — 160 pixels down the window. Two declarations
+ * get the browser there, because that is how a browser does it: `html` has a
+ * `scroll-padding-top` that insets the top of the scrollport for every in-page
+ * scroll, and every prose heading has a `scroll-margin-top` that grows the box
+ * being scrolled to. The second is written as *the landing minus the inset*, so
+ * the chrome above can change height without moving the landing.
  *
- * That was measured rather than reasoned, and it had already cost something:
- * this constant was 120 until 16 October, chosen against the heading's 5rem
- * alone, and 120 is *above* 80 and *below* 160 — so pressing a row on the rail
- * marked the section above the one the reader had asked for, on every page.
+ * It was not always one number, and that cost something. This constant was 120
+ * until 16 October, chosen against the heading's own 5rem alone, and 120 is
+ * *above* 80 and *below* the sum — so pressing a row on the rail marked the
+ * section above the one the reader had asked for, on every page.
  * `pnpm shoot`' `measure` printed the landing as `y 160` on a press of a
  * contents row at 390 pixels wide, which is the first time anything in this
- * repository looked. The test beside this now reads **both** declarations and
- * sums them, which is the half that was missing: a test that reads one of two
- * numbers is a test that passes while the thing it guards is wrong.
+ * repository looked. The lesson then was that a test reading one of two numbers
+ * passes while the thing it guards is wrong; the answer now is that there is one
+ * number to read, and `chrome.test.ts` holds the arithmetic that keeps it one.
  *
  * The 24 pixels between 160 and 184 are what makes it hold through a browser's
  * own rounding and a smooth scroll that stops a fraction short.

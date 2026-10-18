@@ -11,6 +11,7 @@ import {
   type HeadingFound,
 } from "./on-this-page"
 import { ARTICLE_ID } from "./chrome"
+import { remPx, rootProperties } from "./chrome-css"
 import { readDocsStylesheet } from "./prose-barrier"
 
 const heading = (level: number, id: string, text: string): HeadingFound => ({ level, id, text })
@@ -119,11 +120,11 @@ describe("the bottom of the page", () => {
  * repository, held against that thing rather than against a comment about it.
  *
  * `prose-barrier.ts` established that a claim about the stylesheet can be a
- * test; this is the same move for the declarations the mark depends on. A run
- * that changes the header's height, and the offsets a press is given with it,
- * moves where a pressed row lands — and if the reading line does not move too,
- * the symptom is that pressing a row marks the section *above* the one you
- * asked for. Nothing else in this repository would notice.
+ * test; this is the same move for the declaration the mark depends on. A run
+ * that changes the chrome's height moves where a pressed row lands — and if
+ * the reading line does not move too, the symptom is that pressing a row marks
+ * the section *above* the one you asked for. Nothing else in this repository
+ * would notice.
  *
  * **It said that, and it did not notice**, because until 16 October it read one
  * of the two declarations that decide the landing. `html`'s
@@ -131,31 +132,30 @@ describe("the bottom of the page", () => {
  * `scroll-margin-top` grows the target, and the two add: a press lands a
  * heading 160 pixels down, not 80. The line was 120, which is above one number
  * and below the sum, so the defect this file describes was live on every page
- * while these three tests passed. `pnpm shoot`' `measure` found it, printing
+ * while three tests passed. `pnpm shoot`' `measure` found it, printing
  * `h2#the-bar-above-your-page x 20 y 160` on a press of a contents row.
  *
- * So the helper reads **both** and sums them, and it holds each to one
- * declaration rather than to a count of the pair — a third rule naming either
- * property fails here rather than being silently averaged in.
+ * **Which is why the landing is now declared rather than emergent.** The two
+ * declarations are still two, and the browser still adds them, but
+ * `globals.css` writes the heading's margin as *the landing minus the inset* —
+ * so there is one number to read here, and no sum to get wrong. The chain that
+ * makes that true is held in `chrome.test.ts`, which also retires the figure
+ * this file used to carry: the chrome was 102 pixels and the only thing that
+ * knew so was a `102` typed into the test below, read off a screenshot. The
+ * inset is arithmetic over the bands' own heights now, so there is nothing
+ * left here to hold it to.
  */
 describe("the reading line and where a press lands a heading", () => {
-  const REM_PX = 16
+  /** Where a press of a contents row puts a heading, as the stylesheet declares it. */
+  const pressLandsAtPx = (): number => {
+    const declared = rootProperties(readDocsStylesheet()).get("--press-landing")
 
-  const soleRemValue = (property: string): number => {
-    const found = [...readDocsStylesheet().matchAll(new RegExp(`${property}:\\s*([\\d.]+)rem`, "g"))]
+    if (declared === undefined) throw new Error("globals.css declares no --press-landing for a press to land at")
 
-    /* One declaration each, so the sum below is not read off a rule for
-       something else. A second would make this quietly pick whichever came
-       first, which is the shape of the defect that was already here. */
-    expect(found, `globals.css has one ${property}`).toHaveLength(1)
-
-    return Number(found[0]?.[1]) * REM_PX
+    return remPx(declared)
   }
 
-  /** Where a press of a row puts a heading: the scrollport's inset plus the heading's own margin. */
-  const pressLandsAtPx = (): number => soleRemValue("scroll-padding-top") + soleRemValue("scroll-margin-top")
-
-  it("adds the two declarations, because that is what the browser does", () => {
+  it("is the landing the stylesheet declares, which is the figure a shot measured", () => {
     expect(pressLandsAtPx()).toBe(160)
   })
 
@@ -169,32 +169,6 @@ describe("the reading line and where a press lands a heading", () => {
 
   it("keeps the line near the top of a window rather than halfway down it", () => {
     expect(READING_LINE_PX).toBeLessThan(300)
-  })
-
-  /**
-   * The other half of the inset, and the half the sum above cannot see.
-   *
-   * `scroll-padding-top` is what keeps the thing a reader asked for out from
-   * behind whatever is stuck to the top of the window, and it is the only one
-   * of these numbers a **keyboard** reader depends on: moving focus to
-   * something off screen scrolls by the padding alone, with no heading and no
-   * `scroll-margin-top` involved.
-   *
-   * The chrome is 102 pixels under 1280 — the header's `h-14` and its border,
-   * which the harness reads as 57, and 45 of the bar that holds both
-   * navigations — so the padding has to clear 102. It was 5rem, or 80, while
-   * the header was the only sticky thing on the page. The sum is held at 160 by
-   * the heading's margin coming down as this went up, so the two tests above
-   * are both still about a press and this one is about everything else that
-   * scrolls.
-   *
-   * **102 is a number read off a screenshot and typed in here**, which is the
-   * open finding of 17 October and the stated weakness of this test: nothing
-   * converts `h-14` or `py-3` into pixels, so a run that makes the bar taller
-   * passes this and ships the defect.
-   */
-  it("insets the scrollport past the chrome, which is what a keyboard reader scrolls by", () => {
-    expect(soleRemValue("scroll-padding-top")).toBeGreaterThanOrEqual(102)
   })
 })
 

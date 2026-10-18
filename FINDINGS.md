@@ -55554,9 +55554,14 @@ handles `entry`, `closing` and `either` has handled all of it.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/globals.css`, `_lib/on-this-page.test.ts`,
-`_components/docs-bar.tsx`) · **Status:** open — **nothing is wrong today and
-the number is right**; it is a measurement held by hand, in a place where the
-same shape has already cost this lane one live defect
+`_components/docs-bar.tsx`) · **Status:** **closed by
+`docs-59-one-chrome-one-height`, 18 October 2026** — remedy 2, which is what
+this entry recommended. `globals.css` declares the three parts of the chrome and
+derives the rest; `_lib/chrome.ts` names the classes that read them back; the
+header, the bar and both rails wear those classes and spell no number. The 102
+is gone from `_lib/on-this-page.test.ts` because there is nothing left for it to
+guard — the inset is arithmetic over the bands' own heights, so it cannot stop
+clearing them. The closing note is at the foot of this entry.
 
 `scroll-padding-top` is what keeps the thing a reader asked for from arriving
 behind whatever is stuck to the top of the window. It was `5rem` — 80 pixels,
@@ -55604,6 +55609,22 @@ report. So the remedy is one of:
 header, which is the route group's root layout, and the bar, and the stylesheet,
 and it is a different argument from the one this unit is about. 3 is what
 shipped.
+
+### What closing it actually found, 18 October
+
+The entry named three places. There were **six**, and the two it did not name
+are the ones that make the case: `docs/layout.tsx` sticks each of its two rails
+at `top-14` and stands each `calc(100vh - 3.5rem)` tall. So the header's height
+was written six times across three files and a stylesheet — `h-14`, `top-14`
+three times, `3.5rem` twice — and the sweep that now fails on a seventh is the
+part of this worth keeping.
+
+Two things were wrong and neither was the number. The bar stuck at the header's
+**row** rather than at the row plus the hairline under it, so it covered that
+hairline by a pixel; both rails did the same. All three start at the sum now,
+which is one declaration. And `_lib/on-this-page.ts` still described the inset
+as `5rem` and the heading's margin as `5rem` — true until 17 October, stale the
+day after, and the kind of prose nothing checks.
 
 ---
 ## 2026-10-17 — the bar's height is settled before the browser runs and its right-hand label's width is not
@@ -56260,6 +56281,98 @@ thing being rewritten here is not a link. The narrowest safe rule this reading
 supports is: **do not put double quotes inside an inline-code span in a pull
 request body.** A routine that needs to show an attribute can name it in prose
 instead, which is what #664's corrected body does.
+
+---
+## 2026-10-18 — the chrome is now one height at every width, and above 1280 forty-five pixels of it are not there
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/globals.css`) · **Status:** open — **nothing is wrong
+for a reader who scrolls**; it is a scroll a keyboard reader gets and the
+dividend of today's unit rather than a defect it introduced
+
+`--chrome` is the header's row, the bar's row, and the hairline each of them
+draws: 102 pixels. It is the right number at every width where the bar exists,
+which is every width below 1280. At 1280 and above the bar is `xl:hidden` and
+the chrome is 57.
+
+So `scroll-padding-top` insets the scrollport by 112 on a wide screen where 67
+would do, and the forty-five pixels of difference are a band of blank page above
+whatever the browser has just scrolled to. **A press of a contents row is
+unaffected**, which is worth being precise about: the heading's own margin is
+written as `calc(var(--press-landing) - var(--chrome-inset))`, so the landing
+stays 160 wherever the inset goes. What is affected is every scroll the browser
+performs with no heading involved — a search result, a fragment, and the one
+that matters, **moving focus to something off screen with a keyboard**, which
+scrolls by the padding alone.
+
+This was true yesterday too and was not worth an entry, because the inset was a
+number somebody had typed and making it width-aware meant typing two. It is
+worth one now:
+
+> `@media (min-width: 80rem) { :root { --chrome-bar: 0px } }`
+
+and everything downstream follows, because everything downstream is arithmetic
+over `--chrome-bar`. That is the whole change.
+
+**Not taken here, for one reason that is this lane's own argument turned on
+itself.** `80rem` is Tailwind's `xl`, which is also where `docs-bar.tsx` says
+`xl:hidden` and where `docs/layout.tsx` says `xl:sticky`. Writing it into the
+stylesheet by hand makes the breakpoint a number in two languages — which is
+the shape of the thing closed today, one layer up. The remedy wants the
+breakpoint read from the theme rather than transcribed, and that is a different
+argument from *how tall is the chrome*.
+
+Three ways, in the order they are worth considering:
+
+1. **Read the breakpoint from Tailwind's theme** and write the media query
+   against it, so `xl` is one value for the stylesheet and the markup. The right
+   answer and the only one that does not add a copy.
+2. **Transcribe `80rem`** with a test holding it against the markup's `xl:`
+   usage, which is cheap and is a sixth copy with a guard on it.
+3. **Leave it.** A wide screen has the vertical space to spare, which is why
+   this has never been reported by anything but arithmetic.
+
+**Recommendation: 1**, as a small unit of its own.
+
+---
+## 2026-10-18 — the bar's row is declared now, so a control that outgrows it spills instead of making the bar taller
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/docs-bar.tsx`) · **Status:** open — **the
+stated limit of what shipped today**, and a failure mode deliberately traded for
+a quieter one
+
+The bar's height used to be whatever its controls came to: `py-3` and a line of
+`text-sm`, which is 44 pixels, which nothing anywhere could read. That is the
+half of the 17 October finding that made the inset guessable only from a
+screenshot. It is `h-[var(--chrome-bar)]` now, and the stylesheet's
+`--chrome-bar` is the same 44.
+
+**What that trades is which way a mistake shows.** Before, a control with a
+second line of text grew the bar, the inset stayed where it was, and a reader
+got a heading tucked behind the bar — wrong, and invisible. Now the inset is
+right by construction and the control is the thing that is wrong: 44 pixels of
+row with more than 44 pixels in it, spilling over the hairline.
+
+That is the better failure by a distance, because it is the one a photograph
+shows. But it is still a failure nothing reports: jsdom lays nothing out, so no
+test in this repository can see a control overflow its row, and `pnpm shoot`'
+`measure` prints boxes and never asserts (0213).
+
+Three ways:
+
+1. **Leave it**, and rely on the fact that a spilling control is visible in the
+   first screenshot anybody takes. This is what shipped.
+2. **Let the row grow and declare a floor** — `min-h-[var(--chrome-bar)]` — which
+   restores the old failure mode for anything above the floor and buys nothing
+   the floor does not already buy.
+3. **Measure it**, which means a check that reads the control's box out of a
+   browser and compares it to the declaration. `pnpm shoot` has the number and
+   deliberately cannot fail on it, so this is the standing open finding about
+   an instrument that prints and never asserts, met again from a different side.
+
+**Recommendation: 1**, and 3 if that finding is ever taken up — the chrome's two
+rows would be a good first subject for it.
 
 ---
 
