@@ -113,7 +113,7 @@ somebody looking at a page that is fine.
 
 ## Records added
 
-[0292](../decisions/0292-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md),
+[0293](../decisions/0293-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md),
 Accepted. **Nothing is superseded**: 0263, 0284, 0290 and 0291 are all unchanged
 and all right. Its *Alternatives considered* records four rejections, of which
 two are worth reading — that **having the caller split the window first** is the

@@ -36,7 +36,7 @@ import type { TreeId } from "../ids.js"
  * spans two revisions of one page. The two are deliberately not one, and the
  * difference is written on {@link PageForm}. It was written in the module that
  * first needed it and kept there, while four other comparisons went on spelling
- * the pairing by tree alone with no key to import (0292) — which is the drift
+ * the pairing by tree alone with no key to import (0293) — which is the drift
  * both of these exist to stop, arriving through the one gap a published rule
  * leaves: being published to a single caller.
  *

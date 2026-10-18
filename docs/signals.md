@@ -2383,7 +2383,7 @@ should not be one. It was wrong in the same two ways.
 **Done.** `formKeyOf`, `formOf`, `PageForm` and `inFormOrder` published from
 [`audiences.ts`](../src/signals/audiences.ts) beside `readingKeyOf`, and
 `pairedWindowOf` keyed by the form
-([0292](../decisions/0292-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md)).
+([0293](../decisions/0293-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md)).
 `formKeyOf` was written for 0290 clause 7 and kept private in
 `deployment-change.ts`; it now lives where `readingKeyOf` does and that module
 imports it, which is the lesson of the finding filed the same day: *a published

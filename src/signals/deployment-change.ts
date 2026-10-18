@@ -381,7 +381,7 @@ const EMPTY_STANDINGS: Readonly<Record<MovementStanding, number>> = Object.freez
  * `formKeyOf` was written in this module and now lives beside `readingKeyOf`,
  * for the reason that one is published: four library comparisons had the defect
  * it fixes and no key to import, so each spelled the pairing by tree alone
- * (0292). The difference between the two rules is written where they are
+ * (0293). The difference between the two rules is written where they are
  * published.
  *
  * The audience is the later window's, for the reason only the later window's

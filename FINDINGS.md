@@ -56159,7 +56159,7 @@ instead, which is what #664's corrected body does.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
 **closed by `signals-37-a-comparison-pairs-pages-by-form`** — found while
-reading the comparison layer for the open `change.ts` entry below, fixed as 0292
+reading the comparison layer for the open `change.ts` entry below, fixed as 0293
 in the same run, and written down because it is the **same defect** the morning
 run fixed in one module and because the shape of how it survived is the useful
 half
@@ -56208,7 +56208,7 @@ four other modules could not reach it, and the grep that would have shown so is
 
 **So the rule this lane should hold itself to:** a key that decides what counts
 as one of something goes in `audiences.ts` (or the module whose record owns the
-concept) the first time it is written, not the second time it is needed. `0292`
+concept) the first time it is written, not the second time it is needed. `0293`
 publishes both keys with the difference between them written down, which is the
 form that argument should take from here.
 
@@ -56224,7 +56224,7 @@ clothes*, which stays open · **Status:** open — **nothing is broken today**; 
 shape is now settled by having read all nine, and three questions in it are
 answerable without writing code
 
-0292 made each comparison pair the **pages inside one window** by form. It did
+0293 made each comparison pair the **pages inside one window** by form. It did
 not make any comparison check that its **two windows** are of one form, and
 reading all nine functions for it settled three things the earlier entry left
 open.
@@ -56249,7 +56249,7 @@ later one produces every stop, every share and every `improvement`, with no
 `null` and no silence anywhere on it, labelled as what a change did. That one is
 the 0284 collapse at the comparison layer — *a number that looks right forever*.
 Fixing the quiet one and not the loud one leaves two spellings of one guard,
-which is what 0292 is about.
+which is what 0293 is about.
 
 **The `null` side is a third state and probably wants a field rather than a
 refusal.** `PageReading.audienceId` is `null` both for a window whose rows never

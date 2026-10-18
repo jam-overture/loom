@@ -783,7 +783,7 @@ describe("a kind of part against the readers who met it, before and after", () =
 
   /**
    * The pairing from the side this reading is the only one that could get wrong
-   * twice. Two forms of a page share a tree, so before 0292 the second form was
+   * twice. Two forms of a page share a tree, so before 0293 the second form was
    * dropped as the first handed in twice — **and** the door map was keyed by the
    * tree, so whichever form it held scaled both sides of the other.
    */
@@ -805,7 +805,7 @@ describe("a kind of part against the readers who met it, before and after", () =
     expect(change.ambiguous).toEqual([])
     expect(change.pages).toBe(2)
     expect(quote?.comparable).toBe(2)
-    /** The two forms stand in two pages, which is what the set counts after 0292. */
+    /** The two forms stand in two pages, which is what the set counts after 0293. */
     expect(quote?.pages).toBe(2)
     /**
      * Each form's readers against its own arrivals: 41 of 110 met it and read

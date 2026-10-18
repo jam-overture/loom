@@ -552,7 +552,7 @@ describe("the words of a kind of part the typical reader reached, before and aft
 
   /**
    * The same pairing defect, at the reading whose figure is a mass rather than a
-   * share. Two forms of a page share a tree and a revision, so before 0292 the
+   * share. Two forms of a page share a tree and a revision, so before 0293 the
    * second form's mass was dropped as the first's handed in twice — and the
    * `pages` behind a withheld row counted the two as one.
    */

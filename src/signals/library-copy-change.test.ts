@@ -669,7 +669,7 @@ describe("what a change did to the words a kind of part says", () => {
     })
 
     /**
-     * This module spelled the pairing itself until 0292 — a second copy of a
+     * This module spelled the pairing itself until 0293 — a second copy of a
      * rule published with a comment saying why there should not be one — and
      * both copies keyed a paired page by its tree, so two forms of a page
      * (0263) were one key and the second form's words were dropped as the
@@ -715,7 +715,7 @@ describe("what a change did to the words a kind of part says", () => {
 
     /**
      * A form held at two revisions says nothing about the other form, which a
-     * list of trees could not express: before 0292 both were excluded from
+     * list of trees could not express: before 0293 both were excluded from
      * every row and every total, and the exclusion named a page rather than the
      * form of it that was ambiguous.
      */

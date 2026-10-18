@@ -1,8 +1,15 @@
-# 0292. A comparison pairs pages by form, and the pairing rule is published beside the reading rule
+# 0293. A comparison pairs pages by form, and the pairing rule is published beside the reading rule
 
 **Status:** Accepted
 **Date:** 2026-10-17
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-18**, from 0292, when this branch (#668) was merged.
+> `main` had meanwhile accepted a different 0292 — *a project holds at most one
+> repository, and a repository belongs to at most one project* — and two records
+> sharing a number is fatal (0097). This record was written on 17 October and
+> nothing in it changed but its number; references on the branch were updated
+> with it.
 
 ## Context
 

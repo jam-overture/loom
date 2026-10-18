@@ -459,7 +459,7 @@ describe("the double counts a comparison of two libraries can be told", () => {
   })
 
   /**
-   * The whole of 0292, from the side that was 0158-permanent. Two forms of a
+   * The whole of 0293, from the side that was 0158-permanent. Two forms of a
    * page (0263) sit at one revision with one tree between them, so a pairing
    * keyed by the tree dropped the second as the first handed in twice — a count
    * that was never added, which nothing can notice.
