@@ -307,3 +307,33 @@ describe("regionReadingFor", () => {
     expect(read.otherAudience).toBe(0)
   })
 })
+
+/**
+ * A map says which population it is of, which is the one thing a comparison of
+ * two of them cannot derive.
+ */
+describe("the audience a region map is of", () => {
+  it("names the audience the rows were picked for", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1, audienceId: SKIERS }, [
+      row({ audienceId: SKIERS, views: 60 }),
+      row({ audienceId: RIDERS, views: 400 }),
+    ])
+
+    expect(read.reading.audienceId).toBe(SKIERS)
+    expect(read.reading.views).toBe(60)
+    expect(read.otherAudience).toBe(1)
+  })
+
+  it("names none where the caller asked about no audience", () => {
+    expect(regionReadingFor({ treeId: TREE, revision: 1 }, [row()]).reading.audienceId).toBeNull()
+  })
+
+  /**
+   * A whole window grouped across whatever it holds is a deployment's
+   * readership rather than one form's, so it asserts no audience — which is
+   * what keeps a comparison of two such maps answerable rather than refused.
+   */
+  it("names none when a window is read whole", () => {
+    expect(regionReadingOf([row({ audienceId: SKIERS })]).audienceId).toBeNull()
+  })
+})

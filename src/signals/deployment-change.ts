@@ -3,7 +3,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
 import type { ChangeSilence, ComparedStop, ReadingChange } from "./change.js"
-import { readingKeyOf } from "./audiences.js"
+import { formKeyOf, readingKeyOf } from "./audiences.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 
 /**
@@ -376,20 +376,19 @@ const EMPTY_STANDINGS: Readonly<Record<MovementStanding, number>> = Object.freez
 )
 
 /**
- * A page in one of its forms: the tree and the audience, with no revision in
- * it.
+ * The form this comparison is of, under the published rule.
  *
- * Deliberately **not** `readingKeyOf`, and the difference is the point. That
- * rule answers *what is one reading*, and a revision is part of what one
- * reading is (0290). This answers *what is one page in one form*, which a
- * comparison spans two revisions of — so the revision is absent here because
- * it is the thing being compared across.
+ * `formKeyOf` was written in this module and now lives beside `readingKeyOf`,
+ * for the reason that one is published: four library comparisons had the defect
+ * it fixes and no key to import, so each spelled the pairing by tree alone
+ * (0293). The difference between the two rules is written where they are
+ * published.
  *
  * The audience is the later window's, for the reason only the later window's
  * rows are asked for.
  */
-const formKeyOf = (change: ReadingChange): string =>
-  `${change.treeId}\u0000${change.progress.now.audienceId ?? ""}`
+const formKeyOfChange = (change: ReadingChange): string =>
+  formKeyOf({ treeId: change.treeId, audienceId: change.progress.now.audienceId })
 
 /**
  * What makes two reads of a comparison the same read: the form, and the two
@@ -401,7 +400,7 @@ const formKeyOf = (change: ReadingChange): string =>
  * makes the second form's comparison the first one handed in twice.
  */
 const pairKeyOf = (change: ReadingChange): string =>
-  `${formKeyOf(change)}\u0000${change.revisions.was}\u0000${change.revisions.now}`
+  `${formKeyOfChange(change)}\u0000${change.revisions.was}\u0000${change.revisions.now}`
 
 /**
  * One direction's movement, scaled where the page has a scale.
@@ -533,14 +532,14 @@ export const deploymentChangeOf = (
   const pairsByForm = new Map<string, Set<string>>()
 
   for (const change of changes) {
-    const pairs = pairsByForm.get(formKeyOf(change)) ?? new Set<string>()
+    const pairs = pairsByForm.get(formKeyOfChange(change)) ?? new Set<string>()
 
     pairs.add(pairKeyOf(change))
-    pairsByForm.set(formKeyOf(change), pairs)
+    pairsByForm.set(formKeyOfChange(change), pairs)
   }
 
   const unsettled = (change: ReadingChange): boolean =>
-    (pairsByForm.get(formKeyOf(change))?.size ?? 0) > 1
+    (pairsByForm.get(formKeyOfChange(change))?.size ?? 0) > 1
 
   /**
    * Named by tree, because a page is what a surface draws and the tree id is
@@ -552,7 +551,7 @@ export const deploymentChangeOf = (
     (one, other) => one.localeCompare(other)
   )
 
-  const unreadable = new Set<string>(changes.filter(unsettled).map(formKeyOf))
+  const unreadable = new Set<string>(changes.filter(unsettled).map(formKeyOfChange))
   const seen = new Set<string>()
   const counted = new Set<string>()
   const read: MovedPage[] = []
@@ -561,7 +560,7 @@ export const deploymentChangeOf = (
   let arrivals = 0
 
   for (const change of changes) {
-    if (unreadable.has(formKeyOf(change))) continue
+    if (unreadable.has(formKeyOfChange(change))) continue
 
     const key = pairKeyOf(change)
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION } from "../tree/tree.js"
 
@@ -757,5 +757,68 @@ describe("the closed sets", () => {
 
   it("publishes three causes, one fewer than every other counterfactual here", () => {
     expect(CONVERSION_CAUSES).toStrictEqual(["entry", "closing", "either"])
+  })
+})
+
+/**
+ * A comparison is of one readership, and two forms of one page are two of them.
+ *
+ * The audience is set on the two readings here rather than threaded through the
+ * window helper, because what is under test is the comparison; that a reading
+ * names the audience it read is `funnel.test.ts`'s assertion.
+ */
+describe("funnelChangeOf across two audiences", () => {
+  const ONE = window({ revision: 1, opened: 100, appearances: 100 }, [
+    { from: "band", to: "form", reached: 50, converted: 10 },
+  ])
+  const OTHER = window({ revision: 2, opened: 100, appearances: 100 }, [
+    { from: "band", to: "form", reached: 50, converted: 20 },
+  ])
+
+  /**
+   * One question answered twice over two populations, held against itself as
+   * though one of the two answers had moved.
+   */
+  it("refuses a pair of two audiences and holds no question against any other", () => {
+    const change = funnelChangeOf(
+      { ...ONE, audienceId: SKIERS },
+      { ...OTHER, audienceId: RIDERS }
+    )
+
+    expect(change.silence).toBe("different-audiences")
+    expect(change.compared).toEqual([])
+    expect(change.added).toEqual([])
+    expect(change.removed).toEqual([])
+    expect(change.mostGained).toBeNull()
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+  })
+
+  it("compares one audience's two windows exactly as it always did", () => {
+    const scoped = funnelChangeOf(
+      { ...ONE, audienceId: SKIERS },
+      { ...OTHER, audienceId: SKIERS }
+    )
+    const whole = funnelChangeOf(ONE, OTHER)
+
+    expect(scoped.silence).toBe(whole.silence)
+    expect(scoped.compared).toEqual(whole.compared)
+    expect(scoped.audiences).toEqual({ was: SKIERS, now: SKIERS })
+  })
+
+  it("compares a pair it cannot prove and names what it compared across", () => {
+    const change = funnelChangeOf(ONE, { ...OTHER, audienceId: SKIERS })
+
+    expect(change.silence).not.toBe("different-audiences")
+    expect(change.audiences).toEqual({ was: null, now: SKIERS })
+  })
+
+  it("says two pages before it says two audiences", () => {
+    const elsewhere = window({ revision: 2, opened: 100, appearances: 100, treeId: OTHER_TREE }, [])
+    const change = funnelChangeOf(
+      { ...ONE, audienceId: SKIERS },
+      { ...elsewhere, audienceId: RIDERS }
+    )
+
+    expect(change.silence).toBe("different-trees")
   })
 })

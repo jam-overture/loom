@@ -3,6 +3,11 @@ import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
+import {
+  comparedAudiencesOf,
+  crossesAudiences,
+  type ComparedAudiences,
+} from "./audiences.js"
 import { copyReadingOf, passageOf, type CopyReading, type Passage } from "./copy.js"
 import { spokenFor, type PageReading, type PartStanding } from "./parts.js"
 
@@ -116,6 +121,20 @@ export type CopyChangeSilence =
    * one change should not meet two names for one state.
    */
   | "different-trees"
+  /**
+   * The two readings are of two audiences, and so of two populations.
+   *
+   * Spelled and refused as `ChangeSilence` spells and refuses it (0240), and
+   * for the sharper reason here: a page is one base tree plus the deltas an
+   * audience earns (0263), so the words the other form says would be counted as
+   * words this change wrote. Both halves are withheld, the census included,
+   * because the census is the half that would look most like an answer.
+   *
+   * Refused only where both sides name an audience and the two differ; a pair
+   * spanning the migration that added the column (0284) is in
+   * {@link CopyChange.audiences} instead.
+   */
+  | "different-audiences"
   /** Neither revision says anything that could have been read. */
   | "wordless"
   /**
@@ -177,6 +196,7 @@ export type CopyChangeSilence =
 export const COPY_CHANGE_SILENCES: readonly CopyChangeSilence[] =
   everyMemberOf<CopyChangeSilence>()([
     "different-trees",
+    "different-audiences",
     "wordless",
     "nothing-measured",
     "inconsistent",
@@ -190,6 +210,8 @@ export const describeCopyChangeSilence = (silence: CopyChangeSilence): string =>
   switch (silence) {
     case "different-trees":
       return "the two readings are of different pages"
+    case "different-audiences":
+      return "the two readings are of different audiences, and so of different readers"
     case "wordless":
       return "neither revision says anything that could be read"
     case "nothing-measured":
@@ -411,6 +433,14 @@ export type CopyChange = {
   /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */
   readonly treeId: TreeId
   readonly revisions: { readonly was: number; readonly now: number }
+  /**
+   * The audience each side was of, where its reading named one.
+   *
+   * As `ReadingChange.audiences` carries it, and for the same reason: a `null`
+   * on either side is why an unprovable pair of populations is compared rather
+   * than refused.
+   */
+  readonly audiences: ComparedAudiences
   /** The two copy readings this comparison is made of. */
   readonly readings: { readonly was: CopyReading; readonly now: CopyReading }
   /**
@@ -717,28 +747,31 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
   const head = {
     treeId: was.treeId,
     revisions: { was: was.revision, now: now.revision },
+    audiences: comparedAudiencesOf(was, now),
     readings,
     words,
   }
 
-  if (was.treeId !== now.treeId) {
-    return {
-      ...head,
-      wrote: NO_WORDS_WRITTEN,
-      compared: [],
-      reworded: [],
-      added: [],
-      removed: [],
-      wordsByMovement: ZERO_BY_MOVEMENT,
-      passagesByMovement: ZERO_BY_MOVEMENT,
-      floored: 0,
-      stillUnseen: [],
-      typical: null,
-      mostGained: null,
-      mostLost: null,
-      silence: "different-trees",
-    }
-  }
+  /** The two states in which neither half of the comparison stands. */
+  const refusing = (silence: CopyChangeSilence): CopyChange => ({
+    ...head,
+    wrote: NO_WORDS_WRITTEN,
+    compared: [],
+    reworded: [],
+    added: [],
+    removed: [],
+    wordsByMovement: ZERO_BY_MOVEMENT,
+    passagesByMovement: ZERO_BY_MOVEMENT,
+    floored: 0,
+    stillUnseen: [],
+    typical: null,
+    mostGained: null,
+    mostLost: null,
+    silence,
+  })
+
+  if (was.treeId !== now.treeId) return refusing("different-trees")
+  if (crossesAudiences(was, now)) return refusing("different-audiences")
 
   const earlier = passagesOf(was)
   const later = passagesOf(now)

@@ -3,6 +3,11 @@ import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
+import {
+  comparedAudiencesOf,
+  crossesAudiences,
+  type ComparedAudiences,
+} from "./audiences.js"
 import type { PageReading } from "./parts.js"
 import {
   paceStandingOf,
@@ -122,6 +127,19 @@ export type PaceChangeSilence =
    */
   | "different-trees"
   /**
+   * The two readings are of two audiences, and so of two populations.
+   *
+   * Spelled and refused as the other comparisons spell and refuse it (0240). A
+   * page is one base tree plus the deltas an audience earns (0263), so the time
+   * the other form asks for would be read as the time this change added, and
+   * the two sides' spent time is two populations' reading.
+   *
+   * Refused only where both sides name an audience and the two differ; a pair
+   * spanning the migration that added the column (0284) is in
+   * {@link PaceChange.audiences} instead.
+   */
+  | "different-audiences"
+  /**
    * Neither revision says anything that takes time to read.
    *
    * No words on either side and nothing undeclared either, so there is no
@@ -152,6 +170,7 @@ export type PaceChangeSilence =
 export const PACE_CHANGE_SILENCES: readonly PaceChangeSilence[] =
   everyMemberOf<PaceChangeSilence>()([
     "different-trees",
+    "different-audiences",
     "wordless",
     "nothing-measured",
     "dissolved",
@@ -162,6 +181,8 @@ export const describePaceChangeSilence = (silence: PaceChangeSilence): string =>
   switch (silence) {
     case "different-trees":
       return "the two readings are of different pages"
+    case "different-audiences":
+      return "the two readings are of different audiences, and so of different readers"
     case "wordless":
       return "neither revision says anything that takes time to read"
     case "nothing-measured":
@@ -389,6 +410,14 @@ export type PaceChange = {
   /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */
   readonly treeId: TreeId
   readonly revisions: { readonly was: number; readonly now: number }
+  /**
+   * The audience each side was of, where its reading named one.
+   *
+   * As `ReadingChange.audiences` carries it, and for the same reason: a `null`
+   * on either side is why an unprovable pair of populations is compared rather
+   * than refused.
+   */
+  readonly audiences: ComparedAudiences
   /** The two pace readings this comparison is made of. */
   readonly readings: { readonly was: PagePace; readonly now: PagePace }
   /**
@@ -660,27 +689,30 @@ export const paceChangeOf = (
   const head = {
     treeId: was.treeId,
     revisions: { was: was.revision, now: now.revision },
+    audiences: comparedAudiencesOf(was, now),
     readings,
     wordsPerMinute,
     inflation,
   }
 
-  if (was.treeId !== now.treeId) {
-    return {
-      ...head,
-      compared: [],
-      added: [],
-      removed: [],
-      movements: ZERO_BY_MOVEMENT,
-      causes: ZERO_BY_CAUSE,
-      whole: null,
-      mostEased: null,
-      mostRushed: null,
-      stillSkimmed: [],
-      need: null,
-      silence: "different-trees",
-    }
-  }
+  /** The two states in which neither half of the comparison stands. */
+  const refusing = (silence: PaceChangeSilence): PaceChange => ({
+    ...head,
+    compared: [],
+    added: [],
+    removed: [],
+    movements: ZERO_BY_MOVEMENT,
+    causes: ZERO_BY_CAUSE,
+    whole: null,
+    mostEased: null,
+    mostRushed: null,
+    stillSkimmed: [],
+    need: null,
+    silence,
+  })
+
+  if (was.treeId !== now.treeId) return refusing("different-trees")
+  if (crossesAudiences(was, now)) return refusing("different-audiences")
 
   const earlier = partsOf(readings.was)
   const later = partsOf(readings.now)

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
+import type { AudienceId } from "../audience/audience.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -264,6 +265,7 @@ describe("what the comparison refuses to publish", () => {
 
     expect(Object.keys(change).sort()).toEqual([
       "added",
+      "audiences",
       "compared",
       "insides",
       "mostAbandoned",
@@ -469,5 +471,64 @@ describe("the published vocabularies", () => {
 
     expect(lines.every((line) => line.length > 0)).toBe(true)
     expect(new Set(lines).size).toBe(lines.length)
+  })
+})
+
+/**
+ * A comparison is of one readership, and two forms of one page are two of them.
+ */
+describe("actionChangeOf across two audiences", () => {
+  const formOf = (
+    side: { tree: LoomTree; counters: readonly ReaderTally[] },
+    audience: AudienceId
+  ) =>
+    pageReadingOf(
+      side.tree,
+      side.counters.map((counter) => ({ ...counter, audienceId: audience })),
+      NOTHING_DECLARED
+    )
+
+  /**
+   * A control only the other form carries would have been read as a control
+   * this change added, and the two sides' takings-up are two populations'.
+   */
+  it("refuses a pair of two audiences, census included", () => {
+    const change = actionChangeOf(formOf(WAS, SKIERS), formOf(NOW, RIDERS))
+
+    expect(change.silence).toBe("different-audiences")
+    expect(change.compared).toEqual([])
+    expect(change.added).toEqual([])
+    expect(change.removed).toEqual([])
+    expect(change.whole).toBeNull()
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+  })
+
+  it("compares one audience's two windows exactly as it always did", () => {
+    const scoped = actionChangeOf(formOf(WAS, SKIERS), formOf(NOW, SKIERS))
+    const whole = changeOf(WAS, NOW)
+
+    expect(scoped.silence).toBe(whole.silence)
+    expect(scoped.compared).toHaveLength(whole.compared.length)
+    expect(scoped.whole).toEqual(whole.whole)
+  })
+
+  it("compares a pair it cannot prove and names what it compared across", () => {
+    const change = actionChangeOf(
+      pageReadingOf(WAS.tree, WAS.counters, NOTHING_DECLARED),
+      formOf(NOW, SKIERS)
+    )
+
+    expect(change.silence).not.toBe("different-audiences")
+    expect(change.audiences).toEqual({ was: null, now: SKIERS })
+  })
+
+  it("says two pages before it says two audiences", () => {
+    const change = actionChangeOf(
+      formOf(WAS, SKIERS),
+      pageReadingOf(treeOf(PAGE(), 2, OTHER_TREE), [], NOTHING_DECLARED, RIDERS)
+    )
+
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+    expect(change.silence).toBe("different-trees")
   })
 })

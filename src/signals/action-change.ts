@@ -4,6 +4,11 @@ import type { PrimitiveRole } from "../role.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
 import { pageActionOf, type ActionStanding, type PageAction, type PartAction } from "./action.js"
+import {
+  comparedAudiencesOf,
+  crossesAudiences,
+  type ComparedAudiences,
+} from "./audiences.js"
 import type { PageReading } from "./parts.js"
 
 /**
@@ -121,6 +126,19 @@ export type ActionChangeSilence =
    */
   | "different-trees"
   /**
+   * The two readings are of two audiences, and so of two populations.
+   *
+   * Spelled and refused as the other comparisons spell and refuse it (0240). A
+   * page is one base tree plus the deltas an audience earns (0263), so a
+   * control only the other form carries would be read as a control this change
+   * added, and the two sides' takings-up are two populations'.
+   *
+   * Refused only where both sides name an audience and the two differ; a pair
+   * spanning the migration that added the column (0284) is in
+   * {@link ActionChange.audiences} instead.
+   */
+  | "different-audiences"
+  /**
    * One of the two windows holds uses and credits no reader with acting inside
    * anything.
    *
@@ -164,6 +182,7 @@ export type ActionChangeSilence =
 export const ACTION_CHANGE_SILENCES: readonly ActionChangeSilence[] =
   everyMemberOf<ActionChangeSilence>()([
     "different-trees",
+    "different-audiences",
     "unwalked",
     "nothing-measured",
     "dissolved",
@@ -174,6 +193,8 @@ export const describeActionChangeSilence = (silence: ActionChangeSilence): strin
   switch (silence) {
     case "different-trees":
       return "the two readings are of different pages"
+    case "different-audiences":
+      return "the two readings are of different audiences, and so of different readers"
     case "unwalked":
       return "one of the two windows does not report where actions happened, so its shares are noughts"
     case "nothing-measured":
@@ -392,6 +413,14 @@ export type ActionChange = {
   /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */
   readonly treeId: TreeId
   readonly revisions: { readonly was: number; readonly now: number }
+  /**
+   * The audience each side was of, where its reading named one.
+   *
+   * As `ReadingChange.audiences` carries it, and for the same reason: a `null`
+   * on either side is why an unprovable pair of populations is compared rather
+   * than refused.
+   */
+  readonly audiences: ComparedAudiences
   /** The two readings of what readers did that this comparison is made of. */
   readonly readings: { readonly was: PageAction; readonly now: PageAction }
   /**
@@ -586,24 +615,27 @@ export const actionChangeOf = (was: PageReading, now: PageReading): ActionChange
   const head = {
     treeId: was.treeId,
     revisions: { was: was.revision, now: now.revision },
+    audiences: comparedAudiencesOf(was, now),
     readings,
   }
 
-  if (was.treeId !== now.treeId) {
-    return {
-      ...head,
-      compared: [],
-      added: [],
-      removed: [],
-      movements: ZERO_BY_MOVEMENT,
-      insides: ZERO_BY_INSIDE,
-      whole: null,
-      mostTakenUp: null,
-      mostAbandoned: null,
-      stillUntouched: [],
-      silence: "different-trees",
-    }
-  }
+  /** The two states in which neither half of the comparison stands. */
+  const refusing = (silence: ActionChangeSilence): ActionChange => ({
+    ...head,
+    compared: [],
+    added: [],
+    removed: [],
+    movements: ZERO_BY_MOVEMENT,
+    insides: ZERO_BY_INSIDE,
+    whole: null,
+    mostTakenUp: null,
+    mostAbandoned: null,
+    stillUntouched: [],
+    silence,
+  })
+
+  if (was.treeId !== now.treeId) return refusing("different-trees")
+  if (crossesAudiences(was, now)) return refusing("different-audiences")
 
   const earlier = partsOf(readings.was)
   const later = partsOf(readings.now)

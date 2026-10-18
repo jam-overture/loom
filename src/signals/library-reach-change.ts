@@ -1,8 +1,8 @@
 import { everyMemberOf } from "../closed-set.js"
-import type { TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
+import { inFormOrder, type PageForm } from "./audiences.js"
 import { doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import { pairedWindowOf, partsByNodeIn, type PairedWindow } from "./library-change.js"
@@ -405,7 +405,14 @@ export type KindReachChange = {
    * two sides are read over exactly the same set of places.
    */
   readonly comparable: number
-  /** Pages bearing a comparable place of it, which is trees and not revisions. */
+  /**
+   * Pages bearing a comparable place of it, which is **forms** and not
+   * revisions.
+   *
+   * A page served in two forms (0263) is two of them, for the reason the
+   * pairing counts it as two: the two have separate counters, separate doors
+   * and separate readers, and a kind standing in both stands in both.
+   */
   readonly pages: number
   /**
    * Page views that met a page bearing a comparable place of it in the earlier
@@ -587,13 +594,15 @@ export type LibraryReachChange = {
   /** The type that gained the most readers, by the same rule. */
   readonly mostTakenUp: KindReachChange | null
   /**
-   * Trees read at two revisions in one window, which are in nothing above.
+   * Forms read at two revisions in one window, which are in nothing above.
    *
    * A page that is two live revisions in one window has no single counterpart in
-   * the other, and the comparison pairs by page (0266): excluded and named
-   * rather than picked between.
+   * the other, and the comparison pairs by page in its form (0266): excluded and
+   * named rather than picked between. A form and not a tree, because two forms
+   * of a page (0263) are two paired pages and one of them being ambiguous says
+   * nothing about the other.
    */
-  readonly ambiguous: readonly TreeId[]
+  readonly ambiguous: readonly PageForm[]
   /** Readings of a revision beyond the first, on either side, which were dropped (0158). */
   readonly duplicated: number
   /**
@@ -885,14 +894,19 @@ const add = (
   into: Tallying,
   places: { readonly was: PartReading; readonly now: PartReading },
   doors: { readonly was: PageDoor; readonly now: PageDoor },
-  tree: TreeId
+  form: string
 ): void => {
   into.places += 1
 
   if (places.was.standing === "unknown" || places.now.standing === "unknown") return
 
   into.comparable += 1
-  into.pages.add(tree)
+  /**
+   * The form and not the tree, because the pairing is per form: counting two
+   * forms of a page as one page would understate the places a kind stands in
+   * by exactly the pages a deployment serves twice.
+   */
+  into.pages.add(form)
 
   if (doors.was.silence !== null || doors.now.silence !== null) {
     into.blocked ??= doors.was.silence ?? doors.now.silence
@@ -925,19 +939,27 @@ const add = (
     reachedWas > doors.was.appearances || reachedNow > doors.now.appearances ? 1 : 0
 }
 
-/** One whole side: its pages keyed by tree, each page's door, and the rows a caller handed in twice. */
+/** One whole side: its pages keyed by form, each page's door, and the rows a caller handed in twice. */
 export type LibrarySide = {
   readonly pages: PairedWindow
-  readonly scaled: ReadonlyMap<TreeId, ScaledPage>
+  /**
+   * Each paired page's door, under the same key the pairing uses.
+   *
+   * Keyed by the form rather than by the tree because the door is per form too:
+   * `pageViewsFor` scopes a page-view row to the reading's own audience (0290),
+   * so two forms of one page have two doors and a map keyed by the tree would
+   * hold one of them and scale both sides of the other against it.
+   */
+  readonly scaled: ReadonlyMap<string, ScaledPage>
   readonly duplicatedRows: number
 }
 
-/** The pages of one window, keyed by tree, with each page's door already worked out. */
+/** The pages of one window, keyed by form, with each page's door already worked out. */
 export const librarySideOf = (window: LibraryWindow): LibrarySide => {
   const pages = pairedWindowOf(window.readings)
   const scaled = new Map(
-    [...pages.byTree].map(([treeId, reading]): [TreeId, ScaledPage] => [
-      treeId,
+    [...pages.byForm].map(([form, reading]): [string, ScaledPage] => [
+      form,
       scaledPageOf(reading, window.rows),
     ])
   )
@@ -976,7 +998,7 @@ export const libraryReachChangeOf = (
   const rows = new Map<string, Tallying>()
   const roleWas = new Map<PrimitiveType, PrimitiveRole | null>()
   const roleNow = new Map<PrimitiveType, PrimitiveRole | null>()
-  const ambiguous = new Set([...earlier.pages.ambiguous, ...later.pages.ambiguous])
+  const ambiguous = new Map([...earlier.pages.ambiguous, ...later.pages.ambiguous])
   const unscaled: UnscaledSide[] = []
   let pages = 0
   let pagesGained = 0
@@ -998,15 +1020,15 @@ export const libraryReachChangeOf = (
    */
   for (const role of [...PRIMITIVE_ROLES, null]) rowFor(rows, { by: "role", role })
 
-  for (const [treeId, reading] of earlier.pages.byTree) {
-    if (ambiguous.has(treeId)) continue
+  for (const [form, reading] of earlier.pages.byForm) {
+    if (ambiguous.has(form)) continue
 
     for (const part of reading.parts) {
       roleWas.set(part.type, part.role)
       rowFor(rows, { by: "type", type: part.type }).role = part.role
     }
 
-    if (later.pages.byTree.has(treeId)) continue
+    if (later.pages.byForm.has(form)) continue
 
     pagesLost += 1
 
@@ -1017,15 +1039,15 @@ export const libraryReachChangeOf = (
     }
   }
 
-  for (const [treeId, reading] of later.pages.byTree) {
-    if (ambiguous.has(treeId)) continue
+  for (const [form, reading] of later.pages.byForm) {
+    if (ambiguous.has(form)) continue
 
     for (const part of reading.parts) {
       roleNow.set(part.type, part.role)
       rowFor(rows, { by: "type", type: part.type }).role = part.role
     }
 
-    if (earlier.pages.byTree.has(treeId)) continue
+    if (earlier.pages.byForm.has(form)) continue
 
     pagesGained += 1
 
@@ -1036,13 +1058,13 @@ export const libraryReachChangeOf = (
     }
   }
 
-  for (const [treeId, before] of earlier.pages.byTree) {
-    const after = later.pages.byTree.get(treeId)
-    const doorWas = earlier.scaled.get(treeId)
-    const doorNow = later.scaled.get(treeId)
+  for (const [form, before] of earlier.pages.byForm) {
+    const after = later.pages.byForm.get(form)
+    const doorWas = earlier.scaled.get(form)
+    const doorNow = later.scaled.get(form)
 
     if (after === undefined || doorWas === undefined || doorNow === undefined) continue
-    if (ambiguous.has(treeId)) continue
+    if (ambiguous.has(form)) continue
 
     const beforeParts = partsByNodeIn(before)
     const afterParts = partsByNodeIn(after)
@@ -1073,8 +1095,9 @@ export const libraryReachChangeOf = (
     if (spoken) {
       if (doors.was.silence !== null) {
         unscaled.push({
-          treeId,
+          treeId: before.treeId,
           revision: before.revision,
+          audienceId: before.audienceId,
           against: after.revision,
           side: "was",
           silence: doors.was.silence,
@@ -1082,8 +1105,9 @@ export const libraryReachChangeOf = (
       }
       if (doors.now.silence !== null) {
         unscaled.push({
-          treeId,
+          treeId: after.treeId,
           revision: after.revision,
+          audienceId: after.audienceId,
           against: before.revision,
           side: "now",
           silence: doors.now.silence,
@@ -1129,7 +1153,7 @@ export const libraryReachChangeOf = (
         part.role === counterpart.role ? [{ by: "role", role: part.role }] : []
 
       for (const kind of [...sameType, ...sameRole]) {
-        add(rowFor(rows, kind), { was: part, now: counterpart }, doors, treeId)
+        add(rowFor(rows, kind), { was: part, now: counterpart }, doors, form)
       }
     }
 
@@ -1172,7 +1196,7 @@ export const libraryReachChangeOf = (
             (other.readersMoved ?? 0) - (one.readersMoved ?? 0) ||
             nameOf(one.kind).localeCompare(nameOf(other.kind))
         )[0] ?? null,
-    ambiguous: [...ambiguous].sort((one, other) => one.localeCompare(other)),
+    ambiguous: [...ambiguous.values()].sort(inFormOrder),
     duplicated: earlier.pages.duplicated + later.pages.duplicated,
     duplicatedRows: earlier.duplicatedRows + later.duplicatedRows,
     roleDisagreed: disagreed,
