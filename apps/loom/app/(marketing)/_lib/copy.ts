@@ -132,6 +132,28 @@ export const PLACEHOLDER_COPY = {} as const
 export const LICENSE_NOTICE = "Loom is open source under the MIT license."
 
 /**
+ * Loom itself, and the one of the two a reader is likelier to have heard of.
+ *
+ * Named apart from the list as of 18 October, because **the band that asks for
+ * them now says which is which.** Until today the two names appeared on the
+ * front door in exactly one place — inside `INSTALL_COMMAND` — and the
+ * paragraph above the panel described them positionally: *one package is Loom
+ * itself, the other is the set of components this page is drawn from.* That
+ * sentence is only a description of a line the reader can see, and on a phone
+ * they cannot: the panel is 361 pixels wide and the command is 504, so it ends
+ * mid-name at `@jam-overtu` and *the other* names nothing.
+ *
+ * An index into `PACKAGES` would have done it and is the wrong shape. The two
+ * have different jobs, the paragraph says what each job is, and
+ * `PACKAGES[1] is the set of components` is a sentence whose correctness
+ * depends on the order of an array nobody reading it can see.
+ */
+export const RUNTIME_PACKAGE = "@jam-overture/loom"
+
+/** The starter library, which is where every component on this page comes from. */
+export const STARTER_PACKAGE = "@jam-overture/loom-primitives"
+
+/**
  * The two packages, and the line a reader is meant to type.
  *
  * The front door asks for an install as of 11 October, and the ask is two
@@ -156,7 +178,7 @@ export const LICENSE_NOTICE = "Loom is open source under the MIT license."
  * required, the page that tells a stranger what to install goes red rather than
  * quietly printing a line that installs nothing.
  */
-export const PACKAGES: readonly string[] = ["@jam-overture/loom", "@jam-overture/loom-primitives"]
+export const PACKAGES: readonly string[] = [RUNTIME_PACKAGE, STARTER_PACKAGE]
 
 /** The ask on the front door, as one line. */
 export const INSTALL_COMMAND = `npm install ${PACKAGES.join(" ")}`

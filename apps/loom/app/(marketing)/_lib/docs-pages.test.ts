@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url"
 
 import { beforeAll, describe, expect, it } from "vitest"
 
+import { PACKAGES, RUNTIME_PACKAGE, STARTER_PACKAGE } from "./copy"
 import { DOC_PAGES, INSTALLATION, type DocPage } from "./docs-pages"
 import { pathsLinkedFrom } from "./naming"
 import { servedBy } from "./routes"
@@ -35,6 +36,11 @@ import { ORIGIN_FOR_TESTS, servedPages, type ServedPage } from "./served"
  *    site before this run: four controls pointed into the documentation and
  *    nothing held any of them.
  * 4. **The page carries what this site sent the reader for.**
+ *
+ * A fifth arrived on 18 October and is at the foot of this file: the install
+ * guide names **every package this site's own command installs**, derived from
+ * `PACKAGES` rather than quoted. Rule 4 had been standing in for it with one
+ * typed command fragment that named one of the two.
  *
  * `/docs` itself is deliberately allowed by rule 3 and is not an entry. It is
  * the whole documentation rather than a page, it is what *Read the docs* should
@@ -166,7 +172,7 @@ describe("every link this site has into the documentation", () => {
  * The bug this run was about, named rather than left to the rules above.
  *
  * A sweep reports *nothing is wrong*; it never reports *this control was the
- * reason*. The front door's install band printed `pnpm add` and then offered
+ * reason*. The front door's install band printed its command and then offered
  * *Follow the install guide* pointing at `/docs`, which redirects to the first
  * page in reading order — *Introduction*, three pages above the command. The
  * rules above would all have passed on that site, because a site with no deep
@@ -182,5 +188,83 @@ describe("the control that offers the install guide", () => {
     for (const page of front) {
       expect([...pathsLinkedFrom(page.tree.root, ORIGIN_FOR_TESTS)]).toContain(INSTALLATION.path)
     }
+  })
+})
+
+/**
+ * A package name, matched as a name and not as a run of characters.
+ *
+ * `@jam-overture/loom` is a prefix of `@jam-overture/loom-primitives`, so
+ * `includes` is satisfied by the longer one standing where the shorter one
+ * should be — which is precisely the state this rule exists to refuse, since
+ * *the starter library is the only one the guide still names* is the break it
+ * is watching for. The lookahead is the character classes a package name is
+ * made of: a name followed by a word character, a dot, a slash or a hyphen is
+ * the start of a different name.
+ *
+ * Built per call rather than held in a map because the input is two constants
+ * this module already owns, and a cached regular expression with `g` on it is
+ * the `lastIndex` bug this file would find the hard way.
+ *
+ * **A full stop is admitted deliberately**, and the twin of this matcher in
+ * `pages/installed.test.ts` has the whole of why: refusing one makes the rule
+ * go red on a name at the end of a sentence, which is correct copy. What the
+ * lookahead is for is the hyphen between these two names, not punctuation.
+ */
+const namesPackage = (source: string, name: string): boolean =>
+  new RegExp(`${name.replace(/[.*+?^${}()|[\]\\\/-]/g, "\\$&")}(?![\\w/-])`).test(source)
+
+/**
+ * The hop from the command to the guide, held to the packages rather than to a
+ * sentence somebody typed.
+ *
+ * The install band is the one control on this site that asks a stranger to run
+ * something, and the button under it promises the longer version of what they
+ * were just shown. Until today the only thing holding that promise was one
+ * quoted command fragment naming one of the two packages — and the page it
+ * quotes says *"You can skip the second one."* The docblock on `INSTALLATION`
+ * has the whole of it.
+ *
+ * Both rules pass on the site as it stands. That is what they are for: the
+ * first was written because the break it names is one sentence away in somebody
+ * else's file, and the second because the first would be worth nothing if a
+ * third Loom package arrived and only one surface heard about it.
+ */
+describe("the install guide and the command that sends a reader to it", () => {
+  const guide = (): string => wordsIn(sourceOf(INSTALLATION))
+
+  it.each(PACKAGES)("names %s, which this site's own command installs", (name) => {
+    expect(
+      namesPackage(guide(), name),
+      `${INSTALLATION.path} no longer names ${name}, which the front door's install command installs — so either take it out of PACKAGES or raise it with Loom docs`
+    ).toBe(true)
+  })
+
+  /**
+   * The reverse, scoped to this project's own packages.
+   *
+   * The guide asks for `react` and `react-dom` as well, and that is correct and
+   * is not this band's business: the band's heading is *put it in a project you
+   * already have*, so a React renderer is a thing the reader has. What would be
+   * this band's business is a **third `@jam-overture/` package** becoming part
+   * of installing Loom and the front door going on printing two — a command
+   * that no longer installs what the guide beside it teaches.
+   */
+  it("asks for no Loom package the front door leaves out of its command", () => {
+    const named = new Set(guide().match(/@jam-overture\/[\w.-]+/g) ?? [])
+
+    expect(named.size).toBeGreaterThan(0)
+    expect([...named].filter((name) => !PACKAGES.includes(name))).toEqual([])
+  })
+
+  /**
+   * The matcher itself, because the rule above is only as good as it is and a
+   * substring check would pass both of them on a page naming one package.
+   */
+  it("reads a whole name, so the starter library cannot stand in for the runtime", () => {
+    expect(namesPackage(STARTER_PACKAGE, STARTER_PACKAGE)).toBe(true)
+    expect(namesPackage(STARTER_PACKAGE, RUNTIME_PACKAGE)).toBe(false)
+    expect(namesPackage(`${RUNTIME_PACKAGE} and more`, RUNTIME_PACKAGE)).toBe(true)
+    expect(namesPackage(`${RUNTIME_PACKAGE}.`, RUNTIME_PACKAGE)).toBe(true)
   })
 })
