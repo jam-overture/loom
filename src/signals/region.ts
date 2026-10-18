@@ -207,6 +207,19 @@ export type RegionBucket = {
 export type RegionReading = {
   /** The floor the rows were read at, so a screen can say what it is withholding by. */
   readonly floor: number
+  /**
+   * The audience whose arrivals this map is of, or `null` where nothing said.
+   *
+   * {@link regionReadingFor} names it, because it picked the rows of one
+   * audience to build the map from. {@link regionReadingOf} leaves it `null`,
+   * because it groups whatever it is handed and a deployment's whole window is
+   * a readership rather than one form's.
+   *
+   * Carried so that a comparison of two maps can refuse a pair of two
+   * populations (0284). It is the one thing a readership comparison cannot
+   * derive and the one thing that makes it a comparison of like with like.
+   */
+  readonly audienceId: AudienceId | null
   /** Buckets large enough to name, most-read first. */
   readonly regions: readonly RegionBucket[]
   /** What was too small to name, as a total that names nowhere. */
@@ -255,6 +268,7 @@ export const regionReadingOf = (
 
   return {
     floor,
+    audienceId: null,
     /** Most-read first, and by code when two are equal, so a screen does not reorder on a refresh. */
     regions: named.sort((one, other) => other.views - one.views || one.region.localeCompare(other.region)),
     withheld: {
@@ -344,7 +358,7 @@ export const regionReadingFor = (
   }
 
   return {
-    reading: regionReadingOf([...first.values()], options),
+    reading: { ...regionReadingOf([...first.values()], options), audienceId: audience },
     foreign: rows.length - here.length,
     otherAudience: here.length - matching.length,
     duplicated: matching.length - first.size,

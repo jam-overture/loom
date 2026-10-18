@@ -55938,8 +55938,13 @@ its own record's claims against what arrived, not just re-run the suite.
 ## 2026-10-17 — a change comparison whose two sides name different audiences is a cross-population comparison wearing a before-and-after's clothes
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/change.ts`)
-· **Status:** open — **nothing is broken today and nothing is urgent**; a guard
-worth adding the next time that file is open, with the argument already written
+· **Status:** **closed by `signals-38-a-comparison-is-of-one-population`** —
+taken as 0292, §37, as a **refusal** over five page-scale comparisons and the
+readership comparison, with the census withheld rather than left standing; the
+four library comparisons are left out and refiled below, because #668 was open
+on them. Original status: open — **nothing is broken today and nothing is
+urgent**; a guard worth adding the next time that file is open, with the
+argument already written
 
 `readingChangeOf(was, now)` takes two readings and compares them. Since 0290
 each reading names the audience it is of, which makes a new caller error
@@ -56048,3 +56053,166 @@ request body.** A routine that needs to show an attribute can name it in prose
 instead, which is what #664's corrected body does.
 
 ---
+
+---
+## 2026-10-18 — the four library comparisons take their pairs the same way and the guard was deliberately not put on them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/library-change.ts`,
+`src/signals/library-copy-change.ts`, `src/signals/library-reach-change.ts`,
+`src/signals/library-word-reach-change.ts`) · **Status:** open — **the decision
+is taken and the rule is published; what is left is applying it to four
+functions**, and it was left because another branch held those files
+
+0292 refuses a comparison whose two sides prove two populations, and publishes
+`crossesAudiences` once so that nine comparisons do not each decide it. It was
+applied to six: the five page-scale comparisons that publish a silence
+vocabulary, and the readership comparison.
+
+**The four library comparisons were not touched, and the reason is process
+rather than design.** #668 (*a comparison pairs pages by form*) was open on all
+four files when this was built — it keys their pairing by the form rather than by
+the tree — so adding a guard to them here would have been a branch stacked on a
+branch, and the brief forbids that. Nothing about them makes the guard wrong or
+different.
+
+**What they need, which is small.** Each takes two windows of kind readings and
+compares them. The pair a caller hands in is two whole windows rather than two
+readings of one page, so the guard is one level up from the page-scale one: the
+two windows are of two populations if each names one audience and the two
+differ. Each gains a member in its silence vocabulary, spelled
+`different-audiences` as the other five spell it, mapped to `two-audiences` in
+`silences.ts`, which already publishes the condition.
+
+**One thing to settle when it is taken.** A library window is a set of readings
+rather than one reading, so *what audience is this window of* has two possible
+answers: the audience every reading in it names, or nothing where they disagree.
+The second is the honest one and it is already built — `audiencesIn` answers
+exactly that question over rows, and a window naming two is the `audiences-mixed`
+state `pageReadingOf` reports. A library comparison should almost certainly
+refuse a **mixed** window before it refuses a mismatched pair, which is a
+sentence the page-scale comparisons get for free because each side is one
+reading.
+
+---
+## 2026-10-18 — a region map read whole over two audiences names none, so a readership comparison across two forms is unprovable rather than refused
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/region.ts`)
+· **Status:** open — **a limit written down, nothing superseded and nothing
+asked of anybody**; it is the one honest gap 0292 leaves and it is better
+published than guessed at
+
+0292 gives `RegionReading` an `audienceId` so that `readershipChangeOf` can
+refuse a pair of two populations. `regionReadingFor` names it, because it picked
+one audience's rows. **`regionReadingOf` leaves it `null`, and that is
+deliberate**: it groups whatever it is handed, across revisions by design — *ten
+views of one revision and twenty of the next are thirty views of one country* —
+and a deployment's whole window is a readership rather than one form's.
+
+The consequence is exact and worth stating. A caller that builds **both** sides
+with `regionReadingOf` over a window holding two audiences gets two maps that
+each name no audience, so the pair is unprovable and is compared. Both maps are
+sums over two populations, and the comparison of them is a comparison of two
+mixes rather than of two readerships.
+
+**Why it is not fixed by refusing.** The same call is the correct one for the
+question it was built for — *where are this deployment's readers* — and refusing
+a map with two audiences in it would withhold that. `pageReadingOf` has an
+`audiences-mixed` fault for the same shape because a *page* reading of two forms
+is wrong in a way a deployment-wide region map is not: summing two forms'
+countries is one population of people, while summing two forms' node counters is
+one number about two pages.
+
+**What would close it, if anybody wants it closed.** `regionReadingOf` could
+report the audiences it grouped across — `audiencesIn` over the rows, the same
+three-valued answer `PageReading.audiences` publishes — without refusing
+anything and without changing what it sums. A readership comparison could then
+say *both of these maps are sums over two audiences* instead of being silent
+about it, which is the half of this that is a measurement rather than a fault.
+It is a field and a sentence, not a decision.
+
+---
+## 2026-10-18 — every comparison now carries the two audiences it was taken across, and no screen reads it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one field and one refusal on six readings**, filed the way 0284 filed the
+dimension itself
+
+0292 puts `audiences: { was, now }` on six comparisons — where reading stops,
+the words a change put in front of readers, whether readers had time for it,
+what readers did, what a change did to the funnel, and who the readers were. It
+is carried under a silence and under none.
+
+**Three states, and a surface that draws two of them is hiding the third.**
+
+- **Both sides name one audience, the same one.** The ordinary comparison, and
+  the dimension is worth printing beside it: *the pro form of this page, last
+  week against this week*.
+- **Both name an audience and the two differ.** Refused. `silence` is
+  `different-audiences` (or `comparability` is, on the readership comparison),
+  every figure is absent and the census is withheld too. **The remedy is a line
+  of the surface's own code**: split the window with `byAudience` and compare
+  each form with itself. The row should say that rather than reading as a fault
+  in the data.
+- **One or both name none.** Compared, and not provably of one population. Every
+  figure stands and the honest caption is *compared across a window that named
+  no audience* — which is every window written before the column existed and
+  every comparison spanning the day a deployment upgraded. A screen that prints
+  nothing here is a screen that cannot distinguish it from the first state.
+
+Nothing here needs a new call: the field is on the object the screen already
+holds.
+
+---
+## 2026-10-18 — a generated signature is truncated before its comments are cleaned, so a long union fails the decision-number check on a citation nobody added
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **it fired on
+this branch and was worked around in the source**, which is the wrong place for
+the fix and leaves the next lane to hit it doing the same thing
+
+`readerFacingSignature` lifts a decision-record citation out of every comment
+inside a published signature, and drops a comment whole where the number is part
+of its grammar. It is a good rule and it works. **It runs after the truncation,
+and the truncation does not know what a comment is.**
+
+`extractOf` cuts a signature at `SIGNATURE_CAP` (6,000 characters of the
+*uncleaned* text) and appends an ellipsis. A union type whose members carry doc
+comments is cut wherever that lands — frequently in the middle of a comment,
+which leaves an opening `/**` with no `*/`. `COMMENT_IN_CODE` then does not
+match it, no citation is lifted out of it, and `DECISION_NUMBER` finds the
+number in the fragment.
+
+**What it looked like from here.** Adding one member to `SilenceCondition` took
+its source past 6,000 characters for the first time. `pnpm verify` failed with
+
+> a decision number reached the page: expected [ "SilenceCondition's signature" ]
+> to deeply equal []
+
+and the number it found was `0212`, in the comment on `no-reach-reported` —
+a member this branch did not touch, written by another lane, correctly cited in
+parentheses, and clean in every generation before this one. The failing
+assertion names the type and not the member, so the first minute of reading it
+is spent looking for a citation that was never added.
+
+**What it is worth fixing rather than working around.** Two properties of the
+check are lost at the cap and both of them matter more as these unions grow:
+
+- a parenthetical citation inside a cut comment is **not** lifted, so it fails a
+  rule it actually complies with;
+- a comment whose grammar needs the number is **not** dropped, so the one case
+  the rule exists to withhold reaches the page as a fragment instead.
+
+**The remedy is an ordering, not a new rule.** Clean the full signature first
+and truncate the cleaned text, or — if the cap must apply to the source — drop a
+trailing unterminated comment before the ellipsis. Either keeps the check
+measuring what it was written to measure.
+
+**What this branch did instead, and why it is a workaround.** The new member's
+doc comment was shortened until the declaration fit under the cap again, which
+is a change to `src/signals/silences.ts` made for a reason that has nothing to do
+with that file. The argument it carried is in 0292 and is not lost, but **the
+next member added to `SilenceCondition` will put it back over**, and the two
+longest published signatures in the subsystem are now close to the line:
+`SilenceCondition` at 5,732 characters cleaned and `CopyChange` at 5,550, both
+against a 6,000-character cap applied to the uncleaned text. Whoever hits it next
+will read the same misleading failure.

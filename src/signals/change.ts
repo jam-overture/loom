@@ -1,6 +1,11 @@
 import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 
+import {
+  comparedAudiencesOf,
+  crossesAudiences,
+  type ComparedAudiences,
+} from "./audiences.js"
 import type { PageReading, PartReading } from "./parts.js"
 import { readingProgressOf, type ReadingProgress, type ReadingStep } from "./progress.js"
 
@@ -62,6 +67,15 @@ import { readingProgressOf, type ReadingProgress, type ReadingStep } from "./pro
  * and `now` are the caller's, and a caller who holds them backwards gets a
  * comparison with every sign reversed rather than a refusal.
  *
+ * ## It does check that the two readings are of one readership
+ *
+ * Holding the tree still is the whole design above. A pair whose two sides name
+ * two audiences holds nothing still: a page is one base tree and the deltas an
+ * audience earns (0263), so the two sides are two trees wearing one tree id and
+ * two populations wearing one page. Every figure here would be produced and the
+ * sentence on top of them would be wrong, which is why that pair is refused
+ * rather than silenced in the reader half alone — see {@link ChangeSilence}.
+ *
  * ## What it refuses to add up
  *
  * There is no page-level total of readers kept, and the absence is deliberate.
@@ -88,6 +102,27 @@ export type ChangeSilence =
    */
   | "different-trees"
   /**
+   * The two readings are of two audiences, and so of two populations.
+   *
+   * A page is one base tree plus the deltas an audience earns (0263), so two
+   * forms of it share a tree id and are not the same page: the parts census
+   * would report the other form's deltas as what the change did, and the stops
+   * would report one population's reading against another's. Nothing here is
+   * comparable, which is why the census is withheld as it is for two trees and
+   * not published as it is for a window with no views.
+   *
+   * Refused only where both sides name an audience and the two differ. A
+   * window whose rows never carried the column (0284) names none, and a pair
+   * spanning that migration is not provably two populations — it is in
+   * {@link ReadingChange.audiences} instead, where a surface can see what it is
+   * reading across.
+   *
+   * Checked after `different-trees`, which is the broader fault: two unrelated
+   * pages are not made comparable by one audience, and a caller holding two
+   * pages wants to be told that first.
+   */
+  | "different-audiences"
+  /**
    * One of the two windows held no views.
    *
    * Every standing on that side is `unknown` (`parts.ts`), so there is no share
@@ -101,6 +136,7 @@ export type ChangeSilence =
 
 export const CHANGE_SILENCES: readonly ChangeSilence[] = everyMemberOf<ChangeSilence>()([
   "different-trees",
+  "different-audiences",
   "nothing-measured",
 ])
 
@@ -109,6 +145,8 @@ export const describeChangeSilence = (silence: ChangeSilence): string => {
   switch (silence) {
     case "different-trees":
       return "the two readings are of different pages"
+    case "different-audiences":
+      return "the two readings are of different audiences, and so of different readers"
     case "nothing-measured":
       return "one of the two windows held no page views"
   }
@@ -304,6 +342,15 @@ export type ReadingChange = {
   /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */
   readonly treeId: TreeId
   readonly revisions: { readonly was: number; readonly now: number }
+  /**
+   * The audience each side was of, where its reading named one.
+   *
+   * Carried under every silence and under none. A `null` on either side is why
+   * a pair of two populations can still be compared here: it is unprovable
+   * rather than proven alike, and a surface saying *compared across a window
+   * that named no audience* needs the field to say it.
+   */
+  readonly audiences: ComparedAudiences
   /**
    * The two progress readings this comparison is made of.
    *
@@ -563,6 +610,7 @@ export const readingChangeOf = (was: PageReading, now: PageReading): ReadingChan
   const empty = {
     treeId: was.treeId,
     revisions: { was: was.revision, now: now.revision },
+    audiences: comparedAudiencesOf(was, now),
     progress,
     stops: [],
     incomparable: [],
@@ -572,6 +620,15 @@ export const readingChangeOf = (was: PageReading, now: PageReading): ReadingChan
 
   if (was.treeId !== now.treeId) {
     return { ...empty, parts: NO_PARTS, silence: "different-trees" }
+  }
+
+  /**
+   * Two forms of one page are two trees under one tree id, so the census is
+   * withheld with the stops rather than left standing: *three bands moved* read
+   * across two forms is the audience's own deltas presented as the change.
+   */
+  if (crossesAudiences(was, now)) {
+    return { ...empty, parts: NO_PARTS, silence: "different-audiences" }
   }
 
   const parts = partsChangedOf(was, now)

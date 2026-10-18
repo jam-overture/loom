@@ -397,6 +397,16 @@ export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
   | "two-pages"
   /**
+   * The two readings are of two audiences, so they are of two populations.
+   *
+   * The sibling of `two-pages`, and the pair is why this is its own condition.
+   * Two pages make every figure absurd; two forms of one page compare cleanly
+   * and carry a sentence about a readership that was varied rather than held
+   * still. Reported only where both readings name an audience and the two
+   * differ.
+   */
+  | "two-audiences"
+  /**
    * Nothing reported a view of it.
    *
    * Of a page, the window's counters say no view of this revision happened. Of
@@ -511,6 +521,7 @@ export type SilenceCondition =
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
+  "two-audiences",
   "no-view-reported",
   "no-arrivals-counted",
   "no-openings-marked",
@@ -537,6 +548,8 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
   switch (condition) {
     case "two-pages":
       return "the two readings are of different pages"
+    case "two-audiences":
+      return "the two readings are of different audiences, and so of different readers"
     case "no-view-reported":
       return "nothing reported a view of it"
     case "no-arrivals-counted":
@@ -592,6 +605,8 @@ export const meaningOfActionChangeSilence = (silence: ActionChangeSilence): Sile
   switch (silence) {
     case "different-trees":
       return meaning("action-change", "two-pages")
+    case "different-audiences":
+      return meaning("action-change", "two-audiences")
     case "unwalked":
       return meaning("action-change", "no-action-credited")
     case "nothing-measured":
@@ -606,6 +621,8 @@ export const meaningOfChangeSilence = (silence: ChangeSilence): SilenceMeaning =
   switch (silence) {
     case "different-trees":
       return meaning("change", "two-pages")
+    case "different-audiences":
+      return meaning("change", "two-audiences")
     case "nothing-measured":
       return meaning("change", "no-view-reported")
   }
@@ -643,6 +660,8 @@ export const meaningOfCopyChangeSilence = (silence: CopyChangeSilence): SilenceM
   switch (silence) {
     case "different-trees":
       return meaning("copy-change", "two-pages")
+    case "different-audiences":
+      return meaning("copy-change", "two-audiences")
     case "wordless":
       return meaning("copy-change", "says-nothing")
     case "nothing-measured":
@@ -965,6 +984,8 @@ export const meaningOfPaceChangeSilence = (silence: PaceChangeSilence): SilenceM
   switch (silence) {
     case "different-trees":
       return meaning("pace-change", "two-pages")
+    case "different-audiences":
+      return meaning("pace-change", "two-audiences")
     case "wordless":
       return meaning("pace-change", "says-nothing")
     case "nothing-measured":
@@ -1010,6 +1031,8 @@ export const meaningOfFunnelChangeSilence = (silence: FunnelChangeSilence): Sile
   switch (silence) {
     case "different-trees":
       return meaning("funnel-change", "two-pages")
+    case "different-audiences":
+      return meaning("funnel-change", "two-audiences")
     case "unscaled":
       return meaning("funnel-change", "no-arrivals-counted")
     case "unopened":

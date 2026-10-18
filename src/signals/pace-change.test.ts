@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
+import type { AudienceId } from "../audience/audience.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -814,5 +815,77 @@ describe("paceChangeOf", () => {
 
       expect(new Set(lines).size).toBe(lines.length)
     })
+  })
+})
+
+/**
+ * A comparison is of one readership, and two forms of one page are two of them.
+ */
+describe("paceChangeOf across two audiences", () => {
+  const WAS: Window = {
+    tree: pageOf(1, [band("pricing", 200)]),
+    counters: window(1, [
+      { name: "page", spentMs: 20_000 },
+      { name: "pricing", spentMs: 20_000 },
+    ]),
+  }
+  const NOW: Window = {
+    tree: pageOf(2, [band("pricing", 100)]),
+    counters: window(2, [
+      { name: "page", spentMs: 20_000 },
+      { name: "pricing", spentMs: 20_000 },
+    ]),
+  }
+
+  const formOf = (side: Window, audience: AudienceId) =>
+    pageReadingOf(
+      side.tree,
+      side.counters.map((counter) => ({ ...counter, audienceId: audience })),
+      side.declarations ?? BODY_IS_COPY
+    )
+
+  /**
+   * The time the other form asks for would have been read as the time this
+   * change added, and the two sides' spent time is two populations' reading.
+   */
+  it("refuses a pair of two audiences, census included", () => {
+    const change = paceChangeOf(formOf(WAS, SKIERS), formOf(NOW, RIDERS))
+
+    expect(change.silence).toBe("different-audiences")
+    expect(change.compared).toEqual([])
+    expect(change.added).toEqual([])
+    expect(change.removed).toEqual([])
+    expect(change.whole).toBeNull()
+    expect(change.need).toBeNull()
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+  })
+
+  it("compares one audience's two windows exactly as it always did", () => {
+    const scoped = paceChangeOf(formOf(WAS, SKIERS), formOf(NOW, SKIERS))
+    const whole = changeOf(WAS, NOW)
+
+    expect(scoped.silence).toBe(whole.silence)
+    expect(scoped.compared).toEqual(whole.compared)
+    expect(scoped.need).toEqual(whole.need)
+  })
+
+  it("compares a pair it cannot prove and names what it compared across", () => {
+    const change = paceChangeOf(
+      pageReadingOf(WAS.tree, WAS.counters, BODY_IS_COPY),
+      formOf(NOW, SKIERS)
+    )
+
+    expect(change.silence).not.toBe("different-audiences")
+    expect(change.audiences).toEqual({ was: null, now: SKIERS })
+  })
+
+  it("says two pages before it says two audiences", () => {
+    const change = paceChangeOf(
+      formOf(WAS, SKIERS),
+      pageReadingOf({ ...NOW.tree, treeId: OTHER_TREE }, [], BODY_IS_COPY, RIDERS)
+    )
+
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+    expect(change.silence).toBe("different-trees")
   })
 })
