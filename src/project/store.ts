@@ -22,6 +22,15 @@ export type ProjectStoreError =
   /** No project under this id. */
   | { readonly code: "not-found"; readonly projectId: ProjectId }
   | { readonly code: "already-exists"; readonly projectId: ProjectId }
+  /**
+   * Another project already names this repository (0292).
+   *
+   * Its own code rather than `already-exists`, because the thing that is taken
+   * is not the thing the caller named: they asked for a new project and the
+   * collision is on a field. A screen can put this fault on the repository
+   * input, where `already-exists` has no input to point at.
+   */
+  | { readonly code: "repository-taken"; readonly repository: string }
   /** A row the current code cannot parse, which is a row an older one wrote. */
   | { readonly code: "unreadable"; readonly projectId: ProjectId; readonly detail: string }
   | { readonly code: "unavailable"; readonly detail: string }
@@ -37,6 +46,7 @@ export type ProjectStoreErrorCode = ProjectStoreError["code"]
 export const projectStoreErrorCodes: readonly ProjectStoreErrorCode[] = [
   "not-found",
   "already-exists",
+  "repository-taken",
   "unreadable",
   "unavailable",
 ]
@@ -47,6 +57,8 @@ export const describeProjectStoreError = (error: ProjectStoreError): string => {
       return `no project ${error.projectId}`
     case "already-exists":
       return `project ${error.projectId} already exists`
+    case "repository-taken":
+      return `another project already names ${error.repository}`
     case "unreadable":
       return `project ${error.projectId} could not be read: ${error.detail}`
     case "unavailable":

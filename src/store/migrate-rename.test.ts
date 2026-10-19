@@ -117,6 +117,8 @@ describe("the rename, on a database that has the old table", () => {
       "project_id",
       "name",
       "created_at",
+      /** The repository a project names, at most one each way (0292). */
+      "repository",
       /** Closing, which is what this store has instead of a delete (0289). */
       "closed_at",
     ])

@@ -34,6 +34,20 @@ export const memoryProjectStore = (seed: readonly Project[] = []): ProjectStore 
       if (projects.has(project.projectId)) {
         return err({ code: "already-exists", projectId: project.projectId })
       }
+
+      /**
+       * The partial unique index Postgres carries, by hand (0292). Without it
+       * the two stores disagree about whether a repository can be claimed
+       * twice — and the one that admits it is the one `pnpm dev` runs on, so
+       * the disagreement would be found in production.
+       */
+      if (
+        project.repository !== undefined &&
+        [...projects.values()].some((held) => held.repository === project.repository)
+      ) {
+        return err({ code: "repository-taken", repository: project.repository })
+      }
+
       projects.set(project.projectId, project)
       return ok(project)
     },

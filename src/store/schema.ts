@@ -224,6 +224,12 @@ export const loomProjects = pgTable("loom_projects", {
   name: text("name").notNull(),
   createdAt: text("created_at").notNull(),
   /**
+   * The repository this project's pages live in, absent while it has none
+   * (0292). Unique where present, because a repository belongs to at most one
+   * project and two claiming it is a race rather than a typo.
+   */
+  repository: text("repository"),
+  /**
    * When it was closed, absent while it is open (0289).
    *
    * This store has no delete and this is what it has instead. Nullable and
