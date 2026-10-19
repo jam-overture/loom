@@ -212,7 +212,13 @@ on that path runs in a browser.
 
 ## Preview
 
-PLACEHOLDER_PREVIEW
+https://loom-git-signals-41-two-form-ebefad-jpizzolato36-6341s-projects.vercel.app
+
+Taken from the `vercel[bot]` comment on #680 rather than composed from the
+branch name, per the open finding on that mistake — this branch name is 42
+characters and 23 of them survive, so a guess would have had no hash segment.
+Nothing in this unit renders, so there is no screenshot: no screen reads these
+numbers yet, which is the finding filed for `Loom portal`.
 
 ## Open questions
 
