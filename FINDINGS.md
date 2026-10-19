@@ -56540,9 +56540,14 @@ reading.
 ## 2026-10-18 — a region map read whole over two audiences names none, so a readership comparison across two forms is unprovable rather than refused
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/region.ts`)
-· **Status:** open — **a limit written down, nothing superseded and nothing
-asked of anybody**; it is the one honest gap 0294 leaves and it is better
-published than guessed at
+· **Status:** **closed by `signals-40-the-populations-a-region-map-summed`**
+(0297) — taken exactly as the closure below describes it, *a field and a
+sentence*: `RegionReading.audiences` is the census and
+`ReadershipChange.populations` is the pair of them, and nothing is refused on
+either. Reading the two calls to add the field also found a number rather than a
+silence, which is the entry filed below. Original status: open — **a limit
+written down, nothing superseded and nothing asked of anybody**; it is the one
+honest gap 0294 leaves and it is better published than guessed at
 
 0294 gives `RegionReading` an `audienceId` so that `readershipChangeOf` can
 refuse a pair of two populations. `regionReadingFor` names it, because it picked
@@ -56912,3 +56917,115 @@ surface that drew one would be inventing a fault.
 
 Nothing needs a new call: all three are on the object the screen already holds.
 
+---
+## 2026-10-19 — a region map of a revision served in two forms published one form's arrivals and reported the other form's as a duplicate it dropped
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/region.ts`) · **Status:** **closed on filing by
+`signals-40-the-populations-a-region-map-summed`** (0297 clause 4) — written
+down because it is a number a deployment would have read and acted on, and
+because it was found by adding a field that was supposed to be a caption
+
+`regionReadingFor` deduplicates a revision's region rows so that a caller who
+concatenated two reads of the store's running totals cannot double a bucket
+(0158). It keyed that dedup by the **region alone**. A revision served in two
+forms (0263) has two rows for one country, one per form, so a map read whole of
+such a revision — `where.audienceId` not given, which is the deployment-wide
+question — kept the first and dropped the second:
+
+```
+SKIERS  GB   60
+RIDERS  GB  400   →   GB 60, duplicated: 1
+```
+
+**60 published where 460 arrived**, and the 400 reported as a count of
+duplicates, which is the one number in the output nobody reads as an undercount.
+It is 0290's fault in the one reading that was given the audience column and
+only half used it, and it is 0158's shape: a count that was never added cannot
+be noticed.
+
+**Two things made it invisible.** The existing test for the whole-window path
+used two *different* countries, so it documented the intent — take every form's
+rows — while the implementation failed only where two forms share one. And the
+`duplicated` doc comment asserted the fault away: *"the audience is picked
+before this is counted, so this cannot come out of one read"*, which is true of
+a form's own map and false of the one above.
+
+**What shipped:** the key is the region and the audience, which is what the
+store keeps one row per (0284). A form's own map is unchanged — the audience is
+picked before the dedup, so the two keys select the same rows. `duplicated` now
+means what it always claimed. The floor is unaffected and still applies after
+the grouping, so a country whose two forms each hold fifteen arrivals is thirty
+arrivals of one country, named rather than withheld twice.
+
+---
+## 2026-10-19 — `pageViewsFor` picks one form's door row for a revision served in two, and reports the other as a duplicate
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/page-views.ts`) · **Status:** open — **the same fault as the entry
+above, in a different reading**, and it is not a key fix
+
+The entry above is `regionReadingFor` keying a dedup by the region where the
+store keys its rows by the region and the audience. `pageViewsFor` has the same
+shape at line 349:
+
+```ts
+const matching = audience === null ? here : here.filter(...)
+const first = matching[0]
+...
+duplicated: Math.max(0, matching.length - 1),
+```
+
+A revision served in two forms has **two door rows**, one per form (0284). A
+caller that does not name an audience — the deployment-wide question — gets
+`measured` from whichever row came first and the other counted as
+`duplicated: 1`. So `opened`, `appearances`, `drift` and `pending` for that
+revision are one form's, and `inflationFor` hands the straddle rate of one form
+to a reading of both.
+
+**Why it was not taken in the same unit.** The region fix was a key: two buckets
+that were one. This one is a **sum**: two door rows have to become one
+`RevisionPageViews`, and `readingOf` maps one row to one reading while
+`pageViewReadingOf` sorts rather than groups — so two rows of one revision come
+back as two entries and `measured` takes the first. Adding the arithmetic is the
+honest fix and it is a unit with its own tests, including the double-count case
+that makes a concatenated window still a duplicate.
+
+**The arithmetic itself looks additive and should be checked rather than
+assumed.** `opened` and `appearances` are counts and add; `drift` is their
+difference and therefore adds; `inflation` is a ratio and must be recomputed
+from the sums rather than averaged; `pending` is a subtraction and needs the
+same reading. Nothing here is a decision about what to collect — it is a reading
+of rows the store already keeps apart.
+
+---
+## 2026-10-19 — a readership comparison now says what each of its two maps was a sum over, and no screen reads it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one set per side on one reading**, filed the way 0294's own surface gap was
+filed
+
+0297 puts `populations: ComparedPopulations` on `ReadershipChange` and
+`audiences` on every `RegionReading`. Three states read identically before this
+and a surface drawing none of them cannot tell them apart.
+
+- **One name on each side, the same one.** *The pro form last week against the
+  pro form this week.* The ordinary comparison, and what every deployment
+  serving one form always sees — the name being `aud_everyone` there.
+- **Two or more names on a side.** *Both of these maps are sums over two of the
+  forms you serve.* Not a fault and not a refusal: arrivals are people, and a
+  reader who arrived arrived once whichever form they were served. The caption
+  belongs on the reading because the mix is a mix of forms as well as of places,
+  and a deployment that took up 0263 between the two windows is reading partly
+  its own new form.
+- **`[]` on a side.** A window whose rows never carried the column, which is
+  every window written before 0284. The honest caption is *compared across a
+  window that named no audience*, which is the one 0294 already asked for.
+
+**What must not be drawn:** `populations` is not a refusal and not a fault badge.
+`comparability` is the field that says whether the comparison beside it is of
+like with like, and `different-audiences` is still the only member that withholds
+figures. A surface that greyed out a mixed window would be hiding the
+deployment-wide readership answer this reading exists to give.
+
+Nothing needs a new call: both fields are on objects the screen already holds.
