@@ -898,3 +898,80 @@ describe("the words of a kind of part the typical reader reached, before and aft
     expect(change.pages).toBe(0)
   })
 })
+
+/**
+ * The form-and-page census 0295 put on all four library comparisons, asserted
+ * here on the words-reached one, which is the deepest of the four: it pairs by
+ * form, scales at the door and compares passages, and none of that is what
+ * moves when a deployment begins serving a second form.
+ */
+describe("a library that gained a form rather than a page", () => {
+  const met = { opened: 10, appearances: 10, reached: { intro: 10 } }
+
+  it("counts a second form begun as a form gained and never as a page published", () => {
+    const tree = page()
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, tree, met)]),
+      windowOf([inAudience(SKIERS, tree, met), inAudience(RIDERS, tree, met)])
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(1)
+  })
+
+  it("counts a page published as a page gained and never as a form begun", () => {
+    const first = page()
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, first, met)]),
+      windowOf([inAudience(SKIERS, first, met), inAudience(SKIERS, second, met)])
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(0)
+  })
+
+  it("counts a form withdrawn apart from a page that left the library", () => {
+    const first = page()
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryWordReachChangeOf(
+      windowOf([
+        inAudience(SKIERS, first, met),
+        inAudience(RIDERS, first, met),
+        inAudience(SKIERS, second, met),
+      ]),
+      windowOf([inAudience(SKIERS, first, met)])
+    )
+
+    expect(change.pagesLost).toBe(2)
+    expect(change.formsLost).toBe(1)
+    expect(change.pagesLost - change.formsLost).toBe(1)
+  })
+
+  /** A form handed in twice is one form, so it is not a page published nobody published (0158). */
+  it("counts a form gained once however many times the window was handed in", () => {
+    const tree = page()
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, tree, met)]),
+      windowOf([
+        inAudience(SKIERS, tree, met),
+        inAudience(RIDERS, tree, met),
+        inAudience(RIDERS, tree, met),
+      ])
+    )
+
+    expect(change.formsGained).toBe(1)
+    expect(change.pagesGained).toBe(1)
+  })
+
+  it("names the audiences each window held, and refuses nothing for holding two", () => {
+    const tree = page()
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, tree, met)]),
+      windowOf([inAudience(SKIERS, tree, met), inAudience(RIDERS, tree, met)])
+    )
+
+    expect(change.audiences).toEqual({ was: [SKIERS], now: [RIDERS, SKIERS] })
+    expect(change.pages).toBe(1)
+  })
+})

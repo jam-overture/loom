@@ -2,7 +2,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
-import { inFormOrder, type PageForm } from "./audiences.js"
+import { inFormOrder, type ComparedPopulations, type PageForm } from "./audiences.js"
 import { doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import { pairedWindowOf, partsByNodeIn, type PairedWindow } from "./library-change.js"
@@ -537,12 +537,18 @@ export type LibraryReachChange = {
    * none, in the same order as {@link byType}.
    */
   readonly byRole: readonly KindReachChange[]
-  /** Pages read in both windows, which is trees and not revisions. */
+  /** Forms read in both windows: a page in one of its forms, never a revision. */
   readonly pages: number
-  /** Pages read in the later window only. */
+  /** Forms read in the later window only, which is not pages published. */
   readonly pagesGained: number
-  /** Pages read in the earlier window only. */
+  /** Of {@link pagesGained}, forms whose page the earlier window already held. */
+  readonly formsGained: number
+  /** Forms read in the earlier window only, which is not pages withdrawn. */
   readonly pagesLost: number
+  /** Of {@link pagesLost}, forms whose page the later window still holds. */
+  readonly formsLost: number
+  /** The audiences each window's forms named, published and never refused. */
+  readonly audiences: ComparedPopulations
   /**
    * Paired pages whose revision moved between the windows.
    *
@@ -1003,6 +1009,8 @@ export const libraryReachChangeOf = (
   let pages = 0
   let pagesGained = 0
   let pagesLost = 0
+  let formsGained = 0
+  let formsLost = 0
   let republished = 0
   let placements = 0
   let gained = 0
@@ -1031,6 +1039,8 @@ export const libraryReachChangeOf = (
     if (later.pages.byForm.has(form)) continue
 
     pagesLost += 1
+    /** The page is still served, in the other form: a form left the library and the page did not (0295). */
+    if (later.pages.pagesHeld.has(reading.treeId)) formsLost += 1
 
     for (const part of reading.parts) {
       lost += 1
@@ -1050,6 +1060,8 @@ export const libraryReachChangeOf = (
     if (earlier.pages.byForm.has(form)) continue
 
     pagesGained += 1
+    /** The page was already served, in the other form: a second form began rather than a page being published. */
+    if (earlier.pages.pagesHeld.has(reading.treeId)) formsGained += 1
 
     for (const part of reading.parts) {
       gained += 1
@@ -1177,7 +1189,10 @@ export const libraryReachChangeOf = (
     byRole: built.filter((row) => row.kind.by === "role").sort(worseOf),
     pages,
     pagesGained,
+    formsGained,
     pagesLost,
+    formsLost,
+    audiences: { was: earlier.pages.audiences, now: later.pages.audiences },
     republished,
     placements,
     gained,

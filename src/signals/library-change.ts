@@ -1,9 +1,18 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
-import type { NodeId } from "../ids.js"
+import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
-import { formKeyOf, formOf, inFormOrder, type PageForm } from "./audiences.js"
+import {
+  audiencesOf,
+  formKeyOf,
+  formOf,
+  inFormOrder,
+  pagesOf,
+  type ComparedPopulations,
+  type PageForm,
+} from "./audiences.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import type { PageReading, PartReading } from "./parts.js"
 
@@ -328,12 +337,18 @@ export type LibraryChange = {
    * migration.
    */
   readonly byRole: readonly KindChange[]
-  /** Pages read in both windows, which is trees and not revisions. */
+  /** Forms read in both windows: a page in one of its forms, never a revision. */
   readonly pages: number
-  /** Pages read in the later window only. */
+  /** Forms read in the later window only, which is not pages published. */
   readonly pagesGained: number
-  /** Pages read in the earlier window only. */
+  /** Of {@link pagesGained}, forms whose page the earlier window already held. */
+  readonly formsGained: number
+  /** Forms read in the earlier window only, which is not pages withdrawn. */
   readonly pagesLost: number
+  /** Of {@link pagesLost}, forms whose page the later window still holds. */
+  readonly formsLost: number
+  /** The audiences each window's forms named, published and never refused. */
+  readonly audiences: ComparedPopulations
   /**
    * Paired pages whose revision moved between the windows.
    *
@@ -569,6 +584,24 @@ export type PairedWindow = {
   readonly ambiguous: ReadonlyMap<string, PageForm>
   /** The same revision of the same form handed in again. */
   readonly duplicated: number
+  /**
+   * The audiences this window's forms named, in a stable order.
+   *
+   * `[]` is *no form here named one*, which is every window written before the
+   * column existed (0284) and every one a test builds by hand. Two members is
+   * a deployment serving two forms of at least one of its pages (0263) and is
+   * not a fault: the pairing is by form, so the two never meet inside a figure.
+   */
+  readonly audiences: readonly AudienceId[]
+  /**
+   * The pages behind this window's forms, which two forms of one page share.
+   *
+   * What makes *a form the other window does not hold* answerable as either a
+   * page published or a page that began being served in a second form (0295).
+   * Ambiguous forms are in it: the question is what the window held, not what
+   * was comparable.
+   */
+  readonly pagesHeld: ReadonlySet<TreeId>
 }
 
 /**
@@ -598,7 +631,9 @@ export const pairedWindowOf = (readings: readonly PageReading[]): PairedWindow =
     else ambiguous.set(key, formOf(reading))
   }
 
-  return { byForm, ambiguous, duplicated }
+  const forms = [...byForm.values()].map(formOf)
+
+  return { byForm, ambiguous, duplicated, audiences: audiencesOf(forms), pagesHeld: pagesOf(forms) }
 }
 
 /**
@@ -640,6 +675,8 @@ export const libraryChangeOf = (
   let pages = 0
   let pagesGained = 0
   let pagesLost = 0
+  let formsGained = 0
+  let formsLost = 0
   let republished = 0
   let placements = 0
   let gained = 0
@@ -667,6 +704,8 @@ export const libraryChangeOf = (
     if (later.byForm.has(form)) continue
 
     pagesLost += 1
+    /** The page is still served, in the other form: a form left the library and the page did not (0295). */
+    if (later.pagesHeld.has(reading.treeId)) formsLost += 1
 
     for (const part of reading.parts) {
       lost += 1
@@ -688,6 +727,8 @@ export const libraryChangeOf = (
     if (earlier.byForm.has(form)) continue
 
     pagesGained += 1
+    /** The page was already served, in the other form: a second form began rather than a page being published. */
+    if (earlier.pagesHeld.has(reading.treeId)) formsGained += 1
 
     for (const part of reading.parts) {
       gained += 1
@@ -778,7 +819,10 @@ export const libraryChangeOf = (
     byRole: built.filter((row) => row.kind.by === "role").sort(worseOf),
     pages,
     pagesGained,
+    formsGained,
     pagesLost,
+    formsLost,
+    audiences: { was: earlier.audiences, now: later.audiences },
     republished,
     placements,
     gained,

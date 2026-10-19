@@ -645,9 +645,12 @@ describe("what the reading publishes", () => {
 
     expect(Object.keys(change).sort()).toEqual([
       "ambiguous",
+      "audiences",
       "byRole",
       "byType",
       "duplicated",
+      "formsGained",
+      "formsLost",
       "gained",
       "lost",
       "mostAbandoned",
@@ -703,5 +706,139 @@ describe("what the reading publishes", () => {
     expect(change.duplicated).toBe(0)
     expect(change.roleDisagreed).toEqual([])
     expect(change.byRole.every((row) => row.silence === "unplaced")).toBe(true)
+  })
+
+  /**
+   * The sentence 0295 is for. A deployment that began serving a second form of
+   * a page it already served has published nothing, and before this the
+   * comparison said its library grew.
+   */
+  it("counts a second form begun as a form gained and never as a page published", () => {
+    const tree = page()
+    const change = libraryChangeOf(
+      [inAudience(SKIERS, tree, ["intro"])],
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(RIDERS, tree, ["intro"])]
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(1)
+    expect(change.pagesGained - change.formsGained).toBe(0)
+    expect(change.pages).toBe(1)
+  })
+
+  /** The other half of the same subtraction, so that one number cannot stand for both. */
+  it("counts a page published as a page gained and never as a form begun", () => {
+    const first = page({ treeId: TREE })
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryChangeOf(
+      [inAudience(SKIERS, first, ["intro"])],
+      [inAudience(SKIERS, first, ["intro"]), inAudience(SKIERS, second, ["intro"])]
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(0)
+  })
+
+  /** Both at once, which is the only case where the subtraction is the whole answer. */
+  it("tells a page published from a second form begun in one window", () => {
+    const first = page({ treeId: TREE })
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryChangeOf(
+      [inAudience(SKIERS, first, ["intro"])],
+      [
+        inAudience(SKIERS, first, ["intro"]),
+        inAudience(RIDERS, first, ["intro"]),
+        inAudience(SKIERS, second, ["intro"]),
+      ]
+    )
+
+    expect(change.pagesGained).toBe(2)
+    expect(change.formsGained).toBe(1)
+    expect(change.pagesGained - change.formsGained).toBe(1)
+  })
+
+  /** Withdrawing a form is the mirror, and a deployment doing it has lost no page. */
+  it("counts a form withdrawn apart from a page that left the library", () => {
+    const first = page({ treeId: TREE })
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryChangeOf(
+      [
+        inAudience(SKIERS, first, ["intro"]),
+        inAudience(RIDERS, first, ["intro"]),
+        inAudience(SKIERS, second, ["intro"]),
+      ],
+      [inAudience(SKIERS, first, ["intro"])]
+    )
+
+    expect(change.pagesLost).toBe(2)
+    expect(change.formsLost).toBe(1)
+    expect(change.pagesLost - change.formsLost).toBe(1)
+  })
+
+  /**
+   * The double count this counter could have had: a caller that concatenated
+   * two reads of one window holds a form twice, and a form counted twice is a
+   * page published that nobody published (0158).
+   */
+  it("counts a form gained once however many times the window was handed in", () => {
+    const tree = page()
+    const once = libraryChangeOf(
+      [inAudience(SKIERS, tree, ["intro"])],
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(RIDERS, tree, ["intro"])]
+    )
+    const twice = libraryChangeOf(
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(SKIERS, tree, ["intro"])],
+      [
+        inAudience(SKIERS, tree, ["intro"]),
+        inAudience(RIDERS, tree, ["intro"]),
+        inAudience(RIDERS, tree, ["intro"]),
+      ]
+    )
+
+    expect(twice.duplicated).toBe(2)
+    expect(twice.formsGained).toBe(once.formsGained)
+    expect(twice.pagesGained).toBe(once.pagesGained)
+    expect(twice.formsGained).toBe(1)
+  })
+
+  /**
+   * A form excluded as ambiguous is still a form the window held, which is the
+   * deliberate half of `pagesHeld`: the question is what the deployment served
+   * and not what could be compared.
+   */
+  it("reads a page held only in an ambiguous form as a page the window held", () => {
+    const tree = page()
+    const second = page({ revision: 2 })
+    const change = libraryChangeOf(
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(SKIERS, second, ["intro"])],
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(RIDERS, tree, ["intro"])]
+    )
+
+    expect(change.ambiguous).toEqual([{ treeId: TREE, audienceId: SKIERS }])
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(1)
+  })
+
+  /** Whose library each side was, published and never refused. */
+  it("names the audiences each window held, and refuses nothing for holding two", () => {
+    const tree = page()
+    const change = libraryChangeOf(
+      [inAudience(SKIERS, tree, ["intro"])],
+      [inAudience(SKIERS, tree, ["intro", "pricing"]), inAudience(RIDERS, tree, ["intro"])]
+    )
+
+    expect(change.audiences).toEqual({ was: [SKIERS], now: [RIDERS, SKIERS] })
+    expect(typeRow(change, "loom.section")?.tookUp).toBe(1)
+    expect(typeRow(change, "loom.section")?.places).toBe(2)
+  })
+
+  /** A window of rows that never carried the column names none, and is read whole. */
+  it("names no audience for a window whose forms named none", () => {
+    const tree = page()
+    const change = libraryChangeOf([read(tree, ["intro"])], [read(tree, ["intro"])])
+
+    expect(change.audiences).toEqual({ was: [], now: [] })
+    expect(change.formsGained).toBe(0)
+    expect(change.formsLost).toBe(0)
   })
 })
