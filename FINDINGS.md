@@ -8,6 +8,84 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-19 — `external` draws an arrow on one of the three primitives that take it, so a control that leaves the site looks exactly like one that does not
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.link.ts`, `src/primitives/loom.action.ts`) ·
+**Status:** **open** — nothing is broken, no test is failing, and both
+behaviours are deliberate in their own file
+
+Three registered primitives take an `external` boolean. Two of them do one
+thing with it and the third does another, and the prop is spelled the same way
+in all three.
+
+| primitive | what `external: true` does |
+| --- | --- |
+| `loom.inline-link` | `target="_blank" rel="noreferrer noopener"`, **and draws `↗` after the words**, `aria-hidden` |
+| `loom.link` | `target="_blank" rel="noreferrer noopener"` |
+| `loom.action` | `target="_blank" rel="noreferrer noopener"` |
+
+`loom.inline-link`'s own docblock gives the reason it draws one, under the
+heading *`external`, and the arrow that is not a word*. The reasoning is right
+and it is not about being inline: a reader about to leave the site is owed the
+same warning whether the words are in a sentence, in a footer column or on a
+button.
+
+### How this lane met it
+
+The front door's *Built in the open* band offered **Read the decisions** as a
+`loom.action` with `external: true`, pointing at `decisions/` on GitHub. It
+opened a new tab, off the product, and the button said nothing about either.
+Beside it sat **What you would be running**, an ordinary internal navigation,
+drawn identically — same tone, same scale, same shape, same absence of any
+mark.
+
+That control is now internal (`marketing-10-the-quietest-number-on-the-front-door`
+points it at `/docs/architecture/decision-records`), so the instance is gone
+and the gap is not. The footer still offers *Source* and *Decisions* as
+`loom.link`s with `external: true`, and both leave the site silently.
+
+**The contrast is on one screen.** `(docs)` renders every off-site link through
+its own `OffSiteLink`, which draws `OFF_SITE_MARK` — `↗`, the same character —
+on all 277 record titles. A reader crossing from the front door to that page
+meets two conventions on one domain: one surface marks every departure and the
+other marks none.
+
+### Three shapes, costed
+
+1. **`loom.link` and `loom.action` draw the mark `loom.inline-link` already
+   draws.** One character, `aria-hidden`, after the label. It is the smallest
+   change, it makes the prop mean one thing across the library, and it is the
+   recommendation. The cost is that every existing `external` control on every
+   surface grows a glyph on the same commit, which is a visible change nobody
+   asked for — so it wants an eye on it rather than a merge.
+2. **A prop.** `mark: "arrow" | "none"` beside `external`. Refused in the
+   costing: the caller already said the thing that matters by setting
+   `external`, and a second prop to say whether they meant it is how one
+   decision becomes two that can disagree.
+3. **Nothing, written down.** If an action is deliberately unmarked because a
+   button is a stronger affordance than a link and an arrow on it reads as
+   decoration, that is a defensible position and the place for it is
+   `loom.action`'s docblock, where this finding would stop being surprising.
+   This is the answer worth giving if shape 1 is not wanted.
+
+### The row for `Loom daily build`
+
+**None.** A character after a label is the primitive's own markup, and
+`aria-hidden` on it is the convention `loom.inline-link` already set. Nothing
+here needs a schema change, a palette slot or a theme token.
+
+### How it was found
+
+Not by a test, and not by a screenshot either. The before and after pictures of
+the band in
+[`reports/2026-10-19-marketing-the-quietest-number-on-the-front-door.md`](reports/2026-10-19-marketing-the-quietest-number-on-the-front-door.md)
+differ in exactly one digit — the control changed from an off-site new-tab
+press to an in-site navigation and **neither picture shows it**. The instrument
+was reading `src/primitives/loom.action.ts` to check what `external` did before
+taking the prop away.
+
+---
 ## 2026-10-18 — `loom.code` contains its overflow and never admits to it, so a line too wide for a phone ends mid-word with nothing on the screen saying there is more
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
@@ -19442,7 +19520,40 @@ correct rather than broken.
 
 ## 2026-08-25 — the primitive count and the generated reference, opened from this lane for the second run running
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs` ·
+**Status:** **`Loom marketing`'s half is closed, 19 October**, by
+`marketing-10-the-quietest-number-on-the-front-door`. The `Loom docs` row —
+regenerating `reference.generated.json` — is a separate question and is not
+touched here.
+
+> **Closed for `Loom marketing`, 19 October, and one of the two counts is
+> closed by an answer rather than by a build.**
+>
+> **`FACTS.primitives`** stopped being a literal on 4 September. It counts
+> `catalogueOf(siteRegistry)`, so registering a primitive no longer opens a
+> marketing file.
+>
+> **`FACTS.decisions` stays a floor, and the directory listing this entry asks
+> for is refused.** Counting `decisions/` means reading the disk, and `/` is
+> server-rendered on demand rather than prerendered — so the read would happen
+> in the deployed function, where the repository is not. The number would be
+> right in every screenshot and wrong on the deployment, which is worse than a
+> conservative number. `(docs)` reads the same index safely because its pages
+> are built once, in a checkout; `(docs)/_lib/architecture/source.ts` has the
+> other half of why, which is that the idiomatic spelling of the path does not
+> survive the bundler.
+>
+> **What exists instead is a bound in the direction nothing was checking.** The
+> floor was `100` for seven weeks while the count went to 277, because *never
+> claim more records than there are* is satisfied more comfortably the further
+> behind it falls. It is `250` now, and `DECISIONS_FLOOR_FRACTION` holds it to
+> within 45% of the records on disk. **That is a weak version of the coupling
+> this entry is about** — roughly one bump per 180 records rather than one per
+> record — and it is deliberate, argued in `copy.ts` and in the report. Neither
+> lane has to touch it before then, and the failure names the value to type.
+>
+> Writing a decision record still cannot turn this lane red. That is the
+> property the entry asked for and it is unchanged.
 
 Two files outside `src/primitives/` changed, both because another lane holds a
 count against the registry with its own test:
