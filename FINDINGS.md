@@ -57288,3 +57288,27 @@ arrival count would be hiding the figure the portal exists to show.
 
 Nothing needs a new call: the field is on the reading every one of those screens
 already holds, through `pageReachOf`, `funnelReachOf` or `doorOf`'s caller.
+## 2026-10-19 — the site says it is counting its readers on a deployment that has not minted the key it counts them with
+
+**Filed by:** portal steering (unit 4b, [0298](decisions/0298-a-projects-ingest-key-is-public-and-names-its-application-and-the-door-files-nothing-it-cannot-name.md)) ·
+**Owned by:** `Loom marketing` (`app/(marketing)/_lib/readers/counting.ts`) ·
+**Status:** open — nothing is broken on a deployment that has run
+`pnpm signals:key prj_default`
+
+Since 4b the door refuses every delivery without a key, this site's included,
+so the layout reads the site's project key (`readers/key.ts`) and mounts the
+broadcaster only when there is one. `readersCountedHere()` is still the switch
+alone, and it decides two other things: whether the pages are rendered
+`addressed`, and whether their words say *this page is counting you*.
+
+So a deployment with `LOOM_SIGNAL_INTAKE=on` and no key minted renders
+addressed pages that say they are counting, and counts nobody. That is the
+direction to be wrong in (a page that over-discloses rather than one that
+measures silently), and it is still a sentence the page cannot back.
+
+The fix belongs to this lane because the disclosure is: `readersCountedHere`
+becomes *switch on and a key held*, which makes it a read rather than an
+environment lookup, and every caller of it (`render.ts`, `stored.ts`,
+`layout.tsx`) has to take it as an answer handed down rather than asked again.
+`stored.ts` already names the related gap of a disclosure stored into a tree
+going stale when the setting changes, and the two are probably one fix.

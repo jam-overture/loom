@@ -124,7 +124,7 @@ const site = (options: { readonly addressed: boolean; readonly send: (batch: Rea
   return render(
     <>
       {rendered.element}
-      <CountReaders send={options.send} />
+      <CountReaders url="/api/reader-signals?key=lk_0123456789abcdef0123456789abcdef" send={options.send} />
     </>
   )
 }

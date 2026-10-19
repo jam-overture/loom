@@ -12,7 +12,24 @@ import {
   type ReaderSignalJournal,
 } from "@jam-overture/loom/signals"
 
-import { describeIntake, readerSignalStatus, receiveReaderSignals, type Intake } from "./receive"
+import { err, ok } from "@jam-overture/loom"
+import {
+  applicationIdSchema,
+  DEFAULT_APPLICATION_ID,
+  projectIdSchema,
+  type Application,
+  type ApplicationId,
+} from "@jam-overture/loom/store"
+
+import type { Senders } from "./attribution"
+import { mintIngestKey } from "./keys"
+import {
+  describeIntake,
+  readerSignalStatus,
+  receiveReaderSignals,
+  type Filing,
+  type Intake,
+} from "./receive"
 import {
   DEFAULT_REGION_HEADER,
   readIntakeSwitch,
@@ -51,27 +68,61 @@ const settingsOf = (over: Partial<IntakeSettings> = {}): IntakeSettings => ({
   ...over,
 })
 
-const intakeOf = (over: Partial<Intake> = {}): Intake => ({
-  settings: settingsOf(),
-  journal: memoryReaderSignalJournal(),
-  regions: memoryReaderRegionStore(),
-  openings: memoryReaderTallyStore(),
-  gate: createIntakeGate(policy),
-  durable: true,
-  subjectOf: () => Promise.resolve("a-caller"),
-  now: () => 1_000,
-  ...over,
-})
+/**
+ * A deployment that has issued one key, to its own application — what this
+ * site's pages post with. Every test that is not about *whose* readers these
+ * are posts with it.
+ */
+const SITE_KEY = mintIngestKey()
 
+const SITE: Application = {
+  applicationId: DEFAULT_APPLICATION_ID,
+  projectId: projectIdSchema.parse("prj_default"),
+  name: "Your application",
+  createdAt: "1970-01-01T00:00:00.000Z",
+}
+
+const siteSenders: Senders = {
+  applicationWithKey: (key) => Promise.resolve(ok(key === SITE_KEY ? SITE : null)),
+}
+
+const ADDRESS = "https://loom.test/api/reader-signals"
+
+/**
+ * An intake whose every delivery is kept in one filing, handed back beside it
+ * so a test can read what was kept. The tests of *which* filing are below, in
+ * `whose readers these are`, and they build their own.
+ */
+const intakeOf = (over: Partial<Intake> & Partial<Filing> = {}): Intake & Filing => {
+  const filing: Filing = {
+    journal: over.journal ?? memoryReaderSignalJournal(),
+    regions: over.regions ?? memoryReaderRegionStore(),
+    openings: over.openings ?? memoryReaderTallyStore(),
+  }
+
+  return {
+    settings: settingsOf(),
+    senders: siteSenders,
+    filingFor: () => filing,
+    gate: createIntakeGate(policy),
+    durable: true,
+    subjectOf: () => Promise.resolve("a-caller"),
+    now: () => 1_000,
+    ...over,
+    ...filing,
+  }
+}
+
+/** What one of this site's pages posts: its project's key, from the origin it posts to. */
 const post = (body: unknown, headers: Record<string, string> = {}): Request =>
-  new Request("https://loom.test/api/reader-signals", {
+  new Request(`${ADDRESS}?key=${SITE_KEY}`, {
     method: "POST",
-    headers,
+    headers: { origin: "https://loom.test", ...headers },
     body: typeof body === "string" ? body : JSON.stringify(body),
   })
 
 describe("receiveReaderSignals", () => {
-  let intake: Intake
+  let intake: Intake & Filing
 
   beforeEach(() => {
     intake = intakeOf()
@@ -154,7 +205,7 @@ describe("receiveReaderSignals", () => {
 
     it("refuses an empty body", async () => {
       const response = await receiveReaderSignals(
-        new Request("https://loom.test/api/reader-signals", { method: "POST" }),
+        new Request(`${ADDRESS}?key=${SITE_KEY}`, { method: "POST" }),
         intake
       )
 
@@ -241,6 +292,203 @@ describe("receiveReaderSignals", () => {
       expect(response.status).toBe(400)
       expect(await response.text()).toContain("50")
     })
+  })
+})
+
+describe("whose readers these are", () => {
+  const SHOP = applicationIdSchema.parse("app_shop")
+  const BLOG = applicationIdSchema.parse("app_blog")
+  const SHOP_KEY = mintIngestKey()
+  const BLOG_KEY = mintIngestKey()
+
+  const application = (
+    applicationId: ApplicationId,
+    over: Partial<Application> = {}
+  ): Application => ({
+    applicationId,
+    projectId: projectIdSchema.parse(`prj_${applicationId.slice(4)}`),
+    name: applicationId,
+    createdAt: "2026-10-19T00:00:00.000Z",
+    ...over,
+  })
+
+  /** Two customers and the deployment itself, each with a buffer of its own. */
+  const deployment = (
+    applications: readonly Application[] = [application(SHOP), application(BLOG)]
+  ) => {
+    const issued = new Map([
+      [SHOP_KEY, SHOP],
+      [BLOG_KEY, BLOG],
+    ])
+    const filings = new Map<ApplicationId, Filing>()
+
+    const filingFor = (applicationId: ApplicationId): Filing => {
+      const held = filings.get(applicationId)
+      if (held !== undefined) return held
+
+      const made: Filing = {
+        journal: memoryReaderSignalJournal(),
+        regions: memoryReaderRegionStore(),
+        openings: memoryReaderTallyStore(),
+      }
+      filings.set(applicationId, made)
+
+      return made
+    }
+
+    const senders: Senders = {
+      applicationWithKey: (key) =>
+        Promise.resolve(
+          ok(applications.find((candidate) => candidate.applicationId === issued.get(key)) ?? null)
+        ),
+    }
+
+    const kept = async (applicationId: ApplicationId): Promise<number> => {
+      const page = await filingFor(applicationId).journal.read()
+
+      return page.ok ? page.value.batches.length : -1
+    }
+
+    return { intake: intakeOf({ senders, filingFor }), kept }
+  }
+
+  const keyed = (key: string, headers: Record<string, string> = {}): Request =>
+    new Request(`https://loom.test/api/reader-signals?key=${key}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(batch()),
+    })
+
+  it("files a keyed delivery under the key's project and nowhere else", async () => {
+    const { intake, kept } = deployment()
+
+    expect((await receiveReaderSignals(keyed(SHOP_KEY), intake)).status).toBe(204)
+
+    expect(await kept(SHOP)).toBe(1)
+    expect(await kept(BLOG)).toBe(0)
+    expect(await kept(DEFAULT_APPLICATION_ID)).toBe(0)
+  })
+
+  /** The demonstration the plan names: a second project's signals are never visible from the first. */
+  it("keeps two projects' readers apart", async () => {
+    const { intake, kept } = deployment()
+
+    await receiveReaderSignals(keyed(SHOP_KEY), intake)
+    await receiveReaderSignals(keyed(BLOG_KEY), intake)
+    await receiveReaderSignals(keyed(BLOG_KEY), intake)
+
+    expect({ shop: await kept(SHOP), blog: await kept(BLOG) }).toEqual({ shop: 1, blog: 2 })
+  })
+
+  /** And the same signal without a key is refused. */
+  it("refuses a keyless delivery from another machine and keeps nothing", async () => {
+    const { intake, kept } = deployment()
+    const stranger = new Request(ADDRESS, { method: "POST", body: JSON.stringify(batch()) })
+
+    const response = await receiveReaderSignals(stranger, intake)
+
+    expect(response.status).toBe(403)
+    expect(await response.text()).toContain("?key=")
+    expect(await kept(DEFAULT_APPLICATION_ID)).toBe(0)
+  })
+
+  /** This deployment's own pages carry a key like anyone's (0298 clause 4). */
+  it("refuses a keyless delivery from this deployment's own pages", async () => {
+    const { intake, kept } = deployment()
+    const own = new Request(ADDRESS, {
+      method: "POST",
+      headers: { origin: "https://loom.test" },
+      body: JSON.stringify(batch()),
+    })
+
+    expect((await receiveReaderSignals(own, intake)).status).toBe(403)
+    expect(await kept(DEFAULT_APPLICATION_ID)).toBe(0)
+  })
+
+  it("refuses a key it never issued", async () => {
+    const { intake } = deployment()
+
+    const response = await receiveReaderSignals(keyed(mintIngestKey()), intake)
+
+    expect(response.status).toBe(403)
+    expect(await response.text()).toContain("not a key this deployment issued")
+  })
+
+  it("refuses a closed project's key", async () => {
+    const { intake, kept } = deployment([
+      application(SHOP, { closedAt: "2026-10-19T12:00:00.000Z" }),
+      application(BLOG),
+    ])
+
+    const response = await receiveReaderSignals(keyed(SHOP_KEY), intake)
+
+    expect(response.status).toBe(403)
+    expect(await response.text()).toContain("closed")
+    expect(await kept(SHOP)).toBe(0)
+  })
+
+  it("refuses the project's key from a site the project does not name", async () => {
+    const { intake, kept } = deployment([application(SHOP, { host: "shop.example.com" })])
+
+    const copied = await receiveReaderSignals(
+      keyed(SHOP_KEY, { origin: "https://copied.example.org" }),
+      intake
+    )
+
+    expect(copied.status).toBe(403)
+    expect(await copied.text()).toContain("https://copied.example.org")
+
+    const own = await receiveReaderSignals(
+      keyed(SHOP_KEY, { origin: "https://shop.example.com" }),
+      intake
+    )
+
+    expect(own.status).toBe(204)
+    expect(await kept(SHOP)).toBe(1)
+  })
+
+  /** A lookup that cannot answer is this deployment's fault, and is said to be. */
+  it("answers 503 when it cannot look the key up", async () => {
+    const intake = intakeOf({
+      senders: { applicationWithKey: () => Promise.resolve(err({ detail: "no database" })) },
+    })
+
+    const response = await receiveReaderSignals(keyed(SHOP_KEY), intake)
+
+    expect(response.status).toBe(503)
+    expect(await response.text()).toContain("no database")
+  })
+
+  /**
+   * The gate comes first, so a stranger guessing keys spends their own budget
+   * rather than this deployment's database.
+   */
+  it("counts a sender against the window before it looks any key up", async () => {
+    let lookups = 0
+    const intake = intakeOf({
+      senders: {
+        applicationWithKey: () => {
+          lookups += 1
+          return Promise.resolve(ok(null))
+        },
+      },
+    })
+
+    for (let sent = 0; sent < 4; sent += 1) {
+      await receiveReaderSignals(keyed(mintIngestKey()), intake)
+    }
+
+    expect(lookups).toBe(3)
+  })
+
+  /** A refused sender is not told what was wrong with a body nobody was going to keep. */
+  it("refuses an unattributable delivery before it parses it", async () => {
+    const stranger = new Request("https://loom.test/api/reader-signals", {
+      method: "POST",
+      body: "{not json",
+    })
+
+    expect((await receiveReaderSignals(stranger, intakeOf())).status).toBe(403)
   })
 })
 
