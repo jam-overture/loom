@@ -86,8 +86,8 @@ export const applicationSchema = z
     createdAt: z.string().datetime(),
     /**
      * Where the application lives, when it has said so. Used to tell a reader
-     * which application they are looking at, and — once ingest authenticates — to
-     * decide which origins may post to it.
+     * which application they are looking at, and to decide which origin may
+     * post its readers' signals — that one exactly, when it is set (0298).
      */
     host: z.string().min(1).max(253).optional(),
     /**
@@ -97,7 +97,8 @@ export const applicationSchema = z
      * its project reopening.
      *
      * A closed application takes no signals. That is enforced where ingest
-     * learns which application is posting, which is not here and not yet.
+     * learns which application is posting, which is the host's door rather
+     * than this schema (0298).
      */
     closedAt: z.string().datetime().optional(),
   })

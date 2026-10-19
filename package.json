@@ -120,7 +120,8 @@
     "prepack": "pnpm build",
     "reports:check": "tsx tools/reports/main.ts",
     "reports:shrink": "tsx tools/reports/shrink.ts",
-    "portal:account": "pnpm --filter @loom/app portal:account"
+    "portal:account": "pnpm --filter @loom/app portal:account",
+    "signals:key": "pnpm --filter @loom/app signals:key"
   },
   "dependencies": {
     "zod": "^3.24.1"

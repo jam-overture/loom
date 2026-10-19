@@ -32,7 +32,9 @@ import { SITE_SIGNAL_TYPES } from "@/app/(marketing)/_lib/readers/asked"
  * `deliverReaderSignals`: a beacon when the browser will take one, a `fetch`
  * with `keepalive` when it will not, to `/api/reader-signals` on this same
  * origin — the address this application already answers, and no service
- * anywhere else. Nothing about the response is read, because a page has no
+ * anywhere else — carrying this site's project key, which the layout reads on
+ * the server (`readers/key.ts`) because the door files nothing it cannot name
+ * (0298). Nothing about the response is read, because a page has no
  * retry to attempt and no reader to tell.
  *
  * The import is `@jam-overture/loom/signals/broadcast` rather than
@@ -62,6 +64,8 @@ export const COUNTING_ATTRIBUTE = "data-reader-signals"
 export type CountingState = "broadcasting" | "unaddressed"
 
 export type CountReadersProps = {
+  /** Where a batch is posted, key included. The layout reads it on the server. */
+  readonly url: string
   /**
    * Where a batch goes. The runtime's delivery when absent, which is what the
    * layout mounts; a test passes its own so it can read the batches back
@@ -73,7 +77,7 @@ export type CountReadersProps = {
 /** The root of the rendered tree — the element carrying the tree's own address. */
 const TREE_ROOT = "[data-loom-tree]"
 
-export const CountReaders = ({ send }: CountReadersProps = {}) => {
+export const CountReaders = ({ url, send }: CountReadersProps) => {
   useEffect(() => {
     const document = globalThis.document
     const page = document.documentElement
@@ -88,7 +92,7 @@ export const CountReaders = ({ send }: CountReadersProps = {}) => {
 
     const started = broadcastReaderSignals(root, {
       types: SITE_SIGNAL_TYPES,
-      send: send ?? deliverReaderSignals(),
+      send: send ?? deliverReaderSignals({ url }),
     })
 
     if (!started.ok) {
@@ -102,7 +106,7 @@ export const CountReaders = ({ send }: CountReadersProps = {}) => {
       started.value.stop()
       page.removeAttribute(COUNTING_ATTRIBUTE)
     }
-  }, [send])
+  }, [url, send])
 
   return null
 }

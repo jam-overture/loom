@@ -360,6 +360,10 @@ Three so far, and the last two are the ones to get right:
   table now rather than a variable, and there is nowhere to put the row that
   `pnpm portal:account` writes. These two are the portal's own, like the attempt
   log above and unlike everything else on this list.
+- `loom_ingest_keys` (0298). **Miss this and every customer's readers are
+  refused** with a `503` naming the lookup, because the intake asks it about
+  every delivery, and the marketing site counts nobody because it has no key
+  to post with. The table is this deployment's own, like the two above.
 - `loom_holds` (0088), which is where a change the Gate held back waits for the
   human who answers it. **Only a deployment that uses `postgresHoldStore` needs
   it**, and one that stays on the in-memory store keeps working without it — but
@@ -478,12 +482,39 @@ browser has it, so the last batch of a page view survives the page closing, and 
 that a beacon cannot preflight, so a cross-origin URL needs CORS on the far end
 or the browser refuses the delivery before it is sent.
 
+**Whose readers they are.** A project's pages post with its key,
+`/api/reader-signals?key=lk_…`, and every batch is filed under the project the
+key names (0298). Mint one with:
+
+```bash
+pnpm signals:key prj_a1b2c3
+```
+
+Minting another ends the one before it. The key is printed in every page that
+sends one, so it is not a secret: it says which project a delivery is for, and
+the origin check is what stops it being used from another site. A delivery
+with **no key** is refused, this deployment's own pages included.
+
+**The marketing site needs its key too.** It posts with the key of the
+deployment's own project, read from the same table, so after switching intake
+on run:
+
+```bash
+pnpm signals:key prj_default
+```
+
+Until then the site mounts no broadcaster and counts nobody.
+
 **Who may post, and how often.** The endpoint is public — a published page is
 public, so a session check is not available, and 0146 forbids the endpoint
 learning anything about who is posting. What it does instead:
 
 | | |
 | --- | --- |
+| no key | `403`, saying to add `?key=` |
+| a key this deployment did not issue, or has replaced | `403` |
+| a key whose project is closed | `403` |
+| a key whose project names its host, from any other origin or from none | `403`, naming the origin. Exact host and port; a subdomain is another site |
 | a delivery over **64 KB** | `413`. That is the ceiling `sendBeacon` itself imposes, so a larger delivery did not come from one. Measured off the bytes, never off `content-length` |
 | more than **120 deliveries a minute** from one sender | `429` with `Retry-After`. A broadcaster flushes every five seconds, so that is eight tabs' worth |
 | a delivery that is not a batch | `400`, naming which batch of the delivery and why. Nothing is kept unless all of it parses |
@@ -512,7 +543,9 @@ pnpm --filter @loom/app signals:collect
 ```
 
 It counts every batch older than the window into `loom_reader_tallies` and
-`loom_reader_funnels`, then forgets exactly those. Counting and forgetting are
+`loom_reader_funnels`, then forgets exactly those — for every project in turn,
+closed ones included, since a closed project's last batches are still owed a
+count. Counting and forgetting are
 one operation on purpose (0158): a rollup reports what its window *added*, so a
 batch counted twice is counted twice forever.
 
