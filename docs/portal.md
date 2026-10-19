@@ -256,8 +256,8 @@ Each is one pull request, and **do not start a unit whose input is not on
 | # | Unit | Plane | Blocked on |
 | --- | --- | --- | --- |
 | 1 | ~~**The signal tables take the application and the audience.**~~ **Done, in two migrations rather than one.** The dimension is the *application*, not the project (0269): the finer grain, matching `loom_trees`, with the project as the grouping above it. `application_id` landed on all five reader tables with 0273, and `audience_id` with [0284](../decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md) once 0263 was accepted | observation | — |
-| 2 | **Accounts and roles.** The environment roster goes; the actor comes from the session, the scope from the route (0027), and a role is a ceiling on the stake scale | identity | unit 0 |
-| 3 | **The workspace.** The prototype's project list, wired: create, delete, switch | identity | units 1, 2 |
+| 2 | ~~**Accounts and roles.**~~ **Done** ([0285](../decisions/0285-an-account-is-a-row-with-a-minted-key-and-a-role-is-a-ceiling-on-the-gates-own-scale.md)). `LOOM_PORTAL_REVIEWERS` is gone; an account is a row with a key the portal mints, prints once and stores as a digest, and `viewer`/`approver`/`owner` are ceilings on the Gate's own stake scale rather than a second permission system. `currentActor` and `requireActor` kept their signatures, which is the seam `identity.ts` promised. **The portal now needs a database to admit anybody**, and the way in is `pnpm portal:account` rather than a variable | identity | — |
+| 3 | ~~**The workspace.** …create, delete, switch~~ **Done, as create and close.** `/portal` lists the projects you hold a role in, and registering one makes you its owner — without which the screen is empty for everybody for ever. **Delete became closing** ([0289](../decisions/0289-a-project-is-closed-rather-than-deleted-and-closing-is-a-column-and-a-filter.md)): three stores refuse to delete, and *the project says it was closed* is what they name instead. **Switch has no destination yet** — `/portal/[application]` went in unit 0 and the prototype's project screens are invented, so the cards show what is inside each project and the link lands with unit 5. No counts: pages and waiting need a store handle per application, and *signals in 24h* is not countable at all while the only table with time in it is the short-lived buffer | identity | — |
 | 4 | **Registration and the key.** The repository first, then the project it names, then the ingest key, a snippet to paste, and `/api/reader-signals` authenticating it. **It authenticates nobody today.** The order is [0292](../decisions/0292-a-project-holds-at-most-one-repository-and-a-repository-belongs-to-at-most-one-project.md)'s, and it is the reverse of what `/portal/new` does — a project is named after its repository rather than after the first application in it | connection | unit 3 |
 | 5 | **Arrival.** The prototype's logs screen against the project's own signals | observation | unit 4 |
 
@@ -279,10 +279,19 @@ The pages inspector, the rules screen, trust, checkup and readers are not in
 either table. They were the portal; they are now things to re-earn one at a
 time, each behind a unit in this file.
 
-> **Standing constraint until unit 1 is on `main`: the portal must not offer a
-> second project.** A create button over a ledger that cannot tell two apps
-> apart mixes two customers' readers on the first day, and the rows cannot be
-> separated afterwards.
+> ~~**Standing constraint until unit 1 is on `main`: the portal must not offer a
+> second project.**~~ **Lifted on 15 October**, when the five reader tables took
+> `application_id` (0273) and then `audience_id` (0284). The constraint existed
+> because a create button over a ledger that could not tell two apps apart
+> mixes two customers' readers on the first day and the rows cannot be
+> separated afterwards. The ledger tells them apart now, in both dimensions.
+>
+> **What replaces it is narrower and still standing: the door cannot.**
+> `/api/reader-signals` authenticates nobody and files everything under
+> `app_default`, so a second application's signals would arrive under the
+> first's name — the same mixing, one layer down. Unit 4 is what closes it, and
+> until then a deployment serving two applications is only safe because nothing
+> is pointed at it yet.
 
 ---
 
@@ -314,10 +323,17 @@ unit 0.
    `/portal/app` rather than rebuilding it. 0260's clause 4 was corrected on the
    way in: nothing authenticates the signal intake today, which this plan said
    and that record denied. Units 1 and 6 are unblocked.
-2. **Go-ahead for unit 0.** The manifest above is exact; the deletion is one
-   verified pass and is ready to run.
+2. ~~**Go-ahead for unit 0.**~~ **Given, and done on 13 October** — the section
+   above records what the deletion actually cost and the three amendments it
+   landed with.
 3. **When `Loom portal` resumes, and under what charter.** `docs/routines.md`
    now records it as paused.
+4. **Nothing else is waiting on a decision.** Units 1, 2 and 3 are on `main`,
+   and the two questions they raised were answered rather than parked: delete
+   versus close became [0289](../decisions/0289-a-project-is-closed-rather-than-deleted-and-closing-is-a-column-and-a-filter.md),
+   and how many repositories a project may hold became
+   [0292](../decisions/0292-a-project-holds-at-most-one-repository-and-a-repository-belongs-to-at-most-one-project.md).
+   Unit 4 is unblocked and is next.
 
 ## Not in scope, and one of them deserves naming
 
