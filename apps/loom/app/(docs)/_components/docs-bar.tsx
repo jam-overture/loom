@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import {
   BAR_CONTROL_CLASS,
+  BAR_HIDDEN_CLASS,
   railScrollerAttr,
   UNDER_HEADER_CLASS,
 } from "@/app/(docs)/_lib/chrome"
@@ -108,6 +109,11 @@ import { usePageSections, useSectionBeingRead } from "./use-page-sections"
  * below 1280. The left-hand control stands down from 1024, where the site's own
  * rail is on screen and a second way to reach it would be furniture.
  *
+ * That width is `_lib/chrome.ts`' and not this file's, because the same number
+ * decides three things: whether the bar is here, whether the page's rail is
+ * there instead, and whether the scrollport is inset by the bar's band. The
+ * stylesheet reads it out of Tailwind's theme rather than transcribing it.
+ *
  * It sticks **under** the header rather than at its height: the header's row
  * and the hairline it draws are two declarations, and taking only the first of
  * them left the bar covering that hairline by a pixel. `_lib/chrome.ts` names
@@ -172,7 +178,7 @@ export const DocsBar = ({ pagesWithSections }: { readonly pagesWithSections: rea
 
   return (
     <div
-      className={`bg-surface-page/85 border-edge sticky z-30 backdrop-blur xl:hidden ${UNDER_HEADER_CLASS} ${edge}`}
+      className={`bg-surface-page/85 border-edge sticky z-30 backdrop-blur ${BAR_HIDDEN_CLASS} ${UNDER_HEADER_CLASS} ${edge}`}
     >
       <div className="flex items-center gap-4 px-5 sm:px-8 lg:px-12">
         {/*

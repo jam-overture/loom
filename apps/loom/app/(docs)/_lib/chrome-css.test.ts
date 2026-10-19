@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { propertiesNamedIn, remPx, rootProperties, soleDeclaration } from "./chrome-css"
+import { guardedRoots, propertiesNamedIn, remPx, rootProperties, soleDeclaration } from "./chrome-css"
 
 /**
  * The reader itself, against stylesheets written for the purpose.
@@ -30,6 +30,18 @@ const SHEET = `
   html {
     scroll-padding-top: var(--chrome-inset);
   }
+
+  @media (width >= theme(--breakpoint-xl)) {
+    :root {
+      --chrome-bar-band: 0px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 }
 `
 
@@ -49,6 +61,46 @@ describe("the properties the stylesheet declares on :root", () => {
 
   it("says so rather than reporting an empty chrome when there is no :root at all", () => {
     expect(() => rootProperties("html { color: red; }")).toThrow(/declares nothing on :root/)
+  })
+
+  /*
+   * The chrome has a second configuration above 1280 and this is not it. A
+   * reader that swept the guarded block in too would hand back `0px` for
+   * `--chrome-bar-band` and call it the value, which is the one answer that is
+   * wrong at both widths.
+   */
+  it("leaves a block a media query guards out of what the page is at every width", () => {
+    expect(rootProperties(SHEET).has("--chrome-bar-band")).toBe(false)
+  })
+})
+
+describe("the :root blocks a media query guards", () => {
+  it("is the condition as written, so a query asking the theme can be told from one with a number in it", () => {
+    const guarded = guardedRoots(SHEET)
+
+    expect(guarded).toHaveLength(1)
+    expect(guarded[0]?.condition).toBe("(width >= theme(--breakpoint-xl))")
+    expect(guarded[0]?.properties.get("--chrome-bar-band")).toBe("0px")
+  })
+
+  /* The reduced-motion query in the sheet above guards `html`, not `:root`. */
+  it("is none of the queries that redeclare no custom property", () => {
+    expect(guardedRoots(SHEET).map((found) => found.condition)).not.toContain("(prefers-reduced-motion: reduce)")
+  })
+
+  it("finds a query whose body holds braces, which is every query holding a block", () => {
+    const nested = "@media (min-width: 40rem) { html { color: red; } :root { --a: 1px; } }\n:root { --a: 2px; }"
+
+    expect(guardedRoots(nested)[0]?.properties.get("--a")).toBe("1px")
+    expect(rootProperties(nested).get("--a")).toBe("2px")
+  })
+
+  it("says so rather than guessing when a query is not closed", () => {
+    expect(() => guardedRoots("@media (min-width: 40rem) { :root { --a: 1px; }")).toThrow(/is not closed/)
+  })
+
+  it("is empty where the sheet has no query at all", () => {
+    expect(guardedRoots(":root { --a: 1px; }")).toEqual([])
   })
 })
 

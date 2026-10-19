@@ -270,8 +270,16 @@
 
     /** Where a second sticky band starts, and where a rail's height begins. */
     --chrome-under-header: calc(var(--chrome-header) + var(--chrome-edge));
-    /** Everything stuck to the top of the window, at the widths with a bar. */
-    --chrome: calc(var(--chrome-under-header) + var(--chrome-bar) + var(--chrome-edge));
+    /**
+     * The bar's whole contribution: its row, and the hairline it draws under
+     * itself. One name rather than two terms, because above the breakpoint
+     * the bar is not rendered and the honest number for all of it is nothing.
+     * A `--chrome-bar: 0px` there would have left the hairline in and made the
+     * chrome a pixel taller than it is.
+     */
+    --chrome-bar-band: calc(var(--chrome-bar) + var(--chrome-edge));
+    /** Everything stuck to the top of the window, at this width. */
+    --chrome: calc(var(--chrome-under-header) + var(--chrome-bar-band));
     /** What is left of the window for a rail that starts under the header. */
     --chrome-rail: calc(100vh - var(--chrome-under-header));
 
@@ -286,6 +294,37 @@
      * (`_lib/on-this-page.ts`), and the two have to stay in that order.
      */
     --press-landing: 10rem;
+  }
+
+  /*
+   * The one width the chrome changes at, and it is asked for rather than
+   * written.
+   *
+   * At 1280 and above the bar is not there: `docs-bar.tsx` wears
+   * `BAR_HIDDEN_CLASS` and the page's own rail arrives beside the prose
+   * instead. So everything measured against the bar is measured against
+   * something that is not on the screen, and the scrollport was inset by 112
+   * where 67 would do. Nothing a reader who scrolls would notice; what gets
+   * it is every scroll the browser performs with no heading in it, and above
+   * all moving focus to something off screen with a keyboard.
+   *
+   * `theme(--breakpoint-xl)` is **Tailwind's own `xl`**, the same declaration
+   * the `xl:` in those two classes compiles against. Transcribing `80rem`
+   * here would have worked today and would have been the sixth copy of a
+   * number, which is the thing the block above exists to have stopped. The
+   * breakpoint has one value and three readers: this query, the class that
+   * hides the bar, and the class that brings the rail in. `chrome.ts` names
+   * it for the two that are markup, and `chrome.test.ts` holds all three
+   * together.
+   *
+   * It is in `@layer base` beside the declarations it overrides, so the two
+   * are ordered within one layer. Unlayered, it would win for a reason that
+   * has nothing to do with being written second.
+   */
+  @media (width >= theme(--breakpoint-xl)) {
+    :root {
+      --chrome-bar-band: 0px;
+    }
   }
 
   /*
