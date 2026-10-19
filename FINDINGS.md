@@ -57177,8 +57177,20 @@ arrivals of one country, named rather than withheld twice.
 ## 2026-10-19 — `pageViewsFor` picks one form's door row for a revision served in two, and reports the other as a duplicate
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`) · **Status:** open — **the same fault as the entry
-above, in a different reading**, and it is not a key fix
+(`src/signals/page-views.ts`) · **Status:** **closed by
+`signals-41-two-forms-arrivals-are-one-door`** (0298) — taken with the
+arithmetic this entry named, and it was additive as predicted in three of the
+four figures: `opened` and `appearances` add, `inflation` is recomputed from the
+summed drift over the summed openings, and **`drift` and `pending` are summed
+per row rather than taken from the two sums**, which is the one place the
+prediction *their difference and therefore adds* would have been wrong — a form
+mid-collection and a form with straddles net to a revision with neither. Two
+fields the entry did not name needed a rule as well, because a reading over two
+rows cannot carry one row's timestamps: `updatedAt` is the newest of them, and
+`foldedAt` is the oldest fold attested by a row that still has openings pending,
+which makes a summed door stalled exactly when one of its forms is. Original
+status: open — **the same fault as the entry above, in a different reading**,
+and it is not a key fix
 
 The entry above is `regionReadingFor` keying a dedup by the region where the
 store keys its rows by the region and the audience. `pageViewsFor` has the same
@@ -57244,3 +57256,35 @@ figures. A surface that greyed out a mixed window would be hiding the
 deployment-wide readership answer this reading exists to give.
 
 Nothing needs a new call: both fields are on objects the screen already holds.
+
+---
+## 2026-10-19 — a door read whole over two forms is a sum of them, and no screen says so
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one census on one reading**, and the third of these (0295, 0297, 0298)
+
+0298 puts `audiences` on `RevisionPageViews` and makes `audienceId` three-valued
+there, so a door reading now says which forms' arrivals it added. A screen that
+draws neither cannot tell the three states apart, and they are the same three
+0297 filed for the region map:
+
+- **One name, and `audienceId` naming it.** One form's door. What every
+  deployment serving one form of a page always sees, the name being
+  `aud_everyone` there.
+- **More than one name, with `audienceId` null.** *This arrival count is the sum
+  of the forms you serve of this page.* **Not a fault and not a refusal**: a
+  reader who arrived arrived once whichever form they were served. The caption
+  matters because every share on the screen beside it is taken of this number,
+  so a reader of the screen should know whose arrivals the denominator is.
+- **`[]`.** Rows that named no audience, which is a window no store produced —
+  the migration files pre-0284 rows under `aud_everyone` — so in practice a
+  hand-built window or a fixture. The honest caption is *nothing here says*.
+
+**What must not be drawn:** a sum over forms is not `audiences-mixed`. That
+fault is a *page* reading's, where adding two forms' node counters is one number
+about two pages (0290); the door is the one counter where the sum is the answer
+(0297 clause 2, 0298 clause 2). A screen that greyed out a deployment-wide
+arrival count would be hiding the figure the portal exists to show.
+
+Nothing needs a new call: the field is on the reading every one of those screens
+already holds, through `pageReachOf`, `funnelReachOf` or `doorOf`'s caller.

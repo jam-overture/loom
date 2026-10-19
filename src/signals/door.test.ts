@@ -16,6 +16,7 @@ import { doorOf, type RevisionPageViews } from "./index.js"
 
 const row = (counts: Partial<RevisionPageViews> = {}): RevisionPageViews => ({
   audienceId: DEFAULT_AUDIENCE_ID,
+  audiences: [DEFAULT_AUDIENCE_ID],
   treeId: TREE,
   revision: 1,
   opened: 0,

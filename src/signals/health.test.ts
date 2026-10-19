@@ -147,6 +147,12 @@ const ago = (ms: number): string => new Date(Date.parse(NOW) - ms).toISOString()
 /** The same row, with the fold's own timestamp on it. */
 const foldedAt = (row: StoredPageViews, at: string): StoredPageViews => ({ ...row, foldedAt: at })
 
+/** The same row, filed under one of the forms a page is served in (0284). */
+const inForm = (audienceId: typeof SKIERS, row: StoredPageViews): StoredPageViews => ({
+  ...row,
+  audienceId,
+})
+
 /** A deployment that folds hourly behind a ten-minute window, give or take. */
 const schedule = (over: Partial<CollectionSchedule> = {}): CollectionSchedule => ({
   at: NOW,
@@ -481,6 +487,44 @@ describe("collectionHealthOf", () => {
       expect(health.pages[0]?.foldedAt).toBe(ago(3 * AN_HOUR))
       expect(health.readersAffected).toBe(140)
       expect(remedyOf("collection-stalled")).toBe("configuration")
+    })
+
+    /**
+     * A reading that names no audience divides by every form's door added
+     * together (0298), and the fold it waits on is the oldest attested by a
+     * form that still has openings pending — so a fold that ran a minute ago
+     * on a busy form cannot vouch for the form that has been waiting three
+     * hours.
+     */
+    it("faults a revision where one of two forms has waited longer than a fold is meant to take", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [
+          foldedAt(inForm(SKIERS, door(TREE, 1, 140, 100)), ago(3 * AN_HOUR)),
+          foldedAt(inForm(RIDERS, door(TREE, 1, 60, 60)), ago(60 * 1000)),
+        ],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual(["collection-stalled"])
+      expect(health.pages[0]?.arrivals).toBe(200)
+      expect(health.pages[0]?.pending).toBe(40)
+    })
+
+    /** And the other way about, which is why the oldest fold of them all is the wrong rule. */
+    it("leaves a revision sound where the old fold belongs to the form with nothing pending", () => {
+      const health = collectionHealthOf(
+        [reading(TREE, 1, [100])],
+        [
+          foldedAt(inForm(SKIERS, door(TREE, 1, 140, 100)), ago(60 * 1000)),
+          foldedAt(inForm(RIDERS, door(TREE, 1, 60, 60)), ago(3 * AN_HOUR)),
+        ],
+        schedule()
+      )
+
+      expect(faultsOn(health, TREE)).toEqual([])
+      expect(health.pages[0]?.arrivals).toBe(200)
+      expect(health.pages[0]?.pending).toBe(40)
     })
 
     /** The allowance itself is sound, which is the boundary the threshold rule asks for. */

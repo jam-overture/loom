@@ -1,6 +1,7 @@
 import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 
+import { audiencesIn } from "./audiences.js"
 import type { ReaderSignalBatch } from "./signal.js"
 
 /**
@@ -45,6 +46,19 @@ import type { ReaderSignalBatch } from "./signal.js"
  * a count of page views of a revision names nowhere and nobody, so there is
  * nothing in it to withhold. Four page views of revision 3 is four page views
  * of revision 3.
+ *
+ * **A page served in two forms has two doors, and a deployment-wide reading
+ * adds them.** The store keeps one row per revision per audience (0284), so a
+ * revision served to two audiences (0263) is counted twice over — and a reading
+ * that named no audience used to take whichever row came first and report the
+ * other as a row handed in twice, which published one form's arrivals and
+ * called the rest a duplicate. They add because **arrivals are people**: a
+ * reader who arrived arrived once whichever form they were served, so the sum
+ * is one deployment's arrivals and the census beside it says what it was a sum
+ * over (0297, 0298). It is the opposite of a page reading, where adding two
+ * forms' node counters would be one number about two pages (0290) — and the
+ * asymmetry is not a special case for arrivals but the plainest instance of the
+ * rule that what may be added is whatever was counted once.
  */
 
 /**
@@ -180,7 +194,54 @@ export const openingsOf = (batches: readonly ReaderSignalBatch[]): readonly Revi
  * day is a fact about the deployment rather than about its readers, and a screen
  * showing the number should be able to say when it last did.
  */
-export type RevisionPageViews = StoredPageViews & {
+export type RevisionPageViews = ReaderPageViews & {
+  /**
+   * The audience this reading is of, or `null` where it is of every form the
+   * window held.
+   *
+   * The same three-valued field `RegionReading.audienceId` is, and the
+   * same rule: it is what the *asking* named and never what the rows turned out
+   * to say. One row naming one form is not a reading of one form — a window may
+   * simply hold one today — so a single-membered census does not fill this in
+   * (0297, 0298).
+   */
+  readonly audienceId: AudienceId | null
+  /**
+   * The audiences whose rows were added into this reading, deduplicated and in
+   * a stable order.
+   *
+   * `[]` where the rows named none, one name where this is one form's door, and
+   * **more than one where it is a sum over forms, which is a measurement rather
+   * than a fault**: a page served in two forms (0263) has two door rows (0284),
+   * and a reader who arrived arrived once whichever form they were served, so
+   * the sum is one deployment's arrivals (0297, 0298). Compare a page reading,
+   * where adding two forms' node counters is one number about two pages and
+   * `PageHealth` calls it `audiences-mixed` (0290).
+   */
+  readonly audiences: readonly AudienceId[]
+  /**
+   * When either writer last moved a row behind this reading — the newest of
+   * them where it is a sum, because the question is when the number last
+   * changed and the busiest form is what last changed it.
+   *
+   * See {@link StoredPageViews.updatedAt} for why it cannot tell a stalled
+   * collection from a quiet one.
+   */
+  readonly updatedAt: string
+  /**
+   * The fold this reading is waiting on: the oldest fold attested by a row that
+   * still has openings pending, or the oldest attested of them all where none
+   * has, and absent where nothing attests one.
+   *
+   * For one form's door that is simply {@link StoredPageViews.foldedAt}. For a
+   * sum over forms it is the only choice that keeps a fault from hiding behind
+   * a busier form — a fold that ran a minute ago on one form cannot vouch for a
+   * form whose openings have been waiting a day — and it is *the oldest of the
+   * rows still waiting* rather than the oldest of all of them so that a quiet
+   * form with nothing pending cannot invent a stall. A summed door is therefore
+   * stalled exactly when one of its forms is (0298).
+   */
+  readonly foldedAt?: string
   /**
    * Appearances in excess of openings — the over-count in every distinct view
    * count stored against this revision, measured rather than bounded.
@@ -194,9 +255,13 @@ export type RevisionPageViews = StoredPageViews & {
    * Page views that began and whose batches no rollup has folded yet — the
    * buffer, as a number.
    *
-   * It is the other sign of the same subtraction, so a revision never has both.
-   * A reading that showed neither would make a deployment whose collection has
-   * stopped look like a deployment whose readers had left.
+   * It is the other sign of the same subtraction, so **one form's door never
+   * has both** — and a door summed over two forms can, because the two are
+   * added per row rather than taken from the two sums (0298): one form
+   * mid-collection and one form with straddles is a revision with six of each,
+   * and netting them would report it as exactly measured, which neither form
+   * is. A reading that showed neither would make a deployment whose collection
+   * has stopped look like a deployment whose readers had left.
    */
   readonly pending: number
   /**
@@ -218,12 +283,19 @@ export type PageViewReading = {
   readonly revisions: readonly RevisionPageViews[]
 }
 
-const readingOf = (row: StoredPageViews): RevisionPageViews => ({
-  ...row,
-  drift: Math.max(0, row.appearances - row.opened),
-  pending: Math.max(0, row.opened - row.appearances),
-  inflation: row.opened === 0 ? null : Math.max(0, row.appearances - row.opened) / row.opened,
-})
+const readingOf = (row: StoredPageViews): RevisionPageViews => {
+  const audiences = audiencesIn([row])
+
+  return {
+    ...row,
+    /** One row's own form, and `null` where the row named none (0298). */
+    audienceId: audiences[0] ?? null,
+    audiences,
+    drift: Math.max(0, row.appearances - row.opened),
+    pending: Math.max(0, row.opened - row.appearances),
+    inflation: row.opened === 0 ? null : Math.max(0, row.appearances - row.opened) / row.opened,
+  }
+}
 
 /**
  * Rows from the store, read as something a screen may show.
@@ -278,12 +350,21 @@ export const pageViewReadingOf = (rows: readonly StoredPageViews[]): PageViewRea
  */
 export type PageViewsFor = {
   /**
-   * The row, read through {@link pageViewReadingOf}, or `null` where this
-   * revision has none.
+   * This revision's door, read through {@link pageViewReadingOf}, or `null`
+   * where this revision has none.
    *
    * Read through the reading rather than subtracted again, because one
    * definition of drift, pending and inflation is the point: a second would be
    * a second place for them to disagree with the counter they describe.
+   *
+   * **Where the asking names no audience this is the sum of every form's
+   * door**, and it was once whichever form came first in the caller's array
+   * (0298). A page served in two forms has two door rows (0263, 0284), so a
+   * deployment-wide asking was answered with one form's openings and the other
+   * form's reported as a row handed in twice — the same quiet undercount found
+   * in the reading beside it (0297). Arrivals add because arrivals are people:
+   * a reader who arrived arrived once whichever form they were served.
+   * {@link RevisionPageViews.audiences} is what the sum was over.
    */
   readonly measured: RevisionPageViews | null
   /**
@@ -304,14 +385,21 @@ export type PageViewsFor = {
    */
   readonly otherAudience: number
   /**
-   * Rows for this tree, revision and audience beyond the first, where every one
-   * after it was ignored.
+   * Rows for this tree, revision **and audience** beyond the first of that
+   * audience, where every one after it was ignored.
    *
    * A store keeps one row per revision per audience, so this cannot happen from
    * one read — it happens when a caller concatenates two. Adding them is wrong,
-   * because the openings are already a total and would double; taking the last
-   * is wrong, because it is not the truer one. So the first row stands and the
-   * fact is reported.
+   * because the openings are already a running total and would double (0158);
+   * taking the last is wrong, because it is not the truer one. So the first row
+   * of each form stands and the fact is reported.
+   *
+   * **The audience is part of what makes two rows two rows**, and leaving it
+   * out was an undercount (0298): two forms' doors keyed by nothing at all made
+   * the second form a repeat of the first, so a deployment-wide reading
+   * published one form's arrivals and called the rest a duplicate. A form's own
+   * door was never affected — the audience is picked before this, so one form's
+   * rows key the same either way.
    */
   readonly duplicated: number
 }
@@ -332,9 +420,88 @@ export type RevisionOf = {
 }
 
 /**
- * Pick the page-view row for one revision out of a window of rows.
+ * The newest instant either writer moved one of these rows.
  *
- * Linear in the rows, with one pass.
+ * A reading's own figure is as fresh as the freshest row under it, so this is a
+ * maximum. Compared by parsed instant rather than by string order, because two
+ * stores may write the same instant in two spellings and only one of them sorts.
+ */
+const movedLast = (rows: readonly StoredPageViews[]): string => {
+  let latest = rows[0]?.updatedAt ?? ""
+
+  for (const row of rows) {
+    if (Date.parse(row.updatedAt) > Date.parse(latest)) latest = row.updatedAt
+  }
+
+  return latest
+}
+
+/**
+ * The oldest fold attested by one of these rows, or absent where none attests
+ * one.
+ *
+ * A `folded_at` nothing can read attests no fold, which is how a stall reading
+ * already treats one (0274): it is skipped rather than kept as the oldest, so
+ * one unreadable instant cannot make a deployment's whole collection look
+ * unattested.
+ */
+const foldWaitedOn = (rows: readonly StoredPageViews[]): string | undefined => {
+  let oldest: string | undefined
+
+  for (const row of rows) {
+    const at = row.foldedAt
+
+    if (at === undefined || Number.isNaN(Date.parse(at))) continue
+    if (oldest === undefined || Date.parse(at) < Date.parse(oldest)) oldest = at
+  }
+
+  return oldest
+}
+
+/**
+ * One revision's door rows, added into one reading.
+ *
+ * **The arithmetic is the reading's own, taken over the rows rather than
+ * written again.** `opened` and `appearances` are counts and add; `drift` and
+ * `pending` are added *per row and never taken from the two sums*, because a
+ * form mid-collection has openings no fold has reached and subtracting in the
+ * aggregate would let that cancel another form's straddles — which is the rule
+ * {@link pageViewReadingOf} already states for revisions and holds for forms of
+ * one revision for the same reason; and `inflation` is a ratio, so it is
+ * recomputed from the summed drift and the summed openings rather than averaged
+ * over the forms. Handing the rows to {@link pageViewReadingOf} is what keeps
+ * those four from being a second spelling of one rule.
+ */
+const summedOf = (
+  where: RevisionOf,
+  audience: AudienceId | null,
+  rows: readonly StoredPageViews[]
+): RevisionPageViews | null => {
+  if (rows.length === 0) return null
+
+  const { opened, appearances, drift, pending, inflation } = pageViewReadingOf(rows)
+  const waiting = rows.filter((row) => row.opened > row.appearances)
+  const folded = foldWaitedOn(waiting.length > 0 ? waiting : rows)
+
+  return {
+    treeId: where.treeId,
+    revision: where.revision,
+    audienceId: audience,
+    audiences: audiencesIn(rows),
+    opened,
+    appearances,
+    drift,
+    pending,
+    inflation,
+    updatedAt: movedLast(rows),
+    ...(folded === undefined ? {} : { foldedAt: folded }),
+  }
+}
+
+/**
+ * Read one revision's door out of a window of rows.
+ *
+ * Linear in the rows, with one pass and one map.
  */
 export const pageViewsFor = (
   where: RevisionOf,
@@ -346,19 +513,29 @@ export const pageViewsFor = (
   const audience = where.audienceId ?? null
   const matching =
     audience === null ? here : here.filter((row) => row.audienceId === audience)
-  const first = matching[0]
+  /**
+   * Keyed by the audience, which is what the store keeps one row per (0284):
+   * two forms' doors are two rows and one arrival count, and keying them by the
+   * revision alone dropped the second as a repeat of the first (0298).
+   */
+  const first = new Map<AudienceId, StoredPageViews>()
+
+  for (const row of matching) {
+    if (!first.has(row.audienceId)) first.set(row.audienceId, row)
+  }
 
   return {
-    measured: first === undefined ? null : (pageViewReadingOf([first]).revisions[0] ?? null),
+    measured: summedOf(where, audience, [...first.values()]),
     foreign: rows.length - here.length,
     otherAudience: here.length - matching.length,
-    duplicated: Math.max(0, matching.length - 1),
+    duplicated: matching.length - first.size,
   }
 }
 
 /**
  * The straddle correction for one revision of one page: `drift ÷ opened` off
- * that page's own door row.
+ * that page's own door — its own form's row where the asking names an audience,
+ * and the sum of every form's where it names none (0298).
  *
  * The number `PaceOptions.inflation` wants, published so that a consumer
  * holding a window of counters over several pages does not write the matching
