@@ -308,7 +308,7 @@ describe("regionReadingFor", () => {
   })
 
   /**
-   * The quiet half of 0296. A revision served in two forms has two rows for one
+   * The quiet half of 0297. A revision served in two forms has two rows for one
    * country, and the dedup that stops a concatenated window doubling a bucket
    * keyed only the region — so a map read whole of such a revision published
    * one form's arrivals and reported the other form's as a duplicate it had
@@ -390,7 +390,7 @@ describe("the audience a region map is of", () => {
 
 /**
  * What a map summed, which is a different question from what form it is of, and
- * the one a comparison of two whole windows could not ask at all (0296).
+ * the one a comparison of two whole windows could not ask at all (0297).
  */
 describe("the populations a region map summed", () => {
   it("names every audience the rows it added named", () => {

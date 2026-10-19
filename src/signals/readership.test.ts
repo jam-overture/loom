@@ -484,7 +484,7 @@ describe("readershipChangeOf across two audiences", () => {
 /**
  * A map read whole over a deployment serving two forms is its readers twice
  * over, which is the question this reading exists to answer — so the census is
- * published beside the comparison and refuses nothing (0296).
+ * published beside the comparison and refuses nothing (0297).
  */
 describe("the populations each map was a sum over", () => {
   /** A whole revision's window, read as one map however many forms it holds. */

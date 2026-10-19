@@ -56430,7 +56430,7 @@ reading.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/region.ts`)
 · **Status:** **closed by `signals-40-the-populations-a-region-map-summed`**
-(0296) — taken exactly as the closure below describes it, *a field and a
+(0297) — taken exactly as the closure below describes it, *a field and a
 sentence*: `RegionReading.audiences` is the census and
 `ReadershipChange.populations` is the pair of them, and nothing is refused on
 either. Reading the two calls to add the field also found a number rather than a
@@ -56811,7 +56811,7 @@ Nothing needs a new call: all three are on the object the screen already holds.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/region.ts`) · **Status:** **closed on filing by
-`signals-40-the-populations-a-region-map-summed`** (0296 clause 4) — written
+`signals-40-the-populations-a-region-map-summed`** (0297 clause 4) — written
 down because it is a number a deployment would have read and acted on, and
 because it was found by adding a field that was supposed to be a caption
 
@@ -56894,7 +56894,7 @@ of rows the store already keeps apart.
 **one set per side on one reading**, filed the way 0294's own surface gap was
 filed
 
-0296 puts `populations: ComparedPopulations` on `ReadershipChange` and
+0297 puts `populations: ComparedPopulations` on `ReadershipChange` and
 `audiences` on every `RegionReading`. Three states read identically before this
 and a surface drawing none of them cannot tell them apart.
 

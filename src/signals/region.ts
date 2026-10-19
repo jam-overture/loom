@@ -230,7 +230,7 @@ export type RegionReading = {
    *
    * The same census `PageReading.audiences` publishes over a window of tallies,
    * and it answers the same question — *what was in the window?* — but it is
-   * **not** the same kind of fact (0296). A page reading of two audiences is
+   * **not** the same kind of fact (0297). A page reading of two audiences is
    * read as neither, because adding two forms' node counters is one number
    * about two pages. A region map of two audiences is read whole, because
    * adding two forms' arrivals is one number about one deployment's readers:
@@ -285,7 +285,7 @@ export type RegionReadingOptions = {
  * who arrived arrived once, whichever form they were served — so a map of the
  * window is the readership and not a collapse of two. The census is published
  * on {@link RegionReading.audiences} so that a caller comparing two such maps
- * can say what each was a sum over, and nothing is refused on it (0296).
+ * can say what each was a sum over, and nothing is refused on it (0297).
  */
 export const regionReadingOf = (
   rows: readonly StoredRegionCount[],
@@ -372,7 +372,7 @@ export type RegionReadingFor = {
    * stands and the fact is reported.
    *
    * **The audience is part of what makes two rows two rows**, and leaving it
-   * out was a quiet undercount (0296). A revision served in two forms (0263)
+   * out was a quiet undercount (0297). A revision served in two forms (0263)
    * has two rows for one country, one per form, and a map read whole of such a
    * revision dropped the second as the first handed in twice: 60 views
    * published where 460 arrived, with the loss reported as a count of
@@ -402,7 +402,7 @@ export const regionReadingFor = (
    * Keyed by the region **and** the audience, which is what the store keeps one
    * row per (0284): two forms' arrivals in one country are two rows and one
    * readership, and keying by the region alone dropped the second as a repeat
-   * of the first (0296).
+   * of the first (0297).
    */
   const first = new Map<string, StoredRegionCount>()
 

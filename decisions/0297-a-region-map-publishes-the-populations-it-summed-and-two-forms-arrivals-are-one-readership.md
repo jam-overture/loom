@@ -1,4 +1,4 @@
-# 0296 — A region map publishes the populations it summed, and two forms' arrivals are one readership
+# 0297 — A region map publishes the populations it summed, and two forms' arrivals are one readership
 
 **Status:** Accepted
 
@@ -6,14 +6,14 @@
 
 **Section:** §4c (reader signals)
 
-> **The number may be renumbered on merge.** #674 holds 0296 on an open branch
-> (*a project holds exactly one application*). `main` has 0295 as its highest
-> record, so this takes the next free number there, which is what this lane is
-> instructed to do; `Loom merge` renumbers a clash with a dated note, as it did
-> for [0294](0294-a-comparison-is-of-one-readership-and-a-pair-that-proves-two-audiences-is-refused.md).
-> Two records sharing a number is fatal
+> **Renumbered on 2026-10-19**, from 0296, when this branch (#675) was merged.
+> `main` had meanwhile accepted a different 0296 — *a project holds exactly one
+> application and the portal never names it*, from #674 — and two records
+> sharing a number is fatal
 > ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)), so
-> whichever branch lands second gives way. Nothing here depends on the number.
+> the record already on `main` keeps the number and this one gives way. This
+> record was written on 19 October and nothing in it changed but its number;
+> references on the branch were updated with it.
 
 ## Context
 

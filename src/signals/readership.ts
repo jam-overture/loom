@@ -98,7 +98,7 @@ import { UNKNOWN_REGION } from "./region.js"
  * ## Two questions about audiences, and only one of them is a refusal
  *
  * A map carries both an `audienceId` and a census of the audiences its rows
- * named, and they are not two spellings of one fact (0296). The first is *which
+ * named, and they are not two spellings of one fact (0297). The first is *which
  * form this map is of*, which only a caller that picked one can say; the second
  * is *what this map summed*, which every map can say.
  *
@@ -375,7 +375,7 @@ export type ReadershipChange = {
    * where the silence that was there before was indistinguishable from a window
    * that named nothing at all.
    *
-   * **Nothing is refused on it** (0296). A deployment's two forms are served to
+   * **Nothing is refused on it** (0297). A deployment's two forms are served to
    * two sets of readers, but the readers are people and a person who arrived
    * arrived once — so adding two forms' arrivals is one readership, unlike
    * adding two forms' node counters, which is one number about two pages

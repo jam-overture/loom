@@ -108,19 +108,19 @@ shape it needs rather than taken half-done beside this.
 
 ## Records added
 
-[0296](../decisions/0296-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)
+[0297](../decisions/0297-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)
 — *A region map publishes the populations it summed, and two forms' arrivals are
 one readership.* Accepted; five clauses; nothing superseded, and 0294 clause 7
 holds literally. Six alternatives recorded, including the two above.
 
-**On its number.** #674 holds 0296 on an open branch. `main`'s highest record is
-0295, and the brief is to take the next number free on `main`, so this takes
-0296 with a dated note under its header saying so. If #674 lands first,
-`Loom merge` renumbers this one — the way it renumbered 0294 twice last week —
-and the references to update are the record's filename, two doc comments, two
-test comments, `docs/signals.md`, three `FINDINGS.md` entries and this report.
-**Nothing in the unit depends on the number**; I have flagged it on the pull
-request so the cost of the renumber is visible before it is paid.
+**On its number.** Written as 0296, and **renumbered to 0297 by `Loom merge` on
+19 October**, when #674 landed its own 0296 — *a project holds exactly one
+application* — on `main` first. The record already on `main` keeps the number
+(0097), so this one gave way: the filename, two doc comments, two test
+comments, `docs/signals.md`, three `FINDINGS.md` entries and this report were
+updated with it, and a dated note under the record's header says what it was
+renumbered from and why. **Nothing in the unit depended on the number**, which
+is why the cost was a rename and not a decision.
 
 ## Findings filed or closed
 
@@ -181,7 +181,7 @@ One check failed on my first run and the failure was mine: `documentation.test.t
 refuses a decision-record number that is part of a published sentence, and three
 of my new doc comments wrote one as a markdown link or as *"(0294 clause 7)"*,
 neither of which is the parenthetical the site can lift out. Rewritten as plain
-`(0296)` citations; the check passes.
+`(0297)` citations; the check passes.
 
 ## Browser cost
 
@@ -217,7 +217,7 @@ record:
    beside it rather than withheld. I think that is right — the alternative
    withholds the deployment-wide answer this reading exists to give — but it is
    the judgement in the unit that a surface can undo by drawing it as a fault.
-2. **The number 0296 may need renumbering on merge**, per above.
+2. **The number was renumbered to 0297 on merge**, per above.
 
 ## Beside the framework lane
 
