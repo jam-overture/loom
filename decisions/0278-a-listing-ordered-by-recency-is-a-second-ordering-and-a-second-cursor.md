@@ -1,19 +1,17 @@
 # 0278. A listing ordered by recency is a second ordering, and a second cursor
 
-**Status:** Proposed — ARCHITECTURAL, needs review
+**Status:** Accepted — partially supersedes 0020
 **Date:** 2026-10-14
 **Section:** §5 (the store), §3 (portal)
 
-> **Nothing in this record is implemented.** It would supersede part 2 of
-> [0020](0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md), which is
-> `Accepted`, so it waits for the maintainer rather than shipping. 0020 is left
-> as it stands and is **not** marked superseded.
->
-> **This record is alone in its pull request on purpose.** It was written beside
-> the half that shipped — the `changedAt` field, record [0277](0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md), from #633 — and
-> holding it there held that half too: `Loom merge` skips any branch carrying a
-> `Proposed` record, correctly, so escalating one question cost the shipping of
-> everything next to it.
+> Raised as `Proposed` on #633 and carried alone in #647, because it supersedes
+> part 2 of [0020](0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md),
+> which is `Accepted`. The maintainer answered on 19 October 2026: "Go with a
+> sort and accept 0278." Accepted on that basis, choosing the sort over the
+> filter as recommended below. 0020's text is unchanged, and only its status
+> line records the partial supersession. **Nothing in this record is
+> implemented yet;** the ordering, the composite cursor and the contract cases
+> are the next piece of work.
 
 ## Context
 
@@ -58,7 +56,7 @@ list of filters — while the name reads like a sort.
 
 They want different contracts, and building one does not give you the other.
 
-## Decision (proposed)
+## Decision
 
 **Add the sort, not the filter**, as an explicit second ordering on
 `ListRequest`:

@@ -1,6 +1,6 @@
 # 0020. A store handle is the scope, and a listing is a keyset page
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by 0278
 **Date:** 2026-07-30
 **Section:** §5
 
