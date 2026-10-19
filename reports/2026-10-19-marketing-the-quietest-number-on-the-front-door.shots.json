@@ -1,0 +1,80 @@
+{
+ "baseUrl": "http://localhost:3000",
+ "outDir": "/tmp/claude-0/-home-user-loom/d49ea81f-e4ec-5c26-b67c-6132711b76ca/scratchpad/shots",
+ "shots": [
+  {
+   "path": "/",
+   "out": "after-facts-wide",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "do": [
+    {
+     "scrollTo": "text=Built in the open"
+    }
+   ],
+   "measure": [
+    "text=Built in the open",
+    "text=Read the decisions"
+   ]
+  },
+  {
+   "path": "/",
+   "out": "after-facts-phone",
+   "viewport": "phone",
+   "waitFor": "h1",
+   "do": [
+    {
+     "scrollTo": "text=Built in the open"
+    }
+   ],
+   "measure": [
+    "text=Read the decisions"
+   ]
+  },
+  {
+   "path": "/?theme=bold",
+   "out": "after-facts-bold",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "do": [
+    {
+     "scrollTo": "text=Built in the open"
+    }
+   ]
+  },
+  {
+   "path": "/?theme=editorial",
+   "out": "after-facts-editorial",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "do": [
+    {
+     "scrollTo": "text=Built in the open"
+    }
+   ]
+  },
+  {
+   "path": "/docs/architecture/decision-records",
+   "out": "after-landing-wide",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": [
+    "text=records."
+   ]
+  },
+  {
+   "path": "/",
+   "out": "after-pressed-wide",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "do": [
+    {
+     "scrollTo": "text=Read the decisions"
+    },
+    {
+     "click": "text=Read the decisions"
+    }
+   ]
+  }
+ ]
+}
