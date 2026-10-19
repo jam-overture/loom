@@ -56136,6 +56136,11 @@ fault at the top of a list of pages to fix.
 (`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Extends** the two
 15 October entries, *the records index render test has about eighty records of
 headroom left* and *`pnpm verify` was green on `main` this evening* ·
+**Status:** **closed by #678** (19 October). It stopped being a coin flip
+and became a deterministic red on `main`, and what fixed it was none of the
+three remedies this entry or its predecessors proposed — **the render was never
+the cost.** The measurement is at the foot of the entry. Original status below.
+
 **Status:** open — **at 272 records this test passes or fails at random**: five
 passes and four failures of the same work on one machine in one session,
 including a full-suite failure on a branch whose entire diff is one markdown
@@ -56234,6 +56239,69 @@ The one thing worth saying about the remedy from outside the lane: **raising the
 timeout buys time and does not stop the clock**, and the sibling test *says once
 that the whole table leaves, and marks every row* was measured at 4,291 ms in
 today's full-suite run, so it is close behind rather than a year behind.
+
+### What closing it found, 19 October — the render was never the cost
+
+**It is not a coin flip any more.** At 278 records, `links each row at the
+record itself` failed **four times out of four** run alone on this machine, at
+5,192, 5,303, 5,192 and 5,801 ms, and once in the full suite at 5,999 ms. It
+then failed on a clean worktree of `origin/main` at `ed6d27e` at **6,155 ms**.
+`pnpm verify` was red on `main` this morning, for every lane, not on anybody's
+branch.
+
+**Nobody had measured the inside of the test, and every remedy proposed in
+three entries was aimed at the wrong half of it.** One probe, six readings, one
+render of the real 278-record table:
+
+| what | ms |
+| --- | --- |
+| `render(<DecisionRecords />)` | **258** |
+| `container.querySelectorAll("a")` | 15 |
+| `screen.getAllByRole("row")` | 972 |
+| `screen.getAllByRole("link")` | 3,742 |
+| `screen.getAllByRole("link", { hidden: true })` | 2,022 |
+| `screen.getByRole("link", { name })` | **4,064** |
+
+The render is **5%** of a test that was timing out at 5,000 ms. *Splitting the
+render* was this entry's second remedy, *rendering once per block* was the
+obvious cheap win, and both would have bought about a fifth of a second. The
+cost is the role queries, and the reason is one sentence: **a role query is
+priced by the tree it is given, not by how many matches it wants.**
+`getByRole` walks every element under `document.body` deriving implicit roles,
+then computes accessible names until one matches — so asking for *one* link in
+a 278-row table costs the same as asking for all of them.
+
+**Scoping alone does not rescue it, which is the second reading worth keeping.**
+Handing the query one `<tr>` and asking it 278 times came to **6,213 ms**, about
+20 ms a call: the per-call cost is in the accessible-name machinery, not in the
+walk. A fix that only narrows the container is a fix that fails at a different
+record count.
+
+**What shipped, and nothing was weakened.** The per-row question is asked of the
+DOM — a row's link points at the record's file and carries its title — and the
+accessible-name question, which a DOM read cannot ask, is asked once, scoped to
+one row, which is the number of times it was asked before. The sweep over every
+link reads `a` elements rather than role matches, and that set is not narrower:
+a role query matches an `<a>` **with** an `href`, this matches every `<a>`.
+
+| test | before | after |
+| --- | --- | --- |
+| `links each row at the record itself` | 6,213 ms, **timed out**, checked **1** record | **239 ms**, checks **278** |
+| `names a row's link by the record's title alone` | — | **243 ms** (new; the accessible-name claim, named for what it checks) |
+| `says once that the whole table leaves, and marks every row` | 4,890 ms | **556 ms** |
+| the file | 19.0 s | **9.4 s** |
+
+The old test was called *links each row* and checked the first row. It checks
+every row now, so 277 href assertions were added while the thing got 26 times
+faster. Both rewritten tests were mutation-checked: pointing the component's
+`href` at a path that does not exist fails both.
+
+**The budget is no longer the thing to watch.** The slowest test in the file is
+`shows every record the repository has, once` at 869 ms, which is still a
+`getAllByRole("row")` over the whole table — 5.7× of headroom rather than
+sitting on the line. It is the next one to cross, and it will cross the same way
+for the same reason, so whoever meets it should reach for this entry rather than
+for the timeout.
 ## 2026-10-17 — the published key was imported by five readings and a sixth landed on `main` the same day without it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
@@ -56397,9 +56465,13 @@ instead, which is what #664's corrected body does.
 ## 2026-10-18 — the chrome is now one height at every width, and above 1280 forty-five pixels of it are not there
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/globals.css`) · **Status:** open — **nothing is wrong
-for a reader who scrolls**; it is a scroll a keyboard reader gets and the
-dividend of today's unit rather than a defect it introduced
+(`apps/loom/app/(docs)/globals.css`) · **Status:** **closed by #678**
+(19 October), by remedy 1, which is what this entry recommended. What closing
+it found is at the foot of the entry. Original status below.
+
+**Status:** open — **nothing is wrong for a reader who scrolls**; it is a
+scroll a keyboard reader gets and the dividend of today's unit rather than a
+defect it introduced
 
 `--chrome` is the header's row, the bar's row, and the hairline each of them
 draws: 102 pixels. It is the right number at every width where the bar exists,
@@ -56444,6 +56516,34 @@ Three ways, in the order they are worth considering:
    this has never been reported by anything but arithmetic.
 
 **Recommendation: 1**, as a small unit of its own.
+
+### What closing it found, 19 October
+
+**Remedy 1 cost nothing to take and the entry was wrong about why.** It said
+reading the breakpoint from the theme was *a different argument from how tall
+the chrome is*, and treated that as a reason to defer. It is not an argument at
+all: Tailwind v4 declares `xl` as `--breakpoint-xl` and offers
+`theme(--breakpoint-xl)` inside a media query, so the stylesheet and the
+variants read **one declaration** and there is nothing left to compare. No
+sixth copy, no guard on a sixth copy, and no test holding two numbers together
+— the whole of it is one query. Remedy 2 would have bought a worse version of
+this for the price of a test.
+
+**And the number the entry proposed was wrong by a pixel.**
+`--chrome-bar: 0px` says the control in the bar is nothing tall. What is true
+above the breakpoint is that the bar is **not rendered**, so its row *and the
+hairline it draws under itself* are both absent. Zeroing the row alone would
+have left a 1-pixel border in the chrome's height that no screen has. The
+declarations now name the bar's whole contribution — `--chrome-bar-band`, the
+row plus the edge — and that is what the query takes to nothing. A pixel is not
+worth a paragraph; naming the thing that is actually absent is, because the
+next person to change the bar reads the name.
+
+**Three readers of one width, not two.** The entry counted `xl:hidden` in
+`docs-bar.tsx` and `xl:sticky` in `docs/layout.tsx`. The third is the stylesheet
+itself, which had no reader at all — that is the defect. All three are held
+together now, and the sweep over the route group is the part worth keeping: it
+fails on a fourth `xl:` written anywhere but `_lib/chrome.ts`.
 
 ---
 ## 2026-10-18 — the bar's row is declared now, so a control that outgrows it spills instead of making the bar taller
@@ -56918,6 +57018,121 @@ surface that drew one would be inventing a fault.
 Nothing needs a new call: all three are on the object the screen already holds.
 
 ---
+## 2026-10-19 — the sweep that works for `xl:` cannot be written for `lg:`, because one prefix carries two decisions
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **the stated limit of what
+shipped today**, and the reason the unit stopped at one width
+
+Today's unit made the width the chrome changes at one declaration: the
+stylesheet asks Tailwind for `theme(--breakpoint-xl)`, `_lib/chrome.ts` names
+the two classes that carry the variant, and a sweep over every component and
+layout in the route group fails on an `xl:` written anywhere else. That last
+part is the half that holds: the assertions cover the three readers that exist,
+and the sweep covers the fourth one nobody notices.
+
+**The same sweep over `lg:` would fail today, correctly, and could not be
+fixed.** There are twelve uses of `lg:` in the route group and they are two
+different decisions wearing one prefix:
+
+| the decision | where |
+| --- | --- |
+| the site's own rail is on screen beside the page | `docs/layout.tsx` (`lg:flex-row`, `lg:sticky lg:block lg:overflow-y-auto lg:border-r`, plus `SITE_RAIL_CLASS`), `docs-bar.tsx` (`lg:hidden`, `lg:border-b-0`, `lg:ml-0`) |
+| the page has more room, so it gets a wider gutter | `lg:px-12`, four times — `docs/layout.tsx`, `docs-bar.tsx` twice, `site-footer.tsx` |
+
+The first is chrome: it decides which navigation a reader gets, and it belongs
+in `_lib/chrome.ts` the way the bar's width now does. The second is a gutter.
+It has nothing to do with the rail and would still be right if the rail
+appeared somewhere else entirely. A sweep forbidding `lg:` outside `chrome.ts`
+would be asking four pieces of page padding to move into the module that names
+the chrome, which is worse than the copy it closes.
+
+**What makes `xl:` different is not that it is tidier. It is that every use of
+it in this route group is one decision.** That is a property of this
+repository today rather than a rule, and it is why the remedy was free here and
+is not free one breakpoint down.
+
+Three ways, in the order they are worth considering:
+
+1. **Leave it.** `lg:` has no third reader — nothing in the stylesheet is
+   measured against the site's rail the way the inset was measured against the
+   bar — so the defect this closes does not exist at that width. The copies are
+   real and cost nothing yet.
+2. **Name the rail's `lg:` classes in `chrome.ts`** and sweep for `lg:` with the
+   four `px-12` spelled into an allowance. A list of exceptions inside a check
+   is the thing that stops being read.
+3. **Give the gutter a name of its own** — one constant for *the page's
+   gutter at each width* — so that every remaining `lg:` is a chrome decision
+   and the sweep becomes writable. The honest version of 2, and a unit about
+   page padding rather than about the chrome.
+
+**Recommendation: 1**, and 3 if a second thing is ever measured against the
+width the site's rail arrives at. The entry exists so that whoever writes that
+thing finds this rather than the sweep's absence.
+
+---
+## 2026-10-19 — a reference page's anchors land 48 pixels below where a written page's headings land, and the number that puts them there was chosen against nothing
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
+found while reading the reference pages for a photograph of today's change, and
+**not** introduced by it
+
+Where a press of a contents row lands a heading is one declared number on the
+written pages: `--press-landing`, 10rem, 160 pixels down the window. It stays
+160 wherever the chrome goes, because every prose heading's own margin is
+written as `calc(var(--press-landing) - var(--chrome-inset))` — the landing
+minus whatever the scrollport is inset by. That is the arrangement this lane
+built on 18 October and extended today.
+
+**The seventeen generated reference pages are not in that arrangement.** Their
+anchors are `<div id="s-…" class="scroll-mt-24">` for a symbol and
+`<section id="…" class="scroll-mt-24">` for a module group. `scroll-mt-24` is
+6rem, 96 pixels, and it is a constant rather than a difference — so where a
+reference anchor lands is the inset *plus* 96 rather than a declared place:
+
+| width | `--chrome-inset` | a written page's heading | a reference anchor |
+| --- | --- | --- | --- |
+| below 1280 | 112 | 160 | **208** |
+| 1280 and above | 67 | 160 | **163** |
+
+So the same kind of act — *press a link, arrive at the thing it names* — puts
+the reader 48 pixels lower on a reference page than on a written one at the
+widths most readers are at, and 3 pixels lower above 1280. Before today it was
+208 at every width, which was at least consistent; today's change made the
+chrome honest and left this reading the honest chrome plus a number nobody
+picked.
+
+**Nothing is broken and that is why it is filed rather than fixed.** 96 clears
+the chrome at every width — it is larger than the bar's band — so no anchor
+lands behind anything. What it is not is *the place this site puts a thing a
+reader asked for*, and it is one more number measured against the chrome that
+the chrome cannot move.
+
+**It is also 17 pages' worth of the same copy.** The `scroll-mt-24` is written
+twice in `api-reference.tsx` and read by every generated page, so this is one
+edit rather than seventeen.
+
+Three ways:
+
+1. **Give the anchors the expression the prose headings have** —
+   `scroll-margin-top: calc(var(--press-landing) - var(--chrome-inset))`, as a
+   rule on `[id]` inside the reference body rather than a utility class. Every
+   anchored thing on the site then lands at one declared place, and the
+   reference pages join the arrangement instead of sitting beside it. The right
+   answer.
+2. **Declare a second landing for reference pages** and write their margin as
+   the difference from it. Honest, and it is two landings where the argument
+   for one is that a reader should not be able to tell which kind of page they
+   are on.
+3. **Leave it.** Nothing lands behind the chrome, and a reference page is a
+   different shape of document.
+
+**Recommendation: 1**, as a small unit of its own. It wants a picture of a
+reference anchor before and after, which is why it was not folded into today's
+unit: that would have been a second subject in a run whose pictures are already
+of a third.
+
 ## 2026-10-19 — a region map of a revision served in two forms published one form's arrivals and reported the other form's as a duplicate it dropped
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`

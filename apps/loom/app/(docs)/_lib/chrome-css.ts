@@ -42,30 +42,125 @@ import { withoutComments } from "./prose-barrier"
 
 const REM_PX = 16
 
+/** The declarations in one block body, as written. */
+const declarationsIn = (body: string): ReadonlyMap<string, string> =>
+  new Map(
+    [...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map(
+      (declared) => [declared[1] ?? "", (declared[2] ?? "").trim()] as const
+    )
+  )
+
 /**
- * Every custom property declared on `:root`.
+ * A guarded block, read back as the condition it is under and what it says.
  *
- * Both `:root` blocks, because there are two and they are two for a reason: the
- * palette's and the chrome's. The dark theme's block is a different selector
- * and is not read here — nothing about the chrome's height is a theme value.
+ * `condition` is the query exactly as the stylesheet wrote it, which is the
+ * point: the chrome's one media query asks for `theme(--breakpoint-xl)`, and a
+ * reader that resolved that to `80rem` would be unable to tell the two apart —
+ * which is the whole thing the query exists to make checkable.
+ */
+export type GuardedRoot = {
+  readonly condition: string
+  readonly properties: ReadonlyMap<string, string>
+}
+
+/**
+ * One `@media` rule's own span, found by matching braces.
+ *
+ * `componentsLayer` in `prose-barrier.ts` does this for `@layer components` and
+ * for the same reason: the body contains braces, so a lazy match stops at the
+ * first inner one. A media query holding a `:root` block is exactly that case.
+ *
+ * `after` is where the rule ends, which is what lets the next one be found and
+ * lets the rule be taken back out of the sheet.
+ */
+type MediaSpan = {
+  readonly condition: string
+  readonly body: string
+  readonly at: number
+  readonly after: number
+}
+
+const firstMediaSpan = (css: string): MediaSpan | undefined => {
+  const at = css.indexOf("@media")
+  if (at === -1) return undefined
+
+  const open = css.indexOf("{", at)
+  if (open === -1) throw new Error("chrome-css: an @media in globals.css has no body")
+
+  let depth = 0
+  for (let i = open; i < css.length; i += 1) {
+    if (css[i] === "{") depth += 1
+    else if (css[i] === "}") {
+      depth -= 1
+      if (depth === 0) {
+        return {
+          condition: css.slice(at + "@media".length, open).trim(),
+          body: css.slice(open + 1, i),
+          at,
+          after: i + 1,
+        }
+      }
+    }
+  }
+
+  throw new Error("chrome-css: an @media in globals.css is not closed")
+}
+
+/** Every top-level `@media` rule. A query nested in another is that one's body. */
+const mediaSpans = (css: string): readonly MediaSpan[] => {
+  const span = firstMediaSpan(css)
+
+  return span === undefined ? [] : [span, ...mediaSpans(css.slice(span.after))]
+}
+
+/** The sheet with every `@media` rule taken out of it, braces and all. */
+const withoutMediaRules = (css: string): string => {
+  const span = firstMediaSpan(css)
+
+  return span === undefined ? css : css.slice(0, span.at) + withoutMediaRules(css.slice(span.after))
+}
+
+/**
+ * Every custom property declared on `:root` **at every width**.
+ *
+ * Both unguarded `:root` blocks, because there are two and they are two for a
+ * reason: the palette's and the chrome's. The dark theme's block is a different
+ * selector and is not read here — nothing about the chrome's height is a theme
+ * value.
+ *
+ * A block inside a media query is left out, and that is the one thing about
+ * this function worth knowing. The chrome has a second configuration above
+ * 1280, where the bar is not rendered and its band is nothing tall; folding
+ * that into the same map would hand back whichever value came last in the file
+ * and call it *the* value of `--chrome-bar-band`. There is no such value. The
+ * two are read separately, and `guardedRoots` is the other one.
  *
  * A regular expression rather than a parser, for `prose-barrier.ts`' reason
  * narrowed further: these blocks are declarations and nothing else, so there is
- * no nesting for a lazy match to stop short of.
+ * no nesting for a lazy match to stop short of once the guarded ones are gone.
  */
 export const rootProperties = (css: string): ReadonlyMap<string, string> => {
-  const blocks = [...withoutComments(css).matchAll(/:root\s*\{([^}]*)\}/g)]
+  const blocks = [...withoutMediaRules(withoutComments(css)).matchAll(/:root\s*\{([^}]*)\}/g)]
 
   if (blocks.length === 0) throw new Error("chrome-css: globals.css declares nothing on :root")
 
-  return new Map(
-    blocks.flatMap((block) =>
-      [...(block[1] ?? "").matchAll(/(--[\w-]+):\s*([^;]+);/g)].map(
-        (declared) => [declared[1] ?? "", (declared[2] ?? "").trim()] as const
-      )
-    )
-  )
+  return new Map(blocks.flatMap((block) => [...declarationsIn(block[1] ?? "")]))
 }
+
+/**
+ * The `:root` blocks a media query guards, with the query that guards them.
+ *
+ * One today, and the check on it is in `chrome.test.ts`: the chrome changes at
+ * exactly one width, and a second query redeclaring a chrome property would be
+ * a second width nobody had decided on.
+ */
+export const guardedRoots = (css: string): readonly GuardedRoot[] =>
+  mediaSpans(withoutComments(css)).flatMap((span) =>
+    [...span.body.matchAll(/:root\s*\{([^}]*)\}/g)].map((block) => ({
+      condition: span.condition,
+      properties: declarationsIn(block[1] ?? ""),
+    }))
+  )
 
 /**
  * The one value a property is given anywhere in the stylesheet, as written.

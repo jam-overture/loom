@@ -87,8 +87,12 @@ const DocsLayout = ({ children }: { readonly children: React.ReactNode }) => (
      * It is narrower than the rail on the left because its rows are a few words
      * each rather than page titles, and because what it takes it takes off the
      * measure of the prose.
+     *
+     * The width it arrives at is the width the bar stands down at, and the two
+     * are one declaration in `_lib/chrome.ts` rather than two `xl:` this file
+     * and `docs-bar.tsx` each spelled for themselves.
      */}
-    <aside className={`hidden w-56 shrink-0 xl:sticky xl:block xl:overflow-y-auto ${PAGE_RAIL_CLASS}`}>
+    <aside className={`hidden w-56 shrink-0 ${PAGE_RAIL_CLASS}`}>
       <OnThisPage />
     </aside>
   </div>

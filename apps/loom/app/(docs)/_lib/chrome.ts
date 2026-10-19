@@ -103,8 +103,57 @@ export const BAR_CONTROL_CLASS = "h-[var(--chrome-bar)]"
 /** The site's rail: sticks under the header, from the width it appears at. */
 export const SITE_RAIL_CLASS = "lg:top-[var(--chrome-under-header)] lg:h-[var(--chrome-rail)]"
 
-/** The page's rail, the same two decisions at its own width. */
-export const PAGE_RAIL_CLASS = "xl:top-[var(--chrome-under-header)] xl:h-[var(--chrome-rail)]"
+/**
+ * The page's rail: the same two decisions as the site's, and the width it
+ * arrives at.
+ *
+ * It carries `xl:sticky xl:block xl:overflow-y-auto` as well, which the layout
+ * used to spell beside it. Those are not a second decision — they are the same
+ * one — and keeping them here is what lets the breakpoint be checkable: every
+ * `xl:` in this route group is now in this file.
+ */
+export const PAGE_RAIL_CLASS =
+  "xl:sticky xl:block xl:overflow-y-auto xl:top-[var(--chrome-under-header)] xl:h-[var(--chrome-rail)]"
+
+/* ── The width the chrome changes at ─────────────────────────────────────
+ *
+ * ## The plain version
+ *
+ * Below 1280 there is a bar under the header holding both of a narrow
+ * screen's navigations. At 1280 and above there is not: the page's contents
+ * get a rail of their own beside the prose, so the bar has nothing left to
+ * offer and stands down.
+ *
+ * That is **one** decision and three things follow from it — the bar is
+ * hidden, the rail appears, and the chrome loses the bar's band, which is
+ * what the scrollport is inset by. Three readers of one number, and until
+ * 19 October each of them spelled it: two `xl:` prefixes in the markup, and
+ * nothing at all in the stylesheet, which went on insetting the page by a
+ * band that was not on the screen.
+ *
+ * ## Why there is no number here
+ *
+ * `xl` is Tailwind's, and Tailwind declares it as `--breakpoint-xl`. The
+ * stylesheet asks for it by that name — `@media (width >= theme(--breakpoint-xl))`
+ * — rather than transcribing `80rem`, so the query and the variants move
+ * together if the theme ever moves. What this file holds is the other half:
+ * the **name**, so the markup spells it once.
+ *
+ * A class is still written out in full, for the reason the section above
+ * gives: Tailwind generates the utilities it has seen as text, so
+ * `` `${BAR_BREAKPOINT}:hidden` `` is a class nothing generated. The tie
+ * between the name and the literal is an assertion in `chrome.test.ts`
+ * instead.
+ * ──────────────────────────────────────────────────────────────────── */
+
+/** Tailwind's name for the width, as a variant prefix is spelled. */
+export const BAR_BREAKPOINT = "xl"
+
+/** The theme variable that variant compiles against, which is what the stylesheet asks for. */
+export const BAR_BREAKPOINT_PROPERTY = `--breakpoint-${BAR_BREAKPOINT}`
+
+/** The bar: there below the breakpoint, and not above it. */
+export const BAR_HIDDEN_CLASS = "xl:hidden"
 
 /**
  * All of them, for the check that every property they name is declared.
@@ -119,4 +168,5 @@ export const CHROME_CLASSES = [
   BAR_CONTROL_CLASS,
   SITE_RAIL_CLASS,
   PAGE_RAIL_CLASS,
+  BAR_HIDDEN_CLASS,
 ] as const

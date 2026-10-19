@@ -1,0 +1,57 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/runtime#s-resolveTreeData",
+      "out": "2026-10-19-docs-one-breakpoint-wide-anchor",
+      "viewport": "wide",
+      "waitFor": "#s-resolveTreeData",
+      "measure": [
+        "header > div",
+        "#article > div:first-child",
+        "#s-resolveTreeData"
+      ]
+    },
+    {
+      "path": "/docs/api-reference/runtime#s-resolveTreeData",
+      "out": "2026-10-19-docs-one-breakpoint-laptop-anchor",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "waitFor": "#s-resolveTreeData",
+      "measure": [
+        "header > div",
+        "#article > div:first-child",
+        "#s-resolveTreeData"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-19-docs-one-breakpoint-wide-press",
+      "viewport": "wide",
+      "waitFor": "nav[aria-label='On this page']",
+      "measure": [
+        "header > div",
+        "#article > div:first-child",
+        "h2#the-bar-above-your-page"
+      ],
+      "do": [
+        {
+          "click": "nav[aria-label='On this page'] a[href='#the-bar-above-your-page']"
+        }
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-19-docs-one-breakpoint-phone-top",
+      "viewport": "phone",
+      "waitFor": "article.prose",
+      "measure": [
+        "header > div",
+        "#article > div:first-child",
+        "button[aria-label='On this page']"
+      ]
+    }
+  ]
+}

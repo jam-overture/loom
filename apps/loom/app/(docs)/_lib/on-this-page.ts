@@ -150,6 +150,11 @@ export type SectionTop = {
  * being scrolled to. The second is written as *the landing minus the inset*, so
  * the chrome above can change height without moving the landing.
  *
+ * It does change height, as of 19 October: above 1280 the bar is not rendered
+ * and the inset is 67 rather than 112. The landing is 160 at both widths, which
+ * is the property that difference was written to have, and it is why this
+ * constant is one number and not one per width.
+ *
  * It was not always one number, and that cost something. This constant was 120
  * until 16 October, chosen against the heading's own 5rem alone, and 120 is
  * *above* 80 and *below* the sum — so pressing a row on the rail marked the

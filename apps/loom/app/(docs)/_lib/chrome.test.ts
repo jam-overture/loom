@@ -7,7 +7,10 @@ import { describe, expect, it } from "vitest"
 import {
   ARTICLE_HREF,
   ARTICLE_ID,
+  BAR_BREAKPOINT,
+  BAR_BREAKPOINT_PROPERTY,
   BAR_CONTROL_CLASS,
+  BAR_HIDDEN_CLASS,
   CHROME_CLASSES,
   HEADER_ROW_CLASS,
   PAGE_RAIL_CLASS,
@@ -16,7 +19,7 @@ import {
   SITE_RAIL_CLASS,
   UNDER_HEADER_CLASS,
 } from "./chrome"
-import { propertiesNamedIn, rootProperties, soleDeclaration } from "./chrome-css"
+import { guardedRoots, propertiesNamedIn, rootProperties, soleDeclaration } from "./chrome-css"
 import { readDocsStylesheet, withoutComments } from "./prose-barrier"
 
 /**
@@ -226,6 +229,7 @@ describe("the chrome's height", () => {
       ["_components/docs-bar.tsx", "BAR_CONTROL_CLASS", BAR_CONTROL_CLASS],
       ["docs/layout.tsx", "SITE_RAIL_CLASS", SITE_RAIL_CLASS],
       ["docs/layout.tsx", "PAGE_RAIL_CLASS", PAGE_RAIL_CLASS],
+      ["_components/docs-bar.tsx", "BAR_HIDDEN_CLASS", BAR_HIDDEN_CLASS],
     ] as const
 
     for (const [file, name, value] of wears) {
@@ -250,6 +254,121 @@ describe("the chrome's height", () => {
   it("is spelled by no component or layout in the route group", () => {
     const spelled = componentsAndLayouts().filter((file) =>
       /(?<![\w-])(?:h|top)-14(?![\d.])|100vh-3\.5rem/.test(withoutComments(source(file)).replace(/\/\/[^\n]*/g, ""))
+    )
+
+    expect(spelled).toEqual([])
+  })
+})
+
+/**
+ * The width the chrome changes at, from Tailwind's theme to the three things
+ * that follow from it.
+ *
+ * ## The plain version
+ *
+ * Below 1280 the page has a bar under the header with both of a narrow
+ * screen's navigations in it. At 1280 and above it does not: the page's
+ * contents get a rail of their own beside the prose instead.
+ *
+ * That is one decision, and three things read it — the bar hides, the rail
+ * arrives, and the chrome loses the bar's band, which is what the top of the
+ * page is inset by when the browser scrolls to something. Until 19 October the
+ * first two spelled `xl:` for themselves and the third did not happen at all:
+ * the stylesheet went on insetting the page by 112 pixels on a screen with 67
+ * of chrome on it. A reader who scrolls never meets that. A reader moving
+ * focus with a keyboard meets it on every tab.
+ *
+ * ## What is held, and the one link that is not an assertion
+ *
+ * The stylesheet asks for `theme(--breakpoint-xl)` rather than transcribing
+ * `80rem`, so the query and the `xl:` variants are **one declaration** and
+ * there is nothing for a test to compare. What is left to hold is that the
+ * query asks for the property this module names, and that the markup's two
+ * variants come from here — which is this block.
+ *
+ * The link that is not an assertion is `theme()` itself: Tailwind fails the
+ * build on a theme variable it does not have, so a query naming a breakpoint
+ * that does not exist never reaches a test. That is the right place for it,
+ * and it is why `80rem` appears nowhere in this file.
+ */
+describe("the width the chrome changes at", () => {
+  const css = (): string => readDocsStylesheet()
+
+  it("is one name, and the theme variable that name compiles against", () => {
+    expect(BAR_BREAKPOINT_PROPERTY).toBe(`--breakpoint-${BAR_BREAKPOINT}`)
+  })
+
+  /**
+   * The classes are written out in full because Tailwind generates the
+   * utilities it has **seen**, as text — so these cannot be assembled from the
+   * name, and the tie between the two is this instead. A class list prefixed
+   * with a different width would be a class nothing generated, which is an
+   * element with no rule rather than an error.
+   */
+  it("is the variant on every class that carries one", () => {
+    expect(BAR_HIDDEN_CLASS).toBe(`${BAR_BREAKPOINT}:hidden`)
+
+    for (const utility of PAGE_RAIL_CLASS.split(" ")) {
+      expect(utility, `${utility} is at the chrome's own width`).toMatch(new RegExp(`^${BAR_BREAKPOINT}:`))
+    }
+  })
+
+  /**
+   * One query, and it asks the theme for the width rather than saying it.
+   *
+   * Asserted as the whole condition, which also holds the comparison: a
+   * `max-width` query reading the same variable would be the breakpoint minus
+   * a pixel, and the bar and the band would change at widths one apart.
+   */
+  it("is asked of Tailwind's theme by the one query that redeclares the chrome", () => {
+    const guarded = guardedRoots(css())
+
+    expect(guarded).toHaveLength(1)
+    expect(guarded[0]?.condition).toBe(`(width >= theme(${BAR_BREAKPOINT_PROPERTY}))`)
+  })
+
+  /**
+   * And what it changes is the bar's band, down to nothing.
+   *
+   * `--chrome-bar` stays what it is: the control in the bar is 44 pixels tall
+   * wherever the bar is rendered, and above the breakpoint it is not rendered.
+   * The band is the row **and the hairline under it**, which is the honest
+   * thing to take away — zeroing the row alone would leave a pixel of border
+   * in the chrome's height that no screen has.
+   */
+  it("takes the bar's whole band away, and redeclares nothing else", () => {
+    const guarded = guardedRoots(css())[0]
+    const base = rootProperties(css())
+
+    expect([...(guarded?.properties.keys() ?? [])]).toEqual(["--chrome-bar-band"])
+    expect(guarded?.properties.get("--chrome-bar-band")).toBe("0px")
+    expect(base.get("--chrome-bar-band")).toBe("calc(var(--chrome-bar) + var(--chrome-edge))")
+  })
+
+  /**
+   * The link that makes the override worth making: the inset is arithmetic
+   * over the band, so taking the band away moves what clears it. A query that
+   * set a property nothing downstream read would pass every assertion above
+   * and change nothing on the screen.
+   */
+  it("changes the scrollport's inset, because the inset reads the band", () => {
+    const declared = rootProperties(css())
+
+    expect(propertiesNamedIn(declared.get("--chrome-inset") ?? "")).toContain("--chrome")
+    expect(propertiesNamedIn(declared.get("--chrome") ?? "")).toContain("--chrome-bar-band")
+  })
+
+  /**
+   * And the width is spelled nowhere else in the route group.
+   *
+   * The sweep is the part worth keeping, for the reason the one above it is:
+   * the assertions hold the three readers that exist, and the finding's
+   * subject is always the fourth one nobody notices. `2xl:` and `text-xl` are
+   * not this width, which is what the boundary in front of the match is for.
+   */
+  it("is spelled by no component or layout in the route group", () => {
+    const spelled = componentsAndLayouts().filter((file) =>
+      new RegExp(`(?<![\\w-])${BAR_BREAKPOINT}:`).test(withoutComments(source(file)).replace(/\/\/[^\n]*/g, ""))
     )
 
     expect(spelled).toEqual([])

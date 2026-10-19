@@ -154,28 +154,91 @@ describe("the records index, rendered", () => {
     expect(screen.getAllByText(superseded?.status ?? "—").length).toBeGreaterThan(0)
   })
 
+  /**
+   * Every row, which is what this has always been called and is now what it
+   * does.
+   *
+   * It used to check the first record and nothing else, and it timed out
+   * anyway. **A role query is priced by the tree it is given, not by how many
+   * matches it wants.** `screen.getByRole("link", { name })` walks every
+   * element under `document.body` working out each one’s implicit role, then
+   * computes accessible names until one matches: measured at 4,064 ms over
+   * this table, against a render of 258 ms. The render was never the cost, and
+   * the three remedies the open finding proposed were all aimed at it.
+   *
+   * Scoping does not rescue it either, which is the second measurement worth
+   * keeping: handing the query one row and asking it 278 times came to
+   * 6,213 ms, about 20 ms a call, because the per-call cost is in the
+   * accessible-name machinery rather than in the walk.
+   *
+   * So this asks the per-row question of the DOM — a row’s link points at the
+   * record’s file and carries its title — 278 times, and the accessible-name
+   * question is asked once, below, which is the number of times it was asked
+   * before. Nothing that was claimed has stopped being claimed, and 277 href
+   * checks have been added.
+   */
   it("links each row at the record itself", () => {
-    render(<DecisionRecords />)
+    const { container } = render(<DecisionRecords />)
 
-    const first = DECISION_RECORDS[0]
+    const rows = [...container.querySelectorAll("tbody tr")]
 
-    expect(first).toBeDefined()
+    expect(rows).toHaveLength(DECISION_RECORDS.length)
+
+    DECISION_RECORDS.forEach((record, index) => {
+      const link = rows[index]?.querySelector("a")
+
+      expect(link?.getAttribute("href"), record.id).toBe(record.href)
+      expect(link?.textContent ?? "", record.id).toContain(record.title)
+    })
+  })
+
+  /**
+   * And the mark is decorative, which is the half of the old assertion that a
+   * DOM read cannot make.
+   *
+   * `getByRole("link", { name })` matches the **accessible name** exactly, so
+   * this passing is the statement that the off-site mark beside every title is
+   * hidden from the accessibility tree. A reader of the row hears the record’s
+   * title and nothing else; the sentence above the table is where the leaving
+   * is said. One row is enough, because every row is the same component.
+   */
+  it("names a row's link by the record's title alone, with the mark left out", () => {
+    const { container } = render(<DecisionRecords />)
+
+    const first = container.querySelector("tbody tr")
+    const record = DECISION_RECORDS[0]
+
+    expect(first).toBeTruthy()
+    expect(record).toBeDefined()
     expect(
-      screen.getByRole("link", { name: first?.title ?? "" }).getAttribute("href")
-    ).toBe(first?.href)
+      within(first as HTMLElement).getByRole("link", { name: record?.title ?? "" }).getAttribute("href")
+    ).toBe(record?.href)
   })
 
   /**
    * One row per record, all of them leaving the site, said once above the table
    * and marked at each row. The sentence is what a screen reader hears; saying it
    * per row instead would be correct and unusable.
+   *
+   * The links are read off the DOM for the reason above — `getAllByRole("link")`
+   * over this table was measured at 3,742 ms — and the set it reads is not a
+   * narrower one. A role query matches an `<a>` **with** an `href` and anything
+   * carrying `role="link"`; this matches every `<a>`, href or not. For a claim
+   * of the form *every link is marked*, the anchors a role query would have
+   * filtered out as inaccessible are ones a reader could still meet, so
+   * including them asks more rather than less. The accessible-name half of the
+   * claim is asked by the two tests above.
    */
   it("says once that the whole table leaves, and marks every row", () => {
-    render(<DecisionRecords />)
+    const { container } = render(<DecisionRecords />)
 
     expect(screen.getByText(/opens that record’s file in the repository/)).toBeTruthy()
 
-    for (const link of screen.getAllByRole("link")) {
+    const links = [...container.querySelectorAll("a")]
+
+    expect(links.length).toBeGreaterThanOrEqual(DECISION_RECORDS.length)
+
+    for (const link of links) {
       expect(link.textContent ?? "", link.getAttribute("href") ?? "").toContain(OFF_SITE_MARK)
     }
   })
