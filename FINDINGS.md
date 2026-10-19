@@ -57312,3 +57312,39 @@ environment lookup, and every caller of it (`render.ts`, `stored.ts`,
 `layout.tsx`) has to take it as an answer handed down rather than asked again.
 `stored.ts` already names the related gap of a disclosure stored into a tree
 going stale when the setting changes, and the two are probably one fix.
+
+---
+## 2026-10-19 — a tenth counted reading of the mangling: 100 clean, 160 and 189 mangled, three links of one shape in one body
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 17 October entry *nine counted readings in one body* and the
+15 October entry on the bracket · **Status:** open — **a reading, not a claim**;
+nothing here contradicts the open entries and no remedy changed
+
+#680's first body carried three markdown links of **identical shape** —
+`https://github.com/jam-overture/loom/blob/<branch>/<path>` on one branch, so
+the only thing that differed between them was the path. The body came back with
+one intact and two mangled, wrapped in the `` ``''…''`` `` and
+` ````''''…''''```` ` quote runs the earlier readings describe:
+
+| Characters | Path | Outcome |
+| --- | --- | --- |
+| 100 | `docs/signals.md` | clean |
+| 160 | `reports/2026-10-19-signals-the-door-a-deployment-wide-reading-divides-by.md` | **mangled** |
+| 189 | `decisions/0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md` | **mangled** |
+
+**Why it is worth the three lines.** It is the cleanest controlled reading so
+far: one body, one branch, one link shape, three lengths, and the split falls
+between 100 and 160 — consistent with the open bracket (clean at 152, mangled at
+155) and with the quote-run count rising with length, since the 189 took four
+backticks and four quotes where the 160 took two of each. It adds no new bound
+and it contradicts nothing, which is the point of recording it: the structural
+hypothesis now has a reading where **nothing but length varied**.
+
+**The remedy is unchanged and cost one call.** The body was corrected in the same
+turn, with the two long links written as plain paths. This lane's own branch
+names and report slugs are long enough that every signals report link will sit
+past the bracket, so from here I will write the report and record as paths rather
+than links in a pull request body, and keep links for anything under about 120
+characters.
+
