@@ -37,6 +37,7 @@ the portal every day.
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
+| Which populations a reading summed | the audiences a region map added up, published as a census rather than a refusal ([0296](../decisions/0296-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)), because arrivals are people and a reader who arrived arrived once — so a revision served in two forms is one readership and is now summed as one |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
 | Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
@@ -2533,6 +2534,56 @@ minified and 2,941 gzipped.
 **What is left and is filed:** the placements are not decomposed the same way
 and the reason is written down; and no screen reads either new number, which is
 `Loom portal`'s.
+
+### 40. The populations a region map summed · `Loom signals` · **done, 19 October**
+
+§38 gave every comparison the audience dimension and
+[0294](../decisions/0294-a-comparison-is-of-one-readership-and-a-pair-that-proves-two-audiences-is-refused.md)
+clause 7 left one call naming no audience on purpose: `regionReadingOf` groups
+whatever it is handed, and a deployment's whole window is *a readership* rather
+than one form's. The limit that leaves was filed the same day — a caller that
+builds **both** sides of a readership comparison that way, over a window holding
+two audiences, is comparing two mixes and nothing in the output said so.
+
+**Done**
+([0296](../decisions/0296-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)),
+and the field the finding asked for was the smaller half of what reading the two
+calls found.
+
+- **`RegionReading.audiences`** — the census `audiencesIn` answers, over the rows
+  the map added, in the three-valued shape `PageReading.audiences` publishes.
+  More than one member is a **measurement and never a fault**: arrivals are
+  people, and a reader who arrived arrived once whichever form they were served,
+  so a sum over two forms is one deployment's readership. Compare a page
+  reading, where a sum over two forms is one number about two pages (0290).
+- **The census cannot be made to refuse, and the reason is in the names.** An
+  `aud_` is a name the host chose for a predicate Loom never sees, so two
+  different names are not two disjoint sets of readers — `aud_everyone` is a
+  name for everybody, and a window of it held against one of `aud_pro` is the
+  migration 0294 refused to withhold. `audienceId` stays what 0294 made it; one
+  name on the rows is not one population behind them.
+- **`ReadershipChange.populations`**, beside the `audiences` 0294 put there, so a
+  surface can tell *the pro form last week against the pro form this week* from
+  *two sums over two forms* from *a window that named nothing at all* — three
+  states that read identically before.
+- **A quiet undercount, found while adding the field and fixed with it.**
+  `regionReadingFor` deduplicated a revision's rows by region alone, so a
+  revision served in two forms — two rows for one country — had the second
+  dropped as the first handed in twice. **60 views published where 460
+  arrived**, reported only as `duplicated: 1`. The key is the region *and* the
+  audience now, which is what the store keeps one row per (0284); a form's own
+  map was never affected, because the audience is picked before the dedup.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the twenty-ninth thing taken out of what this subsystem already
+knows. The broadcaster was not touched and is byte-identical at 6,477 bytes
+minified.
+
+**What is left and is filed:** `pageViewsFor` deduplicates a revision's door
+rows the same way, so a whole-window read of a two-form revision takes one
+form's door and reports the other as a duplicate — the same fault in a
+different reading, and summing two door rows is a change to `pageViewReadingOf`
+rather than to a key; and no screen reads the census, which is `Loom portal`'s.
 
 ## Still not in scope
 

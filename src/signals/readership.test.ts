@@ -287,6 +287,7 @@ describe("readershipChangeOf", () => {
         "loudest",
         "moved",
         "movedAtMost",
+        "populations",
         "regions",
         "unaccounted",
       ])
@@ -477,5 +478,81 @@ describe("readershipChangeOf across two audiences", () => {
 
     expect(change.comparability).not.toBe("different-audiences")
     expect(change.audiences).toEqual({ was: null, now: SKIERS })
+  })
+})
+
+/**
+ * A map read whole over a deployment serving two forms is its readers twice
+ * over, which is the question this reading exists to answer — so the census is
+ * published beside the comparison and refuses nothing (0296).
+ */
+describe("the populations each map was a sum over", () => {
+  /** A whole revision's window, read as one map however many forms it holds. */
+  const windowOf = (
+    counts: Readonly<Record<string, readonly [typeof SKIERS, number]>>
+  ): RegionReading =>
+    regionReadingOf(
+      Object.entries(counts).map(
+        ([code, [audience, views]]): StoredRegionCount => ({
+          audienceId: audience,
+          treeId: TREE,
+          revision: 1,
+          region: region(code),
+          views,
+          updatedAt: AT,
+        })
+      )
+    )
+
+  it("names the one audience an ordinary deployment's rows carry", () => {
+    const change = readershipChangeOf(reading({ GB: 100 }), reading({ GB: 120 }))
+
+    expect(change.populations).toEqual({
+      was: [DEFAULT_AUDIENCE_ID],
+      now: [DEFAULT_AUDIENCE_ID],
+    })
+  })
+
+  /**
+   * The state that was invisible before: two maps naming no form, which read
+   * identically whether the window held one audience or two.
+   */
+  it("compares two mixed windows and says both sides were sums over two forms", () => {
+    const was = windowOf({ GB: [SKIERS, 100], FR: [RIDERS, 100] })
+    const now = windowOf({ GB: [SKIERS, 150], FR: [RIDERS, 50] })
+    const change = readershipChangeOf(was, now)
+
+    expect(change.comparability).not.toBe("different-audiences")
+    expect(change.populations).toEqual({ was: [RIDERS, SKIERS], now: [RIDERS, SKIERS] })
+    expect(change.audiences).toEqual({ was: null, now: null })
+    expect(change.moved).toBeCloseTo(0.25)
+  })
+
+  /** One form's own map, picked out of a revision's rows by the audience it names. */
+  const oneFormOf = (audience: typeof SKIERS, code: string, views: number): RegionReading =>
+    regionReadingFor({ treeId: TREE, revision: 1, audienceId: audience }, [
+      {
+        audienceId: audience,
+        treeId: TREE,
+        revision: 1,
+        region: region(code),
+        views,
+        updatedAt: AT,
+      },
+    ]).reading
+
+  /** Carried under a silence as every census here is, so a refusal still says what it refused. */
+  it("names each side's audiences on a pair it refused", () => {
+    const change = readershipChangeOf(oneFormOf(SKIERS, "GB", 100), oneFormOf(RIDERS, "FR", 100))
+
+    expect(change.comparability).toBe("different-audiences")
+    expect(change.populations).toEqual({ was: [SKIERS], now: [RIDERS] })
+  })
+
+  it("names none for a window that counted nothing", () => {
+    const change = readershipChangeOf(reading({}), reading({ GB: 100 }))
+
+    expect(change.comparability).toBe("unmeasured")
+    expect(change.populations).toEqual({ was: [], now: [DEFAULT_AUDIENCE_ID] })
   })
 })

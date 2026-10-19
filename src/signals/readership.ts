@@ -4,6 +4,7 @@ import {
   comparedAudiencesOf,
   crossesAudiences,
   type ComparedAudiences,
+  type ComparedPopulations,
 } from "./audiences.js"
 import type { ReaderRegion, RegionReading } from "./region.js"
 import { UNKNOWN_REGION } from "./region.js"
@@ -93,6 +94,26 @@ import { UNKNOWN_REGION } from "./region.js"
  * floor withholds little the two numbers are nearly one number; where a page is
  * quiet they open wide and {@link ReadershipComparability} `unsettled` is the
  * honest answer rather than a verdict.
+ *
+ * ## Two questions about audiences, and only one of them is a refusal
+ *
+ * A map carries both an `audienceId` and a census of the audiences its rows
+ * named, and they are not two spellings of one fact (0296). The first is *which
+ * form this map is of*, which only a caller that picked one can say; the second
+ * is *what this map summed*, which every map can say.
+ *
+ * Only the first refuses. Two maps that each name a form, of two different
+ * forms, are two populations by construction and the comparison is withheld
+ * ({@link ReadershipComparability} `different-audiences`, 0294). Two maps read
+ * whole over a window holding two forms are a deployment's readers twice, which
+ * is the question this reading exists to answer, so the pair is compared and
+ * {@link ReadershipChange.populations} is what a surface says it over.
+ *
+ * The census cannot be made to refuse, and the reason is in the names: an
+ * `aud_` is a name the host chose for a predicate Loom never sees, so two
+ * different names are not two disjoint sets of people. `aud_everyone` is a name
+ * for everybody, and a window of it held against one of `aud_pro` is the
+ * migration 0294 refused to withhold rather than two readerships.
  *
  * Pure, linear in the buckets, and it reaches no store, clock or DOM.
  */
@@ -341,6 +362,27 @@ export type ReadershipChange = {
    */
   readonly audiences: ComparedAudiences
   /**
+   * The audiences each map's rows named, which is what each side was a sum
+   * over.
+   *
+   * Beside {@link ReadershipChange.audiences} rather than instead of it,
+   * because the two answer different questions and a surface needs both: that
+   * one is the form each map is **of**, this one is the forms each map **added
+   * up**. A map read whole over a deployment serving two audiences names no
+   * form and has two members here, which is the ordinary case for a deployment
+   * serving two forms of a page (0263) and the one this field exists for.
+   * *Both of these maps are sums over two of the forms you serve* is a caption,
+   * where the silence that was there before was indistinguishable from a window
+   * that named nothing at all.
+   *
+   * **Nothing is refused on it** (0296). A deployment's two forms are served to
+   * two sets of readers, but the readers are people and a person who arrived
+   * arrived once — so adding two forms' arrivals is one readership, unlike
+   * adding two forms' node counters, which is one number about two pages
+   * (0290). Carried under a silence and under none, as every census here is.
+   */
+  readonly populations: ComparedPopulations
+  /**
    * Half the sum of the absolute share movements over the regions both maps
    * name, in `[0, 1]`, or `undefined` where nothing was compared.
    *
@@ -446,6 +488,7 @@ const magnitudeOf = (row: ComparedRegion): number =>
  */
 export const readershipChangeOf = (was: RegionReading, now: RegionReading): ReadershipChange => {
   const audiences = comparedAudiencesOf(was, now)
+  const populations: ComparedPopulations = { was: was.audiences, now: now.audiences }
   /**
    * Checked ahead of the floor, because it is not a floor fault and no floor
    * fixes it: two maps of two populations read at one floor are still two
@@ -494,6 +537,7 @@ export const readershipChangeOf = (was: RegionReading, now: RegionReading): Read
       floor: incomparable ? undefined : was.floor,
       comparability: withheld,
       audiences,
+      populations,
       moved: undefined,
       movedAtMost: undefined,
       // Two differently floored maps publish nothing, because every row of the
@@ -532,6 +576,7 @@ export const readershipChangeOf = (was: RegionReading, now: RegionReading): Read
     floor: was.floor,
     comparability: comparabilityOf(moved, movedAtMost, loudest),
     audiences,
+    populations,
     moved,
     movedAtMost,
     regions: ranked(regions),

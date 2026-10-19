@@ -306,6 +306,56 @@ describe("regionReadingFor", () => {
     expect(read.reading.views).toBe(120)
     expect(read.otherAudience).toBe(0)
   })
+
+  /**
+   * The quiet half of 0296. A revision served in two forms has two rows for one
+   * country, and the dedup that stops a concatenated window doubling a bucket
+   * keyed only the region — so a map read whole of such a revision published
+   * one form's arrivals and reported the other form's as a duplicate it had
+   * dropped.
+   */
+  it("adds two forms' arrivals in one country where the asking names no audience", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1 }, [
+      row({ audienceId: SKIERS, region: region("GB"), views: 60 }),
+      row({ audienceId: RIDERS, region: region("GB"), views: 400 }),
+    ])
+
+    expect(read.reading.regions).toEqual([{ region: "GB", views: 460 }])
+    expect(read.reading.views).toBe(460)
+    expect(read.duplicated).toBe(0)
+    expect(read.otherAudience).toBe(0)
+  })
+
+  /** The other half of a two-part key: one form's two countries are two buckets. */
+  it("keeps one form's two countries apart", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1, audienceId: SKIERS }, [
+      row({ audienceId: SKIERS, region: region("GB"), views: 60 }),
+      row({ audienceId: SKIERS, region: region("FR"), views: 40 }),
+    ])
+
+    expect(read.reading.regions).toEqual([
+      { region: "GB", views: 60 },
+      { region: "FR", views: 40 },
+    ])
+    expect(read.duplicated).toBe(0)
+  })
+
+  /**
+   * The case the key exists for, now that it is two values rather than one: a
+   * caller concatenating two reads of the same window holds the store's running
+   * totals twice, and adding them would double every bucket — the one error
+   * here that cannot be undone afterwards (0158).
+   */
+  it("counts each form's country once however many times the window is handed in", () => {
+    const window = [
+      row({ audienceId: SKIERS, region: region("GB"), views: 60 }),
+      row({ audienceId: RIDERS, region: region("GB"), views: 400 }),
+    ]
+    const read = regionReadingFor({ treeId: TREE, revision: 1 }, [...window, ...window])
+
+    expect(read.reading.views).toBe(460)
+    expect(read.duplicated).toBe(2)
+  })
 })
 
 /**
@@ -335,5 +385,66 @@ describe("the audience a region map is of", () => {
    */
   it("names none when a window is read whole", () => {
     expect(regionReadingOf([row({ audienceId: SKIERS })]).audienceId).toBeNull()
+  })
+})
+
+/**
+ * What a map summed, which is a different question from what form it is of, and
+ * the one a comparison of two whole windows could not ask at all (0296).
+ */
+describe("the populations a region map summed", () => {
+  it("names every audience the rows it added named", () => {
+    const read = regionReadingOf([
+      row({ audienceId: SKIERS, region: region("GB"), views: 60 }),
+      row({ audienceId: RIDERS, region: region("GB"), views: 400 }),
+    ])
+
+    expect(read.audiences).toEqual([RIDERS, SKIERS])
+    expect(read.regions).toEqual([{ region: "GB", views: 460 }])
+  })
+
+  /**
+   * A name on the rows is not a population behind them: `aud_everyone` is a
+   * name for everybody, so one member here is never a proof of which form the
+   * map is of, and the field a comparison refuses on stays `null`.
+   */
+  it("names one audience without claiming the map is of that form", () => {
+    const read = regionReadingOf([row({ audienceId: SKIERS, views: 60 })])
+
+    expect(read.audiences).toEqual([SKIERS])
+    expect(read.audienceId).toBeNull()
+  })
+
+  it("names none where the rows never carried the column", () => {
+    expect(regionReadingOf([]).audiences).toEqual([])
+  })
+
+  it("names the one form where the rows were picked for one", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1, audienceId: SKIERS }, [
+      row({ audienceId: SKIERS, views: 60 }),
+      row({ audienceId: RIDERS, views: 400 }),
+    ])
+
+    expect(read.reading.audiences).toEqual([SKIERS])
+    expect(read.reading.audienceId).toBe(SKIERS)
+  })
+
+  it("names both forms where a revision's rows were read whole", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1 }, [
+      row({ audienceId: SKIERS, region: region("GB"), views: 60 }),
+      row({ audienceId: RIDERS, region: region("FR"), views: 400 }),
+    ])
+
+    expect(read.reading.audiences).toEqual([RIDERS, SKIERS])
+    expect(read.reading.audienceId).toBeNull()
+  })
+
+  it("does not count the other form's rows it was told to ignore", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1, audienceId: SKIERS }, [
+      row({ audienceId: RIDERS, views: 400 }),
+    ])
+
+    expect(read.reading.audiences).toEqual([])
+    expect(read.otherAudience).toBe(1)
   })
 })
