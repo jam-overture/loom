@@ -109,7 +109,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0017](0017-every-write-goes-through-one-server-side-path.md) | Every write goes through one server-side path | Accepted | §5 |
 | [0018](0018-the-portal-is-a-consumer-not-an-insider.md) | The portal is a consumer, not an insider | Accepted | §5 |
 | [0019](0019-the-portal-is-a-review-queue-not-a-design-tool.md) | The portal is a review queue, not a design tool | Accepted | §5 |
-| [0020](0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md) | A store handle is the scope, and a listing is a keyset page | Accepted | §5 |
+| [0020](0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md) | A store handle is the scope, and a listing is a keyset page | Accepted — partially superseded by 0278 | §5 |
 | [0021](0021-a-held-proposal-stays-server-side-and-answers-are-by-id.md) | A held proposal stays server-side, and an answer names its id | Accepted | §5 |
 | [0022](0022-the-backing-store-is-postgres-reached-by-sql.md) | The backing store is Postgres, reached by SQL | Accepted | §5 |
 | [0023](0023-telemetry-narrows-the-stream-and-never-copies-the-log.md) | Telemetry narrows the event stream and never copies the log | Accepted | §6 |
@@ -367,7 +367,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0275](0275-a-connection-is-a-read-path-and-a-write-back-path-and-loom-never-writes-into-the-customers-store.md) | A connection is a read path and a write-back path, and Loom never writes into the customer's store | Accepted | §1, §5 |
 | [0276](0276-a-patch-field-says-set-cleared-or-unchanged-and-clearing-removes-the-key.md) | A patch field says set, cleared or unchanged, and clearing removes the key | Accepted | §2 (the store), §3 (portal) |
 | [0277](0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md) | A listing carries when the page last changed, and an absent stamp means never | Accepted | §5 (the store), §3 (portal) |
-| 0278 | *No record on this branch* | — | — |
+| [0278](0278-a-listing-ordered-by-recency-is-a-second-ordering-and-a-second-cursor.md) | A listing ordered by recency is a second ordering, and a second cursor | Accepted — partially supersedes 0020 | §5 (the store), §3 (portal) |
 | [0279](0279-a-kinds-share-of-the-readers-who-met-it-is-compared-at-each-windows-own-weights-and-a-counterfactual-says-which-side-moved.md) | A kind's share of the readers who met it is compared at each window's own weights, and a counterfactual says which side moved | Accepted | §4c (reader signals) |
 | [0280](0280-the-words-of-a-kind-of-part-the-typical-reader-reached-are-weighted-once-per-page-and-a-floor-withholds-every-difference.md) | The words of a kind of part the typical reader reached are weighted once per page, and a floor withholds every difference | Accepted | §4c (reader signals) |
 | [0281](0281-the-answers-a-resolution-was-built-from-are-published-as-data-and-the-far-side-re-plans.md) | The answers a resolution was built from are published as data, and the far side re-plans | Accepted | §4 (the binding seam) |
