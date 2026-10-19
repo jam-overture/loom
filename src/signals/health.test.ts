@@ -491,7 +491,7 @@ describe("collectionHealthOf", () => {
 
     /**
      * A reading that names no audience divides by every form's door added
-     * together (0298), and the fold it waits on is the oldest attested by a
+     * together (0299), and the fold it waits on is the oldest attested by a
      * form that still has openings pending — so a fold that ran a minute ago
      * on a busy form cannot vouch for the form that has been waiting three
      * hours.

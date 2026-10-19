@@ -57178,7 +57178,7 @@ arrivals of one country, named rather than withheld twice.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/page-views.ts`) · **Status:** **closed by
-`signals-41-two-forms-arrivals-are-one-door`** (0298) — taken with the
+`signals-41-two-forms-arrivals-are-one-door`** (0299) — taken with the
 arithmetic this entry named, and it was additive as predicted in three of the
 four figures: `opened` and `appearances` add, `inflation` is recomputed from the
 summed drift over the summed openings, and **`drift` and `pending` are summed
@@ -57261,9 +57261,9 @@ Nothing needs a new call: both fields are on objects the screen already holds.
 ## 2026-10-19 — a door read whole over two forms is a sum of them, and no screen says so
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
-**one census on one reading**, and the third of these (0295, 0297, 0298)
+**one census on one reading**, and the third of these (0295, 0297, 0299)
 
-0298 puts `audiences` on `RevisionPageViews` and makes `audienceId` three-valued
+0299 puts `audiences` on `RevisionPageViews` and makes `audienceId` three-valued
 there, so a door reading now says which forms' arrivals it added. A screen that
 draws neither cannot tell the three states apart, and they are the same three
 0297 filed for the region map:
@@ -57283,7 +57283,7 @@ draws neither cannot tell the three states apart, and they are the same three
 **What must not be drawn:** a sum over forms is not `audiences-mixed`. That
 fault is a *page* reading's, where adding two forms' node counters is one number
 about two pages (0290); the door is the one counter where the sum is the answer
-(0297 clause 2, 0298 clause 2). A screen that greyed out a deployment-wide
+(0297 clause 2, 0299 clause 2). A screen that greyed out a deployment-wide
 arrival count would be hiding the figure the portal exists to show.
 
 Nothing needs a new call: the field is on the reading every one of those screens

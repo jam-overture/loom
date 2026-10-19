@@ -600,7 +600,7 @@ const EMPTY_FAULTS: Readonly<Record<CollectionFault, number>> = Object.freeze(
  * and that equivalence is a property of the fold the reading waits on rather
  * than of anything here: `pending` is the sum of the forms' pending openings
  * and `foldedAt` is the oldest fold attested by a form that still has some
- * (0298), so one lagging form answers *yes* and a quiet form whose openings are
+ * (0299), so one lagging form answers *yes* and a quiet form whose openings are
  * all folded cannot.
  */
 const stalled = (door: RevisionPageViews | null, schedule: CollectionSchedule | undefined): boolean => {

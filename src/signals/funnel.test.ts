@@ -179,7 +179,7 @@ describe("the audience a door row and a funnel row belong to", () => {
   })
 
   /**
-   * The undercount 0298 fixed. A deployment-wide asking took whichever form's
+   * The undercount 0299 fixed. A deployment-wide asking took whichever form's
    * row came first in the caller's array and reported the other form's
    * arrivals as a row handed in twice — 400 views published where 404 arrived,
    * with the loss counted as a duplicate nobody reads as an undercount, which
@@ -203,7 +203,7 @@ describe("the audience a door row and a funnel row belong to", () => {
 
   /**
    * One name on the rows is not one population behind them, and the asking is
-   * what a reading is of (0297 clause 3, 0298). A window holding one form today
+   * what a reading is of (0297 clause 3, 0299). A window holding one form today
    * is not a reading of that form.
    */
   it("names the one form in it without claiming to be a reading of it", () => {
@@ -829,7 +829,7 @@ describe("the stages as a closed set", () => {
 
 /**
  * A door read whole over two forms, where the arithmetic is the part that can
- * be got wrong without anything failing (0298).
+ * be got wrong without anything failing (0299).
  *
  * Each of these is a figure that comes out right when it is summed per row and
  * wrong when it is taken from the two sums — which is the rule

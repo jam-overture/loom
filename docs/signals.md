@@ -2597,7 +2597,7 @@ readings through `doorOf`, and `inflationFor`, whose job is to hand one
 revision's straddle rate to a pace correction.
 
 **Done**
-([0298](../decisions/0298-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md)):
+([0299](../decisions/0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md)):
 
 - **The dedup key is the audience**, which is what the store keeps one row per
   (0284), and the kept rows are **added**. Arrivals are people: a reader who
@@ -2629,7 +2629,7 @@ The broadcaster was not touched and is byte-identical at 6,477 bytes minified.
 
 **What is left and is filed:** no screen reads `audiences` on a door, so a
 deployment-wide figure that is a sum over forms is drawn exactly like one
-form's — `Loom portal`'s, and the third such finding (0295, 0297, 0298).
+form's — `Loom portal`'s, and the third such finding (0295, 0297, 0299).
 
 
 ## Still not in scope

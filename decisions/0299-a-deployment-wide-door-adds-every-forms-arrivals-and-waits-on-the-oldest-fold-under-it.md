@@ -1,10 +1,20 @@
-# 0298 — A deployment-wide door adds every form's arrivals, and waits on the oldest fold under it
+# 0299 — A deployment-wide door adds every form's arrivals, and waits on the oldest fold under it
 
 **Status:** Accepted
 
 **Date:** 19 October 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-19**, from 0298, before this branch opened its pull
+> request. 0298 was the next number free on `main` when this record was written;
+> #679 then merged its own 0298 — *a project's ingest key is public and names
+> its application* — while this branch was verifying, and two records sharing a
+> number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)), so
+> the record already on `main` keeps the number and this one gives way. Nothing
+> in it changed but its number; the references on this branch were updated with
+> it.
 
 ## Context
 

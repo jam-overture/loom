@@ -55,7 +55,7 @@ import type { ReaderSignalBatch } from "./signal.js"
  * called the rest a duplicate. They add because **arrivals are people**: a
  * reader who arrived arrived once whichever form they were served, so the sum
  * is one deployment's arrivals and the census beside it says what it was a sum
- * over (0297, 0298). It is the opposite of a page reading, where adding two
+ * over (0297, 0299). It is the opposite of a page reading, where adding two
  * forms' node counters would be one number about two pages (0290) — and the
  * asymmetry is not a special case for arrivals but the plainest instance of the
  * rule that what may be added is whatever was counted once.
@@ -203,7 +203,7 @@ export type RevisionPageViews = ReaderPageViews & {
    * same rule: it is what the *asking* named and never what the rows turned out
    * to say. One row naming one form is not a reading of one form — a window may
    * simply hold one today — so a single-membered census does not fill this in
-   * (0297, 0298).
+   * (0297, 0299).
    */
   readonly audienceId: AudienceId | null
   /**
@@ -214,7 +214,7 @@ export type RevisionPageViews = ReaderPageViews & {
    * **more than one where it is a sum over forms, which is a measurement rather
    * than a fault**: a page served in two forms (0263) has two door rows (0284),
    * and a reader who arrived arrived once whichever form they were served, so
-   * the sum is one deployment's arrivals (0297, 0298). Compare a page reading,
+   * the sum is one deployment's arrivals (0297, 0299). Compare a page reading,
    * where adding two forms' node counters is one number about two pages and
    * `PageHealth` calls it `audiences-mixed` (0290).
    */
@@ -239,7 +239,7 @@ export type RevisionPageViews = ReaderPageViews & {
    * form whose openings have been waiting a day — and it is *the oldest of the
    * rows still waiting* rather than the oldest of all of them so that a quiet
    * form with nothing pending cannot invent a stall. A summed door is therefore
-   * stalled exactly when one of its forms is (0298).
+   * stalled exactly when one of its forms is (0299).
    */
   readonly foldedAt?: string
   /**
@@ -257,7 +257,7 @@ export type RevisionPageViews = ReaderPageViews & {
    *
    * It is the other sign of the same subtraction, so **one form's door never
    * has both** — and a door summed over two forms can, because the two are
-   * added per row rather than taken from the two sums (0298): one form
+   * added per row rather than taken from the two sums (0299): one form
    * mid-collection and one form with straddles is a revision with six of each,
    * and netting them would report it as exactly measured, which neither form
    * is. A reading that showed neither would make a deployment whose collection
@@ -288,7 +288,7 @@ const readingOf = (row: StoredPageViews): RevisionPageViews => {
 
   return {
     ...row,
-    /** One row's own form, and `null` where the row named none (0298). */
+    /** One row's own form, and `null` where the row named none (0299). */
     audienceId: audiences[0] ?? null,
     audiences,
     drift: Math.max(0, row.appearances - row.opened),
@@ -359,7 +359,7 @@ export type PageViewsFor = {
    *
    * **Where the asking names no audience this is the sum of every form's
    * door**, and it was once whichever form came first in the caller's array
-   * (0298). A page served in two forms has two door rows (0263, 0284), so a
+   * (0299). A page served in two forms has two door rows (0263, 0284), so a
    * deployment-wide asking was answered with one form's openings and the other
    * form's reported as a row handed in twice — the same quiet undercount found
    * in the reading beside it (0297). Arrivals add because arrivals are people:
@@ -395,7 +395,7 @@ export type PageViewsFor = {
    * of each form stands and the fact is reported.
    *
    * **The audience is part of what makes two rows two rows**, and leaving it
-   * out was an undercount (0298): two forms' doors keyed by nothing at all made
+   * out was an undercount (0299): two forms' doors keyed by nothing at all made
    * the second form a repeat of the first, so a deployment-wide reading
    * published one form's arrivals and called the rest a duplicate. A form's own
    * door was never affected — the audience is picked before this, so one form's
@@ -516,7 +516,7 @@ export const pageViewsFor = (
   /**
    * Keyed by the audience, which is what the store keeps one row per (0284):
    * two forms' doors are two rows and one arrival count, and keying them by the
-   * revision alone dropped the second as a repeat of the first (0298).
+   * revision alone dropped the second as a repeat of the first (0299).
    */
   const first = new Map<AudienceId, StoredPageViews>()
 
@@ -535,7 +535,7 @@ export const pageViewsFor = (
 /**
  * The straddle correction for one revision of one page: `drift ÷ opened` off
  * that page's own door — its own form's row where the asking names an audience,
- * and the sum of every form's where it names none (0298).
+ * and the sum of every form's where it names none (0299).
  *
  * The number `PaceOptions.inflation` wants, published so that a consumer
  * holding a window of counters over several pages does not write the matching

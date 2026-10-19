@@ -98,17 +98,24 @@ alternative rather than left implicit.
 
 ## Records added
 
-[0298](../decisions/0298-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md)
+[0299](../decisions/0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md)
 — *A deployment-wide door adds every form's arrivals, and waits on the oldest
 fold under it.* Accepted; eight clauses; nothing superseded — 0147, 0158, 0214,
 0274, 0284, 0290 and 0297 all stand, and clause 5 applies 0297 clause 3 to a
 second reading rather than changing it. Seven alternatives recorded, including
 the four above.
 
-**On its number.** 0298 is the next free number on `main`, which is the rule.
-**#679 (`Loom portal`, open) also holds a 0298**, so one of the two will be
-renumbered by `Loom merge` when the second of them lands — the same thing that
-happened to this morning's record. Nothing in this unit depends on the number.
+**On its number.** Written as **0298**, the next free number on `main` when I
+started, and **renumbered to 0299 by me before opening the pull request**: #679
+merged its own 0298 — *a project's ingest key is public and names its
+application* — while this branch was verifying, so the record already on `main`
+keeps the number and mine gives way (0097). The filename, ten doc comments
+across four source files, `docs/signals.md`, two `FINDINGS.md` entries and this
+report were updated with it, and a dated note under the record's header says
+what it was renumbered from. **Nothing in the unit depended on the number**,
+which is why the cost was a rename rather than a decision — and renumbering it
+here rather than leaving it to `Loom merge` is what keeps a fatal clash off
+`main`.
 
 ## Findings filed or closed
 
@@ -125,11 +132,14 @@ after 0295 and 0297.
 
 ## Test numbers
 
-**`pnpm install && pnpm verify` is green, exit code 0.** The root suite is
-**233 files and 5,457 tests passed**, in 306 seconds; the app suite is **338
-files and 6,002 tests passed**, in 199 seconds. `findings:check` reads 1,258
-findings with none malformed, and `prerender:check` reports 133 prerendered
-pages, 1,850 text junctions, 0 run together.
+**`pnpm install && pnpm verify` is green, exit code 0**, and these numbers are
+from the run **after** `main` was merged in (see *Beside the framework lane*).
+The root suite is **233 files and 5,457 tests passed**, in 303 seconds; the app
+suite is **343 files and 6,053 tests passed**, in 201 seconds. `findings:check`
+reads 1,259 findings with none malformed, and `prerender:check` reports 133
+prerendered pages, 1,850 text junctions, 0 run together. The run before the
+merge was green too, on 338 app files and 6,002 tests — the five files and
+fifty-one tests between them are #679's, not mine.
 
 `src/signals/funnel.test.ts` is **66 tests, up from 55** — where
 `pageViewsFor`'s tests live. Eleven are new: four on a door read whole over two
@@ -178,8 +188,8 @@ files together, and no claim in the record rests on only one of them.
 ### One check failed on the first run, and the failure was mine
 
 `documentation.test.ts` refuses a decision-record number that is part of a
-published sentence — the site can lift `(0298)` out of a sentence as a footnote
-and cannot lift *"before 0298 it was…"*. Two of my new doc comments wrote one
+published sentence — the site can lift `(0299)` out of a sentence as a footnote
+and cannot lift *"before 0299 it was…"*. Two of my new doc comments wrote one
 into the grammar, so the generated reference dropped both comments whole, which
 is the generator doing exactly what it says. Rewritten as parentheticals; the
 check passes and both comments are back in
@@ -224,14 +234,20 @@ Nothing blocking. Two things are worth the maintainer's eye:
 
 ## Beside the framework lane
 
-`Loom daily build` has no branch open. **One open pull request touches my lane:**
-#679 (`The key a project's pages post with, and a door that files nothing it
-cannot name (4b)`) changes `apps/loom/app/_lib/reader-signals/` — `intake.ts`,
-`receive.ts`, the key stores and a new `attribution.ts` — which is the intake
-half of my lane. **I did not touch any file it touches.** This unit is
-`src/signals/page-views.ts`, `health.ts` and two test files, so the only overlap
-is `FINDINGS.md` (appended, never reflowed), `decisions/README.md` (regenerated)
-and the record number above.
+`Loom daily build` has no branch open. **#679 did touch my lane and has now
+merged** (`The key a project's pages post with, and a door that files nothing it
+cannot name (4b)`): it changed `apps/loom/app/_lib/reader-signals/` —
+`intake.ts`, `receive.ts`, the key stores and a new `attribution.ts` — which is
+the intake half of this lane, written by the portal thread rather than by me. I
+read it before I started and **did not touch a single file it touches**; this
+unit is `src/signals/page-views.ts`, `health.ts` and three test files.
+
+It landed on `main` while I was verifying, so I merged `main` into this branch
+rather than opening a pull request behind it: `FINDINGS.md` resolved by union,
+`decisions/README.md` and the generated reference by regeneration, and nothing
+in `src/` or `apps/` conflicted at all. The record number is the one real
+collision and it is handled above. **`pnpm verify` was run again after the
+merge**, and the numbers in this report are from that run.
 
 ## The door this lane is keeping cheap
 
