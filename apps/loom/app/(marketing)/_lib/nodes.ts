@@ -324,6 +324,26 @@ export const inlineLink = (
   })
 
 /**
+ * A name set in monospace inside a sentence.
+ *
+ * The inline counterpart of `code` above, and the two are not
+ * interchangeable: `loom.code` is a panel with its own chrome and a *Copy*
+ * button, which is right for a line somebody is meant to paste and wrong for a
+ * package name inside a paragraph about it.
+ *
+ * It takes no props at all — the primitive declares `z.object({}).strict()` —
+ * so there is nothing here to get wrong and no `TERTIARY` of it. The size is
+ * `0.9em` of whatever line it lands in rather than a step off the ramp, which
+ * is why the same helper is correct in a lede and in a footnote.
+ */
+export const codeSpan = (ids: IdFactory, name: string): LoomNode =>
+  buildElement(ids, {
+    type: "loom.code-span",
+    props: {},
+    children: [buildText(ids, name)],
+  })
+
+/**
  * A paragraph whose sentence is not one piece, which is what an inline link
  * makes of it.
  *

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
 
+import {
+  DEFAULT_AUDIENCE_ID,
+  audienceIdSchema,
+  type AudienceId,
+} from "../audience/audience.js"
 import { nodeIdSchema, treeIdSchema, type NodeId, type TreeId } from "../ids.js"
 import { primitiveTypeSchema, type PrimitiveType } from "../primitive-type.js"
 import type { ReaderSignalJournal } from "../signals/journal.js"
@@ -36,6 +41,17 @@ export const primitiveType = (name: string): PrimitiveType => primitiveTypeSchem
 export const viewKey = (nth: number): ViewKey => String(nth).padStart(32, "0") as ViewKey
 
 export const region = (code: string): ReaderRegion => code as ReaderRegion
+
+/**
+ * Two audiences to tell apart, and neither of them the default.
+ *
+ * Named rather than reusing `aud_everyone` for one side, because a test whose
+ * two audiences are *everyone* and *somebody* passes on a store that quietly
+ * files everything under the default — which is exactly the failure these are
+ * here to catch (0284).
+ */
+export const SKIERS = audienceIdSchema.parse("aud_skiers") as AudienceId
+export const RIDERS = audienceIdSchema.parse("aud_riders") as AudienceId
 
 export const batchOf = (
   signals: readonly ReaderSignal[],
@@ -213,6 +229,43 @@ export const describeReaderSignalJournalContract = (
       expect(stored?.view).toBe(viewKey(3))
     })
 
+    /**
+     * The dimension this record is about, at the point it enters the system
+     * (0284). A buffer that dropped it would make every counter below it one
+     * population rather than two, and nothing afterwards could tell.
+     */
+    it("files a batch under the audience it names", async () => {
+      const journal = await make()
+      await journal.receive([batchOf([viewed("a")], { audience: SKIERS })])
+
+      expect(unwrap(await journal.read()).batches[0]?.audienceId).toBe(SKIERS)
+    })
+
+    /**
+     * Resolved rather than left absent, so a fold reads one spelling of *this
+     * batch named no audience*. A sender serving one form of every page has
+     * nothing to say, and what it was doing all along has a name now.
+     */
+    it("files a batch that named no audience under everyone", async () => {
+      const journal = await make()
+      await journal.receive([batchOf([viewed("a")])])
+
+      expect(unwrap(await journal.read()).batches[0]?.audienceId).toBe(DEFAULT_AUDIENCE_ID)
+    })
+
+    it("keeps two audiences' batches apart in one delivery", async () => {
+      const journal = await make()
+      await journal.receive([
+        batchOf([viewed("a")], { audience: SKIERS }),
+        batchOf([viewed("b")], { audience: RIDERS }),
+      ])
+
+      expect(unwrap(await journal.read()).batches.map((batch) => batch.audienceId)).toEqual([
+        SKIERS,
+        RIDERS,
+      ])
+    })
+
     it("keeps trees apart", async () => {
       const journal = await make()
       await journal.receive([batchOf([viewed("a")]), batchOf([viewed("b")], { treeId: OTHER_TREE })])
@@ -365,6 +418,84 @@ export const describeReaderTallyStoreContract = (
 
       expect(unwrap(await store.tallies())).toEqual([])
       expect(unwrap(await store.funnels())).toEqual([])
+    })
+
+    /**
+     * ## The audience (0284)
+     *
+     * The dimension is in the key, and these are the three things that makes
+     * true: two audiences never fold into one row, a reading may name one, and
+     * a reading that names none gets both and can tell them apart.
+     *
+     * The failure this guards is the one described of applications, and of
+     * audiences before them — *a number that looks right forever* (0273, 0263).
+     * Two variants summed into one tally is not recoverable from the rows, so a
+     * store that keyed without the audience would pass every other test in this
+     * file.
+     */
+    describe("the audience", () => {
+      it("keeps two audiences' tallies of the same node apart", async () => {
+        const store = await make()
+        await store.apply({ tallies: [tally({ views: 2 })], funnels: [] }, AT, SKIERS)
+        await store.apply({ tallies: [tally({ views: 5 })], funnels: [] }, AT, RIDERS)
+
+        const rows = unwrap(await store.tallies())
+
+        expect(rows).toHaveLength(2)
+        expect(
+          Object.fromEntries(rows.map((row) => [row.audienceId, row.views]))
+        ).toEqual({ [SKIERS]: 2, [RIDERS]: 5 })
+      })
+
+      it("adds a second window of the same audience to the first", async () => {
+        const store = await make()
+        await store.apply({ tallies: [tally({ views: 2 })], funnels: [] }, AT, SKIERS)
+        await store.apply({ tallies: [tally({ views: 3 })], funnels: [] }, LATER, SKIERS)
+
+        const rows = unwrap(await store.tallies())
+
+        expect(rows).toHaveLength(1)
+        expect(rows[0]).toMatchObject({ audienceId: SKIERS, views: 5, updatedAt: LATER })
+      })
+
+      it("reads one audience without the other", async () => {
+        const store = await make()
+        await store.apply({ tallies: [tally({ views: 2 })], funnels: [] }, AT, SKIERS)
+        await store.apply({ tallies: [tally({ views: 5 })], funnels: [] }, AT, RIDERS)
+
+        const rows = unwrap(await store.tallies({ audience: RIDERS }))
+
+        expect(rows).toHaveLength(1)
+        expect(rows[0]).toMatchObject({ audienceId: RIDERS, views: 5 })
+      })
+
+      it("reads an audience nothing was ever filed under as nothing", async () => {
+        const store = await make()
+        await store.apply({ tallies: [tally()], funnels: [] }, AT, SKIERS)
+
+        expect(unwrap(await store.tallies({ audience: RIDERS }))).toEqual([])
+      })
+
+      it("files a window that named no audience under everyone", async () => {
+        const store = await make()
+        await store.apply({ tallies: [tally()], funnels: [] }, AT)
+
+        expect(unwrap(await store.tallies())[0]?.audienceId).toBe(DEFAULT_AUDIENCE_ID)
+      })
+
+      it("keeps two audiences' funnel answers apart", async () => {
+        const store = await make()
+        const answer = { treeId: TREE, revision: 1, pair: PAIR, reached: 10 }
+        await store.apply({ tallies: [], funnels: [{ ...answer, converted: 1 }] }, AT, SKIERS)
+        await store.apply({ tallies: [], funnels: [{ ...answer, converted: 4 }] }, AT, RIDERS)
+
+        const rows = unwrap(await store.funnels())
+
+        expect(rows).toHaveLength(2)
+        expect(
+          Object.fromEntries(rows.map((row) => [row.audienceId, row.converted]))
+        ).toEqual({ [SKIERS]: 1, [RIDERS]: 4 })
+      })
     })
 
     it("accepts a rollup with nothing in it", async () => {
@@ -537,6 +668,54 @@ export const describeReaderTallyStoreContract = (
         const store = await make()
 
         expect(unwrap(await store.pageViews())).toEqual([])
+      })
+
+      /**
+       * The door's half of the dimension, on the counter it matters most on
+       * (0284): page views are the denominator every rate on a screen is taken
+       * of, so two audiences summed here would make both variants' rates wrong
+       * in the same invisible direction.
+       */
+      it("keeps two audiences' openings apart", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 3 })], AT, SKIERS)
+        await store.opened([opening({ views: 7 })], AT, RIDERS)
+
+        const rows = unwrap(await store.pageViews())
+
+        expect(rows).toHaveLength(2)
+        expect(
+          Object.fromEntries(rows.map((row) => [row.audienceId, row.opened]))
+        ).toEqual({ [SKIERS]: 3, [RIDERS]: 7 })
+      })
+
+      /**
+       * The row written from two sides, in one audience. A fold's appearances
+       * and a door's openings have to meet in the same row or the subtraction
+       * that measures the straddle (0147) is taken across two populations.
+       */
+      it("meets a fold of the same audience in one row", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 4 })], AT, SKIERS)
+        await store.apply({ tallies: [], funnels: [], appearances: [opening({ views: 5 })] }, LATER, SKIERS)
+
+        const rows = unwrap(await store.pageViews())
+
+        expect(rows).toHaveLength(1)
+        expect(rows[0]).toMatchObject({ audienceId: SKIERS, opened: 4, appearances: 5 })
+      })
+
+      it("keeps a fold of one audience out of another's row", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 4 })], AT, SKIERS)
+        await store.apply({ tallies: [], funnels: [], appearances: [opening({ views: 5 })] }, LATER, RIDERS)
+
+        const rows = unwrap(await store.pageViews())
+
+        expect(rows).toHaveLength(2)
+        expect(
+          Object.fromEntries(rows.map((row) => [row.audienceId, [row.opened, row.appearances]]))
+        ).toEqual({ [SKIERS]: [4, 0], [RIDERS]: [0, 5] })
       })
 
       it("accepts a delivery that opened nothing", async () => {
@@ -759,6 +938,32 @@ export const describeReaderRegionStoreContract = (
       const store = await make()
 
       expect(unwrap(await store.regions())).toEqual([])
+    })
+
+    /** The regions' half of the dimension — see the tally contract's note (0284). */
+    it("keeps two audiences' buckets apart", async () => {
+      const store = await make()
+      await store.count([count({ views: 3 })], AT, SKIERS)
+      await store.count([count({ views: 8 })], AT, RIDERS)
+
+      const rows = unwrap(await store.regions())
+
+      expect(rows).toHaveLength(2)
+      expect(Object.fromEntries(rows.map((row) => [row.audienceId, row.views]))).toEqual({
+        [SKIERS]: 3,
+        [RIDERS]: 8,
+      })
+    })
+
+    it("reads one audience's buckets without the other's", async () => {
+      const store = await make()
+      await store.count([count({ views: 3 })], AT, SKIERS)
+      await store.count([count({ views: 8 })], AT, RIDERS)
+
+      const rows = unwrap(await store.regions({ audience: SKIERS }))
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({ audienceId: SKIERS, views: 3 })
     })
 
     it("accepts a delivery that counted nothing", async () => {

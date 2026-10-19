@@ -99,7 +99,18 @@ const describe = (ask: AskState, counting: boolean): string =>
     counting ? "counting" : "not counting",
   ].join("/")
 
-const ORIGIN = "https://loom.example"
+/**
+ * The origin every page in this sweep is built for.
+ *
+ * Exported as of 16 October because a second sweep wanted it. `docs-pages.test.ts`
+ * reads the links off these same trees, and `pathsLinkedFrom` needs the origin a
+ * tree was built for to tell this site's own addresses from anybody else's — so a
+ * second literal there would be a sweep that silently found nothing the day this
+ * one changed.
+ */
+export const ORIGIN_FOR_TESTS = "https://loom.example"
+
+const ORIGIN = ORIGIN_FOR_TESTS
 
 /**
  * Every page, in every state, in document order of the routes.

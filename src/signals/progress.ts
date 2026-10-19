@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveRole } from "../role.js"
 import type { PrimitiveType } from "../primitive-type.js"
@@ -140,6 +141,16 @@ export type ReadingProgress = {
   readonly treeId: TreeId
   readonly revision: number
   /**
+   * The audience the reading was of, carried through unchanged.
+   *
+   * Carried rather than derived, and carried for one reason: an order over a
+   * deployment's pages picks each page's door row by this trio and refuses to
+   * count a page twice by it (`readingKeyOf`), and a progress reading that
+   * dropped the audience would hand that order two forms of one page it could
+   * not tell apart.
+   */
+  readonly audienceId: AudienceId | null
+  /**
    * The page's view floor, carried through from the reading unchanged.
    *
    * Zero is the whole answer: nothing was measured, so nothing stopped
@@ -281,6 +292,7 @@ export const readingProgressOf = (reading: PageReading): ReadingProgress => {
   const empty = {
     treeId: reading.treeId,
     revision: reading.revision,
+    audienceId: reading.audienceId,
     views: reading.views,
   }
 

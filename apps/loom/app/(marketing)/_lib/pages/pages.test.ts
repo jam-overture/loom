@@ -9,6 +9,7 @@ import { ASKS } from "../adapt/asks"
 import { BAND } from "../bands"
 import { PALETTE_SWITCHER_LABEL, READ_NEXT_EYEBROW } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
+import { DOC_PAGES } from "../docs-pages"
 import { unhonored } from "../frames"
 import { SHORT_ANSWERS } from "./how-it-works"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
@@ -298,21 +299,36 @@ describe.each(SITE_ROUTES)("$path", (route) => {
   })
 
   /**
-   * Two kinds of destination on this origin, and the difference is the point.
-   * A site route is a page this lane builds, so it must have a builder; a
-   * surface is another route group's front door, which this lane may point at
-   * and must not otherwise know anything about. Anything else on this origin is
-   * a link to nowhere.
+   * Three kinds of destination on this origin, and the differences are the
+   * point. A site route is a page this lane builds, so it must have a builder.
+   * A surface is another route group's front door, which this lane may point at
+   * and must not otherwise know anything about. A **named page inside** another
+   * route group is the third, as of 16 October: `DOC_PAGES` is the list of
+   * them, and the condition on being in that list is a page `routes.ts` says
+   * this application serves and whose own heading and promised words
+   * `docs-pages.test.ts` has read off disk.
+   *
+   * Anything else on this origin is a link to nowhere.
+   *
+   * **The third arm is a list rather than a shape**, and it is deliberately not
+   * "any path under a surface". `/docs/anything-at-all` would pass a prefix
+   * test and 404; the reason there is now a list at all is that a link into
+   * somebody else's route group is the one kind this lane cannot check by
+   * building its own page.
    */
   it("links to every route of the site, and to no unknown path on this origin", () => {
     const internal = linksIn(markupOf(route, DEFAULT_THEME))
       .filter((href) => href.startsWith("/"))
       .map((href) => href.split("?")[0] ?? href)
     const surfaces = PRODUCT_SURFACES.map((surface) => surface.path)
+    const named = DOC_PAGES.map((page) => page.path)
 
     for (const other of SITE_ROUTES) expect(internal).toContain(other.path)
     for (const path of internal) {
-      expect(SITE_PAGES.has(path) || surfaces.includes(path)).toBe(true)
+      expect(
+        SITE_PAGES.has(path) || surfaces.includes(path) || named.includes(path),
+        `${route.path} links to ${path}, which is no page of this site, no surface, and in no entry of DOC_PAGES`
+      ).toBe(true)
     }
   })
 

@@ -36,8 +36,16 @@ const STYLESHEET = join(REPOSITORY_ROOT, "apps", "loom", "app", "(docs)", "globa
 
 export const readDocsStylesheet = (): string => readFileSync(STYLESHEET, "utf8")
 
-/** Comments hold example selectors and prose about them; neither is a rule. */
-const withoutComments = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
+/**
+ * Comments hold example selectors and prose about them; neither is a rule.
+ *
+ * Exported because it is the first thing any claim about this stylesheet has to
+ * do, and the second one arrived: `chrome-css.ts` reads the chrome's own
+ * declarations, and the comment above them quotes the six numbers the chrome
+ * used to be spelled with. A reader that did not strip comments would find
+ * those first.
+ */
+export const withoutComments = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
 
 /**
  * The body of `@layer components { … }`, which is where every prose rule lives.

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { OTHER_TREE, region, TREE } from "../testing/reader-signal-contract.js"
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
+import { OTHER_TREE, region, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 
 import {
   DEFAULT_REGION_FLOOR,
@@ -16,6 +17,7 @@ import {
 const AT = "2026-10-02T00:00:00.000Z"
 
 const row = (over: Partial<StoredRegionCount> = {}): StoredRegionCount => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: TREE,
   revision: 1,
   region: region("GB"),
@@ -261,5 +263,77 @@ describe("regionReadingFor", () => {
 
     expect(read.reading.views).toBe(0)
     expect(read.foreign).toBe(1)
+  })
+
+  /**
+   * A page served in two forms counts each form's arrivals on its own row
+   * (0284), so one form's map is not the page's and the other form's rows are
+   * neither foreign nor a doubled bucket. Before the audience was part of the
+   * matching the second form's bucket was dropped as the first one handed in
+   * twice, and the map published one form's readership as the page's.
+   */
+  it("reads one form's map and counts the other form's rows apart from it", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1, audienceId: SKIERS }, [
+      row({ audienceId: SKIERS, region: region("GB"), views: 60 }),
+      row({ audienceId: RIDERS, region: region("GB"), views: 400 }),
+      row({ audienceId: RIDERS, region: region("FR"), views: 400 }),
+    ])
+
+    expect(read.reading.views).toBe(60)
+    expect(read.reading.regions).toEqual([{ region: "GB", views: 60 }])
+    expect(read.otherAudience).toBe(2)
+    expect(read.duplicated).toBe(0)
+    expect(read.foreign).toBe(0)
+  })
+
+  it("still counts one form's region handed in twice as a bucket it dropped", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1, audienceId: SKIERS }, [
+      row({ audienceId: SKIERS, views: 60 }),
+      row({ audienceId: SKIERS, views: 60 }),
+    ])
+
+    expect(read.reading.views).toBe(60)
+    expect(read.duplicated).toBe(1)
+    expect(read.otherAudience).toBe(0)
+  })
+
+  it("takes every form's rows where the asking names no audience, as it always has", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1 }, [
+      row({ audienceId: SKIERS, region: region("GB"), views: 60 }),
+      row({ audienceId: RIDERS, region: region("FR"), views: 60 }),
+    ])
+
+    expect(read.reading.views).toBe(120)
+    expect(read.otherAudience).toBe(0)
+  })
+})
+
+/**
+ * A map says which population it is of, which is the one thing a comparison of
+ * two of them cannot derive.
+ */
+describe("the audience a region map is of", () => {
+  it("names the audience the rows were picked for", () => {
+    const read = regionReadingFor({ treeId: TREE, revision: 1, audienceId: SKIERS }, [
+      row({ audienceId: SKIERS, views: 60 }),
+      row({ audienceId: RIDERS, views: 400 }),
+    ])
+
+    expect(read.reading.audienceId).toBe(SKIERS)
+    expect(read.reading.views).toBe(60)
+    expect(read.otherAudience).toBe(1)
+  })
+
+  it("names none where the caller asked about no audience", () => {
+    expect(regionReadingFor({ treeId: TREE, revision: 1 }, [row()]).reading.audienceId).toBeNull()
+  })
+
+  /**
+   * A whole window grouped across whatever it holds is a deployment's
+   * readership rather than one form's, so it asserts no audience — which is
+   * what keeps a comparison of two such maps answerable rather than refused.
+   */
+  it("names none when a window is read whole", () => {
+    expect(regionReadingOf([row({ audienceId: SKIERS })]).audienceId).toBeNull()
   })
 })

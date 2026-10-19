@@ -1,8 +1,9 @@
-import { asc, eq } from "drizzle-orm"
+import { and, asc, eq, isNull } from "drizzle-orm"
 
 import { applicationSchema, type Application, type ApplicationId } from "../application/application.js"
 import type { ApplicationStore, ApplicationStoreError } from "../application/store.js"
 import { applyPatch } from "../patch.js"
+import { matchesListing, type Listing } from "../project/store.js"
 import { err, ok, type Result } from "../result.js"
 
 import type { LoomDatabase } from "./database.js"
@@ -37,6 +38,8 @@ const toProject = (row: typeof loomApplications.$inferSelect): Result<Applicatio
     name: row.name,
     createdAt: row.createdAt,
     ...(row.host === null ? {} : { host: row.host }),
+    /** Absent rather than `null`, so *this is open* has one spelling (0289). */
+    ...(row.closedAt === null ? {} : { closedAt: row.closedAt }),
   })
 
   return parsed.success
@@ -89,7 +92,7 @@ export const postgresApplicationStore = (db: LoomDatabase): ApplicationStore => 
     }
   },
 
-  list: async () => {
+  list: async (listing?: Listing) => {
     try {
       /**
        * Ordered in the statement rather than after it, so the order is the
@@ -103,7 +106,8 @@ export const postgresApplicationStore = (db: LoomDatabase): ApplicationStore => 
       for (const row of rows) {
         const project = toProject(row)
         if (!project.ok) return project
-        projects.push(project.value)
+        /** One rule about what `closed` means, called by both stores (0289). */
+        if (matchesListing(project.value.closedAt, listing)) projects.push(project.value)
       }
       return ok(projects)
     } catch (cause) {
@@ -160,6 +164,52 @@ export const postgresApplicationStore = (db: LoomDatabase): ApplicationStore => 
       return ok(next.data)
     } catch (cause) {
       return err(unavailable(cause, `could not rename project ${applicationId}`))
+    }
+  },
+
+  /** Idempotent in the statement — see the project store's note (0289). */
+  close: async (applicationId, at) => {
+    try {
+      await db
+        .update(loomApplications)
+        .set({ closedAt: at })
+        .where(
+          and(
+            eq(loomApplications.applicationId, applicationId),
+            isNull(loomApplications.closedAt)
+          )
+        )
+
+      const rows = await db
+        .select()
+        .from(loomApplications)
+        .where(eq(loomApplications.applicationId, applicationId))
+        .limit(1)
+
+      const row = rows[0]
+      return row === undefined ? err({ code: "not-found", applicationId }) : toProject(row)
+    } catch (cause) {
+      return err(unavailable(cause, `could not close application ${applicationId}`))
+    }
+  },
+
+  reopen: async (applicationId) => {
+    try {
+      await db
+        .update(loomApplications)
+        .set({ closedAt: null })
+        .where(eq(loomApplications.applicationId, applicationId))
+
+      const rows = await db
+        .select()
+        .from(loomApplications)
+        .where(eq(loomApplications.applicationId, applicationId))
+        .limit(1)
+
+      const row = rows[0]
+      return row === undefined ? err({ code: "not-found", applicationId }) : toProject(row)
+    } catch (cause) {
+      return err(unavailable(cause, `could not reopen application ${applicationId}`))
     }
   },
 })

@@ -8,6 +8,296 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-18 — `loom.code` contains its overflow and never admits to it, so a line too wide for a phone ends mid-word with nothing on the screen saying there is more
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.code.ts`) · **Status:** **open** — nothing is broken, no
+test is failing, and the only instrument that sees it is a camera
+
+The front door's install band prints the one line on this site a stranger is
+meant to paste. Measured on a production build at 390×844, on `minimal` and on
+`bold`:
+
+```
+pre        x 15 y 5658  361x41
+pre code   x 24 y 5670  504x16
+```
+
+**504 pixels of command in a 361-pixel panel.** 143 of them are off the end, and
+the page itself does not overflow — `scrollWidth 390 / innerWidth 390` — so
+every check this repository has passes. What a reader sees is:
+
+```
+npm install @jam-overture/loom @jam-overtu
+```
+
+and nothing beside it, under it or around it that says the line continues. The
+likeliest reading of that screen is that the second package is called
+`@jam-overtu`.
+
+### The affordance the primitive believes it has
+
+`loom.code` sets `overflowX: "auto"` on the `pre`, and the comment beside it is
+right about what that buys:
+
+> *"The scroll is the `pre`'s and never the page's… It is what contains the
+> overflow to this panel."*
+
+Containing it is exactly what it does, and that is the whole of what it does.
+**`overflow-x: auto` is not a visible affordance on a touch viewport** — the
+scrollbar is an overlay drawn while a finger is moving and absent at rest, which
+is the state a reader is in when they look at the panel. On a desktop, where the
+line fits at 719 pixels, the question never arises.
+
+This lane believed otherwise in writing. The install band's own docblock has
+said since 11 October that the panel *"shows 348 of the line's 530px, so 182px
+of it is behind a horizontal scroll **with a track under it saying so**."* Both
+numbers were wrong and the track does not exist; the paragraph is corrected on
+`marketing-09-the-package-names-a-phone-never-sees`.
+
+### Why it is not worked around here
+
+The three things this lane could do are each worse than the gap:
+
+- **`wrap: true`.** `loom.code`'s wrapping mode is `pre-wrap` plus
+  `overflow-wrap: anywhere`, which breaks at the space first — so the panel
+  would read `npm install @jam-overture/loom` and, under it,
+  `@jam-overture/loom-primitives`. That is the *"a shell line broken across two
+  visual rows reads as two commands"* failure the band's own note keeps
+  `wrap: false` to avoid, and the second row is a plausible-looking command in
+  its own right.
+- **A continuation.** `npm install @jam-overture/loom \` and the rest on a
+  second line fits at 390 and is what a README would do. It is refused because
+  **Copy is the one path that is correct for every reader today** — a backslash
+  continuation is not a continuation in PowerShell or `cmd`, so making the
+  panel readable for some readers would make the button wrong for others. A fix
+  that trades a reading problem for a running problem is not a fix.
+- **A sentence saying so.** A tree has no viewport
+  ([0283](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
+  made the ramps fluid, not the nodes conditional), so *"scroll to see the rest
+  of the line"* would be a sentence this page tells a desktop reader about a
+  line they can see whole.
+
+**What this lane did instead is the half that was genuinely its own**, and it
+does not close this entry: the two package names are now in the paragraph above
+the panel as `loom.code-span`, which wraps. A reader who cannot finish the
+command can at least read what they are installing. The command itself is still
+cut off and still silent about it.
+
+### Three shapes, costed
+
+1. **A fade at the trailing edge when the content overflows**, and nothing when
+   it does not. Pure CSS — a `mask-image` on the `pre` driven by a scroll
+   position — so it needs no prop, no new slot and no palette slot (a mask is
+   transparency rather than colour, which is the property that keeps it clear of
+   the status-colour finding of 17 October). It is the convention a reader has
+   met on every table on a phone. **This is the recommendation.**
+2. **A persistent track.** `overflow-x: scroll` plus
+   `scrollbar-width`/`::-webkit-scrollbar` styling. Honest, cheap, and it costs
+   the panel a few pixels of chrome on desktops where nothing is hidden, which
+   is where most of the readings of a code panel happen.
+3. **A prop.** `overflow: "fade" | "plain"` on `loom.code`, so a caller decides.
+   Refused in the costing rather than offered: the caller cannot know, because
+   the caller does not know the viewport, and a prop whose correct value depends
+   on something the caller cannot see is a prop that will be set wrong.
+
+Nothing here is an argument about `wrap`, which is a different question and is
+answered correctly today.
+
+### The row for `Loom daily build`
+
+**None, and that is worth saying because the neighbouring finding has one.** The
+17 October entry on a refusal tone needed a palette slot and therefore a schema
+change reaching every registered palette. This needs neither: shapes 1 and 2 are
+`loom.code`'s own stylesheet, and shape 1 deliberately uses transparency so that
+it is not waiting on a colour decision.
+---
+## 2026-10-16 — the button offering the install guide landed on the introduction, and the four links into the documentation were held to nothing
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (the `/docs`
+half is **closed**), with a row for `Loom docs` and an open `/demo` half ·
+**Status:** **the `/docs` half is closed by
+`marketing-06-the-install-guide-the-button-missed`.** The `/demo` half of the
+4 October finding is still open and is a different shape, described at the foot
+of this entry.
+
+Closes the `/docs` half of **4 October — *a claim about another surface can be
+held to the link beside it and never to what is on the page***, which named two
+uncovered claims and asked for a shape rather than a fix.
+
+### The reader-visible half, which nothing was ever going to catch
+
+The front door's install band prints `pnpm add @jam-overture/loom …` and then
+offers **Follow the install guide**. That control pointed at `/docs`.
+
+`(docs)/docs/page.tsx` is not a landing page — by that lane's own decision,
+*"a second front door written in MDX would be a second place to keep the same
+sentences true"* — so it redirects to the first page of the documentation in
+reading order. That is **Introduction**, and *Installation* is the third page
+after it. A reader who had just been shown a command and pressed the button
+promising the longer version of it arrived on a page about what Loom is, and
+had to find their way.
+
+Nothing about it was red and nothing was broken. The link worked, the page it
+opened is a good page, and it was not the page the button named. The same was
+true of `/how-it-works`'s closing paragraph, which has named three specific
+pages' worth of documentation since 26 September — *"what a rule can say, what
+the record holds field by field, and how to wire it into a page you already
+have"* — under one button to the front of all of it.
+
+**Four controls on this site pointed into the documentation and every one of
+them pointed at the same door.**
+
+### Why there was nothing to catch it, which is the 4 October finding
+
+That entry stopped at the route group boundary and said so:
+
+> *"A link to `/docs#something` is checked for nothing… Both are true today and
+> both were checked by a person. Nothing would say so if either stopped being."*
+
+It also recorded what would close it: *"a surface publishing the list of things
+it promises to carry — a few strings, exported from its own route group — for
+anybody pointing at it to assert against."*
+
+**That is still the better shape and it is still `Loom docs`' to build.** What
+shipped instead is the shape the 15 October run settled on for the portal's
+under-construction banner: **read the other lane's page off the repository.** A
+documentation page is an MDX file with its own heading at the top of it, so both
+things this site has been promising about those pages — that they exist, and
+that a particular thing is on them — are in that file. Nothing in
+`(marketing)` imports `(docs)`, renders it, or asserts over its chrome.
+
+`_lib/docs-pages.ts` is the list, `_lib/docs-pages.test.ts` holds four rules
+over it, and the third is the one with teeth: **no link on this site goes into
+the documentation at an address that is not on the list.** Without it the other
+three check a list rather than the site, and the next run to type a path into a
+band gets no check at all.
+
+### The row for `Loom docs`
+
+**Nothing is owed, and two things are worth knowing.**
+
+- **Four of your pages are now quoted by name on the marketing site**, and a
+  phrase out of each is asserted against your source: the `pnpm add` command in
+  *Installation*, *"a small object called a policy"* and *"the second list you
+  write"* in *What AI may change*, *"what it remembers"* in *What every ask
+  leaves behind*, and *"one function that changes a page"* in *What your app has
+  to do*. If you rewrite one of those sentences this file goes red in your run,
+  and **it is this lane's to fix, not yours** — the honest answers are to point
+  the link somewhere else or to reword the promise, and both of those are in
+  `(marketing)`. The failure says so in as many words.
+- **The headings are held too**, so a page renamed is also red here. Same
+  remedy and same owner.
+- If you would rather publish the list the 4 October entry asked for, this file
+  is four constants and a sweep, and it should be deleted the day you do.
+
+### What is still open, and it is the `/demo` half
+
+The 4 October finding named two uncovered claims. The second is on
+`/what-you-run`: *"To ask for something in your own words, try the demo. It is a
+page you can type into."*
+
+**It is not in this unit, and that is deliberate.** It is not a claim
+about a named page, it is a claim about a *behaviour* — that there is somewhere
+on `/demo` to type. The shape above cannot carry it: a phrase quoted out of
+another lane's prose is a claim about words, and *you can type into this* is a
+claim about a control. Checking it would mean this lane asserting that `(demo)`
+renders a text input, which is nearer to testing another lane's work than
+quoting its page is.
+
+So it is left open with the question stated rather than answered: **is a claim
+about another surface's behaviour one this lane may hold at all, or is it the
+first thing that genuinely needs the publishing shape the 4 October entry
+asked for?** My recommendation is the second, and it is the argument for
+`Loom docs` and `Loom demo` each exporting a short list of what their surface
+promises — at which point the file this run added becomes four constants to
+delete.
+---
+## 2026-10-15 — the audience dimension is in the schema and its type is not reachable from any published entry point
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom framework` · **Status:**
+**closed by `signals-34-the-audience-a-host-can-name`**, and **the reasoning
+below was wrong about why it had to wait.**
+
+> **Corrected the same day, by the routine that filed it.** This entry said
+> *"the same is true of `ApplicationId` today"* and concluded that the two
+> dimensions should be reachable the same way or neither should, so the call
+> was not one unit's to take. **`ApplicationId` is exported** — `src/store/index.ts`
+> has re-exported `../application/application.js` since 0260, which is how
+> `(portal)/_lib/scoped.ts` imports `applicationIdSchema` from
+> `@jam-overture/loom/store`. The symmetry the finding rested on did not exist:
+> `audience` was simply missing from that list beside `application` and
+> `project`, and adding it is one line rather than a decision.
+>
+> Filed while writing 0284 and checked against the wrong thing — the entry
+> points in `package.json`, which name `./store` but not what it re-exports.
+> The first half stands: `AudienceId` genuinely was unreachable.
+
+[0284](decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
+put `audience` on `ReaderSignalBatch` and `audienceId` on every stored counter
+row. Both are branded types — `AudienceId`, from `src/audience/audience.ts` —
+and **neither that type nor its schema is exported from any entry point in
+`package.json`.**
+
+So a host can read the field (the row hands it over, structurally typed) and
+cannot **write** one: setting `audience` on a batch means producing a branded
+string, which needs `audienceIdSchema`, which is not published. The same is
+true of `ApplicationId` today, and that is exactly why this is filed rather
+than fixed in passing: the two dimensions should be reachable the same way or
+neither should, and deciding which is not this unit's to take alone.
+
+The portal's own note on `(portal)/_lib/reader-signals.ts` names the rule this
+sits under:
+
+> *"Nothing here reaches into `src/`, and a gap in what those entry points
+> expose is a finding rather than a deep import."*
+
+**What it took to act on it:** one line — `export * from "../audience/audience.js"`
+in `src/store/index.ts`, beside the two ids that were already there. A host that
+imports a store now names an audience the same way it names an application.
+
+**What stays open, and it is a different question.** Whether a host should
+*mint* an audience id at all, or only ever echo back one the control plane gave
+it, is unanswered — and it is not answerable until the composing `TreeSource`
+exists (0263) and something decides where an audience is defined. `newAudienceId`
+is published because its module is; nothing calls it.
+
+---
+## 2026-10-14 — lesson 16 taught that a listing has no timestamp, and the framework gave it one
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/16-persistence.md`)
+· **Status:** **corrected from outside the lane**, as the 11 October precedent on
+lesson 36 did — **nothing is broken and no test is failing now**; filed because
+the correction is a judgement about what the lesson teaches and that judgement is
+yours to keep or overturn
+
+`framework-72-when-a-page-last-changed` put `changedAt` on `TreeListing`
+([0277](decisions/0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md)),
+and lesson 16 is the lesson that prints a listing. Two things in it stopped being
+true in the same commit:
+
+- **The transcript.** `listing: [{"treeId":"t_1","revision":2}]` is now
+  `listing: [{"treeId":"t_1","revision":2,"changedAt":"2026-07-28T00:00:00.000Z"}]`.
+  `transcripts.test.ts` caught it, which is the instrument working.
+- **The paragraph under it**, which is the part worth your attention. It read
+  *"Nothing in it is a timestamp, because a `LoomTree` carries none — §1 kept
+  time out of the document, and a listing cannot honestly invent what the
+  document does not have."*
+
+**The second sentence of that is still exactly right and is the reason the field
+could be added at all.** A `LoomTree` carries no time; `changedAt` is the
+*store's* fact about the tree rather than the document's fact about itself. So
+the repair was not to delete the teaching but to split it: the document still has
+no time, and the thing reporting one is the store, reading the log's `appliedAt`.
+
+**What I added beyond the minimum, which is the bit to overturn if you disagree.**
+A short paragraph on the absence — a tree never appended to carries no
+`changedAt` key at all, not `null` — pointing at the `answeredBy` distinction the
+lesson already draws a few lines above, and suggesting the reader add a second
+`create` to Exercise A to see a two-key object beside a three-key one. It seemed
+a better lesson than the sentence it replaced, and it is the same shape as the
+11 October entry's *"the repair is arguably the better lesson"*. I did not add an
+exercise or a mark, because those are yours.
 ## 2026-10-15 — the front door sold a surface that is still being built, and the only place that said so was on the far side of the link
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` (closed), with a
@@ -131,6 +421,25 @@ reachable without losing anything a reader needs.
 under a length nobody has established would be this repository asserting a
 guess, and the body is not a file in it. The remedy above is a habit, and this
 entry is where the next lane that loses a screenshot will find it.
+
+> **Two more readings, 16 October, and they narrow the bracket from the other
+> end.** `marketing-06` followed the remedy above on #655 — short sha, visual
+> slug not repeating the report slug — and posted two image links in one
+> comment at **124** and **116** characters. Both came back clean, read back
+> off the API rather than eyeballed.
+>
+> 124 is above the previous highest clean reading of 121, so the boundary is
+> now somewhere in **124–141** rather than 121–141. Nothing contradicts length
+> yet.
+>
+> **And the same run lost a link anyway, which is the part worth carrying.**
+> #655's *body* linked the report by branch name rather than by sha — 158
+> characters — and came back ``` `` ``` -wrapped exactly as #634 did. The
+> remedy had been applied to the comment and not to the body, in the same
+> twenty minutes, by a run that had read this entry. So the habit is **per
+> URL and not per pull request**: the body, every comment and every review
+> reply each need the short sha, and the body is the one written first and
+> therefore the one written before the lesson is fresh.
 
 ---
 ## 2026-10-14 — the marketing site named seven retired pages forty times, eleven of them in the present tense, and every reader-facing path was derived and therefore correct
@@ -47094,8 +47403,23 @@ on all three palettes, and it is photographed in the 4 October report.
 ## 2026-10-04 — a claim about another surface can be held to the link beside it and never to what is on the page
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
-line from `Loom docs` · **Status:** open — a stated limit of what shipped on
-4 October, not a defect today
+line from `Loom docs` · **Status:** **the `/docs` half is closed** by
+`marketing-06-the-install-guide-the-button-missed` on 16 October, which also
+found that the claim it names was costing a reader a click; the **`/demo` half
+is still open** and is a different shape. The 16 October entry at the top of
+this file has both halves.
+
+> **Closed for `/docs`, 16 October.** `_lib/docs-pages.ts` is the list of
+> documentation pages this site names and `docs-pages.test.ts` holds each one
+> to being served, to its own heading, and to a phrase out of its own source —
+> read off the repository rather than imported, which is the route the
+> 15 October run took for the portal's banner. The publishing shape this entry
+> asked for is still the better one and is still `Loom docs`' to build.
+>
+> The uncovered claim about the documentation named below was not merely
+> unchecked, it was **misdirected**: `/docs` is a redirect to the first page in
+> reading order, so *Follow the install guide* on the front door landed on
+> *Introduction* three pages above the command the band had just printed.
 
 `naming.ts` holds three rules over what this site says about its own pages, and
 the third one stops at the route group boundary. A link from `/what-you-run` to
@@ -47554,9 +47878,24 @@ here so the judgement is made rather than inherited.
 `tools/screenshot` and `tools/specimen/playwright.ts`) ·
 **Extends:** the closed 13 September entry *the screenshot harness cannot
 photograph a block that only exists once you press it*, whose own closing note
-is the sentence that became this limit · **Status:** open — **a stated limit of
-an `Accepted` record ([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)),
-not a defect**; what it cost this run is one visual, and the report says so
+is the sentence that became this limit · **Status:** **open for the `goTo`
+step; half closed by `framework-75-the-press-that-does-not-leave-the-page`**,
+16 October — **the smaller half is done and the `goTo` half is still a stated
+limit of an `Accepted` record
+([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md))
+rather than a defect.** The line this entry
+called *smaller and free* exists: a press the pin refused prints
+`pinned  <address>  ← press refused, it leaves the page` beside the shot, the
+`before`'s refusals ahead of the shot's own, and no lane has to infer a refusal
+from a `no match` two lines down again. The same branch narrowed the pin to
+presses that **leave the document**
+([0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md)),
+which does not reach this entry's subject: your pager press is a navigation and
+is still refused. **`{ "goTo": … }` is the open half**, it is still
+`ARCHITECTURAL — needs review` for the reason this entry gives — 0159 would want
+a line — and this lane did not take it in the same unit as a pin that is not
+architectural, because the two would have travelled in one pull request and only
+one of them can merge
 
 A `do` list runs `pinNavigation` before its first step: a capture-phase listener
 that calls `preventDefault` on any click whose target is inside an `a[href]`,
@@ -51831,7 +52170,32 @@ read. It is still worth a sentence in `docs/routines.md`, which is
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom marketing`
 (`apps/loom/app/(marketing)/`) · **Raised by:** the maintainer, 11 October ·
-**Status:** open — **nothing is broken and nothing is blocked**; this is the one
+**Status:** **closed for this lane**, and it has been since 13 October.
+
+> **Closing note, 17 October**, by `Loom marketing` on
+> `marketing-07-the-refused-chip`. **Condition 1 is met and
+> this entry had been stale for five days**, which matters because this is the
+> file every run reads before choosing work.
+>
+> `_lib/stored.ts` seeds the three pages through the published
+> `TreeStore.create`, guarded so that a page already in the store is never
+> written over; `pageTreeFor` reads the store and falls back to the builder when
+> it is empty or unreachable; and `_lib/requested.ts` is the line this entry
+> said only this lane could draw — a stored page holds its words, its
+> arrangement and its destinations, and a request puts back the host and the
+> palette. The rearrangement was unaffected, exactly as predicted.
+>
+> **The other two conditions are not this lane's and are not claimed.**
+> Condition 2 (the portal's registry) is `Loom portal`'s and has the registry
+> clash in front of it; condition 3 (`DATABASE_URL`) is the maintainer's.
+>
+> It is the second instance of a shape this lane filed on 1 October — *a finding
+> named the remedy, said the branch had added it, and the branch had not* — in
+> the opposite direction: a finding whose remedy shipped and whose status never
+> said so. Both cost the same thing, which is a later run planning against a
+> queue that is wrong.
+
+**Original status:** open — **nothing is broken and nothing is blocked**; this is the one
 change that turns a surface into a governed one
 
 The maintainer asked for the marketing and docs surfaces to be *"hooked up to
@@ -52992,7 +53356,40 @@ not quietly build something else in its place — which is what happened to
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
 (`src/theme/apply.ts`, `src/theme/font-packs.ts`) and `Loom primitives`
 (`src/primitives/loom.hero.ts`, `src/primitives/loom.page.ts`) ·
-**Status:** open — **nothing is broken and no test is failing.** Every page is
+**Status:** **closed by
+`framework-73-the-ramp-a-phone-can-hold`** — shape 1, the fluid ramp, taken in
+`src/theme/ramp.ts` and recorded as
+[0284](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md).
+**The row for `Loom primitives` is now a removal rather than a fix**; shape 3,
+the padding, is not needed and should not be taken.
+
+**Re-measured with this entry's own shot list**, which is what made closing it
+one command. `before` is `4ce00d0`; `after` is that branch:
+
+| front door at 390 | before | after |
+| --- | --- | --- |
+| the `h1` box, `minimal` | x 68, 254 × 247 | x 40, **310 × 197** |
+| *See how a change travels*, `minimal` | **286 past the fold** | **y 696, on the first screen** |
+| *Try it yourself*, `minimal` | **364 past the fold** | **y 757, on the first screen** |
+| *See how a change travels*, `editorial` | 182 past | **y 675, on screen** |
+| *See how a change travels*, `bold` | 196 past | **y 680, on screen** |
+| the `h1` at 1280 | x 148, 984 × 166 | **x 148, 984 × 166 — identical** |
+
+The arithmetic in this entry said the hero had to lose about 290 pixels and that
+the two levers this lane owned were worth about 75. **Both were right and
+neither was needed**: the headline lost 50 points of height, the gutter went
+from 68 a side to 40, and the hero's own vertical padding came off the ramp with
+it. Nothing at or above 768px moved at all.
+
+**What is left for `Loom primitives`, and it is one deletion.**
+`loom.heading`'s `CAP_FOR_STEP` is now redundant — its
+`min(var(--loom-scale-8), 11cqi)` wraps a clamp already at or below the cap at
+every width, which is what that file's own comment predicted when it wrote *"a
+pack whose step 8 is already a clamp is simply a ramp that wins here at every
+width."* It is harmless where it stands. Filed separately below so it is not
+lost in a closed entry.
+
+**The original entry follows, unchanged.** — **nothing is broken and no test is failing.** Every page is
 correct, every overflow measurement passes, and the only instrument that sees
 this is a camera
 
@@ -53524,8 +53921,38 @@ does not get to make it, which is why this is filed rather than worked around.
 ## 2026-10-13 — a listing says what a page is at, never when, so *changed recently* cannot be drawn
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom framework` (`src/store/`) ·
-**Status:** open — **a prototype entry that could not be built, and the reason
-is the contract rather than the screen**
+**Status:** **half closed by `framework-72-when-a-page-last-changed`**, 14
+October — **the fact ships, the ordering is the maintainer's.** `TreeListing`
+now carries `changedAt`, the `appliedAt` of the newest entry in that tree's log,
+absent exactly when `revision` is 0; both stores fill it and five contract cases
+hold them to it, including one that compares the listing against what
+`revisions` itself hands back. Recorded as
+[0277](decisions/0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md).
+
+**What is still open is the half this entry correctly guessed was not mine
+alone.** Ordering by recency supersedes part 2 of
+[0020](decisions/0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md),
+which is `Accepted`, so it is written as a `Proposed` record and **not
+implemented** — escalated rather than taken, and carried in a pull request of
+its own rather than beside the half that shipped. That record also
+names a thing this entry did not separate and the prototype does not say: *changed
+recently* is a sort (*every page, newest first*) or a filter (*the pages touched
+in the last N days*), they want different contracts, and it proposes the sort.
+
+**What `(portal)` can do with what shipped, and the line it must not cross.** A
+deployment whose pages fit in one listing page — `MAX_LISTING_LIMIT` is 200 —
+can draw the entry honestly today by sorting the page it holds. Past that it
+cannot: sorting a page sorts that page and not the store, so the newest tree
+overall may sit on a page the screen never asked for. The type says so. Until
+the ordering proposal is answered, `?filter=changed` reading as no filter at all stays the right
+behaviour for a deployment of unknown size, and this entry stays open for that
+reason rather than because nothing happened.
+
+**One sentence in `(portal)` is now stale**, left for that lane rather than
+edited from outside it: `_lib/page-filter.ts` opens with "`changed` cannot be
+computed. `TreeListing` is `{ treeId, revision }` and nothing else", and the
+second clause stopped being true today. The reasoning around it is still right
+and is why this was filed rather than guessed at — only the premise moved.
 
 `TreeListing` is the whole of what a listing gives about a page:
 
@@ -53921,9 +54348,20 @@ three links above are this lane's to fix either way.
 ## 2026-10-15 — a shot cannot photograph a press of a contents row, because the harness refuses every link and a fragment is not a navigation
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/specimen/playwright.ts`) · **Status:** open — **nothing is broken and
-one picture had to be taken another way**; the remedy is one comparison and the
-reason it was not taken here is lane rather than difficulty
+(`tools/specimen/playwright.ts`) · **Status:** **closed by
+`framework-75-the-press-that-does-not-leave-the-page`** — the comparison this
+entry wrote out, taken as written. A press is pinned when
+`new URL(href, location.href)` differs from `location.href` on origin, path or
+query, and a pure fragment change is let through; an `href` that will not
+resolve is refused, which is the one case the entry did not name. Recorded as
+[0286](decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md),
+which refines 0159's pin clause rather than superseding it: every property the
+pin was written for is stated there and kept. The pin moved to
+`tools/specimen/pin.ts` so the shipped string could be compiled with esbuild and
+`keepNames` and tested as the artefact — fifteen cases, five of which fail
+against the predicate that shipped yesterday. **Your `(docs)` shot is retakeable
+as a press**; the picture of a reader scrolling is a correct record of the limit
+and the retake is yours rather than this lane's
 
 `pinNavigation` is run in the top document before the first step of a `do`
 list, and it prevents the default on **every** click that lands inside an
@@ -53969,9 +54407,12 @@ do.
 ## 2026-10-15 — the contents rail is a desktop rail, so the reader most likely to be lost in a long page is the one without it
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/docs/layout.tsx`) · **Status:** open — **a stated limit
-of what shipped today**, with the shape of the remedy named and deliberately
-not taken
+(`apps/loom/app/(docs)/docs/layout.tsx`) · **Status:** **closed by
+`docs-57-the-contents-a-phone-can-open`, 16 October 2026** — a closed disclosure
+above the article at every width below 1280, from the same walk as the rail.
+What it did **not** take is the reachability half, which is filed again below as
+its own entry: the list is above the article, so it serves a reader arriving at
+a page rather than one already deep in it
 
 *On this page* is in the layout at `xl` and above, so it is in the picture at
 1280 and absent at 390. A phone reader of *Making it look like yours* gets
@@ -54102,7 +54543,7 @@ ceiling over `read + skipped` rather than over the page's words.
 ## 2026-10-15 — a page where nothing reports reach publishes a share of nought beside an empty list of the words nobody saw
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/copy.ts`) · **Status:** open — **the half of 0282 that was left**,
+(`src/signals/copy.ts`) · **Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken as 0287, §33, over all four places the quotient is read. Original status: open — **the half of 0282 that was left**,
 and a unit rather than a line
 
 0282 withholds `CopyReading.typical` where no word of the page is in a part the
@@ -54360,7 +54801,7 @@ URL with many would separate them, and nobody has written one by accident yet.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/copy-change.ts`, `src/signals/library-word-reach-change.ts`) ·
-**Status:** open — **two spellings of one projection**, found by reading the
+**Status:** **closed by `signals-33-a-share-of-the-words-the-window-can-speak-for`** — taken with 0287, and the predicate is published from `parts.ts` rather than from `copy-change.ts`, since a third module and the page-scale share read it too. Original status: open — **two spellings of one projection**, found by reading the
 merge rather than by a test, and filed rather than taken because it is not what
 #642 is about
 
@@ -54406,6 +54847,18 @@ is that the sentence they both state be stated once.
 (`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Status:** open —
 **`pnpm verify` is red on `main`**, reproduced there with nothing of this lane's
 in the tree
+
+> **Confirmed independently by `Loom daily build`, 15 October, 21:50 UTC.** Hit
+> twice in one run on a branch carrying no `(docs)` change, and the signature is
+> this entry's exactly: under full-suite parallel load the two tests time out at
+> 5,000ms; run alone the file passes with *links each row at the record itself*
+> at **3,200ms** and its sibling at **2,725ms**. Two consecutive full runs on
+> one tree failed in *different* files — the first in `offered.test.ts`, the
+> second here — which is what an intermittent budget looks like from a lane
+> trying to tell its own red from the tree's. **Worth stating plainly for
+> whoever picks this up: it is the gate four surfaces share, so it does not
+> block one routine, it blocks all of them**, and every record anybody writes
+> adds a row. 0283 added one today.
 
 `the records index, rendered > links each row at the record itself` renders
 `<DecisionRecords />` — one row per decision record — and asserts one `href`.
@@ -54528,7 +54981,28 @@ the clean range.
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom daily build`
 (`.gitattributes`, `package.json`'s `prepare`, `docs/routines.md`) ·
-**Status:** open — **nothing is broken and the mechanism is documented where it
+**Status:** **closed by `framework-73-the-ramp-a-phone-can-hold`** — by the
+sentence this entry recommended, in `docs/routines.md` beside *Reading the merge
+gate*
+
+**The other half, met by the next run the same day, and it is the worse half.**
+Installing first makes the driver work, and **a working driver is not the end of
+it**: `merge=ours` takes *the branch's* copy, so a merge that resolves cleanly
+hands the branch a **stale** generated file. On #633 that was
+`reference.generated.json`, a fortnight of exports behind `main`. The drift
+surfaced where `.gitattributes` says it would — `pnpm verify` failed — but it
+surfaced as two failures in `app/(docs)/_lib/api/offered.test.ts` naming
+`src/signals/` exports that *"no page on this site mentions"*, which names
+neither the branch, the merge, nor the generated file. It took running the same
+test on a pristine `main` worktree (green) and diffing the file against `main`
+(177 lines missing) to find. `pnpm docs:api` fixes it in one command.
+
+So the sentence in `docs/routines.md` says both things: **install before you
+merge, and regenerate after you merge.** The attribute's comment already said
+the second; what was missing is that nothing reminds you, and the failure does
+not look like its cause.
+
+**The original entry follows, unchanged.** — **nothing is broken and the mechanism is documented where it
 lives**; filed because the order a run naturally works in defeats it, and the
 symptom is a hand-resolved generated file
 
@@ -54567,3 +55041,1763 @@ entry is where the next run that meets it will find out why.
 `docs/routines.md` are `Loom daily build`'s; the framework lane met the symptom
 rather than owning the file. The hand-resolution it caused is recorded in #633's
 merge commit, which says the regenerated index agreed with it.
+
+---
+## 2026-10-15 — a share of a page's words is now a share of the words the window can speak for, and the field kept its name
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a published figure whose denominator moved under a name
+that did not**, with the one pair it must never draw again
+
+[0287](decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md),
+§33 of [`docs/signals.md`](docs/signals.md). `CopyReading.share` and
+`RoleCopy.share` were `read ÷ words` and are now `read ÷ spoken`, where
+`spoken` is a new published field: the words in parts whose standing is not
+`unknown`.
+
+**Nothing on a screen breaks and one thing on it changes value.** A page every
+part of which reports reach is unaffected — `spoken` is `words` there, which is
+the ordinary state. Where a page has `unknown` words the figure goes **up**,
+because those words were in the denominator and in neither half of the sentence
+above it.
+
+**Three things worth knowing before the card is drawn:**
+
+- **`share` can now be `null`, and it could not before.** It is absent in
+  exactly the three states `silence` names as `wordless`, `unmeasured` or
+  `unspoken`. The second of those is the common one: **every window with no
+  page views used to publish a share of exactly 0**, which drew as *none of
+  this page was reached* for a page nobody had opened.
+- **Do not put `share` and `unseen` on one card without `spoken` beside
+  them.** That pair is what the finding this closes was about: a nought share
+  over an empty list of the words nobody saw, because `unseen` is `skipped`
+  only. It cannot happen now, and the way to re-create it is to compute a
+  share from `wordsByStanding.read ÷ words` on the surface.
+- **`words` is unchanged and still partitions the page.** `spoken` plus
+  `wordsByStanding.unknown` is `words`, and the gap is the mass outside the
+  question rather than words nobody read.
+
+**The sentence to put under it** is *of the words this window can speak for*.
+The field's name is unchanged on purpose: its claim — the share of words at
+least one reader reached — did not move, only the universe did, and a rename
+would have cost a migration to say the same thing.
+
+---
+## 2026-10-15 — `pnpm verify` was green on `main` this evening, and the records-index render test passed at 13.4 seconds
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/architecture.test.tsx`) ·
+**Extends** this afternoon's entry *the records index render test has about
+eighty records of headroom left* · **Status:** open — **the failure did not
+reproduce, and the headroom reading it rests on still stands**
+
+Run on `4ce00d0` with nothing of this lane's in the tree, before branching:
+`pnpm verify` exited **0**, 557 test files and 10,948 tests, with
+`app/(docs)/_components/architecture.test.tsx` passing — 21 tests in
+**13,365 ms** for the file.
+
+**That is not a contradiction of the entry it extends and should not be read as
+one.** That entry measured the one test at 3,836 ms and 4,434 ms *run alone*
+against a 5,000 ms budget, and said the crossing happens under the full suite's
+parallel load. A machine with more of it to spare does not cross; this one did
+not. The arithmetic — 262 records, ~15 ms a record, under forty records of
+headroom — is untouched by a green run, and so is the remedy.
+
+**What it adds is that the gate is load-dependent**, which is the worst shape
+for a failure this repository's routines read as a branch's own doing. The
+remedy that entry recommends is still the one to take, and until it is, a red
+`architecture.test.tsx` should be re-run before anybody reverts anything.
+
+---
+## 2026-10-15 — the API reference truncates a long signature mid-comment, and a citation past the cut is never lifted
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a hole in a
+check that is otherwise airtight**, met by a change that was nowhere near it
+
+`readerFacingSignature` lifts citations out of the comments inside a published
+declaration, and drops whole any comment whose grammar needs the number. The
+test beside it holds every signature on the site to carrying none. Both are
+right and the reasoning in them is right.
+
+**A signature is truncated before that runs, and the cut lands inside a
+comment.** `CopyReading`'s signature is about 6,000 characters and ends `…no
+word this\n * wind\n…`. The `/**` that comment opened with has no `*/` in what
+is left, so `COMMENT_IN_CODE` — `/\/\*\*[\s\S]*?\*\//g` — never matches it, the
+citations in it are never lifted, and the whole-comment fallback never fires
+either. Everything above the cut is cleaned correctly; the tail is published
+raw.
+
+**How it was found.** This lane added a paragraph to the last field of
+`CopyReading`, which pushed that field's comment across the cut. `pnpm verify`
+then failed on *never puts a decision-record number in front of a reader*,
+naming `CopyReading's signature`, while `readerFacingSignature` run by hand
+over the same declaration out of `dist/` returned it clean — because by hand it
+was handed the whole thing. The remedy taken in this branch was to drop the two
+numbers from that one comment, which is right for the page and does nothing
+about the hole.
+
+**Why it is worth fixing rather than leaving to the gate.** The check does
+catch it, which is the good news, and the diagnosis costs an hour: the test
+names a symbol, the source comment looks exactly like fifty others that pass,
+and the stripper demonstrably works on it. The failure is **positional** — the
+same comment is fine a hundred characters earlier in the file — so the next
+lane to meet it will be a lane that did not touch the comment at all. One field
+added above a cited one is enough.
+
+**Two shapes, and the first is nearly free:**
+
+- **Truncate after cleaning, not before.** `readerFacingSignature` then always
+  sees balanced comments, and what is cut is already reader-facing.
+- **Or close the cut**: drop a trailing partial comment rather than publishing
+  it, since half a sentence of documentation under an ellipsis is not worth
+  reading anyway.
+
+**Not proposed: relaxing the test.** It is correct, it caught this, and the
+rule it enforces is the maintainer's.
+## 2026-10-16 — the composed preview URL, fifth instance, and the remedy is now free in a way it was not when it was written
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 27 September entry *the preview deploys and a routine cannot
+reach it: `*.vercel.app` is denied by the environment's network policy* and its
+2 October section · **Status:** open — **the body was corrected the way that
+entry prescribes and cost nothing; filed for the count and for one sentence
+that is now stronger than when it was written**
+
+#653's first body carried a preview URL composed from the branch name:
+
+```
+loom-git-framework-75-the-pr-jpizzolato36-6341s-projects.vercel.app
+```
+
+The one Vercel assigned, from the `vercel[bot]` comment:
+
+```
+loom-git-framework-75-the-pr-362b31-jpizzolato36-6341s-projects.vercel.app
+```
+
+Same shape as the 2 October reading and the same cause: Vercel truncates the
+branch segment and appends a hash of the rest, and this lane's branch names are
+long. `framework-75-the-press-that-does-not-leave-the-page` is 51 characters and
+15 of them survive. The guess has **no hash segment at all**, which is the tell
+and is invisible to the run that wrote it.
+
+**Confirmed again that a run cannot check its own guess.** Both URLs return
+`000` from this container — not 404, no connection. `https://vercel.com` and
+`https://vercel.app` return `000` as well while `https://github.com` connects,
+so it is the egress policy and not the deployment. That is the 27 September
+entry's claim, unchanged, re-measured today because a run that reports an
+unverifiable link should say which kind of unverifiable.
+
+**The sentence worth updating is the remedy's, and it is this entry's whole
+reason for existing.** The 2 October section says *"open the pull request, let
+the `vercel[bot]` comment arrive with the real URL in it, then correct the
+body — on a subscribed pull request that comment is an event the session is
+already woken by, so it is not a poll."* When that was written it was an
+argument. Today it is simply what happens: this run was woken four times by that
+one comment being edited through its deployment lifecycle, with the real URL in
+each. **The correction cost one API call inside a turn that was already open**,
+no wait, no schedule, and no check that the token-discipline rule forbids.
+
+So the remedy is not merely available, it is **cheaper than composing the
+URL**, and the only reason this instance happened is that a run which had read
+`FINDINGS.md` had not read this entry before writing its body. Which is the
+argument for the one line this cannot write itself: the procedure in
+`docs/routines.md` says *"include the deployed preview URL"* and does not say
+where to get it. **A clause there — *take it from the `vercel[bot]` comment
+after opening, never from the branch name* — would have cost this run nothing
+and would have cost the four before it nothing.** That file is governance and a
+routine cannot write the governance it is bound by, which is why this is filed
+rather than done.
+
+---
+## 2026-10-16 — two more counted readings for the mangling, and a 152-character URL that came back clean in the body that mangled a 164
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 15 October entry *the mangling bracket, measured on purpose this
+time: 144 clean and 155 mangled in one body* and the two entries it extends ·
+**Status:** open — **two readings, one new variable, and the first test of the
+remedy on a whole body rather than one link**
+
+#653's first body carried five URLs. Counted with `len()` over the exact
+strings, before and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 75 | the preview deployment | bare | **clean** |
+| 121 | 0159, by `main` | `[…](…)` | **clean** |
+| 152 | the report's two images, by branch name | `<img src="…">` | **clean** |
+| 164 | the report, by branch name | `[…](…)` | mangled |
+| 204 | 0286, by branch name | `[…](…)` | mangled |
+
+The two mangled ones came back with `` `` `` injected around the URL inside the
+parens, which is the same injection the three previous entries record.
+
+**Nothing here narrows the bracket on length alone, and one row widens the
+question.** 164 and 204 are both above 155 and are consistent with every
+previous reading. The row that is not is the **152**: if length were the only
+variable it should have mangled, since 152 sits inside the 144–155 bracket's
+upper half and above the highest clean `[…](…)` reading ever taken. It is in an
+HTML `src` attribute rather than a markdown link.
+
+So **the structural hypothesis is not dead, it was killed in the wrong
+place.** The 15 October entry tested adjacency to an inline-code span, a
+trailing comma, and the branch name, and all three are genuinely dead. It did
+not test *the syntax the URL is written in*, because every link it measured was
+a markdown link. Two readings now say the two syntaxes behave differently at a
+length where one of them breaks. Either:
+
+- the bracket for a markdown link is **155–164** and an HTML attribute has a
+  different one, or none at all; or
+- length is a proxy and what actually matters is the `[…](…)` construct, which
+  would make every previous reading a measurement of how long a link has to be
+  before something gives up parsing it.
+
+**A remedy tested on a whole body for the first time.** The three earlier
+entries each shortened one link and watched it. This body was re-posted with
+**every** URL under 144 — the two images and the report by short sha
+(`a5482a3`: 108, 108, 120), and 0286 not linked at all, because its filename is
+103 characters and no choice of ref gets it under 144, so the path is in
+backticks and `decisions/README.md` (69) carries the link. **The whole body came
+back verbatim**, every link included. That is the first evidence that the
+remedy holds for a body rather than for a link, and it is why there is a
+correction to look at rather than a second mangled body.
+
+**Still not proposed: a check.** The 14 and 15 October entries both reject one
+and the reasoning is unchanged — and this entry adds the sharper reason. A check
+holding every URL in a pull request body under 144 would have failed this body's
+two **clean** image attributes, which are 152 and which nothing was wrong with.
+The number is not established and the variable may not be the number.
+
+---
+## 2026-10-16 — lesson 32's census lost its fourth row, and four paragraphs under it are about that row
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom lessons` (`lessons/32-layout.md`)
+· **Status:** open — **the transcript is correct and the prose under it is not.**
+The fence was re-run and pasted from this lane, which is what its own `moves:`
+mark asks for and the only reason the gate is green; the paragraphs are prose
+and no check reads prose, which is the cost that mark was written to warn about
+
+Exercise G reads `tools/specimen/playwright.ts` and prints, among other things,
+every top-level const in it that is handed to the page. It printed four.
+`framework-75-the-press-that-does-not-leave-the-page` moved `pinNavigation` into
+`tools/specimen/pin.ts` — so the exercise, which reads one file, now prints
+three:
+
+```
+  top-level consts in playwright.ts: 11 → 10
+  of those, handed to the page: 4 → 3
+    pinNavigation      evaluate     takes nothing                  named in the suite true   (gone)
+```
+
+**Why it moved, because the reason is the lesson's own subject.** Both functions
+the pin is made of are serialised with `Function.prototype.toString` and run in
+a page, so the string that ships is the artefact and the module Vitest compiles
+is not it. The test that can see the difference compiles the module with esbuild
+and `keepNames` and asks *that* module its questions, and it can only do so for
+a module with no imports to resolve — `playwright.ts` has four. The file split
+is the testability, which is the thing this lesson is about.
+
+**What is now stale, in the order a reader meets it.** Four paragraphs under the
+fence, and one of them is load-bearing:
+
+- *"`measureDocument`, `readClippingBoxes` and `pinNavigation` take **nothing**:
+  each reaches for `document` or `window` itself, so a double has nothing to
+  hand them and the only thing it can do is answer in their place."* Still true
+  of the first two. The third is no longer in the census.
+- *"**And the function the suite names is not the function it runs.**"* The whole
+  paragraph is about `pinNavigation` being the one row with `named in the suite
+  true`, and no row says `true` any more. The point it makes — *is it named* and
+  *is it run* are independent and were distributed opposite ways round — is
+  still a real point about `readBoxes` and has lost its other half.
+- **The sentence the lesson rests on is now false as written**: *"a function
+  that fetches its own subject cannot be run anywhere but a page."*
+  `tools/specimen/pin.test.ts` runs `pinNavigation` — the compiled artefact, not
+  the module — against a `JSDOM` built by hand, in fifteen cases, five of which
+  fail against the predicate that shipped on 15 October. A function that reaches
+  for `document` can be run wherever a `document` can be *handed to the process*
+  rather than to the function. That is a third category beside *passed in* and
+  *reached for*, it is more interesting than the sentence it breaks, and it is
+  this lesson's to make rather than this lane's.
+
+**What this lane did not do.** It did not touch the exercise program, which
+would be editing another lane's lesson rather than re-running it, and it did not
+rewrite the paragraphs. Widening the exercise to read `pin.ts` beside
+`playwright.ts` is one obvious remedy and is yours; so is leaving the census at
+one file and saying why, which the lesson is well placed to do.
+
+---
+## 2026-10-15 — `loom.heading`'s two per-step caps are now redundant, and the file predicted it in writing
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.heading.ts`) · **Status:** open — **nothing is broken,
+nothing renders differently, and this is a deletion rather than a repair**
+
+[0284](decisions/0283-a-declared-ramp-step-is-a-maximum-and-the-browser-reads-the-width.md)
+makes a declared ramp step a maximum: `--loom-scale-8` is now
+`clamp(42.84px, 9.38cqi, 72px)` on a pack whose top step is 72, instead of
+`72px`.
+
+`CAP_FOR_STEP` caps steps 8 and 7 at `11cqi` and `9cqi`, so `headingSize` now
+emits `min(clamp(42.84px, 9.38cqi, 72px), 11cqi)`. **That is correct at every
+width and says nothing the clamp does not already say** — the clamp's floor is
+42.84 where `11cqi` is 42.90 at 390, and above `48rem` the declared size is
+below the cap by a growing margin. Step 7 is the same shape: a 48px step floors
+at 31.80 against a `9cqi` of 35.10.
+
+**This file called it, on 20 August, in its own comment:**
+
+> The better fix is a fluid `scaleRamp` in the font pack, which is a schema
+> three registered packs depend on and therefore another lane's. This does not
+> block it: **a pack whose step 8 is already a clamp is simply a ramp that wins
+> here at every width.**
+
+That is exactly what happened, so the caps are now the harmless half of a thing
+that has been fixed underneath them. **Not deleted from this lane**, for the
+reason that paragraph gives in reverse: `src/primitives/` is yours, and a
+`min()` nobody needs is not worth a cross-lane diff.
+
+**Two things worth having before deleting it.** The comment above
+`CAP_FOR_STEP` is forty lines of genuinely useful reasoning about `cqi` versus
+`vw` and about a heading in a bare `loom.grid` cell, and most of it is still
+true of the clamp — it would be a loss to delete with the constant. And the
+`11cqi` figure is now load-bearing *elsewhere*: 0283's compression constant is
+derived from it, and this entry is where somebody changing one will find the
+other.
+
+---
+## 2026-10-16 — both of a phone's navigations sit at the top of the document, so a reader 15,000 pixels into a page scrolls back to the top to use either
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/mobile-nav.tsx`,
+`_components/page-contents.tsx`, `docs/layout.tsx`) · **Status:** **closed by
+`docs-58-the-bar-that-stays-with-the-reader`**, 17 October, as the remedy below
+describes it — one bar under the header, at every width with no contents rail,
+holding both questions. Both components named above are gone; `_components/docs-bar.tsx`
+is the one that replaced them.
+
+`page-contents.tsx` gives a narrow screen the contents of the page it is on,
+which closes the 15 October entry *the contents rail is a desktop rail*. It
+sits above the article, which is where that entry said to put it and is the
+right place for a reader **arriving** at a page: they land at the top, the line
+says the page has fourteen sections, and one press lists them.
+
+**It is the wrong place for a reader already in the page.** *Making it look
+like yours* is 24,944 pixels of article. A reader two thirds of the way down it
+who wants another section has to scroll to the top of the document to reach the
+list, and the measurement that makes this certain rather than likely is in
+`page-contents.tsx`: the line's foot is at `y 188` with the page at the top, so 188
+pixels of scroll put it off the screen, and a press of a row leaves it `y -20605`
+above the window.
+
+**`mobile-nav.tsx` has exactly the same property**, and that is why this is one
+finding rather than two. *Browse the documentation* is in the layout above
+`main` and is not sticky either, so the phone's answer to *where am I in the
+site* scrolls away at the same rate as its answer to *what is in this page*.
+The site's header is sticky; neither navigation is in it.
+
+**The remedy is one bar that stays with the reader and holds both questions**,
+under the sticky header, at the widths with no rail. It is a unit of its own
+because it is a restructuring of `mobile-nav.tsx` rather than an addition
+beside it, it costs vertical space on every scroll on the screen with least of
+it, and the two disclosures then have to agree about which of them is open.
+Taking it today would have meant shipping that argument inside a unit about a
+contents list.
+
+---
+## 2026-10-16 — the line appears when the page's script runs, so the prose below it moves down by 85 pixels after the first paint
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/page-contents.tsx`, `docs/layout.tsx`) ·
+**Status:** **closed by `docs-58-the-bar-that-stays-with-the-reader`**,
+17 October, by remedy 3 and then remedy 1 — which is the recommendation this
+entry made. `_lib/contents/pages.ts` is the set of addresses with sections, read
+off the pages at build time, so the layout knows whether there is a control
+before the browser runs and the bar is at its final height in the HTML the
+server sends. The 17 reference pages get no empty band, because the set does not
+hold them. One thing is **not** closed and is filed separately below: the
+right-hand label gains the section count when the walk finishes, which changes
+that label's width and nothing else.
+
+The rows of a contents list are read off the rendered page in the browser, for
+the reason `_lib/on-this-page.ts` gives at length: two *Architecture* pages get
+most of their headings from a component, so a list compiled from the markdown
+would show five rows for a page with thirteen places to land. The cost of that
+choice is stated there too — **the list is not in the server's HTML** — and on
+the rail it costs nothing visible, because `docs/layout.tsx` reserves the
+column whether or not a rail arrives in it.
+
+**The narrow presentation has no column to reserve.** It is a line in the
+document above the article, so the server sends the page without it and the
+prose moves down when it appears. The line measures 46 pixels and carries a
+40-pixel margin, so the shift is **86 pixels**, every page, at every width
+below 1280. It is derived from the box the harness measured rather than
+photographed: a shot cannot be taken between hydration and the effect.
+
+Three remedies, none of them free:
+
+1. **Reserve 85 pixels in the layout**, which is what the column beside the
+   prose already does and the same argument — *prose that shifts under them
+   costs them their place*. It leaves a permanent empty band above the title on
+   the seventeen generated reference pages, which have no sections to list, at
+   the width where vertical space is scarcest.
+2. **Render the line on the server without its count**, and fill the count in
+   after the walk. The height is then right from the first paint on the
+   thirty-one written pages, and the seventeen reference pages get a line that
+   says *On this page* and then vanishes.
+3. **Tell the layout which pages have no sections.** The search index is
+   generated at build time and already holds each page's headings
+   (`_lib/search/`), so the set of pages with nothing to list is knowable
+   without reading the document. That makes 1 exact rather than a compromise,
+   and it is a second source for a list this lane deliberately reads from one.
+
+**Recommendation: 3, then 1.** Not taken today because the unit was the
+presentation, and because 1 on its own trades a shift on 31 pages for a blank
+band on 17 — which is a different reader's loss rather than a smaller one, and
+not a trade to make without the maintainer or the index behind it.
+
+---
+## 2026-10-16 — the contents list is now two elements with one accessible name, and a shot-list selector naming it matches the hidden one too
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/on-this-page.tsx`,
+`_components/page-contents.tsx`) · **Status:** open — **a hazard an instrument
+meets rather than a defect a reader meets**, worked around in today's shot list
+and written down for the next run
+
+`nav[aria-label="On this page"]` was one element until today and is now two: the
+rail beside the prose, and the disclosure above it. Only one is ever
+**displayed** — the layout's `xl:block` and `xl:hidden` are one decision written
+twice — so a reader and a screen reader are each offered exactly one navigation
+with that name, which is the property that matters and is held by the
+breakpoints.
+
+**Both are in the DOM at every width**, because `display: none` is how the other
+one is put away. So a shot list that names the list by that label is naming two
+elements, and the harness refuses a `click` whose selector matches more than
+one. `pnpm shoot`'s `measure` does not refuse: it prints `(1 of 2)` and the box
+of the first match, which is the disclosure, because `main` comes before the
+trailing `aside` in the layout. A wide shot asking for the rail's box gets the
+disclosure's, which at 1280 is `0x0`.
+
+Today's shot list scopes every selector with `#article`, which is the one thing
+that tells them apart without adding anything to the markup: the disclosure is
+inside the article's landmark and the rail is outside it. That works and is
+worth knowing; what it is not is discoverable, which is what this entry is for.
+
+The alternative is a `data-` attribute on one of them, as `railScrollerAttr`
+already does for the other rail's scroller, and `_lib/chrome.ts` is where it
+would live. It is not taken yet because `#article` is free and because a second
+name for a thing that already has one is the kind of addition this route group
+keeps declining.
+
+---
+## 2026-10-16 — the before-and-after funnel card, and the one figure on it that is an interval rather than a number
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens) ·
+**Status:** open — **a surface to build on a reading that is on `main`**, with
+the four refusals it must not undo
+
+[0288](decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)
+publishes `funnelChangeOf(was, now)`: two windows of one page's funnels held
+against each other, per question, with what moved and which half of the funnel
+moved it. It takes the two `FunnelReach`es a funnel card already builds — no
+store read, no second join — and answers *we shipped a change, did more readers
+buy*, which is the sentence the whole subsystem has been building toward.
+
+**Four things the screen must not do**, each a refusal in the record rather
+than an oversight here:
+
+- **Do not draw `rateRatio` as a number on its own.** It is the only figure in
+  this subsystem built out of two *floors*: `rate` leans down by the
+  conversions a rollup boundary split (0231), by an amount the deployment's own
+  `windowMs` sets. `rateRatioAtLeast` and `rateRatioAtMost` bracket the true
+  ratio and `rateMoved` says whether the bracket clears 1. **`rateMoved: false`
+  is a thing to draw and not to hide** — *the rate fell by a third and your
+  rollup window can explain all of it* is a sentence about configuration, and a
+  card showing the bare ratio prints it as a collapse. `FunnelChange.undecided`
+  is how many of the pairs on the screen are in that state.
+- **Do not print `readersMoved` as people.** It is the movement in the
+  conversion share at the later window's scale — a mass for ranking, like every
+  other `…Moved` figure here (0280). `mostGained` and `mostLost` are already
+  ranked by it, by headcount rather than by share, so a screen that re-ranks by
+  `rateRatio` will lead with whichever funnel has four readers in it.
+- **Do not draw a `broken` question as readers who stopped buying.** It is the
+  most useful row this reading has and the most alarming if it is drawn as a
+  funnel: the change removed a part the question names (0238), every later-side
+  figure is withheld, and the thing to fix is the deployment's configuration.
+  `QuestionMovement` answers under every silence, because it is a fact about
+  two trees.
+- **Do not refuse the row under a silence.** This is the first silence set here
+  that costs half a reading rather than a figure or a row: the door's three
+  states withhold every share of the arrivals and leave the rates, the
+  movements and the questions standing, because a rate is two counts off one
+  row. A deployment whose page-view rows have expired still has a funnel
+  comparison worth drawing.
+
+**The one state worth a design decision rather than a rule.** Where a window is
+`unopened` or `uncounted` there is no drift to bracket with, so `rateRatio` is
+given and `rateMoved` is `null` — a ratio with no interval, in exactly the state
+where the straddle is least knowable. A card drawing it as though it were
+`rateMoved: true` would be wrong in the worst direction. The honest treatment is
+probably the ratio in the same weight as an estimate elsewhere on your screens,
+with the silence's own sentence under it.
+
+`cause` is the sentence to lead the card with where it is not `null`: *more
+readers reached the ask and the same share bought*, or *the same readers reached
+it and more bought*. It has three members and never a fourth, so a surface that
+handles `entry`, `closing` and `either` has handled all of it.
+
+---
+
+## 2026-10-17 — the chrome is 102 pixels tall and the only thing that knows so is a number typed into a test
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/globals.css`, `_lib/on-this-page.test.ts`,
+`_components/docs-bar.tsx`) · **Status:** **closed by
+`docs-59-one-chrome-one-height`, 18 October 2026** — remedy 2, which is what
+this entry recommended. `globals.css` declares the three parts of the chrome and
+derives the rest; `_lib/chrome.ts` names the classes that read them back; the
+header, the bar and both rails wear those classes and spell no number. The 102
+is gone from `_lib/on-this-page.test.ts` because there is nothing left for it to
+guard — the inset is arithmetic over the bands' own heights, so it cannot stop
+clearing them. The closing note is at the foot of this entry.
+
+`scroll-padding-top` is what keeps the thing a reader asked for from arriving
+behind whatever is stuck to the top of the window. It was `5rem` — 80 pixels,
+against a 57-pixel header — and the bar that landed today puts 45 more pixels
+there at every width below 1280. So it is `7rem` now, 112 against 102, and the
+heading's own `scroll-margin-top` came down from `5rem` to `3rem` so that the
+two still add to the 160 the reading line is chosen against.
+
+All three numbers are right. **What is missing is anything that would notice
+them stop being right.** The guard added beside them asserts the inset is at
+least 102, and 102 is a figure read off a screenshot and typed in by hand: the
+header's 57 is `h-14` plus a border in a layout and the bar's 45 is `py-3` plus
+a line of `text-sm`, none of which any test converts to pixels. A run that
+gives the bar a second line, or a larger control, or a taller header, makes the
+inset too small and nothing anywhere goes red. The symptom would be quiet and
+specific: a keyboard reader tabbing down a long page gets the link they focused
+half-hidden behind the bar, and a reader pressing a search result lands on a
+heading tucked under it.
+
+**This is the shape that already cost this lane a live defect**, which is why it
+is worth an entry rather than a line in a report. The reading line was 120 for a
+day while a press landed a heading at 160, and the test written to prevent
+exactly that read one of the two declarations it needed. The lesson then was *a
+test that reads one of two numbers passes while the thing it guards is wrong*.
+This is the next instance of the same genus: a test that reads a number the
+markup does not supply passes while the markup moves away from it.
+
+**The remedy is a measurement rather than a parse**, and it is why this is filed
+instead of fixed. `pnpm shoot`' `measure` already prints the bar's box — the run
+that shipped it read `x 0 y 57 390x45` off a phone — so the number exists in the
+right units at the only moment anything can know it, which is with a browser
+open. What does not exist is a way for a shot to **fail**, and 0213 is deliberate
+about that: the harness prints and never asserts, and the judgement stays in the
+report. So the remedy is one of:
+
+1. a check that reads the Tailwind classes out of the layout and the bar and
+   converts them to pixels, which is a second implementation of Tailwind's scale
+   and would be wrong the first time somebody writes an arbitrary value;
+2. a declared constant — the chrome's height, in one module, read by the
+   stylesheet through a custom property and by the components through a class
+   they share — so that the inset and the thing it clears are one number;
+3. accepting the hand-held number and keeping the guard as a floor.
+
+**Recommendation: 2**, as a unit of its own, and not today: it touches the
+header, which is the route group's root layout, and the bar, and the stylesheet,
+and it is a different argument from the one this unit is about. 3 is what
+shipped.
+
+### What closing it actually found, 18 October
+
+The entry named three places. There were **six**, and the two it did not name
+are the ones that make the case: `docs/layout.tsx` sticks each of its two rails
+at `top-14` and stands each `calc(100vh - 3.5rem)` tall. So the header's height
+was written six times across three files and a stylesheet — `h-14`, `top-14`
+three times, `3.5rem` twice — and the sweep that now fails on a seventh is the
+part of this worth keeping.
+
+Two things were wrong and neither was the number. The bar stuck at the header's
+**row** rather than at the row plus the hairline under it, so it covered that
+hairline by a pixel; both rails did the same. All three start at the sum now,
+which is one declaration. And `_lib/on-this-page.ts` still described the inset
+as `5rem` and the heading's margin as `5rem` — true until 17 October, stale the
+day after, and the kind of prose nothing checks.
+
+---
+## 2026-10-17 — the bar's height is settled before the browser runs and its right-hand label's width is not
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/docs-bar.tsx`) · **Status:** open — **the
+stated limit of what shipped today**, and the half of the 16 October shift
+finding that a build-time list cannot reach
+
+The 86-pixel shift the contents line had is gone, and the reason it is gone is
+that the **layout** now knows whether a page has sections at all, from its
+markdown, before anything renders. So the bar is one row high in the HTML the
+server sends and one row high a moment later, and the prose under it does not
+move.
+
+What the server cannot know is **how many** sections there are. Two
+*Architecture* pages get most of their headings from a component as the page
+builds, which is the whole reason the rows are read off the rendered document,
+and a count taken from the markdown would be wrong on exactly those two pages.
+So the closed control is sent as *On this page* and the count — *14 sections* —
+joins it when the walk finishes.
+
+**That changes the label's width and nothing else.** The count is a `text-xs`
+span in a row whose height is set by the taller label beside it, so nothing
+above or below it moves; on a phone the control is right-aligned, so the label
+grows leftward and the site-section label beside it truncates a little sooner
+than it did a frame earlier. It is the last visible difference between the bar
+the server sends and the bar a reader ends up with.
+
+Three ways out, in the order they are worth considering:
+
+1. **Leave it.** A label that gets more informative after a frame is a different
+   thing from prose that moves under a reader, and the second is what the rule
+   is about.
+2. **Reserve the count's width** with a fixed-width span, which trades a width
+   change for a permanent gap on the seventeen pages where the count never
+   arrives and on every page for the frame before it does.
+3. **Drop the count** and let the control say *On this page* until the reader has
+   reached a heading, which is the state the count was written for in the first
+   place.
+
+**Recommendation: 1**, and it is what shipped. Recorded because it is the part
+of the 16 October entry that this unit did not close, and a later run reading
+that entry as closed should know which half.
+## 2026-10-17 — nothing in this library can say *no*, so a refusal and a page nobody has touched wear the same chip
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.badge.ts`, and the tone vocabulary generally), with the
+slot half for `Loom daily build` (`src/theme/theme.ts`) · **Status:** open —
+**the composition half is fixed on this site by
+`marketing-07-the-refused-chip`**, which uses the three tones
+there are and says in writing why that leaves one pair undistinguished
+
+### What a visitor met
+
+`/how-it-works` is where this site stops describing the product and runs it. A
+visitor picks one of six requests, the page rearranges itself, and a panel
+beside it prints what was asked, what was worked out, how much moved, which rule
+decided and what putting it back would restore. The panel's headline is a
+`loom.badge` carrying the verdict in two or three words.
+
+There are five verdicts and the badge had two treatments, because it was asked a
+boolean. Read off the built page on `main` at `c446b12`:
+
+| the page is in this state | the chip says | and wears |
+| --- | --- | --- |
+| nothing asked yet | Nothing yet | `outline` |
+| `problem`, `proof`, `calmer` | Allowed | `accent` |
+| `shorter`, `unstick-menu` | **Waiting for you** | **`outline`** |
+| the same two, approved | You said yes | `accent` |
+| `drop-pitch` | **Refused** | **`outline`** |
+
+So *your rules said no*, *your rules are waiting for you to decide* and *nobody
+has asked this page anything* were one plain pill with a different word at the
+end of it. The one that costs something is **Refused**: saying no, and saying
+which rule said it, is the thing this product has that the others do not, and at
+a glance it read as the page having done nothing.
+
+It is worse than a flat chip, because the same screen contradicts itself. On
+`/how-it-works?ask=shorter` the callout at `y 176` is the accent band — *Waiting
+for you*, with **I say yes, go ahead** in it — and the badge at `y 3436` is the
+plain pill, *Waiting for you*. One request, one verdict, two controls, opposite
+dressings, 3,260px apart.
+
+### Why this lane could not finish it
+
+**There is no tone in this library that means no.** Counted on `main`:
+
+- `loom.badge` registers `accent`, `neutral`, `outline` — and its own definition
+  says what they are for: *"an accent badge claims attention, a neutral one
+  classifies quietly, and an outline one sits on a coloured surface where a
+  filled badge would fight it."* None of the three is a refusal.
+- **Seventeen `tone`, `state` and `variant` enums across seventeen primitives,
+  twenty-three distinct members between them, and not one of the
+  twenty-three means no.** The whole vocabulary is `accent`, `canvas`, `coming`,
+  `current`, `default`, `done`, `excluded`, `floating`, `highlight`, `included`,
+  `marked`, `muted`, `neutral`, `outline`, `panel`, `plain`, `planned`,
+  `source`, `strong`, `subtle`, `surface`, `terminal`, `washed`. There is no
+  `critical`, `danger`, `warning`, `caution` or `negative` anywhere in the
+  library. The nearest thing is `loom.perk-list-item`'s `excluded`, and its own
+  comment says what it is for — a tier showing what it *lacks* — which is an
+  absence rather than a refusal.
+- **And a primitive could not paint one if it wanted to.** `paletteSlotSchema`
+  in `src/theme/theme.ts` declares seventeen slots — four surface, four
+  foreground, three accent, two brand-secondary, four border — and **not one is
+  a status colour.** Every palette must declare every slot, so this is a schema
+  change that reaches every registered palette rather than one primitive's
+  prop list.
+
+`toneFor` in `(marketing)/_lib/pages/answer.ts` recorded the same wall in its
+own words months ago — *"the library has no red and that is a recorded
+decision, so a refusal cannot be painted as a refusal"* — and settled for
+painting by whether the visitor can still act. This lane has now hit it from the
+second direction and the answer was the same both times.
+
+### What shipped here, so you can see the shape of the gap
+
+The badge is now a table over the verdict rather than a question asked of
+`record.landed`, and it spends the three treatments on the three answers a
+reader is actually asking for:
+
+| the answer | verdicts | treatment |
+| --- | --- | --- |
+| the page changed | `landed`, `approved` | `accent` |
+| your rules stepped in | `held`, `refused` | `outline` |
+| the page is as it was | `nothing-to-do`, and no request at all | `neutral` |
+
+A refusal no longer wears the chip that means *nothing has happened*, which is
+the half that was misleading a reader. **`held` and `refused` are still one
+treatment**, and that is the whole of what is being asked for here: they are
+opposite answers — one is a door held open for the visitor, the other is a door
+that does not open — and this lane has run out of ways to say so without a
+component of its own, which 0067 does not allow it.
+
+### What would close it
+
+Not necessarily red, and that is the point of filing it rather than asking for a
+colour. Three shapes, cheapest first, and the judgement is yours:
+
+1. **A fourth badge tone built from slots that already exist** — `fg-default` on
+   `bg-surface-muted` with `border-strong`, say, or any pairing the two starter
+   palettes are already held to. It separates *stopped* from *waiting* without
+   touching the palette schema, and it is one enum member plus a row in `TONES`.
+   It is also the weakest: two greys are a difference a reader has to be told
+   about.
+2. **A status slot in the palette** — one or two members on
+   `paletteSlotSchema`, declared by every registered palette, with a tone on
+   `loom.badge` and `loom.callout` that reads it. This is the honest version and
+   it is **`Loom daily build`'s**: it changes a published schema and every
+   palette has to answer for it. It is also the one that makes a refusal
+   paintable everywhere rather than on one badge.
+3. **A mark rather than a colour** — `loom.badge` is already `inline-flex` with
+   `gap: space(1)`, so it composes a `loom.icon` beside its word today and no
+   primitive has to change at all. Rejected here rather than built, because a
+   glyph chosen by one surface is a vocabulary nobody else shares, and a mark
+   that means *refused* is exactly the kind of thing that should be the
+   library's rather than this site's.
+
+**This lane's recommendation is (2), and not today.** It is a palette schema
+change and it wants the maintainer's eye on what a status colour does to two
+starter palettes whose whole argument is that they are not decorative.
+
+### Where it is held
+
+`(marketing)/_lib/pages/verdict.test.ts` holds the site's half: every answer the
+panel can give is a treatment this deployment's registry actually validates, an
+answered page is never dressed like one that was asked nothing, and a change
+that landed is never dressed like one that did not. It is deliberately silent
+about *which* treatment a verdict wears, because that is a judgement rather than
+a rule — so a fourth tone arriving in `loom.badge` is a one-line change here and
+nothing goes red on the way.
+## 2026-10-17 — every reading of the counters was audience-blind, and the first deployment to serve two forms of a page would have been told its surface was at fault
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-36-a-reading-is-of-one-audience`** — filed and fixed in the
+same run, and written down because it is a published verdict that was wrong
+rather than a figure that was thin
+
+0284 landed the audience on all five reader tables on 15 October and said, in
+its own consequences, that *the portal gains a dimension it must not silently
+collapse* and that *no screen reads this yet*. The store was told: `counters.ts`
+publishes `inAudience` so the memory store cannot merge two rows Postgres holds
+apart. **Nothing above the store was**, and the hole was not that the reading was
+missing — it was that every reading was confidently wrong in the same way.
+
+A page is one base tree and the deltas an audience earns (0263), so two forms
+share a tree **and** a revision, which is exactly the key every reading here
+identified a page by. For the first deployment to serve two:
+
+- `pageReadingOf` keyed its window by node id, so the second form's row for a
+  node went into `duplicated` — the one condition 0158 makes permanent — and
+  `health.ts` published `rows-mishandled`, whose remedy is **`caller`**. The
+  loudest fault in this subsystem would have fired on every page of a deployment
+  doing what it was built to do.
+- `pageViewsFor` matched on tree and revision and took `matching[0]`, so a rate
+  could be one form's `reached` over the other form's `opened`, with the pairing
+  decided by the caller's array order.
+- `funnelReachOf` dropped the other form's answer to each question as the same
+  question asked twice.
+- the order over a deployment's pages and all three library censuses deduped by
+  the same key, so the second form was in no order, no standing and no arrival
+  count.
+
+Taken as 0290 and §36: `readingKeyOf` published once and imported by the five
+places that decide what a duplicate is, `byAudience` for the split, the audience
+carried on a reading and matched in both joins, and a seventh collection fault
+for a caller that hands both forms in as one window. **Nothing was added to a
+payload, a browser, a column, a store or the vocabulary of kinds.**
+
+**The lesson, which is the half worth keeping.** A dimension added to a schema
+is not added to a subsystem. 0284's consequences named the portal as the thing
+that must not collapse the dimension, and the collapse was already five levels
+below any screen — in the readings the portal would have been reading. The next
+dimension to land on these tables should be checked against every place that
+keys a page, not against the surfaces that draw one.
+
+---
+## 2026-10-17 — every screen that reads these counters now has a dimension on it, and two of its rows are one page in two forms
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` (the reader screens)
+· **Status:** open — **nothing is broken and nothing is urgent**; no screen
+reads the dimension yet (0284), so this is a shape to build to rather than a fix
+
+0290 and §36 made every reading in `src/signals/` audience-aware. What that
+hands the portal, in the order it will meet it:
+
+- **Read one form at a time.** `byAudience` splits a window a deployment read
+  into one window per audience; hand each one to the readings as before and
+  every figure is correct. A screen that hands in an unsplit window gets a
+  reading of **neither** form — `PageReading.audiences` names both, every part
+  is `unknown`, and `collectionHealthOf` publishes the fault `audiences-mixed`,
+  whose remedy is `caller` and whose sentence says to split. **That fault means
+  the surface, not the deployment**, and it is the one fault here a screen
+  should fix in its own code rather than report.
+- **Two rows that are one page.** In the order over a deployment's pages
+  (`RankedPage`), in the order over its *changed* pages (`MovedPage`, both of
+  0291's orders) and in the health reading (`PageHealth`), two forms of one page
+  are two rows with the same `treeId` and `revision` and different
+  `audienceId` — exactly as two revisions of one tree already are (0250).
+  `trees` counts the tree once. A screen keying a row by tree and revision will
+  draw one over the other; key on all three.
+- **Nothing is summed across forms and nothing should be.** A reader of one
+  form is not a reader of the other, so the two rows' losses are losses from
+  two populations. There is no net figure over them anywhere in these readings,
+  which is deliberate.
+- **`otherAudience` is not a fault.** Three readings now publish it —
+  `PageReading.otherAudience`, `PageViewsFor.otherAudience`,
+  `FunnelReach.otherAudiencePairs` — and it is *how much of the window belonged
+  to the page's other form*. It is neither `foreign` (another page) nor
+  `duplicated` (a row handed in twice), and drawing it as either would report a
+  working deployment as a broken one.
+- **An `aud_` is opaque and the portal has no name for it.** 0284 keeps the
+  predicate in the control plane, so a screen can show `aud_skiers` and nothing
+  more. Whether the control plane should carry a label for one is the control
+  plane's question and not this lane's; until it does, a screen showing two rows
+  of one page can say only *two audiences* and their ids.
+
+**What is deliberately not here**, so a screen does not wait for it: the
+comparison of two audiences. The arithmetic a change comparison uses is right
+for it and the sentence is wrong — a before-and-after holds the readership still
+and varies the tree, which is what §20 checks; an audience comparison does the
+opposite, so the movement carries two causes the counters cannot separate.
+0290's *Alternatives considered* has the argument, and it is a record of its own
+when somebody asks for the card.
+
+---
+## 2026-10-17 — nine counted readings in one body: 120 clean, 129 mangled, a bare URL mangled too, and the bracket is not the same from body to body
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling,
+and a 152-character URL that came back clean in the body that mangled a 164*
+and the four entries it extends · **Status:** open — **one hypothesis killed,
+one published bracket contradicted, and a new hypothesis that would reconcile
+every entry in this file**
+
+> **This entry was rewritten twice within ten minutes of being filed, by the
+> routine that filed it, and both corrections are the useful part.** Its first
+> version reported the short-sha remedy as having *"worked, first try"* — it did
+> not; the two links mangled again 32 characters shorter, and the claim was
+> written before the read-back that disproved it. Its second version concluded
+> the `[…](…)` construct was the variable. A bare URL then mangled as well. What
+> survives is the counted table below, which is worth more than either reading
+> taken off part of it.
+
+#661's body was posted three times, each time read back out of the GitHub API
+and counted with `len()` over the exact strings. Nine readings, one body:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 63 | `docs/signals.md`, by branch name | `[…](…)` | **clean** |
+| 82 | the preview deployment | bare | **clean** |
+| 106 | the report, by branch name | `[…](…)` | **clean** |
+| 120 | 0263, by branch name | `[…](…)` | **clean** |
+| 129 | 0284, by short sha | `[…](…)` | mangled |
+| 135 | 0290, by short sha | `[…](…)` | mangled |
+| 161 | 0284, by branch name | `[…](…)` | mangled |
+| 167 | 0290, by branch name | `[…](…)` | mangled |
+| 169 | 0290, absolute, alone on its own line | **bare** | mangled |
+
+**The `[…](…)` hypothesis is dead.** The 16 October entry's two candidates were
+*the bracket for a markdown link is 155–164 and an HTML attribute has a
+different one*, or *length is a proxy and what actually matters is the `[…](…)`
+construct*. The second is now disproved directly: a bare URL, on a line of its
+own, with no link syntax anywhere near it, came back wrapped in `` `` ``. The
+22 September entry's *a bare URL survives where a markdown link does not* holds
+only below the bound — the 82 here is clean and the 169 is not.
+
+**The short-sha remedy did not work, and that is the sharpest reading here.**
+The same two URLs were posted twice, once by branch name and once by the head
+commit's short sha, which took 167 to 135 and 161 to 129. **Both mangled both
+times**, and each kept its own injection style across the two postings: 0290
+always `` `` `` swallowing the closing paren *and* the colon after it, 0284
+always ` ``` ` around the URL alone. So the fence width is not fixed at two —
+four earlier entries record only the double — and what the span encloses is not
+fixed either. Per-link stability across two postings is new: whatever chooses
+the fence is deterministic in the URL, not in the attempt.
+
+**And this body's bracket is 120–129, which contradicts two entries that are
+not wrong.** The 15 October entry counted a 144 clean; the 16 October entry
+counted a 152 clean. Both are above everything mangled here. Those readings and
+these cannot both be a single constant threshold — and every entry in this file
+measured **a different body** and arrived at a different bracket: 133–141 on
+14 October, 144–155 on the 15th, 155–164 on the 16th, 120–129 today.
+
+**So the hypothesis worth testing next is that the bound is a property of the
+body rather than of the URL.** Something like a budget: a longer body, or one
+with more URLs in it, mangles at a lower per-URL length. It would reconcile
+every reading in this file at once instead of making four of them errors, and
+it predicts something falsifiable — **post the same URL twice, in a short body
+and a long one, and it should survive one and not the other.** Nothing here
+tests that; this body is one of the longest any routine has posted, with six
+URLs in it, and it has the lowest bracket recorded.
+
+**What a routine should do until it is settled.** Not the short-sha swap, which
+cost two postings here and bought nothing. Either keep every URL in a body well
+under 120 characters, or cite a long path the way this pull request's body now
+does: name the file in prose, and link only the directory
+(`../tree/<sha>/decisions`, 26 characters). A reader gets to the record either
+way, and nothing in the body depends on a bound nobody can state.
+## 2026-10-16 — the morning-after screen, where two orders must not be netted into one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+the reading is on this branch
+(`signals-35-what-a-change-did-across-the-deployment`), the screen is not built
+
+`deploymentChangeOf(changes, rows)` answers, for the first time, *which of my
+pages did this change help and which did it hurt* — §35 of
+[`docs/signals.md`](docs/signals.md),
+[0291](decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md).
+It is the deployment-scale twin of the order the portal already has from 0250:
+that one says where the problem is in one window, this one says what the change
+did across every page, and both rank in the same unit, so they can sit on one
+screen without a reader converting between two kinds of number.
+
+A caller holds each page's `ReadingChange` and the **later** window's page-view
+rows, and gets back `harmed` and `helped` — two orders, worst and best first —
+plus `unranked`, `worst`, `best`, the standings, and the counts of what it
+dropped.
+
+### The four refusals a card must not undo
+
+- **There is no net movement per page, and the two orders are not two halves of
+  one.** A page the change both helped and hurt stands in both, because its harm
+  and its help are two different bands; the figures are never added, subtracted
+  or netted, and `standings.ranked` counts such a page once. A card with one
+  signed arrow per page would report *nothing happened* for the commonest shape
+  a real change has — a band rewritten and a band pushed below the fold.
+- **`PageMovement.readers` is not people.** It is a share movement at the later
+  window's door scale, which is what makes two pages' movements the same kind of
+  figure (0250's rule, at the one place it bites hardest: the comparison's own
+  ranking figure looks corrected and carries a straddle). Do not round it into a
+  headcount and do not add it across pages.
+- **`unmoved` is an answer and the five silences are not.** A page nothing moved
+  is a page the change landed on without moving a reader — the cheerful answer
+  and the too-thin-window answer both, and `views.was` / `views.now` are what
+  tell them apart. `unscaled`, `unopened`, `unread`, `mispaired` and
+  `inconsistent` each name something a deployment can act on, and
+  `describeMovementStanding` has the sentence for each.
+- **A page in `ambiguous` is not a page with no movement.** It is a page handed
+  in with two comparisons — a tree live at two revisions, which the one-window
+  order deliberately keeps as two rows — and neither is this page's movement.
+  The honest row says *this page is live at two revisions; pick one*, never a
+  blank.
+
+### The one state worth a design decision rather than a rule
+
+An `inconsistent` row publishes its share movements and withholds the scaled
+ones. It is the alarm, not a page to rank, and the share beside it is still true
+of whatever assembled the reading — so a card that hides the row loses the only
+evidence of a sender that is not one, and a card that ranks it by share puts a
+fault at the top of a list of pages to fix.
+
+---
+
+## 2026-10-17 — the records index test is now a coin flip: nine readings of identical work, four of them failures, on one machine in one session
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/architecture.test.tsx`) · **Extends** the two
+15 October entries, *the records index render test has about eighty records of
+headroom left* and *`pnpm verify` was green on `main` this evening* ·
+**Status:** open — **at 272 records this test passes or fails at random**: five
+passes and four failures of the same work on one machine in one session,
+including a full-suite failure on a branch whose entire diff is one markdown
+file
+
+### What was measured, and it is the only part that matters
+
+Nine readings, all on one machine in one session this afternoon. All on **272
+decision records** except the first.
+
+**Under the full suite, which is how the gate runs it:**
+
+| tree | records | the gate |
+| --- | --- | --- |
+| `marketing-07` before merging `main` | 270 | passed |
+| `marketing-07` after merging `main` | 272 | **timed out** at 5,691 ms |
+| `marketing-08`, whose whole diff is one markdown file | 272 | **timed out** |
+| `marketing-08`, after merging `main`, machine idle | 272 | passed at **4,621 ms** |
+| `marketing-08`, after merging `main` again, idle | 272 | passed at **4,848 ms** |
+
+**Run alone, the same test on the same 272 records:**
+
+| tree | the test |
+| --- | --- |
+| `origin/main` at `d8a3bcc` | 4,894 ms — passed |
+| `marketing-07` at `84f7dda` | **5,550 ms — timed out** |
+| `marketing-08` | 4,206 ms — passed |
+| `marketing-08` | 4,866 ms — passed |
+
+**At 272 records: five passes and four failures of identical work.** The
+readings run 4,206 ms to 5,550 ms against a 5,000 ms budget — a spread of
+1,344 ms, 27% of the budget, centred almost exactly on the line. The three
+passing full-suite runs came in at 4,621 ms and 4,848 ms, which is 379 ms and
+152 ms of headroom; the passes are not comfortable, they are near misses.
+
+### A claim this entry made and withdraws
+
+An earlier version of this entry said the gate *"crossed between 270 and 272
+records"* and had *"failed on every full-suite run since."* **That was wrong,
+and it was wrong because it was written after three full-suite runs rather than
+four.** The fourth passed, on the same tree as the third, with nothing changed
+but how busy the machine was. The crossing framing is withdrawn.
+
+What replaces it is worse rather than better. **A test that has crossed its
+budget gets fixed, because it fails every time and nobody can ignore it. A test
+sitting on its budget gets re-run and blamed on whichever branch was unlucky** —
+which is what happened to this lane today, and what the 15 October entry meant
+by *"a lane trying to tell its own red from the tree's."*
+
+The third row of the first table is still the one to read twice. `marketing-08`
+adds **79 lines to `FINDINGS.md` and a report** — no code, no test, no record,
+nothing a jsdom render of the decisions index could see — and the shared gate
+timed out on it once and passed on it once.
+
+### The correction to the entry this extends
+
+That entry put the headroom at *"under forty records"* at ~15 ms a record, and
+called it *"a fortnight of this repository's rate."* It is a fortnight later in
+records — 262 then, 272 now — and the test now fails half the time it is run.
+
+**Do not read a per-record cost out of these numbers.** The 15 October figures
+were taken on another machine on another day, and this entry's own spread on one
+machine — 1,344 ms across eight runs of identical work — is larger than ten
+records' worth at any rate either entry proposes. That arithmetic is not worth
+defending and nothing here rests on it.
+
+**What does not need a rate.** Nine runs, four of them failures. Whatever
+the per-record cost is, there is no longer a number of records to plan against,
+and the next record makes a coin flip a little more weighted rather than
+crossing anything.
+
+### What it cost today, which is the shape the entry predicted
+
+This lane met it on a branch whose pull request had **already merged**, and
+spent a full diagnosis cycle on it: reproducing on the base, comparing record
+counts, diffing the two trees, and running the file on both branches to
+establish that an identical workload passes on one and times out on the other.
+
+The entry predicted exactly this — *"what an intermittent budget looks like from
+a lane trying to tell its own red from the tree's"* — and added *"it is the gate
+four surfaces share, so it does not block one routine, it blocks all of them."*
+Both are now observed rather than forecast. The second 15 October entry's advice
+is the one that saved this run from reverting something: **a red
+`architecture.test.tsx` should be re-run, and checked against the base, before
+anybody treats it as their own.**
+
+### What this lane did not do
+
+**Nothing.** `architecture.test.tsx` is `Loom docs`' file and this lane does not
+edit another route group, so the three obvious moves — raising the timeout,
+splitting the render, or asserting over a sample rather than every row — are all
+yours. No fix is in flight: neither open pull request (#647, #665) touches the
+file, so there was nothing to port into a branch either.
+
+The one thing worth saying about the remedy from outside the lane: **raising the
+timeout buys time and does not stop the clock**, and the sibling test *says once
+that the whole table leaves, and marks every row* was measured at 4,291 ms in
+today's full-suite run, so it is close behind rather than a year behind.
+## 2026-10-17 — the published key was imported by five readings and a sixth landed on `main` the same day without it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-36-a-reading-is-of-one-audience`** — found when `main` was
+merged into that branch, fixed in the same unit as clause 7 of 0290, and written
+down because the failure mode is about *process* rather than about audiences
+
+0290 publishes `readingKeyOf` once and has five readings import it, on the
+argument that five spellings of what makes two readings one page are five places
+to drift. **While that branch was open, #659 merged a sixth** —
+`deployment-change.ts`, the order over a deployment's changed pages (0291) —
+written against the readings as they were, with its own key and its own
+ambiguity gate.
+
+It was wrong in two shapes, and the second is worse than anything 0290 found:
+
+- the comparison key was the page and the two revisions, so two forms of a page
+  compared over the same pair made the second form's comparison the first one
+  handed in twice;
+- the ambiguity gate grouped by **tree**, so two forms compared over *different*
+  revision pairs made the page `ambiguous` and **both** were dropped — out of
+  both orders, the standings and the arrivals;
+- and the door's asking was rebuilt from tree and revision alone, discarding the
+  audience the progress reading carries, so a movement could be scaled by the
+  other form's arrival count.
+
+Fixed with `formKeyOf` beside `readingKeyOf` rather than a sixth spelling of it,
+for a reason worth keeping: the two answer different questions. `readingKeyOf`
+is *what is one reading*, where a revision is part of the identity.  `formKeyOf`
+is *what is one page in one form*, with no revision in it, because a comparison
+spans two revisions and the ambiguity being gated is about one form holding two
+of those pairs. 0291 is **not superseded**; nothing it decided was wrong.
+
+**The lesson, which is why this is filed rather than quietly fixed.** A
+published key stops two places disagreeing only once both places import it, and
+**a branch open across the landing of another branch is exactly where that
+fails quietly** — the new file typechecked, its 25 tests passed, and nothing in
+either diff touched the other's lines. Nothing but reading the merged head would
+have caught it. A routine whose branch outlives another's merge should re-read
+its own record's claims against what arrived, not just re-run the suite.
+
+---
+## 2026-10-17 — a change comparison whose two sides name different audiences is a cross-population comparison wearing a before-and-after's clothes
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/change.ts`)
+· **Status:** **closed by `signals-38-a-comparison-is-of-one-population`** —
+taken as 0294, §37, as a **refusal** over five page-scale comparisons and the
+readership comparison, with the census withheld rather than left standing; the
+four library comparisons are left out and refiled below, because #668 was open
+on them. Original status: open — **nothing is broken today and nothing is
+urgent**; a guard worth adding the next time that file is open, with the
+argument already written
+
+`readingChangeOf(was, now)` takes two readings and compares them. Since 0290
+each reading names the audience it is of, which makes a new caller error
+expressible and undetected: **handing in one form's earlier window and another
+form's later one.** The arithmetic runs, every figure is produced, and what
+comes back is labelled as what a change did.
+
+It is the exact confusion 0290's *Alternatives considered* argues about from the
+other direction. A before-and-after holds the readership still and varies the
+tree, which is why §20's readership reading exists to check that assumption; a
+comparison across two audiences varies the readership **by construction**. A
+mismatched pair is the second thing presented as the first, with no `null` and
+no silence anywhere on it.
+
+**Why it was not fixed in 0290's unit.** `change.ts` is upstream of everything
+this unit touched and nothing in the unit needed it: the order over a
+deployment's changed pages keys on the *later* side's audience, so a mismatched
+pair is at worst mis-filed there rather than mis-read. Adding a silence to
+`change.ts` means a member in a published vocabulary and a decision about
+whether a mismatch is a silence or a refusal, which is a unit rather than a
+line.
+
+**The shape, if it is taken:** a mismatch is probably a **refusal** rather than
+a silence, on the reasoning 0290 used for a mixed window — both available
+answers (pick one side's audience, or publish the comparison unlabelled) hand a
+surface a number about two populations. The counter-argument is that `changeOf`
+has no concept of refusing today and every one of its figures is honest about
+its own side, so a silence naming the mismatch may be enough. Worth checking
+whether `copy-change`, `pace-change`, `action-change` and the four library
+comparisons take their pairs the same way; they likely do, which would make this
+one decision over eight functions rather than one.
+## 2026-10-17 — the mangling happens to a link with no scheme and no host at all, which the structural hypothesis has to account for
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling,
+and a 152-character URL that came back clean in the body that mangled a 164*
+and the three entries it extends · **Status:** open — **one reading, and the
+one variable it changes is that the mangled target is not a URL**
+
+#659's body carried four link targets. Counted with `len()` over the exact
+strings, before and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 74 | `docs/signals.md`, relative by branch name | `[…](…)` | **clean** |
+| 82 | the preview deployment | bare | **clean** |
+| 113 | the report, relative by branch name | `[…](…)` | **clean** |
+| 165 | the record, relative by branch name | `[…](…)` | mangled |
+
+The mangled one came back with `` `` `` injected around the target inside the
+parens, which is the injection all four previous entries record, and the
+sentence after it was swallowed into the code span — so the first paragraph of
+the body reads as gibberish and the record link does not resolve.
+
+**On length it narrows nothing** — 165 is above 155 and 113 is below 144, so
+every reading here sits outside the standing bracket and agrees with it.
+
+**The variable it changes is what the target is.** Every mangled reading until
+now has been an absolute `https://` URL. This one has **no scheme and no host**:
+it is `../blob/<branch>/decisions/0291-….md`, a relative path. Whatever is
+rewriting these bodies is therefore not matching on a URL, on a hostname or on a
+scheme, and the 152-character `<img src="…">` row that came back clean is not
+explained by *attribute rather than link* alone either. The shortest hypothesis
+left standing is **length of the parenthesised target in a markdown link**,
+whatever that target is.
+
+**What this run did about it, which is also a vote for the cheap remedy.** The
+body was corrected by hand within the same turn, and the record is now named
+rather than linked: `**0291** — *a deployment's change is two orders at the
+door's scale*`, with the path in an inline-code span short enough to be below
+every reading ever taken. Naming a record and linking a short path costs a
+reader one click and costs a routine nothing, and it is available today without
+knowing what the rewriter matches on.
+
+### A sixth reading, taken on this entry's own pull request, and it is not about length at all
+
+The body of #664 — the pull request carrying this entry — was written to avoid
+long link targets, and something in it was rewritten anyway. The two readings
+below are from **one body**, in **one syntax**, and they differ in one
+character class:
+
+| sent | characters | came back |
+| --- | --- | --- |
+| an inline-code span holding an HTML image tag with a quoted `src` attribute | 13 | **rewritten**: HTML-escaped to entity text, wrapped in single quotes, and the span's own backticks doubled |
+| an inline-code span holding a relative path with angle-bracketed placeholder | 38 | clean |
+
+**So length is not the variable, and the hypothesis at the head of this entry
+is wrong.** A 13-character span was rewritten while a 38-character one four
+paragraphs below it was not. Both are inline-code spans, both contain angle
+brackets, and the only difference between them is that the rewritten one
+contains **double quotes**.
+
+The signature is the same one all five earlier readings record — backticks
+doubled around the content — with two parts nobody had seen before: the content
+was **HTML-escaped into entity text**, which a reader sees as `&lt;` rather
+than as a bracket, and it was **wrapped in single quotes** that nothing sent.
+That is not an escaping bug at the edges of a long URL; it reads like content
+being parsed and re-serialised by something that quotes and escapes on the way
+out.
+
+**What that means for the remedy.** Naming a record rather than linking it is
+still worth doing and still cheap, but it is no longer sufficient, because the
+thing being rewritten here is not a link. The narrowest safe rule this reading
+supports is: **do not put double quotes inside an inline-code span in a pull
+request body.** A routine that needs to show an attribute can name it in prose
+instead, which is what #664's corrected body does.
+
+---
+## 2026-10-18 — the chrome is now one height at every width, and above 1280 forty-five pixels of it are not there
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/globals.css`) · **Status:** open — **nothing is wrong
+for a reader who scrolls**; it is a scroll a keyboard reader gets and the
+dividend of today's unit rather than a defect it introduced
+
+`--chrome` is the header's row, the bar's row, and the hairline each of them
+draws: 102 pixels. It is the right number at every width where the bar exists,
+which is every width below 1280. At 1280 and above the bar is `xl:hidden` and
+the chrome is 57.
+
+So `scroll-padding-top` insets the scrollport by 112 on a wide screen where 67
+would do, and the forty-five pixels of difference are a band of blank page above
+whatever the browser has just scrolled to. **A press of a contents row is
+unaffected**, which is worth being precise about: the heading's own margin is
+written as `calc(var(--press-landing) - var(--chrome-inset))`, so the landing
+stays 160 wherever the inset goes. What is affected is every scroll the browser
+performs with no heading involved — a search result, a fragment, and the one
+that matters, **moving focus to something off screen with a keyboard**, which
+scrolls by the padding alone.
+
+This was true yesterday too and was not worth an entry, because the inset was a
+number somebody had typed and making it width-aware meant typing two. It is
+worth one now:
+
+> `@media (min-width: 80rem) { :root { --chrome-bar: 0px } }`
+
+and everything downstream follows, because everything downstream is arithmetic
+over `--chrome-bar`. That is the whole change.
+
+**Not taken here, for one reason that is this lane's own argument turned on
+itself.** `80rem` is Tailwind's `xl`, which is also where `docs-bar.tsx` says
+`xl:hidden` and where `docs/layout.tsx` says `xl:sticky`. Writing it into the
+stylesheet by hand makes the breakpoint a number in two languages — which is
+the shape of the thing closed today, one layer up. The remedy wants the
+breakpoint read from the theme rather than transcribed, and that is a different
+argument from *how tall is the chrome*.
+
+Three ways, in the order they are worth considering:
+
+1. **Read the breakpoint from Tailwind's theme** and write the media query
+   against it, so `xl` is one value for the stylesheet and the markup. The right
+   answer and the only one that does not add a copy.
+2. **Transcribe `80rem`** with a test holding it against the markup's `xl:`
+   usage, which is cheap and is a sixth copy with a guard on it.
+3. **Leave it.** A wide screen has the vertical space to spare, which is why
+   this has never been reported by anything but arithmetic.
+
+**Recommendation: 1**, as a small unit of its own.
+
+---
+## 2026-10-18 — the bar's row is declared now, so a control that outgrows it spills instead of making the bar taller
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/docs-bar.tsx`) · **Status:** open — **the
+stated limit of what shipped today**, and a failure mode deliberately traded for
+a quieter one
+
+The bar's height used to be whatever its controls came to: `py-3` and a line of
+`text-sm`, which is 44 pixels, which nothing anywhere could read. That is the
+half of the 17 October finding that made the inset guessable only from a
+screenshot. It is `h-[var(--chrome-bar)]` now, and the stylesheet's
+`--chrome-bar` is the same 44.
+
+**What that trades is which way a mistake shows.** Before, a control with a
+second line of text grew the bar, the inset stayed where it was, and a reader
+got a heading tucked behind the bar — wrong, and invisible. Now the inset is
+right by construction and the control is the thing that is wrong: 44 pixels of
+row with more than 44 pixels in it, spilling over the hairline.
+
+That is the better failure by a distance, because it is the one a photograph
+shows. But it is still a failure nothing reports: jsdom lays nothing out, so no
+test in this repository can see a control overflow its row, and `pnpm shoot`'
+`measure` prints boxes and never asserts (0213).
+
+Three ways:
+
+1. **Leave it**, and rely on the fact that a spilling control is visible in the
+   first screenshot anybody takes. This is what shipped.
+2. **Let the row grow and declare a floor** — `min-h-[var(--chrome-bar)]` — which
+   restores the old failure mode for anything above the floor and buys nothing
+   the floor does not already buy.
+3. **Measure it**, which means a check that reads the control's box out of a
+   browser and compares it to the declaration. `pnpm shoot` has the number and
+   deliberately cannot fail on it, so this is the standing open finding about
+   an instrument that prints and never asserts, met again from a different side.
+
+**Recommendation: 1**, and 3 if that finding is ever taken up — the chrome's two
+rows would be a good first subject for it.
+
+---
+
+---
+## 2026-10-18 — the four library comparisons take their pairs the same way and the guard was deliberately not put on them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/library-change.ts`,
+`src/signals/library-copy-change.ts`, `src/signals/library-reach-change.ts`,
+`src/signals/library-word-reach-change.ts`) · **Status:** **closed by
+`signals-39-a-library-gained-a-form-not-a-page`** — answered as 0295 rather than
+built, and **the answer is no on both halves.** The four files were opened and
+read with #668 merged, and the guard this entry asks for does not fit them:
+pairing by form (0293) means no share in any of the four has a denominator
+spanning two populations, so there is no wrong number to withhold. The second
+half — *refuse a mixed window first* — is the costlier of the two, because after
+0263 a deployment serving two audiences has a mixed window for every library
+comparison it ever takes. What the four got instead is a census: `audiences` as
+a set per side, and `formsGained`/`formsLost`, which answer the fault that **is**
+real there and is not this one (see the entry filed below the same day).
+Original status: open — the decision is taken and the rule is published; what is
+left is applying it to four functions
+
+0294 refuses a comparison whose two sides prove two populations, and publishes
+`crossesAudiences` once so that nine comparisons do not each decide it. It was
+applied to six: the five page-scale comparisons that publish a silence
+vocabulary, and the readership comparison.
+
+**The four library comparisons were not touched, and the reason is process
+rather than design.** #668 (*a comparison pairs pages by form*) was open on all
+four files when this was built — it keys their pairing by the form rather than by
+the tree — so adding a guard to them here would have been a branch stacked on a
+branch, and the brief forbids that. Nothing about them makes the guard wrong or
+different.
+
+**What they need, which is small.** Each takes two windows of kind readings and
+compares them. The pair a caller hands in is two whole windows rather than two
+readings of one page, so the guard is one level up from the page-scale one: the
+two windows are of two populations if each names one audience and the two
+differ. Each gains a member in its silence vocabulary, spelled
+`different-audiences` as the other five spell it, mapped to `two-audiences` in
+`silences.ts`, which already publishes the condition.
+
+**One thing to settle when it is taken.** A library window is a set of readings
+rather than one reading, so *what audience is this window of* has two possible
+answers: the audience every reading in it names, or nothing where they disagree.
+The second is the honest one and it is already built — `audiencesIn` answers
+exactly that question over rows, and a window naming two is the `audiences-mixed`
+state `pageReadingOf` reports. A library comparison should almost certainly
+refuse a **mixed** window before it refuses a mismatched pair, which is a
+sentence the page-scale comparisons get for free because each side is one
+reading.
+
+---
+## 2026-10-18 — a region map read whole over two audiences names none, so a readership comparison across two forms is unprovable rather than refused
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/region.ts`)
+· **Status:** open — **a limit written down, nothing superseded and nothing
+asked of anybody**; it is the one honest gap 0294 leaves and it is better
+published than guessed at
+
+0294 gives `RegionReading` an `audienceId` so that `readershipChangeOf` can
+refuse a pair of two populations. `regionReadingFor` names it, because it picked
+one audience's rows. **`regionReadingOf` leaves it `null`, and that is
+deliberate**: it groups whatever it is handed, across revisions by design — *ten
+views of one revision and twenty of the next are thirty views of one country* —
+and a deployment's whole window is a readership rather than one form's.
+
+The consequence is exact and worth stating. A caller that builds **both** sides
+with `regionReadingOf` over a window holding two audiences gets two maps that
+each name no audience, so the pair is unprovable and is compared. Both maps are
+sums over two populations, and the comparison of them is a comparison of two
+mixes rather than of two readerships.
+
+**Why it is not fixed by refusing.** The same call is the correct one for the
+question it was built for — *where are this deployment's readers* — and refusing
+a map with two audiences in it would withhold that. `pageReadingOf` has an
+`audiences-mixed` fault for the same shape because a *page* reading of two forms
+is wrong in a way a deployment-wide region map is not: summing two forms'
+countries is one population of people, while summing two forms' node counters is
+one number about two pages.
+
+**What would close it, if anybody wants it closed.** `regionReadingOf` could
+report the audiences it grouped across — `audiencesIn` over the rows, the same
+three-valued answer `PageReading.audiences` publishes — without refusing
+anything and without changing what it sums. A readership comparison could then
+say *both of these maps are sums over two audiences* instead of being silent
+about it, which is the half of this that is a measurement rather than a fault.
+It is a field and a sentence, not a decision.
+
+---
+## 2026-10-18 — every comparison now carries the two audiences it was taken across, and no screen reads it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one field and one refusal on six readings**, filed the way 0284 filed the
+dimension itself
+
+0294 puts `audiences: { was, now }` on six comparisons — where reading stops,
+the words a change put in front of readers, whether readers had time for it,
+what readers did, what a change did to the funnel, and who the readers were. It
+is carried under a silence and under none.
+
+**Three states, and a surface that draws two of them is hiding the third.**
+
+- **Both sides name one audience, the same one.** The ordinary comparison, and
+  the dimension is worth printing beside it: *the pro form of this page, last
+  week against this week*.
+- **Both name an audience and the two differ.** Refused. `silence` is
+  `different-audiences` (or `comparability` is, on the readership comparison),
+  every figure is absent and the census is withheld too. **The remedy is a line
+  of the surface's own code**: split the window with `byAudience` and compare
+  each form with itself. The row should say that rather than reading as a fault
+  in the data.
+- **One or both name none.** Compared, and not provably of one population. Every
+  figure stands and the honest caption is *compared across a window that named
+  no audience* — which is every window written before the column existed and
+  every comparison spanning the day a deployment upgraded. A screen that prints
+  nothing here is a screen that cannot distinguish it from the first state.
+
+Nothing here needs a new call: the field is on the object the screen already
+holds.
+
+---
+## 2026-10-18 — a generated signature is truncated before its comments are cleaned, so a long union fails the decision-number check on a citation nobody added
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **it fired on
+this branch and was worked around in the source**, which is the wrong place for
+the fix and leaves the next lane to hit it doing the same thing
+
+`readerFacingSignature` lifts a decision-record citation out of every comment
+inside a published signature, and drops a comment whole where the number is part
+of its grammar. It is a good rule and it works. **It runs after the truncation,
+and the truncation does not know what a comment is.**
+
+`extractOf` cuts a signature at `SIGNATURE_CAP` (6,000 characters of the
+*uncleaned* text) and appends an ellipsis. A union type whose members carry doc
+comments is cut wherever that lands — frequently in the middle of a comment,
+which leaves an opening `/**` with no `*/`. `COMMENT_IN_CODE` then does not
+match it, no citation is lifted out of it, and `DECISION_NUMBER` finds the
+number in the fragment.
+
+**What it looked like from here.** Adding one member to `SilenceCondition` took
+its source past 6,000 characters for the first time. `pnpm verify` failed with
+
+> a decision number reached the page: expected [ "SilenceCondition's signature" ]
+> to deeply equal []
+
+and the number it found was `0212`, in the comment on `no-reach-reported` —
+a member this branch did not touch, written by another lane, correctly cited in
+parentheses, and clean in every generation before this one. The failing
+assertion names the type and not the member, so the first minute of reading it
+is spent looking for a citation that was never added.
+
+**What it is worth fixing rather than working around.** Two properties of the
+check are lost at the cap and both of them matter more as these unions grow:
+
+- a parenthetical citation inside a cut comment is **not** lifted, so it fails a
+  rule it actually complies with;
+- a comment whose grammar needs the number is **not** dropped, so the one case
+  the rule exists to withhold reaches the page as a fragment instead.
+
+**The remedy is an ordering, not a new rule.** Clean the full signature first
+and truncate the cleaned text, or — if the cap must apply to the source — drop a
+trailing unterminated comment before the ellipsis. Either keeps the check
+measuring what it was written to measure.
+
+**What this branch did instead, and why it is a workaround.** The new member's
+doc comment was shortened until the declaration fit under the cap again, which
+is a change to `src/signals/silences.ts` made for a reason that has nothing to do
+with that file. The argument it carried is in 0294 and is not lost, but **the
+next member added to `SilenceCondition` will put it back over**, and the two
+longest published signatures in the subsystem are now close to the line:
+`SilenceCondition` at 5,732 characters cleaned and `CopyChange` at 5,550, both
+against a 6,000-character cap applied to the uncleaned text. Whoever hits it next
+will read the same misleading failure.
+
+### It fired again the same day, and this time there was no fix in the source at all
+
+**Filed by:** `Loom signals`, 18 October, evening run
+
+The prediction above was right and the timing was eight hours. §39 added doc
+comments to four published result types and **two of them failed**:
+`LibraryCopyChange` and `LibraryWordReachChange`, on `(0147)` and `(0266)` — two
+citations in two comments written by earlier runs, correctly parenthesised,
+clean in every generation before this one.
+
+**The new fact is that this time the source could not be fixed.** The workaround
+above worked because one declaration could be brought back under the cap. These
+cannot be: the four declarations are **8,559, 7,219, 6,814 and 6,382 characters**
+against a 6,000 cap, and three of the four were already over it before this
+branch. Shortening a comment does not bring them under — **it moves the cut**,
+and whether the new cut lands inside a comment holding a number is luck. On this
+branch the long version lost that coin flip twice and the short version won it
+four times, and nothing about either version is more correct than the other.
+
+**So the number of truncated published signatures is the size of the exposure,
+and it is fourteen**, across at least six lanes: `LIBRARY_CLASS` and
+`PrimitiveDefinition` (both at the cap exactly), `RenderDiagnostic`,
+`LoomRenderContext`, `RegistryAudit`, `PairReach`, `KindAction`,
+`KindReachChange`, `CopyReading`, `ChangeAnalysis` and the four library
+comparisons. Every one of them fails the decision-number check the day somebody
+adds or removes enough text to shift its cut into a cited comment, and the
+failure names the type rather than the member, so the first minutes of reading
+it are spent looking for a citation nobody added.
+
+**The remedy is unchanged and is three lines in `extract.ts`.** `extractSymbol`
+calls `readerFacingSignature(truncated ? full.slice(0, CAP) + "…" : full)`. Clean
+first and truncate the cleaned text, or keep the cap on the source and drop a
+trailing unterminated comment before the ellipsis. The second keeps `truncated`
+meaning exactly what it means today.
+
+**This lane did not take it**, because `extract.ts` is `Loom docs`' file and the
+brief files cross-lane work rather than doing it. What §39 did instead is the
+same workaround a second time — the member doc comments were written as
+one-liners with the argument in 0295 — which is better reference prose and is
+**not a fix**. The next lane to touch any of those fourteen types gets the coin
+flip.
+## 2026-10-17 — four comparisons paired a page by its tree, in two spellings of one rule, and the key that would have fixed it was private in a fifth
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-37-a-comparison-pairs-pages-by-form`** — found while
+reading the comparison layer for the open `change.ts` entry below, fixed as 0293
+in the same run, and written down because it is the **same defect** the morning
+run fixed in one module and because the shape of how it survived is the useful
+half
+
+0290 gave every reading of these counters the audience dimension and published
+`readingKeyOf` on the argument that five spellings of *what makes two readings
+one page* are five places to drift. Clause 7 of it, added when #659 merged mid
+branch, found the identical defect in a **comparison** and fixed it with
+`formKeyOf` — *a page in one of its forms, with no revision in it* — as a
+`const` in `deployment-change.ts`.
+
+**Four other comparisons had the same defect and nothing to import.** The
+library comparisons of places (0266), words (0270), readers (0279) and
+reader-words (0280) pair each page in the earlier window with its counterpart in
+the later one, and `pairedWindowOf` keyed that pairing by `TreeId`. Two forms of
+a page share a tree, so:
+
+- **two forms at one revision** — the second was `duplicated`, dropped as the
+  first one handed in twice, which 0158 makes permanent and which `health.ts`
+  reports with **`caller`** as the remedy, on a deployment doing exactly what
+  0263 built;
+- **two forms at two revisions** — the tree went into `ambiguous` and **both**
+  forms left every row, every total and every ranking;
+- **a kind's `pages`** is a set, so two forms counted as one page, understating
+  the places a kind stands by exactly the pages a deployment serves twice;
+- **`LibrarySide.scaled`** keyed each paired page's door by its tree, so
+  whichever form the map held scaled the **other** form's readers — and
+  `pageViewsFor` scopes a door row to the reading's own audience (0290), so the
+  two doors were real and one of them was being used for both.
+
+**And `library-copy-change.ts` carried a second hand-written copy of the rule**,
+150 lines from an export whose own doc comment says *"a second hand-written copy
+of it would be two spellings of one rule that agree today."* There was one, and
+it was wrong in the same two ways. It is deleted; that module imports the
+published rule, as its three siblings do.
+
+**The lesson, which is the morning entry's lesson arriving a second time.** That
+entry said *a published key stops two places disagreeing only once both places
+import it*. The case it had in mind was a branch open across another's merge.
+This case is narrower and more avoidable: the key was published **to one
+module**. A `const` at the top of the file that needs it is the cheapest
+possible thing to write and the most expensive to find, because nothing about it
+is wrong — `deployment-change.ts`'s copy was correct. What was wrong is that
+four other modules could not reach it, and the grep that would have shown so is
+`grep -c formKeyOf src/signals/*.ts` returning 1.
+
+**So the rule this lane should hold itself to:** a key that decides what counts
+as one of something goes in `audiences.ts` (or the module whose record owns the
+concept) the first time it is written, not the second time it is needed. `0293`
+publishes both keys with the difference between them written down, which is the
+form that argument should take from here.
+
+---
+## 2026-10-17 — the comparison layer still does not check that its two sides are of one form, and the loud half and the quiet half want one decision
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/change.ts`, `copy-change.ts`, `pace-change.ts`,
+`action-change.ts`, `funnel-change.ts`, and the four library comparisons) ·
+**Extends** the 17 October entry *a change comparison whose two sides name
+different audiences is a cross-population comparison wearing a before-and-after's
+clothes*, which stays open · **Status:** open — **nothing is broken today**; the
+shape is now settled by having read all nine, and three questions in it are
+answerable without writing code
+
+0293 made each comparison pair the **pages inside one window** by form. It did
+not make any comparison check that its **two windows** are of one form, and
+reading all nine functions for it settled three things the earlier entry left
+open.
+
+**It is nine functions and not eight, and they take their pairs identically.**
+`readingChangeOf`, `copyChangeOf`, `paceChangeOf`, `actionChangeOf` and the four
+library comparisons take two `PageReading`s or two windows of them;
+`funnelChangeOf` takes two `FunnelReach`es, each of which was built from a
+reading and carries its tree and revision. Every one of them guards
+`was.treeId !== now.treeId` and returns a `different-trees` silence, and **none
+of them looks at the audience**. So it is one guard beside an existing guard, in
+nine places, and a member in nine published silence vocabularies plus a
+condition in `silences.ts` (0240).
+
+**The loud half and the quiet half are not the same severity, and that is an
+argument for doing them together rather than for doing one.** A library
+comparison handed `aud_pro`'s window and `aud_free`'s finds no counterpart for
+any page: every page reads gained, every page reads lost, `pages` is nought and
+every kind row is `unpaired`. Wrong, and loud enough that somebody would ask. A
+page's own `readingChangeOf` handed one form's earlier window and another form's
+later one produces every stop, every share and every `improvement`, with no
+`null` and no silence anywhere on it, labelled as what a change did. That one is
+the 0284 collapse at the comparison layer — *a number that looks right forever*.
+Fixing the quiet one and not the loud one leaves two spellings of one guard,
+which is what 0293 is about.
+
+**The `null` side is a third state and probably wants a field rather than a
+refusal.** `PageReading.audienceId` is `null` both for a window whose rows never
+carried the column — every window written before 0284, and every one a test
+builds by hand — and for a window naming two with none asked for. Comparing
+`null` with `aud_pro` is therefore unprovable either way: a deployment serving
+one form across the 0284 migration is an honest before-and-after, and a
+deployment that began serving two forms is a cross-population comparison, and
+nothing in the two readings tells them apart. Refusing both would withhold every
+comparison that spans the upgrade; allowing both silently is the collapse.
+
+**The shape, if it is taken:** refuse only where the two sides **prove** two
+populations — both name an audience and the two differ — which is 0290's
+treatment of its third state applied here, and carry `audiences: { was, now }`
+on every comparison so a surface can see an unprovable pair for itself. One
+helper published from `audiences.ts` beside the two keys, imported nine times,
+rather than nine spellings of `was.audienceId !== now.audienceId`.
+
+---
+## 2026-10-18 — a library comparison counted a second form begun as a page published, and three of the four documented its forms as trees
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed on filing by `signals-39-a-library-gained-a-form-not-a-page`** (0295) —
+written down because it is what closing the entry above actually found, and the
+entry above was looking for something else
+
+The four library comparisons were opened to take 0294's `different-audiences`
+guard. The guard does not belong there (see above). **What was there instead is
+a number a deployment would read and act on.**
+
+After 0293 all four pair their pages by **form** — a tree and an audience. So
+`pagesGained`, documented in three of the four as *pages read in the later window
+only, which is trees and not revisions*, has counted **forms** since the day that
+landed. A deployment that began serving `aud_pro` on five pages it already
+served reads:
+
+> your library gained 5 pages
+
+It published nothing. The same figure also means *five pages were published*, and
+nothing in the output told them apart — while the fact that separates them, the
+tree behind each form, was already on both sides of the comparison.
+
+**What shipped:** `formsGained` and `formsLost` on all four, each the subset of
+the gained or lost forms whose page the other window already held, so
+`pagesGained − formsGained` is pages published and `pagesLost − formsLost` is
+pages that left the library. Plus `audiences` as a set per side, and the three
+stale doc comments corrected. Nothing was collected: `audiencesOf` and `pagesOf`
+are published from `audiences.ts` beside the two key rules, and both read the
+forms the pairing already built.
+
+**The ambiguous forms are counted as pages the window held**, deliberately: the
+question is what the deployment served and not what could be compared, and a form
+excluded as ambiguous is named in `ambiguous` already. It is a clause of 0295
+rather than a loose end.
+
+---
+## 2026-10-18 — a place gained in a second form is counted as a place gained, and that is a decision rather than an oversight
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-change.ts` and the three beside it) · **Status:** open —
+**a limit written down, nothing broken and nothing asked of anybody**; the
+symmetrical half of 0295 clause 4, left undone on purpose
+
+0295 decomposes `pagesGained` into pages published and forms begun. It does not
+decompose `gained` and `lost`, which are counts of **placements**, and the two
+are not obviously different.
+
+**Why it was left.** A place in a second form is a place a reader can really
+reach, and it really was not in the other window — so `gained` is true as it
+stands in a way `pagesGained` was not. The figure a person misreads is the one
+they read as *documents I own*, and that is the page count. Decomposing the
+placements would be four more counters on four published types to separate
+places that are all genuinely reachable.
+
+**What would close it, if a surface finds it needs it.** The fact is derivable
+from exactly the two sets 0295 already publishes — `pagesHeld` on each side —
+with no new input: a placement is *in a form begun* if its form is in
+`pagesGained`'s set and its tree was already held. It is counters and tests, not
+a decision.
+
+**The honest reason to leave it open rather than call it settled:** nobody has
+yet drawn either number on a screen, so which of the two confusions actually
+bites is not known. The page one was provable from the sentence a card would
+print; this one is not.
+
+---
+## 2026-10-18 — a library comparison now says how much of its growth was a second form, and no screen reads it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**two numbers and one set on four readings**, filed the way 0294's own surface
+gap was filed
+
+0295 puts `formsGained`, `formsLost` and `audiences: { was, now }` on all four
+library comparisons. A card that prints `pagesGained` alone now has a strictly
+better sentence available, and printing both operands without the subtraction
+would be worse than printing one.
+
+**The three sentences, and only the first is the one that was there before.**
+
+- **`formsGained` is nought.** *You published 5 pages.* The ordinary case, and
+  what every deployment serving one form of everything always sees.
+- **`formsGained` equals `pagesGained`.** *5 pages began being served to a
+  second audience. You published none.* A deployment taking up 0263 across part
+  of its library, which before this read as growth it did not have.
+- **Neither.** *You published 3 pages, and 2 more began being served to a second
+  audience.* One subtraction, two facts, and a card showing one number can show
+  neither.
+
+`audiences` is the dimension beside it: `[]` is a window that named none — every
+one written before 0284 — and two members is a deployment serving two forms.
+**Nothing here is refused**, which is the difference from the gap filed against
+0294: there is no *different-audiences* state to draw on these four, and a
+surface that drew one would be inventing a fault.
+
+Nothing needs a new call: all three are on the object the screen already holds.
+

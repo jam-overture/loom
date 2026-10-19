@@ -706,7 +706,9 @@ const under = (directory: string): readonly string[] =>
 
 describe("D", () => {
   it("asks what the repository's citations can be held to", () => {
-    const sources = ["decisions", "src", "tools"].flatMap((directory) => under(join(ROOT, directory)))
+    const sources = ["apps", "decisions", "src", "tools"].flatMap((directory) =>
+      under(join(ROOT, directory))
+    )
 
     const all: readonly Citation[] = sources.flatMap((path) => [
       ...citationsIn(proseIn(path, readFileSync(path, "utf8"))),
@@ -754,6 +756,21 @@ example of the decision the rest of the lesson is about.
 Note also the exclusion in `under`: this file is skipped, because exercise C put
 a citation of `0300` into it on purpose. A check that reads the file it is
 written in is a check with a fixture in its population.
+
+**`apps` joined the three directories on 15 October**, and what it cost is the
+better half of the story. The first record to govern only the portal — 0285,
+accounts and roles — made `records nothing cites` read `1`, because the record
+*was* cited, in `apps/loom`, where this census was not looking. A verdict about
+three directories had been read as a verdict about the repository.
+
+Widening it then turned `citations the checks refuse` from `0` to `5`: four
+links to records that had since been renamed, and one doc comment illustrating
+the shape of an index row with `[0001](0001-slug.md)` — a record that has never
+existed. Four were real dead links of exactly the kind
+[#637](https://github.com/jam-overture/loom/pull/637) was opened to fix; the
+fifth was a fixture in the population, like this file's own `0300`, and is now
+spelled `NNNN`. Both lines read `0` again, over a population that is now the
+one the sentence claims.
 
 ### Exercise E — a convention followed ten times out of eleven
 

@@ -5,11 +5,13 @@ import {
   READING_LINE_PX,
   sectionBeingRead,
   sectionsIn,
+  sectionsSummary,
   SECTION_SCOPE_SELECTOR,
   SECTION_SELECTOR,
   type HeadingFound,
 } from "./on-this-page"
 import { ARTICLE_ID } from "./chrome"
+import { remPx, rootProperties } from "./chrome-css"
 import { readDocsStylesheet } from "./prose-barrier"
 
 const heading = (level: number, id: string, text: string): HeadingFound => ({ level, id, text })
@@ -118,33 +120,51 @@ describe("the bottom of the page", () => {
  * repository, held against that thing rather than against a comment about it.
  *
  * `prose-barrier.ts` established that a claim about the stylesheet can be a
- * test; this is the same move for the one declaration the mark depends on. A
- * run that changes the header's height, and the heading's scroll margin with
- * it, moves where a pressed row lands — and if the reading line does not move
- * too, the symptom is that pressing a row marks the section *above* the one you
- * asked for. Nothing else in this repository would notice.
+ * test; this is the same move for the declaration the mark depends on. A run
+ * that changes the chrome's height moves where a pressed row lands — and if
+ * the reading line does not move too, the symptom is that pressing a row marks
+ * the section *above* the one you asked for. Nothing else in this repository
+ * would notice.
+ *
+ * **It said that, and it did not notice**, because until 16 October it read one
+ * of the two declarations that decide the landing. `html`'s
+ * `scroll-padding-top` insets the scrollport and the heading's
+ * `scroll-margin-top` grows the target, and the two add: a press lands a
+ * heading 160 pixels down, not 80. The line was 120, which is above one number
+ * and below the sum, so the defect this file describes was live on every page
+ * while three tests passed. `pnpm shoot`' `measure` found it, printing
+ * `h2#the-bar-above-your-page x 20 y 160` on a press of a contents row.
+ *
+ * **Which is why the landing is now declared rather than emergent.** The two
+ * declarations are still two, and the browser still adds them, but
+ * `globals.css` writes the heading's margin as *the landing minus the inset* —
+ * so there is one number to read here, and no sum to get wrong. The chain that
+ * makes that true is held in `chrome.test.ts`, which also retires the figure
+ * this file used to carry: the chrome was 102 pixels and the only thing that
+ * knew so was a `102` typed into the test below, read off a screenshot. The
+ * inset is arithmetic over the bands' own heights now, so there is nothing
+ * left here to hold it to.
  */
-describe("the reading line and the heading's scroll margin", () => {
-  const REM_PX = 16
-  const SCROLL_MARGIN = /scroll-margin-top:\s*([\d.]+)rem/g
+describe("the reading line and where a press lands a heading", () => {
+  /** Where a press of a contents row puts a heading, as the stylesheet declares it. */
+  const pressLandsAtPx = (): number => {
+    const declared = rootProperties(readDocsStylesheet()).get("--press-landing")
 
-  const headingScrollMarginPx = (): number => {
-    const found = [...readDocsStylesheet().matchAll(SCROLL_MARGIN)]
+    if (declared === undefined) throw new Error("globals.css declares no --press-landing for a press to land at")
 
-    /* One declaration, so the number below is not read off a rule for something
-       else. A second one would make this test quietly pick whichever came
-       first. */
-    expect(found, "globals.css has one heading scroll margin").toHaveLength(1)
-
-    return Number(found[0]?.[1]) * REM_PX
+    return remPx(declared)
   }
 
+  it("is the landing the stylesheet declares, which is the figure a shot measured", () => {
+    expect(pressLandsAtPx()).toBe(160)
+  })
+
   it("puts the line below where a press of a row lands the heading", () => {
-    expect(READING_LINE_PX).toBeGreaterThan(headingScrollMarginPx())
+    expect(READING_LINE_PX).toBeGreaterThan(pressLandsAtPx())
   })
 
   it("leaves slack between the two, rather than sitting on the boundary", () => {
-    expect(READING_LINE_PX - headingScrollMarginPx()).toBeGreaterThanOrEqual(16)
+    expect(READING_LINE_PX - pressLandsAtPx()).toBeGreaterThanOrEqual(16)
   })
 
   it("keeps the line near the top of a window rather than halfway down it", () => {
@@ -163,5 +183,25 @@ describe("the selectors", () => {
      browser cannot scroll to. */
   it("ask for an id on both levels", () => {
     expect(SECTION_SELECTOR).toBe("h2[id], h3[id]")
+  })
+})
+
+/**
+ * The words on the closed disclosure, which is the only thing a reader on a
+ * phone has to go on before pressing it.
+ */
+describe("how many sections a page has, in words", () => {
+  it("says the number and the noun, which together are a reason to press it", () => {
+    expect(sectionsSummary(14)).toBe("14 sections")
+  })
+
+  /* The pages with one `##` in them are real — several *Getting started* pages
+     are a single section — so the plural is a case and not a hypothetical. */
+  it("says it in the singular for the pages that have one section", () => {
+    expect(sectionsSummary(1)).toBe("1 section")
+  })
+
+  it("is plural for none, which is a phrase no reader sees because the line does not render", () => {
+    expect(sectionsSummary(0)).toBe("0 sections")
   })
 })

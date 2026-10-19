@@ -2,7 +2,7 @@ import { applyPatch } from "../patch.js"
 import { err, ok, type Result } from "../result.js"
 
 import { projectSchema, type Project, type ProjectId } from "./project.js"
-import type { ProjectStore, ProjectStoreError } from "./store.js"
+import { matchesListing, type Listing, type ProjectStore, type ProjectStoreError } from "./store.js"
 
 /**
  * A `ProjectStore` in a `Map`, for a test and for a deployment with no database.
@@ -40,9 +40,11 @@ export const memoryProjectStore = (seed: readonly Project[] = []): ProjectStore 
 
     get: async (projectId) => read(projectId),
 
-    list: async () =>
+    list: async (listing?: Listing) =>
       ok(
-        [...projects.values()].sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+        [...projects.values()]
+          .filter((project) => matchesListing(project.closedAt, listing))
+          .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
       ),
 
     rename: async (projectId, to) => {
@@ -68,6 +70,32 @@ export const memoryProjectStore = (seed: readonly Project[] = []): ProjectStore 
 
       projects.set(projectId, next.data)
       return ok(next.data)
+    },
+
+    /**
+     * Idempotent, and the instant does not move (0289): pressing the button
+     * twice must not change the answer to *when did this stop*.
+     */
+    close: async (projectId, at) => {
+      const found = read(projectId)
+      if (!found.ok) return found
+      if (found.value.closedAt !== undefined) return ok(found.value)
+
+      const next = { ...found.value, closedAt: at }
+      projects.set(projectId, next)
+
+      return ok(next)
+    },
+
+    reopen: async (projectId) => {
+      const found = read(projectId)
+      if (!found.ok) return found
+
+      /** Spelled as a removal rather than `closedAt: undefined`, which a strict parse refuses. */
+      const { closedAt: _was, ...open } = found.value
+      projects.set(projectId, open)
+
+      return ok(open)
     },
   }
 }

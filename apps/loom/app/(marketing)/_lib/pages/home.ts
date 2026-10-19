@@ -18,12 +18,14 @@ import {
   siteReadingBand,
   type ChromeContext,
 } from "../chrome"
-import { FACTS, INSTALL_COMMAND } from "../copy"
+import { FACTS, INSTALL_COMMAND, RUNTIME_PACKAGE, STARTER_PACKAGE } from "../copy"
+import { INSTALLATION } from "../docs-pages"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import {
   action,
   code,
+  codeSpan,
   heading,
   inlineLink,
   prose,
@@ -768,12 +770,24 @@ const questions = (ids: IdFactory): LoomNode =>
  * it was keeping the prop for — the only line on the front door somebody is
  * meant to type.
  *
- * It is paid for at the small end and the price is known: measured at 390, the
- * panel shows 348 of the line's 530px, so 182px of it is behind a horizontal
- * scroll with a track under it saying so. What makes that the right trade here
- * rather than the one the September finding was about is the *Copy* button —
- * the reader's way to the whole line is the control beside it rather than the
- * gesture, and what they take is the whole line whatever is on screen.
+ * **It is paid for at the small end, and this paragraph had the price wrong in
+ * both of the ways it could be.** It said the panel shows 348 of the line's
+ * 530px *"with a track under it saying so."* Re-measured on a production build
+ * at 390 on 18 October: the panel is **361** and the line is **504**, so 143px
+ * are off the end — and there is no track. `loom.code` sets `overflow-x: auto`,
+ * which on a touch viewport is an overlay scrollbar that appears while a finger
+ * is moving and is absent at rest. So the picture a phone reader actually gets
+ * is `npm install @jam-overture/loom @jam-overtu` and nothing to say the line
+ * continues.
+ *
+ * The *Copy* button is still the answer to **having** the line — it is beside
+ * the panel, it is on screen, and what it hands over is the whole command for
+ * every reader. It was never the answer to **reading** it, and this paragraph
+ * had been treating the two as one thing since 11 October.
+ *
+ * What this lane can do about the reading is below, in the paragraph: the two
+ * package names are now in the prose, where they wrap. The missing affordance
+ * is `loom.code`'s and is filed.
  *
  * Nothing was added to the page to count the press that matters. `loom.code`
  * draws its own copy control, so the type joining `CONTROL_TYPES` in
@@ -785,9 +799,29 @@ const install = (ids: IdFactory): LoomNode =>
     { width: "readable", eyebrow: BAND.install },
     "Put it in a project you already have",
     [
-      prose(
+      /**
+       * The two names, in the sentence rather than only in the command.
+       *
+       * This read *one package is Loom itself, the other is the set of N
+       * components this page is drawn from* — a description of a line, which
+       * works only for a reader who can see the line. On a phone the panel
+       * below cuts the command at `@jam-overtu`, so *the other* named nothing
+       * and the front door asked a stranger to install a package whose name it
+       * never showed them.
+       *
+       * `loom.code-span` wraps and keeps its tint across the break, so a name
+       * too wide for a 390 viewport breaks at its own slash instead of going
+       * off the end the way the panel's does.
+       */
+      proseParts(
         ids,
-        `There is nothing to sign up for. One package is Loom itself. The other is the set of ${FACTS.primitives} components this page is drawn from.`,
+        [
+          "There is nothing to sign up for. ",
+          codeSpan(ids, RUNTIME_PACKAGE),
+          " is Loom itself. ",
+          codeSpan(ids, STARTER_PACKAGE),
+          ` is the set of ${FACTS.primitives} components this page is drawn from.`,
+        ],
         { tone: "muted", align: "center", measured: true }
       ),
       code(ids, INSTALL_COMMAND, {
@@ -797,7 +831,24 @@ const install = (ids: IdFactory): LoomNode =>
         wrap: false,
       }),
       stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
-        action(ids, "Follow the install guide", surfacePath(DOCS), {
+        /**
+         * The install guide, and until this run it was not where this went.
+         *
+         * `surfacePath(DOCS)` is `/docs`, which is a redirect to the first page
+         * of the documentation in reading order — *Introduction*. So a reader
+         * who had just been shown `pnpm add` and pressed the button offering
+         * the longer version of it landed three pages above the command, on a
+         * page about what Loom is. Nothing was broken and nothing was red: the
+         * link worked, the page it opened was good, and it was not the page the
+         * button named.
+         *
+         * `INSTALLATION` is that page, and `docs-pages.test.ts` holds it to
+         * carrying the command this band prints. The front of the documentation
+         * is still offered twice on this page — the card in the band of four and
+         * the footer's map — so nothing was taken away from a reader who wants
+         * to start at the beginning.
+         */
+        action(ids, "Follow the install guide", INSTALLATION.path, {
           variant: "primary",
           scale: "large",
         }),

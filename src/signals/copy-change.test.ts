@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
+import type { AudienceId } from "../audience/audience.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -12,6 +13,8 @@ import {
   describePassageMovement,
   pageReadingOf,
   PASSAGE_MOVEMENTS,
+  spokenFor,
+  spokenForOnBothSides,
   type ComparedPassage,
   type CopyChange,
   type PartDeclarations,
@@ -517,6 +520,30 @@ describe("copyChangeOf", () => {
       expect(change.typical?.change).toBe(gains)
     })
 
+    /**
+     * The predicate is published so that a reading of a library asks this
+     * question with the same function rather than with its own spelling of it
+     * (0287). The claim is that reading the movement and reading the two
+     * standings are one rule: `movementOf` derives the movement from
+     * `spokenFor` itself, so they cannot drift, and this is the case that
+     * would have caught it if they could.
+     */
+    it("says a passage is spoken for exactly where both sides' standings are", () => {
+      for (const change of [changeOf(WAS, NOW), changeOf(WAS_SPOKEN, NOW_HALF_SILENT)]) {
+        for (const one of change.compared) {
+          expect(spokenForOnBothSides(one)).toBe(
+            spokenFor(one.was.standing) && spokenFor(one.now.standing)
+          )
+        }
+      }
+
+      const half = changeOf(WAS_SPOKEN, NOW_HALF_SILENT)
+      const intro = passage(half, "intro")
+
+      expect(intro).toBeDefined()
+      expect(intro === undefined ? true : spokenForOnBothSides(intro)).toBe(false)
+    })
+
     it("counts each carried passage in exactly one movement, by words and by passage", () => {
       const change = changeOf(WAS, NOW)
 
@@ -831,7 +858,7 @@ describe("copyChangeOf", () => {
 
   describe("the closed sets", () => {
     it("describes every silence", () => {
-      expect(COPY_CHANGE_SILENCES).toHaveLength(7)
+      expect(COPY_CHANGE_SILENCES).toHaveLength(8)
       for (const silence of COPY_CHANGE_SILENCES) {
         expect(describeCopyChangeSilence(silence)).toMatch(/\S/)
       }
@@ -884,5 +911,63 @@ describe("copyChangeOf", () => {
 
       expect([...PASSAGE_MOVEMENTS].every((movement) => seen.has(movement))).toBe(true)
     })
+  })
+})
+
+/**
+ * A comparison is of one readership, and two forms of one page are two of them.
+ *
+ * The counters carry the column the store writes (0284), so each reading names
+ * the one audience in its window without a caller saying which.
+ */
+describe("copyChangeOf across two audiences", () => {
+  const formOf = (
+    side: { tree: LoomTree; counters: readonly ReaderTally[] },
+    audience: AudienceId
+  ) =>
+    pageReadingOf(
+      side.tree,
+      side.counters.map((counter) => ({ ...counter, audienceId: audience })),
+      BODY_IS_COPY
+    )
+
+  /**
+   * A page is one base tree plus the deltas an audience earns, so the words the
+   * other form says would have been counted as words this change wrote.
+   */
+  it("refuses a pair of two audiences, census included", () => {
+    const change = copyChangeOf(formOf(WAS, SKIERS), formOf(NOW, RIDERS))
+
+    expect(change.silence).toBe("different-audiences")
+    expect(change.compared).toEqual([])
+    expect(change.added).toEqual([])
+    expect(change.removed).toEqual([])
+    expect(change.typical).toBeNull()
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+  })
+
+  it("compares one audience's two windows exactly as it always did", () => {
+    const scoped = copyChangeOf(formOf(WAS, SKIERS), formOf(NOW, SKIERS))
+    const whole = changeOf(WAS, NOW)
+
+    expect(scoped.silence).toBe(whole.silence)
+    expect(scoped.words).toEqual(whole.words)
+    expect(scoped.compared).toHaveLength(whole.compared.length)
+  })
+
+  /** A window written before the column existed names none, so this is unprovable. */
+  it("compares a pair it cannot prove and names what it compared across", () => {
+    const change = copyChangeOf(pageReadingOf(WAS.tree, WAS.counters, BODY_IS_COPY), formOf(NOW, SKIERS))
+
+    expect(change.silence).not.toBe("different-audiences")
+    expect(change.audiences).toEqual({ was: null, now: SKIERS })
+  })
+
+  it("says two pages before it says two audiences", () => {
+    const other: LoomTree = { ...pageOf(2, THREE_BANDS), treeId: OTHER_TREE }
+    const change = copyChangeOf(formOf(WAS, SKIERS), pageReadingOf(other, [], BODY_IS_COPY, RIDERS))
+
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+    expect(change.silence).toBe("different-trees")
   })
 })

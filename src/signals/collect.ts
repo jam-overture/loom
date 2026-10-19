@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import type { AudienceId } from "../audience/audience.js"
 import { clampLimit } from "../paging.js"
 import { systemClock, type Clock } from "../runtime/events.js"
 
@@ -279,17 +280,57 @@ export const collectReaderSignals = async (
   const plan = collectionPlanOf(scanned.batches, horizon)
   if (plan.before === null) return { outcome: "nothing-ripe", waiting: plan.waiting }
 
-  const rollup = rollUp(plan.ripe, { ...(request.pairs ? { pairs: request.pairs } : {}) })
-  const summary: CollectionSummary = {
-    counted: plan.ripe.length,
-    tallies: rollup.tallies.length,
-    funnels: rollup.funnels.length,
-    views: rollup.views,
-    uncorrelated: rollup.uncorrelated,
+  /**
+   * **One fold per audience, not one per window** (0284).
+   *
+   * A window holds whatever arrived in it, and once a deployment serves two
+   * forms of a page that is two audiences' batches interleaved. Folding them
+   * together would add two populations into one counter — the failure the
+   * record behind this exists to prevent, and the one that cannot be undone
+   * afterwards, because the rows that would say which form a reader saw are the
+   * rows being summed.
+   *
+   * So the ripe batches are grouped by the audience they were filed under and
+   * each group is folded and applied on its own. `rollUp` stays audience-blind:
+   * it is handed one audience's batches and knows nothing about the dimension,
+   * which is what keeps the fold a pure function of a window.
+   *
+   * The summary adds up across audiences, because it describes the run rather
+   * than any one population.
+   */
+  const byAudience = new Map<AudienceId, ReceivedBatch[]>()
+  for (const batch of plan.ripe) {
+    const group = byAudience.get(batch.audienceId)
+    if (group === undefined) byAudience.set(batch.audienceId, [batch])
+    else group.push(batch)
   }
 
-  const applied = await store.apply(rollup, now)
-  if (!applied.ok) return { outcome: "unavailable", error: applied.error }
+  const folded = [...byAudience].map(([audience, batches]) => ({
+    audience,
+    rollup: rollUp(batches, { ...(request.pairs ? { pairs: request.pairs } : {}) }),
+  }))
+
+  const summary: CollectionSummary = {
+    counted: plan.ripe.length,
+    tallies: folded.reduce((total, { rollup }) => total + rollup.tallies.length, 0),
+    funnels: folded.reduce((total, { rollup }) => total + rollup.funnels.length, 0),
+    views: folded.reduce((total, { rollup }) => total + rollup.views, 0),
+    uncorrelated: folded.reduce((total, { rollup }) => total + rollup.uncorrelated, 0),
+  }
+
+  /**
+   * Applied in sequence rather than together, because each call is atomic over
+   * its own audience's counters and the store's contract says nothing about two
+   * calls. A failure part-way through leaves the audiences already applied
+   * counted and the buffer un-forgotten, which is the outcome this function
+   * already has a name for: the window is re-read and re-folded next run, and
+   * the counters it already moved are the bounded over-count that comes with
+   * adding distinct view counts across windows (0147).
+   */
+  for (const { audience, rollup } of folded) {
+    const applied = await store.apply(rollup, now, audience)
+    if (!applied.ok) return { outcome: "unavailable", error: applied.error }
+  }
 
   const forgotten = await journal.forget({ before: plan.before })
   if (!forgotten.ok) {

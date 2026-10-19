@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
@@ -7,6 +8,7 @@ import type { ElementNode, LoomNode } from "../tree/node.js"
 import { outlineTree } from "../tree/outline.js"
 import type { LoomTree } from "../tree/tree.js"
 
+import { audiencesIn, type MaybeAudienceScoped } from "./audiences.js"
 import type { ReaderTally } from "./rollup.js"
 
 /**
@@ -118,6 +120,29 @@ export const PART_STANDINGS: readonly PartStanding[] = everyMemberOf<PartStandin
   "unknown",
 ])
 
+/**
+ * Whether the window can say either way, which is the one question every
+ * figure over a page's words is restricted by.
+ *
+ * `read` and `skipped` are claims about readers; `unknown` is the absence of
+ * one (0282). A passage nothing can be said about is in no mass, out of every
+ * list a person acts on, and outside the denominator of every share
+ * ([0287](../../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)).
+ *
+ * **Published here rather than spelled where it is asked.** Three modules
+ * enumerated the standing by hand and a fourth was about to, and the way that
+ * breaks is a sixth `PartStanding`: one spelling has to be revisited and the
+ * others go on agreeing with the version of the vocabulary they were written
+ * against. Two spellings of a projection that agree today are what the counter
+ * keys were before they were published once.
+ *
+ * **It is not `anchors`.** `change.ts` and `progress.ts` ask the same question
+ * of a part under a different name, because what 0221 needs is *can this part
+ * anchor a stop* and the answer coincides. A predicate shared because two
+ * rules agree is the thing this is fixing.
+ */
+export const spokenFor = (standing: PartStanding): boolean => standing !== "unknown"
+
 /** One line per standing, for a surface putting the reading in front of a person. */
 export const describePartStanding = (standing: PartStanding): string => {
   switch (standing) {
@@ -227,6 +252,40 @@ export type PageReading = {
   readonly treeId: TreeId
   readonly revision: number
   /**
+   * The audience whose counters this reading is of, or `null` where nothing
+   * said.
+   *
+   * `null` has two causes and they are a long way apart. A window whose rows
+   * never named an audience is one population by construction and is read
+   * whole — which is every window written before the column existed (0284) and
+   * every one a test builds by hand. A window naming **two**, handed in without a caller saying
+   * which was wanted, is two populations and is read as neither: see
+   * {@link PageReading.audiences}.
+   */
+  readonly audienceId: AudienceId | null
+  /**
+   * Every audience the window named, whether or not it was the one read.
+   *
+   * More than one member with {@link PageReading.audienceId} `null` is the
+   * refusal: a page served in two forms (0263) has two sets of counters over
+   * one tree at one revision, and adding them is one number about two
+   * populations, which is the collapse a dimension on the rows exists to
+   * prevent (0284). Nothing is read, every part is
+   * `unknown`, and the caller is told what it was holding so it can split
+   * (`byAudience`) and read twice.
+   */
+  readonly audiences: readonly AudienceId[]
+  /**
+   * Counters filed under this tree and revision, in an audience other than the
+   * one read, and ignored.
+   *
+   * Not `foreign`, which is about a page, and not `duplicated`, which is about
+   * a row handed in twice. A deployment reading one form's counters out of a
+   * window holding both of them is doing the right thing, and this is how much
+   * of that window belonged to the other form.
+   */
+  readonly otherAudience: number
+  /**
    * A floor on the page views the window held, not a count of them.
    *
    * The largest `views` any single part reports. A view that produced no signal
@@ -269,7 +328,8 @@ export type PageReading = {
   /**
    * Nodes handed in more than once, where every row but the first was ignored.
    *
-   * A store keeps one row per node per revision, so this cannot happen from one
+   * A store keeps one row per node per revision per audience (0284) and the
+   * audience is picked before this is counted, so this cannot happen from one
    * read — it happens when a caller concatenates two windows instead of letting
    * the store add them. Neither available answer is right: summing is wrong
    * because `views`, `reached` and `engaged` count distinct views and
@@ -426,19 +486,49 @@ const roleReadingsOf = (parts: readonly PartReading[]): readonly RoleReading[] =
  * this question about a revision without holding the revision — which is the
  * property that makes the answer trustworthy. Rows filed under anything else are
  * dropped and counted.
+ *
+ * **A reading is of one audience.** A page is one base tree and the deltas an
+ * audience earns (0263), so two forms of it are two sets of counters over one
+ * tree at one revision, told apart by a column and nothing else (0284). Name
+ * the audience and the rest of the window is `otherAudience`; name none and a
+ * window holding one audience, or none at all, is read whole. A window holding
+ * two with none named is read as neither, because the only other answers are
+ * summing two populations and picking one of them by row order.
  */
 export const pageReadingOf = (
   tree: LoomTree,
-  tallies: readonly ReaderTally[],
-  declarations: PartDeclarations
+  tallies: readonly (ReaderTally & MaybeAudienceScoped)[],
+  declarations: PartDeclarations,
+  audience?: AudienceId
 ): PageReading => {
   const byNode = new Map<NodeId, ReaderTally>()
   const duplicated: NodeId[] = []
   let foreign = 0
+  let otherAudience = 0
+
+  const here = tallies.filter(
+    (tally) => tally.treeId === tree.treeId && tally.revision === tree.revision
+  )
+  const audiences = audiencesIn(here)
+
+  /**
+   * One member is the window's own audience and needs no caller to say so; none
+   * is a window that never carried the column. Two with nothing asked for is
+   * the refusal, and it is spelled as *no audience to read* rather than as a
+   * throw, because a reading is not worth failing over and a surface can draw
+   * `audiences` — a reading that names why its answer is absent (0240).
+   */
+  const reading = audience ?? (audiences.length === 1 ? audiences[0] : null) ?? null
+  const mixed = reading === null && audiences.length > 1
 
   for (const tally of tallies) {
     if (tally.treeId !== tree.treeId || tally.revision !== tree.revision) {
       foreign += 1
+      continue
+    }
+
+    if (mixed || (reading !== null && tally.audienceId !== reading)) {
+      otherAudience += 1
       continue
     }
 
@@ -484,6 +574,9 @@ export const pageReadingOf = (
   return {
     treeId: tree.treeId,
     revision: tree.revision,
+    audienceId: reading,
+    audiences,
+    otherAudience,
     views,
     parts,
     roles: roleReadingsOf(parts),

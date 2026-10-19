@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { err, type Result } from "@jam-overture/loom"
 
-import { attemptSignIn } from "./attempt-sign-in"
+import { attemptSignIn, type VerifyKey } from "./attempt-sign-in"
 import { memoryAttemptLog, type AttemptLog, type AttemptLogError } from "./attempts"
 import { DEFAULT_THROTTLE_POLICY, type ThrottlePolicy } from "./throttle"
 
@@ -27,8 +27,22 @@ const brokenAttemptLog = (): AttemptLog => {
   return { recall: failure, penalise: failure, forgive: failure, survey: failure }
 }
 
-const wrongKey = () => null
-const rightKey = () => "ana"
+/**
+ * A key check that answers, as the store-backed one does.
+ *
+ * `null` is *that key belongs to nobody*; `unreachable` below is *the accounts
+ * table could not say*, which this module must not confuse with either answer.
+ */
+const verifies =
+  (actor: string | null): VerifyKey =>
+  () =>
+    Promise.resolve({ ok: true, actor })
+
+const unreachable: VerifyKey = () =>
+  Promise.resolve({ ok: false, detail: "the accounts table is down" })
+
+const wrongKey = verifies(null)
+const rightKey = verifies("ana")
 
 /** Fails `count` times in a row, one millisecond apart, against a fresh log. */
 const exhaust = async (log: AttemptLog, count: number, at = T0): Promise<void> => {
@@ -188,6 +202,28 @@ describe("attemptSignIn", () => {
       )
 
       expect(verify).not.toHaveBeenCalled()
+    })
+
+    /**
+     * The failure mode an account being a row introduced (0285). The roster was
+     * in memory and could only answer; a table can be down, and the answer to
+     * *is this key anybody's* is then neither yes nor no.
+     */
+    it("refuses when the accounts table cannot answer, without counting a failure", async () => {
+      const log = memoryAttemptLog()
+
+      const outcome = await attemptSignIn(log, POLICY, { subject: SUBJECT, now: T0 }, unreachable)
+
+      expect(outcome).toEqual({ code: "unavailable", detail: "the accounts table is down" })
+
+      /**
+       * The part with consequences: an outage must not spend a caller's
+       * attempts. If it did, everyone who tried during one would arrive
+       * afterwards already part-way to a lockout for something they did not do.
+       */
+      const standing = await log.recall(SUBJECT, 0)
+
+      expect(standing.ok && standing.value).toBeNull()
     })
 
     it("refuses when the failure cannot be recorded, having read the record fine", async () => {

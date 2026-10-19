@@ -10,16 +10,14 @@
 > as it stands and is **not** marked superseded.
 >
 > **This record is alone in its pull request on purpose.** It was written beside
-> the half that shipped — the `changedAt` field, record 0277 on #633 — and
+> the half that shipped — the `changedAt` field, record [0277](0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md), from #633 — and
 > holding it there held that half too: `Loom merge` skips any branch carrying a
 > `Proposed` record, correctly, so escalating one question cost the shipping of
-> everything next to it. The companion record is cited as prose below rather
-> than linked, because it is on the other branch and a link would not resolve
-> from here.
+> everything next to it.
 
 ## Context
 
-Record 0277, on #633, put the fact on the listing: every tree now reports `changedAt`, the stamp of
+Record [0277](0277-a-listing-carries-when-the-page-last-changed-and-the-absence-means-never.md) put the fact on the listing: every tree now reports `changedAt`, the stamp of
 the newest entry in its log. That was the half of 0020's rejected recency
 ordering that needed nobody's permission, because 0020's stated reason for the
 rejection was that there was nothing to sort on.

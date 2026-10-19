@@ -60,6 +60,18 @@ pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit
 and then read `verify.exit` in a separate command. Writing the status to a file
 has to be the *last thing the line does*.
 
+**Install before you merge, and regenerate after you merge.** `.gitattributes`
+gives `decisions/README.md` and `*.generated.json` a `merge=ours` driver, and
+`prepare` sets that driver up **on install** — so a run that checks whether its
+branch still merges before it installs anything, which is the cheapest useful
+first act, resolves those files by hand instead. That is the half that costs a
+careful hand-resolution. The other half costs a confusing red: `merge=ours`
+keeps *the branch's* copy, so a clean merge leaves the generated file stale, and
+`pnpm verify` then fails somewhere that names neither the merge nor the file —
+on 15 October, as two failures in `(docs)` about `src/signals/` exports that no
+page mentions. `pnpm decisions:index` and `pnpm docs:api` are the two
+regenerators. Both filed, both met, both by the framework lane in one day.
+
 This is the second spelling of one mistake and the reason the rule now names the
 act. `Loom primitives` filed the first on 12 September, after
 `pnpm verify 2>&1 | tail -35` cost that run fifteen minutes: the exit code of a
@@ -496,12 +508,38 @@ That is the whole of how a signed-in screen gets photographed — there is no
 
 | in a `do` list | what it does |
 | --- | --- |
-| `{ "click": "<selector>" }` | press it. The selector must match **one** element |
+| `{ "click": "<selector>" }` | press it. The selector must match **one** element. A press that would **leave the page** is refused, and said so |
 | `{ "fill": "<selector>", "text": "…" }` | type into it. `""` clears it |
 | `{ "waitFor": "<selector>" }` | wait for it to appear. The **first** match; several is fine |
 | `{ "wait": <ms> }` | let it settle. 30 seconds is the ceiling and there is no way past it |
 | `{ "scrollTo": "<selector>" }` | bring it into view without pressing it. **One** element, like `click` |
 | `{ "key": "<key>" }` | press a key at whatever holds focus. **No selector**, because a keypress has none |
+
+**A press can move the page, and only within it.** A `do` list pins the page
+against a press that would navigate — 0159's reason is that step two would
+otherwise run on a different page and the picture would silently be of
+somewhere else — and until 16 October it pinned *every* anchor press, which a
+same-page fragment is not: `<a href="#the-bar">` sets `location.hash` and
+scrolls. So a press of a contents row now reaches the state the rail exists for
+([0286](../decisions/0286-a-pinned-press-is-one-that-leaves-the-document-and-the-harness-says-which-presses-it-refused.md)),
+and the comparison is against the document — origin, path and query — rather
+than against the tag.
+
+A press that *is* refused now says so, beside the shot and under the same
+indent as every other reading:
+
+```
+a-page  1280x900@2x  scrollWidth 1280 / innerWidth 1280
+    pinned  https://loom.test/docs/elsewhere  ← press refused, it leaves the page
+```
+
+Two runs lost a picture to the silence that line replaces, and in both the only
+tell was a selector reading `no match` two lines further down. A `before` that
+presses its way to a state is where it matters most: the state is never
+reached, the shot is of the page the `before` started on, and nothing else in
+the output is wrong. **Reaching a page a press would navigate to is still not
+offered** — that is a step that means to change the subject, and it is an open
+finding rather than a thing to spell `click`.
 
 `key` is the step to reach anything whose subject is **focus**, and it is not
 interchangeable with `click` even where both produce the same state: a browser

@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import {
+  nodeId,
+  OTHER_TREE,
+  primitiveType,
+  RIDERS,
+  SKIERS,
+  TREE,
+} from "../testing/reader-signal-contract.js"
 import type { ElementNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -99,6 +107,7 @@ const door = (
   opened: number,
   appearances: number
 ): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId,
   revision,
   opened,
@@ -311,6 +320,47 @@ describe("deploymentReadingOf", () => {
       expect(doubled.arrivals).toBe(250)
       expect(doubled.duplicatedRows).toBe(1)
       expect(single.duplicatedRows).toBe(0)
+    })
+
+    /**
+     * The shape this subsystem was getting wrong until the audience went into
+     * the key, and it is a sibling of the third. A page is one base tree and
+     * the deltas an
+     * audience earns (0263), so two forms of it are two readings of one tree
+     * at one revision — and the second was dropped as the first handed in
+     * twice, out of the order and out of the arrivals.
+     */
+    it("keeps both forms of one page in the order, each scaled by its own door row", () => {
+      const servedTo = (audienceId: typeof SKIERS, reached: readonly number[]): ReadingProgress =>
+        readingProgressOf(
+          pageReadingOf(
+            treeOf(TREE, 1, reached.length),
+            reached.flatMap((count, at) =>
+              count > 0
+                ? [{ ...tally(TREE, 1, `band${at + 1}`, count), audienceId }]
+                : []
+            ),
+            NOTHING_DECLARED,
+            audienceId
+          )
+        )
+      const inAudience = (audienceId: typeof SKIERS, row: StoredPageViews): StoredPageViews => ({
+        ...row,
+        audienceId,
+      })
+
+      const reading = deploymentReadingOf(
+        [servedTo(SKIERS, [900, 300]), servedTo(RIDERS, [100, 90])],
+        [inAudience(SKIERS, exact(TREE, 1, 900)), inAudience(RIDERS, exact(TREE, 1, 100))]
+      )
+
+      expect(reading.duplicated).toBe(0)
+      expect(reading.duplicatedRows).toBe(0)
+      expect(reading.ranked).toHaveLength(2)
+      expect(reading.trees).toBe(1)
+      expect(reading.arrivals).toBe(1_000)
+      expect(reading.ranked.map((row) => row.audienceId)).toEqual([SKIERS, RIDERS])
+      expect(reading.worst?.readers).toBe(600)
     })
 
     /**

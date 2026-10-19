@@ -2,6 +2,9 @@ import Link from "next/link"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { portalMemberships } from "@/app/(portal)/_lib/auth/account-store"
+import { actorSchema } from "@/app/(portal)/_lib/auth/accounts"
+import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalProjects } from "@/app/(portal)/_lib/store"
@@ -27,9 +30,35 @@ import { RegistrationForm } from "./_components/registration-form"
  */
 
 const RegisterApplication = async () => {
-  await requireActor("/portal/new")
+  const actor = await requireActor("/portal/new")
 
-  const projects = await portalProjects.list()
+  /**
+   * **Only the projects this person may add to** (0285).
+   *
+   * It listed every project in the deployment until now, which was two
+   * problems in one select: it named other people's projects to anybody who
+   * opened the form, and it invited them to put an application in one. The
+   * action checks the choice regardless — a select is a text field somebody can
+   * post anything to — and this is what stops the form offering a choice that
+   * will be refused.
+   */
+  const [held, projects] = await Promise.all([
+    portalMemberships.projectsOf(actorSchema.parse(actor)),
+    portalProjects.list(),
+  ])
+
+  const administers = new Set(
+    (held.ok ? held.value : [])
+      .filter((membership) => mayAdminister(membership.role))
+      .map((membership) => membership.projectId)
+  )
+
+  /**
+   * A membership store that cannot answer shows no projects rather than all of
+   * them. The form still works — registering without choosing one makes a new
+   * project — so the failure costs a convenience rather than the screen.
+   */
+  const mine = projects.ok ? projects.value.filter((p) => administers.has(p.projectId)) : []
 
   return (
     <Screen>
@@ -46,7 +75,7 @@ const RegisterApplication = async () => {
 
       {projects.ok ? (
         <RegistrationForm
-          projects={projects.value.map((project) => ({
+          projects={mine.map((project) => ({
             projectId: project.projectId,
             name: project.name,
           }))}

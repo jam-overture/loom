@@ -2,7 +2,7 @@ import type { CSSProperties } from "react"
 
 import type { JsonObject } from "../json.js"
 import { THEME_PROP_KEY } from "../reserved-props.js"
-import { themeVariables } from "../theme/apply.js"
+import { themeVariables, type RampMode } from "../theme/apply.js"
 import { paletteScheme, type PaletteScheme } from "../theme/measure.js"
 import type { ThemeError, ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
@@ -76,8 +76,8 @@ export const resolveTheme = (
  * types-only step, and it happens once here rather than in every primitive that
  * has to apply it.
  */
-export const themeStyle = (theme: ResolvedTheme): CSSProperties =>
-  themeVariables(theme) as unknown as CSSProperties
+export const themeStyle = (theme: ResolvedTheme, ramp: RampMode = "fluid"): CSSProperties =>
+  themeVariables(theme, { ramp }) as unknown as CSSProperties
 
 /**
  * The ground a host paints when it draws a frame standing in for the page.

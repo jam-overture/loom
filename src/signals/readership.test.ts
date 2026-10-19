@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { OTHER_TREE, region, TREE } from "../testing/reader-signal-contract.js"
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
+import { OTHER_TREE, region, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 
 import {
   DEFAULT_REGION_FLOOR,
+  regionReadingFor,
   regionReadingOf,
   UNKNOWN_REGION,
   type RegionReading,
@@ -29,6 +31,7 @@ const reading = (
   regionReadingOf(
     Object.entries(counts).map(
       ([code, views]): StoredRegionCount => ({
+        audienceId: DEFAULT_AUDIENCE_ID,
         treeId: TREE,
         revision: options.revision ?? 1,
         region: code === UNKNOWN_REGION ? UNKNOWN_REGION : region(code),
@@ -278,6 +281,7 @@ describe("readershipChangeOf", () => {
       expect(change.arrivals).toEqual({ was: 100, now: 400 })
       expect(Object.keys(change).sort()).toEqual([
         "arrivals",
+        "audiences",
         "comparability",
         "floor",
         "loudest",
@@ -385,8 +389,93 @@ describe("the closed sets this publishes", () => {
     }
   })
 
-  it("names five movements and six standings", () => {
+  it("names five movements and seven standings", () => {
     expect(REGION_MOVEMENTS).toHaveLength(5)
-    expect(READERSHIP_COMPARABILITIES).toHaveLength(6)
+    expect(READERSHIP_COMPARABILITIES).toHaveLength(7)
+  })
+})
+
+/**
+ * This reading exists to say whether the comparison beside it is of like with
+ * like, so a pair of two populations is the one case where the answer is known
+ * in advance.
+ */
+describe("readershipChangeOf across two audiences", () => {
+  const formOf = (
+    audience: typeof SKIERS,
+    counts: Readonly<Record<string, number>>,
+    floor?: number
+  ): RegionReading =>
+    regionReadingFor(
+      { treeId: TREE, revision: 1, audienceId: audience },
+      Object.entries(counts).map(
+        ([code, views]): StoredRegionCount => ({
+          audienceId: audience,
+          treeId: TREE,
+          revision: 1,
+          region: code === UNKNOWN_REGION ? UNKNOWN_REGION : region(code),
+          views,
+          updatedAt: AT,
+        })
+      ),
+      floor === undefined ? {} : { floor }
+    ).reading
+
+  /**
+   * Every shift here would be the difference between two audiences'
+   * geographies, reported as a readership that moved by the one reading a
+   * surface trusts to catch exactly that.
+   */
+  it("refuses a pair of two audiences and publishes no row of the join", () => {
+    const change = readershipChangeOf(formOf(SKIERS, { GB: 100 }), formOf(RIDERS, { FR: 100 }))
+
+    expect(change.comparability).toBe("different-audiences")
+    expect(change.moved).toBeUndefined()
+    expect(change.movedAtMost).toBeUndefined()
+    expect(change.regions).toEqual([])
+    expect(change.loudest).toBeUndefined()
+    expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
+  })
+
+  /** Nothing was compared, and the two arrival counts are each true of their own side. */
+  it("still publishes the arrivals and the floor the two maps shared", () => {
+    const change = readershipChangeOf(formOf(SKIERS, { GB: 100 }), formOf(RIDERS, { FR: 400 }))
+
+    expect(change.arrivals).toEqual({ was: 100, now: 400 })
+    expect(change.floor).toBe(DEFAULT_REGION_FLOOR)
+    expect(change.unaccounted).toEqual({ was: 1, now: 1 })
+  })
+
+  /** No floor fixes two populations, so the floor is not the thing to report. */
+  it("says two audiences before it says two floors", () => {
+    const change = readershipChangeOf(
+      formOf(SKIERS, { GB: 100 }),
+      formOf(RIDERS, { FR: 100 }, DEFAULT_REGION_FLOOR + 10)
+    )
+
+    expect(change.comparability).toBe("different-audiences")
+  })
+
+  it("compares one audience's two maps exactly as it always did", () => {
+    const change = readershipChangeOf(
+      formOf(SKIERS, { GB: 100, FR: 100 }),
+      formOf(SKIERS, { GB: 150, FR: 50 })
+    )
+
+    expect(change.comparability).not.toBe("different-audiences")
+    expect(change.moved).toBeCloseTo(0.25)
+    expect(change.audiences).toEqual({ was: SKIERS, now: SKIERS })
+  })
+
+  /**
+   * A map read whole asserts no audience, so a pair of such maps is unprovable
+   * rather than proven alike — and refusing it would withhold every readership
+   * comparison a deployment takes over its whole window.
+   */
+  it("compares a pair it cannot prove and names what it compared across", () => {
+    const change = readershipChangeOf(reading({ GB: 100 }), formOf(SKIERS, { GB: 100 }))
+
+    expect(change.comparability).not.toBe("different-audiences")
+    expect(change.audiences).toEqual({ was: null, now: SKIERS })
   })
 })

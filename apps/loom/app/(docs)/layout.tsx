@@ -5,7 +5,7 @@ import { SiteFooter } from "@/app/(docs)/_components/site-footer"
 import { ThemeScript } from "@/app/(docs)/_components/theme-script"
 import { ThemeToggle } from "@/app/(docs)/_components/theme-toggle"
 import { Wordmark } from "@/app/(docs)/_components/wordmark"
-import { ARTICLE_HREF } from "@/app/(docs)/_lib/chrome"
+import { ARTICLE_HREF, HEADER_ROW_CLASS } from "@/app/(docs)/_lib/chrome"
 import { REPOSITORY_URL } from "@/app/(docs)/_lib/surfaces"
 import { SITE_BAR, THEME_COLOR_NAME } from "@/app/(docs)/_lib/theme"
 
@@ -56,7 +56,16 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
       </a>
 
       <header className="border-edge bg-surface-page/85 sticky top-0 z-40 border-b backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-[100rem] items-center justify-between gap-4 px-5">
+        {/*
+         * The header's row is the taller half of the chrome, and three other
+         * things are measured against it: the bar sticks under it, and so does
+         * each of the two rails. So its height is read from the stylesheet
+         * rather than written here — `_lib/chrome.ts` is why, and `globals.css`
+         * is where the number is.
+         */}
+        <div
+          className={`mx-auto flex max-w-[100rem] items-center justify-between gap-4 px-5 ${HEADER_ROW_CLASS}`}
+        >
           {/*
            * Two links, not one — the migration left this surface to decide
            * whether the wordmark should offer the front door, and `wordmark.tsx`

@@ -40,11 +40,20 @@ import { ARTICLE_ID } from "./chrome"
  * fall out of step — the day a component starts or stops rendering a heading,
  * the rail says so without anybody adding a line here.
  *
- * It costs one thing, stated rather than discovered: **the rail is not in the
- * server's HTML.** It appears when the page's script runs. That is the right
+ * It costs one thing, stated rather than discovered: **the rows are not in the
+ * server's HTML.** They appear when the page's script runs. That is the right
  * trade for navigation furniture and would be the wrong one for a sentence a
  * reader came to read — the pager and the rail on the left are already client
  * components for the same reason, and no content is in here.
+ *
+ * What it must not cost is a reader's place on the page, and for a while it
+ * did. Beside the prose the layout reserves the column, so a rail that arrives
+ * late arrives into a space already held for it. The narrow presentation had no
+ * column to reserve, so the prose moved down 86 pixels when the walk finished —
+ * which is why **whether a page has sections at all** is now answered before
+ * the browser is involved, by `contents/pages.ts`, from the page's own markdown.
+ * That is a different question from *what are they*, and the only one a layout
+ * needs in order to be the right height.
  *
  * ## What counts as a section
  *
@@ -128,19 +137,36 @@ export type SectionTop = {
 /**
  * How far down the viewport a heading has to come before the reader is in it.
  *
- * 7.5rem, and the number is **chosen against where a press of a row lands**
- * rather than by eye. `globals.css` gives every prose heading
- * `scroll-margin-top: 5rem`, so a reader who presses a row gets that heading 80
- * pixels down the window — clear of the 3.5rem header that would otherwise sit
- * on top of it. The line has to be below that point, or the section a reader
- * just asked for would arrive unmarked, and the 40 pixels between the two are
- * what makes that hold through a browser's own rounding and a scroll that
- * stops a fraction short.
+ * 11.5rem, and the number is **chosen against where a press of a row lands**
+ * rather than by eye. The line has to be below that point, or the section a
+ * reader just asked for arrives unmarked and the mark sits on the section
+ * above it.
+ *
+ * **Where a press lands is one declared number**, `--press-landing` in
+ * `globals.css`, and it is 10rem — 160 pixels down the window. Two declarations
+ * get the browser there, because that is how a browser does it: `html` has a
+ * `scroll-padding-top` that insets the top of the scrollport for every in-page
+ * scroll, and every prose heading has a `scroll-margin-top` that grows the box
+ * being scrolled to. The second is written as *the landing minus the inset*, so
+ * the chrome above can change height without moving the landing.
+ *
+ * It was not always one number, and that cost something. This constant was 120
+ * until 16 October, chosen against the heading's own 5rem alone, and 120 is
+ * *above* 80 and *below* the sum — so pressing a row on the rail marked the
+ * section above the one the reader had asked for, on every page.
+ * `pnpm shoot`' `measure` printed the landing as `y 160` on a press of a
+ * contents row at 390 pixels wide, which is the first time anything in this
+ * repository looked. The lesson then was that a test reading one of two numbers
+ * passes while the thing it guards is wrong; the answer now is that there is one
+ * number to read, and `chrome.test.ts` holds the arithmetic that keeps it one.
+ *
+ * The 24 pixels between 160 and 184 are what makes it hold through a browser's
+ * own rounding and a smooth scroll that stops a fraction short.
  *
  * It also has to be near the top of the window. A line halfway down would mean
  * the mark moved on while the heading it names was still being read.
  */
-export const READING_LINE_PX = 120
+export const READING_LINE_PX = 184
 
 export type Reading = {
   /** Each section's top, in document order, in viewport coordinates. */
@@ -186,3 +212,19 @@ export const sectionBeingRead = ({ tops, line, atEnd }: Reading): string | undef
  */
 export const atEndOfPage = (scrollY: number, viewportHeight: number, documentHeight: number): boolean =>
   scrollY + viewportHeight >= documentHeight - 1
+
+/**
+ * How many sections a page has, as the words on a closed control.
+ *
+ * The rail beside the prose shows the rows themselves, so it never has to say
+ * how many there are. On a narrow screen the list is closed, and the control
+ * says which section the reader is in — except at the top of a page, where
+ * they are in none yet. That is the state this phrase is for, and it is the
+ * state a reader arrives in: *fourteen sections* is a reason to open it, where
+ * *On this page* on its own is a label with nothing in it.
+ *
+ * It is a function rather than a template in the component for the one reason
+ * a plural ever is: the site has pages with a single section in them, and
+ * *1 sections* is the kind of thing a reader notices and nothing reports.
+ */
+export const sectionsSummary = (count: number): string => `${count} section${count === 1 ? "" : "s"}`

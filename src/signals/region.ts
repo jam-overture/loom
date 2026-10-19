@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
@@ -115,8 +116,12 @@ export type ReaderRegionCount = {
   readonly views: number
 }
 
-/** A region count as the store keeps it, which is the count plus when it last moved. */
+/**
+ * A region count as the store keeps it: the count, the audience it was
+ * collected under, and when it last moved. See `StoredTally.audienceId` (0284).
+ */
 export type StoredRegionCount = ReaderRegionCount & {
+  readonly audienceId: AudienceId
   readonly updatedAt: string
 }
 
@@ -136,7 +141,9 @@ export interface ReaderRegionStore {
    */
   readonly count: (
     counts: readonly ReaderRegionCount[],
-    at: string
+    at: string,
+    /** The audience the delivery was served under (0284). Omitted is `aud_everyone`. */
+    audience?: AudienceId
   ) => Promise<Result<void, ReaderSignalStoreError>>
   readonly regions: (
     request?: TallyReadRequest
@@ -200,6 +207,19 @@ export type RegionBucket = {
 export type RegionReading = {
   /** The floor the rows were read at, so a screen can say what it is withholding by. */
   readonly floor: number
+  /**
+   * The audience whose arrivals this map is of, or `null` where nothing said.
+   *
+   * {@link regionReadingFor} names it, because it picked the rows of one
+   * audience to build the map from. {@link regionReadingOf} leaves it `null`,
+   * because it groups whatever it is handed and a deployment's whole window is
+   * a readership rather than one form's.
+   *
+   * Carried so that a comparison of two maps can refuse a pair of two
+   * populations (0284). It is the one thing a readership comparison cannot
+   * derive and the one thing that makes it a comparison of like with like.
+   */
+  readonly audienceId: AudienceId | null
   /** Buckets large enough to name, most-read first. */
   readonly regions: readonly RegionBucket[]
   /** What was too small to name, as a total that names nowhere. */
@@ -248,6 +268,7 @@ export const regionReadingOf = (
 
   return {
     floor,
+    audienceId: null,
     /** Most-read first, and by code when two are equal, so a screen does not reorder on a refresh. */
     regions: named.sort((one, other) => other.views - one.views || one.region.localeCompare(other.region)),
     withheld: {
@@ -290,10 +311,22 @@ export type RegionReadingFor = {
    */
   readonly foreign: number
   /**
+   * Rows for this revision in another audience, and ignored.
+   *
+   * A page served in two forms counts each form's arrivals on its own row
+   * (0284), and both forms' readers are real readers of the page — so this is
+   * neither foreign nor a doubled bucket. It is the other form's readership,
+   * which is a different map and not part of this one: a mix taken over both
+   * is one composition of two populations, and a comparison beside it would be
+   * comparing neither form with itself.
+   */
+  readonly otherAudience: number
+  /**
    * Rows naming a region this revision already had a row for, beyond the first,
    * every one of which was ignored.
    *
-   * A store keeps one row per tree, revision and region, so this cannot come
+   * A store keeps one row per tree, revision, audience and region, and the
+   * audience is picked before this is counted, so this cannot come
    * out of one read — it happens when a caller concatenates two windows of
    * rows, and the store's counts are already running totals rather than a
    * window's. Adding them would double a bucket, which is the one error in this
@@ -313,9 +346,11 @@ export const regionReadingFor = (
   rows: readonly StoredRegionCount[],
   options: RegionReadingOptions = {}
 ): RegionReadingFor => {
-  const matching = rows.filter(
+  const here = rows.filter(
     (row) => row.treeId === where.treeId && row.revision === where.revision
   )
+  const audience = where.audienceId ?? null
+  const matching = audience === null ? here : here.filter((row) => row.audienceId === audience)
   const first = new Map<ReaderRegion, StoredRegionCount>()
 
   for (const row of matching) {
@@ -323,8 +358,9 @@ export const regionReadingFor = (
   }
 
   return {
-    reading: regionReadingOf([...first.values()], options),
-    foreign: rows.length - matching.length,
+    reading: { ...regionReadingOf([...first.values()], options), audienceId: audience },
+    foreign: rows.length - here.length,
+    otherAudience: here.length - matching.length,
     duplicated: matching.length - first.size,
   }
 }

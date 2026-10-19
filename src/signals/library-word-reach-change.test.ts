@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -119,6 +120,7 @@ const tally = (name: string, counts: Partial<ReaderTally>, tree: LoomTree): Read
 })
 
 const row = (counts: Partial<StoredPageViews> = {}): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: TREE,
   revision: 1,
   opened: 0,
@@ -201,6 +203,40 @@ const read = (
 const windowOf = (pages: readonly Side[]): LibraryWindow => ({
   readings: pages.map((of) => of.reading),
   rows: pages.map((of) => of.row),
+})
+
+/**
+ * One form of one page: the same window as {@link read}, with the audience the
+ * store keeps both the counters and the door row under (0284), and the reading
+ * scoped to it.
+ */
+const inAudience = (
+  audienceId: typeof SKIERS,
+  tree: LoomTree,
+  {
+    opened,
+    appearances,
+    reached,
+  }: {
+    opened: number
+    appearances: number
+    reached: Readonly<Record<string, number | null>>
+  }
+): Side => ({
+  reading: pageReadingOf(
+    tree,
+    [
+      { ...tally("page", { views: appearances, reached: appearances }, tree), audienceId },
+      ...Object.entries(reached).flatMap(([name, count]) =>
+        count === null
+          ? []
+          : [{ ...tally(name, { views: appearances, reached: count }, tree), audienceId }]
+      ),
+    ],
+    BODY_IS_COPY,
+    audienceId
+  ),
+  row: row({ audienceId, treeId: tree.treeId, revision: tree.revision, opened, appearances }),
 })
 
 const typeRow = (
@@ -485,7 +521,7 @@ describe("the words of a kind of part the typical reader reached, before and aft
     expect(quote?.words.unreconciled).toBe(0)
     expect(change.scaled).toBe(0)
     expect(change.unscaled).toEqual([
-      { treeId: TREE, revision: 1, against: 1, side: "now", silence: "unmeasured" },
+      { treeId: TREE, revision: 1, audienceId: null, against: 1, side: "now", silence: "unmeasured" },
     ])
   })
 
@@ -512,6 +548,106 @@ describe("the words of a kind of part the typical reader reached, before and aft
     expect(typeRow(twice, "loom.quote")?.words.typicalWas).toBe(
       typeRow(straight, "loom.quote")?.words.typicalWas
     )
+  })
+
+  /**
+   * The same pairing defect, at the reading whose figure is a mass rather than a
+   * share. Two forms of a page share a tree and a revision, so before 0293 the
+   * second form's mass was dropped as the first's handed in twice — and the
+   * `pages` behind a withheld row counted the two as one.
+   */
+  it("pairs two forms of one page as two pages, each weighted by its own arrivals", () => {
+    const tree = page()
+    const change = libraryWordReachChangeOf(
+      windowOf([
+        inAudience(SKIERS, tree, {
+          opened: 100,
+          appearances: 100,
+          reached: { intro: 100, quote: 40 },
+        }),
+        inAudience(RIDERS, tree, {
+          opened: 10,
+          appearances: 10,
+          reached: { intro: 10, quote: 10 },
+        }),
+      ]),
+      windowOf([
+        inAudience(SKIERS, tree, {
+          opened: 100,
+          appearances: 100,
+          reached: { intro: 100, quote: 70 },
+        }),
+        inAudience(RIDERS, tree, {
+          opened: 10,
+          appearances: 10,
+          reached: { intro: 10, quote: 10 },
+        }),
+      ])
+    )
+    const quote = typeRow(change, "loom.quote")
+
+    expect(change.duplicated).toBe(0)
+    expect(change.ambiguous).toEqual([])
+    expect(change.pages).toBe(2)
+    expect(quote?.pages).toBe(2)
+    expect(change.arrivalsWas).toBe(110)
+    /**
+     * The quote says four words. 40 of 100 skiers and 10 of 10 riders reached
+     * it, so 50 readers of 110 arrivals got 4 words each, and the typical
+     * reader of the kind reached 200 ÷ 110 of them; 70 and 10 make it 320 ÷ 110.
+     */
+    expect(quote?.words.typicalWas).toBeCloseTo(200 / 110, 10)
+    expect(quote?.words.typicalNow).toBeCloseTo(320 / 110, 10)
+  })
+
+  /** The other side of the narrowing: one form handed in twice is still a double count. */
+  it("still drops one form handed in twice, with the other form standing", () => {
+    const tree = page()
+    const skiers = inAudience(SKIERS, tree, {
+      opened: 10,
+      appearances: 10,
+      reached: { intro: 10, quote: 4 },
+    })
+    const riders = inAudience(RIDERS, tree, {
+      opened: 10,
+      appearances: 10,
+      reached: { intro: 10, quote: 4 },
+    })
+    const later = windowOf([skiers, riders])
+
+    const change = libraryWordReachChangeOf(
+      { readings: [skiers.reading, skiers.reading, riders.reading], rows: [skiers.row, riders.row] },
+      later
+    )
+
+    expect(change.duplicated).toBe(1)
+    expect(change.pages).toBe(2)
+    expect(typeRow(change, "loom.quote")?.pages).toBe(2)
+    expect(change.arrivalsWas).toBe(20)
+  })
+
+  /** The exclusion names the form, because a list of trees cannot say *one of these two*. */
+  it("excludes the ambiguous form alone and names which form it was", () => {
+    const tree = page()
+    const second = page({ revision: 2 })
+    const reached = { intro: 10, quote: 4 }
+    const change = libraryWordReachChangeOf(
+      {
+        readings: [
+          inAudience(SKIERS, tree, { opened: 10, appearances: 10, reached }).reading,
+          inAudience(SKIERS, second, { opened: 10, appearances: 10, reached }).reading,
+          inAudience(RIDERS, tree, { opened: 10, appearances: 10, reached }).reading,
+        ],
+        rows: [
+          inAudience(SKIERS, tree, { opened: 10, appearances: 10, reached }).row,
+          inAudience(RIDERS, tree, { opened: 10, appearances: 10, reached }).row,
+        ],
+      },
+      windowOf([inAudience(RIDERS, tree, { opened: 10, appearances: 10, reached })])
+    )
+
+    expect(change.ambiguous).toEqual([{ treeId: TREE, audienceId: SKIERS }])
+    expect(change.pages).toBe(1)
   })
 
   /**
@@ -760,5 +896,82 @@ describe("the words of a kind of part the typical reader reached, before and aft
     expect(change.byRole.every((of) => of.silence === "unplaced")).toBe(true)
     expect(change.words.typicalWas).toBeNull()
     expect(change.pages).toBe(0)
+  })
+})
+
+/**
+ * The form-and-page census 0295 put on all four library comparisons, asserted
+ * here on the words-reached one, which is the deepest of the four: it pairs by
+ * form, scales at the door and compares passages, and none of that is what
+ * moves when a deployment begins serving a second form.
+ */
+describe("a library that gained a form rather than a page", () => {
+  const met = { opened: 10, appearances: 10, reached: { intro: 10 } }
+
+  it("counts a second form begun as a form gained and never as a page published", () => {
+    const tree = page()
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, tree, met)]),
+      windowOf([inAudience(SKIERS, tree, met), inAudience(RIDERS, tree, met)])
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(1)
+  })
+
+  it("counts a page published as a page gained and never as a form begun", () => {
+    const first = page()
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, first, met)]),
+      windowOf([inAudience(SKIERS, first, met), inAudience(SKIERS, second, met)])
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(0)
+  })
+
+  it("counts a form withdrawn apart from a page that left the library", () => {
+    const first = page()
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryWordReachChangeOf(
+      windowOf([
+        inAudience(SKIERS, first, met),
+        inAudience(RIDERS, first, met),
+        inAudience(SKIERS, second, met),
+      ]),
+      windowOf([inAudience(SKIERS, first, met)])
+    )
+
+    expect(change.pagesLost).toBe(2)
+    expect(change.formsLost).toBe(1)
+    expect(change.pagesLost - change.formsLost).toBe(1)
+  })
+
+  /** A form handed in twice is one form, so it is not a page published nobody published (0158). */
+  it("counts a form gained once however many times the window was handed in", () => {
+    const tree = page()
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, tree, met)]),
+      windowOf([
+        inAudience(SKIERS, tree, met),
+        inAudience(RIDERS, tree, met),
+        inAudience(RIDERS, tree, met),
+      ])
+    )
+
+    expect(change.formsGained).toBe(1)
+    expect(change.pagesGained).toBe(1)
+  })
+
+  it("names the audiences each window held, and refuses nothing for holding two", () => {
+    const tree = page()
+    const change = libraryWordReachChangeOf(
+      windowOf([inAudience(SKIERS, tree, met)]),
+      windowOf([inAudience(SKIERS, tree, met), inAudience(RIDERS, tree, met)])
+    )
+
+    expect(change.audiences).toEqual({ was: [SKIERS], now: [RIDERS, SKIERS] })
+    expect(change.pages).toBe(1)
   })
 })

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, OTHER_TREE, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -137,6 +137,26 @@ const read = (
       ...reached.map((name) => tally(name, { views, reached: views }, tree)),
     ],
     declarations
+  )
+
+/**
+ * One form of one page: the same window as {@link read}, with the audience the
+ * store keeps the rows under (0284) and the reading scoped to it.
+ */
+const inAudience = (
+  audienceId: typeof SKIERS,
+  tree: LoomTree,
+  reached: readonly string[],
+  views = 10
+): PageReading =>
+  pageReadingOf(
+    tree,
+    [
+      { ...tally("page", { views, reached: views }, tree), audienceId },
+      ...reached.map((name) => ({ ...tally(name, { views, reached: views }, tree), audienceId })),
+    ],
+    BODY_IS_COPY,
+    audienceId
   )
 
 /** A window that measured nothing of a page, which is what makes every standing unknown. */
@@ -648,14 +668,81 @@ describe("what a change did to the words a kind of part says", () => {
       expect(twice.words).toEqual(once.words)
     })
 
-    it("excludes a tree held at two revisions in one window and names it", () => {
+    /**
+     * This module spelled the pairing itself until 0293 — a second copy of a
+     * rule published with a comment saying why there should not be one — and
+     * both copies keyed a paired page by its tree, so two forms of a page
+     * (0263) were one key and the second form's words were dropped as the
+     * first's handed in twice.
+     */
+    it("pairs two forms of one page as two pages, and reports no double count", () => {
+      const tree = page()
+      const change = libraryCopyChangeOf(
+        [inAudience(SKIERS, tree, ["intro"]), inAudience(RIDERS, tree, ["intro"])],
+        [
+          inAudience(SKIERS, tree, ["intro", "pricing"]),
+          inAudience(RIDERS, tree, ["intro", "pricing"]),
+        ]
+      )
+
+      expect(change.duplicated).toBe(0)
+      expect(change.ambiguous).toEqual([])
+      expect(change.pages).toBe(2)
+      expect(typeRow(change, "loom.section")?.placements).toBe(4)
+      expect(typeRow(change, "loom.section")?.words.carried).toBe(80)
+    })
+
+    /** The other side of the narrowing: the same form twice is still a double count. */
+    it("still drops one form handed in twice, with the other form standing", () => {
+      const tree = page()
+      const change = libraryCopyChangeOf(
+        [
+          inAudience(SKIERS, tree, ["intro"]),
+          inAudience(SKIERS, tree, ["intro"]),
+          inAudience(RIDERS, tree, ["intro"]),
+        ],
+        [
+          inAudience(SKIERS, tree, ["intro", "pricing"]),
+          inAudience(RIDERS, tree, ["intro", "pricing"]),
+        ]
+      )
+
+      expect(change.duplicated).toBe(1)
+      expect(change.pages).toBe(2)
+      expect(typeRow(change, "loom.section")?.placements).toBe(4)
+      expect(typeRow(change, "loom.section")?.words.carried).toBe(80)
+    })
+
+    /**
+     * A form held at two revisions says nothing about the other form, which a
+     * list of trees could not express: before 0293 both were excluded from
+     * every row and every total, and the exclusion named a page rather than the
+     * form of it that was ambiguous.
+     */
+    it("excludes the ambiguous form alone and names which form it was", () => {
+      const tree = page()
+      const change = libraryCopyChangeOf(
+        [
+          inAudience(SKIERS, tree, ["intro"]),
+          inAudience(SKIERS, page({ revision: 2 }), ["intro"]),
+          inAudience(RIDERS, tree, ["intro"]),
+        ],
+        [inAudience(RIDERS, tree, ["intro", "pricing"])]
+      )
+
+      expect(change.ambiguous).toEqual([{ treeId: TREE, audienceId: SKIERS }])
+      expect(change.pages).toBe(1)
+      expect(typeRow(change, "loom.section")?.placements).toBe(2)
+    })
+
+    it("excludes a form held at two revisions in one window and names it", () => {
       const tree = page()
       const change = libraryCopyChangeOf(
         [read(tree, ["intro"]), read(page({ revision: 2 }), ["intro"])],
         [read(page({ revision: 2 }), ["intro"])]
       )
 
-      expect(change.ambiguous).toEqual([TREE])
+      expect(change.ambiguous).toEqual([{ treeId: TREE, audienceId: null }])
       expect(change.pages).toBe(0)
       expect(change.words.carried).toBe(0)
       expect(change.duplicated).toBe(0)
@@ -717,5 +804,89 @@ describe("what a change did to the words a kind of part says", () => {
       expect(change.gained).toBe(0)
       expect(change.lost).toBe(0)
     })
+  })
+})
+
+/**
+ * The form-and-page census 0295 put on all four library comparisons, asserted
+ * here on the words one: this reading pairs by form like the others, so the
+ * counts under it move with the mix of audiences and nothing else does.
+ */
+describe("a library that gained a form rather than a page", () => {
+  it("counts a second form begun as a form gained and never as a page published", () => {
+    const tree = page()
+    const change = libraryCopyChangeOf(
+      [inAudience(SKIERS, tree, ["intro"])],
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(RIDERS, tree, ["intro"])]
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(1)
+  })
+
+  it("counts a page published as a page gained and never as a form begun", () => {
+    const first = page()
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryCopyChangeOf(
+      [inAudience(SKIERS, first, ["intro"])],
+      [inAudience(SKIERS, first, ["intro"]), inAudience(SKIERS, second, ["intro"])]
+    )
+
+    expect(change.pagesGained).toBe(1)
+    expect(change.formsGained).toBe(0)
+  })
+
+  it("counts a form withdrawn apart from a page that left the library", () => {
+    const first = page()
+    const second = page({ treeId: OTHER_TREE })
+    const change = libraryCopyChangeOf(
+      [
+        inAudience(SKIERS, first, ["intro"]),
+        inAudience(RIDERS, first, ["intro"]),
+        inAudience(SKIERS, second, ["intro"]),
+      ],
+      [inAudience(SKIERS, first, ["intro"])]
+    )
+
+    expect(change.pagesLost).toBe(2)
+    expect(change.formsLost).toBe(1)
+    expect(change.pagesLost - change.formsLost).toBe(1)
+  })
+
+  /** A form handed in twice is one form, so it is not a page published nobody published (0158). */
+  it("counts a form gained once however many times the window was handed in", () => {
+    const tree = page()
+    const change = libraryCopyChangeOf(
+      [inAudience(SKIERS, tree, ["intro"])],
+      [
+        inAudience(SKIERS, tree, ["intro"]),
+        inAudience(RIDERS, tree, ["intro"]),
+        inAudience(RIDERS, tree, ["intro"]),
+      ]
+    )
+
+    expect(change.duplicated).toBe(1)
+    expect(change.formsGained).toBe(1)
+    expect(change.pagesGained).toBe(1)
+  })
+
+  it("names the audiences each window held, and refuses nothing for holding two", () => {
+    const tree = page()
+    const change = libraryCopyChangeOf(
+      [inAudience(SKIERS, tree, ["intro"])],
+      [inAudience(SKIERS, tree, ["intro"]), inAudience(RIDERS, tree, ["intro"])]
+    )
+
+    expect(change.audiences).toEqual({ was: [SKIERS], now: [RIDERS, SKIERS] })
+    expect(change.pages).toBe(1)
+  })
+
+  it("names no audience for a window whose forms named none", () => {
+    const tree = page()
+    const change = libraryCopyChangeOf([read(tree, ["intro"])], [read(tree, ["intro"])])
+
+    expect(change.audiences).toEqual({ was: [], now: [] })
+    expect(change.formsGained).toBe(0)
+    expect(change.formsLost).toBe(0)
   })
 })

@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 
 import type { ReaderSignalBatch } from "./signal.js"
@@ -92,6 +93,8 @@ export type ReaderPageViews = {
  * and when the fold last touched it.
  */
 export type StoredPageViews = ReaderPageViews & {
+  /** The audience these page views were served under. See `StoredTally.audienceId` (0284). */
+  readonly audienceId: AudienceId
   /**
    * When either writer last moved this row.
    *
@@ -291,22 +294,41 @@ export type PageViewsFor = {
    */
   readonly foreign: number
   /**
-   * Rows for this tree and revision beyond the first, where every one after it
-   * was ignored.
+   * Rows for this tree and revision, in another audience, and ignored.
    *
-   * A store keeps one row per revision, so this cannot happen from one read —
-   * it happens when a caller concatenates two. Adding them is wrong, because
-   * the openings are already a total and would double; taking the last is
-   * wrong, because it is not the truer one. So the first row stands and the
+   * A page is served in as many forms as it has audiences (0263) and the door
+   * counts each one's arrivals on its own row (0284), so a window holding two
+   * of them is a deployment doing what it was built to do. It is `foreign` to
+   * nothing and `duplicated` to nothing: the other form's readers are real and
+   * are simply not the ones this reading is of.
+   */
+  readonly otherAudience: number
+  /**
+   * Rows for this tree, revision and audience beyond the first, where every one
+   * after it was ignored.
+   *
+   * A store keeps one row per revision per audience, so this cannot happen from
+   * one read — it happens when a caller concatenates two. Adding them is wrong,
+   * because the openings are already a total and would double; taking the last
+   * is wrong, because it is not the truer one. So the first row stands and the
    * fact is reported.
    */
   readonly duplicated: number
 }
 
-/** A revision of a tree, which is all this rule needs to be asked. */
+/**
+ * A revision of a tree, and the audience the asking is about.
+ *
+ * The audience is optional and `null` means the same as absent: *this caller
+ * did not say*, which reads every form of the page and is what a window
+ * written before 0284 and every reading taken before this rule has always
+ * done. A caller that names one — which `PageReading` now does for itself —
+ * gets that form's door row and nothing else.
+ */
 export type RevisionOf = {
   readonly treeId: TreeId
   readonly revision: number
+  readonly audienceId?: AudienceId | null
 }
 
 /**
@@ -318,14 +340,18 @@ export const pageViewsFor = (
   where: RevisionOf,
   rows: readonly StoredPageViews[]
 ): PageViewsFor => {
-  const matching = rows.filter(
+  const here = rows.filter(
     (row) => row.treeId === where.treeId && row.revision === where.revision
   )
+  const audience = where.audienceId ?? null
+  const matching =
+    audience === null ? here : here.filter((row) => row.audienceId === audience)
   const first = matching[0]
 
   return {
     measured: first === undefined ? null : (pageViewReadingOf([first]).revisions[0] ?? null),
-    foreign: rows.length - matching.length,
+    foreign: rows.length - here.length,
+    otherAudience: here.length - matching.length,
     duplicated: Math.max(0, matching.length - 1),
   }
 }

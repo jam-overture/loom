@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { nodeId, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
+import { nodeId, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION } from "../tree/tree.js"
 
@@ -85,6 +86,7 @@ const funnel = (
   converted: number,
   where: { treeId: typeof TREE; revision: number } = WHERE
 ): StoredFunnel => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: where.treeId,
   revision: where.revision,
   pair: pair(from, to),
@@ -98,6 +100,7 @@ const views = (
   appearances: number,
   where: { treeId: typeof TREE; revision: number } = WHERE
 ): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: where.treeId,
   revision: where.revision,
   opened,
@@ -141,6 +144,108 @@ describe("pageViewsFor", () => {
 
     expect(picked.measured?.opened).toBe(4)
     expect(picked.duplicated).toBe(1)
+  })
+})
+
+describe("the audience a door row and a funnel row belong to", () => {
+  /**
+   * A page served in two forms answers one funnel question twice, over two
+   * populations (0263, 0284). Before the audience was part of the matching,
+   * the second answer was the first one handed in twice and the other form's
+   * door row was picked by whichever came first in the caller's list.
+   */
+  const inAudience = <R extends { readonly audienceId: typeof SKIERS }>(
+    audienceId: typeof SKIERS,
+    row: R
+  ): R => ({ ...row, audienceId })
+
+  const SKIER_PAGE = pageReadingOf(
+    { treeId: TREE, schemaVersion: TREE_SCHEMA_VERSION, revision: 1, root: PAGE },
+    [],
+    NOTHING_DECLARED,
+    SKIERS
+  )
+
+  it("picks the door row of the audience the reading is of", () => {
+    const picked = pageViewsFor(SKIER_PAGE, [
+      inAudience(RIDERS, views(400, 400)),
+      inAudience(SKIERS, views(4, 5)),
+    ])
+
+    expect(picked.measured?.opened).toBe(4)
+    expect(picked.otherAudience).toBe(1)
+    expect(picked.duplicated).toBe(0)
+    expect(picked.foreign).toBe(0)
+  })
+
+  it("takes every form's row where the reading names no audience, as it always has", () => {
+    const picked = pageViewsFor(WHERE, [inAudience(RIDERS, views(400, 400)), views(4, 5)])
+
+    expect(picked.measured?.opened).toBe(400)
+    expect(picked.otherAudience).toBe(0)
+    expect(picked.duplicated).toBe(1)
+  })
+
+  it("reads one form's funnel answer and counts the other form's apart from it", () => {
+    const reach = funnelReachOf(
+      SKIER_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 40, 10)), inAudience(RIDERS, funnel("a", "b", 90, 90))],
+      [inAudience(SKIERS, views(100, 100)), inAudience(RIDERS, views(900, 900))]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.pairs[0]?.reached).toBe(40)
+    expect(reach.otherAudiencePairs).toBe(1)
+    expect(reach.duplicatedPairs).toBe(0)
+    expect(reach.foreignPairs).toBe(0)
+    expect(reach.opened).toBe(100)
+  })
+
+  /**
+   * The guard that has to survive the scoping: within one audience, one pair
+   * handed in twice is still one pair, which 0158 makes permanent if it is
+   * ever added instead.
+   */
+  it("still drops one audience's second row for a pair it already answered", () => {
+    const reach = funnelReachOf(
+      SKIER_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 40, 10)), inAudience(SKIERS, funnel("a", "b", 40, 10))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.duplicatedPairs).toBe(1)
+    expect(reach.otherAudiencePairs).toBe(0)
+  })
+
+  /**
+   * Carried rather than consumed and dropped: a comparison of two readings
+   * cannot refuse a pair of two populations unless each reading still says
+   * which population it was of.
+   */
+  it("names the audience the reading was of, so a comparison can refuse a pair of two", () => {
+    const reach = funnelReachOf(
+      SKIER_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 40, 10))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.audienceId).toBe(SKIERS)
+  })
+
+  it("names none where the reading named none, which is every window without the column", () => {
+    expect(funnelReachOf(WHERE, [funnel("a", "b", 40, 10)], [views(100, 100)]).audienceId).toBeNull()
+  })
+
+  it("counts another revision's funnel row as foreign before it is anybody's audience", () => {
+    const reach = funnelReachOf(
+      SKIER_PAGE,
+      [inAudience(RIDERS, funnel("a", "b", 9, 9, { treeId: TREE, revision: 7 }))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.foreignPairs).toBe(1)
+    expect(reach.otherAudiencePairs).toBe(0)
   })
 })
 

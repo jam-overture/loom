@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 
@@ -406,6 +407,16 @@ export type PairReach = {
 export type FunnelReach = {
   readonly treeId: TreeId
   readonly revision: number
+  /**
+   * The audience whose answers this reading is of, or `null` where the reading
+   * it was taken from named none.
+   *
+   * Carried rather than consumed and dropped. The rows are already scoped to it
+   * below, so this adds nothing to what is read — what it adds is the ability
+   * of a comparison to refuse a pair of two populations, which it cannot do
+   * from two readings that have forgotten which population each was of (0284).
+   */
+  readonly audienceId: AudienceId | null
   /** Page views that began on this revision. Exact, and addable (0219). */
   readonly opened: number
   /** The same page views as the rollups counted them: once per window each appeared in. */
@@ -445,12 +456,20 @@ export type FunnelReach = {
    */
   readonly foreignPairs: number
   /**
+   * Funnel rows for this revision in another audience, and ignored.
+   *
+   * The same question, answered for the other form of the page. Not foreign —
+   * it is this page's — and not a duplicate: two populations answering one
+   * question is two answers, and the one this reading wants is its own.
+   */
+  readonly otherAudiencePairs: number
+  /**
    * Funnel rows naming a pair already seen, where every one after the first was
    * ignored.
    *
-   * A store keeps one row per pair per revision, so this is a caller who
-   * concatenated two reads. Adding them would double a total that is already
-   * one.
+   * A store keeps one row per pair per revision per audience, and the audience
+   * is picked before this is counted, so this is a caller who concatenated two
+   * reads. Adding them would double a total that is already one.
    */
   readonly duplicatedPairs: number
   /**
@@ -483,7 +502,24 @@ const silenceOf = (opened: number, appearances: number): ReachSilence | null => 
 
 const endKey = (end: FunnelPair["from"]): string => `${end.nodeId} ${end.kind}`
 
-const pairKey = (pair: FunnelPair): string => `${endKey(pair.from)} ${endKey(pair.to)}`
+/**
+ * What makes two funnel rows the same question: the two nodes a deployment
+ * named, in the two kinds it named them with.
+ *
+ * Published rather than private because a second reading needs the same rule —
+ * a comparison of two windows pairs its rows by it — and two spellings of one
+ * identity is what the counter keys were before `counters.ts` wrote them once,
+ * and what the door's scale was before `door.ts` did. It is also the rule that
+ * decides what a **duplicate** row is, which 0158 makes permanent if it is got
+ * wrong in either place.
+ *
+ * Deliberately not the node ids alone: a pair asking `viewed → completed` and
+ * one asking `viewed → activated` over the same two nodes are two questions,
+ * and a reading that collapsed them would hold one window's conversions
+ * against another window's presses.
+ */
+export const funnelPairKey = (pair: FunnelPair): string =>
+  `${endKey(pair.from)} ${endKey(pair.to)}`
 
 type Measured = {
   readonly opened: number
@@ -590,7 +626,11 @@ export const funnelReachOf = (
   funnels: readonly StoredFunnel[],
   rows: readonly StoredPageViews[]
 ): FunnelReach => {
-  const where = { treeId: reading.treeId, revision: reading.revision }
+  const where = {
+    treeId: reading.treeId,
+    revision: reading.revision,
+    audienceId: reading.audienceId,
+  }
   const { measured, foreign, duplicated } = pageViewsFor(where, rows)
 
   const { opened, appearances, drift, pending, inflation, updatedAt } = measured ?? NOTHING_MEASURED
@@ -600,22 +640,34 @@ export const funnelReachOf = (
 
   const of: Measured = { opened, appearances, drift, pending }
 
-  const matching = funnels.filter(
+  const here = funnels.filter(
     (row) => row.treeId === where.treeId && row.revision === where.revision
   )
+  /**
+   * A funnel pair is asked of a page, and a page served in two forms answers
+   * it twice — one row per audience (0284), the same two ends, two different
+   * populations. Scoped to the reading's own audience so the other form's
+   * answer is neither taken as this one's nor counted as the same question
+   * asked twice, which is what `duplicatedPairs` means and what a double count
+   * makes permanent (0158) if the two are confused.
+   */
+  const matching =
+    where.audienceId === null
+      ? here
+      : here.filter((row) => row.audienceId === where.audienceId)
 
   const present = new Set<NodeId>(reading.parts.map((part) => part.nodeId))
 
   const seen = new Set<string>()
   const pairs = matching
     .filter((row) => {
-      const key = pairKey(row.pair)
+      const key = funnelPairKey(row.pair)
       if (seen.has(key)) return false
       seen.add(key)
 
       return true
     })
-    .sort((one, other) => pairKey(one.pair).localeCompare(pairKey(other.pair)))
+    .sort((one, other) => funnelPairKey(one.pair).localeCompare(funnelPairKey(other.pair)))
     .map((row) =>
       reachOf(row, of, silence !== null, {
         from: standingIn(present, row.pair.from),
@@ -626,6 +678,7 @@ export const funnelReachOf = (
   return {
     treeId: where.treeId,
     revision: where.revision,
+    audienceId: where.audienceId,
     opened,
     appearances,
     drift,
@@ -637,7 +690,8 @@ export const funnelReachOf = (
     pairs,
     foreign,
     duplicated,
-    foreignPairs: funnels.length - matching.length,
+    foreignPairs: funnels.length - here.length,
+    otherAudiencePairs: here.length - matching.length,
     duplicatedPairs: matching.length - pairs.length,
     stalePairs: pairs.filter((pair) => pair.stale).length,
     orphanedPairs: pairs.filter((pair) => pair.orphaned).length,

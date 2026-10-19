@@ -36,7 +36,7 @@ export type Verdict = "landed" | "held" | "approved" | "refused" | "nothing-to-d
  * the words that came in with the request, and they are separated out because
  * **not every request on this page is one of the five buttons.** Putting a
  * change back is a change of its own
- * ([0032](../../../../../../decisions/0032-an-undo-is-a-change-of-its-own-rather-than-a-rewind.md)),
+ * ([0032](../../../../../../decisions/0032-an-undo-is-a-proposal-not-a-rewind.md)),
  * so it arrives here with its own sentence to quote and its own explanation of
  * what it is about to do, and is otherwise reported exactly as anything else is.
  *

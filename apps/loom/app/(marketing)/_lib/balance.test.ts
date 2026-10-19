@@ -93,6 +93,17 @@ const NOT_ROWS: Readonly<Record<string, string>> = {
   "loom.link-list": "flows and wraps",
   /** A card is a row's *cell*, not a row. Its own children are stacked. */
   "loom.card": "stacks its own children",
+  /**
+   * A sentence with more than one pressable phrase in it, which arrived on
+   * 16 October when `/how-it-works` gave its three clauses three destinations.
+   *
+   * The children are an inline run rather than cells: they are words in one
+   * line of text, they wrap wherever the measure ends, and no phrase is
+   * stretched to match another. Reading the three as a row to be evened up
+   * would be asking three clauses of one sentence to be the same length, which
+   * is a rule about prose and the opposite of the one this file holds.
+   */
+  "loom.prose": "an inline run of words, not cells",
 }
 
 /**

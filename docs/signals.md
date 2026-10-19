@@ -33,7 +33,9 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
-| How much of what it says gets read | words readers reached against the words the page says ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)), with the passages nobody saw |
+| Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
+| What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
+| How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
@@ -55,7 +57,7 @@ the portal every day.
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
-| What a reading means when it says nothing | the condition and the subject behind all sixty-eight names, across fifteen sets and thirteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
+| What a reading means when it says nothing | the condition and the subject behind all seventy-eight names, across seventeen sets and thirteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -2043,6 +2045,494 @@ in three ways, and a deployment handed the wrong one looks in the wrong place.
 published next to it, so it is not a false number — but it is one question about
 two published shares and every role row under them, which is a unit and not a
 line.
+
+### 33. A share of the words the window can speak for · `Loom signals` · **done, 15 October**
+
+§32 took every signed figure over a page's words over the passages the window
+can speak for, and said in its own record what it had left: `CopyReading.share`
+is `read ÷ words`, so **a page where nothing reports reach publishes a share of
+nought beside an `unseen` list that is empty.** *None of this page was reached*,
+and underneath it no word it could name. The number is not false — nought is
+exactly what a standing of `read` asserts of those words, and the standings are
+published next to it — which makes it the worst thing a figure can be:
+incoherent read quickly and defensible read carefully.
+
+**Done.** It is the **twenty-third** thing taken out of what this subsystem
+already knows rather than collected, and the second of them that is a published
+figure corrected rather than a new one added. **Nothing was added to a payload,
+a browser, a column, a store or the vocabulary of kinds**, and the broadcaster
+was not touched — measured both sides and byte-identical.
+
+Four things decide the shape
+([0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)):
+
+- **The denominator is published, not derivable.** `CopyReading.spoken` and
+  `RoleCopy.spoken` are the words in parts the window can speak for, and
+  `share` is `read ÷ spoken`. A surface working out what a share is of by
+  taking `words` less `wordsByStanding.unknown` would be re-deriving the
+  universe the figure is about, which is how two screens come to disagree.
+  `words` is untouched and the census stays whole.
+- **The commonest case is not the one it was filed for.** A window with no page
+  views makes every part `unknown`, so **every unmeasured window in this
+  subsystem has been publishing a share of exactly 0** beside a `typical` of
+  `null`. That is far more rows than the broken-sender state §32 found, and it
+  reads the same way on a card.
+- **No fifteenth silence vocabulary.** `share` is absent in exactly three
+  states and all three are already `CopySilence` members — `wordless`,
+  `unmeasured`, `unspoken` — while `floored` and `inconsistent` leave it
+  standing, which is 0235's own rule that a share survives a floor and says so.
+  `silence` is now the reason either figure is absent, and the equivalence is
+  pinned over the closed set rather than by a sentence. That the three cannot
+  become four is arithmetic: `unknown` is the one standing whose `reached` is
+  nought by construction, so a page with no spoken-for word can never also be
+  `inconsistent`.
+- **And *spoken for* is written once.** `spokenFor(standing)` is published from
+  `parts.ts`; `movementOf` reads it, so `copy-change.ts`'s
+  `spokenForOnBothSides` is the same rule twice rather than two that agree;
+  `library-word-reach-change.ts` imports that instead of spelling it inline,
+  and `library-reach-change.ts`'s two-sided test over parts reads the base one.
+  Three modules enumerated the standing by hand and a fourth was about to,
+  which is the finding this lane filed on reading #640 and #642 merge hours
+  apart. `anchors` in `change.ts` and `progress.ts` is deliberately **not**
+  folded in: it asks the same question for 0221's reasons and a predicate
+  shared because two rules agree is the mistake being fixed.
+
+**Nothing is superseded.** 0235 §2's decision — two shares, because *the words
+somebody read* and *the words a reader reads* are two sentences — is unchanged;
+what moved is the universe the first of them is a share of, which is the move
+0282 made to the second of them on the same clause. **If the enumeration in
+0235 §2 is read as the decision rather than as its description, 0287 is the
+record to refuse**: the reversal is one argument and two fields.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: a share
+whose denominator moved under a field that kept its name, and a page that now
+has no share where it had a nought.
+
+### 34. What a change did to the funnel · `Loom signals` · **done, 16 October**
+
+> §33 was on the branch of #649 through this run, so its number was left for it
+> rather than taken, and that branch has since landed. It takes every share of a
+> page's words over the words the window can speak for; nothing in it and
+> nothing here touches the other's files except `docs/signals.md`,
+> `decisions/README.md` and `FINDINGS.md`, in the places two additions always
+> collide.
+
+§13 reads a revision's funnels against the readers who arrived, and §10 onward
+compares two windows of everything else: where reading stops, how much gets
+read, whether readers had time for it, who the readers were, what readers did
+inside a part, and four readings of a library. **The funnel had no comparison**,
+and it is the one counter here a deployment opens the portal for. *We shipped a
+change — did more readers buy?* was two screens and a subtraction done by eye.
+
+**Done.** `funnelChangeOf(was, now)` in
+[`src/signals/funnel-change.ts`](../src/signals/funnel-change.ts) is the
+**twenty-fourth** thing taken out of what this subsystem already knows rather
+than collected. #649 landed first, and §33 counts itself the twenty-third the
+way §32 counted itself, which settles the one number here that depended on the
+merge order. **Nothing was added to a payload, a browser, a column, a store
+or the vocabulary of kinds**; the broadcaster was not touched and is
+byte-identical at 6,477 bytes minified and 2,935 gzipped, measured both sides
+with `cmp`.
+
+Two things decided the shape
+([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)),
+and the second is a rule this subsystem now has in general:
+
+- **A funnel's two factors are separable, so this comparison gets the
+  counterfactual §18's could not have.** Of the readers who arrived, the share
+  that finished is the share that got to the first end multiplied by the share
+  of *those* who finished — an exact identity, with each factor's numerator and
+  denominator inside one window, which is the test 0251 set for any ratio
+  across two windows. So the later window's reach at the earlier window's
+  closing rate isolates one side and the other diagonal isolates the other, and
+  the reading answers *your change did not sell more; it got more readers to the
+  pricing band and the same share of them bought.* The cause has **three**
+  members where 0244's and 0279's have four, and the missing one is unreachable
+  rather than unwanted: a product's two counterfactuals multiply to the product
+  of its two levels, so one of them always carries the movement. A sum's do not,
+  which is why these two rules are deliberately not one function.
+- **A difference of two floors is not a floor, so the rate movement is a
+  bracket.** 0231 found `rate` the one figure here biased *downward* — a page
+  view that straddles a rollup boundary contributes `reached 1, converted 0` to
+  the first window and nothing to the second, so the conversion is lost — and
+  published `rateAtMost` as its ceiling. Nobody had subtracted two of them. The
+  size of the bias is set by the deployment's own rollup window, so **shortening
+  `windowMs` between two readings makes a funnel read as a collapse with no
+  reader behaving differently**. The true ratio is bracketed by each side's own
+  ceiling, and `rateMoved` says whether that interval clears 1. It is 0282's
+  lesson one reading across and at larger stakes: a figure safe to publish as
+  *at most* on one page is a movement nobody made when two of them are held
+  against each other.
+
+Three more settled in the building. **A silence costs this reading half of
+itself and never a row** — a share of the arrivals needs the door on both sides,
+and a rate is two counts off one row, so a deployment whose page-view rows have
+expired still gets its rates, its movements and its questions. **What a change
+did to the question is its own movement**: a funnel pair is the one thing read
+here that a deployment *wrote*, and `broken` — both ends present before and one
+of them gone now — is a thing to fix in the configuration rather than in the
+page, answered under every silence because it is a fact about two trees. And
+**the pairing rule is published once**, as `funnelPairKey`, because what counts
+as one question is what decides what a duplicate is, which 0158 makes permanent
+if the two places disagree.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+before-and-after card the whole subsystem has been building toward, with the one
+figure on it that must be drawn as an interval rather than a number.
+
+### 35. Which page a change helped, and which it hurt · `Loom signals` · **done, 16 October**
+
+§21 puts a deployment's pages in one order — *where is the problem* — and it is
+an order over **one window**. Every comparison this subsystem has is of one
+page: where its reading stops, how much of it gets read, whether its readers had
+room, what they did inside its parts, who they were, and since this morning its
+funnels. Four more compare a **library**, which is a census by kind rather than
+an order over pages.
+
+So *which page is worst* could be asked and **which page got worse could not** —
+and that is the question a change creates, which is the question this product
+exists to answer. A deployment that shipped a change across forty pages had two
+screens and a subtraction done by eye, forty times.
+
+**Done.** `deploymentChangeOf(changes, rows)` in
+[`src/signals/deployment-change.ts`](../src/signals/deployment-change.ts) is the
+**twenty-fifth** thing taken out of what this subsystem already knows rather
+than collected. **Nothing was added to a payload, a browser, a column, a store
+or the vocabulary of kinds**; the broadcaster was not touched and is
+byte-identical, measured both sides.
+
+Two things decide the shape
+([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)):
+
+- **The ranking figure a comparison publishes is not comparable across two
+  pages, and this is the sharpest case of §21's rule rather than another
+  instance of it.** A comparison compares shares and never counts, and its
+  share movement has no straddle in it — both sides are falls off their own
+  rows, so each window's inflation divided out before the two met. Then the
+  honest movement is multiplied by the readers that reached the stop in the
+  later window, which is a distinct view count and carries one. **The straddle
+  walks back in at the last step of a figure that looks corrected**, so the key
+  here is that figure put on the scale the door counts in, with each revision's
+  own rate out of its own row. Only the later window's rows are asked for,
+  because the figure being scaled is the later window's own.
+- **A page has no net movement, so there are two orders and not one.** Adding a
+  page's stops counts one reader once per stop they walked past, which is the
+  refusal every reading here makes of a page-level total; and the shape of a real
+  change makes this the ordinary case rather than an edge — the band an author
+  rewrote reads better and the one it pushed below the fold reads worse. One
+  signed figure per page would net those against each other and report a page
+  where nothing happened. So a page is ordered by its own worst stop and by its
+  own best one, stands in both orders where it earned both places, and is counted
+  once in the standings.
+
+Three more settled in the building. **A page nothing moved is an answer and not
+a silence** — the gate into either order is the comparison's own one-reader test,
+which is what keeps a page three people have read off the top of a screen the
+morning after a change, and the two windows' view floors travel with the row so
+a steady page can be told from a quiet one. **A page handed in with two
+different comparisons is in no order, no standing and no total, and is named**:
+a tree live at two revisions is two live versions of one page and §21 keeps both,
+but a comparison pairs by page, so such a tree has two movements and none that is
+the page's. And **the seventeenth silence vocabulary brought no new condition and
+no new subject, but the one combination of them this table had not held** — its
+reading is of a deployment and every reason it gives is about a *comparison*,
+which is §17's claim at one more remove: an order is silent about its members,
+and here a member is itself a pair of windows.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+morning-after screen, the two orders side by side rather than netted, and the
+three figures on a row that a card must not add.
+
+### 36. A reading is of one audience · `Loom signals` · **done, 17 October**
+
+> §35 was on the branch of #659 when this was built — the two orders a change
+> makes over a deployment's pages — so its number was left for it rather than
+> taken. **It then merged while this branch was open, as 0291 rather than the
+> 0289 it was written as**, and `main` was merged in here. That brought
+> `deployment-change.ts` into this diff, written against the reading this
+> section changes, and it is brought into line below: the merge is part of this
+> unit rather than a thing left for the next run.
+
+[0263](../decisions/0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md)
+made a page one base tree plus the deltas an audience earns, composed per
+request in the customer's own process, and
+[0284](../decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)
+put the audience on all five reader tables so two forms of one page could be
+told apart. **Nothing above the store had been told.** Every reading here
+identifies a page by a tree and a revision, which two audiences share — so the
+first deployment to serve a second form of a page would have had that form's
+counters dropped as *the first form's node handed in twice*, its door row
+chosen by the caller's array order, its funnels dropped as the same question
+asked twice, and itself missing from the order over its pages and from every
+census of its library. And it would have been told, by the one reading whose
+whole job is to say whether what a deployment collects can be trusted, that its
+**caller** had made the mistake.
+
+**Done.** `readingKeyOf` and `byAudience` in
+[`src/signals/audiences.ts`](../src/signals/audiences.ts), with the audience
+carried on a reading and matched in the three joins that pick a page's rows out
+of a window — the door row, the funnel answers and the region map. **Nothing was
+added to a payload, a browser, a column, a store or the vocabulary of kinds** —
+the column has been there since 0284; this is the reading of it. The
+broadcaster was not touched and is byte-identical at 6,477 bytes minified and
+2,935 gzipped.
+
+Three things decided the shape
+([0290](../decisions/0290-a-reading-is-of-one-audience-and-two-forms-of-a-page-are-two-readings-rather-than-one-handed-in-twice.md)):
+
+- **What counts as one page is published once, because what counts as one page
+  is what decides what a duplicate is.** Five readings refuse to count a page
+  twice, each in its own loop, and each refused on a tree and a revision. They
+  now import one rule. It is the lesson `counters.ts` holds for the store keys
+  and `funnelPairKey` holds for the funnel pairing, in the one place where
+  getting it wrong is 0158-permanent: a count that was never added cannot be
+  noticed.
+- **A window holding two audiences with none asked for is read as neither.**
+  The three available answers are summing two populations — the collapse 0284
+  names, *a number that looks right forever* — picking one by row order, which
+  is what the code did and which lets two screens reading one store disagree
+  without either being able to tell, and refusing. The reading names both
+  audiences it was handed, every part is `unknown`, and a **seventh collection
+  fault**, `audiences-mixed`, says it was the caller and says the remedy is to
+  split rather than to go looking for a bad row.
+- **A window naming one audience needs no caller to say so, and a window naming
+  none is not `aud_everyone`.** *Nothing here says* is a third state and is kept
+  as one: `aud_everyone` is an assertion, true of every row written before the
+  migration and false of a deployment serving only `aud_pro`, where defaulting
+  to it would turn a correct reading into a page with no door row at all.
+
+Two more settled in the building. **`duplicated` is narrower and stronger
+everywhere it appears** — *the same row of the same form handed in twice*, which
+is the only reading of it 0158's permanence is true of — and each join gained an
+`otherAudience` count that is neither `foreign` nor `duplicated`, because this
+page's other form has real readers who are not the ones being read. The region
+map is where the old behaviour was least visible and no less wrong: its counts
+are running totals rather than a window's, so the second form's bucket for a
+country was dropped as the first form's bucket handed in twice, one form's
+readership was published as the page's, and the readership comparison of §20
+built on it would have been comparing neither form with itself. And **two
+forms of one page stand as two rows wherever two revisions do**, in the order
+over a deployment's pages and in every library census, with the audience on the
+row so a screen can tell them apart and nothing summed across them.
+
+**What is now expressible and is deliberately not built:** the comparison of two
+audiences. Two readings of one tree at one revision, each of one population, is
+exactly what one would take — and it must not borrow `changeOf`, whose
+arithmetic is right and whose sentence is wrong. A before-and-after holds the
+readership still and varies the tree, which is why §20 exists to check it; an
+audience comparison varies the readership **by construction** and holds the tree
+still, so the confounder §20 detects is permanently true and the movement
+carries two causes nothing in the counters separates. It is a record of its own
+when it is built.
+
+**§35 was brought into line in the same unit, because the merge made it part of
+this one.** `deployment-change.ts` landed on `main` from #659 while this branch
+was open, written against the readings as they were, and it had the defect this
+section exists to remove in two shapes. Its comparison key was the page and two
+revisions, so the second form's comparison was the first one handed in twice;
+and its ambiguity gate grouped by **tree**, so two forms compared over
+*different* revision pairs made the page `ambiguous` and **both** forms were
+dropped from both orders. It also rebuilt the door's asking from tree and
+revision alone, discarding the audience the progress reading now carries, so a
+movement could be scaled by the other form's arrivals.
+
+What it needed was one more rule beside `readingKeyOf` rather than a sixth
+spelling of it: **`formKeyOf` — a page in one of its forms, with no revision in
+it**, because a comparison spans two revisions and the ambiguity being gated is
+about one form holding two of those pairs. The two rules are deliberately not
+one: `readingKeyOf` answers *what is one reading*, where a revision is part of
+the identity, and `formKeyOf` answers *what is one page in one form*, where the
+revision is the thing compared across. `MovedPage` now carries the audience, as
+`RankedPage` and `PageHealth` do.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: a
+dimension on every screen that reads these counters, the two rows that are one
+page in two forms, and the one fault whose remedy is a line of the surface's own
+code.
+
+### 37. A comparison pairs pages by form · `Loom signals` · **done, 17 October**
+
+[0290](../decisions/0290-a-reading-is-of-one-audience-and-two-forms-of-a-page-are-two-readings-rather-than-one-handed-in-twice.md)
+gave every **reading** of these counters the audience dimension and published
+`readingKeyOf` so that five of them would stop spelling it. **The comparisons
+were not in that unit**, and the four comparisons of two windows of a library
+paired each page with its counterpart by tree alone — so two forms of a page
+(0263), which share a tree, were one key. In the two cases a window can hold
+them both:
+
+- **at one revision**, the second form was dropped as the first one handed in
+  twice, which is the one condition
+  [0158](../decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+  makes permanent and which `health.ts` reports with the **caller** as the
+  remedy;
+- **at two revisions**, the tree went into `ambiguous` and **both** forms left
+  every row, every total and every ranking — a page the deployment serves twice,
+  absent from a census of its library because one of its forms was republished.
+
+Two quieter consequences rode along. A kind's `pages` is a set, so two forms
+counted as one page, understating the places a kind stands by exactly the pages
+a deployment serves twice; and `LibrarySide.scaled` keyed each paired page's
+**door** by its tree, so whichever form the map held scaled the other form's
+readers — `pageViewsFor` scopes a door row to the reading's own audience (0290),
+so the two forms have two doors and one of them was being used for both.
+
+And `library-copy-change.ts` carried a **second hand-written copy** of
+`pairedWindowOf`, 150 lines from the export whose own doc comment says why there
+should not be one. It was wrong in the same two ways.
+
+**Done.** `formKeyOf`, `formOf`, `PageForm` and `inFormOrder` published from
+[`audiences.ts`](../src/signals/audiences.ts) beside `readingKeyOf`, and
+`pairedWindowOf` keyed by the form
+([0293](../decisions/0293-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md)).
+`formKeyOf` was written for 0290 clause 7 and kept private in
+`deployment-change.ts`; it now lives where `readingKeyOf` does and that module
+imports it, which is the lesson of the finding filed the same day: *a published
+key stops two places disagreeing only once both places import it*, and one of
+them did not exist to import it. **Nothing was added to a payload, a browser, a
+column, a store or the vocabulary of kinds** — the audience column has been on
+the rows since 0284. The broadcaster was not touched and is byte-identical at
+6,477 bytes minified and 2,935 gzipped.
+
+The two keys are deliberately two, and the difference is now written where they
+are published: `readingKeyOf` answers *what is one reading*, where a revision is
+part of the identity; `formKeyOf` answers *what is one page in one form*, where
+the revision is absent because it is the thing being compared across.
+`ambiguous` is published as `readonly PageForm[]` on all four comparisons, for
+the reason `MovedPage`, `RankedPage` and `PageHealth` carry the audience after
+0290 — a list of trees cannot say *one of these two forms*.
+
+**What is left, and it is an open finding rather than a gap here.** None of the
+comparisons checks that its **two sides** are of one form. For a library
+comparison the failure is loud — `aud_pro`'s pages pair with none of
+`aud_free`'s, so every page reads gained and every page reads lost. For a page's
+own before-and-after it is quiet: `readingChangeOf` compares one form's earlier
+window with another form's later one, produces every figure, and labels it as
+what a change did. That is a decision about four published silence vocabularies
+and the same question in eight more functions, which is a unit of its own.
+
+### 38. A comparison is of one readership · `Loom signals` · **done, 18 October**
+
+> §36 shipped yesterday morning and its own clause 7 was built in the same unit;
+> the pull request that followed it (#668, *a comparison pairs pages by form*)
+> was still open when this was built, so the four library comparisons it touches
+> are **deliberately left out of this unit** rather than stacked on its branch.
+> They are filed, and the rule they need is published and waiting.
+
+§36 gave every *reading* of the reader counters the audience dimension. Its own
+*Alternatives considered* named what it left standing, and an open finding of
+17 October named it again: **ten comparisons take their pair from a caller and
+not one of them could tell that the two were of two populations.**
+
+Nine of them already refuse a pair of two *trees*; the tenth, the readership
+comparison, states the same requirement in prose and cannot check it, because a
+region map names no tree. The two faults are the
+same kind of mistake with opposite visibility: two pages make every figure
+absurd and a reviewer sees it at a glance, while **two forms of one page compare
+cleanly** — they share a tree id, so the join matches, the shares divide, the
+signs are right and the ranking is in the right order. What is wrong is the
+sentence over them, *this is what your change did*, when the readership was
+varied by construction and the tree may not have changed at all.
+
+**Done.** `crossesAudiences` and `comparedAudiencesOf` in
+[`src/signals/audiences.ts`](../src/signals/audiences.ts), with a
+`different-audiences` refusal on the five page-scale comparisons — where reading
+stops, the words a change put in front of readers, whether readers had time, what
+readers did, and what a change did to the funnel — and a seventh
+`ReadershipComparability` on the readership comparison. **Nothing was added to a
+payload, a browser, a column, a store or the vocabulary of kinds** — the audience
+column has been on the rows since 0284 and this is the reading of it. The
+broadcaster was not touched and is byte-identical at 6,477 bytes minified and
+2,941 gzipped.
+
+Four things decided the shape
+([0294](../decisions/0294-a-comparison-is-of-one-readership-and-a-pair-that-proves-two-audiences-is-refused.md)):
+
+- **It refuses what it can prove, and publishes the rest.** Both sides name an
+  audience and the two differ is the only provable case. A window whose rows
+  never carried the column names none, so a pair spanning the migration is
+  either an honest before-and-after across the upgrade or a cross-population
+  comparison and nothing in the counters tells them apart — refusing both would
+  withhold the comparison a deployment most wants. So every comparison now
+  carries `audiences: { was, now }`, under a silence and under none, and a
+  `null` on either side is the whole of why an unrefused pair may still be two
+  populations.
+- **A refusal rather than a partial silence, and the census goes with it.** Six
+  of the nine leave their tree half standing when a window is empty, because what
+  a change did to the tree is a fact about the tree. That does not reach here: a
+  page is one base tree plus the deltas an audience earns, so the two sides are
+  two trees wearing one tree id, and *three bands moved and one was reworded*
+  read across two forms is the other form's deltas reported as the change.
+- **A reading that scoped itself to an audience now says so.** `FunnelReach` and
+  `RegionReading` filtered their rows to one audience and discarded which one,
+  so two of the nine comparisons could not have been guarded at all. Both now
+  carry `audienceId`, derived from what they already filtered on.
+  `regionReadingOf` leaves it `null` deliberately — it groups whatever it is
+  handed, and a deployment's whole window is *a readership* rather than one
+  form's.
+- **One condition for the whole subsystem.** `two-audiences` in
+  [`silences.ts`](../src/signals/silences.ts), reported by all five vocabularies
+  and held apart from `two-pages`, because the two send a reader to fix two
+  different things: one caller is holding two unrelated readings and the other is
+  holding two forms of one page.
+
+**What is left and is filed:** the four library comparisons, for the reason at
+the head of this section; and the readership comparison's honest limit, which is
+that two maps read whole over a window holding two audiences name none, so the
+pair is unprovable and is compared.
+
+### 39. A library gained a form, not a page · `Loom signals` · **done, 18 October**
+
+§38 left four comparisons out and filed them, and the filed proposal was to lift
+its `different-audiences` refusal onto them — probably refusing a **mixed**
+window first, since a library window is a set of readings rather than one. The
+branch holding those files has merged and **the proposal does not survive
+reading them.**
+
+What it was written before is
+[0293](../decisions/0293-a-comparison-pairs-pages-by-form-and-the-pairing-rule-is-published-beside-the-reading-rule.md).
+All four now pair by **form**, so a form meets only the identical form in the
+other window: every placement held still is one form's against its own, and no
+share in any of the four has a denominator spanning two populations. The fault
+0294 refuses cannot be built through these entry points. Two windows of two
+disjoint audiences do not come back as a plausible wrong number — they come back
+as every form unpaired, every movement `unknown` and `pages` of nought.
+
+**What they do get wrong is a count of pages, in the loud direction.** After
+0293 `pagesGained` is forms, and three of the four still documented it as trees.
+A deployment that began serving `aud_pro` on five pages it already served is told
+its library gained five pages. It published nothing — and the fact that separates
+the two readings, the tree behind each form, was already in hand on both sides.
+
+**Done**
+([0295](../decisions/0295-a-library-comparison-reports-the-populations-it-was-taken-over-and-refuses-none-of-them.md)):
+
+- **No refusal, on either count.** Not a `different-audiences` member, because
+  there is no wrong number to withhold; and not a refusal of a mixed window,
+  because after 0263 a deployment serving two audiences has a mixed window for
+  every library comparison it ever takes, and refusing it would withhold this
+  reading from exactly the deployments 0263 was built for.
+- **`formsGained` and `formsLost`** on all four: the subset of the gained or
+  lost forms whose page the other window already held. `pagesGained −
+  formsGained` is pages published and `pagesLost − formsLost` is pages that left
+  the library, so both sentences come out of one subtraction.
+- **`audiences: ComparedPopulations`** on all four — a *set* per side, because a
+  window holds every form a deployment served. Published and never refused;
+  deliberately not `ComparedAudiences`, which is one audience per side and is
+  what a refusal keys on.
+- **`audiencesOf` and `pagesOf`** published from
+  [`audiences.ts`](../src/signals/audiences.ts) beside the two key rules, so the
+  form census is one spelling rather than four.
+- **Three stale doc comments corrected.** `pages`, `pagesGained` and `pagesLost`
+  say forms, which is what they have counted since 0293.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the twenty-eighth thing taken out of what this subsystem already
+knows. The broadcaster was not touched and is byte-identical at 6,477 bytes
+minified and 2,941 gzipped.
+
+**What is left and is filed:** the placements are not decomposed the same way
+and the reason is written down; and no screen reads either new number, which is
+`Loom portal`'s.
 
 ## Still not in scope
 

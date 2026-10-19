@@ -1,0 +1,16 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    { "path": "/?theme=minimal", "out": "2026-10-15-framework-ramp-front-door-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels", "text=Try it yourself"] },
+    { "path": "/?theme=editorial", "out": "2026-10-15-framework-ramp-front-door-editorial-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels"] },
+    { "path": "/?theme=bold", "out": "2026-10-15-framework-ramp-front-door-bold-phone", "viewport": "phone", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels"] },
+    { "path": "/?theme=minimal", "out": "2026-10-15-framework-ramp-front-door-wide", "viewport": "wide", "waitFor": "h1",
+      "measure": ["h1", "text=See how a change travels", "text=Try it yourself"] },
+    { "path": "/docs", "out": "2026-10-15-framework-ramp-docs-phone", "viewport": "phone", "waitFor": "body",
+      "measure": ["h1"] }
+  ]
+}

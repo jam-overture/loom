@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import type { JsonObject } from "../json.js"
 import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
@@ -12,10 +13,13 @@ import {
   COPY_SILENCES,
   copyChangeOf,
   copyReadingOf,
+  DEPLOYMENT_CHANGE_SILENCES,
+  deploymentChangeOf,
   DEPLOYMENT_SILENCES,
   describeSilenceCondition,
   describeSilenceSubject,
   distinctSilences,
+  FUNNEL_CHANGE_SILENCES,
   KIND_ACTION_SILENCES,
   KIND_CHANGE_SILENCES,
   KIND_COPY_CHANGE_SILENCES,
@@ -32,7 +36,9 @@ import {
   meaningOfChangeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
+  meaningOfDeploymentChangeSilence,
   meaningOfDeploymentSilence,
+  meaningOfFunnelChangeSilence,
   meaningOfKindActionSilence,
   meaningOfKindChangeSilence,
   meaningOfKindCopyChangeSilence,
@@ -126,6 +132,7 @@ const tally = (name: string, counters: Partial<ReaderTally> = {}): ReaderTally =
 })
 
 const row = (counts: Partial<StoredPageViews> = {}): StoredPageViews => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
   treeId: TREE,
   revision: 1,
   opened: 0,
@@ -153,6 +160,8 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
   ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
+  ...DEPLOYMENT_CHANGE_SILENCES.map(meaningOfDeploymentChangeSilence),
+  ...FUNNEL_CHANGE_SILENCES.map(meaningOfFunnelChangeSilence),
   ...KIND_SILENCES.map(meaningOfKindSilence),
   ...KIND_ACTION_SILENCES.map(meaningOfKindActionSilence),
   ...KIND_CHANGE_SILENCES.map(meaningOfKindChangeSilence),
@@ -173,6 +182,8 @@ describe("what a reading means when it says nothing", () => {
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
         DEPLOYMENT_SILENCES.length +
+        DEPLOYMENT_CHANGE_SILENCES.length +
+        FUNNEL_CHANGE_SILENCES.length +
         KIND_SILENCES.length +
         KIND_ACTION_SILENCES.length +
         KIND_CHANGE_SILENCES.length +
@@ -267,6 +278,16 @@ describe("what a reading means when it says nothing", () => {
           ),
           [],
         ],
+        [
+          "funnel-change",
+          FUNNEL_CHANGE_SILENCES.map((of) => meaningOfFunnelChangeSilence(of).condition),
+          [],
+        ],
+        [
+          "deployment-change",
+          DEPLOYMENT_CHANGE_SILENCES.map((of) => meaningOfDeploymentChangeSilence(of).condition),
+          [],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -310,6 +331,8 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "comparison",
+      "comparison",
       "kind",
       "kind",
       "kind",
@@ -336,6 +359,42 @@ describe("what a reading means when it says nothing", () => {
     for (const line of SILENCE_CONDITIONS.map(describeSilenceCondition)) {
       expect(line).not.toMatch(/\b0\d{3}\b/)
     }
+  })
+})
+
+/**
+ * The condition the comparisons gained together, which is the shape this table
+ * exists for: one state, reported by five readings, named once.
+ */
+describe("a pair of two populations", () => {
+  it("is one condition however many comparisons report it", () => {
+    const conditions = [
+      meaningOfChangeSilence("different-audiences"),
+      meaningOfCopyChangeSilence("different-audiences"),
+      meaningOfPaceChangeSilence("different-audiences"),
+      meaningOfActionChangeSilence("different-audiences"),
+      meaningOfFunnelChangeSilence("different-audiences"),
+    ]
+
+    expect(new Set(conditions.map((meaning) => meaning.condition))).toEqual(
+      new Set(["two-audiences"])
+    )
+    expect(new Set(conditions.map((meaning) => meaning.vocabulary)).size).toBe(conditions.length)
+  })
+
+  /**
+   * Held apart from two pages, because they are two different things to go and
+   * fix: one caller is holding two unrelated readings and the other is holding
+   * two forms of one page.
+   */
+  it("is not the condition two pages report", () => {
+    expect(meaningOfChangeSilence("different-audiences").condition).not.toBe(
+      meaningOfChangeSilence("different-trees").condition
+    )
+    expect(relateSilences(
+      meaningOfChangeSilence("different-audiences"),
+      meaningOfCopyChangeSilence("different-trees")
+    )).toBe("unrelated")
   })
 })
 
@@ -592,6 +651,25 @@ describe("the mapping, against what the readings actually say", () => {
 
     expect(change.silence).toBe("different-trees")
     expect(meaningOfChangeSilence("different-trees").condition).toBe("two-pages")
+  })
+
+  /**
+   * The two spellings of one state, in the one place a surface meets both at
+   * once: a comparison handed two pages says `different-trees`, and an order
+   * holding that comparison says `mispaired` of the page it could not place. One
+   * condition, one subject, two sentences worth printing.
+   */
+  it("maps an order holding a mispaired comparison to the state the comparison itself reports", () => {
+    const change = readingChangeOf(readingOf(treeOf(PAGE), []), readingOf(ANOTHER_PAGE, []))
+    const order = deploymentChangeOf([change], [])
+
+    expect(order.unranked.map((page) => page.standing)).toEqual(["mispaired"])
+    expect(
+      relateSilences(
+        meaningOfDeploymentChangeSilence("mispaired"),
+        meaningOfChangeSilence("different-trees")
+      )
+    ).toBe("one-state")
   })
 
   it("maps a comparison with one empty window to nothing having been seen, of the pair", () => {

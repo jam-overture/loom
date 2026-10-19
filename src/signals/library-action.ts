@@ -8,6 +8,7 @@ import {
   type ActionStanding,
   type PartAction,
 } from "./action.js"
+import { readingKeyOf } from "./audiences.js"
 import { doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import type { KindReachSilence, UnscaledPage } from "./library-reach.js"
@@ -786,7 +787,7 @@ export const libraryActionOf = (
   }
 
   for (const reading of readings) {
-    const revision = `${reading.treeId}\u0000${reading.revision}`
+    const revision = readingKeyOf(reading)
 
     if (seen.has(revision)) {
       duplicated += 1
