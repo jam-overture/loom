@@ -58,6 +58,30 @@ export const projectSchema = z
     name: z.string().min(1).max(200),
     createdAt: z.string().datetime(),
     /**
+     * The repository this project's pages live in, or absent (0292).
+     *
+     * **At most one, and a repository belongs to at most one project**, which
+     * is what makes the write-back expressible: the first one is a pull
+     * request against the customer's repository (0275), and a pull request has
+     * exactly one destination. The uniqueness is the store's to
+     * enforce, because two projects claiming one repository is a race rather
+     * than a typo.
+     *
+     * Absent is the ordinary first state and stays legal: a project that keeps
+     * its tree in a working copy or in its own database has no repository, and
+     * being connected for observation alone needs none at all (0275).
+     *
+     * Spelled `owner/name`. Not a URL, because the forge is not in the value —
+     * a URL would make `github.com/a/b` and `https://github.com/a/b/` two
+     * repositories, and the uniqueness above is only as good as the spelling.
+     * What understands it is the write-back adapter, which does not exist yet.
+     */
+    repository: z
+      .string()
+      .regex(/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/)
+      .max(140)
+      .optional(),
+    /**
      * When it was closed, or absent while it is open (0289).
      *
      * Closing is what this store has instead of deleting: a project's rows are

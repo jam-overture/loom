@@ -35,6 +35,7 @@ const toProject = (row: typeof loomProjects.$inferSelect): Result<Project, Proje
     projectId: row.projectId,
     name: row.name,
     createdAt: row.createdAt,
+    ...(row.repository === null ? {} : { repository: row.repository }),
     ...(row.closedAt === null ? {} : { closedAt: row.closedAt }),
   })
 
@@ -54,6 +55,7 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
         projectId: project.projectId,
         name: project.name,
         createdAt: project.createdAt,
+        repository: project.repository ?? null,
       })
       return ok(project)
     } catch (cause) {
@@ -64,8 +66,30 @@ export const postgresProjectStore = (db: LoomDatabase): ProjectStore => ({
        * loser of a race between two people registering the same project would
        * otherwise silently take ownership of the winner's rows.
        */
+      /**
+       * Two unique constraints can raise this now: the primary key, and the
+       * partial index on `repository` (0292).
+       *
+       * Which one is **asked** rather than guessed. Deciding from what the
+       * caller passed would misreport an id collision as a taken repository
+       * whenever both were set, and parsing the driver's message is not
+       * portable across the two drivers this runs on. The extra read happens
+       * only on the error path, where one more round trip costs nothing.
+       */
       if (isUniqueViolation(cause)) {
-        return err({ code: "already-exists", projectId: project.projectId })
+        const existing = await db
+          .select({ projectId: loomProjects.projectId })
+          .from(loomProjects)
+          .where(eq(loomProjects.projectId, project.projectId))
+          .limit(1)
+
+        if (existing[0] !== undefined) {
+          return err({ code: "already-exists", projectId: project.projectId })
+        }
+
+        return project.repository === undefined
+          ? err({ code: "already-exists", projectId: project.projectId })
+          : err({ code: "repository-taken", repository: project.repository })
       }
       return err(unavailable(cause, `could not create project ${project.projectId}`))
     }

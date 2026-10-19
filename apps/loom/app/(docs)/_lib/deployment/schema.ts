@@ -60,6 +60,15 @@ export type SchemaIndex = {
    * out of fourteen, and "indexed on that path" would read as all of them.
    */
   readonly where?: string
+  /**
+   * Whether the index also forbids a second row with the same value.
+   *
+   * Carried for the reason `where` is: an index described only as *indexed on*
+   * reads as a performance note, and `loom_projects_repository_idx` is a rule —
+   * a repository belongs to at most one project (0292), and the database is
+   * what enforces it.
+   */
+  readonly unique?: boolean
 }
 
 export type SchemaTable = {
@@ -135,7 +144,7 @@ const GUARDED_BLOCK = /^DO \$\$[\s\S]*\$\$$/
  * refuses it below rather than guessing.
  */
 const CREATE_INDEX =
-  /^CREATE INDEX IF NOT EXISTS (\w+) ON (\w+) \(([\s\S]*)\)(?: WHERE ([\s\S]+))?$/
+  /^CREATE (UNIQUE )?INDEX IF NOT EXISTS (\w+) ON (\w+) \(([\s\S]*)\)(?: WHERE ([\s\S]+))?$/
 const PRIMARY_KEY_CONSTRAINT = /^PRIMARY KEY \(([^)]*)\)$/
 
 /** Everything between the outer brackets, one entry per top-level comma. */
@@ -323,18 +332,19 @@ export const tablesIn = (ddl: readonly string[]): readonly SchemaTable[] => {
     }
 
     const indexed = statement.match(CREATE_INDEX)
-    if (indexed?.[1] !== undefined && indexed[2] !== undefined && indexed[3] !== undefined) {
-      const table = requireTable(tables, indexed[2], statement)
-      const predicate = indexed[4]
+    if (indexed?.[2] !== undefined && indexed[3] !== undefined && indexed[4] !== undefined) {
+      const table = requireTable(tables, indexed[3], statement)
+      const predicate = indexed[5]
 
       if (predicate !== undefined && predicate.includes(")")) {
         throw new Error(`loom: this page cannot read the condition on "${statement}"`)
       }
 
       const index: SchemaIndex = {
-        name: indexed[1],
-        columns: indexed[3].split(",").map((column) => column.trim()),
+        name: indexed[2],
+        columns: indexed[4].split(",").map((column) => column.trim()),
         ...(predicate === undefined ? {} : { where: predicate.trim() }),
+        ...(indexed[1] === undefined ? {} : { unique: true }),
       }
 
       tables = replacing(tables, { ...table, indexes: [...table.indexes, index] })

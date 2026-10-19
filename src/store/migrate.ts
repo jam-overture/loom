@@ -274,8 +274,26 @@ export const PROJECT_STORE_DDL: readonly string[] = [
       project_id text PRIMARY KEY,
       name text NOT NULL,
       created_at text NOT NULL,
+      repository text,
       closed_at text
     )`,
+  /** The repository a project names, for a database that predates it (0292). */
+  `ALTER TABLE loom_projects ADD COLUMN IF NOT EXISTS repository text`,
+  /**
+   * **At most one project per repository**, enforced here rather than checked
+   * before the insert.
+   *
+   * A check and then an insert is a race two people registering the same
+   * repository at the same moment would lose quietly — one of them would take
+   * ownership of the other's write-back destination, and nothing afterwards
+   * could say which. The index makes it the database's answer, the way the
+   * primary key already makes *already taken* the database's answer about an
+   * id.
+   *
+   * Partial, because `NULL` is the ordinary state and a plain unique index
+   * would admit exactly one project with no repository.
+   */
+  `CREATE UNIQUE INDEX IF NOT EXISTS loom_projects_repository_idx ON loom_projects (repository) WHERE repository IS NOT NULL`,
   /** Closing, for a database that predates it — see the applications' note above. */
   `ALTER TABLE loom_projects ADD COLUMN IF NOT EXISTS closed_at text`,
   `ALTER TABLE loom_projects ENABLE ROW LEVEL SECURITY`,

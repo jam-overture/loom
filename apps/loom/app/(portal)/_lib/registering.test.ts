@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { faultFor, hostFrom, readRegistration, readRename } from "./registering"
+import {
+  faultFor,
+  hostFrom,
+  nameFromRepository,
+  readRegistration,
+  readRename,
+  repositoryFrom,
+} from "./registering"
 
 describe("the host somebody typed", () => {
   it("takes a bare host as it is", () => {
@@ -29,115 +36,121 @@ describe("the host somebody typed", () => {
   })
 })
 
+describe("the repository somebody typed", () => {
+  it("takes owner/name as it is", () => {
+    expect(repositoryFrom("jam-overture/loom")).toBe("jam-overture/loom")
+  })
+
+  /**
+   * All three spellings are one repository, and the uniqueness 0292 asks for
+   * is only as good as the spelling: a field that accepted the middle one
+   * alone would let the same repository be claimed twice by two people who
+   * pasted differently.
+   */
+  it("takes the ones people actually paste", () => {
+    for (const typed of [
+      "https://github.com/jam-overture/loom",
+      "github.com/jam-overture/loom",
+      "https://github.com/jam-overture/loom.git",
+      "https://github.com/jam-overture/loom/",
+      "  jam-overture/loom  ",
+    ]) {
+      expect(repositoryFrom(typed)).toBe("jam-overture/loom")
+    }
+  })
+
+  it("reads an empty box as no repository rather than as a fault", () => {
+    expect(repositoryFrom("")).toBeUndefined()
+    expect(repositoryFrom("   ")).toBeUndefined()
+  })
+
+  it("takes the name out of it", () => {
+    expect(nameFromRepository("jam-overture/loom")).toBe("loom")
+  })
+})
+
 describe("what somebody filled in", () => {
-  it("takes a name and nothing else", () => {
-    const read = readRegistration({ name: "The bakery", host: "", project: "" })
+  it("takes a name on its own", () => {
+    const read = readRegistration({ name: "Storefront", host: "" })
 
-    expect(read.ok && read.value).toEqual({ name: "The bakery", host: undefined, joining: undefined })
+    expect(read.ok && read.value).toEqual({
+      name: "Storefront",
+      host: undefined,
+      repository: undefined,
+    })
+  })
+
+  it("takes a repository, a name and a host", () => {
+    const read = readRegistration({
+      name: "Storefront",
+      host: "shop.example.com",
+      repository: "https://github.com/jam-overture/shop",
+    })
+
+    expect(read.ok && read.value).toEqual({
+      name: "Storefront",
+      host: "shop.example.com",
+      repository: "jam-overture/shop",
+    })
   })
 
   /**
-   * The project's name, which is the application's unless somebody says
-   * otherwise (14 October). The default is expressed as `undefined` rather than
-   * by copying the application's name into the value, so that the one place
-   * deciding what a project is called is the caller that makes it — and so a
-   * blank field and a field nobody sent read identically.
+   * One field, which is what 0296 buys a person registering: name a repository
+   * and the project is named after it.
    */
-  it("leaves the project unnamed when the field is blank, which means name it after the application", () => {
-    const read = readRegistration({ name: "The bakery", host: "", project: "", projectName: "  " })
+  it("takes the name from the repository when the name is blank", () => {
+    const read = readRegistration({ name: "", host: "", repository: "jam-overture/loom" })
 
-    expect(read.ok && read.value.projectName).toBeUndefined()
+    expect(read.ok && read.value.name).toBe("loom")
   })
 
-  it("takes a project name of its own, trimmed", () => {
+  it("prefers a name somebody typed over the repository's", () => {
     const read = readRegistration({
-      name: "The bakery",
+      name: "The marketing site",
       host: "",
-      project: "",
-      projectName: "  Storefronts  ",
+      repository: "jam-overture/loom",
     })
 
-    expect(read.ok && read.value.projectName).toBe("Storefronts")
-  })
-
-  it("refuses a project name the list could not show, and says which field", () => {
-    const read = readRegistration({
-      name: "The bakery",
-      host: "",
-      project: "",
-      projectName: "x".repeat(201),
-    })
-
-    expect(read.ok).toBe(false)
-    expect(!read.ok && read.faults.map((fault) => fault.field)).toEqual(["projectName"])
+    expect(read.ok && read.value.name).toBe("The marketing site")
   })
 
   /**
-   * A name for a project that is not being made is not a fault, it is noise —
-   * the form renders both controls at once and the select wins.
+   * Blank and blank is the one combination that cannot be resolved: nothing
+   * has supplied a name. The message says both ways out rather than demanding
+   * the field it happens to be attached to.
    */
-  it("ignores a project name when an existing project was chosen", () => {
-    const read = readRegistration({
-      name: "The bakery",
-      host: "",
-      project: "prj_7h3r31sju5t0n3",
-      projectName: "Storefronts",
-    })
-
-    expect(read.ok && read.value).toMatchObject({
-      joining: "prj_7h3r31sju5t0n3",
-      projectName: undefined,
-    })
-  })
-
-  it("trims the name, so a stray space is not part of it forever", () => {
-    const read = readRegistration({ name: "  The bakery  ", host: "", project: "" })
-
-    expect(read.ok && read.value.name).toBe("The bakery")
-  })
-
-  it("refuses a name that is only whitespace", () => {
-    const read = readRegistration({ name: "   ", host: "", project: "" })
+  it("refuses a blank name with no repository to take one from", () => {
+    const read = readRegistration({ name: "", host: "" })
 
     expect(read.ok).toBe(false)
-    expect(!read.ok && faultFor(read.faults, "name")).toContain("Give it a name")
+    expect(!read.ok && faultFor(read.faults, "name")).toContain("name a repository")
   })
 
-  it("refuses a host that is not one", () => {
-    const read = readRegistration({ name: "Fine", host: "not a host at all", project: "" })
+  it("refuses a repository that is not one", () => {
+    const read = readRegistration({ name: "Storefront", host: "", repository: "not a repo" })
 
     expect(read.ok).toBe(false)
-    expect(!read.ok && faultFor(read.faults, "host")).toContain("shop.example.com")
+    expect(!read.ok && faultFor(read.faults, "repository")).toContain("jam-overture/loom")
   })
 
-  /**
-   * A form that refuses one field at a time makes somebody submit three times to
-   * learn three things they could have been told at once.
-   */
-  it("reports every fault at once rather than the first", () => {
-    const read = readRegistration({ name: "", host: "not a host", project: "" })
+  it("reports every fault rather than the first", () => {
+    const read = readRegistration({ name: "", host: "not a host", repository: "also not one" })
 
     expect(read.ok).toBe(false)
-    expect(!read.ok && read.faults.map((fault) => fault.field)).toEqual(["name", "host"])
+    if (read.ok) return
+
+    expect(read.faults.map((fault) => fault.field).sort()).toEqual([
+      "host",
+      "name",
+      "repository",
+    ])
   })
 
-  it("joins an existing project when one was chosen", () => {
-    const read = readRegistration({ name: "Fine", host: "", project: "prj_abc" })
-
-    expect(read.ok && read.value.joining).toBe("prj_abc")
-  })
-
-  it("makes a new project when 'new' was chosen", () => {
-    const read = readRegistration({ name: "Fine", host: "", project: "new" })
-
-    expect(read.ok && read.value.joining).toBeUndefined()
-  })
-
-  it("does not fall over on fields that are not strings", () => {
-    const read = readRegistration({ name: undefined, host: null, project: 7 })
+  it("refuses a name longer than a list can show", () => {
+    const read = readRegistration({ name: "n".repeat(201), host: "" })
 
     expect(read.ok).toBe(false)
-    expect(!read.ok && faultFor(read.faults, "name")).toBeDefined()
+    expect(!read.ok && faultFor(read.faults, "name")).toContain("200")
   })
 })
 
@@ -167,7 +180,7 @@ describe("what an application may be renamed to", () => {
   })
 
   it("refuses a name it would have refused at registration", () => {
-    const registered = readRegistration({ name: "", host: "", project: "new" })
+    const registered = readRegistration({ name: "", host: "" })
     const renamed = readRename({ name: "", host: "" })
 
     expect([registered.ok, renamed.ok]).toEqual([false, false])

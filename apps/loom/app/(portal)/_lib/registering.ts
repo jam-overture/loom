@@ -27,6 +27,37 @@ import { z } from "zod"
  * stupid for being right. The scheme and any path are stripped rather than
  * refused, so a pasted address works and comes out as the host it contained.
  */
+/**
+ * A repository, from whatever was pasted.
+ *
+ * People paste `https://github.com/owner/name`, type `owner/name`, and
+ * sometimes bring a `.git` on the end. All three mean one repository, and a
+ * field that accepted only the middle one would make the uniqueness in 0292
+ * depend on which of them somebody happened to use.
+ *
+ * Normalised to `owner/name` and nothing else. The forge is deliberately not
+ * kept: what understands a repository is the write-back adapter, which does
+ * not exist yet, and a value that carried `github.com` would be a decision
+ * about which forges Loom supports made by a parser.
+ */
+export const repositoryFrom = (value: string): string | undefined => {
+  const trimmed = value.trim()
+  if (trimmed === "") return undefined
+
+  const withoutScheme = trimmed.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "")
+  const withoutHost = withoutScheme.replace(/^[^/]*\.[^/]*\//, "")
+  const withoutGit = withoutHost.replace(/\.git$/i, "").replace(/\/+$/, "")
+
+  return withoutGit === "" ? undefined : withoutGit
+}
+
+/**
+ * The name a repository supplies when nobody typed one: `jam-overture/loom`
+ * becomes `loom`.
+ */
+export const nameFromRepository = (repository: string): string | undefined =>
+  repository.split("/")[1]?.trim() || undefined
+
 export const hostFrom = (value: string): string | undefined => {
   const trimmed = value.trim()
   if (trimmed === "") return undefined
@@ -51,31 +82,21 @@ export type NamingFault =
 
 export type RegistrationFault =
   | NamingFault
-  | { readonly field: "project"; readonly detail: string }
-  | { readonly field: "projectName"; readonly detail: string }
+  | { readonly field: "repository"; readonly detail: string }
 
 export type Registration = {
   readonly name: string
   readonly host: string | undefined
-  /** An existing project to join, or `undefined` to make one. */
-  readonly joining: string | undefined
   /**
-   * What to call the project being made, or `undefined` to use the
-   * application's own name.
+   * The repository this project's pages live in, or `undefined` (0292).
    *
-   * **The default is the application's name and the field is still offered**,
-   * which is the maintainer's instruction of 14 October. Before it, the first
-   * registration on a deployment made a project named after the application
-   * with no way to say otherwise, and the result reads oddly the moment anyone
-   * looks at it: a project called *Loom marketing site* holding one
-   * application called *Loom marketing site*. Naming is cheap to offer at the
-   * moment somebody is already typing a name, and expensive to go back for —
-   * there is no screen that renames a project.
-   *
-   * Blank means the default rather than an error, so the one-application
-   * deployment still registers in two fields.
+   * **Optional, and asked first.** A project with no repository is connected
+   * for observation, which is the first state every customer reaches and the
+   * only one available to somebody whose tree lives in a working copy — so a
+   * form that demanded one would refuse two of the three customer shapes 0275
+   * describes.
    */
-  readonly projectName: string | undefined
+  readonly repository: string | undefined
 }
 
 const nameSchema = z
@@ -83,6 +104,8 @@ const nameSchema = z
   .trim()
   .min(1, "Give it a name — it is what you will look for in the list.")
   .max(200, "That name is longer than a list can show. 200 characters at most.")
+
+const repositorySchema = z.string().regex(/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/).max(140)
 
 const hostSchema = z
   .string()
@@ -102,20 +125,43 @@ const hostSchema = z
 export const readRegistration = (fields: {
   readonly name: unknown
   readonly host: unknown
-  readonly project: unknown
-  /**
-   * Optional on the parameter rather than required, because a caller that does
-   * not send the field is a real one: the field arrived on 14 October and a
-   * form posted without it still registers an application under a project named
-   * after it, which is the behaviour it had before.
-   */
-  readonly projectName?: unknown
+  /** The repository, or absent — see `Registration.repository` (0292). */
+  readonly repository?: unknown
 }): { readonly ok: true; readonly value: Registration } | { readonly ok: false; readonly faults: readonly RegistrationFault[] } => {
   const faults: RegistrationFault[] = []
 
-  const name = nameSchema.safeParse(typeof fields.name === "string" ? fields.name : "")
+  const repository = repositoryFrom(typeof fields.repository === "string" ? fields.repository : "")
+
+  if (repository !== undefined && !repositorySchema.safeParse(repository).success) {
+    faults.push({
+      field: "repository",
+      detail: "That does not look like a repository. Something like jam-overture/loom.",
+    })
+  }
+
+  /**
+   * **One name, since 0296.** A project holds exactly one application and no
+   * screen says *application*, so the two names this used to ask for are one —
+   * and the oddity the 14 October instruction worked around, a project called
+   * *Loom marketing site* holding an application of the same name, stops being
+   * possible rather than being tolerated.
+   *
+   * Blank takes the name from the repository — `jam-overture/loom` becomes
+   * `loom` — so naming a repository registers in one field. Blank with no
+   * repository is a fault, because then nothing has supplied a name at all.
+   */
+  const typed = typeof fields.name === "string" ? fields.name.trim() : ""
+  const supplied = typed === "" && repository !== undefined ? nameFromRepository(repository) : typed
+
+  const name = nameSchema.safeParse(supplied ?? "")
   if (!name.success) {
-    faults.push({ field: "name", detail: name.error.issues[0]?.message ?? "That name will not do." })
+    faults.push({
+      field: "name",
+      detail:
+        typed === "" && repository === undefined
+          ? "Give it a name, or name a repository and it will take that."
+          : (name.error.issues[0]?.message ?? "That name will not do."),
+    })
   }
 
   const host = hostFrom(typeof fields.host === "string" ? fields.host : "")
@@ -129,38 +175,9 @@ export const readRegistration = (fields: {
     }
   }
 
-  const joining =
-    typeof fields.project === "string" && fields.project !== "" && fields.project !== "new"
-      ? fields.project
-      : undefined
-
-  /**
-   * Checked against the same schema as the application's name, and only when
-   * there is something to check: blank is the default, not a fault. It is
-   * ignored outright when an existing project was chosen, because the field is
-   * about the project being made and there is none.
-   */
-  const typedProjectName =
-    typeof fields.projectName === "string" ? fields.projectName.trim() : ""
-  const projectName =
-    joining !== undefined || typedProjectName === "" ? undefined : typedProjectName
-
-  if (projectName !== undefined) {
-    const checked = nameSchema.safeParse(projectName)
-    if (!checked.success) {
-      faults.push({
-        field: "projectName",
-        detail: checked.error.issues[0]?.message ?? "That name will not do.",
-      })
-    }
-  }
-
   if (faults.length > 0) return { ok: false, faults }
 
-  return {
-    ok: true,
-    value: { name: name.success ? name.data : "", host, joining, projectName },
-  }
+  return { ok: true, value: { name: name.success ? name.data : "", host, repository } }
 }
 
 /** A new name, and a new host or the absence of one. */

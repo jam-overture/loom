@@ -15,11 +15,7 @@ import { registerApplication, type RegistrationReport } from "../actions"
  * a form that refuses them.
  */
 
-export const RegistrationForm = ({
-  projects,
-}: {
-  projects: readonly { readonly projectId: string; readonly name: string }[]
-}) => {
+export const RegistrationForm = () => {
   const [report, action] = useActionState<RegistrationReport | null, FormData>(
     registerApplication,
     null
@@ -28,10 +24,28 @@ export const RegistrationForm = ({
 
   return (
     <form action={action} className="flex max-w-lg flex-col gap-5">
+      {/*
+       * The repository first, which is 0292's order and the reverse of what
+       * this form used to do.
+       *
+       * It is above the name because it supplies one: `jam-overture/loom`
+       * becomes `loom`, so somebody who has a repository registers in one
+       * field. It is optional because a project with none is connected for
+       * observation, which is the first state every customer reaches and the
+       * only one available to somebody whose tree lives in a working copy.
+       */}
+      <Field
+        label="Which repository?"
+        name="repository"
+        placeholder="jam-overture/loom"
+        hint="Optional. Paste the URL if it is easier. Leave it blank to connect for observation only — you can add it later."
+        fault={faultFor(faults, "repository")}
+      />
+
       <Field
         label="What is it called?"
         name="name"
-        hint="What you will look for in the list. You can change it."
+        hint="Leave it blank to take the name from the repository. You can change it."
         fault={faultFor(faults, "name")}
       />
 
@@ -42,53 +56,6 @@ export const RegistrationForm = ({
         hint="Optional. Paste the address if it is easier — we will take the host out of it."
         fault={faultFor(faults, "host")}
       />
-
-      {/*
-       * Always offered, and blank means the application's name.
-       *
-       * The maintainer asked for this on 14 October after watching a
-       * registration produce a project and an application with identical names.
-       * It sits under the host rather than above it because the application is
-       * what somebody came here to register; the project is the shelf it goes
-       * on, and a shelf nobody has an opinion about should cost one glance and
-       * no keystrokes.
-       *
-       * It is rendered even when an existing project can be chosen below, and
-       * `readRegistration` ignores it in that case — the alternative is
-       * revealing a field when a select changes, which needs client state for a
-       * field whose default is already right.
-       */}
-      <Field
-        label="What should the project be called?"
-        name="projectName"
-        hint="Leave it blank to use the application's name. Projects group applications; nothing else hangs off one yet."
-        fault={faultFor(faults, "projectName")}
-      />
-
-      {projects.length > 0 ? (
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm">Which project?</span>
-          <select
-            name="project"
-            defaultValue="new"
-            className="border-edge bg-surface-base rounded-md border px-2.5 py-1.5 text-sm"
-          >
-            <option value="new">A new one, named after this application</option>
-            {projects.map((project) => (
-              <option key={project.projectId} value={project.projectId}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-          {faultFor(faults, "project") === undefined ? (
-            <span className="text-ink-muted text-xs">
-              Choosing one ignores the name above.
-            </span>
-          ) : (
-            <span className="text-refuse-ink text-xs">{faultFor(faults, "project")}</span>
-          )}
-        </label>
-      ) : null}
 
       {report?.detail === undefined ? null : (
         <p className="text-refuse-ink text-sm">{report.detail}</p>
