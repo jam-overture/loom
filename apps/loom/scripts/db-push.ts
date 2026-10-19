@@ -24,6 +24,7 @@ import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
 import { ensurePortalAccountsSchema } from "../app/(portal)/_lib/auth/accounts-postgres"
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
+import { ensureIngestKeysSchema } from "../app/_lib/reader-signals/keys-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
 /**
@@ -130,6 +131,13 @@ try {
    */
   await ensurePortalAccountsSchema(db)
   /**
+   * The keys a project's pages post their readers' signals with (0298). The
+   * door asks this table about every keyed delivery, so a deployment that has
+   * not run this refuses every customer's readers as unavailable rather than
+   * filing them anywhere.
+   */
+  await ensureIngestKeysSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -157,8 +165,8 @@ try {
   console.log(
     "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_projects, " +
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
-      "loom_signin_attempts, loom_portal_accounts and loom_portal_memberships are present, " +
-      "and this deployment's pages are in them"
+      "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships and loom_ingest_keys " +
+      "are present, and this deployment's pages are in them"
   )
 } finally {
   await client.end()

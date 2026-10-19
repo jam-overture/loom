@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 
 import { CountReaders } from "@/app/(marketing)/_components/count-readers"
 import { readersCountedHere } from "@/app/(marketing)/_lib/readers/counting"
+import { siteSignalUrl } from "@/app/(marketing)/_lib/readers/key"
 import { HOME, siteOrigin } from "@/app/(marketing)/_lib/site"
 
 import "./globals.css"
@@ -74,19 +75,28 @@ const GEIST = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&displ
  * is the default, and what this deployment is until somebody sets
  * `LOOM_SIGNAL_INTAKE` — nothing is rendered here, nothing is downloaded, and
  * no batch is sent anywhere.
+ *
+ * **And absent without a key.** The door files nothing it cannot name (0298),
+ * so this site posts with its project's key, and a deployment that has not
+ * minted one mounts no broadcaster rather than one every batch of which is
+ * refused. `readers/key.ts` has why, and the command that ends it.
  */
-const RootLayout = ({ children }: { readonly children: ReactNode }) => (
-  <html lang="en">
-    <head>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link rel="stylesheet" href={GEIST} />
-    </head>
-    <body>
-      {children}
-      {readersCountedHere() ? <CountReaders /> : null}
-    </body>
-  </html>
-)
+const RootLayout = async ({ children }: { readonly children: ReactNode }) => {
+  const url = readersCountedHere() ? await siteSignalUrl() : null
+
+  return (
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="stylesheet" href={GEIST} />
+      </head>
+      <body>
+        {children}
+        {url === null ? null : <CountReaders url={url} />}
+      </body>
+    </html>
+  )
+}
 
 export default RootLayout

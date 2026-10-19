@@ -8,7 +8,9 @@ import {
   describeCollection,
   readerSignalWindowSchema,
 } from "@jam-overture/loom/signals"
+import { postgresApplicationStore } from "@jam-overture/loom/postgres"
 import { postgresReaderSignalJournal, postgresReaderTallyStore } from "@jam-overture/loom/signals/postgres"
+import { DEFAULT_APPLICATION_ID, describeApplicationStoreError } from "@jam-overture/loom/store"
 
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
@@ -91,21 +93,50 @@ try {
     process.exit(0)
   }
 
-  const outcome = await collectReaderSignals(
-    postgresReaderSignalJournal(db),
-    postgresReaderTallyStore(db),
-    configured.data
-  )
-
-  console.log(`loom: ${describeCollection(outcome)}`)
-
   /**
-   * `counted-not-forgotten` fails the job as loudly as the two that changed
-   * nothing, and for a worse reason: the counters took the window and the buffer
-   * still holds it, so the next run counts it again. The line above names the
-   * position to prune below.
+   * **Every application's buffer, one at a time** (0298). A delivery is filed
+   * under the application its key names, and a handle is scoped to one, so a
+   * collector that counted only the deployment's own would leave every
+   * customer's batches in the largest table there is, uncounted, for ever.
+   *
+   * Closed applications included: closing stops new batches at the door, and
+   * the ones that arrived before it are still owed a count. The deployment's
+   * own is added whether or not `db:push` has seeded its row, because the
+   * reader tables default to it and its buffer exists either way.
    */
-  if (outcome.outcome !== "collected" && outcome.outcome !== "nothing-ripe") process.exit(1)
+  const listed = await postgresApplicationStore(db).list({ closed: "all" })
+
+  if (!listed.ok) {
+    console.error(`loom: ${describeApplicationStoreError(listed.error)}`)
+    process.exit(1)
+  }
+
+  const applications = [
+    ...new Set([DEFAULT_APPLICATION_ID, ...listed.value.map((one) => one.applicationId)]),
+  ]
+
+  let failed = 0
+
+  for (const application of applications) {
+    const outcome = await collectReaderSignals(
+      postgresReaderSignalJournal(db, { application }),
+      postgresReaderTallyStore(db, { application }),
+      configured.data
+    )
+
+    console.log(`loom: ${application}: ${describeCollection(outcome)}`)
+
+    /**
+     * `counted-not-forgotten` fails the job as loudly as the two that changed
+     * nothing, and for a worse reason: the counters took the window and the
+     * buffer still holds it, so the next run counts it again. The line above
+     * names the position to prune below. One application failing does not
+     * stop the others being counted — their windows are ripening regardless.
+     */
+    if (outcome.outcome !== "collected" && outcome.outcome !== "nothing-ripe") failed += 1
+  }
+
+  if (failed > 0) process.exit(1)
 } finally {
   await client.end()
 }

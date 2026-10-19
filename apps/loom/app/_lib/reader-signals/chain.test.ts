@@ -14,9 +14,12 @@ import {
   type ReaderTallyStore,
 } from "@jam-overture/loom/signals"
 
-import type { TreeId } from "@jam-overture/loom"
+import { ok, type TreeId } from "@jam-overture/loom"
 
-import { receiveReaderSignals, type Intake } from "./receive"
+import { DEFAULT_APPLICATION_ID, projectIdSchema } from "@jam-overture/loom/store"
+
+import { mintIngestKey } from "./keys"
+import { receiveReaderSignals, type Filing, type Intake } from "./receive"
 
 /**
  * The whole chain, from a body a browser posts to a number the portal reads.
@@ -69,28 +72,44 @@ const readingOf = async (store: ReaderTallyStore) => {
   return pageViewReadingOf(rows.ok ? rows.value : [])
 }
 
+/**
+ * One of this site's pages posting, with its project's key. Whose readers a
+ * delivery is has tests of its own in `receive.test.ts` and
+ * `attribution.test.ts`; this is the join after that question is answered.
+ */
+const SITE_KEY = mintIngestKey()
+
 const post = (body: unknown, headers: Record<string, string> = {}): Request =>
-  new Request("https://loom.test/api/reader-signals", {
+  new Request(`https://loom.test/api/reader-signals?key=${SITE_KEY}`, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
   })
+
+const SITE = {
+  applicationId: DEFAULT_APPLICATION_ID,
+  projectId: projectIdSchema.parse("prj_default"),
+  name: "Your application",
+  createdAt: "1970-01-01T00:00:00.000Z",
+}
+
+/** Every delivery with the site's key into the one filing given. */
+const intakeOf = (filing: Filing, settings: Intake["settings"] = SETTINGS): Intake => ({
+  settings,
+  senders: { applicationWithKey: (key) => Promise.resolve(ok(key === SITE_KEY ? SITE : null)) },
+  filingFor: () => filing,
+  gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
+  durable: true,
+  subjectOf: () => Promise.resolve("a-reader"),
+  now: () => 0,
+})
 
 describe("a batch a browser posts becomes a number the portal can read", () => {
   it("arrives, is counted, and is forgotten", async () => {
     const journal = memoryReaderSignalJournal(at(0))
     const store = memoryReaderTallyStore()
 
-    const intake: Intake = {
-      settings: SETTINGS,
-      journal,
-      regions: memoryReaderRegionStore(),
-      openings: store,
-      gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
-      durable: true,
-      subjectOf: () => Promise.resolve("a-reader"),
-      now: () => 0,
-    }
+    const intake = intakeOf({ journal, regions: memoryReaderRegionStore(), openings: store })
 
     expect((await receiveReaderSignals(post(batch("n_hero", 8_200)), intake)).status).toBe(204)
     expect((await receiveReaderSignals(post(batch("n_hero", 3_100)), intake)).status).toBe(204)
@@ -135,16 +154,7 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
   it("counts where a reader was, once, without the buffer ever holding it", async () => {
     const journal = memoryReaderSignalJournal(at(0))
     const regions = memoryReaderRegionStore()
-    const intake: Intake = {
-      settings: SETTINGS,
-      journal,
-      regions,
-      openings: memoryReaderTallyStore(),
-      gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
-      durable: true,
-      subjectOf: () => Promise.resolve("a-reader"),
-      now: () => 0,
-    }
+    const intake = intakeOf({ journal, regions, openings: memoryReaderTallyStore() })
     const headers = { "x-vercel-ip-country": "gb" }
 
     await receiveReaderSignals(post(batch("n_hero", 1_000, { first: true }), headers), intake)
@@ -177,16 +187,7 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
   it("counts one reader as one page view however long they stay, and says the counters agree", async () => {
     const journal = memoryReaderSignalJournal(at(0))
     const store = memoryReaderTallyStore()
-    const intake: Intake = {
-      settings: SETTINGS,
-      journal,
-      regions: memoryReaderRegionStore(),
-      openings: store,
-      gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
-      durable: true,
-      subjectOf: () => Promise.resolve("a-reader"),
-      now: () => 0,
-    }
+    const intake = intakeOf({ journal, regions: memoryReaderRegionStore(), openings: store })
 
     await receiveReaderSignals(post(batch("n_hero", 1_000, { first: true })), intake)
     await receiveReaderSignals(post(batch("n_hero", 2_000)), intake)
@@ -209,16 +210,10 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     const journal = memoryReaderSignalJournal(at(0))
     const store = memoryReaderTallyStore()
 
-    const shut: Intake = {
-      settings: { ...SETTINGS, chosen: { state: "off" } },
-      journal,
-      regions: memoryReaderRegionStore(),
-      openings: store,
-      gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
-      durable: true,
-      subjectOf: () => Promise.resolve("a-reader"),
-      now: () => 0,
-    }
+    const shut = intakeOf(
+      { journal, regions: memoryReaderRegionStore(), openings: store },
+      { ...SETTINGS, chosen: { state: "off" } }
+    )
 
     expect((await receiveReaderSignals(post(batch("n_hero", 8_200)), shut)).status).toBe(404)
 

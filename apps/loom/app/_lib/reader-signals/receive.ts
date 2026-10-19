@@ -8,7 +8,10 @@ import {
   type ReaderRegionStore,
   type ReaderSignalJournal,
 } from "@jam-overture/loom/signals"
+import type { ApplicationId } from "@jam-overture/loom/store"
 
+import { attributeDelivery, type AttributionRefusal, type Senders } from "./attribution"
+import { INGEST_KEY_PARAMETER } from "./keys"
 import { describeIntakeSwitch, describeRegionSettings, type IntakeSettings } from "./settings"
 
 /**
@@ -37,8 +40,16 @@ import { describeIntakeSwitch, describeRegionSettings, type IntakeSettings } fro
  * understand.
  */
 
-export type Intake = {
-  readonly settings: IntakeSettings
+/**
+ * Where one application's deliveries are kept: the buffer and the two counters
+ * the door moves.
+ *
+ * One of these per application rather than one for the deployment, because the
+ * stores are scoped at construction (`StoreScope`) — which is what makes
+ * *filing one customer's batch under another* unexpressible below this line
+ * rather than merely avoided.
+ */
+export type Filing = {
   readonly journal: ReaderSignalJournal
   /**
    * Where the buckets are kept. Written here rather than by the rollup, because
@@ -53,6 +64,14 @@ export type Intake = {
    * denominator every other number the portal shows is a rate against.
    */
   readonly openings: ReaderOpeningCounter
+}
+
+export type Intake = {
+  readonly settings: IntakeSettings
+  /** Who may send, and which application each key names (0298). */
+  readonly senders: Senders
+  /** The stores a delivery attributed to this application is kept in. */
+  readonly filingFor: (application: ApplicationId) => Filing
   readonly gate: IntakeGate
   /** Whether what is kept outlives this process. The status says it rather than implying it. */
   readonly durable: boolean
@@ -133,13 +152,13 @@ const readAtMost = async (
  * intake that is worth having and never worth guessing at, and *how many*
  * carries no such question.
  */
-const countersFor = (request: Request, intake: Intake): DoorCounters => ({
+const countersFor = (request: Request, intake: Intake, filing: Filing): DoorCounters => ({
   at: new Date(intake.now()).toISOString(),
-  openings: intake.openings,
+  openings: filing.openings,
   ...(intake.settings.region.chosen.state === "on"
     ? {
         region: {
-          store: intake.regions,
+          store: filing.regions,
           region: readerRegionOf(request.headers.get(intake.settings.region.header)),
         },
       }
@@ -147,12 +166,46 @@ const countersFor = (request: Request, intake: Intake): DoorCounters => ({
 })
 
 /**
+ * What a sender is told when the door will not say whose readers these are.
+ *
+ * Every refusal but one is a 403 rather than a 401, because a 401 promises a
+ * `WWW-Authenticate` challenge and there is no scheme to name: a key is a
+ * query parameter a page was given, not a credential a browser can be asked
+ * for. The exception is the lookup failing, which is this deployment's fault
+ * and not the sender's.
+ */
+const refusalOf = (refusal: AttributionRefusal): Response => {
+  switch (refusal.code) {
+    case "no-key":
+      return refuse(
+        403,
+        `a delivery names its project: post to this address with ?${INGEST_KEY_PARAMETER}= and the project's key`
+      )
+    case "unknown-key":
+      return refuse(403, "that is not a key this deployment issued, or it has been replaced")
+    case "closed":
+      return refuse(403, "that project is closed, and a closed project takes no signals")
+    case "wrong-origin":
+      return refuse(
+        403,
+        refusal.origin === null
+          ? "that project takes signals from its own site, and this delivery named no origin"
+          : `that project does not take signals from ${refusal.origin}`
+      )
+    case "unavailable":
+      return refuse(503, `reader signals are unavailable: ${refusal.detail}`)
+  }
+}
+
+/**
  * Receive a delivery.
  *
  * The order is the order of what each refusal costs the deployment. Whether
  * this deployment collects signals at all is a constant; the window is a map
- * lookup; the size is a bounded read; the parse is the expensive part and is
- * reached only by a caller who is within their budget and under the ceiling.
+ * lookup; the size is a bounded read; whose readers these are is one indexed
+ * read, reached only by a caller within their budget, so a stranger cannot
+ * spend this deployment's database by guessing keys faster than the gate
+ * allows; the parse is the expensive part and comes last.
  */
 export const receiveReaderSignals = async (request: Request, intake: Intake): Promise<Response> => {
   const { chosen } = intake.settings
@@ -196,6 +249,12 @@ export const receiveReaderSignals = async (request: Request, intake: Intake): Pr
     return refuse(413, `a delivery may be ${verdict.limit} bytes`)
   }
 
+  const attributed = await attributeDelivery(request, intake.senders)
+
+  if (!attributed.ok) return refusalOf(attributed.error)
+
+  const filing = intake.filingFor(attributed.value)
+
   let delivery: unknown
 
   try {
@@ -204,7 +263,11 @@ export const receiveReaderSignals = async (request: Request, intake: Intake): Pr
     return refuse(400, "a delivery is JSON")
   }
 
-  const kept = await ingestReaderSignals(intake.journal, delivery, countersFor(request, intake))
+  const kept = await ingestReaderSignals(
+    filing.journal,
+    delivery,
+    countersFor(request, intake, filing)
+  )
 
   if (!kept.ok) {
     /**
