@@ -4,6 +4,7 @@ import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
+import { audiencesIn } from "./audiences.js"
 import type { ReaderSignalStoreError } from "./journal.js"
 import type { RevisionOf, RevisionViews } from "./page-views.js"
 import type { TallyReadRequest } from "./tally.js"
@@ -218,8 +219,37 @@ export type RegionReading = {
    * Carried so that a comparison of two maps can refuse a pair of two
    * populations (0284). It is the one thing a readership comparison cannot
    * derive and the one thing that makes it a comparison of like with like.
+   *
+   * What the map **summed** is the other field, and the two are not the same
+   * question: see {@link RegionReading.audiences}.
    */
   readonly audienceId: AudienceId | null
+  /**
+   * Every audience the rows this map summed named, deduplicated and in a stable
+   * order.
+   *
+   * The same census `PageReading.audiences` publishes over a window of tallies,
+   * and it answers the same question — *what was in the window?* — but it is
+   * **not** the same kind of fact (0297). A page reading of two audiences is
+   * read as neither, because adding two forms' node counters is one number
+   * about two pages. A region map of two audiences is read whole, because
+   * adding two forms' arrivals is one number about one deployment's readers:
+   * they are people, and a person who arrived arrived once whichever form they
+   * were served.
+   *
+   * So more than one member here is a **measurement and never a fault**: *this
+   * map is a sum over two of the forms you serve*. `[]` is a window whose rows
+   * named none, which is every window written before the column existed (0284)
+   * and every one a test builds by hand.
+   *
+   * It is deliberately not a proof of which form the map is of.
+   * {@link RegionReading.audienceId} is that, and it stays `null` on a map read
+   * whole however few audiences the rows named (0294) — because an `aud_` is a
+   * name the host chose for a predicate Loom never sees, and `aud_everyone` is
+   * a name for *everybody*. One member means one name was on the rows, not that
+   * one population was behind them.
+   */
+  readonly audiences: readonly AudienceId[]
   /** Buckets large enough to name, most-read first. */
   readonly regions: readonly RegionBucket[]
   /** What was too small to name, as a total that names nowhere. */
@@ -248,6 +278,14 @@ export type RegionReadingOptions = {
  * **The unplaced bucket is never withheld**, however small it is. It names no
  * place, so there is nobody in it to re-identify, and hiding it would mean a
  * reading whose numbers do not add up to the number of views there were.
+ *
+ * **It sums across the audiences it was handed, and says which ones they
+ * were.** A page served in two forms counts each form's arrivals on its own row
+ * (0284), and both forms' readers are the same deployment's readers — a person
+ * who arrived arrived once, whichever form they were served — so a map of the
+ * window is the readership and not a collapse of two. The census is published
+ * on {@link RegionReading.audiences} so that a caller comparing two such maps
+ * can say what each was a sum over, and nothing is refused on it (0297).
  */
 export const regionReadingOf = (
   rows: readonly StoredRegionCount[],
@@ -269,6 +307,7 @@ export const regionReadingOf = (
   return {
     floor,
     audienceId: null,
+    audiences: audiencesIn(rows),
     /** Most-read first, and by code when two are equal, so a screen does not reorder on a refresh. */
     regions: named.sort((one, other) => other.views - one.views || one.region.localeCompare(other.region)),
     withheld: {
@@ -322,16 +361,24 @@ export type RegionReadingFor = {
    */
   readonly otherAudience: number
   /**
-   * Rows naming a region this revision already had a row for, beyond the first,
-   * every one of which was ignored.
+   * Rows naming a region **and an audience** this revision already had a row
+   * for, beyond the first, every one of which was ignored.
    *
-   * A store keeps one row per tree, revision, audience and region, and the
-   * audience is picked before this is counted, so this cannot come
-   * out of one read — it happens when a caller concatenates two windows of
-   * rows, and the store's counts are already running totals rather than a
-   * window's. Adding them would double a bucket, which is the one error in this
-   * subsystem that cannot be undone afterwards (0158), so the first row stands
-   * and the fact is reported.
+   * A store keeps one row per tree, revision, audience and region, so this
+   * cannot come out of one read — it happens when a caller concatenates two
+   * windows of rows, and the store's counts are already running totals rather
+   * than a window's. Adding them would double a bucket, which is the one error
+   * in this subsystem that cannot be undone afterwards (0158), so the first row
+   * stands and the fact is reported.
+   *
+   * **The audience is part of what makes two rows two rows**, and leaving it
+   * out was a quiet undercount (0297). A revision served in two forms (0263)
+   * has two rows for one country, one per form, and a map read whole of such a
+   * revision dropped the second as the first handed in twice: 60 views
+   * published where 460 arrived, with the loss reported as a count of
+   * duplicates nobody would read as an undercount. A form's own map is
+   * unaffected — the audience is picked before this, so region and audience key
+   * the same rows region alone did.
    */
   readonly duplicated: number
 }
@@ -351,10 +398,18 @@ export const regionReadingFor = (
   )
   const audience = where.audienceId ?? null
   const matching = audience === null ? here : here.filter((row) => row.audienceId === audience)
-  const first = new Map<ReaderRegion, StoredRegionCount>()
+  /**
+   * Keyed by the region **and** the audience, which is what the store keeps one
+   * row per (0284): two forms' arrivals in one country are two rows and one
+   * readership, and keying by the region alone dropped the second as a repeat
+   * of the first (0297).
+   */
+  const first = new Map<string, StoredRegionCount>()
 
   for (const row of matching) {
-    if (!first.has(row.region)) first.set(row.region, row)
+    const bucket = `${row.region}\u0000${row.audienceId}`
+
+    if (!first.has(bucket)) first.set(bucket, row)
   }
 
   return {

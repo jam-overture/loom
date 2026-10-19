@@ -19,7 +19,7 @@ import {
   type ChromeContext,
 } from "../chrome"
 import { FACTS, INSTALL_COMMAND, RUNTIME_PACKAGE, STARTER_PACKAGE } from "../copy"
-import { INSTALLATION } from "../docs-pages"
+import { DECISION_RECORDS, INSTALLATION } from "../docs-pages"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import {
@@ -35,7 +35,6 @@ import {
   TERTIARY_CONTROL,
 } from "../nodes"
 import {
-  DECISIONS_URL,
   DEMO,
   DOCS,
   HOME,
@@ -699,10 +698,22 @@ const facts = (ids: IdFactory): LoomNode =>
         sitePath(WHAT_YOU_RUN.path),
         TERTIARY_CONTROL
       ),
-      action(ids, "Read the decisions", DECISIONS_URL, {
-        ...TERTIARY_CONTROL,
-        external: true,
-      }),
+      /**
+       * **A page of this site, as of 19 October, and it used to leave it.**
+       *
+       * It pointed at `decisions/` on GitHub, which is a directory listing:
+       * 277 filenames in a column, no titles, no standing, and the reader out
+       * of the product one press after being told the project writes down what
+       * it rejected. `(docs)` builds the readable version of the same index —
+       * every record by title, in force or replaced, and the total stated
+       * exactly — so that is where the number's own control goes now.
+       *
+       * The repository is still a press away: every title on that page opens
+       * the file, and the footer offers `decisions/` under *The project*
+       * beside *Source*, which is the frame a reader looking for the folder is
+       * already in.
+       */
+      action(ids, "Read the decisions", DECISION_RECORDS.path, TERTIARY_CONTROL),
     ]),
   ])
 

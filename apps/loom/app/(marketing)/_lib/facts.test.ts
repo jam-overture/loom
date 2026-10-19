@@ -7,7 +7,15 @@ import { manifest } from "../../../../../tools/package/manifest"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
-import { DECISIONS_AT_LEAST, FACTS, INSTALL_COMMAND, PACKAGES } from "./copy"
+import {
+  DECISIONS_AT_LEAST,
+  DECISIONS_FLOOR_FRACTION,
+  FACTS,
+  INSTALL_COMMAND,
+  PACKAGES,
+} from "./copy"
+import { DECISION_RECORDS } from "./docs-pages"
+import { pathsLinkedFrom } from "./naming"
 import { siteRegistry } from "./registry"
 import { treeFor } from "./render"
 import { DEFAULT_THEME, HOME, NPM_PACKAGE_URL } from "./site"
@@ -137,6 +145,53 @@ describe("what the site says about the repository", () => {
 
   it("never claims more decision records than there are", () => {
     expect(recordsOnDisk().length).toBeGreaterThanOrEqual(DECISIONS_AT_LEAST)
+  })
+
+  /**
+   * The other side of the same claim, and the one that was missing.
+   *
+   * The rule above passes more comfortably the further behind the floor falls,
+   * so it cannot report the failure it is nearest to: `100+` beside a
+   * repository holding 277 records, under a band promising every number is
+   * checked. A floor that is never checked for staleness is a number nobody
+   * reads again.
+   *
+   * The bound is loose on purpose. `DECISIONS_FLOOR_FRACTION` says why, and the
+   * short version is that every tightening of it is paid for by some other
+   * lane's run going red over a digit — which is the 19 August finding, and the
+   * thing the floor exists to avoid. So it fires about once per 180 records and
+   * says exactly what to type when it does.
+   */
+  it("never lets the floor fall so far behind that the number stops meaning anything", () => {
+    const onDisk = recordsOnDisk().length
+    const atLeast = Math.floor(onDisk * DECISIONS_FLOOR_FRACTION)
+
+    expect(
+      DECISIONS_AT_LEAST,
+      `the front door says "${FACTS.decisions}" and there are ${onDisk} records — raise DECISIONS_AT_LEAST in copy.ts to a round number at or above ${atLeast}`
+    ).toBeGreaterThanOrEqual(atLeast)
+  })
+
+  /**
+   * The press under the number, held to the page that states the number
+   * exactly.
+   *
+   * *Read the decisions* pointed at `decisions/` on GitHub until 19 October — a
+   * directory listing of filenames, off this site, one press from a band about
+   * what the project writes down. `(docs)` serves the readable index of the
+   * same records, so the control stays inside the application (0067) and the
+   * reader who wants to know how many there are gets the count rather than a
+   * scroll.
+   *
+   * Asserted against the **published tree**, like the three numbers above: a
+   * band that quietly went back to an off-site address would still satisfy
+   * `docs-pages.test.ts`, whose sweep only sees the `/docs/` links that are
+   * there.
+   */
+  it("sends a reader from the record count to the page that states it exactly", () => {
+    const front = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+
+    expect([...pathsLinkedFrom(front.root, ORIGIN)]).toContain(DECISION_RECORDS.path)
   })
 
   it("shows the record count as a floor, so adding a record cannot turn this lane red", () => {

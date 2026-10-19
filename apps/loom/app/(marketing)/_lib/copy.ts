@@ -52,8 +52,64 @@ export const DELTA_OPERATIONS: readonly string[] = TREE_OPERATIONS
  * disk are **at least** this many, so writing a record can never make this file
  * wrong — it can only make the claim more conservative. Raise it deliberately,
  * in round numbers, when the true count has moved well past it.
+ *
+ * ## Raised to 250 on 19 October, and the delay is the thing worth reading
+ *
+ * It said `100` for seven weeks, during which the count went from 102 to 277.
+ * The front door printed `100+` beside `107` ready-made pieces and `4` kinds of
+ * change, under a sentence promising that every number on the band is checked
+ * against the code it describes. All three claims were true and the band still
+ * misled: two of the numbers are exact counts, the third is a floor, and a
+ * reader has no way to tell them apart. Taking `100+` for the same kind of
+ * number as `107` gives you a project with about as many decisions as
+ * components. There are 2.5 times as many, and it is the most distinctive fact
+ * this repository has about itself.
+ *
+ * **The press under the band is what made it worth fixing today rather than
+ * noting again.** *Read the decisions* now opens
+ * `/docs/architecture/decision-records`, which states the count exactly. A
+ * front door saying `100+` one press from a page of the same site saying `277`
+ * is not a conservative claim, it is two numbers.
+ *
+ * ## Why this is still a floor and not a count
+ *
+ * Counting `decisions/` means reading the disk, and `/` is server-rendered on
+ * demand rather than prerendered — so the read would happen in the deployed
+ * function, where the repository is not. `(docs)` reads the same index safely
+ * because its pages are built once, at build time, in a checkout.
+ * `(docs)/_lib/architecture/source.ts` has the whole of why the obvious
+ * spelling of the path does not survive the bundler either.
+ *
+ * A deployment that quietly fell back to the floor would be worse than a floor:
+ * the number would be right in every screenshot and wrong on the site. So the
+ * floor stays, and `facts.test.ts` now holds it to being *within sight* of the
+ * truth rather than merely under it.
  */
-export const DECISIONS_AT_LEAST = 100
+export const DECISIONS_AT_LEAST = 250
+
+/**
+ * How far behind the real count the floor above is allowed to fall.
+ *
+ * The old rule — *never claim more records than there are* — is satisfied
+ * harder the wronger the number gets, which is how `100` survived 175 records.
+ * It is the one assertion in `facts.test.ts` that goes quieter as the claim it
+ * guards degrades.
+ *
+ * So there is a second bound, and the whole design of it is the size of the
+ * number. The floor may sit at **no less than 55% of the records on disk**,
+ * which at 277 records means it fires again at 455 — months away at this
+ * repository's rate — and the remedy is this one constant, raised in round
+ * numbers, with the failure naming the value to type.
+ *
+ * **It is a coupling and it is a deliberate one.** The 19 August finding is
+ * that writing a decision record in any lane left the marketing site red; this
+ * brings a weak version of that back, at roughly one bump per 180 records
+ * instead of one per record. That is the price of the number staying worth
+ * printing, and it is the smallest version of the price available: there is no
+ * way to notice a stale floor that does not fail somewhere, and the only suite
+ * that can see `decisions/` is this one.
+ */
+export const DECISIONS_FLOOR_FRACTION = 0.55
 
 /**
  * The last of the three that was still a digit somebody typed.

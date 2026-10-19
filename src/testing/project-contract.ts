@@ -136,6 +136,87 @@ export const describeProjectStoreContract = (
     })
 
     /**
+     * ## The repository (0292)
+     *
+     * At most one per project, and at most one project per repository. The
+     * second half is the one with teeth: two projects naming one repository
+     * would be two write-back destinations for one pull request, and nothing
+     * afterwards could say which was meant.
+     */
+    describe("the repository", () => {
+      it("keeps the repository it was given", async () => {
+        const store = await make()
+        const project = projectFixture({ repository: "jam-overture/loom" })
+
+        expect(await store.create(project)).toEqual({ ok: true, value: project })
+
+        const read = await store.get(project.projectId)
+        expect(read.ok && read.value.repository).toBe("jam-overture/loom")
+      })
+
+      it("takes a project with no repository, which is the ordinary first state", async () => {
+        const store = await make()
+        const project = projectFixture()
+
+        expect(await store.create(project)).toEqual({ ok: true, value: project })
+
+        const read = await store.get(project.projectId)
+        expect(read.ok && read.value.repository).toBeUndefined()
+      })
+
+      it("refuses a repository another project already names", async () => {
+        const store = await make()
+        await store.create(
+          projectFixture({
+            projectId: projectIdSchema.parse("prj_first"),
+            repository: "jam-overture/loom",
+          })
+        )
+
+        const second = await store.create(
+          projectFixture({
+            projectId: projectIdSchema.parse("prj_second"),
+            repository: "jam-overture/loom",
+          })
+        )
+
+        expect(second.ok).toBe(false)
+        expect(!second.ok && second.error.code).toBe("repository-taken")
+      })
+
+      /**
+       * The partial index's reason. A plain unique index would admit exactly
+       * one project with no repository, which is the state almost every
+       * project starts in.
+       */
+      it("lets any number of projects have none", async () => {
+        const store = await make()
+        await store.create(projectFixture({ projectId: projectIdSchema.parse("prj_a") }))
+        await store.create(projectFixture({ projectId: projectIdSchema.parse("prj_b") }))
+
+        const listed = await store.list()
+
+        expect(listed.ok && listed.value).toHaveLength(2)
+      })
+
+      /**
+       * An id collision with a repository set must not be reported as a taken
+       * repository. They are different faults and a screen puts them on
+       * different inputs.
+       */
+      it("calls an id collision an id collision, even with a repository set", async () => {
+        const store = await make()
+        const first = projectFixture({ repository: "jam-overture/loom" })
+        await store.create(first)
+
+        const again = await store.create({ ...first, name: "A second" })
+
+        expect(again.ok).toBe(false)
+        expect(!again.ok && again.error.code).toBe("already-exists")
+      })
+    })
+
+    /**
      * ## Closing (0289)
      *
      * What this store has instead of a delete. The failure these guard is the

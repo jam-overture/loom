@@ -158,6 +158,36 @@ export const WHAT_YOUR_APP_DOES: DocPage = {
 }
 
 /**
+ * The page the front door's record count sends a reader to, and the reason it
+ * is a page of this site rather than a folder on GitHub.
+ *
+ * *Read the decisions* sat under the *Built in the open* band pointing at
+ * `github.com/jam-overture/loom/tree/main/decisions`, which is a directory
+ * listing of 277 filenames. A stranger who has just read that this project
+ * writes down what it chose and what it rejected pressed it, left the product,
+ * and arrived at `0183-a-presentation-returns-the-reader-to-its-trigger.md`
+ * and 276 more like it, in a column, with no titles and no standing.
+ *
+ * **This application already serves the readable version of that**, built by
+ * `Loom docs` out of the same index: every record by title, what state it is
+ * in, and the count stated exactly. The reader stays inside the product, which
+ * is [0067](../../../../decisions/0067-the-four-surfaces-are-one-application.md)'s
+ * whole reason for making the four surfaces one, and each title on that page
+ * still opens the file in the repository for anybody who wants the text.
+ *
+ * `carries` is the two halves of the caption this site prints beside the
+ * number — *"What was chosen, what was rejected, and why"* and *kept
+ * afterwards*. Both are quotations from that page rather than words it happens
+ * to contain, so a rewrite that stopped being about the trail would be red here
+ * instead of leaving this site promising something the page no longer says.
+ */
+export const DECISION_RECORDS: DocPage = {
+  path: "/docs/architecture/decision-records",
+  heading: "Decision records",
+  carries: ["which sensible alternative was rejected, and why", "The trail is never edited"],
+}
+
+/**
  * Every documentation page this site names, which is also the whole of what a
  * sweep is allowed to find.
  *
@@ -172,4 +202,5 @@ export const DOC_PAGES: readonly DocPage[] = [
   WHAT_A_RULE_CAN_SAY,
   WHAT_THE_RECORD_HOLDS,
   WHAT_YOUR_APP_DOES,
+  DECISION_RECORDS,
 ]
