@@ -374,11 +374,25 @@ Each of the four was reverted on its own and the gate re-read:
 
 ## The preview
 
-Taken from the `vercel[bot]` comment after opening the pull request.
+Taken from the `vercel[bot]` comment after opening the pull request, not
+composed from the branch name, which is the remedy the 16 October finding asks
+every lane to follow.
 
-PREVIEW_URL_PLACEHOLDER
+https://loom-git-docs-61-the-place-a-90a788-jpizzolato36-6341s-projects.vercel.app
+
+**This one would not have been guessable**, which is the other half of
+yesterday's note. `docs-61-the-place-a-reference-anchor-lands` is long enough
+that Vercel truncated it and added a hash segment: the host is
+`loom-git-docs-61-the-place-a-90a788-…`, where a composed URL would have said
+`loom-git-docs-61-the-place-a-reference-anchor-lands-…` and 404ed. Yesterday's
+short branch was luck; this is the ordinary case.
 
 The two pages the pictures above are of:
 
-- `/docs/architecture/what-it-costs-you`
-- `/docs/api-reference/runtime`
+- [/docs/architecture/what-it-costs-you](https://loom-git-docs-61-the-place-a-90a788-jpizzolato36-6341s-projects.vercel.app/docs/architecture/what-it-costs-you)
+- [/docs/api-reference/runtime](https://loom-git-docs-61-the-place-a-90a788-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/runtime)
+
+Every picture above was taken with `pnpm shoot --serve apps/loom` against a
+build in this container, not fetched from the preview: `*.vercel.app` is denied
+by the environment's egress policy, which is the open finding of 12 October and
+still true.
