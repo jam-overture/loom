@@ -2669,8 +2669,9 @@ and the third instance is what made it a type rather than a third fix.
   because a reading of one form held against rows of two is as unreadable as the
   reverse, and only the reverse was reachable before.
 - **Summing is refused, and for a reason about the question.** Arrivals add
-  across forms because they are counted once per page view (0297, and #680 for
-  the door) — so a
+  across forms because they are counted once per page view (0297,
+  [0299](../decisions/0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md))
+  — so a
   refused reading still publishes the deployment's arrivals. A pair's ends are
   node ids, and a delta can leave an end out of one form, so a summed numerator
   is over the readers who could answer and the summed denominator over

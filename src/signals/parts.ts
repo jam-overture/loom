@@ -521,7 +521,7 @@ export const pageReadingOf = (
    * Taken from `audienceScopeOf` rather than spelled here. The rule is the same
    * one it was, and it is now the published one: two other readings pick a
    * page's rows out of a window and both had to be corrected for treating the
-   * two kinds of *no audience* alike (0297).
+   * two kinds of *no audience* alike (0297, 0299).
    */
   const scope = audienceScopeOf(audiences, audience)
   const reading = scope.audienceId

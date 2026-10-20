@@ -215,3 +215,25 @@ predicate Loom never sees.
 
 Three, each with a recommendation, none blocking. They are in the pull request
 comment.
+
+## After this report was written: #680 landed
+
+**20 October, 15:22 UTC.** #680 merged as 0299 and `main` was merged into this
+branch, with one conflict in `docs/signals.md` — my placeholder §41 against its
+real one — resolved in its favour, which is right. The two records now sit beside
+each other, so every citation on the branch that had to name #680 by pull request
+names 0299 instead, and the statements that it was *waiting to land* are
+corrected to say it has.
+
+What that changes in substance, rather than in prose: **the door figures on a
+refused funnel reading are now the sum over both forms** rather than whichever
+row sorted first. That was predicted above as the way the two changes compose;
+it is now the behaviour on this branch. `pnpm verify` was re-run on the merged
+head and the numbers in the table above are from that run.
+
+The `pageViewsFor` adoption filed for this lane is no longer blocked — it was
+deferred only to keep two changes out of one function — and I have not widened
+this pull request to take it. The four readings will then answer the `mixed`
+case in writing: the door sums it, `pageReadingOf` and `funnelReachOf` refuse
+it. That split is correct and worth being deliberate rather than incidental,
+which is the whole reason the adoption is worth a unit at all.
