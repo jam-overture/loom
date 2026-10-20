@@ -204,9 +204,19 @@ export const pageTreeFor = async (
  * that looks instrumented and is not. Off, the markup is byte-identical to what
  * this site served yesterday.
  *
- * It is a parameter with a default rather than a lookup inside, so a test can
- * render both pages — the one that is counting and the one that is not — and a
- * caller cannot get a page whose markup and whose words disagree.
+ * **It defaults to off rather than to a lookup, as of 20 October.** It read
+ * `readersCountedHere()` here until today, and that was the line the 19 October
+ * finding was about: whether this deployment counts anybody is the switch *and*
+ * a key it has to be given (0298), the key is a row in a table, and a row is a
+ * read. A synchronous default could only ever ask the half of the question that
+ * is an environment variable, which is how three pages came to ship 16 KB of
+ * addresses on a deployment with nowhere to post them.
+ *
+ * So the question is asked once, by `renderSitePage`, which can wait for the
+ * answer — and a tree rendered by anything else is not addressed, which is the
+ * safe way round: an unaddressed page costs a signal nobody was listening for,
+ * and an addressed one makes a claim about the deployment that `layout.tsx` may
+ * be about to contradict.
  */
 export type SiteRenderOptions = {
   /** Whether the markup carries the addresses a reader signal names. */
@@ -232,7 +242,7 @@ export const renderTree = (page: LoomTree, options: SiteRenderOptions = {}): Ren
     resolver: siteRegistry,
     validator: siteRegistry,
     themes: siteThemes,
-    addressed: options.addressed ?? readersCountedHere(),
+    addressed: options.addressed ?? false,
     /**
      * Omitted rather than passed as `undefined` when the origin could not be
      * registered, so a render with no allowlist is the same object shape the
@@ -250,13 +260,18 @@ export const renderTree = (page: LoomTree, options: SiteRenderOptions = {}): Ren
  * come apart: the same boolean says *this page is counting you* in the footer
  * and puts the addresses on the bands that would be counted. `counting` in the
  * context wins when a caller supplies it, which is how the tests render both
- * halves without an environment variable.
+ * halves without an environment variable or a key table.
+ *
+ * **This is the only place the question is asked on a render path**, and it is
+ * asked once per request rather than once per tree. `renderTree` below takes
+ * the answer; it no longer looks it up, because looking it up now means reading
+ * a row.
  */
 export const renderSitePage = async (
   route: SiteRoute,
   context: SitePageContext
 ): Promise<RenderOutput> => {
-  const counting = context.counting ?? readersCountedHere()
+  const counting = context.counting ?? (await readersCountedHere())
 
   return renderTree(await pageTreeFor(route, { ...context, counting }), {
     addressed: counting,
