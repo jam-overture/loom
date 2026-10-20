@@ -1,6 +1,6 @@
 # 0298. A project's ingest key is public and names its application, and the door files nothing it cannot name
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-19
 **Section:** §5 (portal), §4c (reader signals)
 
@@ -13,12 +13,13 @@
 > a secret or not, stored how, carried how — or what happens to the
 > deployment's own pages, which have posted without one since September.
 >
-> **Why `Proposed`.** Clause 4 is the maintainer's, answered on 19 October:
-> asked whether this deployment's own pages should keep posting without a key
-> until 4c, he chose *key everywhere*, and then *the marketing site needs a
-> key* in this unit rather than the next. Clause 2, storing the key readable,
-> is a choice he has not yet been asked about directly, and the pull request
-> that lands this asks him.
+> **Accepted on the maintainer's answers.** Clause 4 is his, given on 19
+> October: asked whether this deployment's own pages should keep posting
+> without a key until 4c, he chose *key everywhere*, and then *the marketing
+> site needs a key* in this unit rather than the next. Clause 2 was confirmed
+> on 20 October, after #679 landed with the record still `Proposed`: "storing
+> the key as readable text is fine." Nothing in the record changed between
+> the two.
 
 ## Context
 

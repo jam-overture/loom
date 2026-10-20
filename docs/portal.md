@@ -338,10 +338,10 @@ unit 0.
    and how many repositories a project may hold became
    [0292](../decisions/0292-a-project-holds-at-most-one-repository-and-a-repository-belongs-to-at-most-one-project.md).
    Unit 4 is unblocked; 4a and 4b are done and 4c is next.
-5. **0298 is `Proposed`.** 4b had to choose what the key is. The maintainer
-   settled one choice on 19 October (every delivery carries a key, the
-   marketing site included); the other, storing the key readable because it
-   is printed in every page that sends one, is his to confirm.
+5. **0298 is `Accepted`.** 4b had to choose what the key is. The maintainer
+   settled both choices: on 19 October, that every delivery carries a key,
+   the marketing site included; on 20 October, that the key is stored
+   readable, because it is printed in every page that sends one.
 
 ## Not in scope, and one of them deserves naming
 
