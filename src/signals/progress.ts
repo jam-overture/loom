@@ -151,11 +151,28 @@ export type ReadingProgress = {
    */
   readonly audienceId: AudienceId | null
   /**
+   * Every audience the window named, carried through unchanged.
+   *
+   * Carried for the reason {@link ReadingProgress.audienceId} is, one step
+   * further on: the pair of fields is what `audienceScopeRead` needs, and
+   * without the census every reading downstream of this one gets `one` where
+   * the window was two forms read as neither (0300). More than one member with
+   * {@link ReadingProgress.audienceId} `null` is that refusal, and what it
+   * costs to drop is written on {@link ReadingProgress.views}.
+   */
+  readonly audiences: readonly AudienceId[]
+  /**
    * The page's view floor, carried through from the reading unchanged.
    *
-   * Zero is the whole answer: nothing was measured, so nothing stopped
-   * anywhere, and `runs` is empty rather than a page of parts that all look
-   * skipped.
+   * Zero means nothing stopped anywhere, so `runs` is empty rather than a page
+   * of parts that all look skipped.
+   *
+   * **It does not mean nothing was measured, and that is the second job it was
+   * doing.** A window holding two forms of the page with none asked for is read
+   * as neither, so every part is `unknown` and this is nought while the
+   * counters behind it are full and the door beside it has arrivals in it
+   * (0290, 0299). The two states are told apart by the census above and nowhere
+   * else, which is why it travels.
    */
   readonly views: number
   /**
@@ -293,6 +310,7 @@ export const readingProgressOf = (reading: PageReading): ReadingProgress => {
     treeId: reading.treeId,
     revision: reading.revision,
     audienceId: reading.audienceId,
+    audiences: reading.audiences,
     views: reading.views,
   }
 
@@ -304,6 +322,12 @@ export const readingProgressOf = (reading: PageReading): ReadingProgress => {
    * an anchorable step on the page and every run would be a list of parts with
    * no stop in it. Saying so once here is cheaper to read than a page of empty
    * runs, and it is the same refusal `unknown` already makes one level down.
+   *
+   * **A reading refused for holding two forms arrives here as the same nought**
+   * and is answered the same way, which is right: there is no stop to publish
+   * either way. What is not right is a reading further on calling it *a page
+   * nobody read*, and the census this carries is what lets it say which of the
+   * two it was holding (0301).
    */
   if (reading.views === 0) {
     return { ...empty, runs: [], steepest: null, unanchored: [], gained: 0 }

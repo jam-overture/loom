@@ -57567,10 +57567,10 @@ rows collide.
 ## 2026-10-20 — `pageViewsFor` is the fourth reading of this shape and is the one place `AudienceScope` was deliberately not adopted
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`) · **Status:** open — **nothing is wrong**; this is
-an adoption, not a defect. #680 merged on 20 October and `main` is merged into
-the branch that filed this, so the reason it was deferred is gone and it is
-ready to take
+(`src/signals/page-views.ts`) · **Status:** **closed 20 October** in
+`signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`, with one rule the
+adoption turned up and had to write down — see the note at the end of this
+entry
 
 0300 publishes `AudienceScope` and adopts it in the two readings that refuse an
 unsplit window — `pageReadingOf` and `funnelReachOf`. The door's own reading is
@@ -57672,3 +57672,161 @@ past the bracket, so from here I will write the report and record as paths rathe
 than links in a pull request body, and keep links for anything under about 120
 characters.
 
+
+---
+## 2026-10-20 — closing the `pageViewsFor` adoption: the scope's `one` member fills a census in, and the door must not let it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/page-views.ts`) · **Status:** **closed on filing** in
+`signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`, record
+[0301](decisions/0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md)
+
+The adoption filed this morning is taken: `pageViewsFor` reads 0300's rule from
+`audienceScopeOf`, with the `mixed` branch written out rather than left to fall
+past a `null`, and the door's answer to that case — **sum**, against the other
+two readings' **refuse** — is now in writing and under a test that asserts both
+answers over one window.
+
+**It was not quite a pure refactor, and the reason is worth keeping.** The
+obvious adoption hands `scope.audienceId` to the published row. That moves a
+field: `audienceScopeOf` returns `one` when the window names exactly one
+audience and nothing was asked for, so a deployment-wide reading of a window
+holding one form today would start publishing *a reading of that form*. The
+door's own documentation already refuses this in so many words — *it is what the
+asking named and never what the rows turned out to say* (0297, 0299) — and a
+test written for 0299 catches it.
+
+So the scope decides which rows are read and `where.audienceId` decides what the
+reading says it is of. That is not an inconsistency in `AudienceScope`: the
+member deliberately collapses *asked for* and *the only one there* because the
+two readings that merely filter rows by it want them handled alike. A reading
+that **publishes** the field wants them apart, and the door is the only one of
+the four that publishes it.
+
+**For the fifth reading.** If a reading both filters by the scope and publishes
+an audience, it needs `where.audienceId ?? null` for the second, not
+`scope.audienceId`. Whether that is worth a field on the `one` member — *who
+decided, the asking or the window* — is a real question and was left alone
+deliberately: one call site is not evidence of a rule, and the comment on the
+one call site is cheaper than a member every switch has to read.
+
+---
+## 2026-10-20 — a refused page reading was reported as a page nobody read, beside a door summing a thousand arrivals
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**fixed 20 October** in `signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`,
+record
+[0301](decisions/0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md)
+
+0300 made a window of two forms with none asked for a case a reading has to
+answer, and published the refusal. **The refusal was then published as a nought
+that already meant something else.** A page reading that refuses puts every part
+at `unknown` and its view floor at nought — which is exactly what a page nothing
+has opened publishes — and three readings derived from it branch on that floor.
+
+`deploymentReadingOf` called it `unread`, whose sentence is *nothing reported a
+view of this version in the window*. `readingChangeOf` called it
+`nothing-measured`: *one of the two windows held no page views*.
+
+**The deployment order's row contradicted itself.** That order asks the door for
+each page's arrivals, and the door answers a two-form window by **summing**
+them (0297, 0299), because arrivals are people. So on fixtures of a hundred
+skiers and nine hundred riders, handed in unsplit:
+
+```
+standing  unread      nothing reported a view of this version in the window
+opened    1,000       ← both forms arrivals, off the same window
+```
+
+**`ReadingProgress` could not have told them apart.** It carries `audienceId`
+for a stated reason and dropped `audiences`, and `audienceScopeRead` needs both:
+`audienceId` is `null` for a window naming one audience and for a window naming
+two. So the refusal was not ignored downstream — it was unreachable there.
+
+**What this costs a deployment, which is why it is written up rather than
+merely fixed.** `standings.unread` is the headline count of pages nobody read,
+and it absorbed every refused reading. A deployment serving two forms and
+reading its pages unsplit — the mistake `byAudience` exists to prevent and the
+one four records now exist because callers make — would have been told *forty
+pages nobody read* about forty pages with readers on all of them. One sentence
+sends somebody to look for a sender that has stopped. The true one is a function
+call away.
+
+**Fixed by making the refusal travel and be named**: `ReadingProgress` carries
+the census, `ChangeSilence` gains `audiences-mixed` checked before the view
+floor, and both deployment orders gain an `unsplit` standing mapped to the
+condition the funnel comparison brought the day before.
+
+---
+## 2026-10-20 — the change order maps `different-audiences` to `unread`, and so to the condition `no-view-reported`
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/deployment-change.ts`) · **Status:** open — the second conflation
+of 0301's family, deliberately not fixed in the same unit because its argument is
+different
+
+`deploymentChangeOf` puts every comparison silence but `different-trees` into
+one standing, `unread`. 0301 took `audiences-mixed` out of that bucket. Two are
+left in it: `nothing-measured`, which belongs there, and
+**`different-audiences`, which does not obviously.**
+
+The silences table is where it shows. `MovementStanding` `unread` maps to
+`no-view-reported` — *nothing reported a view of it* — so a comparison refused
+for spanning **two known populations** is reported, at the table, as a window
+nobody read. The cause does travel on `MovedPage.silence`, so nothing here is
+unrecoverable by a careful surface; what is wrong is the standing a screen groups
+by and the condition the table publishes.
+
+**Why it was not fixed here.** 0301's argument is that `unsplit` has nothing in
+common with `unread` but a nought. `different-audiences` is a different case: the
+comparison genuinely has nothing to compare, because its two sides are of two
+populations, so *there was nothing to compare on one side* is at least true of it
+in a way it is not true of a full two-form window. Whether that earns a standing
+of its own is a judgement about what a screen should group, and taking it inside
+a unit about a different conflation would have been two decisions in one record.
+
+**What is left to decide.** Either a fourth standing — `mispopulated`, say,
+beside `mispaired` and `unsplit`, the three faults in the pairing rather than in
+the readers — or a written note on `unread` saying it covers two states and
+pointing at `silence`. The first is better if a portal screen will group by
+standing, which is `Loom portal`'s to say.
+
+---
+## 2026-10-20 — a silence set's condition provenance was derived from set arrival order, and an old set adopting a new condition rewrote it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/silences.test.ts`) · **Status:** **fixed 20 October** in
+`signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`
+
+`silences.test.ts` holds a record of which silence set first brought each
+condition, by folding over the sets in **arrival order** and asserting that each
+set's conditions-no-earlier-set-reported equal its own declaration. Its note says
+plainly what the record is for:
+
+> the all-others form would delete the ninth's declaration and report that
+> nothing had ever brought it, which is the one fact this test exists to keep
+
+0301 adds `audiences-mixed` to `ChangeSilence`, which maps to
+`two-forms-unsplit`. The before-and-after reading is one of the **first five**
+sets, whose conditions are seeded into the fold as already-reported, and
+`two-forms-unsplit` was brought by the **eleventh** set the day before. So the
+seed swallowed it, the eleventh set's novelty computed as nothing, and its
+declaration of `["two-forms-unsplit"]` failed — the exact deletion quoted above,
+arriving by the route the note did not consider.
+
+**The cause: set arrival order was standing in for *(set, condition)* arrival
+order.** They are the same until a set already in the list gains a member, and
+then the proxy silently reassigns provenance to whichever set happens to sit
+earlier.
+
+**Fixed** by crediting a declared condition to its declarer whichever set
+reports it first, and by keeping it out of the first five's seed. An
+**undeclared** condition is in neither, so it still surfaces as the novelty of
+the first set to report it and still fails — which is the guard that matters.
+
+**The shape, for this lane's own method.** This is the second instance in two
+days of a verdict that does not survive the set growing: yesterday's was lesson
+28's hard-coded decision number, which the numbering reached. Both were records
+of *what was true when written* expressed as derivations from something that
+keeps moving. A test that holds provenance should state it, not infer it from an
+order.

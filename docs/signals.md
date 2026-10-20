@@ -39,6 +39,7 @@ the portal every day.
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Which populations a reading summed | the audiences a region map added up, published as a census rather than a refusal ([0297](../decisions/0297-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)), because arrivals are people and a reader who arrived arrived once — so a revision served in two forms is one readership and is now summed as one |
 | What population a reading is of | one of three answers rather than a nullable name ([0300](../decisions/0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md)), so a window of two forms with none asked for is read as **neither** and cannot be picked from by row order — which is what three readings did, one of them dividing one form's reach by the other form's arrivals |
+| Whether a reading was read at all | a window read as neither population reported as that, and never as a page nobody read ([0301](../decisions/0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md)) — because a refused reading publishes a view floor of nought, which is what a page nothing opened publishes, so the deployment order said *nothing reported a view of this version* beside a door row summing a thousand arrivals |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
 | Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
@@ -2699,6 +2700,80 @@ The broadcaster was not touched and is byte-identical at 6,477 bytes minified.
 shape and is fixed on #680, so it is deliberately not touched here — adopting
 `AudienceScope` in it is filed for this lane, to be taken now that #680 has
 landed. No screen reads any of the three censuses, which is `Loom portal`'s.
+
+### 43. A page read as neither population is not a page nobody read · `Loom signals` · **done, 20 October**
+
+§42 published `AudienceScope` and closed with a note that the refusal it makes
+is published and nothing downstream reads it. The note understated it: **the
+refusal is published as a nought that already means something else**, and three
+readings derived from a page reading branch on that nought.
+
+A page reading of a window holding two forms with none asked for puts every part
+at `unknown` and its view floor at nought. A page nothing has opened does the
+same. Nothing holding only the floor can tell them apart — and
+`readingProgressOf` dropped the census, so nothing downstream had anything else
+to hold.
+
+What they printed:
+
+```
+deploymentReadingOf   standing "unread"       nothing reported a view of this version
+                      opened   1,000          ← the door sums both forms (0299)
+readingChangeOf       silence  nothing-measured   one of the two windows held no page views
+```
+
+**A thousand readers arrived at a page nobody read**, both halves off one
+window, measured on fixtures of a hundred skiers and nine hundred riders.
+
+**Done**
+([0301](../decisions/0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md)).
+
+- **`ReadingProgress` carries `audiences`**, which is the whole of what makes
+  the rest possible: `audienceScopeRead` needs the pair of fields, and
+  `audienceId` alone is `null` both for a window that named one audience and for
+  one that named two.
+- **`ChangeSilence` gains `audiences-mixed`**, checked **before** the view floor
+  because the refusal is that floor's cause, and after `different-audiences`
+  because two provable populations outrank one unreadable window. The parts
+  census stands, as it does for `nothing-measured`.
+- **`RankStanding` and `MovementStanding` gain `unsplit`**, mapped to
+  `two-forms-unsplit` — the condition the funnel comparison brought in §42, now
+  reported by a **page** as well as by a pair, which the silences table holds as
+  one reason at two subjects rather than one sentence.
+- **The arrivals stay published beside the refusal.** They are the deployment's
+  and they add, so the honest row is *this many readers arrived; which of them
+  read what is a question per form.*
+- **`pageViewsFor` reads the rule from `audienceScopeOf`**, which closes the
+  fourth and last of §42's joins. Behaviour unchanged, and the one thing it must
+  not adopt is now written down: the audience it publishes is the one the
+  **asking** named, never the scope's — `one` fills a single-membered census in,
+  which is right for a reading that only filters by it and wrong for one that
+  publishes the field (0297, 0299).
+- **`unsplit` is the only standing in either order that is a fault in the
+  asking.** Every other is a state of the deployment's readers or its rows. The
+  remedy is `byAudience` and two readings, after which the page stands in the
+  order twice.
+
+**A limit found in this lane's own test method, written down because it is the
+second instance of one shape.** `silences.test.ts` records which set first
+brought each condition by folding over the sets in **arrival order**, and the
+before-and-after reading — one of the first five — has now adopted a condition
+the eleventh set brought. The fold would have reported that nobody ever brought
+it, which is the one deletion the test's own note says it exists to prevent. Set
+arrival order was standing in for *(set, condition)* arrival order and stopped
+working the first time an old set gained a member. Yesterday's instance was
+lesson 28's hard-coded decision number; both are verdicts that do not survive the
+set growing.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the thirty-second thing taken out of what this subsystem already
+knows. The broadcaster was not touched and is byte-identical at 6,477 bytes
+minified.
+
+**What is left and is filed:** no screen draws `unsplit` or `audiences-mixed`,
+which is `Loom portal`'s. The change order's `different-audiences` still maps to
+`unread`, and so to the condition `no-view-reported` — a second conflation of the
+same family, with its own argument, filed for this lane.
 
 ## Still not in scope
 

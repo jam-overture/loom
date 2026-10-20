@@ -141,11 +141,29 @@ export type DeploymentChangeSilence =
    * are the ones the disagreement makes absurd.
    */
   | "inconsistent"
+  /**
+   * One of the two windows holds two forms of the page and named neither, so
+   * that side was read as neither population.
+   *
+   * The comparison's own `audiences-mixed` (0301), named here rather than
+   * folded into `unread` for the reason that record exists: a refused reading
+   * publishes a view floor of nought, so *one of the two windows reported no
+   * view of its revision* was printed about a window holding every reader of
+   * both forms. A caller reads the cause off {@link MovedPage.silence} either
+   * way; the standing is what a screen groups by, and grouping a fault in the
+   * asking under a fact about readers is what sends a deployment to look for a
+   * broken sender.
+   *
+   * It is the one standing here a caller fixes by asking again:
+   * split both windows by audience (`byAudience`) and compare each form.
+   */
+  | "unsplit"
 
 export const DEPLOYMENT_CHANGE_SILENCES: readonly DeploymentChangeSilence[] =
   everyMemberOf<DeploymentChangeSilence>()([
     "unread",
     "mispaired",
+    "unsplit",
     "unscaled",
     "unopened",
     "inconsistent",
@@ -171,6 +189,7 @@ export const MOVEMENT_STANDINGS: readonly MovementStanding[] =
     "unmoved",
     "unread",
     "mispaired",
+    "unsplit",
     "unscaled",
     "unopened",
     "inconsistent",
@@ -187,6 +206,8 @@ export const describeMovementStanding = (standing: MovementStanding): string => 
       return "one of the two windows reported no view of its revision"
     case "mispaired":
       return "the two readings are of different pages, so there is no movement here"
+    case "unsplit":
+      return "one window holds two forms of the page and says which readers neither"
     case "unscaled":
       return "no page views counted at the later door, so its movement is not comparable with another page's"
     case "unopened":
@@ -419,6 +440,29 @@ const movementOf = (at: ComparedStop | null, inflation: number | null): PageMove
       }
 
 /**
+ * The standing a comparison's own silence puts a page in.
+ *
+ * Two of the four comparison silences name themselves here and two share
+ * `unread`, which is the coarser bucket and is deliberate: `different-audiences`
+ * and `nothing-measured` are both *there was nothing to compare on one side*,
+ * and the cause travels on {@link MovedPage.silence} for a surface that wants
+ * to say which. `audiences-mixed` does not share it, because what it has in
+ * common with them is a nought rather than a state of a deployment's readers
+ * (0301).
+ */
+const standingFor = (silence: ChangeSilence): MovementStanding => {
+  switch (silence) {
+    case "different-trees":
+      return "mispaired"
+    case "audiences-mixed":
+      return "unsplit"
+    case "different-audiences":
+    case "nothing-measured":
+      return "unread"
+  }
+}
+
+/**
  * One page's row, with the reasons tried in the order they have to be tried in.
  *
  * The comparison's own silence first, because *there was nothing to compare* is
@@ -441,11 +485,7 @@ const rowOf = (change: ReadingChange, door: RevisionPageViews | null): MovedPage
   const nothing = { worsened: null, improved: null }
 
   if (change.silence !== null) {
-    return {
-      ...where,
-      ...nothing,
-      standing: change.silence === "different-trees" ? "mispaired" : "unread",
-    }
+    return { ...where, ...nothing, standing: standingFor(change.silence) }
   }
 
   if (door === null) return { ...where, ...nothing, standing: "unscaled" }

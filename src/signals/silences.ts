@@ -662,6 +662,8 @@ export const meaningOfChangeSilence = (silence: ChangeSilence): SilenceMeaning =
       return meaning("change", "two-pages")
     case "different-audiences":
       return meaning("change", "two-audiences")
+    case "audiences-mixed":
+      return meaning("change", "two-forms-unsplit")
     case "nothing-measured":
       return meaning("change", "no-view-reported")
   }
@@ -735,6 +737,8 @@ export const meaningOfDeploymentSilence = (silence: DeploymentSilence): SilenceM
   switch (silence) {
     case "unread":
       return meaning("deployment", "no-view-reported")
+    case "unsplit":
+      return meaning("deployment", "two-forms-unsplit")
     case "unscaled":
       return meaning("deployment", "no-arrivals-counted")
     case "unopened":
@@ -765,6 +769,8 @@ export const meaningOfDeploymentChangeSilence = (
       return meaning("deployment-change", "no-view-reported")
     case "mispaired":
       return meaning("deployment-change", "two-pages")
+    case "unsplit":
+      return meaning("deployment-change", "two-forms-unsplit")
     case "unscaled":
       return meaning("deployment-change", "no-arrivals-counted")
     case "unopened":

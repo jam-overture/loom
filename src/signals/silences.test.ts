@@ -293,19 +293,49 @@ describe("what a reading means when it says nothing", () => {
     /** The five sets that were there before any of the above, in arrival order. */
     const FIRST_FIVE: readonly SilenceVocabulary[] = ["change", "copy", "copy-change", "pace", "reach"]
 
+    /**
+     * A condition some later set is on record as having brought.
+     *
+     * **An older set may adopt one afterwards, and this is what keeps the
+     * record of who brought it true when one does.** The order above is the
+     * order the *sets* arrived in, which stood in for the order the
+     * *(set, condition)* pairs arrived in until a set already in the list
+     * gained a member — `change` gaining `audiences-mixed` and so reporting
+     * `two-forms-unsplit`, eleven sets after the funnel comparison brought it
+     * (0301). Without this, the seed below would hold the condition from the
+     * first five, the eleventh set's novelty would compute as nothing, and the
+     * test would report that no set had ever brought it: the exact deletion
+     * this test's own note says it exists to prevent.
+     *
+     * So a declared condition is credited to its declarer and to nobody else,
+     * whichever set reports it first. A condition **no** set declares is in
+     * neither this set nor the seed, so it still shows up as the novelty of the
+     * first set to report it and still fails undeclared.
+     */
+    const BROUGHT_LATER = new Set<SilenceCondition>(
+      later.flatMap(([, , declared]) => declared)
+    )
+
+    const owns = (vocabulary: SilenceVocabulary, condition: SilenceCondition): boolean =>
+      later.some(([of, , declared]) => of === vocabulary && declared.includes(condition))
+
     const earlier = new Set<SilenceCondition>(
-      EVERY_MEANING.filter((meaning) => FIRST_FIVE.includes(meaning.vocabulary)).map(
-        (meaning) => meaning.condition
-      )
+      EVERY_MEANING.filter((meaning) => FIRST_FIVE.includes(meaning.vocabulary))
+        .map((meaning) => meaning.condition)
+        .filter((condition) => !BROUGHT_LATER.has(condition))
     )
 
     for (const [vocabulary, conditions, declared] of later) {
-      expect([...new Set(conditions.filter((condition) => !earlier.has(condition)))]).toEqual(
-        declared
-      )
+      const novel = [...new Set(conditions.filter((condition) => !earlier.has(condition)))]
+
+      expect(
+        novel.filter((condition) => !BROUGHT_LATER.has(condition) || owns(vocabulary, condition))
+      ).toEqual(declared)
       expect(SILENCE_VOCABULARIES).toContain(vocabulary)
 
-      for (const condition of conditions) earlier.add(condition)
+      for (const condition of conditions) {
+        if (!BROUGHT_LATER.has(condition) || owns(vocabulary, condition)) earlier.add(condition)
+      }
     }
   })
 
@@ -416,6 +446,43 @@ describe("a pair of two populations", () => {
     expect(
       relateSilences(unsplit, meaningOfFunnelChangeSilence("different-audiences"))
     ).toBe("unrelated")
+  })
+
+  /**
+   * Three readings now report it, and the two that joined are the ones that had
+   * been calling it *nothing was read* (0301). What the mapping says about them
+   * is the point: the before-and-after reading's is a state of the pair and the
+   * deployment order's is a state of one page, so they are one condition at two
+   * subjects rather than one state — and no screen may draw the comparison's
+   * sentence over the page in front of somebody.
+   */
+  it("is one condition at two subjects once a page reports it as well as a pair", () => {
+    const pair = meaningOfChangeSilence("audiences-mixed")
+    const page = meaningOfDeploymentSilence("unsplit")
+
+    expect(pair.condition).toBe("two-forms-unsplit")
+    expect(page.condition).toBe("two-forms-unsplit")
+    expect(pair.subject).toBe("comparison")
+    expect(page.subject).toBe("page")
+    expect(relateSilences(pair, page)).toBe("one-reason")
+    expect(relateSilences(pair, meaningOfFunnelChangeSilence("audiences-mixed"))).toBe("one-state")
+  })
+
+  /**
+   * The sentence each one replaced, held apart from it. A deployment told
+   * *nothing reported a view of this version* goes looking for a broken sender;
+   * told *the window holds two forms* it splits the window and asks again.
+   */
+  it("is not the condition a page nobody read reports", () => {
+    expect(meaningOfDeploymentSilence("unsplit").condition).not.toBe(
+      meaningOfDeploymentSilence("unread").condition
+    )
+    expect(meaningOfChangeSilence("audiences-mixed").condition).not.toBe(
+      meaningOfChangeSilence("nothing-measured").condition
+    )
+    expect(meaningOfDeploymentChangeSilence("unsplit").condition).not.toBe(
+      meaningOfDeploymentChangeSilence("unread").condition
+    )
   })
 })
 
