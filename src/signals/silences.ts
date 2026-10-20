@@ -213,7 +213,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Thirteen of them against seventy-eight members across the seventeen sets, which
+ * Fifteen of them against eighty-four members across the seventeen sets, which
  * is the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
@@ -392,6 +392,24 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * the arrivals — because a rate is two counts off one row and needs no count of
  * the readers who arrived. A surface reading any condition as *this row says
  * nothing* would throw away the half that still answers.
+ *
+ * **The fifteenth condition arrived without a set of its own either, and it is
+ * the first that is about what the caller handed in**
+ * ([0300](../../decisions/0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md)).
+ * The sixteenth set gained a member: a comparison one side of which was read as
+ * **neither** of the two forms in its window. Every other condition here is
+ * about the deployment, the window or the shape of the page, so every other
+ * remedy is a place to go and look; this one's remedy is an instruction —
+ * split the window by audience and read each form on its own.
+ *
+ * It is held apart from `two-audiences` on purpose, and the pair is the whole
+ * argument for its existence. That is two sides of two **known** populations,
+ * where the arithmetic is right and only the sentence on top of it is wrong.
+ * This is one side of no population at all, because two forms of a page share a
+ * tree and a revision (0263) and are told apart by a column (0284) — so a
+ * reading handed both with neither asked for has nothing to hold against
+ * anything. A deployment given either in place of the other goes to the wrong
+ * remedy.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -518,6 +536,24 @@ export type SilenceCondition =
    * quiet traffic is not a fault.
    */
   | "no-reach-reported"
+  /**
+   * One window holds two forms of the page and the asking named neither.
+   *
+   * The sibling of `two-audiences` and not a second spelling of it. That is two
+   * readings of two **known** populations held against each other, where the
+   * arithmetic is right and the sentence on top of it is wrong. This is one
+   * window that is of no population at all: two forms of a page share a tree
+   * and a revision (0263) and are told apart by a column (0284), so a reading
+   * handed both with neither asked for reads neither — the alternatives being
+   * to sum two populations or to pick one of them by the order rows arrived in.
+   *
+   * **The condition about what the caller handed in**, where every other here
+   * is about the deployment, the window or the shape of the page. The remedy is
+   * therefore the only one in this set that is an instruction to the caller
+   * rather than a place to look: split the window by audience and read each
+   * form on its own.
+   */
+  | "two-forms-unsplit"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -534,6 +570,7 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "nothing-of-the-kind",
   "nothing-inside",
   "no-reach-reported",
+  "two-forms-unsplit",
 ])
 
 /**
@@ -574,6 +611,8 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "it has nothing inside it, so there is nothing a reader could act in"
     case "no-reach-reported":
       return "its counters are there and not one of them reports being reached"
+    case "two-forms-unsplit":
+      return "one window holds two forms of the page and says which readers neither"
   }
 }
 
@@ -1039,6 +1078,8 @@ export const meaningOfFunnelChangeSilence = (silence: FunnelChangeSilence): Sile
       return meaning("funnel-change", "no-openings-marked")
     case "uncounted":
       return meaning("funnel-change", "no-window-folded")
+    case "audiences-mixed":
+      return meaning("funnel-change", "two-forms-unsplit")
     case "unasked":
       return meaning("funnel-change", "nothing-carried")
   }
