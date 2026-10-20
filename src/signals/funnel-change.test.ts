@@ -821,4 +821,61 @@ describe("funnelChangeOf across two audiences", () => {
 
     expect(change.silence).toBe("different-trees")
   })
+
+  /**
+   * A side read as neither population has no pairs, and an empty side pairs
+   * cleanly: every question of the other side comes back as added or removed.
+   * So a window that was never read would otherwise report as a change that
+   * added every question a deployment asks — which is what makes this a
+   * refusal rather than a comparison of one side.
+   */
+  const MIXED = { ...ONE, audienceId: null, audiences: [RIDERS, SKIERS], pairs: [] }
+
+  it("refuses a side that was read as neither of two forms", () => {
+    const change = funnelChangeOf(MIXED, OTHER)
+
+    expect(change.silence).toBe("audiences-mixed")
+    expect(change.compared).toEqual([])
+    expect(change.added).toEqual([])
+    expect(change.removed).toEqual([])
+  })
+
+  it("refuses it on the later side too", () => {
+    expect(funnelChangeOf(ONE, MIXED).silence).toBe("audiences-mixed")
+  })
+
+  /**
+   * The distinction the refusal buys. A window with no funnel row is a window
+   * that was read and had no question, so the other side's question is one the
+   * change added — which is the right answer there and the wrong one for a
+   * window nobody read.
+   */
+  it("tells a window that was read and had no question from one that was not read", () => {
+    const none = window({ revision: 1, opened: 100, appearances: 100 }, [])
+
+    expect(funnelChangeOf(none, OTHER).added).toHaveLength(1)
+    expect(funnelChangeOf(MIXED, OTHER).added).toEqual([])
+  })
+
+  /**
+   * One member in a census with nothing asked for is the ordinary deployment
+   * and is one population, so it must not be caught by the refusal above.
+   */
+  it("compares a side whose window named one form and asked for none", () => {
+    const change = funnelChangeOf({ ...ONE, audiences: [SKIERS] }, { ...OTHER, audiences: [SKIERS] })
+
+    expect(change.silence).not.toBe("audiences-mixed")
+    expect(change.compared).toHaveLength(1)
+  })
+
+  it("says two pages and two audiences before it says one side is of neither", () => {
+    const elsewhere = window({ revision: 2, opened: 100, appearances: 100, treeId: OTHER_TREE }, [])
+
+    expect(funnelChangeOf(MIXED, { ...elsewhere, audienceId: RIDERS }).silence).toBe(
+      "different-trees"
+    )
+    expect(
+      funnelChangeOf({ ...MIXED, audienceId: SKIERS }, { ...OTHER, audienceId: RIDERS }).silence
+    ).toBe("different-audiences")
+  })
 })

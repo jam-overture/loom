@@ -4,6 +4,8 @@ import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { OTHER_TREE, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 
 import {
+  audienceScopeOf,
+  audienceScopeRead,
   audiencesIn,
   byAudience,
   comparedAudiencesOf,
@@ -99,6 +101,113 @@ describe("byAudience", () => {
 
     expect(windows).toHaveLength(1)
     expect(windows[0]?.audience).toBe(DEFAULT_AUDIENCE_ID)
+  })
+})
+
+/**
+ * The three-way answer, which exists because `null` was two states. Two
+ * readings here were corrected one at a time for treating them alike (0297)
+ * and a third was still wrong, so what is tested is that each of the
+ * three is reachable and that the ambiguous one is a value a caller has to
+ * handle rather than one it can read an audience off.
+ */
+describe("audienceScopeOf", () => {
+  it("is of the one audience a window names, with nothing asked for", () => {
+    expect(audienceScopeOf([SKIERS])).toEqual({
+      reading: "one",
+      audienceId: SKIERS,
+      audiences: [SKIERS],
+    })
+  })
+
+  it("is unlabelled where nothing named an audience, which is every window before the column", () => {
+    expect(audienceScopeOf([])).toEqual({ reading: "unlabelled", audienceId: null, audiences: [] })
+  })
+
+  it("is mixed where two forms are named and none is asked for", () => {
+    expect(audienceScopeOf([RIDERS, SKIERS])).toEqual({
+      reading: "mixed",
+      audienceId: null,
+      audiences: [RIDERS, SKIERS],
+    })
+  })
+
+  /** The whole point: the ambiguous answer has no audience to be read off it. */
+  it("gives the mixed answer no audience, so no reading can pick one of the two", () => {
+    const scope = audienceScopeOf([RIDERS, SKIERS])
+
+    expect(scope.audienceId).toBeNull()
+    expect(scope.reading).toBe("mixed")
+  })
+
+  it("takes the audience asked for, and still says what the window held", () => {
+    expect(audienceScopeOf([RIDERS, SKIERS], SKIERS)).toEqual({
+      reading: "one",
+      audienceId: SKIERS,
+      audiences: [RIDERS, SKIERS],
+    })
+  })
+
+  /**
+   * A caller asking for a population the window does not hold is holding an
+   * empty reading, which is what it asked for and not an ambiguity.
+   */
+  it("takes the audience asked for where the window names it nowhere", () => {
+    expect(audienceScopeOf([], SKIERS)).toEqual({
+      reading: "one",
+      audienceId: SKIERS,
+      audiences: [],
+    })
+  })
+
+  it("deduplicates and sorts the census, so two windows concatenated read the same either way", () => {
+    expect(audienceScopeOf([SKIERS, RIDERS, SKIERS]).audiences).toEqual([RIDERS, SKIERS])
+    expect(audienceScopeOf([RIDERS, SKIERS, RIDERS]).audiences).toEqual([RIDERS, SKIERS])
+  })
+
+  it("is of one audience where a window names it twice", () => {
+    expect(audienceScopeOf([SKIERS, SKIERS]).reading).toBe("one")
+  })
+
+  it("is of the default audience like any other, because it is a name a host chose", () => {
+    expect(audienceScopeOf([DEFAULT_AUDIENCE_ID])).toEqual({
+      reading: "one",
+      audienceId: DEFAULT_AUDIENCE_ID,
+      audiences: [DEFAULT_AUDIENCE_ID],
+    })
+    expect(audienceScopeOf([DEFAULT_AUDIENCE_ID, SKIERS]).reading).toBe("mixed")
+  })
+})
+
+describe("audienceScopeRead", () => {
+  it("reads back the one population a reading recorded", () => {
+    expect(audienceScopeRead({ audienceId: SKIERS, audiences: [RIDERS, SKIERS] })).toEqual({
+      reading: "one",
+      audienceId: SKIERS,
+      audiences: [RIDERS, SKIERS],
+    })
+  })
+
+  it("reads back a reading that was of neither of two populations", () => {
+    expect(audienceScopeRead({ audienceId: null, audiences: [RIDERS, SKIERS] }).reading).toBe(
+      "mixed"
+    )
+  })
+
+  it("reads back a reading of a window that named nothing", () => {
+    expect(audienceScopeRead({ audienceId: null, audiences: [] }).reading).toBe("unlabelled")
+  })
+
+  /**
+   * A reading recording one audience in its census and none as its own is not
+   * ambiguous: one population is one population whether or not anybody asked.
+   */
+  it("reads one audience and no asking as that one audience", () => {
+    expect(audienceScopeRead({ audienceId: null, audiences: [SKIERS] })).toEqual({
+      reading: "one",
+      audienceId: SKIERS,
+      audiences: [SKIERS],
+    })
   })
 })
 

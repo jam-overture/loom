@@ -646,7 +646,7 @@ describe("C", () => {
     const written: readonly (readonly [string, string])[] = [
       ["bare, meaning 0095", `/** The origins belong to the deployment (0094). */`],
       ["linked, meaning 0095", `/** The origins belong to the deployment ([0094](../../decisions/${opens})). */`],
-      ["bare, naming nobody", `/** The origins belong to the deployment (0300). */`],
+      ["bare, naming nobody", `/** The origins belong to the deployment (0998). */`],
     ]
 
     for (const [what, source] of written) {
@@ -698,7 +698,7 @@ const under = (directory: string): readonly string[] =>
 
     if (entry.isDirectory()) return under(path)
 
-    /** This file cites 0300 on purpose, one exercise up. */
+    /** This file cites 0998 on purpose, one exercise up. */
     if (basename(path) === "scratch.test.ts") return []
 
     return CITING.test(entry.name) ? [path] : []
@@ -754,8 +754,14 @@ day it stops being true, is the better shape — and choosing it is a small work
 example of the decision the rest of the lesson is about.
 
 Note also the exclusion in `under`: this file is skipped, because exercise C put
-a citation of `0300` into it on purpose. A check that reads the file it is
+a citation of `0998` into it on purpose. A check that reads the file it is
 written in is a check with a fixture in its population.
+
+**It said `0300` until 20 October, and the day the numbering reached that record
+the exercise's own verdict went from `1 problem(s)` to `0`** — which is the
+failure two paragraphs up, arriving in the one place the lesson had not applied
+its own advice. A fixture has to be a number the numbering cannot reach, not
+merely one it has not reached yet.
 
 **`apps` joined the three directories on 15 October**, and what it cost is the
 better half of the story. The first record to govern only the portal — 0285,
@@ -768,7 +774,7 @@ links to records that had since been renamed, and one doc comment illustrating
 the shape of an index row with `[0001](0001-slug.md)` — a record that has never
 existed. Four were real dead links of exactly the kind
 [#637](https://github.com/jam-overture/loom/pull/637) was opened to fix; the
-fifth was a fixture in the population, like this file's own `0300`, and is now
+fifth was a fixture in the population, like this file's own `0998`, and is now
 spelled `NNNN`. Both lines read `0` again, over a population that is now the
 one the sentence claims.
 

@@ -2,6 +2,7 @@ import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 
+import { audienceScopeOf, audiencesIn } from "./audiences.js"
 import { pageViewsFor, type StoredPageViews } from "./page-views.js"
 import type { PageReading } from "./parts.js"
 import type { ReachSilence } from "./reach.js"
@@ -118,13 +119,43 @@ import type { StoredFunnel } from "./tally.js"
  * satisfy several pairs, so adding them counts it several times — the same
  * arithmetic that keeps `engaged` off every per-role total (0147, 0167).
  *
+ * **A window of two forms with none asked for is read as neither.** A page
+ * served in two forms (0263) answers one question twice, one row per audience
+ * (0284), and before this the asking that names no audience took whichever row
+ * came first and counted the other in `duplicatedPairs` — a real second
+ * population reported as a caller handing one question in twice. The door row
+ * was picked out of a **different** array by the same rule, so the numerator
+ * and the denominator could come from different forms: with four of a hundred
+ * skiers and four hundred of a thousand riders, the published entry share was
+ * four over a thousand. Two orders of magnitude, from the order two lists
+ * arrived in.
+ *
+ * So the pairs are refused, every row of the revision is counted in
+ * `otherAudiencePairs`, and `audiences` names both populations — the shape
+ * `pageReadingOf` already had for its parts (0290), read back off the reading
+ * with `audienceScopeRead` rather than subtracted from two fields.
+ *
+ * **Summing them instead is not available, and that is a fact about the
+ * question rather than caution.** Arrivals at the door are counted once per
+ * page view and therefore add across forms (0297), which is why the door's
+ * figures here are the deployment's. A funnel pair is two node ids a
+ * deployment wrote down, and the deltas an audience earns can leave one of
+ * those ends out of one form: a sum would then put the readers who could
+ * answer the question over the readers of both forms, understating conversion
+ * by an amount nothing in the rows can state. The deployment-wide funnel
+ * answer is `byAudience` and one reading per form (0290).
+ *
  * ## One vocabulary for why there is no denominator
  *
  * {@link ReachSilence} is reused rather than restated. The three states it
  * names — no row for the revision, a row that says no page view ever began, and
  * arrivals no rollup has folded — are states of the *deployment* rather than of
  * the question being asked, so a funnel reading and a part reading are silent
- * for the same three reasons and a surface handles them once. `unopened` is
+ * for the same three reasons and a surface handles them once. A window of two
+ * forms is deliberately **not** a fourth member of it: it is a state of what
+ * the caller handed in rather than of the deployment, it is reported by
+ * {@link FunnelReach.audiences} the way `pageReadingOf` reports it, and four
+ * other sets map this one member for member. `unopened` is
  * still the one worth catching: senders that are not marking their openings
  * leave every rate here denominator-less while the counters look healthy.
  *
@@ -417,6 +448,20 @@ export type FunnelReach = {
    * from two readings that have forgotten which population each was of (0284).
    */
   readonly audienceId: AudienceId | null
+  /**
+   * Every population the window named, deduplicated and in a stable order.
+   *
+   * The reading's own census and the funnel rows' together, because either
+   * alone can be the ambiguous one: a caller may hand in a page reading of one
+   * form and funnel rows of two, or the reverse. `[]` is a window that never
+   * carried the column (0284), which is *nothing here says* and not *one
+   * audience*.
+   *
+   * Two members with {@link FunnelReach.audienceId} `null` is the state in
+   * which no pair is read at all — see the module note on what a window of two
+   * forms is refused for.
+   */
+  readonly audiences: readonly AudienceId[]
   /** Page views that began on this revision. Exact, and addable (0219). */
   readonly opened: number
   /** The same page views as the rollups counted them: once per window each appeared in. */
@@ -467,9 +512,17 @@ export type FunnelReach = {
    * Funnel rows naming a pair already seen, where every one after the first was
    * ignored.
    *
-   * A store keeps one row per pair per revision per audience, and the audience
-   * is picked before this is counted, so this is a caller who concatenated two
-   * reads. Adding them would double a total that is already one.
+   * A store keeps one row per pair per revision per audience, so a second row
+   * for one pair **within one population** is a caller who concatenated two
+   * reads, and adding them would double a total that is already one.
+   *
+   * It says *within one population* rather than asserting the audience was
+   * picked first, which is what it used to say and what made the fault below
+   * invisible: where the asking named no audience, two forms' answers to one
+   * question were two rows sharing this key, and the second was counted here —
+   * a real second population reported as the one number in this reading nobody
+   * reads as an undercount. A window of two forms is now read as neither, so
+   * this counts only what it always claimed to.
    */
   readonly duplicatedPairs: number
   /**
@@ -650,11 +703,23 @@ export const funnelReachOf = (
    * answer is neither taken as this one's nor counted as the same question
    * asked twice, which is what `duplicatedPairs` means and what a double count
    * makes permanent (0158) if the two are confused.
+   *
+   * **A window of two forms with none asked for is read as neither**, which the
+   * scope makes a case rather than the `null` it was. The populations are those
+   * of the reading and of these rows together: a reading of one form held
+   * against funnel rows of two is as ambiguous as the reverse, and both were
+   * reachable.
    */
-  const matching =
-    where.audienceId === null
+  const scope = audienceScopeOf(
+    [...reading.audiences, ...audiencesIn(here)],
+    where.audienceId ?? undefined
+  )
+  const mixed = scope.reading === "mixed"
+  const matching = mixed
+    ? []
+    : scope.audienceId === null
       ? here
-      : here.filter((row) => row.audienceId === where.audienceId)
+      : here.filter((row) => row.audienceId === scope.audienceId)
 
   const present = new Set<NodeId>(reading.parts.map((part) => part.nodeId))
 
@@ -679,6 +744,7 @@ export const funnelReachOf = (
     treeId: where.treeId,
     revision: where.revision,
     audienceId: where.audienceId,
+    audiences: scope.audiences,
     opened,
     appearances,
     drift,

@@ -8,7 +8,7 @@ import type { ElementNode, LoomNode } from "../tree/node.js"
 import { outlineTree } from "../tree/outline.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import { audiencesIn, type MaybeAudienceScoped } from "./audiences.js"
+import { audienceScopeOf, audiencesIn, type MaybeAudienceScoped } from "./audiences.js"
 import type { ReaderTally } from "./rollup.js"
 
 /**
@@ -517,9 +517,15 @@ export const pageReadingOf = (
    * the refusal, and it is spelled as *no audience to read* rather than as a
    * throw, because a reading is not worth failing over and a surface can draw
    * `audiences` — a reading that names why its answer is absent (0240).
+   *
+   * Taken from `audienceScopeOf` rather than spelled here. The rule is the same
+   * one it was, and it is now the published one: two other readings pick a
+   * page's rows out of a window and both had to be corrected for treating the
+   * two kinds of *no audience* alike (0297).
    */
-  const reading = audience ?? (audiences.length === 1 ? audiences[0] : null) ?? null
-  const mixed = reading === null && audiences.length > 1
+  const scope = audienceScopeOf(audiences, audience)
+  const reading = scope.audienceId
+  const mixed = scope.reading === "mixed"
 
   for (const tally of tallies) {
     if (tally.treeId !== tree.treeId || tally.revision !== tree.revision) {
