@@ -595,6 +595,13 @@ const EMPTY_FAULTS: Readonly<Record<CollectionFault, number>> = Object.freeze(
  * A fold timestamp ahead of the instant handed in is a clock disagreeing with
  * itself, and it answers *no* by the same subtraction rather than by a special
  * case: a negative age is never longer than a positive allowance.
+ *
+ * **A door summed over two forms is stalled exactly when one of its forms is**,
+ * and that equivalence is a property of the fold the reading waits on rather
+ * than of anything here: `pending` is the sum of the forms' pending openings
+ * and `foldedAt` is the oldest fold attested by a form that still has some
+ * (0299), so one lagging form answers *yes* and a quiet form whose openings are
+ * all folded cannot.
  */
 const stalled = (door: RevisionPageViews | null, schedule: CollectionSchedule | undefined): boolean => {
   if (door === null || schedule === undefined) return false

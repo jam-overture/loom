@@ -179,12 +179,64 @@ describe("the audience a door row and a funnel row belong to", () => {
     expect(picked.foreign).toBe(0)
   })
 
-  it("takes every form's row where the reading names no audience, as it always has", () => {
+  /**
+   * The undercount 0299 fixed. A deployment-wide asking took whichever form's
+   * row came first in the caller's array and reported the other form's
+   * arrivals as a row handed in twice — 400 views published where 404 arrived,
+   * with the loss counted as a duplicate nobody reads as an undercount, which
+   * is the same fault 0297 found in the region map beside it.
+   */
+  it("adds every form's arrivals where the asking names no audience", () => {
     const picked = pageViewsFor(WHERE, [inAudience(RIDERS, views(400, 400)), views(4, 5)])
 
-    expect(picked.measured?.opened).toBe(400)
+    expect(picked.measured?.opened).toBe(404)
+    expect(picked.measured?.appearances).toBe(405)
     expect(picked.otherAudience).toBe(0)
-    expect(picked.duplicated).toBe(1)
+    expect(picked.duplicated).toBe(0)
+  })
+
+  it("names the forms it added and names no audience of its own", () => {
+    const picked = pageViewsFor(WHERE, [inAudience(RIDERS, views(400, 400)), views(4, 5)])
+
+    expect(picked.measured?.audiences).toEqual([DEFAULT_AUDIENCE_ID, RIDERS])
+    expect(picked.measured?.audienceId).toBeNull()
+  })
+
+  /**
+   * One name on the rows is not one population behind them, and the asking is
+   * what a reading is of (0297 clause 3, 0299). A window holding one form today
+   * is not a reading of that form.
+   */
+  it("names the one form in it without claiming to be a reading of it", () => {
+    const picked = pageViewsFor(WHERE, [views(4, 5)])
+
+    expect(picked.measured?.audiences).toEqual([DEFAULT_AUDIENCE_ID])
+    expect(picked.measured?.audienceId).toBeNull()
+  })
+
+  it("is a reading of the form the asking named, and says so", () => {
+    const picked = pageViewsFor(SKIER_PAGE, [
+      inAudience(RIDERS, views(400, 400)),
+      inAudience(SKIERS, views(4, 5)),
+    ])
+
+    expect(picked.measured?.audienceId).toBe(SKIERS)
+    expect(picked.measured?.audiences).toEqual([SKIERS])
+  })
+
+  /**
+   * The case that makes the sum safe to take. A store keeps one door row per
+   * revision per audience, so two rows of one form can only come from a caller
+   * concatenating two reads of running totals — and adding those would double
+   * arrivals permanently (0158).
+   */
+  it("counts each form's door once however many times the window is handed in", () => {
+    const window = [inAudience(RIDERS, views(400, 400)), views(4, 5)]
+    const picked = pageViewsFor(WHERE, [...window, ...window])
+
+    expect(picked.measured?.opened).toBe(404)
+    expect(picked.measured?.appearances).toBe(405)
+    expect(picked.duplicated).toBe(2)
   })
 
   it("reads one form's funnel answer and counts the other form's apart from it", () => {
@@ -987,5 +1039,106 @@ describe("the stages as a closed set", () => {
     for (const stage of FUNNEL_STAGES) expect(describeFunnelStage(stage)).not.toBe("")
 
     expect(FUNNEL_STAGES).toHaveLength(2)
+  })
+})
+
+/**
+ * A door read whole over two forms, where the arithmetic is the part that can
+ * be got wrong without anything failing (0299).
+ *
+ * Each of these is a figure that comes out right when it is summed per row and
+ * wrong when it is taken from the two sums — which is the rule
+ * `pageViewReadingOf` already states for revisions, holding for forms of one
+ * revision for the same reason.
+ */
+describe("the arithmetic of a door summed over two forms", () => {
+  const inAudience = (audienceId: typeof SKIERS, row: StoredPageViews): StoredPageViews => ({
+    ...row,
+    audienceId,
+  })
+
+  /**
+   * The netting this subsystem must never do. One form is mid-collection and
+   * the other has straddles; subtracting in the aggregate makes the page look
+   * exactly measured, which is the one thing neither form is.
+   */
+  it("keeps a form's pending openings and another form's straddles apart", () => {
+    const picked = pageViewsFor(WHERE, [
+      inAudience(SKIERS, views(10, 4)),
+      inAudience(RIDERS, views(4, 10)),
+    ])
+
+    expect(picked.measured?.opened).toBe(14)
+    expect(picked.measured?.appearances).toBe(14)
+    expect(picked.measured?.pending).toBe(6)
+    expect(picked.measured?.drift).toBe(6)
+  })
+
+  /** A ratio is recomputed from the sums and never averaged over the forms. */
+  it("takes inflation from the summed drift and the summed openings", () => {
+    const picked = pageViewsFor(WHERE, [
+      inAudience(SKIERS, views(100, 200)),
+      inAudience(RIDERS, views(300, 300)),
+    ])
+
+    expect(picked.measured?.drift).toBe(100)
+    expect(picked.measured?.inflation).toBe(0.25)
+    expect(inflationFor(WHERE, [
+      inAudience(SKIERS, views(100, 200)),
+      inAudience(RIDERS, views(300, 300)),
+    ])).toBe(0.25)
+  })
+
+  it("says the number last moved when the busiest form last moved it", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 10)), updatedAt: "2026-10-01T00:00:00.000Z" },
+      { ...inAudience(RIDERS, views(10, 10)), updatedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.updatedAt).toBe("2026-10-05T09:00:00.000Z")
+  })
+
+  /**
+   * The fold a reading waits on is the oldest one under it, so that a fold
+   * which ran a minute ago on a busy form cannot vouch for a form whose
+   * openings have been waiting a day.
+   */
+  it("waits on the oldest fold of the forms with openings pending", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 4)), foldedAt: "2026-10-01T00:00:00.000Z" },
+      { ...inAudience(RIDERS, views(10, 4)), foldedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.foldedAt).toBe("2026-10-01T00:00:00.000Z")
+  })
+
+  /**
+   * And a quiet form cannot invent a stall. Nothing is waiting on the fold that
+   * has not run in days, because that form's openings are all folded.
+   */
+  it("ignores the old fold of a form with nothing pending", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 10)), foldedAt: "2026-10-01T00:00:00.000Z" },
+      { ...inAudience(RIDERS, views(10, 4)), foldedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.pending).toBe(6)
+    expect(picked.measured?.foldedAt).toBe("2026-10-05T09:00:00.000Z")
+  })
+
+  it("attests no fold where neither form's row says anything", () => {
+    const picked = pageViewsFor(WHERE, [inAudience(SKIERS, views(10, 4)), views(4, 10)])
+
+    expect(picked.measured?.foldedAt).toBeUndefined()
+  })
+
+  /** An instant nothing can read attests no fold (0274), so it is not the oldest. */
+  it("skips a fold instant that does not parse", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 4)), foldedAt: "whenever" },
+      { ...inAudience(RIDERS, views(10, 4)), foldedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.foldedAt).toBe("2026-10-05T09:00:00.000Z")
   })
 })
