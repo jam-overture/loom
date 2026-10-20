@@ -5,7 +5,6 @@ import { absent } from "@/app/_lib/app/bounded-store"
 import { appStoreForWriting, siteStore } from "@/app/_lib/app/store"
 
 import { SITE_PAGES, treeFor } from "./builders"
-import { readersCountedHere } from "./readers/counting"
 import { SITE_ROUTES, type SiteRoute } from "./site"
 
 /**
@@ -74,27 +73,29 @@ export type SitePage = {
  * deployment answers on and the palette is what a reader asked for —
  * `./requested.ts` puts both back.
  *
- * ## `counting` is the exception, and it is a known limitation
+ * ## No `counting` either, as of 20 October
  *
- * It is not a property of the request; it is a property of the deployment, read
- * from an environment variable. The footer carries a disclosure when it is on —
- * *this page counts which of its parts you reach* — and that sentence has to be
- * true of the deployment serving it.
+ * It read the live setting here until today, and the docblock this replaces
+ * said why that was a known limitation: the footer carried a disclosure when
+ * counting was on, seeding never overwrites, so a deployment that switched
+ * counting on after its pages were stored would count readers under a footer
+ * that said nothing. The fix it proposed was to take the disclosure out of the
+ * tree, *"since a statement the deployment makes about itself is not a thing a
+ * page should be able to have governed away."*
  *
- * Seeding reads the live setting so the stored page matches the deployment that
- * wrote it. **What that does not survive is the setting changing afterwards**:
- * a deployment that turns counting on after its pages are stored will count
- * readers without the footer saying so, because seeding never overwrites a
- * stored page and nothing re-runs the builder.
+ * **That happened on 12 October**, by the maintainer's instruction and for a
+ * different reason — the message came off the site whether it is counting or
+ * not. So no node of any page has read `counting` since, and this read was a
+ * row in a table deciding nothing: `stored.test.ts` holds the three pages
+ * byte-identical under both settings, which is what makes removing it a
+ * no-change rather than a judgement.
  *
- * That is a disclosure going quietly stale, which is worse than a layout going
- * stale, so it is filed rather than lived with — the fix is to take the
- * disclosure out of the tree altogether, since a statement the deployment makes
- * about itself is not a thing a page should be able to have governed away. Not
- * done here because it moves a visible band on somebody's site and this change
- * is already large.
+ * What it cost while it stayed is that seeding — which runs under `db:push` —
+ * reached the environment for an answer it threw away, and the id a page is
+ * stored under was nominally a function of a deployment setting. It was not,
+ * and now it does not look like it.
  */
-const storedContext = () => ({ origin: "", theme: "minimal", counting: readersCountedHere() }) as const
+const storedContext = () => ({ origin: "", theme: "minimal" }) as const
 
 const idFor = (route: SiteRoute): TreeId => treeFor(route, storedContext()).treeId
 

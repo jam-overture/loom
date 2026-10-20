@@ -57292,6 +57292,10 @@ already holds, through `pageReachOf`, `funnelReachOf` or `doorOf`'s caller.
 
 **Filed by:** portal steering (unit 4b, [0298](decisions/0298-a-projects-ingest-key-is-public-and-names-its-application-and-the-door-files-nothing-it-cannot-name.md)) ·
 **Owned by:** `Loom marketing` (`app/(marketing)/_lib/readers/counting.ts`) ·
+**Status:** **closed by `marketing-11-addressed-with-nothing-listening`** —
+`readersCountedHere` is the switch and a key, both callers read one function,
+and the half about the words was already gone. Original status below.
+
 **Status:** open — nothing is broken on a deployment that has run
 `pnpm signals:key prj_default`
 
@@ -57314,6 +57318,111 @@ environment lookup, and every caller of it (`render.ts`, `stored.ts`,
 going stale when the setting changes, and the two are probably one fix.
 
 ---
+## 2026-10-20 — `counting` is handed to the chrome of every page and read by nothing, and the test written to catch exactly that cannot see it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/chrome.ts`, `_lib/served.ts`, and the six test files that
+cross the dimension) · **Status:** open — nothing is broken, no test is failing,
+and the pages are provably identical either way
+
+`ChromeContext` carries a `counting` boolean. Nothing in `chrome.ts` reads it.
+Stripping the comments out of that file and looking for a property access finds
+no `.counting` anywhere in the code, and it has been that way since
+**12 October**, when the maintainer had the footer's disclosure taken off the
+site whether it is counting or not.
+
+So the field is still threaded: `renderSitePage` works the answer out,
+`PageContext` carries it, `home.ts` spreads it into a `ChromeContext`, and
+there the trail stops.
+
+### Why `handed.test.ts` passes
+
+That file exists for this exact shape — *a context field is a promise that some
+page reads it* — and it was written after `trail` survived a fortnight as a
+field nobody read. It passes here, and the reason is worth more than the
+instance.
+
+It looks for `\.counting\b` in the page builders, `chrome.ts` and
+`requested.ts`, with comments stripped. `home.ts` line 1096 is
+`counting: context.counting === true`, which matches. The test's own docblock
+anticipates the opposite case and says so:
+
+> *"A field consumed only by being spread onward is not matched and is not meant
+> to be: the spread hands it to something, and that something names it or nobody
+> does."*
+
+**A named hand-off is not a spread, so it counts as a read** — and what it hands
+to is the one file in the sweep that does not name the field. One reader is
+enough for the rule, the reader is a courier, and the recipient is checked by
+the same pass that already accepted the courier.
+
+### What it costs, measured
+
+`served.ts` crosses `DEPLOYMENTS = [false, true]` into every sweep, and its
+docblock gives the reason:
+
+> *"Both deployments, because a deployment that counts its readers says so. The
+> footer carries a sentence about it and `/what-you-run` carries a second one."*
+
+Neither sentence has existed since 12 October. `counting.test.ts` asserts the
+absence of both. So the dimension doubles a sweep over copy that cannot differ:
+
+```
+ASKS 6  ASK_STATES 25  ROUTES 3  DEPLOYMENTS 2  SERVED_STATE_COUNT 150
+servedPages() built 150 trees in 518ms
+150 of 150 trees have an identical twin in the other deployment
+```
+
+Every one of the 150, not most of them. `servedPages()` is awaited **eight
+times across six test files** — `budget`, `voice`, `naming`, `inline` twice,
+`routes`, `docs-pages` twice — so roughly 600 page builds per suite run produce
+a tree the same run already has, and the mechanism page's share of them runs the
+whole request sequence twice each (`askRunFor` builds the page twice by design).
+`budget.test.ts` and `balance.test.ts` cross the same dimension again with
+local copies of the constant.
+
+### Three shapes, costed
+
+1. **`counting` leaves the page context and the chrome, and stays a render
+   option.** It is what the pages are already true of: `stored.test.ts` now
+   holds all three byte-identical under both settings, and
+   `marketing-11` measured the same thing before relying on it. `addressed` is
+   already a `SiteRenderOptions` field and this is the same fact, so the honest
+   end state is one option on the renderer and nothing on the tree. The cost is
+   the reach: `ChromeContext`, `PageContext`/`MechanismContext`, `home.ts`,
+   `served.ts`, `handed.test.ts`'s `EVERY_FIELD`, and the expected counts in
+   five more test files. **This is the recommendation**, and it is a pull
+   request of its own rather than a paragraph inside one about the key.
+2. **Tighten `handed.test.ts` so a courier is not a reader.** Worth doing
+   *with* shape 1 rather than instead of it: a field is read where it is
+   *used*, so the rule wants the recipient of a hand-off checked too. It is the
+   half that stops the next field doing this, and on its own it would go red
+   today with nothing to point at but shape 1.
+3. **Nothing, written down.** Defensible only if the disclosure is coming back —
+   and whether the front door says anything about what it collects is
+   positioning, which is the maintainer's. If it is coming back, the field is
+   waiting for it and that belongs in `chrome.ts`'s docblock, where this finding
+   would stop being surprising.
+
+### Not done in `marketing-11`, and why
+
+That branch is the 19 October key finding: the renderer and the layout now read
+one answer. Taking the dimension out as well would have put a rename across ten
+files, and four more expected counts, in the same diff as a correctness fix — a
+marketing pull request nobody can review, which is the thing the lane split
+exists to prevent. The invariant it does leave behind is the one this work needs
+first: `stored.test.ts` holds the three pages identical under both settings, so
+shape 1 starts from a measured fact rather than from a reading of the code.
+
+### How it was found
+
+Planting a mutation. `chrome.ts`'s footer was given back a
+`context.counting === true` read, to check that the new `stored.test.ts` rule
+would catch a builder putting a deployment setting back inside a stored row. It
+did, on all three pages — and the interesting half was that the **tree ids
+matched while the trees differed**, because `sequentialIdFactory` counts nodes
+under a prefix rather than hashing what is in them. The comment in that test now
+says so, having briefly claimed the opposite.
 ## 2026-10-20 — a funnel read of a revision served in two forms divided one form's reach by the other form's arrivals
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
