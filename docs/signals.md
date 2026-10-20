@@ -38,6 +38,7 @@ the portal every day.
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
 | Which populations a reading summed | the audiences a region map added up, published as a census rather than a refusal ([0297](../decisions/0297-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)), because arrivals are people and a reader who arrived arrived once — so a revision served in two forms is one readership and is now summed as one |
+| What population a reading is of | one of three answers rather than a nullable name ([0300](../decisions/0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md)), so a window of two forms with none asked for is read as **neither** and cannot be picked from by row order — which is what three readings did, one of them dividing one form's reach by the other form's arrivals |
 | Who the readers were, before and after | two floored maps held against each other, as a mix with a floor and a ceiling ([0247](../decisions/0247-a-readership-comparison-is-built-from-two-floored-maps-and-the-mix-is-the-only-figure-with-no-window.md)), so a comparison can say whether it compared like with like |
 | What a change made readers do | the ask readers reached and ignored, answered now ([0251](../decisions/0251-a-change-to-what-readers-did-is-a-ratio-of-two-shares-and-an-inside-a-change-gave-a-part-is-not-a-reader.md)), with the inside a change gave a part kept apart from a reader |
 | Whether a kind of part gets read anywhere | the library by type and by role, as a share of the places each kind stands ([0257](../decisions/0257-a-kind-of-part-is-read-across-the-places-it-stands-and-the-unit-is-the-placement.md)), with a role nothing plays named rather than missing |
@@ -2584,6 +2585,82 @@ rows the same way, so a whole-window read of a two-form revision takes one
 form's door and reports the other as a duplicate — the same fault in a
 different reading, and summing two door rows is a change to `pageViewReadingOf`
 rather than to a key; and no screen reads the census, which is `Loom portal`'s.
+
+### 41. Two forms' arrivals are one door · `Loom signals` · **in review (#680)**
+
+The second of the three joins 0290 clause 4 left unscoped where the asking names
+no audience. Written and verified on the evening of 19 October and open as
+[#680](https://github.com/jam-overture/loom/pull/680), where it carries a
+record of its own that is not on this branch to cite.
+Listed here so that this plan does not read as though the step below is the last
+of them.
+
+### 42. A funnel over two forms is refused, and `null` was two states · `Loom signals` · **done, 20 October**
+
+The third of those joins, and the only one that **divides**. §40 fixed the
+region map's buckets and §41 the door's arrivals, each after publishing a real
+second population as a count of rows handed in twice. `funnelReachOf` was the
+one left, and its fault is sharper than either: it filtered by audience only
+where one was named, took the first row per question otherwise, and divided by a
+door row picked out of a **different array** by the same rule.
+
+So a numerator from one form over a denominator from the other, paired by the
+order two lists arrived in. Measured on fixtures: four of a hundred skiers and
+four hundred of a thousand riders — **both forty per cent** — came back as an
+entry share of **0.004**.
+
+**Done**
+([0300](../decisions/0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md)),
+and the third instance is what made it a type rather than a third fix.
+
+- **`null` was doing two jobs**, which is the cause all three shared. A reading
+  recording no audience is either a window written before the column existed
+  (0284) — one population, read whole — or a window of two forms with none
+  asked for, which is no population and must be read as neither (0290 clause 3).
+  Spelled as one value, the two were indistinguishable in a diff and the wrong
+  handling compiled.
+- **`AudienceScope`** is the three-way answer, published in `audiences.ts`
+  beside `readingKeyOf` and `formKeyOf` as the third rule of the same kind. The
+  `mixed` member carries no audience, so a reading handed an ambiguous window
+  **cannot read one off it** — the refusal is a branch a new reading has to
+  write rather than a value it can fall past.
+- **A funnel reading of an unsplit window reads no pair**: `pairs` empty, every
+  row in `otherAudiencePairs`, `duplicatedPairs` nought, and `audiences` naming
+  both populations — the shape `pageReadingOf` already had for its parts.
+- **The ambiguity is of the window and not of one list in it.** The scope is
+  taken over the page reading's populations *and* the funnel rows' together,
+  because a reading of one form held against rows of two is as unreadable as the
+  reverse, and only the reverse was reachable before.
+- **Summing is refused, and for a reason about the question.** Arrivals add
+  across forms because they are counted once per page view (0297, and #680 for
+  the door) — so a
+  refused reading still publishes the deployment's arrivals. A pair's ends are
+  node ids, and a delta can leave an end out of one form, so a summed numerator
+  is over the readers who could answer and the summed denominator over
+  everybody. The deployment-wide funnel answer is `byAudience` and one reading
+  per form.
+- **The comparison refuses a mixed side before it pairs**, because an empty side
+  pairs cleanly: without the guard, every question of the other side comes back
+  as added or removed and the reading says *this change added every funnel
+  question you ask* about a window nobody read. `FunnelChangeSilence` gains
+  `audiences-mixed` and the silence table its fifteenth condition,
+  `two-forms-unsplit` — the first in it about what the **caller** handed in.
+
+**A limit found in rule 4's neighbour, written down here because it is about
+this plan's method.** Every test that should have caught these three used two
+*different* key values — two countries, two revisions, two trees — so each
+documented the intent while the code failed only where two rows share a key. A
+test over a window of two forms needs the two rows to **collide**, not merely to
+differ.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the thirtieth thing taken out of what this subsystem already knows.
+The broadcaster was not touched and is byte-identical at 6,477 bytes minified.
+
+**What is left and is filed:** `pageViewsFor` is the fourth reading of this
+shape and is fixed on #680, so it is deliberately not touched here — adopting
+`AudienceScope` in it is filed for this lane, to be taken once that lands. No
+screen reads any of the three censuses, which is `Loom portal`'s.
 
 ## Still not in scope
 

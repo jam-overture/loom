@@ -281,7 +281,7 @@ describe("what a reading means when it says nothing", () => {
         [
           "funnel-change",
           FUNNEL_CHANGE_SILENCES.map((of) => meaningOfFunnelChangeSilence(of).condition),
-          [],
+          ["two-forms-unsplit"],
         ],
         [
           "deployment-change",
@@ -395,6 +395,27 @@ describe("a pair of two populations", () => {
       meaningOfChangeSilence("different-audiences"),
       meaningOfCopyChangeSilence("different-trees")
     )).toBe("unrelated")
+  })
+
+  /**
+   * The sibling that arrived with the funnel's refusal of an unsplit window.
+   * Two sides of two **known** populations is a comparison whose arithmetic is
+   * right and whose sentence is wrong; one side of no population at all is a
+   * side with nothing in it to hold against anything. Handing a deployment
+   * either in place of the other sends it to the wrong remedy — pick a form
+   * versus split the window.
+   */
+  it("is not the condition one unsplit window reports", () => {
+    const unsplit = meaningOfFunnelChangeSilence("audiences-mixed")
+
+    expect(unsplit.condition).toBe("two-forms-unsplit")
+    expect(unsplit.condition).not.toBe(
+      meaningOfFunnelChangeSilence("different-audiences").condition
+    )
+    expect(unsplit.subject).toBe("comparison")
+    expect(
+      relateSilences(unsplit, meaningOfFunnelChangeSilence("different-audiences"))
+    ).toBe("unrelated")
   })
 })
 

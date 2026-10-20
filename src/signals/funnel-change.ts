@@ -2,6 +2,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
 import {
+  audienceScopeRead,
   comparedAudiencesOf,
   crossesAudiences,
   type ComparedAudiences,
@@ -157,6 +158,21 @@ export type FunnelChangeSilence =
    */
   | "different-audiences"
   /**
+   * One of the two windows holds two forms of the page and named neither.
+   *
+   * Not the state above, and the pair is why this is its own member.
+   * `different-audiences` is two sides of two **known** populations, which is a
+   * comparison whose arithmetic is right and whose sentence is wrong. This is
+   * one side that is of no population at all: the reading it came from read
+   * neither form's pairs (0290), so there is nothing on that side to hold
+   * against anything.
+   *
+   * It is refused rather than reported as every question having been removed,
+   * which is what an empty side pairs as. The remedy is the caller's and it is
+   * `byAudience`: split the window and compare each form with itself.
+   */
+  | "audiences-mixed"
+  /**
    * One of the two windows has no page-view row at the door.
    *
    * The door's first state (0229), said of the pair. The rates and the
@@ -194,6 +210,7 @@ export const FUNNEL_CHANGE_SILENCES: readonly FunnelChangeSilence[] =
   everyMemberOf<FunnelChangeSilence>()([
     "different-trees",
     "different-audiences",
+    "audiences-mixed",
     "unscaled",
     "unopened",
     "uncounted",
@@ -207,6 +224,8 @@ export const describeFunnelChangeSilence = (silence: FunnelChangeSilence): strin
       return "the two readings are of different pages"
     case "different-audiences":
       return "the two readings are of different audiences, and so of different readers"
+    case "audiences-mixed":
+      return "one of the two windows holds two forms of the page and says which readers neither"
     case "unscaled":
       return "one of the two windows has no count of the readers who arrived"
     case "unopened":
@@ -823,6 +842,14 @@ export const funnelChangeOf = (was: FunnelReach, now: FunnelReach): FunnelChange
 
   if (was.treeId !== now.treeId) return refusing("different-trees")
   if (crossesAudiences(was, now)) return refusing("different-audiences")
+  /**
+   * Before the pairing rather than after it, because an empty side pairs
+   * cleanly: every question of the other side comes back as added or removed,
+   * which reads as *the change added every funnel question you ask* about a
+   * window that was simply never read.
+   */
+  if (audienceScopeRead(was).reading === "mixed" || audienceScopeRead(now).reading === "mixed")
+    return refusing("audiences-mixed")
 
   const keys = [...earlier.pairs.keys(), ...later.pairs.keys()].sort((one, other) =>
     one.localeCompare(other)

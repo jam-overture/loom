@@ -18,6 +18,7 @@ import {
   type PageReading,
   type PartDeclarations,
   type StoredFunnel,
+  type StoredTally,
   type StoredPageViews,
 } from "./index.js"
 
@@ -246,6 +247,220 @@ describe("the audience a door row and a funnel row belong to", () => {
 
     expect(reach.foreignPairs).toBe(1)
     expect(reach.otherAudiencePairs).toBe(0)
+  })
+})
+
+/**
+ * The third reading in this subsystem to pick a page's rows out of a window by
+ * a key that was missing the audience. The region map's buckets and the door's
+ * arrivals were each corrected after publishing a real second form as a count
+ * of rows handed in twice (0297); this is the same shape in the funnel,
+ * and it is the one where the numerator and the denominator could come from
+ * two different forms.
+ */
+describe("a window of two forms with none asked for", () => {
+  const inAudience = <R extends { readonly audienceId: typeof SKIERS }>(
+    audienceId: typeof SKIERS,
+    row: R
+  ): R => ({ ...row, audienceId })
+
+  const tally = (audienceId: typeof SKIERS, node: string): StoredTally => ({
+    audienceId,
+    treeId: TREE,
+    revision: 1,
+    nodeId: nodeId(node),
+    type: primitiveType("loom.section"),
+    views: 10,
+    reached: 10,
+    engaged: 0,
+    dwellMs: 0,
+    activations: 0,
+    opens: 0,
+    closes: 0,
+    completions: 0,
+    updatedAt: AT,
+  })
+
+  /** A reading `pageReadingOf` read as neither, which is 0290 clause 3's state. */
+  const MIXED_PAGE = pageReadingOf(
+    { treeId: TREE, schemaVersion: TREE_SCHEMA_VERSION, revision: 1, root: PAGE },
+    [tally(SKIERS, "a"), tally(RIDERS, "a")],
+    NOTHING_DECLARED
+  )
+
+  it("is a reading of neither population, so no pair is read", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(SKIERS, views(100, 100)), inAudience(RIDERS, views(1000, 1000))]
+    )
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.audienceId).toBeNull()
+    expect(reach.audiences).toEqual([RIDERS, SKIERS])
+    expect(reach.otherAudiencePairs).toBe(2)
+  })
+
+  /**
+   * The number that made the fault invisible. A second population's answer in
+   * `duplicatedPairs` is the one figure in this reading nobody reads as an
+   * undercount, and a count that was never added cannot be noticed (0158).
+   */
+  it("counts neither form's answer as the same question handed in twice", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.duplicatedPairs).toBe(0)
+  })
+
+  /**
+   * The sharpest version, and the reason this is not merely an undercount: the
+   * funnel rows and the door rows are two arrays, each picked from by its own
+   * first element, so one form's `reached` was published over the other form's
+   * appearances. Forty in a hundred and four hundred in a thousand are both
+   * forty per cent; the reading said four tenths of a per cent.
+   */
+  it("does not divide one form's reach by the other form's arrivals", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(RIDERS, views(1000, 1000)), inAudience(SKIERS, views(10, 10))]
+    )
+
+    expect(reach.pairs.map((pair) => pair.entry.share)).toEqual([])
+  })
+
+  /**
+   * The ambiguity is of the window and not of one list in it. A caller holding
+   * a reading of one form and funnel rows of two is as unable to say whose
+   * answer it is as the reverse, and only the reverse was reachable through the
+   * reading's own census.
+   */
+  it("is refused where the funnel rows name two forms and the reading named none", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [views(100, 100)]
+    )
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.audiences).toEqual([RIDERS, SKIERS])
+    expect(reach.otherAudiencePairs).toBe(2)
+    expect(reach.duplicatedPairs).toBe(0)
+  })
+
+  it("is refused where the reading names two forms and the funnel rows name one", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.otherAudiencePairs).toBe(1)
+  })
+
+  /**
+   * The asking is what resolves it, and it resolves it whichever list the
+   * second form is in. This is the behaviour 0290 clause 4 gave the three
+   * joins, and it is unchanged.
+   */
+  it("reads one form where the reading names it, with the other counted apart", () => {
+    const skiers = pageReadingOf(
+      { treeId: TREE, schemaVersion: TREE_SCHEMA_VERSION, revision: 1, root: PAGE },
+      [tally(SKIERS, "a"), tally(RIDERS, "a")],
+      NOTHING_DECLARED,
+      SKIERS
+    )
+
+    const reach = funnelReachOf(
+      skiers,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(SKIERS, views(10, 10)), inAudience(RIDERS, views(1000, 1000))]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.pairs[0]?.reached).toBe(4)
+    expect(reach.opened).toBe(10)
+    expect(reach.audienceId).toBe(SKIERS)
+    expect(reach.otherAudiencePairs).toBe(1)
+    expect(reach.duplicatedPairs).toBe(0)
+  })
+
+  /**
+   * The guard that has to survive the refusal: one population handing in one
+   * pair twice is still one pair, and adding the second would double a total
+   * that is already one (0158).
+   */
+  it("still drops a second row for a pair one population already answered", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [funnel("a", "b", 40, 10), funnel("a", "b", 40, 10)],
+      [views(100, 100)]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.pairs[0]?.reached).toBe(40)
+    expect(reach.duplicatedPairs).toBe(1)
+    expect(reach.otherAudiencePairs).toBe(0)
+  })
+
+  it("names the one population a window of one form holds, with nothing asked for", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [inAudience(SKIERS, funnel("a", "b", 40, 10))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.audiences).toEqual([SKIERS])
+    expect(reach.audienceId).toBeNull()
+  })
+
+  /**
+   * `StoredFunnel` names an audience by construction, so a window of real rows
+   * always names at least one and `[]` here means the revision had no funnel
+   * row at all. The census is still the pair of fields a surface reads: one
+   * member with nothing asked for is the ordinary deployment, and it is why
+   * `audiences` alone is not the refusal.
+   */
+  it("names no population where the revision has no funnel row and the reading named none", () => {
+    const reach = funnelReachOf(WHERE, [], [views(100, 100)])
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.audiences).toEqual([])
+    expect(reach.audienceId).toBeNull()
+  })
+
+  /**
+   * The door's figures are not withheld, and that is deliberate: arrivals are
+   * counted once per page view and add across forms (0297), so the
+   * deployment-wide count of readers is the one figure a refused reading can
+   * still give.
+   */
+  it("keeps the arrivals it was read against, which are the deployment's", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2))],
+      [inAudience(SKIERS, views(10, 10))]
+    )
+
+    expect(reach.opened).toBeGreaterThan(0)
+  })
+
+  it("counts another revision's row as foreign before it is anybody's audience", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(RIDERS, funnel("a", "b", 9, 9, { treeId: TREE, revision: 7 }))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.foreignPairs).toBe(1)
+    expect(reach.otherAudiencePairs).toBe(0)
+    expect(reach.pairs).toEqual([])
   })
 })
 

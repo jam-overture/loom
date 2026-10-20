@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8457,7 +8457,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9287,7 +9287,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9718,7 +9718,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9970,7 +9970,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10174,6 +10174,34 @@
               "signature": "const audiencesIn: <R extends MaybeAudienceScoped>(rows: readonly R[]) => readonly AudienceId[]",
               "truncated": false,
               "summary": "The audiences a window names, deduplicated and in a stable order."
+            },
+            {
+              "name": "AudienceScope",
+              "kind": "type",
+              "signature": "type AudienceScope =\n/**\n * One population: the audience asked for, or the only one the window named.\n *\n * A window naming one audience needs no caller to say so, and an audience\n * asked for scopes the reading whether or not the window holds others — the\n * rest of it is that page's other form, counted apart and not read.\n */\n{\n    readonly reading: \"one\";\n    readonly audienceId: AudienceId;\n    /** What the window named, which is not what was asked for. */\n    readonly audiences: readonly AudienceId[];\n}\n/**\n * Nothing in the window named an audience, so it is one population by\n * construction and is read whole.\n *\n * Every window written before the column existed, and every window a\n * caller built by hand.\n * Calling it `aud_everyone` would assert what no row said, which is the\n * distinction {@link MaybeAudienceScoped} exists for.\n */\n | {\n    readonly reading: \"unlabelled\";\n    readonly audienceId: null;\n    readonly audiences: readonly [];\n}\n/**\n * Two or more forms, and the asking named none of them.\n *\n * Read as **neither**. The other two answers available are summing two\n * populations and picking one of them by the caller's array order, and the\n * second is the fault this type exists to make unwritable. Summing is a\n * decision per counter rather than a default: arrivals at the door are\n * counted once per page view and therefore add, and a distinct\n * count filed against a node does not.\n */\n | {\n    readonly reading: \"mixed\";\n    readonly audienceId: null;\n    readonly audiences: readonly AudienceId[];\n};",
+              "truncated": false,
+              "summary": "What population a reading is of, as the three answers it can be."
+            },
+            {
+              "name": "audienceScopeOf",
+              "kind": "function",
+              "signature": "const audienceScopeOf: (audiences: Iterable<AudienceId>, asked?: AudienceId) => AudienceScope",
+              "truncated": false,
+              "summary": "Which of the three a window and an asking come to."
+            },
+            {
+              "name": "ReadOfAudience",
+              "kind": "type",
+              "signature": "type ReadOfAudience = {\n    readonly audienceId: AudienceId | null;\n    readonly audiences: readonly AudienceId[];\n};",
+              "truncated": false,
+              "summary": "A reading that has already recorded which population it was of."
+            },
+            {
+              "name": "audienceScopeRead",
+              "kind": "function",
+              "signature": "const audienceScopeRead: (reading: ReadOfAudience) => AudienceScope",
+              "truncated": false,
+              "summary": "The scope a reading already recorded, read back off it."
             },
             {
               "name": "forAudience",
@@ -11025,7 +11053,7 @@
             {
               "name": "FunnelReach",
               "kind": "type",
-              "signature": "type FunnelReach = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience whose answers this reading is of, or `null` where the reading\n     * it was taken from named none.\n     *\n     * Carried rather than consumed and dropped. The rows are already scoped to it\n     * below, so this adds nothing to what is read — what it adds is the ability\n     * of a comparison to refuse a pair of two populations, which it cannot do\n     * from two readings that have forgotten which population each was of.\n     */\n    readonly audienceId: AudienceId | null;\n    /** Page views that began on this revision. Exact, and addable. */\n    readonly opened: number;\n    /** The same page views as the rollups counted them: once per window each appeared in. */\n    readonly appearances: number;\n    /** Appearances in excess of openings — the straddle, measured. Never negative. */\n    readonly drift: number;\n    /** Openings whose reading no rollup has folded yet. The other sign of the same subtraction. */\n    readonly pending: number;\n    /** `drift ÷ opened`: how generous every distinct count here is. `null` when nothing opened. */\n    readonly inflation: number | null;\n    /** When the page-view row last moved, or `null` where there is no row. */\n    readonly updatedAt: string | null;\n    /** Set where no share can be given, and the reason. `null` where they can. */\n    readonly silence: ReachSilence | null;\n    /**\n     * Nobody's visit spanned two windows, so there is nothing to divide out: the\n     * rates are exact and each `rateAtMost` equals its `rate`.\n     *\n     * False under a silence, and false while any opening is pending.\n     */\n    readonly exact: boolean;\n    /**\n     * The revision's pairs, ordered by their two ends so a screen does not\n     * reorder on a refresh. Deliberately not ranked — see the module note.\n     */\n    readonly pairs: readonly PairReach[];\n    /** Page-view rows for another tree or revision, and ignored. */\n    readonly foreign: number;\n    /** Page-view rows for this revision beyond the first, where the first stands. */\n    readonly duplicated: number;\n    /**\n     * Funnel rows for another tree or revision, and ignored.\n     *\n     * Filtered rather than trusted for the same reason the page-view rows are:\n     * answering one revision's question with another revision's counters is a\n     * figure nothing downstream could catch.\n     */\n    readonly foreignPairs: number;\n    /**\n     * Funnel rows for this revision in another audience, and ignored.\n     *\n     * The same question, answered for the other form of the page. Not foreign —\n     * it is this page's — and not a duplicate: two populations answering one\n     * question is two answers, and the one this reading wants is its own.\n     */\n    readonly otherAudiencePairs: number;\n    /**\n     * Funnel rows naming a pair already seen, where every one after the first was\n     * ignored.\n     *\n     * A store keeps one row per pair per revision per audience, and the audience\n     * is picked before this is counted, so this is a caller who concatenated two\n     * reads. Adding them would double a total that is already one.\n     */\n    readonly duplicatedPairs: number;\n    /**\n     * Pairs with an end this revision does not have, counted off\n     * {@link FunnelReach.pairs} and therefore once each.\n     *\n     * The figure a screen leads with when it is not nought: *three of your five\n     * funnel questions are about parts this version of the page no longer has.*\n     */\n    readonly stalePairs: number;\n    /** Of those, the ones with a count against the missing end. Counted off the same list. */\n    readonly orphanedPairs: number;\n};",
+              "signature": "type FunnelReach = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience whose answers this reading is of, or `null` where the reading\n     * it was taken from named none.\n     *\n     * Carried rather than consumed and dropped. The rows are already scoped to it\n     * below, so this adds nothing to what is read — what it adds is the ability\n     * of a comparison to refuse a pair of two populations, which it cannot do\n     * from two readings that have forgotten which population each was of.\n     */\n    readonly audienceId: AudienceId | null;\n    /**\n     * Every population the window named, deduplicated and in a stable order.\n     *\n     * The reading's own census and the funnel rows' together, because either\n     * alone can be the ambiguous one: a caller may hand in a page reading of one\n     * form and funnel rows of two, or the reverse. `[]` is a window that never\n     * carried the column, which is *nothing here says* and not *one\n     * audience*.\n     *\n     * Two members with {@link FunnelReach.audienceId} `null` is the state in\n     * which no pair is read at all — see the module note on what a window of two\n     * forms is refused for.\n     */\n    readonly audiences: readonly AudienceId[];\n    /** Page views that began on this revision. Exact, and addable. */\n    readonly opened: number;\n    /** The same page views as the rollups counted them: once per window each appeared in. */\n    readonly appearances: number;\n    /** Appearances in excess of openings — the straddle, measured. Never negative. */\n    readonly drift: number;\n    /** Openings whose reading no rollup has folded yet. The other sign of the same subtraction. */\n    readonly pending: number;\n    /** `drift ÷ opened`: how generous every distinct count here is. `null` when nothing opened. */\n    readonly inflation: number | null;\n    /** When the page-view row last moved, or `null` where there is no row. */\n    readonly updatedAt: string | null;\n    /** Set where no share can be given, and the reason. `null` where they can. */\n    readonly silence: ReachSilence | null;\n    /**\n     * Nobody's visit spanned two windows, so there is nothing to divide out: the\n     * rates are exact and each `rateAtMost` equals its `rate`.\n     *\n     * False under a silence, and false while any opening is pending.\n     */\n    readonly exact: boolean;\n    /**\n     * The revision's pairs, ordered by their two ends so a screen does not\n     * reorder on a refresh. Deliberately not ranked — see the module note.\n     */\n    readonly pairs: readonly PairReach[];\n    /** Page-view rows for another tree or revision, and ignored. */\n    readonly foreign: number;\n    /** Page-view rows for this revision beyond the first, where the first stands. */\n    readonly duplicated: number;\n    /**\n     * Funnel rows for another tree or revision, and ignored.\n     *\n     * Filtered rather than trusted for the same reason the page-view rows are:\n     * answering one revision's question with another revision's counters is a\n     * figure nothing downstream could catch.\n     */\n    readonly foreignPairs: number;\n    /**\n     * Funnel rows for this revision in another audience, and ignored.\n     *\n     * The same question, answered for the other form of the page. Not foreign —\n     * it is this page's — and not a duplicate: two populations answering one\n     * question is two answers, and the one this reading wants is its own.\n     */\n    readonly otherAudiencePairs: number;\n    /**\n     * Funnel rows naming a pair already seen, where every one after the first was\n     * ignored.\n     *\n     * A store keeps one row per pair per revision per audience, so a second row\n     * for one pair **within one population** is a caller who concatenated two\n     * reads, and adding them would double a total that is already one.\n     *\n     * It says *within one population* rather than asserting the audience was\n     * picked first, which is what it used to say and what made the fault below\n     * invisible: where the asking named no audience, two forms' answers to one\n     * question were two rows sharing this key, and the second was counted here —\n     * a real second population reported as the one number in this reading nobody\n     * reads as an undercount. A window of two forms is now read as neither, so\n     * this counts only what it always claimed to.\n     */\n    readonly duplicatedPairs: number;\n    /**\n     * Pairs with an end this revision does not have, counted off\n     * {@link FunnelReach.pairs} and therefore once each.\n     *\n     * The figure a screen leads with when it is not nought: *three of your five\n     * funnel questions are about parts this version of the page no longer has.*\n     */\n    readonly stalePairs: number;\n    /** Of those, the ones with a count against the missing end. Counted off the same list. */\n    readonly orphanedPairs: number;\n};",
               "truncated": false,
               "summary": "A revision's funnels, read against the exact number of readers that revision had."
             },
@@ -11053,7 +11081,7 @@
             {
               "name": "FunnelChangeSilence",
               "kind": "type",
-              "signature": "type FunnelChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Spelled as every other comparison here spells it, because a surface drawing\n * five comparisons of one change should not meet five names for one state\n *.\n */\n\"different-trees\"\n/**\n * The two readings are of two audiences, and so of two populations.\n *\n * Spelled and refused as the other comparisons spell and refuse it. A\n * funnel question is asked of a page and a page served in two forms answers\n * it twice, one row per audience — the same two ends and two different\n * populations. So a pair of them is two answers to one question held against\n * each other as though one of them had moved, and the arithmetic is right all\n * the way through it.\n *\n * Refused only where both sides name an audience and the two differ; a pair\n * spanning the migration that added the column is in\n * {@link FunnelChange.audiences} instead.\n */\n | \"different-audiences\"\n/**\n * One of the two windows has no page-view row at the door.\n *\n * The door's first state, said of the pair. The rates and the\n * movements stand; every share of the arrivals is withheld, because the\n * number to divide by is missing on one side.\n */\n | \"unscaled\"\n/**\n * One of the two windows has a row and nothing in it says a page view began.\n *\n * The state worth catching: senders that are not marking their openings leave\n * every share here without a denominator while the counters look healthy.\n */\n | \"unopened\"\n/**\n * One of the two windows holds arrivals no rollup has folded yet.\n *\n * The first minutes of a deployment, and what a stalled collection looks like\n * for ever; the fold's own timestamp is what tells the two apart.\n */\n | \"uncounted\"\n/**\n * No pair is asked of both windows.\n *\n * The state `CopyChangeSilence.dissolved` reports of words and\n * `KindReachChangeSilence.unpaired` of places, said of a question: the two\n * windows have funnels and share none, so there is nothing to hold against\n * anything. {@link FunnelChange.added} and {@link FunnelChange.removed}\n * answer in full and are the whole of what can be said.\n */\n | \"unasked\";",
+              "signature": "type FunnelChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Spelled as every other comparison here spells it, because a surface drawing\n * five comparisons of one change should not meet five names for one state\n *.\n */\n\"different-trees\"\n/**\n * The two readings are of two audiences, and so of two populations.\n *\n * Spelled and refused as the other comparisons spell and refuse it. A\n * funnel question is asked of a page and a page served in two forms answers\n * it twice, one row per audience — the same two ends and two different\n * populations. So a pair of them is two answers to one question held against\n * each other as though one of them had moved, and the arithmetic is right all\n * the way through it.\n *\n * Refused only where both sides name an audience and the two differ; a pair\n * spanning the migration that added the column is in\n * {@link FunnelChange.audiences} instead.\n */\n | \"different-audiences\"\n/**\n * One of the two windows holds two forms of the page and named neither.\n *\n * Not the state above, and the pair is why this is its own member.\n * `different-audiences` is two sides of two **known** populations, which is a\n * comparison whose arithmetic is right and whose sentence is wrong. This is\n * one side that is of no population at all: the reading it came from read\n * neither form's pairs, so there is nothing on that side to hold\n * against anything.\n *\n * It is refused rather than reported as every question having been removed,\n * which is what an empty side pairs as. The remedy is the caller's and it is\n * `byAudience`: split the window and compare each form with itself.\n */\n | \"audiences-mixed\"\n/**\n * One of the two windows has no page-view row at the door.\n *\n * The door's first state, said of the pair. The rates and the\n * movements stand; every share of the arrivals is withheld, because the\n * number to divide by is missing on one side.\n */\n | \"unscaled\"\n/**\n * One of the two windows has a row and nothing in it says a page view began.\n *\n * The state worth catching: senders that are not marking their openings leave\n * every share here without a denominator while the counters look healthy.\n */\n | \"unopened\"\n/**\n * One of the two windows holds arrivals no rollup has folded yet.\n *\n * The first minutes of a deployment, and what a stalled collection looks like\n * for ever; the fold's own timestamp is what tells the two apart.\n */\n | \"uncounted\"\n/**\n * No pair is asked of both windows.\n *\n * The state `CopyChangeSilence.dissolved` reports of words and\n * `KindReachChangeSilence.unpaired` of places, said of a question: the two\n * windows have funnels and share none, so there is nothing to hold against\n * anything. {@link FunnelChange.added} and {@link FunnelChange.removed}\n * answer in full and are the whole of what can be said.\n */\n | \"unasked\";",
               "truncated": false,
               "summary": "Why a comparison of two windows' funnels left a figure out."
             },
@@ -13027,8 +13055,8 @@
             {
               "name": "SilenceCondition",
               "kind": "type",
-              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * The two readings are of two audiences, so they are of two populations.\n *\n * The sibling of `two-pages`, and the pair is why this is its own condition.\n * Two pages make every figure absurd; two forms of one page compare cleanly\n * and carry a sentence about a readership that was varied rather than held\n * still. Reported only where both readings name an audience and the two\n * differ.\n */\n | \"two-audiences\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no reader anywhere. The counters are present\n * and look healthy; what is wrong is that every share built on them is a\n * nought that is a filing rule rather than a measurement.\n *\n * The one condition here about a **nought that is not an absence**, which is\n * why no earlier set could report it. The occurrence counts survive it intact,\n * because they are filed against the part a reader used and need no ancestry.\n */\n | \"no-action-credited\"\n/**\n * There is none of it in the pages read.\n *\n * Not a measurement that is missing: the thing being asked about is absent\n * from the library, which only a reading keyed by a vocabulary can say. A role\n * no primitive declares and a type nothing places are both this, and the\n * instruction it carries is the opposite of every other condition here —\n * there is nothing to measure rather than nothing measured.\n */\n | \"nothing-of-the-kind\"\n/**\n * It has nothing inside it, so there is nothing a reader could act in.\n *\n * A press is filed against the control and credited to the addressed\n * ancestors it happened inside, so a part with no element part under it\n * reports a nought for ever — which is the state `says-nothing` is for a\n * page's words, one counter across.\n *\n * **The second condition here about the shape of the page rather than about\n * the window**, and the pair is what makes the claim above still hold: these\n * are states of the world, and the way a new one arrives is with a reading\n * that can be in one nothing before it could. A reading of what readers *did*\n * to a **kind** of part is the first that can report it, because a kind is\n * answered over the places it stands and the question does not exist where\n * none of them has an inside.\n */\n | \"nothing-inside\"\n/**\n * Its counters are there and not one of them reports being reached.\n *\n * Readers arrived — the window holds page views — and every part of what the\n * figure is about has a row whose reach is nought. A part that reported\n * something other than coming into view is `unknown` and never `skipped`\n *, because a reader who pressed something inside a band no `viewed`\n * ever named plainly had it in front of them, and a mean taken over nought\n * reader-words would print *nobody read any of this* as a measurement.\n *\n * **The sibling of `no-action-credited`, and the pair is the reason this is\n * its own condition rather than a second spelling of `no-view-reported`.**\n * That is a nought which is a filing rule, this is a nought which is a\n * missing report, and `no-view-reported` is a nought which is a reader who\n * was not there. A deployment handed the wrong one of the three looks in the\n * wrong place: at its funnel pairs, at its senders, or at nothing, because\n * quiet traffic is not a fault.\n */\n | \"no-reach-reported\";",
-              "truncated": false,
+              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * The two readings are of two audiences, so they are of two populations.\n *\n * The sibling of `two-pages`, and the pair is why this is its own condition.\n * Two pages make every figure absurd; two forms of one page compare cleanly\n * and carry a sentence about a readership that was varied rather than held\n * still. Reported only where both readings name an audience and the two\n * differ.\n */\n | \"two-audiences\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no reader anywhere. The counters are present\n * and look healthy; what is wrong is that every share built on them is a\n * nought that is a filing rule rather than a measurement.\n *\n * The one condition here about a **nought that is not an absence**, which is\n * why no earlier set could report it. The occurrence counts survive it intact,\n * because they are filed against the part a reader used and need no ancestry.\n */\n | \"no-action-credited\"\n/**\n * There is none of it in the pages read.\n *\n * Not a measurement that is missing: the thing being asked about is absent\n * from the library, which only a reading keyed by a vocabulary can say. A role\n * no primitive declares and a type nothing places are both this, and the\n * instruction it carries is the opposite of every other condition here —\n * there is nothing to measure rather than nothing measured.\n */\n | \"nothing-of-the-kind\"\n/**\n * It has nothing inside it, so there is nothing a reader could act in.\n *\n * A press is filed against the control and credited to the addressed\n * ancestors it happened inside, so a part with no element part under it\n * reports a nought for ever — which is the state `says-nothing` is for a\n * page's words, one counter across.\n *\n * **The second condition here about the shape of the page rather than about\n * the window**, and the pair is what makes the claim above still hold: these\n * are states of the world, and the way a new one arrives is with a reading\n * that can be in one nothing before it could. A reading of what readers *did*\n * to a **kind** of part is the first that can report it, because a kind is\n * answered over the places it stands and the question does not exist where\n * none of them has an inside.\n */\n | \"nothing-inside\"\n/**\n * Its counters are there and not one of them reports being reached.\n *\n * Readers arrived — the window holds page views — and every part of what the\n * figure is about has a row whose reach is nought. A part that reported\n * something other than coming into view is `unknown` and never `skipped`\n *, because a reader who pressed something inside a band no `viewed`\n * ever named plainly had it in front of them, and a mean taken over nought\n * reader-words would print *nobody read any of this* as a measurement.\n *\n * **The sibling of `no-action-credited`, and the pair is the reason this is\n * its own condition rather than a second spelling of `no-view-reported`.**\n * That is a nought which is a filing rule, this is a nought which is a\n * missing report, and `no-view-reported` is a nought which is a reader who\n * was not there. A deployment handed the wrong one of the three looks in the\n * wrong place: at its funnel pairs, at its senders, or at nothing, because\n * quiet traffic is not a fault.\n */\n | \"no-reach-reported\"\n/**\n * One window holds two forms of the page and the asking named neither.\n *\n * The sibling of `two-audiences` and not a second spelling of it. That is two\n * readings of two **known** populations held against each other, where th\n…",
+              "truncated": true,
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
             {
@@ -13295,7 +13323,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13438,7 +13466,7 @@
       "files": 18,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13505,7 +13533,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -14102,7 +14130,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14176,7 +14204,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14655,7 +14683,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1695,
+        "packageNames": 1699,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

@@ -388,3 +388,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0296](0296-a-project-holds-exactly-one-application-and-the-portal-never-names-it.md) | A project holds exactly one application, and the portal never names it | Accepted | §5 (portal), §1 (the hierarchy) |
 | [0297](0297-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md) | A region map publishes the populations it summed, and two forms' arrivals are one readership | Accepted | §4c (reader signals) |
 | [0298](0298-a-projects-ingest-key-is-public-and-names-its-application-and-the-door-files-nothing-it-cannot-name.md) | A project's ingest key is public and names its application, and the door files nothing it cannot name | Accepted | §5 (portal), §4c (reader signals) |
+| 0299 | *No record on this branch* | — | — |
+| [0300](0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md) | What audience a reading is of is a three-way answer, and a window of two forms is read as neither | Accepted | §4c (reader signals) |

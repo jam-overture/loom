@@ -57270,3 +57270,89 @@ environment lookup, and every caller of it (`render.ts`, `stored.ts`,
 `layout.tsx`) has to take it as an answer handed down rather than asked again.
 `stored.ts` already names the related gap of a disclosure stored into a tree
 going stale when the setting changes, and the two are probably one fix.
+
+---
+## 2026-10-20 — a funnel read of a revision served in two forms divided one form's reach by the other form's arrivals
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/funnel.ts`) · **Status:** **closed on filing by
+`signals-42-a-funnel-over-two-forms-is-refused`**
+([0300](decisions/0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md))
+— written down because it is the third instance of one shape and the first that
+produced a wrong **rate** rather than a wrong count
+
+The entry of 19 October closed this shape in `regionReadingFor` and filed it in
+`pageViewsFor`; both were a count. `funnelReachOf` is the third and it divides.
+It filtered its rows by audience only where one was named, and otherwise:
+
+```ts
+const matching = where.audienceId === null ? here : here.filter(...)
+// ...dedupe by funnelPairKey, keep the first
+duplicatedPairs: matching.length - pairs.length,
+```
+
+So a deployment-wide asking took the first row per question and counted the
+other form's answer in `duplicatedPairs`. **The door row it divides by is picked
+out of a different array by the same rule**, and the two arrays are two store
+reads with no guaranteed order between them, so the numerator and the
+denominator could come from different forms:
+
+```
+SKIERS    4 reached of   100 arrived   →   40%
+RIDERS  400 reached of 1,000 arrived   →   40%
+published: entry share 0.004, one funnel row and one door row "duplicated"
+```
+
+**0.4% published where both forms converted at 40%.** Two orders of magnitude,
+decided by the order two lists arrived in, with the evidence sitting in the one
+field nobody reads as an undercount (0158).
+
+**What shipped, and why it is a type and not a third fix.** All three instances
+had one cause: `null` meant both *no window ever carried the column* (one
+population, read whole) and *two forms and none asked for* (no population, read
+as neither). `AudienceScope` in `audiences.ts` is now the three-way answer, and
+its `mixed` member carries no audience — so a reading handed an ambiguous window
+cannot read one off it. The funnel refuses the pairs, counts every row as the
+other form's, names both populations, and keeps the door's arrivals, which do
+add across forms (0297, and #680 for the door). `funnelChangeOf` refuses a
+mixed side **before**
+pairing, because an empty side pairs cleanly and would otherwise read as a
+change that added every funnel question the deployment asks.
+
+**The method note, which is the transferable part.** Each of the three had a
+test over the path that used two *different* key values — two countries, two
+revisions, two trees — so each documented the intent while the code failed only
+where two rows **share** a key. A test over a two-form window has to make the
+rows collide.
+
+---
+## 2026-10-20 — `pageViewsFor` is the fourth reading of this shape and is the one place `AudienceScope` was deliberately not adopted
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/page-views.ts`) · **Status:** open — **nothing is wrong once #680
+lands**; this is an adoption to take afterwards, not a defect
+
+0300 publishes `AudienceScope` and adopts it in the two readings that refuse an
+unsplit window — `pageReadingOf` and `funnelReachOf`. The door's own reading is
+the fourth of the four that pick a page's rows out of a window, and it was
+corrected the night before by #680, which rewrites `pageViewsFor` to
+**sum** every form's arrivals rather than refuse them. Touching the same
+function in 0300's change would have handed the merge a conflict in the one file
+both changes rewrite, so it was left alone.
+
+**The two compose rather than overlap.** Once #680 is on `main`, the door
+figures published on a refused funnel reading are the sum over both forms rather
+than whichever row sorted first, which is the coherent answer: *this many
+readers arrived across both forms, and which of them converted is a question per
+form.*
+
+**What is left to do, and it is small.** `pageViewsFor` derives its own
+one-or-none decision inline. Expressing it as `audienceScopeOf` would make the
+four readings read the rule from one place, and — more to the point — would make
+the `mixed` member a case every one of them has answered in writing: the door
+**sums** it (0297's argument, arrivals are people), the other two **refuse** it
+(0290 clause 3). Two different answers to one case is correct and is worth being
+visibly deliberate.
+
+**Not a behaviour change.** If adopting it would move a number, that is a
+finding of its own rather than a refactor.
