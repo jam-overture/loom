@@ -230,4 +230,17 @@ numbering and the plan are clear.
 ## Open questions
 
 Three, each with a recommendation, none blocking. They are in the pull request
-comment.
+comment on
+[#687](https://github.com/jam-overture/loom/pull/687#issuecomment-6302873035),
+and in short: whether the change order's `different-audiences` earns a fourth
+standing of its own (recommend yes, **if** a portal screen will group by
+standing — the grouping question is not mine); whether `AudienceScope.one`
+should carry *who decided*, the asking or the window (recommend leaving it at
+one commented call site); and whether `silences.test.ts` should stop deriving
+condition provenance from set order altogether rather than keep the fold with a
+credit rule (recommend keeping the fold, with the ten-line honest version
+offered).
+
+Preview: <https://loom-git-signals-43-a-page-r-ce2aad-jpizzolato36-6341s-projects.vercel.app>.
+Nothing here draws a screen, so it is the branch deployed rather than something
+to look at.
