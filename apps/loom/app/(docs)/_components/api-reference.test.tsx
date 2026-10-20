@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import type { EntryProse, ProseMention } from "@/app/(docs)/_lib/api/mentions"
 import type { ApiEntry } from "@/app/(docs)/_lib/api/model"
+import { PRESS_LANDING_CLASS } from "@/app/(docs)/_lib/chrome"
 import { ApiEntryReference, apiGroupAnchor, Prose } from "./api-reference"
 
 /**
@@ -89,6 +90,34 @@ describe("an entry point's reference", () => {
 
     expect(container.querySelector("#s-addressNode")).toBeTruthy()
     expect(container.querySelector("#s-NO_TEXT")).toBeTruthy()
+  })
+
+  /**
+   * Both of the things a link on this page lands on, landing where the site's
+   * other headings land.
+   *
+   * These wore `scroll-mt-24` until 20 October — 96 pixels, a constant, where a
+   * prose heading wears the difference between the landing and the chrome. The
+   * two agreed at no width: a press of a row in the contents below put a reader
+   * 48 pixels lower here than the same press puts them on a written page. The
+   * class is the arrangement; `_lib/chrome.test.ts` holds it to the one
+   * declaration it reads.
+   */
+  it("lands a module band and an export where a press of a contents row lands", () => {
+    const { container } = render(<ApiEntryReference entry={entry} prose={noProse} />)
+
+    const landed = [
+      container.querySelector(`#${apiGroupAnchor("render/addressing")}`),
+      container.querySelector(`#${apiGroupAnchor("render/text")}`),
+      container.querySelector("#s-addressNode"),
+      container.querySelector("#s-NO_TEXT"),
+    ]
+
+    expect(landed.filter((anchor) => anchor !== null)).toHaveLength(4)
+
+    for (const anchor of landed) {
+      expect(anchor?.classList.contains(PRESS_LANDING_CLASS), anchor?.id).toBe(true)
+    }
   })
 
   it("puts the sentence before the signature", () => {
