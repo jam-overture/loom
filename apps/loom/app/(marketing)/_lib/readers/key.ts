@@ -26,9 +26,12 @@ import { INGEST_KEY_PARAMETER, type IngestKeyStore } from "@/app/_lib/reader-sig
  * cannot answer within the site's budget reads the same way: the page is
  * served, uncounted, rather than held up.
  *
- * Read on the server, per request, and only when `readersCountedHere()` has
- * already said yes — so a deployment that never asked for signals never asks
- * this table anything.
+ * Read on the server, per request, and only through `readerSignalUrl` in
+ * `./counting.ts`, which asks the switch first — so a deployment that never
+ * asked for signals never asks this table anything. This function is the key
+ * half alone and does not read the switch; calling it directly is asking *is
+ * there a key*, which is a different question from *does this deployment
+ * count*.
  */
 export const siteSignalUrl = async (
   keys: IngestKeyStore = appIngestKeys

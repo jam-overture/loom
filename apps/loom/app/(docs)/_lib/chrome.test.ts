@@ -14,6 +14,7 @@ import {
   CHROME_CLASSES,
   HEADER_ROW_CLASS,
   PAGE_RAIL_CLASS,
+  PRESS_LANDING_CLASS,
   RAIL_SCROLLER_SELECTOR,
   railScrollerAttr,
   SITE_RAIL_CLASS,
@@ -176,7 +177,7 @@ describe("the chrome's height", () => {
 
   it("declares every property its own declarations read, so the chain has no gap", () => {
     const declared = rootProperties(css())
-    const chrome = [...declared.keys()].filter((name) => name.startsWith("--chrome") || name === "--press-landing")
+    const chrome = [...declared.keys()].filter((name) => name.startsWith("--chrome") || name.startsWith("--press"))
 
     for (const property of propertiesNamedIn(chrome.map((name) => declared.get(name) ?? "").join(" "))) {
       expect(declared.has(property), `globals.css declares ${property}`).toBe(true)
@@ -209,7 +210,8 @@ describe("the chrome's height", () => {
    * against the reading line, which is the one figure in TypeScript.
    */
   it("makes the heading's own margin the difference between the landing and the inset", () => {
-    expect(soleDeclaration(css(), "scroll-margin-top")).toBe("calc(var(--press-landing) - var(--chrome-inset))")
+    expect(rootProperties(css()).get("--press-margin")).toBe("calc(var(--press-landing) - var(--chrome-inset))")
+    expect(soleDeclaration(css(), "scroll-margin-top")).toBe("var(--press-margin)")
   })
 
   it("keeps the landing a plain length, because a number in TypeScript is chosen against it", () => {
@@ -254,6 +256,100 @@ describe("the chrome's height", () => {
   it("is spelled by no component or layout in the route group", () => {
     const spelled = componentsAndLayouts().filter((file) =>
       /(?<![\w-])(?:h|top)-14(?![\d.])|100vh-3\.5rem/.test(withoutComments(source(file)).replace(/\/\/[^\n]*/g, ""))
+    )
+
+    expect(spelled).toEqual([])
+  })
+})
+
+/**
+ * Where a press lands, and the three readers the stylesheet cannot reach.
+ *
+ * ## The plain version
+ *
+ * Press a row in a page's contents and the thing it names arrives 160 pixels
+ * down the window. One number, `--press-landing`, and the browser gets there
+ * in two steps: the scrollport is inset by whatever is stuck to the top, and
+ * the box being scrolled to carries the rest of the way as its own
+ * `scroll-margin-top`. The rest of the way is `--press-margin`.
+ *
+ * The rule in `globals.css` that carries it matches `.prose h2` and its three
+ * siblings, and is written `:not(.not-prose *)` on purpose. **Everything this
+ * site renders inside `.not-prose` is therefore outside the arrangement
+ * unless it says otherwise**, and three kinds of anchored thing live there:
+ * the two on a generated reference page, and the headings the two Architecture
+ * components render out of the decision records. On 19 October all three were
+ * outside it — two wearing `scroll-mt-24`, eight wearing nothing — so one act
+ * put a reader in three different places.
+ *
+ * ## What is held
+ *
+ * The same chain as the height above it, one link longer: the property is
+ * declared, it is the difference rather than a figure, the class names it, the
+ * three components wear the class and spell neither the class nor a number of
+ * their own, and no fourth anchor in the route group picks one.
+ */
+describe("where a press lands", () => {
+  const css = (): string => readDocsStylesheet()
+
+  /**
+   * The class is the whole of what an element outside the prose needs, so it
+   * reads the property and declares no number. A `scroll-mt-24` beside it
+   * would be the thing this unit took out, written back in a second spelling.
+   */
+  it("is one property, and the class outside the prose reads that property alone", () => {
+    expect(propertiesNamedIn(PRESS_LANDING_CLASS)).toEqual(["--press-margin"])
+    expect(PRESS_LANDING_CLASS).not.toMatch(/\d/)
+  })
+
+  /**
+   * And the property is reachable from the two halves it is the difference
+   * between — so a run that moves the landing, or gives the bar a second line,
+   * moves this with it. A `--press-margin` that had been transcribed as `3rem`
+   * would pass every assertion about the class and nothing about the arithmetic.
+   */
+  it("is the difference between the landing and the inset, transitively", () => {
+    const margin = rootProperties(css()).get("--press-margin") ?? ""
+
+    expect(propertiesNamedIn(margin)).toEqual(["--press-landing", "--chrome-inset"])
+  })
+
+  /**
+   * The three files that render something a link lands on outside the prose.
+   *
+   * A list rather than a sweep, because a run adding a fourth should have to
+   * put it here and be asked whether the thing it is anchoring is a place a
+   * reader gets sent to. The sweep below is the other half: it is what stops
+   * the fourth one choosing its own number instead.
+   */
+  it("is worn by every anchor outside the prose, through this module", () => {
+    const wears = [
+      "_components/api-reference.tsx",
+      "_components/architecture-costs.tsx",
+      "_components/architecture-ideas.tsx",
+    ] as const
+
+    for (const file of wears) {
+      const text = source(file)
+
+      expect(text, `${file} reads PRESS_LANDING_CLASS`).toContain("PRESS_LANDING_CLASS")
+      expect(text, `${file} spells the class's own value`).not.toContain(PRESS_LANDING_CLASS)
+    }
+  })
+
+  /**
+   * And nothing in the route group picks a scroll margin of its own.
+   *
+   * This is the assertion the unit is for. The two that were here were right
+   * when they were written and were never *connected* to the landing, which is
+   * the same shape as the six copies of the header's height: nothing goes red
+   * when one of them stops agreeing, and what a reader gets is the thing they
+   * asked for in the wrong place. `scroll-mt-[var(…)]` is not a number and is
+   * what the class is.
+   */
+  it("is the only scroll margin any component or layout in the route group names", () => {
+    const spelled = componentsAndLayouts().filter((file) =>
+      /(?<![\w-])scroll-mt-\d/.test(withoutComments(source(file)).replace(/\/\/[^\n]*/g, ""))
     )
 
     expect(spelled).toEqual([])

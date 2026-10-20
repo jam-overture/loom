@@ -4,6 +4,7 @@ import {
   unsettledAlternatives,
   type ConsideredAlternative,
 } from "@/app/(docs)/_lib/architecture/alternatives"
+import { PRESS_LANDING_CLASS } from "@/app/(docs)/_lib/chrome"
 import { ARCHITECTURE_COSTS, type ArchitectureCost } from "@/app/(docs)/_lib/architecture/costs"
 
 /**
@@ -29,7 +30,19 @@ const Cost = ({ cost }: { readonly cost: ArchitectureCost }) => (
     aria-labelledby={cost.id}
     className="border-edge border-t pt-6 first:border-t-0 first:pt-0"
   >
-    <h3 id={cost.id} className="text-ink text-lg font-semibold tracking-tight">
+    {/*
+     * Eight of the thirteen rows in this page's contents are these headings,
+     * so this is a place a reader is sent to as much as any `##` in the
+     * markdown — and it is inside `.not-prose`, which the stylesheet's rule
+     * for a prose heading deliberately does not reach. It had no
+     * `scroll-margin-top` at all until 20 October, so a press of one of those
+     * rows stopped 93 pixels above where a press of the five beside them
+     * stops on a wide screen.
+     */}
+    <h3
+      id={cost.id}
+      className={`${PRESS_LANDING_CLASS} text-ink text-lg font-semibold tracking-tight`}
+    >
       {cost.title}
     </h3>
 

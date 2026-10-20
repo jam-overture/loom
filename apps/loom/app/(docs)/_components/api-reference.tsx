@@ -13,6 +13,7 @@ import {
   type ApiRequirement,
   type ApiSymbol,
 } from "@/app/(docs)/_lib/api/model"
+import { PRESS_LANDING_CLASS } from "@/app/(docs)/_lib/chrome"
 import { packageOf } from "@/app/(docs)/_lib/packages"
 
 /**
@@ -126,7 +127,7 @@ const SymbolEntry = ({
   readonly symbol: ApiSymbol
   readonly mentions: readonly ProseMention[]
 }) => (
-  <div id={apiAnchorFor(symbol.name)} className="scroll-mt-24 py-6">
+  <div id={apiAnchorFor(symbol.name)} className={`${PRESS_LANDING_CLASS} py-6`}>
     <h3 className="text-ink flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.9375rem] font-semibold">
       {symbol.name}
       <KindBadge kind={symbol.kind} />
@@ -171,7 +172,18 @@ const Group = ({
   <section
     id={apiGroupAnchor(group.module)}
     data-search="off"
-    className="scroll-mt-24"
+    /*
+     * The landing, from the one place it is declared.
+     *
+     * This band and the symbols inside it are the two things on a generated
+     * page a link lands on, and both wore `scroll-mt-24` until 20 October: 96
+     * pixels, a constant, where every prose heading on the site wears the
+     * difference between the landing and the chrome. So a reader who pressed
+     * a row in the contents below arrived 48 pixels lower here than the same
+     * press puts them on a written page. The class reads `--press-margin`;
+     * `_lib/chrome.ts` is the argument for its being a class.
+     */
+    className={PRESS_LANDING_CLASS}
   >
     <h2 className="text-ink border-edge mt-14 border-t pt-8 text-[1.375rem] leading-tight font-bold tracking-tight">
       {group.title}

@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 
 import { CountReaders } from "@/app/(marketing)/_components/count-readers"
-import { readersCountedHere } from "@/app/(marketing)/_lib/readers/counting"
-import { siteSignalUrl } from "@/app/(marketing)/_lib/readers/key"
+import { readerSignalUrl } from "@/app/(marketing)/_lib/readers/counting"
 import { HOME, siteOrigin } from "@/app/(marketing)/_lib/site"
 
 import "./globals.css"
@@ -68,21 +67,25 @@ const GEIST = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&displ
  * of them is. It draws nothing, so the claim the comment above makes — the
  * chrome is in the tree, not wrapped around it — is untouched.
  *
- * **Absent unless this deployment collects.** `readersCountedHere` is the same
- * answer `render.ts` uses to decide whether the markup carries the addresses a
- * signal names, so a broadcaster is never started on a page that cannot be
- * measured, and a page is never addressed with nothing listening. Off — which
- * is the default, and what this deployment is until somebody sets
- * `LOOM_SIGNAL_INTAKE` — nothing is rendered here, nothing is downloaded, and
- * no batch is sent anywhere.
+ * **Absent unless this deployment collects, and absent without a key.** Those
+ * are one question and `readerSignalUrl` is where it is asked: the switch says
+ * whether this deployment wants signals, the key table says whether it has
+ * anywhere to put them, and the door files nothing it cannot name (0298). A
+ * deployment that has not run `pnpm signals:key prj_default` mounts no
+ * broadcaster rather than one every batch of which is refused.
  *
- * **And absent without a key.** The door files nothing it cannot name (0298),
- * so this site posts with its project's key, and a deployment that has not
- * minted one mounts no broadcaster rather than one every batch of which is
- * refused. `readers/key.ts` has why, and the command that ends it.
+ * **`render.ts` asks the same function**, which is the 19 October finding's
+ * remedy. It asked only the switch until 20 October, so a deployment with no
+ * key served every page carrying the addresses a signal names with nothing here
+ * to send one. A broadcaster is never started on a page that cannot be
+ * measured, and a page is never addressed with nothing listening.
+ *
+ * Off — which is the default, and what this deployment is until somebody sets
+ * `LOOM_SIGNAL_INTAKE` — nothing is rendered here, nothing is downloaded, no
+ * table is read, and no batch is sent anywhere.
  */
 const RootLayout = async ({ children }: { readonly children: ReactNode }) => {
-  const url = readersCountedHere() ? await siteSignalUrl() : null
+  const url = await readerSignalUrl()
 
   return (
     <html lang="en">

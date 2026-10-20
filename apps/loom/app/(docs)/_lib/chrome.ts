@@ -155,6 +155,42 @@ export const BAR_BREAKPOINT_PROPERTY = `--breakpoint-${BAR_BREAKPOINT}`
 /** The bar: there below the breakpoint, and not above it. */
 export const BAR_HIDDEN_CLASS = "xl:hidden"
 
+/* ── Where a press lands, for everything the stylesheet cannot reach ──
+ *
+ * ## The plain version
+ *
+ * Press a row in the contents and the heading it names arrives 160 pixels down
+ * the window. That is one declared number, `--press-landing`, and a browser
+ * gets there in two steps: the scrollport is inset from the top by whatever is
+ * stuck there, and the box being scrolled to carries the rest of the distance
+ * as its own `scroll-margin-top`. The rest of the distance is `--press-margin`,
+ * declared once in `globals.css` as the difference between the two.
+ *
+ * `.prose h2` and its three siblings read it from a rule in that stylesheet.
+ * **Nothing the site renders inside `.not-prose` is reached by that rule**, and
+ * three kinds of anchored thing live there: a reference page's module band, a
+ * reference page's symbol, and a heading one of the Architecture components
+ * renders out of the decision records.
+ *
+ * Until 20 October those three were not in the arrangement at all. The two on
+ * the reference pages wore `scroll-mt-24` — 96 pixels, a constant where the
+ * prose has a difference, so a symbol landed 48 pixels below a heading at the
+ * widths most readers are at. The Architecture headings wore nothing, so they
+ * landed 93 pixels **above** it on a wide screen. Each was somewhere a reader
+ * is sent by a link they pressed, and all three are the same act.
+ *
+ * ## Why a class and not a rule
+ *
+ * The stylesheet declares `scroll-margin-top` exactly once and
+ * `chrome-css.ts`' `soleDeclaration` insists on that: two declarations of one
+ * property is how the reading line came to be held against the wrong half of
+ * this pair for a day. A second rule here would be the second declaration. A
+ * class puts the same property on the element that needs it without adding one.
+ * ────────────────────────────────────────────────── */
+
+/** An anchored thing outside the prose, landing where a prose heading lands. */
+export const PRESS_LANDING_CLASS = "scroll-mt-[var(--press-margin)]"
+
 /**
  * All of them, for the check that every property they name is declared.
  *
@@ -169,4 +205,5 @@ export const CHROME_CLASSES = [
   SITE_RAIL_CLASS,
   PAGE_RAIL_CLASS,
   BAR_HIDDEN_CLASS,
+  PRESS_LANDING_CLASS,
 ] as const
