@@ -109,10 +109,12 @@ and a window of two forms with none asked for is read as neither.**
 6. **A comparison refuses a side that was read as neither, before it pairs.**
    `FunnelChangeSilence` gains `audiences-mixed` and
    [`silences.ts`](../src/signals/silences.ts) gains the condition
-   `two-forms-unsplit`. The ordering matters: an empty side **pairs cleanly**,
-   so without the guard every question of the other side comes back as added or
-   removed and the reading says *this change added every funnel question you
-   ask* about a window that was simply never read. It is held apart from
+   `two-forms-unsplit`. What makes the refusal necessary rather than tidy is
+   that an empty side **pairs cleanly**: a side read as neither form holds no
+   question, so without the guard every question of the other side comes back
+   as added or removed and the reading says *this change added every funnel
+   question you ask* about a window that was simply never read. It is taken
+   beside the other two refusals, before any question is paired. It is held apart from
    `two-audiences` because the remedies differ — pick a form, versus split the
    window — and it is the first condition in that table about what the caller
    handed in rather than about the deployment, the window or the shape of the

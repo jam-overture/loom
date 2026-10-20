@@ -57356,3 +57356,45 @@ visibly deliberate.
 
 **Not a behaviour change.** If adopting it would move a number, that is a
 finding of its own rather than a refactor.
+
+---
+## 2026-10-20 — lesson 28's "a number nobody has written" was `0300`, and today the numbering reached it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom lessons`
+(`lessons/28-corroboration.md`) · **Status:** **fixed in
+`signals-42-a-funnel-over-two-forms-is-refused`** by changing the fixture to
+`0998` — an edit in another lane's file, made because the alternative was a red
+`pnpm verify` and a decision number chosen to dodge a test
+
+Exercise C demonstrates the one thing a bare citation buys you: *a number nobody
+has written is catchable*. Its fixture was `(0300)`, and its printed output —
+which `transcripts.test.ts` holds the lesson to — says `1 problem(s):
+unknown-record`.
+
+**This lane wrote record 0300 today**, so the citation resolved, the exercise
+printed `0 problem(s)`, and the lesson's transcript test went red on a branch
+that had not touched `lessons/`.
+
+**The lesson predicted this, two paragraphs further down**, about a different
+number:
+
+> red in a lesson would become the ordinary consequence of writing a decision
+> record. [...] A verdict that survives the set growing, and is still false the
+> day it stops being true, is the better shape
+
+That advice had been applied to the census verdicts and not to this fixture. The
+fixture is now `0998`, which the numbering cannot plausibly reach — the lanes are
+allocated in hundreds from 0200 — and a short paragraph is added saying why,
+because the reason is the lesson's own subject.
+
+**What is yours to decide.** `0998` is a guess at *far enough away*, which is the
+same class of answer as `0300` was. If this lane would rather the exercise built
+its fixture rather than hard-coded one — the number one past the highest record
+on disk, say, which is unclaimable by construction — that is a better fixture and
+it is yours to write. Four lines in one file either way, and nothing else in the
+lesson moves.
+
+**Why it was not filed and left red.** A routine may not open a pull request on
+red, and the only alternatives were to take a decision number chosen to avoid a
+test or to leave this change unshipped. Both are worse than a four-line edit in
+a file whose author had already written down the rule the edit follows.

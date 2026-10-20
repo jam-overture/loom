@@ -843,10 +843,13 @@ export const funnelChangeOf = (was: FunnelReach, now: FunnelReach): FunnelChange
   if (was.treeId !== now.treeId) return refusing("different-trees")
   if (crossesAudiences(was, now)) return refusing("different-audiences")
   /**
-   * Before the pairing rather than after it, because an empty side pairs
-   * cleanly: every question of the other side comes back as added or removed,
-   * which reads as *the change added every funnel question you ask* about a
-   * window that was simply never read.
+   * Refused rather than paired, because an empty side **pairs cleanly**: a
+   * reading that was read as neither form holds no question, so every question
+   * of the other side comes back as added or removed and the comparison reads
+   * as *the change added every funnel question you ask* about a window that was
+   * simply never read. Taken beside the other two refusals, so that all three
+   * states of the pair are settled before any question is held against any
+   * other.
    */
   if (audienceScopeRead(was).reading === "mixed" || audienceScopeRead(now).reading === "mixed")
     return refusing("audiences-mixed")

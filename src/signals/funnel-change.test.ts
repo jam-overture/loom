@@ -825,8 +825,9 @@ describe("funnelChangeOf across two audiences", () => {
   /**
    * A side read as neither population has no pairs, and an empty side pairs
    * cleanly: every question of the other side comes back as added or removed.
-   * So the refusal has to happen before the pairing, or a window that was
-   * never read reads as a change that added every question a deployment asks.
+   * So a window that was never read would otherwise report as a change that
+   * added every question a deployment asks — which is what makes this a
+   * refusal rather than a comparison of one side.
    */
   const MIXED = { ...ONE, audienceId: null, audiences: [RIDERS, SKIERS], pairs: [] }
 
