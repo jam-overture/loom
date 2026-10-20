@@ -32,8 +32,13 @@ import { withoutComments } from "./prose-barrier"
  * `--press-landing`* is proved by three strings:
  *
  * - `scroll-padding-top` is `var(--chrome-inset)`;
- * - `scroll-margin-top` is `calc(var(--press-landing) - var(--chrome-inset))`;
+ * - `--press-margin` is `calc(var(--press-landing) - var(--chrome-inset))`, and
+ *   `scroll-margin-top` is `var(--press-margin)`;
  * - and the browser adds the two, which is what it is for.
+ *
+ * The margin is a property with its own name because the rule above is only
+ * one of its four readers: everything this site renders inside `.not-prose` is
+ * outside that rule and wears `PRESS_LANDING_CLASS` instead.
  *
  * The one number that is read is the landing itself, because the reading line
  * in `on-this-page.ts` is a figure in TypeScript chosen against it, and those

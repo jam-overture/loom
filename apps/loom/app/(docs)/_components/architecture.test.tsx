@@ -12,6 +12,8 @@ import {
 import { ARCHITECTURE_COSTS } from "@/app/(docs)/_lib/architecture/costs"
 import { COURSE } from "@/app/(docs)/_lib/architecture/course"
 import { ARCHITECTURE_IDEAS } from "@/app/(docs)/_lib/architecture/ideas"
+import { PRESS_LANDING_CLASS } from "@/app/(docs)/_lib/chrome"
+import { SECTION_SELECTOR } from "@/app/(docs)/_lib/on-this-page"
 import { DECISION_RECORDS } from "@/app/(docs)/_lib/architecture/records"
 
 /**
@@ -377,5 +379,54 @@ describe("what a ruling left open, rendered", () => {
     expect(
       screen.getAllByRole("link", { name: first?.recordTitle ?? "" })[0]?.getAttribute("href")
     ).toBe(first?.href)
+  })
+})
+
+/**
+ * Where a press of a contents row lands, on the two pages whose rows mostly
+ * are not in their own markdown.
+ *
+ * ## The plain version
+ *
+ * *What it costs you* has five `##` lines in its file and thirteen places a
+ * reader can be sent to: the other eight are these headings, rendered out of
+ * the decision records as the page builds. *How it fits together* is the same
+ * shape with the ideas. So on both pages **most of the contents rail is this
+ * component**, and a press of one of its rows is the ordinary case rather than
+ * the exception.
+ *
+ * Those headings had no `scroll-margin-top` at all until 20 October. They are
+ * inside `.not-prose`, which is what keeps the stylesheet's prose rules out of
+ * a rendered example, and the rule that carries the landing is one of them. The
+ * cost was 93 pixels on a wide screen: a press of one of the five markdown
+ * headings stopped at the declared place and a press of one of the eight beside
+ * it stopped above it, on the same rail, in the same list.
+ *
+ * ## Asked through the rail's own selector
+ *
+ * `SECTION_SELECTOR` is the rail's definition of *a place a reader can be sent
+ * to*, so this asks the question in the rail's own words rather than in a copy
+ * of them. A component that renders a heading the rail will link to and no
+ * landing fails here, whether or not anybody remembered this file.
+ */
+describe("where a press of a contents row lands", () => {
+  const anchors = (within: HTMLElement): readonly Element[] => [
+    ...within.querySelectorAll(SECTION_SELECTOR),
+  ]
+
+  it("is the site's one landing, for every heading the rail can send a reader to", () => {
+    const costs = render(<ArchitectureCosts />)
+    const ideas = render(<ArchitectureIdeas />)
+
+    const found = [...anchors(costs.container), ...anchors(ideas.container)]
+
+    /* The count, so that a component which stopped rendering headings — or a
+       selector that stopped matching them — reads as a failure rather than as
+       a loop over nothing. */
+    expect(found).toHaveLength(ARCHITECTURE_COSTS.length + ARCHITECTURE_IDEAS.length)
+
+    for (const anchor of found) {
+      expect(anchor.classList.contains(PRESS_LANDING_CLASS), anchor.id).toBe(true)
+    }
   })
 })

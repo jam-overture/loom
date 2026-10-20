@@ -146,9 +146,15 @@ export type SectionTop = {
  * `globals.css`, and it is 10rem — 160 pixels down the window. Two declarations
  * get the browser there, because that is how a browser does it: `html` has a
  * `scroll-padding-top` that insets the top of the scrollport for every in-page
- * scroll, and every prose heading has a `scroll-margin-top` that grows the box
- * being scrolled to. The second is written as *the landing minus the inset*, so
- * the chrome above can change height without moving the landing.
+ * scroll, and the box being scrolled to has a `scroll-margin-top` that carries
+ * the rest of the way. The second is `--press-margin`, *the landing minus the
+ * inset*, so the chrome above can change height without moving the landing.
+ *
+ * As of 20 October every anchored thing on the site reads it. Eight of the
+ * thirteen rows on *What it costs you* are headings an Architecture component
+ * renders, inside `.not-prose` where the stylesheet's rule for a prose heading
+ * does not reach, and until then a press of one of those rows stopped 93 pixels
+ * above a press of one of the five beside it.
  *
  * It does change height, as of 19 October: above 1280 the bar is not rendered
  * and the inset is 67 rather than 112. The landing is 160 at both widths, which

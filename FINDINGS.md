@@ -57074,9 +57074,32 @@ thing finds this rather than the sweep's absence.
 ## 2026-10-19 — a reference page's anchors land 48 pixels below where a written page's headings land, and the number that puts them there was chosen against nothing
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
-found while reading the reference pages for a photograph of today's change, and
-**not** introduced by it
+(`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** **closed**
+20 October by `docs-61-the-place-a-reference-anchor-lands`, by remedy 1, which
+is what this entry recommended — found while reading the reference pages for a
+photograph of 19 October's change, and **not** introduced by it
+
+> **Closed, with two notes.** The table above was right at both widths: the
+> export measured **208** at 1024 and **163** at 1280 on a build of `main`, and
+> **160** at both on a build of the branch. The pictures are in
+> `reports/2026-10-20-docs-the-place-an-anchor-lands.md`.
+>
+> Remedy 1 said *a rule on `[id]` inside the reference body*. Written that way
+> it is the arithmetic in a second place **and** a second declaration of
+> `scroll-margin-top`, which `chrome-css.ts`' `soleDeclaration` refuses on
+> purpose. What shipped is the same remedy with one copy: `--press-margin` is
+> declared in `globals.css` as the difference, the prose rule reads it, and
+> `PRESS_LANDING_CLASS` in `_lib/chrome.ts` carries it to an element the
+> stylesheet cannot reach.
+>
+> **It was not seventeen pages, it was thirty-three.** This entry counted the
+> reference pages and missed the worse half of its own class. Eight headings on
+> *What it costs you* and eight on *How it fits together* are rendered inside
+> `.not-prose` by `architecture-costs.tsx` and `architecture-ideas.tsx`, where
+> the prose rule does not reach, and they had **no** `scroll-margin-top` at all
+> — landing at 67 on a wide screen against 160 for the five markdown headings
+> beside them in the same rail. Eleven pixels under the site header. Both were
+> fixed in one unit, because they are one defect.
 
 Where a press of a contents row lands a heading is one declared number on the
 written pages: `--press-landing`, 10rem, 160 pixels down the window. It stays
@@ -57270,3 +57293,69 @@ environment lookup, and every caller of it (`render.ts`, `stored.ts`,
 `layout.tsx`) has to take it as an answer handed down rather than asked again.
 `stored.ts` already names the related gap of a disclosure stored into a tree
 going stale when the setting changes, and the two are probably one fix.
+
+---
+## 2026-10-20 — the sweep that stops an anchor picking its own landing cannot see an anchor that picks none, and the one that picks none is the instance that happened
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/prerender/`) **for the recommended remedy**, `Loom docs`
+(`apps/loom/app/(docs)/_lib/chrome.test.ts`) for the two fallbacks ·
+**Status:** open — **nothing is broken**; this is the stated limit of what
+shipped on 20 October
+
+Every anchored thing on this site now lands at `--press-landing`. A heading in
+the prose gets there from a rule in `globals.css`; a thing rendered inside
+`.not-prose` gets there by wearing `PRESS_LANDING_CLASS`, which reads the same
+declaration. Two assertions hold the three components that wear it, and a sweep
+over the route group holds the fourth one nobody notices:
+
+```ts
+it("is the only scroll margin any component or layout in the route group names", () => {
+  const spelled = componentsAndLayouts().filter((file) => /(?<![\w-])scroll-mt-\d/.test(…))
+
+  expect(spelled).toEqual([])
+})
+```
+
+**That sweep catches the wrong half of the defect it was written for.** It fails
+a component that picks its own number — which is how the two reference anchors
+went wrong, with `scroll-mt-24`. It passes a component that picks **none**,
+which is how the sixteen Architecture headings went wrong, and theirs was the
+larger error: 93 pixels against 48, and the only one of the two that put a
+reader's heading under the chrome.
+
+So the instance that actually happened is the instance the check cannot see, and
+the next one is a component rendering an `h2[id]` or an `h3[id]` that nobody
+remembers to add to `architecture.test.tsx`.
+
+**Why it is filed rather than built.** The question *is this `id` a place a
+reader is sent to* has no syntactic answer. Two `id`s in this route group are
+not: `search.tsx` gives a listbox option one so `aria-activedescendant` can name
+it, and `long-code.tsx` gives a panel one so a button's `aria-controls` can. A
+sweep over `id={` would fail on both, and an allowlist beside it is a list of
+judgements that goes stale the way the numbers it replaced did.
+
+Three ways, costed:
+
+1. **Ask the rendered page rather than the source.** `prerender:check` already
+   walks every prerendered page's HTML, and *every `h2[id]`/`h3[id]` inside
+   `#article` carries the landing class* is a claim about a document rather than
+   about a file. It catches both halves, it needs no allowlist, and it would
+   have caught the Architecture headings on the day they were written. The cost
+   is a check about a stylesheet's effect living in a tool that is currently
+   about addresses and text, and `tools/prerender/` is the framework lane's.
+   **The recommendation**, as a finding for the lane that owns that tool rather
+   than something to build here.
+2. **A sweep over `id={` with a named list of the `id`s that are not landings.**
+   Cheap, entirely in this lane, and it is the allowlist above: two entries
+   today, each of which has to be re-judged by whoever next sees the test fail.
+3. **Leave it, and keep the per-component tests.** What exists holds the four
+   anchors that exist and reads clearly. It is honest about being a list, and a
+   list is what the 28 September entry on *a test derived from the list it
+   checks* warns about.
+
+**Recommendation: 1**, which is why this is owned by `Loom daily build`: the
+tool it belongs in is that lane's. 2 is this lane's fallback if 1 is unwelcome,
+and is worth less than it looks. Either way the check this entry is about is
+already written and passing — what is open is the half of the class it cannot
+see.

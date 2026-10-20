@@ -1,0 +1,46 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/runtime#s-resolveTreeData",
+      "out": "2026-10-20-docs-the-place-an-anchor-lands-wide-symbol",
+      "viewport": "wide",
+      "waitFor": "#s-resolveTreeData",
+      "measure": ["header > div", "#s-resolveTreeData", "#s-resolveTreeData h3"]
+    },
+    {
+      "path": "/docs/api-reference/runtime#s-resolveTreeData",
+      "out": "2026-10-20-docs-the-place-an-anchor-lands-laptop-symbol",
+      "viewport": { "width": 1024, "height": 900 },
+      "waitFor": "#s-resolveTreeData",
+      "measure": ["header > div", "#s-resolveTreeData", "#s-resolveTreeData h3"]
+    },
+    {
+      "path": "/docs/architecture/what-it-costs-you",
+      "out": "2026-10-20-docs-the-place-an-anchor-lands-wide-rendered-row",
+      "viewport": "wide",
+      "waitFor": "nav[aria-label='On this page']",
+      "measure": ["header > div", "h3#no-rewind"],
+      "do": [{ "click": "nav[aria-label='On this page'] a[href='#no-rewind']" }]
+    },
+    {
+      "path": "/docs/architecture/what-it-costs-you",
+      "out": "2026-10-20-docs-the-place-an-anchor-lands-wide-written-row",
+      "viewport": "wide",
+      "waitFor": "nav[aria-label='On this page']",
+      "measure": ["header > div", "h2#where-the-arguments-are"],
+      "do": [{ "click": "nav[aria-label='On this page'] a[href='#where-the-arguments-are']" }]
+    },
+    {
+      "path": "/docs/architecture/what-it-costs-you",
+      "out": "2026-10-20-docs-the-place-an-anchor-lands-phone-rendered-row",
+      "viewport": "phone",
+      "waitFor": "button[aria-label='On this page']",
+      "measure": ["header > div", "h3#no-rewind"],
+      "do": [
+        { "click": "button[aria-label='On this page']" },
+        { "click": "#article > div:first-child > nav[aria-label='On this page'] a[href='#no-rewind']" }
+      ]
+    }
+  ]
+}

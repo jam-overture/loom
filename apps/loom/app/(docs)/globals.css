@@ -294,6 +294,28 @@
      * (`_lib/on-this-page.ts`), and the two have to stay in that order.
      */
     --press-landing: 10rem;
+    /**
+     * The other half of getting a reader there, and the only half an element
+     * can carry.
+     *
+     * A browser puts a scrolled-to thing at the top of the scrollport, which
+     * `--chrome-inset` has already pushed down; the box's own
+     * `scroll-margin-top` is what carries it the rest of the way to the
+     * landing. So this is **the difference between the two**, which is what
+     * keeps the landing one number while the chrome above it changes height.
+     *
+     * It is declared here rather than written into the one rule that used to
+     * need it because there are four readers now, and three of them are
+     * elements this stylesheet cannot reach: a prose heading gets it from the
+     * rule below, and a reference page's two anchors and an Architecture
+     * heading get it from `PRESS_LANDING_CLASS` in `_lib/chrome.ts`. Those
+     * three sat outside the arrangement until 20 October, each with a
+     * `scroll-mt` of its own or none at all — so one act put a reader 48 pixels
+     * lower on a reference page than on a written one, and, on the thirteen-row
+     * rail of *What it costs you*, 93 pixels higher on one of the eight
+     * rendered rows than on one of the five markdown rows beside them.
+     */
+    --press-margin: calc(var(--press-landing) - var(--chrome-inset));
   }
 
   /*
@@ -512,14 +534,18 @@
     font-weight: 700;
     letter-spacing: -0.02em;
     /* A press of a contents row lands a heading at `--press-landing`, and the
-       browser gets there by adding the scrollport's inset to this margin. So
-       this is the difference between them, which keeps the landing one number
-       while the chrome above it moves — and keeps the reading line that marks
-       the row chosen against a figure that is declared rather than emergent.
-       `chrome.test.ts` reads this expression; getting it wrong is how the mark
-       sits on the section above the one a reader asked for, which has happened
-       once already. */
-    scroll-margin-top: calc(var(--press-landing) - var(--chrome-inset));
+       browser gets there by adding the scrollport's inset to this margin. The
+       difference between the two is `--press-margin`, declared once above and
+       read here — which keeps the landing one number while the chrome above it
+       moves, and keeps the reading line that marks the row chosen against a
+       figure that is declared rather than emergent. `chrome.test.ts` reads
+       this; getting it wrong is how the mark sits on the section above the one
+       a reader asked for, which has happened once already.
+
+       This rule is one of the landing's four readers and the only one it can
+       reach: it matches a heading in the prose, and everything the site
+       renders inside `.not-prose` wears `PRESS_LANDING_CLASS` instead. */
+    scroll-margin-top: var(--press-margin);
   }
 
   .prose h1:not(.not-prose *) {

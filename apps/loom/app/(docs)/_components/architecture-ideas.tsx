@@ -1,5 +1,6 @@
 import { OffSiteLink } from "./off-site-link"
 import { COURSE_HREF } from "@/app/(docs)/_lib/architecture/course"
+import { PRESS_LANDING_CLASS } from "@/app/(docs)/_lib/chrome"
 import { ARCHITECTURE_IDEAS, type ArchitectureIdea } from "@/app/(docs)/_lib/architecture/ideas"
 
 /**
@@ -65,7 +66,13 @@ const Door = ({
 
 const Idea = ({ idea }: { readonly idea: ArchitectureIdea }) => (
   <section aria-labelledby={idea.id} className="border-edge border-t pt-6 first:border-t-0 first:pt-0">
-    <h3 id={idea.id} className="text-ink text-lg font-semibold tracking-tight">
+    {/* A contents row sends a reader here, and `.not-prose` is why the
+        stylesheet's rule for a prose heading does not. `_lib/chrome.ts`
+        carries the argument; `architecture-costs.tsx` is the same case. */}
+    <h3
+      id={idea.id}
+      className={`${PRESS_LANDING_CLASS} text-ink text-lg font-semibold tracking-tight`}
+    >
       {idea.title}
     </h3>
 
