@@ -306,7 +306,7 @@ describe("the audience a door row and a funnel row belong to", () => {
  * The third reading in this subsystem to pick a page's rows out of a window by
  * a key that was missing the audience. The region map's buckets and the door's
  * arrivals were each corrected after publishing a real second form as a count
- * of rows handed in twice (0297); this is the same shape in the funnel,
+ * of rows handed in twice (0297, 0299); this is the same shape in the funnel,
  * and it is the one where the numerator and the denominator could come from
  * two different forms.
  */
@@ -489,7 +489,7 @@ describe("a window of two forms with none asked for", () => {
 
   /**
    * The door's figures are not withheld, and that is deliberate: arrivals are
-   * counted once per page view and add across forms (0297), so the
+   * counted once per page view and add across forms (0297, 0299), so the
    * deployment-wide count of readers is the one figure a refused reading can
    * still give.
    */

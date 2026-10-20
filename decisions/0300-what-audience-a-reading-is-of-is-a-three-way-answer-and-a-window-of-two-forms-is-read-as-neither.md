@@ -6,16 +6,17 @@
 
 **Section:** §4c (reader signals)
 
-> **The number skips one deliberately.** `main` carries 0298, and the next
-> number after it is held by an open pull request of this lane,
-> [#680](https://github.com/jam-overture/loom/pull/680), written and verified
-> last night. The next number free on `main` is therefore one another branch is
-> already using, and two records sharing a number is fatal
+> **The number skipped one deliberately, and the gap has since closed.** When
+> this was written `main` carried 0298 and the number after it was held by an
+> open pull request of this lane, #680, written and verified the night before.
+> The next number free on `main` was therefore one another branch was already
+> using, and two records sharing a number is fatal
 > ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)), so
-> this takes the one after that rather than the one after `main`. If #680 is
-> closed unmerged there is a hole, which is reported rather than fatal — and
-> that is also why nothing here cites #680's record by number: it is not on this
-> branch, so a citation of it would not resolve.
+> this took the one after that rather than the one after `main`.
+> [0299](0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md)
+> landed on 20 October and `main` was merged into this branch, so the two now
+> sit beside each other and the citations below name it rather than its pull
+> request.
 
 ## Context
 
@@ -33,7 +34,9 @@ the context section said they had stopped doing.** Two have since been corrected
 one at a time, each after publishing a real second population as a count of rows
 handed in twice:
 [0297](0297-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)
-for the region buckets and #680 for the door's arrivals.
+for the region buckets and
+[0299](0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md)
+for the door's arrivals.
 
 The funnel was the third, and it is the worst of the three, because it divides.
 `funnelReachOf` filtered its rows by audience only where one was named and
@@ -97,7 +100,7 @@ and a window of two forms with none asked for is read as neither.**
 
 5. **Summing the pairs instead is refused, and that is a fact about the question
    rather than caution.** Arrivals at the door are counted once per page view
-   and therefore add across forms (0297, #680), which is why the door's figures
+   and therefore add across forms (0297, 0299), which is why the door's figures
    on a refused reading are still published and are still the deployment's. A
    funnel pair is two node ids a deployment wrote down in advance, and the
    deltas an audience earns can leave one of those ends out of one form: a sum
@@ -150,12 +153,16 @@ make the same way.
 it.** Its own tests are the proof: none of them moved.
 
 **The fourth reading of this shape is `pageViewsFor`, and it is not in this
-change.** It is fixed on #680, which was written last night and is waiting to
-land; touching the same function here would hand the merge a conflict in the
-file both changes rewrite. The two compose rather than overlap — once #680 is on
-`main`, the door figures on a refused funnel reading are the sum over both forms
-rather than whichever row sorted first — and adopting `AudienceScope` there is
-filed in `FINDINGS.md` for this lane.
+change.** It was fixed in 0299, which was written the night before and was
+waiting to land while this was built; touching the same function here would have
+handed the merge a conflict in the file both changes rewrite. The two compose
+rather than overlap, and now that 0299 is merged into this branch that is
+visible rather than predicted: the door figures on a refused funnel reading are
+the sum over both forms rather than whichever row sorted first. Adopting
+`AudienceScope` in it is filed in `FINDINGS.md` for this lane, and the reason it
+is worth doing is that the four readings then answer the `mixed` case in
+writing — the door **sums** it and the other two **refuse** it, which is correct
+and should be deliberate rather than incidental.
 
 **What this does not make impossible.** A reading that never asks the question
 still cannot be caught by a type: `audienceScopeOf` has to be called. What the
@@ -164,7 +171,7 @@ handed an ambiguous window can no longer read an audience out of it.
 
 ## Alternatives considered
 
-**Sum the two forms' pairs, as 0297 and #680 sum arrivals.** Rejected, and it
+**Sum the two forms' pairs, as 0297 and 0299 sum arrivals.** Rejected, and it
 was the close call. Arrivals are counted once per page view at the door and add
 across anything (0219); two forms' page views are disjoint, so their funnel
 counts add too — within one rollup window. What breaks it is not the arithmetic

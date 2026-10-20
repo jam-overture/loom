@@ -137,7 +137,7 @@ import type { StoredFunnel } from "./tally.js"
  *
  * **Summing them instead is not available, and that is a fact about the
  * question rather than caution.** Arrivals at the door are counted once per
- * page view and therefore add across forms (0297), which is why the door's
+ * page view and therefore add across forms (0297, 0299), which is why the door's
  * figures here are the deployment's. A funnel pair is two node ids a
  * deployment wrote down, and the deltas an audience earns can leave one of
  * those ends out of one form: a sum would then put the readers who could

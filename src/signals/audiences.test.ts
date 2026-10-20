@@ -106,8 +106,8 @@ describe("byAudience", () => {
 
 /**
  * The three-way answer, which exists because `null` was two states. Two
- * readings here were corrected one at a time for treating them alike (0297)
- * and a third was still wrong, so what is tested is that each of the
+ * readings here were corrected one at a time for treating them alike (0297,
+ * 0299) and a third was still wrong, so what is tested is that each of the
  * three is reachable and that the ambiguous one is a value a caller has to
  * handle rather than one it can read an audience off.
  */

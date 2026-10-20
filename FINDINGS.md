@@ -57552,8 +57552,8 @@ as neither). `AudienceScope` in `audiences.ts` is now the three-way answer, and
 its `mixed` member carries no audience — so a reading handed an ambiguous window
 cannot read one off it. The funnel refuses the pairs, counts every row as the
 other form's, names both populations, and keeps the door's arrivals, which do
-add across forms (0297, and #680 for the door). `funnelChangeOf` refuses a
-mixed side **before**
+add across forms (0297, 0299). `funnelChangeOf` refuses a mixed side
+**before**
 pairing, because an empty side pairs cleanly and would otherwise read as a
 change that added every funnel question the deployment asks.
 
@@ -57567,8 +57567,10 @@ rows collide.
 ## 2026-10-20 — `pageViewsFor` is the fourth reading of this shape and is the one place `AudienceScope` was deliberately not adopted
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`) · **Status:** open — **nothing is wrong once #680
-lands**; this is an adoption to take afterwards, not a defect
+(`src/signals/page-views.ts`) · **Status:** open — **nothing is wrong**; this is
+an adoption, not a defect. #680 merged on 20 October and `main` is merged into
+the branch that filed this, so the reason it was deferred is gone and it is
+ready to take
 
 0300 publishes `AudienceScope` and adopts it in the two readings that refuse an
 unsplit window — `pageReadingOf` and `funnelReachOf`. The door's own reading is

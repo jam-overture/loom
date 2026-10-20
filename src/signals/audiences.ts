@@ -58,8 +58,8 @@ import type { TreeId } from "../ids.js"
  * read as neither) — and spelling them as one `null` meant a reading that
  * treated them alike compiled and was wrong only on the deployment doing
  * exactly what 0263 built. The region map's buckets were fixed for it
- * (0297) and the door's arrivals in a change waiting to land, and the third,
- * the funnel, was still taking `matching[0]`.
+ * (0297) and the door's arrivals after it (0299), and the third, the funnel,
+ * was still taking `matching[0]`.
  * {@link audienceScopeOf} returns the three-way answer and
  * {@link audienceScopeRead} reads it back off a reading that recorded it, so
  * the refusal is a branch a new reading has to write rather than a value it can
@@ -170,8 +170,8 @@ export const audiencesIn = <R extends MaybeAudienceScoped>(
  *
  * Three readings here pick a page's rows out of a window, and two of them had
  * already been fixed one at a time — the region map's buckets (0297) and the
- * door's arrivals, in a change waiting to land — each after publishing a real
- * second form as a count of rows handed in twice. The third was the funnel,
+ * door's arrivals (0299) — each after publishing a real second form as a count
+ * of rows handed in twice. The third was the funnel,
  * where the same `matching[0]` took one form's answer and reported the other's
  * as the same question asked twice. A fourth reading written tomorrow would
  * fall the same way, because nothing in the types asked it the question.
@@ -212,8 +212,8 @@ export type AudienceScope =
    * populations and picking one of them by the caller's array order, and the
    * second is the fault this type exists to make unwritable. Summing is a
    * decision per counter rather than a default: arrivals at the door are
-   * counted once per page view and therefore add (0297), and a distinct count
-   * filed against a node does not.
+   * counted once per page view and therefore add (0297, 0299), and a distinct
+   * count filed against a node does not.
    */
   | { readonly reading: "mixed"; readonly audienceId: null; readonly audiences: readonly AudienceId[] }
 
