@@ -147,8 +147,12 @@ export type ChangeSilence =
    * and the funnel comparison refuses a mixed side in the same place for the
    * same cause (0300).
    *
-   * Checked after `different-audiences` and before the view floor, because it
-   * is the **cause** of that floor and a cause names itself better than its
+   * **It cannot co-occur with `different-audiences`, so the order between the
+   * two is not observable.** `crossesAudiences` needs an audience on both
+   * sides; a mixed side has none. A side that names an audience *and* holds two
+   * in its census is `one` and not mixed, because an audience asked for always
+   * wins (0300). The order that does matter is before the view floor, because
+   * the refusal is that floor's cause and a cause names itself better than its
    * symptom does.
    */
   | "audiences-mixed"
@@ -672,9 +676,11 @@ export const readingChangeOf = (was: PageReading, now: PageReading): ReadingChan
    * floor of nought with full counters behind it, so the floor alone reports a
    * window of two forms as a window nobody read (0301).
    *
-   * Taken off the two sides' own published scope rather than recomputed, which
-   * is what `audienceScopeRead` is for — the same call the funnel comparison
-   * makes for the same state (0300).
+   * It sits below `crossesAudiences` for reading order rather than for
+   * precedence — the two states are mutually exclusive, so swapping them
+   * changes nothing. Taken off the two sides' own published scope rather than
+   * recomputed, which is what `audienceScopeRead` is for: the same call the
+   * funnel comparison makes for the same state (0300).
    */
   if (audienceScopeRead(was).reading === "mixed" || audienceScopeRead(now).reading === "mixed") {
     return { ...empty, parts, silence: "audiences-mixed" }

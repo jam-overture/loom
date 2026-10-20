@@ -643,8 +643,18 @@ describe("readingChangeOf", () => {
       ).toBe("nothing-measured")
     })
 
-    /** Two provable populations outrank one unreadable window, as two pages outrank both. */
-    it("says two audiences before it says one window held two forms", () => {
+    /**
+     * The two refusals cannot both apply, which a mutation found by surviving:
+     * swapping their order changes nothing, and the comment that said the order
+     * mattered was wrong.
+     *
+     * `crossesAudiences` needs an audience on **both** sides and a mixed side
+     * has none; a side that names one and holds two in its census is `one` and
+     * not mixed, because an audience asked for always wins (0300). So the two
+     * states partition rather than overlap, and asserting that is the real
+     * version of the precedence this file used to claim.
+     */
+    it("cannot be both refusals at once, so the two partition the window", () => {
       const unsplit = pageReadingOf(
         AFTER.tree,
         [
@@ -653,9 +663,12 @@ describe("readingChangeOf", () => {
         ],
         NOTHING_DECLARED
       )
-      const change = readingChangeOf(formOf(BEFORE, SKIERS), { ...unsplit, audienceId: RIDERS })
 
-      expect(change.silence).toBe("different-audiences")
+      /** Named, so the asking wins and the window of two is one form's reading. */
+      const named = { ...unsplit, audienceId: RIDERS }
+
+      expect(readingChangeOf(formOf(BEFORE, SKIERS), named).silence).toBe("different-audiences")
+      expect(readingChangeOf(formOf(BEFORE, SKIERS), unsplit).silence).toBe("audiences-mixed")
     })
 
     /** Two unrelated pages are not made comparable by one audience. */

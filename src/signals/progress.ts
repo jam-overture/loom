@@ -170,9 +170,10 @@ export type ReadingProgress = {
    * **It does not mean nothing was measured, and that is the second job it was
    * doing.** A window holding two forms of the page with none asked for is read
    * as neither, so every part is `unknown` and this is nought while the
-   * counters behind it are full and the door beside it has arrivals in it
-   * (0290, 0299). The two states are told apart by the census above and nowhere
-   * else, which is why it travels.
+   * counters behind it are full and the door beside it has arrivals in it, which
+   * is the page reading's refusal held against the door's sum (0290, 0299). The
+   * two states are told apart by the census above and nowhere else, which is
+   * why it travels.
    */
   readonly views: number
   /**

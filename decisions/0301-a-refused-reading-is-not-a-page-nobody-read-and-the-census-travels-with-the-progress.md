@@ -73,10 +73,16 @@ and **checked before the view floor**, because the refusal is that floor's cause
 and a cause names itself better than its symptom. The parts census still stands,
 for `nothing-measured`'s reason: what a change did to the tree is read off the
 two trees and off no counter, so a reading may say *one band was added, and which
-readers these counters are of was not said*. It is checked **after**
-`different-audiences`, which is the provable fault: two sides naming two
-audiences is a comparison across two known populations, and one side naming none
-while holding two is a side with nothing in it.
+readers these counters are of was not said*.
+
+**It cannot co-occur with `different-audiences`, so the order between those two
+is not a decision.** `crossesAudiences` needs an audience on both sides and a
+mixed side has none; a side that names one *and* holds two in its census is
+`one` and not mixed, because an audience asked for always wins (0300). The two
+states partition the window. The guard that **is** ordered is the view floor —
+and this was found by a mutation that moved the mixed check above
+`crossesAudiences` and **survived**, which is what a first draft of this record
+claiming the precedence mattered would have been wrong about.
 
 **`RankStanding` and `MovementStanding` gain `unsplit`**, mapped in the silences
 table to the condition the funnel comparison brought yesterday,

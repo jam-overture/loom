@@ -2733,9 +2733,11 @@ window, measured on fixtures of a hundred skiers and nine hundred riders.
   `audienceId` alone is `null` both for a window that named one audience and for
   one that named two.
 - **`ChangeSilence` gains `audiences-mixed`**, checked **before** the view floor
-  because the refusal is that floor's cause, and after `different-audiences`
-  because two provable populations outrank one unreadable window. The parts
-  census stands, as it does for `nothing-measured`.
+  because the refusal is that floor's cause. The parts census stands, as it does
+  for `nothing-measured`. It cannot co-occur with `different-audiences` — that
+  needs an audience on both sides and a mixed side has none — so the two
+  partition the window and their order is not a decision, which a surviving
+  mutation is what established.
 - **`RankStanding` and `MovementStanding` gain `unsplit`**, mapped to
   `two-forms-unsplit` — the condition the funnel comparison brought in §42, now
   reported by a **page** as well as by a pair, which the silences table holds as

@@ -57830,3 +57830,45 @@ days of a verdict that does not survive the set growing: yesterday's was lesson
 of *what was true when written* expressed as derivations from something that
 keeps moving. A test that holds provenance should state it, not infer it from an
 order.
+
+---
+## 2026-10-20 — a guard ordering claimed as a decision, twice in two days, where a single window cannot reach both guards
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**fixed on filing** in `signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`
+— the prose was corrected and the test that was supposed to prove the ordering
+was replaced
+
+0301 adds `audiences-mixed` to `ChangeSilence`, below `crossesAudiences` in
+`readingChangeOf`. The member's doc comment, the record and the plan all said it
+is checked **after** `different-audiences` *because two provable populations
+outrank one unreadable window*.
+
+**That is not a decision, because the two states cannot both apply.**
+`crossesAudiences` is true only where both sides name an audience and the two
+differ; a mixed side names none. A side that names one **and** holds two forms in
+its census reads as `one`, because an audience asked for always wins (0300). So
+the two partition the window, and swapping the guards changes nothing on any
+input.
+
+**Found by a mutation that survived.** The mutation moved the mixed check above
+`crossesAudiences` and every test passed. The test written for that precedence
+was passing for the wrong reason: its fixture named an audience on the mixed
+side, which made that side `one`, so the mutation was a no-op against it. It is
+replaced by one asserting the partition — a named side is `different-audiences`
+and an unnamed one is `audiences-mixed`, from the same window of counters — which
+is the true fact in the neighbourhood.
+
+**This is the second instance in two days.** 0300 claimed that the funnel
+comparison's refusal happening *before* the pairing mattered; it does not,
+because `refusing()` discards the pairing's output whatever order it is reached
+in, and the mutation meant to prove it inserted unreachable code and survived.
+Both times the mutation that was supposed to prove an ordering was the one that
+survived, and both times the real content was elsewhere.
+
+**The rule, for this lane.** A guard ordering is a decision only if **a single
+input can reach both guards**. Write the fixture that reaches both before writing
+the sentence that ranks them; if you cannot write it, the ordering is reading
+order and the comment should say so. The orderings in this change that *are* real
+— the refusal before the view floor, in two readings — were each caught three
+times, by fixtures where one window reaches both.
