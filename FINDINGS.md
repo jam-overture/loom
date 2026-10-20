@@ -57177,8 +57177,20 @@ arrivals of one country, named rather than withheld twice.
 ## 2026-10-19 — `pageViewsFor` picks one form's door row for a revision served in two, and reports the other as a duplicate
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`) · **Status:** open — **the same fault as the entry
-above, in a different reading**, and it is not a key fix
+(`src/signals/page-views.ts`) · **Status:** **closed by
+`signals-41-two-forms-arrivals-are-one-door`** (0299) — taken with the
+arithmetic this entry named, and it was additive as predicted in three of the
+four figures: `opened` and `appearances` add, `inflation` is recomputed from the
+summed drift over the summed openings, and **`drift` and `pending` are summed
+per row rather than taken from the two sums**, which is the one place the
+prediction *their difference and therefore adds* would have been wrong — a form
+mid-collection and a form with straddles net to a revision with neither. Two
+fields the entry did not name needed a rule as well, because a reading over two
+rows cannot carry one row's timestamps: `updatedAt` is the newest of them, and
+`foldedAt` is the oldest fold attested by a row that still has openings pending,
+which makes a summed door stalled exactly when one of its forms is. Original
+status: open — **the same fault as the entry above, in a different reading**,
+and it is not a key fix
 
 The entry above is `regionReadingFor` keying a dedup by the region where the
 store keys its rows by the region and the audience. `pageViewsFor` has the same
@@ -57246,6 +57258,36 @@ deployment-wide readership answer this reading exists to give.
 Nothing needs a new call: both fields are on objects the screen already holds.
 
 ---
+## 2026-10-19 — a door read whole over two forms is a sum of them, and no screen says so
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one census on one reading**, and the third of these (0295, 0297, 0299)
+
+0299 puts `audiences` on `RevisionPageViews` and makes `audienceId` three-valued
+there, so a door reading now says which forms' arrivals it added. A screen that
+draws neither cannot tell the three states apart, and they are the same three
+0297 filed for the region map:
+
+- **One name, and `audienceId` naming it.** One form's door. What every
+  deployment serving one form of a page always sees, the name being
+  `aud_everyone` there.
+- **More than one name, with `audienceId` null.** *This arrival count is the sum
+  of the forms you serve of this page.* **Not a fault and not a refusal**: a
+  reader who arrived arrived once whichever form they were served. The caption
+  matters because every share on the screen beside it is taken of this number,
+  so a reader of the screen should know whose arrivals the denominator is.
+- **`[]`.** Rows that named no audience, which is a window no store produced —
+  the migration files pre-0284 rows under `aud_everyone` — so in practice a
+  hand-built window or a fixture. The honest caption is *nothing here says*.
+
+**What must not be drawn:** a sum over forms is not `audiences-mixed`. That
+fault is a *page* reading's, where adding two forms' node counters is one number
+about two pages (0290); the door is the one counter where the sum is the answer
+(0297 clause 2, 0299 clause 2). A screen that greyed out a deployment-wide
+arrival count would be hiding the figure the portal exists to show.
+
+Nothing needs a new call: the field is on the reading every one of those screens
+already holds, through `pageReachOf`, `funnelReachOf` or `doorOf`'s caller.
 ## 2026-10-19 — the site says it is counting its readers on a deployment that has not minted the key it counts them with
 
 **Filed by:** portal steering (unit 4b, [0298](decisions/0298-a-projects-ingest-key-is-public-and-names-its-application-and-the-door-files-nothing-it-cannot-name.md)) ·
@@ -57270,3 +57312,39 @@ environment lookup, and every caller of it (`render.ts`, `stored.ts`,
 `layout.tsx`) has to take it as an answer handed down rather than asked again.
 `stored.ts` already names the related gap of a disclosure stored into a tree
 going stale when the setting changes, and the two are probably one fix.
+
+---
+## 2026-10-19 — a tenth counted reading of the mangling: 100 clean, 160 and 189 mangled, three links of one shape in one body
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 17 October entry *nine counted readings in one body* and the
+15 October entry on the bracket · **Status:** open — **a reading, not a claim**;
+nothing here contradicts the open entries and no remedy changed
+
+#680's first body carried three markdown links of **identical shape** —
+`https://github.com/jam-overture/loom/blob/<branch>/<path>` on one branch, so
+the only thing that differed between them was the path. The body came back with
+one intact and two mangled, wrapped in the `` ``''…''`` `` and
+` ````''''…''''```` ` quote runs the earlier readings describe:
+
+| Characters | Path | Outcome |
+| --- | --- | --- |
+| 100 | `docs/signals.md` | clean |
+| 160 | `reports/2026-10-19-signals-the-door-a-deployment-wide-reading-divides-by.md` | **mangled** |
+| 189 | `decisions/0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md` | **mangled** |
+
+**Why it is worth the three lines.** It is the cleanest controlled reading so
+far: one body, one branch, one link shape, three lengths, and the split falls
+between 100 and 160 — consistent with the open bracket (clean at 152, mangled at
+155) and with the quote-run count rising with length, since the 189 took four
+backticks and four quotes where the 160 took two of each. It adds no new bound
+and it contradicts nothing, which is the point of recording it: the structural
+hypothesis now has a reading where **nothing but length varied**.
+
+**The remedy is unchanged and cost one call.** The body was corrected in the same
+turn, with the two long links written as plain paths. This lane's own branch
+names and report slugs are long enough that every signals report link will sit
+past the bracket, so from here I will write the report and record as paths rather
+than links in a pull request body, and keep links for anything under about 120
+characters.
+

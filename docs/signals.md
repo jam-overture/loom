@@ -2585,6 +2585,53 @@ form's door and reports the other as a duplicate — the same fault in a
 different reading, and summing two door rows is a change to `pageViewReadingOf`
 rather than to a key; and no screen reads the census, which is `Loom portal`'s.
 
+### 41. The door a deployment-wide reading divides by · `Loom signals` · **done, 19 October**
+
+§40 fixed the region map's dedup and filed the same fault one counter along.
+`pageViewsFor` matched a revision's door rows and took the **first** of them, so
+a reading that named no audience — the deployment-wide question — was answered
+with one form's `opened` and the other form's reported as a row handed in twice.
+It matters more here than in the map, because the door is the **denominator**
+six readings divide by: a page's reach, a funnel's reach, the three library
+readings through `doorOf`, and `inflationFor`, whose job is to hand one
+revision's straddle rate to a pace correction.
+
+**Done**
+([0299](../decisions/0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md)):
+
+- **The dedup key is the audience**, which is what the store keeps one row per
+  (0284), and the kept rows are **added**. Arrivals are people: a reader who
+  arrived arrived once whichever form they were served, so the sum is one
+  deployment's arrivals — 0297 clause 2, one counter along, and still the
+  opposite of a page reading (0290). A second row of the *same* form is a window
+  handed in twice, is still dropped and is still counted (0158).
+- **The arithmetic is the reading's own.** `summedOf` hands the rows to
+  `pageViewReadingOf` rather than adding them again, so `drift` and `pending` are
+  summed per row and never taken from the two sums — a form mid-collection would
+  otherwise cancel another form's straddles and report a page as more exact than
+  any part of it is — and `inflation` is recomputed from the summed drift over
+  the summed openings rather than averaged over the forms.
+- **`RevisionPageViews.audiences`**, the census in the three-valued shape §40
+  gave the region map, and **`audienceId` is now `AudienceId | null`**: what the
+  asking named, never what the rows turned out to say. The type therefore stops
+  extending `StoredPageViews`, because a reading over two rows cannot carry one
+  row's audience.
+- **A stall is judged per form without `health.ts` learning about forms.**
+  `foldedAt` on a sum is the fold the reading waits on — the oldest attested by a
+  row that still has openings pending — so a summed door is stalled exactly when
+  one of its forms is. The newest would let a busy form vouch for a lagging one;
+  the oldest over every row would let a quiet form with nothing pending invent a
+  stall.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the thirtieth thing taken out of what this subsystem already knows.
+The broadcaster was not touched and is byte-identical at 6,477 bytes minified.
+
+**What is left and is filed:** no screen reads `audiences` on a door, so a
+deployment-wide figure that is a sum over forms is drawn exactly like one
+form's — `Loom portal`'s, and the third such finding (0295, 0297, 0299).
+
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
