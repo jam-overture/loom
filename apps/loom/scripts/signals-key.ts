@@ -11,7 +11,7 @@ import postgres from "postgres"
 import { postgresApplicationStore } from "@jam-overture/loom/postgres"
 import { describeApplicationStoreError, projectIdSchema } from "@jam-overture/loom/store"
 
-import { INGEST_KEY_PARAMETER, mintIngestKey } from "../app/_lib/reader-signals/keys"
+import { INGEST_KEY_PARAMETER, issueIngestKey } from "../app/_lib/reader-signals/keys"
 import { ensureIngestKeysSchema, postgresIngestKeyStore } from "../app/_lib/reader-signals/keys-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
@@ -19,11 +19,13 @@ import { resolveConnectionString } from "../app/_lib/app/connection"
  * Mints a project's ingest key, ending the one it held before
  * ([0298](../../../decisions/0298-a-projects-ingest-key-is-public-and-names-its-application-and-the-door-files-nothing-it-cannot-name.md)).
  *
- * Registration mints one when unit 4c gives it a screen to be shown on. Until
- * then this is how a project gets one, and afterwards it is how a key that
- * leaked into somebody else's site is replaced — on the terms
- * `portal:account` takes: whoever has the database already has every
- * authority this grants, so it asserts none of its own.
+ * Registration mints one, and a project's owner can replace it from the
+ * project's *Connect your site* screen. This is for everything else: the
+ * marketing site's project, which nobody registered, a project registered
+ * before keys were minted at registration, and a deployment whose portal
+ * nobody can sign in to — on the terms `portal:account` takes: whoever has the
+ * database already has every authority this grants, so it asserts none of its
+ * own.
  *
  *     pnpm signals:key prj_a1b2c3
  *
@@ -114,13 +116,14 @@ try {
     process.exit(1)
   }
 
-  const key = mintIngestKey()
-  const written = await postgresIngestKeyStore(db).put(application.applicationId, key, Date.now())
+  const issued = await issueIngestKey(postgresIngestKeyStore(db))(application.applicationId, Date.now())
 
-  if (!written.ok) {
-    console.error(`loom: ${written.error.detail}`)
+  if (!issued.ok) {
+    console.error(`loom: ${issued.error.detail}`)
     process.exit(1)
   }
+
+  const key = issued.value
 
   console.log(
     `loom: ${project.data} has a new key, and the one it held before has stopped working.\n\n` +

@@ -72,6 +72,7 @@ import { mintViewKey, type RandomBytes } from "./view.js"
  * import line for the two things that are always used together.
  */
 export {
+  BATCH_CONTENT_TYPE,
   DEFAULT_READER_SIGNAL_PATH,
   deliverReaderSignals,
   type DeliverOptions,

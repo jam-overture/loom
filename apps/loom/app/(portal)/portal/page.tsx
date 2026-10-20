@@ -49,7 +49,9 @@ import { ClosingControls } from "./_components/closing-controls"
  * keeps a window, and nothing does.
  *
  * So the card says what is true: the project, who you are in it, and the
- * applications under it with the ids and hosts they really carry.
+ * applications under it with the ids and hosts they really carry — and, for an
+ * open project, the way to its *Connect your site* screen, which is the first
+ * screen under a project that reads a real one.
  *
  * ## Closed projects are below, not hidden
  *
@@ -102,6 +104,15 @@ const ProjectCard = ({ group, closed }: { group: ProjectGroup; closed?: boolean 
             </li>
           ))}
         </ul>
+      )}
+
+      {closed !== true && group.applications.length > 0 && (
+        <Link
+          href={`/portal/${group.project.projectId}/connect`}
+          className="text-ink border-edge-subtle border-t pt-3 text-sm no-underline hover:underline"
+        >
+          Connect your site →
+        </Link>
       )}
 
       {mayAdminister(group.role) && (

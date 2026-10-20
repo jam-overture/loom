@@ -478,13 +478,17 @@ broadcastReaderSignals(root, { send: deliverReaderSignals() })
 
 `deliverReaderSignals` posts to `/api/reader-signals` — `sendBeacon` where the
 browser has it, so the last batch of a page view survives the page closing, and a
-`keepalive` fetch where it does not. Pass `{ url }` to send somewhere else; note
-that a beacon cannot preflight, so a cross-origin URL needs CORS on the far end
-or the browser refuses the delivery before it is sent.
+`keepalive` fetch where it does not. Pass `{ url }` to send somewhere else. A
+batch is labelled `text/plain`, which a browser sends across origins without a
+preflight, so a page on another site reaches this deployment with no CORS set up
+on either side.
 
 **Whose readers they are.** A project's pages post with its key,
 `/api/reader-signals?key=lk_…`, and every batch is filed under the project the
-key names (0298). Mint one with:
+key names (0298). Registering a project in the portal mints its key, and the
+project's **Connect your site** screen (`/portal/<project>/connect`) shows it in
+the snippet to paste, with a button for an owner to replace it. For a project
+nobody registered through the portal, mint one with:
 
 ```bash
 pnpm signals:key prj_a1b2c3
