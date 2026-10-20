@@ -18,6 +18,7 @@ import {
   type PageReading,
   type PartDeclarations,
   type StoredFunnel,
+  type StoredTally,
   type StoredPageViews,
 } from "./index.js"
 
@@ -178,12 +179,64 @@ describe("the audience a door row and a funnel row belong to", () => {
     expect(picked.foreign).toBe(0)
   })
 
-  it("takes every form's row where the reading names no audience, as it always has", () => {
+  /**
+   * The undercount 0299 fixed. A deployment-wide asking took whichever form's
+   * row came first in the caller's array and reported the other form's
+   * arrivals as a row handed in twice — 400 views published where 404 arrived,
+   * with the loss counted as a duplicate nobody reads as an undercount, which
+   * is the same fault 0297 found in the region map beside it.
+   */
+  it("adds every form's arrivals where the asking names no audience", () => {
     const picked = pageViewsFor(WHERE, [inAudience(RIDERS, views(400, 400)), views(4, 5)])
 
-    expect(picked.measured?.opened).toBe(400)
+    expect(picked.measured?.opened).toBe(404)
+    expect(picked.measured?.appearances).toBe(405)
     expect(picked.otherAudience).toBe(0)
-    expect(picked.duplicated).toBe(1)
+    expect(picked.duplicated).toBe(0)
+  })
+
+  it("names the forms it added and names no audience of its own", () => {
+    const picked = pageViewsFor(WHERE, [inAudience(RIDERS, views(400, 400)), views(4, 5)])
+
+    expect(picked.measured?.audiences).toEqual([DEFAULT_AUDIENCE_ID, RIDERS])
+    expect(picked.measured?.audienceId).toBeNull()
+  })
+
+  /**
+   * One name on the rows is not one population behind them, and the asking is
+   * what a reading is of (0297 clause 3, 0299). A window holding one form today
+   * is not a reading of that form.
+   */
+  it("names the one form in it without claiming to be a reading of it", () => {
+    const picked = pageViewsFor(WHERE, [views(4, 5)])
+
+    expect(picked.measured?.audiences).toEqual([DEFAULT_AUDIENCE_ID])
+    expect(picked.measured?.audienceId).toBeNull()
+  })
+
+  it("is a reading of the form the asking named, and says so", () => {
+    const picked = pageViewsFor(SKIER_PAGE, [
+      inAudience(RIDERS, views(400, 400)),
+      inAudience(SKIERS, views(4, 5)),
+    ])
+
+    expect(picked.measured?.audienceId).toBe(SKIERS)
+    expect(picked.measured?.audiences).toEqual([SKIERS])
+  })
+
+  /**
+   * The case that makes the sum safe to take. A store keeps one door row per
+   * revision per audience, so two rows of one form can only come from a caller
+   * concatenating two reads of running totals — and adding those would double
+   * arrivals permanently (0158).
+   */
+  it("counts each form's door once however many times the window is handed in", () => {
+    const window = [inAudience(RIDERS, views(400, 400)), views(4, 5)]
+    const picked = pageViewsFor(WHERE, [...window, ...window])
+
+    expect(picked.measured?.opened).toBe(404)
+    expect(picked.measured?.appearances).toBe(405)
+    expect(picked.duplicated).toBe(2)
   })
 
   it("reads one form's funnel answer and counts the other form's apart from it", () => {
@@ -246,6 +299,220 @@ describe("the audience a door row and a funnel row belong to", () => {
 
     expect(reach.foreignPairs).toBe(1)
     expect(reach.otherAudiencePairs).toBe(0)
+  })
+})
+
+/**
+ * The third reading in this subsystem to pick a page's rows out of a window by
+ * a key that was missing the audience. The region map's buckets and the door's
+ * arrivals were each corrected after publishing a real second form as a count
+ * of rows handed in twice (0297); this is the same shape in the funnel,
+ * and it is the one where the numerator and the denominator could come from
+ * two different forms.
+ */
+describe("a window of two forms with none asked for", () => {
+  const inAudience = <R extends { readonly audienceId: typeof SKIERS }>(
+    audienceId: typeof SKIERS,
+    row: R
+  ): R => ({ ...row, audienceId })
+
+  const tally = (audienceId: typeof SKIERS, node: string): StoredTally => ({
+    audienceId,
+    treeId: TREE,
+    revision: 1,
+    nodeId: nodeId(node),
+    type: primitiveType("loom.section"),
+    views: 10,
+    reached: 10,
+    engaged: 0,
+    dwellMs: 0,
+    activations: 0,
+    opens: 0,
+    closes: 0,
+    completions: 0,
+    updatedAt: AT,
+  })
+
+  /** A reading `pageReadingOf` read as neither, which is 0290 clause 3's state. */
+  const MIXED_PAGE = pageReadingOf(
+    { treeId: TREE, schemaVersion: TREE_SCHEMA_VERSION, revision: 1, root: PAGE },
+    [tally(SKIERS, "a"), tally(RIDERS, "a")],
+    NOTHING_DECLARED
+  )
+
+  it("is a reading of neither population, so no pair is read", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(SKIERS, views(100, 100)), inAudience(RIDERS, views(1000, 1000))]
+    )
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.audienceId).toBeNull()
+    expect(reach.audiences).toEqual([RIDERS, SKIERS])
+    expect(reach.otherAudiencePairs).toBe(2)
+  })
+
+  /**
+   * The number that made the fault invisible. A second population's answer in
+   * `duplicatedPairs` is the one figure in this reading nobody reads as an
+   * undercount, and a count that was never added cannot be noticed (0158).
+   */
+  it("counts neither form's answer as the same question handed in twice", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.duplicatedPairs).toBe(0)
+  })
+
+  /**
+   * The sharpest version, and the reason this is not merely an undercount: the
+   * funnel rows and the door rows are two arrays, each picked from by its own
+   * first element, so one form's `reached` was published over the other form's
+   * appearances. Forty in a hundred and four hundred in a thousand are both
+   * forty per cent; the reading said four tenths of a per cent.
+   */
+  it("does not divide one form's reach by the other form's arrivals", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(RIDERS, views(1000, 1000)), inAudience(SKIERS, views(10, 10))]
+    )
+
+    expect(reach.pairs.map((pair) => pair.entry.share)).toEqual([])
+  })
+
+  /**
+   * The ambiguity is of the window and not of one list in it. A caller holding
+   * a reading of one form and funnel rows of two is as unable to say whose
+   * answer it is as the reverse, and only the reverse was reachable through the
+   * reading's own census.
+   */
+  it("is refused where the funnel rows name two forms and the reading named none", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [views(100, 100)]
+    )
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.audiences).toEqual([RIDERS, SKIERS])
+    expect(reach.otherAudiencePairs).toBe(2)
+    expect(reach.duplicatedPairs).toBe(0)
+  })
+
+  it("is refused where the reading names two forms and the funnel rows name one", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.otherAudiencePairs).toBe(1)
+  })
+
+  /**
+   * The asking is what resolves it, and it resolves it whichever list the
+   * second form is in. This is the behaviour 0290 clause 4 gave the three
+   * joins, and it is unchanged.
+   */
+  it("reads one form where the reading names it, with the other counted apart", () => {
+    const skiers = pageReadingOf(
+      { treeId: TREE, schemaVersion: TREE_SCHEMA_VERSION, revision: 1, root: PAGE },
+      [tally(SKIERS, "a"), tally(RIDERS, "a")],
+      NOTHING_DECLARED,
+      SKIERS
+    )
+
+    const reach = funnelReachOf(
+      skiers,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2)), inAudience(RIDERS, funnel("a", "b", 400, 200))],
+      [inAudience(SKIERS, views(10, 10)), inAudience(RIDERS, views(1000, 1000))]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.pairs[0]?.reached).toBe(4)
+    expect(reach.opened).toBe(10)
+    expect(reach.audienceId).toBe(SKIERS)
+    expect(reach.otherAudiencePairs).toBe(1)
+    expect(reach.duplicatedPairs).toBe(0)
+  })
+
+  /**
+   * The guard that has to survive the refusal: one population handing in one
+   * pair twice is still one pair, and adding the second would double a total
+   * that is already one (0158).
+   */
+  it("still drops a second row for a pair one population already answered", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [funnel("a", "b", 40, 10), funnel("a", "b", 40, 10)],
+      [views(100, 100)]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.pairs[0]?.reached).toBe(40)
+    expect(reach.duplicatedPairs).toBe(1)
+    expect(reach.otherAudiencePairs).toBe(0)
+  })
+
+  it("names the one population a window of one form holds, with nothing asked for", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [inAudience(SKIERS, funnel("a", "b", 40, 10))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.pairs).toHaveLength(1)
+    expect(reach.audiences).toEqual([SKIERS])
+    expect(reach.audienceId).toBeNull()
+  })
+
+  /**
+   * `StoredFunnel` names an audience by construction, so a window of real rows
+   * always names at least one and `[]` here means the revision had no funnel
+   * row at all. The census is still the pair of fields a surface reads: one
+   * member with nothing asked for is the ordinary deployment, and it is why
+   * `audiences` alone is not the refusal.
+   */
+  it("names no population where the revision has no funnel row and the reading named none", () => {
+    const reach = funnelReachOf(WHERE, [], [views(100, 100)])
+
+    expect(reach.pairs).toEqual([])
+    expect(reach.audiences).toEqual([])
+    expect(reach.audienceId).toBeNull()
+  })
+
+  /**
+   * The door's figures are not withheld, and that is deliberate: arrivals are
+   * counted once per page view and add across forms (0297), so the
+   * deployment-wide count of readers is the one figure a refused reading can
+   * still give.
+   */
+  it("keeps the arrivals it was read against, which are the deployment's", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(SKIERS, funnel("a", "b", 4, 2))],
+      [inAudience(SKIERS, views(10, 10))]
+    )
+
+    expect(reach.opened).toBeGreaterThan(0)
+  })
+
+  it("counts another revision's row as foreign before it is anybody's audience", () => {
+    const reach = funnelReachOf(
+      MIXED_PAGE,
+      [inAudience(RIDERS, funnel("a", "b", 9, 9, { treeId: TREE, revision: 7 }))],
+      [inAudience(SKIERS, views(100, 100))]
+    )
+
+    expect(reach.foreignPairs).toBe(1)
+    expect(reach.otherAudiencePairs).toBe(0)
+    expect(reach.pairs).toEqual([])
   })
 })
 
@@ -772,5 +1039,106 @@ describe("the stages as a closed set", () => {
     for (const stage of FUNNEL_STAGES) expect(describeFunnelStage(stage)).not.toBe("")
 
     expect(FUNNEL_STAGES).toHaveLength(2)
+  })
+})
+
+/**
+ * A door read whole over two forms, where the arithmetic is the part that can
+ * be got wrong without anything failing (0299).
+ *
+ * Each of these is a figure that comes out right when it is summed per row and
+ * wrong when it is taken from the two sums — which is the rule
+ * `pageViewReadingOf` already states for revisions, holding for forms of one
+ * revision for the same reason.
+ */
+describe("the arithmetic of a door summed over two forms", () => {
+  const inAudience = (audienceId: typeof SKIERS, row: StoredPageViews): StoredPageViews => ({
+    ...row,
+    audienceId,
+  })
+
+  /**
+   * The netting this subsystem must never do. One form is mid-collection and
+   * the other has straddles; subtracting in the aggregate makes the page look
+   * exactly measured, which is the one thing neither form is.
+   */
+  it("keeps a form's pending openings and another form's straddles apart", () => {
+    const picked = pageViewsFor(WHERE, [
+      inAudience(SKIERS, views(10, 4)),
+      inAudience(RIDERS, views(4, 10)),
+    ])
+
+    expect(picked.measured?.opened).toBe(14)
+    expect(picked.measured?.appearances).toBe(14)
+    expect(picked.measured?.pending).toBe(6)
+    expect(picked.measured?.drift).toBe(6)
+  })
+
+  /** A ratio is recomputed from the sums and never averaged over the forms. */
+  it("takes inflation from the summed drift and the summed openings", () => {
+    const picked = pageViewsFor(WHERE, [
+      inAudience(SKIERS, views(100, 200)),
+      inAudience(RIDERS, views(300, 300)),
+    ])
+
+    expect(picked.measured?.drift).toBe(100)
+    expect(picked.measured?.inflation).toBe(0.25)
+    expect(inflationFor(WHERE, [
+      inAudience(SKIERS, views(100, 200)),
+      inAudience(RIDERS, views(300, 300)),
+    ])).toBe(0.25)
+  })
+
+  it("says the number last moved when the busiest form last moved it", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 10)), updatedAt: "2026-10-01T00:00:00.000Z" },
+      { ...inAudience(RIDERS, views(10, 10)), updatedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.updatedAt).toBe("2026-10-05T09:00:00.000Z")
+  })
+
+  /**
+   * The fold a reading waits on is the oldest one under it, so that a fold
+   * which ran a minute ago on a busy form cannot vouch for a form whose
+   * openings have been waiting a day.
+   */
+  it("waits on the oldest fold of the forms with openings pending", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 4)), foldedAt: "2026-10-01T00:00:00.000Z" },
+      { ...inAudience(RIDERS, views(10, 4)), foldedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.foldedAt).toBe("2026-10-01T00:00:00.000Z")
+  })
+
+  /**
+   * And a quiet form cannot invent a stall. Nothing is waiting on the fold that
+   * has not run in days, because that form's openings are all folded.
+   */
+  it("ignores the old fold of a form with nothing pending", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 10)), foldedAt: "2026-10-01T00:00:00.000Z" },
+      { ...inAudience(RIDERS, views(10, 4)), foldedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.pending).toBe(6)
+    expect(picked.measured?.foldedAt).toBe("2026-10-05T09:00:00.000Z")
+  })
+
+  it("attests no fold where neither form's row says anything", () => {
+    const picked = pageViewsFor(WHERE, [inAudience(SKIERS, views(10, 4)), views(4, 10)])
+
+    expect(picked.measured?.foldedAt).toBeUndefined()
+  })
+
+  /** An instant nothing can read attests no fold (0274), so it is not the oldest. */
+  it("skips a fold instant that does not parse", () => {
+    const picked = pageViewsFor(WHERE, [
+      { ...inAudience(SKIERS, views(10, 4)), foldedAt: "whenever" },
+      { ...inAudience(RIDERS, views(10, 4)), foldedAt: "2026-10-05T09:00:00.000Z" },
+    ])
+
+    expect(picked.measured?.foldedAt).toBe("2026-10-05T09:00:00.000Z")
   })
 })

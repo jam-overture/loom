@@ -57200,8 +57200,20 @@ arrivals of one country, named rather than withheld twice.
 ## 2026-10-19 — `pageViewsFor` picks one form's door row for a revision served in two, and reports the other as a duplicate
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`) · **Status:** open — **the same fault as the entry
-above, in a different reading**, and it is not a key fix
+(`src/signals/page-views.ts`) · **Status:** **closed by
+`signals-41-two-forms-arrivals-are-one-door`** (0299) — taken with the
+arithmetic this entry named, and it was additive as predicted in three of the
+four figures: `opened` and `appearances` add, `inflation` is recomputed from the
+summed drift over the summed openings, and **`drift` and `pending` are summed
+per row rather than taken from the two sums**, which is the one place the
+prediction *their difference and therefore adds* would have been wrong — a form
+mid-collection and a form with straddles net to a revision with neither. Two
+fields the entry did not name needed a rule as well, because a reading over two
+rows cannot carry one row's timestamps: `updatedAt` is the newest of them, and
+`foldedAt` is the oldest fold attested by a row that still has openings pending,
+which makes a summed door stalled exactly when one of its forms is. Original
+status: open — **the same fault as the entry above, in a different reading**,
+and it is not a key fix
 
 The entry above is `regionReadingFor` keying a dedup by the region where the
 store keys its rows by the region and the audience. `pageViewsFor` has the same
@@ -57269,10 +57281,44 @@ deployment-wide readership answer this reading exists to give.
 Nothing needs a new call: both fields are on objects the screen already holds.
 
 ---
+## 2026-10-19 — a door read whole over two forms is a sum of them, and no screen says so
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one census on one reading**, and the third of these (0295, 0297, 0299)
+
+0299 puts `audiences` on `RevisionPageViews` and makes `audienceId` three-valued
+there, so a door reading now says which forms' arrivals it added. A screen that
+draws neither cannot tell the three states apart, and they are the same three
+0297 filed for the region map:
+
+- **One name, and `audienceId` naming it.** One form's door. What every
+  deployment serving one form of a page always sees, the name being
+  `aud_everyone` there.
+- **More than one name, with `audienceId` null.** *This arrival count is the sum
+  of the forms you serve of this page.* **Not a fault and not a refusal**: a
+  reader who arrived arrived once whichever form they were served. The caption
+  matters because every share on the screen beside it is taken of this number,
+  so a reader of the screen should know whose arrivals the denominator is.
+- **`[]`.** Rows that named no audience, which is a window no store produced —
+  the migration files pre-0284 rows under `aud_everyone` — so in practice a
+  hand-built window or a fixture. The honest caption is *nothing here says*.
+
+**What must not be drawn:** a sum over forms is not `audiences-mixed`. That
+fault is a *page* reading's, where adding two forms' node counters is one number
+about two pages (0290); the door is the one counter where the sum is the answer
+(0297 clause 2, 0299 clause 2). A screen that greyed out a deployment-wide
+arrival count would be hiding the figure the portal exists to show.
+
+Nothing needs a new call: the field is on the reading every one of those screens
+already holds, through `pageReachOf`, `funnelReachOf` or `doorOf`'s caller.
 ## 2026-10-19 — the site says it is counting its readers on a deployment that has not minted the key it counts them with
 
 **Filed by:** portal steering (unit 4b, [0298](decisions/0298-a-projects-ingest-key-is-public-and-names-its-application-and-the-door-files-nothing-it-cannot-name.md)) ·
 **Owned by:** `Loom marketing` (`app/(marketing)/_lib/readers/counting.ts`) ·
+**Status:** **closed by `marketing-11-addressed-with-nothing-listening`** —
+`readersCountedHere` is the switch and a key, both callers read one function,
+and the half about the words was already gone. Original status below.
+
 **Status:** open — nothing is broken on a deployment that has run
 `pnpm signals:key prj_default`
 
@@ -57359,3 +57405,268 @@ tool it belongs in is that lane's. 2 is this lane's fallback if 1 is unwelcome,
 and is worth less than it looks. Either way the check this entry is about is
 already written and passing — what is open is the half of the class it cannot
 see.
+## 2026-10-20 — `counting` is handed to the chrome of every page and read by nothing, and the test written to catch exactly that cannot see it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/chrome.ts`, `_lib/served.ts`, and the six test files that
+cross the dimension) · **Status:** open — nothing is broken, no test is failing,
+and the pages are provably identical either way
+
+`ChromeContext` carries a `counting` boolean. Nothing in `chrome.ts` reads it.
+Stripping the comments out of that file and looking for a property access finds
+no `.counting` anywhere in the code, and it has been that way since
+**12 October**, when the maintainer had the footer's disclosure taken off the
+site whether it is counting or not.
+
+So the field is still threaded: `renderSitePage` works the answer out,
+`PageContext` carries it, `home.ts` spreads it into a `ChromeContext`, and
+there the trail stops.
+
+### Why `handed.test.ts` passes
+
+That file exists for this exact shape — *a context field is a promise that some
+page reads it* — and it was written after `trail` survived a fortnight as a
+field nobody read. It passes here, and the reason is worth more than the
+instance.
+
+It looks for `\.counting\b` in the page builders, `chrome.ts` and
+`requested.ts`, with comments stripped. `home.ts` line 1096 is
+`counting: context.counting === true`, which matches. The test's own docblock
+anticipates the opposite case and says so:
+
+> *"A field consumed only by being spread onward is not matched and is not meant
+> to be: the spread hands it to something, and that something names it or nobody
+> does."*
+
+**A named hand-off is not a spread, so it counts as a read** — and what it hands
+to is the one file in the sweep that does not name the field. One reader is
+enough for the rule, the reader is a courier, and the recipient is checked by
+the same pass that already accepted the courier.
+
+### What it costs, measured
+
+`served.ts` crosses `DEPLOYMENTS = [false, true]` into every sweep, and its
+docblock gives the reason:
+
+> *"Both deployments, because a deployment that counts its readers says so. The
+> footer carries a sentence about it and `/what-you-run` carries a second one."*
+
+Neither sentence has existed since 12 October. `counting.test.ts` asserts the
+absence of both. So the dimension doubles a sweep over copy that cannot differ:
+
+```
+ASKS 6  ASK_STATES 25  ROUTES 3  DEPLOYMENTS 2  SERVED_STATE_COUNT 150
+servedPages() built 150 trees in 518ms
+150 of 150 trees have an identical twin in the other deployment
+```
+
+Every one of the 150, not most of them. `servedPages()` is awaited **eight
+times across six test files** — `budget`, `voice`, `naming`, `inline` twice,
+`routes`, `docs-pages` twice — so roughly 600 page builds per suite run produce
+a tree the same run already has, and the mechanism page's share of them runs the
+whole request sequence twice each (`askRunFor` builds the page twice by design).
+`budget.test.ts` and `balance.test.ts` cross the same dimension again with
+local copies of the constant.
+
+### Three shapes, costed
+
+1. **`counting` leaves the page context and the chrome, and stays a render
+   option.** It is what the pages are already true of: `stored.test.ts` now
+   holds all three byte-identical under both settings, and
+   `marketing-11` measured the same thing before relying on it. `addressed` is
+   already a `SiteRenderOptions` field and this is the same fact, so the honest
+   end state is one option on the renderer and nothing on the tree. The cost is
+   the reach: `ChromeContext`, `PageContext`/`MechanismContext`, `home.ts`,
+   `served.ts`, `handed.test.ts`'s `EVERY_FIELD`, and the expected counts in
+   five more test files. **This is the recommendation**, and it is a pull
+   request of its own rather than a paragraph inside one about the key.
+2. **Tighten `handed.test.ts` so a courier is not a reader.** Worth doing
+   *with* shape 1 rather than instead of it: a field is read where it is
+   *used*, so the rule wants the recipient of a hand-off checked too. It is the
+   half that stops the next field doing this, and on its own it would go red
+   today with nothing to point at but shape 1.
+3. **Nothing, written down.** Defensible only if the disclosure is coming back —
+   and whether the front door says anything about what it collects is
+   positioning, which is the maintainer's. If it is coming back, the field is
+   waiting for it and that belongs in `chrome.ts`'s docblock, where this finding
+   would stop being surprising.
+
+### Not done in `marketing-11`, and why
+
+That branch is the 19 October key finding: the renderer and the layout now read
+one answer. Taking the dimension out as well would have put a rename across ten
+files, and four more expected counts, in the same diff as a correctness fix — a
+marketing pull request nobody can review, which is the thing the lane split
+exists to prevent. The invariant it does leave behind is the one this work needs
+first: `stored.test.ts` holds the three pages identical under both settings, so
+shape 1 starts from a measured fact rather than from a reading of the code.
+
+### How it was found
+
+Planting a mutation. `chrome.ts`'s footer was given back a
+`context.counting === true` read, to check that the new `stored.test.ts` rule
+would catch a builder putting a deployment setting back inside a stored row. It
+did, on all three pages — and the interesting half was that the **tree ids
+matched while the trees differed**, because `sequentialIdFactory` counts nodes
+under a prefix rather than hashing what is in them. The comment in that test now
+says so, having briefly claimed the opposite.
+## 2026-10-20 — a funnel read of a revision served in two forms divided one form's reach by the other form's arrivals
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/funnel.ts`) · **Status:** **closed on filing by
+`signals-42-a-funnel-over-two-forms-is-refused`**
+([0300](decisions/0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md))
+— written down because it is the third instance of one shape and the first that
+produced a wrong **rate** rather than a wrong count
+
+The entry of 19 October closed this shape in `regionReadingFor` and filed it in
+`pageViewsFor`; both were a count. `funnelReachOf` is the third and it divides.
+It filtered its rows by audience only where one was named, and otherwise:
+
+```ts
+const matching = where.audienceId === null ? here : here.filter(...)
+// ...dedupe by funnelPairKey, keep the first
+duplicatedPairs: matching.length - pairs.length,
+```
+
+So a deployment-wide asking took the first row per question and counted the
+other form's answer in `duplicatedPairs`. **The door row it divides by is picked
+out of a different array by the same rule**, and the two arrays are two store
+reads with no guaranteed order between them, so the numerator and the
+denominator could come from different forms:
+
+```
+SKIERS    4 reached of   100 arrived   →   40%
+RIDERS  400 reached of 1,000 arrived   →   40%
+published: entry share 0.004, one funnel row and one door row "duplicated"
+```
+
+**0.4% published where both forms converted at 40%.** Two orders of magnitude,
+decided by the order two lists arrived in, with the evidence sitting in the one
+field nobody reads as an undercount (0158).
+
+**What shipped, and why it is a type and not a third fix.** All three instances
+had one cause: `null` meant both *no window ever carried the column* (one
+population, read whole) and *two forms and none asked for* (no population, read
+as neither). `AudienceScope` in `audiences.ts` is now the three-way answer, and
+its `mixed` member carries no audience — so a reading handed an ambiguous window
+cannot read one off it. The funnel refuses the pairs, counts every row as the
+other form's, names both populations, and keeps the door's arrivals, which do
+add across forms (0297, and #680 for the door). `funnelChangeOf` refuses a
+mixed side **before**
+pairing, because an empty side pairs cleanly and would otherwise read as a
+change that added every funnel question the deployment asks.
+
+**The method note, which is the transferable part.** Each of the three had a
+test over the path that used two *different* key values — two countries, two
+revisions, two trees — so each documented the intent while the code failed only
+where two rows **share** a key. A test over a two-form window has to make the
+rows collide.
+
+---
+## 2026-10-20 — `pageViewsFor` is the fourth reading of this shape and is the one place `AudienceScope` was deliberately not adopted
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/page-views.ts`) · **Status:** open — **nothing is wrong once #680
+lands**; this is an adoption to take afterwards, not a defect
+
+0300 publishes `AudienceScope` and adopts it in the two readings that refuse an
+unsplit window — `pageReadingOf` and `funnelReachOf`. The door's own reading is
+the fourth of the four that pick a page's rows out of a window, and it was
+corrected the night before by #680, which rewrites `pageViewsFor` to
+**sum** every form's arrivals rather than refuse them. Touching the same
+function in 0300's change would have handed the merge a conflict in the one file
+both changes rewrite, so it was left alone.
+
+**The two compose rather than overlap.** Once #680 is on `main`, the door
+figures published on a refused funnel reading are the sum over both forms rather
+than whichever row sorted first, which is the coherent answer: *this many
+readers arrived across both forms, and which of them converted is a question per
+form.*
+
+**What is left to do, and it is small.** `pageViewsFor` derives its own
+one-or-none decision inline. Expressing it as `audienceScopeOf` would make the
+four readings read the rule from one place, and — more to the point — would make
+the `mixed` member a case every one of them has answered in writing: the door
+**sums** it (0297's argument, arrivals are people), the other two **refuse** it
+(0290 clause 3). Two different answers to one case is correct and is worth being
+visibly deliberate.
+
+**Not a behaviour change.** If adopting it would move a number, that is a
+finding of its own rather than a refactor.
+
+---
+## 2026-10-20 — lesson 28's "a number nobody has written" was `0300`, and today the numbering reached it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom lessons`
+(`lessons/28-corroboration.md`) · **Status:** **fixed in
+`signals-42-a-funnel-over-two-forms-is-refused`** by changing the fixture to
+`0998` — an edit in another lane's file, made because the alternative was a red
+`pnpm verify` and a decision number chosen to dodge a test
+
+Exercise C demonstrates the one thing a bare citation buys you: *a number nobody
+has written is catchable*. Its fixture was `(0300)`, and its printed output —
+which `transcripts.test.ts` holds the lesson to — says `1 problem(s):
+unknown-record`.
+
+**This lane wrote record 0300 today**, so the citation resolved, the exercise
+printed `0 problem(s)`, and the lesson's transcript test went red on a branch
+that had not touched `lessons/`.
+
+**The lesson predicted this, two paragraphs further down**, about a different
+number:
+
+> red in a lesson would become the ordinary consequence of writing a decision
+> record. [...] A verdict that survives the set growing, and is still false the
+> day it stops being true, is the better shape
+
+That advice had been applied to the census verdicts and not to this fixture. The
+fixture is now `0998`, which the numbering cannot plausibly reach — the lanes are
+allocated in hundreds from 0200 — and a short paragraph is added saying why,
+because the reason is the lesson's own subject.
+
+**What is yours to decide.** `0998` is a guess at *far enough away*, which is the
+same class of answer as `0300` was. If this lane would rather the exercise built
+its fixture rather than hard-coded one — the number one past the highest record
+on disk, say, which is unclaimable by construction — that is a better fixture and
+it is yours to write. Four lines in one file either way, and nothing else in the
+lesson moves.
+
+**Why it was not filed and left red.** A routine may not open a pull request on
+red, and the only alternatives were to take a decision number chosen to avoid a
+test or to leave this change unshipped. Both are worse than a four-line edit in
+a file whose author had already written down the rule the edit follows.
+## 2026-10-19 — a tenth counted reading of the mangling: 100 clean, 160 and 189 mangled, three links of one shape in one body
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 17 October entry *nine counted readings in one body* and the
+15 October entry on the bracket · **Status:** open — **a reading, not a claim**;
+nothing here contradicts the open entries and no remedy changed
+
+#680's first body carried three markdown links of **identical shape** —
+`https://github.com/jam-overture/loom/blob/<branch>/<path>` on one branch, so
+the only thing that differed between them was the path. The body came back with
+one intact and two mangled, wrapped in the `` ``''…''`` `` and
+` ````''''…''''```` ` quote runs the earlier readings describe:
+
+| Characters | Path | Outcome |
+| --- | --- | --- |
+| 100 | `docs/signals.md` | clean |
+| 160 | `reports/2026-10-19-signals-the-door-a-deployment-wide-reading-divides-by.md` | **mangled** |
+| 189 | `decisions/0299-a-deployment-wide-door-adds-every-forms-arrivals-and-waits-on-the-oldest-fold-under-it.md` | **mangled** |
+
+**Why it is worth the three lines.** It is the cleanest controlled reading so
+far: one body, one branch, one link shape, three lengths, and the split falls
+between 100 and 160 — consistent with the open bracket (clean at 152, mangled at
+155) and with the quote-run count rising with length, since the 189 took four
+backticks and four quotes where the 160 took two of each. It adds no new bound
+and it contradicts nothing, which is the point of recording it: the structural
+hypothesis now has a reading where **nothing but length varied**.
+
+**The remedy is unchanged and cost one call.** The body was corrected in the same
+turn, with the two long links written as plain paths. This lane's own branch
+names and report slugs are long enough that every signals report link will sit
+past the bracket, so from here I will write the report and record as paths rather
+than links in a pull request body, and keep links for anything under about 120
+characters.
+

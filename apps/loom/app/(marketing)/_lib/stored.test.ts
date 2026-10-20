@@ -96,8 +96,46 @@ describe("the rows this site is", () => {
   })
 
   it("reads the id a builder would produce", () => {
-    expect(storedIdFor(HOME)).toBe(treeFor(HOME, { ...CONTEXT, counting: false }).treeId)
+    expect(storedIdFor(HOME)).toBe(treeFor(HOME, CONTEXT).treeId)
   })
+
+  /**
+   * **What a page is stored as is not a function of whether the deployment
+   * counts its readers**, and this is the assertion that let `stored.ts` stop
+   * reading the setting at all.
+   *
+   * It read it until 20 October, for a reason that stopped being true on
+   * 12 October: the footer carried a disclosure when counting was on, so the
+   * row had to match the deployment that wrote it, and seeding never
+   * overwrites. The maintainer had that message taken off the site whether it
+   * is counting or not, and no node of any page has read `counting` since — so
+   * the read was a row in a table deciding nothing, and the id a page is filed
+   * under was nominally a function of a deployment setting it does not depend
+   * on.
+   *
+   * **Asserted over the whole tree, because the id would not have said so.**
+   * An id comes from `sequentialIdFactory("home")`, which counts nodes under a
+   * prefix rather than hashing what is in them — so two pages differing in
+   * every word of their footer are filed under the same `t_home1`, and the
+   * check above passes while the row is wrong. Measured, by putting a
+   * `context.counting` read back into the footer: the ids matched on all three
+   * pages and the trees did not.
+   *
+   * That is the half worth keeping, and it is what stops the field coming
+   * quietly back to life. A builder that started reading `counting` again
+   * would put a deployment setting back inside a stored row, where seeding
+   * never overwrites and nothing can revisit it.
+   */
+  it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
+    "stores %s as the same page whether the deployment counts or not",
+    (_path, route) => {
+      const counting = treeFor(route, { ...CONTEXT, counting: true })
+      const quiet = treeFor(route, { ...CONTEXT, counting: false })
+
+      expect(counting.treeId).toBe(quiet.treeId)
+      expect(counting).toEqual(quiet)
+    }
+  )
 })
 
 describe("seeding", () => {

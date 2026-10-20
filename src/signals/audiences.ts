@@ -49,6 +49,22 @@ import type { TreeId } from "../ids.js"
  * a number over two populations: `pageReadingOf` reads neither and says which
  * audiences it was handed (`audiences-mixed` in `health.ts`).
  *
+ * ## Reading neither is a case, and it was a `null` three readings could ignore
+ *
+ * {@link AudienceScope} is the third rule, and it exists because the paragraph
+ * above was true of one reading and unenforceable on the next. *No audience
+ * recorded* is two states — a window written before the column (one population,
+ * read whole) and a window of two forms with none asked for (no population,
+ * read as neither) — and spelling them as one `null` meant a reading that
+ * treated them alike compiled and was wrong only on the deployment doing
+ * exactly what 0263 built. The region map's buckets were fixed for it
+ * (0297) and the door's arrivals in a change waiting to land, and the third,
+ * the funnel, was still taking `matching[0]`.
+ * {@link audienceScopeOf} returns the three-way answer and
+ * {@link audienceScopeRead} reads it back off a reading that recorded it, so
+ * the refusal is a branch a new reading has to write rather than a value it can
+ * fall past.
+ *
  * ## Comparing is a third question, and the answer it needs is narrower
  *
  * {@link crossesAudiences} is for the comparisons rather than the readings. A
@@ -138,6 +154,112 @@ export const audiencesIn = <R extends MaybeAudienceScoped>(
 
   return sorted(found)
 }
+
+/**
+ * What population a reading is of, as the three answers it can be.
+ *
+ * The one place that decides it, and the reason it is a type rather than a
+ * nullable audience is that **`null` was doing two jobs**. A reading that
+ * recorded no audience is either a window of rows written before the column
+ * existed (0284) — one population by construction, read whole — or a window
+ * holding two forms with none asked for, which is no population at all and
+ * must be read as neither (0290). The two states want opposite handling and
+ * were spelled as one value, so a reading that forgot to distinguish them did
+ * not fail to compile: it fell into the first and read one form's rows as the
+ * page's.
+ *
+ * Three readings here pick a page's rows out of a window, and two of them had
+ * already been fixed one at a time — the region map's buckets (0297) and the
+ * door's arrivals, in a change waiting to land — each after publishing a real
+ * second form as a count of rows handed in twice. The third was the funnel,
+ * where the same `matching[0]` took one form's answer and reported the other's
+ * as the same question asked twice. A fourth reading written tomorrow would
+ * fall the same way, because nothing in the types asked it the question.
+ * {@link AudienceScope} asks it: the `mixed` member is a case to be handled
+ * rather than a `null` to be ignored.
+ *
+ * Every member carries both halves, so a caller that only wants the audience
+ * reads `audienceId` without a switch and a caller that must handle the refusal
+ * switches on `reading`.
+ */
+export type AudienceScope =
+  /**
+   * One population: the audience asked for, or the only one the window named.
+   *
+   * A window naming one audience needs no caller to say so, and an audience
+   * asked for scopes the reading whether or not the window holds others — the
+   * rest of it is that page's other form, counted apart and not read (0290).
+   */
+  | {
+      readonly reading: "one"
+      readonly audienceId: AudienceId
+      /** What the window named, which is not what was asked for. */
+      readonly audiences: readonly AudienceId[]
+    }
+  /**
+   * Nothing in the window named an audience, so it is one population by
+   * construction and is read whole.
+   *
+   * Every window written before the column existed (0284), and every window a
+   * caller built by hand. Calling it `aud_everyone` would assert what no row
+   * said, which is the distinction {@link MaybeAudienceScoped} exists for.
+   */
+  | { readonly reading: "unlabelled"; readonly audienceId: null; readonly audiences: readonly [] }
+  /**
+   * Two or more forms, and the asking named none of them.
+   *
+   * Read as **neither**. The other two answers available are summing two
+   * populations and picking one of them by the caller's array order, and the
+   * second is the fault this type exists to make unwritable. Summing is a
+   * decision per counter rather than a default: arrivals at the door are
+   * counted once per page view and therefore add (0297), and a distinct count
+   * filed against a node does not.
+   */
+  | { readonly reading: "mixed"; readonly audienceId: null; readonly audiences: readonly AudienceId[] }
+
+/**
+ * Which of the three a window and an asking come to.
+ *
+ * The census is deduplicated and sorted here, so a caller may hand in the rows
+ * of two windows concatenated — a reading of funnel rows is of the populations
+ * its own rows name **and** of the populations the page reading it was taken
+ * against named, and either alone can be the ambiguous one.
+ *
+ * An audience asked for always wins, including over a window that names it
+ * nowhere: a caller asking for one population and being handed none is holding
+ * an empty reading, which is what it asked for and not an ambiguity.
+ */
+export const audienceScopeOf = (
+  audiences: Iterable<AudienceId>,
+  asked?: AudienceId
+): AudienceScope => {
+  const named = sorted(new Set(audiences))
+
+  if (asked !== undefined) return { reading: "one", audienceId: asked, audiences: named }
+  if (named.length === 1 && named[0] !== undefined)
+    return { reading: "one", audienceId: named[0], audiences: named }
+  if (named.length === 0) return { reading: "unlabelled", audienceId: null, audiences: [] }
+
+  return { reading: "mixed", audienceId: null, audiences: named }
+}
+
+/** A reading that has already recorded which population it was of. */
+export type ReadOfAudience = {
+  readonly audienceId: AudienceId | null
+  readonly audiences: readonly AudienceId[]
+}
+
+/**
+ * The scope a reading already recorded, read back off it.
+ *
+ * What a **second** reading needs: a comparison holding two sides against each
+ * other has to know that a side was read as neither population before it can
+ * say what moved between them, and a reading that published only its audience
+ * and its census leaves that as a subtraction for every caller to make the same
+ * way. One of them making it differently is this module's whole subject.
+ */
+export const audienceScopeRead = (reading: ReadOfAudience): AudienceScope =>
+  audienceScopeOf(reading.audiences, reading.audienceId ?? undefined)
 
 /**
  * The rows of one audience, and nothing else.
