@@ -322,9 +322,21 @@ rule says.
 Taken from the `vercel[bot]` comment after opening the pull request, not
 composed from the branch name.
 
-PREVIEW_URL_PLACEHOLDER
+https://loom-git-docs-62-a-signature-f6566b-jpizzolato36-6341s-projects.vercel.app
+
+**Truncated and hashed again**, which is the ordinary case rather than the
+exception: `docs-62-a-signature-is-cut-after-it-is-cleaned` is 45 characters and
+`docs-62-a-signature` is what survives, with `f6566b` standing for the rest. A
+URL composed from the branch name would have had no hash segment and would have
+404ed — the 16 October entry's remedy, followed, at the cost of one API call in
+a turn that was already open.
 
 The two pages the pictures above are of:
 
-- `/docs/api-reference/signals`
-- `/docs/api-reference/primitives`
+- [/docs/api-reference/signals](https://loom-git-docs-62-a-signature-f6566b-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/signals)
+- [/docs/api-reference/primitives](https://loom-git-docs-62-a-signature-f6566b-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/primitives)
+
+Every picture above was taken with `pnpm shoot --serve apps/loom` against a
+build in this container, not fetched from the preview: `*.vercel.app` is denied
+by the environment's egress policy, which is the open finding of 12 October and
+still true.
