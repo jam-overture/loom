@@ -264,7 +264,7 @@ last thing on its line, with nothing else running beside it.
 - framework: **233 files, 5,489 tests passed**
 - application: **348 files, 6,174 tests passed**
 - `findings:check`: 1,267 findings, 0 malformed
-- `reports:check`: 1,925 visuals, none over 1.1MB, 410 cited by no file
+- `reports:check`: 1,925 visuals, none over 1.1MB, 409 cited by no file
 - `prerender:check`: 133 prerendered pages, 1,851 text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
