@@ -4,7 +4,7 @@ import { useActionState, useState } from "react"
 
 import { Submit } from "@/app/(portal)/_components/form"
 
-import { issueKeyAction, type KeyReport } from "../actions"
+import { issueKeyAction, type ConnectReport } from "../actions"
 
 /**
  * Making a project's first key, or replacing the one it has.
@@ -21,7 +21,7 @@ import { issueKeyAction, type KeyReport } from "../actions"
  */
 
 export const KeyControls = ({ projectId, held }: { projectId: string; held: boolean }) => {
-  const [report, action] = useActionState<KeyReport | null, FormData>(issueKeyAction, null)
+  const [report, action] = useActionState<ConnectReport | null, FormData>(issueKeyAction, null)
   const [asking, setAsking] = useState(false)
 
   const refusal =

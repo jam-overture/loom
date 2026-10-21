@@ -517,7 +517,8 @@ project you registered (the `prj_…` in its address) and redeploy. The site the
 posts with that project's key, read from the same table, so replacing the key
 on its *Connect your site* screen moves the site with it. Give that project the
 site's own host, `www.loomjs.org`, or leave its host blank: a project that
-names any other host refuses the site's deliveries. A setting that names
+names any other host, `loomjs.org` included, refuses the site's deliveries. An
+owner changes it under *Where signals are taken from* on the same screen. A setting that names
 nothing usable (not a project id, a closed project, one without exactly one
 site) mounts no broadcaster rather than falling back to the deployment's own
 project.

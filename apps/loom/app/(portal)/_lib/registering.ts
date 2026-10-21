@@ -116,6 +116,29 @@ const hostSchema = z
   )
 
 /**
+ * Where a project's site lives, as typed: the host it contained, `undefined`
+ * for an empty box, or what is wrong with it.
+ *
+ * The one reading of a host, shared by registering and by changing it
+ * afterwards on *Connect your site*, so the door is never held to a host one
+ * form would have refused.
+ */
+export const readHost = (
+  value: unknown
+):
+  | { readonly ok: true; readonly value: string | undefined }
+  | { readonly ok: false; readonly detail: string } => {
+  const host = hostFrom(typeof value === "string" ? value : "")
+  if (host === undefined) return { ok: true, value: undefined }
+
+  const checked = hostSchema.safeParse(host)
+
+  return checked.success
+    ? { ok: true, value: host }
+    : { ok: false, detail: checked.error.issues[0]?.message ?? "That does not look like a host." }
+}
+
+/**
  * What was typed, or what is wrong with it.
  *
  * Every fault is reported, not the first: a form that refuses one field at a
@@ -164,16 +187,9 @@ export const readRegistration = (fields: {
     })
   }
 
-  const host = hostFrom(typeof fields.host === "string" ? fields.host : "")
-  if (host !== undefined) {
-    const checked = hostSchema.safeParse(host)
-    if (!checked.success) {
-      faults.push({
-        field: "host",
-        detail: checked.error.issues[0]?.message ?? "That does not look like a host.",
-      })
-    }
-  }
+  const read = readHost(fields.host)
+  if (!read.ok) faults.push({ field: "host", detail: read.detail })
+  const host = read.ok ? read.value : undefined
 
   if (faults.length > 0) return { ok: false, faults }
 
@@ -214,16 +230,9 @@ export const readRename = (fields: {
     faults.push({ field: "name", detail: name.error.issues[0]?.message ?? "That name will not do." })
   }
 
-  const host = hostFrom(typeof fields.host === "string" ? fields.host : "")
-  if (host !== undefined) {
-    const checked = hostSchema.safeParse(host)
-    if (!checked.success) {
-      faults.push({
-        field: "host",
-        detail: checked.error.issues[0]?.message ?? "That does not look like a host.",
-      })
-    }
-  }
+  const read = readHost(fields.host)
+  if (!read.ok) faults.push({ field: "host", detail: read.detail })
+  const host = read.ok ? read.value : undefined
 
   if (faults.length > 0) return { ok: false, faults }
 
