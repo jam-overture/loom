@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
 import { issueIngestKey } from "@/app/_lib/reader-signals/keys"
 import { actorSchema } from "@/app/(portal)/_lib/auth/accounts"
 import { requireActor, roleOf } from "@/app/(portal)/_lib/auth/identity"
 import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
-import { soleApplicationOf } from "@/app/(portal)/_lib/connecting"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 
 /**

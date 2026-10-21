@@ -167,7 +167,7 @@ itself, in the format a machine reads as fact, as this product.
 
 ## Environment
 
-`apps/loom/.env.example` is the full list with the commentary. Six variables,
+`apps/loom/.env.example` is the full list with the commentary. Seven variables,
 **one** of which is required:
 
 | Variable                         | Required | Notes                                   |
@@ -177,6 +177,7 @@ itself, in the format a machine reads as fact, as this product.
 | `DATABASE_URL`                   | no       | Absent means memory — see below         |
 | `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
 | `LOOM_SITE_ORIGIN`               | in production | The domain, pinned. See [The domain](#the-domain-and-going-public) |
+| `LOOM_SITE_PROJECT`              | no       | The project the site's readers are counted under. Unset is the deployment's own. See [Reader signals](#8-reader-signals--nothing-arrives-until-you-open-the-door) |
 
 **Never prefix any of them `NEXT_PUBLIC_`.** 0017 exists partly to keep the model
 key off the client, and a public prefix would undo the whole record in one
@@ -508,6 +509,18 @@ pnpm signals:key prj_default
 ```
 
 Until then the site mounts no broadcaster and counts nobody.
+
+**Counting the site under a project you registered.** The deployment's own
+project has no members, so its *Signals* screen is one nobody can open. To
+watch the site's readers in the portal, set `LOOM_SITE_PROJECT` to the id of a
+project you registered (the `prj_…` in its address) and redeploy. The site then
+posts with that project's key, read from the same table, so replacing the key
+on its *Connect your site* screen moves the site with it. Give that project the
+site's own host, `www.loomjs.org`, or leave its host blank: a project that
+names any other host refuses the site's deliveries. A setting that names
+nothing usable (not a project id, a closed project, one without exactly one
+site) mounts no broadcaster rather than falling back to the deployment's own
+project.
 
 **Who may post, and how often.** The endpoint is public — a published page is
 public, so a session check is not available, and 0146 forbids the endpoint

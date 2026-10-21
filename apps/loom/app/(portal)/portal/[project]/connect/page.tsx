@@ -8,16 +8,12 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
-import {
-  acceptedFrom,
-  signalAddress,
-  snippetFor,
-  soleApplicationOf,
-} from "@/app/(portal)/_lib/connecting"
+import { acceptedFrom, signalAddress, snippetFor } from "@/app/(portal)/_lib/connecting"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
+import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
 
 import { CopyButton } from "./_components/copy-button"
