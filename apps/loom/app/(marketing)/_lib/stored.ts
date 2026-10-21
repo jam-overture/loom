@@ -73,27 +73,34 @@ export type SitePage = {
  * deployment answers on and the palette is what a reader asked for —
  * `./requested.ts` puts both back.
  *
- * ## No `counting` either, as of 20 October
+ * ## No `counting` either, and as of 21 October no such field
  *
- * It read the live setting here until today, and the docblock this replaces
- * said why that was a known limitation: the footer carried a disclosure when
- * counting was on, seeding never overwrites, so a deployment that switched
- * counting on after its pages were stored would count readers under a footer
- * that said nothing. The fix it proposed was to take the disclosure out of the
- * tree, *"since a statement the deployment makes about itself is not a thing a
- * page should be able to have governed away."*
+ * It read the live setting here until 20 October, and the docblock that
+ * replaced said why that had been a known limitation: the footer carried a
+ * disclosure when counting was on, seeding never overwrites, so a deployment
+ * that switched counting on after its pages were stored would count readers
+ * under a footer that said nothing. The fix it proposed was to take the
+ * disclosure out of the tree, *"since a statement the deployment makes about
+ * itself is not a thing a page should be able to have governed away."*
  *
  * **That happened on 12 October**, by the maintainer's instruction and for a
  * different reason — the message came off the site whether it is counting or
- * not. So no node of any page has read `counting` since, and this read was a
- * row in a table deciding nothing: `stored.test.ts` holds the three pages
- * byte-identical under both settings, which is what makes removing it a
- * no-change rather than a judgement.
+ * not. So no node of any page read `counting` after that, and the read here
+ * was a row in a table deciding nothing.
  *
- * What it cost while it stayed is that seeding — which runs under `db:push` —
- * reached the environment for an answer it threw away, and the id a page is
- * stored under was nominally a function of a deployment setting. It was not,
- * and now it does not look like it.
+ * **The field itself is gone as of 21 October**, off the page context and off
+ * the `ChromeContext`, so a context without it is no longer a context with
+ * something left out: it is the only context there is. Whether readers are
+ * counted is a render option, and what it decides is which attributes the
+ * markup carries rather than a word of what the page says. `stored.test.ts`
+ * holds the end that matters here — no page builder and no part of the chrome
+ * can reach the setting — which is a stronger guard than the two trees it used
+ * to compare, because a builder cannot read a field that does not exist.
+ *
+ * What the read cost while it stayed is that seeding, which runs under
+ * `db:push`, reached the environment for an answer it threw away, and the id a
+ * page is stored under was nominally a function of a deployment setting. It was
+ * not, and now nothing about it looks as though it could be.
  */
 const storedContext = () => ({ origin: "", theme: "minimal" }) as const
 

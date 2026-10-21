@@ -7,7 +7,6 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { boundedReaderSignalJournal, boundedReaderTallyStore } from "@/app/_lib/app/bounded-store"
@@ -215,9 +214,6 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
   return (
     <Screen>
       <div className="flex flex-col gap-2">
-        <Link href="/portal" className="text-ink-muted text-sm no-underline hover:underline">
-          ← {screenName("/portal")}
-        </Link>
         <h1 className="text-2xl tracking-tight">Signals</h1>
         {project.ok && <p className="text-ink-muted text-sm">{project.value.name}</p>}
         {project.ok &&

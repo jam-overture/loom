@@ -58,10 +58,6 @@ const context = (current = HOME): ChromeContext => ({
 const header = (current = HOME): LoomNode => siteHeader(sequentialIdFactory("t"), context(current))
 const footer = (current = HOME): LoomNode => siteFooter(sequentialIdFactory("t"), context(current))
 
-/** The same footer, on a deployment that is counting its readers. */
-const counting = (current = HOME): LoomNode =>
-  siteFooter(sequentialIdFactory("t"), { ...context(current), counting: true })
-
 /** The band, or nothing at all on the one page that does not carry it. */
 const readingBand = (current: SiteRoute): readonly LoomNode[] =>
   siteReadingBand(sequentialIdFactory("t"), context(current))
@@ -323,45 +319,35 @@ describe("the footer", () => {
   })
 
   /**
-   * The disclosure, which is in the chrome because the counting is: a
-   * broadcaster is started by the layout, so the page somebody landed on is not
-   * the page that decides whether they are counted.
-   *
-   * Asserted in both directions. A note that appeared on a deployment counting
-   * nobody would be a false statement about this site, and a note that failed to
-   * appear on one that is counting would be the thing the note exists to
-   * prevent.
-   */
-  /**
-   * **The footer says nothing about counting, on either deployment.**
+   * **The footer says nothing about counting, and there is now no state in
+   * which it could.**
    *
    * It carried a line when counting was on — *this page counts which of its
    * parts you reach… it never counts who you are* — which was free while every
    * page was rebuilt per request and stopped being free when the pages became
    * stored rows (0259): a sentence about the current setting freezes when it is
-   * written and is wrong from the first time anybody changes it.
+   * written and is wrong from the first time anybody changes it. Removed on the
+   * maintainer's instruction, 12 October.
    *
-   * Removed on the maintainer's instruction, 12 October, in both states. What
-   * it pointed at is still there: `/what-you-run`'s *what this page counts*
-   * section, which is true of a Loom page whatever a deployment has switched
-   * on. `readers/counting.test.ts` holds that end.
+   * This was asserted in both directions until 21 October, over a footer built
+   * with `counting: true` and one built without. The field is off
+   * `ChromeContext` as of today, because for nine days nothing in `chrome.ts`
+   * read it: there is one footer now, and the two states this rule used to
+   * cross were the same nodes both times. What it pointed at is still there —
+   * `/what-you-run`'s *what this page counts* section, which is true of a Loom
+   * page whatever a deployment has switched on. `readers/counting.test.ts`
+   * holds that end, and `stored.test.ts` holds that no part of the chrome can
+   * reach the setting again.
    */
-  it("says nothing about counting, whether the deployment counts or not", () => {
-    for (const [name, band] of [
-      ["counting", counting()],
-      ["not counting", footer()],
-    ] as const) {
-      const words = wordsOf(band)
+  it("says nothing about counting", () => {
+    const words = wordsOf(footer())
 
-      expect(words, name).not.toContain("counts which of its parts")
-      expect(words, name).not.toContain("never counts who you are")
-    }
+    expect(words).not.toContain("counts which of its parts")
+    expect(words).not.toContain("never counts who you are")
   })
 
   it("points the disclosure at the page that says the rest of it", () => {
-    expect(hrefsIn(counting())).toContain(
-      sitePath(WHAT_YOU_RUN.path)
-    )
+    expect(hrefsIn(footer())).toContain(sitePath(WHAT_YOU_RUN.path))
   })
 })
 

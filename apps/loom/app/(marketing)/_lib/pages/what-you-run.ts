@@ -192,7 +192,8 @@ const whatIsCounted = (ids: IdFactory): LoomNode =>
        */
       /*
        * **No claim about whether it is switched on here**, which this sentence
-       * used to make in two versions chosen by `context.counting`.
+       * used to make in two versions chosen by a `counting` field on the page
+       * context — a field that no longer exists (21 October).
        *
        * The page is stored and served from the store as of 12 October (0259),
        * so a sentence about the deployment's current setting freezes at the

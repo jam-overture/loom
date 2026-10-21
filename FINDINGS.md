@@ -57421,8 +57421,15 @@ see.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
 (`app/(marketing)/_lib/chrome.ts`, `_lib/served.ts`, and the six test files that
-cross the dimension) · **Status:** open — nothing is broken, no test is failing,
-and the pages are provably identical either way
+cross the dimension) · **Status:** **closed by
+`marketing-12-a-deployment-setting-is-not-a-page-field`** — shapes 1 and 2
+together, as the entry recommends. `counting` is off `PageContext` and off
+`ChromeContext`, `renderSitePage` takes it as a render option, and the
+deployment is no longer a dimension of `servedPages()`. The sweep went from 150
+states in 518ms to **75 in 252ms**, and the courier hole is closed: with the
+field put back and the old predicate restored, both sweep rules are green on it
+again, which is the measurement in
+`reports/2026-10-21-marketing-a-deployment-setting-is-not-a-page-field.md`
 
 `ChromeContext` carries a `counting` boolean. Nothing in `chrome.ts` reads it.
 Stripping the comments out of that file and looking for a property access finds
@@ -57579,10 +57586,10 @@ rows collide.
 ## 2026-10-20 — `pageViewsFor` is the fourth reading of this shape and is the one place `AudienceScope` was deliberately not adopted
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/page-views.ts`) · **Status:** open — **nothing is wrong**; this is
-an adoption, not a defect. #680 merged on 20 October and `main` is merged into
-the branch that filed this, so the reason it was deferred is gone and it is
-ready to take
+(`src/signals/page-views.ts`) · **Status:** **closed 20 October** in
+`signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`, with one rule the
+adoption turned up and had to write down — see the note at the end of this
+entry
 
 0300 publishes `AudienceScope` and adopts it in the two readings that refuse an
 unsplit window — `pageReadingOf` and `funnelReachOf`. The door's own reading is
@@ -57802,3 +57809,423 @@ question this page is for.
 **Recommendation: 1, then 2.** Both are this lane's and neither is large. 3 is
 worth the maintainer's opinion before anybody builds it, because it is about
 what a reference page is for.
+## 2026-10-21 — a hand-off is only visible when the field keeps its name, and a field renamed on the way is a courier the sweep still counts as a reader
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/pages/handed.test.ts`) · **Status:** open — **nothing is
+broken**; this is the stated limit of what shipped on 21 October
+
+`handed.test.ts` holds the general rule that **a context field is a promise that
+some page reads it**, and as of today it no longer counts a courier as a reader:
+`field: thing.field` is struck out of the source before the sweep looks for
+`.field`, so the question *is it read* lands on whatever the field was handed
+to. That closed the `counting` hole, and the closing is measured — with the
+field put back and the old predicate restored, both sweep rules go green on the
+live bug again.
+
+**The pattern only matches a hand-off that keeps the field's name.** All three
+shapes of hand-off this surface writes today do:
+
+```ts
+counting: context.counting === true     // struck out
+origin: context.origin                 // struck out
+ask: context.record.ask                 // NOT struck out, and must not be
+```
+
+The third is the distinction the rule is careful about, because striking it out
+would fail `answer.ts` for building an address out of a record it was given. The
+predicate's own four tests hold both halves.
+
+**What it cannot see is a hand-off that renames.** `counting: context.counted`
+or `addressed: context.counting` reads `.counting` in the courier and hands it
+on under another name, so the courier is credited with a read it is not doing —
+which is this entry's own instance with one word changed. Nothing in this route
+group does that today; that is why it is a finding rather than a failure.
+
+**Two ways, costed:**
+
+1. **Strike out any property whose value is a bare `thing.field`**, whatever the
+   property is called. `addressed: context.counting` goes with
+   `counting: context.counting`, so a rename is no escape. The cost is the
+   `ask: context.record.ask` case: that is a single step through another field,
+   not a bare one, so it survives — but a page writing `href: context.origin`
+   would stop counting as a reader of `origin`, and that is a real read. It
+   would have to be checked against every page on the surface, and the honest
+   version is a list of exceptions, which the 28 September entry on *a test
+   derived from the list it checks* warns about.
+2. **Leave it, written down.** What exists holds every hand-off this surface
+   writes, the predicate is tested directly rather than only through the sweep,
+   and a rename is a thing somebody has to write deliberately. The next field
+   that goes unread goes unread the way `counting` did, and that way is now
+   closed.
+
+**Recommendation: 2**, which is why this is open rather than built. It is here
+so the next run that meets a field nobody reads has the shape of the hole in
+front of it rather than finding it the way this lane found the last two — a
+fortnight for `trail`, nine days for `counting`.
+## 2026-10-21 — two sweep floors are hand-written copies of another module's arithmetic, and both went red for a change that touched no copy
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/voice.test.ts`, `_lib/naming.test.ts`) · **Status:** open
+— **nothing is broken**; both floors are correct for the site as it is today
+
+`served.ts` publishes `SERVED_STATE_COUNT`, and every caller of `servedPages()`
+asserts against it, so halving the sweep's dimensions left six test files green
+without a line changed. **Two floors beside those assertions are not written
+that way**, and both failed on this change:
+
+```
+voice.test.ts    expected 75 to be greater than or equal to 126    // 3 * 2 * 21
+naming.test.ts   expected 550 to be greater than or equal to 600
+```
+
+Neither failure was about the change. The deployment stopped being a dimension
+of a sweep over copy that could not differ by it, so every mention on this site
+stopped being read twice — and the two files that had written a number down
+rather than deriving one said the sweep had gone quiet. `voice.test.ts` spelled
+the dimension out as a factor (`3 * 2 * 21`); `naming.test.ts` carried `600` and
+`80` against a measurement of `798` and `126`, and **the second of those would
+have been the next failure** at 75 against 80.
+
+Both are now re-measured and stated with the date (`400` and `50` against 550
+and 75; `3 * 21`), which is the same shape of claim one dimension smaller. So
+the entry is not about today's numbers.
+
+**What it is about:** a floor whose job is *the sweep did not come back empty*
+should not have to move when the sweep's shape changes, and these do. The fix
+that suggests itself — derive the floor from `SERVED_STATE_COUNT` — is the
+failure this lane filed on 27 September, a test whose expected value comes from
+the code under test: a sweep that returned nothing would then expect nothing and
+pass. A floor has to be independent of the thing it is checking to be worth
+anything, which is exactly why it is written by hand.
+
+**The shape that is worth something is a floor per state rather than a total**:
+*at least five mentions per served state*, which is independent of how many
+states there are and still fails a sweep that reads nothing. It would have
+survived today untouched. It is a finding rather than a fix because it is a
+judgement about what these two rules are for, the numbers it would need are a
+fresh measurement over the two files' own sweeps, and putting it in the same
+diff as the change that exposed it is how a test ends up derived from the run
+that broke it.
+
+---
+## 2026-10-20 — closing the `pageViewsFor` adoption: the scope's `one` member fills a census in, and the door must not let it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/page-views.ts`) · **Status:** **closed on filing** in
+`signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`, record
+[0301](decisions/0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md)
+
+The adoption filed this morning is taken: `pageViewsFor` reads 0300's rule from
+`audienceScopeOf`, with the `mixed` branch written out rather than left to fall
+past a `null`, and the door's answer to that case — **sum**, against the other
+two readings' **refuse** — is now in writing and under a test that asserts both
+answers over one window.
+
+**It was not quite a pure refactor, and the reason is worth keeping.** The
+obvious adoption hands `scope.audienceId` to the published row. That moves a
+field: `audienceScopeOf` returns `one` when the window names exactly one
+audience and nothing was asked for, so a deployment-wide reading of a window
+holding one form today would start publishing *a reading of that form*. The
+door's own documentation already refuses this in so many words — *it is what the
+asking named and never what the rows turned out to say* (0297, 0299) — and a
+test written for 0299 catches it.
+
+So the scope decides which rows are read and `where.audienceId` decides what the
+reading says it is of. That is not an inconsistency in `AudienceScope`: the
+member deliberately collapses *asked for* and *the only one there* because the
+two readings that merely filter rows by it want them handled alike. A reading
+that **publishes** the field wants them apart, and the door is the only one of
+the four that publishes it.
+
+**For the fifth reading.** If a reading both filters by the scope and publishes
+an audience, it needs `where.audienceId ?? null` for the second, not
+`scope.audienceId`. Whether that is worth a field on the `one` member — *who
+decided, the asking or the window* — is a real question and was left alone
+deliberately: one call site is not evidence of a rule, and the comment on the
+one call site is cheaper than a member every switch has to read.
+
+---
+## 2026-10-20 — a refused page reading was reported as a page nobody read, beside a door summing a thousand arrivals
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**fixed 20 October** in `signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`,
+record
+[0301](decisions/0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md)
+
+0300 made a window of two forms with none asked for a case a reading has to
+answer, and published the refusal. **The refusal was then published as a nought
+that already meant something else.** A page reading that refuses puts every part
+at `unknown` and its view floor at nought — which is exactly what a page nothing
+has opened publishes — and three readings derived from it branch on that floor.
+
+`deploymentReadingOf` called it `unread`, whose sentence is *nothing reported a
+view of this version in the window*. `readingChangeOf` called it
+`nothing-measured`: *one of the two windows held no page views*.
+
+**The deployment order's row contradicted itself.** That order asks the door for
+each page's arrivals, and the door answers a two-form window by **summing**
+them (0297, 0299), because arrivals are people. So on fixtures of a hundred
+skiers and nine hundred riders, handed in unsplit:
+
+```
+standing  unread      nothing reported a view of this version in the window
+opened    1,000       ← both forms arrivals, off the same window
+```
+
+**`ReadingProgress` could not have told them apart.** It carries `audienceId`
+for a stated reason and dropped `audiences`, and `audienceScopeRead` needs both:
+`audienceId` is `null` for a window naming one audience and for a window naming
+two. So the refusal was not ignored downstream — it was unreachable there.
+
+**What this costs a deployment, which is why it is written up rather than
+merely fixed.** `standings.unread` is the headline count of pages nobody read,
+and it absorbed every refused reading. A deployment serving two forms and
+reading its pages unsplit — the mistake `byAudience` exists to prevent and the
+one four records now exist because callers make — would have been told *forty
+pages nobody read* about forty pages with readers on all of them. One sentence
+sends somebody to look for a sender that has stopped. The true one is a function
+call away.
+
+**Fixed by making the refusal travel and be named**: `ReadingProgress` carries
+the census, `ChangeSilence` gains `audiences-mixed` checked before the view
+floor, and both deployment orders gain an `unsplit` standing mapped to the
+condition the funnel comparison brought the day before.
+
+---
+## 2026-10-20 — the change order maps `different-audiences` to `unread`, and so to the condition `no-view-reported`
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/deployment-change.ts`) · **Status:** open — the second conflation
+of 0301's family, deliberately not fixed in the same unit because its argument is
+different
+
+`deploymentChangeOf` puts every comparison silence but `different-trees` into
+one standing, `unread`. 0301 took `audiences-mixed` out of that bucket. Two are
+left in it: `nothing-measured`, which belongs there, and
+**`different-audiences`, which does not obviously.**
+
+The silences table is where it shows. `MovementStanding` `unread` maps to
+`no-view-reported` — *nothing reported a view of it* — so a comparison refused
+for spanning **two known populations** is reported, at the table, as a window
+nobody read. The cause does travel on `MovedPage.silence`, so nothing here is
+unrecoverable by a careful surface; what is wrong is the standing a screen groups
+by and the condition the table publishes.
+
+**Why it was not fixed here.** 0301's argument is that `unsplit` has nothing in
+common with `unread` but a nought. `different-audiences` is a different case: the
+comparison genuinely has nothing to compare, because its two sides are of two
+populations, so *there was nothing to compare on one side* is at least true of it
+in a way it is not true of a full two-form window. Whether that earns a standing
+of its own is a judgement about what a screen should group, and taking it inside
+a unit about a different conflation would have been two decisions in one record.
+
+**What is left to decide.** Either a fourth standing — `mispopulated`, say,
+beside `mispaired` and `unsplit`, the three faults in the pairing rather than in
+the readers — or a written note on `unread` saying it covers two states and
+pointing at `silence`. The first is better if a portal screen will group by
+standing, which is `Loom portal`'s to say.
+
+---
+## 2026-10-20 — a silence set's condition provenance was derived from set arrival order, and an old set adopting a new condition rewrote it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/silences.test.ts`) · **Status:** **fixed 20 October** in
+`signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`
+
+`silences.test.ts` holds a record of which silence set first brought each
+condition, by folding over the sets in **arrival order** and asserting that each
+set's conditions-no-earlier-set-reported equal its own declaration. Its note says
+plainly what the record is for:
+
+> the all-others form would delete the ninth's declaration and report that
+> nothing had ever brought it, which is the one fact this test exists to keep
+
+0301 adds `audiences-mixed` to `ChangeSilence`, which maps to
+`two-forms-unsplit`. The before-and-after reading is one of the **first five**
+sets, whose conditions are seeded into the fold as already-reported, and
+`two-forms-unsplit` was brought by the **eleventh** set the day before. So the
+seed swallowed it, the eleventh set's novelty computed as nothing, and its
+declaration of `["two-forms-unsplit"]` failed — the exact deletion quoted above,
+arriving by the route the note did not consider.
+
+**The cause: set arrival order was standing in for *(set, condition)* arrival
+order.** They are the same until a set already in the list gains a member, and
+then the proxy silently reassigns provenance to whichever set happens to sit
+earlier.
+
+**Fixed** by crediting a declared condition to its declarer whichever set
+reports it first, and by keeping it out of the first five's seed. An
+**undeclared** condition is in neither, so it still surfaces as the novelty of
+the first set to report it and still fails — which is the guard that matters.
+
+**The shape, for this lane's own method.** This is the second instance in two
+days of a verdict that does not survive the set growing: yesterday's was lesson
+28's hard-coded decision number, which the numbering reached. Both were records
+of *what was true when written* expressed as derivations from something that
+keeps moving. A test that holds provenance should state it, not infer it from an
+order.
+
+---
+## 2026-10-20 — a guard ordering claimed as a decision, twice in two days, where a single window cannot reach both guards
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**fixed on filing** in `signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`
+— the prose was corrected and the test that was supposed to prove the ordering
+was replaced
+
+0301 adds `audiences-mixed` to `ChangeSilence`, below `crossesAudiences` in
+`readingChangeOf`. The member's doc comment, the record and the plan all said it
+is checked **after** `different-audiences` *because two provable populations
+outrank one unreadable window*.
+
+**That is not a decision, because the two states cannot both apply.**
+`crossesAudiences` is true only where both sides name an audience and the two
+differ; a mixed side names none. A side that names one **and** holds two forms in
+its census reads as `one`, because an audience asked for always wins (0300). So
+the two partition the window, and swapping the guards changes nothing on any
+input.
+
+**Found by a mutation that survived.** The mutation moved the mixed check above
+`crossesAudiences` and every test passed. The test written for that precedence
+was passing for the wrong reason: its fixture named an audience on the mixed
+side, which made that side `one`, so the mutation was a no-op against it. It is
+replaced by one asserting the partition — a named side is `different-audiences`
+and an unnamed one is `audiences-mixed`, from the same window of counters — which
+is the true fact in the neighbourhood.
+
+**This is the second instance in two days.** 0300 claimed that the funnel
+comparison's refusal happening *before* the pairing mattered; it does not,
+because `refusing()` discards the pairing's output whatever order it is reached
+in, and the mutation meant to prove it inserted unreachable code and survived.
+Both times the mutation that was supposed to prove an ordering was the one that
+survived, and both times the real content was elsewhere.
+
+**The rule, for this lane.** A guard ordering is a decision only if **a single
+input can reach both guards**. Write the fixture that reaches both before writing
+the sentence that ranks them; if you cannot write it, the ordering is reading
+order and the comment should say so. The orderings in this change that *are* real
+— the refusal before the view floor, in two readings — were each caught three
+times, by fixtures where one window reaches both.
+## 2026-10-21 — three comparisons still called a window of two forms *a window nobody read*, and the fix was on an open pull request rather than missing
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/copy-change.ts`, `pace-change.ts`, `action-change.ts`) ·
+**Status:** **closed on filing by `signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`**
+as §45 — written down first because the reason it was nearly deferred is the
+useful part, and the reason it was not is governance rather than engineering:
+the branch that carries the blocker is this lane's own open one, and a lane with
+an open pull request pushes onto it. Original status: open — the unit designed,
+the fault confirmed, and blocked on #687 landing rather than on a decision
+
+0301 took `audiences-mixed` into `readingChangeOf` and `unsplit` into the two
+deployment orders, because a window of two forms read as neither publishes *the
+same nought a page nobody opened publishes*. **Three comparisons of the same
+shape were not reached**, and they are of one shape with the one that was:
+`copyChangeOf`, `paceChangeOf` and `actionChangeOf` each take two
+`PageReading`s, each guards `different-trees` and then `crossesAudiences`, and
+neither guard can see a side read as neither.
+
+**What they publish instead, confirmed by reading the paths.** A mixed reading
+has every part `unknown` and a view floor of nought (`parts.ts`), so each of the
+three falls to its own `nothing-measured` — *one of the two windows held no page
+views*. Both forms were measured. The deployment is sent to look for a broken
+sender, and the window it is actually holding wants one line of its own code
+(`byAudience`).
+
+**What the unit is, and it is small.** One guard beside the existing two in each
+of the three, taken from `funnel-change.ts` verbatim
+(`audienceScopeRead(…).reading === "mixed"`), refusing through each module's own
+`refusing()` helper so the census goes with it — as `different-audiences`
+already does there, for the reason that module gives: *the census is the half
+that would look most like an answer*. Then `audiences-mixed` in three published
+vocabularies and three cases in `silences.ts` mapping to the existing
+`two-forms-unsplit`. No new condition, no new subject, nothing collected.
+
+**Why it was not taken today, and the reason is mechanical rather than a
+judgement.** `copy-change` is one of the five sets that predate the arrival
+table in `silences.test.ts`, and `pace-change` and `action-change` both arrive
+in that table **before** `funnel-change`. So any of the three adopting
+`two-forms-unsplit` makes `funnel-change`'s declaration of it stop being novel,
+and the provenance fold reports that no set ever brought it — the exact deletion
+that test's own note says it exists to prevent. #687 fixes that, generally and
+not for its own case: `BROUGHT_LATER` credits a declared condition to its
+declarer whichever set reports it first. With that on `main` this unit needs
+**no further change to `silences.test.ts` at all**. Writing the same fix a
+second time in the same lines, on a branch that cannot be stacked on #687, would
+have handed the merge a conflict in the one file both changes rewrite — which is
+how 0300 came to leave `pageViewsFor` alone, for the same reason.
+
+**What closing it took, beyond the guards.** Two orderings that are real —
+a page saying nothing before the unsplit window, and the window before the view
+floor — and one that needed an argument rather than a cause: in
+`actionChangeOf` a mixed side and a sender that does not walk are reachable at
+once and neither causes the other, so the state whose **remedy is a call** is
+reported first, because taking it reveals the other and taking the other does
+not reveal it. `silences.test.ts` needed **no** further change, exactly as
+predicted above.
+
+---
+## 2026-10-21 — two forms of a page can now be compared, and the same question about its words and its actions is a mirror of it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/forms.ts`) · **Status:** open — **a gap named by the record that
+filled the first of three**, nothing broken and nothing asked of anybody
+
+0302 compares two forms of one page on each part's **reach**. The same join
+answers two more questions with no new input and no new decision, because the
+counters are already there and every clause of 0302 carries over unchanged:
+
+- **the words a part says, form by form** — `copyChangeOf`'s shape, over
+  `PartReading.copy` rather than over two revisions. A form whose deltas reworded
+  a band is the interesting case, and *the pro form says four hundred words here
+  and the free form says ninety* is a sentence a deployment would act on.
+- **what readers did inside a part, form by form** — `actionChangeOf`'s shape,
+  over `engaged ÷ reached` (0242, 0265).
+
+**What makes them a mirror rather than new work.** The six clauses that were
+decisions in 0302 — the tree and revision held still, the symmetry, the share
+as the only comparable figure, the unshared parts stated rather than compared,
+nothing added up, and the three new silence conditions — are all about the
+**pair**, not about the counter. A second and third reading of this shape
+restate none of them: they import the same guards and publish the same census,
+with their own figure in the middle.
+
+**The honest reason to file rather than build.** Three readings of one shape in
+one unit is how a rule comes to be spelled three times and agreed with by two of
+them — which is what `readingKeyOf` and `formKeyOf` exist to stop. The right
+order is one reading, then a second that proves the guards are importable rather
+than copyable, and `audiences.ts` is where anything the two share is published
+from.
+
+---
+## 2026-10-21 — a form comparison publishes a count of parts falling each way and no screen reads it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one reading, filed the way 0284 filed the dimension itself**
+
+`formComparisonOf` (0302) answers *do these two audiences read this page alike*,
+and nothing draws it. It is the first reading in this subsystem whose two sides
+are two populations held against each other on purpose, so it is also the first
+whose card has no obvious shape.
+
+**Three things on it that a screen has to decide about, and two of them are
+traps.**
+
+- **The direction is a name and not a sign.** `gap` is an absolute distance and
+  `favours` is an audience id. A card that drew `gap` with a sign, or that put
+  `one` on the left as *before*, would print the opposite of the truth for half
+  its rows. The reason is in 0302 clause 2: there is no earlier side.
+- **`onlyIn` is not a skipped part.** A part only one form has is a part the
+  other form does not contain. Drawing it in the same list as a part both forms
+  have, with a nought beside it, is the one mistake that produces the most
+  confident wrong sentence here — *this audience ignores your pricing band*
+  about a band that audience was never served.
+- **There is no page-level figure and there will not be one** (0302 clause 5). A
+  card that wants a headline has `counted` — *eleven parts read better by the
+  skiers, three by the riders, four alike, six beyond saying* — and `sharpest`,
+  which is the row somebody acts on.
+
+**What it needs from nobody.** Every field is on the object a screen already
+holds once it has two readings, and splitting a window into those two readings
+is `byAudience`, which is a line of the surface's own code.
