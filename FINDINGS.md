@@ -57872,3 +57872,115 @@ the sentence that ranks them; if you cannot write it, the ordering is reading
 order and the comment should say so. The orderings in this change that *are* real
 — the refusal before the view floor, in two readings — were each caught three
 times, by fixtures where one window reaches both.
+## 2026-10-21 — three comparisons still call a window of two forms *a window nobody read*, and the fix is written on an open pull request rather than missing
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/copy-change.ts`, `pace-change.ts`, `action-change.ts`) ·
+**Status:** open — **the unit is designed, the fault is confirmed, and it is
+blocked on #687 landing rather than on a decision**
+
+0301 took `audiences-mixed` into `readingChangeOf` and `unsplit` into the two
+deployment orders, because a window of two forms read as neither publishes *the
+same nought a page nobody opened publishes*. **Three comparisons of the same
+shape were not reached**, and they are of one shape with the one that was:
+`copyChangeOf`, `paceChangeOf` and `actionChangeOf` each take two
+`PageReading`s, each guards `different-trees` and then `crossesAudiences`, and
+neither guard can see a side read as neither.
+
+**What they publish instead, confirmed by reading the paths.** A mixed reading
+has every part `unknown` and a view floor of nought (`parts.ts`), so each of the
+three falls to its own `nothing-measured` — *one of the two windows held no page
+views*. Both forms were measured. The deployment is sent to look for a broken
+sender, and the window it is actually holding wants one line of its own code
+(`byAudience`).
+
+**What the unit is, and it is small.** One guard beside the existing two in each
+of the three, taken from `funnel-change.ts` verbatim
+(`audienceScopeRead(…).reading === "mixed"`), refusing through each module's own
+`refusing()` helper so the census goes with it — as `different-audiences`
+already does there, for the reason that module gives: *the census is the half
+that would look most like an answer*. Then `audiences-mixed` in three published
+vocabularies and three cases in `silences.ts` mapping to the existing
+`two-forms-unsplit`. No new condition, no new subject, nothing collected.
+
+**Why it was not taken today, and the reason is mechanical rather than a
+judgement.** `copy-change` is one of the five sets that predate the arrival
+table in `silences.test.ts`, and `pace-change` and `action-change` both arrive
+in that table **before** `funnel-change`. So any of the three adopting
+`two-forms-unsplit` makes `funnel-change`'s declaration of it stop being novel,
+and the provenance fold reports that no set ever brought it — the exact deletion
+that test's own note says it exists to prevent. #687 fixes that, generally and
+not for its own case: `BROUGHT_LATER` credits a declared condition to its
+declarer whichever set reports it first. With that on `main` this unit needs
+**no further change to `silences.test.ts` at all**. Writing the same fix a
+second time in the same lines, on a branch that cannot be stacked on #687, would
+have handed the merge a conflict in the one file both changes rewrite — which is
+how 0300 came to leave `pageViewsFor` alone, for the same reason.
+
+**Take it as soon as #687 is on `main`.** Nothing else blocks it and nothing
+about it needs the maintainer.
+
+---
+## 2026-10-21 — two forms of a page can now be compared, and the same question about its words and its actions is a mirror of it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/forms.ts`) · **Status:** open — **a gap named by the record that
+filled the first of three**, nothing broken and nothing asked of anybody
+
+0302 compares two forms of one page on each part's **reach**. The same join
+answers two more questions with no new input and no new decision, because the
+counters are already there and every clause of 0302 carries over unchanged:
+
+- **the words a part says, form by form** — `copyChangeOf`'s shape, over
+  `PartReading.copy` rather than over two revisions. A form whose deltas reworded
+  a band is the interesting case, and *the pro form says four hundred words here
+  and the free form says ninety* is a sentence a deployment would act on.
+- **what readers did inside a part, form by form** — `actionChangeOf`'s shape,
+  over `engaged ÷ reached` (0242, 0265).
+
+**What makes them a mirror rather than new work.** The six clauses that were
+decisions in 0302 — the tree and revision held still, the symmetry, the share
+as the only comparable figure, the unshared parts stated rather than compared,
+nothing added up, and the three new silence conditions — are all about the
+**pair**, not about the counter. A second and third reading of this shape
+restate none of them: they import the same guards and publish the same census,
+with their own figure in the middle.
+
+**The honest reason to file rather than build.** Three readings of one shape in
+one unit is how a rule comes to be spelled three times and agreed with by two of
+them — which is what `readingKeyOf` and `formKeyOf` exist to stop. The right
+order is one reading, then a second that proves the guards are importable rather
+than copyable, and `audiences.ts` is where anything the two share is published
+from.
+
+---
+## 2026-10-21 — a form comparison publishes a count of parts falling each way and no screen reads it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**one reading, filed the way 0284 filed the dimension itself**
+
+`formComparisonOf` (0302) answers *do these two audiences read this page alike*,
+and nothing draws it. It is the first reading in this subsystem whose two sides
+are two populations held against each other on purpose, so it is also the first
+whose card has no obvious shape.
+
+**Three things on it that a screen has to decide about, and two of them are
+traps.**
+
+- **The direction is a name and not a sign.** `gap` is an absolute distance and
+  `favours` is an audience id. A card that drew `gap` with a sign, or that put
+  `one` on the left as *before*, would print the opposite of the truth for half
+  its rows. The reason is in 0302 clause 2: there is no earlier side.
+- **`onlyIn` is not a skipped part.** A part only one form has is a part the
+  other form does not contain. Drawing it in the same list as a part both forms
+  have, with a nought beside it, is the one mistake that produces the most
+  confident wrong sentence here — *this audience ignores your pricing band*
+  about a band that audience was never served.
+- **There is no page-level figure and there will not be one** (0302 clause 5). A
+  card that wants a headline has `counted` — *eleven parts read better by the
+  skiers, three by the riders, four alike, six beyond saying* — and `sharpest`,
+  which is the row somebody acts on.
+
+**What it needs from nobody.** Every field is on the object a screen already
+holds once it has two readings, and splitting a window into those two readings
+is `byAudience`, which is a line of the surface's own code.
