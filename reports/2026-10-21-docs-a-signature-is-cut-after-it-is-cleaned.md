@@ -263,12 +263,25 @@ last thing on its line, with nothing else running beside it.
 
 - framework: **233 files, 5,489 tests passed**
 - application: **348 files, 6,174 tests passed**
-- `findings:check`: 1,265 findings, 0 malformed
-- `reports:check`: 1,919 visuals, none over 1.1MB, 409 cited by no file
+- `findings:check`: 1,267 findings, 0 malformed
+- `reports:check`: 1,925 visuals, none over 1.1MB, 410 cited by no file
 - `prerender:check`: 133 prerendered pages, 1,851 text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
 Nothing failed, nothing was skipped, and no test was weakened.
+
+**Two full runs, and the second is the one quoted.** The first was green on the
+code alone, before the report, the findings entries and the pictures existed;
+the second was run over the finished tree with all of them in it, and the two
+test counts are identical. What was written after it is **this report's prose
+and nothing else** — the five numbers above and the preview URL at the foot,
+which cannot be known until the pull request exists. `findings:check` and
+`reports:check` are the two gate steps that read these files and both were
+re-run against the final tree. No file under `apps/` or `src/` was touched
+after the gate.
+
+Every exit code here was read out of a file written as the last thing on its
+line, with nothing piped into `tail` or `tee`.
 
 **Eight tests are new.** Five hold `publishedSignature` against written-out
 declarations — a type whose members each carry a cited comment, and one whose
