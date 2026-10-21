@@ -153,8 +153,14 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           <pre className="border-edge-subtle bg-surface-page m-0 overflow-x-auto rounded-md border p-3 font-mono text-[11px] leading-relaxed">
             {snippet}
           </pre>
-          <div>
+          <div className="flex flex-wrap items-center gap-4">
             <CopyButton text={snippet} label="Copy the snippet" />
+            <Link
+              href={`/portal/${projectId}/signals`}
+              className="text-ink text-xs no-underline hover:underline"
+            >
+              See what has arrived →
+            </Link>
           </div>
         </section>
 
