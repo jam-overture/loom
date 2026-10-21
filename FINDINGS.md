@@ -58229,3 +58229,88 @@ traps.**
 **What it needs from nobody.** Every field is on the object a screen already
 holds once it has two readings, and splitting a window into those two readings
 is `byAudience`, which is a line of the surface's own code.
+
+---
+## 2026-10-21 (evening) — the action half of the form comparison is built, the words half is still a mirror, and the guards are now imported rather than copyable
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/forms.ts`,
+`form-action.ts`) · **Status:** **half closed on filing** in
+`signals-46-what-readers-do-inside-a-page-form-by-form`, record
+[0303](decisions/0303-what-two-forms-readers-do-is-the-same-pair-at-a-different-counter-and-the-page-has-one-honest-figure.md)
+
+**Extends** this morning's entry *two forms of a page can now be compared, and
+the same question about its words and its actions is a mirror of it*, which named
+two readings and set the order: one, then a second proving the guards are
+importable rather than copyable, with `audiences.ts` as the place anything shared
+is published from.
+
+**The action half is done** as `formActionComparisonOf`, and the shared half of
+it came out as `FormPairRefusal` and `formPairOf` in `audiences.ts` — the two
+sides' order and the five states in which two readings are not two forms of one
+page. `FormComparisonSilence` is now `FormPairRefusal | "nothing-measured"` and
+`formComparisonOf` is the same function from its caller's side, which its own
+suite asserts by passing unchanged.
+
+**The words half stays open**, and it is cheaper than it was this morning: it
+costs its figure over `PartReading.copy` and its own silences, because the pair's
+six clauses are imported now rather than restated. Nothing about it is a decision.
+
+**Two things the second reading turned up that the first could not have**, both
+in 0303:
+
+- **The page has an honest figure here where §44 refuses one.** 0302 clause 5
+  refuses a page total because a mean over parts counts one reader once per part
+  they got through and because two forms have two sets of parts. Neither reason
+  reaches the root: every action is strictly inside it (0242), so its own row is
+  one division rather than a sum. A third reading over the words will **not**
+  inherit this — words partition a page and readers do not, so that one's page
+  figure is a different argument again.
+- **A counter with a withholding rule of its own is what makes the split
+  provable.** `PartAction.share` is absent in exactly the states its standing
+  calls `unknown`, so the pair's rules and the counter's rules stayed apart
+  without either module reaching into the other. That is the property to look for
+  when choosing which reading goes third.
+
+---
+## 2026-10-21 (evening) — `actionChangeOf` publishes a share ratio of nought across an unwalked later window, where the same nought is a filing artefact
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/action-change.ts`) · **Status:** open — found while building the
+reading that withholds it, and deliberately not fixed in the same unit because
+its argument is a different one
+
+`ActionChangeSilence.unwalked` names a window that holds uses and credits no
+reader with acting inside anything (0167). Every `PartAction.share` on such a
+side is a **nought that is a filing artefact**, not a reader who did nothing.
+`actionChangeOf` names the state and **leaves its ratios computed**, and
+`ratioOf` is asymmetric about it:
+
+```ts
+const ratioOf = (was: number | undefined, now: number | undefined): number | null =>
+  was === undefined || now === undefined || was === 0 ? null : now / was
+```
+
+An unwalked **earlier** window gives `was === 0` and the ratio comes back `null`,
+so that direction is already covered by accident. An unwalked **later** window
+gives `now === 0` against a real `was`, and the ratio comes back **`0`** on every
+part that bears an inside — *every band on this page collapsed to nothing* — with
+`movements.abandoned` and `mostAbandoned` populated to match. A surface drawing
+the rows and not reading `silence` prints a change that did not happen, and the
+half of the pair it is wrong about is the one a deployment is looking at.
+
+**Why it was not fixed here.** 0303 withholds the gap on both sides for a reason
+that is about **two populations**: the spurious nought reads as *this audience
+does nothing on your page*, and there is no second window to blame it on. In a
+before-and-after the two sides are two windows of one readership, so *this window
+does not report where actions happened* is a sentence a caller can act on with
+the rows still in front of it, and whether that is worth withholding a figure
+over is a judgement about what a screen should draw rather than a fault in the
+arithmetic. Taking it inside a unit about a different comparison would have been
+two decisions in one record.
+
+**What is left to decide**, and the first is cheap enough to do on its own:
+either withhold `shareRatio` on both sides while either window is unwalked, as
+0303 does and for the symmetry alone, or make `ratioOf` say why it is `null`
+rather than leaving two causes as one value. The second is the wider version of
+the same question and reaches `paceChangeOf` and `copyChangeOf` too, which is
+why it is not bundled in.

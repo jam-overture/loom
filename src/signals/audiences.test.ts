@@ -12,8 +12,11 @@ import {
   crossesAudiences,
   forAudience,
   audiencesOf,
+  describeFormPairRefusal,
   formKeyOf,
   formOf,
+  formPairOf,
+  FORM_PAIR_REFUSALS,
   inFormOrder,
   pagesOf,
   readingKeyOf,
@@ -411,5 +414,92 @@ describe("what a window of forms is of", () => {
 
   it("counts a form that named no audience as the page it is of", () => {
     expect([...pagesOf([{ treeId: TREE, audienceId: null }])]).toEqual([TREE])
+  })
+})
+
+/**
+ * The pairing rule two comparisons of two forms share (0302, 0303).
+ *
+ * Tested on the least a side can be — a page, a revision and a scope — because
+ * that is the whole of what the rule reads, and a fixture carrying counters
+ * would suggest it reads them.
+ */
+describe("formPairOf", () => {
+  const side = (
+    audienceId: typeof SKIERS | null,
+    audiences: readonly (typeof SKIERS)[],
+    revision = 7,
+    treeId = TREE
+  ) => ({ treeId, revision, audienceId, audiences })
+
+  const skiers = side(SKIERS, [SKIERS])
+  const riders = side(RIDERS, [RIDERS])
+
+  it("pairs two forms of one page at one revision, naming both populations", () => {
+    const pair = formPairOf(skiers, riders)
+
+    expect(pair.pairing).toBe("paired")
+    expect(pair.pairing === "paired" && pair.audiences).toEqual({ one: RIDERS, other: SKIERS })
+  })
+
+  /**
+   * The clause that makes a form comparison symmetric: there is no fact about
+   * which of two populations comes first, so the order is taken off the names
+   * before anything else is read.
+   */
+  it("puts the lower-sorting audience first whichever way round it was asked", () => {
+    expect(formPairOf(skiers, riders)).toEqual(formPairOf(riders, skiers))
+    expect(formPairOf(skiers, riders).one.audienceId).toBe(RIDERS)
+  })
+
+  it("refuses two pages before it looks at either population", () => {
+    const pair = formPairOf(skiers, side(RIDERS, [RIDERS], 7, OTHER_TREE))
+
+    expect(pair.pairing === "refused" && pair.refusal).toBe("different-pages")
+  })
+
+  it("refuses a side read as neither of two forms, before an unlabelled side", () => {
+    const pair = formPairOf(side(null, [SKIERS, RIDERS]), side(null, []))
+
+    expect(pair.pairing === "refused" && pair.refusal).toBe("unsplit")
+  })
+
+  it("refuses a side that names no audience at all", () => {
+    const pair = formPairOf(skiers, side(null, []))
+
+    expect(pair.pairing === "refused" && pair.refusal).toBe("unattributed")
+  })
+
+  it("refuses one audience handed in twice", () => {
+    const pair = formPairOf(skiers, side(SKIERS, [SKIERS]))
+
+    expect(pair.pairing === "refused" && pair.refusal).toBe("one-population")
+  })
+
+  /**
+   * Two forms of a page share a tree **and** a revision (0263), so a pair
+   * spanning two of them varies the tree as well as the readership — checked
+   * after the population states, because a caller told *two revisions* while
+   * also holding one audience twice would fix the wrong half.
+   */
+  it("refuses two revisions, and only once two populations are proven", () => {
+    const twoForms = formPairOf(skiers, side(RIDERS, [RIDERS], 8))
+    const oneForm = formPairOf(side(SKIERS, [SKIERS], 7), side(SKIERS, [SKIERS], 8))
+
+    expect(twoForms.pairing === "refused" && twoForms.refusal).toBe("different-revisions")
+    expect(oneForm.pairing === "refused" && oneForm.refusal).toBe("one-population")
+  })
+
+  it("carries both sides through a refusal, so a caller is told about the pair it handed in", () => {
+    const pair = formPairOf(skiers, side(null, []))
+
+    expect(pair.one).toBe(skiers)
+    expect(pair.other.audienceId).toBeNull()
+  })
+
+  it("gives every refusal a line of its own", () => {
+    expect(new Set(FORM_PAIR_REFUSALS.map(describeFormPairRefusal)).size).toBe(
+      FORM_PAIR_REFUSALS.length
+    )
   })
 })

@@ -4,6 +4,7 @@ import type { ActionChangeSilence } from "./action-change.js"
 import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
+import type { FormActionSilence } from "./form-action.js"
 import type { FormComparisonSilence } from "./forms.js"
 import type { FunnelChangeSilence } from "./funnel-change.js"
 import type { DeploymentChangeSilence } from "./deployment-change.js"
@@ -149,6 +150,7 @@ export type SilenceVocabulary =
   | "copy-change"
   | "deployment"
   | "deployment-change"
+  | "form-action"
   | "forms"
   | "funnel-change"
   | "library"
@@ -170,6 +172,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "copy-change",
     "deployment",
     "deployment-change",
+    "form-action",
     "forms",
     "funnel-change",
     "library",
@@ -200,6 +203,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     "copy-change": "comparison",
     deployment: "page",
     "deployment-change": "comparison",
+    "form-action": "comparison",
     forms: "comparison",
     "funnel-change": "comparison",
     library: "kind",
@@ -1178,6 +1182,40 @@ export const meaningOfFormComparisonSilence = (
       return meaning("forms", "two-revisions")
     case "nothing-measured":
       return meaning("forms", "no-view-reported")
+  }
+}
+
+/**
+ * What a comparison of what two forms' readers *did* reports (0303).
+ *
+ * **The nineteenth set, and the first since the fourth to bring no condition of
+ * its own.** That is the whole of what this entry is here to say. It reports
+ * seven states and every one of them was already in the table: five from the
+ * form comparison's own pairing rule, which it imports rather than restates,
+ * one from the comparison of what readers did, and the door's quiet window.
+ *
+ * A set that brings nothing is the shape worth having, because the alternative
+ * was seven more names for seven states a surface can already print one
+ * sentence for (0240) — and `no-action-credited` arriving a second time is the
+ * evidence that the condition the action comparison declared was about the
+ * **sender** rather than about that comparison.
+ */
+export const meaningOfFormActionSilence = (silence: FormActionSilence): SilenceMeaning => {
+  switch (silence) {
+    case "different-pages":
+      return meaning("form-action", "two-pages")
+    case "unsplit":
+      return meaning("form-action", "two-forms-unsplit")
+    case "unattributed":
+      return meaning("form-action", "no-audience-named")
+    case "one-population":
+      return meaning("form-action", "one-population")
+    case "different-revisions":
+      return meaning("form-action", "two-revisions")
+    case "unwalked":
+      return meaning("form-action", "no-action-credited")
+    case "nothing-measured":
+      return meaning("form-action", "no-view-reported")
   }
 }
 
