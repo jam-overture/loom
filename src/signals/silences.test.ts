@@ -19,6 +19,7 @@ import {
   describeSilenceCondition,
   describeSilenceSubject,
   distinctSilences,
+  FORM_COMPARISON_SILENCES,
   FUNNEL_CHANGE_SILENCES,
   KIND_ACTION_SILENCES,
   KIND_CHANGE_SILENCES,
@@ -38,6 +39,7 @@ import {
   meaningOfCopySilence,
   meaningOfDeploymentChangeSilence,
   meaningOfDeploymentSilence,
+  meaningOfFormComparisonSilence,
   meaningOfFunnelChangeSilence,
   meaningOfKindActionSilence,
   meaningOfKindChangeSilence,
@@ -161,6 +163,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
   ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
   ...DEPLOYMENT_CHANGE_SILENCES.map(meaningOfDeploymentChangeSilence),
+  ...FORM_COMPARISON_SILENCES.map(meaningOfFormComparisonSilence),
   ...FUNNEL_CHANGE_SILENCES.map(meaningOfFunnelChangeSilence),
   ...KIND_SILENCES.map(meaningOfKindSilence),
   ...KIND_ACTION_SILENCES.map(meaningOfKindActionSilence),
@@ -183,6 +186,7 @@ describe("what a reading means when it says nothing", () => {
         COPY_CHANGE_SILENCES.length +
         DEPLOYMENT_SILENCES.length +
         DEPLOYMENT_CHANGE_SILENCES.length +
+        FORM_COMPARISON_SILENCES.length +
         FUNNEL_CHANGE_SILENCES.length +
         KIND_SILENCES.length +
         KIND_ACTION_SILENCES.length +
@@ -288,6 +292,11 @@ describe("what a reading means when it says nothing", () => {
           DEPLOYMENT_CHANGE_SILENCES.map((of) => meaningOfDeploymentChangeSilence(of).condition),
           [],
         ],
+        [
+          "forms",
+          FORM_COMPARISON_SILENCES.map((of) => meaningOfFormComparisonSilence(of).condition),
+          ["no-audience-named", "one-population", "two-revisions"],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -331,6 +340,7 @@ describe("what a reading means when it says nothing", () => {
       "page",
       "comparison",
       "page",
+      "comparison",
       "comparison",
       "comparison",
       "kind",

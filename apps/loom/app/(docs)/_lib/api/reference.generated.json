@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8457,7 +8457,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9287,7 +9287,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9718,7 +9718,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9957,7 +9957,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 61,
+      "files": 62,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9970,7 +9970,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10986,6 +10986,83 @@
               "signature": "const nodeReadingsOf: (readings: ReaderReadings) => readonly NodeReading[]",
               "truncated": false,
               "summary": "Readings as rows, longest on screen first."
+            }
+          ]
+        },
+        {
+          "module": "signals/forms",
+          "title": "Forms",
+          "summary": "Two forms of one page, side by side.",
+          "symbols": [
+            {
+              "name": "FormComparisonSilence",
+              "kind": "type",
+              "signature": "type FormComparisonSilence =\n/**\n * The two readings are of different trees.\n *\n * Two pages are two pages, and two audiences do not make them one. Checked\n * first, as every reading here checks it first, because a caller holding two\n * pages wants to be told that before it is told anything about populations.\n */\n\"different-pages\"\n/**\n * One of the two windows holds two forms of the page and named neither.\n *\n * The state published as `AudienceScope.mixed`, and the one\n * refusal here whose remedy is\n * an instruction rather than a fact: **split the window with `byAudience` and\n * read each form on its own** — which is exactly what this comparison then\n * wants as its two sides. A side read as neither form holds no counters at\n * all, so without this every part of the other side would come back as a part\n * only that form has, and the census would read as *the deltas gave this\n * audience the whole page*.\n *\n * Checked before {@link FormComparisonSilence.unattributed}, and that order is\n * a real one: one side can be unlabelled while the other is unsplit. The\n * caller is told the one it can do something about.\n */\n | \"unsplit\"\n/**\n * One of the two windows named no audience at all.\n *\n * Every window written before the column existed, and every window a\n * caller builds by hand. It is one population read whole, which is the right\n * answer to every other question in this subsystem and is no answer at all to\n * this one: the subject here **is** the population, so a side that cannot name\n * its own has nothing to contribute to a comparison of two of them.\n *\n * This is the sharpest difference between this reading and a before-and-after.\n * There, a pair with an unlabelled side is compared and merely not provably of\n * one readership, because the audience is a confounder and refusing it\n * would withhold every comparison spanning the migration. Here the audience is\n * the question.\n */\n | \"unattributed\"\n/**\n * Both windows name one audience and it is the same one.\n *\n * There is one population and so there is no second form: what the caller is\n * holding is one reading handed in twice, or two windows of one form, and\n * neither is this question. **The only refusal in any set here for too few\n * populations rather than too many** — its sibling `two-audiences` refuses a\n * before-and-after for naming two, and the two sit either side of the one\n * thing each reading needs held still.\n *\n * Two windows of one form over two periods is a real question and it is\n * `changeOf`, which is where that caller is sent.\n */\n | \"one-population\"\n/**\n * The two readings are of two revisions of the page.\n *\n * The refusal that is this reading's whole discipline. Two forms of a page\n * share a tree **and a revision**, so two revisions means the pair\n * varies the tree as well as the readership and every figure would carry both\n * causes with nothing to separate them — which is the one thing a\n * before-and-after is built to avoid and this reading would otherwise do\n * silently.\n *\n * Checked after the three population states above, for the reason this reading\n * exists: without two provable populations there is no form comparison to\n * refuse on a revision, and a caller told *two revisions* when it is also\n * holding one audience twice would fix the wrong half.\n */\n | \"different-revisions\"\n/**\n * One of the two windows held no page views.\n *\n * **The one member here that is not a refusal**, and it is spelled as\n * `CopyChangeSilence.nothing-measured` is for the same reason: the parts\n * census is a fact about the two composed trees and stays true of a window\n * nobody read. *The pro form of this page has three bands the free form does\n * not, and nothing has been measured on either* is a sentence worth printing.\n * Every per-part reach on that side is `null`, so every\n * {@link ComparedForm.gap} is withheld and nothing falls either way.\n */\n | \"nothing-measured\";",
+              "truncated": false,
+              "summary": "Why a comparison of two forms answered nothing, or answered less than all of it."
+            },
+            {
+              "name": "FORM_COMPARISON_SILENCES",
+              "kind": "value",
+              "signature": "const FORM_COMPARISON_SILENCES: readonly FormComparisonSilence[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface that has to account for every absent figure."
+            },
+            {
+              "name": "describeFormComparisonSilence",
+              "kind": "function",
+              "signature": "const describeFormComparisonSilence: (silence: FormComparisonSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a figure is not there."
+            },
+            {
+              "name": "FormSide",
+              "kind": "type",
+              "signature": "type FormSide = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** `null` where the window named none, or named two with neither asked for. */\n    readonly audienceId: AudienceId | null;\n    /**\n     * That side's page-view floor, which is the denominator of every reach below.\n     *\n     * A floor rather than a count, for the reason `parts.ts` gives: distinct view\n     * counts cannot be added across rows, so the largest row is the most\n     * that can be said from counters alone.\n     */\n    readonly views: number;\n    /** Element nodes this form has, which two forms of one page need not share. */\n    readonly parts: number;\n};",
+              "truncated": false,
+              "summary": "One side of the comparison, as the window it was read from leaves it."
+            },
+            {
+              "name": "FormPartSide",
+              "kind": "type",
+              "signature": "type FormPartSide = {\n    readonly standing: PartStanding;\n    /** Distinct page views of this form that reported the part coming into view. */\n    readonly readers: number;\n    /** That side's own view floor, carried so the share below can be checked. */\n    readonly views: number;\n    /**\n     * {@link FormPartSide.readers} over {@link FormPartSide.views}, or `null`\n     * where that window held none.\n     *\n     * A ceiling on the share of that form's readers who reached the part:\n     * `reached` leans up by the views that straddled a rollup window and\n     * `views` leans down by being a floor, and the same lean is in both terms of\n     * each side. Above 1 is not clamped — a figure cut to fit its own ceiling is a\n     * fault made undrawable rather than visible.\n     */\n    readonly reach: number | null;\n};",
+              "truncated": false,
+              "summary": "What one side's window says about one part of it."
+            },
+            {
+              "name": "PartOfForm",
+              "kind": "type",
+              "signature": "type PartOfForm = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly role: PrimitiveRole | null;\n    /** The form this part is in. The other form does not have this node at all. */\n    readonly audienceId: AudienceId;\n    readonly side: FormPartSide;\n};",
+              "truncated": false,
+              "summary": "A part exactly one of the two forms has, with the form that has it named."
+            },
+            {
+              "name": "ComparedForm",
+              "kind": "type",
+              "signature": "type ComparedForm = {\n    readonly nodeId: NodeId;\n    /** The type {@link FormComparison.one} gives it; `disagreed` names the pair if the other differs. */\n    readonly type: PrimitiveType;\n    readonly role: PrimitiveRole | null;\n    readonly one: FormPartSide;\n    readonly other: FormPartSide;\n    /**\n     * The form whose readers reached it more often, or `null` where no claim\n     * stands.\n     *\n     * `null` with a {@link ComparedForm.gap} of nought is the two forms reaching\n     * it alike; `null` with a `gap` of `null` is nothing being sayable. The two\n     * are a long way apart and are deliberately not one value.\n     */\n    readonly favours: AudienceId | null;\n    /**\n     * The distance between the two reaches, which is never signed.\n     *\n     * `|one.reach − other.reach|`, with the direction in\n     * {@link ComparedForm.favours} rather than in the sign — because a sign is\n     * read against an order, and the order here is the alphabet of two audience\n     * names and means nothing.\n     *\n     * `null` where either side held no views **or** either side's standing is\n     * `unknown`: a reach of nought that is a missing counter is not a\n     * reader who did not arrive, and subtracting against it would publish the\n     * other side's whole reach as a difference between two populations.\n     */\n    readonly gap: number | null;\n};",
+              "truncated": false,
+              "summary": "A part both forms have, read by each form's own readers."
+            },
+            {
+              "name": "FormsCounted",
+              "kind": "type",
+              "signature": "type FormsCounted = {\n    /** Parts {@link FormComparison.one}'s readers reached more often. */\n    readonly one: number;\n    /** Parts {@link FormComparison.other}'s readers reached more often. */\n    readonly other: number;\n    /** Parts the two forms reached alike. */\n    readonly alike: number;\n    /** Parts where one side or the other cannot say. */\n    readonly unknown: number;\n};",
+              "truncated": false,
+              "summary": "How the shared parts fell, as a count over one set and never a mean."
+            },
+            {
+              "name": "FormComparison",
+              "kind": "type",
+              "signature": "type FormComparison = {\n    /** The side whose audience id sorts lower, or the first argument where no pair of names stands. */\n    readonly one: FormSide;\n    readonly other: FormSide;\n    /** Parts both forms have, in the reading order of {@link FormComparison.one}. */\n    readonly compared: readonly ComparedForm[];\n    /** Parts exactly one form has, by audience and then by node. */\n    readonly onlyIn: readonly PartOfForm[];\n    /**\n     * Shared nodes the two forms give different primitive types.\n     *\n     * Reported and not dropped, the way `LibraryReading.roleDisagreed` is: the\n     * two reaches are each their own form's and stay comparable, while a pair that\n     * is a band on one side and a card on the other is a fact about the deltas\n     * nobody would otherwise see.\n     */\n    readonly disagreed: readonly NodeId[];\n    readonly counted: FormsCounted;\n    /** The shared part with the widest gap, by node id where two tie; `null` where none can say. */\n    readonly sharpest: ComparedForm | null;\n    readonly silence: FormComparisonSilence | null;\n};",
+              "truncated": false,
+              "summary": "Two forms of one page held against each other."
+            },
+            {
+              "name": "formComparisonOf",
+              "kind": "function",
+              "signature": "const formComparisonOf: (one: PageReading, other: PageReading) => FormComparison",
+              "truncated": false,
+              "summary": "Hold two forms of one page against each other."
             }
           ]
         },
@@ -13041,7 +13118,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -13207,6 +13284,13 @@
               "summary": "What a comparison of two windows' funnels reports."
             },
             {
+              "name": "meaningOfFormComparisonSilence",
+              "kind": "function",
+              "signature": "const meaningOfFormComparisonSilence: (silence: FormComparisonSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two forms of one page reports."
+            },
+            {
               "name": "SilenceRelation",
               "kind": "type",
               "signature": "type SilenceRelation = \n/**\n * One condition about one subject: the two readings are silent for the same\n * reason about the same thing, and one sentence serves both.\n */\n\"one-state\"\n/**\n * One condition about two subjects.\n *\n * The same thing is true of a page and of one of its parts, or of a pair of\n * readings and of one side of it. Worth two sentences and never one: the\n * narrower is not evidence for the wider, and the wider does not say which\n * side it is about.\n */\n | \"one-reason\"\n/** Two conditions, which a surface has to print separately or choose between. */\n | \"unrelated\";",
@@ -13330,7 +13414,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13480,7 +13564,7 @@
       "files": 18,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13547,7 +13631,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -14144,7 +14228,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14218,7 +14302,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14697,7 +14781,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1700,
+        "packageNames": 1711,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
