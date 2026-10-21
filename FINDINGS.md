@@ -55223,8 +55223,14 @@ remedy that entry recommends is still the one to take, and until it is, a red
 ## 2026-10-15 — the API reference truncates a long signature mid-comment, and a citation past the cut is never lifted
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a hole in a
-check that is otherwise airtight**, met by a change that was nowhere near it
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** **closed, 21 October
+2026** by `docs-62-a-signature-is-cut-after-it-is-cleaned`, by the first of the
+two shapes this entry offered — the signature is cleaned and the cleaned text is
+cut, so `readerFacingSignature` is never handed a fragment. The second shape was
+taken as well, because a cut that lands in a comment still publishes half a
+sentence even when the number has gone: a comment the cut left open is dropped
+rather than published. Eight of the twelve cut signatures on the site were
+ending in one; none is now
 
 `readerFacingSignature` lifts citations out of the comments inside a published
 declaration, and drops whole any comment whose grammar needs the number. The
@@ -56714,9 +56720,15 @@ holds.
 ## 2026-10-18 — a generated signature is truncated before its comments are cleaned, so a long union fails the decision-number check on a citation nobody added
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **it fired on
-this branch and was worked around in the source**, which is the wrong place for
-the fix and leaves the next lane to hit it doing the same thing
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** **closed, 21 October
+2026** by `docs-62-a-signature-is-cut-after-it-is-cleaned`. The remedy is the
+ordering this entry named: `extractSymbol` no longer cuts and then cleans, and
+the cap is counted against the cleaned text. **The two workarounds in `src/` are
+not needed and are nobody's to undo** — a shortened member comment is better
+reference prose either way, and the coin flip this entry predicted for the next
+lane to touch any of those types is gone. What is left open about truncation is
+two narrower entries of 21 October: where the cut lands when it lands in code
+rather than in a comment, and how little the page says about what is missing
 
 `readerFacingSignature` lifts a decision-record citation out of every comment
 inside a published signature, and drops a comment whole where the number is part
@@ -57679,6 +57691,124 @@ past the bracket, so from here I will write the report and record as paths rathe
 than links in a pull request body, and keep links for anything under about 120
 characters.
 
+
+---
+## 2026-10-21 — the cut now lands on a member boundary wherever it lands in a comment, and mid-token wherever it lands in code
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **the stated
+limit of what shipped on 21 October**, and a readability wart rather than a
+defect: nothing is wrong, no number reaches a page, and no test is failing
+
+A signature past the cap is now cleaned, cut, and has a comment the cut left
+open taken off the end. That last step is why ten of the twelve cut signatures
+on the site end on a complete member:
+
+```
+ChangeAnalysis      readonly unreadBindings: readonly UnreadBinding[];
+CopyReading         readonly typical: number | null;
+LIBRARY_CLASS       readonly cluster: "loom-cluster";
+SilenceCondition     | "no-reach-reported"
+```
+
+**It is a side effect rather than a rule, and the two it does not cover say
+so.** Dropping back to the comment's opening delimiter lands on a boundary
+because a member's comment sits above the member; where the cut falls in the
+code itself there is no comment to drop back to, and what the page gets is the
+character the count stopped on:
+
+```
+PrimitiveDefinition     readonly role?: P
+RenderDiagnostic        (four spaces, and then the ellipsis)
+```
+
+`readonly role?: P` is `readonly role?: PrimitiveRole` with the name cut in
+half. A reader can tell what happened — the ellipsis is on the next line — and
+nobody is misled. It is simply untidy in a place where the rest of the block is
+exact, and *exact* is the whole claim a generated signature makes.
+
+### Three shapes, costed
+
+1. **Cut back to the last complete line.** One `lastIndexOf("\n")` after the
+   comment step, and the two above become `readonly collapses: …` and whatever
+   member precedes the whitespace. It costs up to one line of content and makes
+   *the block ends where a line ends* true of all twelve rather than ten.
+   **The recommendation.** The cost worth naming is that it is a third rule
+   about the cut, and the cut now has two.
+2. **Cut back to the last member boundary** — the last `;` or `|` at brace
+   depth zero. Tidier in principle, and it means tracking depth through a
+   string the module otherwise treats as text, which is a parser where a line
+   count would do.
+3. **Leave it, written down.** Defensible: two of twelve, no reader misled, and
+   a third rule about the cut is a third thing to hold true. This entry is what
+   that choice costs — somebody meets `readonly role?: P` on the page and has to
+   come here to find out it is deliberate.
+
+**Recommendation: 1**, in this lane, not urgent, and worth doing when
+`extract.ts` is open for something else rather than on its own.
+
+---
+## 2026-10-21 — a cut signature says it was cut and never says how much is missing, and the worst of them shows a reader 29 of 168 members
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/api-reference.tsx`,
+`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a reader
+problem rather than a defect**, found while measuring the cap and not caused by
+anything that changed today
+
+Under a cut signature the page says:
+
+> Cut short here — the whole of it is longer than a page can usefully hold.
+
+That sentence is true of all twelve and is the same sentence for all twelve.
+Measured against the declaration each was read from, what is behind it is not
+the same thing twice:
+
+| export | declared | published | `readonly` members shown |
+| --- | --- | --- | --- |
+| `KindReachChange` | 6,424 | 5,966 | 26 of 27 |
+| `CopyReading` | 6,379 | 5,640 | 16 of 17 |
+| `RegistryAudit` | 6,827 | 5,652 | 24 of 26 |
+| `ChangeAnalysis` | 8,538 | 5,792 | 24 of 31 |
+| `RenderDiagnostic` | 13,111 | 6,002 | 40 of 83 |
+| `LIBRARY_CLASS` | 40,636 | 5,335 | **29 of 168** |
+
+A reader of `KindReachChange` is missing one member and a reader of
+`LIBRARY_CLASS` is missing a hundred and thirty-nine. They are told the same
+thing, in the same words, in the same grey, and **neither is told where the
+rest is**. The reference does not link a reader to the declaration it was read
+from — which it could, because `moduleOf` already knows the file.
+
+**It is a stylesheet in the worst case, which is the one that matters.**
+`LIBRARY_CLASS` is the map of every class name the primitive library writes, so
+*the list* is what it is: a reader who needs the name of the cluster class and
+finds the block cut at `"loom-cluster"` has no way to know whether the name they
+want is forty lines below the ellipsis or does not exist. That is the one
+question this page is for.
+
+### Four shapes, costed
+
+1. **Say how much, in the sentence that already exists.** `extractSymbol` has
+   both lengths in hand; carrying a count beside `truncated` is a field on
+   `ApiSymbol` and one clause on the page — *showing the first 29 of 168
+   members*. Cheap, honest, needs no new page. **The recommendation**, and it
+   leaves 2 and 3 as separate questions rather than deciding them.
+2. **Link to the declaration.** The module is known and the repository's own
+   source is already linked from Architecture through `OffSiteLink`, so the
+   mark for leaving the site exists. Worth doing *with* 1 rather than instead
+   of it: a count without a way to get the rest answers half the question.
+3. **Raise the cap for the list-shaped exports.** `LIBRARY_CLASS` at 40,636
+   characters is not a signature anybody reads top to bottom, and a 30,000-cap
+   version of it is not either. A class map wants a different presentation —
+   searchable, or grouped — which is a design question rather than a number.
+4. **Nothing.** What the twelve have in common is that they are long, and a
+   reader of a long type is used to being sent to the source. Defensible, and
+   it leaves `LIBRARY_CLASS` as a page that cannot answer the question it is
+   for.
+
+**Recommendation: 1, then 2.** Both are this lane's and neither is large. 3 is
+worth the maintainer's opinion before anybody builds it, because it is about
+what a reference page is for.
 ## 2026-10-21 — a hand-off is only visible when the field keeps its name, and a field renamed on the way is a courier the sweep still counts as a reader
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
