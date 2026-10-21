@@ -133,8 +133,23 @@ export const publishedEntries = (root: string = packageRoot): readonly Published
   })
 }
 
-/** Past this, a signature stops being something a person reads. */
-const SIGNATURE_CAP = 6000
+/**
+ * Past this, a signature stops being something a person reads.
+ *
+ * **Counted against what a reader gets**, which is the cleaned text and not the
+ * declaration it came from. The two differ by every citation lifted out of a
+ * member's comment and by every comment the rule withholds whole, so counting
+ * the declaration cut a signature partly on the strength of characters the
+ * page never shows.
+ *
+ * It is a smaller correction than it sounds and the measurement is worth
+ * keeping: on 21 October twelve published signatures were over this cap, and
+ * all twelve are still over it once cleaned. These types carry few citations
+ * for their length, so the cut moves by tens of characters rather than
+ * hundreds. What the order buys is in `publishedSignature` below, and it is
+ * not the cap — it is that nothing is ever cleaned *after* being cut.
+ */
+export const SIGNATURE_CAP = 6000
 
 /** A Zod schema's type, which is never the useful half of what it says. */
 const ZOD_TYPE = /^(?:z\.)?Zod/
@@ -275,6 +290,68 @@ export const readerFacingSignature = (signature: string): string => {
     .join("\n")
 }
 
+/**
+ * A doc comment the cut left open, taken off the end rather than published.
+ *
+ * A cut lands wherever the character count puts it, and inside a union whose
+ * members each carry a comment that is inside one of them about as often as
+ * not. What it leaves on the page is a `/**` that never closes and half a
+ * sentence under an ellipsis, which is not documentation anybody can use.
+ *
+ * It is also the one thing `readerFacingSignature` above cannot see. That rule
+ * matches a comment by its closing delimiter, so an unclosed comment is not a
+ * comment to it: no citation is lifted out of the fragment, and a fragment
+ * whose grammar needs a number is not withheld. Cleaning before cutting is
+ * what fixes that, and this is what keeps the cut itself readable.
+ *
+ * The member the half comment described goes with it, because the member is
+ * past the cut already — a comment with nothing under it is the shape this
+ * drops, not a comment separated from what it describes.
+ */
+const withoutAHalfComment = (cut: string): string => {
+  const opened = cut.lastIndexOf("/**")
+
+  if (opened === -1 || cut.includes("*/", opened)) return cut
+
+  return cut.slice(0, opened).trimEnd()
+}
+
+/**
+ * A signature as a reader gets it: **cleaned first, then cut.**
+ *
+ * The order is the whole of this function, and until 21 October it was the
+ * other way round — `extractSymbol` cut the declaration at the cap and handed
+ * the fragment to `readerFacingSignature`. Two lanes lost time to that twice
+ * in four days, and the failure they met named the wrong thing both times.
+ *
+ * What went wrong. A cut that lands inside a member's comment leaves an
+ * opening delimiter with no closing one, so the rule above does not recognise
+ * a comment there at all. A citation in that fragment is **not** lifted, and a
+ * comment whose grammar needs its number is **not** withheld — so the
+ * generated page carries a decision-record number the package had written
+ * correctly, `extract.test.ts` goes red naming the *type*, and whoever reads
+ * the failure goes looking for a citation nobody added. It is positional: the
+ * same comment passes a hundred characters earlier in the file, so the lane
+ * that meets it is usually a lane that did not touch the comment.
+ *
+ * Cleaning first makes both properties hold everywhere. The cleaned text has
+ * no number left in it, and cutting text can only take characters away, so
+ * there is no cut that can put one back.
+ *
+ * The cap moves with the order, and that is the point rather than a side
+ * effect: it now counts what the page shows. `truncated` means *what you are
+ * reading is cut*, which is what the line under the block on the page claims.
+ */
+export const publishedSignature = (
+  full: string
+): { readonly signature: string; readonly truncated: boolean } => {
+  const cleaned = readerFacingSignature(full)
+
+  if (cleaned.length <= SIGNATURE_CAP) return { signature: cleaned, truncated: false }
+
+  return { signature: `${withoutAHalfComment(cleaned.slice(0, SIGNATURE_CAP))}\n…`, truncated: true }
+}
+
 export const readerFacing = (summary: string): string => {
   /*
    * Closing punctuation only, and deliberately not the em dash: lifting
@@ -358,13 +435,12 @@ const extractSymbol = (symbol: ts.Symbol, checker: ts.TypeChecker, typesRoot: st
   if (declaration === undefined) return undefined
 
   const name = symbol.getName()
-  const full = signatureOf(name, declaration)
-  const truncated = full.length > SIGNATURE_CAP
+  const { signature, truncated } = publishedSignature(signatureOf(name, declaration))
 
   return {
     name,
     kind: kindOf(declaration),
-    signature: readerFacingSignature(truncated ? `${full.slice(0, SIGNATURE_CAP).trimEnd()}\n…` : full),
+    signature,
     truncated,
     summary: summaryOf(resolved, checker),
     module: moduleOf(declaration, typesRoot),

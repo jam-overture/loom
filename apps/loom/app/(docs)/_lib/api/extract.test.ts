@@ -14,9 +14,11 @@ import {
   packageRoot,
   publishedEntries,
   publishedPeers,
+  publishedSignature,
   readerFacing,
   readerFacingSignature,
   serializeReference,
+  SIGNATURE_CAP,
 } from "./extract"
 import { MODULE_TITLES, moduleTitle } from "./groups"
 import { apiAnchorFor, apiNavLabelFor, apiSlugFor, apiSymbolCount } from "./model"
@@ -668,6 +670,203 @@ describe("a doc comment a stranger has to read", () => {
   it("leaves a number that is not a decision record alone", () => {
     expect(readerFacing("Rounded to 0.05 of a second.")).toBe("Rounded to 0.05 of a second.")
     expect(readerFacing("The 1024-byte ceiling.")).toBe("The 1024-byte ceiling.")
+  })
+})
+
+/**
+ * What a cut can and cannot do to the rule above it.
+ *
+ * The declarations this is about are real and there are twelve of them, each a
+ * union or an object type whose members carry doc comments of their own and
+ * which runs past the cap for that reason. A cut lands inside one of those
+ * comments about as often as not, and for four days that was a live defect
+ * rather than a readability wart: a comment the cut had left open was not a
+ * comment to `readerFacingSignature`, so the citation in it was published
+ * exactly as the package wrote it and the generated page carried a
+ * decision-record number. Two lanes met it, four days apart, and the failure
+ * named the type rather than the member both times.
+ *
+ * So these are about an **order** rather than a rule, and the first of them
+ * asserts the order by running the old one beside the new one.
+ */
+describe("a signature longer than a page can hold", () => {
+  /**
+   * A type whose members each carry a cited comment, which is the shape all
+   * twelve of the over-cap declarations in this package have.
+   *
+   * Written out rather than taken from the package, so that the case stays put
+   * when somebody shortens the comment on `CopyReading`.
+   */
+  const citedMembers = (count: number): string =>
+    [
+      "type Reading = {",
+      ...Array.from({ length: count }, (_, index) =>
+        [
+          "    /**",
+          `     * Whether the ${index}th figure is there, and \`null\` where it is not (0038).`,
+          "     *",
+          "     * The paragraph under the first sentence is why these declarations run",
+          "     * past the cap at all: the reasoning is longer than the member.",
+          "     */",
+          `    readonly figure${index}: number | null;`,
+        ].join("\n")
+      ),
+      "}",
+    ].join("\n")
+
+  /** The same shape, with the number in the grammar rather than in parentheses. */
+  const withheldMembers = (count: number): string =>
+    [
+      "type Theme = {",
+      ...Array.from({ length: count }, (_, index) =>
+        [
+          "    /**",
+          `     * 0049's three ids, of which this is the ${index}th.`,
+          "     */",
+          `    readonly id${index}: string;`,
+        ].join("\n")
+      ),
+      "}",
+    ].join("\n")
+
+  /** An opening delimiter with no closing one after it: the shape a cut leaves. */
+  const endsInAHalfComment = (signature: string): boolean => {
+    const opened = signature.lastIndexOf("/**")
+
+    return opened !== -1 && !signature.includes("*/", opened)
+  }
+
+  /**
+   * The ordering, stated as the difference it makes.
+   *
+   * The first expectation is the defect — it is what this file did until
+   * 21 October, written out here so that the fix is held against it rather
+   * than against nothing. Put the cut back before the clean and the second
+   * expectation fails on the same string.
+   */
+  it("lifts a citation out of the comment the cut lands in, which cutting first could not", () => {
+    const declaration = citedMembers(30)
+
+    expect(declaration.length).toBeGreaterThan(SIGNATURE_CAP)
+
+    const cutFirst = readerFacingSignature(`${declaration.slice(0, SIGNATURE_CAP).trimEnd()}\n…`)
+
+    expect(DECISION_NUMBER.test(cutFirst), "cut first, then cleaned").toBe(true)
+    expect(endsInAHalfComment(cutFirst), "cut first, then cleaned").toBe(true)
+
+    const { signature, truncated } = publishedSignature(declaration)
+
+    expect(DECISION_NUMBER.test(signature), "cleaned first, then cut").toBe(false)
+    expect(endsInAHalfComment(signature), "cleaned first, then cut").toBe(false)
+    expect(truncated).toBe(true)
+  })
+
+  /**
+   * The other half of the rule, and the one the cut used to hide altogether.
+   *
+   * A comment whose grammar needs its number is withheld whole. Cut first and
+   * the fragment is not a comment, so it is not withheld — the number reaches
+   * the page as half a sentence, which is the one case the rule exists for.
+   */
+  it("withholds a comment whose grammar needs the number even where the cut falls in it", () => {
+    const { signature } = publishedSignature(withheldMembers(120))
+
+    expect(DECISION_NUMBER.test(signature)).toBe(false)
+    expect(signature).not.toContain("/**")
+  })
+
+  /**
+   * The cap counts what the page shows.
+   *
+   * 120 withheld comments are some seven kilobytes of declaration and nothing
+   * at all on the page, so a cap counting the declaration would cut this type
+   * mid-way through its members for characters a reader never sees. Every
+   * member is on the page instead, and the block is not marked cut short.
+   */
+  it("does not cut a declaration whose length is all in comments the page withholds", () => {
+    const declaration = withheldMembers(120)
+
+    expect(declaration.length).toBeGreaterThan(SIGNATURE_CAP)
+
+    const { signature, truncated } = publishedSignature(declaration)
+
+    expect(truncated).toBe(false)
+    expect(signature).toContain("readonly id119: string;")
+    expect(signature).not.toContain("…")
+  })
+
+  it("leaves a signature that fits exactly as the rule leaves it", () => {
+    const signature = "const applyDelta: (tree: LoomTree, delta: TreeDelta) => Result<LoomTree, TreeError>"
+
+    expect(publishedSignature(signature)).toEqual({ signature, truncated: false })
+  })
+
+  it("keeps everything above the comment it dropped", () => {
+    const { signature } = publishedSignature(citedMembers(30))
+
+    expect(signature).toContain("readonly figure0: number | null;")
+    expect(signature.endsWith("\n…")).toBe(true)
+    expect(signature.length).toBeLessThanOrEqual(SIGNATURE_CAP + 2)
+  })
+})
+
+describe("every signature the generated file publishes", () => {
+  /**
+   * The sweep, which is what holds the twelve real declarations rather than
+   * the written-out one above.
+   *
+   * It is a claim about the file the pages read, so it catches a cut landing
+   * in a comment whoever is adding a member this week has never looked at —
+   * which is how both instances of this arrived.
+   */
+  it("never ends in a comment the cut left open", () => {
+    const open: string[] = []
+
+    for (const entry of apiEntries) {
+      for (const group of entry.groups) {
+        for (const symbol of group.symbols) {
+          const opened = symbol.signature.lastIndexOf("/**")
+
+          if (opened !== -1 && !symbol.signature.includes("*/", opened)) {
+            open.push(`${symbol.name} (${group.module})`)
+          }
+        }
+      }
+    }
+
+    expect(open, "a comment with no end reached the page").toEqual([])
+  })
+
+  /** Which is to say: the cap is a cap on the text, not on the declaration. */
+  it("is within the cap, with two characters for the ellipsis that says it was cut", () => {
+    for (const entry of apiEntries) {
+      for (const group of entry.groups) {
+        for (const symbol of group.symbols) {
+          expect(symbol.signature.length, symbol.name).toBeLessThanOrEqual(SIGNATURE_CAP + 2)
+
+          if (!symbol.truncated) {
+            expect(symbol.signature.length, symbol.name).toBeLessThanOrEqual(SIGNATURE_CAP)
+            expect(symbol.signature.endsWith("\n…"), symbol.name).toBe(false)
+          }
+        }
+      }
+    }
+  })
+
+  /**
+   * And that the cut ones are really cut, so the sentence under the block on
+   * the page is true of every block that carries it.
+   */
+  it("says a signature was cut short only where it was", () => {
+    const cut = apiEntries.flatMap((entry) =>
+      entry.groups.flatMap((group) => group.symbols.filter((symbol) => symbol.truncated))
+    )
+
+    expect(cut.length).toBeGreaterThan(0)
+
+    for (const symbol of cut) {
+      expect(symbol.signature.endsWith("\n…"), symbol.name).toBe(true)
+    }
   })
 })
 

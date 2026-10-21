@@ -1,0 +1,29 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-10-21-docs-a-signature-is-cut-after-it-is-cleaned-wide-copy-reading",
+      "viewport": "wide",
+      "waitFor": "#s-CopyReading",
+      "do": [{ "scrollTo": "#s-CopyReading p.text-ink-faint" }],
+      "measure": ["#s-CopyReading p.text-ink-faint"]
+    },
+    {
+      "path": "/docs/api-reference/primitives",
+      "out": "2026-10-21-docs-a-signature-is-cut-after-it-is-cleaned-wide-library-class",
+      "viewport": "wide",
+      "waitFor": "#s-LIBRARY_CLASS",
+      "do": [{ "scrollTo": "#s-LIBRARY_CLASS p.text-ink-faint" }],
+      "measure": ["#s-LIBRARY_CLASS p.text-ink-faint"]
+    },
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-10-21-docs-a-signature-is-cut-after-it-is-cleaned-phone-copy-reading",
+      "viewport": "phone",
+      "waitFor": "#s-CopyReading",
+      "do": [{ "scrollTo": "#s-CopyReading p.text-ink-faint" }],
+      "measure": ["#s-CopyReading p.text-ink-faint"]
+    }
+  ]
+}
