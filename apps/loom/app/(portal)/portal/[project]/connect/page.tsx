@@ -9,7 +9,6 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
 import { acceptedFrom, signalAddress, snippetFor } from "@/app/(portal)/_lib/connecting"
-import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
@@ -17,7 +16,6 @@ import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
 
 import { CopyButton } from "./_components/copy-button"
-import { HostControls } from "./_components/host-controls"
 import { KeyControls } from "./_components/key-controls"
 
 /**
@@ -35,9 +33,9 @@ import { KeyControls } from "./_components/key-controls"
  *
  * **Anybody in the project sees it; only an owner changes it.** A key is
  * public, so showing it to a viewer gives them nothing a reader of the site
- * does not have. Replacing it stops every page carrying the old one, and so
- * does naming a site those pages are not on, which makes both an owner's
- * decision for the reason closing is.
+ * does not have. Replacing it stops every page carrying the old one, which is
+ * an owner's decision for the reason closing is. Where deliveries are taken
+ * from is said here and changed on *Settings*.
  *
  * The address is the deployment's as this request reached it, not
  * `siteOrigin()`: it is where the person reading this is talking to the
@@ -176,11 +174,12 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           <h2 className="text-sm font-medium tracking-tight">Where signals are taken from</h2>
           <p className="text-ink-muted text-xs">{acceptedFrom(application.host)}</p>
           {owner && (
-            <HostControls
-              key={application.host ?? ""}
-              projectId={projectId}
-              host={application.host}
-            />
+            <Link
+              href={`/portal/${projectId}/settings`}
+              className="text-ink self-start text-xs no-underline hover:underline"
+            >
+              Change it in Settings →
+            </Link>
           )}
         </section>
       </div>
@@ -190,9 +189,6 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
   return (
     <Screen>
       <div className="flex flex-col gap-2">
-        <Link href="/portal" className="text-ink-muted text-sm no-underline hover:underline">
-          ← {screenName("/portal")}
-        </Link>
         <h1 className="text-2xl tracking-tight">Connect your site</h1>
         {project.ok && <p className="text-ink-muted text-sm">{project.value.name}</p>}
       </div>

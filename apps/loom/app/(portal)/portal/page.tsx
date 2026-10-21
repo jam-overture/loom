@@ -5,10 +5,8 @@ import { portalMemberships } from "@/app/(portal)/_lib/auth/account-store"
 import { actorSchema } from "@/app/(portal)/_lib/auth/accounts"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
-import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
+import { projectHome, projectTabs } from "@/app/(portal)/_lib/project-tabs"
 import { workspaceFor, type ProjectGroup } from "@/app/(portal)/_lib/workspace"
-
-import { ClosingControls } from "./_components/closing-controls"
 
 /**
  * The workspace: the projects you hold a role in, and what is in them.
@@ -50,8 +48,10 @@ import { ClosingControls } from "./_components/closing-controls"
  *
  * So the card says what is true: the project, who you are in it, and the
  * applications under it with the ids and hosts they really carry — and the way
- * to its two screens: *Signals*, what has arrived, which a closed project keeps;
- * and, while it is open, *Connect your site*.
+ * into it. The name opens the project, and the project's own tabs are listed
+ * underneath, so every screen a project has is one click from here. Closing and
+ * reopening live on a project's *Settings*, with everything else an owner
+ * changes, rather than on a card that is mostly read.
  *
  * ## Closed projects are below, not hidden
  *
@@ -76,7 +76,12 @@ const ProjectCard = ({ group, closed }: { group: ProjectGroup; closed?: boolean 
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium tracking-tight">{group.project.name}</span>
+          <Link
+            href={projectHome(group.project.projectId)}
+            className="text-ink text-sm font-medium tracking-tight no-underline hover:underline"
+          >
+            {group.project.name}
+          </Link>
           <span className="text-ink-muted font-mono text-[11px]">{group.project.projectId}</span>
         </div>
         <RoleBadge role={group.role} />
@@ -108,30 +113,11 @@ const ProjectCard = ({ group, closed }: { group: ProjectGroup; closed?: boolean 
 
       {group.applications.length > 0 && (
         <div className="border-edge-subtle flex flex-wrap gap-x-4 gap-y-1 border-t pt-3 text-sm">
-          <Link
-            href={`/portal/${group.project.projectId}/signals`}
-            className="text-ink no-underline hover:underline"
-          >
-            Signals →
-          </Link>
-          {closed !== true && (
-            <Link
-              href={`/portal/${group.project.projectId}/connect`}
-              className="text-ink no-underline hover:underline"
-            >
-              Connect your site →
+          {projectTabs(group.project.projectId).map((tab) => (
+            <Link key={tab.href} href={tab.href} className="text-ink no-underline hover:underline">
+              {tab.label} →
             </Link>
-          )}
-        </div>
-      )}
-
-      {mayAdminister(group.role) && (
-        <div className="border-edge-subtle border-t pt-3">
-          <ClosingControls
-            projectId={group.project.projectId}
-            name={group.project.name}
-            closedAt={group.project.closedAt}
-          />
+          ))}
         </div>
       )}
     </div>

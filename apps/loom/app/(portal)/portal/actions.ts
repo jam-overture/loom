@@ -76,7 +76,7 @@ export const closeProjectAction = async (
 
   if (!closed.ok) return { detail: describeClosingError(closed.error) }
 
-  revalidatePath("/portal")
+  revalidatePath("/portal", "layout")
 
   return {}
 }
@@ -102,7 +102,7 @@ export const reopenProjectAction = async (
 
   if (!reopened.ok) return { detail: "That project could not be reopened." }
 
-  revalidatePath("/portal")
+  revalidatePath("/portal", "layout")
 
   return {}
 }
