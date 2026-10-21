@@ -227,6 +227,9 @@ conflicts to resolve. `decisions/README.md` was regenerated with
 and never reflowed. `docs/signals.md` gained §46 at the one anchor and one row in
 the summary table.
 
-Preview: the branch alias, which Vercel's own comment on the pull request
-carries. Nothing in this unit draws a screen, so it is the branch deployed rather
-than something to look at.
+Preview:
+<https://loom-git-signals-46-what-rea-f741f4-jpizzolato36-6341s-projects.vercel.app>
+— taken from Vercel's own comment on #693 rather than guessed, and not opened
+from here, because this session's egress policy refuses that host. Nothing in
+this unit draws a screen, so it is the branch deployed rather than something to
+look at.
