@@ -7,11 +7,11 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { soleApplicationOf } from "@/app/(portal)/_lib/connecting"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { boundedReaderSignalJournal, boundedReaderTallyStore } from "@/app/_lib/app/bounded-store"
+import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
 /**

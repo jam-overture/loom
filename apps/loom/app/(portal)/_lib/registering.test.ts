@@ -4,6 +4,7 @@ import {
   faultFor,
   hostFrom,
   nameFromRepository,
+  readHost,
   readRegistration,
   readRename,
   repositoryFrom,
@@ -33,6 +34,25 @@ describe("the host somebody typed", () => {
 
   it("is absent when nothing was typed", () => {
     expect(hostFrom("   ")).toBeUndefined()
+  })
+})
+
+describe("a host on its own, as the Connect screen reads it", () => {
+  it("takes the host out of what was pasted", () => {
+    expect(readHost("https://www.loomjs.org/docs")).toEqual({ ok: true, value: "www.loomjs.org" })
+  })
+
+  /** An empty box is the absence of a host, which the action turns into *any site*. */
+  it("reads an empty box as no host", () => {
+    expect(readHost("  ")).toEqual({ ok: true, value: undefined })
+    expect(readHost(null)).toEqual({ ok: true, value: undefined })
+  })
+
+  it("says what is wrong with something that is not a host", () => {
+    expect(readHost("not a host")).toEqual({
+      ok: false,
+      detail: "That does not look like a host. Something like shop.example.com.",
+    })
   })
 })
 
@@ -139,11 +159,7 @@ describe("what somebody filled in", () => {
     expect(read.ok).toBe(false)
     if (read.ok) return
 
-    expect(read.faults.map((fault) => fault.field).sort()).toEqual([
-      "host",
-      "name",
-      "repository",
-    ])
+    expect(read.faults.map((fault) => fault.field).sort()).toEqual(["host", "name", "repository"])
   })
 
   it("refuses a name longer than a list can show", () => {
