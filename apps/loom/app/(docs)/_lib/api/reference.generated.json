@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8457,7 +8457,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9287,7 +9287,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9718,7 +9718,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9965,12 +9965,12 @@
           "avoids": [
             "zod"
           ],
-          "shared": 14,
+          "shared": 15,
           "files": 10
         }
       ],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9978,7 +9978,7 @@
           {
             "specifier": "@jam-overture/loom/signals/broadcast",
             "slug": "signals-broadcast",
-            "names": 14
+            "names": 15
           },
           {
             "specifier": "@jam-overture/loom/telemetry",
@@ -10748,6 +10748,13 @@
               "signature": "const DEFAULT_READER_SIGNAL_PATH = \"/api/reader-signals\"",
               "truncated": false,
               "summary": "Where a delivery goes when the host has no opinion."
+            },
+            {
+              "name": "BATCH_CONTENT_TYPE",
+              "kind": "value",
+              "signature": "const BATCH_CONTENT_TYPE = \"text/plain;charset=UTF-8\"",
+              "truncated": false,
+              "summary": "What a batch is labelled as on the wire: **plain text, which happens to be JSON**."
             },
             {
               "name": "SendBeacon",
@@ -13323,7 +13330,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13331,7 +13338,7 @@
           {
             "specifier": "@jam-overture/loom/signals",
             "slug": "signals",
-            "names": 14
+            "names": 15
           }
         ],
         "collisions": []
@@ -13420,6 +13427,13 @@
               "summary": "Where a delivery goes when the host has no opinion."
             },
             {
+              "name": "BATCH_CONTENT_TYPE",
+              "kind": "value",
+              "signature": "const BATCH_CONTENT_TYPE = \"text/plain;charset=UTF-8\"",
+              "truncated": false,
+              "summary": "What a batch is labelled as on the wire: **plain text, which happens to be JSON**."
+            },
+            {
               "name": "SendBeacon",
               "kind": "type",
               "signature": "type SendBeacon = (url: string, body: Blob) => boolean;",
@@ -13466,7 +13480,7 @@
       "files": 18,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13533,7 +13547,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -14130,7 +14144,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14204,7 +14218,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14683,7 +14697,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1699,
+        "packageNames": 1700,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

@@ -10,6 +10,8 @@ import {
   type ApplicationId,
 } from "@jam-overture/loom/store"
 
+import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
+import { issueIngestKey } from "@/app/_lib/reader-signals/keys"
 import { portalMemberships } from "@/app/(portal)/_lib/auth/account-store"
 import { actorSchema } from "@/app/(portal)/_lib/auth/accounts"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -27,7 +29,7 @@ import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
  * had never been added to, because there is nothing left to attach.
  *
  * The rules live in `_lib/registering.ts` and are a function of what was typed;
- * this is the part that cannot be tested without a request — a session, three
+ * this is the part that cannot be tested without a request — a session, four
  * stores and a redirect.
  */
 
@@ -133,10 +135,21 @@ export const registerApplication = async (
   }
 
   /**
-   * The workspace, which is where the project now is. It carries the id so the
-   * screen can say which one is new, when it learns to; the id is not the path,
-   * because the screen that took one was deleted in unit 0 and
-   * `destinations.test.ts` asserts what this redirects to.
+   * **The key, minted with the project** (0298 clause 1), so that the screen
+   * this lands on has a snippet to show rather than a step to take.
+   *
+   * Last, and the one write here whose failure is not reported as one. The
+   * project is registered and is its author's by now; a key that could not be
+   * saved leaves a project with no key, which is a state the screen below
+   * already shows — *No key yet*, with the button that makes one — rather than
+   * a broken registration. Reporting it here instead would invite registering
+   * again, and that makes a second project.
    */
-  redirect(`/portal?registered=${projectId}`)
+  await issueIngestKey(appIngestKeys)(applicationId, Date.now())
+
+  /**
+   * Where the project is connected, which is the next thing anybody who just
+   * registered one does. `destinations.test.ts` asserts the screen exists.
+   */
+  redirect(`/portal/${projectId}/connect`)
 }
