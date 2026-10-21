@@ -1,7 +1,7 @@
 import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 
-import { audiencesIn } from "./audiences.js"
+import { audienceScopeOf, audiencesIn } from "./audiences.js"
 import type { ReaderSignalBatch } from "./signal.js"
 
 /**
@@ -510,9 +510,26 @@ export const pageViewsFor = (
   const here = rows.filter(
     (row) => row.treeId === where.treeId && row.revision === where.revision
   )
-  const audience = where.audienceId ?? null
+  /**
+   * Taken from `audienceScopeOf` rather than spelled here, which is the fourth
+   * and last of the readings that pick a page's rows out of a window to read
+   * the rule from one place (0300). It was spelled here because this one was
+   * being rewritten the same night the rule was published (0299).
+   *
+   * **The door is the one of the four that answers `mixed` by summing**, and
+   * that is why the branch is written out rather than left to fall past a
+   * `null`: arrivals are counted once per page view and a reader who arrived
+   * arrived once whichever form they were served, so two forms' doors add to
+   * one deployment's arrivals (0297, 0299). A page reading and a funnel reading
+   * refuse the same window, because a node counter filed under two forms is one
+   * number about two pages (0290). Two opposite answers to one case is the
+   * reason the case is worth a member.
+   */
+  const scope = audienceScopeOf(audiencesIn(here), where.audienceId ?? undefined)
   const matching =
-    audience === null ? here : here.filter((row) => row.audienceId === audience)
+    scope.reading === "mixed" || scope.audienceId === null
+      ? here
+      : here.filter((row) => row.audienceId === scope.audienceId)
   /**
    * Keyed by the audience, which is what the store keeps one row per (0284):
    * two forms' doors are two rows and one arrival count, and keying them by the
@@ -525,7 +542,15 @@ export const pageViewsFor = (
   }
 
   return {
-    measured: summedOf(where, audience, [...first.values()]),
+    /**
+     * The audience published is the one the **asking** named and never
+     * `scope.audienceId`, which fills a single-membered census in. A window
+     * holding one form today is not a reading of one form (0297, 0299), and the
+     * scope collapses *asked for* and *the only one there* into one member
+     * because the two readings that refuse want them handled alike. This one
+     * publishes the field, so it wants them apart.
+     */
+    measured: summedOf(where, where.audienceId ?? null, [...first.values()]),
     foreign: rows.length - here.length,
     otherAudience: here.length - matching.length,
     duplicated: matching.length - first.size,

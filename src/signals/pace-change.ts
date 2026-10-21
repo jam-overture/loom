@@ -4,6 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
 import {
+  audienceScopeRead,
   comparedAudiencesOf,
   crossesAudiences,
   type ComparedAudiences,
@@ -147,6 +148,34 @@ export type PaceChangeSilence =
    */
   | "wordless"
   /**
+   * One of the two windows holds two forms of the page and named neither.
+   *
+   * The state the before-and-after reading and the two deployment orders took
+   * the morning before (0301), in one of the three readings that record did not
+   * reach. Without it this comparison published `nothing-measured` — *one of the two windows
+   * held no page views* — of a window that held plenty: it held two forms of
+   * them. A page reading read as neither has a view floor of nought with full
+   * counters behind it (`parts.ts`), so the floor alone cannot tell a window
+   * nobody read from a window nobody split, and the two sentences send a
+   * deployment to opposite places: one to look for a broken sender, the other
+   * to split the window and read twice, which is a call away.
+   *
+   * **The word side still answers**, which is the half `nothing-measured`
+   * leaves standing and for its reason: what the change did to the time the
+   * page asks for is a fact about the two trees and about no counter. Every
+   * figure about readers is withheld, and the two pace readings on the
+   * comparison stay honest about the windows they were each handed.
+   *
+   * **It cannot co-occur with `different-audiences`**, so the order between the
+   * two is not observable: `crossesAudiences` needs an audience on both sides
+   * and a mixed side has none, while a side that names one and holds two in its
+   * census reads as `one`, because an audience asked for always wins (0300).
+   * The order that does matter is **after `wordless` and before the view
+   * floor**, for the reason the before-and-after gives: a page saying nothing
+   * survives the remedy, and the floor is this state's own symptom.
+   */
+  | "audiences-mixed"
+  /**
    * One of the two windows held no page views.
    *
    * Every part on that side is `unreached` (`pace.ts`), so there is no time to
@@ -172,6 +201,7 @@ export const PACE_CHANGE_SILENCES: readonly PaceChangeSilence[] =
     "different-trees",
     "different-audiences",
     "wordless",
+    "audiences-mixed",
     "nothing-measured",
     "dissolved",
   ])
@@ -185,6 +215,8 @@ export const describePaceChangeSilence = (silence: PaceChangeSilence): string =>
       return "the two readings are of different audiences, and so of different readers"
     case "wordless":
       return "neither revision says anything that takes time to read"
+    case "audiences-mixed":
+      return "one window holds two forms of the page and says which readers neither"
     case "nothing-measured":
       return "one of the two windows held no page views"
     case "dissolved":
@@ -635,11 +667,24 @@ const byWordsPassed = (one: ComparedPace, other: ComparedPace): number =>
 const saysAnything = (pace: PagePace): boolean =>
   pace.parts.some((part) => part.words > 0 || part.floored)
 
+/**
+ * Whether either side was read as neither of two forms.
+ *
+ * Taken off the two readings' own published scope rather than recomputed, which
+ * is what `audienceScopeRead` is for: five comparisons now ask this one question
+ * and a sixth spelling of it is how the rule comes to be agreed with by some of
+ * them (0293).
+ */
+const unsplit = (was: PageReading, now: PageReading): boolean =>
+  audienceScopeRead(was).reading === "mixed" || audienceScopeRead(now).reading === "mixed"
+
 const silenceOf = (
   readings: { readonly was: PagePace; readonly now: PagePace },
-  compared: readonly ComparedPace[]
+  compared: readonly ComparedPace[],
+  unsplitWindow: boolean
 ): PaceChangeSilence | null => {
   if (!saysAnything(readings.was) && !saysAnything(readings.now)) return "wordless"
+  if (unsplitWindow) return "audiences-mixed"
   if (readings.was.views === 0 || readings.now.views === 0) return "nothing-measured"
 
   return compared.length === 0 ? "dissolved" : null
@@ -801,6 +846,6 @@ export const paceChangeOf = (
             now: whole.now.needMs,
             change: whole.now.needMs - whole.was.needMs,
           },
-    silence: silenceOf(readings, compared),
+    silence: silenceOf(readings, compared, unsplit(was, now)),
   }
 }
