@@ -154,22 +154,25 @@ const rowsOf = (page: LoomTree, route: string): readonly Row[] =>
 const ORIGIN = "https://loom.example"
 
 /**
- * Both, because `/what-you-run` says a different sentence on a deployment that
- * is counting its readers from the one it says on a deployment that is not, and
- * a rule swept over only one of them is a rule about half the site.
+ * **One page per route, as of 21 October.**
+ *
+ * This swept both deployments, because *"`/what-you-run` says a different
+ * sentence on a deployment that is counting its readers from the one it says
+ * on a deployment that is not."* It said that until 12 October, when the
+ * maintainer had the tracking-status message taken off the site whether it is
+ * counting or not, and both halves of this sweep have been the same tree since.
  *
  * The palettes are deliberately **not** swept, unlike `alignment.test.ts`. What
  * a theme can change is colour and type, and neither is a word; a loop over
  * three palettes here would triple the assertions and could not fail
- * differently in any of them, which is decoration rather than coverage.
+ * differently in any of them, which is decoration rather than coverage — which
+ * is, in the end, exactly what the deployment loop had become.
  */
-const DEPLOYMENTS: readonly boolean[] = [false, true]
-
-const pagesOf = (route: SiteRoute): readonly LoomTree[] =>
-  DEPLOYMENTS.map((counting) => treeFor(route, { origin: ORIGIN, theme: "minimal", counting }))
+const pageOf = (route: SiteRoute): LoomTree =>
+  treeFor(route, { origin: ORIGIN, theme: "minimal" })
 
 const allRows = (): readonly Row[] =>
-  SITE_ROUTES.flatMap((route) => pagesOf(route).flatMap((page) => rowsOf(page, route.path)))
+  SITE_ROUTES.flatMap((route) => rowsOf(pageOf(route), route.path))
 
 const describeRow = (row: Row): string =>
   `${row.route} — ${row.container} of ${row.words.length} ${row.cell} [${row.words.join(", ")}]`
@@ -178,14 +181,12 @@ describe("a row of cards says about the same amount in each card", () => {
   it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
     "%s: no card in a row is left holding the difference as empty space",
     (_path, route) => {
-      for (const page of pagesOf(route)) {
-        for (const row of rowsOf(page, route.path).filter((found) =>
-          ROWS.includes(found.container)
-        )) {
-          const spread = Math.max(...row.words) - Math.min(...row.words)
+      for (const row of rowsOf(pageOf(route), route.path).filter((found) =>
+        ROWS.includes(found.container)
+      )) {
+        const spread = Math.max(...row.words) - Math.min(...row.words)
 
-          expect(spread, describeRow(row)).toBeLessThanOrEqual(MOST_A_ROW_MAY_DIFFER)
-        }
+        expect(spread, describeRow(row)).toBeLessThanOrEqual(MOST_A_ROW_MAY_DIFFER)
       }
     }
   )
@@ -237,7 +238,7 @@ describe("a row of cards says about the same amount in each card", () => {
    */
   it("holds the front door's band of ways in, which is the one it was written for", () => {
     const waysIn = SITE_ROUTES.filter((route) => route.path === "/")
-      .flatMap((route) => pagesOf(route).flatMap((page) => rowsOf(page, route.path)))
+      .flatMap((route) => rowsOf(pageOf(route), route.path))
       .filter((row) => row.container === "loom.grid" && row.cell === "loom.card")
       .filter((row) => row.words.length === 4)
 

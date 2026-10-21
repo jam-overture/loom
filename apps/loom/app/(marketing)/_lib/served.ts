@@ -72,31 +72,45 @@ export const ASK_STATES: readonly AskState[] = [
 ]
 
 /**
- * Both deployments, because a deployment that counts its readers says so.
+ * **The deployment is no longer a dimension of this sweep, as of 21 October.**
  *
- * The footer carries a sentence about it and `/what-you-run` carries a second
- * one, so a sweep over one value of this is a sweep over half the site's copy
- * in two places. Palettes are deliberately not crossed: what a theme changes is
- * colour and type, and neither is a word.
+ * It was `[false, true]` — whether the deployment counts its readers — and the
+ * reason given here was that *"the footer carries a sentence about it and
+ * `/what-you-run` carries a second one, so a sweep over one value of this is a
+ * sweep over half the site's copy in two places."* **Neither sentence has
+ * existed since 12 October**, when the maintainer had the message taken off
+ * the site whether it is counting or not, and `readers/counting.test.ts` has
+ * asserted the absence of both ever since.
+ *
+ * So the dimension doubled every sweep over a tree that could not differ, and
+ * it was measured rather than argued before it came out: 150 states built in
+ * 518ms, and **150 of the 150 had a byte-identical twin in the other
+ * deployment.** `servedPages()` is awaited eight times across six test files,
+ * so that was roughly 600 page builds per suite run producing a tree the same
+ * run already held, and the mechanism page's share of them ran the whole
+ * request sequence twice each.
+ *
+ * Whether readers are counted is a render option now and decides what the
+ * markup carries, never what the page says, so there is nothing here for a
+ * sweep over copy to find. `stored.test.ts` is what holds that: no page
+ * builder and no chrome module may read the setting at all. Palettes are
+ * deliberately still not crossed, for the reason this dimension turned out to
+ * share — what a theme changes is colour and type, and neither is a word.
  */
-export const DEPLOYMENTS: readonly boolean[] = [false, true]
 
 /** A page of this site, and the state it was served in. */
 export type ServedPage = {
   readonly route: SiteRoute
-  /** The state, as a short string for a failure message: `calmer/yes/put back/counting`. */
+  /** The state, as a short string for a failure message: `calmer/yes/put back`. */
   readonly state: string
-  /** Which deployment this is, kept as the value rather than read back out of `state`. */
-  readonly counting: boolean
   readonly tree: LoomTree
 }
 
-const describe = (ask: AskState, counting: boolean): string =>
+const describe = (ask: AskState): string =>
   [
     ask.ask ?? "no request",
     ...(ask.ask === undefined ? [] : [ask.approve === true ? "yes" : "no"]),
     ...(ask.back === true ? ["put back"] : []),
-    counting ? "counting" : "not counting",
   ].join("/")
 
 /**
@@ -130,20 +144,12 @@ export const servedPages = async (): Promise<readonly ServedPage[]> => {
   const pages: ServedPage[] = []
 
   for (const route of SITE_ROUTES) {
-    for (const counting of DEPLOYMENTS) {
-      for (const ask of ASK_STATES) {
-        pages.push({
-          route,
-          counting,
-          state: describe(ask, counting),
-          tree: await pageTreeFor(route, {
-            origin: ORIGIN,
-            theme: DEFAULT_THEME,
-            counting,
-            ...ask,
-          }),
-        })
-      }
+    for (const ask of ASK_STATES) {
+      pages.push({
+        route,
+        state: describe(ask),
+        tree: await pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME, ...ask }),
+      })
     }
   }
 
@@ -151,4 +157,4 @@ export const servedPages = async (): Promise<readonly ServedPage[]> => {
 }
 
 /** How many states the sweep above covers, stated so a caller can check it. */
-export const SERVED_STATE_COUNT = SITE_ROUTES.length * DEPLOYMENTS.length * ASK_STATES.length
+export const SERVED_STATE_COUNT = SITE_ROUTES.length * ASK_STATES.length

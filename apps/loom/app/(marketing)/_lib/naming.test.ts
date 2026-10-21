@@ -124,14 +124,21 @@ describe("the pages this site names", () => {
     expect(stranded).toEqual([])
     /**
      * A sweep that found nothing passes everything, so it says how much it
-     * read. 798 mentions and 126 of them inside a sentence, measured over the
-     * 126 served states the day this was written; the floors are well under
-     * those, because a band removed by one of the five choices is allowed to
-     * take a mention with it and so is an ordinary copy edit. They are here to
-     * catch a sweep that read nothing, which is the failure that passes.
+     * read. **550 mentions and 75 of them inside a sentence, measured over the
+     * 75 served states on 21 October**; the floors are well under those,
+     * because a band removed by one of the five choices is allowed to take a
+     * mention with it and so is an ordinary copy edit. They are here to catch a
+     * sweep that read nothing, which is the failure that passes.
+     *
+     * **Both numbers halved on 21 October and no copy changed.** `served.ts`
+     * crossed every state with whether the deployment counts its readers until
+     * then, and both halves of that had been the same tree since 12 October —
+     * so this sweep was reading every mention on this site twice. 798 over 126
+     * states became 550 over 75, and the floors were 600 and 80: the first was
+     * the failure, and the second would have been the next one.
      */
-    expect(found.length).toBeGreaterThanOrEqual(600)
-    expect(found.filter(({ mention }) => mention.inASentence).length).toBeGreaterThanOrEqual(80)
+    expect(found.length).toBeGreaterThanOrEqual(400)
+    expect(found.filter(({ mention }) => mention.inASentence).length).toBeGreaterThanOrEqual(50)
   })
 
   /**
