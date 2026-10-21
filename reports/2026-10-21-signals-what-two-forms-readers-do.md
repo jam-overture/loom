@@ -157,7 +157,8 @@ a pipe.
 - `src/signals/silences.test.ts` — **55 tests**, two lines changed: the
   nineteenth vocabulary in the arrival table with an empty declaration, and one
   more `comparison` in the subject vector.
-- Whole suite: **TOTAL_ALL**.
+- Whole suite: **5,580 passing in 235 files** for the library, **6,197 passing
+  in 349 files** for the application. **Zero failures, zero skipped.**
 
 Nothing was skipped, nothing was weakened, and no test was marked pending. One
 expectation was corrected while writing it — the double-count guard asserted a
@@ -165,6 +166,22 @@ sum of 22 and the real figure is 17 — and the correction made the test say mor
 rather than less: 17 against the root's own 10 is the double-count it was written
 to catch, so the assertion now states both numbers and the inequality between
 them.
+
+## The one red, and it was mine to clear
+
+The first full run came back **red on two tests in `(docs)`** — *the generated
+reference is what the generator produces right now*, and *every published door
+hands back exactly what its page says it does*. Both are the generated API
+reference drifting: it is read from `dist/*.d.ts`, so a new export under
+`src/signals/` fails them until `pnpm docs:api` is run. The library suite was
+green at the time, which is the shape `docs/routines.md` already records — *two
+failures in `(docs)` about `src/signals/` exports that no page mentions*, in a
+route group that names neither the change nor the file.
+
+**Regenerated rather than hand-resolved**, as the rule says, in its own commit:
+140 lines added and 21 removed in `reference.generated.json`, 1,779 exports
+across 17 entry points. The second full run is the green one above. The gate was
+read from a file in both runs and never from a pipe.
 
 ## Browser cost
 
