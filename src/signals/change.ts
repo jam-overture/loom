@@ -2,6 +2,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 
 import {
+  audienceScopeRead,
   comparedAudiencesOf,
   crossesAudiences,
   type ComparedAudiences,
@@ -123,6 +124,39 @@ export type ChangeSilence =
    */
   | "different-audiences"
   /**
+   * One of the two windows holds two forms of the page and nothing said which
+   * was wanted, so that side was read as neither population.
+   *
+   * The sibling of `different-audiences` and the one it cannot catch: that
+   * refuses a pair whose two sides name **two** audiences, and this refuses a
+   * side that names **none while holding two**. `crossesAudiences` is false
+   * wherever either side's audience is `null` and is right to be — a window
+   * written before the column existed names none too (0284) — so the ambiguity
+   * had no reader here at all.
+   *
+   * **What it was reported as instead is why it is worth a member.** A refused
+   * page reading has every part `unknown` and a view floor of nought (0290), so
+   * the pair fell into `nothing-measured` and the sentence printed was *one of
+   * the two windows held no page views*. The window held plenty: it held two
+   * forms of them. One sentence sends a deployment to look for a broken sender
+   * and the other tells it to split the window and read twice, which is a call
+   * away.
+   *
+   * The parts census still answers, for `nothing-measured`'s reason — what the
+   * change did to the tree is read off the two trees and not off any counter —
+   * and the funnel comparison refuses a mixed side in the same place for the
+   * same cause (0300).
+   *
+   * **It cannot co-occur with `different-audiences`, so the order between the
+   * two is not observable.** `crossesAudiences` needs an audience on both
+   * sides; a mixed side has none. A side that names an audience *and* holds two
+   * in its census is `one` and not mixed, because an audience asked for always
+   * wins (0300). The order that does matter is before the view floor, because
+   * the refusal is that floor's cause and a cause names itself better than its
+   * symptom does.
+   */
+  | "audiences-mixed"
+  /**
    * One of the two windows held no views.
    *
    * Every standing on that side is `unknown` (`parts.ts`), so there is no share
@@ -137,6 +171,7 @@ export type ChangeSilence =
 export const CHANGE_SILENCES: readonly ChangeSilence[] = everyMemberOf<ChangeSilence>()([
   "different-trees",
   "different-audiences",
+  "audiences-mixed",
   "nothing-measured",
 ])
 
@@ -147,6 +182,8 @@ export const describeChangeSilence = (silence: ChangeSilence): string => {
       return "the two readings are of different pages"
     case "different-audiences":
       return "the two readings are of different audiences, and so of different readers"
+    case "audiences-mixed":
+      return "one window holds two forms of the page and says which readers neither"
     case "nothing-measured":
       return "one of the two windows held no page views"
   }
@@ -632,6 +669,22 @@ export const readingChangeOf = (was: PageReading, now: PageReading): ReadingChan
   }
 
   const parts = partsChangedOf(was, now)
+
+  /**
+   * A side read as neither population, which is checked **before** the view
+   * floor because it is the cause of it: a refused page reading publishes a
+   * floor of nought with full counters behind it, so the floor alone reports a
+   * window of two forms as a window nobody read (0301).
+   *
+   * It sits below `crossesAudiences` for reading order rather than for
+   * precedence — the two states are mutually exclusive, so swapping them
+   * changes nothing. Taken off the two sides' own published scope rather than
+   * recomputed, which is what `audienceScopeRead` is for: the same call the
+   * funnel comparison makes for the same state (0300).
+   */
+  if (audienceScopeRead(was).reading === "mixed" || audienceScopeRead(now).reading === "mixed") {
+    return { ...empty, parts, silence: "audiences-mixed" }
+  }
 
   /**
    * A side with no views has no share to compare against, and the parts census

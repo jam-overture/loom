@@ -2,7 +2,7 @@ import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
-import { readingKeyOf } from "./audiences.js"
+import { audienceScopeRead, readingKeyOf } from "./audiences.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 import type { ReadingProgress, ReadingStop } from "./progress.js"
 
@@ -83,8 +83,33 @@ export type DeploymentSilence =
    * There is no fall to rank because there was no reading, and this is checked
    * before the door is, so a page nobody opened is not reported as a page the
    * door could not scale.
+   *
+   * **It means what it says, which it did not before.** A reading refused for
+   * holding two forms of the page publishes the same nought
+   * ({@link ReadingProgress.views}), so until `unsplit` existed this standing
+   * was printed over a window full of readers (0301).
    */
   | "unread"
+  /**
+   * The reading handed in holds two forms of the page and named neither, so it
+   * was read as neither population.
+   *
+   * **Not a page nobody read, which is what it was reported as.** A page served
+   * in two forms (0263) has two sets of counters over one tree at one revision,
+   * and a page reading handed both with no audience asked for reads neither:
+   * every part is `unknown` and its view floor is nought (0290). That nought is
+   * indistinguishable from a page nothing has opened, so this order published
+   * *nothing reported a view of this version* about a window holding every
+   * reader of both forms — and it published it beside a door row that **sums**
+   * those forms' arrivals (0299), so the row said five hundred readers arrived
+   * at a page nobody read.
+   *
+   * Checked before `unread`, because it is that nought's cause. It is a fault
+   * in the asking rather than in the deployment, and the only standing here
+   * that is: split the window by audience (`byAudience`) and read each form on
+   * its own, and the page takes its place in the order twice.
+   */
+  | "unsplit"
   /**
    * There is no page-view row at the door for this revision, so its loss cannot
    * be put on the same scale as another page's.
@@ -113,7 +138,13 @@ export type DeploymentSilence =
   | "inconsistent"
 
 export const DEPLOYMENT_SILENCES: readonly DeploymentSilence[] =
-  everyMemberOf<DeploymentSilence>()(["unread", "unscaled", "unopened", "inconsistent"])
+  everyMemberOf<DeploymentSilence>()([
+    "unread",
+    "unsplit",
+    "unscaled",
+    "unopened",
+    "inconsistent",
+  ])
 
 /** Where one page stands in the order, or why it is not in it. */
 export type RankStanding =
@@ -133,6 +164,7 @@ export const RANK_STANDINGS: readonly RankStanding[] = everyMemberOf<RankStandin
   "ranked",
   "unbroken",
   "unread",
+  "unsplit",
   "unscaled",
   "unopened",
   "inconsistent",
@@ -147,6 +179,8 @@ export const describeRankStanding = (standing: RankStanding): string => {
       return "read, and losing nobody anywhere on the page"
     case "unread":
       return "nothing reported a view of this version in the window"
+    case "unsplit":
+      return "one window holds two forms of the page and says which readers neither"
     case "unscaled":
       return "no page views counted at the door, so its loss is not comparable with another page's"
     case "unopened":
@@ -286,6 +320,16 @@ const rowOf = (page: ReadingProgress, door: RevisionPageViews | null): RankedPag
     inflation: door?.inflation ?? null,
   }
   const nothing = { at: null, lost: null, readers: null, share: null }
+
+  /**
+   * Before the view floor, because a reading read as neither population
+   * publishes that floor as nought with full counters behind it, and *nobody
+   * read this page* is then a false sentence over a door row that sums both
+   * forms' arrivals (0301).
+   */
+  if (audienceScopeRead(page).reading === "mixed") {
+    return { ...where, ...nothing, standing: "unsplit" }
+  }
 
   if (page.views === 0) return { ...where, ...nothing, standing: "unread" }
   if (door === null) return { ...where, ...nothing, standing: "unscaled" }

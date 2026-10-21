@@ -88,7 +88,7 @@ export const readerSignalUrl = async (
   env: Record<string, string | undefined> = process.env,
   keys: IngestKeyStore = appIngestKeys
 ): Promise<string | null> =>
-  readIntakeSwitch(env[INTAKE_KEY]).state === "on" ? siteSignalUrl(keys) : null
+  readIntakeSwitch(env[INTAKE_KEY]).state === "on" ? siteSignalUrl(keys, env) : null
 
 /**
  * The same answer as a boolean, for the caller that renders rather than mounts.

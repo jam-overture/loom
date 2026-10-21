@@ -340,6 +340,37 @@ describe("a window of two forms with none asked for", () => {
     NOTHING_DECLARED
   )
 
+  /**
+   * The four readings that pick a page's rows out of a window read the rule from
+   * one place as of 0301, and this is the pair of answers that made it worth a
+   * type rather than a nullable audience.
+   *
+   * **One window, two opposite answers, both correct.** The door adds both
+   * forms' arrivals, because a reader who arrived arrived once whichever form
+   * they were served (0297, 0299); the page reading and the funnel refuse,
+   * because adding two forms' node counters is one number about two pages
+   * (0290). That is why `mixed` is a branch each reading writes rather than a
+   * `null` it can fall past — and asserting the two together is what stops one
+   * of them being changed to match the other.
+   */
+  it("is summed at the door and refused by the page reading, for one window", () => {
+    const door = pageViewsFor(MIXED_PAGE, [
+      inAudience(SKIERS, views(100, 100)),
+      inAudience(RIDERS, views(900, 900)),
+    ])
+
+    expect(door.measured?.opened).toBe(1_000)
+    expect(door.measured?.audiences).toEqual([RIDERS, SKIERS])
+    expect(door.measured?.audienceId).toBeNull()
+    expect(door.otherAudience).toBe(0)
+    expect(door.duplicated).toBe(0)
+
+    expect(MIXED_PAGE.audienceId).toBeNull()
+    expect(MIXED_PAGE.audiences).toEqual([RIDERS, SKIERS])
+    expect(MIXED_PAGE.views).toBe(0)
+    expect(MIXED_PAGE.parts.every((part) => part.standing === "unknown")).toBe(true)
+  })
+
   it("is a reading of neither population, so no pair is read", () => {
     const reach = funnelReachOf(
       MIXED_PAGE,

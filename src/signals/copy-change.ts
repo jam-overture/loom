@@ -4,6 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
 import {
+  audienceScopeRead,
   comparedAudiencesOf,
   crossesAudiences,
   type ComparedAudiences,
@@ -138,6 +139,34 @@ export type CopyChangeSilence =
   /** Neither revision says anything that could have been read. */
   | "wordless"
   /**
+   * One of the two windows holds two forms of the page and named neither.
+   *
+   * The state the before-and-after reading and the two deployment orders took
+   * the morning before (0301), in one of the three readings that record did not
+   * reach. Without it this comparison published `nothing-measured` — *one of the two windows
+   * held no page views* — of a window that held plenty: it held two forms of
+   * them. A page reading read as neither has a view floor of nought with full
+   * counters behind it (`parts.ts`), so the floor alone cannot tell a window
+   * nobody read from a window nobody split, and the two sentences send a
+   * deployment to opposite places: one to look for a broken sender, the other
+   * to split the window and read twice, which is a call away.
+   *
+   * The census of words still answers, for `wordless`'s reason and
+   * `nothing-measured`'s: what the change wrote is read off the two trees and
+   * off no counter at all, so *this change added three hundred words and took
+   * two hundred away, over a window that holds two forms* is true and is worth
+   * saying.
+   *
+   * **It cannot co-occur with `different-audiences`**, so the order between the
+   * two is not observable: `crossesAudiences` needs an audience on both sides
+   * and a mixed side has none, while a side that names one and holds two in its
+   * census reads as `one`, because an audience asked for always wins (0300).
+   * The order that does matter is **after `wordless` and before the view
+   * floor**: a page saying nothing survives the remedy, so reporting it first
+   * loses nothing, and the floor is this state's own symptom.
+   */
+  | "audiences-mixed"
+  /**
    * One of the two windows held no page views.
    *
    * Every standing on that side is `unknown` (`parts.ts`) and that side has no
@@ -198,6 +227,7 @@ export const COPY_CHANGE_SILENCES: readonly CopyChangeSilence[] =
     "different-trees",
     "different-audiences",
     "wordless",
+    "audiences-mixed",
     "nothing-measured",
     "inconsistent",
     "dissolved",
@@ -214,6 +244,8 @@ export const describeCopyChangeSilence = (silence: CopyChangeSilence): string =>
       return "the two readings are of different audiences, and so of different readers"
     case "wordless":
       return "neither revision says anything that could be read"
+    case "audiences-mixed":
+      return "one window holds two forms of the page and says which readers neither"
     case "nothing-measured":
       return "one of the two windows held no page views"
     case "inconsistent":
@@ -701,15 +733,28 @@ const passagesOf = (reading: PageReading): ReadonlyMap<NodeId, Passage> => {
  * a floor is a declaration a library has not made and a page where nothing
  * reports reach would still have no mean once every `copy` prop was declared.
  */
+/**
+ * Whether either side was read as neither of two forms.
+ *
+ * Taken off the two readings' own published scope rather than recomputed, which
+ * is what `audienceScopeRead` is for: five comparisons now ask this one question
+ * and a sixth spelling of it is how the rule comes to be agreed with by some of
+ * them (0293).
+ */
+const unsplit = (was: PageReading, now: PageReading): boolean =>
+  audienceScopeRead(was).reading === "mixed" || audienceScopeRead(now).reading === "mixed"
+
 const silenceOf = (
   words: WordCount,
   readings: { readonly was: CopyReading; readonly now: CopyReading },
   views: { readonly was: number; readonly now: number },
+  unsplit: boolean,
   carried: number,
   spoken: number,
   floored: number
 ): CopyChangeSilence | null => {
   if (words.was === 0 && words.now === 0) return "wordless"
+  if (unsplit) return "audiences-mixed"
   if (views.was === 0 || views.now === 0) return "nothing-measured"
   if (readings.was.silence === "inconsistent" || readings.now.silence === "inconsistent") {
     return "inconsistent"
@@ -867,6 +912,7 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
     words,
     readings,
     { was: was.views, now: now.views },
+    unsplit(was, now),
     carried,
     carriedSpoken,
     floored

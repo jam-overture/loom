@@ -4,6 +4,7 @@ import type { ActionChangeSilence } from "./action-change.js"
 import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
+import type { FormComparisonSilence } from "./forms.js"
 import type { FunnelChangeSilence } from "./funnel-change.js"
 import type { DeploymentChangeSilence } from "./deployment-change.js"
 import type { DeploymentSilence } from "./deployment.js"
@@ -148,6 +149,7 @@ export type SilenceVocabulary =
   | "copy-change"
   | "deployment"
   | "deployment-change"
+  | "forms"
   | "funnel-change"
   | "library"
   | "library-action"
@@ -168,6 +170,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "copy-change",
     "deployment",
     "deployment-change",
+    "forms",
     "funnel-change",
     "library",
     "library-action",
@@ -197,6 +200,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     "copy-change": "comparison",
     deployment: "page",
     "deployment-change": "comparison",
+    forms: "comparison",
     "funnel-change": "comparison",
     library: "kind",
     "library-action": "kind",
@@ -554,6 +558,43 @@ export type SilenceCondition =
    * form on its own.
    */
   | "two-forms-unsplit"
+  /**
+   * The two readings are of two revisions of the page.
+   *
+   * The sibling of `two-pages` and of `two-audiences`, and the third side of
+   * what any comparison has to hold still. One page over two revisions with the
+   * readership held still is a before-and-after (0224); two forms of one page at
+   * one revision with the tree held still is a
+   * comparison of two populations; **both at once is neither**, because the
+   * movement then carries two causes and nothing in the counters separates them.
+   *
+   * No reading could report it before one existed whose subject is the
+   * readership: every comparison until then varied the revision on purpose, so
+   * two revisions was the premise rather than a fault.
+   */
+  | "two-revisions"
+  /**
+   * Both readings are of one audience, so there is not a second population.
+   *
+   * **The only condition here about too few of something**, where every other
+   * is about something missing or something doubled. It is `two-audiences`
+   * turned over: that refuses a comparison for varying the readership where it
+   * had to be held still, and this refuses one for holding it still where it had
+   * to be varied. A deployment reading it is holding one form twice, and the
+   * question it can ask of that pair is a before-and-after.
+   */
+  | "one-population"
+  /**
+   * Nothing recorded which audience the window was of.
+   *
+   * One population read whole, which is the correct answer for every window
+   * written before the column existed (0284) and is no answer at all to a
+   * question **about** the population. Held apart from `two-forms-unsplit`
+   * because the remedies are opposite: that one is a window to split, this one
+   * is a window from before there was anything to split by, and there is nothing
+   * a caller can do to it.
+   */
+  | "no-audience-named"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -571,6 +612,9 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "nothing-inside",
   "no-reach-reported",
   "two-forms-unsplit",
+  "two-revisions",
+  "one-population",
+  "no-audience-named",
 ])
 
 /**
@@ -613,6 +657,12 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "its counters are there and not one of them reports being reached"
     case "two-forms-unsplit":
       return "one window holds two forms of the page and says which readers neither"
+    case "two-revisions":
+      return "the two readings are of two revisions, and so not of one page held still"
+    case "one-population":
+      return "both readings are of one audience, so there is no second population"
+    case "no-audience-named":
+      return "nothing recorded which audience it was of"
   }
 }
 
@@ -646,6 +696,8 @@ export const meaningOfActionChangeSilence = (silence: ActionChangeSilence): Sile
       return meaning("action-change", "two-pages")
     case "different-audiences":
       return meaning("action-change", "two-audiences")
+    case "audiences-mixed":
+      return meaning("action-change", "two-forms-unsplit")
     case "unwalked":
       return meaning("action-change", "no-action-credited")
     case "nothing-measured":
@@ -662,6 +714,8 @@ export const meaningOfChangeSilence = (silence: ChangeSilence): SilenceMeaning =
       return meaning("change", "two-pages")
     case "different-audiences":
       return meaning("change", "two-audiences")
+    case "audiences-mixed":
+      return meaning("change", "two-forms-unsplit")
     case "nothing-measured":
       return meaning("change", "no-view-reported")
   }
@@ -703,6 +757,8 @@ export const meaningOfCopyChangeSilence = (silence: CopyChangeSilence): SilenceM
       return meaning("copy-change", "two-audiences")
     case "wordless":
       return meaning("copy-change", "says-nothing")
+    case "audiences-mixed":
+      return meaning("copy-change", "two-forms-unsplit")
     case "nothing-measured":
       return meaning("copy-change", "no-view-reported")
     case "inconsistent":
@@ -735,6 +791,8 @@ export const meaningOfDeploymentSilence = (silence: DeploymentSilence): SilenceM
   switch (silence) {
     case "unread":
       return meaning("deployment", "no-view-reported")
+    case "unsplit":
+      return meaning("deployment", "two-forms-unsplit")
     case "unscaled":
       return meaning("deployment", "no-arrivals-counted")
     case "unopened":
@@ -765,6 +823,8 @@ export const meaningOfDeploymentChangeSilence = (
       return meaning("deployment-change", "no-view-reported")
     case "mispaired":
       return meaning("deployment-change", "two-pages")
+    case "unsplit":
+      return meaning("deployment-change", "two-forms-unsplit")
     case "unscaled":
       return meaning("deployment-change", "no-arrivals-counted")
     case "unopened":
@@ -1027,6 +1087,8 @@ export const meaningOfPaceChangeSilence = (silence: PaceChangeSilence): SilenceM
       return meaning("pace-change", "two-audiences")
     case "wordless":
       return meaning("pace-change", "says-nothing")
+    case "audiences-mixed":
+      return meaning("pace-change", "two-forms-unsplit")
     case "nothing-measured":
       return meaning("pace-change", "no-view-reported")
     case "dissolved":
@@ -1082,6 +1144,40 @@ export const meaningOfFunnelChangeSilence = (silence: FunnelChangeSilence): Sile
       return meaning("funnel-change", "two-forms-unsplit")
     case "unasked":
       return meaning("funnel-change", "nothing-carried")
+  }
+}
+
+/**
+ * What a comparison of two forms of one page reports (0302).
+ *
+ * **The eighteenth set, and the first whose subject is the readership rather
+ * than the tree, the window or the vocabulary** — which is why it is also the
+ * first to bring three conditions of its own where no set since the eighth
+ * brought more than one. Each of the three is a state only a reading that holds
+ * the tree still and varies the audience can be in: two revisions, one
+ * population, and a side that cannot name its own.
+ *
+ * The other three are borrowed exactly. `different-pages` is the state every
+ * comparison here reports, `unsplit` is the window fault 0300 brought, and
+ * `nothing-measured` is the door's quiet window — and it is the only member of
+ * this set that withholds half of a reading rather than all of it.
+ */
+export const meaningOfFormComparisonSilence = (
+  silence: FormComparisonSilence
+): SilenceMeaning => {
+  switch (silence) {
+    case "different-pages":
+      return meaning("forms", "two-pages")
+    case "unsplit":
+      return meaning("forms", "two-forms-unsplit")
+    case "unattributed":
+      return meaning("forms", "no-audience-named")
+    case "one-population":
+      return meaning("forms", "one-population")
+    case "different-revisions":
+      return meaning("forms", "two-revisions")
+    case "nothing-measured":
+      return meaning("forms", "no-view-reported")
   }
 }
 

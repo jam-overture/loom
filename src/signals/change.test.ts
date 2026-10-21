@@ -572,6 +572,105 @@ describe("readingChangeOf", () => {
       expect(refused.audiences).toEqual({ was: SKIERS, now: RIDERS })
     })
 
+    /**
+     * The state `crossesAudiences` cannot see, and the reason this silence is
+     * its own member. That rule is false wherever either side's audience is
+     * `null` and is right to be — a window written before the column existed
+     * names none too — so a side holding **two** forms with none asked for was
+     * never refused here at all. It fell through to the view floor, because a
+     * refused page reading publishes a floor of nought, and the sentence
+     * printed was *one of the two windows held no page views* over a window
+     * holding every reader of both forms (0301).
+     */
+    it("refuses a side that holds two forms and names neither", () => {
+      const unsplit = pageReadingOf(
+        AFTER.tree,
+        [
+          ...AFTER.counters.map((counter) => ({ ...counter, audienceId: SKIERS })),
+          ...AFTER.counters.map((counter) => ({ ...counter, audienceId: RIDERS })),
+        ],
+        NOTHING_DECLARED
+      )
+      const change = readingChangeOf(formOf(BEFORE, SKIERS), unsplit)
+
+      expect(unsplit.views).toBe(0)
+      expect(unsplit.audiences).toEqual([RIDERS, SKIERS])
+      expect(change.silence).toBe("audiences-mixed")
+      expect(change.stops).toEqual([])
+      expect(change.mostKept).toBeNull()
+    })
+
+    /**
+     * The tree half stands, for `nothing-measured`'s reason: what a change did
+     * to the tree is read off the two trees and off no counter. So a reading
+     * may say *one band was added, and which readers these counters are of was
+     * not said.*
+     */
+    it("still says what the change did to the tree on a side it read as neither", () => {
+      const unsplit = pageReadingOf(
+        treeOf(bands("one", "two", "three", "four"), 5),
+        [
+          ...reach(5, { page: 200, one: 200 }).map((row) => ({ ...row, audienceId: SKIERS })),
+          ...reach(5, { page: 900, one: 900 }).map((row) => ({ ...row, audienceId: RIDERS })),
+        ],
+        NOTHING_DECLARED
+      )
+      const change = readingChangeOf(pageReadingOf(BEFORE.tree, BEFORE.counters, NOTHING_DECLARED), unsplit)
+
+      expect(change.silence).toBe("audiences-mixed")
+      expect(change.parts).toMatchObject({ shared: 4, added: [nodeId("four")], removed: [] })
+    })
+
+    /**
+     * The precedence that matters, and the one a test has to pin because both
+     * answers are reachable from one fixture: the refusal and the view floor are
+     * the same nought, so whichever check runs first is the sentence printed.
+     * The cause names itself better than its symptom.
+     */
+    it("names the two forms rather than the empty floor they produced", () => {
+      const unsplit = pageReadingOf(
+        AFTER.tree,
+        [
+          ...AFTER.counters.map((counter) => ({ ...counter, audienceId: SKIERS })),
+          ...AFTER.counters.map((counter) => ({ ...counter, audienceId: RIDERS })),
+        ],
+        NOTHING_DECLARED
+      )
+
+      expect(readingChangeOf(formOf(BEFORE, SKIERS), unsplit).silence).toBe("audiences-mixed")
+      expect(
+        readingChangeOf(pageReadingOf(AFTER.tree, [], NOTHING_DECLARED), formOf(AFTER, SKIERS)).silence
+      ).toBe("nothing-measured")
+    })
+
+    /**
+     * The two refusals cannot both apply, which a mutation found by surviving:
+     * swapping their order changes nothing, and the comment that said the order
+     * mattered was wrong.
+     *
+     * `crossesAudiences` needs an audience on **both** sides and a mixed side
+     * has none; a side that names one and holds two in its census is `one` and
+     * not mixed, because an audience asked for always wins (0300). So the two
+     * states partition rather than overlap, and asserting that is the real
+     * version of the precedence this file used to claim.
+     */
+    it("cannot be both refusals at once, so the two partition the window", () => {
+      const unsplit = pageReadingOf(
+        AFTER.tree,
+        [
+          ...AFTER.counters.map((counter) => ({ ...counter, audienceId: SKIERS })),
+          ...AFTER.counters.map((counter) => ({ ...counter, audienceId: RIDERS })),
+        ],
+        NOTHING_DECLARED
+      )
+
+      /** Named, so the asking wins and the window of two is one form's reading. */
+      const named = { ...unsplit, audienceId: RIDERS }
+
+      expect(readingChangeOf(formOf(BEFORE, SKIERS), named).silence).toBe("different-audiences")
+      expect(readingChangeOf(formOf(BEFORE, SKIERS), unsplit).silence).toBe("audiences-mixed")
+    })
+
     /** Two unrelated pages are not made comparable by one audience. */
     it("says two pages before it says two audiences", () => {
       const other: LoomTree = { ...treeOf(THREE, 5), treeId: OTHER_TREE }
