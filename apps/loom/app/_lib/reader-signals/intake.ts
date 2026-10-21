@@ -6,6 +6,9 @@ import {
   memoryReaderRegionStore,
   memoryReaderSignalJournal,
   memoryReaderTallyStore,
+  type ReaderRegionStore,
+  type ReaderSignalJournal,
+  type ReaderTallyStore,
 } from "@jam-overture/loom/signals"
 import {
   postgresReaderRegionStore,
@@ -57,23 +60,37 @@ type Carrier = { [CARRIER_KEY]?: Intake }
 const carrier = globalThis as unknown as Carrier
 
 /**
- * One application's stores, on the handle the store and the journal already
- * use.
+ * One application's stores, in full: what the door files into and what a
+ * screen reads back out of.
+ *
+ * The door is handed a `Filing`, which is these narrowed to the methods it
+ * moves; the project's *Signals* screen is handed a `Readings`. Both come from
+ * here so that they are **the same stores** — in memory that is the whole
+ * point, since two constructions would be two maps and a screen reading the
+ * second would show nothing the door had filed into the first.
+ */
+type Kept = {
+  readonly journal: ReaderSignalJournal
+  readonly regions: ReaderRegionStore
+  readonly tallies: ReaderTallyStore
+}
+
+/**
+ * On the handle the store and the journal already use.
  *
  * The region buckets are a durable counter rather than a window, so in memory
  * they are a map the next cold start has never heard of — the status endpoint
  * already says whether anything here outlives the process. The page-view
  * counter is the tallies store rather than a store of its own: the other side
  * of the same row is written by `signals:collect`, and a column nothing writes
- * is a column nobody can subtract. The door is handed the one method it needs
- * and cannot read a deployment's tallies through it.
+ * is a column nobody can subtract.
  */
-const postgresFilings =
+const postgresKept =
   (db: LoomDatabase) =>
-  (application: ApplicationId): Filing => ({
+  (application: ApplicationId): Kept => ({
     journal: postgresReaderSignalJournal(db, { application }),
     regions: postgresReaderRegionStore(db, { application }),
-    openings: postgresReaderTallyStore(db, { application }),
+    tallies: postgresReaderTallyStore(db, { application }),
   })
 
 /**
@@ -82,22 +99,52 @@ const postgresFilings =
  * replaced. A process that served two applications from one buffer would be
  * the mixing this unit exists to prevent, one layer further down.
  */
-const memoryFilings = (): ((application: ApplicationId) => Filing) => {
-  const filings = new Map<ApplicationId, Filing>()
+const memoryKept = (): ((application: ApplicationId) => Kept) => {
+  const kept = new Map<ApplicationId, Kept>()
 
   return (application) => {
-    const held = filings.get(application)
+    const held = kept.get(application)
     if (held !== undefined) return held
 
-    const made: Filing = {
+    const made: Kept = {
       journal: memoryReaderSignalJournal(),
       regions: memoryReaderRegionStore(),
-      openings: memoryReaderTallyStore(),
+      tallies: memoryReaderTallyStore(),
     }
-    filings.set(application, made)
+    kept.set(application, made)
 
     return made
   }
+}
+
+const KEPT_KEY = Symbol.for("loom.app.reader-signals.kept")
+
+/** Memoised for the gate's reason below: a re-evaluated module would be an empty map. */
+const keptFor: (application: ApplicationId) => Kept = ((
+  globalThis as unknown as { [KEPT_KEY]?: (application: ApplicationId) => Kept }
+)[KEPT_KEY] ??= portalDatabase === undefined ? memoryKept() : postgresKept(portalDatabase))
+
+/** The door's view: the buffer and the two counters it moves, and nothing it could read a tally through. */
+const filingFor = (application: ApplicationId): Filing => {
+  const kept = keptFor(application)
+
+  return { journal: kept.journal, regions: kept.regions, openings: kept.tallies }
+}
+
+/** What a screen reads for one application: what is waiting, and what has been counted. */
+export type Readings = {
+  readonly journal: ReaderSignalJournal
+  readonly tallies: ReaderTallyStore
+}
+
+/**
+ * One application's readings, from the stores its deliveries are filed into.
+ * Unbounded, like everything else here; the screen bounds its own reads.
+ */
+export const readingsFor = (application: ApplicationId): Readings => {
+  const kept = keptFor(application)
+
+  return { journal: kept.journal, tallies: kept.tallies }
 }
 
 /**
@@ -133,7 +180,7 @@ const build = (): Intake => {
   return {
     settings,
     senders: sendersOf(appIngestKeys),
-    filingFor: portalDatabase === undefined ? memoryFilings() : postgresFilings(portalDatabase),
+    filingFor,
     /**
      * The runtime's own numbers, with nothing in the environment able to widen
      * them. A deployment that needs different limits is a finding and a
