@@ -10,10 +10,11 @@ import { projectBySlug } from "../../../_lib/fixtures"
  * Credentials, and the snippet that registers an app — the maintainer's second
  * component and the portal's stated primary purpose.
  *
- * It is worth being plain that **this screen is invented.** The key, the
- * origin check and the filing it describes exist since 0298, and a key is
- * minted with `pnpm signals:key`; the screen that shows a real one with its
- * snippet is unit 4c's, and this preview is what it would be in service of.
+ * It is worth being plain that **this screen is invented.** The real one is
+ * `/portal/[project]/connect`, since unit 4c, and it differs from this where
+ * this had to guess: the key is public and shown whole (0298), and the snippet
+ * is the two calls the runtime publishes rather than a client that does not
+ * exist.
  */
 
 const Field = ({

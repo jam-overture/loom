@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import type { Result } from "@jam-overture/loom"
+import { ok, type Result } from "@jam-overture/loom"
 import type { ApplicationId } from "@jam-overture/loom/store"
 
 import { mintKey } from "@/app/(portal)/_lib/auth/accounts"
@@ -101,3 +101,25 @@ export interface IngestKeyStore {
     at: number
   ) => Promise<Result<void, IngestKeyStoreError>>
 }
+
+/**
+ * Mint a key and give it to the application: the one act registration, the
+ * connect screen's *replace* and `pnpm signals:key` all perform.
+ *
+ * One function rather than three copies of two lines, because the two lines
+ * are an order — mint, then write — and a copy that wrote a key it had been
+ * handed instead of one it minted would be a chosen key by another road.
+ * Answers with the key that was written, so the caller can show the snippet
+ * without asking the store for what it just told it.
+ */
+export const issueIngestKey =
+  (keys: Pick<IngestKeyStore, "put">) =>
+  async (
+    applicationId: ApplicationId,
+    at: number
+  ): Promise<Result<IngestKey, IngestKeyStoreError>> => {
+    const key = mintIngestKey()
+    const written = await keys.put(applicationId, key, at)
+
+    return written.ok ? ok(key) : written
+  }

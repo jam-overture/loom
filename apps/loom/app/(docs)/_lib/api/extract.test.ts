@@ -391,7 +391,7 @@ describe("which door a reader should have gone through instead", () => {
         specifier: "@jam-overture/loom/signals/broadcast",
         slug: "signals-broadcast",
         avoids: ["zod"],
-        shared: 14,
+        shared: 15,
         files: 10,
       },
     ])
@@ -473,7 +473,7 @@ describe("how much of the package is behind one door", () => {
     const broadcast = apiEntryAt("signals-broadcast")
 
     expect(broadcast?.standing.sharedWith).toEqual([
-      { specifier: "@jam-overture/loom/signals", slug: "signals", names: 14 },
+      { specifier: "@jam-overture/loom/signals", slug: "signals", names: 15 },
     ])
     expect(broadcast?.standing.sharedWith[0]?.names).toBe(broadcast === undefined ? -1 : apiSymbolCount(broadcast))
   })

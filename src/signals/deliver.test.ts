@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import type { TreeId } from "../ids.js"
 
 import {
+  BATCH_CONTENT_TYPE,
   DEFAULT_READER_SIGNAL_PATH,
   deliverReaderSignals,
   type PostBatch,
@@ -19,7 +20,7 @@ const batch = {
 } as unknown as ReaderSignalBatch
 
 describe("deliverReaderSignals", () => {
-  it("posts the batch as JSON to the default path", async () => {
+  it("posts the batch, as JSON labelled plain text, to the default path", async () => {
     const beacon = vi.fn<SendBeacon>(() => true)
 
     deliverReaderSignals({ beacon })(batch)
@@ -27,7 +28,7 @@ describe("deliverReaderSignals", () => {
     expect(beacon).toHaveBeenCalledTimes(1)
     const [url, body] = beacon.mock.calls[0] ?? []
     expect(url).toBe(DEFAULT_READER_SIGNAL_PATH)
-    expect(body?.type).toBe("application/json")
+    expect(body?.type).toBe(BATCH_CONTENT_TYPE.toLowerCase())
     expect(JSON.parse(await (body as Blob).text())).toEqual(JSON.parse(JSON.stringify(batch)))
   })
 
@@ -88,6 +89,37 @@ describe("deliverReaderSignals", () => {
     })
 
     expect(() => send(batch)).not.toThrow()
+  })
+
+  /**
+   * The label a browser lets cross origins without asking first. Anything else
+   * and a customer's beacon is refused before it leaves their page.
+   */
+  it("labels a batch with a type a browser sends across origins unasked", () => {
+    expect(BATCH_CONTENT_TYPE.split(";")[0]).toBe("text/plain")
+  })
+
+  /** The answer is never read, so it is asked for opaque, and a deployment needs no CORS. */
+  it("falls back to an opaque fetch that survives the page", () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(() => Promise.resolve(new Response(null)))
+    vi.stubGlobal("fetch", fetch)
+
+    try {
+      deliverReaderSignals({ url: "https://signals.example/in", beacon: null })(batch)
+
+      expect(fetch).toHaveBeenCalledTimes(1)
+      const [url, init] = fetch.mock.calls[0] ?? []
+      expect(url).toBe("https://signals.example/in")
+      expect(init).toMatchObject({
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        headers: { "content-type": BATCH_CONTENT_TYPE },
+      })
+      expect(JSON.parse(String(init?.body))).toMatchObject({ revision: 3 })
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 
   /** The path is relative, so a delivery is same-origin unless a host says otherwise. */

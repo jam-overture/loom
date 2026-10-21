@@ -27,16 +27,36 @@ import type { ReaderSignalBatch } from "./signal.js"
  * Where a delivery goes when the host has no opinion.
  *
  * A path rather than a URL, and relative, so it is same-origin by construction.
- * That is not only tidiness: `sendBeacon` cannot preflight, so a cross-origin
- * beacon carrying `application/json` is refused by the browser before it is
- * sent. A deployment that wants to collect signals on another origin has to
- * serve CORS from it and will find out here.
+ * A host whose pages are served from somewhere other than the deployment that
+ * counts them names that deployment's full address instead, and
+ * {@link BATCH_CONTENT_TYPE} is why that works without the deployment serving
+ * CORS.
  *
  * It is a default and not a constant the receiver shares. The endpoint's
  * address is a deployment's choice — a host may serve it anywhere, and this is
  * what the host who does not care gets.
  */
 export const DEFAULT_READER_SIGNAL_PATH = "/api/reader-signals"
+
+/**
+ * What a batch is labelled as on the wire: **plain text, which happens to be
+ * JSON**.
+ *
+ * The label is the whole of what decides whether a delivery can leave a page
+ * for another origin. A browser sends a cross-origin `POST` without asking
+ * first only when its body is one of three CORS-safelisted types, and
+ * `text/plain` is the one of them a JSON document fits. Labelled
+ * `application/json` it is not safelisted: a `fetch` has to be preflighted by
+ * an `OPTIONS` request the deployment must answer, and a beacon, which cannot
+ * preflight at all, is refused by the browser before it is sent. The beacon
+ * carries the last batch of every page view, so a label that cost it would
+ * cost the batch that matters most, on every customer's site.
+ *
+ * Nothing receiving a batch reads the label. The door parses the body it is
+ * given and refuses what does not parse, so a batch is exactly as checked under
+ * this label as under the other one, and same-origin delivery is unchanged.
+ */
+export const BATCH_CONTENT_TYPE = "text/plain;charset=UTF-8"
 
 /** `navigator.sendBeacon`, narrowed to what this uses. `false` means it would not take it. */
 export type SendBeacon = (url: string, body: Blob) => boolean
@@ -63,13 +83,22 @@ const browserBeacon = (): SendBeacon | null => {
  * `keepalive` is what makes this survive the page it was sent from. Rejections
  * are swallowed here rather than left to the broadcaster's containment, so that
  * a host calling this directly gets the same promise the broadcaster does.
+ *
+ * **`no-cors`, because nothing here reads the answer.** Across origins a
+ * `cors` request still arrives — its label is safelisted, so nothing is
+ * preflighted — but a deployment that sends no CORS headers makes the browser
+ * reject the response, and every customer's console would carry an error per
+ * batch for a reply this function was going to ignore. `no-cors` asks for an
+ * opaque response, which is what ignoring one already was. It permits only
+ * safelisted headers, and {@link BATCH_CONTENT_TYPE} is the only one sent.
  */
 const fetchPost: PostBatch = (url, body) => {
   void globalThis
     .fetch(url, {
       method: "POST",
+      mode: "no-cors",
       keepalive: true,
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": BATCH_CONTENT_TYPE },
       body,
     })
     .catch(() => undefined)
@@ -100,7 +129,7 @@ export const deliverReaderSignals = (
     try {
       const beacon = options.beacon === undefined ? browserBeacon() : options.beacon
 
-      if (beacon !== null && beacon(url, new Blob([body], { type: "application/json" }))) return
+      if (beacon !== null && beacon(url, new Blob([body], { type: BATCH_CONTENT_TYPE }))) return
 
       post(url, body)
     } catch {

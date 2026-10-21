@@ -18,11 +18,8 @@ import { RegistrationForm } from "./_components/registration-form"
  * somebody's projects here was both a leak and an invitation: it named other
  * people's projects to anybody who opened the form, and offered to add to one.
  *
- * ## What it does not yet do
- *
- * It does not hand back a credential. Ingest does not authenticate yet, so
- * there is nothing to hand back that would be true; that is 4b, and the
- * snippet a person pastes is 4c.
+ * Registering mints the project's key (0298) and lands on the project's
+ * *Connect your site* screen, which shows it in the snippet a person pastes.
  */
 
 const RegisterApplication = async () => {
