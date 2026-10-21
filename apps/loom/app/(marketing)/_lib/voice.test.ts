@@ -482,7 +482,14 @@ describe("every string a reader reads", () => {
    */
   it("looked at every state this site can be served in", () => {
     expect(pages.length).toBe(SERVED_STATE_COUNT)
-    expect(pages.length).toBeGreaterThanOrEqual(3 * 2 * 21)
+    /**
+     * Three routes and the twenty-one request states the day this was written,
+     * which is a floor under `served.ts`' own arithmetic rather than a copy of
+     * it. It was `3 * 2 * 21` until 21 October, when the deployment stopped
+     * being a dimension of that sweep: both of its values had been the same
+     * tree since 12 October.
+     */
+    expect(pages.length).toBeGreaterThanOrEqual(3 * 21)
     expect(read.length).toBeGreaterThanOrEqual(200)
   })
 

@@ -858,7 +858,7 @@ describe("copyChangeOf", () => {
 
   describe("the closed sets", () => {
     it("describes every silence", () => {
-      expect(COPY_CHANGE_SILENCES).toHaveLength(8)
+      expect(COPY_CHANGE_SILENCES).toHaveLength(9)
       for (const silence of COPY_CHANGE_SILENCES) {
         expect(describeCopyChangeSilence(silence)).toMatch(/\S/)
       }
@@ -969,5 +969,81 @@ describe("copyChangeOf across two audiences", () => {
 
     expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
     expect(change.silence).toBe("different-trees")
+  })
+
+  /**
+   * A window of two forms with neither asked for, built so that the two
+   * audiences' rows **collide** on every node — which is what makes the fault
+   * reachable at all, rather than merely documented (0300).
+   */
+  const unsplitOf = (side: { tree: LoomTree; counters: readonly ReaderTally[] }) =>
+    pageReadingOf(
+      side.tree,
+      [
+        ...side.counters.map((counter) => ({ ...counter, audienceId: SKIERS })),
+        ...side.counters.map((counter) => ({ ...counter, audienceId: RIDERS })),
+      ],
+      BODY_IS_COPY
+    )
+
+  /**
+   * The sentence this replaces is the one 0301 removed from two other readings:
+   * a side read as neither form has a view floor of nought with full counters
+   * behind it, so the floor alone called a window nobody **split** a window
+   * nobody **read**.
+   */
+  it("says the window holds two forms rather than that nobody read it", () => {
+    const unsplit = unsplitOf(WAS)
+
+    expect(unsplit.audiences).toEqual([RIDERS, SKIERS])
+    expect(unsplit.audienceId).toBeNull()
+    expect(unsplit.views).toBe(0)
+    expect(unsplit.otherAudience).toBe(WAS.counters.length * 2)
+
+    const change = copyChangeOf(unsplit, formOf(NOW, SKIERS))
+
+    expect(change.silence).toBe("audiences-mixed")
+    expect(change.typical).toBeNull()
+  })
+
+  it("says it of the later window too", () => {
+    expect(copyChangeOf(formOf(WAS, SKIERS), unsplitOf(NOW)).silence).toBe("audiences-mixed")
+  })
+
+  /**
+   * The census of words survives it, for the reason `nothing-measured` leaves it
+   * standing: what the change wrote is read off the two trees and off no
+   * counter at all.
+   */
+  it("still says what the change wrote", () => {
+    const change = copyChangeOf(unsplitOf(WAS), formOf(NOW, SKIERS))
+    const measured = copyChangeOf(formOf(WAS, SKIERS), formOf(NOW, SKIERS))
+
+    expect(change.wrote).toEqual(measured.wrote)
+    expect(change.compared).toHaveLength(measured.compared.length)
+  })
+
+  /** A window that really held no views still says so, which is what makes the two worth telling apart. */
+  it("keeps saying nothing was measured of a window that held no views", () => {
+    expect(
+      copyChangeOf(pageReadingOf(WAS.tree, [], BODY_IS_COPY, SKIERS), formOf(NOW, SKIERS)).silence
+    ).toBe("nothing-measured")
+  })
+
+  /**
+   * Both orderings this reading claims are real, and each fixture reaches both
+   * guards. A page saying nothing survives the remedy, so it is reported first
+   * and nothing is lost; the view floor is this state's own symptom, so the
+   * cause is reported instead of it.
+   */
+  it("says a page that says nothing before it says the window holds two forms", () => {
+    const wordless = { tree: pageOf(1, [element("bare", "loom.section")]), counters: [] }
+    const later = { tree: pageOf(2, [element("bare", "loom.section")]), counters: [] }
+
+    expect(copyChangeOf(unsplitOf(wordless), formOf(later, SKIERS)).silence).toBe("wordless")
+  })
+
+  it("says the window holds two forms before it says nobody read it", () => {
+    expect(copyChangeOf(unsplitOf(WAS), formOf(NOW, SKIERS)).silence).not.toBe("nothing-measured")
   })
 })

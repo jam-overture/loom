@@ -23,7 +23,7 @@ import { HOME, HOW_IT_WORKS, SITE_THEMES, SITE_THEME_NAMES, WHAT_YOU_RUN } from 
 
 const ROUTES = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN] as const
 
-const STORED = { origin: "", theme: "minimal", counting: false } as const
+const STORED = { origin: "", theme: "minimal" } as const
 
 const hrefsIn = (tree: ReturnType<typeof treeFor>): readonly string[] =>
   elementsIn(tree.root).flatMap((element) => {

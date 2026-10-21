@@ -185,25 +185,31 @@ const A_CEILING_IS_BINDING_ABOVE = 0.6
 const ORIGIN = "https://loom.example"
 
 /**
- * Both deployments, because the footer of a deployment that counts its readers
- * says 85 words where the other says 59, and a budget swept over only one of
- * them is a budget for half the site.
+ * **One page per route, as of 21 October.**
  *
- * Palettes are deliberately not swept. What a theme changes is colour and type,
- * and neither is a word.
+ * This swept both deployments — *"the footer of a deployment that counts its
+ * readers says 85 words where the other says 59, and a budget swept over only
+ * one of them is a budget for half the site"* — and that footer line came off
+ * the site on 12 October, on the maintainer's instruction, whether a
+ * deployment is counting or not. From then on the two trees were identical and
+ * every word counted here was counted twice. The numbers in the table above
+ * did not move when the second one went: they were a maximum over two equal
+ * values.
+ *
+ * Palettes are deliberately not swept, which is the one dimension left out for
+ * a reason that is still true. What a theme changes is colour and type, and
+ * neither is a word.
  */
-const DEPLOYMENTS: readonly boolean[] = [false, true]
-
-const pagesOf = (route: SiteRoute): readonly LoomTree[] =>
-  DEPLOYMENTS.map((counting) => treeFor(route, { origin: ORIGIN, theme: "minimal", counting }))
+const pageOf = (route: SiteRoute): LoomTree =>
+  treeFor(route, { origin: ORIGIN, theme: "minimal" })
 
 const bandsOf = (page: LoomTree): readonly ElementNode[] =>
   page.root.children.filter((node): node is ElementNode => node.kind === "element")
 
-/** Every band on the site, with the route and the deployment it was found in. */
+/** Every band on the site, with the route it was found on. */
 const allBands = (): readonly { route: string; band: ElementNode }[] =>
   SITE_ROUTES.flatMap((route) =>
-    pagesOf(route).flatMap((page) => bandsOf(page).map((band) => ({ route: route.path, band })))
+    bandsOf(pageOf(route)).map((band) => ({ route: route.path, band }))
   )
 
 /** A band holds a run when some element inside it holds two siblings of one type. */
@@ -212,23 +218,17 @@ const isPlain = (band: ElementNode): boolean => runsIn(band).length === 0
 const describeBand = (route: string, band: ElementNode): string =>
   `${route} — ${band.type} ${String(band.props["eyebrow"] ?? band.props["title"] ?? band.id)}`
 
-const siteWords = (counting: boolean): number =>
-  SITE_ROUTES.reduce(
-    (total, route) =>
-      total + wordsIn(treeFor(route, { origin: ORIGIN, theme: "minimal", counting }).root),
-    0
-  )
+const siteWords = (): number =>
+  SITE_ROUTES.reduce((total, route) => total + wordsIn(pageOf(route).root), 0)
 
 describe("the site has a copy budget, and every part of it is inside one", () => {
   it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
     "%s: no band a reader reads straight down becomes an essay",
     (path, route) => {
-      for (const page of pagesOf(route)) {
-        for (const band of bandsOf(page).filter(isPlain)) {
-          expect(wordsIn(band), describeBand(path, band)).toBeLessThanOrEqual(
-            MOST_WORDS_IN_A_PLAIN_BAND
-          )
-        }
+      for (const band of bandsOf(pageOf(route)).filter(isPlain)) {
+        expect(wordsIn(band), describeBand(path, band)).toBeLessThanOrEqual(
+          MOST_WORDS_IN_A_PLAIN_BAND
+        )
       }
     }
   )
@@ -236,14 +236,12 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
   it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
     "%s: no one cell of a run asks for more than a cell's worth of reading",
     (path, route) => {
-      for (const page of pagesOf(route)) {
-        for (const band of bandsOf(page)) {
-          for (const run of runsIn(band)) {
-            expect(
-              Math.max(...run.words),
-              `${describeBand(path, band)} — ${run.container} of ${run.cell} [${run.words.join(", ")}]`
-            ).toBeLessThanOrEqual(MOST_WORDS_IN_A_CELL)
-          }
+      for (const band of bandsOf(pageOf(route))) {
+        for (const run of runsIn(band)) {
+          expect(
+            Math.max(...run.words),
+            `${describeBand(path, band)} — ${run.container} of ${run.cell} [${run.words.join(", ")}]`
+          ).toBeLessThanOrEqual(MOST_WORDS_IN_A_CELL)
         }
       }
     }
@@ -252,10 +250,8 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
   it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
     "%s: no band is a page",
     (path, route) => {
-      for (const page of pagesOf(route)) {
-        for (const band of bandsOf(page)) {
-          expect(wordsIn(band), describeBand(path, band)).toBeLessThanOrEqual(MOST_WORDS_IN_A_BAND)
-        }
+      for (const band of bandsOf(pageOf(route))) {
+        expect(wordsIn(band), describeBand(path, band)).toBeLessThanOrEqual(MOST_WORDS_IN_A_BAND)
       }
     }
   )
@@ -263,23 +259,16 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
   it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
     "%s: no page is the site",
     (path, route) => {
-      for (const page of pagesOf(route)) {
-        expect(wordsIn(page.root), path).toBeLessThanOrEqual(MOST_WORDS_ON_A_PAGE)
-      }
+      expect(wordsIn(pageOf(route).root), path).toBeLessThanOrEqual(MOST_WORDS_ON_A_PAGE)
     }
   )
 
-  /**
-   * The total, which is the one quantity the failure was ever visible in.
-   *
-   * Taken over the deployment that says the most, because a budget should be
-   * spent at its worst case rather than its best.
-   */
+  /** The total, which is the one quantity the failure was ever visible in. */
   it("the whole site is inside its budget, and still says enough to make its case", () => {
-    const widest = Math.max(...DEPLOYMENTS.map(siteWords))
+    const words = siteWords()
 
-    expect(widest).toBeLessThanOrEqual(MOST_WORDS_ON_THE_SITE)
-    expect(widest).toBeGreaterThanOrEqual(FEWEST_WORDS_ON_THE_SITE)
+    expect(words).toBeLessThanOrEqual(MOST_WORDS_ON_THE_SITE)
+    expect(words).toBeGreaterThanOrEqual(FEWEST_WORDS_ON_THE_SITE)
   })
 
   /**
@@ -296,12 +285,10 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
       "a cell": [Math.max(...cells), MOST_WORDS_IN_A_CELL],
       "a band": [Math.max(...bands.map(({ band }) => wordsIn(band))), MOST_WORDS_IN_A_BAND],
       "a page": [
-        Math.max(
-          ...SITE_ROUTES.flatMap((route) => pagesOf(route).map((page) => wordsIn(page.root)))
-        ),
+        Math.max(...SITE_ROUTES.map((route) => wordsIn(pageOf(route).root))),
         MOST_WORDS_ON_A_PAGE,
       ],
-      "the site": [Math.max(...DEPLOYMENTS.map(siteWords)), MOST_WORDS_ON_THE_SITE],
+      "the site": [siteWords(), MOST_WORDS_ON_THE_SITE],
     }
 
     for (const [what, [widest, ceiling]] of Object.entries(nearest)) {
@@ -407,9 +394,8 @@ const MOST_WORDS_IN_AN_ANSWERED_BAND = 700
 const servedBandsOf = (page: ServedPage): readonly ElementNode[] =>
   page.tree.root.children.filter((node): node is ElementNode => node.kind === "element")
 
-/** The widest this route publishes, which is what a request is measured on top of. */
-const publishedWidth = (route: SiteRoute): number =>
-  Math.max(...pagesOf(route).map((tree) => wordsIn(tree.root)))
+/** What this route publishes, which is what a request is measured on top of. */
+const publishedWidth = (route: SiteRoute): number => wordsIn(pageOf(route).root)
 
 const addedBy = (page: ServedPage): number =>
   wordsIn(page.tree.root) - publishedWidth(page.route)
@@ -487,17 +473,11 @@ describe("what a request adds to a page is inside a budget too", () => {
   })
 
   it("the site is inside its budget in the state that says the most", () => {
-    const widest = Math.max(
-      ...DEPLOYMENTS.map((counting) =>
-        SITE_ROUTES.reduce((total, route) => {
-          const states = served.filter(
-            (page) => page.route.path === route.path && page.counting === counting
-          )
+    const widest = SITE_ROUTES.reduce((total, route) => {
+      const states = served.filter((page) => page.route.path === route.path)
 
-          return total + Math.max(...states.map((page) => wordsIn(page.tree.root)))
-        }, 0)
-      )
-    )
+      return total + Math.max(...states.map((page) => wordsIn(page.tree.root)))
+    }, 0)
 
     expect(widest).toBeLessThanOrEqual(MOST_WORDS_ON_THE_SITE)
     expect(widest).toBeGreaterThanOrEqual(FEWEST_WORDS_ON_THE_SITE)
@@ -526,9 +506,9 @@ describe("what a request adds to a page is inside a budget too", () => {
    * the above from being the published tree measured many times.
    *
    * The failure it guards is not a sweep over nothing but a sweep over the same
-   * thing: `servedPages` crossing six choices with two answers and two
-   * deployments is worth nothing if `pageTreeFor` ignored the lot, and the
-   * assertions here would all pass on three identical trees.
+   * thing: `servedPages` crossing six choices with two answers each is worth
+   * nothing if `pageTreeFor` ignored the lot, and the assertions here would all
+   * pass on three identical trees.
    */
   it("is looking at pages a request actually changed", () => {
     const sizes = new Set(served.map((page) => wordsIn(page.tree.root)))

@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+
 import {
   err,
   walkTree,
@@ -69,6 +72,12 @@ const headingIn = (tree: LoomTree): ElementNode => {
   return heading
 }
 
+/** A module of this route group, as the text that actually runs. */
+const read = (relative: string): string =>
+  readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "")
+
 const configure = (tree: LoomTree, nodeId: NodeId, set: JsonObject): TreeDelta => ({
   deltaId: `d_${tree.revision + 1}` as DeltaId,
   treeId: tree.treeId,
@@ -100,42 +109,70 @@ describe("the rows this site is", () => {
   })
 
   /**
-   * **What a page is stored as is not a function of whether the deployment
-   * counts its readers**, and this is the assertion that let `stored.ts` stop
-   * reading the setting at all.
+   * **What a page is stored as cannot be a function of a deployment setting**,
+   * and as of 21 October that is the type rather than a comparison.
    *
-   * It read it until 20 October, for a reason that stopped being true on
-   * 12 October: the footer carried a disclosure when counting was on, so the
-   * row had to match the deployment that wrote it, and seeding never
-   * overwrites. The maintainer had that message taken off the site whether it
-   * is counting or not, and no node of any page has read `counting` since — so
-   * the read was a row in a table deciding nothing, and the id a page is filed
-   * under was nominally a function of a deployment setting it does not depend
-   * on.
+   * The history is worth the lines, because this rule replaces a measurement.
+   * `stored.ts` read whether the deployment counts its readers until
+   * 20 October, for a reason that stopped being true on 12 October: the footer
+   * carried a disclosure when counting was on, so the row had to match the
+   * deployment that wrote it, and seeding never overwrites. The maintainer had
+   * that message taken off the site whether it is counting or not. What stood
+   * here then was *stores each page as the same tree whether the deployment
+   * counts or not* — two trees, built with `counting: true` and
+   * `counting: false`, compared whole. It held for all three pages, which is
+   * the fact this change started from.
    *
-   * **Asserted over the whole tree, because the id would not have said so.**
-   * An id comes from `sequentialIdFactory("home")`, which counts nodes under a
-   * prefix rather than hashing what is in them — so two pages differing in
-   * every word of their footer are filed under the same `t_home1`, and the
-   * check above passes while the row is wrong. Measured, by putting a
-   * `context.counting` read back into the footer: the ids matched on all three
-   * pages and the trees did not.
+   * **It cannot be written any more, and that is the improvement.** `counting`
+   * is off the page context and off the `ChromeContext`, so there is no second
+   * tree to compare: a builder cannot read a field that does not exist. What
+   * is left to guard is the way it would come back, which is a builder
+   * reaching past the context to the setting itself — and that is a claim
+   * about imports rather than about trees.
    *
-   * That is the half worth keeping, and it is what stops the field coming
-   * quietly back to life. A builder that started reading `counting` again
-   * would put a deployment setting back inside a stored row, where seeding
-   * never overwrites and nothing can revisit it.
+   * **Why it matters more here than anywhere else.** A page of this site is a
+   * row (0259), seeding never overwrites, and nothing revisits a row once it
+   * is written. A node built from a setting is therefore frozen at the moment
+   * the row was written and is wrong from the first time anybody changes it —
+   * and *nobody reading this page has been counted* is the worst of the
+   * possible sentences to be wrong about.
+   *
+   * The one assertion the old rule made that this one does not is that two
+   * such trees are equal. Nothing can build the second one, so there is
+   * nothing to assert; `pages/handed.test.ts` holds the other end, that a
+   * field on the context is read by somebody.
    */
-  it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
-    "stores %s as the same page whether the deployment counts or not",
-    (_path, route) => {
-      const counting = treeFor(route, { ...CONTEXT, counting: true })
-      const quiet = treeFor(route, { ...CONTEXT, counting: false })
+  it("is built by nothing that can read what this deployment has switched on", () => {
+    const sources = [
+      ...readdirSync(fileURLToPath(new URL("./pages", import.meta.url)))
+        .filter((name) => name.endsWith(".ts") && !name.endsWith(".test.ts"))
+        .map((name) => [`pages/${name}`, read(`./pages/${name}`)] as const),
+      ["chrome.ts", read("./chrome.ts")] as const,
+      ["stored.ts", read("./stored.ts")] as const,
+    ]
 
-      expect(counting.treeId).toBe(quiet.treeId)
-      expect(counting).toEqual(quiet)
-    }
-  )
+    const reaching = sources
+      .filter(([, source]) => /readersCountedHere|readerSignalUrl|INTAKE_KEY|process\.env/.test(source))
+      .map(([name]) => name)
+
+    expect(reaching).toEqual([])
+  })
+
+  /**
+   * And the sweep is looking at the files it means to, which is the clause the
+   * 29 September entry in `FINDINGS.md` says to write: a sweep over a list
+   * that came back empty passes, and the list here is a directory read.
+   */
+  it("swept every builder this site has", () => {
+    const swept = readdirSync(fileURLToPath(new URL("./pages", import.meta.url))).filter(
+      (name) => name.endsWith(".ts") && !name.endsWith(".test.ts")
+    )
+
+    expect(swept).toContain("home.ts")
+    expect(swept).toContain("how-it-works.ts")
+    expect(swept).toContain("what-you-run.ts")
+    expect(swept.length).toBeGreaterThanOrEqual(SITE_ROUTES.length)
+  })
 })
 
 describe("seeding", () => {

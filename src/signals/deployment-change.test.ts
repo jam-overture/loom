@@ -532,6 +532,58 @@ describe("deploymentChangeOf", () => {
       expect(reading.arrivals).toBe(200)
     })
 
+    /**
+     * A window handed in with both forms in it and neither named. The
+     * comparison refuses it (0301) and this order used to put the refusal in
+     * `unread`, whose sentence is *one of the two windows reported no view of
+     * its revision* — said of a window holding every reader of both forms, and
+     * said beside arrivals that **sum** those forms (0299).
+     */
+    const unsplitSide = (treeId: TreeId, reached: readonly number[], revision: number) =>
+      pageReadingOf(
+        treeOf(treeId, revision, reached.length),
+        [SKIERS, RIDERS].flatMap((audienceId) =>
+          reached.flatMap((count, at) =>
+            count > 0 ? [{ ...tally(treeId, revision, `band${at + 1}`, count), audienceId }] : []
+          )
+        ),
+        NOTHING_DECLARED
+      )
+
+    it("names a side that holds two forms rather than calling the window unread", () => {
+      const reading = deploymentChangeOf(
+        [readingChangeOf(servedTo(SKIERS, TREE, [100, 100], 1), unsplitSide(TREE, [100, 40], 2))],
+        [inAudience(SKIERS, exact(TREE, 2, 100)), inAudience(RIDERS, exact(TREE, 2, 200))]
+      )
+      const row = reading.unranked[0]
+
+      expect(row?.standing).toBe("unsplit")
+      expect(row?.silence).toBe("audiences-mixed")
+      expect(row?.views).toEqual({ was: 100, now: 0 })
+      expect(reading.standings.unread).toBe(0)
+    })
+
+    /**
+     * The two kinds of nothing side by side, which is the whole of why the
+     * standing is its own member: one of these windows is empty and the other
+     * is full of readers nobody said which form they were served.
+     */
+    it("tells a side that holds two forms from a side nothing read", () => {
+      const reading = deploymentChangeOf(
+        [
+          readingChangeOf(servedTo(SKIERS, TREE, [100, 100], 1), unsplitSide(TREE, [100, 40], 2)),
+          readingChangeOf(
+            servedTo(SKIERS, OTHER_TREE, [100, 100], 1),
+            servedTo(SKIERS, OTHER_TREE, [0, 0], 2)
+          ),
+        ],
+        [inAudience(SKIERS, exact(TREE, 2, 100)), inAudience(RIDERS, exact(TREE, 2, 200))]
+      )
+
+      expect(reading.standings.unsplit).toBe(1)
+      expect(reading.standings.unread).toBe(1)
+    })
+
     it("still reads one form handed in twice as one comparison", () => {
       const once = changeFor(SKIERS, TREE, [100, 100], [100, 40])
       const reading = deploymentChangeOf(

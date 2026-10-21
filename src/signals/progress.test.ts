@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
+import type { AudienceId } from "../audience/audience.js"
 import type { JsonObject } from "../json.js"
-import { nodeId, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, primitiveType, RIDERS, SKIERS, TREE } from "../testing/reader-signal-contract.js"
 import type { ElementNode, LoomNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
@@ -63,8 +64,11 @@ const PAGE = element("page", "loom.stack", {}, [
   element("five", "loom.section"),
 ])
 
-const progressOf = (tree: LoomTree, counters: readonly ReaderTally[]) =>
-  readingProgressOf(pageReadingOf(tree, counters, NOTHING_DECLARED))
+const progressOf = (
+  tree: LoomTree,
+  counters: readonly (ReaderTally & { readonly audienceId?: AudienceId })[],
+  audience?: AudienceId
+) => readingProgressOf(pageReadingOf(tree, counters, NOTHING_DECLARED, audience))
 
 /** A reader who got to band four and left: the sentence the module exists for. */
 const LEAVING_AT_FIVE: readonly ReaderTally[] = [
@@ -216,6 +220,44 @@ describe("readingProgressOf", () => {
       const progress = progressOf(treeOf(PAGE, 7), [])
 
       expect(progress).toMatchObject({ treeId: TREE, revision: 7 })
+    })
+
+    /**
+     * The second job the nought was doing, and the reason the census travels.
+     *
+     * A reading refused for holding two forms of the page publishes the same
+     * floor of nought with full counters behind it (0290), so a reading
+     * downstream of this one that branched on the floor alone called it *a page
+     * nobody read* — which it was not (0301). The audiences are what tell the
+     * two apart, and this is the only place they could have come from.
+     */
+    it("carries the two forms a refused reading was holding, so the nought can be told apart", () => {
+      const unsplit = progressOf(treeOf(PAGE), [
+        { ...tally("page", { views: 100, reached: 100 }), audienceId: SKIERS },
+        { ...tally("one", { views: 100, reached: 40 }), audienceId: SKIERS },
+        { ...tally("page", { views: 900, reached: 900 }), audienceId: RIDERS },
+        { ...tally("one", { views: 900, reached: 850 }), audienceId: RIDERS },
+      ])
+      const nobody = progressOf(treeOf(PAGE), [])
+
+      expect(unsplit.views).toBe(0)
+      expect(nobody.views).toBe(0)
+      expect(unsplit.audiences).toEqual([RIDERS, SKIERS])
+      expect(unsplit.audienceId).toBeNull()
+      expect(nobody.audiences).toEqual([])
+    })
+
+    it("carries one form's own audience through unchanged", () => {
+      const progress = progressOf(
+        treeOf(PAGE),
+        [
+          { ...tally("page", { views: 10, reached: 10 }), audienceId: SKIERS },
+          { ...tally("one", { views: 10, reached: 4 }), audienceId: SKIERS },
+        ],
+        SKIERS
+      )
+
+      expect(progress).toMatchObject({ audienceId: SKIERS, audiences: [SKIERS], views: 10 })
     })
 
     it("reports no steepest fall for a page every reader read to the end", () => {

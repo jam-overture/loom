@@ -101,6 +101,52 @@ const page = (treeId: TreeId, revision: number, reached: readonly number[]): Rea
 const unreadPage = (treeId: TreeId, revision: number): ReadingProgress =>
   readingProgressOf(pageReadingOf(treeOf(treeId, revision, 3), [], NOTHING_DECLARED))
 
+/**
+ * One page served in two forms, read with no audience asked for — so the
+ * reading refuses, every part is `unknown` and its view floor is nought (0290).
+ *
+ * The two forms' counters are given **different** reader counts, so a reading
+ * that summed them or took one of them would publish a figure rather than
+ * nothing and the test below would say which it took.
+ */
+const unsplitPage = (treeId: TreeId, revision: number): ReadingProgress =>
+  readingProgressOf(
+    pageReadingOf(
+      treeOf(treeId, revision, 2),
+      [...formTallies(treeId, revision, SKIERS, [100, 40]), ...formTallies(treeId, revision, RIDERS, [900, 850])],
+      NOTHING_DECLARED
+    )
+  )
+
+/** One form's counters, which is what the store keeps under an audience (0284). */
+const formTallies = (
+  treeId: TreeId,
+  revision: number,
+  audienceId: typeof SKIERS,
+  reached: readonly number[]
+): readonly (ReaderTally & { readonly audienceId: typeof SKIERS })[] =>
+  reached.flatMap((count, at) =>
+    count > 0 ? [{ ...tally(treeId, revision, `band${at + 1}`, count), audienceId }] : []
+  )
+
+/** One form of a page, read as that form — which is what `byAudience` hands over. */
+const formPage = (
+  treeId: TreeId,
+  revision: number,
+  audienceId: typeof SKIERS,
+  reached: readonly number[]
+): ReadingProgress =>
+  readingProgressOf(
+    pageReadingOf(
+      treeOf(treeId, revision, reached.length),
+      formTallies(treeId, revision, audienceId, reached),
+      NOTHING_DECLARED,
+      audienceId
+    )
+  )
+
+const WHEN = "2026-10-09T21:00:00.000Z"
+
 const door = (
   treeId: TreeId,
   revision: number,
@@ -112,8 +158,16 @@ const door = (
   revision,
   opened,
   appearances,
-  updatedAt: "2026-10-09T21:00:00.000Z",
+  updatedAt: WHEN,
 })
+
+/** One form's door, which is the shape the store keeps one row per (0284). */
+const formDoor = (
+  treeId: TreeId,
+  revision: number,
+  audienceId: typeof SKIERS,
+  views: number
+): StoredPageViews => ({ ...door(treeId, revision, views, views), audienceId })
 
 /** A page whose readers never straddled a window, so its counters need no scaling. */
 const exact = (treeId: TreeId, revision: number, views: number): StoredPageViews =>
@@ -283,10 +337,78 @@ describe("deploymentReadingOf", () => {
         ranked: 1,
         unbroken: 1,
         unread: 1,
+        unsplit: 0,
         unscaled: 1,
         unopened: 0,
         inconsistent: 0,
       })
+    })
+  })
+
+  /**
+   * The fault this standing exists for, and the sentence it replaces.
+   *
+   * A page reading refused for holding two forms publishes a view floor of
+   * nought — which is the same nought a page nobody opened publishes — so this
+   * order read it as `unread` and printed *nothing reported a view of this
+   * version in the window* over a window holding every reader of both forms
+   * (0301). The door row beside it makes the contradiction explicit, because the
+   * door **sums** those forms (0299): the published row said a thousand readers
+   * arrived at a page nobody read.
+   */
+  describe("a page handed in as two forms at once", () => {
+    const PAGE = unsplitPage(TREE, 1)
+    const ROWS = [formDoor(TREE, 1, SKIERS, 100), formDoor(TREE, 1, RIDERS, 900)]
+
+    it("is the nought a page nobody read publishes, which is why it was reported as one", () => {
+      expect(PAGE.views).toBe(0)
+      expect(PAGE.steepest).toBeNull()
+      expect(PAGE.audiences).toEqual([RIDERS, SKIERS])
+      expect(PAGE.audienceId).toBeNull()
+      expect(unreadPage(TREE, 1).views).toBe(0)
+    })
+
+    it("says the window holds two forms rather than that nothing read the page", () => {
+      const reading = deploymentReadingOf([PAGE], ROWS)
+
+      expect(reading.unranked.map((row) => row.standing)).toEqual(["unsplit"])
+      expect(reading.ranked).toEqual([])
+      expect(reading.worst).toBeNull()
+    })
+
+    /**
+     * The contradiction, in one row: the arrivals stand because arrivals add
+     * across forms (0299), and the standing beside them no longer denies that
+     * anybody came.
+     */
+    it("publishes both forms arrivals beside the refusal rather than withholding them", () => {
+      const row = deploymentReadingOf([PAGE], ROWS).unranked[0]
+
+      expect(row).toMatchObject({ standing: "unsplit", views: 0, opened: 1_000, readers: null })
+    })
+
+    it("is told apart from a page nobody read in the standings", () => {
+      const reading = deploymentReadingOf([PAGE, unreadPage(OTHER_TREE, 1)], ROWS)
+
+      expect(reading.standings.unsplit).toBe(1)
+      expect(reading.standings.unread).toBe(1)
+    })
+
+    /**
+     * The same window, asked properly. Two forms of one page are two rows in the
+     * order (0290), each against its own door, and neither is `unsplit` — which
+     * is what makes the standing a fault in the asking rather than in the
+     * deployment.
+     */
+    it("takes its place in the order twice once the window is split", () => {
+      const reading = deploymentReadingOf(
+        [formPage(TREE, 1, SKIERS, [100, 40]), formPage(TREE, 1, RIDERS, [900, 850])],
+        ROWS
+      )
+
+      expect(reading.standings.unsplit).toBe(0)
+      expect(reading.ranked.map((row) => row.audienceId)).toEqual([SKIERS, RIDERS])
+      expect(reading.ranked.map((row) => row.lost)).toEqual([60, 50])
     })
   })
 

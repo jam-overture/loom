@@ -888,4 +888,65 @@ describe("paceChangeOf across two audiences", () => {
     expect(change.audiences).toEqual({ was: SKIERS, now: RIDERS })
     expect(change.silence).toBe("different-trees")
   })
+
+  /**
+   * A window of two forms with neither asked for, with the two audiences' rows
+   * **colliding** on every node — the fixture shape 0300 found to be the only
+   * one that reaches the fault rather than documenting it.
+   */
+  const unsplitOf = (side: Window) =>
+    pageReadingOf(
+      side.tree,
+      [
+        ...side.counters.map((counter) => ({ ...counter, audienceId: SKIERS })),
+        ...side.counters.map((counter) => ({ ...counter, audienceId: RIDERS })),
+      ],
+      side.declarations ?? BODY_IS_COPY
+    )
+
+  /**
+   * The sentence this replaces is 0301's: the floor alone cannot tell a window
+   * nobody **read** from a window nobody **split**, and the two send a
+   * deployment to opposite places.
+   */
+  it("says the window holds two forms rather than that nobody read it", () => {
+    const unsplit = unsplitOf(WAS)
+
+    expect(unsplit.audienceId).toBeNull()
+    expect(unsplit.audiences).toEqual([RIDERS, SKIERS])
+    expect(unsplit.views).toBe(0)
+
+    const change = paceChangeOf(unsplit, formOf(NOW, SKIERS))
+
+    expect(change.silence).toBe("audiences-mixed")
+  })
+
+  it("says it of the later window too", () => {
+    expect(paceChangeOf(formOf(WAS, SKIERS), unsplitOf(NOW)).silence).toBe("audiences-mixed")
+  })
+
+  /**
+   * The word side survives it, as it survives `nothing-measured`: what the
+   * change did to the time the page asks for is a fact about the two trees.
+   * Each side read on its own is still honest about the window it was handed.
+   */
+  it("still says what the change did to the time the page asks for", () => {
+    const change = paceChangeOf(unsplitOf(WAS), formOf(NOW, SKIERS))
+    const measured = paceChangeOf(formOf(WAS, SKIERS), formOf(NOW, SKIERS))
+
+    expect(change.need).toEqual(measured.need)
+    expect(change.readings.now.views).toBeGreaterThan(0)
+    expect(change.readings.was.views).toBe(0)
+  })
+
+  /** A window that really held no views still says so. */
+  it("keeps saying nothing was measured of a window that held no views", () => {
+    expect(
+      paceChangeOf(pageReadingOf(WAS.tree, [], BODY_IS_COPY, SKIERS), formOf(NOW, SKIERS)).silence
+    ).toBe("nothing-measured")
+  })
+
+  it("says the window holds two forms before it says nobody read it", () => {
+    expect(paceChangeOf(unsplitOf(WAS), formOf(NOW, SKIERS)).silence).not.toBe("nothing-measured")
+  })
 })
