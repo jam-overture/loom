@@ -367,5 +367,10 @@ would have been two branches rewriting one test's provenance fold for the same
 reason. That is the cost the governance rule exists to avoid and it is the
 concrete version of it, so it is written down here.
 
-Preview: the branch deployment is linked on #687. Nothing here draws a screen,
-so it is the branch deployed rather than something to look at.
+Preview:
+<https://loom-git-signals-43-a-page-r-ce2aad-jpizzolato36-6341s-projects.vercel.app>
+— the branch alias, which stays the same across pushes; Vercel's own comment on
+#687 carries the per-deployment link. Nothing in either unit draws a screen, so
+it is the branch deployed rather than something to look at. The egress policy
+for this session refuses that host, so it is quoted from Vercel's comment rather
+than checked from here.
