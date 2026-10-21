@@ -82,16 +82,16 @@ describe("isForwarding", () => {
 
   /**
    * The other half, as a fact about the group rather than about one file: every
-   * page here is a screen. The helper stays because `every-screen.test.ts`
-   * filters with it and unit 3 may well add a forward back; the day it does,
-   * this says so rather than letting a page quietly skip the sweeps that ask
-   * what a screen owes a reader.
+   * page here is a screen but one. A project's own address forwards to the
+   * screen a project opens on, and it is named here so that a second forward
+   * says so rather than quietly skipping the sweeps that ask what a screen
+   * owes a reader.
    */
-  it("finds no forwarding page in the group at all", () => {
+  it("finds exactly one forwarding page in the group, a project's own address", () => {
     const forwards = portalScreens()
       .filter((screen) => isForwarding(screenSource(screen.file)))
       .map((screen) => screen.route)
 
-    expect(forwards).toEqual([])
+    expect(forwards).toEqual(["/portal/[project]"])
   })
 })

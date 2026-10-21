@@ -60,6 +60,12 @@ export const TopBarChrome = ({ actor }: { readonly actor: string | null }) => {
         <span className="text-ink-muted font-mono text-2xs">portal · alpha</span>
       </Link>
 
+      {actor !== null && (
+        <Link href="/portal" className="text-ink-secondary hover:text-ink text-sm no-underline">
+          Projects
+        </Link>
+      )}
+
       {actor !== null && <SignedInAs actor={actor} />}
     </header>
   )

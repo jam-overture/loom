@@ -30,7 +30,7 @@ describe("TopBarChrome", () => {
   it("keeps a signed-in reviewer inside the portal rather than pushing them out", () => {
     render(<TopBarChrome actor="reviewer@example.com" />)
 
-    const home = screen.getByRole("link")
+    const home = screen.getByRole("link", { name: "Portal home" })
 
     /*
      * `/portal`, not `/`. A reviewer who is here to work does not want to be
@@ -39,6 +39,13 @@ describe("TopBarChrome", () => {
      */
     expect(home.getAttribute("href")).toBe("/portal")
     expect(home.getAttribute("aria-label")).toBe("Portal home")
+  })
+
+  /** The wordmark goes there too, but nobody guesses that a logo is the way back. */
+  it("names the way back to the projects in words once somebody is signed in", () => {
+    render(<TopBarChrome actor="reviewer@example.com" />)
+
+    expect(screen.getByRole("link", { name: "Projects" }).getAttribute("href")).toBe("/portal")
   })
 
   it("still holds the wordmark's parts, so nothing was traded to make it a link", () => {

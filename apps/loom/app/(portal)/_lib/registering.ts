@@ -202,11 +202,9 @@ export type Rename = {
   /**
    * `undefined` means **the box was empty**, and nothing more than that.
    *
-   * What an empty box *means* is not this function's to decide, and today the
-   * answer is awkward: `ApplicationStore.rename` reads an absent host as *leave
-   * it alone*, in both of its implementations, so a host cannot be cleared
-   * through the contract at all. The action is where that is reported, because
-   * it is the part that knows what the host was before.
+   * What an empty box *means* is not this function's to decide. The settings
+   * action reads it as *any site* and clears the host, because its box starts
+   * with the host the project has.
    */
   readonly host: string | undefined
 }
