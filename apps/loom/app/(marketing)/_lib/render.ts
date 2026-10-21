@@ -253,28 +253,32 @@ export const renderTree = (page: LoomTree, options: SiteRenderOptions = {}): Ren
 }
 
 /**
- * The page, with the one fact about the deployment that the page is allowed to
- * mention, read once.
- *
- * Read here rather than in each builder so that the words and the markup cannot
- * come apart: the same boolean says *this page is counting you* in the footer
- * and puts the addresses on the bands that would be counted. `counting` in the
- * context wins when a caller supplies it, which is how the tests render both
- * halves without an environment variable or a key table.
+ * The page, and whether its markup carries the addresses a reader signal names.
  *
  * **This is the only place the question is asked on a render path**, and it is
- * asked once per request rather than once per tree. `renderTree` below takes
- * the answer; it no longer looks it up, because looking it up now means reading
- * a row.
+ * asked once per request rather than once per tree. `renderTree` above takes
+ * the answer; it does not look it up, because looking it up means reading a
+ * row.
+ *
+ * **It is asked of the deployment and never of the page, as of 21 October.**
+ * The answer used to travel as `counting` on the page context: the tree was
+ * built with it, `home.ts` handed it to a `ChromeContext`, and nothing read it
+ * at the other end — a setting threaded through three types for a footer line
+ * that came off the site on 12 October. What it decides is which attributes
+ * the renderer writes, so it belongs where the renderer's other options are.
+ *
+ * `addressed` is for a caller that already knows — the tests that render both
+ * halves without an environment variable and a key table, and anything that
+ * has asked `readerSignalUrl` for the same answer. Given one, this asks the
+ * deployment nothing, which is the behaviour `counting.test.ts` counts the
+ * reads for.
  */
 export const renderSitePage = async (
   route: SiteRoute,
-  context: SitePageContext
-): Promise<RenderOutput> => {
-  const counting = context.counting ?? (await readersCountedHere())
-
-  return renderTree(await pageTreeFor(route, { ...context, counting }), {
-    addressed: counting,
+  context: SitePageContext,
+  options: Pick<SiteRenderOptions, "addressed"> = {}
+): Promise<RenderOutput> =>
+  renderTree(await pageTreeFor(route, context), {
+    addressed: options.addressed ?? (await readersCountedHere()),
     origin: context.origin,
   })
-}

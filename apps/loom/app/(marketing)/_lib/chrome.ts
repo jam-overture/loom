@@ -69,6 +69,24 @@ export const PALETTE_SWITCHER_LABEL = "The same page, a different palette:"
  */
 export const SIGN_IN_LABEL = "Sign in"
 
+/**
+ * **Nothing here is a fact about the deployment, as of 21 October.**
+ *
+ * This type carried a `counting` boolean until today, for a footer line that
+ * said *this page counts which of its parts you reach*. The maintainer had
+ * that line taken off the site on 12 October, whether a deployment is counting
+ * or not, and from then on nothing in this file read the field: the header and
+ * the footer were handed a deployment setting on every page of the site and
+ * threw it away.
+ *
+ * Whether readers are counted is now a render option and nothing else
+ * (`SiteRenderOptions.addressed`), which is what the pages were already true
+ * of. The reason it may not come back as a context field is stronger than the
+ * tidiness: a page of this site is **stored** (0259), seeding never
+ * overwrites, and a node built from a setting freezes at the moment the row
+ * was written. `stored.test.ts` holds that end, and it holds it as a rule
+ * about this file rather than as a comparison of two trees.
+ */
 export type ChromeContext = {
   readonly origin: string
   readonly theme: SiteThemeName
@@ -77,18 +95,6 @@ export type ChromeContext = {
   /** What the visitor has asked the front door for, when they are on it. */
   readonly ask?: AskId
   readonly approve?: boolean
-  /**
-   * Whether this deployment is counting the person reading the page, which the
-   * foot of every page says when it is.
-   *
-   * It is in the chrome rather than on one page because it is true of all ten:
-   * a broadcaster is started by the layout, so the page a reader happens to
-   * have landed on is not the page that decides whether they are counted. A
-   * site that counted on ten pages and disclosed on one would be making the
-   * argument this site sells in exactly the form it tells a reader not to
-   * accept.
-   */
-  readonly counting?: boolean
 }
 
 /**

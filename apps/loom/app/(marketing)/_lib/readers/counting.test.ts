@@ -41,14 +41,29 @@ const keyed = async (): Promise<IngestKeyStore> => {
 
 const on = { [INTAKE_KEY]: "on" } as const
 
-const markup = async (counting: boolean): Promise<string> =>
+/**
+ * A page, rendered for a deployment that is counting its readers or one that
+ * is not.
+ *
+ * **Told rather than threaded, as of 21 October.** This passed `counting` on
+ * the page *context* until today, which is how the setting came to be a field
+ * on three types that no node read. Whether a page carries the addresses is a
+ * render option, so that is what a caller who already knows the answer hands
+ * over.
+ *
+ * **That the option wins over the deployment is held rather than assumed**, by
+ * *carries the tree's address* below: these tests run with the switch unset, so
+ * a render that consulted the deployment instead of the answer it was given
+ * would come back with no address on it at all.
+ */
+const markup = async (addressed: boolean): Promise<string> =>
   renderToStaticMarkup(
-    (await renderSitePage(HOME, { origin: ORIGIN, theme: DEFAULT_THEME, counting })).element
+    (await renderSitePage(HOME, { origin: ORIGIN, theme: DEFAULT_THEME }, { addressed })).element
   )
 
-const readersPage = async (counting: boolean): Promise<string> =>
+const readersPage = async (addressed: boolean): Promise<string> =>
   renderToStaticMarkup(
-    (await renderSitePage(WHAT_YOU_RUN, { origin: ORIGIN, theme: DEFAULT_THEME, counting }))
+    (await renderSitePage(WHAT_YOU_RUN, { origin: ORIGIN, theme: DEFAULT_THEME }, { addressed }))
       .element
   )
 

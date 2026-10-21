@@ -57409,8 +57409,15 @@ see.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
 (`app/(marketing)/_lib/chrome.ts`, `_lib/served.ts`, and the six test files that
-cross the dimension) · **Status:** open — nothing is broken, no test is failing,
-and the pages are provably identical either way
+cross the dimension) · **Status:** **closed by
+`marketing-12-a-deployment-setting-is-not-a-page-field`** — shapes 1 and 2
+together, as the entry recommends. `counting` is off `PageContext` and off
+`ChromeContext`, `renderSitePage` takes it as a render option, and the
+deployment is no longer a dimension of `servedPages()`. The sweep went from 150
+states in 518ms to **75 in 252ms**, and the courier hole is closed: with the
+field put back and the old predicate restored, both sweep rules are green on it
+again, which is the measurement in
+`reports/2026-10-21-marketing-a-deployment-setting-is-not-a-page-field.md`
 
 `ChromeContext` carries a `counting` boolean. Nothing in `chrome.ts` reads it.
 Stripping the comments out of that file and looking for a property access finds
@@ -57672,6 +57679,104 @@ past the bracket, so from here I will write the report and record as paths rathe
 than links in a pull request body, and keep links for anything under about 120
 characters.
 
+## 2026-10-21 — a hand-off is only visible when the field keeps its name, and a field renamed on the way is a courier the sweep still counts as a reader
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/pages/handed.test.ts`) · **Status:** open — **nothing is
+broken**; this is the stated limit of what shipped on 21 October
+
+`handed.test.ts` holds the general rule that **a context field is a promise that
+some page reads it**, and as of today it no longer counts a courier as a reader:
+`field: thing.field` is struck out of the source before the sweep looks for
+`.field`, so the question *is it read* lands on whatever the field was handed
+to. That closed the `counting` hole, and the closing is measured — with the
+field put back and the old predicate restored, both sweep rules go green on the
+live bug again.
+
+**The pattern only matches a hand-off that keeps the field's name.** All three
+shapes of hand-off this surface writes today do:
+
+```ts
+counting: context.counting === true     // struck out
+origin: context.origin                 // struck out
+ask: context.record.ask                 // NOT struck out, and must not be
+```
+
+The third is the distinction the rule is careful about, because striking it out
+would fail `answer.ts` for building an address out of a record it was given. The
+predicate's own four tests hold both halves.
+
+**What it cannot see is a hand-off that renames.** `counting: context.counted`
+or `addressed: context.counting` reads `.counting` in the courier and hands it
+on under another name, so the courier is credited with a read it is not doing —
+which is this entry's own instance with one word changed. Nothing in this route
+group does that today; that is why it is a finding rather than a failure.
+
+**Two ways, costed:**
+
+1. **Strike out any property whose value is a bare `thing.field`**, whatever the
+   property is called. `addressed: context.counting` goes with
+   `counting: context.counting`, so a rename is no escape. The cost is the
+   `ask: context.record.ask` case: that is a single step through another field,
+   not a bare one, so it survives — but a page writing `href: context.origin`
+   would stop counting as a reader of `origin`, and that is a real read. It
+   would have to be checked against every page on the surface, and the honest
+   version is a list of exceptions, which the 28 September entry on *a test
+   derived from the list it checks* warns about.
+2. **Leave it, written down.** What exists holds every hand-off this surface
+   writes, the predicate is tested directly rather than only through the sweep,
+   and a rename is a thing somebody has to write deliberately. The next field
+   that goes unread goes unread the way `counting` did, and that way is now
+   closed.
+
+**Recommendation: 2**, which is why this is open rather than built. It is here
+so the next run that meets a field nobody reads has the shape of the hole in
+front of it rather than finding it the way this lane found the last two — a
+fortnight for `trail`, nine days for `counting`.
+## 2026-10-21 — two sweep floors are hand-written copies of another module's arithmetic, and both went red for a change that touched no copy
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/voice.test.ts`, `_lib/naming.test.ts`) · **Status:** open
+— **nothing is broken**; both floors are correct for the site as it is today
+
+`served.ts` publishes `SERVED_STATE_COUNT`, and every caller of `servedPages()`
+asserts against it, so halving the sweep's dimensions left six test files green
+without a line changed. **Two floors beside those assertions are not written
+that way**, and both failed on this change:
+
+```
+voice.test.ts    expected 75 to be greater than or equal to 126    // 3 * 2 * 21
+naming.test.ts   expected 550 to be greater than or equal to 600
+```
+
+Neither failure was about the change. The deployment stopped being a dimension
+of a sweep over copy that could not differ by it, so every mention on this site
+stopped being read twice — and the two files that had written a number down
+rather than deriving one said the sweep had gone quiet. `voice.test.ts` spelled
+the dimension out as a factor (`3 * 2 * 21`); `naming.test.ts` carried `600` and
+`80` against a measurement of `798` and `126`, and **the second of those would
+have been the next failure** at 75 against 80.
+
+Both are now re-measured and stated with the date (`400` and `50` against 550
+and 75; `3 * 21`), which is the same shape of claim one dimension smaller. So
+the entry is not about today's numbers.
+
+**What it is about:** a floor whose job is *the sweep did not come back empty*
+should not have to move when the sweep's shape changes, and these do. The fix
+that suggests itself — derive the floor from `SERVED_STATE_COUNT` — is the
+failure this lane filed on 27 September, a test whose expected value comes from
+the code under test: a sweep that returned nothing would then expect nothing and
+pass. A floor has to be independent of the thing it is checking to be worth
+anything, which is exactly why it is written by hand.
+
+**The shape that is worth something is a floor per state rather than a total**:
+*at least five mentions per served state*, which is independent of how many
+states there are and still fails a sweep that reads nothing. It would have
+survived today untouched. It is a finding rather than a fix because it is a
+judgement about what these two rules are for, the numbers it would need are a
+fresh measurement over the two files' own sweeps, and putting it in the same
+diff as the change that exposed it is how a test ends up derived from the run
+that broke it.
 
 ---
 ## 2026-10-20 — closing the `pageViewsFor` adoption: the scope's `one` member fills a census in, and the door must not let it
