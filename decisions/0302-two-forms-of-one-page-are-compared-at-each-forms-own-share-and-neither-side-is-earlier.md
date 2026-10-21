@@ -6,14 +6,17 @@
 
 **Section:** §4c (reader signals)
 
-> **The number skips one, for the reason 0300's did.** When this was written
-> `main` carried 0300 and the number after it was held by an open pull request
-> of this lane, #687, verified the evening before. Two records sharing a number
-> is fatal
-> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)), so
-> this takes the one after that rather than the one after `main`. #687 is not
-> merged as this is written, so nothing here cites 0301 and nothing here depends
-> on it.
+> **The number is the one after `main`'s plus one, and the two now sit on one
+> branch.** When this was written `main` carried 0300 and 0301 was held by this
+> lane's open pull request, #687, verified the evening before — so this took the
+> number after that rather than the number after `main`, because two records
+> sharing one is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> This record was then moved onto that same branch, per the governance rule that
+> a lane with an open pull request pushes onto it rather than opening a second
+> one, so 0301 and 0302 are now neighbours rather than strangers. Nothing here
+> depends on 0301; the two units are independent and are described separately in
+> `docs/signals.md` as §44 and §45.
 
 ## Context
 

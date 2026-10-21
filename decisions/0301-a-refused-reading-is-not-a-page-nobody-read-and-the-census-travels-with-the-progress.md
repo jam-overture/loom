@@ -125,6 +125,15 @@ twice.
   `everyMemberOf` and an exhaustive switch, so every surface that draws a
   standing or a silence is forced to name them. `Loom portal` has a row to draw
   and a sentence for it; that is filed rather than done.
+- **The same guard went into the three remaining comparisons of this shape in
+  the same unit** — `copyChangeOf`, `paceChangeOf` and `actionChangeOf`, which
+  each took two page readings and published `nothing-measured` of a window that
+  held two forms of them. All five comparisons over two page readings now report
+  it, and what survives the refusal in each is its own tree half. The ordering
+  that needed an argument rather than a cause is in `actionChangeOf`: a mixed
+  side and a sender that does not walk (0167) are reachable at once and neither
+  causes the other, so the state whose **remedy is a call** is reported first,
+  because taking it reveals the other and taking the other does not reveal it.
 - **The silences table gains no condition.** All three map to
   `two-forms-unsplit`, which the funnel comparison brought yesterday, and the
   mapping now says what it is worth saying: the comparison's is a state of the

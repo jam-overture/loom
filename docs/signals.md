@@ -2781,7 +2781,9 @@ minified.
 **What is left and is filed:** no screen draws `unsplit` or `audiences-mixed`,
 which is `Loom portal`'s. The change order's `different-audiences` still maps to
 `unread`, and so to the condition `no-view-reported` — a second conflation of the
-same family, with its own argument, filed for this lane.
+same family, with its own argument, filed for this lane. **The three comparisons
+this did not reach were taken the next morning, as §45**, in the same unit for
+the reason the step gives.
 ### 44. Two forms of one page, side by side · `Loom signals` · **done, 21 October**
 
 The reading §36 named and deliberately did not build, with the instruction that
@@ -2846,14 +2848,52 @@ minified.
 what readers **did** inside it, which is this join at a different counter and no
 decision at all; and no screen reads any of it, which is `Loom portal`'s.
 
-**Also filed and not built, because it is blocked rather than deferred:**
-`copyChangeOf`, `paceChangeOf` and `actionChangeOf` still publish
-`nothing-measured` — *one of the two windows held no page views* — where one
-side was a window of two forms read as neither. That is the fault 0301 removed
-from two readings, in the three it did not reach. Taking it needs
-`silences.test.ts`'s condition-provenance fold to credit a declared condition to
-its declarer, which is written and is on #687 and not yet on `main`, so doing it
-here would mean writing that fix a second time in the same lines.
+### 45. The three comparisons §43 did not reach · `Loom signals` · **done, 21 October**
+
+§43 removed *a page nobody read* from the before-and-after reading and the two
+deployment orders. **Three comparisons of the same shape were not reached**,
+and they are of one shape with the one that was: `copyChangeOf`, `paceChangeOf`
+and `actionChangeOf` each take two page readings, each guards two pages and then
+two audiences, and neither guard can see a side read as neither form.
+
+What they published instead was `nothing-measured` — *one of the two windows
+held no page views* — of a window that held plenty: it held two forms of them. A
+page reading read as neither has a view floor of nought with full counters
+behind it, so the floor alone cannot tell a window nobody **read** from a window
+nobody **split**, and the two sentences send a deployment to opposite places:
+one to look for a broken sender, the other to split the window with `byAudience`
+and read twice.
+
+**Done**, as 0301 applied rather than as a decision of its own — one guard
+beside the two each already had, `audiences-mixed` on three more published
+vocabularies, and three cases in `silences.ts` mapping to the existing
+`two-forms-unsplit`. All five comparisons over two page readings now report it,
+and the silence table gains no condition.
+
+- **What survives the refusal is each reading's own tree half**, which is how
+  `nothing-measured` is already spelled in all three: the words a change wrote,
+  the time the page asks for, and which parts it added and removed are facts
+  about the two trees and about no counter. Every figure about readers is
+  withheld.
+- **Two orderings, and both are real.** A page that says nothing is reported
+  before the unsplit window, because it survives the remedy and reporting it
+  first loses nothing; the view floor is reported after it, because the floor is
+  the unsplit window's own symptom.
+- **The third ordering is a rule rather than a cause, and it is the one worth
+  keeping.** In `actionChangeOf` a mixed side and a sender that does not walk
+  (0167) are reachable at once, and neither causes the other. The state whose
+  **remedy is a call** wins, because taking it reveals the other and taking the
+  other does not reveal it: a deployment told `unwalked` first goes and fixes a
+  sender, asks again, and is handed the same unsplit window with nothing saying
+  so.
+- **It needed no further change to the silence table's provenance test**, which
+  is why it is in this unit and not the next one: §43's credit rule — a declared
+  condition belongs to its declarer whichever set reports it first — is what
+  makes three more sets able to report `two-forms-unsplit` without deleting the
+  funnel comparison's claim to having brought it.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds.** `broadcast.ts` is byte-identical.
 
 ## Still not in scope
 

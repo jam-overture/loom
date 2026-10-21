@@ -5,6 +5,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 
 import { pageActionOf, type ActionStanding, type PageAction, type PartAction } from "./action.js"
 import {
+  audienceScopeRead,
   comparedAudiencesOf,
   crossesAudiences,
   type ComparedAudiences,
@@ -139,6 +140,39 @@ export type ActionChangeSilence =
    */
   | "different-audiences"
   /**
+   * One of the two windows holds two forms of the page and named neither.
+   *
+   * The state the before-and-after reading and the two deployment orders took
+   * the morning before (0301), in one of the three readings that record did not
+   * reach. Without it this comparison published `nothing-measured` — *one of the two windows
+   * held no page views* — of a window that held plenty: it held two forms of
+   * them. A page reading read as neither has a view floor of nought with full
+   * counters behind it (`parts.ts`), so the floor alone cannot tell a window
+   * nobody read from a window nobody split, and the two sentences send a
+   * deployment to opposite places: one to look for a broken sender, the other
+   * to split the window and read twice, which is a call away.
+   *
+   * **The tree half still answers**, which is the half `nothing-measured`
+   * leaves standing and for its reason: which parts the change added and
+   * removed, and which of them gained or lost an inside, are facts about the
+   * two revisions. Every share is withheld, and the two readings on the
+   * comparison stay honest about the windows they were each handed.
+   *
+   * **It cannot co-occur with `different-audiences`**, so the order between the
+   * two is not observable: `crossesAudiences` needs an audience on both sides
+   * and a mixed side has none, while a side that names one and holds two in its
+   * census reads as `one`, because an audience asked for always wins (0300).
+   * The order that does matter is **before `unwalked`**, and it is the one
+   * ordering in this set taken on a rule rather than on a cause. Both are
+   * reachable at once — one side read as neither form, the other a window whose
+   * delegated signals carry no `within` — and **the state whose remedy is a
+   * call wins, because taking it reveals the other and taking the other does
+   * not reveal it.** A deployment told `unwalked` first goes and fixes a
+   * sender, asks again, and is handed the same unsplit window with nothing
+   * saying so.
+   */
+  | "audiences-mixed"
+  /**
    * One of the two windows holds uses and credits no reader with acting inside
    * anything.
    *
@@ -183,6 +217,7 @@ export const ACTION_CHANGE_SILENCES: readonly ActionChangeSilence[] =
   everyMemberOf<ActionChangeSilence>()([
     "different-trees",
     "different-audiences",
+    "audiences-mixed",
     "unwalked",
     "nothing-measured",
     "dissolved",
@@ -195,6 +230,8 @@ export const describeActionChangeSilence = (silence: ActionChangeSilence): strin
       return "the two readings are of different pages"
     case "different-audiences":
       return "the two readings are of different audiences, and so of different readers"
+    case "audiences-mixed":
+      return "one window holds two forms of the page and says which readers neither"
     case "unwalked":
       return "one of the two windows does not report where actions happened, so its shares are noughts"
     case "nothing-measured":
@@ -584,10 +621,23 @@ const byReachedNow = (one: ComparedAction, other: ComparedAction): number =>
  * where a malformed row makes them, *this window does not report where actions
  * happened* is the thing worth printing.
  */
+/**
+ * Whether either side was read as neither of two forms.
+ *
+ * Taken off the two readings' own published scope rather than recomputed, which
+ * is what `audienceScopeRead` is for: five comparisons now ask this one question
+ * and a sixth spelling of it is how the rule comes to be agreed with by some of
+ * them (0293).
+ */
+const unsplit = (was: PageReading, now: PageReading): boolean =>
+  audienceScopeRead(was).reading === "mixed" || audienceScopeRead(now).reading === "mixed"
+
 const silenceOf = (
   readings: { readonly was: PageAction; readonly now: PageAction },
-  compared: readonly ComparedAction[]
+  compared: readonly ComparedAction[],
+  unsplitWindow: boolean
 ): ActionChangeSilence | null => {
+  if (unsplitWindow) return "audiences-mixed"
   if (readings.was.unwalked || readings.now.unwalked) return "unwalked"
   if (readings.was.views === 0 || readings.now.views === 0) return "nothing-measured"
 
@@ -704,6 +754,6 @@ export const actionChangeOf = (was: PageReading, now: PageReading): ActionChange
     stillUntouched: compared
       .filter((part) => part.movement === "still-untouched" && part !== whole)
       .sort(byReachedNow),
-    silence: silenceOf(readings, compared),
+    silence: silenceOf(readings, compared, unsplit(was, now)),
   }
 }

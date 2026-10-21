@@ -57872,12 +57872,16 @@ the sentence that ranks them; if you cannot write it, the ordering is reading
 order and the comment should say so. The orderings in this change that *are* real
 — the refusal before the view floor, in two readings — were each caught three
 times, by fixtures where one window reaches both.
-## 2026-10-21 — three comparisons still call a window of two forms *a window nobody read*, and the fix is written on an open pull request rather than missing
+## 2026-10-21 — three comparisons still called a window of two forms *a window nobody read*, and the fix was on an open pull request rather than missing
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/copy-change.ts`, `pace-change.ts`, `action-change.ts`) ·
-**Status:** open — **the unit is designed, the fault is confirmed, and it is
-blocked on #687 landing rather than on a decision**
+**Status:** **closed on filing by `signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`**
+as §45 — written down first because the reason it was nearly deferred is the
+useful part, and the reason it was not is governance rather than engineering:
+the branch that carries the blocker is this lane's own open one, and a lane with
+an open pull request pushes onto it. Original status: open — the unit designed,
+the fault confirmed, and blocked on #687 landing rather than on a decision
 
 0301 took `audiences-mixed` into `readingChangeOf` and `unsplit` into the two
 deployment orders, because a window of two forms read as neither publishes *the
@@ -57917,8 +57921,14 @@ second time in the same lines, on a branch that cannot be stacked on #687, would
 have handed the merge a conflict in the one file both changes rewrite — which is
 how 0300 came to leave `pageViewsFor` alone, for the same reason.
 
-**Take it as soon as #687 is on `main`.** Nothing else blocks it and nothing
-about it needs the maintainer.
+**What closing it took, beyond the guards.** Two orderings that are real —
+a page saying nothing before the unsplit window, and the window before the view
+floor — and one that needed an argument rather than a cause: in
+`actionChangeOf` a mixed side and a sender that does not walk are reachable at
+once and neither causes the other, so the state whose **remedy is a call** is
+reported first, because taking it reveals the other and taking the other does
+not reveal it. `silences.test.ts` needed **no** further change, exactly as
+predicted above.
 
 ---
 ## 2026-10-21 — two forms of a page can now be compared, and the same question about its words and its actions is a mirror of it

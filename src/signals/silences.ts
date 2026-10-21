@@ -696,6 +696,8 @@ export const meaningOfActionChangeSilence = (silence: ActionChangeSilence): Sile
       return meaning("action-change", "two-pages")
     case "different-audiences":
       return meaning("action-change", "two-audiences")
+    case "audiences-mixed":
+      return meaning("action-change", "two-forms-unsplit")
     case "unwalked":
       return meaning("action-change", "no-action-credited")
     case "nothing-measured":
@@ -755,6 +757,8 @@ export const meaningOfCopyChangeSilence = (silence: CopyChangeSilence): SilenceM
       return meaning("copy-change", "two-audiences")
     case "wordless":
       return meaning("copy-change", "says-nothing")
+    case "audiences-mixed":
+      return meaning("copy-change", "two-forms-unsplit")
     case "nothing-measured":
       return meaning("copy-change", "no-view-reported")
     case "inconsistent":
@@ -1083,6 +1087,8 @@ export const meaningOfPaceChangeSilence = (silence: PaceChangeSilence): SilenceM
       return meaning("pace-change", "two-audiences")
     case "wordless":
       return meaning("pace-change", "says-nothing")
+    case "audiences-mixed":
+      return meaning("pace-change", "two-forms-unsplit")
     case "nothing-measured":
       return meaning("pace-change", "no-view-reported")
     case "dissolved":

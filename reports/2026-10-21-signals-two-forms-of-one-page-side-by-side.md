@@ -1,22 +1,31 @@
-# 21 October 2026 — two forms of one page, side by side
+# 21 October 2026 — two forms of one page side by side, and the three comparisons yesterday did not reach
 
-**Routine:** `Loom signals` · **Branch:** `signals-44-two-forms-of-one-page-side-by-side` ·
-**Section:** §4c
+**Routine:** `Loom signals` · **Branch:** `signals-43-a-page-read-as-neither-is-not-a-page-nobody-read`
+(#687) · **Section:** §4c
 
 ## Before anything was built
 
 Two pull requests open. **#687** is this lane's, from last night, carrying 0301;
-it has no maintainer comment and no review comment of any kind, so there was
-nothing outranking the plan to address. **#689** is `Loom portal`'s and touches
-nothing in `src/signals/`. Nothing was waiting on me.
+no maintainer comment and no review comment of any kind, so there was nothing
+outranking the plan to address. **#689** is `Loom portal`'s and touches nothing
+in `src/signals/`.
 
-#687 is **not merged**, which has not happened to this lane before — every
-previous run found its predecessor on `main`. That single fact decided what was
-built today, and the reasoning is in *The unit I did not build* below rather
-than buried, because it is the most useful thing in this report.
+#687 being **unmerged** has not happened to this lane before — every previous
+run found its predecessor on `main` — and it decided both what was built and
+where it was pushed. `docs/routines.md`'s procedure is explicit about the
+second: *check whether you already have an open pull request; if you do, push
+onto that branch rather than opening a second one — two open branches from one
+lane touching one file is a conflict the lane created for itself, and the cost
+lands on the maintainer at merge time rather than on the run.* So this work is
+**on #687** and there is no second pull request.
 
-Branch cut from `origin/main` at `300f48f` (#688) after `git fetch origin main`,
-which moved the clone on from `0b1479e`.
+That rule then paid for itself twice over, which is the part worth reading: the
+unit I had written off as blocked is blocked **only** by something #687 carries,
+so pushing onto #687 unblocked it. Both are here.
+
+Sequence on the branch: `origin/main` at `300f48f` merged in (clean), then
+today's work. One conflict in `docs/signals.md`, which was two sections
+appending at one anchor and is resolved as §43 then §44.
 
 ## The plain version
 
@@ -37,7 +46,7 @@ It can now.
 Over one tree at one revision, so nothing about the page moved and the only
 thing that differs is who was reading.
 
-## What was built
+## The first unit — two forms of one page, side by side (§44)
 
 `formComparisonOf` in `src/signals/forms.ts`, taken as
 [0302](../decisions/0302-two-forms-of-one-page-are-compared-at-each-forms-own-share-and-neither-side-is-earlier.md),
@@ -141,67 +150,121 @@ both.
   reading in this subsystem has one. This is a reading of two sides, and the two
   refusals that matter most are exactly the two where picking one side's would
   be picking one of two different answers. Each side carries its own.
-- **I did not number this 0301.** `main` carries 0300 and #687 holds 0301, and
-  two records sharing a number is fatal (0097). 0300 did the same thing eight
-  days ago for the same reason, so this follows its precedent and says so in a
-  note at the top of the record. Nothing in 0302 cites or depends on 0301.
+- **I numbered the record 0302 and not 0301.** It was written while #687 held
+  0301 and `main` carried 0300, and two records sharing a number is fatal
+  (0097). 0300 did the same thing eight days ago for the same reason. The two
+  now sit on one branch, which the record's own opening note explains rather
+  than hides; renumbering it back to 0301 was not an option and leaving the hole
+  on `main` for a day is what 0097 is written for.
+- **I appended one bullet to 0301 rather than writing a second record for §45.**
+  The second unit is that record applied to three more readings of one shape, so
+  a record of its own would have been a record about where the first one had not
+  reached. Nothing in 0301 was reversed or reworded; one consequence was added,
+  and the one genuinely new rule in §45 — the `unwalked` ordering — is in it, in
+  the plan step, and in the module's own doc comment.
 
-## The unit I did not build, and why that is the useful part of this report
+## The second unit — the three comparisons §43 did not reach (§45)
 
-The obvious next unit was not this. **0301 left three comparisons behind** —
-`copyChangeOf`, `paceChangeOf` and `actionChangeOf` — and they still publish
-`nothing-measured`, *one of the two windows held no page views*, where one side
-was a window of two forms read as neither. Both forms were measured. It is the
-same false claim about readers that 0301 removed from two readings, in the three
-it did not reach, and the fix is one guard each taken from `funnel-change.ts`
-verbatim.
+**0301 left three comparisons behind.** `copyChangeOf`, `paceChangeOf` and
+`actionChangeOf` each take two page readings, each guards two pages and then two
+audiences, and neither guard can see a side read as neither form. What they
+published instead was `nothing-measured` — *one of the two windows held no page
+views* — of a window that held plenty: it held two forms of them. A refused page
+reading has a view floor of nought with full counters behind it, so the floor
+alone cannot tell a window nobody **read** from a window nobody **split**, and
+the two sentences send a deployment to opposite places.
 
-**It is blocked, and the blocker is exactly one thing.** `copy-change` is one of
+Taken as 0301 applied rather than as a decision of its own: one guard beside the
+two each already had, `audiences-mixed` on three more vocabularies, three cases
+in `silences.ts` mapping to the existing `two-forms-unsplit`. All five
+comparisons over two page readings now report it and the silence table gains no
+condition. 0301's consequences gained a bullet saying so; nothing in it was
+reversed.
+
+**Why I had written this off, and why that was wrong.** `copy-change` is one of
 the five silence sets that predate the arrival table in `silences.test.ts`, and
 `pace-change` and `action-change` both arrive in that table *before*
 `funnel-change`. So any of the three adopting `two-forms-unsplit` makes
 `funnel-change`'s declaration of it stop being novel, and the provenance fold
 reports that no set ever brought it — the exact deletion that test's own note
-says it exists to prevent. #687 fixes that generally rather than for its own
-case, and **with it on `main` the unit needs no further change to
-`silences.test.ts` at all.**
+says it exists to prevent. **#687 fixes that generally rather than for its own
+case**, so on this branch the unit needed *no* change to `silences.test.ts` at
+all, which is what happened: it passed untouched on the first run.
 
-The alternative was to write that same fix a second time, in the same lines, on
-a branch that cannot be stacked on #687 — which would have handed the merge a
-conflict in the one file both changes rewrite. That is the situation 0300 was in
-with `pageViewsFor` eight days ago, and it took the same decision. So the unit
-is filed with its design, its confirmation and its single blocker, to be taken
-on the first run after #687 lands.
+I had reached the opposite conclusion earlier in the run, because I had read the
+task prompt's *branch off `main`* without having read `docs/routines.md`'s
+procedure, which is more specific about the case I was actually in. The finding
+is filed with the original reasoning intact and its closure beside it, because
+the useful part is the shape of the mistake: **a blocker that lives on your own
+open branch is not a blocker.**
 
-**What I built instead was not a consolation.** §44 was the next unbuilt item in
-the plan's own words and had been waiting four days; it touches none of #687's
-files in `src/signals/`.
+Three orderings, and all three are real — each fixture reaches both guards:
+
+- **a page that says nothing** is reported before the unsplit window, because it
+  survives the remedy, so reporting it first loses nothing;
+- **the view floor** is reported after it, because the floor is the unsplit
+  window's own symptom — 0301's argument;
+- **`unwalked`** is reported after it, and this is the one ordering taken on a
+  rule rather than on a cause. A mixed side and a sender whose delegated signals
+  carry no `within` are reachable at once and neither causes the other. The rule:
+  **the state whose remedy is a call wins, because taking it reveals the other
+  and taking the other does not reveal it.** A deployment told `unwalked` first
+  goes and fixes a sender, asks again, and is handed the same unsplit window with
+  nothing saying so.
+
+What survives the refusal in each is that reading's own **tree half**, exactly
+as `nothing-measured` already leaves it standing: the words a change wrote, the
+time the page asks for, and which parts it added and removed are facts about the
+two trees and about no counter. Every figure about readers is withheld. I had
+first written all three to refuse wholesale through their `refusing()` helpers
+and corrected it, because `different-audiences` withholds the census for a
+reason that does not hold here — there the two sides are two forms wearing one
+tree id, so the census would report the other form's deltas as what the change
+wrote, and here the two trees are two revisions of one page and the census is as
+true as it ever was.
 
 ## Real test numbers
 
-`pnpm install && pnpm verify` — **green**. 234 test files, 5,514 tests, nothing
-skipped. `src/signals/` alone: 43 files, 1,383 tests. `forms.test.ts` is 25
-tests.
+`pnpm install && pnpm verify` — **green**, on the whole branch with all three
+units on it, exit code 0 through every stage: build, typecheck, the root suite,
+`findings:check`, `reports:check`, the app's own verify and `prerender:check`.
+Nothing skipped.
 
-Two things failed on the way and both were mine:
+| suite | files | tests |
+| --- | --- | --- |
+| root (`vitest run`) | 234 | **5,547** |
+| the app's own | 347 | **6,153** |
+| `src/signals/` alone | 43 | **1,416** |
 
-- `pnpm typecheck` rejected `readonly readonly [A, B][]` in the test file.
+`forms.test.ts` is 25 of those. The three comparison test files gained 17 between
+them — six, five and six — and `silences.test.ts` passed **untouched**, which is
+the prediction the second unit rested on.
+
+Three things failed on the way and all three were mine:
+
+- `pnpm typecheck` rejected `readonly readonly [A, B][]` in `forms.test.ts`.
   Corrected to a readonly array of readonly tuples.
-- `src/documentation.test.ts` found two published sentences with a
-  decision-record number in them — one in `forms.ts`, one in `silences.ts`. The
-  maintainer's rule is that a number never reaches a page, and an *indented*
-  doc comment is published whole, so a markdown link to a record inside one puts
-  the number in a sentence where a left-margin comment's second paragraph would
-  not. Both rewritten as parentheticals. **This is the second thing I have
-  learned about that test by failing it**, and the rule worth carrying is: in an
-  indented doc comment, cite as `(0300)` and never as a link.
+- the app's generated API reference drifted **twice**: first `offered.test.ts`
+  found four exports no page mentions, and later `extract.test.ts` found the
+  three closed silence sets had each gained a member since I last regenerated.
+  `pnpm docs:api` both times. The rule I should have followed from the start:
+  regenerate it **last**, after the final word of every doc comment, because the
+  reference carries the prose as well as the signatures.
+- `src/documentation.test.ts` failed **twice**, five sentences in all, and it is
+  worth being specific because the rule is not obvious. An *indented* doc
+  comment is published whole, where a left-margin one has only its first
+  paragraph lifted — so a markdown link to a record inside an indented comment
+  puts the number in a published sentence. The first two were links; the second
+  three were a bare `0301` in a prose clause. The rule to carry: **inside an
+  indented doc comment, cite as `(0301)` and never as a link or as the subject
+  of a sentence.**
 
 ### The planted mutations
 
-Five, each reverted after measuring, because a test that cannot fail is
-documentation:
+Nine, each reverted after measuring, because a test that cannot fail is
+documentation. Five on the first unit:
 
-| what I broke | tests that failed |
+| what I broke in `forms.ts` | tests that failed |
 | --- | --- |
 | dropped the canonical ordering of the two sides | **8** |
 | swapped `unsplit` and `unattributed` | **5** |
@@ -209,25 +272,32 @@ documentation:
 | moved the revision guard ahead of the population guards | **2** |
 | let the second pass re-file parts both forms have | **4** |
 
-The third one is the one worth reporting. **It was a survivor until I added a
-test for it**, and the reason is instructive: the gap rule withholds a
-difference where either side held no views *or* either side's standing is
-`unknown`, and every fixture I had written reached the first clause only. The
-second clause needs a window that **held readers** and has a row for the band
-whose reach is nought — a press delegated to a band no `viewed` ever named,
-which is the 0282 state. Nobody writes that window by accident.
+The third is the one worth reporting. **It was a survivor until I added a test
+for it.** The gap rule withholds a difference where either side held no views
+*or* either side's standing is `unknown`, and every fixture I had written reached
+the first clause only. The second needs a window that **held readers** and has a
+row for the band whose reach is nought — a press delegated to a band no `viewed`
+ever named, which is the 0282 state. Nobody writes that window by accident.
 
-That is the third day running that the thing a mutation found was a test I had
-not written rather than a line of code. Yesterday's note was *a guard ordering
-is a decision only if a single input can reach both guards*; the one this adds
-is **a disjunction in a guard needs a fixture per branch, and the branch nobody
-writes by hand is the one that will survive.**
+That is the third day running that what a mutation found was a test I had not
+written rather than a line of code. Yesterday's note was *a guard ordering is a
+decision only if a single input can reach both guards*; this adds **a
+disjunction in a guard needs a fixture per branch, and the branch nobody writes
+by hand is the one that will survive.**
 
-The fourth and fifth rows are the ordering and double-counting cases the
-standards ask for by name. The two orderings this reading claims are both real —
-a pair can be of two revisions *and* have no second population, and a pair can
-have one unlabelled side and one unsplit one — and the fixtures reach both
-guards in each case, which is what makes them decisions rather than sentences.
+Four on the second unit:
+
+| what I broke | tests that failed |
+| --- | --- |
+| dropped the clause from `copyChangeOf` | **3** |
+| put `paceChangeOf`'s clause after the view floor | **3** |
+| put `actionChangeOf`'s clause after `unwalked` | **1** |
+| made the guard look at the earlier side only | **1** |
+
+All four bite, and the two orderings in rows two and three are the ones the
+standards ask to be proved reachable rather than asserted. Rows four and five of
+the first table, and row four here, are the double-counting and
+one-side-only cases the standards ask for by name.
 
 ## Nothing reaches a reader
 
@@ -260,10 +330,12 @@ but it means `broadcast.ts` is no longer only this lane's to measure.
 
 ## Findings
 
-Three filed, none closed.
+Three filed, one of them closed on filing.
 
-- **the three comparisons 0301 did not reach**, owned by this lane, with the
-  design, the confirmation and the single blocker above.
+- **the three comparisons 0301 did not reach**, owned by this lane and **closed
+  by §45 in this same unit**. It is filed with its original reasoning intact and
+  its closure beside it, because the shape of the near-miss is the useful part:
+  a blocker that lives on your own open branch is not a blocker.
 - **the same form comparison of a part's words and of what readers did inside
   it**, owned by this lane. It is this join at a different counter and no
   decision at all: every clause of 0302 is about the pair rather than the
@@ -279,24 +351,21 @@ Three filed, none closed.
 Three, each with a recommendation, none blocking. They are in the pull request
 comment.
 
-## Known conflicts for the merge
+## What the merge has to deal with
 
-Said plainly because #687 is still open and this is the first time this lane has
-had two branches in flight.
+One branch, which is the point of pushing onto it. `origin/main` at `300f48f`
+was merged in before anything was written and the only conflict in the whole run
+was `docs/signals.md` — two plan sections appending at one anchor — resolved as
+§43 then §44, with §45 added after. `decisions/README.md` and the generated API
+reference were regenerated rather than hand-resolved. `FINDINGS.md` was appended
+to and never reflowed.
 
-- **`docs/signals.md`** — both branches insert a new section immediately before
-  *Still not in scope*. #687 adds §43 and this adds §44, so the numbering is
-  already right and the conflict, if git takes one, is two appends at one anchor.
-- **`decisions/README.md`** and the generated API reference — regenerated by
-  `pnpm decisions:index` and the app's own verify, never hand-resolved.
-- **`FINDINGS.md`** — union-merged; appended to and never reflowed.
-- **`src/signals/silences.ts` and `silences.test.ts`** — both branches touch
-  these, in different functions and different hunks separated by unchanged
-  lines. The one adjacency is my new row at the end of the arrival table in
-  `silences.test.ts`, three unchanged lines above where #687's first hunk starts.
-- **Nothing else overlaps.** #687's `change.ts`, `progress.ts`,
-  `deployment.ts`, `deployment-change.ts`, `page-views.ts` and `funnel.test.ts`
-  are all untouched here.
+Had this opened a second pull request instead, the collision list would have
+been `docs/signals.md`, `decisions/README.md`, the generated reference,
+`FINDINGS.md`, `silences.ts` and `silences.test.ts` — and the last of those
+would have been two branches rewriting one test's provenance fold for the same
+reason. That is the cost the governance rule exists to avoid and it is the
+concrete version of it, so it is written down here.
 
-Preview: the branch deployment is linked on the pull request. Nothing here draws
-a screen, so it is the branch deployed rather than something to look at.
+Preview: the branch deployment is linked on #687. Nothing here draws a screen,
+so it is the branch deployed rather than something to look at.
