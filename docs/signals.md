@@ -2956,7 +2956,71 @@ minified.
 **What is left and is filed:** the words comparison, which is this pair at
 `PartReading.copy` and now costs its figure and its own silences and nothing
 else; that `actionChangeOf` is the one reading left computing a ratio across an
-unwalked side; and no screen reads any of it, which is `Loom portal`'s.
+unwalked side — **taken by §47**; and no screen reads any of it, which is
+`Loom portal`'s.
+
+### 47. A window that credits nobody has no share to give · `Loom signals` · **done, 22 October**
+
+The open finding of 21 October, which named one wrong sentence on an existing
+reading: `actionChangeOf` publishes a `shareRatio` of **nought** on every part
+that bears an inside when the **later** window is unwalked, with
+`movements.abandoned` and `mostAbandoned` populated to match. *Every band on this
+page collapsed to nothing*, about a sender with the ancestry walk turned off.
+
+**Done**
+([0304](../decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)),
+and **not where the finding put it**. The fix is two fields in
+[`src/signals/action.ts`](../src/signals/action.ts).
+
+- **The rule belongs to the reading, not to the comparisons.** `engaged` is the
+  one counter here the ancestry walk feeds (0167), and `PageAction.unwalked` has
+  named a window that credits nobody with being inside anything since 0242 —
+  while publishing a share of nought on every band and a standing of `untouched`
+  on every band regardless. Three readings are built on it and each answered the
+  fault differently: the library roll refuses, the form comparison withheld
+  through a `walked` argument of its own (0303), and the before-and-after named
+  the state and left every figure computed. **Fixing it in the third would have
+  made three spellings of one rule**, which is the fault 0218 and 0235 were both
+  written about. It is fixed in the one place the fault is visible, which is the
+  direction 0282 says a rule should travel.
+- **Two fields and no others.** In such a window every `share` is withheld
+  whatever the standing, and `untouched` becomes `unknown` — a fourth way to be
+  unknown, beside no row, a `reached` of nought and a leaf. Everything the walk
+  does not feed stands in full: `reached`, `within` as the store holds it,
+  `uses`, the four counters, `usesPerReader`, `shutAgain`, and the `acted` a part
+  earns from uses filed against **itself**.
+- **`actionChangeOf` changes not one line**, which is the proof the rule was in
+  the wrong place. Every movement across an unwalked side falls to `unknown`
+  through `movementOf`'s existing collapse, every `shareRatio` to `null` through
+  `ratioOf`'s existing `undefined` clause, and the three rankings empty
+  themselves. The asymmetry the finding measured — `null` by accident when the
+  **earlier** window was unwalked, `0` when the later one was — is gone because
+  neither direction has a nought to divide.
+- **`formActionComparisonOf` loses its `walked` argument** and `gapOf` is one
+  check again; its suite passes unchanged, which is the assertion that its answer
+  did not move. `libraryActionOf` is untouched and still refuses, because one
+  poisoned page poisons a mean across pages and that is a different argument.
+- **A limit found in the rule this lane relies on.** 0303's *an unknown standing
+  and a withheld share are the same fact said twice* survives in the direction it
+  needs — unknown standing ⇒ withheld share — and the converse now fails in
+  exactly one window. A disclosure band with `opens` of its own and children
+  under it is `acted` on evidence that needed no walk and has a share that is a
+  filing artefact. So the share rule is **not** read off the standing, and that
+  is the part of this record a later reading is most likely to get wrong.
+- **The same wrong sentence one level up, found while fixing this one.**
+  `pageActionOf.mostIgnored` named the band the most readers reached as the
+  page's most ignored part, and `standings.untouched` was the whole page. Both
+  are now `null` and nought. Nothing had reported it.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — and this is the first unit here that **removes** a figure rather
+than deriving one. `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** the words comparison, unchanged by this; and
+whether `ratioOf`'s `null` should say *which* of its causes it is, which is now a
+smaller question than it was — the unwalked cause no longer reaches it, so what
+remains is *no share on a side* against *a nought on the earlier side*, across
+`actionChangeOf`, `paceChangeOf` and `copyChangeOf` at once.
 
 ## Still not in scope
 

@@ -92,24 +92,28 @@ import type { PageReading } from "./parts.js"
  *
  * ## What survives a sender that does not walk, and what does not
  *
- * {@link ActionChangeSilence} `unwalked` is the one state to refuse to draw, and
- * the division it makes is worth having rather than treating as a blanket:
+ * {@link ActionChangeSilence} `unwalked` names the state, and the division it
+ * makes is worth having rather than treating as a blanket:
  *
  * - **The shares are poisoned.** A window whose delegated signals carry no
- *   `within` credits nobody with acting inside anything, so every band in it
- *   reads `untouched` with the counters looking healthy — and a comparison
- *   between a walked window and an unwalked one reports the whole page as
- *   abandoned, which is the most alarming sentence this module can print and is
- *   about a configuration change.
+ *   `within` credits nobody with acting inside anything, so every share in it
+ *   is a nought that is a filing artefact — and a comparison between a walked
+ *   window and an unwalked one would report the whole page as abandoned, which
+ *   is the most alarming sentence this module could print and is about a
+ *   configuration change.
  * - **The occurrences are not.** `activations`, `opens`, `closes` and
  *   `completions` are filed against the part they happened to and need no walk
  *   at all, so {@link ComparedAction.usesRatio} and the four counts on either
- *   side stand in full.
+ *   side stand in full — as does a {@link ComparedAction.movement} of `held`
+ *   between two controls their own presses account for.
  *
- * It is reported as one silence over the reading rather than part by part,
- * because the fault is a property of the window and not of any part: deciding
- * part by part would mean a second rule for a standing `pageActionOf` has
- * already published, and two spellings of one rule is the fault this subsystem
+ * **Nothing here enforces that division.** `pageActionOf` withholds every share
+ * and calls nothing `untouched` in such a window (0304), so every movement
+ * across it falls to `unknown` through `movementOf`'s existing collapse and
+ * every `shareRatio` to `null` through `ratioOf`'s, which is why there is no
+ * `walked` clause anywhere below. The fault is a property of the window rather
+ * than of any part, and a rule spelled here as well would be a second rule for
+ * a standing `pageActionOf` has already published — the fault this subsystem
  * has been bitten by twice (0218, 0235).
  *
  * Pure, linear in the parts of the two readings, and reaches no store, clock or
@@ -178,13 +182,19 @@ export type ActionChangeSilence =
    *
    * `PageAction.unwalked` on either side: a sender whose delegated signals carry
    * no `within` (0167), a server synthesising batches, a fixture replayed. Every
-   * share on that side is a nought that is a filing artefact, so every movement
-   * across it is spurious and the page reads as abandoned.
+   * share on that side would be a nought that is a filing artefact, so every
+   * movement across it would be spurious and the page would read as abandoned.
+   *
+   * **So the figures are withheld as well as the state named** (0304), and by
+   * the reading rather than here: that side's standings are `unknown` and its
+   * shares absent, so every {@link ComparedAction.movement} falls to `unknown`
+   * and every {@link ComparedAction.shareRatio} to `null`.
    *
    * **The occurrence figures still stand**, because a press is filed against the
-   * part it happened to and needs no ancestry. Which side it is, is on that
-   * side's own reading, as `nothing-measured` leaves which window was empty to
-   * the pair of readings rather than naming it here.
+   * part it happened to and needs no ancestry — including a `held` between two
+   * controls their own presses account for. Which side it is, is on that side's
+   * own reading, as `nothing-measured` leaves which window was empty to the pair
+   * of readings rather than naming it here.
    *
    * Checked before `nothing-measured`, which it cannot ordinarily coincide with:
    * a window with no page views holds no uses either. A row carrying occurrences
@@ -422,6 +432,9 @@ export type ComparedAction = {
    * the two sides' shares being withheld on a leaf and is not a separate rule: a
    * ratio across a part whose shape changed would be a ratio of two different
    * measurements.
+   *
+   * `null` across an {@link ActionChangeSilence} of `unwalked` for the same
+   * reason and by the same route: that window has no share to give (0304).
    */
   readonly shareRatio: number | null
   /**
@@ -433,7 +446,7 @@ export type ComparedAction = {
    * rate** on both sides (0242), so this is how much more each reader used a
    * part and never how many more readers did.
    *
-   * The one figure here that survives `unwalked`, because the four occurrence
+   * The figure here that survives `unwalked`, because the four occurrence
    * counters are filed against the part a reader used and need no ancestry.
    */
   readonly usesRatio: number | null

@@ -93,6 +93,11 @@ import type { PageReading } from "./parts.js"
  * either side is unwalked, the parts fall into `unknown`, and
  * {@link FormActionSilence.unwalked} says which state the reading is in.
  *
+ * That withholding is **`pageActionOf`'s own** since 0304 — 0303 spelled it
+ * here, in a second clause of `gapOf`, and the rule moved down to the reading
+ * that can see the fault once the before-and-after needed it too. Nothing about
+ * this reading's answer changed, which is what its suite asserts.
+ *
  * Pure, linear in the parts of the two readings, and reaches no store, clock or
  * DOM. A caller checks `PageReading.orphaned` on both readings before trusting
  * either, exactly as it must before trusting either on its own.
@@ -118,14 +123,14 @@ export type FormActionSilence =
    * so every gap across it would be the other form's whole share reported as a
    * difference between two populations.
    *
-   * **Unlike `ActionChangeSilence.unwalked`, this one withholds the figures as
-   * well as naming the state.** There the two sides are two windows of one
-   * readership and a caller reading the silence knows which window to distrust;
-   * here the two sides are two populations and the spurious nought would be
-   * read as *this audience does nothing on your page*, which is the most
-   * confident wrong sentence this reading could print. The census of what each
-   * form has still answers, because which parts a form carries is a fact about
-   * the deltas and about no counter.
+   * **The figures are withheld as well as the state named.** The spurious
+   * nought would be read as *this audience does nothing on your page*, which is
+   * the most confident wrong sentence this reading could print. That was argued
+   * here first (0303), with `ActionChangeSilence.unwalked` left naming the state
+   * alone, and settled for both by moving the rule into the reading (0304), so
+   * the two no longer differ. The census of what each form has still answers,
+   * because which parts a form carries is a fact about the deltas and about no
+   * counter.
    *
    * Checked before `nothing-measured`, and **a single
    * window can reach both**, so the order is a decision rather than reading
@@ -322,17 +327,16 @@ const sideOf = (reading: PageAction, audienceId: AudienceId | null): FormActionS
 })
 
 /**
- * The gap, and the two rules that withhold it.
+ * The gap, and the one rule that withholds it.
  *
- * A share is already absent wherever it is not a measurement (0242), so the
- * first rule is `undefined` on either side. The second is the pair's: an
- * unwalked window's noughts are a filing artefact, and a real share held
- * against one of them is the other form's whole share reported as a difference
- * between two populations — 0282's rule reaching a state it was not written
- * for.
+ * A share is absent wherever it is not a measurement, which is the whole of it:
+ * a leaf, a part with no row and a part nobody reached (0242), **and every part
+ * of an unwalked window** (0304). 0303 withheld the second case here, with a
+ * `walked` argument of its own; the rule now lives in the reading that can see
+ * the fault, so this is one check again and the cases cannot disagree.
  */
-const gapOf = (one: PartAction, other: PartAction, walked: boolean): number | null =>
-  !walked || one.share === undefined || other.share === undefined
+const gapOf = (one: PartAction, other: PartAction): number | null =>
+  one.share === undefined || other.share === undefined
     ? null
     : Math.abs(one.share - other.share)
 
@@ -387,7 +391,6 @@ export const formActionComparisonOf = (
     }
 
   const audiences = pair.audiences
-  const walked = !readings.one.unwalked && !readings.other.unwalked
   const held = { one: partsOf(readings.one), other: partsOf(readings.other) }
 
   const compared: ComparedFormAction[] = []
@@ -413,7 +416,7 @@ export const formActionComparisonOf = (
     if (across.type !== part.type) disagreed.push(part.nodeId)
     if (across.bearsParts !== part.bearsParts) insideDisagreed.push(part.nodeId)
 
-    const gap = gapOf(part, across, walked)
+    const gap = gapOf(part, across)
     const favours = favouredBy(gap, part, across, audiences)
 
     if (gap === null) counted.unknown += 1
@@ -460,7 +463,7 @@ export const formActionComparisonOf = (
   }, null)
 
   const silence = (): FormActionSilence | null => {
-    if (!walked) return "unwalked"
+    if (readings.one.unwalked || readings.other.unwalked) return "unwalked"
 
     return readings.one.views === 0 || readings.other.views === 0 ? "nothing-measured" : null
   }

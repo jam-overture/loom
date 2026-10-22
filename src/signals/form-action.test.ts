@@ -339,6 +339,27 @@ describe("what readers do inside a page, form by form", () => {
       expect(comparison.whole?.gap).toBeNull()
     })
 
+    /**
+     * Where that withholding comes from, which 0304 moved. The reading itself
+     * has no share to give on an unwalked side, so this comparison has no
+     * clause of its own and the two cannot disagree — the property to pin
+     * rather than to describe.
+     */
+    it("takes the withholding off the reading rather than off a clause of its own", () => {
+      const comparison = formActionComparisonOf(
+        formOf(SKIERS, 1000, SKIER_WINDOW),
+        formOf(RIDERS, 100, {
+          page: { reached: 100 },
+          pricing: { reached: 50, presses: 40 },
+        })
+      )
+
+      expect(comparison.readings.one.unwalked).toBe(true)
+      expect(comparison.readings.one.parts.every((part) => part.share === undefined)).toBe(true)
+      expect(comparison.readings.one.standings.untouched).toBe(0)
+      expect(comparison.readings.one.mostIgnored).toBeNull()
+    })
+
     it("still answers which parts each form has while its shares are withheld", () => {
       const comparison = formActionComparisonOf(
         formOf(SKIERS, 1000, SKIER_WINDOW, FOUR),

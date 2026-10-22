@@ -323,19 +323,92 @@ describe("pageActionOf", () => {
   })
 
   describe("a sender that does not walk", () => {
-    it("is named, because every share on the page is then a nought that means nothing", () => {
-      const unwalked: readonly ReaderTally[] = [
+    /**
+     * Thirty presses of the button, and not one of them credited to a band it
+     * is inside. Every `engaged` on the page is absent, which is what a sender
+     * with the walk off looks like from the counters (0167).
+     */
+    const UNWALKED: readonly ReaderTally[] = [
+      tally("page", { views: 100, reached: 100 }),
+      tally("pricing", { views: 40, reached: 40 }),
+      tally("buy", { views: 40, reached: 40, activations: 30 }),
+      tally("quiet", { views: 30, reached: 30 }),
+    ]
+
+    it("is named, because every share on the page would otherwise be a nought that means nothing", () => {
+      expect(actionOf(treeOf(PAGE), UNWALKED).unwalked).toBe(true)
+    })
+
+    it("withholds every share on the page, the root's included", () => {
+      const page = actionOf(treeOf(PAGE), UNWALKED)
+
+      expect(page.whole?.share).toBeUndefined()
+      expect(page.parts.filter((part) => part.share !== undefined)).toEqual([])
+    })
+
+    it("says nothing is untouched, because the nought that member is read off is the walk", () => {
+      const page = actionOf(treeOf(PAGE), UNWALKED)
+
+      expect(page.standings.untouched).toBe(0)
+      expect(partIn(page, "pricing")?.standing).toBe("unknown")
+      expect(partIn(page, "quiet")?.standing).toBe("unknown")
+    })
+
+    /**
+     * The sentence this costs, and the reason the rule is here rather than in
+     * each of the three readings built on top: the band the most readers
+     * reached and nothing was credited inside would be named as the page's most
+     * ignored part, about a configuration fault.
+     */
+    it("has nothing to rank as most ignored", () => {
+      expect(actionOf(treeOf(PAGE), UNWALKED).mostIgnored).toBeNull()
+    })
+
+    /**
+     * An occurrence is filed against the part it happened to and needs no
+     * ancestry at all, so the one claim that survives is the one the walk does
+     * not feed.
+     */
+    it("leaves a part acted on by its own uses standing, and every figure the walk does not feed", () => {
+      const button = partIn(actionOf(treeOf(PAGE), UNWALKED), "buy")
+
+      expect(button?.standing).toBe("acted")
+      expect(button?.uses).toBe(30)
+      expect(button?.counts.activations).toBe(30)
+      expect(button?.reached).toBe(40)
+      expect(button?.usesPerReader).toBe(30 / 40)
+    })
+
+    /**
+     * A disclosure's own opens are filed against the band, so it is `acted`
+     * on evidence that needed no walk **and** has an inside whose share is a
+     * filing artefact. It is the one part that can hold the two at once, and
+     * the reason the share rule is not read off the standing.
+     */
+    it("withholds the share of a band acted on by its own uses, where the standing stands", () => {
+      const opened: readonly ReaderTally[] = [
         tally("page", { views: 100, reached: 100 }),
-        tally("pricing", { views: 40, reached: 40 }),
-        tally("buy", { views: 40, reached: 40, activations: 30 }),
-        tally("quiet", { views: 30, reached: 30 }),
+        tally("pricing", { views: 40, reached: 40, opens: 12 }),
+        tally("buy", { views: 40, reached: 40 }),
       ]
 
-      const page = actionOf(treeOf(PAGE), unwalked)
+      const band = partIn(actionOf(treeOf(PAGE), opened), "pricing")
 
-      expect(page.unwalked).toBe(true)
-      expect(page.whole?.share).toBe(0)
-      expect(partIn(page, "pricing")?.standing).toBe("untouched")
+      expect(band?.standing).toBe("acted")
+      expect(band?.bearsParts).toBe(true)
+      expect(band?.share).toBeUndefined()
+    })
+
+    /**
+     * `within` is passed through unaltered wherever the store holds one, which
+     * is this module's rule for a counter as against a figure: a caller looking
+     * at one row should see what was written.
+     */
+    it("passes the counters through unaltered, and withholds only the figure built out of them", () => {
+      const page = actionOf(treeOf(PAGE), UNWALKED)
+
+      expect(partIn(page, "pricing")?.within).toBe(0)
+      expect(partIn(page, "pricing")?.reached).toBe(40)
     })
 
     it("is false on a page whose uses were credited to somebody", () => {
