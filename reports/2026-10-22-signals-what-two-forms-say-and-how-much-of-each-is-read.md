@@ -1,7 +1,7 @@
 # 22 October 2026 (evening) — what two forms of a page *say*, and the third different answer about the page as a whole
 
 **Routine:** `Loom signals` · **Branch:** `signals-48-what-two-forms-say-and-how-much-of-each-is-read`
-· **Section:** §48
+(#697) · **Section:** §48
 
 ## Before anything was built
 
@@ -253,7 +253,10 @@ nothing was merged in and there was no conflict anywhere in the run.
 `decisions/README.md` and the generated API reference were regenerated rather
 than hand-resolved. `FINDINGS.md` was appended to and never reflowed.
 
-Preview: the branch alias Vercel mints on first push, which stays the same
-across pushes; Vercel's own comment on the pull request carries the
-per-deployment link. Nothing in this unit draws a screen, so it is the branch
-deployed rather than something to look at.
+Preview:
+<https://loom-git-signals-48-what-two-fa2361-jpizzolato36-6341s-projects.vercel.app>
+— the branch alias, which stays the same across pushes; Vercel's own comment on
+#697 carries the per-deployment link. Nothing in this unit draws a screen, so it
+is the branch deployed rather than something to look at. The egress policy for
+this session refuses that host, so the URL is quoted from Vercel's comment on
+#697 rather than checked from here.
