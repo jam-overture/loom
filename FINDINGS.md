@@ -58667,3 +58667,121 @@ for and this one does not.
 
 Noted rather than built because it is a drawing decision and the portal is
 paused; a finding against a paused routine is still filed and waits.
+
+---
+## 2026-10-22 (evening) — the words half of the form comparison is built, and the three readings of one pair of forms have three different answers about the page
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/form-copy.ts`) ·
+**Status:** **closes the open half of the 21 October entry** *the action half of
+the form comparison is built, the words half is still a mirror*, in
+`signals-48-what-two-forms-say-and-how-much-of-each-is-read`, record
+[0305](decisions/0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md)
+
+The third of the three readings 0302 named is `formCopyComparisonOf`. The filing
+entry said it cost its figure and its own silences and that nothing about it was
+a decision. **Two things about it were**, and both are the kind that would have
+been settled wrongly inside a pull request.
+
+**The unit is not the shared part.** Reach and action compare every part both
+forms have, because a part is the same part whatever the deltas did to it. Two
+forms' *text* differs by construction (0263), so a band the deltas reworded is
+two pieces of text with two word counts and a word-weighted figure over it reads
+two populations and two passages at once. The comparable unit is the passage both
+forms say **the same way**; the rest is reported — `reworded` with both counts
+and the form that says more, `onlyIn` with the form that has it, and a census
+that accounts for every word each form says.
+
+**The direction of the figure is not read off the figure.** A floored word count
+(0122) is the same understatement on both sides of a shared passage, so it scales
+the gap toward nought and can report nought where the hidden words differ; the
+two reaches are exact whatever a library has declared. So `favours` comes off the
+reaches and the magnitude off the words, which is this reading's one departure
+from its two siblings and is the field a surface drawing a half-declared page
+should trust.
+
+### What the three readings now say about the page as a whole
+
+Worth having in one place, because they look alike and are three arguments:
+
+| reading | the page |
+| --- | --- |
+| reach (0302) | **refused** — a mean over parts counts one reader once per part, and two forms have two sets of parts |
+| what readers did (0303) | **one row** — every action is strictly inside the root, so the root's own row is one division per side |
+| what the forms say (0305) | **a sum over words** — a passage's words are its own, so they partition the page exactly once and no reader is counted twice |
+
+And the trap the third one carries: **the page's gap is not the sum of the rows'
+gaps.** Every row's gap is unsigned, so two passages favouring opposite forms add
+there and cancel here — twelve against four in this unit's own fixture. A screen
+that summed the rows and called it the page would be reporting *how far apart the
+two forms are read, passage by passage* and labelling it *how much of the shared
+page each form's reader gets to*.
+
+**Nothing is left of the filing entry.** All three readings of one pair of forms
+are built, over one pairing rule published once in `audiences.ts`.
+
+---
+## 2026-10-22 (evening) — three form comparisons are built and no screen draws any of them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken and nothing is failing; it is the open question with the most
+built behind it
+
+`formComparisonOf` (0302), `formActionComparisonOf` (0303) and
+`formCopyComparisonOf` (0305) now answer, for two forms of one page: *do these
+readers reach the same parts, do they do the same things inside them, and do they
+get told the same words.* Each publishes a census that survives a window nobody
+read, a per-part or per-passage row with a withholding rule, and a closed set of
+reasons a figure is absent that maps onto conditions a surface already has
+sentences for.
+
+**No surface reads one field of any of them.** The three earlier entries this
+lane filed against this routine — a readership comparison's census, a door read
+over two forms, and a form comparison's count of parts falling each way — are the
+same gap at a smaller scale, and this one supersedes none of them.
+
+**What a screen would need and already has.** The two sides are named and
+ordered by audience id before anything is read off either, so a card has two
+column headings and no decision to make about which is first. `counted` and
+`wordsCounted` are a four-way census over one set, which is a bar and not a mean.
+`sharpest` is the one row somebody would act on. `silence` is one line per state
+through `describeFormCopySilence`, and `meaningOfFormCopySilence` gives the
+condition and the subject for a card drawing two readings at once.
+
+**One drawing decision is this reading's own**, and it is the reason this entry
+names a field rather than asking for a page: under a floor the page figures are
+absent and every row still carries a `gap` and a `favours`. A card that draws the
+rows and the page total from one object has to say *these rows are a floor and
+the total is withheld* rather than drawing an empty headline over full rows.
+
+Filed against a paused routine, which still waits.
+
+---
+## 2026-10-22 (evening) — a decision link whose slug is guessed from the record's subject reads identically in a diff to one that resolves
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed on filing** in `signals-48-what-two-forms-say-and-how-much-of-each-is-read`
+— nothing is left to do but keep doing it, and it is filed because the mistake is
+cheap to repeat and was caught by a gate rather than by reading
+
+`tools/decisions/decisions.test.ts` went red on the new module's own
+documentation for two links out of eleven:
+
+```
+src/signals/form-copy.ts links 0122 to 0122-a-primitive-declares-which-of-its-props-are-copy.md
+src/signals/form-copy.ts links 0242 to 0242-what-readers-do-inside-a-part-is-a-share-of-the-readers-who-reached-it.md
+```
+
+Both slugs are **what the record is about**, written from memory of the
+subsystem rather than copied. The real ones are
+`0122-a-primitive-says-which-of-its-props-a-reader-reads.md` and
+`0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md`. The
+nine that resolved were copied from sibling modules; the two that did not are
+the two no sibling happened to link.
+
+**Why it is worth an entry rather than a quiet fix.** A guessed slug is quicker
+to type than a looked-up one, it is syntactically perfect, it reads as a correct
+citation in a review, and the number in front of it is right — so the only thing
+standing between it and a dead link on the documentation site is a gate that
+runs in `pnpm verify` and nowhere else. **The rule, for this lane:** a record
+link is copied from `ls decisions/` or from a sibling module, never typed from
+the record's subject. The number may be typed; the slug may not.
