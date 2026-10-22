@@ -158,3 +158,66 @@ export const servedPages = async (): Promise<readonly ServedPage[]> => {
 
 /** How many states the sweep above covers, stated so a caller can check it. */
 export const SERVED_STATE_COUNT = SITE_ROUTES.length * ASK_STATES.length
+
+/** What a sweep over the states above found, counted per state rather than in total. */
+export type SweepShare = {
+  /**
+   * The states that contributed nothing, named the way a failure message wants
+   * them: `/how-it-works (shorter/yes)`.
+   */
+  readonly quiet: readonly string[]
+  /** Everything the sweep found, which is what a total floor used to be written against. */
+  readonly found: number
+  /** What one state contributed on average. Zero when the sweep had no states to read. */
+  readonly each: number
+}
+
+/**
+ * A sweep's size, expressed so that a floor under it does not move when the
+ * sweep changes shape.
+ *
+ * **A floor exists to catch a sweep that silently stopped finding things**, and
+ * a floor written as a total cannot do that job for long, because a total is
+ * the product of what the sweep reads and how many states it reads it in. On
+ * 21 October the deployment stopped being a dimension of `servedPages` — both
+ * of its halves had been the same tree since the 12th, so the sweep had been
+ * reading every word on this site twice — and two floors in two files went red
+ * for a change that touched no copy at all:
+ *
+ * ```
+ * voice.test.ts    expected 75 to be greater than or equal to 126    // 3 * 2 * 21
+ * naming.test.ts   expected 550 to be greater than or equal to 600
+ * ```
+ *
+ * Neither failure was about the change, and `naming.test.ts` carried a second
+ * floor that would have been the next one. Both were re-measured by hand that
+ * day, which is the fix that lasts until the next time the sweep's shape moves.
+ *
+ * **Deriving the floor from `SERVED_STATE_COUNT` is the wrong way out**, and
+ * this lane filed why on 27 September: an expected value taken from the code
+ * under test means a sweep that returned nothing expects nothing and passes.
+ * So this divides by the states the sweep **actually came back with**, and a
+ * caller still has to say separately that it got states at all — the two
+ * assertions are independent, and it takes both to fail an empty sweep.
+ *
+ * `quiet` is the stronger half and is what an average cannot say: a sweep that
+ * stopped reading one page of three keeps two thirds of its average and is
+ * still broken. It is only worth asserting on a reading every state really does
+ * have — mentions and copy, not the sparse ones — so it is reported rather than
+ * enforced here.
+ */
+export const sweepShare = (
+  pages: readonly ServedPage[],
+  counted: (page: ServedPage) => number
+): SweepShare => {
+  const counts = pages.map((page) => ({ page, count: counted(page) }))
+  const found = counts.reduce((sum, { count }) => sum + count, 0)
+
+  return {
+    quiet: counts
+      .filter(({ count }) => count === 0)
+      .map(({ page }) => `${page.route.path} (${page.state})`),
+    found,
+    each: pages.length === 0 ? 0 : found / pages.length,
+  }
+}
