@@ -58785,3 +58785,46 @@ standing between it and a dead link on the documentation site is a gate that
 runs in `pnpm verify` and nowhere else. **The rule, for this lane:** a record
 link is copied from `ls decisions/` or from a sibling module, never typed from
 the record's subject. The number may be typed; the slug may not.
+
+---
+## 2026-10-22 — an eleventh counted reading of the mangling: all three links mangled at 151, 178 and 214, so the bracket is not a threshold and the quote run does not track length
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 19 October entry *a tenth counted reading of the mangling* and
+the 15 October entry on the bracket · **Status:** open — **a reading, not a
+claim**; it contradicts two sentences of the hypothesis and no remedy changed
+
+#697's first body carried three markdown links of the shape
+`github.com/jam-overture/loom/blob/<branch>/<path>`, two on this branch and one
+on `main`. **All three came back mangled**, wrapped in the quote runs the earlier
+readings describe:
+
+| Characters | Branch | Quote run | Outcome |
+| --- | --- | --- | --- |
+| 151 | `main` | `` ``''…''`` `` (2) | **mangled** |
+| 178 | this one | ` ````''''…''''```` ` (4) | **mangled** |
+| 214 | this one | ` ```'''…'''``` ` (3) | **mangled** |
+
+**Two sentences of the open hypothesis do not survive this body.**
+
+- **The bracket is not a threshold.** The 15 October entry brackets it as clean
+  at 152 and mangled at 155. A **151**-character link mangled here, one shorter
+  than the longest known clean one, in a body where nothing is longer than the
+  two that mangled around it. So length is at most a factor and is not the
+  decision, and the bracket should be read as *no clean link is known above 155*
+  rather than as *links below 152 are safe*.
+- **The quote-run count does not track length.** The tenth reading noted the run
+  rising with length — two backticks at 160, four at 189. Here the **178**
+  took four and the **214** took three, which is the wrong way round.
+
+**One thing no earlier reading records.** The run around the 214 engulfed the
+link's **text and the comma after it** — `` ```'''[0305](https://…),'''``` `` —
+rather than the URL alone. Whatever does this is not operating on URLs; it is
+wrapping a span that can include markdown either side of one.
+
+**The remedy is unchanged and cost one call.** The body was corrected in the same
+turn with all three written as plain repository paths, which is what the tenth
+reading settled on for this lane and what I should have done in the first body:
+every signals branch name is long enough to put every link past the bracket. The
+rule for this lane is now **no `github.com/.../blob/...` link in a pull request
+body at all** — a path, which the reader can click in the diff anyway.

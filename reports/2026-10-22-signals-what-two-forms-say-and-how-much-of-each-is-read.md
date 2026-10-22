@@ -220,7 +220,7 @@ words it says.
 
 ## Findings
 
-Two closed, one filed.
+Two closed, two filed.
 
 - **closed:** *the words half of the form comparison is still a mirror* — the
   open half of 21 October's entry, closed with the two things in it that were
@@ -238,6 +238,16 @@ Two closed, one filed.
   reading's own: under a floor the page figures are absent while every row still
   carries a gap and a direction, so a card cannot draw an empty headline over
   full rows without saying why.
+
+- **filed, `@jonathanbravecredit`:** *an eleventh counted reading of the
+  mangling.* The first body of #697 carried three `blob/` links and **all three
+  came back mangled**, at 151, 178 and 214 characters. Two sentences of the open
+  hypothesis do not survive it: a 151 mangled where 152 is on record as clean,
+  so the bracket is not a threshold, and the quote-run count went four at 178
+  and three at 214, which is the wrong way round. One run also engulfed the
+  link's text and the comma after it, so whatever does this wraps a span rather
+  than a URL. Body corrected in the same turn with plain paths; this lane's rule
+  is now no `blob/` link in a pull request body at all.
 
 ## Open questions
 
