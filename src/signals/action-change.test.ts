@@ -347,10 +347,76 @@ describe("a sender that does not report where actions happened", () => {
     expect(change.readings.now.unwalked).toBe(true)
   })
 
-  it("would otherwise have reported the page as abandoned", () => {
+  /** The same window, with the unwalked side as the earlier one. */
+  const unwalkedWas = {
+    tree: treeOf(PAGE(), 1),
+    counters: unwalked.counters.map((counter) => ({ ...counter, revision: 1 })),
+  }
+
+  /**
+   * The sentence this refusal exists to stop, and the one the reading used to
+   * print: the band readers used before reads as a band they have given up on,
+   * about a sender with the walk turned off.
+   */
+  it("reports nothing as abandoned, because the nought is the walk and not the readers", () => {
     const change = changeOf(WAS, unwalked)
 
-    expect(comparedIn(change, "quiet")?.movement).toBe("abandoned")
+    expect(comparedIn(change, "quiet")?.movement).toBe("unknown")
+    expect(change.movements.abandoned).toBe(0)
+    expect(change.mostAbandoned).toBeNull()
+  })
+
+  it("withholds every share ratio, where one side of each is a filing artefact", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.compared.filter((part) => part.shareRatio !== null)).toEqual([])
+    expect(change.whole?.shareRatio).toBeNull()
+  })
+
+  it("has nothing to put in the still-untouched list and nothing taken up", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.stillUntouched).toEqual([])
+    expect(change.mostTakenUp).toBeNull()
+    expect(change.movements["still-untouched"]).toBe(0)
+  })
+
+  it("counts every compared part as unknown, so the five still account for them", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.movements.unknown).toBe(change.compared.length)
+  })
+
+  /**
+   * The asymmetry this refusal replaced. An unwalked **earlier** window gave a
+   * share of nought on the denominator, which `ratioOf` already answered `null`
+   * to; an unwalked **later** one gave a nought on the numerator and came back
+   * `0`. One value for two states, and only one of them was covered — so the
+   * two directions are asserted to agree rather than described as agreeing.
+   */
+  it("withholds the same figures whichever window is the unwalked one", () => {
+    const earlier = changeOf(unwalkedWas, NOW)
+
+    expect(earlier.silence).toBe("unwalked")
+    expect(earlier.compared.filter((part) => part.shareRatio !== null)).toEqual([])
+    expect(earlier.mostTakenUp).toBeNull()
+    expect(earlier.mostAbandoned).toBeNull()
+    expect(earlier.stillUntouched).toEqual([])
+  })
+
+  /**
+   * The one movement that is **not** unknown across an unwalked window, and it
+   * is a real claim rather than a leak: a control pressed on both sides is
+   * `acted` on both sides on evidence filed against itself, so *they were using
+   * this and they still are* needs no ancestry. It is the half of this rule that
+   * would be lost by refusing the comparison wholesale.
+   */
+  it("still holds a control its own presses account for on both sides", () => {
+    const earlier = changeOf(unwalkedWas, NOW)
+
+    expect(comparedIn(earlier, "buy")?.movement).toBe("held")
+    expect(comparedIn(earlier, "buy")?.usesRatio).toBe(1)
+    expect(earlier.movements.unknown).toBe(earlier.compared.length - 1)
   })
 
   it("keeps the occurrence figures, which need no ancestry", () => {
@@ -358,6 +424,20 @@ describe("a sender that does not report where actions happened", () => {
 
     expect(comparedIn(change, "buy")?.now.uses).toBe(24)
     expect(comparedIn(change, "buy")?.now.usesPerReader).toBe(24 / 50)
+  })
+
+  /**
+   * What the change did to whether a share is measurable at all is a fact about
+   * the two trees and about no counter, so it stands in full — the same half
+   * every other silence in this subsystem leaves standing.
+   */
+  it("keeps the census of what the change did to each part's inside", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.insides.kept).toBeGreaterThan(0)
+    expect(
+      change.insides.kept + change.insides.gained + change.insides.lost + change.insides.none
+    ).toBe(change.compared.length)
   })
 })
 

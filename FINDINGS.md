@@ -44517,8 +44517,18 @@ in 0211, so a reader who gets as far as the source finds them.
 
 ## 2026-10-01 — nothing on the marketing site is a form, so the site's answer to the fifth kind is an empty list that nobody will revisit
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom marketing` · **Status:** open
-— no defect today, a decision to re-take on the day the site grows a form
+**Filed by:** `Loom signals` · **Owned by:** `Loom marketing` · **Status:**
+**closed** by `marketing-13-a-check-that-cannot-fail` on 22 October, and what
+closing it found is that the alarm this entry asked for had been written and
+could not fire. `asked.test.ts` asked `BANDS.has("loom.form")`, and `BANDS` is
+the types of `page.root.children` — the top level of the page. A form is not a
+band; it goes inside a section like every other control here, so that set could
+never hold one. Measured rather than read: with a `loom.form` composed into the
+front door, **all 56 files and 1,486 tests of this route group passed at
+`origin/main`**. It asks `RENDERED` now — every type on every page in every
+state the site is served in — and the same mutation fails it. *Originally: no
+defect today, a decision to re-take on the day the site grows a form.* Original
+entry below.
 
 `SITE_SIGNAL_TYPES` carries a deliberate alarm: `asked.test.ts` holds its keys
 against `READER_SIGNAL_KINDS`, so a kind added to the runtime reddens this site
@@ -57877,8 +57887,17 @@ fortnight for `trail`, nine days for `counting`.
 ## 2026-10-21 — two sweep floors are hand-written copies of another module's arithmetic, and both went red for a change that touched no copy
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
-(`app/(marketing)/_lib/voice.test.ts`, `_lib/naming.test.ts`) · **Status:** open
-— **nothing is broken**; both floors are correct for the site as it is today
+(`app/(marketing)/_lib/voice.test.ts`, `_lib/naming.test.ts`) · **Status:**
+**closed** by `marketing-13-a-check-that-cannot-fail` on 22 October, as the
+shape this entry recommended: a floor per served state, in `served.ts` as
+`sweepShare`, divided by the states the sweep **came back with** rather than by
+`SERVED_STATE_COUNT`. Four floors went, not the two named here — the third is
+`naming.test.ts`' `checked >= 40` and the fourth is `inline.test.ts`'
+`links.length >= 40`, whose own comment said in as many words that 40 was *"the
+number of states of that page"*. Checked by halving `ASK_STATES`: three of the
+four old floors go red on a sweep that touches no copy, and none of the new ones
+moves. *Originally: nothing is broken; both floors are correct for the site as
+it is today.* Original entry below.
 
 `served.ts` publishes `SERVED_STATE_COUNT`, and every caller of `servedPages()`
 asserts against it, so halving the sweep's dimensions left six test files green
@@ -58384,3 +58403,267 @@ types.
 
 **Recommendation: 1.** Recorded so that whoever meets a widened declaration
 under this link has the paragraph rather than the surprise.
+## 2026-10-22 — four sweeps in this route group are held only by a count the swept module computes itself
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/budget.test.ts`, `_lib/routes.test.ts`,
+`_lib/docs-pages.test.ts`, `_lib/addressed.test.ts`) · **Status:** open —
+**nothing is broken**; it is the half of today's work that was left outside the
+diff on purpose
+
+Seven test files in this route group sweep `servedPages()`. The question each
+of them has to answer before any of its rules mean anything is *did the sweep
+come back with the site*, and until today every one of them answered it the
+same way:
+
+```ts
+expect(pages).toHaveLength(SERVED_STATE_COUNT)
+```
+
+`SERVED_STATE_COUNT` is `SITE_ROUTES.length * ASK_STATES.length`, computed by
+the module the sweep comes from. If `SITE_ROUTES` went empty the sweep would
+return nothing, the constant would be zero, that line would pass, and every
+rule in the file would run over an empty list and pass with it. It is the
+27 September failure — *a test whose expected value came from the code under
+test* — sitting in the one assertion written to prevent it.
+
+**Two more lines fix it and they are independent of each other.** The sweep
+reached every route in `SITE_ROUTES`, which catches the ask dimension
+collapsing; and `SITE_ROUTES.length >= 3`, hand-written, which catches the
+route dimension collapsing and is the only number here that is not computed by
+anything. Both are in `voice.test.ts`, `naming.test.ts`, `inline.test.ts` and
+`readers/asked.test.ts` as of today.
+
+**What is left is the other four**, and they are listed above rather than done
+because of what doing them would mean. `budget.test.ts` and `routes.test.ts`
+carry the one-line guard; `docs-pages.test.ts` and `addressed.test.ts` carry no
+guard at all and lean on `toBeGreaterThan(0)` floors, which do not move with
+the sweep's shape and are not the problem. Writing the same three lines into
+eight files is the thing `measure.ts` has a paragraph against, so the entry is
+really two questions in one:
+
+1. **Do it as it stands**, three lines a file, eight times.
+2. **Give `served.ts` the pair to hand back** — a `sweepCover(pages)` returning
+   the states and the routes, asserted in two lines by each caller. Shorter per
+   file and one place to read. The cost is that the check lives beside the
+   thing it checks, which is exactly the arrangement this entry is complaining
+   about, and it would want a comment saying why that is still safe here.
+
+**Recommendation: 2**, and not in the same pull request as the floors. It is a
+judgement about seven files, today's diff already crosses four, and a change to
+every sweep in the route group is its own reviewable thing.
+
+---
+## 2026-10-22 — the one band on this site that only exists after a visitor asks for something is the one band nothing counts
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/readers/asked.ts`) · **Status:** open — **nothing is
+broken**, the lists are correct as written, and this is a question about what
+is worth measuring rather than a gap
+
+`readers/asked.test.ts` moved from the page as written to the page as served
+today, and the difference it found is one primitive: **`loom.callout`** is
+rendered on this site and had never appeared on a tree that file looked at. It
+is the panel that reports what a request did — the proposal, the Gate's verdict
+and the revision — so it exists only after a visitor has asked for something.
+
+Nothing in `SITE_SIGNAL_TYPES` names it, so nothing is asked about it. That is
+correct by the list's own rules and it is also the odd thing here:
+
+- **It is the most interesting thing on the page to measure.** Every other
+  reading this site collects answers *how far did a stranger get*. This one
+  would answer *did the person who made the page rewrite itself stay and read
+  what it said about doing so*, which is the question the whole surface is
+  arguing towards.
+- **It is not a band and not a control**, so neither existing list is its home.
+  It sits inside a section, nobody presses it, and it does not open. A reading
+  about it would be `viewed` and `dwelled` on a type that is neither of the two
+  `BAND_TYPES`.
+
+**Three shapes, and none is obviously right:**
+
+1. **Add `loom.callout` to `BAND_TYPES`.** One line. It is wrong in the way the
+   retired third entry on that list was wrong: the list means *a band a reader
+   travels through*, and a panel inside a section is not one. The time figure
+   would also be nested inside its section's own, so two readings on one report
+   would double-count the same seconds.
+2. **A list of its own**, `PANEL_TYPES`, asked `viewed` and `dwelled`. Honest
+   about what it is. It is also a fourth list on a shape (0136) that has three
+   because three is what the kinds are about, and the nesting problem above is
+   unchanged.
+3. **Leave it.** The band is counted through its section, which is the band a
+   reader actually travels through, and *they reached the section the panel is
+   in* is most of the question. The fine-grained version waits for somebody to
+   want it.
+
+**Recommendation: 3**, with this entry as the record of why — but the first
+bullet is a real argument and the person who should settle it is whoever is
+reading the funnel. Raised in the report rather than built.
+## 2026-10-21 (evening) — the action half of the form comparison is built, the words half is still a mirror, and the guards are now imported rather than copyable
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/forms.ts`,
+`form-action.ts`) · **Status:** **half closed on filing** in
+`signals-46-what-readers-do-inside-a-page-form-by-form`, record
+[0303](decisions/0303-what-two-forms-readers-do-is-the-same-pair-at-a-different-counter-and-the-page-has-one-honest-figure.md)
+
+**Extends** this morning's entry *two forms of a page can now be compared, and
+the same question about its words and its actions is a mirror of it*, which named
+two readings and set the order: one, then a second proving the guards are
+importable rather than copyable, with `audiences.ts` as the place anything shared
+is published from.
+
+**The action half is done** as `formActionComparisonOf`, and the shared half of
+it came out as `FormPairRefusal` and `formPairOf` in `audiences.ts` — the two
+sides' order and the five states in which two readings are not two forms of one
+page. `FormComparisonSilence` is now `FormPairRefusal | "nothing-measured"` and
+`formComparisonOf` is the same function from its caller's side, which its own
+suite asserts by passing unchanged.
+
+**The words half stays open**, and it is cheaper than it was this morning: it
+costs its figure over `PartReading.copy` and its own silences, because the pair's
+six clauses are imported now rather than restated. Nothing about it is a decision.
+
+**Two things the second reading turned up that the first could not have**, both
+in 0303:
+
+- **The page has an honest figure here where §44 refuses one.** 0302 clause 5
+  refuses a page total because a mean over parts counts one reader once per part
+  they got through and because two forms have two sets of parts. Neither reason
+  reaches the root: every action is strictly inside it (0242), so its own row is
+  one division rather than a sum. A third reading over the words will **not**
+  inherit this — words partition a page and readers do not, so that one's page
+  figure is a different argument again.
+- **A counter with a withholding rule of its own is what makes the split
+  provable.** `PartAction.share` is absent in exactly the states its standing
+  calls `unknown`, so the pair's rules and the counter's rules stayed apart
+  without either module reaching into the other. That is the property to look for
+  when choosing which reading goes third.
+
+---
+## 2026-10-21 (evening) — `actionChangeOf` publishes a share ratio of nought across an unwalked later window, where the same nought is a filing artefact
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/action-change.ts`) · **Status:** **closed by
+`signals-46-what-readers-do-inside-a-page-form-by-form` (#693)**, record
+[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
+— and **not in the file this entry names.** The symptom was measured correctly
+here and the fix was put one level too high: `actionChangeOf` changes not one
+line, because `pageActionOf` now withholds every share and calls nothing
+`untouched` in such a window, and every movement, ratio and ranking across it
+falls out of rules the comparison already had. Fixing it where this entry says
+would have been a third spelling of one rule over one reading. Both of the two
+things *left to decide* below are settled or narrowed: the symmetry is taken, and
+`ratioOf` saying why it is `null` is filed again as a smaller question.
+
+`ActionChangeSilence.unwalked` names a window that holds uses and credits no
+reader with acting inside anything (0167). Every `PartAction.share` on such a
+side is a **nought that is a filing artefact**, not a reader who did nothing.
+`actionChangeOf` names the state and **leaves its ratios computed**, and
+`ratioOf` is asymmetric about it:
+
+```ts
+const ratioOf = (was: number | undefined, now: number | undefined): number | null =>
+  was === undefined || now === undefined || was === 0 ? null : now / was
+```
+
+An unwalked **earlier** window gives `was === 0` and the ratio comes back `null`,
+so that direction is already covered by accident. An unwalked **later** window
+gives `now === 0` against a real `was`, and the ratio comes back **`0`** on every
+part that bears an inside — *every band on this page collapsed to nothing* — with
+`movements.abandoned` and `mostAbandoned` populated to match. A surface drawing
+the rows and not reading `silence` prints a change that did not happen, and the
+half of the pair it is wrong about is the one a deployment is looking at.
+
+**Why it was not fixed here.** 0303 withholds the gap on both sides for a reason
+that is about **two populations**: the spurious nought reads as *this audience
+does nothing on your page*, and there is no second window to blame it on. In a
+before-and-after the two sides are two windows of one readership, so *this window
+does not report where actions happened* is a sentence a caller can act on with
+the rows still in front of it, and whether that is worth withholding a figure
+over is a judgement about what a screen should draw rather than a fault in the
+arithmetic. Taking it inside a unit about a different comparison would have been
+two decisions in one record.
+
+**What is left to decide**, and the first is cheap enough to do on its own:
+either withhold `shareRatio` on both sides while either window is unwalked, as
+0303 does and for the symmetry alone, or make `ratioOf` say why it is `null`
+rather than leaving two causes as one value. The second is the wider version of
+the same question and reaches `paceChangeOf` and `copyChangeOf` too, which is
+why it is not bundled in.
+
+---
+## 2026-10-22 — `ratioOf`'s `null` is still two states in three comparisons, and the cheap half of it was never the problem
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/action-change.ts`, `pace-change.ts`, `copy-change.ts`) ·
+**Status:** open — **the half of the 21 October finding
+[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
+did not take**, narrowed by it and not resolved
+
+Three comparisons of two windows share one helper, spelled once per module:
+
+```ts
+const ratioOf = (was: number | undefined, now: number | undefined): number | null =>
+  was === undefined || now === undefined || was === 0 ? null : now / was
+```
+
+`null` means two different things and a caller cannot tell them apart: **neither
+side measured this** (a leaf, a part with no row, a part nobody reached, a
+passage with no words) against **the earlier side measured nought** — which is a
+real figure and the state a rise from nothing is read off. *Nobody acted here and
+now four in ten do* and *nothing here can be compared* are a long way apart and
+arrive as one value.
+
+**What 0304 changed about this.** It did not touch the helper, and it removed one
+of the three causes: an unwalked window used to reach it with a nought, so `null`
+carried a third meaning on `ActionChange.shareRatio` and — because the clause is
+`was === 0` and not `now === 0` — the nought escaped as a **`0`** in the other
+direction. That is gone. What is left is the original pair, which is the version
+of the question worth deciding on its own.
+
+**Why it is not small.** Every ratio field on three published types changes shape
+at once: `ActionChange.shareRatio` and `usesRatio`, `PaceChange`'s and
+`CopyChange`'s. A tagged absence (`{ ratio: null, why: "unmeasured" | "from-nothing" }`,
+or a second field) is a decision about what a surface draws, not an arithmetic
+fix, and the three must agree or the fourth comparison written after it will pick
+whichever it read last. There is no wrong sentence published today — only a
+sentence a surface cannot distinguish from another one — so it is a design
+question and not a defect.
+
+**The order to take it in, if it is taken.** One record over all three, one
+helper published from somewhere both can import — `audiences.ts` is where the
+pair rules went and is the wrong home for this; a figures module would be new —
+and the fixture per branch that 21 October's lesson asks for: a disjunction in a
+guard needs one case each, and the branch nobody writes by hand is the one that
+survives.
+
+---
+## 2026-10-22 — a reading withholds a figure and a surface has no sentence for the fourth reason it is withheld
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` ·
+**Status:** open — nothing is broken and nothing is failing; it is a sentence a
+screen will need and does not have
+
+0304 gives `ActionStanding.unknown` a fourth cause: a part that bears an inside
+in a window whose sender does not walk. The closed set did not change and
+`describeActionStanding` still reads *nothing in the window can say whether
+readers acted here*, which is true of all four.
+
+**What a screen cannot do from that.** The other three causes are properties of
+the part or of the window's emptiness and a reader can act on none of them. This
+one has a remedy and it is a configuration change on the deployment's own side:
+*your sender is filing presses and not saying what they happened inside.* The
+reading says so once, as `PageAction.unwalked` and as an `unwalked` silence on
+each comparison built on it, and a card drawing per-part standings has no way to
+put *this* `unknown` beside the page-level sentence that explains it.
+
+**What it needs from nobody.** `PageAction.unwalked` is on the object a screen
+already holds, and `describeActionChangeSilence("unwalked")` and
+`describeKindActionSilence("unwalked")` both already say the sentence. The
+decision is only whether a card that draws `unknown` rows reads the page-level
+flag first and says *every one of these is the same fault* instead of listing
+them — which is the shape `CopyReading`'s `unknown` passages already have a rule
+for and this one does not.
+
+Noted rather than built because it is a drawing decision and the portal is
+paused; a finding against a paused routine is still filed and waits.

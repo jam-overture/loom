@@ -8,9 +8,10 @@ import {
   pathNamed,
   pathsLinkedFrom,
   PAGE_NAMES,
+  type CrossPageLink,
   type Mention,
 } from "./naming"
-import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
+import { SERVED_STATE_COUNT, servedPages, sweepShare, type ServedPage } from "./served"
 import { PRODUCT_SURFACES, SITE_ROUTES } from "./site"
 import { readerCopy } from "./words"
 
@@ -38,7 +39,34 @@ const ROUTE_PATHS: readonly string[] = SITE_ROUTES.map((route) => route.path)
 type Found = {
   readonly where: string
   readonly mention: Mention
+  /** The addresses the band it is in offers, which is what makes it stranded or not. */
+  readonly linked: ReadonlySet<string>
 }
+
+/**
+ * Every page this site names from a band of one served state, with the way out
+ * of that band beside it.
+ *
+ * A function rather than the loop it was, because the rule and the two floors
+ * under it ask the same question of a page and had to agree about the answer:
+ * the floors are now *per state* (`sweepShare`), so they count what this
+ * returns for one page while the rule reads it for all of them. Written twice,
+ * the two readings would eventually be two different sweeps with one floor
+ * between them.
+ */
+const mentionsOn = (page: ServedPage): readonly Found[] =>
+  page.tree.root.children.flatMap((band) => {
+    if (band.kind !== "element") return []
+
+    const linked = pathsLinkedFrom(band, ORIGIN)
+    const where = `${page.route.path} (${page.state}) ${band.type}`
+
+    return mentionsIn(readerCopy(band)).map((mention) => ({ where, mention, linked }))
+  })
+
+/** Every link one served state makes into another page of this site, at an anchor. */
+const linksOn = (page: ServedPage): readonly CrossPageLink[] =>
+  crossPageFragmentsIn(page.tree.root, page.route.path, ORIGIN, ROUTE_PATHS)
 
 describe("the pages this site names", () => {
   let pages: readonly ServedPage[] = []
@@ -47,8 +75,24 @@ describe("the pages this site names", () => {
     pages = await servedPages()
   })
 
-  it("sweeps every state the site can be served in", () => {
+  /**
+   * **The sweep had nothing independent holding it until 22 October.** This
+   * assertion was one line against `SERVED_STATE_COUNT`, which is a value
+   * computed by the module under test: a `servedPages` that came back with
+   * nothing, because `SITE_ROUTES` or `ASK_STATES` had gone empty, would have
+   * been compared against the zero that same arithmetic produces and every rule
+   * in this file would have swept an empty list and passed.
+   *
+   * So the sweep is also held to reaching every page of this site, and to there
+   * being at least three of them. Three is hand-written and is the right thing
+   * to write by hand here: it moves when a page is added or retired, which is a
+   * deliberate act, and never when the sweep is crossed with one dimension
+   * more or less.
+   */
+  it("sweeps every page of this site, in every state it can be served in", () => {
     expect(pages).toHaveLength(SERVED_STATE_COUNT)
+    expect([...new Set(pages.map((page) => page.route.path))].sort()).toEqual([...ROUTE_PATHS].sort())
+    expect(ROUTE_PATHS.length).toBeGreaterThanOrEqual(3)
   })
 
   /**
@@ -101,44 +145,52 @@ describe("the pages this site names", () => {
    */
   it("offers the way to every page it names, from the band that names it", () => {
     const stranded: string[] = []
-    const found: Found[] = []
 
     for (const page of pages) {
-      for (const band of page.tree.root.children) {
-        if (band.kind !== "element") continue
-
-        const linked = pathsLinkedFrom(band, ORIGIN)
-
-        for (const mention of mentionsIn(readerCopy(band))) {
-          const where = `${page.route.path} (${page.state}) ${band.type}`
-
-          found.push({ where, mention })
-
-          if (!linked.has(mention.names)) {
-            stranded.push(`${where} names ${mention.names} as "${mention.phrase}": ${mention.text}`)
-          }
+      for (const found of mentionsOn(page)) {
+        if (!found.linked.has(found.mention.names)) {
+          stranded.push(
+            `${found.where} names ${found.mention.names} as "${found.mention.phrase}": ${found.mention.text}`
+          )
         }
       }
     }
 
     expect(stranded).toEqual([])
+
     /**
      * A sweep that found nothing passes everything, so it says how much it
-     * read. **550 mentions and 75 of them inside a sentence, measured over the
-     * 75 served states on 21 October**; the floors are well under those,
-     * because a band removed by one of the five choices is allowed to take a
-     * mention with it and so is an ordinary copy edit. They are here to catch a
-     * sweep that read nothing, which is the failure that passes.
+     * read — **per served state, and never as a total**.
      *
-     * **Both numbers halved on 21 October and no copy changed.** `served.ts`
-     * crossed every state with whether the deployment counts its readers until
-     * then, and both halves of that had been the same tree since 12 October —
-     * so this sweep was reading every mention on this site twice. 798 over 126
-     * states became 550 over 75, and the floors were 600 and 80: the first was
-     * the failure, and the second would have been the next one.
+     * Both floors here were totals until 22 October and both were wrong in the
+     * way `sweepShare` describes. They were `600` and `80` against a
+     * measurement of 798 and 126, and on 21 October the deployment stopped
+     * being a dimension of `servedPages`: every mention on this site had been
+     * read twice, the readings halved to 550 and 75 for a change that touched
+     * no copy, the first floor failed and the second would have been next.
+     * Re-measuring them by hand is a fix that lasts until the sweep changes
+     * shape again.
+     *
+     * **7.3 mentions a state and 1.0 of them inside a sentence, measured over
+     * the 75 served states on 22 October.** The floors are well under those,
+     * because a band removed by one of the five choices is allowed to take a
+     * mention with it and so is an ordinary copy edit.
+     *
+     * `quiet` is enforced on the first and not the second, and the difference
+     * is real rather than caution: every state of every page names another page
+     * somewhere — six in the thinnest of them — while a mention *inside a
+     * sentence* is sparse enough that the front door has states with none. A
+     * rule has to be true of the site before it is worth having.
      */
-    expect(found.length).toBeGreaterThanOrEqual(400)
-    expect(found.filter(({ mention }) => mention.inASentence).length).toBeGreaterThanOrEqual(50)
+    const named = sweepShare(pages, (page) => mentionsOn(page).length)
+    const inASentence = sweepShare(
+      pages,
+      (page) => mentionsOn(page).filter(({ mention }) => mention.inASentence).length
+    )
+
+    expect(named.quiet).toEqual([])
+    expect(named.each).toBeGreaterThanOrEqual(3)
+    expect(inASentence.each).toBeGreaterThanOrEqual(0.5)
   })
 
   /**
@@ -167,12 +219,9 @@ describe("the pages this site names", () => {
     }
 
     const broken: string[] = []
-    let checked = 0
 
     for (const page of pages) {
-      for (const link of crossPageFragmentsIn(page.tree.root, page.route.path, ORIGIN, ROUTE_PATHS)) {
-        checked += 1
-
+      for (const link of linksOn(page)) {
         const states = anchorsByState.get(link.to) ?? []
         const missing = states.filter((declared) => !declared.includes(link.fragment)).length
 
@@ -186,12 +235,20 @@ describe("the pages this site names", () => {
 
     expect(broken).toEqual([])
     /**
-     * 84 the day this was written: two links, each in the 42 states of the
-     * page it is on. The floor is the 42 that were already live and unheld,
-     * because it is here to catch a sweep that read nothing rather than to
-     * count the links.
+     * The third total floor in this file, and the third one whose number was a
+     * fact about how many states the sweep happened to have.
+     *
+     * It was `40` against a reading of 84 — *two links, each in the 42 states
+     * of the page it is on* — and both halves of that sentence halved on
+     * 21 October, to 50 over 75 states. It did not fail then and it is the next
+     * one that would: halving `ASK_STATES` again takes the reading to 26, which
+     * is what the mutation run for this change measured.
+     *
+     * **0.67 links a state on 22 October**, which is two states in three. No
+     * `quiet` here: only two pages of the three make such a link, so a third of
+     * the states correctly carry none.
      */
-    expect(checked).toBeGreaterThanOrEqual(40)
+    expect(sweepShare(pages, (page) => linksOn(page).length).each).toBeGreaterThanOrEqual(0.3)
   })
 
   /**
