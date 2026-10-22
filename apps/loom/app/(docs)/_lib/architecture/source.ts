@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 
+import { repositoryFileUrl } from "../surfaces"
+
 /**
  * Where the Architecture section's material actually lives, which is not here.
  *
@@ -61,8 +63,6 @@ export const readCourseFile = (name: string): string =>
 export const repositoryFileExists = (...segments: readonly string[]): boolean =>
   existsSync(join(REPOSITORY_ROOT, ...segments))
 
-const BLOB = "https://github.com/jam-overture/loom/blob/main"
-
 /**
  * A link to a file in the repository, which is a link off this site.
  *
@@ -78,9 +78,13 @@ const BLOB = "https://github.com/jam-overture/loom/blob/main"
  * argument is that it is a trail rather than a second documentation site. What
  * is owed to a reader is that a link which leaves says it leaves — which is what
  * the components do with it — rather than that every file becomes a page.
+ *
+ * The address itself is `surfaces.ts`', which is where every other link off
+ * this site to the project is written. This takes segments because its callers
+ * hold a folder and a filename separately.
  */
 export const repositoryHref = (...segments: readonly string[]): string =>
-  `${BLOB}/${segments.join("/")}`
+  repositoryFileUrl(segments.join("/"))
 
 /** Markdown link syntax and emphasis, removed. Titles here are rendered as text. */
 export const plainText = (markdown: string): string =>

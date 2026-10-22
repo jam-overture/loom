@@ -24,13 +24,60 @@ import { workspaceSpecifier } from "../packages"
  */
 export type ApiKind = "function" | "value" | "schema" | "type" | "interface" | "class"
 
+/**
+ * What is missing, where a signature ran past the cap and was cut short.
+ *
+ * A reader of a cut block has one question — *is the thing I came for below
+ * the ellipsis* — and until this existed every cut block answered it with the
+ * same grey sentence, whether ten lines were missing or six hundred and
+ * thirty-six. `LIBRARY_CLASS` is the case that makes the point: it is the map
+ * of every class name the primitive library writes, so the list is the whole
+ * of what it says, and a reader who finds it cut at `"loom-cluster"` could not
+ * tell whether the name they wanted was forty lines down or did not exist.
+ *
+ * **Lines, not members.** The measure has to be true of a union, an object
+ * type and a function type alike, and a member count means tracking brace
+ * depth through a string this module otherwise treats as text — a parser where
+ * a line count will do. Lines are also what the cut is now made of: the block
+ * ends where a line ends, so *the first 91 of 727 lines* describes the rule
+ * rather than approximating it.
+ *
+ * Both numbers are counted on the **reader-facing** text, which is the text
+ * the page shows — not the declaration it was read from. Cleaning drops
+ * comments the citation rule withholds, and counting those would mean telling
+ * a reader they are missing lines no reader was ever going to see.
+ */
+export type ApiCut = {
+  /** Lines of it the block above shows. */
+  readonly shown: number
+  /** Lines there are in all, so a reader can tell how much is behind it. */
+  readonly whole: number
+  /**
+   * Where the whole of it lives: a path in this repository, or empty.
+   *
+   * The source file rather than the declaration file, because `dist/` is not
+   * in the repository and a reader cannot open it. It is the file the
+   * declaration was generated from, which is the nearest thing to the whole
+   * that a reader can be handed — empty where the module has no source file
+   * under `src/`, and a page says nothing rather than linking nowhere.
+   */
+  readonly source: string
+}
+
 export type ApiSymbol = {
   readonly name: string
   readonly kind: ApiKind
   /** The declaration as the package publishes it, with `export declare` removed. */
   readonly signature: string
-  /** Whether the signature above was cut short because it ran past the cap. */
-  readonly truncated: boolean
+  /**
+   * How much was cut, where the signature above ran past the cap.
+   *
+   * `undefined` is the whole declaration being on the page, which is 1,751 of
+   * the 1,763 exports. It replaced a `truncated: boolean` on 22 October: the
+   * flag and the measure were one fact, and carrying both would have been two
+   * fields that have to agree about whether a block is cut.
+   */
+  readonly cut: ApiCut | undefined
   /** The first paragraph of the doc comment, or empty when there is none. */
   readonly summary: string
 }

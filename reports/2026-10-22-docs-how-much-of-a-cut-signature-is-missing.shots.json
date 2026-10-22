@@ -1,0 +1,29 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/primitives",
+      "out": "2026-10-22-docs-how-much-of-a-cut-signature-is-missing-wide-library-class",
+      "viewport": "wide",
+      "waitFor": "#s-LIBRARY_CLASS",
+      "do": [{ "scrollTo": "#s-LIBRARY_CLASS p.text-ink-faint" }],
+      "measure": ["#s-LIBRARY_CLASS p.text-ink-faint"]
+    },
+    {
+      "path": "/docs/api-reference/sdk",
+      "out": "2026-10-22-docs-how-much-of-a-cut-signature-is-missing-wide-primitive-definition",
+      "viewport": "wide",
+      "waitFor": "#s-PrimitiveDefinition",
+      "do": [{ "scrollTo": "#s-PrimitiveDefinition p.text-ink-faint" }],
+      "measure": ["#s-PrimitiveDefinition p.text-ink-faint"]
+    },
+    {
+      "path": "/docs/api-reference/primitives",
+      "out": "2026-10-22-docs-how-much-of-a-cut-signature-is-missing-phone-library-class",
+      "viewport": "phone",
+      "waitFor": "#s-LIBRARY_CLASS",
+      "do": [{ "scrollTo": "#s-LIBRARY_CLASS p.text-ink-faint" }],
+      "measure": ["#s-LIBRARY_CLASS p.text-ink-faint"]
+    }
+  ]
+}

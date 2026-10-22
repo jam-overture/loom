@@ -57706,9 +57706,16 @@ characters.
 ## 2026-10-21 — the cut now lands on a member boundary wherever it lands in a comment, and mid-token wherever it lands in code
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **the stated
-limit of what shipped on 21 October**, and a readability wart rather than a
-defect: nothing is wrong, no number reaches a page, and no test is failing
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** **closed by
+`docs-63-how-much-of-a-cut-signature-is-missing`** (22 October) — by remedy 1,
+cutting back to the last complete line, and by a generalisation this entry did
+not ask for: the comment rule now drops a trailing comment **whether or not it
+closed**, because cutting to a line end turned `PrimitiveDefinition` into a
+block ending on eighteen lines about a `role` that was past the cut. Two rules
+about the cut, not three — the half-comment rule became the closed case of one
+rule rather than a second one beside it. All twelve cut blocks now end on a
+complete line, eleven of them on a whole member, and `RenderDiagnostic` on
+`} | {`
 
 A signature past the cap is now cleaned, cut, and has a comment the cut left
 open taken off the end. That last step is why ten of the twelve cut signatures
@@ -57762,9 +57769,13 @@ exact, and *exact* is the whole claim a generated signature makes.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/api-reference.tsx`,
-`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a reader
-problem rather than a defect**, found while measuring the cap and not caused by
-anything that changed today
+`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** **closed by
+`docs-63-how-much-of-a-cut-signature-is-missing`** (22 October) — remedies 1
+and 2 together, as recommended. A cut block now says *showing the first 91
+lines of 727* and links the source the whole of it is in. Counted in **lines**
+rather than members, and on the **cleaned** text rather than the declaration;
+both choices are argued in `ApiCut`'s own docblock. Remedy 3 is the maintainer's
+question and is re-filed below rather than closed with the rest
 
 Under a cut signature the page says:
 
@@ -58250,6 +58261,148 @@ holds once it has two readings, and splitting a window into those two readings
 is `byAudience`, which is a line of the surface's own code.
 
 ---
+## 2026-10-22 — a cut signature now tells a reader how much is missing, and nothing can check the number it tells them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a stated
+limit of what shipped**, not a wrong number: the figure is right today and
+there is no sweep that would notice the day it stopped being
+
+A cut block prints two numbers — *showing the first 91 lines of 727* — and they
+are not equally held.
+
+`shown` is a claim about the text on the page, so the sweep over the generated
+file re-counts the lines of the block and compares. It cannot be wrong without
+something going red.
+
+`whole` is a claim about text **the generated file does not carry**. It is the
+cleaned declaration's line count, and the cleaned declaration exists for about
+a microsecond inside `publishedSignature` before being cut. The sweep can only
+ask that it is larger than `shown`, which it would be for any wrong number
+bigger than ninety-one. What holds the rule is the one written-out case —
+`withheldMembers(300)`, where the test has both strings in hand and can assert
+that the denominator counts the reader-facing text rather than the 1,202-line
+declaration behind it.
+
+That is the same shape as the 28 September entry about a test derived from the
+list it checks, and the same answer applies: a written-out case holds what the
+rule says and a sweep holds what is there. The gap worth naming is that this
+particular number is **printed to a reader as a fact about a file they cannot
+see from the page**, which is a stronger claim than anything else the reference
+prints.
+
+### Three shapes, costed
+
+1. **Carry the whole cleaned text in the generated file and let the sweep count
+   it.** Correct and absurd: the file would grow by the forty kilobytes of
+   `LIBRARY_CLASS` the cap exists to keep off the page, to hold a number three
+   digits long.
+2. **Re-read the declarations in the test.** `extract.test.ts` already builds
+   the program once for the drift check, so a second pass could count the
+   cleaned lines of every cut symbol independently. It is perhaps fifteen lines
+   and the honest objection is that it would be *the same two functions* doing
+   the counting — `readerFacingSignature` and a `split`. It tests that the
+   generator was run, which the drift check already tests.
+3. **Leave it, written down.** **The recommendation.** The number is derived
+   from the same string in the same statement that cuts it; the failure mode
+   that would make it wrong is a mutation to one line of
+   `publishedSignature`, and the written-out case kills that mutation — it was
+   one of five planted on 22 October and it died.
+
+**Recommendation: 3.** Filed because *the page prints a number nothing sweeps*
+is worth somebody being able to find, not because it is work.
+
+---
+## 2026-10-22 — a map of 168 class names is not a signature, and thirteen per cent of one is not a reference
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`, pending the maintainer's
+view on what a reference page is for
+(`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
+**carried from the 21 October entry's remedy 3**, which closed today without
+it because it is a design question rather than a number
+
+`LIBRARY_CLASS` is the map of every class name the primitive library writes. It
+is 727 lines of reader-facing declaration and the page shows 91 of them.
+
+As of today the page says so, and links `src/primitives/stylesheet.ts`. That is
+a real improvement on *the whole of it is longer than a page can usefully hold*
+and it is still the wrong shape of answer. The question a reader brings to this
+export is **"what is the class for a cluster"**, and a page that answers *here
+are the first ninety-one lines, the other six hundred are on GitHub* has sent
+them to a text file to run a search they came here to avoid.
+
+Nothing is wrong. Every line printed is exact, the count is true, and the link
+works. What is wrong is that one of the seventeen hundred exports is a **list**,
+and a page built to print declarations prints a list badly.
+
+### Four shapes, costed
+
+1. **Raise the cap for this one export.** Cheapest and worst: 40,636 characters
+   is not a signature anybody reads top to bottom at any cap, and a reader
+   scrolling six hundred lines of `readonly x: "loom-x";` is no better served
+   than one reading ninety-one.
+2. **Give a list-shaped export a list-shaped presentation** — the class names in
+   columns, or a filter box. It is the right answer for a reader and it costs
+   this section its one claim to being trustworthy: the words stop being the
+   package's own declaration and start being this site's rendering of it. It
+   also needs a rule for *which* exports are lists, which is a judgement, which
+   is the thing a generated reference has none of.
+3. **Link the declaration rather than the source**, at a line anchor, so a
+   reader lands on the map rather than at the top of a 900-line file. Half a
+   remedy and cheap — it does not make the page answer the question, it makes
+   the file quicker to search.
+4. **Nothing.** Defensible. A reader who needs one of 168 class names is doing
+   something a reference page is not for, and the stylesheet is documented in
+   prose elsewhere.
+
+**Recommendation: 3 now, and 2 only if he wants it.** 3 is in this lane and is
+an hour. 2 is the first thing this section would have built that is a
+*rendering* rather than a transcription, and the question of whether that is
+allowed is his, not mine — it is the same bargain 0067 makes about primitives,
+one level up.
+
+---
+## 2026-10-22 — the link under a cut signature goes to the source, and the signature was read from the declaration
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a stated
+limit**, and nothing on the page is untrue: the words say *source* and the
+link goes to the source
+
+The reference is read from `dist/*.d.ts`, which is the right file and is the
+whole argument for generating it — those declarations are exactly what a
+consumer's type-checker sees. `dist/` is **not in the repository**, so there is
+no address to send a reader to.
+
+So a cut block links `src/signals/copy.ts`: the file the declaration was
+generated from. For every one of the twelve it is the same text — these are
+types and `as const` maps, where emit changes nothing — and the sentence on the
+page says *the whole of it is in* a path under `src/` rather than claiming it
+is the declaration.
+
+Where the two could differ is a declaration TypeScript **widens or rewrites** on
+emit. A reader following the link for the rest of a long function overload set,
+or for an inferred type written as `const x = …` in the source and emitted as a
+spelled-out type, would find the file saying the same thing differently. Nothing
+published today is that shape, and the twelve that are cut are all hand-written
+types.
+
+### Two shapes, costed
+
+1. **Leave it, with the words doing the work.** **The recommendation.** The link
+   is labelled with the path, the path plainly says `src/`, and a reader who
+   knows the difference between a source and a declaration is a reader who will
+   see it. The reference's own module docblock already explains that the source
+   tree and the published surface are two things.
+2. **Say which, in the sentence.** *The whole of it is in the source it was
+   generated from, `src/signals/copy.ts`* — eight words to pre-empt a confusion
+   nobody has reported, on the one line of the page where the brief's rule about
+   a reader who does not have the model in their head cuts the other way: a
+   stranger does not know what a declaration file is and should not have to
+   learn here.
+
+**Recommendation: 1.** Recorded so that whoever meets a widened declaration
+under this link has the paragraph rather than the surprise.
 ## 2026-10-22 — four sweeps in this route group are held only by a count the swept module computes itself
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`

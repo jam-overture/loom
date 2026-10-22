@@ -212,9 +212,9 @@ describe("what one reference page is told about the prose", () => {
         title: "Tree",
         summary: "",
         symbols: [
-          { name: "createTree", kind: "function", signature: "", truncated: false, summary: "" },
-          { name: "buildText", kind: "function", signature: "", truncated: false, summary: "" },
-          { name: "parseTree", kind: "function", signature: "", truncated: false, summary: "" },
+          { name: "createTree", kind: "function", signature: "", cut: undefined, summary: "" },
+          { name: "buildText", kind: "function", signature: "", cut: undefined, summary: "" },
+          { name: "parseTree", kind: "function", signature: "", cut: undefined, summary: "" },
         ],
       },
       {
@@ -222,7 +222,7 @@ describe("what one reference page is told about the prose", () => {
         title: "Render",
         summary: "",
         symbols: [
-          { name: "renderLoomTree", kind: "function", signature: "", truncated: false, summary: "" },
+          { name: "renderLoomTree", kind: "function", signature: "", cut: undefined, summary: "" },
         ],
       },
     ],
