@@ -9,6 +9,12 @@ import { submitKey, type SignInReport } from "../actions"
  *
  * `autoComplete="current-password"` so a password manager will hold the key,
  * which is the realistic alternative to it living in a note somewhere.
+ *
+ * **A refusal is said where the eye already is**: under the box, in the
+ * colour a refused change is drawn in, and announced. It sat beside the button in muted text the
+ * size of a footnote, and a key that was not recognised read as a form that
+ * did nothing — a password manager filling in a replaced key looks exactly
+ * like that.
  */
 export const SignInForm = ({ from, disabled }: { readonly from: string; readonly disabled: boolean }) => {
   const [report, submit, pending] = useActionState<SignInReport | null, FormData>(submitKey, null)
@@ -39,8 +45,13 @@ export const SignInForm = ({ from, disabled }: { readonly from: string; readonly
           {pending ? "checking…" : "sign in"}
         </button>
 
-        {report && <span className="text-ink-muted text-xs">{report.detail}</span>}
       </div>
+
+      {report && (
+        <p role="alert" className="bg-rejected text-rejected-ink m-0 rounded-md px-3 py-2 text-sm">
+          {report.detail}
+        </p>
+      )}
     </form>
   )
 }
