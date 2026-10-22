@@ -6,8 +6,17 @@ import type { ProjectId } from "@jam-overture/loom/store"
 import { hasAccounts, portalAccounts, portalMemberships } from "./account-store"
 import { actorSchema, digestOf, type Actor } from "./accounts"
 import { portalAttemptLog } from "./attempt-log"
-import { attemptSignIn } from "./attempt-sign-in"
+import { attemptSignIn, type VerifyKey } from "./attempt-sign-in"
 import { describeAuthProblem, portalAuth } from "./config"
+import { readAllowedEmails, type Credentials } from "./credentials"
+import {
+  readPasswordAuthConfig,
+  supabasePasswordAuth,
+  SUPABASE_ANON_KEY_KEY,
+  SUPABASE_URL_KEY,
+  type PasswordAuthError,
+  type SignUpOutcome,
+} from "./password-auth"
 import { SIGN_IN_PATH, WORKSPACE_PATH } from "./paths"
 import { mayAdminister, type Role } from "./roles"
 import { mintSession, readSession, SESSION_COOKIE, SESSION_TTL_MS } from "./session"
@@ -51,6 +60,10 @@ export type SignInProblem =
    * else's infrastructure.
    */
   | { readonly code: "unavailable" }
+  /** The password was right and the address has not been confirmed from its inbox yet (0304). */
+  | { readonly code: "unconfirmed" }
+  /** The password provider asked us to slow down. Not counted: it is not the caller's guess. */
+  | { readonly code: "busy" }
 
 export type SignInResult =
   | { readonly ok: true; readonly actor: string }
@@ -75,7 +88,11 @@ export const describeSignInProblem = (problem: SignInProblem): string => {
        * "No such account" would turn the form into a way to enumerate the
        * accounts table.
        */
-      return "That key was not recognised."
+      return "That was not recognised. Check it and try again."
+    case "unconfirmed":
+      return "Confirm your address first: follow the link in the email we sent when you signed up."
+    case "busy":
+      return "Too many attempts just now. Wait a minute and try again."
     case "locked":
       return `Too many failed attempts. Try again in ${describeWait(problem.retryAfterMs)}.`
     case "unavailable":
@@ -201,15 +218,58 @@ const parseActor = (actor: string): Actor => {
  */
 const trustedHops = resolveTrustedHops(process.env.LOOM_PORTAL_TRUSTED_PROXY_HOPS)
 
+/** Who holds passwords, or `undefined` until the deployment names a provider (0304). */
+const passwordAuth = (() => {
+  const config = readPasswordAuthConfig({
+    [SUPABASE_URL_KEY]: process.env.LOOM_SUPABASE_URL,
+    [SUPABASE_ANON_KEY_KEY]: process.env.LOOM_SUPABASE_ANON_KEY,
+  })
+
+  return config === undefined ? undefined : supabasePasswordAuth(config)
+})()
+
+/** Whether a deployment can take passwords at all, for the screens that offer them. */
+export const passwordsOffered = passwordAuth !== undefined
+
+/** Who may have an account here. Unset is nobody — see `readAllowedEmails`. */
+const allowedEmails = readAllowedEmails(process.env.LOOM_PORTAL_EMAILS)
+
+const describePasswordAuthMissing = (): string =>
+  `Passwords are not set up on this deployment: ${SUPABASE_URL_KEY} and ` +
+  `${SUPABASE_ANON_KEY_KEY} name the Supabase project that holds them.`
+
+/** The session cookie for an actor the portal has just established. */
+const startSession = async (actor: string, issuedAt: number, secret: string): Promise<void> => {
+  ;(await cookies()).set({
+    name: SESSION_COOKIE,
+    value: await mintSession(actor, issuedAt, secret),
+    httpOnly: true,
+    sameSite: "lax",
+    /**
+     * `secure` off in development only, because localhost is served over http
+     * and a Secure cookie there is silently never sent — which reads as a
+     * sign-in that succeeds and does nothing.
+     */
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: Math.floor(SESSION_TTL_MS / 1000),
+  })
+}
+
 /**
- * A sign-in attempt, throttled.
+ * A sign-in attempt, throttled, whatever the credential is.
  *
  * This function's job is to turn a web request into the four things
- * `attemptSignIn` needs — a subject, a clock, a log and a way to check a key —
- * and to mint a cookie if it says yes. The decision itself is not made here,
- * which is what keeps the order of operations under test.
+ * `attemptSignIn` needs — a subject, a clock, a log and a way to check the
+ * credential — and to mint a cookie if it says yes. The decision itself is not
+ * made here, which is what keeps the order of operations under test. A key and
+ * a password differ only in `verify`, and in how a failure to check one is
+ * said (`unverified`).
  */
-export const signIn = async (key: string): Promise<SignInResult> => {
+const throttledSignIn = async <TFailure>(
+  verify: VerifyKey<TFailure>,
+  unverified: (failure: TFailure) => SignInProblem
+): Promise<SignInResult> => {
   const auth = portalAuth
 
   if (!auth.ok) {
@@ -231,6 +291,31 @@ export const signIn = async (key: string): Promise<SignInResult> => {
     portalAttemptLog,
     DEFAULT_THROTTLE_POLICY,
     { subject, now: issuedAt },
+    verify
+  )
+
+  switch (outcome.code) {
+    case "locked":
+      return { ok: false, error: { code: "locked", retryAfterMs: outcome.retryAfterMs } }
+    case "unavailable":
+      return { ok: false, error: { code: "unavailable" } }
+    case "unverified":
+      return { ok: false, error: unverified(outcome.failure) }
+    case "rejected":
+      return { ok: false, error: { code: "rejected" } }
+    case "accepted":
+      await startSession(outcome.actor, issuedAt, auth.value.secret)
+
+      return { ok: true, actor: outcome.actor }
+  }
+}
+
+/**
+ * Signing in with a minted key (0285), which stays as the way in for an
+ * account the command line made.
+ */
+export const signIn = (key: string): Promise<SignInResult> =>
+  throttledSignIn<string>(
     /**
      * The key never leaves this closure and the store never sees it: what is
      * looked up is its digest, which is also what the row holds. So the one
@@ -240,35 +325,156 @@ export const signIn = async (key: string): Promise<SignInResult> => {
     async () => {
       const found = await portalAccounts.actorWithDigest(await digestOf(key))
 
-      return found.ok ? { ok: true, actor: found.value } : { ok: false, detail: found.error.detail }
-    }
+      return found.ok
+        ? { ok: true, actor: found.value }
+        : { ok: false, failure: found.error.detail }
+    },
+    () => ({ code: "unavailable" })
   )
 
-  if (outcome.code === "locked") {
-    return { ok: false, error: { code: "locked", retryAfterMs: outcome.retryAfterMs } }
+/**
+ * Signing in with an email address and a password (0304).
+ *
+ * The provider checks the password; this checks the address is one the
+ * deployment lets in. **An address that is not allowed is a wrong password**,
+ * counted by the throttle and answered with the same sentence, because an
+ * account can exist at the provider that this deployment never offered — made
+ * against its public key from outside the form — and telling its owner
+ * *allowed or not* would be telling them which addresses are.
+ */
+export const signInWithPassword = (credentials: Credentials): Promise<SignInResult> => {
+  const auth = passwordAuth
+
+  if (auth === undefined) {
+    return Promise.resolve({
+      ok: false,
+      error: { code: "not-configured", detail: describePasswordAuthMissing() },
+    })
   }
 
-  if (outcome.code === "unavailable") return { ok: false, error: { code: "unavailable" } }
-  if (outcome.code === "rejected") return { ok: false, error: { code: "rejected" } }
+  return throttledSignIn<PasswordAuthError>(
+    async () => {
+      const checked = await auth.signIn(credentials)
 
-  const actor = outcome.actor
+      if (checked.ok) {
+        return { ok: true, actor: allowedEmails.has(checked.value) ? checked.value : null }
+      }
 
-  ;(await cookies()).set({
-    name: SESSION_COOKIE,
-    value: await mintSession(actor, issuedAt, auth.value.secret),
-    httpOnly: true,
-    sameSite: "lax",
-    /**
-     * `secure` off in development only, because localhost is served over http
-     * and a Secure cookie there is silently never sent — which reads as a
-     * sign-in that succeeds and does nothing.
-     */
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: Math.floor(SESSION_TTL_MS / 1000),
-  })
+      return checked.error.code === "rejected"
+        ? { ok: true, actor: null }
+        : { ok: false, failure: checked.error }
+    },
+    (failure) => passwordProblem(failure)
+  )
+}
 
-  return { ok: true, actor }
+/** A provider's failure as the problem a sign-in form says. */
+const passwordProblem = (failure: PasswordAuthError): SignInProblem => {
+  switch (failure.code) {
+    case "unconfirmed":
+      return { code: "unconfirmed" }
+    case "busy":
+      return { code: "busy" }
+    default:
+      return { code: "unavailable" }
+  }
+}
+
+/**
+ * Opening an account, for an address the deployment lets in.
+ *
+ * An address it does not let in is told so plainly. Unlike signing in, this
+ * says nothing about who has an account — only who may make one, which is the
+ * deployment's policy rather than anybody's secret.
+ */
+export type SignUpResult =
+  | { readonly ok: true; readonly outcome: SignUpOutcome }
+  | { readonly ok: false; readonly detail: string }
+
+export const signUp = async (
+  credentials: Credentials,
+  confirmTo: string
+): Promise<SignUpResult> => {
+  const auth = passwordAuth
+
+  if (auth === undefined) return { ok: false, detail: describePasswordAuthMissing() }
+  if (!allowedEmails.has(credentials.email)) {
+    return { ok: false, detail: "This deployment is not taking new accounts for that address." }
+  }
+
+  const made = await auth.signUp(credentials, confirmTo)
+
+  if (made.ok) return { ok: true, outcome: made.value }
+
+  switch (made.error.code) {
+    case "taken":
+      return {
+        ok: false,
+        detail: "That address already has an account. Sign in, or reset its password.",
+      }
+    case "weak":
+      return { ok: false, detail: made.error.detail }
+    case "busy":
+      return { ok: false, detail: "Too many attempts just now. Wait a minute and try again." }
+    default:
+      return { ok: false, detail: "Accounts cannot be made right now. Try again in a moment." }
+  }
+}
+
+/**
+ * Asking for a recovery link.
+ *
+ * **Always the same answer**, sent or not, so the form cannot be asked which
+ * addresses have accounts. An address the deployment does not let in is never
+ * passed to the provider at all, so the form cannot be used to send mail to
+ * strangers either.
+ */
+export const requestRecovery = async (email: Actor, resetTo: string): Promise<void> => {
+  if (passwordAuth === undefined || !allowedEmails.has(email)) return
+
+  await passwordAuth.recover(email, resetTo)
+}
+
+/**
+ * Setting a new password from a recovery link, which also signs its owner in.
+ *
+ * The token is the provider's proof that whoever holds it opened the email,
+ * so a new password set with it is as good as a sign-in. The address it names
+ * is still held to the allowed list, for `signInWithPassword`'s reason.
+ */
+export const resetPassword = async (
+  recoveryToken: string,
+  password: string
+): Promise<{ readonly ok: true } | { readonly ok: false; readonly detail: string }> => {
+  const auth = passwordAuth
+
+  if (auth === undefined || !portalAuth.ok) {
+    return { ok: false, detail: describePasswordAuthMissing() }
+  }
+
+  const set = await auth.setPassword(recoveryToken, password)
+
+  if (!set.ok) {
+    switch (set.error.code) {
+      case "expired":
+        return {
+          ok: false,
+          detail: "That link has expired or was already used. Ask for a new one.",
+        }
+      case "weak":
+        return { ok: false, detail: set.error.detail }
+      default:
+        return { ok: false, detail: "The password could not be changed. Try again in a moment." }
+    }
+  }
+
+  if (!allowedEmails.has(set.value)) {
+    return { ok: false, detail: "That link has expired or was already used. Ask for a new one." }
+  }
+
+  await startSession(set.value, Date.now(), portalAuth.value.secret)
+
+  return { ok: true }
 }
 
 export const signOut = async (): Promise<void> => {

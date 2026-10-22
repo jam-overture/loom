@@ -24,12 +24,20 @@ import { assess, forgetBefore, type ThrottlePolicy } from "./throttle"
  *    try.
  */
 
-export type SignInOutcome =
+export type SignInOutcome<TFailure = string> =
   | { readonly code: "accepted"; readonly actor: string }
   | { readonly code: "rejected" }
   | { readonly code: "locked"; readonly retryAfterMs: number }
   /** The log could not answer. Nobody signs in — see 0034. */
   | { readonly code: "unavailable"; readonly detail: string }
+  /**
+   * The credential could not be checked, for the checker's own reason. Kept
+   * apart from the log failing because the reasons are the checker's to
+   * name: a key lookup fails as a sentence, and a password provider fails as
+   * *that address is not confirmed* or *slow down*, which a form says
+   * differently (0304). Nothing is counted either way.
+   */
+  | { readonly code: "unverified"; readonly failure: TFailure }
 
 export type Attempt = {
   readonly subject: string
@@ -45,16 +53,17 @@ export type Attempt = {
  * not answer* and *that key belongs to nobody* are the same sentence only to a
  * caller who is already in.
  */
-export type VerifyKey = () => Promise<
-  { readonly ok: true; readonly actor: string | null } | { readonly ok: false; readonly detail: string }
+export type VerifyKey<TFailure = string> = () => Promise<
+  | { readonly ok: true; readonly actor: string | null }
+  | { readonly ok: false; readonly failure: TFailure }
 >
 
-export const attemptSignIn = async (
+export const attemptSignIn = async <TFailure = string>(
   log: AttemptLog,
   policy: ThrottlePolicy,
   attempt: Attempt,
-  verify: VerifyKey
-): Promise<SignInOutcome> => {
+  verify: VerifyKey<TFailure>
+): Promise<SignInOutcome<TFailure>> => {
   const cutoff = forgetBefore(attempt.now, policy)
 
   const known = await log.recall(attempt.subject, cutoff)
@@ -73,7 +82,7 @@ export const attemptSignIn = async (
    * counted against them for something they did not do. Nobody signs in — 0034
    * — and nobody is charged for it either.
    */
-  if (!verified.ok) return { code: "unavailable", detail: verified.detail }
+  if (!verified.ok) return { code: "unverified", failure: verified.failure }
 
   const actor = verified.actor
 

@@ -392,3 +392,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0300](0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md) | What audience a reading is of is a three-way answer, and a window of two forms is read as neither | Accepted | §4c (reader signals) |
 | [0301](0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md) | A refused reading is not a page nobody read, and the census travels with the progress | Accepted | §4c (reader signals) |
 | [0302](0302-two-forms-of-one-page-are-compared-at-each-forms-own-share-and-neither-side-is-earlier.md) | Two forms of one page are compared at each form's own share, and neither side is earlier | Accepted | §4c (reader signals) |
+| 0303 | *No record on this branch* | — | — |
+| [0304](0304-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |

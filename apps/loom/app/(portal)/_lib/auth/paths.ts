@@ -21,25 +21,23 @@ export const SIGN_IN_PATH = "/portal/sign-in"
  */
 export const WORKSPACE_PATH = "/portal"
 
-/**
- * The demo is the second public path, and it is public by design rather than by
- * omission: it exists to be looked at by somebody who has not been given an
- * account, and §4d's marketing site cannot embed a surface behind a sign-in.
- *
- * What makes it safe to open is that it shares nothing with the portal but the
- * deployment. It has its own registry, its own in-memory store, its own policy
- * and no identity at all, so an anonymous visitor reaches a tree that expires
- * with the instance and never the one the portal is reviewing.
- *
- * **This is now the demo's old address, not the demo.** The demo moved to a
- * public `/demo` on 21 August, which is outside the proxy's matcher altogether
- * and needs nothing from this list. What remains here is a 308, and the
- * exemption is what keeps it working: without it a signed-out visitor following
- * an old link would be sent to sign in rather than forwarded on, which is a
- * redirect that only serves the people who do not need it.
- */
+/** Opening an account, asking for a recovery link, and the page that link opens (0304). */
+export const SIGN_UP_PATH = "/portal/sign-up"
+export const FORGOT_PASSWORD_PATH = "/portal/forgot-password"
+export const RESET_PASSWORD_PATH = "/portal/reset-password"
 
-const PUBLIC_PATHS: readonly string[] = [SIGN_IN_PATH]
+/**
+ * The pages a signed-out person must reach: the ways in, and the way back in
+ * when a password is lost. Each is the whole segment, because a page's server
+ * actions post to its own path and a guarded action would send the form to
+ * sign in.
+ */
+const PUBLIC_PATHS: readonly string[] = [
+  SIGN_IN_PATH,
+  SIGN_UP_PATH,
+  FORGOT_PASSWORD_PATH,
+  RESET_PASSWORD_PATH,
+]
 
 export const isPublicPath = (pathname: string): boolean =>
   PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))

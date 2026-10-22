@@ -49,11 +49,22 @@ const APP = join(process.cwd(), "app", "(portal)")
  * What is left is the sign-in page itself, which cannot require an actor to
  * ask for one.
  *
+ * **Three joined it on 22 October** (0304): opening an account, asking for a
+ * recovery link, and the page that link opens. Each is a way of getting a
+ * session for somebody who has none, which is the sign-in page's own reason.
+ *
  * The list is allowed to grow with renames and must not grow with pages. An
  * exemption covering something that reads `portalStore` would be the failure it
  * exists to make visible, so the test below asserts that none of them does.
  */
-const UNGUARDED_BY_DESIGN: readonly string[] = ["portal/sign-in/page.tsx"]
+const WAYS_IN: readonly string[] = [
+  "portal/forgot-password/page.tsx",
+  "portal/reset-password/page.tsx",
+  "portal/sign-in/page.tsx",
+  "portal/sign-up/page.tsx",
+]
+
+const UNGUARDED_BY_DESIGN: readonly string[] = WAYS_IN
 
 const pagesUnder = (directory: string, prefix = ""): readonly string[] =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -80,8 +91,13 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts the sign-in page and nothing else", () => {
-    expect([...UNGUARDED_BY_DESIGN].sort()).toEqual(["portal/sign-in/page.tsx"])
+  it("exempts the ways in and nothing else", () => {
+    expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
+      "portal/forgot-password/page.tsx",
+      "portal/reset-password/page.tsx",
+      "portal/sign-in/page.tsx",
+      "portal/sign-up/page.tsx",
+    ])
   })
 
   /**
@@ -91,8 +107,9 @@ describe("every page", () => {
    * reason is asserted rather than remembered.
    */
   it("exempts nothing that renders a screen", () => {
-    const rendering = UNGUARDED_BY_DESIGN.filter((page) => page !== "portal/sign-in/page.tsx")
-      .filter((page) => !readFileSync(join(APP, page), "utf8").includes("permanentRedirect("))
+    const rendering = UNGUARDED_BY_DESIGN.filter((page) => !WAYS_IN.includes(page)).filter(
+      (page) => !readFileSync(join(APP, page), "utf8").includes("permanentRedirect(")
+    )
 
     expect(rendering).toEqual([])
   })
@@ -108,7 +125,7 @@ describe("every page", () => {
    * warning about**, and the maintainer found it by opening the live site.
    *
    * This is the rule stated where it can be checked rather than a second place
-   * to remember. It is one page today, and the list it sweeps is the same
+   * to remember. It is the four ways in today, and the list it sweeps is the same
    * `UNGUARDED_BY_DESIGN` the assertions above hold to rendering nothing — so a
    * second public portal screen is inside this rule the moment somebody exempts
    * one, which is exactly when it would otherwise be forgotten.
@@ -142,7 +159,7 @@ describe("every page", () => {
     )
 
     /** Guards the guard: an empty list would make the rule below vacuous. */
-    expect(rendering).toEqual(["portal/sign-in/page.tsx"])
+    expect(rendering).toEqual(WAYS_IN)
 
     for (const page of rendering) {
       expect(sourcesBeside(page), `${page} does not say the portal is unfinished`).toContain(
@@ -159,7 +176,7 @@ describe("every page", () => {
    */
   it("keeps every unguarded page away from the portal's own store and journal", () => {
     /**
-     * Auth is not on the list: `/portal/sign-in` exists to use it. What must not be
+     * Auth is not on the list: the ways in exist to use it. What must not be
      * reachable without a session is the reviewed tree, the write path that
      * appends to it, and the journal of what has been asked of it.
      */

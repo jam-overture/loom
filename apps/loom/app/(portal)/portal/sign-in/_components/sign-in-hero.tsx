@@ -1,10 +1,12 @@
 import Link from "next/link"
 
+import { AuthFrame } from "@/app/(portal)/_components/auth-frame"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnderConstruction } from "@/app/(portal)/_components/under-construction"
+import { SIGN_UP_PATH } from "@/app/(portal)/_lib/auth/paths"
 import type { AuthReadout } from "@/app/(portal)/_lib/signin-view"
 
-import { SignInForm } from "./sign-in-form"
+import { KeySignInForm, PasswordSignInForm } from "./sign-in-form"
 
 /**
  * The first page a stranger sees now that the marketing site sends them here.
@@ -30,86 +32,79 @@ import { SignInForm } from "./sign-in-form"
  * async `TopBar`: the page gathers its data (return path, config resolution)
  * and this renders it. The renderer is a sync Server Component, testable with
  * ordinary RTL rather than through an async import dance.
+ *
+ * **An email and a password lead** once a deployment names who holds
+ * passwords (0304); the minted key is folded beneath them, and leads only on a
+ * deployment that has not.
  */
 export const SignInHero = ({
   readout,
   destination,
+  passwords,
 }: {
   readonly readout: AuthReadout
   readonly destination: string
-}) => (
-  <div className="mx-auto flex w-full max-w-lg flex-col gap-8 px-6 py-16">
-    {/*
-     * Above the heading, which is where `/portal` puts the same banner — and
-     * **this is the screen it was missing from.**
-     *
-     * 28 September put it on the landing page, behind the sign-in. A stranger
-     * following *Portal* from the marketing site's menu or its footer never
-     * reaches that screen: they land here, read a page that describes a working
-     * review surface in the present tense, and have no way to know most of it is
-     * unbuilt. The warning was behind the door it was warning about.
-     *
-     * This page's own module comment is the argument in one line — *"the only
-     * page reachable without a session."* So it is the only portal screen a
-     * person who has not been given a key will ever see, and the one place the
-     * banner has to be for it to reach the audience it was written for.
-     */}
-    <UnderConstruction />
+  /** Whether this deployment takes passwords (0304). */
+  readonly passwords: boolean
+}) => {
+  const disabled = !readout.ok
 
-    <div className="flex flex-col gap-3">
-      <p className="text-ink-muted text-2xs tracking-wide uppercase">Loom · review portal</p>
-      <h1 className="text-3xl tracking-tight">Sign in</h1>
-      <p className="text-ink-secondary text-sm leading-relaxed">
-        This is where the people who run this project review the changes an AI
-        proposes before any of them go live. It's signed-in only — the key on
-        the form below is the way in.
-      </p>
+  const forms = passwords ? (
+    <div className="flex flex-col gap-4">
+      <PasswordSignInForm from={destination} disabled={disabled} />
+      <details className="text-xs">
+        <summary className="text-ink-muted hover:text-ink cursor-pointer">
+          Use an access key instead
+        </summary>
+        <div className="pt-3">
+          <KeySignInForm from={destination} disabled={disabled} />
+        </div>
+      </details>
     </div>
+  ) : (
+    <KeySignInForm from={destination} disabled={disabled} />
+  )
 
-    {readout.ok ? (
-      <SignInForm from={destination} disabled={false} />
-    ) : (
-      <div className="border-edge-subtle bg-surface-hover flex flex-col gap-3 rounded-md border p-4">
-        <p className="text-sm">{readout.headline}</p>
-        <p className="text-ink-muted text-xs leading-relaxed">{readout.detail}</p>
-        <SignInForm from={destination} disabled={true} />
-        <TechnicalDetail summary="For the operator setting this up">
-          {/*
-           * The operator's message goes here word for word. This is what the
-           * page used to render at a visitor's altitude, and it belongs here
-           * rather than nowhere — an operator who has just deployed the
-           * portal and hit the sign-in page is the one person on earth who
-           * wants to read `LOOM_PORTAL_SESSION_SECRET is unset…`.
-           */}
-          <p className="text-ink-muted font-mono leading-relaxed break-words whitespace-pre-wrap">
-            {readout.technical}
-          </p>
-        </TechnicalDetail>
-      </div>
-    )}
-
-    <div className="border-edge-subtle flex flex-col gap-3 border-t pt-6">
-      {/*
-       * **No demo link here either**, on the maintainer's instruction of 12
-       * October, which was to take it out of the portal. One stood in this
-       * block and the block was built around it — *don't have a key? see the
-       * demo* — so the copy went with it. What is left is the way back, which
-       * is what a person without a key actually needs from a sign-in screen.
-       */}
-      <p className="text-ink-muted text-xs">
-        Don't have a key? Whoever set this deployment up can issue you one.
-      </p>
-      <div className="flex flex-wrap items-center gap-4">
-        {/*
-         * The way out. `/` is the marketing home — the front door that sent
-         * them here, so the loop closes. The topbar's wordmark now points at
-         * `/` too when signed out; this is the same link phrased for a
-         * reader who has already looked past the header.
-         */}
-        <Link href="/" className="text-ink-muted hover:text-ink-secondary text-xs">
-          ← Back to Loom
-        </Link>
-      </div>
-    </div>
-  </div>
-)
+  return (
+    <AuthFrame
+      banner={<UnderConstruction />}
+      title="Sign in"
+      intro="This is where the people who run this project review the changes an AI proposes before any of them go live. It's signed-in only."
+      footer={
+        <>
+          {passwords ? (
+            <p className="text-ink-muted m-0">
+              New here?{" "}
+              <Link href={SIGN_UP_PATH} className="text-ink">
+                Create an account
+              </Link>
+              .
+            </p>
+          ) : (
+            <p className="text-ink-muted m-0">
+              Don&rsquo;t have a key? Whoever set this deployment up can issue you one.
+            </p>
+          )}
+          <Link href="/" className="text-ink-muted hover:text-ink-secondary">
+            ← Back to Loom
+          </Link>
+        </>
+      }
+    >
+      {readout.ok ? (
+        forms
+      ) : (
+        <div className="border-edge-subtle bg-surface-hover flex flex-col gap-3 rounded-md border p-4">
+          <p className="text-sm">{readout.headline}</p>
+          <p className="text-ink-muted text-xs leading-relaxed">{readout.detail}</p>
+          {forms}
+          <TechnicalDetail summary="For the operator setting this up">
+            <p className="text-ink-muted font-mono leading-relaxed break-words whitespace-pre-wrap">
+              {readout.technical}
+            </p>
+          </TechnicalDetail>
+        </div>
+      )}
+    </AuthFrame>
+  )
+}

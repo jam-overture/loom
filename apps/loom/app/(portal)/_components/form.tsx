@@ -50,15 +50,24 @@ export const Field = ({
  *
  * Both words are the caller's, because *Register it* and *Save* are not the
  * same promise and a shared button that said one of them for both would be
- * wrong on one screen.
+ * wrong on one screen. `disabled` is for a form that can never be accepted,
+ * such as sign-in on a deployment that cannot sign a session.
  */
-export const Submit = ({ label, pendingLabel }: { label: string; pendingLabel: string }) => {
+export const Submit = ({
+  label,
+  pendingLabel,
+  disabled = false,
+}: {
+  label: string
+  pendingLabel: string
+  disabled?: boolean
+}) => {
   const { pending } = useFormStatus()
 
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || disabled}
       className="bg-affirm text-affirm-ink border-affirm-edge self-start rounded-md border px-3 py-1.5 text-sm disabled:opacity-60"
     >
       {pending ? pendingLabel : label}
