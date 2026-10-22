@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4846,7 +4846,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4892,7 +4892,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5882,7 +5882,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6410,7 +6410,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7589,7 +7589,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8229,7 +8229,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8457,7 +8457,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9287,7 +9287,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9718,7 +9718,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9957,7 +9957,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 62,
+      "files": 63,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9970,7 +9970,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10003,7 +10003,7 @@
             {
               "name": "ActionStanding",
               "kind": "type",
-              "signature": "type ActionStanding =\n/** A row credits it with readers who acted inside it, or with uses of its own. */\n\"acted\"\n/**\n * Readers reached it, it has an inside, and nothing happened in or on it.\n *\n * The only claim this module makes about an absence, and the sentence worth\n * acting on.\n */\n | \"untouched\"\n/**\n * Nothing can be said.\n *\n * A part with no row at all, a part whose `reached` is 0 while the window held\n * views — the unanchorable case, where it reported something other than coming\n * into view), or **a leaf**, whose nought is a filing rule rather than a\n * measurement.\n */\n | \"unknown\";",
+              "signature": "type ActionStanding =\n/** A row credits it with readers who acted inside it, or with uses of its own. */\n\"acted\"\n/**\n * Readers reached it, it has an inside, and nothing happened in or on it.\n *\n * The only claim this module makes about an absence, and the sentence worth\n * acting on.\n */\n | \"untouched\"\n/**\n * Nothing can be said.\n *\n * A part with no row at all, a part whose `reached` is 0 while the window held\n * views — the unanchorable case, where it reported something other than coming\n * into view), or **a leaf**, whose nought is a filing rule rather than a\n * measurement.\n *\n * And a part that bears an inside in an {@link PageAction.unwalked} window,\n * where the nought the other three are told apart from is the ancestry\n * missing rather than the readers idle.\n */\n | \"unknown\";",
               "truncated": false,
               "summary": "What a window can say about whether readers acted on one part."
             },
@@ -10024,14 +10024,14 @@
             {
               "name": "PartAction",
               "kind": "type",
-              "signature": "type PartAction = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    readonly standing: ActionStanding;\n    /**\n     * Whether any element part of this revision names it as a parent.\n     *\n     * The structural fact that decides whether a share is a measurement. Taken\n     * off the tree the reading was built from, so it is a property of the page\n     * and not of the window — a part with children keeps them in a window nobody\n     * read.\n     */\n    readonly bearsParts: boolean;\n    /** Distinct page views that reported it coming into view, or `undefined` where no row named it. */\n    readonly reached: number | undefined;\n    /**\n     * Distinct page views in which a reader used something strictly inside it\n     *, or `undefined` where no row named it.\n     *\n     * `0` on a leaf is a filing rule and not a measurement; {@link share} is what\n     * is withheld on account of it, and this number is passed through unaltered\n     * because a caller looking at one part's row should see what the store holds.\n     */\n    readonly within: number | undefined;\n    /**\n     * `within ÷ reached`, in `[0, 1]`, or `undefined`.\n     *\n     * Withheld where the part bears no element parts, where no row named it, and\n     * where its `reached` is 0 — which are the three states the standing of\n     * `unknown` covers, so a withheld share and an unknown standing are the same\n     * fact said twice and never disagree.\n     *\n     * Both terms are distinct view counts off the same row, which is why this is\n     * the figure on a card that can be trusted while the counts beside it are\n     * generous by the straddle, measured since the door counted openings\n     *. It is deliberately\n     * **not** divided by the page views counted at the door: `opened` and\n     * `engaged` are written in different places and their ratio can honestly\n     * exceed 1, which is a refusal made once already and it still stands.\n     */\n    readonly share: number | undefined;\n    /**\n     * Presses, opens, closes and submissions filed against this part itself,\n     * added.\n     *\n     * **Occurrences, never readers.** Four counters go in because they are four\n     * ways of using a thing and a caller asking *was this used* wants one number;\n     * the four are on {@link PartAction.counts} apart for a caller that wants to\n     * tell a press from a dismissal. `0` where no row named it, because *nothing\n     * happened* and *nothing was reported* are told apart by the standing rather\n     * than by making every arithmetic consumer handle an absence.\n     */\n    readonly uses: number;\n    /** The four occurrence counters, kept apart. `0` each where no row named it. */\n    readonly counts: {\n        readonly activations: number;\n        readonly opens: number;\n        readonly closes: number;\n        readonly completions: number;\n    };\n    /**\n     * `uses ÷ reached`, or `undefined` where nothing was used or nobody reached\n     * it.\n     *\n     * **An intensity and not a rate.** It may exceed 1, and above 1 it says\n     * readers used this part more than once each rather than that more readers\n     * used it than reached it. Withheld at `uses` of 0 rather than published as a\n     * nought, because a nought here is the ordinary state of every heading on the\n     * page and {@link uses} already says it.\n     */\n    readonly usesPerReader: number | undefined;\n    /**\n     * `closes ÷ opens`, or `undefined` where nothing was opened.\n     *\n     * *Readers open this ask and shut it again nine times in ten* — two\n     * occurrence counts off one row, so the straddle divides out of it the way it\n     * does out of {@link share}.\n     *\n     * **Uncapped on purpose.** Above 1 means closes the page's own opens cannot\n     * account for, which is a disclosure a revision renders already open: the\n     * reader shuts something they never opened. Capping it would hide the one\n     * state it can diagnose, and a clause nothing can falsify is not a safeguard\n     *.\n     */\n    readonly shutAgain: number | undefined;\n};",
+              "signature": "type PartAction = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    /**\n     * What this window can say about whether readers acted on this part.\n     *\n     * Per part, except for the one rule that is a property of the window: in an\n     * {@link PageAction.unwalked} window nothing is `untouched`, because the\n     * nought that member is read off is the ancestry missing.\n     */\n    readonly standing: ActionStanding;\n    /**\n     * Whether any element part of this revision names it as a parent.\n     *\n     * The structural fact that decides whether a share is a measurement. Taken\n     * off the tree the reading was built from, so it is a property of the page\n     * and not of the window — a part with children keeps them in a window nobody\n     * read.\n     */\n    readonly bearsParts: boolean;\n    /** Distinct page views that reported it coming into view, or `undefined` where no row named it. */\n    readonly reached: number | undefined;\n    /**\n     * Distinct page views in which a reader used something strictly inside it\n     *, or `undefined` where no row named it.\n     *\n     * `0` on a leaf is a filing rule and not a measurement; {@link share} is what\n     * is withheld on account of it, and this number is passed through unaltered\n     * because a caller looking at one part's row should see what the store holds.\n     */\n    readonly within: number | undefined;\n    /**\n     * `within ÷ reached`, in `[0, 1]`, or `undefined`.\n     *\n     * Withheld where the part bears no element parts, where no row named it, and\n     * where its `reached` is 0 — which are the three states the standing of\n     * `unknown` covers, so a withheld share and an unknown standing are the same\n     * fact said twice and never disagree.\n     *\n     * **And withheld on every part of an {@link PageAction.unwalked} window**,\n     * whatever its standing, because this is the one figure here built out of\n     * `engaged` and `engaged` is the one counter the ancestry walk feeds.\n     * So an unknown standing still always means a withheld share, and in that one\n     * window a withheld share no longer means an unknown standing: a band with\n     * opens of its own is `acted` on evidence that needed no walk, and has no\n     * share all the same.\n     *\n     * Both terms are distinct view counts off the same row, which is why this is\n     * the figure on a card that can be trusted while the counts beside it are\n     * generous by the straddle, measured since the door counted openings\n     *. It is deliberately\n     * **not** divided by the page views counted at the door: `opened` and\n     * `engaged` are written in different places and their ratio can honestly\n     * exceed 1, which is a refusal made once already and it still stands.\n     */\n    readonly share: number | undefined;\n    /**\n     * Presses, opens, closes and submissions filed against this part itself,\n     * added.\n     *\n     * **Occurrences, never readers.** Four counters go in because they are four\n     * ways of using a thing and a caller asking *was this used* wants one number;\n     * the four are on {@link PartAction.counts} apart for a caller that wants to\n     * tell a press from a dismissal. `0` where no row named it, because *nothing\n     * happened* and *nothing was reported* are told apart by the standing rather\n     * than by making every arithmetic consumer handle an absence.\n     */\n    readonly uses: number;\n    /** The four occurrence counters, kept apart. `0` each where no row named it. */\n    readonly counts: {\n        readonly activations: number;\n        readonly opens: number;\n        readonly closes: number;\n        readonly completions: number;\n    };\n    /**\n     * `uses ÷ reached`, or `undefined` where nothing was used or nobody reached\n     * it.\n     *\n     * **An intensity and not a rate.** It may exceed 1, and above 1 it says\n     * readers used this part more than once each rather than that more readers\n     * used it than reached it. Withheld at `uses` of 0 rather than published as a\n     * nought, because a nought here is the ordinary state of every heading on the\n     * page and {@link uses} already says it.\n     */\n    readonly usesPerReader: number | undefined;\n    /**\n     * `closes ÷ opens`, or `undefined` where nothing was opened.\n     *\n     * *Readers open this ask and shut it again nine times in ten* — two\n     * occurrence counts off one row, so the straddle divides out of it the way it\n     * does out of {@link share}.\n     *\n     * **Uncapped on purpose.** Above 1 means closes the page's own opens cannot\n     * account for, which is a disclosure a revision renders already open: the\n     * reader shuts something they never opened. Capping it would hide the one\n     * state it can diagnose, and a clause nothing can falsify is not a safeguard\n     *.\n     */\n    readonly shutAgain: number | undefined;\n};",
               "truncated": false,
               "summary": "One element node of one revision, and what readers did with it."
             },
             {
               "name": "PageAction",
               "kind": "type",
-              "signature": "type PageAction = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The page's view floor, carried through from the reading unchanged.\n     *\n     * Zero makes every standing `unknown`: nothing was measured, so nothing was\n     * left untouched.\n     */\n    readonly views: number;\n    /** Every element part of the revision, in reading order. */\n    readonly parts: readonly PartAction[];\n    readonly standings: Readonly<Record<ActionStanding, number>>;\n    /**\n     * The root, which is the one page-wide headcount this subsystem has.\n     *\n     * Every action anywhere on the page is strictly inside the root, and the root\n     * is an addressed node reached by every view that renders — so its `within` is\n     * **the distinct page views in which a reader did anything at all**, counted\n     * once, off one row. *Three in ten readers did something on this page* is one\n     * division and is the sentence a reader screen opens with.\n     *\n     * It is the only page-level total here and it is not an addition. Summing\n     * `within` across parts would charge one reader once per level of the tree\n     * they acted inside, so there is no page total of readers who\n     * acted and this is what stands in for one.\n     *\n     * Kept out of {@link mostIgnored}, because the page contains every part it\n     * would outrank, which is how the pace reading treats it and for the\n     * same reason.\n     *\n     * `null` where the revision's root is not an element.\n     */\n    readonly whole: PartAction | null;\n    /**\n     * The part the most readers reached and did nothing in: most reached, then\n     * first in reading order.\n     *\n     * By headcount rather than by share, which is the ranking rule spelled\n     * once: a band two readers out of three ignored is a worse ratio and a smaller\n     * problem than one four hundred of them did.\n     *\n     * `null` where nothing is `untouched`.\n     */\n    readonly mostIgnored: PartAction | null;\n    /**\n     * Parts with no element parts under them, whose share is withheld for the\n     * structural reason.\n     *\n     * Published so a reading accounts for every part rather than leaving a caller\n     * to wonder where the shares went. What is withheld is still reported as a\n     * total. On an ordinary page it is most of the page.\n     */\n    readonly leaves: number;\n    /**\n     * Whether the window holds uses and credits them to nobody.\n     *\n     * True where some part reports an occurrence and **no** part reports a reader\n     * inside it. A press is filed against the control and credited to its\n     * addressed ancestors from the ancestry the signal carries, so a batch whose\n     * delegated signals have no `within` adds occurrences and no `engaged` at all\n     * — a sender synthesising batches on a server, replaying a fixture, or with\n     * the walk turned off.\n     *\n     * It matters because the symptom is otherwise *a page readers act on and\n     * nothing can say where*: every {@link share} on the page is a nought, every\n     * band reads `untouched`, and the counters look healthy. §11's `unopened`\n     * diagnosis one counter across, and nothing else here would say so.\n     */\n    readonly unwalked: boolean;\n};",
+              "signature": "type PageAction = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The page's view floor, carried through from the reading unchanged.\n     *\n     * Zero makes every standing `unknown`: nothing was measured, so nothing was\n     * left untouched.\n     */\n    readonly views: number;\n    /** Every element part of the revision, in reading order. */\n    readonly parts: readonly PartAction[];\n    readonly standings: Readonly<Record<ActionStanding, number>>;\n    /**\n     * The root, which is the one page-wide headcount this subsystem has.\n     *\n     * Every action anywhere on the page is strictly inside the root, and the root\n     * is an addressed node reached by every view that renders — so its `within` is\n     * **the distinct page views in which a reader did anything at all**, counted\n     * once, off one row. *Three in ten readers did something on this page* is one\n     * division and is the sentence a reader screen opens with.\n     *\n     * It is the only page-level total here and it is not an addition. Summing\n     * `within` across parts would charge one reader once per level of the tree\n     * they acted inside, so there is no page total of readers who\n     * acted and this is what stands in for one.\n     *\n     * Kept out of {@link mostIgnored}, because the page contains every part it\n     * would outrank, which is how the pace reading treats it and for the\n     * same reason.\n     *\n     * `null` where the revision's root is not an element.\n     */\n    readonly whole: PartAction | null;\n    /**\n     * The part the most readers reached and did nothing in: most reached, then\n     * first in reading order.\n     *\n     * By headcount rather than by share, which is the ranking rule spelled\n     * once: a band two readers out of three ignored is a worse ratio and a smaller\n     * problem than one four hundred of them did.\n     *\n     * `null` where nothing is `untouched`, which includes every\n     * {@link unwalked} window: the page a sender does not walk reads as a\n     * page of ignored bands, and that is the sentence this field exists to make\n     * somebody act on.\n     */\n    readonly mostIgnored: PartAction | null;\n    /**\n     * Parts with no element parts under them, whose share is withheld for the\n     * structural reason.\n     *\n     * Published so a reading accounts for every part rather than leaving a caller\n     * to wonder where the shares went. What is withheld is still reported as a\n     * total. On an ordinary page it is most of the page.\n     */\n    readonly leaves: number;\n    /**\n     * Whether the window holds uses and credits them to nobody.\n     *\n     * True where some part reports an occurrence and **no** part reports a reader\n     * inside it. A press is filed against the control and credited to its\n     * addressed ancestors from the ancestry the signal carries, so a batch whose\n     * delegated signals have no `within` adds occurrences and no `engaged` at all\n     * — a sender synthesising batches on a server, replaying a fixture, or with\n     * the walk turned off.\n     *\n     * It matters because the symptom would otherwise be *a page readers act on\n     * and nothing can say where*: every {@link PartAction.share} on the page a\n     * nought, every band reading `untouched`, and the counters looking healthy.\n     * §11's `unopened` diagnosis one counter across, and nothing else here would\n     * say so.\n     *\n     * **So it is not only reported, it is applied**: in such a window\n     * every share is withheld and nothing is `untouched`, so\n     * {@link PageAction.mostIgnored} is `null` and the three comparisons built on\n     * this reading inherit the refusal rather than each spelling it. What stands\n     * is everything the walk does not feed — `reached`, `uses`, the four counts,\n     * {@link PartAction.usesPerReader}, {@link PartAction.shutAgain} and the\n     * `acted` a part earns from uses filed against itself.\n     */\n    readonly unwalked: boolean;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -10052,7 +10052,7 @@
             {
               "name": "ActionChangeSilence",
               "kind": "type",
-              "signature": "type ActionChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Spelled as `ChangeSilence`, `CopyChangeSilence` and `PaceChangeSilence`\n * spell it, because a surface drawing four comparisons of one change should\n * not meet four names for one state.\n */\n\"different-trees\"\n/**\n * The two readings are of two audiences, and so of two populations.\n *\n * Spelled and refused as the other comparisons spell and refuse it. A\n * page is one base tree plus the deltas an audience earns, so a\n * control only the other form carries would be read as a control this change\n * added, and the two sides' takings-up are two populations'.\n *\n * Refused only where both sides name an audience and the two differ; a pair\n * spanning the migration that added the column is in\n * {@link ActionChange.audiences} instead.\n */\n | \"different-audiences\"\n/**\n * One of the two windows holds two forms of the page and named neither.\n *\n * The state the before-and-after reading and the two deployment orders took\n * the morning before, in one of the three readings that record did not\n * reach. Without it this comparison published `nothing-measured` — *one of the two windows\n * held no page views* — of a window that held plenty: it held two forms of\n * them. A page reading read as neither has a view floor of nought with full\n * counters behind it (`parts.ts`), so the floor alone cannot tell a window\n * nobody read from a window nobody split, and the two sentences send a\n * deployment to opposite places: one to look for a broken sender, the other\n * to split the window and read twice, which is a call away.\n *\n * **The tree half still answers**, which is the half `nothing-measured`\n * leaves standing and for its reason: which parts the change added and\n * removed, and which of them gained or lost an inside, are facts about the\n * two revisions. Every share is withheld, and the two readings on the\n * comparison stay honest about the windows they were each handed.\n *\n * **It cannot co-occur with `different-audiences`**, so the order between the\n * two is not observable: `crossesAudiences` needs an audience on both sides\n * and a mixed side has none, while a side that names one and holds two in its\n * census reads as `one`, because an audience asked for always wins.\n * The order that does matter is **before `unwalked`**, and it is the one\n * ordering in this set taken on a rule rather than on a cause. Both are\n * reachable at once — one side read as neither form, the other a window whose\n * delegated signals carry no `within` — and **the state whose remedy is a\n * call wins, because taking it reveals the other and taking the other does\n * not reveal it.** A deployment told `unwalked` first goes and fixes a\n * sender, asks again, and is handed the same unsplit window with nothing\n * saying so.\n */\n | \"audiences-mixed\"\n/**\n * One of the two windows holds uses and credits no reader with acting inside\n * anything.\n *\n * `PageAction.unwalked` on either side: a sender whose delegated signals carry\n * no `within`, a server synthesising batches, a fixture replayed. Every\n * share on that side is a nought that is a filing artefact, so every movement\n * across it is spurious and the page reads as abandoned.\n *\n * **The occurrence figures still stand**, because a press is filed against the\n * part it happened to and needs no ancestry. Which side it is, is on that\n * side's own reading, as `nothing-measured` leaves which window was empty to\n * the pair of readings rather than naming it here.\n *\n * Checked before `nothing-measured`, which it cannot ordinarily coincide with:\n * a window with no page views holds no uses either. A row carrying occurrences\n * with no views is a sender that is not one, and this is the sharper of the two\n * things to say about it.\n */\n | \"unwalked\"\n/**\n * One of the two windows held no page views.\n *\n * Every standing on that side is `unknown`, so there is no share to\n * compare. **The tree half still answers**: which parts the change added and\n * removed, and which of them gained or lost an inside, are facts about the two\n * revisions — and *the change added a band and nothing has been measured\n * since* is true and worth saying.\n */\n | \"nothing-measured\"\n/**\n * No part the two revisions share says anything on either side.\n *\n * The state `CopyChangeSilence.dissolved` reports of words and\n * `PaceChangeSilence.dissolved` of parts: a page that carries no part carries\n * no action either. The census of what was added and removed answers in\n * full and is the whole of what can be said.\n */\n | \"dissolved\";",
+              "signature": "type ActionChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Spelled as `ChangeSilence`, `CopyChangeSilence` and `PaceChangeSilence`\n * spell it, because a surface drawing four comparisons of one change should\n * not meet four names for one state.\n */\n\"different-trees\"\n/**\n * The two readings are of two audiences, and so of two populations.\n *\n * Spelled and refused as the other comparisons spell and refuse it. A\n * page is one base tree plus the deltas an audience earns, so a\n * control only the other form carries would be read as a control this change\n * added, and the two sides' takings-up are two populations'.\n *\n * Refused only where both sides name an audience and the two differ; a pair\n * spanning the migration that added the column is in\n * {@link ActionChange.audiences} instead.\n */\n | \"different-audiences\"\n/**\n * One of the two windows holds two forms of the page and named neither.\n *\n * The state the before-and-after reading and the two deployment orders took\n * the morning before, in one of the three readings that record did not\n * reach. Without it this comparison published `nothing-measured` — *one of the two windows\n * held no page views* — of a window that held plenty: it held two forms of\n * them. A page reading read as neither has a view floor of nought with full\n * counters behind it (`parts.ts`), so the floor alone cannot tell a window\n * nobody read from a window nobody split, and the two sentences send a\n * deployment to opposite places: one to look for a broken sender, the other\n * to split the window and read twice, which is a call away.\n *\n * **The tree half still answers**, which is the half `nothing-measured`\n * leaves standing and for its reason: which parts the change added and\n * removed, and which of them gained or lost an inside, are facts about the\n * two revisions. Every share is withheld, and the two readings on the\n * comparison stay honest about the windows they were each handed.\n *\n * **It cannot co-occur with `different-audiences`**, so the order between the\n * two is not observable: `crossesAudiences` needs an audience on both sides\n * and a mixed side has none, while a side that names one and holds two in its\n * census reads as `one`, because an audience asked for always wins.\n * The order that does matter is **before `unwalked`**, and it is the one\n * ordering in this set taken on a rule rather than on a cause. Both are\n * reachable at once — one side read as neither form, the other a window whose\n * delegated signals carry no `within` — and **the state whose remedy is a\n * call wins, because taking it reveals the other and taking the other does\n * not reveal it.** A deployment told `unwalked` first goes and fixes a\n * sender, asks again, and is handed the same unsplit window with nothing\n * saying so.\n */\n | \"audiences-mixed\"\n/**\n * One of the two windows holds uses and credits no reader with acting inside\n * anything.\n *\n * `PageAction.unwalked` on either side: a sender whose delegated signals carry\n * no `within`, a server synthesising batches, a fixture replayed. Every\n * share on that side would be a nought that is a filing artefact, so every\n * movement across it would be spurious and the page would read as abandoned.\n *\n * **So the figures are withheld as well as the state named**, and by\n * the reading rather than here: that side's standings are `unknown` and its\n * shares absent, so every {@link ComparedAction.movement} falls to `unknown`\n * and every {@link ComparedAction.shareRatio} to `null`.\n *\n * **The occurrence figures still stand**, because a press is filed against the\n * part it happened to and needs no ancestry — including a `held` between two\n * controls their own presses account for. Which side it is, is on that side's\n * own reading, as `nothing-measured` leaves which window was empty to the pair\n * of readings rather than naming it here.\n *\n * Checked before `nothing-measured`, which it cannot ordinarily coincide with:\n * a window with no page views holds no uses either. A row carrying occurrences\n * with no views is a sender that is not one, and this is the sharper of the two\n * things to say about it.\n */\n | \"unwalked\"\n/**\n * One of the two windows held no page views.\n *\n * Every standing on that side is `unknown`, so there is no share to\n * compare. **The tree half still answers**: which parts the change added and\n * removed, and which of them gained or lost an inside, are facts about the two\n * revisions — and *the change added a band and nothing has been measured\n * since* is true and worth saying.\n */\n | \"nothing-measured\"\n/**\n * No part the two revisions share says anything on either side.\n *\n * The state `CopyChangeSilence.dissolved` reports of words and\n * `PaceChangeSilence.dissolved` of parts: a page that carries no part carries\n * no action either. The census of what was added and removed answers in\n * full and is the whole of what can be said.\n */\n | \"dissolved\";",
               "truncated": false,
               "summary": "Why a comparison of what readers did answered nothing."
             },
@@ -10115,7 +10115,7 @@
             {
               "name": "ComparedAction",
               "kind": "type",
-              "signature": "type ComparedAction = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PartAction;\n    /** The whole of what the later window said about it. */\n    readonly now: PartAction;\n    readonly movement: ActionMovement;\n    /** What the change did to whether a share of this part is measurable at all. */\n    readonly inside: InsideMovement;\n    /**\n     * `now.share ÷ was.share`, and `null` where either side withheld a share or\n     * the earlier one is nought.\n     *\n     * **The one ratio here that is sound across two windows.** Each side's share\n     * is two distinct view counts off one row, so each window's straddle\n     * has very nearly divided out before the two sides meet — the cancellation a\n     * fall between two siblings rests on, and the reason a ratio of the\n     * counts themselves is refused by this module and not published anywhere on\n     * this type.\n     *\n     * Nought on the earlier side is `null` rather than infinity: *nobody acted\n     * here and now somebody does* is {@link movement}'s answer, and a ratio is a\n     * figure a surface divides and ranks by.\n     *\n     * It is **non-null only where {@link inside} is `kept`**, which falls out of\n     * the two sides' shares being withheld on a leaf and is not a separate rule: a\n     * ratio across a part whose shape changed would be a ratio of two different\n     * measurements.\n     */\n    readonly shareRatio: number | null;\n    /**\n     * `now.usesPerReader ÷ was.usesPerReader`, and `null` where either side used\n     * nothing or reached nobody.\n     *\n     * Occurrences per reader on each side, so each term has its own window's\n     * straddle divided out of it and the ratio stands. **An intensity and not a\n     * rate** on both sides, so this is how much more each reader used a\n     * part and never how many more readers did.\n     *\n     * The one figure here that survives `unwalked`, because the four occurrence\n     * counters are filed against the part a reader used and need no ancestry.\n     */\n    readonly usesRatio: number | null;\n};",
+              "signature": "type ComparedAction = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PartAction;\n    /** The whole of what the later window said about it. */\n    readonly now: PartAction;\n    readonly movement: ActionMovement;\n    /** What the change did to whether a share of this part is measurable at all. */\n    readonly inside: InsideMovement;\n    /**\n     * `now.share ÷ was.share`, and `null` where either side withheld a share or\n     * the earlier one is nought.\n     *\n     * **The one ratio here that is sound across two windows.** Each side's share\n     * is two distinct view counts off one row, so each window's straddle\n     * has very nearly divided out before the two sides meet — the cancellation a\n     * fall between two siblings rests on, and the reason a ratio of the\n     * counts themselves is refused by this module and not published anywhere on\n     * this type.\n     *\n     * Nought on the earlier side is `null` rather than infinity: *nobody acted\n     * here and now somebody does* is {@link movement}'s answer, and a ratio is a\n     * figure a surface divides and ranks by.\n     *\n     * It is **non-null only where {@link inside} is `kept`**, which falls out of\n     * the two sides' shares being withheld on a leaf and is not a separate rule: a\n     * ratio across a part whose shape changed would be a ratio of two different\n     * measurements.\n     *\n     * `null` across an {@link ActionChangeSilence} of `unwalked` for the same\n     * reason and by the same route: that window has no share to give.\n     */\n    readonly shareRatio: number | null;\n    /**\n     * `now.usesPerReader ÷ was.usesPerReader`, and `null` where either side used\n     * nothing or reached nobody.\n     *\n     * Occurrences per reader on each side, so each term has its own window's\n     * straddle divided out of it and the ratio stands. **An intensity and not a\n     * rate** on both sides, so this is how much more each reader used a\n     * part and never how many more readers did.\n     *\n     * The figure here that survives `unwalked`, because the four occurrence\n     * counters are filed against the part a reader used and need no ancestry.\n     */\n    readonly usesRatio: number | null;\n};",
               "truncated": false,
               "summary": "One part both revisions have, as two windows read what readers did with it."
             },
@@ -10300,6 +10300,48 @@
               "signature": "type ComparedPopulations = {\n    /** The audiences the earlier window's forms named. `[]` where none did. */\n    readonly was: readonly AudienceId[];\n    /** The audiences the later window's forms named, by the same rule. */\n    readonly now: readonly AudienceId[];\n};",
               "truncated": false,
               "summary": "The audiences each side of a **window** comparison was of."
+            },
+            {
+              "name": "FormPairRefusal",
+              "kind": "type",
+              "signature": "type FormPairRefusal =\n/**\n * The two readings are of different trees.\n *\n * Two pages are two pages, and two audiences do not make them one. Checked\n * first, as every comparison in this subsystem checks it first, because a\n * caller holding two pages wants to be told that before it is told anything\n * about populations.\n */\n\"different-pages\"\n/**\n * One of the two windows holds two forms of the page and named neither.\n *\n * The state published as `AudienceScope.mixed`, and the one\n * refusal here whose remedy is an instruction rather than a fact: **split the\n * window with {@link byAudience} and read each form on its own** — which is\n * exactly what a comparison of two forms then wants as its two sides. A side\n * read as neither form holds no counters at all, so without this every part\n * of the other side would come back as a part only that form has, and the\n * census would read as *the deltas gave this audience the whole page*.\n *\n * Checked before {@link FormPairRefusal.unattributed}, and that order is a\n * real one: one side can be unlabelled while the other is unsplit. The caller\n * is told the one it can do something about.\n */\n | \"unsplit\"\n/**\n * One of the two windows named no audience at all.\n *\n * Every window written before the column existed, and every window a\n * caller builds by hand. It is one population read whole, which is the right\n * answer to every other question in this subsystem and is no answer at all to\n * this one: the subject of a form comparison **is** the population, so a side\n * that cannot name its own has nothing to contribute to a comparison of two\n * of them.\n *\n * This is the sharpest difference between a form comparison and a\n * before-and-after. There, a pair with an unlabelled side is compared and\n * merely not provably of one readership, because the audience is a\n * confounder and refusing it would withhold every comparison spanning the\n * migration. Here the audience is the question.\n */\n | \"unattributed\"\n/**\n * Both windows name one audience and it is the same one.\n *\n * There is one population and so there is no second form: what the caller is\n * holding is one reading handed in twice, or two windows of one form, and\n * neither is this question. **The only refusal in this subsystem for too few\n * populations rather than too many** — its sibling `two-audiences` refuses a\n * before-and-after for naming two, and the two sit either side of the one\n * thing each reading needs held still.\n *\n * Two windows of one form over two periods is a real question and it is\n * `changeOf`, which is where that caller is sent.\n */\n | \"one-population\"\n/**\n * The two readings are of two revisions of the page.\n *\n * The refusal that is a form comparison's whole discipline. Two forms of a\n * page share a tree **and a revision**, so two revisions means the\n * pair varies the tree as well as the readership and every figure would carry\n * both causes with nothing to separate them — which is the one thing a\n * before-and-after is built to avoid and a form comparison would otherwise do\n * silently.\n *\n * Checked after the three population states above, for the reason a form\n * comparison exists: without two provable populations there is no form\n * comparison to refuse on a revision, and a caller told *two revisions* when\n * it is also holding one audience twice would fix the wrong half.\n */\n | \"different-revisions\";",
+              "truncated": false,
+              "summary": "Why two readings are not two forms of one page."
+            },
+            {
+              "name": "FORM_PAIR_REFUSALS",
+              "kind": "value",
+              "signature": "const FORM_PAIR_REFUSALS: readonly FormPairRefusal[]",
+              "truncated": false,
+              "summary": "The closed set, in the order {@link formPairOf} reaches them."
+            },
+            {
+              "name": "describeFormPairRefusal",
+              "kind": "function",
+              "signature": "const describeFormPairRefusal: (refusal: FormPairRefusal) => string",
+              "truncated": false,
+              "summary": "One line per refusal, for a surface saying why there is no pair."
+            },
+            {
+              "name": "SideOfForm",
+              "kind": "type",
+              "signature": "type SideOfForm = ReadOfAudience & {\n    readonly treeId: TreeId;\n    readonly revision: number;\n};",
+              "truncated": false,
+              "summary": "What {@link formPairOf} needs of a side: a page, a revision, and a scope."
+            },
+            {
+              "name": "FormPair",
+              "kind": "type",
+              "signature": "type FormPair<R> = {\n    readonly pairing: \"paired\";\n    /** The side whose audience id sorts lower. */\n    readonly one: R;\n    readonly other: R;\n    /** The two names, already in the same order as the two sides. */\n    readonly audiences: {\n        readonly one: AudienceId;\n        readonly other: AudienceId;\n    };\n} | {\n    readonly pairing: \"refused\";\n    /** The lower-sorting side, or the first argument where no pair of names stands. */\n    readonly one: R;\n    readonly other: R;\n    readonly refusal: FormPairRefusal;\n};",
+              "truncated": false,
+              "summary": "Two readings as a pair of forms, or the reason they are not one."
+            },
+            {
+              "name": "formPairOf",
+              "kind": "function",
+              "signature": "const formPairOf: <R extends SideOfForm>(one: R, other: R) => FormPair<R>",
+              "truncated": false,
+              "summary": "Settle two readings into two forms of one page, or say why they are not."
             }
           ]
         },
@@ -10990,6 +11032,76 @@
           ]
         },
         {
+          "module": "signals/form-action",
+          "title": "Form action",
+          "summary": "What readers *do* inside a page, form by form.",
+          "symbols": [
+            {
+              "name": "FormActionSilence",
+              "kind": "type",
+              "signature": "type FormActionSilence =\n/**\n * The five states in which two readings are not two forms of one page.\n *\n * Imported from {@link FormPairRefusal} rather than restated, for the reason\n * the module documentation gives: every one of them is a fact about the pair\n * and none of them is about the counter.\n */\nFormPairRefusal\n/**\n * One of the two windows holds uses and credits no reader with acting inside\n * anything.\n *\n * `PageAction.unwalked` on either side: a sender whose delegated signals\n * carry no `within`, a server synthesising batches, a fixture\n * replayed. Every share on that side is a nought that is a filing artefact,\n * so every gap across it would be the other form's whole share reported as a\n * difference between two populations.\n *\n * **The figures are withheld as well as the state named.** The spurious\n * nought would be read as *this audience does nothing on your page*, which is\n * the most confident wrong sentence this reading could print. That was argued\n * here first, with `ActionChangeSilence.unwalked` left naming the state\n * alone, and settled for both by moving the rule into the reading, so\n * the two no longer differ. The census of what each form has still answers,\n * because which parts a form carries is a fact about the deltas and about no\n * counter.\n *\n * Checked before `nothing-measured`, and **a single\n * window can reach both**, so the order is a decision rather than reading\n * order: a side with no page views and occurrences filed against its parts is\n * a sender that is not one, and *this window does not report where actions\n * happened* is the sharper of the two things to say about it.\n */\n | \"unwalked\"\n/**\n * One of the two windows held no page views.\n *\n * Every standing on that side is `unknown`, so there is no share to\n * compare and every gap is already withheld. **The census still answers**,\n * which is what this member has in common with its spelling everywhere else:\n * *the pro form has three bands the free form does not, and nothing has been\n * measured on either* is a sentence worth printing.\n */\n | \"nothing-measured\";",
+              "truncated": false,
+              "summary": "Why a comparison of what two forms' readers did answered nothing, or less than all of it."
+            },
+            {
+              "name": "FORM_ACTION_SILENCES",
+              "kind": "value",
+              "signature": "const FORM_ACTION_SILENCES: readonly FormActionSilence[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface that has to account for every absent figure."
+            },
+            {
+              "name": "describeFormActionSilence",
+              "kind": "function",
+              "signature": "const describeFormActionSilence: (silence: FormActionSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a figure is not there."
+            },
+            {
+              "name": "FormActionSide",
+              "kind": "type",
+              "signature": "type FormActionSide = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** `null` where the window named none, or named two with neither asked for. */\n    readonly audienceId: AudienceId | null;\n    /**\n     * That side's page-view floor, carried through unchanged.\n     *\n     * A floor rather than a count, for the reason `parts.ts` gives: distinct view\n     * counts cannot be added across rows, so the largest row is the most\n     * that can be said from counters alone. Nothing here divides by it — every\n     * share in this reading is off one row — and it is carried so a surface can\n     * say how big each population was beside what it did.\n     */\n    readonly views: number;\n    /** Element nodes this form has, which two forms of one page need not share. */\n    readonly parts: number;\n    /** Parts with no element parts under them, whose share is withheld structurally. */\n    readonly leaves: number;\n    /** Whether this side holds uses and credits them to nobody. */\n    readonly unwalked: boolean;\n};",
+              "truncated": false,
+              "summary": "One side of the comparison, as the reading of what its readers did leaves it."
+            },
+            {
+              "name": "PartActionOfForm",
+              "kind": "type",
+              "signature": "type PartActionOfForm = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly role: PrimitiveRole | null;\n    /** The form this part is in. The other form does not have this node at all. */\n    readonly audienceId: AudienceId;\n    readonly side: PartAction;\n};",
+              "truncated": false,
+              "summary": "A part exactly one of the two forms has, with the form that has it named."
+            },
+            {
+              "name": "ComparedFormAction",
+              "kind": "type",
+              "signature": "type ComparedFormAction = {\n    readonly nodeId: NodeId;\n    /** The type {@link FormActionComparison.one} gives it; `disagreed` names the pair if the other differs. */\n    readonly type: PrimitiveType;\n    readonly role: PrimitiveRole | null;\n    readonly one: PartAction;\n    readonly other: PartAction;\n    /**\n     * The form whose readers acted inside it more often, or `null` where no claim\n     * stands.\n     *\n     * `null` with a {@link ComparedFormAction.gap} of nought is the two forms\n     * acting alike; `null` with a `gap` of `null` is nothing being sayable. The\n     * two are a long way apart and are deliberately not one value.\n     */\n    readonly favours: AudienceId | null;\n    /**\n     * The distance between the two shares, which is never signed.\n     *\n     * `|one.share − other.share|`, with the direction in\n     * {@link ComparedFormAction.favours} rather than in the sign — because a sign\n     * is read against an order, and the order here is the alphabet of two\n     * audience names and means nothing.\n     *\n     * `null` where either side withholds its share — a leaf, a part with no row,\n     * a part nobody reached — **and on every part of a pair where either side is\n     * unwalked**, where the noughts are a filing artefact rather than readers who\n     * did nothing.\n     */\n    readonly gap: number | null;\n};",
+              "truncated": false,
+              "summary": "A part both forms have, as each form's own readers used it."
+            },
+            {
+              "name": "FormActionsCounted",
+              "kind": "type",
+              "signature": "type FormActionsCounted = {\n    /** Parts {@link FormActionComparison.one}'s readers acted inside more often. */\n    readonly one: number;\n    /** Parts {@link FormActionComparison.other}'s readers acted inside more often. */\n    readonly other: number;\n    /** Parts the two forms acted inside alike. */\n    readonly alike: number;\n    /** Parts where one side or the other cannot say. */\n    readonly unknown: number;\n};",
+              "truncated": false,
+              "summary": "How the shared parts fell, as a count over one set and never a mean."
+            },
+            {
+              "name": "FormActionComparison",
+              "kind": "type",
+              "signature": "type FormActionComparison = {\n    /** The side whose audience id sorts lower, or the first argument where no pair of names stands. */\n    readonly one: FormActionSide;\n    readonly other: FormActionSide;\n    /** The two readings this comparison was taken from, so nothing downstream derives them twice. */\n    readonly readings: {\n        readonly one: PageAction;\n        readonly other: PageAction;\n    };\n    /** Parts both forms have, in the reading order of {@link FormActionComparison.one}. */\n    readonly compared: readonly ComparedFormAction[];\n    /** Parts exactly one form has, by audience and then by node. */\n    readonly onlyIn: readonly PartActionOfForm[];\n    /**\n     * Shared nodes the two forms give different primitive types.\n     *\n     * Reported and not dropped, as `FormComparison.disagreed` is: the two shares\n     * are each their own form's and stay comparable, while a pair that is a band\n     * on one side and a card on the other is a fact about the deltas nobody would\n     * otherwise see.\n     */\n    readonly disagreed: readonly NodeId[];\n    /**\n     * Shared nodes one form gives an inside and the other does not.\n     *\n     * The diagnosis this reading needs and its sibling does not. A share is\n     * withheld on a leaf for a structural reason, so a part the deltas filled for\n     * one audience and left bare for the other has a share on one side and none\n     * on the other — and the pair lands in `unknown` with nothing saying why.\n     * *The riders' version of this band has nothing in it* is the answer, and it\n     * is a fact about the deltas rather than about either readership.\n     */\n    readonly insideDisagreed: readonly NodeId[];\n    readonly counted: FormActionsCounted;\n    /**\n     * The root, held against itself across the two forms.\n     *\n     * The one page-level claim either form comparison makes, and it is a division\n     * rather than an addition: see the module documentation. `null` where the\n     * revision's root is not an element part of both forms.\n     */\n    readonly whole: ComparedFormAction | null;\n    /**\n     * The shared part with the widest gap, by node id where two tie.\n     *\n     * The page itself is never it, because it contains every part it would\n     * outrank. `null` where nothing can say.\n     */\n    readonly sharpest: ComparedFormAction | null;\n    readonly silence: FormActionSilence | null;\n};",
+              "truncated": false,
+              "summary": "What two forms' readers did inside one page, held against each other."
+            },
+            {
+              "name": "formActionComparisonOf",
+              "kind": "function",
+              "signature": "const formActionComparisonOf: (one: PageReading, other: PageReading) => FormActionComparison",
+              "truncated": false,
+              "summary": "Hold what two forms' readers did against each other."
+            }
+          ]
+        },
+        {
           "module": "signals/forms",
           "title": "Forms",
           "summary": "Two forms of one page, side by side.",
@@ -10997,7 +11109,7 @@
             {
               "name": "FormComparisonSilence",
               "kind": "type",
-              "signature": "type FormComparisonSilence =\n/**\n * The two readings are of different trees.\n *\n * Two pages are two pages, and two audiences do not make them one. Checked\n * first, as every reading here checks it first, because a caller holding two\n * pages wants to be told that before it is told anything about populations.\n */\n\"different-pages\"\n/**\n * One of the two windows holds two forms of the page and named neither.\n *\n * The state published as `AudienceScope.mixed`, and the one\n * refusal here whose remedy is\n * an instruction rather than a fact: **split the window with `byAudience` and\n * read each form on its own** — which is exactly what this comparison then\n * wants as its two sides. A side read as neither form holds no counters at\n * all, so without this every part of the other side would come back as a part\n * only that form has, and the census would read as *the deltas gave this\n * audience the whole page*.\n *\n * Checked before {@link FormComparisonSilence.unattributed}, and that order is\n * a real one: one side can be unlabelled while the other is unsplit. The\n * caller is told the one it can do something about.\n */\n | \"unsplit\"\n/**\n * One of the two windows named no audience at all.\n *\n * Every window written before the column existed, and every window a\n * caller builds by hand. It is one population read whole, which is the right\n * answer to every other question in this subsystem and is no answer at all to\n * this one: the subject here **is** the population, so a side that cannot name\n * its own has nothing to contribute to a comparison of two of them.\n *\n * This is the sharpest difference between this reading and a before-and-after.\n * There, a pair with an unlabelled side is compared and merely not provably of\n * one readership, because the audience is a confounder and refusing it\n * would withhold every comparison spanning the migration. Here the audience is\n * the question.\n */\n | \"unattributed\"\n/**\n * Both windows name one audience and it is the same one.\n *\n * There is one population and so there is no second form: what the caller is\n * holding is one reading handed in twice, or two windows of one form, and\n * neither is this question. **The only refusal in any set here for too few\n * populations rather than too many** — its sibling `two-audiences` refuses a\n * before-and-after for naming two, and the two sit either side of the one\n * thing each reading needs held still.\n *\n * Two windows of one form over two periods is a real question and it is\n * `changeOf`, which is where that caller is sent.\n */\n | \"one-population\"\n/**\n * The two readings are of two revisions of the page.\n *\n * The refusal that is this reading's whole discipline. Two forms of a page\n * share a tree **and a revision**, so two revisions means the pair\n * varies the tree as well as the readership and every figure would carry both\n * causes with nothing to separate them — which is the one thing a\n * before-and-after is built to avoid and this reading would otherwise do\n * silently.\n *\n * Checked after the three population states above, for the reason this reading\n * exists: without two provable populations there is no form comparison to\n * refuse on a revision, and a caller told *two revisions* when it is also\n * holding one audience twice would fix the wrong half.\n */\n | \"different-revisions\"\n/**\n * One of the two windows held no page views.\n *\n * **The one member here that is not a refusal**, and it is spelled as\n * `CopyChangeSilence.nothing-measured` is for the same reason: the parts\n * census is a fact about the two composed trees and stays true of a window\n * nobody read. *The pro form of this page has three bands the free form does\n * not, and nothing has been measured on either* is a sentence worth printing.\n * Every per-part reach on that side is `null`, so every\n * {@link ComparedForm.gap} is withheld and nothing falls either way.\n */\n | \"nothing-measured\";",
+              "signature": "type FormComparisonSilence = \n/**\n * The five states in which two readings are not two forms of one page, taken\n * whole from {@link FormPairRefusal}.\n *\n * They were written here first and moved once a second comparison of two\n * forms wanted every one of them unchanged: each is a fact about the pair\n * rather than about the counter being compared, so the rule belongs where\n * both readings can import it instead of where one of them can be copied\n * from.\n */\nFormPairRefusal\n/**\n * One of the two windows held no page views.\n *\n * **The one member here that is not a refusal**, and it is spelled as\n * `CopyChangeSilence.nothing-measured` is for the same reason: the parts\n * census is a fact about the two composed trees and stays true of a window\n * nobody read. *The pro form of this page has three bands the free form does\n * not, and nothing has been measured on either* is a sentence worth printing.\n * Every per-part reach on that side is `null`, so every\n * {@link ComparedForm.gap} is withheld and nothing falls either way.\n */\n | \"nothing-measured\";",
               "truncated": false,
               "summary": "Why a comparison of two forms answered nothing, or answered less than all of it."
             },
@@ -13118,7 +13230,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "truncated": false,
               "summary": "Which reading published a silence."
             },
@@ -13291,6 +13403,13 @@
               "summary": "What a comparison of two forms of one page reports."
             },
             {
+              "name": "meaningOfFormActionSilence",
+              "kind": "function",
+              "signature": "const meaningOfFormActionSilence: (silence: FormActionSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of what two forms' readers *did* reports."
+            },
+            {
               "name": "SilenceRelation",
               "kind": "type",
               "signature": "type SilenceRelation = \n/**\n * One condition about one subject: the two readings are silent for the same\n * reason about the same thing, and one sentence serves both.\n */\n\"one-state\"\n/**\n * One condition about two subjects.\n *\n * The same thing is true of a page and of one of its parts, or of a pair of\n * readings and of one side of it. Worth two sentences and never one: the\n * narrower is not evidence for the wider, and the wider does not say which\n * side it is about.\n */\n | \"one-reason\"\n/** Two conditions, which a surface has to print separately or choose between. */\n | \"unrelated\";",
@@ -13414,7 +13533,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13561,10 +13680,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 18,
+      "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13631,7 +13750,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -14228,7 +14347,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14302,7 +14421,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14781,7 +14900,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1711,
+        "packageNames": 1727,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
