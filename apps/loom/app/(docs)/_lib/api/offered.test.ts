@@ -49,7 +49,7 @@ const page = (specifier: string, symbols: readonly (readonly [string, ApiKind])[
       module: "invented",
       title: "Invented",
       summary: "",
-      symbols: symbols.map(([name, kind]) => ({ name, kind, signature: "", truncated: false, summary: "" })),
+      symbols: symbols.map(([name, kind]) => ({ name, kind, signature: "", cut: undefined, summary: "" })),
     },
   ],
 })

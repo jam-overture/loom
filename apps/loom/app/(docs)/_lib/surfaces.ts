@@ -95,7 +95,22 @@ export const DOCS_HOME = "/docs"
  */
 export const REPOSITORY_URL = "https://github.com/jam-overture/loom"
 export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/decisions"
-export const LICENSE_URL = "https://github.com/jam-overture/loom/blob/main/LICENSE"
+
+/**
+ * A file in the repository, at the address a reader can open.
+ *
+ * Three places now send a reader to a file rather than to the project: the
+ * licence in the footer, every decision record the Architecture section
+ * indexes, and the source behind a signature the API reference had to cut
+ * short. `blob/main` was written out in two of them before this existed.
+ *
+ * It takes a repository-relative path — `src/signals/copy.ts`, `LICENSE` —
+ * because that is what the things on the other side of it hold. Nothing that
+ * resolves a path should have to know this site is reading from GitHub.
+ */
+export const repositoryFileUrl = (path: string): string => `${REPOSITORY_URL}/blob/main/${path}`
+
+export const LICENSE_URL = repositoryFileUrl("LICENSE")
 
 /**
  * The one sentence at the very foot of the page.

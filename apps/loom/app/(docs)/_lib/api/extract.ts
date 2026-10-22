@@ -7,7 +7,7 @@ import ts from "typescript"
 import { publishedSpecifier } from "../packages"
 
 import { moduleTitle } from "./groups"
-import { apiSlugFor, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
+import { apiSlugFor, type ApiCut, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
 import { narrowerDoorsBySpecifier, type DoorFacts } from "./narrower"
 import { standingBySpecifier } from "./standing"
 import { doorReach, packagesNamedIn, peersOf, requirementsFor, type Peers, type ReadFile } from "./requires"
@@ -291,11 +291,11 @@ export const readerFacingSignature = (signature: string): string => {
 }
 
 /**
- * A doc comment the cut left open, taken off the end rather than published.
+ * A trailing comment, taken off the end rather than published.
  *
  * A cut lands wherever the character count puts it, and inside a union whose
  * members each carry a comment that is inside one of them about as often as
- * not. What it leaves on the page is a `/**` that never closes and half a
+ * not. What that leaves on the page is a `/**` that never closes and half a
  * sentence under an ellipsis, which is not documentation anybody can use.
  *
  * It is also the one thing `readerFacingSignature` above cannot see. That rule
@@ -304,16 +304,65 @@ export const readerFacingSignature = (signature: string): string => {
  * whose grammar needs a number is not withheld. Cleaning before cutting is
  * what fixes that, and this is what keeps the cut itself readable.
  *
- * The member the half comment described goes with it, because the member is
- * past the cut already — a comment with nothing under it is the shape this
- * drops, not a comment separated from what it describes.
+ * **A comment that closed and describes nothing goes too**, which is the same
+ * rule rather than a second one: what is dropped is a comment with nothing
+ * under it, and whether the cut fell inside the comment or just after it is
+ * not a difference a reader can see. Either way the member it described is
+ * past the cut already, and a block ending on a sentence about a member that
+ * is not there reads as a page with something missing — which it is.
+ *
+ * A comment separated from what it describes is **not** this shape and is left
+ * alone. A comment that closes and has a member under it keeps both halves,
+ * because the member is on the page.
  */
-const withoutAHalfComment = (cut: string): string => {
+const withoutATrailingComment = (cut: string): string => {
   const opened = cut.lastIndexOf("/**")
 
-  if (opened === -1 || cut.includes("*/", opened)) return cut
+  if (opened === -1) return cut
+
+  const closed = cut.indexOf("*/", opened)
+
+  if (closed !== -1 && cut.slice(closed + 2).trim() !== "") return cut
 
   return cut.slice(0, opened).trimEnd()
+}
+
+/** Lines of text, counted the way a reader counts them: the last line counts. */
+const linesIn = (text: string): number => text.split("\n").length
+
+/**
+ * The block ends where a line ends.
+ *
+ * Where the cut falls in the code itself there is no comment for the step
+ * above to drop back to, and what the page got was the character the count
+ * stopped on: `readonly role?: P` is `readonly role?: PrimitiveRole` with the
+ * name cut in half, and `RenderDiagnostic` ended on four spaces. Nobody was
+ * misled — the ellipsis is on the next line — but *exact* is the whole claim a
+ * generated signature makes, and a name cut in half is not exact.
+ *
+ * It costs at most one line: the furthest any cut on the site was from its
+ * line end is twenty-two characters.
+ *
+ * **It runs before the comment step and not after, and the two do not
+ * commute.** Run it second and it takes a line off a block that already ended
+ * where the dropped comment began — which is a whole member, leaving a bare
+ * closing delimiter as the last line on the page, or, where that member's own
+ * comment ran over two lines, an opening delimiter with no close: exactly the
+ * shape the comment step exists to remove. Both were measured on the real
+ * reference while this was being written, and the generated file is what said
+ * so.
+ *
+ * **A fragment with no line end in it is left as it is**, rather than emptied.
+ * That is a declaration over six thousand characters with no newline before
+ * the cut — no published export is one today, and the alternative is a block
+ * showing a reader nothing at all.
+ */
+const toALineEnd = (cut: string): string => {
+  const ended = cut.lastIndexOf("\n")
+
+  if (ended === -1) return cut
+
+  return cut.slice(0, ended).trimEnd()
 }
 
 /**
@@ -339,17 +388,27 @@ const withoutAHalfComment = (cut: string): string => {
  * there is no cut that can put one back.
  *
  * The cap moves with the order, and that is the point rather than a side
- * effect: it now counts what the page shows. `truncated` means *what you are
+ * effect: it now counts what the page shows. A `cut` means *what you are
  * reading is cut*, which is what the line under the block on the page claims.
+ *
+ * **What it cannot know is where the whole of it lives**, which is a fact
+ * about a file on disk rather than about a string. So the measure comes back
+ * without `source` and `extractSymbol` fills it in, which is also what keeps
+ * this function worth testing against a declaration written out in a test.
  */
 export const publishedSignature = (
   full: string
-): { readonly signature: string; readonly truncated: boolean } => {
+): { readonly signature: string; readonly cut: Omit<ApiCut, "source"> | undefined } => {
   const cleaned = readerFacingSignature(full)
 
-  if (cleaned.length <= SIGNATURE_CAP) return { signature: cleaned, truncated: false }
+  if (cleaned.length <= SIGNATURE_CAP) return { signature: cleaned, cut: undefined }
 
-  return { signature: `${withoutAHalfComment(cleaned.slice(0, SIGNATURE_CAP))}\n…`, truncated: true }
+  const kept = withoutATrailingComment(toALineEnd(cleaned.slice(0, SIGNATURE_CAP)))
+
+  return {
+    signature: `${kept}\n…`,
+    cut: { shown: linesIn(kept), whole: linesIn(cleaned) },
+  }
 }
 
 export const readerFacing = (summary: string): string => {
@@ -380,6 +439,27 @@ const undecorate = (block: string): string =>
 const DETACHED = /^[ \t]*\r?\n[ \t]*\r?\n/
 
 /**
+ * The file a module's declarations were generated from, as a path in this
+ * repository — or empty, where there is no such file.
+ *
+ * Two callers and one reason to have it in one place: the paragraph a module
+ * opens with is read out of this file, and a cut signature points a reader at
+ * it. The convention is the package's own — `src/signals/copy.ts` for the
+ * module `signals/copy`, and a directory's `index.ts` where a module is a
+ * directory.
+ *
+ * It is a path and not a URL. Where it goes is a question for whatever hands
+ * it to a reader, and nothing here should have to know that the repository is
+ * on GitHub.
+ */
+const moduleSourcePath = (module: string, root: string): string => {
+  const candidates = [join("src", `${module}.ts`), join("src", module, "index.ts")]
+  const found = candidates.find((path) => existsSync(join(root, path)))
+
+  return found === undefined ? "" : found.replace(/\\/g, "/")
+}
+
+/**
  * The paragraph a module opens with — read from the module's source, not from
  * its declarations, and this is the one place that is true.
  *
@@ -397,12 +477,11 @@ const DETACHED = /^[ \t]*\r?\n[ \t]*\r?\n/
  * rather than credited with the module's sentence.
  */
 const moduleSummaryFrom = (module: string, root: string): string => {
-  const candidates = [join(root, "src", `${module}.ts`), join(root, "src", module, "index.ts")]
-  const source = candidates.find((path) => existsSync(path))
+  const path = moduleSourcePath(module, root)
 
-  if (source === undefined) return ""
+  if (path === "") return ""
 
-  const text = readFileSync(source, "utf8")
+  const text = readFileSync(join(root, path), "utf8")
   const start = text.indexOf("/**")
   const end = text.indexOf("*/", start)
 
@@ -428,22 +507,33 @@ type Extracted = ApiSymbol & {
   readonly position: number
 }
 
-const extractSymbol = (symbol: ts.Symbol, checker: ts.TypeChecker, typesRoot: string): Extracted | undefined => {
+const extractSymbol = (
+  symbol: ts.Symbol,
+  checker: ts.TypeChecker,
+  typesRoot: string,
+  root: string
+): Extracted | undefined => {
   const resolved = resolveAlias(symbol, checker)
   const declaration = resolved.declarations?.[0]
 
   if (declaration === undefined) return undefined
 
   const name = symbol.getName()
-  const { signature, truncated } = publishedSignature(signatureOf(name, declaration))
+  const { signature, cut } = publishedSignature(signatureOf(name, declaration))
+  const module = moduleOf(declaration, typesRoot)
 
   return {
     name,
     kind: kindOf(declaration),
     signature,
-    truncated,
+    /*
+     * The source is looked for only where something was cut, which is twelve
+     * exports of seventeen hundred. It is two `existsSync` calls, and a block
+     * nobody is missing anything from has nowhere to send them.
+     */
+    cut: cut === undefined ? undefined : { ...cut, source: moduleSourcePath(module, root) },
     summary: summaryOf(resolved, checker),
-    module: moduleOf(declaration, typesRoot),
+    module,
     position: declaration.getStart(),
   }
 }
@@ -473,7 +563,7 @@ const groupSymbols = (symbols: readonly Extracted[], root: string): readonly Api
             name: symbol.name,
             kind: symbol.kind,
             signature: symbol.signature,
-            truncated: symbol.truncated,
+            cut: symbol.cut,
             summary: symbol.summary === summary ? "" : symbol.summary,
           })),
       }
@@ -520,7 +610,7 @@ export const extractReference = (root: string = packageRoot): ApiReference => {
     const symbols = checker
       .getExportsOfModule(moduleSymbol)
       .flatMap((symbol) => {
-        const extracted = extractSymbol(symbol, checker, typesRoot)
+        const extracted = extractSymbol(symbol, checker, typesRoot, root)
 
         return extracted === undefined ? [] : [extracted]
       })

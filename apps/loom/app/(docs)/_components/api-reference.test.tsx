@@ -5,6 +5,7 @@ import type { EntryProse, ProseMention } from "@/app/(docs)/_lib/api/mentions"
 import type { ApiEntry } from "@/app/(docs)/_lib/api/model"
 import { PRESS_LANDING_CLASS } from "@/app/(docs)/_lib/chrome"
 import { ApiEntryReference, apiGroupAnchor, Prose } from "./api-reference"
+import { OFF_SITE_MARK } from "./off-site-link"
 
 /**
  * What the reference has to get right when it renders.
@@ -33,7 +34,7 @@ const entry: ApiEntry = {
           name: "addressNode",
           kind: "function",
           signature: "const addressNode: (node: LoomNode) => Addressing",
-          truncated: false,
+          cut: undefined,
           summary: "The node a click lands on when the user meant `nodeId`.",
         },
       ],
@@ -47,7 +48,7 @@ const entry: ApiEntry = {
           name: "NO_TEXT",
           kind: "value",
           signature: "const NO_TEXT: TextResolver",
-          truncated: true,
+          cut: { shown: 29, whole: 168, source: "src/render/text.ts" },
           summary: "",
         },
       ],
@@ -132,6 +133,53 @@ describe("an entry point's reference", () => {
     render(<ApiEntryReference entry={entry} prose={noProse} />)
 
     expect(screen.getAllByText(/Cut short here/)).toHaveLength(1)
+  })
+
+  /**
+   * The count, which is the whole of what the 21 October finding asked for:
+   * a block missing ten lines and one missing six hundred and thirty-six used
+   * to carry the same sentence, in the same words, in the same grey.
+   */
+  it("says how many lines of it a reader is being shown, and of how many", () => {
+    const { container } = render(<ApiEntryReference entry={entry} prose={noProse} />)
+    const text = container.querySelector("#s-NO_TEXT")?.textContent ?? ""
+
+    expect(text).toContain("showing the first 29 lines of 168")
+  })
+
+  it("links the source the whole of it is in, marked as leaving the site", () => {
+    const { container } = render(<ApiEntryReference entry={entry} prose={noProse} />)
+    const link = container.querySelector("#s-NO_TEXT a")
+
+    expect(link?.getAttribute("href")).toBe(
+      "https://github.com/jam-overture/loom/blob/main/src/render/text.ts"
+    )
+    expect(link?.textContent).toContain("src/render/text.ts")
+    expect(link?.textContent).toContain(OFF_SITE_MARK)
+  })
+
+  /**
+   * A module with no source file under `src/` is the one case with nowhere to
+   * send a reader, and the sentence has to stand without the link rather than
+   * trail off or point at nothing.
+   */
+  it("still says how much is missing where there is no source to link", () => {
+    const unsourced: ApiEntry = {
+      ...entry,
+      groups: entry.groups.map((group) => ({
+        ...group,
+        symbols: group.symbols.map((symbol) =>
+          symbol.cut === undefined ? symbol : { ...symbol, cut: { ...symbol.cut, source: "" } }
+        ),
+      })),
+    }
+
+    const { container } = render(<ApiEntryReference entry={unsourced} prose={noProse} />)
+    const block = container.querySelector("#s-NO_TEXT")
+
+    expect(block?.textContent).toContain("showing the first 29 lines of 168")
+    expect(block?.textContent).toContain("longer than a page can usefully hold")
+    expect(block?.querySelector("a")).toBeNull()
   })
 
   it("leaves out a module's paragraph when it has none rather than printing an empty one", () => {
