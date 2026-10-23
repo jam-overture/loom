@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4251,7 +4251,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4295,7 +4295,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5180,7 +5180,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5649,7 +5649,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6737,7 +6737,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7312,7 +7312,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7515,7 +7515,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8247,7 +8247,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8626,7 +8626,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8841,7 +8841,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 64,
+      "files": 65,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8854,7 +8854,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8966,7 +8966,7 @@
             {
               "name": "InsideMovement",
               "kind": "type",
-              "signature": "type InsideMovement = \n/** It bore element parts in both revisions, so its share means the same thing on both sides. */\n\"kept\"\n/**\n * It was a leaf and now bears element parts, so it has a share where its share\n * was withheld.\n *\n * **The one that reads like success and is not.** A button a change wrapped in\n * a band reports a share from the moment it has an inside, and the share it\n * had before was not a nought — it was not a measurement at all.\n *\n * The movement cannot be fooled by it: `taken-up` needs the earlier side to\n * have borne parts, so it is unreachable here. The **share** can be, which is\n * why {@link ComparedAction.shareRatio} is `null` on every part whose inside\n * moved, and why a surface drawing a bare `now.share` beside an absent\n * `was.share` needs this member to say what the absence was.\n */\n | \"gained\"\n/** It bore element parts and is now a leaf, so a share that was a measurement is withheld. */\n | \"lost\"\n/** A leaf in both revisions: its share is withheld on both sides and its standing is `unknown` on both. */\n | \"none\";",
+              "signature": "type InsideMovement = \n/** It bore element parts in both revisions, so its share means the same thing on both sides. */\n\"kept\"\n/**\n * It was a leaf and now bears element parts, so it has a share where its share\n * was withheld.\n *\n * **The one that reads like success and is not.** A button a change wrapped in\n * a band reports a share from the moment it has an inside, and the share it\n * had before was not a nought — it was not a measurement at all.\n *\n * The movement cannot be fooled by it: `taken-up` needs the earlier side to\n * have borne parts, so it is unreachable here. The **share** can be, which is\n * why {@link ComparedAction.shareRatio} holds no quotient on any part whose\n * inside moved, and why a surface drawing a bare `now.share` beside an absent\n * `was.share` needs this member to say what the absence was: the ratio says\n * only that one side did not measure it.\n */\n | \"gained\"\n/** It bore element parts and is now a leaf, so a share that was a measurement is withheld. */\n | \"lost\"\n/** A leaf in both revisions: its share is withheld on both sides and its standing is `unknown` on both. */\n | \"none\";",
               "summary": "What the change did to whether a part has an inside for actions to be filed against."
             },
             {
@@ -8984,7 +8984,7 @@
             {
               "name": "ComparedAction",
               "kind": "type",
-              "signature": "type ComparedAction = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PartAction;\n    /** The whole of what the later window said about it. */\n    readonly now: PartAction;\n    readonly movement: ActionMovement;\n    /** What the change did to whether a share of this part is measurable at all. */\n    readonly inside: InsideMovement;\n    /**\n     * `now.share ÷ was.share`, and `null` where either side withheld a share or\n     * the earlier one is nought.\n     *\n     * **The one ratio here that is sound across two windows.** Each side's share\n     * is two distinct view counts off one row, so each window's straddle\n     * has very nearly divided out before the two sides meet — the cancellation a\n     * fall between two siblings rests on, and the reason a ratio of the\n     * counts themselves is refused by this module and not published anywhere on\n     * this type.\n     *\n     * Nought on the earlier side is `null` rather than infinity: *nobody acted\n     * here and now somebody does* is {@link movement}'s answer, and a ratio is a\n     * figure a surface divides and ranks by.\n     *\n     * It is **non-null only where {@link inside} is `kept`**, which falls out of\n     * the two sides' shares being withheld on a leaf and is not a separate rule: a\n     * ratio across a part whose shape changed would be a ratio of two different\n     * measurements.\n     *\n     * `null` across an {@link ActionChangeSilence} of `unwalked` for the same\n     * reason and by the same route: that window has no share to give.\n     */\n    readonly shareRatio: number | null;\n    /**\n     * `now.usesPerReader ÷ was.usesPerReader`, and `null` where either side used\n     * nothing or reached nobody.\n     *\n     * Occurrences per reader on each side, so each term has its own window's\n     * straddle divided out of it and the ratio stands. **An intensity and not a\n     * rate** on both sides, so this is how much more each reader used a\n     * part and never how many more readers did.\n     *\n     * The figure here that survives `unwalked`, because the four occurrence\n     * counters are filed against the part a reader used and need no ancestry.\n     */\n    readonly usesRatio: number | null;\n};",
+              "signature": "type ComparedAction = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PartAction;\n    /** The whole of what the later window said about it. */\n    readonly now: PartAction;\n    readonly movement: ActionMovement;\n    /** What the change did to whether a share of this part is measurable at all. */\n    readonly inside: InsideMovement;\n    /**\n     * `now.share ÷ was.share`, with the reason named where there is no quotient\n     *.\n     *\n     * **The one ratio here that is sound across two windows.** Each side's share\n     * is two distinct view counts off one row, so each window's straddle\n     * has very nearly divided out before the two sides meet — the cancellation a\n     * fall between two siblings rests on, and the reason a ratio of the\n     * counts themselves is refused by this module and not published anywhere on\n     * this type.\n     *\n     * Nought on the earlier side is `from-nothing` rather than infinity: *nobody\n     * acted here and now somebody does* is {@link movement}'s answer and the two\n     * sides', and a quotient is a figure a surface divides and ranks by.\n     *\n     * It holds a number **only where {@link inside} is `kept`**, which falls out\n     * of the two sides' shares being withheld on a leaf and is not a separate\n     * rule: a ratio across a part whose shape changed would be a ratio of two\n     * different measurements. Those are `unmeasured`, and {@link inside} says\n     * which direction the shape moved in.\n     *\n     * `unmeasured` across an {@link ActionChangeSilence} of `unwalked` by the\n     * same route: that window has no share to give.\n     */\n    readonly shareRatio: Ratio;\n    /**\n     * `now.usesPerReader ÷ was.usesPerReader`, with a nought a side withheld\n     * restored first.\n     *\n     * Occurrences per reader on each side, so each term has its own window's\n     * straddle divided out of it and the ratio stands. **An intensity and not a\n     * rate** on both sides, so this is how much more each reader used a\n     * part and never how many more readers did.\n     *\n     * A side that reached readers and was used by none of them counts as a nought\n     * here, where the reading itself withholds the figure: a part nobody touched\n     * and four presses a reader now is `from-nothing`, and a part readers used\n     * and have stopped using is a quotient of nought. `unmeasured` is a side with\n     * no readers to divide by, which is the one state neither window measured.\n     *\n     * The figure here that survives `unwalked`, because the four occurrence\n     * counters are filed against the part a reader used and need no ancestry.\n     */\n    readonly usesRatio: Ratio;\n};",
               "summary": "One part both revisions have, as two windows read what readers did with it."
             },
             {
@@ -10162,7 +10162,7 @@
             {
               "name": "ComparedFunnel",
               "kind": "type",
-              "signature": "type ComparedFunnel = {\n    /** The pair as the later window holds it, which is the same question either way. */\n    readonly pair: FunnelPair;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PairReach;\n    /** The whole of what the later window said about it. */\n    readonly now: PairReach;\n    readonly movement: FunnelMovement;\n    /** What the change did to whether the question names anything. */\n    readonly question: QuestionMovement;\n    /**\n     * `now.rate ÷ was.rate` — of the readers who got to the first end, how much\n     * likelier they are to finish.\n     *\n     * Each side is two counts off one row, so each window's straddle has very\n     * nearly divided out before the two meet. **It is still a ratio\n     * of two figures that lean down** by an amount the deployment's rollup window\n     * sets, which is what the bracket is for.\n     *\n     * `null` where either side has no rate, and where the earlier one is nought:\n     * *nobody finished and now somebody does* is {@link movement}'s answer, and a\n     * ratio is a figure a surface divides and ranks by.\n     */\n    readonly rateRatio: number | null;\n    /**\n     * The least the true ratio could be: `now.rate ÷ was.rateAtMost`.\n     *\n     * `null` wherever {@link rateRatio} is, and wherever either side's ceiling is\n     * withheld — the ceiling is built from the door's drift, so it goes when the\n     * door does.\n     */\n    readonly rateRatioAtLeast: number | null;\n    /** The most the true ratio could be: `now.rateAtMost ÷ was.rate`. `null` on the same terms. */\n    readonly rateRatioAtMost: number | null;\n    /**\n     * The bracket clears 1, so the rate moved by more than the straddle alone\n     * could account for.\n     *\n     * `false` is the figure to draw rather than suppress: *the rate fell by a\n     * third and the rollup window can explain all of it* is a sentence about the\n     * deployment's configuration, and it is the one a card showing a bare ratio\n     * prints as a collapse. `null` where there is no bracket.\n     */\n    readonly rateMoved: boolean | null;\n    /**\n     * `now.entry.share ÷ was.entry.share` — how much likelier an arrival is to\n     * get to the first end.\n     *\n     * `null` under any silence, where either side withheld the share, and where\n     * the earlier one is nought.\n     */\n    readonly entryRatio: number | null;\n    /**\n     * `now.conversion.share ÷ was.conversion.share` — how much likelier an\n     * arrival is to finish, which is the figure a deployment means by *did the\n     * change work*.\n     *\n     * `null` on the same terms as {@link entryRatio}.\n     */\n    readonly conversionRatio: number | null;\n    /**\n     * The later window's reach at the earlier window's closing rate, as a share\n     * of arrivals: the conversion share if only getting there had moved.\n     */\n    readonly ifOnlyEntryMoved: number | null;\n    /** The other diagonal: the conversion share if only the closing had moved. */\n    readonly ifOnlyClosingMoved: number | null;\n    /** Which side was enough on its own. `null` where the conversion share did not move. */\n    readonly cause: ConversionCause | null;\n    /**\n     * The movement in the conversion share, put on the later window's scale:\n     * `(now.conversion.share − was.conversion.share) × now.opened`.\n     *\n     * **A mass for ranking and not a count of people**, as every `…Moved` figure\n     * in this subsystem is. A difference of two windows' conversion counts\n     * is refused here and nowhere published: both are generous by their own\n     * window's straddle, and the inflation does not divide out of a difference\n     * whose two terms are in different windows.\n     *\n     * `null` under any silence and wherever either share is withheld.\n     */\n    readonly readersMoved: number | null;\n};",
+              "signature": "type ComparedFunnel = {\n    /** The pair as the later window holds it, which is the same question either way. */\n    readonly pair: FunnelPair;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PairReach;\n    /** The whole of what the later window said about it. */\n    readonly now: PairReach;\n    readonly movement: FunnelMovement;\n    /** What the change did to whether the question names anything. */\n    readonly question: QuestionMovement;\n    /**\n     * `now.rate ÷ was.rate` — of the readers who got to the first end, how much\n     * likelier they are to finish.\n     *\n     * Each side is two counts off one row, so each window's straddle has very\n     * nearly divided out before the two meet. **It is still a ratio\n     * of two figures that lean down** by an amount the deployment's rollup window\n     * sets, which is what the bracket is for.\n     *\n     * `unmeasured` where either side has no rate, and `from-nothing` where the\n     * earlier one is nought: *nobody finished and now somebody does* is\n     * {@link movement}'s answer as well, and a quotient is a figure a surface\n     * divides and ranks by.\n     */\n    readonly rateRatio: Ratio;\n    /**\n     * The least the true ratio could be: `now.rate ÷ was.rateAtMost`.\n     *\n     * `null` wherever {@link rateRatio} holds no quotient, and wherever either\n     * side's ceiling is withheld — the ceiling is built from the door's drift, so\n     * it goes when the door does.\n     *\n     * **A bound and not a figure of its own**, which is why it is a bare `null`\n     * where the ratio it brackets names its absence: a bracket around a\n     * quotient that does not exist has nothing to say that the quotient has not\n     * said already, and a bracket missing where the quotient is there is the\n     * door's drift and nothing else.\n     */\n    readonly rateRatioAtLeast: number | null;\n    /** The most the true ratio could be: `now.rateAtMost ÷ was.rate`. `null` on the same terms. */\n    readonly rateRatioAtMost: number | null;\n    /**\n     * The bracket clears 1, so the rate moved by more than the straddle alone\n     * could account for.\n     *\n     * `false` is the figure to draw rather than suppress: *the rate fell by a\n     * third and the rollup window can explain all of it* is a sentence about the\n     * deployment's configuration, and it is the one a card showing a bare ratio\n     * prints as a collapse. `null` where there is no bracket.\n     */\n    readonly rateMoved: boolean | null;\n    /**\n     * `now.entry.share ÷ was.entry.share` — how much likelier an arrival is to\n     * get to the first end.\n     *\n     * `unmeasured` under any silence and where either side withheld the share,\n     * `from-nothing` where the earlier one is nought.\n     */\n    readonly entryRatio: Ratio;\n    /**\n     * `now.conversion.share ÷ was.conversion.share` — how much likelier an\n     * arrival is to finish, which is the figure a deployment means by *did the\n     * change work*.\n     *\n     * Absent on the same terms as {@link entryRatio}.\n     */\n    readonly conversionRatio: Ratio;\n    /**\n     * The later window's reach at the earlier window's closing rate, as a share\n     * of arrivals: the conversion share if only getting there had moved.\n     */\n    readonly ifOnlyEntryMoved: number | null;\n    /** The other diagonal: the conversion share if only the closing had moved. */\n    readonly ifOnlyClosingMoved: number | null;\n    /** Which side was enough on its own. `null` where the conversion share did not move. */\n    readonly cause: ConversionCause | null;\n    /**\n     * The movement in the conversion share, put on the later window's scale:\n     * `(now.conversion.share − was.conversion.share) × now.opened`.\n     *\n     * **A mass for ranking and not a count of people**, as every `…Moved` figure\n     * in this subsystem is. A difference of two windows' conversion counts\n     * is refused here and nowhere published: both are generous by their own\n     * window's straddle, and the inflation does not divide out of a difference\n     * whose two terms are in different windows.\n     *\n     * `null` under any silence and wherever either share is withheld.\n     */\n    readonly readersMoved: number | null;\n};",
               "summary": "One funnel question both windows were asked, as two windows answer it."
             },
             {
@@ -11182,7 +11182,7 @@
             {
               "name": "ComparedPace",
               "kind": "type",
-              "signature": "type ComparedPace = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PacedPart;\n    /** The whole of what the later window said about it. */\n    readonly now: PacedPart;\n    readonly movement: PaceMovement;\n    /**\n     * `now.pace ÷ was.pace`, and `null` where either side has none or the earlier\n     * one is nought.\n     *\n     * Exactly {@link timeRatio} ÷ {@link needRatio}, which is the identity this\n     * module is built on: a pace moves because readers' time moved, because the\n     * words moved, or both.\n     */\n    readonly paceRatio: number | null;\n    /**\n     * `now.spentMs ÷ was.spentMs` — the readers' side of the division.\n     *\n     * Each term is a mean off one side's own row, so each side's straddle has\n     * very nearly divided out before they meet. `null` where either side had no\n     * reader, or the earlier one no time at all.\n     */\n    readonly timeRatio: number | null;\n    /**\n     * `now.needMs ÷ was.needMs` — the page's side of the division.\n     *\n     * Exact and reader-free: it is what the change did to the time this part's\n     * words ask for. Below 1 is a part the change shortened. `null` where the\n     * earlier revision's part said nothing.\n     */\n    readonly needRatio: number | null;\n    /** The later window's time against the earlier revision's words — the readers alone. */\n    readonly ifWordsHeld: PaceHeld;\n    /** The earlier window's time against the later revision's words — the change alone. */\n    readonly ifTimeHeld: PaceHeld;\n    /** Which side the verdict moved with, and `null` where it did not move. */\n    readonly cause: PaceCause | null;\n};",
+              "signature": "type ComparedPace = {\n    readonly nodeId: NodeId;\n    /** The later revision's type, which is the page somebody is looking at. */\n    readonly type: PrimitiveType;\n    /** The later revision's role, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** The whole of what the earlier window said about it. */\n    readonly was: PacedPart;\n    /** The whole of what the later window said about it. */\n    readonly now: PacedPart;\n    readonly movement: PaceMovement;\n    /**\n     * `now.pace ÷ was.pace`, with the reason named where there is no quotient\n     *.\n     *\n     * Exactly {@link timeRatio} ÷ {@link needRatio}, which is the identity this\n     * module is built on: a pace moves because readers' time moved, because the\n     * words moved, or both. The identity holds over the quotients and not over\n     * the absences: a part whose words were wordless then and are not now has no\n     * pace to divide and three absences that do not multiply.\n     */\n    readonly paceRatio: Ratio;\n    /**\n     * `now.spentMs ÷ was.spentMs` — the readers' side of the division.\n     *\n     * Each term is a mean off one side's own row, so each side's straddle has\n     * very nearly divided out before they meet. `unmeasured` where either side\n     * had no reader, and `from-nothing` where the earlier window's readers spent\n     * no measurable time at all.\n     */\n    readonly timeRatio: Ratio;\n    /**\n     * `now.needMs ÷ was.needMs` — the page's side of the division.\n     *\n     * Exact and reader-free: it is what the change did to the time this part's\n     * words ask for. Below 1 is a part the change shortened, and `from-nothing`\n     * is a part the earlier revision left wordless — which is a fact about the\n     * change rather than about a window, and the one absence here no reader can\n     * cause.\n     */\n    readonly needRatio: Ratio;\n    /** The later window's time against the earlier revision's words — the readers alone. */\n    readonly ifWordsHeld: PaceHeld;\n    /** The earlier window's time against the later revision's words — the change alone. */\n    readonly ifTimeHeld: PaceHeld;\n    /** Which side the verdict moved with, and `null` where it did not move. */\n    readonly cause: PaceCause | null;\n};",
               "summary": "One part both revisions have, as two windows paced it."
             },
             {
@@ -11391,6 +11391,43 @@
               "kind": "function",
               "signature": "const readingProgressOf: (reading: PageReading) => ReadingProgress",
               "summary": "Where reading stops, from a reading of one revision."
+            }
+          ]
+        },
+        {
+          "module": "signals/ratios",
+          "title": "Ratios",
+          "summary": "A quotient of one window's figure against the other's, and the reason there is not one.",
+          "symbols": [
+            {
+              "name": "RatioAbsence",
+              "kind": "type",
+              "signature": "type RatioAbsence = \n/**\n * One of the two windows did not measure this, so there is nothing to divide.\n *\n * The absence is the other side's as much as this one's: a part that was a\n * leaf and now bears an inside has a share now and never had one, and a\n * window with no page views has no figure of any kind. What each side\n * withholds and why is that reading's own rule, and this says only that one\n * of them did.\n */\n\"unmeasured\"\n/**\n * Both windows measured it and the earlier one measured nought.\n *\n * A division by nought and not an absence of measurement, so the pair of\n * sides a comparison publishes beside this is worth reading: the later side\n * says whether the figure rose from nothing or stayed there, and the\n * movement of the two standings says it in words. *Nobody acted in this band\n * and four in ten do now* is this member with a later side above nought, and\n * it is the state a surface most wants to draw and could least afford to\n * read as *nothing to compare*.\n */\n | \"from-nothing\";",
+              "summary": "Why there is no quotient."
+            },
+            {
+              "name": "RATIO_ABSENCES",
+              "kind": "value",
+              "signature": "const RATIO_ABSENCES: readonly RatioAbsence[]",
+              "summary": "The closed set, for a surface accounting for every absent quotient."
+            },
+            {
+              "name": "describeRatioAbsence",
+              "kind": "function",
+              "signature": "const describeRatioAbsence: (absence: RatioAbsence) => string",
+              "summary": "One line per absence, for a surface saying why a ratio is not there."
+            },
+            {
+              "name": "Ratio",
+              "kind": "type",
+              "signature": "type Ratio = {\n    /** `now ÷ was`, or `null` where {@link absent} says why there is none. */\n    readonly ratio: number | null;\n    /** Why there is no quotient, or `null` where there is one. */\n    readonly absent: RatioAbsence | null;\n};",
+              "summary": "A quotient of the later window's figure by the earlier one's, or the reason there is none."
+            },
+            {
+              "name": "ratioOf",
+              "kind": "function",
+              "signature": "const ratioOf: (was: number | null | undefined, now: number | null | undefined) => Ratio",
+              "summary": "The later window's figure over the earlier one's, with the absence named."
             }
           ]
         },
@@ -12078,7 +12115,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12213,7 +12250,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12275,7 +12312,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12800,7 +12837,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12870,7 +12907,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13292,7 +13329,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1741,
+        "packageNames": 1746,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

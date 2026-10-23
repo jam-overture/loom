@@ -58596,9 +58596,20 @@ why it is not bundled in.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/action-change.ts`, `pace-change.ts`, `copy-change.ts`) ·
-**Status:** open — **the half of the 21 October finding
-[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
-did not take**, narrowed by it and not resolved
+**Status:** **closed by `signals-48-what-two-forms-say-and-how-much-of-each-is-read`
+(#697)**, record
+[0306](decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)
+— with **two corrections to this entry.** The third module named here is wrong:
+`copy-change.ts` publishes a difference and not a quotient, and its `null` has
+one meaning. The third copy of the helper was in `funnel-change.ts`, which this
+entry does not name, so the fields were eight rather than six and the figure a
+deployment opens the portal for was one of them. And the shape proposed below —
+a tagged absence — turned out to be necessary rather than merely tidier, because
+one of the eight cannot be read off the two sides at all: `usesPerReader` is
+withheld at a *measured* nought on purpose (0242), so a surface deriving the
+reason would call *readers used this twice each and do not touch it now*
+unmeasured. The order this entry set was otherwise followed exactly: one record
+over all three, one helper in a new figures module, a fixture per branch
 
 Three comparisons of two windows share one helper, spelled once per module:
 
@@ -58828,3 +58839,69 @@ reading settled on for this lane and what I should have done in the first body:
 every signals branch name is long enough to put every link past the bracket. The
 rule for this lane is now **no `github.com/.../blob/...` link in a pull request
 body at all** — a path, which the reader can click in the diff anyway.
+
+---
+## 2026-10-23 — a distance of nought where there is no distance, guarded by a silence rather than withheld
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-reach-change.ts`, `library-word-reach-change.ts`) ·
+**Status:** open — found while taking 0306 and deliberately left, because it is
+two library rolls rather than the three comparisons that record is about
+
+`weightMovedOver` is the figure two library rolls publish as `weightMoved`, and
+it opens with
+
+```ts
+if (totals.was === 0 || totals.now === 0) return 0
+```
+
+A side with no weight at all has **no distance to report**, and a nought here is
+the one value a surface reads as *the weights did not move*. Its own
+documentation says the state is *accounted for by a silence*, which is the exact
+sentence
+[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
+was written about one level down: a silence that names a state while the figure
+beside it is still computed leaves a card drawing the rows a wrong sentence to
+print.
+
+**It may also be unreachable**, which is the other half of the finding and the
+reason it is worth an entry rather than a quiet change. Both callers compute
+`weightMoved` only where their silence is `null`, and a roll with no weight on a
+side plausibly cannot be measured — in which case the clause is one nothing can
+falsify, which is its own fault (0231). Neither suite has a case that reaches it;
+`weightMovedOver` is exported and has no direct test of its own.
+
+**What it needs.** One run to establish which of the two it is, and then either a
+fixture that reaches it and a `null` in place of the nought, or the clause
+deleted. The field is already `number | null` in both rolls, so withholding costs
+no published type. Not folded into 0306: that record is about a quotient of two
+figures and this is a sum of absolute differences, and the two readings are a
+different pair of modules.
+
+---
+## 2026-10-23 — every ratio a comparison publishes is a pair now, and a card drawing one reads two fields
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken and nothing is failing; it is what a screen has to do with
+[0306](decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)
+
+Eight published fields changed shape on three comparison types:
+`ActionChange.shareRatio` and `usesRatio`, `PaceChange`'s `paceRatio`,
+`timeRatio` and `needRatio`, and `FunnelChange`'s `rateRatio`, `entryRatio` and
+`conversionRatio`. Each is now `{ ratio, absent }`, with exactly one of the two
+non-null, and `describeRatioAbsence` gives a line per absence.
+
+**What it buys a screen.** *Nobody acted in this band and four in ten do now* and
+*nothing here can be compared* were one value and are now two. The first is
+`from-nothing` with a later side above nought, and it is the state a
+before-and-after exists for — a card that drew a bare `null` as a dash was
+drawing the most interesting row on the page as the least.
+
+**The one drawing decision.** `from-nothing` has no number to rank by while being
+the row somebody most wants ranked first, so a card sorting by the quotient drops
+it to the bottom or off the list. The two sides are both published beside it, so
+*from nothing to four in ten* is sayable without a ratio; whether such a row
+sorts by the later side's figure, pins to the top, or sits in a band of its own
+is a decision about what a surface draws and is not this lane's.
+
+Filed against a paused routine, which still waits.

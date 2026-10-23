@@ -3081,6 +3081,59 @@ once; the `different-audiences` standing in the deployment change order; and tha
 **nothing draws any of the three form comparisons**, which is `Loom portal`'s and
 is now the open question with the most built behind it.
 
+### 49. A ratio names the state it has no quotient in · `Loom signals` · **done, 23 October**
+
+The correction half of the queue rather than a new reading, which is what the
+pull request comment of 22 October recommended by default: the open finding of
+that evening, which measured one published `null` that is two states and named
+the modules it is in.
+
+**Done**
+([0306](../decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)),
+as `Ratio`, `RatioAbsence` and `ratioOf` in
+[`src/signals/ratios.ts`](../src/signals/ratios.ts), imported by the three
+comparisons that divide.
+
+- **Three copies of one helper, and the finding named the wrong third module.**
+  It said `copy-change.ts`, which publishes a *difference* and not a quotient —
+  `gain`'s `null` is *one side is not a measurement* and nothing else (0282).
+  The third copy was in `funnel-change.ts`, where the commercial figure is.
+  Eight published fields across the three, not six. Counted from the files.
+- **A ratio is now the quotient or the reason there is not one**, and exactly one
+  of the two is non-null in every value. `unmeasured` is either side having no
+  such figure; `from-nothing` is both sides measured with the earlier one at
+  nought. *Nobody acted in this band and four in ten do now* and *nothing here
+  can be compared* were one value on eight fields, on three types nothing yet
+  draws — which is the argument for moving them now rather than after a screen
+  exists.
+- **Two members and not three.** A nought on both sides is `from-nothing` as
+  well, because every comparison publishes both sides and the movement between
+  them: *it was nothing and it is nothing* is already answerable, and a member
+  for it would be a second way to say what the later side says.
+- **One field's absence was backwards, and that is the proof the reason has to be
+  published rather than derived.** `PartAction.usesPerReader` is withheld at a
+  *measured* nought on purpose (0242), so a surface deriving the reason from the
+  two sides would call *readers used this twice each and do not touch it now*
+  unmeasured. The comparison restores that nought for the quotient and only for
+  the quotient; the field itself is published unaltered.
+- **A bound on a tagged figure is not tagged.** `rateRatioAtLeast` and
+  `rateRatioAtMost` stay bare: a bracket around a quotient that is not there has
+  nothing to add, and a bracket missing where the quotient is present is the
+  door's drift.
+- **No reading changed.** `pageActionOf`, `pacedPartOf` and the funnel's reach
+  are untouched — a window's rule about its own figures stays that reading's,
+  which is the direction 0282 and 0304 both send a rule in.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the thirty-seventh thing taken out of what this subsystem already
+knows, and the second that **publishes less ambiguity** rather than deriving a
+figure. `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** the `different-audiences` standing in the
+deployment change order; and that **nothing draws any of this**, which is
+`Loom portal`'s and has been the open question with the most built behind it for
+four runs.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
