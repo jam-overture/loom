@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { grouped } from "@/app/(docs)/_components/api-reference"
 import { apiDoorsFor, type ApiAudience, type ApiDoor, type ApiDoorway } from "@/app/(docs)/_lib/api/doors"
+import type { PackageSpelling } from "@/app/(docs)/_lib/spelling"
 
 /**
  * The front door of the reference: sixteen imports on one screen.
@@ -213,6 +214,70 @@ const TheyDoNotNest = ({ doorway }: { readonly doorway: ApiDoorway }) => {
 }
 
 /**
+ * The one thing about these names a reader will get wrong while typing, rather
+ * than while reading.
+ *
+ * Some of the names in this package are spelled the British way — `colour`,
+ * `behaviour`, `catalogue` — and the prose on this site is US English. A reader
+ * who meets *color* in a sentence and copies it into an import gets a name that
+ * does not exist, and nothing tells them why: the word is right and the name is
+ * right and they are two different words.
+ *
+ * So the site says it once, here, which is the page a reader is standing on
+ * when they have several of these names in front of them at the same time.
+ *
+ * **Every number and every example is handed in** (`_lib/spelling.ts` reads
+ * them off the package), for the same reason every number in the band above is
+ * counted rather than written: *forty-seven of the names below* is a true
+ * sentence today, a false one the morning a forty-eighth is published, and
+ * nothing would have gone red. A package with no such name in it gets no
+ * band.
+ */
+const HowTheyAreSpelled = ({
+  doorway,
+  spelling,
+}: {
+  readonly doorway: ApiDoorway
+  readonly spelling: PackageSpelling
+}) => {
+  if (spelling.british.length === 0 || spelling.examples.length === 0) return null
+
+  return (
+    <section className="mt-12">
+      <h2 className="text-ink text-[1.375rem] leading-tight font-bold tracking-tight">
+        Some of these names are spelled the British way
+      </h2>
+
+      <p className="text-ink-muted mt-2 leading-relaxed">
+        {grouped(spelling.british.length)} of the {grouped(doorway.packageNames)} names in this
+        package carry a British spelling:{" "}
+        {spelling.examples.map((name, index) => (
+          <span key={name}>
+            {index === 0 ? "" : index === spelling.examples.length - 1 ? " and " : ", "}
+            <code className="code-chip font-mono text-xs">{name}</code>
+          </span>
+        ))}
+        . Type them exactly as they appear on these pages. The spelling is part of the name, so a
+        different spelling is a different name and the package does not publish it.
+      </p>
+
+      <p className="text-ink-muted mt-3 leading-relaxed">
+        {/* `{" "}` rather than the ordinary space that was here, which `next build` dropped:
+            the built page read `colorin a sentence` while `textContent` under vitest read it
+            with the space. It is the 9 September run-together class arriving at a tag boundary
+            rather than between two expressions, which is the shape
+            `tools/prerender/hazards.ts` cannot see — it looks for React's `<!-- -->` separator
+            and a dropped space leaves none. Caught in a screenshot, and filed. */}
+        The writing on this site is US English, so a page can say <em>color</em>{" "}
+        in a sentence and show you a name with the British spelling in the code beside it. Both are
+        right. The sentence is ours and the name is the package&rsquo;s, and anything in code voice
+        on this site is spelled the way you have to write it.
+      </p>
+    </section>
+  )
+}
+
+/**
  * Where a reader goes from here, and it is two different readers.
  *
  * One has a name — they read it in a stack trace or a colleague's branch — and
@@ -275,7 +340,13 @@ const Lead = ({ doorway }: { readonly doorway: ApiDoorway }) => (
   </>
 )
 
-export const ApiDoors = ({ doorway }: { readonly doorway: ApiDoorway }) => (
+export const ApiDoors = ({
+  doorway,
+  spelling,
+}: {
+  readonly doorway: ApiDoorway
+  readonly spelling: PackageSpelling
+}) => (
   <>
     <Lead doorway={doorway} />
 
@@ -290,6 +361,8 @@ export const ApiDoors = ({ doorway }: { readonly doorway: ApiDoorway }) => (
     })}
 
     <TheyDoNotNest doorway={doorway} />
+
+    <HowTheyAreSpelled doorway={doorway} spelling={spelling} />
 
     <FromHere />
   </>

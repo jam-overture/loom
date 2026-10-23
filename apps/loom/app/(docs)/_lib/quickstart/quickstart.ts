@@ -112,7 +112,7 @@ const page = createTree(root, ids)
 // ── 3. Drawing it ────────────────────────────────────────────────────────────
 //
 // Rendering is synchronous, pure, and never fails. It hands back an element and
-// a list of what it could not honour — empty, on a healthy render.
+// a list of what it could not honor — empty, on a healthy render.
 
 const draw = (tree: LoomTree): string => {
   const rendered = renderLoomTree(tree, {

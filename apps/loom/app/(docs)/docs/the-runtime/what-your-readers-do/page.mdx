@@ -310,7 +310,7 @@ const collected = await collectReaderSignals(journal, tallies)
 ```
 
 A rollup reports *what this window added*, so a batch counted twice is counted
-twice forever and nothing afterwards can tell. The only defence that needs no
+twice forever and nothing afterwards can tell. The only defense that needs no
 bookkeeping is for the set of batches counted and the set forgotten to be the
 same set, decided once, in one place. So there is no "apply retention" call
 beside this one: a function that forgets without counting loses data, and one

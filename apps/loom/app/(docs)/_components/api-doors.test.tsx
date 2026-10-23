@@ -2,6 +2,7 @@ import { render, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import type { ApiDoor, ApiDoorway } from "@/app/(docs)/_lib/api/doors"
+import type { PackageSpelling } from "@/app/(docs)/_lib/spelling"
 
 import { ApiDoors } from "./api-doors"
 
@@ -36,9 +37,15 @@ const doorway = (over: Partial<ApiDoorway> = {}): ApiDoorway => ({
   ...over,
 })
 
+const spelling = (over: Partial<PackageSpelling> = {}): PackageSpelling => ({
+  british: ["Catalogued", "catalogueOf", "colour"],
+  examples: ["catalogueOf", "colour"],
+  ...over,
+})
+
 describe("the front door of the reference", () => {
   it("links every import to the page that documents it", () => {
-    const { container } = render(<ApiDoors doorway={doorway()} />)
+    const { container } = render(<ApiDoors doorway={doorway()} spelling={spelling()} />)
     const list = within(container)
 
     expect(list.getAllByRole("link", { name: "@invented" })[0]?.getAttribute("href")).toBe(
@@ -52,6 +59,7 @@ describe("the front door of the reference", () => {
   it("says how many names are behind each one, in the singular where there is one", () => {
     const { container } = render(
       <ApiDoors
+        spelling={spelling()}
         doorway={doorway({
           doors: [
             door({ publishes: 1_040 }),
@@ -70,6 +78,7 @@ describe("the front door of the reference", () => {
   it("groups the imports by who writes them, and prints no heading over an empty group", () => {
     const { container } = render(
       <ApiDoors
+        spelling={spelling()}
         doorway={doorway({
           doors: [
             door(),
@@ -85,11 +94,12 @@ describe("the front door of the reference", () => {
       "If you are building a page",
       "From a terminal, and from your tests",
       "No import has everything behind it",
+      "Some of these names are spelled the British way",
     ])
   })
 
   it("names the widest door and the narrowest, with the package's own total", () => {
-    const { container } = render(<ApiDoors doorway={doorway()} />)
+    const { container } = render(<ApiDoors doorway={doorway()} spelling={spelling()} />)
     const said = container.textContent ?? ""
 
     expect(said).toContain("118 names")
@@ -99,7 +109,10 @@ describe("the front door of the reference", () => {
 
   it("counts the pairs that share nothing, in the words of the package it has", () => {
     const { container } = render(
-      <ApiDoors doorway={doorway({ pairs: 120, pairsSharingNothing: 116, packageNames: 1_077 })} />
+      <ApiDoors
+        doorway={doorway({ pairs: 120, pairsSharingNothing: 116, packageNames: 1_077 })}
+        spelling={spelling()}
+      />
     )
 
     const said = container.textContent ?? ""
@@ -109,12 +122,13 @@ describe("the front door of the reference", () => {
   })
 
   it("lists the pairs that do overlap, and says nothing where none do", () => {
-    const none = render(<ApiDoors doorway={doorway({ overlapping: [] })} />)
+    const none = render(<ApiDoors doorway={doorway({ overlapping: [] })} spelling={spelling()} />)
 
     expect(none.container.textContent ?? "").not.toContain("overlap")
 
     const { container } = render(
       <ApiDoors
+        spelling={spelling()}
         doorway={doorway({
           overlapping: [
             { a: "@invented", b: "@invented/b", names: 14 },
@@ -132,12 +146,13 @@ describe("the front door of the reference", () => {
   })
 
   it("says a name means two things only where one does", () => {
-    const none = render(<ApiDoors doorway={doorway()} />)
+    const none = render(<ApiDoors doorway={doorway()} spelling={spelling()} />)
 
     expect(none.container.textContent ?? "").not.toContain("two different things")
 
     const { container } = render(
       <ApiDoors
+        spelling={spelling()}
         doorway={doorway({
           collisions: [{ name: "horizonOf", specifiers: ["@invented", "@invented/b"] }],
         })}
@@ -156,12 +171,13 @@ describe("the front door of the reference", () => {
    * part of a bigger one* is a claim about the other fifteen.
    */
   it("names the door that is inside another, and only when there is one", () => {
-    const none = render(<ApiDoors doorway={doorway()} />)
+    const none = render(<ApiDoors doorway={doorway()} spelling={spelling()} />)
 
     expect(none.container.textContent ?? "").not.toContain("is the one import")
 
     const { container } = render(
       <ApiDoors
+        spelling={spelling()}
         doorway={doorway({
           doors: [
             door(),
@@ -181,11 +197,43 @@ describe("the front door of the reference", () => {
   })
 
   it("sends a reader who has a name to the search and one who has nothing to installation", () => {
-    const { container } = render(<ApiDoors doorway={doorway()} />)
+    const { container } = render(<ApiDoors doorway={doorway()} spelling={spelling()} />)
 
     expect(
       within(container).getByRole("link", { name: "Installation" }).getAttribute("href")
     ).toBe("/docs/getting-started/installation")
     expect(container.textContent ?? "").toContain("Looking for one particular name?")
+  })
+
+  /**
+   * The spelling band, and the two things it has to get right.
+   *
+   * It is the only place on this site that tells a reader why a page can say
+   * *color* in a sentence and `colour` in the code beside it, so the sentence
+   * is checked rather than the heading — and the count is the package's own,
+   * grouped the way every other number on this page is.
+   */
+  it("says how many names carry a British spelling, and shows some of them as code", () => {
+    const { container } = render(
+      <ApiDoors
+        doorway={doorway({ packageNames: 1_727 })}
+        spelling={spelling({ british: Array.from({ length: 47 }, (_, index) => `n${index}`) })}
+      />
+    )
+
+    const said = container.textContent ?? ""
+
+    expect(said).toContain("47 of the 1,727 names in this package carry a British spelling")
+    expect(said).toContain("The spelling is part of the name")
+    expect(within(container).getByText("catalogueOf").tagName).toBe("CODE")
+    expect(within(container).getByText("colour").tagName).toBe("CODE")
+  })
+
+  it("prints no such band for a package whose names are all spelled the American way", () => {
+    const { container } = render(
+      <ApiDoors doorway={doorway()} spelling={{ british: [], examples: [] }} />
+    )
+
+    expect(container.textContent ?? "").not.toContain("British")
   })
 })

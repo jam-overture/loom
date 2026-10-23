@@ -56,11 +56,11 @@ const props = z
 type Props = z.infer<typeof props>
 
 /**
- * The badge's two colours per state, taken from the theme and never typed.
+ * The badge's two colors per state, taken from the theme and never typed.
  *
  * Nothing here is green, amber or red, and that is not squeamishness: a Loom
  * palette names a canvas, an accent and a set of borders, and it names no
- * colour that means *bad*. A primitive that reached for `#b91c1c` would look
+ * color that means *bad*. A primitive that reached for `#b91c1c` would look
  * right under the palette its author had open and would survive every re-theme
  * unchanged, which is the one failure the token helpers exist to prevent.
  *

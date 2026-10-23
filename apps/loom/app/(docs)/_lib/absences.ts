@@ -250,7 +250,7 @@ export const NOT_DATED_CLAIMS: readonly NotADatedClaim[] = [
     reason:
       "`today` meaning *under the rules as they stand*, which is a permanent statement wearing a temporal word.",
     says: [
-      "whether today's answer is grey",
+      "whether today's answer is gray",
       "would refuse today stays refused, however",
       "would refuse today stays refused however",
       "how Loom works today",

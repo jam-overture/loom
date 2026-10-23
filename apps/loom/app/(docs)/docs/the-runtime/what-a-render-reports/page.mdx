@@ -10,7 +10,7 @@ export const metadata = pageMetadata("the-runtime", "what-a-render-reports")
 # What a render reports
 
 Your page came back. Something on it is not what you asked for: a card is
-missing, the colours are gone, a list is shorter than the one in the database.
+missing, the colors are gone, a list is shorter than the one in the database.
 Nothing threw, nothing logged an error, and the page looks finished.
 
 Loom told you. It told you in the second thing every render hands back, and this
@@ -23,7 +23,7 @@ accident, and it is the reason this list exists at all: a tree can name a card
 you have not registered, and blanking the whole page over one card serves
 nobody.
 
-So anything the render could not honour comes back **beside** the element:
+So anything the render could not honor comes back **beside** the element:
 
 ```ts
 const { element, diagnostics } = renderLoomTree(tree, options)
@@ -70,7 +70,7 @@ Both trees contain the same unregistered node. The second does not mention it,
 because the node above it was never called, and a component that was not called
 renders no children for the walk to reach.
 
-That is the right behaviour and it has one consequence for you:
+That is the right behavior and it has one consequence for you:
 
 ```ts function-body
 expect(rendered.diagnostics).toEqual([])

@@ -75,11 +75,11 @@ any of them out is legal and usually wrong. Each one is a list of names your
 deployment is willing to be asked for, and the model can only name what is on
 them.
 
-Without a catalogue the model is told nothing about what your deployment can
+Without `catalogue` the model is told nothing about what your deployment can
 build with, so the only primitives it knows are the ones already on the page.
-Without a theme catalogue, *"make it warmer"* has nowhere to go: the tree names
+Without `themeCatalogue`, *"make it warmer"* has nowhere to go: the tree names
 one palette and nothing says another exists, so the model either leaves it alone
-or invents an id that fails to resolve. Without a data catalogue, *"put our
+or invents an id that fails to resolve. Without `dataCatalogue`, *"put our
 services here"* has the same problem one floor down — a model can tell that a
 node is able to ask a question and cannot tell which questions you answer, so it
 names a source you never registered and the seam refuses it.

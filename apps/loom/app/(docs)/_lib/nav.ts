@@ -361,7 +361,7 @@ const orderedSections: readonly DocsSection[] = [
         slug: "what-a-render-reports",
         title: "What a render reports",
         summary:
-          "Rendering never fails, so anything it could not honour comes back beside the page: every diagnostic a render can leave behind, what each one cost you, and which of three people has to fix it.",
+          "Rendering never fails, so anything it could not honor comes back beside the page: every diagnostic a render can leave behind, what each one cost you, and which of three people has to fix it.",
       },
       {
         slug: "when-something-looks-wrong",
