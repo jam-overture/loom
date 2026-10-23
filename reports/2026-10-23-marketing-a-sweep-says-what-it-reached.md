@@ -275,10 +275,25 @@ thing on its line, over the tree being pushed with this report and the findings
 entries already in it:
 
 ```
-VERIFY_PLACEHOLDER
+Test Files  235 passed (235)      Tests  5593 passed (5593)    # framework
+Test Files  349 passed (349)      Tests  6210 passed (6210)    # @loom/app
+Test Files   56 passed  (56)      Tests  1488 passed (1488)    # app/(marketing)
+1287 findings, 0 malformed
+1943 visuals in reports/, 135.1MB, none over 1.1MB, 409 cited by no file
+133 prerendered pages, 1913 text junctions, 0 run together; 3 metadata conventions, 0 unserved
+EXIT=0
 ```
 
 Nothing skipped, nothing deleted, no test weakened to pass.
+
+**The gate was run four times and the numbers above are the fourth.** The first
+three are not quoted because each began before the last edit landed and `vitest`
+reads a file when it runs it, so none of them is a reading of this tree — the
+same discipline the 21 and 22 October reports describe, hit three times here
+because two of the edits were a docblock and a stray blank line and it was
+cheaper to re-run than to argue the difference was immaterial. Only this section
+was written after the fourth run; the `app/(marketing)` row is the subset run
+separately on the same tree.
 
 ---
 
