@@ -58850,11 +58850,13 @@ one a reader gets is again the one nothing looked at — which is the half of th
 ### Three shapes, costed
 
 1. **Also sweep for a tag followed immediately by a joining character**, with
-   an allowed list of the shapes that are correct — `<code>PageReading</code>s`
-   is a plural on a chip and is the only one on the site today. The sweep found
-   exactly one other candidate across 133 pages, so the noise is measured
-   rather than feared. **The recommendation**, and it is a few lines beside the
-   separator sweep.
+   an allowed list of the shapes that are correct. Across the 133 built pages
+   there is **one** such junction outside a `</span>` — `<code>PageReading</code>s`,
+   a plural on a chip — and 77 at a `</span>`, every one of which carries its
+   space inside the span (`<span>Asked: </span>Make the main heading…`) and is
+   correct. So the noise is measured rather than feared, and an allowed list of
+   two shapes covers the site as it stands. **The recommendation**, and it is a
+   few lines beside the separator sweep.
 2. **Compare the built text against the `textContent` a test sees**, which
    catches the class outright and needs a page rendered twice by two
    transforms. It is the complete answer and it is a different tool.

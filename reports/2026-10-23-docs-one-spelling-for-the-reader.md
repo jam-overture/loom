@@ -15,6 +15,25 @@ nothing here touches it.
 
 Branch cut from `origin/main` at `2cfd93d` (#696), after `git fetch origin main`.
 
+## Why this, and not the queue
+
+**The queue had one item that was ready**, and this run did not take it: remedy
+3 of *a map of 168 class names is not a signature* — link a cut signature at a
+line anchor in the source rather than at the top of the file. It is this lane's,
+it is about an hour, and it is still the next thing. The other eight open
+findings owned here are stated limits with *leave it* as the recommendation.
+
+What this run did instead, and the reason, said plainly so it can be
+disagreed with: the line anchor is **half a remedy on a page this lane has
+worked for four days running**, and its other half is a design question waiting
+on the maintainer. The register this site is written in had never been measured
+at all, and it turned out to be inconsistent in the one word the theming pages
+are mostly about. A reader meets that on every page; the line anchor is met by
+a reader who has already decided to go and search a source file.
+
+That is a judgement rather than a rule, and if the rule is *the queue first*,
+this run got it wrong and the next one should take the line anchor.
+
 ## The plain version
 
 This site is written in American English. It said *color* twenty-six times and
@@ -228,10 +247,12 @@ marker. `{" "}` restores it, and the built page now reads
 The mechanism is not established here and the finding does not claim one. What
 is established is that the source has the space, one transform keeps it, the
 other does not, and the reader gets the one nothing was reading. A sweep across
-all 133 built pages for the same shape — a closing tag followed immediately by
-a letter — found exactly one other instance, `<code>PageReading</code>s`, which
-is a plural on a chip and is correct. So the noise in the remedy is measured
-rather than feared, and it is filed with that number in it.
+all 133 built pages for the same shape found **one** other closing tag followed
+immediately by a letter — `<code>PageReading</code>s`, a plural on a chip,
+which is correct — and 77 more at a `</span>`, every one of which carries the
+space *inside* the span (`<span>Asked: </span>Make the main heading…`) and is
+also correct. So the noise a check for this shape would make is measured rather
+than feared, and the finding carries that number.
 
 **This is the argument for the rule that a report carries a visual**, made
 again and from the inside: three screenshots were taken today and one of them
@@ -260,7 +281,7 @@ was the only thing in the run that read the page a reader gets.
 - **One name per word in the examples, shortest first.** Argued above.
 - **The band is at the foot of the page** rather than in the lead. A reader who
   has not met one of these names yet does not need to be told about spelling;
-  one who has just read sixteen rows of imports does.
+  one who has just read every row of imports on the page does.
 
 ## Records
 
@@ -269,7 +290,7 @@ model or an `Accepted` record. Renaming the package's British-spelled exports
 **would** be architectural, and that is said in the finding rather than started
 here.
 
-The whole unit is a test, a word list, 32 words of prose and one band on a page
+The whole unit is two tests, a word list, 37 words of prose and one band on a page
 that is furniture by its own docblock. It composes no primitives and needs none.
 **No finding for `Loom primitives` came out of it**, beyond its share of the
 naming entry below.
@@ -317,7 +338,76 @@ Standing entries this run met again and did not duplicate:
 
 ## Test numbers
 
-PLACEHOLDER_TEST_NUMBERS
+`pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
+last thing on its line, with nothing else running beside it.
+
+- framework: **235 files, 5,593 tests passed**
+- application: **351 files, 6,272 tests passed**
+- `findings:check`: 1,290 findings, 0 malformed
+- `reports:check`: 1,944 visuals, none over 1.1MB, 409 cited by no file
+- `prerender:check`: 133 prerendered pages, 1,918 text junctions, 0 run
+  together; 3 metadata conventions, 0 unserved
+
+Nothing failed, nothing was skipped, and no test was weakened.
+
+**Sixty-two tests are new**: 52 in `voice.test.ts` — one per page, plus two
+floors and the matcher's own check — and 10 in `spelling.test.ts`. Two more in
+`api-doors.test.tsx`, and one row added to the heading list it already
+asserted. The four worth reading are the ones that hold a rule rather than a
+result:
+
+- **the sweep is reading every page the rail lists, with words on each of
+  them** — the floor under the 49 rows above it, which is what stops the file
+  passing on a morning when the reader is broken and every page comes back
+  empty;
+- **it would say so if a page had one** — the same page's words with a British
+  sentence appended, so a matcher that stopped matching fails here rather than
+  passing everywhere;
+- **each page's summary is among the words it reads** — the second floor, and
+  it was written *because a mutation survived*: see below;
+- **the two readers are not the same read** — `PrimitiveBehaviours` is visible
+  to one and invisible to the other, which is the boundary bug written down as
+  a test.
+
+### Four mutations, one survivor and one near-survivor
+
+Each was applied on its own and the two new files re-run. **This section is why
+the test count went up after the gate was green**, and two of the four rows are
+worth more than a tick.
+
+| what was put back | what failed |
+| --- | --- |
+| the no-boundary name matcher | **2**: *answers the same question the same way twice* and *does not read a British spelling across the join* |
+| one page's `colour`, restored in the MDX | **1**: that page's row, naming the page and the word |
+| the summary dropped from the reader | **0 at first** — see below |
+| a shared `/g` matcher across both readers | **0, and it stays 0** — see below |
+
+**The summary dropped from the reader survived, and now does not.** Taking
+`page.summary` out of what `readerPages` returns broke nothing: every row below
+it is about what is left, and the three summaries that carried a British
+spelling had already been fixed. So the sweep would have gone on passing while
+quietly not reading the copy in the rail, the pager and every page's
+description. `voice.test.ts` now asserts each page's summary is among the words
+read, which fails under that mutation and is the second floor in the file.
+
+**The shared `/g` matcher survived and that is the correct result.** The
+original bug was real and was `test` on a shared matcher; every reader here
+uses `matchAll`, which clones the matcher and leaves the original's `lastIndex`
+alone, so sharing one is not observable today. Building one per call is a guard
+against the next caller rather than a property a test can hold, and both the
+module and the test now say so rather than implying the test covers it. What is
+load-bearing is that **no matcher is exported**, so a future `test` cannot be
+written against a shared one.
+
+**Two full runs, and the second is the one quoted.** The first was green on the
+code alone. The second was run over the committed tree, with the report, the
+findings entries and the pictures in it. What was written after it is **this
+report's preview URL and pull-request number**, which cannot be known until the
+pull request exists, and the two prose corrections listed in the commit that
+carries them.
+
+Every exit code here was read out of a file written as the last thing on its
+line, with nothing piped into `tail` or `tee`.
 
 ## The pictures
 
@@ -345,7 +435,7 @@ carrying each of the four British words the package uses, chosen by
 
 ### And on a phone
 
-![390, after: the same band at phone width, where its first paragraph wraps to five lines and the names stay on one line each](2026-10-23-docs-one-spelling-for-the-reader-phone-reference.webp)
+![390, after: the same band at phone width — the heading wraps to two lines, the first paragraph to six, and each of the four names stays whole on its own](2026-10-23-docs-one-spelling-for-the-reader-phone-reference.webp)
 
 `350x88` against `704x61` at 1280 — two paragraphs that wrap and nothing that
 scrolls sideways (`scrollWidth 390 / innerWidth 390`). **There is no before at

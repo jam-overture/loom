@@ -37,8 +37,13 @@ describe("the two readers", () => {
    * Called twice, on purpose. A `/g` matcher kept between calls carries a
    * `lastIndex`, so the second answer is about an offset the caller never
    * passed, and a sweep over a list of names returns neither the right answer
-   * nor the same one twice. Two identical calls returning two identical
-   * answers is the whole of that regression.
+   * nor the same one twice.
+   *
+   * **It would not fail today if the matcher were shared**, because `matchAll`
+   * clones rather than advancing the original — which `spelling.ts` says under
+   * `BRITISH_SPELLINGS`, and which a planted mutation confirmed. What this
+   * holds is the property a caller depends on, so a reader that moves to `test`
+   * or `exec` breaks here rather than in a sweep's output.
    */
   it("answers the same question the same way twice", () => {
     const names = ["ThemeCatalogueEntry", "RenderDiagnostic", "colour", "IrreversibilityReason"]

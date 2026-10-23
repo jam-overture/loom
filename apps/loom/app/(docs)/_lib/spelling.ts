@@ -26,13 +26,19 @@ import { publishedNames } from "./api/mentions"
  * expression.
  *
  * **A source string and not a `RegExp`, deliberately.** A `/g` regular
- * expression carries a `lastIndex`, so `test` called twice over a list answers
- * about two different offsets: it reports one name as British because the
- * previous name was, and skips the next one for the same reason. The first
- * draft of this filtered seventeen hundred published names through a shared
- * matcher that way, and what came back was neither the right list nor a
- * repeatable one. So nothing here exports a matcher, every reader builds its
- * own, and `spelling.test.ts` asks the same question twice.
+ * expression carries a `lastIndex`, so `test` or `exec` called twice over a
+ * list answers about two different offsets: it reports one name as British
+ * because the previous name was, and skips the next one for the same reason.
+ * The first draft of this filtered seventeen hundred published names through a
+ * shared matcher with `test`, and what came back was neither the right list nor
+ * a repeatable one.
+ *
+ * **Every reader below uses `matchAll`, which is not exposed to that** — it
+ * clones the matcher and leaves the original's `lastIndex` alone. So building
+ * one per call is a guard against the next caller rather than something a test
+ * can catch today, and a mutation that shares one survives the suite. It is
+ * still the right shape: what is cheap here is not exporting a matcher at all,
+ * so a future `test` cannot be written against a shared one.
  *
  * **Only words that are British.** The marketing list this was taken from is a
  * *detector* over copy that never names an export, so `colou?rs?` is free

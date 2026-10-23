@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { docsOrder } from "./nav"
+import { plainWords } from "./search/words"
 import { britishSpellingsIn } from "./spelling"
 import { readerPages } from "./voice"
 
@@ -22,6 +23,26 @@ describe("the spelling a reader meets", () => {
 
     for (const page of pages) {
       expect(page.words.length, page.id).toBeGreaterThan(200)
+    }
+  })
+
+  /**
+   * And the summary is among those words, which nothing else here would say.
+   *
+   * It is the one piece the reader adds that is not on the page — `nav.ts`
+   * keeps a sentence per page and a reader meets it in the rail, under a pager
+   * link and in the page's description. Three of the forty-nine carried a
+   * British spelling the morning this was written, and dropping them from the
+   * reader passes every row below, because the rows below are about what is
+   * left. So it is asserted rather than left to the sweep.
+   */
+  it("has each page's one-line summary among the words it reads", () => {
+    const byId = new Map(readerPages().map((page) => [page.id, page.words]))
+
+    for (const { section, page } of docsOrder) {
+      const id = page.slug === "" ? section.slug : `${section.slug}/${page.slug}`
+
+      expect(byId.get(id), id).toContain(plainWords(page.summary))
     }
   })
 
