@@ -49,12 +49,12 @@ export const entryPoints: readonly EntryPoint[] = [
   {
     specifier: "@jam-overture/loom-primitives/compositions",
     /** The one size stated here, read off the library rather than typed (`_lib/counts.ts`). */
-    summary: `The starter library's ${spellOut(siteCount("starter-bands").value)} bands under their own names, for assembling a page without going through the catalogue.`,
+    summary: `The starter library's ${spellOut(siteCount("starter-bands").value)} bands under their own names, for assembling a page without going through the catalog.`,
     audience: "app",
   },
   {
     specifier: "@jam-overture/loom/sdk",
-    summary: "Defining and registering primitives of your own, and the catalogue a model is shown.",
+    summary: "Defining and registering primitives of your own, and the catalog a model is shown.",
     audience: "host",
   },
   {

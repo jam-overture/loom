@@ -5,6 +5,7 @@ import { ApiEntryReference } from "@/app/(docs)/_components/api-reference"
 
 import { entryPoints } from "../entry-points"
 import { DOCS_LANDING_SLUG } from "../nav"
+import { packageSpelling } from "../spelling"
 
 import { doorwayOf } from "./doors"
 import { entryProseFor } from "./mentions"
@@ -37,7 +38,7 @@ export const generatedPageBody = (sectionSlug: string, pageSlug: string): ReactN
   if (sectionSlug !== "api-reference") return undefined
 
   if (pageSlug === DOCS_LANDING_SLUG) {
-    return <ApiDoors doorway={doorwayOf(apiEntries, entryPoints)} />
+    return <ApiDoors doorway={doorwayOf(apiEntries, entryPoints)} spelling={packageSpelling()} />
   }
 
   const entry = apiEntryAt(pageSlug)

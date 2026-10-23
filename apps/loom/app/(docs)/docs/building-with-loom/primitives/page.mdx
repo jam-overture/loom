@@ -48,11 +48,11 @@ export const stat = definePrimitive({
 
 Four of those five fields are doing more work than they look like.
 
-**`type`** is what a node names, and what a model reads in the catalogue. It is
+**`type`** is what a node names, and what a model reads in the catalog. It is
 a lowercase, dotted identifier — namespace your own.
 
 **`description`** is not a comment. It is shown to the model as part of the
-catalogue of what it may propose, and it is the single most effective place to
+catalog of what it may propose, and it is the single most effective place to
 say when *not* to use this primitive.
 
 **`props`** is a Zod schema, and `.strict()` matters: it makes an unrecognized

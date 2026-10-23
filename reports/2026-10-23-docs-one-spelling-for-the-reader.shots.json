@@ -1,0 +1,41 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-10-23-docs-one-spelling-for-the-reader-wide-reference",
+      "viewport": "wide",
+      "waitFor": "[aria-label='Where to go from here']",
+      "do": [
+        {
+          "scrollTo": "[aria-label='Where to go from here']"
+        }
+      ],
+      "measure": [
+        "text=Some of these names are spelled the British way",
+        "[aria-label='Where to go from here']"
+      ]
+    },
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-10-23-docs-one-spelling-for-the-reader-phone-reference",
+      "viewport": "phone",
+      "waitFor": "text=Some of these names are spelled the British way",
+      "do": [
+        {
+          "scrollTo": "text=Some of these names are spelled the British way"
+        }
+      ],
+      "measure": [
+        "text=Some of these names are spelled the British way"
+      ]
+    },
+    {
+      "path": "/docs/the-runtime/what-a-render-reports",
+      "out": "2026-10-23-docs-one-spelling-for-the-reader-wide-render-reports",
+      "viewport": "wide",
+      "waitFor": "h1"
+    }
+  ]
+}

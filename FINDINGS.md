@@ -58719,6 +58719,204 @@ Noted rather than built because it is a drawing decision and the portal is
 paused; a finding against a paused routine is still filed and waits.
 
 ---
+## 2026-10-23 — the package publishes 47 names spelled in British English, and the site that documents it is written in American English
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/`) and
+`Loom primitives` (`src/primitives/`) · **Status:** open — **nothing is broken,
+no test is failing, and this is not a request for a rename**; it is the fact
+the documentation site had to decide around today, written down for the lanes
+that own the names
+
+The maintainer's instruction of 26 September was *US spelling, everywhere a
+visitor reads*. `(marketing)` has held it with a test since. `(docs)` could
+not hold it the same way, and the reason is not the prose:
+
+| the word | published names carrying it | examples |
+| --- | --- | --- |
+| `catalogue` | 28 | `catalogueOf`, `DataCatalogue`, `CATALOGUE_TYPES`, `CataloguedProp` |
+| `behaviour` | 13 | `BEHAVIOURS`, `PrimitiveBehaviours`, `BehaviourName` |
+| `colour` | 5 | `colour`, `ColourPairing`, `colourDifference` |
+| `centred` | 1 | `navCentredBand` |
+
+47 of 1,727 published names, read off the generated reference rather than
+counted by hand (`(docs)/_lib/spelling.ts`).
+
+**What the documentation lane did about it**, so nobody has to guess: the rule
+on this site is now about which voice a word is in rather than about the word.
+A word in a sentence is the site's and is spelled the American way; a name in
+code voice is the package's and is spelled whichever way the package spells it.
+`(docs)/_lib/voice.test.ts` sweeps every page for the first half, and the
+reference's own front page carries a band saying the second half to a reader in
+two sentences, with the count and the examples read off the package.
+
+So the site is consistent, it is honest about the split, and a reader who
+copies a name gets a name that resolves. **The cost is one sentence on this
+site that would not need to exist** — *the spelling is part of the name, so the
+American version of it will not resolve* — and a reader meeting `color` in a
+paragraph above `ColourPairing` in a block.
+
+### Three shapes, costed
+
+1. **Leave it, with the band doing the work.** **The recommendation**, and it
+   is what shipped. Renaming a published export is a breaking change for every
+   consumer, the names are correct and consistent *with each other*, and the
+   confusion costs a reader one sentence they read once.
+2. **Rename on the next breaking version**, with the British spellings kept as
+   aliases for a release. It is the only shape that removes the sentence, it is
+   47 names across `src/` and `src/primitives/`, and it touches the published
+   surface — which makes it **ARCHITECTURAL** rather than a tidy-up: the
+   reference is generated from `exports`, so the rename is the API.
+3. **Nothing, and do not say anything.** What was true until today. A reader
+   copies `catalog` out of a sentence, gets a module-resolution error, and has
+   no way to know the sentence was prose.
+
+**This entry asks for no code.** It exists because the owners of these names
+should know that a surface now documents the spelling as a fact about the
+package, and because whoever eventually considers 2 should find the count and
+the reasoning rather than rediscover them.
+
+---
+## 2026-10-23 — the spelling sweep reads 49 pages and cannot read the copy every written one of them prints from a component
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/voice.ts`) · **Status:** open — **the stated limit
+of what shipped today**, written in the module's own docblock as well as here
+
+`readerPages()` reads a written page the way the search index reads it: the
+title, the summary, the headings and the prose, with names elided. What an MDX
+file does **not** contain is what its components print. `<ScaffoldTranscript />`
+is a tag with nothing between its ends on disk and about forty lines of
+transcript on the screen.
+
+The numbers: **all 31** written pages embed at least one component that prints
+copy the file does not contain — 124 instances of 82 distinct components,
+every one of them self-closing. The 85 `<Callout>`s are the exception and are
+read, because a callout's words are between its ends in the MDX and the reader
+drops the tag and keeps what is in it. The 18 generated pages are covered
+outright, because there the component *is* the page and `search/rendered.ts`
+walks it.
+
+**It is not where today's drift was.** Every British spelling the sweep found
+was in prose or in a summary, and a grep over the components' source literals
+finds the rest of it in identifiers, comments and `data-` attributes rather
+than in copy. That is a reading of today and not a property.
+
+### Three shapes, costed
+
+1. **Leave it, with the docblock saying so.** **The recommendation.** The
+   components on these pages mostly print data read from the package, where the
+   package's own spelling is the right answer anyway, and the copy they do
+   carry is reviewed in the same file as the component.
+2. **Render each written page's MDX in the test.** It is the complete answer and
+   it needs the MDX compiler inside vitest, which nothing in this route group
+   does today. The cost is a second compile of every page in the test run, and
+   a test that fails for a reason that is about MDX rather than about spelling.
+3. **Read the built HTML**, which `tools/prerender/pages.ts` already does for
+   133 prerendered pages. It is the cheapest complete read and it moves the
+   check out of this lane: `prerender:check` runs over the whole application, so
+   a spelling rule there would be a rule for four surfaces and one lane's
+   word list would become everybody's. Whether that is wanted is above this
+   lane.
+
+---
+## 2026-10-23 — three surfaces a visitor reads have British spellings in their copy, and only two of the six have a test that would say so
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom demo` (`app/(demo)/_lib/presets.ts`),
+`Loom lessons` (`app/(lessons)/`), `Loom portal` (`app/(portal)/`, **paused**) ·
+**Status:** open — **small, and nothing is broken**; found while building the
+sweep for `(docs)` and measured rather than guessed
+
+`(marketing)/_lib/voice.test.ts` has held *US spelling everywhere a visitor
+reads* since 26 September. As of today `(docs)` holds it too. A scan of the
+prose-looking string literals in the other three visitor-read route groups —
+25 characters or more, with a space in them, comments stripped — finds:
+
+| route group | found |
+| --- | --- |
+| `(demo)` | **7**: six × `colour` in `_lib/presets.ts` — *"Every colour and typeface on the page changes at once."* is on the public demo — and `honour` in `demo/page.tsx` |
+| `(portal)` | `recognised` ×2 (*"That key was not recognised."*, a message a person reads), `colour` ×1, `judgement` ×1 |
+| `(lessons)` | `recognise` ×1, in a lesson's own prose |
+| `(marketing)` | 0 — which is the test working |
+
+The scan is a crude instrument and says so: it reads source literals rather
+than rendered pages, so it will miss copy assembled from parts and may report a
+literal nobody renders. Every instance above was read and is copy.
+
+**The recommendation is to fix the instances, not to copy the sweep.** There
+are now **two** word lists of British spellings in this repository —
+`(marketing)/_lib/voice.test.ts` and `(docs)/_lib/spelling.ts` — and a third
+copy is the thing `measure.ts` has a paragraph against. Where a shared one
+would live is `src/` or `tools/`, neither of which belongs to any surface lane,
+so that is a question for whoever owns the shared ground rather than a change
+for the next surface to make.
+
+`Loom portal` is paused, so its two instances wait; the entry is filed against
+it rather than reassigned.
+
+---
+## 2026-10-23 — a space lost between a tag and the text after it leaves no separator, so the one check written for run-together text cannot see it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/prerender/hazards.ts`) · **Status:** open — **the instance is fixed and
+the gap is not**; one page, caught in a screenshot rather than by any check
+
+The band this lane added today contained the ordinary sentence
+
+```tsx
+<p>…so a page can say <em>color</em> in a sentence and show you a name…</p>
+```
+
+with a real space after `</em>`. `container.textContent` under `vitest` reads
+*say color in a sentence*. The page `next build` produced reads
+
+```html
+…so a page can say <em>color</em>in a sentence…
+```
+
+**`pnpm prerender:check` passed**: 133 pages, 1,917 text junctions, 0 run
+together. It was found by looking at the screenshot.
+
+### Why the check cannot see it
+
+`hazards.ts` is right about everything it says and it looks for one marker:
+React's `<!-- -->` separator, written between two adjacent **text children**, and
+reports the pair where the characters either side of it would run together.
+That is exactly the 9 September defect — `{ARRIVAL_TOTALS.compiled}` beside
+`of those blocks` — and this is the same defect one step to the left:
+
+- when the space **is** a text child, React writes `</em> <!-- -->in`, the
+  separator is there, and the check reads a space either side and passes
+  correctly;
+- when the space is **dropped**, there is no second text child, so there is no
+  separator, so there is nothing for the check to look at. A hazard that leaves
+  no marker is invisible to a detector built on the marker.
+
+**The mechanism is not established here and this entry does not claim one.**
+What is established: the source had the space, `vitest` renders it, the built
+page does not, and `{" "}` restores it. Two transforms, two sentences, and the
+one a reader gets is again the one nothing looked at — which is the half of the
+9 September finding that is about the class rather than the paragraph.
+
+### Three shapes, costed
+
+1. **Also sweep for a tag followed immediately by a joining character**, with
+   an allowed list of the shapes that are correct. Across the 133 built pages
+   there is **one** such junction outside a `</span>` — `<code>PageReading</code>s`,
+   a plural on a chip — and 77 at a `</span>`, every one of which carries its
+   space inside the span (`<span>Asked: </span>Make the main heading…`) and is
+   correct. So the noise is measured rather than feared, and an allowed list of
+   two shapes covers the site as it stands. **The recommendation**, and it is a
+   few lines beside the separator sweep.
+2. **Compare the built text against the `textContent` a test sees**, which
+   catches the class outright and needs a page rendered twice by two
+   transforms. It is the complete answer and it is a different tool.
+3. **Nothing**, with this entry as the record. The instance is fixed; the next
+   one is found by somebody looking at a picture, which is how this one was
+   found.
+
+The three documentation screenshots taken today are why this is a closed
+instance rather than a shipped one, which is an argument for the rule that a
+report carries a visual.
 ## 2026-10-23 — a sweep guard a caller has to remember is a guard one caller had already forgotten, and `servedPages` refusing a thin sweep is the shape that cannot be forgotten
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
