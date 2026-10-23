@@ -5,6 +5,7 @@ import type { ChangeSilence } from "./change.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
 import type { FormActionSilence } from "./form-action.js"
+import type { FormCopySilence } from "./form-copy.js"
 import type { FormComparisonSilence } from "./forms.js"
 import type { FunnelChangeSilence } from "./funnel-change.js"
 import type { DeploymentChangeSilence } from "./deployment-change.js"
@@ -25,7 +26,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are seventeen of them. Each set's names are right in its own
+ * absent, and there are twenty of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -151,6 +152,7 @@ export type SilenceVocabulary =
   | "deployment"
   | "deployment-change"
   | "form-action"
+  | "form-copy"
   | "forms"
   | "funnel-change"
   | "library"
@@ -173,6 +175,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "deployment",
     "deployment-change",
     "form-action",
+    "form-copy",
     "forms",
     "funnel-change",
     "library",
@@ -204,6 +207,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     deployment: "page",
     "deployment-change": "comparison",
     "form-action": "comparison",
+    "form-copy": "comparison",
     forms: "comparison",
     "funnel-change": "comparison",
     library: "kind",
@@ -221,8 +225,8 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Fifteen of them against eighty-four members across the seventeen sets, which
- * is the overlap this module exists to state. None of them replaces a set's own name:
+ * Eighteen of them against a hundred and fourteen members across the twenty
+ * sets, which is the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
  *
@@ -1216,6 +1220,50 @@ export const meaningOfFormActionSilence = (silence: FormActionSilence): SilenceM
       return meaning("form-action", "no-action-credited")
     case "nothing-measured":
       return meaning("form-action", "no-view-reported")
+  }
+}
+
+/**
+ * What a comparison of what two forms *say* reports (0305).
+ *
+ * **The twentieth set, and the second in a row to bring no condition of its
+ * own** — eleven states, every one of them already here. Five are the pairing
+ * rule it imports rather than restates, and the other six are the states a
+ * reading of words has been in since the fourth set: a page that says nothing,
+ * a window nobody opened, a passage reporting more readers than views, no text
+ * the two sides share, nothing either side can speak for, and a word count that
+ * is a floor.
+ *
+ * Two sets in a row bringing nothing is a stronger version of what the
+ * nineteenth said about one. These are the states of the world, and a third
+ * reading of one pair of forms over a counter nothing else compares still lands
+ * entirely on them: what a new reading brings is a figure, and only a reading
+ * that can be in a state nothing before it could reaches for a condition.
+ */
+export const meaningOfFormCopySilence = (silence: FormCopySilence): SilenceMeaning => {
+  switch (silence) {
+    case "different-pages":
+      return meaning("form-copy", "two-pages")
+    case "unsplit":
+      return meaning("form-copy", "two-forms-unsplit")
+    case "unattributed":
+      return meaning("form-copy", "no-audience-named")
+    case "one-population":
+      return meaning("form-copy", "one-population")
+    case "different-revisions":
+      return meaning("form-copy", "two-revisions")
+    case "wordless":
+      return meaning("form-copy", "says-nothing")
+    case "nothing-measured":
+      return meaning("form-copy", "no-view-reported")
+    case "inconsistent":
+      return meaning("form-copy", "readers-above-views")
+    case "unshared":
+      return meaning("form-copy", "nothing-carried")
+    case "unspoken":
+      return meaning("form-copy", "no-reach-reported")
+    case "floored":
+      return meaning("form-copy", "words-a-floor")
   }
 }
 

@@ -154,9 +154,9 @@ describe("what a change did to the funnel", () => {
     expect(funnelPairKey(buy.pair)).toBe(BUY)
     expect(buy.movement).toBe("held")
     expect(buy.question).toBe("asked")
-    expect(buy.rateRatio).toBe(2)
-    expect(buy.conversionRatio).toBe(2)
-    expect(buy.entryRatio).toBe(1)
+    expect(buy.rateRatio).toEqual({ ratio: 2, absent: null })
+    expect(buy.conversionRatio).toEqual({ ratio: 2, absent: null })
+    expect(buy.entryRatio).toEqual({ ratio: 1, absent: null })
     expect(buy.readersMoved).toBeCloseTo(2, 10)
   })
 
@@ -211,8 +211,33 @@ describe("what a change did to the funnel", () => {
 
     expect(buy.movement).toBe("unknown")
     expect(buy.question).toBe("asked")
-    expect(buy.rateRatio).toBeNull()
+    expect(buy.rateRatio).toEqual({ ratio: null, absent: "unmeasured" })
     expect(buy.was.rate).toBeNull()
+  })
+
+  /**
+   * The state a before-and-after exists for, and the one a bare `null` could
+   * not tell from *nothing here can be compared* (0306). The bracket stays
+   * absent, because an interval around a quotient there is not would be a bound
+   * on nothing.
+   */
+  it("says nobody finished and one in ten do now, rather than that there is nothing to compare", () => {
+    const change = funnelChangeOf(
+      window({ revision: 1, opened: 100, appearances: 100 }, [
+        { from: "band", to: "form", reached: 40, converted: 0 },
+      ]),
+      window({ revision: 2, opened: 100, appearances: 100 }, [
+        { from: "band", to: "form", reached: 40, converted: 4 },
+      ])
+    )
+    const buy = only(change)
+
+    expect(buy.movement).toBe("taken-up")
+    expect(buy.was.rate).toBe(0)
+    expect(buy.rateRatio).toEqual({ ratio: null, absent: "from-nothing" })
+    expect(buy.rateRatioAtLeast).toBeNull()
+    expect(buy.rateRatioAtMost).toBeNull()
+    expect(buy.rateMoved).toBeNull()
   })
 
   it("orders the compared pairs by the question and not by how either window stored them", () => {
@@ -259,8 +284,8 @@ describe("the question a change can break", () => {
     expect(buy.movement).toBe("unknown")
     expect(buy.now.stale).toBe(true)
     expect(buy.now.rate).toBeNull()
-    expect(buy.rateRatio).toBeNull()
-    expect(buy.conversionRatio).toBeNull()
+    expect(buy.rateRatio).toEqual({ ratio: null, absent: "unmeasured" })
+    expect(buy.conversionRatio).toEqual({ ratio: null, absent: "unmeasured" })
   })
 
   it("says the change put a question back", () => {
@@ -333,7 +358,7 @@ describe("a difference of two floors", () => {
 
     expect(buy.was.rate).toBe(0.2)
     expect(buy.now.rate).toBeCloseTo(0.142857, 6)
-    expect(buy.rateRatio).toBeCloseTo(0.714286, 6)
+    expect(buy.rateRatio.ratio).toBeCloseTo(0.714286, 6)
 
     expect(buy.rateRatioAtLeast).toBeCloseTo(0.714286, 6)
     expect(buy.rateRatioAtMost).toBe(5)
@@ -354,7 +379,7 @@ describe("a difference of two floors", () => {
     const buy = only(change)
 
     expect(change.exact).toBe(true)
-    expect(buy.rateRatio).toBe(2)
+    expect(buy.rateRatio).toEqual({ ratio: 2, absent: null })
     expect(buy.rateRatioAtLeast).toBe(2)
     expect(buy.rateRatioAtMost).toBe(2)
     expect(buy.rateMoved).toBe(true)
@@ -372,7 +397,7 @@ describe("a difference of two floors", () => {
     )
     const buy = only(change)
 
-    expect(buy.rateRatio).toBe(8)
+    expect(buy.rateRatio).toEqual({ ratio: 8, absent: null })
     expect(buy.rateRatioAtLeast ?? 0).toBeGreaterThan(1)
     expect(buy.rateMoved).toBe(true)
   })
@@ -388,7 +413,7 @@ describe("a difference of two floors", () => {
     )
     const buy = only(change)
 
-    expect(buy.rateRatio).toBe(2)
+    expect(buy.rateRatio).toEqual({ ratio: 2, absent: null })
     expect(buy.now.rateAtMost).toBeNull()
     expect(buy.rateRatioAtLeast).toBeNull()
     expect(buy.rateRatioAtMost).toBeNull()
@@ -422,9 +447,9 @@ describe("which half of the funnel moved", () => {
     )
     const buy = only(change)
 
-    expect(buy.conversionRatio).toBe(2)
-    expect(buy.entryRatio).toBe(2)
-    expect(buy.rateRatio).toBe(1)
+    expect(buy.conversionRatio).toEqual({ ratio: 2, absent: null })
+    expect(buy.entryRatio).toEqual({ ratio: 2, absent: null })
+    expect(buy.rateRatio).toEqual({ ratio: 1, absent: null })
     expect(buy.ifOnlyEntryMoved).toBeCloseTo(0.2, 12)
     expect(buy.ifOnlyClosingMoved).toBeCloseTo(0.1, 12)
     expect(buy.cause).toBe("entry")
@@ -467,7 +492,7 @@ describe("which half of the funnel moved", () => {
     )
     const buy = only(change)
 
-    expect(buy.conversionRatio).toBe(1)
+    expect(buy.conversionRatio).toEqual({ ratio: 1, absent: null })
     expect(buy.cause).toBeNull()
   })
 
@@ -527,10 +552,10 @@ describe("the ranking, which is by readers and not by rate", () => {
 
     expect(change.mostGained?.pair.from.nodeId).toBe(nodeId("band"))
     expect(change.mostGained?.readersMoved).toBeCloseTo(100, 8)
-    expect(change.mostGained?.rateRatio).toBeCloseTo(2, 8)
-    expect(change.compared.find((one) => one.pair.from.nodeId === nodeId("other"))?.rateRatio).toBe(
-      4
-    )
+    expect(change.mostGained?.rateRatio.ratio).toBeCloseTo(2, 8)
+    expect(
+      change.compared.find((one) => one.pair.from.nodeId === nodeId("other"))?.rateRatio.ratio
+    ).toBe(4)
     expect(change.mostLost).toBeNull()
   })
 
@@ -603,10 +628,10 @@ describe("what survives a door that cannot say how many readers arrived", () => 
     expect(change.silence).toBe("unscaled")
     expect(change.compared).toHaveLength(1)
     expect(buy.movement).toBe("held")
-    expect(buy.rateRatio).toBe(2)
+    expect(buy.rateRatio).toEqual({ ratio: 2, absent: null })
 
-    expect(buy.entryRatio).toBeNull()
-    expect(buy.conversionRatio).toBeNull()
+    expect(buy.entryRatio).toEqual({ ratio: null, absent: "unmeasured" })
+    expect(buy.conversionRatio).toEqual({ ratio: null, absent: "unmeasured" })
     expect(buy.cause).toBeNull()
     expect(buy.readersMoved).toBeNull()
     expect(buy.rateMoved).toBeNull()
@@ -623,7 +648,7 @@ describe("what survives a door that cannot say how many readers arrived", () => 
     )
 
     expect(change.silence).toBe("unopened")
-    expect(only(change).rateRatio).toBeCloseTo(2, 8)
+    expect(only(change).rateRatio.ratio).toBeCloseTo(2, 8)
   })
 
   it("names a window no rollup has folded yet", () => {

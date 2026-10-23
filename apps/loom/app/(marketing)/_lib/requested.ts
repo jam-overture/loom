@@ -1,7 +1,7 @@
 import { walkTree, type ElementNode, type LoomNode, type LoomTree } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { ADDRESS_PARAMS, SITE_ROUTES, SITE_THEMES, type SiteThemeName } from "./site"
+import { ADDRESS_PARAMS, SITE_PATHS, SITE_THEMES, type SiteThemeName } from "./site"
 
 /**
  * The base a path is parsed against. Never read, never in the output — a path
@@ -68,11 +68,25 @@ const NO_ORIGIN = "https://site.invalid"
  * Caught by `chrome.test.ts`' *carries the visitor's palette on its own links
  * and not into another surface*, which existed before any of this and was
  * right about a property that outlived the implementation it was written for.
+ *
+ * **Built from `site.ts`' `SITE_PATHS` as of 23 October, and renamed.** This
+ * file wrote the projection out for itself, which was a third spelling of it:
+ * four test files had the same thing inline and now read that export. Keeping
+ * the local name would have left two things called `SITE_PATHS` in one route
+ * group, one a sorted `readonly string[]` and one a `ReadonlySet<string>`,
+ * which is how two readers come to disagree about which one they have — so this
+ * one is named for the question it answers instead.
+ *
+ * Nothing here changed: a `Set` of a sorted list has the membership of a `Set`
+ * of an unsorted one, and `.has` is all that reads it. Measured rather than
+ * left at that, because this is a module `pageTreeFor` reaches — all 75 served
+ * trees hash identically either way, and the report for
+ * `marketing-14-a-sweep-says-what-it-reached` quotes the digest.
  */
-const SITE_PATHS: ReadonlySet<string> = new Set(SITE_ROUTES.map((route) => route.path))
+const ON_THIS_SITE: ReadonlySet<string> = new Set(SITE_PATHS)
 
 const isSameSite = (href: string): boolean =>
-  href.startsWith("/") && SITE_PATHS.has(new URL(href, NO_ORIGIN).pathname)
+  href.startsWith("/") && ON_THIS_SITE.has(new URL(href, NO_ORIGIN).pathname)
 
 /**
  * The palette named in an href, where it names one.

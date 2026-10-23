@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, it } from "vitest"
 
 import { pathsLinkedFrom } from "./naming"
 import { APP_ROUTES, segmentFor, servedBy, serves } from "./routes"
-import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
-import { PRODUCT_SURFACES, SITE_ROUTES } from "./site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, type ServedPage } from "./served"
+import { PAGES_AT_LEAST, PRODUCT_SURFACES, SITE_PATHS, SITE_ROUTES } from "./site"
 
 /**
  * Every address this site sends a visitor to, held to an address this
@@ -101,8 +101,26 @@ describe("the addresses this site points at", () => {
     ]
   })
 
+  /**
+   * **This was one line and the line was green on a site with no pages.**
+   *
+   * `SERVED_STATE_COUNT` is `SITE_ROUTES.length * ASK_STATES.length`, so an
+   * empty `SITE_ROUTES` makes the sweep return nothing and the constant zero,
+   * and the rule below — *sends nobody to an address this application does not
+   * serve*, which is this file's whole point — passes over no addresses at all.
+   * Measured on 23 October with `SITE_ROUTES` emptied: this test green, that
+   * rule green, and the file red only on `DESTINATIONS_AT_LEAST` in the test
+   * underneath, which is a floor on the destinations rather than on the sweep
+   * and so says nothing about which pages were read.
+   *
+   * `PAGES_AT_LEAST` is the half nothing computes. `sweepCover` has the
+   * measurement in full.
+   */
   it("sweeps every state the site can be served in", () => {
-    expect(pages).toHaveLength(SERVED_STATE_COUNT)
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
   })
 
   it("reads enough of them for the rule below to mean anything", () => {

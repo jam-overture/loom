@@ -2,8 +2,8 @@ import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import { elementsIn } from "./measure"
-import { SERVED_STATE_COUNT, servedPages, sweepShare, type ServedPage } from "./served"
-import { SITE_ROUTES } from "./site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, sweepShare, type ServedPage } from "./served"
+import { PAGES_AT_LEAST, SITE_PATHS } from "./site"
 import { INLINE_TYPES, readerCopy, wordCountOf } from "./words"
 
 /**
@@ -85,17 +85,16 @@ describe("a phrase inside a sentence", () => {
   /**
    * `SERVED_STATE_COUNT` is computed by the module this sweep comes from, so on
    * its own it would compare an empty sweep against the zero that arithmetic
-   * produces and every rule below would pass over nothing. The two lines under
-   * it are the independent half: the sweep reached every page of this site, and
-   * there are at least three of them. Three is hand-written, and it moves only
-   * when a page is added or retired.
+   * produces and every rule below would pass over nothing. `PAGES_AT_LEAST` is
+   * the independent half — hand-written, and it moves only when a page is added
+   * or retired. `sweepCover` has the measurement of what the one line let
+   * through.
    */
   it("sweeps every page of this site, in every state it can be served in", () => {
-    expect(pages).toHaveLength(SERVED_STATE_COUNT)
-    expect([...new Set(pages.map((page) => page.route.path))].sort()).toEqual(
-      [...SITE_ROUTES.map((route) => route.path)].sort()
-    )
-    expect(SITE_ROUTES.length).toBeGreaterThanOrEqual(3)
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
   })
 
   /**
