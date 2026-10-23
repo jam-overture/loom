@@ -3134,6 +3134,50 @@ deployment change order; and that **nothing draws any of this**, which is
 `Loom portal`'s and has been the open question with the most built behind it for
 four runs.
 
+### 50. A distance that is not there, and a refusal that is not a silence · `Loom signals` · **done, 23 October**
+
+The second correction run in a row, and both halves are an absence wearing a
+measurement's clothes. One was taken; the other turned out to contradict an
+accepted record and is **proposed rather than built**.
+
+**Done**
+([0307](../decisions/0307-a-distance-between-a-mix-and-nothing-is-withheld-and-the-invariant-both-rolls-rest-on-is-asserted.md)),
+in `weightMovedOver` in
+[`library-reach-change.ts`](../src/signals/library-reach-change.ts), the helper
+both library rolls take their weight distance from.
+
+- **A side with no weight has no distance, and said it had one of nought.** A
+  nought there is the one value a surface reads as *the weights did not move*.
+  The helper now withholds it. 0247's own reading, which this arithmetic comes
+  from, already withholds `moved` in the same state.
+- **Neither roll can reach it**, which was the other half of the filing and is
+  now settled: a door that can scale a page has counted a page view at it, so a
+  measured row has a weight behind it. The clause stays because the helper is
+  exported and an outside caller would otherwise publish `NaN`.
+- **The invariant is a test rather than a sentence.** The word roll rested four
+  quotients on it in prose and nothing checked it; a row-walk now asserts the
+  figure is withheld exactly where the row's silence is set.
+- **No published field changed shape.** Both `weightMoved` fields were already
+  `number | null`.
+
+**Proposed, not built**
+([0308](../decisions/0308-a-comparison-of-two-populations-is-not-a-window-nobody-read.md)):
+the deployment change order folds `different-audiences` into the standing
+`unread`, whose sentence is *one of the two windows reported no view of its
+revision* and whose silence condition is `no-view-reported`. Both its windows
+reported plenty. 0301 decided that mapping explicitly, so reversing it is
+**architectural — needs review**, and the record says so. What was built in its
+place is two fixtures standing the two kinds of nothing side by side — which
+makes 0301's promise that *the cause travels on the row* checked rather than
+stated — and a note on the member saying it covers two states.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** 0308 itself, which is the maintainer's; and that
+**nothing draws any of this**, which is `Loom portal`'s and has been the open
+question with the most built behind it for five runs.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

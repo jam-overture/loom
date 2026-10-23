@@ -584,6 +584,75 @@ describe("deploymentChangeOf", () => {
       expect(reading.standings.unread).toBe(1)
     })
 
+    /**
+     * The third kind of nothing, and the one this order still folds into
+     * `unread`.
+     *
+     * 0301 took `audiences-mixed` out of that bucket and left
+     * `different-audiences` in it, on the ground that it and `nothing-measured`
+     * are both *there was nothing to compare on one side* and that the cause
+     * travels on the row for a surface that wants to say which. **Nothing
+     * checked the second half of that**, which is what this pins: a comparison
+     * refused for holding two known populations stands under the same standing
+     * as a window nobody opened, and the two are told apart only by `silence`.
+     *
+     * Asserted as it stands rather than changed. Giving it a standing of its
+     * own contradicts an accepted record, so it is proposed in
+     * [0308](../../decisions/0308-a-comparison-of-two-populations-is-not-a-window-nobody-read.md)
+     * and left for review; the day that is accepted, this test is the one that
+     * says what moved.
+     */
+    it("folds a comparison of two known populations into unread, and tells it apart only by its silence", () => {
+      const reading = deploymentChangeOf(
+        [
+          readingChangeOf(
+            servedTo(SKIERS, TREE, [100, 100], 1),
+            servedTo(RIDERS, TREE, [100, 40], 2)
+          ),
+          readingChangeOf(
+            servedTo(SKIERS, OTHER_TREE, [100, 100], 1),
+            servedTo(SKIERS, OTHER_TREE, [0, 0], 2)
+          ),
+        ],
+        [inAudience(SKIERS, exact(TREE, 2, 100)), inAudience(RIDERS, exact(TREE, 2, 200))]
+      )
+      const crossed = reading.unranked.find((row) => row.treeId === TREE)
+      const quiet = reading.unranked.find((row) => row.treeId === OTHER_TREE)
+
+      expect(crossed?.standing).toBe("unread")
+      expect(crossed?.silence).toBe("different-audiences")
+      expect(quiet?.standing).toBe("unread")
+      expect(quiet?.silence).toBe("nothing-measured")
+      expect(reading.standings.unread).toBe(2)
+    })
+
+    /**
+     * The arrivals half of the same row, which is what makes the sentence it
+     * prints wrong rather than merely coarse.
+     *
+     * The row takes its audience from the later side, so it is the riders' own
+     * door that scales it: two hundred readers arrived, both windows reported
+     * a hundred views apiece, and the standing beside all three says *one of
+     * the two windows reported no view of its revision*. Every figure on the
+     * row contradicts the sentence over it, which is the shape 0301 removed one
+     * cause of and left this one behind.
+     */
+    it("publishes the later form's arrivals and both view floors beside that refusal", () => {
+      const reading = deploymentChangeOf(
+        [
+          readingChangeOf(
+            servedTo(SKIERS, TREE, [100, 100], 1),
+            servedTo(RIDERS, TREE, [100, 40], 2)
+          ),
+        ],
+        [inAudience(SKIERS, exact(TREE, 2, 100)), inAudience(RIDERS, exact(TREE, 2, 200))]
+      )
+
+      expect(reading.arrivals).toBe(200)
+      expect(reading.unranked[0]?.audienceId).toBe(RIDERS)
+      expect(reading.unranked[0]?.views).toEqual({ was: 100, now: 100 })
+    })
+
     it("still reads one form handed in twice as one comparison", () => {
       const once = changeFor(SKIERS, TREE, [100, 100], [100, 40])
       const reading = deploymentChangeOf(

@@ -58025,6 +58025,22 @@ condition the funnel comparison brought the day before.
 ---
 ## 2026-10-20 — the change order maps `different-audiences` to `unread`, and so to the condition `no-view-reported`
 
+**Status (23 October):** **put to the maintainer as
+[0308](decisions/0308-a-comparison-of-two-populations-is-not-a-window-nobody-read.md),
+`Proposed` — architectural, still open.** The entry asked for one of two things:
+a fourth standing, or a note on `unread`. The fourth standing turns out to
+reverse a clause of 0301, which is accepted, so it is written as a proposal and
+**not built**. The note was written. What the entry did not have, and the
+proposal does, is the measured version of the sentence: on fixtures, a page
+served to skiers in the earlier window and to riders in the later one stands in
+`standings.unread` with a hundred views on **each** floor and two hundred
+arrivals at the later form's own door, so every figure on the row contradicts
+the standing over it. The condition it wants already exists — `two-audiences`,
+which the before-and-after reading brings — so the silences table would gain
+nothing, exactly as 0301's three members gained nothing. Two fixtures now pin
+the present behaviour, so the day this is accepted there is a test that says
+what moved. Original status below.
+
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/deployment-change.ts`) · **Status:** open — the second conflation
 of 0301's family, deliberately not fixed in the same unit because its argument is
@@ -59132,6 +59148,19 @@ body at all** — a path, which the reader can click in the diff anyway.
 
 ---
 ## 2026-10-23 — a distance of nought where there is no distance, guarded by a silence rather than withheld
+
+**Status:** **closed by `signals-50-a-comparison-of-two-populations-is-not-a-window-nobody-read`**
+([0307](decisions/0307-a-distance-between-a-mix-and-nothing-is-withheld-and-the-invariant-both-rolls-rest-on-is-asserted.md)).
+It was **both** of the two things this entry said it might be. The clause is
+**unreachable** from either roll — a door that can scale a page has counted at
+least one page view at it, so a measured row has a weight on both sides — and
+the nought it returned was **also wrong**, for any caller outside the two rolls
+that reached it. So the fix is neither of the two the entry offered on its own:
+the helper withholds the figure rather than returning a nought, the clause stays
+because the helper is exported and deleting it would publish `NaN`, and the
+unreachability is asserted by a row-walk rather than left as the comment it had
+been in `library-word-reach-change.ts` all along. No published field changed
+shape. Original status below.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/library-reach-change.ts`, `library-word-reach-change.ts`) ·
