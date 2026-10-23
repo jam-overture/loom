@@ -347,11 +347,11 @@ Standing entries this run met again and did not duplicate:
 `pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
 last thing on its line, with nothing else running beside it.
 
-- framework: **FW_FILES files, FW_TESTS tests passed**
-- application: **APP_FILES files, APP_TESTS tests passed**
-- `findings:check`: FINDINGS_N findings, 0 malformed
-- `reports:check`: VISUALS_N visuals, none over 1.1MB, UNCITED_N cited by no file
-- `prerender:check`: PRE_PAGES prerendered pages, PRE_JUNCTIONS text junctions, 0 run
+- framework: **237 files, 5,656 tests passed**
+- application: **351 files, 6,274 tests passed**
+- `findings:check`: 1,298 findings, 0 malformed
+- `reports:check`: 1,948 visuals, none over 1.1MB, 409 cited by no file
+- `prerender:check`: 133 prerendered pages, 1,918 text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
 Nothing failed, nothing was skipped, and no test was weakened.
@@ -412,7 +412,10 @@ the mutation work above — a test was added after a mutation survived, so the
 second run's count was no longer the tree's — and gave 5,593 and 6,273.
 
 **The numbers above are the fourth run's**, over the merge recorded at the foot
-of this report, which brings two other lanes' work onto this branch. What was
+of this report, which brings two other lanes' work onto this branch — so the
+framework count is 5,656 rather than 5,593, and the application count 6,274
+rather than 6,273. Neither rise is this lane's: 63 framework tests arrived with
+`src/signals/`, and the one application test is `(marketing)`'s. What was
 written after it is **this report's preview URL and pull-request number**,
 which cannot be known until the pull request exists.
 
