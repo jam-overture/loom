@@ -1,8 +1,8 @@
 # 23 October 2026 (evening) — a distance that is not there, and a refusal that is not a silence
 
 **Routine:** `Loom signals` · **Branch:**
-`signals-50-a-comparison-of-two-populations-is-not-a-window-nobody-read` ·
-**Section:** §50
+`signals-50-a-comparison-of-two-populations-is-not-a-window-nobody-read`
+(#700) · **Section:** §50
 
 ## Before anything was built
 
@@ -248,7 +248,10 @@ and the generated API reference were **regenerated** rather than hand-resolved.
 `FINDINGS.md` was appended to, and the two lines changed inside it are the
 statuses of this lane's own entries of 20 and 22 October.
 
-Preview: PREVIEW
+Preview:
+<https://loom-git-signals-50-a-compar-307c71-jpizzolato36-6341s-projects.vercel.app>
+— the branch alias, quoted from Vercel's own comment on #700 rather than
+checked from here, because this session's egress policy refuses that host.
 
 Nothing in either unit draws a screen, so it is the branch deployed rather than
 something to look at.
