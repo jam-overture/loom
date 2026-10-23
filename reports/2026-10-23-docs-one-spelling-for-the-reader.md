@@ -460,4 +460,28 @@ either picture wraps differently.
 
 ## The preview
 
-PLACEHOLDER_PREVIEW
+Taken from the `vercel[bot]` comment after opening the pull request, not
+composed from the branch name.
+
+https://loom-git-docs-64-one-spellin-bfb3bb-jpizzolato36-6341s-projects.vercel.app
+
+**Truncated and hashed again**, which is the ordinary case rather than the
+exception: `docs-64-one-spelling-for-the-reader` is 35 characters,
+`docs-64-one-spellin` is what survives, and `bfb3bb` stands for the rest. A URL
+composed from the branch name would have had no hash segment and would have
+404ed — the 16 October entry's remedy, followed.
+
+The page the band is on:
+
+- [/docs/api-reference](https://loom-git-docs-64-one-spellin-bfb3bb-jpizzolato36-6341s-projects.vercel.app/docs/api-reference)
+
+and one of the pages whose prose changed:
+
+- [/docs/the-runtime/what-a-render-reports](https://loom-git-docs-64-one-spellin-bfb3bb-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-a-render-reports)
+
+Every picture above was taken with `pnpm shoot --serve apps/loom` against a
+build in this container, not fetched from the preview: `*.vercel.app` is denied
+by the environment's egress policy, which is the open finding of 12 October and
+still true.
+
+The pull request is **#699**.
