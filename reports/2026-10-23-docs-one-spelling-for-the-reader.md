@@ -429,6 +429,13 @@ first of them published nineteen more names out of `src/signals/`. `main` was
 merged into this branch rather than left for tomorrow, for one reason worth
 writing down.
 
+**`Loom merge` merged `main` in as well, while the gate was running here**, and
+pushed it. Its merge and this one take the same `main` into the same base and
+produced the same tree but for this report, so the remote's merge commit was
+merged in rather than either rewritten — which is what `routines.md` says a
+lane does with a merge commit it did not write. The branch carries both, and
+`pnpm --filter @loom/app docs:api` produced no change over the result.
+
 `.gitattributes` gives `*.generated.json` a **`merge=ours`** driver, and the
 15 October entry says what that costs: a clean merge keeps the branch's copy of
 the API reference, the copy goes stale, and `pnpm verify` then fails somewhere
