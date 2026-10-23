@@ -7,7 +7,8 @@ import { PACKAGES, RUNTIME_PACKAGE, STARTER_PACKAGE } from "./copy"
 import { DOC_PAGES, INSTALLATION, type DocPage } from "./docs-pages"
 import { pathsLinkedFrom } from "./naming"
 import { servedBy } from "./routes"
-import { ORIGIN_FOR_TESTS, servedPages, type ServedPage } from "./served"
+import { ORIGIN_FOR_TESTS, SERVED_STATE_COUNT, servedPages, sweepCover, type ServedPage } from "./served"
+import { PAGES_AT_LEAST, SITE_PATHS } from "./site"
 
 /**
  * Every link this site has into the documentation, held to the page it lands on.
@@ -135,12 +136,40 @@ describe("a documentation page this site names", () => {
   )
 })
 
+/**
+ * **One sweep for the file, which it did not have until 23 October.**
+ *
+ * It swept twice — once in the describe below and once inside the `it` under
+ * that — so this file built 150 pages a run to read two things off 75, and
+ * neither sweep was held to having reached the site. The guard the other six
+ * sweep files carry was missing here altogether, and the floors that stood in
+ * for it (`linked.length`, the distinct count, `front.length`) are floors on
+ * what the walk *found* rather than on where it looked.
+ *
+ * Measured with `servedPages` dropping its last route, so the sweep read two
+ * of this site's three pages: **29 of 29 green.** The deep links on the two
+ * that remained cleared every floor, and nothing said a third of the site had
+ * gone unread.
+ */
+let pages: readonly ServedPage[] = []
+
+beforeAll(async () => {
+  pages = await servedPages()
+})
+
+describe("the sweep these rules are read off", () => {
+  it("reached every page of this site, in every state it can be served in", () => {
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
+  })
+})
+
 describe("every link this site has into the documentation", () => {
   let linked: readonly { readonly where: string; readonly path: string }[] = []
 
-  beforeAll(async () => {
-    const pages: readonly ServedPage[] = await servedPages()
-
+  beforeAll(() => {
     linked = pages.flatMap((page) =>
       [...pathsLinkedFrom(page.tree.root, ORIGIN_FOR_TESTS)]
         .filter((path) => path.startsWith("/docs/"))
@@ -151,6 +180,11 @@ describe("every link this site has into the documentation", () => {
   /**
    * The sweep looked at a site with links in it, which is the same self-check
    * one level out: a walk that finds nothing passes rule 3 trivially.
+   *
+   * It is kept beside the coverage guard above rather than replaced by it. The
+   * two fail for different reasons — *the sweep never read the site* and *the
+   * site stopped linking into the documentation* — and this file's own docblock
+   * on the self-check argues that the reason is the thing a guard buys.
    */
   it("found the deep links this run put on the site", () => {
     expect(linked.length).toBeGreaterThan(0)
@@ -179,8 +213,7 @@ describe("every link this site has into the documentation", () => {
  * links into the documentation satisfies every one of them.
  */
 describe("the control that offers the install guide", () => {
-  it("goes to the page with the command on it", async () => {
-    const pages = await servedPages()
+  it("goes to the page with the command on it", () => {
     const front = pages.filter((page) => page.route.path === "/")
 
     expect(front.length).toBeGreaterThan(0)

@@ -58407,9 +58407,11 @@ under this link has the paragraph rather than the surprise.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
 (`app/(marketing)/_lib/budget.test.ts`, `_lib/routes.test.ts`,
-`_lib/docs-pages.test.ts`, `_lib/addressed.test.ts`) · **Status:** open —
-**nothing is broken**; it is the half of today's work that was left outside the
-diff on purpose
+`_lib/docs-pages.test.ts`, `_lib/addressed.test.ts`) · **Status:** **closed by
+`marketing-14-a-sweep-says-what-it-reached`**, as shape 2 — `sweepCover` in
+`served.ts`, asserted by all seven callers. Two corrections to this entry are
+recorded at its foot: `addressed.test.ts` is not one of these files, and the
+vacuity was two files rather than four
 
 Seven test files in this route group sweep `servedPages()`. The question each
 of them has to answer before any of its rules mean anything is *did the sweep
@@ -58452,6 +58454,43 @@ really two questions in one:
 **Recommendation: 2**, and not in the same pull request as the floors. It is a
 judgement about seven files, today's diff already crosses four, and a change to
 every sweep in the route group is its own reviewable thing.
+
+> **Closed 23 October by the lane that filed it, as shape 2, and the entry was
+> wrong in two places that are worth writing down rather than editing out.**
+>
+> **`addressed.test.ts` does not sweep `servedPages` at all.** It is not a
+> caller — `grep` for the import returns seven test files and it is not one of
+> them — so it was named here off the same reading of its `toBeGreaterThan(0)`
+> floors that put it in the 22 October report's closing list. The seven callers
+> are `budget`, `voice`, `naming`, `inline`, `routes`, `docs-pages` and
+> `readers/asked`.
+>
+> **The vacuity was narrower and worse than this entry says.** Measured with
+> `SITE_ROUTES` emptied rather than read: all seven files go red, so *the check
+> cannot fail* is not true of any of them. What is true is that **two of the six
+> tests named for holding the sweep were green on a site with no pages** —
+> `budget.test.ts`' and `routes.test.ts`', the two with no hand-written floor —
+> and **six rules of the form *nothing on this site is X* were green with
+> them**, including `routes.test.ts`' *sends nobody to an address this
+> application does not serve*, which is that file's whole point. The seven files
+> went red elsewhere: on the maintainer's own line, on `PAGE_NAMES`, on a
+> deep-link floor. **None of those failures says the sweep came back with
+> nothing**, which is the cost — the next run reads copy and bands looking for a
+> cause that is in `site.ts`.
+>
+> And the file this entry called unguarded was worse than unguarded:
+> **`docs-pages.test.ts` was 29 of 29 green on a sweep that lost a third of the
+> site.** It also swept twice, so it built 150 pages a run to read two things
+> off 75; it has one sweep now.
+>
+> The cost this entry worried about — *the check lives beside the thing it
+> checks* — is answered by `sweepCover` handing back a reading and never an
+> expectation, with `SITE_PATHS` and `PAGES_AT_LEAST` moved to `site.ts`, the
+> module that *declares* the site. Measured: on an empty site the `toEqual`
+> passes and the hand-written floor is what fails, so both halves are load-bearing
+> and neither is dead. The remaining half — a refusal in `servedPages`, which is
+> the only shape a caller cannot forget — is filed as its own entry at the foot
+> of this file.
 
 ---
 ## 2026-10-22 — the one band on this site that only exists after a visitor asks for something is the one band nothing counts
@@ -58680,6 +58719,59 @@ Noted rather than built because it is a drawing decision and the portal is
 paused; a finding against a paused routine is still filed and waits.
 
 ---
+## 2026-10-23 — a sweep guard a caller has to remember is a guard one caller had already forgotten, and `servedPages` refusing a thin sweep is the shape that cannot be forgotten
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/served.ts`) · **Status:** open — **nothing is broken**;
+every sweep in this route group carries the guard as of today, and this is the
+half of today's work that was costed and not taken
+
+`sweepCover` landed today and all seven `servedPages` callers assert it. That
+closes the instances. It does not close the shape, and the shape has a measured
+instance behind it rather than a worry:
+
+> **`docs-pages.test.ts` had no sweep guard at all**, and on a `servedPages`
+> that dropped one of this site's three routes it was **29 of 29 green**. The
+> deep links on the two pages that remained cleared every floor in the file.
+
+The guard is a thing each caller states. Six callers stated a version of it and
+the seventh did not, and nothing in the repository could say which was which
+until somebody went and looked. The eighth caller is a file nobody has written
+yet.
+
+**The shape that cannot be forgotten is a refusal**: `servedPages` throws when
+the sweep it is about to hand back reached fewer than `PAGES_AT_LEAST` routes,
+or no ask states at all. Every caller is then held whether or not it remembered,
+including the one written next week, and the message names the cause instead of
+arriving as five reds about the maintainer's own line.
+
+**Two things argue against it and both are real:**
+
+1. **It makes the caller's floor unreachable.** `expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)`
+   is today the assertion that fails on an empty site — measured: the `toEqual`
+   beside it passes, because `SERVED_STATE_COUNT` and the sweep are zero
+   together and two empty path lists are equal. A refusal upstream means that
+   line can never fail, and a dead assertion reads exactly like a live one.
+   Deleting it instead leaves the caller stating nothing, which is the position
+   the head of `served.ts` argues against.
+2. **It is a module deciding for seven files.** `served.ts`' own docblock says
+   *"`servedPages` is useless on its own: what makes it a check is a caller
+   saying how many states it expected to look at"*, and that sentence is this
+   lane's recorded position rather than an accident. A refusal overturns it.
+   The reason it is still worth overturning is that the position assumed callers
+   remember, and one did not.
+
+**Recommendation: take it, and delete the caller-side floor when you do** —
+`cover.routes` compared against `SITE_PATHS` stays, because that is the half a
+refusal cannot state (a sweep that reached three routes which are not this
+site's three). What goes is the number, up into the one module that can hold it
+for everybody. A dead assertion is the thing to avoid and the way to avoid it is
+to remove it, not to decline the refusal that kills it.
+
+It is not in today's pull request because today's is *every sweep in this route
+group gets the guard*, and *the guard moves into the module* is a change to the
+same seven files for a different reason. Two reasons in one diff is how a
+reviewer loses track of which files changed for which.
 ## 2026-10-22 (evening) — the words half of the form comparison is built, and the three readings of one pair of forms have three different answers about the page
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/form-copy.ts`) ·

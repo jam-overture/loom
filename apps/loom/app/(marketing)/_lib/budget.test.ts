@@ -3,8 +3,8 @@ import { beforeAll, describe, expect, it } from "vitest"
 
 import { runsIn, wordsIn } from "./measure"
 import { treeFor } from "./render"
-import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
-import { SITE_ROUTES, type SiteRoute } from "./site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, type ServedPage } from "./served"
+import { PAGES_AT_LEAST, SITE_PATHS, SITE_ROUTES, type SiteRoute } from "./site"
 
 /**
  * How much this site is allowed to say.
@@ -407,12 +407,26 @@ describe("what a request adds to a page is inside a budget too", () => {
     served = await servedPages()
   })
 
-  /** The sweep says how much it looked at. Same clause, same reason. */
+  /**
+   * The sweep says how much it looked at. Same clause, same reason — **and it
+   * was the weaker of the two halves until 23 October.**
+   *
+   * The `PAGES_AT_LEAST` line is new here and it is the one that does the work.
+   * The two assertions this replaces were both satisfied by a site with no
+   * pages at all: `served.length` and `SERVED_STATE_COUNT` are zero together,
+   * and two empty lists of paths are equal. Measured that day with
+   * `SITE_ROUTES` emptied, this test was **green**, and so were all four
+   * ceilings below it — `no request turns a page into a longer page`,
+   * `no request adds more`, `no band becomes a page` and `no cell and no plain
+   * band grows past its authored ceiling`. The file went red only on the
+   * *published*-tree sweep in the describe above, which is a different sweep
+   * and says nothing about this one.
+   */
   it("looked at every state this site can be served in", () => {
-    expect(served.length).toBe(SERVED_STATE_COUNT)
-    expect([...new Set(served.map(({ route }) => route.path))].sort()).toEqual(
-      [...SITE_ROUTES.map((route) => route.path)].sort()
-    )
+    const cover = sweepCover(served)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
   })
 
   it("no request turns a page into a longer page than the site may have", () => {
