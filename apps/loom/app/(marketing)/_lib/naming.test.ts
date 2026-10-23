@@ -11,8 +11,8 @@ import {
   type CrossPageLink,
   type Mention,
 } from "./naming"
-import { SERVED_STATE_COUNT, servedPages, sweepShare, type ServedPage } from "./served"
-import { PRODUCT_SURFACES, SITE_ROUTES } from "./site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, sweepShare, type ServedPage } from "./served"
+import { PAGES_AT_LEAST, PRODUCT_SURFACES, SITE_PATHS, SITE_ROUTES } from "./site"
 import { readerCopy } from "./words"
 
 /**
@@ -32,8 +32,6 @@ import { readerCopy } from "./words"
  */
 
 const ORIGIN = "https://loom.example"
-
-const ROUTE_PATHS: readonly string[] = SITE_ROUTES.map((route) => route.path)
 
 /** A mention, and the band and state it was found in, so a failure can be read. */
 type Found = {
@@ -66,7 +64,7 @@ const mentionsOn = (page: ServedPage): readonly Found[] =>
 
 /** Every link one served state makes into another page of this site, at an anchor. */
 const linksOn = (page: ServedPage): readonly CrossPageLink[] =>
-  crossPageFragmentsIn(page.tree.root, page.route.path, ORIGIN, ROUTE_PATHS)
+  crossPageFragmentsIn(page.tree.root, page.route.path, ORIGIN, SITE_PATHS)
 
 describe("the pages this site names", () => {
   let pages: readonly ServedPage[] = []
@@ -84,15 +82,17 @@ describe("the pages this site names", () => {
    * in this file would have swept an empty list and passed.
    *
    * So the sweep is also held to reaching every page of this site, and to there
-   * being at least three of them. Three is hand-written and is the right thing
-   * to write by hand here: it moves when a page is added or retired, which is a
-   * deliberate act, and never when the sweep is crossed with one dimension
-   * more or less.
+   * being at least `PAGES_AT_LEAST` of them — the hand-written number, which
+   * moves when a page is added or retired and never when the sweep is crossed
+   * with one dimension more or less. The walk is `sweepCover` as of
+   * 23 October, which is where the measurement of what the one-line version
+   * let through is written down.
    */
   it("sweeps every page of this site, in every state it can be served in", () => {
-    expect(pages).toHaveLength(SERVED_STATE_COUNT)
-    expect([...new Set(pages.map((page) => page.route.path))].sort()).toEqual([...ROUTE_PATHS].sort())
-    expect(ROUTE_PATHS.length).toBeGreaterThanOrEqual(3)
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
   })
 
   /**
@@ -273,7 +273,7 @@ describe("the pages this site names", () => {
 
           return says.length === 0
             ? []
-            : [{ band: band.props["eyebrow"], fragments: crossPageFragmentsIn(band, page.route.path, ORIGIN, ROUTE_PATHS) }]
+            : [{ band: band.props["eyebrow"], fragments: crossPageFragmentsIn(band, page.route.path, ORIGIN, SITE_PATHS) }]
         })
       )
 

@@ -4,8 +4,8 @@ import { beforeAll, describe, expect, it } from "vitest"
 
 import { bandsOf } from "../outline"
 import { siteRegistry } from "../registry"
-import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "../served"
-import { SITE_ROUTES } from "../site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, type ServedPage } from "../served"
+import { PAGES_AT_LEAST, SITE_PATHS } from "../site"
 
 import {
   BAND_TYPES,
@@ -72,15 +72,14 @@ describe("what this site asks about its readers", () => {
   /**
    * Every rule below is *nothing on this site is X*, and a sweep that came back
    * with nothing satisfies all of them. So the sweep is held first, and to
-   * something `served.ts` does not compute: that it reached every page of the
-   * site, and that there are at least three of them.
+   * something `served.ts` does not compute: that it reached every page the site
+   * declares, and that there are at least `PAGES_AT_LEAST` of them.
    */
   it("read every page of this site, in every state it can be served in", () => {
-    expect(pages).toHaveLength(SERVED_STATE_COUNT)
-    expect([...new Set(pages.map((page) => page.route.path))].sort()).toEqual(
-      [...SITE_ROUTES.map((route) => route.path)].sort()
-    )
-    expect(SITE_ROUTES.length).toBeGreaterThanOrEqual(3)
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
   })
 
   /**

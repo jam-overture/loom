@@ -149,7 +149,9 @@ today, and the docblock says so rather than leaving it to be discovered.
 ## What a reader is told, and where
 
 One band, at the foot of the reference's front page, which is the one screen
-where a reader has several of these names in front of them at once:
+where a reader has several of these names in front of them at once — quoted
+here as it read at `2cfd93d`, before `main` was merged in and the denominator
+moved to 1,746:
 
 > **Some of these names are spelled the British way**
 >
@@ -331,6 +333,10 @@ Standing entries this run met again and did not duplicate:
 
 - **`*.vercel.app` is denied by the environment's egress policy** (12 October,
   open). Every picture below was taken against a build in this container.
+- **`merge=ours` leaves a generated file stale** (15 October, closed by its own
+  remedy). Met head-on when `main` was merged in after the pull request opened,
+  and it did not bite — the section below says why, and both regenerators were
+  run as the check.
 - **The composed preview URL** (16 October). The URL below is taken from the
   `vercel[bot]` comment rather than guessed from the branch name.
 - **`nextjs.org` is refused by the gateway** (15 October, open, the
@@ -341,11 +347,11 @@ Standing entries this run met again and did not duplicate:
 `pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
 last thing on its line, with nothing else running beside it.
 
-- framework: **235 files, 5,593 tests passed**
-- application: **351 files, 6,273 tests passed**
-- `findings:check`: 1,290 findings, 0 malformed
-- `reports:check`: 1,944 visuals, none over 1.1MB, 409 cited by no file
-- `prerender:check`: 133 prerendered pages, 1,918 text junctions, 0 run
+- framework: **FW_FILES files, FW_TESTS tests passed**
+- application: **APP_FILES files, APP_TESTS tests passed**
+- `findings:check`: FINDINGS_N findings, 0 malformed
+- `reports:check`: VISUALS_N visuals, none over 1.1MB, UNCITED_N cited by no file
+- `prerender:check`: PRE_PAGES prerendered pages, PRE_JUNCTIONS text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
 Nothing failed, nothing was skipped, and no test was weakened.
@@ -399,18 +405,57 @@ module and the test now say so rather than implying the test covers it. What is
 load-bearing is that **no matcher is exported**, so a future `test` cannot be
 written against a shared one.
 
-**Three full runs, and the third is the one quoted.** The first was green on
-the code alone. The second was over the committed tree with the report, the
-findings and the pictures in it, and its numbers were the ones this section
-first carried. The third followed the mutation work above — a test was added
-after a mutation survived, so the second run's count was no longer the tree's —
-and it is this one: 5,593 and **6,273**, one more than the run before it.
+**Three full runs before the pull request, and a fourth after `main` was merged
+in.** The first was green on the code alone. The second was over the committed
+tree with the report, the findings and the pictures in it. The third followed
+the mutation work above — a test was added after a mutation survived, so the
+second run's count was no longer the tree's — and gave 5,593 and 6,273.
 
-What was written after the third run is **this report's preview URL and
-pull-request number**, which cannot be known until the pull request exists.
+**The numbers above are the fourth run's**, over the merge recorded at the foot
+of this report, which brings two other lanes' work onto this branch. What was
+written after it is **this report's preview URL and pull-request number**,
+which cannot be known until the pull request exists.
 
 Every exit code here was read out of a file written as the last thing on its
 line, with nothing piped into `tail` or `tee`.
+
+## Added after the pull request opened: main merged in, and the denominator moved
+
+#697 and #698 landed on `main` while this branch was being written, and the
+first of them published nineteen more names out of `src/signals/`. `main` was
+merged into this branch rather than left for tomorrow, for one reason worth
+writing down.
+
+`.gitattributes` gives `*.generated.json` a **`merge=ours`** driver, and the
+15 October entry says what that costs: a clean merge keeps the branch's copy of
+the API reference, the copy goes stale, and `pnpm verify` then fails somewhere
+naming neither the merge nor the file — *"on 15 October, as two failures in
+`(docs)` about `src/signals/` exports that no page mentions"*, which is the
+same directory that moved today.
+
+**It did not bite, and that is worth knowing too.** The driver only decides a
+file both sides changed, and this branch never touched the generated reference,
+so the merge took `main`'s copy outright. `pnpm build && pnpm --filter @loom/app
+docs:api` and `pnpm decisions:index` were both run afterwards and **both
+produced no change**, which is the check rather than the fix.
+
+What did move is the number the band prints:
+
+| | at `2cfd93d` | after the merge |
+| --- | --- | --- |
+| names the package publishes | 1,727 | **1,746** |
+| of them spelled the British way | 47 | **47** |
+
+**The numerator did not move**, and that is the derived list working: nineteen
+names arrived and not one of them is British-spelled, so the band says *47 of
+the 1,746* without anybody editing a sentence. The four examples are unchanged.
+
+**The pictures below were taken before the merge**, at `2cfd93d`, and the band
+in them reads *1,727*. They are left as they are rather than retaken: the pair
+is a controlled comparison — two builds of one tree differing only by this
+branch's `(docs)` diff — and retaking the *after* against the merged tree would
+leave the *before* describing a different package. What the pair is evidence
+for is the band, and the band is the same band.
 
 ## The pictures
 

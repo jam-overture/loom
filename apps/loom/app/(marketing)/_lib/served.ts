@@ -159,6 +159,75 @@ export const servedPages = async (): Promise<readonly ServedPage[]> => {
 /** How many states the sweep above covers, stated so a caller can check it. */
 export const SERVED_STATE_COUNT = SITE_ROUTES.length * ASK_STATES.length
 
+/** What a sweep came back with, in the two shapes a caller has its own expectation for. */
+export type SweepCover = {
+  /** How many states it came back with, against which `SERVED_STATE_COUNT` is the arithmetic. */
+  readonly states: number
+  /** The pages it reached, sorted, so it compares against `SITE_PATHS` as written. */
+  readonly routes: readonly string[]
+}
+
+/**
+ * What a sweep reached, read off the sweep and compared against nothing.
+ *
+ * **Every rule in this route group that sweeps `servedPages` is of the form
+ * *nothing on this site is X*, and a sweep that came back with nothing
+ * satisfies all of them.** The guard against that was one line, in each of the
+ * files that had one:
+ *
+ * ```ts
+ * expect(pages).toHaveLength(SERVED_STATE_COUNT)
+ * ```
+ *
+ * `SERVED_STATE_COUNT` is computed by this module out of `SITE_ROUTES` and
+ * `ASK_STATES`, so when either goes empty the sweep returns nothing, the
+ * constant is zero, and the line passes. It is this lane's 27 September filing
+ * — *a test whose expected value came from the code under test* — sitting in
+ * the one assertion written to prevent it.
+ *
+ * **Measured on 23 October rather than argued**, with `SITE_ROUTES` emptied and
+ * the seven sweep files run against a site with no pages:
+ *
+ * | | |
+ * | --- | --- |
+ * | tests named for holding the sweep that were **green** | **2 of the 6 that existed** — `budget.test.ts` and `routes.test.ts`; the four that went red are the four given a hand-written floor on 22 October |
+ * | rules of the form *nothing on this site is X* that were **green** | **6**, four of them `budget.test.ts`' ceilings and one `routes.test.ts`' whole point |
+ * | `docs-pages.test.ts` on a sweep that lost **a third of the site** | **29 of 29 green** — it had no guard at all |
+ *
+ * The seven files did go red, which is the thing that made this look held: they
+ * went red on `voice.test.ts`' maintainer's-line assertions, on `naming.test.ts`'
+ * `PAGE_NAMES` list, on `docs-pages.test.ts`' deep-link floor. **Not one of
+ * those failures says the sweep came back with nothing** — they say this site
+ * stopped carrying the maintainer's own line and stopped linking into the
+ * documentation, which sends the next run reading copy and bands. The reason is
+ * the thing a guard buys, and `docs-pages.test.ts`' own docblock is where that
+ * argument was already written down.
+ *
+ * ## It hands back a reading and never an expectation
+ *
+ * That is the line that keeps this out of the trap above. Both fields are
+ * counted off the array it was given. The values they are compared against are
+ * `SERVED_STATE_COUNT` for the arithmetic, `SITE_PATHS` from the module that
+ * *declares* the site, and `PAGES_AT_LEAST`, which is hand-written and the only
+ * number in the pair that nothing computes — so on a site with no pages the
+ * first comparison still passes and the floor is what fails. A caller states
+ * all three, because what makes this a check is a caller saying what it
+ * expected to look at: the position the head of this module takes, unchanged.
+ *
+ * ## What it does not do
+ *
+ * **It does not refuse a thin sweep.** `servedPages` throwing on one is the
+ * shape that would make the guard unforgettable, and `docs-pages.test.ts` is
+ * the measured proof that a caller-stated guard is a guard a caller can forget.
+ * It is not taken here because it would make the floor below unreachable in
+ * every caller, and a dead assertion is worse than an absent one. It is filed
+ * with the measurement that argues for it.
+ */
+export const sweepCover = (pages: readonly ServedPage[]): SweepCover => ({
+  states: pages.length,
+  routes: [...new Set(pages.map((page) => page.route.path))].sort(),
+})
+
 /** What a sweep over the states above found, counted per state rather than in total. */
 export type SweepShare = {
   /**

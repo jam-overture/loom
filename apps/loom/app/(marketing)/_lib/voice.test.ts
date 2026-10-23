@@ -3,8 +3,8 @@ import { beforeAll, describe, expect, it } from "vitest"
 
 import { MAINTAINERS_OWN, PACKAGES, RESERVED_VOCABULARY } from "./copy"
 import { pageTreeFor, treeFor } from "./render"
-import { SERVED_STATE_COUNT, servedPages, sweepShare, type ServedPage } from "./served"
-import { DEFAULT_THEME, HOME, SITE_ROUTES, type SiteRoute } from "./site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, sweepShare, type ServedPage } from "./served"
+import { DEFAULT_THEME, HOME, PAGES_AT_LEAST, SITE_PATHS, SITE_ROUTES, type SiteRoute } from "./site"
 import { readerCopy, sentencesOf, uses, wordCountOf, wordsOf, type ReaderString } from "./words"
 
 /**
@@ -487,22 +487,20 @@ describe("every string a reader reads", () => {
    * reasoning.
    */
   it("looked at every page of this site, in every state, and none of them came back quiet", () => {
-    expect(pages.length).toBe(SERVED_STATE_COUNT)
-
     /**
      * The sweep reached every page, which is the half a per-state floor cannot
      * see: a sweep that stopped building one route of three keeps two thirds of
      * its average and is still broken.
      *
-     * Three is the hand-written number here and it is the right one to write by
-     * hand. It moves when a page is added to this site or retired from it,
-     * which is a deliberate act somebody is already thinking about, and never
-     * when the sweep is crossed with one dimension more or less.
+     * The walk this file wrote by hand is `sweepCover` as of 23 October, which
+     * has the measurement of what the one-line version let through. The floor
+     * is `PAGES_AT_LEAST` and is still the only number in the pair that nothing
+     * computes.
      */
-    expect([...new Set(pages.map((page) => page.route.path))].sort()).toEqual(
-      [...SITE_ROUTES.map((route) => route.path)].sort()
-    )
-    expect(SITE_ROUTES.length).toBeGreaterThanOrEqual(3)
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
 
     /**
      * 97 strings a state on 22 October, the smallest state carrying 54 — so a
