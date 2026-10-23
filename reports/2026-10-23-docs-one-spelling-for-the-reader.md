@@ -342,7 +342,7 @@ Standing entries this run met again and did not duplicate:
 last thing on its line, with nothing else running beside it.
 
 - framework: **235 files, 5,593 tests passed**
-- application: **351 files, 6,272 tests passed**
+- application: **351 files, 6,273 tests passed**
 - `findings:check`: 1,290 findings, 0 malformed
 - `reports:check`: 1,944 visuals, none over 1.1MB, 409 cited by no file
 - `prerender:check`: 133 prerendered pages, 1,918 text junctions, 0 run
@@ -399,12 +399,15 @@ module and the test now say so rather than implying the test covers it. What is
 load-bearing is that **no matcher is exported**, so a future `test` cannot be
 written against a shared one.
 
-**Two full runs, and the second is the one quoted.** The first was green on the
-code alone. The second was run over the committed tree, with the report, the
-findings entries and the pictures in it. What was written after it is **this
-report's preview URL and pull-request number**, which cannot be known until the
-pull request exists, and the two prose corrections listed in the commit that
-carries them.
+**Three full runs, and the third is the one quoted.** The first was green on
+the code alone. The second was over the committed tree with the report, the
+findings and the pictures in it, and its numbers were the ones this section
+first carried. The third followed the mutation work above — a test was added
+after a mutation survived, so the second run's count was no longer the tree's —
+and it is this one: 5,593 and **6,273**, one more than the run before it.
+
+What was written after the third run is **this report's preview URL and
+pull-request number**, which cannot be known until the pull request exists.
 
 Every exit code here was read out of a file written as the last thing on its
 line, with nothing piped into `tail` or `tee`.
