@@ -58596,9 +58596,20 @@ why it is not bundled in.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/action-change.ts`, `pace-change.ts`, `copy-change.ts`) ·
-**Status:** open — **the half of the 21 October finding
-[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
-did not take**, narrowed by it and not resolved
+**Status:** **closed by `signals-48-what-two-forms-say-and-how-much-of-each-is-read`
+(#697)**, record
+[0306](decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)
+— with **two corrections to this entry.** The third module named here is wrong:
+`copy-change.ts` publishes a difference and not a quotient, and its `null` has
+one meaning. The third copy of the helper was in `funnel-change.ts`, which this
+entry does not name, so the fields were eight rather than six and the figure a
+deployment opens the portal for was one of them. And the shape proposed below —
+a tagged absence — turned out to be necessary rather than merely tidier, because
+one of the eight cannot be read off the two sides at all: `usesPerReader` is
+withheld at a *measured* nought on purpose (0242), so a surface deriving the
+reason would call *readers used this twice each and do not touch it now*
+unmeasured. The order this entry set was otherwise followed exactly: one record
+over all three, one helper in a new figures module, a fixture per branch
 
 Three comparisons of two windows share one helper, spelled once per module:
 
@@ -58667,3 +58678,278 @@ for and this one does not.
 
 Noted rather than built because it is a drawing decision and the portal is
 paused; a finding against a paused routine is still filed and waits.
+
+---
+## 2026-10-22 (evening) — the words half of the form comparison is built, and the three readings of one pair of forms have three different answers about the page
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/form-copy.ts`) ·
+**Status:** **closes the open half of the 21 October entry** *the action half of
+the form comparison is built, the words half is still a mirror*, in
+`signals-48-what-two-forms-say-and-how-much-of-each-is-read`, record
+[0305](decisions/0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md)
+
+The third of the three readings 0302 named is `formCopyComparisonOf`. The filing
+entry said it cost its figure and its own silences and that nothing about it was
+a decision. **Two things about it were**, and both are the kind that would have
+been settled wrongly inside a pull request.
+
+**The unit is not the shared part.** Reach and action compare every part both
+forms have, because a part is the same part whatever the deltas did to it. Two
+forms' *text* differs by construction (0263), so a band the deltas reworded is
+two pieces of text with two word counts and a word-weighted figure over it reads
+two populations and two passages at once. The comparable unit is the passage both
+forms say **the same way**; the rest is reported — `reworded` with both counts
+and the form that says more, `onlyIn` with the form that has it, and a census
+that accounts for every word each form says.
+
+**The direction of the figure is not read off the figure.** A floored word count
+(0122) is the same understatement on both sides of a shared passage, so it scales
+the gap toward nought and can report nought where the hidden words differ; the
+two reaches are exact whatever a library has declared. So `favours` comes off the
+reaches and the magnitude off the words, which is this reading's one departure
+from its two siblings and is the field a surface drawing a half-declared page
+should trust.
+
+### What the three readings now say about the page as a whole
+
+Worth having in one place, because they look alike and are three arguments:
+
+| reading | the page |
+| --- | --- |
+| reach (0302) | **refused** — a mean over parts counts one reader once per part, and two forms have two sets of parts |
+| what readers did (0303) | **one row** — every action is strictly inside the root, so the root's own row is one division per side |
+| what the forms say (0305) | **a sum over words** — a passage's words are its own, so they partition the page exactly once and no reader is counted twice |
+
+And the trap the third one carries: **the page's gap is not the sum of the rows'
+gaps.** Every row's gap is unsigned, so two passages favouring opposite forms add
+there and cancel here — twelve against four in this unit's own fixture. A screen
+that summed the rows and called it the page would be reporting *how far apart the
+two forms are read, passage by passage* and labelling it *how much of the shared
+page each form's reader gets to*.
+
+**Nothing is left of the filing entry.** All three readings of one pair of forms
+are built, over one pairing rule published once in `audiences.ts`.
+
+---
+## 2026-10-22 (evening) — three form comparisons are built and no screen draws any of them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken and nothing is failing; it is the open question with the most
+built behind it
+
+`formComparisonOf` (0302), `formActionComparisonOf` (0303) and
+`formCopyComparisonOf` (0305) now answer, for two forms of one page: *do these
+readers reach the same parts, do they do the same things inside them, and do they
+get told the same words.* Each publishes a census that survives a window nobody
+read, a per-part or per-passage row with a withholding rule, and a closed set of
+reasons a figure is absent that maps onto conditions a surface already has
+sentences for.
+
+**No surface reads one field of any of them.** The three earlier entries this
+lane filed against this routine — a readership comparison's census, a door read
+over two forms, and a form comparison's count of parts falling each way — are the
+same gap at a smaller scale, and this one supersedes none of them.
+
+**What a screen would need and already has.** The two sides are named and
+ordered by audience id before anything is read off either, so a card has two
+column headings and no decision to make about which is first. `counted` and
+`wordsCounted` are a four-way census over one set, which is a bar and not a mean.
+`sharpest` is the one row somebody would act on. `silence` is one line per state
+through `describeFormCopySilence`, and `meaningOfFormCopySilence` gives the
+condition and the subject for a card drawing two readings at once.
+
+**One drawing decision is this reading's own**, and it is the reason this entry
+names a field rather than asking for a page: under a floor the page figures are
+absent and every row still carries a `gap` and a `favours`. A card that draws the
+rows and the page total from one object has to say *these rows are a floor and
+the total is withheld* rather than drawing an empty headline over full rows.
+
+Filed against a paused routine, which still waits.
+
+---
+## 2026-10-22 (evening) — a decision link whose slug is guessed from the record's subject reads identically in a diff to one that resolves
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed on filing** in `signals-48-what-two-forms-say-and-how-much-of-each-is-read`
+— nothing is left to do but keep doing it, and it is filed because the mistake is
+cheap to repeat and was caught by a gate rather than by reading
+
+`tools/decisions/decisions.test.ts` went red on the new module's own
+documentation for two links out of eleven:
+
+```
+src/signals/form-copy.ts links 0122 to 0122-a-primitive-declares-which-of-its-props-are-copy.md
+src/signals/form-copy.ts links 0242 to 0242-what-readers-do-inside-a-part-is-a-share-of-the-readers-who-reached-it.md
+```
+
+Both slugs are **what the record is about**, written from memory of the
+subsystem rather than copied. The real ones are
+`0122-a-primitive-says-which-of-its-props-a-reader-reads.md` and
+`0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md`. The
+nine that resolved were copied from sibling modules; the two that did not are
+the two no sibling happened to link.
+
+**Why it is worth an entry rather than a quiet fix.** A guessed slug is quicker
+to type than a looked-up one, it is syntactically perfect, it reads as a correct
+citation in a review, and the number in front of it is right — so the only thing
+standing between it and a dead link on the documentation site is a gate that
+runs in `pnpm verify` and nowhere else. **The rule, for this lane:** a record
+link is copied from `ls decisions/` or from a sibling module, never typed from
+the record's subject. The number may be typed; the slug may not.
+
+---
+## 2026-10-22 — an eleventh counted reading of the mangling: all three links mangled at 151, 178 and 214, so the bracket is not a threshold and the quote run does not track length
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 19 October entry *a tenth counted reading of the mangling* and
+the 15 October entry on the bracket · **Status:** open — **a reading, not a
+claim**; it contradicts two sentences of the hypothesis and no remedy changed
+
+#697's first body carried three markdown links of the shape
+`github.com/jam-overture/loom/blob/<branch>/<path>`, two on this branch and one
+on `main`. **All three came back mangled**, wrapped in the quote runs the earlier
+readings describe:
+
+| Characters | Branch | Quote run | Outcome |
+| --- | --- | --- | --- |
+| 151 | `main` | `` ``''…''`` `` (2) | **mangled** |
+| 178 | this one | ` ````''''…''''```` ` (4) | **mangled** |
+| 214 | this one | ` ```'''…'''``` ` (3) | **mangled** |
+
+**Two sentences of the open hypothesis do not survive this body.**
+
+- **The bracket is not a threshold.** The 15 October entry brackets it as clean
+  at 152 and mangled at 155. A **151**-character link mangled here, one shorter
+  than the longest known clean one, in a body where nothing is longer than the
+  two that mangled around it. So length is at most a factor and is not the
+  decision, and the bracket should be read as *no clean link is known above 155*
+  rather than as *links below 152 are safe*.
+- **The quote-run count does not track length.** The tenth reading noted the run
+  rising with length — two backticks at 160, four at 189. Here the **178**
+  took four and the **214** took three, which is the wrong way round.
+
+**One thing no earlier reading records.** The run around the 214 engulfed the
+link's **text and the comma after it** — `` ```'''[0305](https://…),'''``` `` —
+rather than the URL alone. Whatever does this is not operating on URLs; it is
+wrapping a span that can include markdown either side of one.
+
+**The remedy is unchanged and cost one call.** The body was corrected in the same
+turn with all three written as plain repository paths, which is what the tenth
+reading settled on for this lane and what I should have done in the first body:
+every signals branch name is long enough to put every link past the bracket. The
+rule for this lane is now **no `github.com/.../blob/...` link in a pull request
+body at all** — a path, which the reader can click in the diff anyway.
+
+---
+## 2026-10-23 — a distance of nought where there is no distance, guarded by a silence rather than withheld
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-reach-change.ts`, `library-word-reach-change.ts`) ·
+**Status:** open — found while taking 0306 and deliberately left, because it is
+two library rolls rather than the three comparisons that record is about
+
+`weightMovedOver` is the figure two library rolls publish as `weightMoved`, and
+it opens with
+
+```ts
+if (totals.was === 0 || totals.now === 0) return 0
+```
+
+A side with no weight at all has **no distance to report**, and a nought here is
+the one value a surface reads as *the weights did not move*. Its own
+documentation says the state is *accounted for by a silence*, which is the exact
+sentence
+[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
+was written about one level down: a silence that names a state while the figure
+beside it is still computed leaves a card drawing the rows a wrong sentence to
+print.
+
+**It may also be unreachable**, which is the other half of the finding and the
+reason it is worth an entry rather than a quiet change. Both callers compute
+`weightMoved` only where their silence is `null`, and a roll with no weight on a
+side plausibly cannot be measured — in which case the clause is one nothing can
+falsify, which is its own fault (0231). Neither suite has a case that reaches it;
+`weightMovedOver` is exported and has no direct test of its own.
+
+**What it needs.** One run to establish which of the two it is, and then either a
+fixture that reaches it and a `null` in place of the nought, or the clause
+deleted. The field is already `number | null` in both rolls, so withholding costs
+no published type. Not folded into 0306: that record is about a quotient of two
+figures and this is a sum of absolute differences, and the two readings are a
+different pair of modules.
+
+---
+## 2026-10-23 — every ratio a comparison publishes is a pair now, and a card drawing one reads two fields
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken and nothing is failing; it is what a screen has to do with
+[0306](decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)
+
+Eight published fields changed shape on three comparison types:
+`ActionChange.shareRatio` and `usesRatio`, `PaceChange`'s `paceRatio`,
+`timeRatio` and `needRatio`, and `FunnelChange`'s `rateRatio`, `entryRatio` and
+`conversionRatio`. Each is now `{ ratio, absent }`, with exactly one of the two
+non-null, and `describeRatioAbsence` gives a line per absence.
+
+**What it buys a screen.** *Nobody acted in this band and four in ten do now* and
+*nothing here can be compared* were one value and are now two. The first is
+`from-nothing` with a later side above nought, and it is the state a
+before-and-after exists for — a card that drew a bare `null` as a dash was
+drawing the most interesting row on the page as the least.
+
+**The one drawing decision.** `from-nothing` has no number to rank by while being
+the row somebody most wants ranked first, so a card sorting by the quotient drops
+it to the bottom or off the list. The two sides are both published beside it, so
+*from nothing to four in ten* is sayable without a ratio; whether such a row
+sorts by the later side's figure, pins to the top, or sits in a band of its own
+is a decision about what a surface draws and is not this lane's.
+
+Filed against a paused routine, which still waits.
+
+---
+## 2026-10-23 — a commit authored as `jpizzolato36@gmail.com` deployed a preview, where `routines.md` says that identity is refused
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — **one reading against a written environment rule**, not a
+request to change it; nothing is broken and no preview is missing
+
+`docs/routines.md`, under *Commit identity, and the preview that goes missing*,
+is unambiguous: **do not set a commit author**, because a run that reaches for
+the address its session opens with gets Vercel's
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+and the symptom is a pull request with no preview URL. The section says the trap
+has been recorded seven times, and it names two identities that *are* known to
+deploy: the session default, `Claude <noreply@anthropic.com>`, and
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`.
+
+**On #697 the refused identity deployed.** The branch carries four commits from
+two runs of this lane. The first three are `Claude <noreply@anthropic.com>`; the
+fourth, `77588870`, is authored
+
+```
+Loom signals <jpizzolato36@gmail.com>
+```
+
+and Vercel's combined status for that exact head is `success` —
+*Deployment has completed* — with the branch alias serving it. No `Blocked`, and
+the per-commit deployment is in Vercel's own comment on the pull request.
+
+**What this does and does not establish.** It is one reading, and the honest
+reading of it is *that address is not refused today* rather than *the section is
+wrong*: a team membership or a project setting may have changed in the six weeks
+since the section was written, which is exactly what nobody can tell from
+inside a run. Two things follow for whoever owns the file:
+
+- The section's **instruction is still the cheap one** and should stand. "Use
+  whatever the session is configured with" costs nothing and cannot regress,
+  whatever Vercel's team list says this week.
+- Its **explanation now has a counter-example**, and a run that reads the
+  section as *this address cannot deploy* will mis-diagnose the next missing
+  preview. The sentence worth having is that the author line is the **first
+  thing to check** when a preview is missing, not that one address always fails.
+
+Filed rather than edited: `docs/routines.md` is not this lane's file, and a
+governance section is not something a routine rewrites on one observation.

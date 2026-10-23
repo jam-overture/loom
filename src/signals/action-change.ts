@@ -11,6 +11,7 @@ import {
   type ComparedAudiences,
 } from "./audiences.js"
 import type { PageReading } from "./parts.js"
+import { ratioOf, type Ratio } from "./ratios.js"
 
 /**
  * What a change made readers *do*, rather than what it made them see.
@@ -85,10 +86,11 @@ import type { PageReading } from "./parts.js"
  * requires the earlier side to be `untouched`, which requires it to have borne
  * parts then — so a part that gained an inside **cannot** be reported as taken
  * up, by construction rather than by a guard. What it can do is carry a share
- * where the earlier side withheld one, and that is why `shareRatio` is `null`
- * across every `gained` and every `lost`: the ratio exists only where both sides
- * measured the same thing, which is `kept`. Both are properties of the code
- * rather than claims about it, and both are pinned by tests.
+ * where the earlier side withheld one, and that is why `shareRatio` holds no
+ * quotient across every `gained` and every `lost`, and says `unmeasured` where
+ * it does not: the quotient exists only where both sides measured the same
+ * thing, which is `kept`. Both are properties of the code rather than claims
+ * about it, and both are pinned by tests.
  *
  * ## What survives a sender that does not walk, and what does not
  *
@@ -110,11 +112,11 @@ import type { PageReading } from "./parts.js"
  * **Nothing here enforces that division.** `pageActionOf` withholds every share
  * and calls nothing `untouched` in such a window (0304), so every movement
  * across it falls to `unknown` through `movementOf`'s existing collapse and
- * every `shareRatio` to `null` through `ratioOf`'s, which is why there is no
- * `walked` clause anywhere below. The fault is a property of the window rather
- * than of any part, and a rule spelled here as well would be a second rule for
- * a standing `pageActionOf` has already published — the fault this subsystem
- * has been bitten by twice (0218, 0235).
+ * every `shareRatio` to `unmeasured` through the shared helper's first clause,
+ * which is why there is no `walked` clause anywhere below. The fault is a
+ * property of the window rather than of any part, and a rule spelled here as
+ * well would be a second rule for a standing `pageActionOf` has already
+ * published — the fault this subsystem has been bitten by twice (0218, 0235).
  *
  * Pure, linear in the parts of the two readings, and reaches no store, clock or
  * DOM, so it adds nothing to the broadcaster's import graph.
@@ -359,9 +361,10 @@ export type InsideMovement =
    *
    * The movement cannot be fooled by it: `taken-up` needs the earlier side to
    * have borne parts, so it is unreachable here. The **share** can be, which is
-   * why {@link ComparedAction.shareRatio} is `null` on every part whose inside
-   * moved, and why a surface drawing a bare `now.share` beside an absent
-   * `was.share` needs this member to say what the absence was.
+   * why {@link ComparedAction.shareRatio} holds no quotient on any part whose
+   * inside moved, and why a surface drawing a bare `now.share` beside an absent
+   * `was.share` needs this member to say what the absence was: the ratio says
+   * only that one side did not measure it.
    */
   | "gained"
   /** It bore element parts and is now a leaf, so a share that was a measurement is withheld. */
@@ -414,8 +417,8 @@ export type ComparedAction = {
   /** What the change did to whether a share of this part is measurable at all. */
   readonly inside: InsideMovement
   /**
-   * `now.share ÷ was.share`, and `null` where either side withheld a share or
-   * the earlier one is nought.
+   * `now.share ÷ was.share`, with the reason named where there is no quotient
+   * (0306).
    *
    * **The one ratio here that is sound across two windows.** Each side's share
    * is two distinct view counts off one row, so each window's straddle (0147)
@@ -424,32 +427,39 @@ export type ComparedAction = {
    * counts themselves is refused by this module and not published anywhere on
    * this type.
    *
-   * Nought on the earlier side is `null` rather than infinity: *nobody acted
-   * here and now somebody does* is {@link movement}'s answer, and a ratio is a
-   * figure a surface divides and ranks by.
+   * Nought on the earlier side is `from-nothing` rather than infinity: *nobody
+   * acted here and now somebody does* is {@link movement}'s answer and the two
+   * sides', and a quotient is a figure a surface divides and ranks by.
    *
-   * It is **non-null only where {@link inside} is `kept`**, which falls out of
-   * the two sides' shares being withheld on a leaf and is not a separate rule: a
-   * ratio across a part whose shape changed would be a ratio of two different
-   * measurements.
+   * It holds a number **only where {@link inside} is `kept`**, which falls out
+   * of the two sides' shares being withheld on a leaf and is not a separate
+   * rule: a ratio across a part whose shape changed would be a ratio of two
+   * different measurements. Those are `unmeasured`, and {@link inside} says
+   * which direction the shape moved in.
    *
-   * `null` across an {@link ActionChangeSilence} of `unwalked` for the same
-   * reason and by the same route: that window has no share to give (0304).
+   * `unmeasured` across an {@link ActionChangeSilence} of `unwalked` by the
+   * same route: that window has no share to give (0304).
    */
-  readonly shareRatio: number | null
+  readonly shareRatio: Ratio
   /**
-   * `now.usesPerReader ÷ was.usesPerReader`, and `null` where either side used
-   * nothing or reached nobody.
+   * `now.usesPerReader ÷ was.usesPerReader`, with a nought a side withheld
+   * restored first (0306).
    *
    * Occurrences per reader on each side, so each term has its own window's
    * straddle divided out of it and the ratio stands. **An intensity and not a
    * rate** on both sides (0242), so this is how much more each reader used a
    * part and never how many more readers did.
    *
+   * A side that reached readers and was used by none of them counts as a nought
+   * here, where the reading itself withholds the figure: a part nobody touched
+   * and four presses a reader now is `from-nothing`, and a part readers used
+   * and have stopped using is a quotient of nought. `unmeasured` is a side with
+   * no readers to divide by, which is the one state neither window measured.
+   *
    * The figure here that survives `unwalked`, because the four occurrence
    * counters are filed against the part a reader used and need no ancestry.
    */
-  readonly usesRatio: number | null
+  readonly usesRatio: Ratio
 }
 
 /**
@@ -594,14 +604,22 @@ const insideOf = (was: boolean, now: boolean): InsideMovement => {
 }
 
 /**
- * A ratio of two figures from the two sides, or `null` where there is none.
+ * One side's occurrences per reader, with a nought it withheld restored.
  *
- * `pace-change.ts`'s rule, applied to the two figures here whose terms each have
- * their own window's straddle divided out of them. Nought on the earlier side is
- * `null` rather than infinity, for the reason the field documentation gives.
+ * `PartAction.usesPerReader` is withheld at `uses` of nought on purpose, and
+ * the reason is about one window: a nought there is the ordinary state of every
+ * heading on a page, and `uses` beside it already says so (0242). Across two
+ * windows that withholding is the wrong term: *readers used this twice each and
+ * do not touch it now* is a measurement on both sides, and handed an absence
+ * the ratio would call it unmeasured.
+ *
+ * So a side that reached readers and was used by none of them is a nought here,
+ * and a side with no readers to divide by stays absent. The field itself is
+ * published unaltered, because a card drawing one window has `uses` next to it
+ * and this one does not.
  */
-const ratioOf = (was: number | undefined, now: number | undefined): number | null =>
-  was === undefined || now === undefined || was === 0 ? null : now / was
+const intensityOf = (part: PartAction): number | undefined =>
+  part.usesPerReader ?? ((part.reached ?? 0) > 0 ? 0 : undefined)
 
 /** Every part of a reading of what readers did, keyed by node. */
 const partsOf = (page: PageAction): ReadonlyMap<NodeId, PartAction> => {
@@ -726,7 +744,7 @@ export const actionChangeOf = (was: PageReading, now: PageReading): ActionChange
       movement: movementOf(before.standing, part.standing),
       inside: insideOf(before.bearsParts, part.bearsParts),
       shareRatio: ratioOf(before.share, part.share),
-      usesRatio: ratioOf(before.usesPerReader, part.usesPerReader),
+      usesRatio: ratioOf(intensityOf(before), intensityOf(part)),
     })
   }
 

@@ -10,6 +10,7 @@ import {
   type ComparedAudiences,
 } from "./audiences.js"
 import type { PageReading } from "./parts.js"
+import { ratioOf, type Ratio } from "./ratios.js"
 import {
   paceStandingOf,
   readingPaceOf,
@@ -391,30 +392,35 @@ export type ComparedPace = {
   readonly now: PacedPart
   readonly movement: PaceMovement
   /**
-   * `now.pace ÷ was.pace`, and `null` where either side has none or the earlier
-   * one is nought.
+   * `now.pace ÷ was.pace`, with the reason named where there is no quotient
+   * (0306).
    *
    * Exactly {@link timeRatio} ÷ {@link needRatio}, which is the identity this
    * module is built on: a pace moves because readers' time moved, because the
-   * words moved, or both.
+   * words moved, or both. The identity holds over the quotients and not over
+   * the absences: a part whose words were wordless then and are not now has no
+   * pace to divide and three absences that do not multiply.
    */
-  readonly paceRatio: number | null
+  readonly paceRatio: Ratio
   /**
    * `now.spentMs ÷ was.spentMs` — the readers' side of the division.
    *
    * Each term is a mean off one side's own row, so each side's straddle has
-   * very nearly divided out before they meet. `null` where either side had no
-   * reader, or the earlier one no time at all.
+   * very nearly divided out before they meet. `unmeasured` where either side
+   * had no reader, and `from-nothing` where the earlier window's readers spent
+   * no measurable time at all.
    */
-  readonly timeRatio: number | null
+  readonly timeRatio: Ratio
   /**
    * `now.needMs ÷ was.needMs` — the page's side of the division.
    *
    * Exact and reader-free: it is what the change did to the time this part's
-   * words ask for. Below 1 is a part the change shortened. `null` where the
-   * earlier revision's part said nothing.
+   * words ask for. Below 1 is a part the change shortened, and `from-nothing`
+   * is a part the earlier revision left wordless — which is a fact about the
+   * change rather than about a window, and the one absence here no reader can
+   * cause.
    */
-  readonly needRatio: number | null
+  readonly needRatio: Ratio
   /** The later window's time against the earlier revision's words — the readers alone. */
   readonly ifWordsHeld: PaceHeld
   /** The earlier window's time against the later revision's words — the change alone. */
@@ -598,16 +604,6 @@ const movementOf = (was: PaceStanding, now: PaceStanding): PaceMovement => {
 
   return hadTime(now) ? "held" : "rushed"
 }
-
-/**
- * A ratio of two figures from the two sides, or `null` where there is none.
- *
- * Nought on the earlier side is `null` rather than infinity: *it was nothing
- * and now it is something* is a movement the standings already report, and a
- * ratio is a figure a surface divides and ranks by.
- */
-const ratioOf = (was: number | null, now: number | null): number | null =>
-  was === null || now === null || was === 0 ? null : now / was
 
 /** One side's time against the other side's words, under either side's floor. */
 const heldOf = (spentMs: number | null, needMs: number, floored: boolean): PaceHeld => {

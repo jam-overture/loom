@@ -8,6 +8,7 @@ import {
   type ComparedAudiences,
 } from "./audiences.js"
 import { funnelPairKey, type FunnelReach, type PairReach } from "./funnel.js"
+import { ratioOf, type Ratio } from "./ratios.js"
 import type { FunnelPair } from "./rollup.js"
 
 /**
@@ -448,17 +449,24 @@ export type ComparedFunnel = {
    * of two figures that lean down** by an amount the deployment's rollup window
    * sets, which is what the bracket is for.
    *
-   * `null` where either side has no rate, and where the earlier one is nought:
-   * *nobody finished and now somebody does* is {@link movement}'s answer, and a
-   * ratio is a figure a surface divides and ranks by.
+   * `unmeasured` where either side has no rate, and `from-nothing` where the
+   * earlier one is nought: *nobody finished and now somebody does* is
+   * {@link movement}'s answer as well, and a quotient is a figure a surface
+   * divides and ranks by (0306).
    */
-  readonly rateRatio: number | null
+  readonly rateRatio: Ratio
   /**
    * The least the true ratio could be: `now.rate ÷ was.rateAtMost`.
    *
-   * `null` wherever {@link rateRatio} is, and wherever either side's ceiling is
-   * withheld — the ceiling is built from the door's drift, so it goes when the
-   * door does.
+   * `null` wherever {@link rateRatio} holds no quotient, and wherever either
+   * side's ceiling is withheld — the ceiling is built from the door's drift, so
+   * it goes when the door does.
+   *
+   * **A bound and not a figure of its own**, which is why it is a bare `null`
+   * where the ratio it brackets names its absence (0306): a bracket around a
+   * quotient that does not exist has nothing to say that the quotient has not
+   * said already, and a bracket missing where the quotient is there is the
+   * door's drift and nothing else.
    */
   readonly rateRatioAtLeast: number | null
   /** The most the true ratio could be: `now.rateAtMost ÷ was.rate`. `null` on the same terms. */
@@ -477,18 +485,18 @@ export type ComparedFunnel = {
    * `now.entry.share ÷ was.entry.share` — how much likelier an arrival is to
    * get to the first end.
    *
-   * `null` under any silence, where either side withheld the share, and where
-   * the earlier one is nought.
+   * `unmeasured` under any silence and where either side withheld the share,
+   * `from-nothing` where the earlier one is nought.
    */
-  readonly entryRatio: number | null
+  readonly entryRatio: Ratio
   /**
    * `now.conversion.share ÷ was.conversion.share` — how much likelier an
    * arrival is to finish, which is the figure a deployment means by *did the
    * change work*.
    *
-   * `null` on the same terms as {@link entryRatio}.
+   * Absent on the same terms as {@link entryRatio}.
    */
-  readonly conversionRatio: number | null
+  readonly conversionRatio: Ratio
   /**
    * The later window's reach at the earlier window's closing rate, as a share
    * of arrivals: the conversion share if only getting there had moved.
@@ -655,10 +663,6 @@ const movementOf = (was: PairReach, now: PairReach): FunnelMovement => {
   return before ? "abandoned" : "still-unconverted"
 }
 
-/** `null` rather than a division by nought, which is `movement`'s answer and not a ratio. */
-const ratioOf = (was: number | null, now: number | null): number | null =>
-  was === null || now === null || was === 0 ? null : now / was
-
 /**
  * Which side was enough on its own, by the direction each counterfactual
  * carries — the sufficiency rule the two earlier counterfactuals here publish
@@ -707,7 +711,7 @@ const comparedOf = (
    * so neither division here can be by nought.
    */
   const bracket =
-    rateRatio !== null && was.rate !== null && now.rate !== null
+    rateRatio.ratio !== null && was.rate !== null && now.rate !== null
       ? was.rateAtMost !== null && now.rateAtMost !== null
         ? {
             atLeast: now.rate / was.rateAtMost,
