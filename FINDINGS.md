@@ -58905,3 +58905,51 @@ sorts by the later side's figure, pins to the top, or sits in a band of its own
 is a decision about what a surface draws and is not this lane's.
 
 Filed against a paused routine, which still waits.
+
+---
+## 2026-10-23 — a commit authored as `jpizzolato36@gmail.com` deployed a preview, where `routines.md` says that identity is refused
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — **one reading against a written environment rule**, not a
+request to change it; nothing is broken and no preview is missing
+
+`docs/routines.md`, under *Commit identity, and the preview that goes missing*,
+is unambiguous: **do not set a commit author**, because a run that reaches for
+the address its session opens with gets Vercel's
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+and the symptom is a pull request with no preview URL. The section says the trap
+has been recorded seven times, and it names two identities that *are* known to
+deploy: the session default, `Claude <noreply@anthropic.com>`, and
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`.
+
+**On #697 the refused identity deployed.** The branch carries four commits from
+two runs of this lane. The first three are `Claude <noreply@anthropic.com>`; the
+fourth, `77588870`, is authored
+
+```
+Loom signals <jpizzolato36@gmail.com>
+```
+
+and Vercel's combined status for that exact head is `success` —
+*Deployment has completed* — with the branch alias serving it. No `Blocked`, and
+the per-commit deployment is in Vercel's own comment on the pull request.
+
+**What this does and does not establish.** It is one reading, and the honest
+reading of it is *that address is not refused today* rather than *the section is
+wrong*: a team membership or a project setting may have changed in the six weeks
+since the section was written, which is exactly what nobody can tell from
+inside a run. Two things follow for whoever owns the file:
+
+- The section's **instruction is still the cheap one** and should stand. "Use
+  whatever the session is configured with" costs nothing and cannot regress,
+  whatever Vercel's team list says this week.
+- Its **explanation now has a counter-example**, and a run that reads the
+  section as *this address cannot deploy* will mis-diagnose the next missing
+  preview. The sentence worth having is that the author line is the **first
+  thing to check** when a preview is missing, not that one address always fails.
+
+Filed rather than edited: `docs/routines.md` is not this lane's file, and a
+governance section is not something a routine rewrites on one observation.
