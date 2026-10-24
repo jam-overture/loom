@@ -156,7 +156,7 @@ describe("SignInHero", () => {
   })
 
   /**
-   * 0304: once a deployment takes passwords, they lead, and the minted key is
+   * 0310: once a deployment takes passwords, they lead, and the minted key is
    * folded beneath them rather than gone, because accounts the command line
    * made still sign in with one.
    */

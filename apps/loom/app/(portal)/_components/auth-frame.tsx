@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 
 /**
  * The frame every signed-out screen shares: signing in, opening an account,
- * and getting back in after a password is lost (0304).
+ * and getting back in after a password is lost (0310).
  *
  * One frame so the four read as one place. The banner is the page's to pass,
  * because the rule that every screen a stranger can reach says the portal is

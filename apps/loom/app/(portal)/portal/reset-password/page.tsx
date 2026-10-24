@@ -7,7 +7,7 @@ import { SIGN_IN_PATH } from "@/app/(portal)/_lib/auth/paths"
 import { ResetPasswordForm } from "./_components/reset-password-form"
 
 /**
- * Where a recovery link lands (0304).
+ * Where a recovery link lands (0310).
  *
  * It does not turn a signed-in person away, unlike the other ways in: a
  * person who follows a reset link means to change the password, whoever the

@@ -35,7 +35,7 @@ export type SignInOutcome<TFailure = string> =
    * apart from the log failing because the reasons are the checker's to
    * name: a key lookup fails as a sentence, and a password provider fails as
    * *that address is not confirmed* or *slow down*, which a form says
-   * differently (0304). Nothing is counted either way.
+   * differently (0310). Nothing is counted either way.
    */
   | { readonly code: "unverified"; readonly failure: TFailure }
 

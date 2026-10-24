@@ -60,7 +60,7 @@ export type SignInProblem =
    * else's infrastructure.
    */
   | { readonly code: "unavailable" }
-  /** The password was right and the address has not been confirmed from its inbox yet (0304). */
+  /** The password was right and the address has not been confirmed from its inbox yet (0310). */
   | { readonly code: "unconfirmed" }
   /** The password provider asked us to slow down. Not counted: it is not the caller's guess. */
   | { readonly code: "busy" }
@@ -218,7 +218,7 @@ const parseActor = (actor: string): Actor => {
  */
 const trustedHops = resolveTrustedHops(process.env.LOOM_PORTAL_TRUSTED_PROXY_HOPS)
 
-/** Who holds passwords, or `undefined` until the deployment names a provider (0304). */
+/** Who holds passwords, or `undefined` until the deployment names a provider (0310). */
 const passwordAuth = (() => {
   const config = readPasswordAuthConfig({
     [SUPABASE_URL_KEY]: process.env.LOOM_SUPABASE_URL,
@@ -333,7 +333,7 @@ export const signIn = (key: string): Promise<SignInResult> =>
   )
 
 /**
- * Signing in with an email address and a password (0304).
+ * Signing in with an email address and a password (0310).
  *
  * The provider checks the password; this checks the address is one the
  * deployment lets in. **An address that is not allowed is a wrong password**,

@@ -6,7 +6,7 @@ import { signUp } from "@/app/(portal)/_lib/auth/identity"
 import { SIGN_IN_PATH } from "@/app/(portal)/_lib/auth/paths"
 
 /**
- * Opening an account with an email and a password (0304).
+ * Opening an account with an email and a password (0310).
  *
  * The confirmation email links back to the sign-in page on the host the
  * person is on, so a preview deployment confirms into itself. The provider

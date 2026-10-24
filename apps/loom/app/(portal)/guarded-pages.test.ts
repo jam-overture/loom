@@ -49,7 +49,7 @@ const APP = join(process.cwd(), "app", "(portal)")
  * What is left is the sign-in page itself, which cannot require an actor to
  * ask for one.
  *
- * **Three joined it on 22 October** (0304): opening an account, asking for a
+ * **Three joined it on 22 October** (0310): opening an account, asking for a
  * recovery link, and the page that link opens. Each is a way of getting a
  * session for somebody who has none, which is the sign-in page's own reason.
  *

@@ -1,5 +1,5 @@
 /**
- * The token a password-recovery link carries (0304).
+ * The token a password-recovery link carries (0310).
  *
  * The provider puts it in the address's fragment — `#access_token=…&type=recovery`
  * — which never reaches a server, so the page it lands on reads it in the

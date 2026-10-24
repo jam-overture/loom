@@ -6,7 +6,7 @@ import { requestRecovery } from "@/app/(portal)/_lib/auth/identity"
 import { RESET_PASSWORD_PATH } from "@/app/(portal)/_lib/auth/paths"
 
 /**
- * Asking for a link to set a new password (0304).
+ * Asking for a link to set a new password (0310).
  *
  * **One answer whatever happened**, so the form cannot be asked which
  * addresses have accounts; only a malformed address is told so, which reveals

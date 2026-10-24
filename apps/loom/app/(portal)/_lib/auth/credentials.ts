@@ -4,7 +4,7 @@ import { actorSchema, type Actor } from "./accounts"
 
 /**
  * What a person types to sign up, sign in and recover a password, and which
- * addresses this deployment lets in (0304).
+ * addresses this deployment lets in (0310).
  *
  * Pure, like `throttle.ts` beside it: no clock, no IO and no `process.env`, so
  * every rule a person meets on the forms is tested without a request.

@@ -21,7 +21,7 @@ export const SIGN_IN_PATH = "/portal/sign-in"
  */
 export const WORKSPACE_PATH = "/portal"
 
-/** Opening an account, asking for a recovery link, and the page that link opens (0304). */
+/** Opening an account, asking for a recovery link, and the page that link opens (0310). */
 export const SIGN_UP_PATH = "/portal/sign-up"
 export const FORGOT_PASSWORD_PATH = "/portal/forgot-password"
 export const RESET_PASSWORD_PATH = "/portal/reset-password"

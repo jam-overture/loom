@@ -34,7 +34,7 @@ import { KeySignInForm, PasswordSignInForm } from "./sign-in-form"
  * ordinary RTL rather than through an async import dance.
  *
  * **An email and a password lead** once a deployment names who holds
- * passwords (0304); the minted key is folded beneath them, and leads only on a
+ * passwords (0310); the minted key is folded beneath them, and leads only on a
  * deployment that has not.
  */
 export const SignInHero = ({
@@ -44,7 +44,7 @@ export const SignInHero = ({
 }: {
   readonly readout: AuthReadout
   readonly destination: string
-  /** Whether this deployment takes passwords (0304). */
+  /** Whether this deployment takes passwords (0310). */
   readonly passwords: boolean
 }) => {
   const disabled = !readout.ok

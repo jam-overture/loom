@@ -8,7 +8,7 @@ import { resetPassword } from "@/app/(portal)/_lib/auth/identity"
 import { DEFAULT_LANDING } from "@/app/(portal)/_lib/auth/paths"
 
 /**
- * Choosing a new password with the token a recovery link carried (0304), and
+ * Choosing a new password with the token a recovery link carried (0310), and
  * signing its owner in.
  */
 

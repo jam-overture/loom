@@ -231,7 +231,7 @@ made its owner without this.
 ### Email and password
 
 Signing up, signing in and resetting a password with an email address
-([0304](../decisions/0304-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md))
+([0310](../decisions/0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md))
 needs Supabase Auth and a list of who may. Without all three variables the
 sign-in page offers keys alone.
 

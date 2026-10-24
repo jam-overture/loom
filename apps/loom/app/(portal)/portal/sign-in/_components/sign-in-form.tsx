@@ -12,7 +12,7 @@ import { submitKey, submitPassword, type SignInReport } from "../actions"
 /**
  * The two ways in, and where to go afterwards. Nothing else.
  *
- * **An email and a password first** (0304), because that is the way in a
+ * **An email and a password first** (0310), because that is the way in a
  * person expects. **A minted key second**, folded away, because accounts the
  * command line made still sign in with one (0285).
  *

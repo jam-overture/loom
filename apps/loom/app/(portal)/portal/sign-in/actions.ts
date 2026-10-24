@@ -52,7 +52,7 @@ export const submitKey = async (
 }
 
 /**
- * Signing in with an email and a password (0304).
+ * Signing in with an email and a password (0310).
  *
  * The password is not held to the length a new one must have: the provider is
  * what knows whether it is right, and a rule here that refused a password the

@@ -392,5 +392,11 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0300](0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md) | What audience a reading is of is a three-way answer, and a window of two forms is read as neither | Accepted | §4c (reader signals) |
 | [0301](0301-a-refused-reading-is-not-a-page-nobody-read-and-the-census-travels-with-the-progress.md) | A refused reading is not a page nobody read, and the census travels with the progress | Accepted | §4c (reader signals) |
 | [0302](0302-two-forms-of-one-page-are-compared-at-each-forms-own-share-and-neither-side-is-earlier.md) | Two forms of one page are compared at each form's own share, and neither side is earlier | Accepted | §4c (reader signals) |
-| 0303 | *No record on this branch* | — | — |
-| [0304](0304-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |
+| [0303](0303-what-two-forms-readers-do-is-the-same-pair-at-a-different-counter-and-the-page-has-one-honest-figure.md) | What two forms' readers *do* is the same pair at a different counter, and the page has one honest figure | Accepted | §4c (reader signals) |
+| [0304](0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md) | An unwalked window has no share and nothing untouched to give, and the rule belongs to the reading | Accepted | §4c (reader signals) |
+| [0305](0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md) | What two forms say is compared over the text they share, and the page figure is a third argument | Accepted | §4c (reader signals) |
+| [0306](0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md) | A ratio names the state it has no quotient in, and the rule is published once | Accepted | §4c (reader signals) |
+| 0307 | *No record on this branch* | — | — |
+| 0308 | *No record on this branch* | — | — |
+| 0309 | *No record on this branch* | — | — |
+| [0310](0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |

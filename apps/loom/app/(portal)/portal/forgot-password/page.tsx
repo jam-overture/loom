@@ -8,7 +8,7 @@ import { DEFAULT_LANDING, SIGN_IN_PATH } from "@/app/(portal)/_lib/auth/paths"
 
 import { ForgotPasswordForm } from "./_components/forgot-password-form"
 
-/** The way back in when a password is lost (0304). */
+/** The way back in when a password is lost (0310). */
 const ForgotPasswordPage = async () => {
   if ((await currentActor()) !== null) redirect(DEFAULT_LANDING)
 

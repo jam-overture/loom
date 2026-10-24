@@ -4,7 +4,7 @@ import type { Actor } from "./accounts"
 import { emailSchema, type Credentials } from "./credentials"
 
 /**
- * Who holds the passwords: Supabase Auth, spoken to over its HTTP API (0304).
+ * Who holds the passwords: Supabase Auth, spoken to over its HTTP API (0310).
  *
  * **Its HTTP API, not its client.** 0022 reached Postgres by SQL rather than
  * through the Supabase client, and four requests do not need a library: a

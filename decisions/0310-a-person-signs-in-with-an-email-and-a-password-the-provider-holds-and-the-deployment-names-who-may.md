@@ -1,12 +1,12 @@
-# 0304. A person signs in with an email and a password the provider holds, and the deployment names who may
+# 0310. A person signs in with an email and a password the provider holds, and the deployment names who may
 
 **Status:** Proposed
 **Date:** 2026-10-22
 **Section:** §5 (portal)
 
-> **The number is the one after #693's.** That open pull request holds 0303, so
-> this takes 0304 rather than the number after `main`, because two records
-> sharing one is fatal
+> **The number is the one after the open pull requests'.** This was written as
+> 0304 on 22 October; `main` took 0304 to 0306 before it merged and #700 holds
+> 0307 to 0309, so it is 0310, because two records sharing one is fatal
 > ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
 
 ## Context

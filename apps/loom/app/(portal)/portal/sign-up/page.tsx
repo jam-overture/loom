@@ -9,7 +9,7 @@ import { DEFAULT_LANDING, SIGN_IN_PATH } from "@/app/(portal)/_lib/auth/paths"
 import { SignUpForm } from "./_components/sign-up-form"
 
 /**
- * Opening an account (0304). Reachable without a session, because it is how
+ * Opening an account (0310). Reachable without a session, because it is how
  * a session is first had; who may open one is the deployment's list.
  */
 const SignUpPage = async () => {
