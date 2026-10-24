@@ -9,6 +9,7 @@ import { publishedSpecifier } from "../packages"
 
 import {
   DECISION_NUMBER,
+  declarationLineIn,
   extractReference,
   GENERATED_FILE,
   packageRoot,
@@ -341,6 +342,45 @@ describe("what the generated file says a door needs installed", () => {
         ],
       })
     ).toThrow(/loads everything the wider door does/)
+  })
+
+  it("refuses a reference whose cut block is at a line of a file it does not name", () => {
+    /*
+     * `0` is both halves of *nowhere to send them* at once — no file, and no
+     * line in the file — so a line against an empty path is two fields
+     * disagreeing about whether a reader has anywhere to go. The rule cannot
+     * produce one: the line is only read once the file has been found.
+     */
+    expect(() =>
+      parseReference({
+        entries: [
+          {
+            specifier: "@jam-overture/loom",
+            slug: "runtime",
+            types: "./dist/index.d.ts",
+            requires: [],
+            files: 91,
+            narrower: [],
+            groups: [
+              {
+                module: "render/text",
+                title: "Text",
+                summary: "",
+                symbols: [
+                  {
+                    name: "NO_TEXT",
+                    kind: "value",
+                    signature: "const NO_TEXT: TextResolver",
+                    cut: { shown: 29, whole: 168, source: "", line: 12 },
+                    summary: "",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      })
+    ).toThrow(/is at line 12 of no file/)
   })
 
   it("refuses a reference that does not say which doors are narrower than a door", () => {
@@ -1044,6 +1084,145 @@ describe("every signature the generated file publishes", () => {
       expect(source, symbol.name).not.toBe("")
       expect(existsSync(join(packageRoot, source)), `${symbol.name} — ${source}`).toBe(true)
     }
+  })
+
+  /**
+   * And at a line of it, which is the half of the answer a path cannot give.
+   *
+   * Four of the twelve files are over a thousand lines and the longest is
+   * 2,407. A link to the top of one of those is a link to a search box.
+   */
+  it("points a reader at a line of that file", () => {
+    const unplaced = cutSymbols.filter((symbol) => (symbol.cut?.line ?? 0) === 0).map((symbol) => symbol.name)
+
+    expect(unplaced, "a cut block links a file and no line in it").toEqual([])
+  })
+
+  /**
+   * And the line really declares the name, read off the file rather than
+   * taken from the generator a second time.
+   *
+   * This is the assertion that makes the anchor worth having. A line number is
+   * the one field on this page that is **confidently wrong** when it is wrong:
+   * a reader following a link to line 81 of `library-action.ts` lands in a
+   * paragraph about a different export, reads it as the declaration of the one
+   * they came for, and has nothing to tell them otherwise. A 404 announces
+   * itself; this does not.
+   */
+  it("lands on the line that declares it, counting the file's own lines", () => {
+    const wrong: string[] = []
+
+    for (const symbol of cutSymbols) {
+      const cut = symbol.cut
+
+      if (cut === undefined) throw new Error(`${symbol.name} is in the cut list and carries no cut`)
+
+      const lines = readFileSync(join(packageRoot, cut.source), "utf8").split("\n")
+      const landing = lines[cut.line - 1] ?? ""
+      const declares = new RegExp(
+        `^(?:export\\s+)?(?:declare\\s+)?(?:type|interface|class|function|enum|const|let|var)\\s+${symbol.name}\\b`
+      )
+
+      if (cut.line > lines.length || !declares.test(landing)) {
+        wrong.push(`${symbol.name} — ${cut.source}:${cut.line} is \`${landing.trim()}\``)
+      }
+    }
+
+    expect(wrong, "a cut block sends a reader to a line that declares something else").toEqual([])
+  })
+})
+
+/**
+ * Finding the declaration in the file, which is what the link under a cut
+ * block now lands on.
+ *
+ * The cases below are written out rather than swept, because the ones that
+ * matter are the ones this package does not happen to contain today: a name
+ * mentioned in another export's comment, a name declared inside a function,
+ * and a name the file only passes along.
+ */
+describe("which line of its own file a declaration is on", () => {
+  /**
+   * One file with every shape in it, in the order they are argued about.
+   *
+   * `Wanted` is written twice: once in the comment above `Other`, which is
+   * where a text search stops, and once as the declaration, which is where a
+   * reader wants to be.
+   */
+  const file = [
+    "/**",
+    " * A paragraph about the module.",
+    " */",
+    "",
+    "/** Mentions {@link Wanted} by name, three lines above it. */",
+    "export type Other = { readonly a: string }",
+    "",
+    "/** The one a reader came for. */",
+    "export type Wanted = {",
+    "  readonly b: string",
+    "}",
+    "",
+    "export const WANTED_MAP = {",
+    "  a: 1,",
+    "} as const",
+    "",
+    "export { Elsewhere } from \"./elsewhere\"",
+    "",
+    "export const makeOne = () => {",
+    "  const Inner = 1",
+    "",
+    "  return Inner",
+    "}",
+    "",
+  ].join("\n")
+
+  /**
+   * The case the whole thing is for, and the reason it parses rather than
+   * searching.
+   *
+   * Of the twelve declarations this reference cuts short, five have their own
+   * name written above them in another export's `{@link}`. A text search for
+   * `KindAction` lands on line 81 of `src/signals/library-action.ts`; the
+   * declaration is on line 215, 134 lines further down.
+   */
+  it("is not the line another export's comment mentions the name on", () => {
+    expect(file.split("\n").findIndex((line) => /\bWanted\b/.test(line)) + 1).toBe(5)
+    expect(declarationLineIn(file, "Wanted")).toBe(9)
+  })
+
+  /** And not the line its own comment starts on, which is the line above it. */
+  it("is the declaration and not the sentence above it", () => {
+    expect(file.split("\n")[declarationLineIn(file, "Wanted") - 2]).toContain("a reader came for")
+  })
+
+  it("finds a value as well as a type", () => {
+    expect(declarationLineIn(file, "WANTED_MAP")).toBe(13)
+  })
+
+  /**
+   * A name inside a function is not the export, and a match on one would be
+   * the confidently wrong answer the sweep above exists to refuse. Nothing is
+   * better than somewhere else.
+   */
+  it("says nothing rather than finding a name declared inside something else", () => {
+    expect(declarationLineIn(file, "Inner")).toBe(0)
+  })
+
+  /**
+   * A module that only passes a name along declares it somewhere else, and
+   * this reads one file. The page keeps the path and drops the line.
+   */
+  it("says nothing for a name the file only re-exports", () => {
+    expect(declarationLineIn(file, "Elsewhere")).toBe(0)
+  })
+
+  it("says nothing for a name the file does not have", () => {
+    expect(declarationLineIn(file, "Missing")).toBe(0)
+  })
+
+  /** An empty file has no line 1 to send anybody to. */
+  it("says nothing for a file with nothing in it", () => {
+    expect(declarationLineIn("", "Wanted")).toBe(0)
   })
 })
 

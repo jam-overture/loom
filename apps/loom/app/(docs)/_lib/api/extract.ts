@@ -393,12 +393,16 @@ const toALineEnd = (cut: string): string => {
  *
  * **What it cannot know is where the whole of it lives**, which is a fact
  * about a file on disk rather than about a string. So the measure comes back
- * without `source` and `extractSymbol` fills it in, which is also what keeps
- * this function worth testing against a declaration written out in a test.
+ * without `source` or `line` and `extractSymbol` fills them in, which is also
+ * what keeps this function worth testing against a declaration written out in
+ * a test.
  */
+/** How much was cut, before anything has looked for the file it was cut from. */
+export type ApiCutMeasure = Omit<ApiCut, "source" | "line">
+
 export const publishedSignature = (
   full: string
-): { readonly signature: string; readonly cut: Omit<ApiCut, "source"> | undefined } => {
+): { readonly signature: string; readonly cut: ApiCutMeasure | undefined } => {
   const cleaned = readerFacingSignature(full)
 
   if (cleaned.length <= SIGNATURE_CAP) return { signature: cleaned, cut: undefined }
@@ -459,6 +463,58 @@ const moduleSourcePath = (module: string, root: string): string => {
   return found === undefined ? "" : found.replace(/\\/g, "/")
 }
 
+/** Whether a statement is the declaration of `name` — a `const`, or any of the five keywords. */
+const declaresName = (statement: ts.Statement, name: string): boolean => {
+  if (ts.isVariableStatement(statement)) {
+    return statement.declarationList.declarations.some(
+      (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name
+    )
+  }
+
+  const named =
+    ts.isFunctionDeclaration(statement) ||
+    ts.isClassDeclaration(statement) ||
+    ts.isInterfaceDeclaration(statement) ||
+    ts.isTypeAliasDeclaration(statement) ||
+    ts.isEnumDeclaration(statement)
+
+  return named && statement.name !== undefined && statement.name.text === name
+}
+
+/**
+ * Which line of a file declares a name, counting from one — or 0, where the
+ * file does not declare it at the top level.
+ *
+ * This is what turns the link under a cut block from *the file it is in* into
+ * *where in the file it is*. It parses rather than searches, and the reason is
+ * measurable: of the twelve declarations the reference cuts short, **five have
+ * their own name written above them** in a `{@link}` in some other export's
+ * doc comment. A search for `KindAction` finds line 81 of
+ * `src/signals/library-action.ts`; the declaration is on line 215. A reader
+ * sent to the first lands in a paragraph about a different export and has no
+ * way to know it.
+ *
+ * **Top-level statements only.** A name declared inside a function, a block or
+ * a namespace is not the export the page is about, and a match on one would
+ * send a reader somewhere confidently wrong — which is worse than the top of
+ * the file, because the top of the file does not claim to be the declaration.
+ * Nothing here checks for an `export` modifier: a file cannot declare one name
+ * twice at the top level, so the statement that declares it is the one the
+ * published declaration came from however it leaves the module.
+ *
+ * `getStart` rather than `pos`, so the line is the `export type` and not the
+ * first line of the comment above it. A reader lands on the declaration with
+ * its sentence just above, which is the way round a reader wants it.
+ */
+export const declarationLineIn = (text: string, name: string): number => {
+  const file = ts.createSourceFile("source.ts", text, ts.ScriptTarget.Latest, false)
+  const declaring = file.statements.find((statement) => declaresName(statement, name))
+
+  if (declaring === undefined) return 0
+
+  return file.getLineAndCharacterOfPosition(declaring.getStart(file)).line + 1
+}
+
 /**
  * The paragraph a module opens with — read from the module's source, not from
  * its declarations, and this is the one place that is true.
@@ -507,6 +563,24 @@ type Extracted = ApiSymbol & {
   readonly position: number
 }
 
+/**
+ * The file a cut declaration carries on in, and the line it starts at.
+ *
+ * Two facts about one file, filled in together because the second is only
+ * answerable once the first has been found: there is no line without a file to
+ * count lines in. A module with no source under `src/` comes back with neither,
+ * and so does a file that turns out not to declare the name — the page then
+ * says how much is missing and stops, which it has done since the source link
+ * existed.
+ */
+const whereTheRestIs = (cut: ApiCutMeasure, name: string, module: string, root: string): ApiCut => {
+  const source = moduleSourcePath(module, root)
+
+  if (source === "") return { ...cut, source, line: 0 }
+
+  return { ...cut, source, line: declarationLineIn(readFileSync(join(root, source), "utf8"), name) }
+}
+
 const extractSymbol = (
   symbol: ts.Symbol,
   checker: ts.TypeChecker,
@@ -527,11 +601,12 @@ const extractSymbol = (
     kind: kindOf(declaration),
     signature,
     /*
-     * The source is looked for only where something was cut, which is twelve
-     * exports of seventeen hundred. It is two `existsSync` calls, and a block
-     * nobody is missing anything from has nowhere to send them.
+     * Where the rest of it is, looked for only where something was cut, which
+     * is twelve exports of seventeen hundred. A block nobody is missing
+     * anything from has nowhere to send them, so it costs those twelve two
+     * `existsSync` calls and one parse each and the rest of them nothing.
      */
-    cut: cut === undefined ? undefined : { ...cut, source: moduleSourcePath(module, root) },
+    cut: cut === undefined ? undefined : whereTheRestIs(cut, name, module, root),
     summary: summaryOf(resolved, checker),
     module,
     position: declaration.getStart(),

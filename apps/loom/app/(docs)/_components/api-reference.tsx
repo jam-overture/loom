@@ -138,6 +138,13 @@ const ShownInUse = ({ mentions }: { readonly mentions: readonly ProseMention[] }
  * first because it is the answer to *is it worth leaving the page*; the link
  * is what makes the answer actionable, and it leaves the site, which is why it
  * carries the mark that says so.
+ *
+ * **The line is in the words and not only in the href.** A link labelled with
+ * a path and landing eighty lines down a file is a link that did something the
+ * reader was not told about, and the files behind these twelve links run to
+ * two thousand lines. So the label names the whole destination — *the whole of
+ * it is in `src/primitives/stylesheet.ts`, from line 83* — and a reader who
+ * would rather not leave the page has the number without pressing anything.
  */
 const CutShort = ({ cut }: { readonly cut: ApiCut }) => (
   <p className="text-ink-faint mt-2 text-xs">
@@ -147,8 +154,12 @@ const CutShort = ({ cut }: { readonly cut: ApiCut }) => (
     ) : (
       <>
         . The whole of it is in{" "}
-        <OffSiteLink href={repositoryFileUrl(cut.source)} className="underline underline-offset-2 hover:no-underline">
+        <OffSiteLink
+          href={repositoryFileUrl(cut.source, cut.line)}
+          className="underline underline-offset-2 hover:no-underline"
+        >
           <code className="font-mono">{cut.source}</code>
+          {cut.line === 0 ? null : <>, from line {cut.line}</>}
         </OffSiteLink>
         .
       </>
