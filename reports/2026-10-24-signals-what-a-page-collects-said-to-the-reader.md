@@ -152,7 +152,8 @@ in a pull request, and it is the first question below.
 
 ## Findings
 
-Filed, three:
+Filed, four — the last two after this report was first written, which is why
+the count below is the one to trust:
 
 - **The guide and the worked example describe what is collected in prose**, and
   one of the two copies cannot go stale now. Owned by `Loom docs` and
@@ -167,6 +168,17 @@ Filed, three:
   number this notice has to report to a reader — the window is the one intake
   setting not in `settings.ts`, and a deployment-specific notice is what it
   points at next.
+- **A second measurement of the subscription wakes**, corroborating this
+  morning's `Loom docs` entry: eleven wakes in twenty-seven minutes across the
+  two pull requests this run opened, none of them actionable — two
+  subscriptions, seven `vercel[bot]` deployment comments and edits, two check
+  suites completing with nothing failed. Owned by `Loom daily build`
+  (`docs/routines.md`), no new shapes, and it names the interaction with the
+  governance finding above: splitting a proposal into its own pull request
+  multiplies the pull requests a lane opens, and so this cost. **This run read
+  the queue once, checked both pull requests, unsubscribed from both and armed
+  no check-in** — `Loom merge` lands these branches, and a lane that waits on
+  its own pull request is the cost *run, report, exit* exists to prevent.
 
 Closed, none. The open finding I filed against myself last night — the region map
 the rung leaves a caller to assemble — **is still open and was not touched,
