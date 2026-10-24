@@ -152,7 +152,7 @@ in a pull request, and it is the first question below.
 
 ## Findings
 
-Filed, two:
+Filed, three:
 
 - **The guide and the worked example describe what is collected in prose**, and
   one of the two copies cannot go stale now. Owned by `Loom docs` and
@@ -160,6 +160,13 @@ Filed, two:
 - **The escalation rule and the merge brief compose into a pull request nobody
   can land.** Owned by the maintainer, with the citation cost measured and three
   shapes.
+- **The collection window's default is written twice**, and the copy a
+  deployment's sweep actually runs on is the hand-written one in
+  `apps/loom/scripts/signals-collect.ts` rather than the published constant with
+  the reasoning attached. Mine, found while reading the intake's settings for a
+  number this notice has to report to a reader — the window is the one intake
+  setting not in `settings.ts`, and a deployment-specific notice is what it
+  points at next.
 
 Closed, none. The open finding I filed against myself last night — the region map
 the rung leaves a caller to assemble — **is still open and was not touched,
