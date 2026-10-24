@@ -59630,3 +59630,46 @@ it is bound by. Three shapes:
    recommendation**, because it is what the escalation rule already asks lanes to
    do, because it is already what happens to a plain `Proposed` record, and
    because a proposal is read on its own thread either way.
+
+---
+## 2026-10-24 (evening) — the collection window's default is written twice, and the copy that a deployment actually runs on is the hand-written one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/scripts/signals-collect.ts`) · **Status:** open — **nothing is
+broken today and the two numbers agree**; found while reading the intake's
+settings for a notice that has to report this number to a reader
+
+`src/signals/collect.ts` publishes `DEFAULT_READER_SIGNAL_WINDOW_MS`, an hour,
+with the whole argument for the number in its doc comment — longer is more
+accurate, shorter is more anonymous, and rule 5 makes it a deployment's rather
+than a constant. The script that runs the sweep does not import it:
+
+```ts
+// apps/loom/scripts/signals-collect.ts
+const DEFAULT_WINDOW_MS = 60 * 60 * 1000
+…
+windowMs: Number(process.env.LOOM_SIGNAL_WINDOW_MS ?? DEFAULT_WINDOW_MS),
+```
+
+Two spellings of one default, which is the fault this subsystem has been bitten
+by twice (0218, 0235) — and this one has a direction: the package's number is
+the one with the reasoning attached, and the script's is the one a deployment's
+batches are actually swept on.
+
+**Two other things that reading found, and they are why this is worth a unit
+rather than a one-line import.**
+
+- **The window is the one intake setting that is not in
+  `apps/loom/app/_lib/reader-signals/settings.ts`.** The intake switch, the
+  region switch, the region header and the region floor are all there, each
+  with a three-state reading and a sentence (`describeRegionSettings`). The
+  window is read inline in a script, with `Number(…)` and no state for *you
+  typed something that is not a window*.
+- **`collectionNoticeOf` (0313) needs exactly these settings**, which is the
+  next unit this points at: `deploymentNoticeOf(readIntakeSettings(env))` is
+  this deployment's own notice, and it cannot be written honestly while one of
+  the two numbers it reports lives in a script.
+
+Not taken tonight because moving the window into `settings.ts` changes what the
+sweep runs on, which is operational rather than a tidy-up, and it deserves its
+own unit with its own tests rather than a line in one about something else.
