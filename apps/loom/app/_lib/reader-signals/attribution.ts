@@ -39,10 +39,18 @@ export type AttributionRefusal =
   | { readonly code: "no-key" }
   /** A key this deployment did not issue, or has since replaced. Malformed is the same answer. */
   | { readonly code: "unknown-key" }
-  /** The project was closed (0289): a closed project takes no signals. */
-  | { readonly code: "closed" }
+  /**
+   * The project was closed (0289): a closed project takes no signals. This and
+   * the next carry the application the key named, because the key was right
+   * and the refusal can be counted against its project (0311).
+   */
+  | { readonly code: "closed"; readonly application: ApplicationId }
   /** The project names its site and this delivery came from somewhere else, or did not say. */
-  | { readonly code: "wrong-origin"; readonly origin: string | null }
+  | {
+      readonly code: "wrong-origin"
+      readonly origin: string | null
+      readonly application: ApplicationId
+    }
   | { readonly code: "unavailable"; readonly detail: string }
 
 /**
@@ -99,7 +107,9 @@ export const attributeDelivery = async (
    * The check `Application.closedAt` deferred to *where ingest learns which
    * application is posting* — which is here.
    */
-  if (application.closedAt !== undefined) return err({ code: "closed" })
+  if (application.closedAt !== undefined) {
+    return err({ code: "closed", application: application.applicationId })
+  }
 
   /**
    * **Checked when the project names its site, and only then.** A project
@@ -114,7 +124,7 @@ export const attributeDelivery = async (
     const origin = request.headers.get("origin")
 
     if (hostOf(origin) !== application.host.toLowerCase()) {
-      return err({ code: "wrong-origin", origin })
+      return err({ code: "wrong-origin", origin, application: application.applicationId })
     }
   }
 

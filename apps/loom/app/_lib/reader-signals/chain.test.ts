@@ -20,6 +20,7 @@ import { DEFAULT_APPLICATION_ID, projectIdSchema } from "@jam-overture/loom/stor
 
 import { mintIngestKey } from "./keys"
 import { receiveReaderSignals, type Filing, type Intake } from "./receive"
+import { memoryRefusalCounter } from "./refusals-memory"
 
 /**
  * The whole chain, from a body a browser posts to a number the portal reads.
@@ -109,7 +110,12 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     const journal = memoryReaderSignalJournal(at(0))
     const store = memoryReaderTallyStore()
 
-    const intake = intakeOf({ journal, regions: memoryReaderRegionStore(), openings: store })
+    const intake = intakeOf({
+      journal,
+      regions: memoryReaderRegionStore(),
+      openings: store,
+      refusals: memoryRefusalCounter(),
+    })
 
     expect((await receiveReaderSignals(post(batch("n_hero", 8_200)), intake)).status).toBe(204)
     expect((await receiveReaderSignals(post(batch("n_hero", 3_100)), intake)).status).toBe(204)
@@ -154,7 +160,12 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
   it("counts where a reader was, once, without the buffer ever holding it", async () => {
     const journal = memoryReaderSignalJournal(at(0))
     const regions = memoryReaderRegionStore()
-    const intake = intakeOf({ journal, regions, openings: memoryReaderTallyStore() })
+    const intake = intakeOf({
+      journal,
+      regions,
+      openings: memoryReaderTallyStore(),
+      refusals: memoryRefusalCounter(),
+    })
     const headers = { "x-vercel-ip-country": "gb" }
 
     await receiveReaderSignals(post(batch("n_hero", 1_000, { first: true }), headers), intake)
@@ -187,7 +198,12 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
   it("counts one reader as one page view however long they stay, and says the counters agree", async () => {
     const journal = memoryReaderSignalJournal(at(0))
     const store = memoryReaderTallyStore()
-    const intake = intakeOf({ journal, regions: memoryReaderRegionStore(), openings: store })
+    const intake = intakeOf({
+      journal,
+      regions: memoryReaderRegionStore(),
+      openings: store,
+      refusals: memoryRefusalCounter(),
+    })
 
     await receiveReaderSignals(post(batch("n_hero", 1_000, { first: true })), intake)
     await receiveReaderSignals(post(batch("n_hero", 2_000)), intake)
@@ -211,7 +227,12 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     const store = memoryReaderTallyStore()
 
     const shut = intakeOf(
-      { journal, regions: memoryReaderRegionStore(), openings: store },
+      {
+        journal,
+        regions: memoryReaderRegionStore(),
+        openings: store,
+        refusals: memoryRefusalCounter(),
+      },
       { ...SETTINGS, chosen: { state: "off" } }
     )
 

@@ -25,6 +25,7 @@ import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 import { ensurePortalAccountsSchema } from "../app/(portal)/_lib/auth/accounts-postgres"
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
 import { ensureIngestKeysSchema } from "../app/_lib/reader-signals/keys-postgres"
+import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
 /**
@@ -138,6 +139,12 @@ try {
    */
   await ensureIngestKeysSchema(db)
   /**
+   * What the door turned away that named a project (0311). A deployment that
+   * has not run this still refuses and keeps exactly what it kept before; the
+   * project's *Signals* screen says its refusals cannot be read.
+   */
+  await ensureReaderRefusalsSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -165,7 +172,8 @@ try {
   console.log(
     "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_projects, " +
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
-      "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships and loom_ingest_keys " +
+      "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys " +
+      "and loom_reader_refusals " +
       "are present, and this deployment's pages are in them"
   )
 } finally {

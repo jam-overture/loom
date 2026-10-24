@@ -400,3 +400,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0308 | *No record on this branch* | — | — |
 | 0309 | *No record on this branch* | — | — |
 | [0310](0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |
+| [0311](0311-a-refusal-whose-key-was-right-is-counted-against-its-project-and-one-without-one-is-not.md) | A refusal whose key was right is counted against its project, and one without one is not | Proposed | §5 (portal), §4c (reader signals) |
