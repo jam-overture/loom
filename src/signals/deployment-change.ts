@@ -103,6 +103,14 @@ export type DeploymentChangeSilence =
    * The comparison's own reason, carried through on the row rather than
    * restated: a surface that wants to say which window was quiet reads the
    * floors beside it.
+   *
+   * **It covers two comparison silences and the sentence above is true of only
+   * one of them.** `nothing-measured` is this; `different-audiences` is a pair
+   * of windows that both reported plenty and are of two populations (0301),
+   * and it arrives here with a door row and two view floors that all
+   * contradict the sentence. The cause is on {@link MovedPage.silence} and a
+   * surface printing one sentence should print that one. Giving the second a
+   * standing of its own is proposed and deliberately not taken here (0308).
    */
   | "unread"
   /**
@@ -449,6 +457,10 @@ const movementOf = (at: ComparedStop | null, inflation: number | null): PageMove
  * to say which. `audiences-mixed` does not share it, because what it has in
  * common with them is a nought rather than a state of a deployment's readers
  * (0301).
+ *
+ * **That the cause travels is now asserted rather than promised**, by a pair
+ * of fixtures standing the two side by side, so the day a fourth standing is
+ * taken (0308, proposed) there is a test that says what moved.
  */
 const standingFor = (silence: ChangeSilence): MovementStanding => {
   switch (silence) {
