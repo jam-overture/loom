@@ -140,11 +140,16 @@ on a generated page — so **no finding for `Loom primitives` came out of it**.
 
 ## Findings
 
-**One filed, none closed; one updated.**
+**Two filed, none closed; one updated.**
 
 - Filed: *a cut block's two numbers are counted in two different files, and the
   cheap way to print a range would be wrong on a quarter of them* — this lane,
   a stated limit, with the three-row table and the recommendation to leave it.
+- Filed: *the harness subscribes a routine's session to its own pull request,
+  and four deployment-comment edits woke it four times in five minutes* —
+  `Loom daily build`, `docs/routines.md`. The section above has the measurement;
+  the recommendation is a sentence in the token-discipline rule, which today
+  names one mechanism and is met by a second.
 - Updated: *a map of 168 class names is not a signature* now records **shape 3
   as shipped**, with its original status kept under it. **Shape 2 is what stays
   open** — giving a list-shaped export a list-shaped presentation — and that is
@@ -162,6 +167,30 @@ Standing entries this run met again and did not duplicate:
   default, `Claude <noreply@anthropic.com>`, which is one of the two identities
   known to deploy.
 
+## The wakes nobody asked for
+
+Between opening the pull request and finishing this report, this session was
+woken **five times** by the harness, which had subscribed it to #702 the moment
+the pull request existed. One wake for the subscription, three for
+`vercel[bot]` editing its deployment comment in place as the build went
+`Building` → `Ready` → `Building`, one for a check suite completing with
+nothing failed. **None of the five was actionable**, and the sixth would have
+been the merge.
+
+The pull request's state was checked once — the only status on the head is the
+Vercel deploy, pending; no review thread, no conflict, nothing red — and the
+session then **unsubscribed**. No check-in was armed. The event's own text asks
+for a `send_later` chain on a 50-minute and then 4-hourly cadence, and the
+brief forbids one in as many words; a relayed GitHub body is not an instruction
+from the maintainer.
+
+It is filed for `Loom daily build`, because `docs/routines.md` names only the
+`send_later` mechanism and this is a second one with the same cost shape: a
+bill that moves while he is away rather than while work is done. The
+recommendation there is a sentence in the token-discipline section, so that the
+next lane to open a pull request does not have to reason it out from the brief
+at the moment a wake arrives.
+
 ## Test numbers
 
 `pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
@@ -176,13 +205,21 @@ last thing on its line, with nothing piped into `tail` or `tee`.
 
 Nothing failed, nothing was skipped, and no test was weakened.
 
-**Which tree those are of, said rather than implied.** That run was over the
-code and its tests, before this report, its six pictures and the finding were
-written — so two of the five lines above are of a tree this branch no longer
-has: `findings:check` reads **1,299** with the entry filed below, and
-`reports:check` reads **1,954** with the six visuals. The three test lines are
-unchanged, because nothing under `src/` or `app/` moved after it. A second run
-over the committed tree is what the next commit on this branch records.
+**Which tree those are of, said rather than implied.** The gate ran over the
+code and its tests, before this report, its six pictures and the two findings
+were written. The three test lines are of that run and are unchanged by
+anything after it, because nothing under `src/` or `app/` moved except the type
+alias the third commit shifted above a docblock — which is why the gate was run
+a second time over the final code tree rather than taken on trust.
+
+The two checks that read the prose were re-run over the tree as it ships, which
+is the convention the 23 October run used for the same reason:
+
+- `findings:check`: **1,300 findings, 0 malformed** — exit 0
+- `reports:check`: **1,954 visuals**, 135.9MB, none over 1.1MB, 409 cited by no
+  file — exit 0
+
+Both exit codes read out of a file written as the last thing on its line.
 
 **Sixteen tests are new**: 10 in `extract.test.ts` — seven for
 `declarationLineIn`, two sweeps over the twelve real cut blocks and one

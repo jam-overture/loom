@@ -59303,3 +59303,59 @@ says.
    costed: `whole` is a claim about the text on the page, and counting withheld
    comments would tell a reader they are missing lines no reader was ever going
    to see.
+
+---
+## 2026-10-24 — the harness subscribes a routine's session to its own pull request, and four deployment-comment edits woke it four times in five minutes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — **a governance gap rather than a defect**: nothing is
+broken, and the run that met it handled it by unsubscribing
+
+`docs/routines.md`'s *Token discipline* section is about one mechanism:
+`send_later` chains that re-arm themselves. Its rule — *never schedule a
+follow-up or a self-check-in; run, report, exit* — names scheduling, and the
+test it gives is broader than the mechanism it names: **the maintainer must be
+able to step away for days without the bill moving.**
+
+**A second mechanism now exists and the file does not name it.** The session
+harness subscribes a session to any pull request it opens, automatically and
+without being asked. Measured on #702 this morning: the subscription was
+created at 14:11:12, and by 14:16 the session had been woken **five times** —
+once for the subscription itself, three times for `vercel[bot]` editing its
+deployment comment in place as the build went `Building` → `Ready` →
+`Building`, and once for a check suite completing with nothing failed. **Not
+one of the five was actionable.**
+
+That is the 9 August failure's shape arriving through a different door. It is
+cheaper than a poller — it wakes on events rather than on a timer, and a pull
+request nobody touches costs nothing — but it is still a cost that scales with
+how long the maintainer is away rather than with the work: `Loom merge` merges
+these branches daily, every merge and every bot edit is a wake, and six lanes
+opening a pull request a day is six subscriptions.
+
+**What this run did**, stated so the next one does not have to decide it again:
+unsubscribed from #702 immediately after checking its state once — no failing
+check, no review thread, no conflict — and **armed no check-in**, because the
+event's own text asks for a `send_later` chain and the brief forbids one in as
+many words.
+
+### Three shapes, costed
+
+1. **A sentence in `docs/routines.md`'s token-discipline section** saying that a
+   routine unsubscribes from its own pull request after checking it once, and
+   why. **The recommendation.** It costs a paragraph, it puts the second
+   mechanism under the rule that already covers it in spirit, and it means no
+   lane has to work this out from the brief at the moment a wake arrives.
+2. **Leave it to each brief.** The documentation brief's *never schedule a
+   follow-up* is clear enough to decide this, which is how this run decided it.
+   The cost is that six lanes each reason it out separately, and a lane that
+   reads *scheduling* narrowly stays subscribed.
+3. **Stay subscribed deliberately**, treating the wakes as the price of a lane
+   that answers CI and review comments on its own pull request. It is a real
+   option and it is the maintainer's to take, not a routine's: it is the thing
+   his rule exists to prevent, and he is the one who sees the bill.
+
+**Recommendation: 1.** The rule is already written; it names one spelling of
+the act. *A rule naming one spelling of an act is a rule that stops working the
+moment somebody reaches for the other one* — `routines.md`'s own sentence,
+third instance, and this is the fourth.
