@@ -121,7 +121,9 @@ describe("whose readers a delivery is", () => {
     it("refuses a key whose project was closed", async () => {
       const closed = shop({ closedAt: "2026-10-19T12:00:00.000Z" })
 
-      expect(await attributeDelivery(keyed(), sendersFor(closed))).toEqual(err({ code: "closed" }))
+      expect(await attributeDelivery(keyed(), sendersFor(closed))).toEqual(
+        err({ code: "closed", application: closed.applicationId })
+      )
     })
 
     it("says the store could not answer, rather than that the key was wrong", async () => {
@@ -148,7 +150,13 @@ describe("whose readers a delivery is", () => {
     it("refuses one from another site carrying the project's key", async () => {
       expect(
         await attributeDelivery(keyed({ origin: "https://copied.example.org" }), sendersFor(hosted))
-      ).toEqual(err({ code: "wrong-origin", origin: "https://copied.example.org" }))
+      ).toEqual(
+        err({
+          code: "wrong-origin",
+          origin: "https://copied.example.org",
+          application: hosted.applicationId,
+        })
+      )
     })
 
     /** Close enough is how a staging site files into production. */
@@ -162,6 +170,7 @@ describe("whose readers a delivery is", () => {
         err({
           code: "wrong-origin",
           origin: "https://staging.shop.example.com",
+          application: hosted.applicationId,
         })
       )
     })
@@ -172,7 +181,13 @@ describe("whose readers a delivery is", () => {
           keyed({ origin: "https://shop.example.com:8443" }),
           sendersFor(hosted)
         )
-      ).toEqual(err({ code: "wrong-origin", origin: "https://shop.example.com:8443" }))
+      ).toEqual(
+        err({
+          code: "wrong-origin",
+          origin: "https://shop.example.com:8443",
+          application: hosted.applicationId,
+        })
+      )
     })
 
     it("holds a project that names a port to that port", async () => {
@@ -185,7 +200,7 @@ describe("whose readers a delivery is", () => {
 
     it("refuses a delivery that names no origin once the project names its site", async () => {
       expect(await attributeDelivery(keyed(), sendersFor(hosted))).toEqual(
-        err({ code: "wrong-origin", origin: null })
+        err({ code: "wrong-origin", origin: null, application: hosted.applicationId })
       )
     })
 

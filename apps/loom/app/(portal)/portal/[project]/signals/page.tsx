@@ -8,9 +8,11 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
+import { turnedAwayOf, type TurnedAway } from "@/app/(portal)/_lib/turned-away"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { boundedReaderSignalJournal, boundedReaderTallyStore } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
+import { readWithin } from "@/app/_lib/app/bounded-store"
 import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
 /**
@@ -23,11 +25,14 @@ import { readingsFor } from "@/app/_lib/reader-signals/intake"
  * and nothing filed under anybody else's (0298 clause 5). `_lib/arrivals.ts`
  * holds what the screen says; this is the reading.
  *
- * ## What it does not show
+ * **What the door turned away** that named this project (0311) is read from
+ * its own small table, and a failure to read it costs that figure alone: a
+ * deployment that has not run `db:push` since the table arrived still shows
+ * everything that was kept. The reasons are listed even when nothing has
+ * arrived, because *nothing arrived* and *everything was turned away* are the
+ * two answers a person setting up their site cannot tell apart otherwise.
  *
- * **Refused deliveries.** The door turns a refused batch away before anything
- * is written, so there is no count to read. The screen says so in one line
- * rather than drawing a nought that would read as *nothing was refused*.
+ * ## What it does not show
  *
  * **Page names.** A customer's pages are rendered on their own site and this
  * deployment does not hold them until the read path (unit 6), so a page is
@@ -46,7 +51,37 @@ const Figure = ({ label, value, note }: { label: string; value: string; note: st
   </div>
 )
 
-const Received = ({ arrivals }: { arrivals: Arrivals }) => (
+/** `undefined` where the refusals could not be read, which is said rather than drawn as a nought. */
+const refusedFigure = (turnedAway: TurnedAway | undefined) =>
+  turnedAway === undefined
+    ? { value: "Not available", note: "This deployment could not read what it turned away." }
+    : {
+        value: turnedAway.refused.toLocaleString("en-GB"),
+        note:
+          turnedAway.refused === 0
+            ? "Nothing sent with this project's key has been turned away."
+            : "Sent with this project's key and turned away. The reasons are below.",
+      }
+
+const TurnedAwayList = ({ turnedAway }: { turnedAway: TurnedAway | undefined }) =>
+  turnedAway === undefined || turnedAway.lines.length === 0 ? null : (
+    <section className="flex flex-col gap-2">
+      <h2 className="text-sm font-medium tracking-tight">Turned away</h2>
+      <ul className="text-ink-secondary m-0 flex list-disc flex-col gap-1.5 pl-5 text-xs leading-relaxed">
+        {turnedAway.lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+    </section>
+  )
+
+const Received = ({
+  arrivals,
+  turnedAway,
+}: {
+  arrivals: Arrivals
+  turnedAway: TurnedAway | undefined
+}) => (
   <div className="flex flex-col gap-6">
     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
       <Figure
@@ -63,12 +98,10 @@ const Received = ({ arrivals }: { arrivals: Arrivals }) => (
             : "When this deployment last received something from one of your pages."
         }
       />
-      <Figure
-        label="Refused"
-        value="Not counted"
-        note="A refused batch is turned away before anything is kept, so there is no count of them yet."
-      />
+      <Figure label="Turned away" {...refusedFigure(turnedAway)} />
     </div>
+
+    <TurnedAwayList turnedAway={turnedAway} />
 
     <section className="flex flex-col gap-2">
       <h2 className="text-sm font-medium tracking-tight">Newest arrivals</h2>
@@ -156,13 +189,19 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
    */
   const readings = application === undefined ? undefined : readingsFor(application.applicationId)
 
-  const [rows, newest] =
+  const [rows, newest, refusals] =
     readings === undefined
-      ? [undefined, undefined]
+      ? [undefined, undefined, undefined]
       : await Promise.all([
           boundedReaderTallyStore(readings.tallies).pageViews(),
           boundedReaderSignalJournal(readings.journal).read({ direction: "older", limit: RECENT }),
+          readWithin(
+            () => readings.refusals.read(),
+            (detail) => ({ code: "unavailable" as const, detail })
+          ),
         ])
+
+  const turnedAway = refusals?.ok === true ? turnedAwayOf(refusals.value) : undefined
 
   const connect = `/portal/${projectId}/connect`
 
@@ -193,22 +232,25 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
 
     if (arrivals.latest === undefined) {
       return (
-        <StateNotice
-          tone="empty"
-          title="Nothing has arrived yet"
-          action={
-            <Link href={connect} className="text-ink underline">
-              Connect your site
-            </Link>
-          }
-        >
-          Once the snippet is on your site, each reader who opens a page shows up here within a few
-          seconds.
-        </StateNotice>
+        <div className="flex flex-col gap-6">
+          <StateNotice
+            tone="empty"
+            title="Nothing has arrived yet"
+            action={
+              <Link href={connect} className="text-ink underline">
+                Connect your site
+              </Link>
+            }
+          >
+            Once the snippet is on your site, each reader who opens a page shows up here within a
+            few seconds.
+          </StateNotice>
+          <TurnedAwayList turnedAway={turnedAway} />
+        </div>
       )
     }
 
-    return <Received arrivals={arrivals} />
+    return <Received arrivals={arrivals} turnedAway={turnedAway} />
   })()
 
   return (

@@ -30,6 +30,8 @@ import {
   type Filing,
   type Intake,
 } from "./receive"
+import type { RefusalCounter } from "./refusals"
+import { memoryRefusalCounter } from "./refusals-memory"
 import {
   DEFAULT_REGION_HEADER,
   readIntakeSwitch,
@@ -98,6 +100,7 @@ const intakeOf = (over: Partial<Intake> & Partial<Filing> = {}): Intake & Filing
     journal: over.journal ?? memoryReaderSignalJournal(),
     regions: over.regions ?? memoryReaderRegionStore(),
     openings: over.openings ?? memoryReaderTallyStore(),
+    refusals: over.refusals ?? memoryRefusalCounter(),
   }
 
   return {
@@ -321,6 +324,7 @@ describe("whose readers these are", () => {
       [BLOG_KEY, BLOG],
     ])
     const filings = new Map<ApplicationId, Filing>()
+    const counters = new Map<ApplicationId, RefusalCounter>()
 
     const filingFor = (applicationId: ApplicationId): Filing => {
       const held = filings.get(applicationId)
@@ -330,8 +334,10 @@ describe("whose readers these are", () => {
         journal: memoryReaderSignalJournal(),
         regions: memoryReaderRegionStore(),
         openings: memoryReaderTallyStore(),
+        refusals: memoryRefusalCounter(),
       }
       filings.set(applicationId, made)
+      counters.set(applicationId, made.refusals as RefusalCounter)
 
       return made
     }
@@ -349,7 +355,14 @@ describe("whose readers these are", () => {
       return page.ok ? page.value.batches.length : -1
     }
 
-    return { intake: intakeOf({ senders, filingFor }), kept }
+    const refused = async (applicationId: ApplicationId) => {
+      filingFor(applicationId)
+      const read = await counters.get(applicationId)?.read()
+
+      return read?.ok === true ? read.value : undefined
+    }
+
+    return { intake: intakeOf({ senders, filingFor }), kept, refused }
   }
 
   const keyed = (key: string, headers: Record<string, string> = {}): Request =>
@@ -445,6 +458,71 @@ describe("whose readers these are", () => {
 
     expect(own.status).toBe(204)
     expect(await kept(SHOP)).toBe(1)
+  })
+
+  /**
+   * 0311: a refusal whose key was right is counted against the key's project,
+   * so its *Signals* screen can say a page is posting and being turned away.
+   */
+  describe("counting what it turns away", () => {
+    it("counts a delivery from another site against the project, with the site", async () => {
+      const { intake, refused } = deployment([
+        application(SHOP, { host: "www.shop.example.com" }),
+        application(BLOG),
+      ])
+
+      await receiveReaderSignals(keyed(SHOP_KEY, { origin: "https://shop.example.com" }), intake)
+
+      expect(await refused(SHOP)).toEqual([
+        { reason: "wrong-site", refused: 1, lastAt: 1_000, lastOrigin: "https://shop.example.com" },
+      ])
+      expect(await refused(BLOG)).toEqual([])
+    })
+
+    it("counts a closed project's deliveries", async () => {
+      const { intake, refused } = deployment([
+        application(SHOP, { closedAt: "2026-10-19T12:00:00.000Z" }),
+      ])
+
+      await receiveReaderSignals(keyed(SHOP_KEY), intake)
+
+      expect((await refused(SHOP))?.map((tally) => tally.reason)).toEqual(["closed"])
+    })
+
+    it("counts a delivery the door could not read", async () => {
+      const { intake, refused } = deployment()
+      const garbled = new Request(`https://loom.test/api/reader-signals?key=${SHOP_KEY}`, {
+        method: "POST",
+        body: "{ not json",
+      })
+
+      expect((await receiveReaderSignals(garbled, intake)).status).toBe(400)
+      expect((await refused(SHOP))?.map((tally) => tally.reason)).toEqual(["unreadable"])
+    })
+
+    it("counts nothing that was kept", async () => {
+      const { intake, refused } = deployment()
+
+      await receiveReaderSignals(keyed(SHOP_KEY), intake)
+
+      expect(await refused(SHOP)).toEqual([])
+    })
+
+    /** A counter that cannot answer changes nothing the sender is told. */
+    it("refuses the same way when the count cannot be written", async () => {
+      const { intake } = deployment([application(SHOP, { closedAt: "2026-10-19T12:00:00.000Z" })])
+      const broken: Intake = {
+        ...intake,
+        filingFor: (applicationId) => ({
+          ...intake.filingFor(applicationId),
+          refusals: {
+            record: () => Promise.resolve(err({ code: "unavailable", detail: "down" })),
+          },
+        }),
+      }
+
+      expect((await receiveReaderSignals(keyed(SHOP_KEY), broken)).status).toBe(403)
+    })
   })
 
   /** A lookup that cannot answer is this deployment's fault, and is said to be. */
