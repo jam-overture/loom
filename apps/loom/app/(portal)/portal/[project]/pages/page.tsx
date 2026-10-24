@@ -90,7 +90,6 @@ const PagesPage = async ({ params }: { params: Promise<{ project: string }> }) =
         <thead className="text-ink-muted">
           <tr>
             <th className="py-1.5 font-normal">Page</th>
-            <th className="py-1.5 font-normal">Id</th>
             <th className="py-1.5 font-normal">Version</th>
             <th className="py-1.5 text-right font-normal">Last published</th>
           </tr>
@@ -98,10 +97,12 @@ const PagesPage = async ({ params }: { params: Promise<{ project: string }> }) =
         <tbody>
           {published.value.map(publishedRowOf).map((row) => (
             <tr key={row.treeId} className="border-edge-subtle border-t">
-              <td className={row.derived ? "py-1.5" : "text-ink-muted py-1.5 italic"}>
-                {row.name}
+              <td className="py-1.5">
+                <span className={row.derived ? undefined : "text-ink-muted italic"}>
+                  {row.name}
+                </span>
+                <span className="text-ink-muted block font-mono text-[11px]">{row.treeId}</span>
               </td>
-              <td className="py-1.5 font-mono">{row.treeId}</td>
               <td className="py-1.5">{row.revision}</td>
               <td className="py-1.5 text-right">{row.received}</td>
             </tr>
