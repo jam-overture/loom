@@ -59673,3 +59673,43 @@ rather than a one-line import.**
 Not taken tonight because moving the window into `settings.ts` changes what the
 sweep runs on, which is operational rather than a tidy-up, and it deserves its
 own unit with its own tests rather than a line in one about something else.
+
+---
+## 2026-10-24 (evening) — a second measurement of the subscription wakes: eleven in twenty-seven minutes across two pull requests, none actionable
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **corroborates this morning's entry**
+*the harness subscribes a routine's session to its own pull request* rather than
+adding anything to decide; it is here because one measurement is an anecdote and
+the recommendation in that entry is a paragraph in the governance file
+
+This lane opened two pull requests tonight, #706 at 21:44 and #707 at 21:59. By
+22:11 the session had been woken **eleven times**:
+
+| what woke it | times |
+| --- | --- |
+| the subscription itself, one per pull request | 2 |
+| `vercel[bot]` posting its deployment comment | 2 |
+| `vercel[bot]` **editing** that comment in place as a build went `Building` → `Ready` | 5 |
+| a check suite completing with nothing failed | 2 |
+
+**None of the eleven was actionable**: no failing check, no review thread, no
+conflict. Two of the three pull requests this lane has open were not even
+mentioned in them.
+
+The shape matches the morning's instance exactly, at twice the scale because two
+pull requests were opened rather than one, which is the ordinary case for a lane
+that files a proposal separately — and filing a proposal separately is what the
+other entry of tonight recommends. **The two interact**: the governance fix for
+`Proposed` records multiplies the pull requests a lane opens, and so multiplies
+this cost, unless the subscription sentence lands too.
+
+**What this run did**, the same as the morning's and recorded for the same
+reason: read the queue once, checked both pull requests' state, **unsubscribed
+from both**, and armed no check-in. `Loom merge` lands these branches; a lane
+that waits on its own pull request is the cost the brief's *run, report, exit*
+exists to prevent, whichever door it arrives through.
+
+**No new shapes.** Shape 1 of the morning's entry — a sentence in
+`docs/routines.md` — is the recommendation here too, and this entry is the
+second measurement that argues for it.
