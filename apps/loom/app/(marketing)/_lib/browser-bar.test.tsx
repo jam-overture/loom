@@ -66,7 +66,7 @@ const ORIGIN = "https://loom.example"
 const here = (path: string): string => fileURLToPath(new URL(path, import.meta.url))
 
 const rendered = (route: SiteRoute, theme: SiteThemeName) =>
-  renderTree(treeFor(route, { origin: ORIGIN, theme }), { origin: ORIGIN })
+  renderTree(treeFor(route, { theme }), { origin: ORIGIN })
 
 /** The tag the page emits, as markup, for a route served in a palette. */
 const barFor = (route: SiteRoute, theme: SiteThemeName): string =>

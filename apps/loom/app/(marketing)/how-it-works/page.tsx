@@ -44,9 +44,8 @@ export const generateMetadata = routeMetadata(HOW_IT_WORKS)
  * is that eight days, written down.
  */
 const HowItWorksPage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
-  const rendered = await renderSitePage(HOW_IT_WORKS, {
+  const rendered = await renderSitePage(HOW_IT_WORKS, askedFor(await searchParams), {
     origin: await servedOrigin(),
-    ...askedFor(await searchParams),
   })
 
   /**

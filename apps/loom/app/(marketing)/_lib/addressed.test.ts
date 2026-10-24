@@ -7,7 +7,7 @@ import { renderSitePage } from "./render"
 import { ASK_STATES } from "./served"
 import {
   ADDRESS_PARAMS,
-  askHref,
+  askPath,
   DEFAULT_THEME,
   HOME,
   HOW_IT_WORKS,
@@ -75,13 +75,14 @@ const ORIGIN = siteOrigin()
 
 /** An address, as the parameters a route is handed. */
 const paramsOf = (href: string): AddressParams =>
-  Object.fromEntries(new URL(href).searchParams.entries())
+  Object.fromEntries(new URL(href, `${ORIGIN}/`).searchParams.entries())
 
 /** A state as the query string a visitor would see, which is this file's label for one. */
-const queryOf = (state: AskedFor): string => new URL(askHref(ORIGIN, state)).search.slice(1)
+const queryOf = (state: AskedFor): string =>
+  new URL(askPath(state), `${ORIGIN}/`).search.slice(1)
 
 /** The address of a state, and the parameters it arrives as. */
-const addressOf = (state: AskedFor): AddressParams => paramsOf(askHref(ORIGIN, state))
+const addressOf = (state: AskedFor): AddressParams => paramsOf(askPath(state))
 
 /**
  * The two tags a route sends beside the tree, taken back off.
@@ -107,7 +108,7 @@ const servedFor = async (route: SiteRoute, params: AddressParams): Promise<strin
 
 /** And what this lane's own library says that address should produce. */
 const libraryFor = async (route: SiteRoute, params: AddressParams): Promise<string> => {
-  const rendered = await renderSitePage(route, { origin: ORIGIN, ...askedFor(params) })
+  const rendered = await renderSitePage(route, { ...askedFor(params) })
 
   return renderToStaticMarkup(rendered.element)
 }
@@ -159,7 +160,7 @@ describe("the words an address of this site is made of", () => {
 })
 
 describe("an address written and read back", () => {
-  it.each(WRITTEN.map((state) => [queryOf(state), askHref(ORIGIN, state)] as const))(
+  it.each(WRITTEN.map((state) => [queryOf(state), askPath(state)] as const))(
     "?%s",
     (_query, href) => {
     /**
@@ -169,7 +170,7 @@ describe("an address written and read back", () => {
      * which absences count — and a rule like that is where a parameter goes
      * missing.
      */
-      expect(askHref(ORIGIN, askedFor(paramsOf(href)))).toBe(href)
+      expect(askPath(askedFor(paramsOf(href)))).toBe(href)
     }
   )
 

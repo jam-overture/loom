@@ -20,9 +20,8 @@ export const generateMetadata = routeMetadata(WHAT_YOU_RUN)
  * the decision that went stale when the band moved (`_lib/addressed.ts`).
  */
 const WhatYouRunPage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
-  const rendered = await renderSitePage(WHAT_YOU_RUN, {
+  const rendered = await renderSitePage(WHAT_YOU_RUN, askedFor(await searchParams), {
     origin: await servedOrigin(),
-    ...askedFor(await searchParams),
   })
 
   /**

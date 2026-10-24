@@ -44,7 +44,6 @@ import {
  */
 
 export type AnswerContext = {
-  readonly origin: string
   readonly theme: SiteThemeName
   /**
    * The most recent thing that happened, which is the undo once there is one.

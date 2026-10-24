@@ -40,7 +40,6 @@ const ORIGIN = "https://loom.example"
 const THEME: SiteThemeName = "minimal"
 
 const contextFor = (ask?: AskId, approve = false): PageContext => ({
-  origin: ORIGIN,
   theme: THEME,
   ...(ask === undefined ? {} : { ask, approve }),
 })

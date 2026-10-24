@@ -325,7 +325,6 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
           ? []
           : [
               answerBand(ids, {
-                origin: context.origin,
                 theme: context.theme,
                 record: latest,
                 ...(context.ask === undefined ? {} : { ask: context.ask }),
@@ -361,7 +360,6 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
          * menu, which the rules protect on every page of this site.
          */
         seeItHappenBand(ids, {
-          origin: context.origin,
           theme: context.theme,
           ...(context.ask === undefined
             ? {}

@@ -52,9 +52,8 @@ export const generateMetadata = routeMetadata(HOME)
  * is announced as the page it publishes.
  */
 const HomePage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
-  const rendered = await renderSitePage(HOME, {
+  const rendered = await renderSitePage(HOME, askedFor(await searchParams), {
     origin: await servedOrigin(),
-    ...askedFor(await searchParams),
   })
 
   /**
