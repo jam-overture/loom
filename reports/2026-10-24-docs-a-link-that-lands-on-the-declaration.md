@@ -122,6 +122,13 @@ left to be discovered, and it is the one new finding of the run.
   cannot produce one, because the line is only read once the file has been
   found.
 - **No range**, argued above with the number.
+- **The measure got a name**, `ApiCutMeasure`, where two signatures had spelled
+  out `Omit<ApiCut, …>` and would now have had to agree about two keys rather
+  than one. It landed in the wrong place first — between `publishedSignature`'s
+  docblock and the function, so eight paragraphs about the order a signature is
+  cleaned and cut in documented a type alias — and the third commit on this
+  branch moves it above the block. Caught by reading the diff before the gate
+  was re-run, which is the one thing a test could not have said.
 
 ## Records
 
@@ -162,12 +169,20 @@ last thing on its line, with nothing piped into `tail` or `tee`.
 
 - framework: **237 files, 5,656 tests passed**
 - application: **351 files, 6,290 tests passed**
-- `findings:check`: 1,298 findings, 0 malformed (1,299 with this run's)
+- `findings:check`: 1,298 findings, 0 malformed
 - `reports:check`: 1,948 visuals, none over 1.1MB, 409 cited by no file
 - `prerender:check`: 133 prerendered pages, 1,930 text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
 Nothing failed, nothing was skipped, and no test was weakened.
+
+**Which tree those are of, said rather than implied.** That run was over the
+code and its tests, before this report, its six pictures and the finding were
+written — so two of the five lines above are of a tree this branch no longer
+has: `findings:check` reads **1,299** with the entry filed below, and
+`reports:check` reads **1,954** with the six visuals. The three test lines are
+unchanged, because nothing under `src/` or `app/` moved after it. A second run
+over the committed tree is what the next commit on this branch records.
 
 **Sixteen tests are new**: 10 in `extract.test.ts` — seven for
 `declarationLineIn`, two sweeps over the twelve real cut blocks and one
@@ -225,34 +240,52 @@ says the block was cut is in the same place, and the next export —
 
 ### And on a phone
 
-![390, after: the same sentence at phone width, wrapping to two lines with the whole link — path, comma, "from line 83" and the off-site mark — on the second](2026-10-24-docs-a-link-that-lands-on-the-declaration-phone-primitives.webp)
+![390, before: the same sentence at phone width, wrapping to two lines and ending on the path](2026-10-24-docs-a-link-that-lands-on-the-declaration-before-phone-primitives.webp)
 
-`350x32` against `704x16` at 1280: two lines rather than one, the link whole on
-the second, and nothing that scrolls sideways (`scrollWidth 390 /
-innerWidth 390`). The path is in code voice and *from line 83* is not, which is
-the font difference visible at this size.
+![390, after: the same sentence, still two lines, with the whole link — path, comma, "from line 83" and the off-site mark — on the second](2026-10-24-docs-a-link-that-lands-on-the-declaration-phone-primitives.webp)
 
-### One of the five the search would have got wrong
+`350x32` in **both**, against `704x16` at 1280: two lines before and two lines
+after, so the eleven added words did not cost a third, and nothing scrolls
+sideways (`scrollWidth 390 / innerWidth 390`). That is the question only a
+phone picture answers, and it is the reason there is a before at this width —
+the box is the same, so the pair is a reading of the words.
 
-![1280, after: the signals reference, where SilenceCondition's cut block ends "src/signals/silences.ts, from line 426"](2026-10-24-docs-a-link-that-lands-on-the-declaration-wide-signals.webp)
+The path is in code voice and *from line 83* is not, which is the font
+difference this width is large enough to show.
 
-The signals door is the page with six cut blocks on it, and five of its six are
-in the table above. `SilenceCondition` is on line 426 of a 1,331-line file.
+The sixth picture, `2026-10-24-docs-a-link-that-lands-on-the-declaration-before-wide-signals.webp`,
+is the signals page before the change. It is not shown because its pair below
+differs from it in exactly the way the first pair does, and one illustration of
+that is enough; it is committed so that the claim can be checked rather than
+taken.
+
+### The page with six cut blocks on it
+
+![1280, after: the signals reference, where SilenceCondition's cut block ends "Cut short here — showing the first 125 lines of 180. The whole of it is in src/signals/silences.ts, from line 426."](2026-10-24-docs-a-link-that-lands-on-the-declaration-wide-signals.webp)
+
+The signals door has six of the twelve, and **five of those six are rows in the
+table above** — the ones a text search would have sent a reader to a `{@link}`
+in a different export's comment. The one in the picture is the sixth, where a
+search would have landed correctly: `SilenceCondition`, on line 426 of a
+1,331-line file. That is an accident of which block the shot list named — it
+was written before the table was computed — and it makes the point anyway:
+**nothing on the page distinguishes the two cases**, which is why the line is
+found the same way for all twelve rather than searched for and spot-checked.
 
 ## The preview
 
 Taken from the `vercel[bot]` comment after opening the pull request, not
 composed from the branch name.
 
-PREVIEW_URL
+https://loom-git-docs-65-a-link-that-86e952-jpizzolato36-6341s-projects.vercel.app
 
 The two pages the pictures are of:
 
-- PREVIEW_URL/docs/api-reference/primitives
-- PREVIEW_URL/docs/api-reference/signals
+- https://loom-git-docs-65-a-link-that-86e952-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/primitives
+- https://loom-git-docs-65-a-link-that-86e952-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/signals
 
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,
 which is the open finding of 12 October and still true.
 
-The pull request is **PR_NUMBER**.
+The pull request is **#702**.
