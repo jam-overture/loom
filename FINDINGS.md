@@ -59524,3 +59524,109 @@ menu above it uses. Three shapes:
 **Recommendation: 3 until the prop takes a word, then 2.** Marking it `page`
 today would be this site using the wrong word in the one place it is making a
 claim about saying exactly what is going on.
+
+---
+## 2026-10-24 (evening) — what a page collects is now a value a surface can print, and the two surfaces that would print it describe it in prose instead
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`/docs/the-runtime/what-your-readers-do`) and `Loom demo`
+(`prototypes/ski-apparel`) · **Status:** open — **nothing is broken and nothing
+is failing**; a hand-written paragraph and a derived value now say the same
+thing, and only one of them cannot go stale
+
+`collectionNoticeOf` (0313) publishes what a published page reports, derived
+from the options the page is broadcast with and from the schema it sends: the
+kinds with a sentence each, every field of every kind and of the delivery with a
+sentence each, the closed list of what is never collected, the region floor or
+that no country is read, and how long a delivery lives. Every sentence is
+addressed to the reader rather than to an engineer.
+
+```ts
+const notice = collectionNoticeOf({
+  page: { kinds: ["viewed", "dwelled"] },
+  windowMs: 15 * 60_000,
+  region: { floor: 50 },
+})
+```
+
+**Why this is filed rather than built.** A page that prints it is each surface's
+own, and the sentences are already written — this is a rendering, not a design.
+
+- **The guide** describes the five kinds and what a batch carries in prose. The
+  prose is good and it is a second copy: `completed` landed on 1 October,
+  `audience` with 0284 and `within` with 0167, and a paragraph written before any
+  of those was wrong the day after it was written. A page built on `notice.ts`
+  cannot be: the tables are keyed by the schema's own fields, so a payload field
+  with no sentence does not compile.
+- **The worked example** is the page a prospective deployment reads to see what
+  switching this on actually does. It has a rail and no notice, so the one
+  surface that demonstrates reader measurement end to end demonstrates the half
+  this product argues about least convincingly.
+
+Nothing about the derivation is this lane's to draw, and nothing in it needs a
+decision from either owner.
+
+---
+## 2026-10-24 (evening) — the escalation rule tells a lane to ship the independent half with a `Proposed` record, and the merge brief skips any pull request that carries one
+
+**Filed by:** `Loom signals` · **Owned by:** the maintainer
+(`docs/routines.md`, and `Loom merge`'s brief) · **Status:** open — **a
+governance conflict rather than a fault in anybody's code**; it has cost one
+pull request a day so far and the lane-level workaround is applied
+
+Two rules that are each right on their own:
+
+- **Escalation** (`docs/routines.md`, *Escalation*): anything contradicting an
+  accepted record is **ARCHITECTURAL — needs review**, so *write the record as
+  `Proposed`, do not supersede anything, **build what does not depend on it**,
+  and say in the report what was left out.*
+- **`Loom merge`**: *it skips … anything with `ARCHITECTURAL — needs review` or
+  a `Proposed` record.*
+
+A lane that follows the first produces exactly the pull request the second
+skips. #700 is the instance: two accepted records' worth of green work (0307,
+0309 — the latter being the rung from a store to a reading that five pull
+request comments had asked for) held because it also carries `0308`, which is
+one reading of one record and the maintainer's.
+
+**What the split costs, measured, because it is not free.** The merge routine
+offered *tell the lane to split the proposal out* as its option 2. Doing it
+means the built half can no longer **cite** the proposal: `collectCitations`
+(`tools/decisions/collect.ts`) checks every citation in `decisions/`, `src/` and
+`tools/` against the records that exist, and a bare `(0308)` in `src/` fails the
+moment the record is on another branch. Three citations were rewritten on #700
+tonight to say *proposed, in a record of its own awaiting review* with no number
+in them — which is the pointer a reader of that member needed, deleted to satisfy
+a check that is otherwise exactly right. The record comes back into those
+comments when 0308 lands.
+
+**The lane practice, applied from now on without waiting for an answer**: a
+`Proposed` record goes in a pull request of its own, and the built half ships
+beside it with no citation of it. That is what #700 and the 0308 pull request now
+are.
+
+**And the rule is not being applied the way it is written, which narrows the
+question.** `main` carries two `Proposed` records that landed in the last two
+days: `0310` (#694) and `0311` (#703), both merged by `Loom merge`, both plainly
+`**Status:** Proposed`. What 0308 has that those do not is the architectural
+marker — `Proposed — **architectural, needs review.**` — so in practice the skip
+keys on the marker and not on the word `Proposed`, while the brief and
+`docs/routines.md` name both. Read from the files, not from the comment.
+
+**What is the maintainer's.** Whether a record marked `ARCHITECTURAL — needs
+review` should hold only itself or the whole pull request that carries it. It
+affects every lane, not only this one, and a routine cannot write the governance
+it is bound by. Three shapes:
+
+1. **Leave the rules as they are and let every lane split.** No change to
+   governance; the cost is one extra pull request per proposal and the lost
+   citation above, every time.
+2. **The merge routine skips the record rather than the pull request** — merging
+   the branch minus the `Proposed` file is not mechanical (it would renumber or
+   leave a hole, and the citations break the same way), so this is probably not
+   available.
+3. **Say that a record needing review holds only itself**, and have the merge
+   routine land the rest and comment that the proposal is still open. **The
+   recommendation**, because it is what the escalation rule already asks lanes to
+   do, because it is already what happens to a plain `Proposed` record, and
+   because a proposal is read on its own thread either way.

@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 65,
+      "files": 66,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -11035,6 +11035,109 @@
           ]
         },
         {
+          "module": "signals/notice",
+          "title": "Notice",
+          "summary": "What a published page reports, written for the people it reports about.",
+          "symbols": [
+            {
+              "name": "FieldSubject",
+              "kind": "type",
+              "signature": "type FieldSubject =\n/** The part of the page the observation is about. */\n\"part\"\n/** Which page, which revision of it, and which form was served. */\n | \"page\"\n/** What was observed about the part — when, how long, open or closed. */\n | \"observation\"\n/**\n * The one visit the delivery belongs to.\n *\n * The narrowest scope anything here is correlated at, and the only one about\n * a visit rather than about a page.\n */\n | \"page-view\"\n/** The delivery itself — when it was sent, and what it carried. */\n | \"delivery\";",
+              "summary": "What one field of a delivery is about."
+            },
+            {
+              "name": "FIELD_SUBJECTS",
+              "kind": "value",
+              "signature": "const FIELD_SUBJECTS: readonly FieldSubject[]",
+              "summary": "The closed set, for a surface grouping a notice by what its fields are about."
+            },
+            {
+              "name": "describeFieldSubject",
+              "kind": "function",
+              "signature": "const describeFieldSubject: (subject: FieldSubject) => string",
+              "summary": "One line per subject, addressed to the reader, for a surface grouping a notice."
+            },
+            {
+              "name": "CollectedField",
+              "kind": "type",
+              "signature": "type CollectedField = {\n    /** The field's name in the delivery, which is what a reader comparing this to a payload sees. */\n    readonly field: string;\n    /** What it is about. */\n    readonly subject: FieldSubject;\n    /** One sentence, addressed to the reader. */\n    readonly says: string;\n};",
+              "summary": "One field of a payload, and what it says."
+            },
+            {
+              "name": "SIGNAL_FIELDS",
+              "kind": "value",
+              "signature": "const SIGNAL_FIELDS: {\n    readonly [Kind in ReaderSignalKind]: FieldsOf<Extract<ReaderSignal, {\n        kind: Kind;\n    }>>;\n}",
+              "summary": "Every kind's fields."
+            },
+            {
+              "name": "DELIVERY_FIELDS",
+              "kind": "value",
+              "signature": "const DELIVERY_FIELDS: FieldsOf<ReaderSignalBatch>",
+              "summary": "What travels with a delivery, whatever observations are in it."
+            },
+            {
+              "name": "Refusal",
+              "kind": "type",
+              "signature": "type Refusal = \n/**\n * No identifier for a person or a device, and nothing standing in for one.\n *\n * The first clause of rule 1. The second half of the sentence is the half\n * that matters to somebody who has read a privacy policy before: an\n * identifier nobody set is still an identifier.\n */\n\"no-identifier\"\n/** No signature derived from a device, a browser or its settings. */\n | \"no-fingerprint\"\n/** Nothing the page said to you and nothing you said to it. */\n | \"no-content\"\n/** No cursor, no scroll trace, no recording. */\n | \"no-pointer-path\"\n/** Nothing that joins one visit to another. */\n | \"no-stitching\"\n/** Nothing derived from your address outlives the request it arrived on. */\n | \"no-address\";",
+              "summary": "Something a reader signal never carries, whatever a deployment configures."
+            },
+            {
+              "name": "REFUSALS",
+              "kind": "value",
+              "signature": "const REFUSALS: readonly Refusal[]",
+              "summary": "The closed set, for a surface listing what is refused."
+            },
+            {
+              "name": "describeRefusal",
+              "kind": "function",
+              "signature": "const describeRefusal: (refusal: Refusal) => string",
+              "summary": "One line per refusal, addressed to the reader."
+            },
+            {
+              "name": "RegionNotice",
+              "kind": "type",
+              "signature": "type RegionNotice = {\n    /**\n     * The page views a country needs before it is published at all, or `null`\n     * where no country is read.\n     *\n     * `null` is *nothing about where you are is read*, which is a different\n     * sentence from *your country is counted and will not be published until\n     * enough others share it* — and the difference is the whole of what a floor\n     * is for. A country with a handful of views in it is a person (§7).\n     */\n    readonly floor: number | null;\n};",
+              "summary": "Where a deployment counts its readers from, or that it does not."
+            },
+            {
+              "name": "describeRegionNotice",
+              "kind": "function",
+              "signature": "const describeRegionNotice: (notice: RegionNotice) => string",
+              "summary": "One or two sentences about where readers are counted from, addressed to the reader."
+            },
+            {
+              "name": "CollectionNotice",
+              "kind": "type",
+              "signature": "type CollectionNotice = {\n    /** The kinds this configuration broadcasts, in the vocabulary's order. */\n    readonly collects: readonly CollectedKind[];\n    /** What travels with every delivery. */\n    readonly delivery: readonly CollectedField[];\n    /** What is never collected, whatever else is configured. */\n    readonly refuses: readonly Refusal[];\n    /** Where readers are counted from, or that they are not. */\n    readonly region: RegionNotice;\n    /**\n     * How long a delivery itself lives before it is counted and dropped, in\n     * milliseconds.\n     *\n     * The deployment's own number (`collect.ts`), and the honest bound on the\n     * life of the page-view key, since the key exists in the buffer and nowhere\n     * else. **The framework cannot promise the moment it is swept**, because a\n     * host schedules the sweep: this is the age at which a delivery becomes ripe,\n     * not a guarantee about when the next run happens.\n     * {@link describeBuffer} says both halves.\n     */\n    readonly bufferMs: number;\n};",
+              "summary": "What a published page reports, and what it refuses to."
+            },
+            {
+              "name": "CollectedKind",
+              "kind": "type",
+              "signature": "type CollectedKind = {\n    readonly kind: ReaderSignalKind;\n    /** What the page observed, addressed to the reader. */\n    readonly observes: string;\n    /** Every field that kind carries, including the ones it sometimes omits. */\n    readonly carries: readonly CollectedField[];\n};",
+              "summary": "One kind of observation, with the fields it carries."
+            },
+            {
+              "name": "describeBuffer",
+              "kind": "function",
+              "signature": "const describeBuffer: (bufferMs: number) => string",
+              "summary": "How long a delivery lives, addressed to the reader."
+            },
+            {
+              "name": "NoticeRequest",
+              "kind": "type",
+              "signature": "type NoticeRequest = {\n    /**\n     * The options the page is broadcast with — the same object, so that a notice\n     * and the page it is about cannot disagree about which kinds are reported.\n     *\n     * Only `kinds` is read. `types` and `within` narrow collection below what the\n     * notice says, which is the ceiling rule above.\n     */\n    readonly page?: Pick<ReaderSignalOptions, \"kinds\">;\n    /**\n     * The window the deployment collects on, from its own `CollectionRequest`\n     * (`collect.ts`). The default when absent.\n     *\n     * Reported as given rather than clamped: `collect.ts` is what refuses a\n     * window below its minimum, and a notice that silently reported a different\n     * number from the one a deployment configured would be a second rule about\n     * one setting.\n     */\n    readonly windowMs?: number;\n    /**\n     * The region counting this deployment's intake does, where it does any.\n     *\n     * Absent is *no country is read*, which is the default: reading one is\n     * something an intake is configured to do (§7). A floor below the published\n     * minimum is raised to it, by the same helper the region map itself uses.\n     */\n    readonly region?: {\n        readonly floor?: number;\n    };\n};",
+              "summary": "The configuration a notice is of."
+            },
+            {
+              "name": "collectionNoticeOf",
+              "kind": "function",
+              "signature": "const collectionNoticeOf: (request?: NoticeRequest) => CollectionNotice",
+              "summary": "What a page broadcast with these options reports, as a deployment may publish it."
+            }
+          ]
+        },
+        {
           "module": "signals/pace",
           "title": "Pace",
           "summary": "Whether a part was read or scrolled past.",
@@ -12127,7 +12230,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12262,7 +12365,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12324,7 +12427,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12849,7 +12952,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12919,7 +13022,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13341,7 +13444,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1762,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
