@@ -1,0 +1,34 @@
+{
+ "baseUrl": "http://localhost:3000",
+ "outDir": "reports",
+ "shots": [
+  {
+   "path": "/",
+   "out": "2026-10-23-marketing-front-door-wide",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": ["h1"]
+  },
+  {
+   "path": "/how-it-works",
+   "out": "2026-10-23-marketing-how-it-works-wide",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": ["h1"]
+  },
+  {
+   "path": "/what-you-run",
+   "out": "2026-10-23-marketing-what-you-run-wide",
+   "viewport": "wide",
+   "waitFor": "h1",
+   "measure": ["h1"]
+  },
+  {
+   "path": "/",
+   "out": "2026-10-23-marketing-front-door-phone",
+   "viewport": "phone",
+   "waitFor": "h1",
+   "measure": ["h1"]
+  }
+ ]
+}

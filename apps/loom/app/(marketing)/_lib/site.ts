@@ -169,6 +169,48 @@ export const WHAT_YOU_RUN: SiteRoute = {
 export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN]
 
 /**
+ * The paths of {@link SITE_ROUTES}, sorted — **what a sweep's coverage is held
+ * against, declared in the module that declares the site.**
+ *
+ * Four test files had each written `[...SITE_ROUTES.map((route) => route.path)].sort()`
+ * inline by 22 October, and `requested.ts` kept a `Set` of the same thing under
+ * this same name. That is the shape `measure.ts` has a paragraph against: a
+ * projection copied into five files is five chances to disagree about what
+ * counts as a page of this site, and one of them was already a different type
+ * wearing the same spelling.
+ *
+ * **It is here rather than beside `sweepCover` in `served.ts` on purpose.** The
+ * thing a sweep guard has to avoid is an expected value taken from the code
+ * under test — this lane's 27 September filing — and the code under test for a
+ * sweep is `served.ts`. This module is the *declaration* of what the site is,
+ * which is the thing a sweep is supposed to have found. The two being different
+ * modules is what makes the comparison an assertion.
+ */
+export const SITE_PATHS: readonly string[] = [...SITE_ROUTES.map((route) => route.path)].sort()
+
+/**
+ * The fewest pages this site may have for a sweep over it to be worth reading,
+ * hand-written.
+ *
+ * **It is the only number in the sweep guards that nothing computes**, and that
+ * is its whole job. `SERVED_STATE_COUNT` is `SITE_ROUTES.length * ASK_STATES.length`,
+ * so on a site with no pages the sweep comes back with nothing, the constant is
+ * zero, and *the sweep found what it expected to* is true. Measured on
+ * 23 October with `SITE_ROUTES` emptied: **six rules of the form “nothing on
+ * this site is X” were green, and so were two of the six tests written to stop
+ * exactly that** — the two that had no floor of this kind.
+ *
+ * Three is right to write by hand because it moves when a page is added to this
+ * site or retired from it — a deliberate act somebody is already thinking about
+ * — and never when the sweep is crossed with one dimension more or less, which
+ * is the 21 October failure `sweepShare` records.
+ *
+ * It is a floor and not an equality for the same reason: a fourth page should
+ * not turn this red.
+ */
+export const PAGES_AT_LEAST = 3
+
+/**
  * The pages this site used to have, and where each one went.
  *
  * **It is here because the prose of this route group kept naming them.** On
@@ -880,34 +922,6 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
 }
 
 /**
- * The page a request is run against, with the request in the address.
- *
- * The page keeps nothing, so what it shows is a function of its address.
- * `/how-it-works` on its own is the page it has always been. With an ask in the
- * address it rearranges for that request and prints its record, which is what
- * lets one visitor hand another the record of the change they just watched
- * rather than of a different one.
- *
- * `approve` travels with it because the record does. A change the rules held
- * and the visitor then allowed has a line the held one does not, and a link
- * that dropped the approval would open a page whose record is one line shorter
- * than the panel the visitor followed it from.
- *
- * **There were two of these until 12 October**, and the second was
- * `mechanismHref`. They were different functions in September, when `askHref`
- * wrote an address of the front door and `mechanismHref` wrote one of
- * `/how-it-works`; the maintainer moved the band on 1 October and the two
- * destinations became the same page, after which 19 call sites across 8 files
- * were choosing between two names for one body. `ASKED_ROUTE` is now the single
- * answer to *which page*, so the name that says what the address **carries** is
- * the one that survived. Filed on 11 October, collapsed here, and the deletion
- * is the point: a second name is a decision every later call site has to make
- * again.
- */
-export const askHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, ASKED_ROUTE.path, options)
-
-/**
  * A link into another surface of the product.
  *
  * The palette is deliberately **not** carried across. It is this site's
@@ -949,12 +963,41 @@ export const surfaceHref = (origin: string, surface: Surface): string =>
  * The absolute pair above is untouched and is still what metadata uses.
  */
 /**
- * The asked route, as a path this site can store.
+ * The page a request is run against, with the request in the address.
  *
- * `askHref` keeps taking an origin because metadata still needs an absolute
- * URL. A link **in a tree** never does: the invariant this change establishes
- * is that no href in a stored page carries a host, so that one row serves
- * every deployment of this site.
+ * The page keeps nothing, so what it shows is a function of its address.
+ * `/how-it-works` on its own is the page it has always been. With an ask in the
+ * address it rearranges for that request and prints its record, which is what
+ * lets one visitor hand another the record of the change they just watched
+ * rather than of a different one.
+ *
+ * `approve` travels with it because the record does. A change the rules held
+ * and the visitor then allowed has a line the held one does not, and a link
+ * that dropped the approval would open a page whose record is one line shorter
+ * than the panel the visitor followed it from.
+ *
+ * **There were two of these until 12 October**, and the second was
+ * `mechanismHref`. They were different functions in September, when `askHref`
+ * wrote an address of the front door and `mechanismHref` wrote one of
+ * `/how-it-works`; the maintainer moved the band on 1 October and the two
+ * destinations became the same page, after which 19 call sites across 8 files
+ * were choosing between two names for one body. `ASKED_ROUTE` is now the single
+ * answer to *which page*, so the name that says what the address **carries** is
+ * the one that survived. Filed on 11 October, collapsed here, and the deletion
+ * is the point: a second name is a decision every later call site has to make
+ * again.
+ *
+ * **And then there were none**, as of 24 October. The absolute spelling,
+ * `askHref`, is gone with the last thing that called it: one control on
+ * `/how-it-works` that linked to the address it was drawn on. The reason this
+ * docblock gave for keeping it — *"metadata still needs an absolute URL"* —
+ * named a caller that does not exist, because the canonical link, the share
+ * card and the sitemap all go through `internalHref`.
+ *
+ * So what is left is the path, which is what a link in a tree has to be (0259),
+ * and this site now has no way to spell an address of itself with a host in it.
+ * `routes.test.ts` sweeps all 75 served states for one anyway, because a
+ * literal is still a literal.
  */
 export const askPath = (options: AskedFor = {}): string => askedHref("", ASKED_ROUTE.path, options)
 

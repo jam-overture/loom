@@ -86,12 +86,12 @@ bargain this whole framework is making. A bounded vocabulary buys you
 reviewability. Nobody has to read your component to know that this row can say
 one of three things, and nobody has to write a rule forbidding the fourth.
 
-`.strict()` is what makes an unrecognised prop a refusal rather than a value
+`.strict()` is what makes an unrecognized prop a refusal rather than a value
 that rides along unnoticed.
 
-### Behaviour lives in the component, not in the tree
+### Behavior lives in the component, not in the tree
 
-The tree says `offline`. It does not say what colour that is, how big the badge
+The tree says `offline`. It does not say what color that is, how big the badge
 is, or whether the word is capitalised. All of that is in the component, which
 means you can change every one of them without touching a single stored page.
 
@@ -105,13 +105,13 @@ declared beside the component and read back through `loom.text`, so a deployment
 can hand back its own set and get a translated page without anybody editing a
 component.
 
-### Nothing in it is a colour
+### Nothing in it is a color
 
-No hex, anywhere. The badge takes its two colours from the theme through the
+No hex, anywhere. The badge takes its two colors from the theme through the
 token helpers in `@jam-overture/loom-primitives`, which return `var()`
 references rather than values, so the component never learns which palette is
 mounted. [Making it look like yours](/docs/building-with-loom/theming) is the
-page about that, and the short version is that a literal colour in a component
+page about that, and the short version is that a literal color in a component
 looks perfect under the palette its author had open and survives every re-theme
 unchanged.
 
@@ -159,7 +159,7 @@ of this page doing visible work.
 
 ## What a model is told about it
 
-An interpreter hands a model a catalogue of what it may propose, and this is
+An interpreter hands a model a catalog of what it may propose, and this is
 your primitive's row in it, read off the registry as this page built.
 
 <OwnPrimitiveCatalogue />
@@ -174,10 +174,10 @@ this thing, and it is read by the only reader who cannot go and look at your
 code.
 
 <Callout kind="note">
-  The catalogue is deliberately shallower than the schema. A structural
+  The catalog is deliberately shallower than the schema. A structural
   description of arbitrary Zod would be a second schema language to keep true,
   and the model already sees real prop values in the outline of the page it is
-  being asked to change. What stops it writing nonsense is not the catalogue; it
+  being asked to change. What stops it writing nonsense is not the catalog; it
   is that the schema refuses the nonsense on the way back in.
 </Callout>
 

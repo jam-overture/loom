@@ -306,7 +306,6 @@ describe("an address that carries an undo", () => {
     const picture = new URL(pictureIn(await announcedBy(ASKED_ROUTE, held)))
     const { card } = await shareImageFor(picture.searchParams, ORIGIN)
     const run = await askRunFor({
-      origin: ORIGIN,
       theme: "minimal",
       ask: "unstick-menu",
       approve: true,

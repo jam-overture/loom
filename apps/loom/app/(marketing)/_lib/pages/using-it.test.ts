@@ -21,8 +21,6 @@ import { HOME, SITE_THEME_NAMES, type SiteThemeName } from "../site"
  * carries the record rather than ending on adaptation.
  */
 
-const ORIGIN = "https://loom.example"
-
 const elementsOf = (node: LoomNode): readonly ElementNode[] =>
   node.kind === "text"
     ? []
@@ -42,7 +40,7 @@ const stepsOf = (page: LoomTree): readonly ElementNode[] => {
 }
 
 const home = (theme: SiteThemeName = "minimal"): LoomTree =>
-  treeFor(HOME, { origin: ORIGIN, theme })
+  treeFor(HOME, { theme })
 
 const textOf = (node: LoomNode): string =>
   node.kind === "text"

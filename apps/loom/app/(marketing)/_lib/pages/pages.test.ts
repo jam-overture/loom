@@ -61,7 +61,7 @@ const THEMES: readonly SiteThemeName[] = SITE_THEME_NAMES
  * would be asserting the stored row and calling it the page.
  */
 const rendered = (route: SiteRoute, theme: SiteThemeName) =>
-  renderTree(asRequested(treeFor(route, { origin: ORIGIN, theme }), { theme }), { origin: ORIGIN })
+  renderTree(asRequested(treeFor(route, { theme }), { theme }), { origin: ORIGIN })
 
 const markupOf = (route: SiteRoute, theme: SiteThemeName): string =>
   renderToStaticMarkup(rendered(route, theme).element)
@@ -150,8 +150,8 @@ describe.each(SITE_ROUTES)("$path", (route) => {
   })
 
   it("builds the same tree twice, byte for byte", () => {
-    const once = treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })
-    const twice = treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const once = treeFor(route, { theme: DEFAULT_THEME })
+    const twice = treeFor(route, { theme: DEFAULT_THEME })
 
     expect(JSON.stringify(twice)).toBe(JSON.stringify(once))
   })
@@ -455,7 +455,7 @@ describe("the way to the demonstration", () => {
     )
 
   const bandOf = (route: SiteRoute, holds: (found: ElementNode) => boolean): ElementNode => {
-    const found = bandWith(treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }).root, holds)[0]
+    const found = bandWith(treeFor(route, { theme: DEFAULT_THEME }).root, holds)[0]
 
     if (found === undefined) throw new Error(`loom: ${route.path} has no such band`)
 
@@ -502,13 +502,13 @@ describe("the way to the demonstration", () => {
    * there perfectly well.
    */
   it("still offers the demonstration, from somewhere on the front door", () => {
-    const tree = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const tree = treeFor(HOME, { theme: DEFAULT_THEME })
 
     expect(hrefsIn(tree.root)).toContain(DEMO_HREF)
   })
 
   it("frames nothing, now that the demonstration is a link", () => {
-    const tree = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const tree = treeFor(HOME, { theme: DEFAULT_THEME })
 
     expect(bandWith(tree.root, (found) => found.type === "loom.embed")).toHaveLength(0)
   })
@@ -524,7 +524,6 @@ describe("the way to the demonstration", () => {
     "survives the front door being asked for %s",
     async (ask) => {
       const page = await pageTreeFor(HOME, {
-        origin: ORIGIN,
         theme: DEFAULT_THEME,
         ...(ask === undefined ? {} : { ask }),
       })
@@ -568,7 +567,7 @@ describe("a surface added to the product", () => {
    * from here" has to be a surface or has to change this test.
    */
   it("is the whole of the band that invites, and nothing else is", () => {
-    const inviting = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const inviting = treeFor(HOME, { theme: DEFAULT_THEME })
       .root.children.find(
         (child) => child.kind === "element" && child.props["eyebrow"] === BAND.waysIn
       )
@@ -604,7 +603,7 @@ describe("a surface added to the product", () => {
    * agrees with `site.ts`, not that anybody's phrasing survives review.
    */
   it("says what each destination costs, in the order they are offered", () => {
-    const inviting = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const inviting = treeFor(HOME, { theme: DEFAULT_THEME })
       .root.children.find(
         (child) => child.kind === "element" && child.props["eyebrow"] === BAND.waysIn
       )
@@ -643,7 +642,7 @@ describe("a surface added to the product", () => {
  * test people learn to change rather than to read.
  */
 describe("the band that says what this is for", () => {
-  const rhythm = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+  const rhythm = treeFor(HOME, { theme: DEFAULT_THEME })
     .root.children.find(
       (child) => child.kind === "element" && child.props["eyebrow"] === BAND.problems
     )
@@ -698,10 +697,10 @@ describe("the band that says what this is for", () => {
  */
 describe("the mechanism page's short answers", () => {
   const served = async (theme: SiteThemeName) =>
-    renderTree(await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme }), { origin: ORIGIN })
+    renderTree(await pageTreeFor(HOW_IT_WORKS, { theme }), { origin: ORIGIN })
 
   const eyebrowsOf = async (): Promise<readonly string[]> => {
-    const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const tree = await pageTreeFor(HOW_IT_WORKS, { theme: DEFAULT_THEME })
 
     return tree.root.children.flatMap((child) =>
       child.kind === "element" && typeof child.props["eyebrow"] === "string"
@@ -784,7 +783,7 @@ describe("the panels that print data", () => {
           ]
 
     const trees = await Promise.all(
-      SITE_ROUTES.map((route) => pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }))
+      SITE_ROUTES.map((route) => pageTreeFor(route, { theme: DEFAULT_THEME }))
     )
 
     return trees.flatMap((tree) => found(tree.root))
@@ -855,7 +854,7 @@ describe("the bands, and the plate the house palette draws as padding", () => {
           ]
 
     const trees = await Promise.all(
-      SITE_ROUTES.map((route) => pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }))
+      SITE_ROUTES.map((route) => pageTreeFor(route, { theme: DEFAULT_THEME }))
     )
 
     return trees.flatMap((tree) => found(tree.root))

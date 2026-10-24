@@ -128,7 +128,7 @@ describe("actionChangeOf", () => {
     expect(comparedIn(change, "pricing")).toMatchObject({
       movement: "taken-up",
       inside: "kept",
-      shareRatio: null,
+      shareRatio: { ratio: null, absent: "from-nothing" },
     })
 
     expect(comparedIn(change, "pricing")?.was).toMatchObject({ standing: "untouched", share: 0 })
@@ -139,7 +139,7 @@ describe("actionChangeOf", () => {
     expect(comparedIn(changeOf(WAS, NOW), "quiet")).toMatchObject({
       movement: "abandoned",
       inside: "kept",
-      shareRatio: 0,
+      shareRatio: { ratio: 0, absent: null },
     })
   })
 
@@ -155,7 +155,7 @@ describe("actionChangeOf", () => {
 
     expect(change.whole?.nodeId).toBe(nodeId("page"))
     expect(change.whole?.movement).toBe("held")
-    expect(change.whole?.shareRatio).toBeCloseTo(10 / 3)
+    expect(change.whole?.shareRatio.ratio).toBeCloseTo(10 / 3)
     expect(change.mostTakenUp).not.toBe(change.whole)
     expect(change.stillUntouched).not.toContain(change.whole)
   })
@@ -206,7 +206,10 @@ describe("the shape a change gave a part", () => {
   it("says a share appeared because the part gained an inside, not because readers acted", () => {
     const buy = comparedIn(changeOf(WAS, wrapped), "buy")
 
-    expect(buy).toMatchObject({ inside: "gained", shareRatio: null })
+    expect(buy).toMatchObject({
+      inside: "gained",
+      shareRatio: { ratio: null, absent: "unmeasured" },
+    })
     expect(buy?.was.share).toBeUndefined()
     expect(buy?.now.share).toBe(9 / 50)
   })
@@ -225,7 +228,10 @@ describe("the shape a change gave a part", () => {
 
     const pricing = comparedIn(changeOf(WAS, flattened), "pricing")
 
-    expect(pricing).toMatchObject({ inside: "lost", shareRatio: null })
+    expect(pricing).toMatchObject({
+      inside: "lost",
+      shareRatio: { ratio: null, absent: "unmeasured" },
+    })
     expect(pricing?.now.share).toBeUndefined()
   })
 
@@ -247,7 +253,7 @@ describe("the shape a change gave a part", () => {
   it("publishes a share ratio only where the part's shape was kept", () => {
     for (const change of [changeOf(WAS, wrapped), changeOf(wrapped, WAS), changeOf(WAS, NOW)]) {
       for (const part of change.compared) {
-        if (part.shareRatio !== null) expect(part.inside).toBe("kept")
+        if (part.shareRatio.ratio !== null) expect(part.inside).toBe("kept")
       }
     }
   })
@@ -317,11 +323,40 @@ describe("the figures that survive two windows", () => {
 
     expect(quiet?.was.usesPerReader).toBeCloseTo(9 / 30)
     expect(quiet?.now.usesPerReader).toBeCloseTo(18 / 30)
-    expect(quiet?.usesRatio).toBeCloseTo(2)
+    expect(quiet?.usesRatio.ratio).toBeCloseTo(2)
   })
 
-  it("withholds the use ratio where a side used nothing", () => {
-    expect(comparedIn(changeOf(WAS, NOW), "quiet")?.usesRatio).toBeNull()
+  /**
+   * The nought `PartAction.usesPerReader` withholds, restored for the two-window
+   * figure and not for the one-window one (0306). *Readers used this band and
+   * have stopped* is a measurement, and the field it is read off is absent.
+   */
+  it("publishes a quotient of nought where readers have stopped using a part", () => {
+    const quiet = comparedIn(changeOf(WAS, NOW), "quiet")
+
+    expect(quiet?.was.usesPerReader).toBeCloseTo(9 / 30)
+    expect(quiet?.now.usesPerReader).toBeUndefined()
+    expect(quiet?.usesRatio).toEqual({ ratio: 0, absent: null })
+  })
+
+  it("names a part nobody used before and half the readers press now", () => {
+    const buy = comparedIn(changeOf(WAS, NOW), "buy")
+
+    expect(buy?.was.usesPerReader).toBeUndefined()
+    expect(buy?.now.usesPerReader).toBeCloseTo(24 / 50)
+    expect(buy?.usesRatio).toEqual({ ratio: null, absent: "from-nothing" })
+  })
+
+  it("says nothing was measured where a side had no readers to divide by", () => {
+    const empty = {
+      tree: NOW.tree,
+      counters: AFTER.filter((counter) => counter.nodeId !== nodeId("buy")),
+    }
+
+    expect(comparedIn(changeOf(WAS, empty), "buy")?.usesRatio).toEqual({
+      ratio: null,
+      absent: "unmeasured",
+    })
   })
 })
 
@@ -347,10 +382,76 @@ describe("a sender that does not report where actions happened", () => {
     expect(change.readings.now.unwalked).toBe(true)
   })
 
-  it("would otherwise have reported the page as abandoned", () => {
+  /** The same window, with the unwalked side as the earlier one. */
+  const unwalkedWas = {
+    tree: treeOf(PAGE(), 1),
+    counters: unwalked.counters.map((counter) => ({ ...counter, revision: 1 })),
+  }
+
+  /**
+   * The sentence this refusal exists to stop, and the one the reading used to
+   * print: the band readers used before reads as a band they have given up on,
+   * about a sender with the walk turned off.
+   */
+  it("reports nothing as abandoned, because the nought is the walk and not the readers", () => {
     const change = changeOf(WAS, unwalked)
 
-    expect(comparedIn(change, "quiet")?.movement).toBe("abandoned")
+    expect(comparedIn(change, "quiet")?.movement).toBe("unknown")
+    expect(change.movements.abandoned).toBe(0)
+    expect(change.mostAbandoned).toBeNull()
+  })
+
+  it("withholds every share ratio, where one side of each is a filing artefact", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.compared.filter((part) => part.shareRatio.ratio !== null)).toEqual([])
+    expect(change.whole?.shareRatio).toEqual({ ratio: null, absent: "unmeasured" })
+  })
+
+  it("has nothing to put in the still-untouched list and nothing taken up", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.stillUntouched).toEqual([])
+    expect(change.mostTakenUp).toBeNull()
+    expect(change.movements["still-untouched"]).toBe(0)
+  })
+
+  it("counts every compared part as unknown, so the five still account for them", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.movements.unknown).toBe(change.compared.length)
+  })
+
+  /**
+   * The asymmetry this refusal replaced. An unwalked **earlier** window gave a
+   * share of nought on the denominator, which the ratio already answered with an
+   * absence; an unwalked **later** one gave a nought on the numerator and came
+   * back `0`. One value for two states, and only one of them was covered — so
+   * the two directions are asserted to agree rather than described as agreeing.
+   */
+  it("withholds the same figures whichever window is the unwalked one", () => {
+    const earlier = changeOf(unwalkedWas, NOW)
+
+    expect(earlier.silence).toBe("unwalked")
+    expect(earlier.compared.filter((part) => part.shareRatio.ratio !== null)).toEqual([])
+    expect(earlier.mostTakenUp).toBeNull()
+    expect(earlier.mostAbandoned).toBeNull()
+    expect(earlier.stillUntouched).toEqual([])
+  })
+
+  /**
+   * The one movement that is **not** unknown across an unwalked window, and it
+   * is a real claim rather than a leak: a control pressed on both sides is
+   * `acted` on both sides on evidence filed against itself, so *they were using
+   * this and they still are* needs no ancestry. It is the half of this rule that
+   * would be lost by refusing the comparison wholesale.
+   */
+  it("still holds a control its own presses account for on both sides", () => {
+    const earlier = changeOf(unwalkedWas, NOW)
+
+    expect(comparedIn(earlier, "buy")?.movement).toBe("held")
+    expect(comparedIn(earlier, "buy")?.usesRatio).toEqual({ ratio: 1, absent: null })
+    expect(earlier.movements.unknown).toBe(earlier.compared.length - 1)
   })
 
   it("keeps the occurrence figures, which need no ancestry", () => {
@@ -358,6 +459,20 @@ describe("a sender that does not report where actions happened", () => {
 
     expect(comparedIn(change, "buy")?.now.uses).toBe(24)
     expect(comparedIn(change, "buy")?.now.usesPerReader).toBe(24 / 50)
+  })
+
+  /**
+   * What the change did to whether a share is measurable at all is a fact about
+   * the two trees and about no counter, so it stands in full — the same half
+   * every other silence in this subsystem leaves standing.
+   */
+  it("keeps the census of what the change did to each part's inside", () => {
+    const change = changeOf(WAS, unwalked)
+
+    expect(change.insides.kept).toBeGreaterThan(0)
+    expect(
+      change.insides.kept + change.insides.gained + change.insides.lost + change.insides.none
+    ).toBe(change.compared.length)
   })
 })
 
@@ -427,7 +542,7 @@ describe("counting the same thing twice", () => {
     expect(change.movements.abandoned).toBe(0)
     expect(change.mostTakenUp).toBeNull()
     expect(change.mostAbandoned).toBeNull()
-    expect(change.whole?.shareRatio).toBe(1)
+    expect(change.whole?.shareRatio).toEqual({ ratio: 1, absent: null })
     expect(change.added).toEqual([])
     expect(change.removed).toEqual([])
   })

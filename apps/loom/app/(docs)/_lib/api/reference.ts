@@ -1,6 +1,7 @@
 import generated from "./reference.generated.json"
 import {
   apiSlugFor,
+  type ApiCut,
   type ApiEntry,
   type ApiGroup,
   type ApiKind,
@@ -39,6 +40,42 @@ const asString = (value: unknown, where: string): string => {
   return value
 }
 
+/**
+ * A cut, where there is one — and nothing where the whole declaration is on
+ * the page, which is the ordinary case.
+ *
+ * The one shape refused is a cut that shows everything, because the sentence
+ * it renders is a true statement of nothing: *showing the first 91 lines of
+ * 91*. The rule cannot produce one — a cut is only recorded when the text ran
+ * past the cap — so a file carrying one is a file nobody's generator wrote.
+ */
+const asCut = (value: unknown, where: string): ApiCut | undefined => {
+  if (value === undefined) return undefined
+  if (!isRecord(value)) throw new Error(`loom: ${where} is not a cut`)
+
+  const shown = asNumber(value.shown, `${where}.shown`)
+  const whole = asNumber(value.whole, `${where}.whole`)
+
+  if (shown >= whole) {
+    throw new Error(`loom: ${where} is cut short at ${shown} of ${whole} lines, which is all of them`)
+  }
+
+  const source = asString(value.source, `${where}.source`)
+  const line = asNumber(value.line, `${where}.line`)
+
+  /*
+   * The other shape the rule cannot produce: a line in a file that is not
+   * there. `0` is both answers to *where is the rest of it* at once — no file,
+   * and no line in the file — so a line against an empty path is two fields
+   * disagreeing about whether a reader has anywhere to go.
+   */
+  if (source === "" && line !== 0) {
+    throw new Error(`loom: ${where} is at line ${line} of no file`)
+  }
+
+  return { shown, whole, source, line }
+}
+
 const asSymbol = (value: unknown, where: string): ApiSymbol => {
   if (!isRecord(value)) throw new Error(`loom: ${where} is not an export`)
 
@@ -50,7 +87,7 @@ const asSymbol = (value: unknown, where: string): ApiSymbol => {
     name: asString(value.name, `${where}.name`),
     kind: kind as ApiKind,
     signature: asString(value.signature, `${where}.signature`),
-    truncated: value.truncated === true,
+    cut: asCut(value.cut, `${where}.cut`),
     summary: asString(value.summary, `${where}.summary`),
   }
 }

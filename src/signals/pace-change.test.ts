@@ -158,9 +158,9 @@ describe("paceChangeOf", () => {
       expect(partIn(change, "pricing")).toMatchObject({
         movement: "eased",
         cause: "words",
-        timeRatio: 1,
-        needRatio: 0.5,
-        paceRatio: 2,
+        timeRatio: { ratio: 1, absent: null },
+        needRatio: { ratio: 0.5, absent: null },
+        paceRatio: { ratio: 2, absent: null },
         was: { standing: "skimmed", pace: 0.4, needMs: takes(200) },
         now: { standing: "paced", pace: 0.8, needMs: takes(100) },
         ifWordsHeld: { pace: 0.4, standing: "skimmed" },
@@ -192,9 +192,9 @@ describe("paceChangeOf", () => {
       expect(partIn(change, "pricing")).toMatchObject({
         movement: "eased",
         cause: "time",
-        timeRatio: 2,
-        needRatio: 1,
-        paceRatio: 2,
+        timeRatio: { ratio: 2, absent: null },
+        needRatio: { ratio: 1, absent: null },
+        paceRatio: { ratio: 2, absent: null },
         ifWordsHeld: { standing: "paced" },
         ifTimeHeld: { standing: "skimmed" },
       })
@@ -279,7 +279,7 @@ describe("paceChangeOf", () => {
       expect(partIn(change, "pricing")).toMatchObject({
         movement: "rushed",
         cause: "words",
-        needRatio: 2,
+        needRatio: { ratio: 2, absent: null },
       })
 
       expect(change.mostRushed?.nodeId).toBe(nodeId("pricing"))
@@ -347,9 +347,42 @@ describe("paceChangeOf", () => {
 
       const pricing = partIn(change, "pricing")
 
-      expect(pricing?.timeRatio).toBe(1.5)
-      expect(pricing?.needRatio).toBe(0.4)
-      expect(pricing?.paceRatio).toBeCloseTo(1.5 / 0.4, 10)
+      expect(pricing?.timeRatio.ratio).toBe(1.5)
+      expect(pricing?.needRatio.ratio).toBe(0.4)
+      expect(pricing?.paceRatio.ratio).toBeCloseTo(1.5 / 0.4, 10)
+    })
+
+    /**
+     * The three divisions disagree about why they have no quotient, which is
+     * what naming the absence buys (0306): a band the earlier revision left
+     * wordless has nothing to ask the reader for, so the page's side of the
+     * division is a nought and the pace it feeds was never a measurement — while
+     * the readers' side is a quotient like any other.
+     */
+    it("names which of the three divisions had nothing to divide by", () => {
+      const change = changeOf(
+        {
+          tree: pageOf(1, [band("pricing", 0)]),
+          counters: window(1, [
+            { name: "page", spentMs: 10_000 },
+            { name: "pricing", spentMs: 10_000 },
+          ]),
+        },
+        {
+          tree: pageOf(2, [band("pricing", 100)]),
+          counters: window(2, [
+            { name: "page", spentMs: 20_000 },
+            { name: "pricing", spentMs: 20_000 },
+          ]),
+        }
+      )
+
+      expect(partIn(change, "pricing")).toMatchObject({
+        was: { pace: null, needMs: 0 },
+        needRatio: { ratio: null, absent: "from-nothing" },
+        timeRatio: { ratio: 2, absent: null },
+        paceRatio: { ratio: null, absent: "unmeasured" },
+      })
     })
   })
 
@@ -542,9 +575,9 @@ describe("paceChangeOf", () => {
       expect(change.need).toEqual({ was: takes(200), now: takes(200), change: 0 })
 
       for (const part of change.compared) {
-        expect(part.paceRatio).toBe(1)
-        expect(part.timeRatio).toBe(1)
-        expect(part.needRatio).toBe(1)
+        expect(part.paceRatio).toEqual({ ratio: 1, absent: null })
+        expect(part.timeRatio).toEqual({ ratio: 1, absent: null })
+        expect(part.needRatio).toEqual({ ratio: 1, absent: null })
         expect(part.cause).toBeNull()
       }
     })
@@ -636,7 +669,10 @@ describe("paceChangeOf", () => {
       expect(slow.wordsPerMinute).toBe(120)
       expect(slow.readings.was.wordsPerMinute).toBe(120)
       expect(slow.readings.now.wordsPerMinute).toBe(120)
-      expect(partIn(slow, "pricing")).toMatchObject({ movement: "still-skimmed", paceRatio: 1 })
+      expect(partIn(slow, "pricing")).toMatchObject({
+        movement: "still-skimmed",
+        paceRatio: { ratio: 1, absent: null },
+      })
 
       /** A rate no reader could have is refused on both sides at once, as `pace.ts` refuses it. */
       expect(changeOf(was, now, { wordsPerMinute: 0 }).wordsPerMinute).toBe(
@@ -735,7 +771,7 @@ describe("paceChangeOf", () => {
       expect(partIn(change, "pricing")).toMatchObject({
         movement: "unknown",
         cause: null,
-        needRatio: 0.5,
+        needRatio: { ratio: 0.5, absent: null },
         now: { silence: "unreached" },
       })
     })

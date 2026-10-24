@@ -110,7 +110,7 @@ const apart = (palette: Palette, first: PaletteSlot, second: PaletteSlot): numbe
 /** Every page of this site, in every state a visitor can put it in. */
 const everyState = async (): Promise<readonly LoomTree[]> => {
   const published = SITE_THEME_NAMES.flatMap((theme) =>
-    SITE_ROUTES.map((route) => treeFor(route, { origin: ORIGIN, theme }))
+    SITE_ROUTES.map((route) => treeFor(route, { theme }))
   )
 
   /**

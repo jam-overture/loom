@@ -4,6 +4,7 @@ import type { EntryProse, ProseMention } from "@/app/(docs)/_lib/api/mentions"
 import {
   apiAnchorFor,
   apiSymbolCount,
+  type ApiCut,
   type ApiEntry,
   type ApiGroup,
   type ApiKind,
@@ -15,6 +16,9 @@ import {
 } from "@/app/(docs)/_lib/api/model"
 import { PRESS_LANDING_CLASS } from "@/app/(docs)/_lib/chrome"
 import { packageOf } from "@/app/(docs)/_lib/packages"
+import { repositoryFileUrl } from "@/app/(docs)/_lib/surfaces"
+
+import { OffSiteLink } from "./off-site-link"
 
 /**
  * The reference, rendered.
@@ -120,6 +124,49 @@ const ShownInUse = ({ mentions }: { readonly mentions: readonly ProseMention[] }
   </p>
 )
 
+/**
+ * What a reader is missing under a block that was cut short.
+ *
+ * The sentence used to be *the whole of it is longer than a page can usefully
+ * hold*, and it was the same sentence under every cut block on the site. One
+ * of those blocks is missing ten lines and another is missing six hundred and
+ * thirty-six; told the same thing in the same grey, a reader of the
+ * second has no way to know that the name they came for might be forty lines
+ * below the ellipsis — or might not exist at all.
+ *
+ * So it says **how much**, and then **where the rest is**. The count comes
+ * first because it is the answer to *is it worth leaving the page*; the link
+ * is what makes the answer actionable, and it leaves the site, which is why it
+ * carries the mark that says so.
+ *
+ * **The line is in the words and not only in the href.** A link labelled with
+ * a path and landing eighty lines down a file is a link that did something the
+ * reader was not told about, and the files behind these twelve links run to
+ * two thousand lines. So the label names the whole destination — *the whole of
+ * it is in `src/primitives/stylesheet.ts`, from line 83* — and a reader who
+ * would rather not leave the page has the number without pressing anything.
+ */
+const CutShort = ({ cut }: { readonly cut: ApiCut }) => (
+  <p className="text-ink-faint mt-2 text-xs">
+    Cut short here — showing the first {cut.shown} lines of {cut.whole}
+    {cut.source === "" ? (
+      ", which is longer than a page can usefully hold."
+    ) : (
+      <>
+        . The whole of it is in{" "}
+        <OffSiteLink
+          href={repositoryFileUrl(cut.source, cut.line)}
+          className="underline underline-offset-2 hover:no-underline"
+        >
+          <code className="font-mono">{cut.source}</code>
+          {cut.line === 0 ? null : <>, from line {cut.line}</>}
+        </OffSiteLink>
+        .
+      </>
+    )}
+  </p>
+)
+
 const SymbolEntry = ({
   symbol,
   mentions,
@@ -143,11 +190,7 @@ const SymbolEntry = ({
 
     <Signature symbol={symbol} />
 
-    {symbol.truncated ? (
-      <p className="text-ink-faint mt-2 text-xs">
-        Cut short here — the whole of it is longer than a page can usefully hold.
-      </p>
-    ) : null}
+    {symbol.cut === undefined ? null : <CutShort cut={symbol.cut} />}
   </div>
 )
 

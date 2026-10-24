@@ -1,11 +1,11 @@
 import type { LoomNode } from "@jam-overture/loom"
 import { READER_SIGNAL_KINDS } from "@jam-overture/loom/signals"
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 
 import { bandsOf } from "../outline"
 import { siteRegistry } from "../registry"
-import { treeFor } from "../render"
-import { DEFAULT_THEME, SITE_ROUTES } from "../site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, type ServedPage } from "../served"
+import { PAGES_AT_LEAST, SITE_PATHS } from "../site"
 
 import {
   BAND_TYPES,
@@ -27,11 +27,6 @@ import {
  * editorial choice and the test derives the fact.
  */
 
-const ORIGIN = "https://loom.example"
-
-const pages = () =>
-  SITE_ROUTES.map((route) => treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }))
-
 const typesIn = (node: LoomNode): readonly string[] =>
   node.kind === "element"
     ? [node.type, ...node.children.flatMap(typesIn)]
@@ -39,17 +34,54 @@ const typesIn = (node: LoomNode): readonly string[] =>
       ? node.children.flatMap(typesIn)
       : []
 
-/** Every primitive type this site renders anywhere, on any of its pages. */
-const RENDERED: ReadonlySet<string> = new Set(pages().flatMap((page) => typesIn(page.root)))
-
-/** Every kind of band a reader of this site travels through, read off the pages. */
-const BANDS: ReadonlySet<string> = new Set(
-  pages().flatMap((page) => bandsOf(page).map((band) => band.what))
-)
-
 const ASKED_ABOUT: readonly string[] = [...BAND_TYPES, ...CONTROL_TYPES, ...DISCLOSURE_TYPES]
 
+/**
+ * **This file read the page as written until 22 October**, and the broadcaster
+ * runs on the page as served.
+ *
+ * `treeFor` returns a route's tree before anything a request supplies, which is
+ * three trees; `servedPages` returns the 75 trees this site is actually served
+ * as, each route crossed with the 25 states a request can leave it in. Measured
+ * on the day this moved, the difference is one primitive: **`loom.callout`** is
+ * on this site and was on no tree this file had ever looked at. It is the panel
+ * that reports what a request did, so it exists only after one.
+ *
+ * Nothing asks about `loom.callout` and no assertion here changed colour, which
+ * is the point: a sweep shaped to the input of the thing a visitor gets had
+ * been one primitive short of the site for as long as the record panel has
+ * existed, and the only reason it never said anything wrong is that the one
+ * thing it could not see is not a type these lists name. `served.ts` records
+ * the same lesson for copy, and this is the seventh file to take it.
+ */
 describe("what this site asks about its readers", () => {
+  let pages: readonly ServedPage[] = []
+
+  /** Every primitive type this site renders anywhere, on any page, in any state. */
+  let RENDERED: ReadonlySet<string> = new Set()
+
+  /** Every kind of band a reader of this site travels through, read off the pages. */
+  let BANDS: ReadonlySet<string> = new Set()
+
+  beforeAll(async () => {
+    pages = await servedPages()
+    RENDERED = new Set(pages.flatMap((page) => typesIn(page.tree.root)))
+    BANDS = new Set(pages.flatMap((page) => bandsOf(page.tree).map((band) => band.what)))
+  })
+
+  /**
+   * Every rule below is *nothing on this site is X*, and a sweep that came back
+   * with nothing satisfies all of them. So the sweep is held first, and to
+   * something `served.ts` does not compute: that it reached every page the site
+   * declares, and that there are at least `PAGES_AT_LEAST` of them.
+   */
+  it("read every page of this site, in every state it can be served in", () => {
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
+  })
+
   /**
    * The alarm a fifth kind trips.
    *
@@ -111,9 +143,31 @@ describe("what this site asks about its readers", () => {
    * while the site has nothing to submit. Asserted from the pages rather than
    * from the list, so the day a band grows a form this says the list has
    * stopped being the answer — the alarm above cannot fire twice for one kind.
+   *
+   * ## It could not fire, from the day it was written until 22 October
+   *
+   * It asked `BANDS.has("loom.form")`, and `BANDS` is what `bandsOf` returns:
+   * the types of `page.root.children`, which is the **top level of the page and
+   * nothing under it**. A form is not a band. It goes inside a section, the way
+   * every control on this site does, so the one thing this rule was written to
+   * notice is the one thing that set could never hold — and `loom.form` is in
+   * the starter registry, so a page builder could have rendered one any day
+   * and this would have stayed green.
+   *
+   * Checked by putting a `loom.form` on the front door rather than by reading:
+   * the rule as it stood passed with the form on the page, and the rule below
+   * fails on it. It is the same shape as the `counting` hole closed in
+   * `handed.test.ts` yesterday — a check written for a shape it cannot match —
+   * and the fix is the same, which is to ask the question of the whole tree.
+   *
+   * `RENDERED` is every type on every page in every state, so a form anywhere,
+   * including one that only appears after a visitor has asked for something,
+   * is this list's business.
    */
   it("asks about no completions because there is nothing here to complete", () => {
-    const submittable = ["loom.form", "loom.field"].filter((type) => BANDS.has(type) || ASKED_ABOUT.includes(type))
+    const submittable = ["loom.form", "loom.field"].filter(
+      (type) => RENDERED.has(type) || ASKED_ABOUT.includes(type)
+    )
 
     expect([submittable, [...COMPLETION_TYPES]]).toEqual([[], []])
   })

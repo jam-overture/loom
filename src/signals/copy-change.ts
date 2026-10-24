@@ -604,7 +604,17 @@ const NO_WORDS_WRITTEN: WordsWritten = Object.freeze({
 const sameText = (one: readonly string[], other: readonly string[]): boolean =>
   one.length === other.length && one.every((value, at) => value === other[at])
 
-const sideOf = (passage: Passage, views: number): PassageSide => ({
+/**
+ * What one window said about one passage, as a side of a comparison.
+ *
+ * **Published rather than kept private**, for the reason `passageOf` itself is
+ * (0235): a comparison of two **forms** of one page asks the same question of
+ * the same passages as this comparison of two windows, and one projection with
+ * two spellings is two things to disagree about once a third reading arrives.
+ * The rule it carries is the whole of it — a window with no views has no reach
+ * at all, and a reach is never clamped to its own ceiling.
+ */
+export const passageSideOf = (passage: Passage, views: number): PassageSide => ({
   standing: passage.standing,
   readers: passage.readers,
   views,
@@ -841,8 +851,8 @@ export const copyChangeOf = (was: PageReading, now: PageReading): CopyChange => 
       type: passage.type,
       role: passage.role,
       floored: before.floored || passage.floored,
-      was: sideOf(before, was.views),
-      now: sideOf(passage, now.views),
+      was: passageSideOf(before, was.views),
+      now: passageSideOf(passage, now.views),
       movement: movementOf(before.standing, passage.standing),
     }
 

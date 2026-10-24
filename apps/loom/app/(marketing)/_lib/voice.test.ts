@@ -3,8 +3,8 @@ import { beforeAll, describe, expect, it } from "vitest"
 
 import { MAINTAINERS_OWN, PACKAGES, RESERVED_VOCABULARY } from "./copy"
 import { pageTreeFor, treeFor } from "./render"
-import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
-import { DEFAULT_THEME, HOME, SITE_ROUTES, type SiteRoute } from "./site"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, sweepShare, type ServedPage } from "./served"
+import { DEFAULT_THEME, HOME, PAGES_AT_LEAST, SITE_PATHS, SITE_ROUTES, type SiteRoute } from "./site"
 import { readerCopy, sentencesOf, uses, wordCountOf, wordsOf, type ReaderString } from "./words"
 
 /**
@@ -45,7 +45,7 @@ import { readerCopy, sentencesOf, uses, wordCountOf, wordsOf, type ReaderString 
  */
 const pageWords = async (route: SiteRoute): Promise<string> =>
   withoutPackageNames(
-    wordsOf((await pageTreeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME })).root)
+    wordsOf((await pageTreeFor(route, { theme: DEFAULT_THEME })).root)
   )
 
 /**
@@ -89,7 +89,7 @@ const heroOf = (route: SiteRoute): ElementNode => {
             undefined
           )
 
-  const hero = find(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root)
+  const hero = find(treeFor(route, { theme: DEFAULT_THEME }).root)
 
   if (hero === undefined) throw new Error(`loom: ${route.path} has no hero band`)
 
@@ -474,22 +474,51 @@ describe("every string a reader reads", () => {
    *
    * A test over an empty list passes, and this lane has filed that failure
    * once already — a test whose expected value came from the code under test,
-   * 27 September. So the state count and the string count are checked before
-   * anything is checked *about* the strings: the first against the arithmetic
-   * `served.ts` publishes, and the second against a floor, because the exact
-   * number moves with every word added to the site and a floor cannot be
-   * satisfied by a sweep that silently stopped finding things.
+   * 27 September. So the sweep is checked before anything is checked *about*
+   * the strings, and in three independent ways: it covered every page of the
+   * site, no state of any page came back quiet, and what one state carries is
+   * above a floor.
+   *
+   * **None of the three moves when the sweep changes shape**, which is the
+   * whole of what was wrong with the floor that stood here. It was
+   * `3 * 2 * 21` — a hand copy of `served.ts`' own dimensions — and it went red
+   * on 21 October for a change that touched no copy at all, because the
+   * deployment stopped being one of those dimensions. `sweepShare` has the
+   * reasoning.
    */
-  it("looked at every state this site can be served in", () => {
-    expect(pages.length).toBe(SERVED_STATE_COUNT)
+  it("looked at every page of this site, in every state, and none of them came back quiet", () => {
     /**
-     * Three routes and the twenty-one request states the day this was written,
-     * which is a floor under `served.ts`' own arithmetic rather than a copy of
-     * it. It was `3 * 2 * 21` until 21 October, when the deployment stopped
-     * being a dimension of that sweep: both of its values had been the same
-     * tree since 12 October.
+     * The sweep reached every page, which is the half a per-state floor cannot
+     * see: a sweep that stopped building one route of three keeps two thirds of
+     * its average and is still broken.
+     *
+     * The walk this file wrote by hand is `sweepCover` as of 23 October, which
+     * has the measurement of what the one-line version let through. The floor
+     * is `PAGES_AT_LEAST` and is still the only number in the pair that nothing
+     * computes.
      */
-    expect(pages.length).toBeGreaterThanOrEqual(3 * 21)
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
+
+    /**
+     * 97 strings a state on 22 October, the smallest state carrying 54 — so a
+     * floor of 30 is well under the page this site is thinnest in, and a state
+     * that reads nothing at all is caught by `quiet` rather than by this.
+     */
+    const share = sweepShare(pages, (page) => readerCopy(page.tree.root).length)
+
+    expect(share.quiet).toEqual([])
+    expect(share.each).toBeGreaterThanOrEqual(30)
+
+    /**
+     * `read` is the strings de-duplicated across the states of a route, so this
+     * one is already independent of how many states there are: it did not move
+     * on 21 October and it would not move if the sweep were crossed again. It
+     * is the count the three rules below actually run over, which is why it is
+     * floored separately from the per-state reading above.
+     */
     expect(read.length).toBeGreaterThanOrEqual(200)
   })
 
@@ -507,7 +536,7 @@ describe("every string a reader reads", () => {
   it("read the copy a request puts on the page, and not only the page as published", () => {
     const written = new Set(
       SITE_ROUTES.flatMap((route) =>
-        readerCopy(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root).map(
+        readerCopy(treeFor(route, { theme: DEFAULT_THEME }).root).map(
           ({ field, text }) => `${field}|${text}`
         )
       )
@@ -567,7 +596,7 @@ describe("every string a reader reads", () => {
 const SCANNED_PROPS: readonly string[] = ["title", "body", "label", "caption", "value", "eyebrow"]
 
 const scannedCopyOf = (route: SiteRoute): readonly ReaderString[] =>
-  readerCopy(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root).filter(
+  readerCopy(treeFor(route, { theme: DEFAULT_THEME }).root).filter(
     ({ field }) => SCANNED_PROPS.includes(field.split(".").slice(-1)[0] ?? "")
   )
 

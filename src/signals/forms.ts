@@ -4,7 +4,12 @@ import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
-import { audienceScopeRead } from "./audiences.js"
+import {
+  describeFormPairRefusal,
+  formPairOf,
+  FORM_PAIR_REFUSALS,
+  type FormPairRefusal,
+} from "./audiences.js"
 import { spokenFor, type PageReading, type PartReading, type PartStanding } from "./parts.js"
 
 /**
@@ -34,22 +39,13 @@ import { spokenFor, type PageReading, type PartReading, type PartStanding } from
  *
  * ## Neither side is earlier, so the order is not the caller's to set
  *
- * `changeOf` takes `was` and `now` and does not check which is older: a caller
- * holding them backwards gets every sign reversed, which is the bargain 0224
- * struck so that *this week against last week* comes out of the same function.
- * **Here that bargain would be a bug rather than a trade**, because there is no
- * fact of the matter about which of two populations comes first. Two
- * deployments asking one question would get two answers, and a screen built on
- * one of them would read the sign of every figure backwards without anything
- * saying so.
- *
- * So the two sides are put in the order of their audience ids before anything
- * is compared, and {@link FormComparison.one} is the lower of the two names
- * rather than the first argument. The answer is therefore the same whichever
- * way round it is asked — which is asserted rather than described — wherever
- * the pair names two audiences at all. It cannot be asserted of the two
- * refusals that have no second population to sort by, and those are the only
- * two cases where the arguments' own order survives.
+ * `formPairOf` settles which side is {@link FormComparison.one} and refuses the
+ * five pairs that are not two forms of one page. The rule and its reasons are
+ * published there, with the five refusals, because they are facts about the
+ * **pair** rather than about the counter this reading compares — and a second
+ * comparison of two forms (0303) wants every one of them with no clause
+ * changed. What stays here is the consequence: the answer is the same whichever
+ * way round it is asked, which is asserted rather than described.
  *
  * ## The figure that is comparable across two populations
  *
@@ -103,76 +99,16 @@ import { spokenFor, type PageReading, type PartReading, type PartStanding } from
 /** Why a comparison of two forms answered nothing, or answered less than all of it. */
 export type FormComparisonSilence =
   /**
-   * The two readings are of different trees.
+   * The five states in which two readings are not two forms of one page, taken
+   * whole from {@link FormPairRefusal}.
    *
-   * Two pages are two pages, and two audiences do not make them one. Checked
-   * first, as every reading here checks it first, because a caller holding two
-   * pages wants to be told that before it is told anything about populations.
+   * They were written here first and moved once a second comparison of two
+   * forms wanted every one of them unchanged: each is a fact about the pair
+   * rather than about the counter being compared, so the rule belongs where
+   * both readings can import it instead of where one of them can be copied
+   * from.
    */
-  | "different-pages"
-  /**
-   * One of the two windows holds two forms of the page and named neither.
-   *
-   * The state published as `AudienceScope.mixed` (0290, 0300), and the one
-   * refusal here whose remedy is
-   * an instruction rather than a fact: **split the window with `byAudience` and
-   * read each form on its own** — which is exactly what this comparison then
-   * wants as its two sides. A side read as neither form holds no counters at
-   * all, so without this every part of the other side would come back as a part
-   * only that form has, and the census would read as *the deltas gave this
-   * audience the whole page*.
-   *
-   * Checked before {@link FormComparisonSilence.unattributed}, and that order is
-   * a real one: one side can be unlabelled while the other is unsplit. The
-   * caller is told the one it can do something about.
-   */
-  | "unsplit"
-  /**
-   * One of the two windows named no audience at all.
-   *
-   * Every window written before the column existed (0284), and every window a
-   * caller builds by hand. It is one population read whole, which is the right
-   * answer to every other question in this subsystem and is no answer at all to
-   * this one: the subject here **is** the population, so a side that cannot name
-   * its own has nothing to contribute to a comparison of two of them.
-   *
-   * This is the sharpest difference between this reading and a before-and-after.
-   * There, a pair with an unlabelled side is compared and merely not provably of
-   * one readership (0294), because the audience is a confounder and refusing it
-   * would withhold every comparison spanning the migration. Here the audience is
-   * the question.
-   */
-  | "unattributed"
-  /**
-   * Both windows name one audience and it is the same one.
-   *
-   * There is one population and so there is no second form: what the caller is
-   * holding is one reading handed in twice, or two windows of one form, and
-   * neither is this question. **The only refusal in any set here for too few
-   * populations rather than too many** — its sibling `two-audiences` refuses a
-   * before-and-after for naming two, and the two sit either side of the one
-   * thing each reading needs held still.
-   *
-   * Two windows of one form over two periods is a real question and it is
-   * `changeOf`, which is where that caller is sent.
-   */
-  | "one-population"
-  /**
-   * The two readings are of two revisions of the page.
-   *
-   * The refusal that is this reading's whole discipline. Two forms of a page
-   * share a tree **and a revision** (0263), so two revisions means the pair
-   * varies the tree as well as the readership and every figure would carry both
-   * causes with nothing to separate them — which is the one thing a
-   * before-and-after is built to avoid and this reading would otherwise do
-   * silently.
-   *
-   * Checked after the three population states above, for the reason this reading
-   * exists: without two provable populations there is no form comparison to
-   * refuse on a revision, and a caller told *two revisions* when it is also
-   * holding one audience twice would fix the wrong half.
-   */
-  | "different-revisions"
+  | FormPairRefusal
   /**
    * One of the two windows held no page views.
    *
@@ -188,32 +124,13 @@ export type FormComparisonSilence =
 
 /** The closed set, for a surface that has to account for every absent figure. */
 export const FORM_COMPARISON_SILENCES: readonly FormComparisonSilence[] =
-  everyMemberOf<FormComparisonSilence>()([
-    "different-pages",
-    "unsplit",
-    "unattributed",
-    "one-population",
-    "different-revisions",
-    "nothing-measured",
-  ])
+  everyMemberOf<FormComparisonSilence>()([...FORM_PAIR_REFUSALS, "nothing-measured"])
 
 /** One line per silence, for a surface saying why a figure is not there. */
-export const describeFormComparisonSilence = (silence: FormComparisonSilence): string => {
-  switch (silence) {
-    case "different-pages":
-      return "the two readings are of different pages"
-    case "unsplit":
-      return "one of the two windows holds two forms of the page and says which readers neither"
-    case "unattributed":
-      return "one of the two windows names no audience, so it is of no form in particular"
-    case "one-population":
-      return "both readings are of one audience, so there is no second form to compare"
-    case "different-revisions":
-      return "the two readings are of two revisions, so they are not two forms of one page"
-    case "nothing-measured":
-      return "one of the two windows held no page views"
-  }
-}
+export const describeFormComparisonSilence = (silence: FormComparisonSilence): string =>
+  silence === "nothing-measured"
+    ? "one of the two windows held no page views"
+    : describeFormPairRefusal(silence)
 
 /** One side of the comparison, as the window it was read from leaves it. */
 export type FormSide = {
@@ -398,49 +315,22 @@ const partsOf = (reading: PageReading): ReadonlyMap<NodeId, PartReading> =>
  * {@link FormComparisonSilence} for the five states in which there is no pair.
  */
 export const formComparisonOf = (one: PageReading, other: PageReading): FormComparison => {
-  /**
-   * The order of the two audience names, taken before anything is read off
-   * either side, so that the answer does not depend on which way round the
-   * caller asked. A pair with a name missing on either side has no order to
-   * take and keeps the arguments' own, which is all two refusals need.
-   */
-  const ordered =
-    one.audienceId !== null &&
-    other.audienceId !== null &&
-    other.audienceId.localeCompare(one.audienceId) < 0
-      ? ([other, one] as const)
-      : ([one, other] as const)
+  const pair = formPairOf(one, other)
+  const [first, second] = [pair.one, pair.other]
 
-  const [first, second] = ordered
+  if (pair.pairing === "refused")
+    return {
+      one: sideOf(first),
+      other: sideOf(second),
+      compared: [],
+      onlyIn: [],
+      disagreed: [],
+      counted: NOTHING_COUNTED,
+      sharpest: null,
+      silence: pair.refusal,
+    }
 
-  const empty = {
-    one: sideOf(first),
-    other: sideOf(second),
-    disagreed: [],
-    counted: NOTHING_COUNTED,
-    sharpest: null,
-  }
-
-  /** The five states in which no part of either form is held against another. */
-  const refusing = (silence: FormComparisonSilence): FormComparison => ({
-    ...empty,
-    compared: [],
-    onlyIn: [],
-    silence,
-  })
-
-  if (first.treeId !== second.treeId) return refusing("different-pages")
-
-  const scopes = { one: audienceScopeRead(first), other: audienceScopeRead(second) }
-
-  if (scopes.one.reading === "mixed" || scopes.other.reading === "mixed")
-    return refusing("unsplit")
-  if (scopes.one.audienceId === null || scopes.other.audienceId === null)
-    return refusing("unattributed")
-  if (scopes.one.audienceId === scopes.other.audienceId) return refusing("one-population")
-  if (first.revision !== second.revision) return refusing("different-revisions")
-
-  const audiences = { one: scopes.one.audienceId, other: scopes.other.audienceId }
+  const audiences = pair.audiences
   const held = { one: partsOf(first), other: partsOf(second) }
 
   const compared: ComparedForm[] = []

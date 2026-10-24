@@ -74,7 +74,7 @@ export const shareImageFor = async (
     return { route, card: publishedCard(route, origin), theme }
   }
 
-  const run = await askRunFor({ ...state, origin })
+  const run = await askRunFor(state)
 
   /**
    * **The undo when the address reached one**, and the change when it did not.

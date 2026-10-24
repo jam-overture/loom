@@ -44517,8 +44517,18 @@ in 0211, so a reader who gets as far as the source finds them.
 
 ## 2026-10-01 — nothing on the marketing site is a form, so the site's answer to the fifth kind is an empty list that nobody will revisit
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom marketing` · **Status:** open
-— no defect today, a decision to re-take on the day the site grows a form
+**Filed by:** `Loom signals` · **Owned by:** `Loom marketing` · **Status:**
+**closed** by `marketing-13-a-check-that-cannot-fail` on 22 October, and what
+closing it found is that the alarm this entry asked for had been written and
+could not fire. `asked.test.ts` asked `BANDS.has("loom.form")`, and `BANDS` is
+the types of `page.root.children` — the top level of the page. A form is not a
+band; it goes inside a section like every other control here, so that set could
+never hold one. Measured rather than read: with a `loom.form` composed into the
+front door, **all 56 files and 1,486 tests of this route group passed at
+`origin/main`**. It asks `RENDERED` now — every type on every page in every
+state the site is served in — and the same mutation fails it. *Originally: no
+defect today, a decision to re-take on the day the site grows a form.* Original
+entry below.
 
 `SITE_SIGNAL_TYPES` carries a deliberate alarm: `asked.test.ts` holds its keys
 against `READER_SIGNAL_KINDS`, so a kind added to the runtime reddens this site
@@ -44622,7 +44632,22 @@ run's report with a recommendation.
 ## 2026-10-01 — no request on the mechanism page can produce a held undo, so the site demonstrates one fewer thing than it used to
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — measured, not urgent, and not something the move could avoid
+**closed 2026-10-24** — closed by work that landed on 10 October and was never
+marked here. `unstick-menu` is the sixth choice this entry asked for, in
+`adapt/asks.ts`, and `adapt/undo.test.ts` holds its undo as held on the same
+grounds as the change: *"holds the undo of a change it held, on the same
+grounds, and lands it on a yes."* The report is
+`reports/2026-10-10-marketing-the-undo-the-rules-hold.md`, on
+`marketing-65-the-undo-the-rules-hold`.
+
+**What the entry got wrong, kept rather than edited out.** It said the shape
+that works is a request that **moves** something protected, because *"the
+inverse of a move is another move"*, and concluded that `/how-it-works`'s two
+protected nodes are both worse to move than what was already demonstrated. A
+setting change is the other operation whose inverse is itself, and that is what
+the 10 October run built: one `configure` on the menu, held because the menu is
+protected, and an undo that is another `configure` on the same node and is
+weighed identically. `asks.ts` has the account under `unstickMenu`.
 
 The maintainer moved the five choices off the front door and onto
 `/how-it-works` on 1 October. The demonstration survives: **landed**, **held**
@@ -57696,9 +57721,16 @@ characters.
 ## 2026-10-21 — the cut now lands on a member boundary wherever it lands in a comment, and mid-token wherever it lands in code
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **the stated
-limit of what shipped on 21 October**, and a readability wart rather than a
-defect: nothing is wrong, no number reaches a page, and no test is failing
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** **closed by
+`docs-63-how-much-of-a-cut-signature-is-missing`** (22 October) — by remedy 1,
+cutting back to the last complete line, and by a generalisation this entry did
+not ask for: the comment rule now drops a trailing comment **whether or not it
+closed**, because cutting to a line end turned `PrimitiveDefinition` into a
+block ending on eighteen lines about a `role` that was past the cut. Two rules
+about the cut, not three — the half-comment rule became the closed case of one
+rule rather than a second one beside it. All twelve cut blocks now end on a
+complete line, eleven of them on a whole member, and `RenderDiagnostic` on
+`} | {`
 
 A signature past the cap is now cleaned, cut, and has a comment the cut left
 open taken off the end. That last step is why ten of the twelve cut signatures
@@ -57752,9 +57784,13 @@ exact, and *exact* is the whole claim a generated signature makes.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/_components/api-reference.tsx`,
-`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a reader
-problem rather than a defect**, found while measuring the cap and not caused by
-anything that changed today
+`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** **closed by
+`docs-63-how-much-of-a-cut-signature-is-missing`** (22 October) — remedies 1
+and 2 together, as recommended. A cut block now says *showing the first 91
+lines of 727* and links the source the whole of it is in. Counted in **lines**
+rather than members, and on the **cleaned** text rather than the declaration;
+both choices are argued in `ApiCut`'s own docblock. Remedy 3 is the maintainer's
+question and is re-filed below rather than closed with the rest
 
 Under a cut signature the page says:
 
@@ -57866,8 +57902,17 @@ fortnight for `trail`, nine days for `counting`.
 ## 2026-10-21 — two sweep floors are hand-written copies of another module's arithmetic, and both went red for a change that touched no copy
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
-(`app/(marketing)/_lib/voice.test.ts`, `_lib/naming.test.ts`) · **Status:** open
-— **nothing is broken**; both floors are correct for the site as it is today
+(`app/(marketing)/_lib/voice.test.ts`, `_lib/naming.test.ts`) · **Status:**
+**closed** by `marketing-13-a-check-that-cannot-fail` on 22 October, as the
+shape this entry recommended: a floor per served state, in `served.ts` as
+`sweepShare`, divided by the states the sweep **came back with** rather than by
+`SERVED_STATE_COUNT`. Four floors went, not the two named here — the third is
+`naming.test.ts`' `checked >= 40` and the fourth is `inline.test.ts`'
+`links.length >= 40`, whose own comment said in as many words that 40 was *"the
+number of states of that page"*. Checked by halving `ASK_STATES`: three of the
+four old floors go red on a sweep that touches no copy, and none of the new ones
+moves. *Originally: nothing is broken; both floors are correct for the site as
+it is today.* Original entry below.
 
 `served.ts` publishes `SERVED_STATE_COUNT`, and every caller of `servedPages()`
 asserts against it, so halving the sweep's dimensions left six test files green
@@ -58229,3 +58274,1253 @@ traps.**
 **What it needs from nobody.** Every field is on the object a screen already
 holds once it has two readings, and splitting a window into those two readings
 is `byAudience`, which is a line of the surface's own code.
+
+---
+## 2026-10-22 — a cut signature now tells a reader how much is missing, and nothing can check the number it tells them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a stated
+limit of what shipped**, not a wrong number: the figure is right today and
+there is no sweep that would notice the day it stopped being
+
+A cut block prints two numbers — *showing the first 91 lines of 727* — and they
+are not equally held.
+
+`shown` is a claim about the text on the page, so the sweep over the generated
+file re-counts the lines of the block and compares. It cannot be wrong without
+something going red.
+
+`whole` is a claim about text **the generated file does not carry**. It is the
+cleaned declaration's line count, and the cleaned declaration exists for about
+a microsecond inside `publishedSignature` before being cut. The sweep can only
+ask that it is larger than `shown`, which it would be for any wrong number
+bigger than ninety-one. What holds the rule is the one written-out case —
+`withheldMembers(300)`, where the test has both strings in hand and can assert
+that the denominator counts the reader-facing text rather than the 1,202-line
+declaration behind it.
+
+That is the same shape as the 28 September entry about a test derived from the
+list it checks, and the same answer applies: a written-out case holds what the
+rule says and a sweep holds what is there. The gap worth naming is that this
+particular number is **printed to a reader as a fact about a file they cannot
+see from the page**, which is a stronger claim than anything else the reference
+prints.
+
+### Three shapes, costed
+
+1. **Carry the whole cleaned text in the generated file and let the sweep count
+   it.** Correct and absurd: the file would grow by the forty kilobytes of
+   `LIBRARY_CLASS` the cap exists to keep off the page, to hold a number three
+   digits long.
+2. **Re-read the declarations in the test.** `extract.test.ts` already builds
+   the program once for the drift check, so a second pass could count the
+   cleaned lines of every cut symbol independently. It is perhaps fifteen lines
+   and the honest objection is that it would be *the same two functions* doing
+   the counting — `readerFacingSignature` and a `split`. It tests that the
+   generator was run, which the drift check already tests.
+3. **Leave it, written down.** **The recommendation.** The number is derived
+   from the same string in the same statement that cuts it; the failure mode
+   that would make it wrong is a mutation to one line of
+   `publishedSignature`, and the written-out case kills that mutation — it was
+   one of five planted on 22 October and it died.
+
+**Recommendation: 3.** Filed because *the page prints a number nothing sweeps*
+is worth somebody being able to find, not because it is work.
+
+---
+## 2026-10-22 — a map of 168 class names is not a signature, and thirteen per cent of one is not a reference
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`, pending the maintainer's
+view on what a reference page is for
+(`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
+**shape 3 shipped** on 24 October in
+`docs-65-a-link-that-lands-on-the-declaration`: the link lands on the line the
+declaration starts on, *from line 83*, read by parsing the source. **Shape 2 is
+what stays open**, and it is a design question rather than a number.
+Original status below.
+
+**Status:** open — **carried from the 21 October entry's remedy 3**, which
+closed today without it because it is a design question rather than a number
+
+`LIBRARY_CLASS` is the map of every class name the primitive library writes. It
+is 727 lines of reader-facing declaration and the page shows 91 of them.
+
+As of today the page says so, and links `src/primitives/stylesheet.ts`. That is
+a real improvement on *the whole of it is longer than a page can usefully hold*
+and it is still the wrong shape of answer. The question a reader brings to this
+export is **"what is the class for a cluster"**, and a page that answers *here
+are the first ninety-one lines, the other six hundred are on GitHub* has sent
+them to a text file to run a search they came here to avoid.
+
+Nothing is wrong. Every line printed is exact, the count is true, and the link
+works. What is wrong is that one of the seventeen hundred exports is a **list**,
+and a page built to print declarations prints a list badly.
+
+### Four shapes, costed
+
+1. **Raise the cap for this one export.** Cheapest and worst: 40,636 characters
+   is not a signature anybody reads top to bottom at any cap, and a reader
+   scrolling six hundred lines of `readonly x: "loom-x";` is no better served
+   than one reading ninety-one.
+2. **Give a list-shaped export a list-shaped presentation** — the class names in
+   columns, or a filter box. It is the right answer for a reader and it costs
+   this section its one claim to being trustworthy: the words stop being the
+   package's own declaration and start being this site's rendering of it. It
+   also needs a rule for *which* exports are lists, which is a judgement, which
+   is the thing a generated reference has none of.
+3. **Link the declaration rather than the source**, at a line anchor, so a
+   reader lands on the map rather than at the top of a 900-line file. Half a
+   remedy and cheap — it does not make the page answer the question, it makes
+   the file quicker to search.
+4. **Nothing.** Defensible. A reader who needs one of 168 class names is doing
+   something a reference page is not for, and the stylesheet is documented in
+   prose elsewhere.
+
+**Recommendation: 3 now, and 2 only if he wants it.** 3 is in this lane and is
+an hour. 2 is the first thing this section would have built that is a
+*rendering* rather than a transcription, and the question of whether that is
+allowed is his, not mine — it is the same bargain 0067 makes about primitives,
+one level up.
+
+---
+## 2026-10-22 — the link under a cut signature goes to the source, and the signature was read from the declaration
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.ts`) · **Status:** open — **a stated
+limit**, and nothing on the page is untrue: the words say *source* and the
+link goes to the source
+
+The reference is read from `dist/*.d.ts`, which is the right file and is the
+whole argument for generating it — those declarations are exactly what a
+consumer's type-checker sees. `dist/` is **not in the repository**, so there is
+no address to send a reader to.
+
+So a cut block links `src/signals/copy.ts`: the file the declaration was
+generated from. For every one of the twelve it is the same text — these are
+types and `as const` maps, where emit changes nothing — and the sentence on the
+page says *the whole of it is in* a path under `src/` rather than claiming it
+is the declaration.
+
+Where the two could differ is a declaration TypeScript **widens or rewrites** on
+emit. A reader following the link for the rest of a long function overload set,
+or for an inferred type written as `const x = …` in the source and emitted as a
+spelled-out type, would find the file saying the same thing differently. Nothing
+published today is that shape, and the twelve that are cut are all hand-written
+types.
+
+### Two shapes, costed
+
+1. **Leave it, with the words doing the work.** **The recommendation.** The link
+   is labelled with the path, the path plainly says `src/`, and a reader who
+   knows the difference between a source and a declaration is a reader who will
+   see it. The reference's own module docblock already explains that the source
+   tree and the published surface are two things.
+2. **Say which, in the sentence.** *The whole of it is in the source it was
+   generated from, `src/signals/copy.ts`* — eight words to pre-empt a confusion
+   nobody has reported, on the one line of the page where the brief's rule about
+   a reader who does not have the model in their head cuts the other way: a
+   stranger does not know what a declaration file is and should not have to
+   learn here.
+
+**Recommendation: 1.** Recorded so that whoever meets a widened declaration
+under this link has the paragraph rather than the surprise.
+## 2026-10-22 — four sweeps in this route group are held only by a count the swept module computes itself
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/budget.test.ts`, `_lib/routes.test.ts`,
+`_lib/docs-pages.test.ts`, `_lib/addressed.test.ts`) · **Status:** **closed by
+`marketing-14-a-sweep-says-what-it-reached`**, as shape 2 — `sweepCover` in
+`served.ts`, asserted by all seven callers. Two corrections to this entry are
+recorded at its foot: `addressed.test.ts` is not one of these files, and the
+vacuity was two files rather than four
+
+Seven test files in this route group sweep `servedPages()`. The question each
+of them has to answer before any of its rules mean anything is *did the sweep
+come back with the site*, and until today every one of them answered it the
+same way:
+
+```ts
+expect(pages).toHaveLength(SERVED_STATE_COUNT)
+```
+
+`SERVED_STATE_COUNT` is `SITE_ROUTES.length * ASK_STATES.length`, computed by
+the module the sweep comes from. If `SITE_ROUTES` went empty the sweep would
+return nothing, the constant would be zero, that line would pass, and every
+rule in the file would run over an empty list and pass with it. It is the
+27 September failure — *a test whose expected value came from the code under
+test* — sitting in the one assertion written to prevent it.
+
+**Two more lines fix it and they are independent of each other.** The sweep
+reached every route in `SITE_ROUTES`, which catches the ask dimension
+collapsing; and `SITE_ROUTES.length >= 3`, hand-written, which catches the
+route dimension collapsing and is the only number here that is not computed by
+anything. Both are in `voice.test.ts`, `naming.test.ts`, `inline.test.ts` and
+`readers/asked.test.ts` as of today.
+
+**What is left is the other four**, and they are listed above rather than done
+because of what doing them would mean. `budget.test.ts` and `routes.test.ts`
+carry the one-line guard; `docs-pages.test.ts` and `addressed.test.ts` carry no
+guard at all and lean on `toBeGreaterThan(0)` floors, which do not move with
+the sweep's shape and are not the problem. Writing the same three lines into
+eight files is the thing `measure.ts` has a paragraph against, so the entry is
+really two questions in one:
+
+1. **Do it as it stands**, three lines a file, eight times.
+2. **Give `served.ts` the pair to hand back** — a `sweepCover(pages)` returning
+   the states and the routes, asserted in two lines by each caller. Shorter per
+   file and one place to read. The cost is that the check lives beside the
+   thing it checks, which is exactly the arrangement this entry is complaining
+   about, and it would want a comment saying why that is still safe here.
+
+**Recommendation: 2**, and not in the same pull request as the floors. It is a
+judgement about seven files, today's diff already crosses four, and a change to
+every sweep in the route group is its own reviewable thing.
+
+> **Closed 23 October by the lane that filed it, as shape 2, and the entry was
+> wrong in two places that are worth writing down rather than editing out.**
+>
+> **`addressed.test.ts` does not sweep `servedPages` at all.** It is not a
+> caller — `grep` for the import returns seven test files and it is not one of
+> them — so it was named here off the same reading of its `toBeGreaterThan(0)`
+> floors that put it in the 22 October report's closing list. The seven callers
+> are `budget`, `voice`, `naming`, `inline`, `routes`, `docs-pages` and
+> `readers/asked`.
+>
+> **The vacuity was narrower and worse than this entry says.** Measured with
+> `SITE_ROUTES` emptied rather than read: all seven files go red, so *the check
+> cannot fail* is not true of any of them. What is true is that **two of the six
+> tests named for holding the sweep were green on a site with no pages** —
+> `budget.test.ts`' and `routes.test.ts`', the two with no hand-written floor —
+> and **six rules of the form *nothing on this site is X* were green with
+> them**, including `routes.test.ts`' *sends nobody to an address this
+> application does not serve*, which is that file's whole point. The seven files
+> went red elsewhere: on the maintainer's own line, on `PAGE_NAMES`, on a
+> deep-link floor. **None of those failures says the sweep came back with
+> nothing**, which is the cost — the next run reads copy and bands looking for a
+> cause that is in `site.ts`.
+>
+> And the file this entry called unguarded was worse than unguarded:
+> **`docs-pages.test.ts` was 29 of 29 green on a sweep that lost a third of the
+> site.** It also swept twice, so it built 150 pages a run to read two things
+> off 75; it has one sweep now.
+>
+> The cost this entry worried about — *the check lives beside the thing it
+> checks* — is answered by `sweepCover` handing back a reading and never an
+> expectation, with `SITE_PATHS` and `PAGES_AT_LEAST` moved to `site.ts`, the
+> module that *declares* the site. Measured: on an empty site the `toEqual`
+> passes and the hand-written floor is what fails, so both halves are load-bearing
+> and neither is dead. The remaining half — a refusal in `servedPages`, which is
+> the only shape a caller cannot forget — is filed as its own entry at the foot
+> of this file.
+
+---
+## 2026-10-22 — the one band on this site that only exists after a visitor asks for something is the one band nothing counts
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/readers/asked.ts`) · **Status:** open — **nothing is
+broken**, the lists are correct as written, and this is a question about what
+is worth measuring rather than a gap
+
+`readers/asked.test.ts` moved from the page as written to the page as served
+today, and the difference it found is one primitive: **`loom.callout`** is
+rendered on this site and had never appeared on a tree that file looked at. It
+is the panel that reports what a request did — the proposal, the Gate's verdict
+and the revision — so it exists only after a visitor has asked for something.
+
+Nothing in `SITE_SIGNAL_TYPES` names it, so nothing is asked about it. That is
+correct by the list's own rules and it is also the odd thing here:
+
+- **It is the most interesting thing on the page to measure.** Every other
+  reading this site collects answers *how far did a stranger get*. This one
+  would answer *did the person who made the page rewrite itself stay and read
+  what it said about doing so*, which is the question the whole surface is
+  arguing towards.
+- **It is not a band and not a control**, so neither existing list is its home.
+  It sits inside a section, nobody presses it, and it does not open. A reading
+  about it would be `viewed` and `dwelled` on a type that is neither of the two
+  `BAND_TYPES`.
+
+**Three shapes, and none is obviously right:**
+
+1. **Add `loom.callout` to `BAND_TYPES`.** One line. It is wrong in the way the
+   retired third entry on that list was wrong: the list means *a band a reader
+   travels through*, and a panel inside a section is not one. The time figure
+   would also be nested inside its section's own, so two readings on one report
+   would double-count the same seconds.
+2. **A list of its own**, `PANEL_TYPES`, asked `viewed` and `dwelled`. Honest
+   about what it is. It is also a fourth list on a shape (0136) that has three
+   because three is what the kinds are about, and the nesting problem above is
+   unchanged.
+3. **Leave it.** The band is counted through its section, which is the band a
+   reader actually travels through, and *they reached the section the panel is
+   in* is most of the question. The fine-grained version waits for somebody to
+   want it.
+
+**Recommendation: 3**, with this entry as the record of why — but the first
+bullet is a real argument and the person who should settle it is whoever is
+reading the funnel. Raised in the report rather than built.
+## 2026-10-21 (evening) — the action half of the form comparison is built, the words half is still a mirror, and the guards are now imported rather than copyable
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/forms.ts`,
+`form-action.ts`) · **Status:** **half closed on filing** in
+`signals-46-what-readers-do-inside-a-page-form-by-form`, record
+[0303](decisions/0303-what-two-forms-readers-do-is-the-same-pair-at-a-different-counter-and-the-page-has-one-honest-figure.md)
+
+**Extends** this morning's entry *two forms of a page can now be compared, and
+the same question about its words and its actions is a mirror of it*, which named
+two readings and set the order: one, then a second proving the guards are
+importable rather than copyable, with `audiences.ts` as the place anything shared
+is published from.
+
+**The action half is done** as `formActionComparisonOf`, and the shared half of
+it came out as `FormPairRefusal` and `formPairOf` in `audiences.ts` — the two
+sides' order and the five states in which two readings are not two forms of one
+page. `FormComparisonSilence` is now `FormPairRefusal | "nothing-measured"` and
+`formComparisonOf` is the same function from its caller's side, which its own
+suite asserts by passing unchanged.
+
+**The words half stays open**, and it is cheaper than it was this morning: it
+costs its figure over `PartReading.copy` and its own silences, because the pair's
+six clauses are imported now rather than restated. Nothing about it is a decision.
+
+**Two things the second reading turned up that the first could not have**, both
+in 0303:
+
+- **The page has an honest figure here where §44 refuses one.** 0302 clause 5
+  refuses a page total because a mean over parts counts one reader once per part
+  they got through and because two forms have two sets of parts. Neither reason
+  reaches the root: every action is strictly inside it (0242), so its own row is
+  one division rather than a sum. A third reading over the words will **not**
+  inherit this — words partition a page and readers do not, so that one's page
+  figure is a different argument again.
+- **A counter with a withholding rule of its own is what makes the split
+  provable.** `PartAction.share` is absent in exactly the states its standing
+  calls `unknown`, so the pair's rules and the counter's rules stayed apart
+  without either module reaching into the other. That is the property to look for
+  when choosing which reading goes third.
+
+---
+## 2026-10-21 (evening) — `actionChangeOf` publishes a share ratio of nought across an unwalked later window, where the same nought is a filing artefact
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/action-change.ts`) · **Status:** **closed by
+`signals-46-what-readers-do-inside-a-page-form-by-form` (#693)**, record
+[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
+— and **not in the file this entry names.** The symptom was measured correctly
+here and the fix was put one level too high: `actionChangeOf` changes not one
+line, because `pageActionOf` now withholds every share and calls nothing
+`untouched` in such a window, and every movement, ratio and ranking across it
+falls out of rules the comparison already had. Fixing it where this entry says
+would have been a third spelling of one rule over one reading. Both of the two
+things *left to decide* below are settled or narrowed: the symmetry is taken, and
+`ratioOf` saying why it is `null` is filed again as a smaller question.
+
+`ActionChangeSilence.unwalked` names a window that holds uses and credits no
+reader with acting inside anything (0167). Every `PartAction.share` on such a
+side is a **nought that is a filing artefact**, not a reader who did nothing.
+`actionChangeOf` names the state and **leaves its ratios computed**, and
+`ratioOf` is asymmetric about it:
+
+```ts
+const ratioOf = (was: number | undefined, now: number | undefined): number | null =>
+  was === undefined || now === undefined || was === 0 ? null : now / was
+```
+
+An unwalked **earlier** window gives `was === 0` and the ratio comes back `null`,
+so that direction is already covered by accident. An unwalked **later** window
+gives `now === 0` against a real `was`, and the ratio comes back **`0`** on every
+part that bears an inside — *every band on this page collapsed to nothing* — with
+`movements.abandoned` and `mostAbandoned` populated to match. A surface drawing
+the rows and not reading `silence` prints a change that did not happen, and the
+half of the pair it is wrong about is the one a deployment is looking at.
+
+**Why it was not fixed here.** 0303 withholds the gap on both sides for a reason
+that is about **two populations**: the spurious nought reads as *this audience
+does nothing on your page*, and there is no second window to blame it on. In a
+before-and-after the two sides are two windows of one readership, so *this window
+does not report where actions happened* is a sentence a caller can act on with
+the rows still in front of it, and whether that is worth withholding a figure
+over is a judgement about what a screen should draw rather than a fault in the
+arithmetic. Taking it inside a unit about a different comparison would have been
+two decisions in one record.
+
+**What is left to decide**, and the first is cheap enough to do on its own:
+either withhold `shareRatio` on both sides while either window is unwalked, as
+0303 does and for the symmetry alone, or make `ratioOf` say why it is `null`
+rather than leaving two causes as one value. The second is the wider version of
+the same question and reaches `paceChangeOf` and `copyChangeOf` too, which is
+why it is not bundled in.
+
+---
+## 2026-10-22 — `ratioOf`'s `null` is still two states in three comparisons, and the cheap half of it was never the problem
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/action-change.ts`, `pace-change.ts`, `copy-change.ts`) ·
+**Status:** **closed by `signals-48-what-two-forms-say-and-how-much-of-each-is-read`
+(#697)**, record
+[0306](decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)
+— with **two corrections to this entry.** The third module named here is wrong:
+`copy-change.ts` publishes a difference and not a quotient, and its `null` has
+one meaning. The third copy of the helper was in `funnel-change.ts`, which this
+entry does not name, so the fields were eight rather than six and the figure a
+deployment opens the portal for was one of them. And the shape proposed below —
+a tagged absence — turned out to be necessary rather than merely tidier, because
+one of the eight cannot be read off the two sides at all: `usesPerReader` is
+withheld at a *measured* nought on purpose (0242), so a surface deriving the
+reason would call *readers used this twice each and do not touch it now*
+unmeasured. The order this entry set was otherwise followed exactly: one record
+over all three, one helper in a new figures module, a fixture per branch
+
+Three comparisons of two windows share one helper, spelled once per module:
+
+```ts
+const ratioOf = (was: number | undefined, now: number | undefined): number | null =>
+  was === undefined || now === undefined || was === 0 ? null : now / was
+```
+
+`null` means two different things and a caller cannot tell them apart: **neither
+side measured this** (a leaf, a part with no row, a part nobody reached, a
+passage with no words) against **the earlier side measured nought** — which is a
+real figure and the state a rise from nothing is read off. *Nobody acted here and
+now four in ten do* and *nothing here can be compared* are a long way apart and
+arrive as one value.
+
+**What 0304 changed about this.** It did not touch the helper, and it removed one
+of the three causes: an unwalked window used to reach it with a nought, so `null`
+carried a third meaning on `ActionChange.shareRatio` and — because the clause is
+`was === 0` and not `now === 0` — the nought escaped as a **`0`** in the other
+direction. That is gone. What is left is the original pair, which is the version
+of the question worth deciding on its own.
+
+**Why it is not small.** Every ratio field on three published types changes shape
+at once: `ActionChange.shareRatio` and `usesRatio`, `PaceChange`'s and
+`CopyChange`'s. A tagged absence (`{ ratio: null, why: "unmeasured" | "from-nothing" }`,
+or a second field) is a decision about what a surface draws, not an arithmetic
+fix, and the three must agree or the fourth comparison written after it will pick
+whichever it read last. There is no wrong sentence published today — only a
+sentence a surface cannot distinguish from another one — so it is a design
+question and not a defect.
+
+**The order to take it in, if it is taken.** One record over all three, one
+helper published from somewhere both can import — `audiences.ts` is where the
+pair rules went and is the wrong home for this; a figures module would be new —
+and the fixture per branch that 21 October's lesson asks for: a disjunction in a
+guard needs one case each, and the branch nobody writes by hand is the one that
+survives.
+
+---
+## 2026-10-22 — a reading withholds a figure and a surface has no sentence for the fourth reason it is withheld
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` ·
+**Status:** open — nothing is broken and nothing is failing; it is a sentence a
+screen will need and does not have
+
+0304 gives `ActionStanding.unknown` a fourth cause: a part that bears an inside
+in a window whose sender does not walk. The closed set did not change and
+`describeActionStanding` still reads *nothing in the window can say whether
+readers acted here*, which is true of all four.
+
+**What a screen cannot do from that.** The other three causes are properties of
+the part or of the window's emptiness and a reader can act on none of them. This
+one has a remedy and it is a configuration change on the deployment's own side:
+*your sender is filing presses and not saying what they happened inside.* The
+reading says so once, as `PageAction.unwalked` and as an `unwalked` silence on
+each comparison built on it, and a card drawing per-part standings has no way to
+put *this* `unknown` beside the page-level sentence that explains it.
+
+**What it needs from nobody.** `PageAction.unwalked` is on the object a screen
+already holds, and `describeActionChangeSilence("unwalked")` and
+`describeKindActionSilence("unwalked")` both already say the sentence. The
+decision is only whether a card that draws `unknown` rows reads the page-level
+flag first and says *every one of these is the same fault* instead of listing
+them — which is the shape `CopyReading`'s `unknown` passages already have a rule
+for and this one does not.
+
+Noted rather than built because it is a drawing decision and the portal is
+paused; a finding against a paused routine is still filed and waits.
+
+---
+## 2026-10-23 — the package publishes 47 names spelled in British English, and the site that documents it is written in American English
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/`) and
+`Loom primitives` (`src/primitives/`) · **Status:** open — **nothing is broken,
+no test is failing, and this is not a request for a rename**; it is the fact
+the documentation site had to decide around today, written down for the lanes
+that own the names
+
+The maintainer's instruction of 26 September was *US spelling, everywhere a
+visitor reads*. `(marketing)` has held it with a test since. `(docs)` could
+not hold it the same way, and the reason is not the prose:
+
+| the word | published names carrying it | examples |
+| --- | --- | --- |
+| `catalogue` | 28 | `catalogueOf`, `DataCatalogue`, `CATALOGUE_TYPES`, `CataloguedProp` |
+| `behaviour` | 13 | `BEHAVIOURS`, `PrimitiveBehaviours`, `BehaviourName` |
+| `colour` | 5 | `colour`, `ColourPairing`, `colourDifference` |
+| `centred` | 1 | `navCentredBand` |
+
+47 of 1,727 published names, read off the generated reference rather than
+counted by hand (`(docs)/_lib/spelling.ts`).
+
+**What the documentation lane did about it**, so nobody has to guess: the rule
+on this site is now about which voice a word is in rather than about the word.
+A word in a sentence is the site's and is spelled the American way; a name in
+code voice is the package's and is spelled whichever way the package spells it.
+`(docs)/_lib/voice.test.ts` sweeps every page for the first half, and the
+reference's own front page carries a band saying the second half to a reader in
+two sentences, with the count and the examples read off the package.
+
+So the site is consistent, it is honest about the split, and a reader who
+copies a name gets a name that resolves. **The cost is one sentence on this
+site that would not need to exist** — *the spelling is part of the name, so the
+American version of it will not resolve* — and a reader meeting `color` in a
+paragraph above `ColourPairing` in a block.
+
+### Three shapes, costed
+
+1. **Leave it, with the band doing the work.** **The recommendation**, and it
+   is what shipped. Renaming a published export is a breaking change for every
+   consumer, the names are correct and consistent *with each other*, and the
+   confusion costs a reader one sentence they read once.
+2. **Rename on the next breaking version**, with the British spellings kept as
+   aliases for a release. It is the only shape that removes the sentence, it is
+   47 names across `src/` and `src/primitives/`, and it touches the published
+   surface — which makes it **ARCHITECTURAL** rather than a tidy-up: the
+   reference is generated from `exports`, so the rename is the API.
+3. **Nothing, and do not say anything.** What was true until today. A reader
+   copies `catalog` out of a sentence, gets a module-resolution error, and has
+   no way to know the sentence was prose.
+
+**This entry asks for no code.** It exists because the owners of these names
+should know that a surface now documents the spelling as a fact about the
+package, and because whoever eventually considers 2 should find the count and
+the reasoning rather than rediscover them.
+
+---
+## 2026-10-23 — the spelling sweep reads 49 pages and cannot read the copy every written one of them prints from a component
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/voice.ts`) · **Status:** open — **the stated limit
+of what shipped today**, written in the module's own docblock as well as here
+
+`readerPages()` reads a written page the way the search index reads it: the
+title, the summary, the headings and the prose, with names elided. What an MDX
+file does **not** contain is what its components print. `<ScaffoldTranscript />`
+is a tag with nothing between its ends on disk and about forty lines of
+transcript on the screen.
+
+The numbers: **all 31** written pages embed at least one component that prints
+copy the file does not contain — 124 instances of 82 distinct components,
+every one of them self-closing. The 85 `<Callout>`s are the exception and are
+read, because a callout's words are between its ends in the MDX and the reader
+drops the tag and keeps what is in it. The 18 generated pages are covered
+outright, because there the component *is* the page and `search/rendered.ts`
+walks it.
+
+**It is not where today's drift was.** Every British spelling the sweep found
+was in prose or in a summary, and a grep over the components' source literals
+finds the rest of it in identifiers, comments and `data-` attributes rather
+than in copy. That is a reading of today and not a property.
+
+### Three shapes, costed
+
+1. **Leave it, with the docblock saying so.** **The recommendation.** The
+   components on these pages mostly print data read from the package, where the
+   package's own spelling is the right answer anyway, and the copy they do
+   carry is reviewed in the same file as the component.
+2. **Render each written page's MDX in the test.** It is the complete answer and
+   it needs the MDX compiler inside vitest, which nothing in this route group
+   does today. The cost is a second compile of every page in the test run, and
+   a test that fails for a reason that is about MDX rather than about spelling.
+3. **Read the built HTML**, which `tools/prerender/pages.ts` already does for
+   133 prerendered pages. It is the cheapest complete read and it moves the
+   check out of this lane: `prerender:check` runs over the whole application, so
+   a spelling rule there would be a rule for four surfaces and one lane's
+   word list would become everybody's. Whether that is wanted is above this
+   lane.
+
+---
+## 2026-10-23 — three surfaces a visitor reads have British spellings in their copy, and only two of the six have a test that would say so
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom demo` (`app/(demo)/_lib/presets.ts`),
+`Loom lessons` (`app/(lessons)/`), `Loom portal` (`app/(portal)/`, **paused**) ·
+**Status:** open — **small, and nothing is broken**; found while building the
+sweep for `(docs)` and measured rather than guessed
+
+`(marketing)/_lib/voice.test.ts` has held *US spelling everywhere a visitor
+reads* since 26 September. As of today `(docs)` holds it too. A scan of the
+prose-looking string literals in the other three visitor-read route groups —
+25 characters or more, with a space in them, comments stripped — finds:
+
+| route group | found |
+| --- | --- |
+| `(demo)` | **7**: six × `colour` in `_lib/presets.ts` — *"Every colour and typeface on the page changes at once."* is on the public demo — and `honour` in `demo/page.tsx` |
+| `(portal)` | `recognised` ×2 (*"That key was not recognised."*, a message a person reads), `colour` ×1, `judgement` ×1 |
+| `(lessons)` | `recognise` ×1, in a lesson's own prose |
+| `(marketing)` | 0 — which is the test working |
+
+The scan is a crude instrument and says so: it reads source literals rather
+than rendered pages, so it will miss copy assembled from parts and may report a
+literal nobody renders. Every instance above was read and is copy.
+
+**The recommendation is to fix the instances, not to copy the sweep.** There
+are now **two** word lists of British spellings in this repository —
+`(marketing)/_lib/voice.test.ts` and `(docs)/_lib/spelling.ts` — and a third
+copy is the thing `measure.ts` has a paragraph against. Where a shared one
+would live is `src/` or `tools/`, neither of which belongs to any surface lane,
+so that is a question for whoever owns the shared ground rather than a change
+for the next surface to make.
+
+`Loom portal` is paused, so its two instances wait; the entry is filed against
+it rather than reassigned.
+
+---
+## 2026-10-23 — a space lost between a tag and the text after it leaves no separator, so the one check written for run-together text cannot see it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/prerender/hazards.ts`) · **Status:** open — **the instance is fixed and
+the gap is not**; one page, caught in a screenshot rather than by any check
+
+The band this lane added today contained the ordinary sentence
+
+```tsx
+<p>…so a page can say <em>color</em> in a sentence and show you a name…</p>
+```
+
+with a real space after `</em>`. `container.textContent` under `vitest` reads
+*say color in a sentence*. The page `next build` produced reads
+
+```html
+…so a page can say <em>color</em>in a sentence…
+```
+
+**`pnpm prerender:check` passed**: 133 pages, 1,917 text junctions, 0 run
+together. It was found by looking at the screenshot.
+
+### Why the check cannot see it
+
+`hazards.ts` is right about everything it says and it looks for one marker:
+React's `<!-- -->` separator, written between two adjacent **text children**, and
+reports the pair where the characters either side of it would run together.
+That is exactly the 9 September defect — `{ARRIVAL_TOTALS.compiled}` beside
+`of those blocks` — and this is the same defect one step to the left:
+
+- when the space **is** a text child, React writes `</em> <!-- -->in`, the
+  separator is there, and the check reads a space either side and passes
+  correctly;
+- when the space is **dropped**, there is no second text child, so there is no
+  separator, so there is nothing for the check to look at. A hazard that leaves
+  no marker is invisible to a detector built on the marker.
+
+**The mechanism is not established here and this entry does not claim one.**
+What is established: the source had the space, `vitest` renders it, the built
+page does not, and `{" "}` restores it. Two transforms, two sentences, and the
+one a reader gets is again the one nothing looked at — which is the half of the
+9 September finding that is about the class rather than the paragraph.
+
+### Three shapes, costed
+
+1. **Also sweep for a tag followed immediately by a joining character**, with
+   an allowed list of the shapes that are correct. Across the 133 built pages
+   there is **one** such junction outside a `</span>` — `<code>PageReading</code>s`,
+   a plural on a chip — and 77 at a `</span>`, every one of which carries its
+   space inside the span (`<span>Asked: </span>Make the main heading…`) and is
+   correct. So the noise is measured rather than feared, and an allowed list of
+   two shapes covers the site as it stands. **The recommendation**, and it is a
+   few lines beside the separator sweep.
+2. **Compare the built text against the `textContent` a test sees**, which
+   catches the class outright and needs a page rendered twice by two
+   transforms. It is the complete answer and it is a different tool.
+3. **Nothing**, with this entry as the record. The instance is fixed; the next
+   one is found by somebody looking at a picture, which is how this one was
+   found.
+
+The three documentation screenshots taken today are why this is a closed
+instance rather than a shipped one, which is an argument for the rule that a
+report carries a visual.
+## 2026-10-23 — a sweep guard a caller has to remember is a guard one caller had already forgotten, and `servedPages` refusing a thin sweep is the shape that cannot be forgotten
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/served.ts`) · **Status:** open — **nothing is broken**;
+every sweep in this route group carries the guard as of today, and this is the
+half of today's work that was costed and not taken
+
+`sweepCover` landed today and all seven `servedPages` callers assert it. That
+closes the instances. It does not close the shape, and the shape has a measured
+instance behind it rather than a worry:
+
+> **`docs-pages.test.ts` had no sweep guard at all**, and on a `servedPages`
+> that dropped one of this site's three routes it was **29 of 29 green**. The
+> deep links on the two pages that remained cleared every floor in the file.
+
+The guard is a thing each caller states. Six callers stated a version of it and
+the seventh did not, and nothing in the repository could say which was which
+until somebody went and looked. The eighth caller is a file nobody has written
+yet.
+
+**The shape that cannot be forgotten is a refusal**: `servedPages` throws when
+the sweep it is about to hand back reached fewer than `PAGES_AT_LEAST` routes,
+or no ask states at all. Every caller is then held whether or not it remembered,
+including the one written next week, and the message names the cause instead of
+arriving as five reds about the maintainer's own line.
+
+**Two things argue against it and both are real:**
+
+1. **It makes the caller's floor unreachable.** `expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)`
+   is today the assertion that fails on an empty site — measured: the `toEqual`
+   beside it passes, because `SERVED_STATE_COUNT` and the sweep are zero
+   together and two empty path lists are equal. A refusal upstream means that
+   line can never fail, and a dead assertion reads exactly like a live one.
+   Deleting it instead leaves the caller stating nothing, which is the position
+   the head of `served.ts` argues against.
+2. **It is a module deciding for seven files.** `served.ts`' own docblock says
+   *"`servedPages` is useless on its own: what makes it a check is a caller
+   saying how many states it expected to look at"*, and that sentence is this
+   lane's recorded position rather than an accident. A refusal overturns it.
+   The reason it is still worth overturning is that the position assumed callers
+   remember, and one did not.
+
+**Recommendation: take it, and delete the caller-side floor when you do** —
+`cover.routes` compared against `SITE_PATHS` stays, because that is the half a
+refusal cannot state (a sweep that reached three routes which are not this
+site's three). What goes is the number, up into the one module that can hold it
+for everybody. A dead assertion is the thing to avoid and the way to avoid it is
+to remove it, not to decline the refusal that kills it.
+
+It is not in today's pull request because today's is *every sweep in this route
+group gets the guard*, and *the guard moves into the module* is a change to the
+same seven files for a different reason. Two reasons in one diff is how a
+reviewer loses track of which files changed for which.
+## 2026-10-22 (evening) — the words half of the form comparison is built, and the three readings of one pair of forms have three different answers about the page
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/form-copy.ts`) ·
+**Status:** **closes the open half of the 21 October entry** *the action half of
+the form comparison is built, the words half is still a mirror*, in
+`signals-48-what-two-forms-say-and-how-much-of-each-is-read`, record
+[0305](decisions/0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md)
+
+The third of the three readings 0302 named is `formCopyComparisonOf`. The filing
+entry said it cost its figure and its own silences and that nothing about it was
+a decision. **Two things about it were**, and both are the kind that would have
+been settled wrongly inside a pull request.
+
+**The unit is not the shared part.** Reach and action compare every part both
+forms have, because a part is the same part whatever the deltas did to it. Two
+forms' *text* differs by construction (0263), so a band the deltas reworded is
+two pieces of text with two word counts and a word-weighted figure over it reads
+two populations and two passages at once. The comparable unit is the passage both
+forms say **the same way**; the rest is reported — `reworded` with both counts
+and the form that says more, `onlyIn` with the form that has it, and a census
+that accounts for every word each form says.
+
+**The direction of the figure is not read off the figure.** A floored word count
+(0122) is the same understatement on both sides of a shared passage, so it scales
+the gap toward nought and can report nought where the hidden words differ; the
+two reaches are exact whatever a library has declared. So `favours` comes off the
+reaches and the magnitude off the words, which is this reading's one departure
+from its two siblings and is the field a surface drawing a half-declared page
+should trust.
+
+### What the three readings now say about the page as a whole
+
+Worth having in one place, because they look alike and are three arguments:
+
+| reading | the page |
+| --- | --- |
+| reach (0302) | **refused** — a mean over parts counts one reader once per part, and two forms have two sets of parts |
+| what readers did (0303) | **one row** — every action is strictly inside the root, so the root's own row is one division per side |
+| what the forms say (0305) | **a sum over words** — a passage's words are its own, so they partition the page exactly once and no reader is counted twice |
+
+And the trap the third one carries: **the page's gap is not the sum of the rows'
+gaps.** Every row's gap is unsigned, so two passages favouring opposite forms add
+there and cancel here — twelve against four in this unit's own fixture. A screen
+that summed the rows and called it the page would be reporting *how far apart the
+two forms are read, passage by passage* and labelling it *how much of the shared
+page each form's reader gets to*.
+
+**Nothing is left of the filing entry.** All three readings of one pair of forms
+are built, over one pairing rule published once in `audiences.ts`.
+
+---
+## 2026-10-22 (evening) — three form comparisons are built and no screen draws any of them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken and nothing is failing; it is the open question with the most
+built behind it
+
+`formComparisonOf` (0302), `formActionComparisonOf` (0303) and
+`formCopyComparisonOf` (0305) now answer, for two forms of one page: *do these
+readers reach the same parts, do they do the same things inside them, and do they
+get told the same words.* Each publishes a census that survives a window nobody
+read, a per-part or per-passage row with a withholding rule, and a closed set of
+reasons a figure is absent that maps onto conditions a surface already has
+sentences for.
+
+**No surface reads one field of any of them.** The three earlier entries this
+lane filed against this routine — a readership comparison's census, a door read
+over two forms, and a form comparison's count of parts falling each way — are the
+same gap at a smaller scale, and this one supersedes none of them.
+
+**What a screen would need and already has.** The two sides are named and
+ordered by audience id before anything is read off either, so a card has two
+column headings and no decision to make about which is first. `counted` and
+`wordsCounted` are a four-way census over one set, which is a bar and not a mean.
+`sharpest` is the one row somebody would act on. `silence` is one line per state
+through `describeFormCopySilence`, and `meaningOfFormCopySilence` gives the
+condition and the subject for a card drawing two readings at once.
+
+**One drawing decision is this reading's own**, and it is the reason this entry
+names a field rather than asking for a page: under a floor the page figures are
+absent and every row still carries a `gap` and a `favours`. A card that draws the
+rows and the page total from one object has to say *these rows are a floor and
+the total is withheld* rather than drawing an empty headline over full rows.
+
+Filed against a paused routine, which still waits.
+
+---
+## 2026-10-22 (evening) — a decision link whose slug is guessed from the record's subject reads identically in a diff to one that resolves
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed on filing** in `signals-48-what-two-forms-say-and-how-much-of-each-is-read`
+— nothing is left to do but keep doing it, and it is filed because the mistake is
+cheap to repeat and was caught by a gate rather than by reading
+
+`tools/decisions/decisions.test.ts` went red on the new module's own
+documentation for two links out of eleven:
+
+```
+src/signals/form-copy.ts links 0122 to 0122-a-primitive-declares-which-of-its-props-are-copy.md
+src/signals/form-copy.ts links 0242 to 0242-what-readers-do-inside-a-part-is-a-share-of-the-readers-who-reached-it.md
+```
+
+Both slugs are **what the record is about**, written from memory of the
+subsystem rather than copied. The real ones are
+`0122-a-primitive-says-which-of-its-props-a-reader-reads.md` and
+`0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md`. The
+nine that resolved were copied from sibling modules; the two that did not are
+the two no sibling happened to link.
+
+**Why it is worth an entry rather than a quiet fix.** A guessed slug is quicker
+to type than a looked-up one, it is syntactically perfect, it reads as a correct
+citation in a review, and the number in front of it is right — so the only thing
+standing between it and a dead link on the documentation site is a gate that
+runs in `pnpm verify` and nowhere else. **The rule, for this lane:** a record
+link is copied from `ls decisions/` or from a sibling module, never typed from
+the record's subject. The number may be typed; the slug may not.
+
+---
+## 2026-10-22 — an eleventh counted reading of the mangling: all three links mangled at 151, 178 and 214, so the bracket is not a threshold and the quote run does not track length
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 19 October entry *a tenth counted reading of the mangling* and
+the 15 October entry on the bracket · **Status:** open — **a reading, not a
+claim**; it contradicts two sentences of the hypothesis and no remedy changed
+
+#697's first body carried three markdown links of the shape
+`github.com/jam-overture/loom/blob/<branch>/<path>`, two on this branch and one
+on `main`. **All three came back mangled**, wrapped in the quote runs the earlier
+readings describe:
+
+| Characters | Branch | Quote run | Outcome |
+| --- | --- | --- | --- |
+| 151 | `main` | `` ``''…''`` `` (2) | **mangled** |
+| 178 | this one | ` ````''''…''''```` ` (4) | **mangled** |
+| 214 | this one | ` ```'''…'''``` ` (3) | **mangled** |
+
+**Two sentences of the open hypothesis do not survive this body.**
+
+- **The bracket is not a threshold.** The 15 October entry brackets it as clean
+  at 152 and mangled at 155. A **151**-character link mangled here, one shorter
+  than the longest known clean one, in a body where nothing is longer than the
+  two that mangled around it. So length is at most a factor and is not the
+  decision, and the bracket should be read as *no clean link is known above 155*
+  rather than as *links below 152 are safe*.
+- **The quote-run count does not track length.** The tenth reading noted the run
+  rising with length — two backticks at 160, four at 189. Here the **178**
+  took four and the **214** took three, which is the wrong way round.
+
+**One thing no earlier reading records.** The run around the 214 engulfed the
+link's **text and the comma after it** — `` ```'''[0305](https://…),'''``` `` —
+rather than the URL alone. Whatever does this is not operating on URLs; it is
+wrapping a span that can include markdown either side of one.
+
+**The remedy is unchanged and cost one call.** The body was corrected in the same
+turn with all three written as plain repository paths, which is what the tenth
+reading settled on for this lane and what I should have done in the first body:
+every signals branch name is long enough to put every link past the bracket. The
+rule for this lane is now **no `github.com/.../blob/...` link in a pull request
+body at all** — a path, which the reader can click in the diff anyway.
+
+---
+## 2026-10-23 — a distance of nought where there is no distance, guarded by a silence rather than withheld
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-reach-change.ts`, `library-word-reach-change.ts`) ·
+**Status:** open — found while taking 0306 and deliberately left, because it is
+two library rolls rather than the three comparisons that record is about
+
+`weightMovedOver` is the figure two library rolls publish as `weightMoved`, and
+it opens with
+
+```ts
+if (totals.was === 0 || totals.now === 0) return 0
+```
+
+A side with no weight at all has **no distance to report**, and a nought here is
+the one value a surface reads as *the weights did not move*. Its own
+documentation says the state is *accounted for by a silence*, which is the exact
+sentence
+[0304](decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)
+was written about one level down: a silence that names a state while the figure
+beside it is still computed leaves a card drawing the rows a wrong sentence to
+print.
+
+**It may also be unreachable**, which is the other half of the finding and the
+reason it is worth an entry rather than a quiet change. Both callers compute
+`weightMoved` only where their silence is `null`, and a roll with no weight on a
+side plausibly cannot be measured — in which case the clause is one nothing can
+falsify, which is its own fault (0231). Neither suite has a case that reaches it;
+`weightMovedOver` is exported and has no direct test of its own.
+
+**What it needs.** One run to establish which of the two it is, and then either a
+fixture that reaches it and a `null` in place of the nought, or the clause
+deleted. The field is already `number | null` in both rolls, so withholding costs
+no published type. Not folded into 0306: that record is about a quotient of two
+figures and this is a sum of absolute differences, and the two readings are a
+different pair of modules.
+
+---
+## 2026-10-23 — every ratio a comparison publishes is a pair now, and a card drawing one reads two fields
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken and nothing is failing; it is what a screen has to do with
+[0306](decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)
+
+Eight published fields changed shape on three comparison types:
+`ActionChange.shareRatio` and `usesRatio`, `PaceChange`'s `paceRatio`,
+`timeRatio` and `needRatio`, and `FunnelChange`'s `rateRatio`, `entryRatio` and
+`conversionRatio`. Each is now `{ ratio, absent }`, with exactly one of the two
+non-null, and `describeRatioAbsence` gives a line per absence.
+
+**What it buys a screen.** *Nobody acted in this band and four in ten do now* and
+*nothing here can be compared* were one value and are now two. The first is
+`from-nothing` with a later side above nought, and it is the state a
+before-and-after exists for — a card that drew a bare `null` as a dash was
+drawing the most interesting row on the page as the least.
+
+**The one drawing decision.** `from-nothing` has no number to rank by while being
+the row somebody most wants ranked first, so a card sorting by the quotient drops
+it to the bottom or off the list. The two sides are both published beside it, so
+*from nothing to four in ten* is sayable without a ratio; whether such a row
+sorts by the later side's figure, pins to the top, or sits in a band of its own
+is a decision about what a surface draws and is not this lane's.
+
+Filed against a paused routine, which still waits.
+
+---
+## 2026-10-23 — a commit authored as `jpizzolato36@gmail.com` deployed a preview, where `routines.md` says that identity is refused
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — **one reading against a written environment rule**, not a
+request to change it; nothing is broken and no preview is missing
+
+`docs/routines.md`, under *Commit identity, and the preview that goes missing*,
+is unambiguous: **do not set a commit author**, because a run that reaches for
+the address its session opens with gets Vercel's
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+and the symptom is a pull request with no preview URL. The section says the trap
+has been recorded seven times, and it names two identities that *are* known to
+deploy: the session default, `Claude <noreply@anthropic.com>`, and
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`.
+
+**On #697 the refused identity deployed.** The branch carries four commits from
+two runs of this lane. The first three are `Claude <noreply@anthropic.com>`; the
+fourth, `77588870`, is authored
+
+```
+Loom signals <jpizzolato36@gmail.com>
+```
+
+and Vercel's combined status for that exact head is `success` —
+*Deployment has completed* — with the branch alias serving it. No `Blocked`, and
+the per-commit deployment is in Vercel's own comment on the pull request.
+
+**What this does and does not establish.** It is one reading, and the honest
+reading of it is *that address is not refused today* rather than *the section is
+wrong*: a team membership or a project setting may have changed in the six weeks
+since the section was written, which is exactly what nobody can tell from
+inside a run. Two things follow for whoever owns the file:
+
+- The section's **instruction is still the cheap one** and should stand. "Use
+  whatever the session is configured with" costs nothing and cannot regress,
+  whatever Vercel's team list says this week.
+- Its **explanation now has a counter-example**, and a run that reads the
+  section as *this address cannot deploy* will mis-diagnose the next missing
+  preview. The sentence worth having is that the author line is the **first
+  thing to check** when a preview is missing, not that one address always fails.
+
+Filed rather than edited: `docs/routines.md` is not this lane's file, and a
+governance section is not something a routine rewrites on one observation.
+
+---
+## 2026-10-24 — a cut block's two numbers are counted in two different files, and the cheap way to print a range would be wrong on a quarter of them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/model.ts`) · **Status:** open — **a stated
+limit**, and nothing on the page is untrue: both numbers are right and they
+answer two different questions
+
+The sentence under a cut block now carries two numbers:
+
+> Cut short here — showing the first **91** lines of **727**. The whole of it is
+> in `src/primitives/stylesheet.ts`, **from line 83**.
+
+**They are counted in two different files.** 91 and 727 are lines of the
+*declaration*, read from `dist/*.d.ts` and counted on the cleaned text the page
+shows — which is the rule the 22 October entry argues for and which is right.
+83 is a line of the *source*, because `dist/` is not in the repository and a
+reader cannot open it.
+
+Measured across the twelve, the two coordinate systems agree on **nine** and
+differ on **three**:
+
+| export | source lines | declaration lines |
+| --- | --- | --- |
+| `RenderDiagnostic` | 322 | 298 |
+| `PrimitiveDefinition` | 180 | 176 |
+| `LoomRenderContext` | 146 | 143 |
+
+The difference is comments the citation rule withholds, and what emit does to a
+declaration. On the other nine — `LIBRARY_CLASS` among them, which spans source
+lines 83–809 and is 727 lines of declaration — they are equal.
+
+Nothing on the page invites a reader to add them, and a reader who did would be
+24 lines out on one of the twelve rather than wrong about anything the page
+says.
+
+### Three shapes, costed
+
+1. **Leave it.** **The recommendation.** The two numbers answer two different
+   questions — *how much am I missing* and *where does it start* — and the
+   sentence never puts them in one arithmetic.
+2. **Link a range rather than a line**: `#L42-L363`, so GitHub highlights the
+   whole extent and a reader can see where it ends without scrolling. It is a
+   better answer to *is the name I came for in here* than a start is. The cost
+   is that the page then prints a **second extent of one thing** in units the
+   sentence's own number is not in. **The cheap version is wrong**: `line +
+   whole − 1` is off on the three above, by 24 lines on `RenderDiagnostic`, so
+   anyone who builds this must read the declaration's end position rather than
+   add — which is the sentence this entry exists for.
+3. **Count `whole` on the source**, so the two agree. Refused rather than
+   costed: `whole` is a claim about the text on the page, and counting withheld
+   comments would tell a reader they are missing lines no reader was ever going
+   to see.
+
+---
+## 2026-10-24 — the harness subscribes a routine's session to its own pull request, and four deployment-comment edits woke it four times in five minutes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — **a governance gap rather than a defect**: nothing is
+broken, and the run that met it handled it by unsubscribing
+
+`docs/routines.md`'s *Token discipline* section is about one mechanism:
+`send_later` chains that re-arm themselves. Its rule — *never schedule a
+follow-up or a self-check-in; run, report, exit* — names scheduling, and the
+test it gives is broader than the mechanism it names: **the maintainer must be
+able to step away for days without the bill moving.**
+
+**A second mechanism now exists and the file does not name it.** The session
+harness subscribes a session to any pull request it opens, automatically and
+without being asked. Measured on #702 this morning: the subscription was
+created at 14:11:12, and by 14:16 the session had been woken **five times** —
+once for the subscription itself, three times for `vercel[bot]` editing its
+deployment comment in place as the build went `Building` → `Ready` →
+`Building`, and once for a check suite completing with nothing failed. **Not
+one of the five was actionable.**
+
+That is the 9 August failure's shape arriving through a different door. It is
+cheaper than a poller — it wakes on events rather than on a timer, and a pull
+request nobody touches costs nothing — but it is still a cost that scales with
+how long the maintainer is away rather than with the work: `Loom merge` merges
+these branches daily, every merge and every bot edit is a wake, and six lanes
+opening a pull request a day is six subscriptions.
+
+**What this run did**, stated so the next one does not have to decide it again:
+unsubscribed from #702 immediately after checking its state once — no failing
+check, no review thread, no conflict — and **armed no check-in**, because the
+event's own text asks for a `send_later` chain and the brief forbids one in as
+many words.
+
+### Three shapes, costed
+
+1. **A sentence in `docs/routines.md`'s token-discipline section** saying that a
+   routine unsubscribes from its own pull request after checking it once, and
+   why. **The recommendation.** It costs a paragraph, it puts the second
+   mechanism under the rule that already covers it in spirit, and it means no
+   lane has to work this out from the brief at the moment a wake arrives.
+2. **Leave it to each brief.** The documentation brief's *never schedule a
+   follow-up* is clear enough to decide this, which is how this run decided it.
+   The cost is that six lanes each reason it out separately, and a lane that
+   reads *scheduling* narrowly stays subscribed.
+3. **Stay subscribed deliberately**, treating the wakes as the price of a lane
+   that answers CI and review comments on its own pull request. It is a real
+   option and it is the maintainer's to take, not a routine's: it is the thing
+   his rule exists to prevent, and he is the one who sees the bill.
+
+**Recommendation: 1.** The rule is already written; it names one spelling of
+the act. *A rule naming one spelling of an act is a rule that stops working the
+moment somebody reaches for the other one* — `routines.md`'s own sentence,
+third instance, and this is the fourth.
+## 2026-10-24 — a control cannot say it is the one the reader already took, so the only mark a tree has for *you are here* is a link's
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.action.ts`) · **Status:** **open** — nothing is broken,
+no test is failing, and what it costs today is one exemption in a rule rather
+than anything a visitor meets
+
+`loom.link` takes `current`. Its own docblock calls it *"the prop the chrome
+could not do without"*, it emits `aria-current="page"`, and it pins the
+underline, so the bar and the footer's map can keep the page the reader is on
+instead of dropping it from the menu.
+
+**`loom.action` takes no such prop.** A button that is the state the reader is
+already in has nothing to say so with except the `variant` it is painted in,
+which is a paint rather than a fact: it is not announced, it is not in the tree
+as a claim, and nothing can read it back.
+
+### Where it bites, measured
+
+`/how-it-works` offers six choices, as six `loom.action`s. Whichever one the
+reader took is `variant: "primary"` and the other five are `secondary` — so a
+sighted reader can see which request they are reading about, and a reader on a
+screen reader is read six buttons with nothing distinguishing one of them.
+
+It also costs a rule. `routes.test.ts` gained *sends nobody to the address they
+are already reading* today, over all 75 served states, and the chosen button is
+a link to the address being served: pressing it reloads the page. That is right
+and is the same rightness as the menu keeping the current page — a row of six
+that dropped the one you took would be six buttons one visit and five the next.
+The menu can say so in the tree and the row cannot, so the rule carries a
+written exemption for *an address naming a request and answering nothing about
+it* instead. The exemption has a cost stated in its own docblock: a lone control
+spelled that way would read as a choice and go unreported.
+
+### The shape
+
+**`current` on `loom.action`, meaning the same thing it means on `loom.link`.**
+One optional boolean, one `aria-current`, no new paint needed — the `primary`
+variant is already carrying the visual half and would go on carrying it.
+
+The one thing worth deciding rather than assuming is **which `aria-current`
+value**. `loom.link` emits `page`, which is right for a menu. A choice on this
+site is also a page — `/how-it-works?ask=calmer` is an address the site serves
+and treats as a state of its own — so `page` is defensible here too. A host
+using `loom.action` for a tab or a step in a wizard would want `step` or
+`true`, which is an argument for the prop taking the word rather than a boolean.
+`loom.link`'s boolean is the simpler thing and this lane would be happy with it.
+
+**Not worked around here.** The workaround is a local component, and 0067 does
+not allow this lane one. The exemption in the test is the honest alternative and
+it is written down as temporary: the day the prop exists, it is deleted and the
+six choices carry the mark the menu carries.
+
+---
+## 2026-10-24 — a control that drops part of what the visitor has done is held by nothing, and this is the third instance
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/pages/answer.ts`, `pages/see-it-happen.ts`) ·
+**Status:** **open** — the instance is fixed, the class is not
+
+`answer.ts` has the argument already, in a docblock over the one function that
+gets it right:
+
+> *"a control that quietly dropped `back=1` would put the change the visitor had
+> just reversed back on the page while claiming to do nothing but scroll. That
+> failure is this site's recorded shape rather than a hypothetical: the undo is
+> the parameter two of this lane's own findings were about, both times because a
+> link between two of its pages carried some of what had happened and not all of
+> it."*
+
+`where()` in that file is the remedy — the address the visitor is at, whole —
+and the remedy is a convention. **Nothing says it was used.**
+
+Today's run is the third instance, in the file next door. *See every line the
+machinery wrote* was built from `{ ask, approve }` and never from `back`, so on
+the 12 put-back states of this site it offered the reader the page with the
+change still on it. It is gone, and what replaced it leaves the page, so the
+instance cannot recur in that control.
+
+### Why no rule caught it and why the two added today do not close this
+
+Three rules landed in `routes.test.ts` with the fix. *Writes no link with a host
+in it* caught the instance, because that control was also the last absolute href
+in any tree here. *Sends nobody to the address they are already reading* caught
+6 of the 24 states. Neither is about the thing this entry is about: a control
+whose address carries **less** of what the visitor has done than the address
+they are at.
+
+The reason that is hard is that **dropping state is sometimes exactly right.**
+*Start again* goes to `/how-it-works` and means it. Each of the six choices is a
+bare request and means it. So the rule cannot be *every control keeps
+everything*; it has to be *a control that names the same request the reader is
+on keeps the answers they have given to it*, with the choices exempt — and the
+choices are the controls that name the same request, which is the circularity to
+solve.
+
+### Two shapes, neither built
+
+1. **A rule over the sweep**, as above, with the exemption keyed off the same
+   *bare request* predicate `routes.test.ts` already uses. It is honest and it
+   inherits that predicate's gap.
+2. **Make it unspellable.** Every control that means *this page, with what you
+   have done so far* goes through one function. `where()` already is that
+   function and already lives in `answer.ts`; `see-it-happen.ts` built its own
+   `sofar` object instead, which is the duplication the instance grew out of.
+   Move `where()` somewhere both files read, make it the only way to spell the
+   current address, and the next control that wants one cannot write it from
+   parts.
+
+**Recommendation: 2, then 1.** The second removes the shape; the first catches
+whoever writes it from parts anyway. Not done in this run because this one is
+already a diff across 51 files, and because 2 is a judgement about where a
+shared helper lives, which is worth its own pull request rather than a corner of
+somebody else's.
+
+---
+## 2026-10-24 — the palette switcher offers the palette the reader is already wearing, and nothing marks it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/chrome.ts`) · **Status:** **open** — a judgement, not a
+defect, and recorded because a rule added today steps over it
+
+The footer's last row offers all three palettes. One of them is the one the
+reader is looking at, and it is drawn exactly like the other two, so pressing it
+changes nothing and says nothing. *Sends nobody to the address they are already
+reading* in `routes.test.ts` would report it, and does not, because that rule
+looks at a page's own bands and this is chrome.
+
+**Leaving all three is right** and the argument is the menu's: a switcher that
+showed two would be a reader learning there are two palettes, and which two
+would depend on which one they had. The question is only whether the one they
+are wearing says so.
+
+`loom.link` has `current` and emits `aria-current="page"`, which is what the
+menu above it uses. Three shapes:
+
+1. **`current` on the palette you are wearing.** One line in `chrome.ts`, the
+   same prop the menu already uses, and it makes the row legible to a screen
+   reader as well as pinning the underline. The objection is semantic:
+   `aria-current="page"` says *page*, and a palette is not one — `/?theme=bold`
+   and `/?theme=minimal` are the same page wearing different clothes, which is
+   0049's whole point.
+2. **A different value**, `true` rather than `page`, which is what ARIA has for
+   exactly this. It needs the prop to take a word, which is the primitive change
+   the other entry filed today is also about. The two would land together.
+3. **Leave it**, with this entry as the record.
+
+**Recommendation: 3 until the prop takes a word, then 2.** Marking it `page`
+today would be this site using the wrong word in the one place it is making a
+claim about saying exactly what is going on.

@@ -70,7 +70,7 @@ describe.each(ASKS)("a request for $id in the address", (ask) => {
       ...(approve ? { approve: "1" } : {}),
     })
     const { card } = await shareImageFor(params, ORIGIN)
-    const run = await askRunFor({ origin: ORIGIN, theme: "minimal", ask: ask.id, approve })
+    const run = await askRunFor({ theme: "minimal", ask: ask.id, approve })
 
     expect(card.eyebrow).toBe(run?.record.verdictLabel)
     expect(card.headline).toBe(`“${run?.record.asked}”`)
@@ -118,7 +118,6 @@ describe("an address carrying an undo", () => {
 
   const runFor = async (back: boolean, backApprove = false) =>
     askRunFor({
-      origin: ORIGIN,
       theme: "minimal",
       ask: ask.id,
       approve: true,

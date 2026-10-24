@@ -107,7 +107,7 @@ describe("the card of a published page", () => {
  */
 describe.each(ASKS)("a link somebody sends after asking $id", (ask) => {
   const runFor = async (approve: boolean) =>
-    askRunFor({ origin: ORIGIN, theme: "minimal", ask: ask.id, approve })
+    askRunFor({ theme: "minimal", ask: ask.id, approve })
 
   it.each([false, true])("quotes the request verbatim (approved: %s)", async (approve) => {
     const run = await runFor(approve)
@@ -199,7 +199,7 @@ describe("a card speaks the visitor's language", () => {
     ...SITE_ROUTES.map((route) => publishedCard(route, ORIGIN)),
     ...(await Promise.all(
       ASKS.map(async (ask) => {
-        const run = await askRunFor({ origin: ORIGIN, theme: "minimal", ask: ask.id })
+        const run = await askRunFor({ theme: "minimal", ask: ask.id })
 
         return askedCard(run!.record, ORIGIN)
       })

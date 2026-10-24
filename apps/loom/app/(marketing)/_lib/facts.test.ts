@@ -56,7 +56,7 @@ const elementsOf = (node: LoomNode): readonly ElementNode[] => [
 
 /** Every `loom.stat` on the front door as published, in the order it is offered. */
 const statsOfHome = (): readonly ElementNode[] =>
-  elementsOf(treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME }).root).filter(
+  elementsOf(treeFor(HOME, { theme: DEFAULT_THEME }).root).filter(
     (element) => element.type === "loom.stat"
   )
 
@@ -189,7 +189,7 @@ describe("what the site says about the repository", () => {
    * there.
    */
   it("sends a reader from the record count to the page that states it exactly", () => {
-    const front = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const front = treeFor(HOME, { theme: DEFAULT_THEME })
 
     expect([...pathsLinkedFrom(front.root, ORIGIN)]).toContain(DECISION_RECORDS.path)
   })

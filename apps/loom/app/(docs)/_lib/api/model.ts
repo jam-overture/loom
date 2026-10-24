@@ -24,13 +24,83 @@ import { workspaceSpecifier } from "../packages"
  */
 export type ApiKind = "function" | "value" | "schema" | "type" | "interface" | "class"
 
+/**
+ * What is missing, where a signature ran past the cap and was cut short.
+ *
+ * A reader of a cut block has one question — *is the thing I came for below
+ * the ellipsis* — and until this existed every cut block answered it with the
+ * same grey sentence, whether ten lines were missing or six hundred and
+ * thirty-six. `LIBRARY_CLASS` is the case that makes the point: it is the map
+ * of every class name the primitive library writes, so the list is the whole
+ * of what it says, and a reader who finds it cut at `"loom-cluster"` could not
+ * tell whether the name they wanted was forty lines down or did not exist.
+ *
+ * **Lines, not members.** The measure has to be true of a union, an object
+ * type and a function type alike, and a member count means tracking brace
+ * depth through a string this module otherwise treats as text — a parser where
+ * a line count will do. Lines are also what the cut is now made of: the block
+ * ends where a line ends, so *the first 91 of 727 lines* describes the rule
+ * rather than approximating it.
+ *
+ * Both numbers are counted on the **reader-facing** text, which is the text
+ * the page shows — not the declaration it was read from. Cleaning drops
+ * comments the citation rule withholds, and counting those would mean telling
+ * a reader they are missing lines no reader was ever going to see.
+ */
+export type ApiCut = {
+  /** Lines of it the block above shows. */
+  readonly shown: number
+  /** Lines there are in all, so a reader can tell how much is behind it. */
+  readonly whole: number
+  /**
+   * Where the whole of it lives: a path in this repository, or empty.
+   *
+   * The source file rather than the declaration file, because `dist/` is not
+   * in the repository and a reader cannot open it. It is the file the
+   * declaration was generated from, which is the nearest thing to the whole
+   * that a reader can be handed — empty where the module has no source file
+   * under `src/`, and a page says nothing rather than linking nowhere.
+   */
+  readonly source: string
+  /**
+   * Which line of that file the declaration starts on, counting from one.
+   *
+   * A path alone lands a reader at the top of the file, and the files these
+   * links go to are long: `LIBRARY_CLASS` is 727 lines of map starting on line
+   * 83 of a 2,406-line stylesheet. *The whole of it is in
+   * `src/primitives/stylesheet.ts`* was true and sent them to a text file to
+   * run the search they came here to avoid.
+   *
+   * `0` is **no line**, which is the same answer as no source: a module with
+   * no file under `src/`, and a name that file does not declare at the top
+   * level. No file has a line 0, so there is no number a reader could be sent
+   * to by mistake — and a page that has no line says nothing about one rather
+   * than linking to the top of the file and calling it the declaration.
+   *
+   * **The start of the declaration and not the end of it.** A range would
+   * print a second extent of one thing — the source's, in source lines —
+   * beside the extent the sentence above it already gives in the declaration's
+   * own lines, and the two do not agree: emit widens, comments differ, and
+   * `whole` is counted on the text the page shows. One number that is exactly
+   * what it says beats two that have to be explained.
+   */
+  readonly line: number
+}
+
 export type ApiSymbol = {
   readonly name: string
   readonly kind: ApiKind
   /** The declaration as the package publishes it, with `export declare` removed. */
   readonly signature: string
-  /** Whether the signature above was cut short because it ran past the cap. */
-  readonly truncated: boolean
+  /**
+   * How much was cut, where the signature above ran past the cap.
+   *
+   * `undefined` is the whole declaration being on the page, which is 1,751 of
+   * the 1,763 exports. It replaced a `truncated: boolean` on 22 October: the
+   * flag and the measure were one fact, and carrying both would have been two
+   * fields that have to agree about whether a block is cut.
+   */
+  readonly cut: ApiCut | undefined
   /** The first paragraph of the doc comment, or empty when there is none. */
   readonly summary: string
 }

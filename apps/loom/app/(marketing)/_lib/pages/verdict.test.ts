@@ -43,11 +43,9 @@ import type { PageContext } from "./home"
  * that has been answered.
  */
 
-const ORIGIN = "https://loom.example"
 const THEME: SiteThemeName = DEFAULT_THEME
 
 const contextFor = (ask?: AskId, approve = false): PageContext => ({
-  origin: ORIGIN,
   theme: THEME,
   ...(ask === undefined ? {} : { ask, approve }),
 })
@@ -142,7 +140,6 @@ const dressed = async (): Promise<ReadonlyMap<string, Dressed>> => {
 
   return new Map([[UNASKED, verdictChip(untouched)], ...answered])
 }
-
 
 describe("the chip the record panel wears", () => {
   it("is a treatment this deployment's badge actually registers", async () => {

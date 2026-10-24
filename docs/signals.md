@@ -37,6 +37,8 @@ the portal every day.
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
 | Which page to fix first | the deployment's pages in one order, by the readers each loses at its sharpest fall, scaled to the door ([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)), with the pages the door cannot scale reported out of it |
+| What two forms of a page *say*, and how much of it is read | each form's words counted exactly, and the text both forms share read at each form's own reach, weighted by words ([0305](../decisions/0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md)) — the third of the three readings of one pair of forms, and the only one whose page figure is a sum, because words partition a page where readers do not |
+| Whether two forms' readers act alike | each form's own `within ÷ reached`, part by part, with one page-level figure over it ([0303](../decisions/0303-what-two-forms-readers-do-is-the-same-pair-at-a-different-counter-and-the-page-has-one-honest-figure.md)) — the root's own row rather than a mean, which is the one page total either form comparison may publish |
 | Whether two forms of a page read alike | each form's own share of its own arrivals, part by part, with the difference unsigned and the direction a name ([0302](../decisions/0302-two-forms-of-one-page-are-compared-at-each-forms-own-share-and-neither-side-is-earlier.md)) — the one comparison here that holds the tree still and varies the readership, so neither side is earlier and the order of the arguments does not reach the answer |
 | Which populations a reading summed | the audiences a region map added up, published as a census rather than a refusal ([0297](../decisions/0297-a-region-map-publishes-the-populations-it-summed-and-two-forms-arrivals-are-one-readership.md)), because arrivals are people and a reader who arrived arrived once — so a revision served in two forms is one readership and is now summed as one |
 | What population a reading is of | one of three answers rather than a nullable name ([0300](../decisions/0300-what-audience-a-reading-is-of-is-a-three-way-answer-and-a-window-of-two-forms-is-read-as-neither.md)), so a window of two forms with none asked for is read as **neither** and cannot be picked from by row order — which is what three readings did, one of them dividing one form's reach by the other form's arrivals |
@@ -61,7 +63,7 @@ the portal every day.
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
-| What a reading means when it says nothing | the condition and the subject behind all seventy-eight names, across seventeen sets and thirteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
+| What a reading means when it says nothing | the condition and the subject behind all a hundred and fourteen names, across twenty sets and eighteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -2894,6 +2896,243 @@ and the silence table gains no condition.
 
 **Nothing was added to a payload, a browser, a column, a store or the vocabulary
 of kinds.** `broadcast.ts` is byte-identical.
+
+### 46. What two forms' readers *do*, and the pairing rule both comparisons share · `Loom signals` · **done, 21 October**
+
+The second of the two readings §44 named and filed rather than built, taken in
+the order that finding set: **one reading, then a second that proves the guards
+are importable rather than copyable**, with `audiences.ts` as the place anything
+the two share is published from.
+
+**Done**
+([0303](../decisions/0303-what-two-forms-readers-do-is-the-same-pair-at-a-different-counter-and-the-page-has-one-honest-figure.md)),
+as `formActionComparisonOf` in [`src/signals/form-action.ts`](../src/signals/form-action.ts)
+and `formPairOf` in [`src/signals/audiences.ts`](../src/signals/audiences.ts).
+
+- **The five refusals moved, and that is half the unit.** `FormPairRefusal` and
+  `formPairOf` — the order of the two sides, and the five states in which two
+  readings are not two forms of one page — are published from `audiences.ts` and
+  imported by both comparisons. Every clause 0302 argued for is about the
+  **pair** rather than about the counter, so a second copy of them would be a
+  second thing to disagree with the first. `formComparisonOf` is the same
+  function from its caller's side, asserted by its own suite passing unchanged.
+- **The figure is `within ÷ reached`, and it needs one withholding check where
+  reach needs two.** `PartAction.share` is already absent on a leaf, on a part
+  with no row and on a part nobody reached — the three states its standing calls
+  `unknown` — so this reading relies on that guarantee instead of re-deriving
+  0282's rule over a second pair of fields.
+- **A sender that does not walk withholds every gap here, where a
+  before-and-after only names the state.** An unwalked window's noughts are a
+  filing artefact (0167); held against a real share they publish the other
+  form's whole share as a difference between two populations, which is *this
+  audience does nothing on your page* — the most confident wrong sentence this
+  reading could print. `unwalked` is checked before `nothing-measured`, **a
+  single window reaches both guards**, and the fixture that reaches both is
+  written before the sentence that ranks them (this lane's own rule of 20
+  October).
+- **The page as a whole has an honest figure here, where §44 refuses one.**
+  0302 clause 5's two reasons — a mean over parts counts one reader once per part
+  they got through, and two forms do not have the same parts — reach no further
+  than a mean. Every action anywhere is strictly inside the root (0242), so the
+  root's own row is *the readers who did anything at all*: one row, one division,
+  no addition. `whole` is that row held against itself, kept out of `sharpest`
+  because the page contains everything it would outrank and kept inside `counted`
+  because a census that leaves one part out does not account for the page.
+- **`insideDisagreed`, because a withheld share needs a cause.** Two forms need
+  not give a node the same inside, so a band the deltas filled for one audience
+  and left bare for the other lands in `unknown` with nothing saying why. Named
+  beside `disagreed`, and both are facts about the deltas rather than about
+  either readership.
+- **The nineteenth silence set, and the first since the fourth to bring no
+  condition of its own.** Seven states, every one already in the table.
+  `no-action-credited` arriving a second time is the evidence that the condition
+  the action comparison declared was about the **sender** rather than about that
+  comparison.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the thirty-fourth thing taken out of what this subsystem already
+knows. `broadcast.ts` was not touched and is byte-identical at 6,477 bytes
+minified.
+
+**What is left and is filed:** the words comparison, which is this pair at
+`PartReading.copy` and now costs its figure and its own silences and nothing
+else; that `actionChangeOf` is the one reading left computing a ratio across an
+unwalked side — **taken by §47**; and no screen reads any of it, which is
+`Loom portal`'s.
+
+### 47. A window that credits nobody has no share to give · `Loom signals` · **done, 22 October**
+
+The open finding of 21 October, which named one wrong sentence on an existing
+reading: `actionChangeOf` publishes a `shareRatio` of **nought** on every part
+that bears an inside when the **later** window is unwalked, with
+`movements.abandoned` and `mostAbandoned` populated to match. *Every band on this
+page collapsed to nothing*, about a sender with the ancestry walk turned off.
+
+**Done**
+([0304](../decisions/0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md)),
+and **not where the finding put it**. The fix is two fields in
+[`src/signals/action.ts`](../src/signals/action.ts).
+
+- **The rule belongs to the reading, not to the comparisons.** `engaged` is the
+  one counter here the ancestry walk feeds (0167), and `PageAction.unwalked` has
+  named a window that credits nobody with being inside anything since 0242 —
+  while publishing a share of nought on every band and a standing of `untouched`
+  on every band regardless. Three readings are built on it and each answered the
+  fault differently: the library roll refuses, the form comparison withheld
+  through a `walked` argument of its own (0303), and the before-and-after named
+  the state and left every figure computed. **Fixing it in the third would have
+  made three spellings of one rule**, which is the fault 0218 and 0235 were both
+  written about. It is fixed in the one place the fault is visible, which is the
+  direction 0282 says a rule should travel.
+- **Two fields and no others.** In such a window every `share` is withheld
+  whatever the standing, and `untouched` becomes `unknown` — a fourth way to be
+  unknown, beside no row, a `reached` of nought and a leaf. Everything the walk
+  does not feed stands in full: `reached`, `within` as the store holds it,
+  `uses`, the four counters, `usesPerReader`, `shutAgain`, and the `acted` a part
+  earns from uses filed against **itself**.
+- **`actionChangeOf` changes not one line**, which is the proof the rule was in
+  the wrong place. Every movement across an unwalked side falls to `unknown`
+  through `movementOf`'s existing collapse, every `shareRatio` to `null` through
+  `ratioOf`'s existing `undefined` clause, and the three rankings empty
+  themselves. The asymmetry the finding measured — `null` by accident when the
+  **earlier** window was unwalked, `0` when the later one was — is gone because
+  neither direction has a nought to divide.
+- **`formActionComparisonOf` loses its `walked` argument** and `gapOf` is one
+  check again; its suite passes unchanged, which is the assertion that its answer
+  did not move. `libraryActionOf` is untouched and still refuses, because one
+  poisoned page poisons a mean across pages and that is a different argument.
+- **A limit found in the rule this lane relies on.** 0303's *an unknown standing
+  and a withheld share are the same fact said twice* survives in the direction it
+  needs — unknown standing ⇒ withheld share — and the converse now fails in
+  exactly one window. A disclosure band with `opens` of its own and children
+  under it is `acted` on evidence that needed no walk and has a share that is a
+  filing artefact. So the share rule is **not** read off the standing, and that
+  is the part of this record a later reading is most likely to get wrong.
+- **The same wrong sentence one level up, found while fixing this one.**
+  `pageActionOf.mostIgnored` named the band the most readers reached as the
+  page's most ignored part, and `standings.untouched` was the whole page. Both
+  are now `null` and nought. Nothing had reported it.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — and this is the first unit here that **removes** a figure rather
+than deriving one. `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** the words comparison, unchanged by this; and
+whether `ratioOf`'s `null` should say *which* of its causes it is, which is now a
+smaller question than it was — the unwalked cause no longer reaches it, so what
+remains is *no share on a side* against *a nought on the earlier side*, across
+`actionChangeOf`, `paceChangeOf` and `copyChangeOf` at once.
+
+### 48. What two forms of a page *say*, and how much of each gets read · `Loom signals` · **done, 22 October**
+
+The last of the three readings §44 named, filed through two runs and taken in the
+order those findings set: reach, then what readers do, then the words. The
+finding that filed it said it costs its figure over `PartReading.copy` and its
+own silences and nothing else, because the pair's six clauses are imported rather
+than restated.
+
+**Done**
+([0305](../decisions/0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md)),
+as `formCopyComparisonOf` in [`src/signals/form-copy.ts`](../src/signals/form-copy.ts).
+
+- **Two things about it were decisions after all**, which is why there is a
+  record rather than a module. Both earlier readings compare every shared part,
+  because a part is the same part in both forms; **words are not**, since a form
+  is a base tree plus the deltas an audience earns (0263) and a band the deltas
+  reworded is two pieces of text with two word counts. So the comparable unit is
+  the passage both forms say **the same way**, and everything else is reported
+  rather than compared.
+- **The census is the half that needs no counter and it is exact.** `reworded`
+  carries both word counts and the form that says more — *the pro form says four
+  hundred words in this band and the free form says ninety*, which is the
+  sentence this reading was asked for — `onlyIn` carries every passage one form
+  alone has with what its own readers did about it, and `says` accounts for every
+  word each form says. No reader is in any of it, so a window nobody read still
+  answers all of it.
+- **The figure is `words × |one.reach − other.reach|`, and the direction is not
+  read off it.** A floor (0122) is on both sides of a shared passage, so it
+  scales the gap toward nought and can report nought where the hidden words
+  differ, while the two reaches stay exact. So `favours` comes from the reaches
+  and the magnitude from the words, which is the one place this reading departs
+  from its two siblings — and it is the field a surface drawing a half-declared
+  page should trust.
+- **The page figure is the third different argument in three readings.** Reach
+  refuses one (a mean over parts counts one reader once per part); what readers
+  do has one from a single row (every action is strictly inside the root); words
+  have one because a passage's words are its own and partition the page exactly
+  once (0235). **It is not the sum of the rows' gaps** — a row's gap is unsigned,
+  so two passages favouring opposite forms add there and cancel here, and the
+  fixture reaching both directions reports twelve against four.
+- **The twentieth silence set, and the second in a row to bring no condition.**
+  Eleven states, every one already in the table: the five pairing refusals and
+  the six a reading of words has been in since the fourth set. Each of the three
+  claimed orderings is reachable by a single pair and has a fixture.
+- **`passageSideOf` is published from `copy-change.ts`** rather than copied, for
+  the reason `passageOf` itself is published: two comparisons now project a
+  window's reading of a passage.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the thirty-sixth thing taken out of what this subsystem already
+knows. `broadcast.ts` was not touched.
+
+**What is left and is filed:** whether `ratioOf`'s `null` should say which of its
+two causes it is, across `actionChangeOf`, `paceChangeOf` and `copyChangeOf` at
+once; the `different-audiences` standing in the deployment change order; and that
+**nothing draws any of the three form comparisons**, which is `Loom portal`'s and
+is now the open question with the most built behind it.
+
+### 49. A ratio names the state it has no quotient in · `Loom signals` · **done, 23 October**
+
+The correction half of the queue rather than a new reading, which is what the
+pull request comment of 22 October recommended by default: the open finding of
+that evening, which measured one published `null` that is two states and named
+the modules it is in.
+
+**Done**
+([0306](../decisions/0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md)),
+as `Ratio`, `RatioAbsence` and `ratioOf` in
+[`src/signals/ratios.ts`](../src/signals/ratios.ts), imported by the three
+comparisons that divide.
+
+- **Three copies of one helper, and the finding named the wrong third module.**
+  It said `copy-change.ts`, which publishes a *difference* and not a quotient —
+  `gain`'s `null` is *one side is not a measurement* and nothing else (0282).
+  The third copy was in `funnel-change.ts`, where the commercial figure is.
+  Eight published fields across the three, not six. Counted from the files.
+- **A ratio is now the quotient or the reason there is not one**, and exactly one
+  of the two is non-null in every value. `unmeasured` is either side having no
+  such figure; `from-nothing` is both sides measured with the earlier one at
+  nought. *Nobody acted in this band and four in ten do now* and *nothing here
+  can be compared* were one value on eight fields, on three types nothing yet
+  draws — which is the argument for moving them now rather than after a screen
+  exists.
+- **Two members and not three.** A nought on both sides is `from-nothing` as
+  well, because every comparison publishes both sides and the movement between
+  them: *it was nothing and it is nothing* is already answerable, and a member
+  for it would be a second way to say what the later side says.
+- **One field's absence was backwards, and that is the proof the reason has to be
+  published rather than derived.** `PartAction.usesPerReader` is withheld at a
+  *measured* nought on purpose (0242), so a surface deriving the reason from the
+  two sides would call *readers used this twice each and do not touch it now*
+  unmeasured. The comparison restores that nought for the quotient and only for
+  the quotient; the field itself is published unaltered.
+- **A bound on a tagged figure is not tagged.** `rateRatioAtLeast` and
+  `rateRatioAtMost` stay bare: a bracket around a quotient that is not there has
+  nothing to add, and a bracket missing where the quotient is present is the
+  door's drift.
+- **No reading changed.** `pageActionOf`, `pacedPartOf` and the funnel's reach
+  are untouched — a window's rule about its own figures stays that reading's,
+  which is the direction 0282 and 0304 both send a rule in.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — the thirty-seventh thing taken out of what this subsystem already
+knows, and the second that **publishes less ambiguity** rather than deriving a
+figure. `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** the `different-audiences` standing in the
+deployment change order; and that **nothing draws any of this**, which is
+`Loom portal`'s and has been the open question with the most built behind it for
+four runs.
 
 ## Still not in scope
 

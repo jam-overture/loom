@@ -2,7 +2,8 @@ import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import { elementsIn } from "./measure"
-import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
+import { SERVED_STATE_COUNT, servedPages, sweepCover, sweepShare, type ServedPage } from "./served"
+import { PAGES_AT_LEAST, SITE_PATHS } from "./site"
 import { INLINE_TYPES, readerCopy, wordCountOf } from "./words"
 
 /**
@@ -81,20 +82,49 @@ describe("a phrase inside a sentence", () => {
     pages = await servedPages()
   })
 
-  it("sweeps every state the site can be served in", () => {
-    expect(pages).toHaveLength(SERVED_STATE_COUNT)
+  /**
+   * `SERVED_STATE_COUNT` is computed by the module this sweep comes from, so on
+   * its own it would compare an empty sweep against the zero that arithmetic
+   * produces and every rule below would pass over nothing. `PAGES_AT_LEAST` is
+   * the independent half — hand-written, and it moves only when a page is added
+   * or retired. `sweepCover` has the measurement of what the one line let
+   * through.
+   */
+  it("sweeps every page of this site, in every state it can be served in", () => {
+    const cover = sweepCover(pages)
+
+    expect(cover).toEqual({ states: SERVED_STATE_COUNT, routes: SITE_PATHS })
+    expect(cover.routes.length).toBeGreaterThanOrEqual(PAGES_AT_LEAST)
   })
 
   /**
-   * A sweep that found nothing passes everything. The site composes one inline
-   * link, on one band of one page, in every state that page can be served in,
-   * so the floor is the number of states of that page rather than a count of
-   * links — an ordinary copy edit may move the phrase and must not move this.
+   * A sweep that found nothing passes everything, so this says how much it
+   * found — **per served state, never as a total.**
+   *
+   * It was `40`, and its own comment said what that number was: *"the number of
+   * states of that page"*. That is a fact about `served.ts`' dimensions and not
+   * about this site's copy, so on 21 October, when the deployment stopped being
+   * one of those dimensions, the reading under it halved from 250 to 125 for a
+   * change that moved no phrase. This floor had room and survived; the two in
+   * `voice.test.ts` and `naming.test.ts` did not, and went red that morning
+   * naming nothing. Surviving on room is luck, and `sweepShare` has the rest of
+   * the reasoning.
+   *
+   * **125 phrases over the 75 served states on 22 October, and not one state
+   * without one**: the front door and `/what-you-run` carry one each, and
+   * `/how-it-works` carries three in every state it can be in. The comment this
+   * replaces described *"one inline link, on one band of one page"*, which had
+   * been untrue for some time and is the other thing a total floor hides.
+   *
+   * `quiet` is the assertion that matters and the average is the backstop. A
+   * phrase moved off one page leaves the average well above 1 and is named here
+   * the moment it leaves that page's last state.
    */
   it("is on this site at all", () => {
-    const links = pages.flatMap((page) => placed(page, ["loom.inline-link"]))
+    const share = sweepShare(pages, (page) => placed(page, ["loom.inline-link"]).length)
 
-    expect(links.length).toBeGreaterThanOrEqual(40)
+    expect(share.quiet).toEqual([])
+    expect(share.each).toBeGreaterThanOrEqual(1)
   })
 
   it("is only ever inside a paragraph", () => {

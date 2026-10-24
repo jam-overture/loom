@@ -71,6 +71,30 @@ import type { PageReading, PartReading } from "./parts.js"
  * finding of 6 October, owned by `Loom primitives`, showing up in a second
  * place — and it is why a leaf is `unknown` here rather than `untouched`.
  *
+ * ## A window that credits nobody with being inside anything
+ *
+ * `engaged` is the one counter here the **ancestry walk** feeds: a press is
+ * filed against the control and credited to the addressed ancestors the signal
+ * carries (0167). A window whose delegated signals carry no `within` therefore
+ * reports occurrences and credits no reader with being inside anything — a
+ * sender with the walk off, a server synthesising batches, a fixture replayed.
+ * {@link PageAction.unwalked} is that state, and in it **every share on the
+ * page is a nought that is a filing artefact and every band reads
+ * `untouched`.**
+ *
+ * So the state is applied here and not only named (0304). Every share is
+ * withheld, nothing is `untouched`, and {@link PageAction.mostIgnored} is
+ * `null`. Everything the walk does not feed stands in full: `reached`, `uses`,
+ * the four counts, {@link PartAction.usesPerReader},
+ * {@link PartAction.shutAgain}, and the `acted` a part earns from uses filed
+ * against itself.
+ *
+ * **The rule lives here because this is where the fault is visible**, which is
+ * the direction 0282 says a rule should travel. Three readings are built on
+ * this one — the before-and-after, the two-form comparison and the library roll
+ * — and each of them would otherwise need its own copy of it, which is the
+ * fault this subsystem has been bitten by twice (0218, 0235).
+ *
  * Pure, linear in the parts, and reaches no store, clock or DOM, so it adds
  * nothing to the broadcaster's import graph.
  */
@@ -100,6 +124,10 @@ export type ActionStanding =
    * views — the unanchorable case (0221), where it reported something other than coming
    * into view), or **a leaf**, whose nought is a filing rule rather than a
    * measurement.
+   *
+   * And a part that bears an inside in an {@link PageAction.unwalked} window,
+   * where the nought the other three are told apart from is the ancestry
+   * missing rather than the readers idle (0304).
    */
   | "unknown"
 
@@ -130,6 +158,13 @@ export type PartAction = {
   readonly depth: number
   /** null at the root. */
   readonly parentId: NodeId | null
+  /**
+   * What this window can say about whether readers acted on this part.
+   *
+   * Per part, except for the one rule that is a property of the window: in an
+   * {@link PageAction.unwalked} window nothing is `untouched`, because the
+   * nought that member is read off is the ancestry missing (0304).
+   */
   readonly standing: ActionStanding
   /**
    * Whether any element part of this revision names it as a parent.
@@ -158,6 +193,14 @@ export type PartAction = {
    * where its `reached` is 0 — which are the three states the standing of
    * `unknown` covers, so a withheld share and an unknown standing are the same
    * fact said twice and never disagree.
+   *
+   * **And withheld on every part of an {@link PageAction.unwalked} window**,
+   * whatever its standing, because this is the one figure here built out of
+   * `engaged` and `engaged` is the one counter the ancestry walk feeds (0304).
+   * So an unknown standing still always means a withheld share, and in that one
+   * window a withheld share no longer means an unknown standing: a band with
+   * opens of its own is `acted` on evidence that needed no walk, and has no
+   * share all the same.
    *
    * Both terms are distinct view counts off the same row, which is why this is
    * the figure on a card that can be trusted while the counts beside it are
@@ -256,7 +299,10 @@ export type PageAction = {
    * once: a band two readers out of three ignored is a worse ratio and a smaller
    * problem than one four hundred of them did.
    *
-   * `null` where nothing is `untouched`.
+   * `null` where nothing is `untouched`, which includes every
+   * {@link unwalked} window (0304): the page a sender does not walk reads as a
+   * page of ignored bands, and that is the sentence this field exists to make
+   * somebody act on.
    */
   readonly mostIgnored: PartAction | null
   /**
@@ -278,10 +324,19 @@ export type PageAction = {
    * — a sender synthesising batches on a server, replaying a fixture, or with
    * the walk turned off.
    *
-   * It matters because the symptom is otherwise *a page readers act on and
-   * nothing can say where*: every {@link share} on the page is a nought, every
-   * band reads `untouched`, and the counters look healthy. §11's `unopened`
-   * diagnosis one counter across, and nothing else here would say so.
+   * It matters because the symptom would otherwise be *a page readers act on
+   * and nothing can say where*: every {@link PartAction.share} on the page a
+   * nought, every band reading `untouched`, and the counters looking healthy.
+   * §11's `unopened` diagnosis one counter across, and nothing else here would
+   * say so.
+   *
+   * **So it is not only reported, it is applied** (0304): in such a window
+   * every share is withheld and nothing is `untouched`, so
+   * {@link PageAction.mostIgnored} is `null` and the three comparisons built on
+   * this reading inherit the refusal rather than each spelling it. What stands
+   * is everything the walk does not feed — `reached`, `uses`, the four counts,
+   * {@link PartAction.usesPerReader}, {@link PartAction.shutAgain} and the
+   * `acted` a part earns from uses filed against itself.
    */
   readonly unwalked: boolean
 }
@@ -374,6 +429,49 @@ const actionOf = (part: PartReading, parents: ReadonlySet<NodeId>): PartAction =
 }
 
 /**
+ * Whether a window holds uses and credits them to nobody.
+ *
+ * A presence test on each side and deliberately not a sum: adding `within`
+ * across parts would charge one reader once per level they acted inside
+ * (0147, 0167), and a number nobody should add is a number not worth computing.
+ *
+ * Read off the parts as they came out of the counters, before anything is
+ * withheld on account of the answer.
+ */
+const unwalkedIn = (parts: readonly PartAction[]): boolean => {
+  let anyUse = false
+  let anyWithin = false
+
+  for (const part of parts) {
+    if (part.uses > 0) anyUse = true
+    if ((part.within ?? 0) > 0) anyWithin = true
+  }
+
+  return anyUse && !anyWithin
+}
+
+/**
+ * One part as a window that credits nobody with being inside anything can
+ * honestly report it (0304).
+ *
+ * Two fields and no others. The share goes because it is `engaged ÷ reached`
+ * and `engaged` is the one counter the ancestry walk feeds, so every share in
+ * such a window is a nought that is a filing artefact. `untouched` goes because
+ * it is read off that same nought — *readers reached this part and did nothing
+ * in it* — and becomes `unknown`, which is what the window is.
+ *
+ * `acted` stays `acted`: a part with uses filed against itself was used, and an
+ * occurrence is filed against the part it happened to and needs no ancestry at
+ * all. `within` stays as the store holds it, for the reason its own
+ * documentation gives.
+ */
+const uncredited = (part: PartAction): PartAction => ({
+  ...part,
+  standing: part.standing === "untouched" ? "unknown" : part.standing,
+  share: undefined,
+})
+
+/**
  * The more ignored of two, which is the ranking rule spelled once.
  *
  * Most readers reached, then the earlier in reading order — and the caller
@@ -392,28 +490,20 @@ const moreIgnoredOf = (standing: PartAction | null, next: PartAction): PartActio
  */
 export const pageActionOf = (reading: PageReading): PageAction => {
   const parents = parentsIn(reading.parts)
-  const parts = reading.parts.map((part) => actionOf(part, parents))
+  const counted = reading.parts.map((part) => actionOf(part, parents))
+  const unwalked = unwalkedIn(counted)
+  const parts = unwalked ? counted.map(uncredited) : counted
 
   const standings: Record<ActionStanding, number> = { ...NO_STANDINGS }
   let whole: PartAction | null = null
   let mostIgnored: PartAction | null = null
   let leaves = 0
-  let anyUse = false
-  /**
-   * Whether *any* part credits a reader with acting inside it — a presence test
-   * and deliberately not a sum. Adding `within` across parts would charge one
-   * reader once per level they acted inside (0147, 0167), and a number nobody
-   * should add is a number not worth computing.
-   */
-  let anyWithin = false
 
   for (const part of parts) {
     standings[part.standing] += 1
 
     if (part.depth === 0 && whole === null) whole = part
     if (!part.bearsParts) leaves += 1
-    if (part.uses > 0) anyUse = true
-    if ((part.within ?? 0) > 0) anyWithin = true
 
     if (part.standing === "untouched" && part !== whole) {
       mostIgnored = moreIgnoredOf(mostIgnored, part)
@@ -429,6 +519,6 @@ export const pageActionOf = (reading: PageReading): PageAction => {
     whole,
     mostIgnored,
     leaves,
-    unwalked: anyUse && !anyWithin,
+    unwalked,
   }
 }

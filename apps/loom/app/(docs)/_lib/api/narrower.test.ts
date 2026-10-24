@@ -23,7 +23,7 @@ const symbol = (name: string, signature: string): ApiSymbol => ({
   name,
   kind: "function",
   signature,
-  truncated: false,
+  cut: undefined,
   summary: "",
 })
 
