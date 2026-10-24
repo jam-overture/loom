@@ -460,7 +460,7 @@ const USING_IT: readonly UsingItStep[] = [
   },
   {
     marker: "4",
-    title: "Adapt your page, on your rules",
+    title: "Adapt your page within your rules",
     body: "Define your acceptance policy up front, so an AI model can only make changes you already approved. Anything else gets rejected, and Loom tells you why.",
     state: "current",
   },
@@ -566,14 +566,14 @@ const problems = (ids: IdFactory): LoomNode =>
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              title: "It writes code, and somebody has to read all of it",
+              title: "Somebody has to read every line it writes",
               body: "When a tool writes components for you, somebody still has to read, review and own every line. Loom does not write code. It rearranges components you already built.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              title: "Nobody can say what changed, or why",
+              title: "Nobody can tell you what changed or why",
               body: "Ask most tools what changed last Tuesday and the best answer is a diff.",
             },
           }),

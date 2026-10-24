@@ -59524,3 +59524,39 @@ menu above it uses. Three shapes:
 **Recommendation: 3 until the prop takes a word, then 2.** Marking it `page`
 today would be this site using the wrong word in the one place it is making a
 claim about saying exactly what is going on.
+
+---
+## 2026-10-24 (evening) — the marketing lane now has a positioning file, and two files that send a run to its lane's reading list do not mention it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) and the maintainer (the routine brief) · **Status:**
+**open** — nothing is broken and the site is unaffected; this is about whether
+the next run finds the file
+
+`docs/positioning.md` landed today. It holds the maintainer's answers to the six
+questions this lane had been asking since 1 October, verbatim, and it overrules
+two of the three marketing bullets at the foot of `docs/rollout.md`. A dated
+note there points at it, which is the one hook that works today: `rollout.md` is
+in every marketing run's *read first* list, so a run reaches the new file in one
+hop.
+
+**One hop is one hop more than it should be**, and two places say what a
+marketing run reads:
+
+1. **`docs/routines.md`'s lane table.** The signals row reads
+   *"`src/signals/`, the reader-signal intake under `apps/loom/app/`, and
+   `docs/signals.md`"* — a lane owning its own document is established and has a
+   spelling. The marketing row says only the route group. One cell.
+2. **The routine brief**, which is the maintainer's and nobody else's. Its
+   *Read first, every run* list names `docs/routines.md`, `docs/rollout.md`,
+   `FINDINGS.md`, `decisions/0067`, `src/primitives/` and the recent reports.
+   `docs/positioning.md` belongs on it, above `rollout.md`, because it is the
+   file that decides what the copy says.
+
+**Not done rather than done**, for the reason the portal routine gave on
+15 August when it filed the absence of `routines.md` itself and declined to
+write it: *a routine cannot write the governance it is bound by.* A lane adding
+itself to the table that defines lanes is that, even for a true one-line edit,
+and a lane editing its own brief is worse.
+
+`positioning.md` itself is this lane's and is not part of this finding.
