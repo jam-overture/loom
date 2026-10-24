@@ -35,9 +35,7 @@ import {
  * sent this*.
  */
 
-const ORIGIN = "https://loom.example"
-
-const page = () => homePageTree({ origin: ORIGIN, theme: DEFAULT_THEME })
+const page = () => homePageTree({ theme: DEFAULT_THEME })
 
 describe("the scripted visits", () => {
   it("is twelve of them, which is what the page says it is", () => {

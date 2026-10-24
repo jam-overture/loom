@@ -43,14 +43,11 @@ import { wordsOf } from "./words"
  * the assertions here are about the nodes.
  */
 
-const ORIGIN = "https://loom.example"
-
 /** The pages the bar carries, and the ones it deliberately does not. */
 const IN_MENU = SITE_ROUTES.filter((route) => route.inMenu)
 const OFF_MENU = SITE_ROUTES.filter((route) => !route.inMenu)
 
 const context = (current = HOME): ChromeContext => ({
-  origin: ORIGIN,
   theme: DEFAULT_THEME,
   current,
 })

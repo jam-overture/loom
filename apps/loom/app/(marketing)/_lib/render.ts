@@ -225,12 +225,22 @@ export type SiteRenderOptions = {
    * The origin this page is being served from, which is the one origin it
    * frames.
    *
-   * It is here rather than read from the environment inside, because the tree
-   * already carries absolute URLs built from the origin its *builder* was given
-   * — so a render that consulted `siteOrigin()` for the allowlist while the tree
-   * was built for somewhere else would refuse the site's own frame and say the
-   * content cannot be shown. Two readings of one fact is one reading too many;
-   * the caller has it, so the caller passes it.
+   * It is here rather than read from the environment inside because the caller
+   * has it: a deployment answers on several hosts, `serving.ts` knows which one
+   * this request arrived at, and `siteOrigin()` knows only what the environment
+   * was configured with. A render that consulted the environment for the
+   * allowlist while the request came in somewhere else would refuse the site's
+   * own frame and tell the reader the content cannot be shown.
+   *
+   * **It used to come off the page context, and that was the last thing the
+   * context carried that the address did not say.** The reason given here was
+   * that *"the tree already carries absolute URLs built from the origin its
+   * builder was given"*, which stopped being true on 12 October when every link
+   * in a tree became a path (0259) — except one control on `/how-it-works`,
+   * which was a link to the address it was drawn on. That control is gone, so
+   * no builder needs an origin and none is handed one; the only thing left that
+   * an origin decides is this, and this is a render option. `counting` made the
+   * same move on 21 October for the same reason.
    */
   readonly origin?: string
 }
@@ -276,9 +286,15 @@ export const renderTree = (page: LoomTree, options: SiteRenderOptions = {}): Ren
 export const renderSitePage = async (
   route: SiteRoute,
   context: SitePageContext,
-  options: Pick<SiteRenderOptions, "addressed"> = {}
+  options: SiteRenderOptions = {}
 ): Promise<RenderOutput> =>
   renderTree(await pageTreeFor(route, context), {
     addressed: options.addressed ?? (await readersCountedHere()),
-    origin: context.origin,
+    /**
+     * Omitted rather than passed as `undefined`, so a caller that does not know
+     * which host it is answering on gets `renderTree`'s own fallback to the
+     * configured origin rather than an explicit nothing. It read
+     * `context.origin` until today; see `SiteRenderOptions.origin`.
+     */
+    ...(options.origin === undefined ? {} : { origin: options.origin }),
   })

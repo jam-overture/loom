@@ -96,8 +96,6 @@ const describeBand = (band: ElementNode): string =>
 
 const PAGES: readonly SiteRoute[] = SITE_ROUTES
 const THEMES: readonly SiteThemeName[] = SITE_THEME_NAMES
-const ORIGIN = "https://loom.example"
-
 describe("a band and the words in it stand in the same place", () => {
   /**
    * The front-door defect, stated as the smallest thing that would have caught
@@ -107,7 +105,7 @@ describe("a band and the words in it stand in the same place", () => {
   it.each(PAGES.map((route) => [route.path, route] as const))(
     "%s: a hero's heading is aligned the way the hero is",
     (_path, route) => {
-      const page = treeFor(route, { origin: ORIGIN, theme: "minimal" })
+      const page = treeFor(route, { theme: "minimal" })
 
       for (const hero of bandsOf(page).filter((band) => band.type === HERO)) {
         const heading = headingOf(hero)
@@ -123,7 +121,7 @@ describe("a band and the words in it stand in the same place", () => {
   it.each(PAGES.map((route) => [route.path, route] as const))(
     "%s: a hero's own paragraphs are aligned the way the hero is",
     (_path, route) => {
-      const page = treeFor(route, { origin: ORIGIN, theme: "minimal" })
+      const page = treeFor(route, { theme: "minimal" })
 
       for (const hero of bandsOf(page).filter((band) => band.type === HERO)) {
         for (const prose of spokenProseOf(hero)) {
@@ -142,7 +140,7 @@ describe("a band and the words in it stand in the same place", () => {
   it.each(PAGES.map((route) => [route.path, route] as const))(
     "%s: a section's own paragraphs are aligned the way its heading is",
     (_path, route) => {
-      const page = treeFor(route, { origin: ORIGIN, theme: "minimal" })
+      const page = treeFor(route, { theme: "minimal" })
 
       for (const section of bandsOf(page).filter((band) => band.type === SECTION)) {
         const heading = headingOf(section)
@@ -163,7 +161,7 @@ describe("a band and the words in it stand in the same place", () => {
    */
   it.each(THEMES)("every band agrees with itself under %s", (theme) => {
     for (const route of PAGES) {
-      const page = treeFor(route, { origin: ORIGIN, theme })
+      const page = treeFor(route, { theme })
 
       for (const band of bandsOf(page)) {
         const heading = headingOf(band)
@@ -193,7 +191,7 @@ describe("a band and the words in it stand in the same place", () => {
 
     expect(home).toBeDefined()
 
-    const page = treeFor(home as SiteRoute, { origin: ORIGIN, theme: "minimal" })
+    const page = treeFor(home as SiteRoute, { theme: "minimal" })
     const centred = bandsOf(page).filter((band) => {
       const heading = headingOf(band)
 

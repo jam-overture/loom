@@ -27,8 +27,6 @@ import { DEFAULT_THEME, HOW_IT_WORKS, type SiteRoute, WHAT_YOU_RUN } from "./sit
  * only paragraphs, and if so, is its heading beside them?*
  */
 
-const ORIGIN = "https://loom.example"
-
 /** The two pages the rule is stated over: the site's interior, where prose-only bands live. */
 const INTERIOR: readonly (readonly [string, SiteRoute])[] = [
   ["how it works", HOW_IT_WORKS],
@@ -74,7 +72,7 @@ const eyebrowOf = (band: ElementNode): string =>
   typeof band.props["eyebrow"] === "string" ? band.props["eyebrow"] : "(no eyebrow)"
 
 const served = async (route: SiteRoute): Promise<LoomTree> =>
-  pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })
+  pageTreeFor(route, { theme: DEFAULT_THEME })
 
 describe("a band of nothing but paragraphs faces its heading", () => {
   describe.each(INTERIOR)("on %s", (_name, route) => {

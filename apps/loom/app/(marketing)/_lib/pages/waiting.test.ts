@@ -24,7 +24,6 @@ import { PANEL_STEPS } from "./see-it-happen"
  * page that has done nothing from looking like a page that has done something.
  */
 
-const ORIGIN = "https://loom.example"
 const THEME: SiteThemeName = DEFAULT_THEME
 
 const elementsOf = (node: LoomNode): readonly ElementNode[] =>
@@ -32,7 +31,7 @@ const elementsOf = (node: LoomNode): readonly ElementNode[] =>
     ? []
     : [...(node.kind === "element" ? [node] : []), ...node.children.flatMap(elementsOf)]
 
-const arrival = (): LoomTree => treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME })
+const arrival = (): LoomTree => treeFor(HOW_IT_WORKS, { theme: THEME })
 
 /**
  * The band, found by its eyebrow rather than by position — the same handle the
@@ -64,7 +63,7 @@ describe("the panel before the visitor has asked for anything", () => {
   it.each(ASKS.map((ask) => ask.id))(
     "names the same steps, in the same order, as the panel %s fills in",
     async (ask) => {
-      const asked = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME, ask })
+      const asked = await pageTreeFor(HOW_IT_WORKS, { theme: THEME, ask })
 
       expect(stepsIn(bandOf(arrival())).map((step) => step.props["title"])).toEqual(
         stepsIn(bandOf(asked)).map((step) => step.props["title"])
@@ -146,7 +145,7 @@ describe("the panel before the visitor has asked for anything", () => {
    * `/how-it-works` cannot be missing from the state every visitor sees first.
    */
   it("names as many steps as the mechanism page teaches", () => {
-    const mechanism = treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME })
+    const mechanism = treeFor(HOW_IT_WORKS, { theme: THEME })
 
     /**
      * **Both runs of milestones are on one page now**, so the mechanism side has

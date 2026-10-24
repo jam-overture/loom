@@ -1,0 +1,57 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/how-it-works?ask=calmer",
+      "out": "2026-10-24-marketing-the-panel",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "xpath=//a[text()='What else a record keeps']/../..",
+      "measure": ["text=What else a record keeps", "text=Put it back", "text=Start again"]
+    },
+    {
+      "path": "/how-it-works?ask=unstick-menu&approve=1&back=1",
+      "out": "2026-10-24-marketing-the-panel-put-back",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "xpath=//a[text()='What else a record keeps']/../../../..",
+      "measure": ["text=What else a record keeps", "text=I say yes, go ahead"]
+    },
+    {
+      "path": "/how-it-works?ask=calmer",
+      "out": "2026-10-24-marketing-the-panel-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "clip": "xpath=//a[text()='What else a record keeps']/../.."
+    },
+    {
+      "path": "/",
+      "out": "2026-10-24-marketing-front-door-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/how-it-works",
+      "out": "2026-10-24-marketing-how-it-works-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/what-you-run",
+      "out": "2026-10-24-marketing-what-you-run-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/",
+      "out": "2026-10-24-marketing-front-door-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "fullPage": true
+    }
+  ]
+}

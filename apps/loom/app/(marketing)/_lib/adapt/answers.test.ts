@@ -29,13 +29,11 @@ import { runAsk } from "./run"
  * guess is a page agreeing with nothing.
  */
 
-const ORIGIN = "https://loom.example"
 const THEME: SiteThemeName = "minimal"
 
-const basePage = (): LoomTree => treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME })
+const basePage = (): LoomTree => treeFor(HOW_IT_WORKS, { theme: THEME })
 
-const wordsOn = (route: typeof HOW_IT_WORKS): string =>
-  wordsOf(treeFor(route, { origin: ORIGIN, theme: THEME }).root)
+const wordsOn = (route: typeof HOW_IT_WORKS): string => wordsOf(treeFor(route, { theme: THEME }).root)
 
 describe("what this site's rules actually do with each choice", () => {
   it.each(ASKS)("$id is declared $answer and the sequence agrees", async (ask) => {
