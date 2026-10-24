@@ -198,28 +198,21 @@ last thing on its line, with nothing piped into `tail` or `tee`.
 
 - framework: **237 files, 5,656 tests passed**
 - application: **351 files, 6,290 tests passed**
-- `findings:check`: 1,298 findings, 0 malformed
-- `reports:check`: 1,948 visuals, none over 1.1MB, 409 cited by no file
+- `findings:check`: 1,300 findings, 0 malformed
+- `reports:check`: 1,954 visuals, 135.9MB, none over 1.1MB, 409 cited by no file
 - `prerender:check`: 133 prerendered pages, 1,930 text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
 Nothing failed, nothing was skipped, and no test was weakened.
 
-**Which tree those are of, said rather than implied.** The gate ran over the
-code and its tests, before this report, its six pictures and the two findings
-were written. The three test lines are of that run and are unchanged by
-anything after it, because nothing under `src/` or `app/` moved except the type
-alias the third commit shifted above a docblock — which is why the gate was run
-a second time over the final code tree rather than taken on trust.
-
-The two checks that read the prose were re-run over the tree as it ships, which
-is the convention the 23 October run used for the same reason:
-
-- `findings:check`: **1,300 findings, 0 malformed** — exit 0
-- `reports:check`: **1,954 visuals**, 135.9MB, none over 1.1MB, 409 cited by no
-  file — exit 0
-
-Both exit codes read out of a file written as the last thing on its line.
+**Two full runs, and the second is the one quoted above.** The first was over
+the code alone, before this report, its six pictures and the two findings
+existed; it was green on the same test counts. The third commit on this branch
+then moved a type alias above a docblock, which is a change to a file under
+`app/` however small, so the gate was run again rather than taken on trust —
+and that second run is where every line above comes from. It read the findings
+file and the reports directory as they ship, which is why the counts are
+1,300 and 1,954 rather than the first run's.
 
 **Sixteen tests are new**: 10 in `extract.test.ts` — seven for
 `declarationLineIn`, two sweeps over the twelve real cut blocks and one
