@@ -3160,8 +3160,7 @@ both library rolls take their weight distance from.
 - **No published field changed shape.** Both `weightMoved` fields were already
   `number | null`.
 
-**Proposed, not built**
-([0308](../decisions/0308-a-comparison-of-two-populations-is-not-a-window-nobody-read.md)):
+**Proposed, not built** (`0308`, on a pull request of its own):
 the deployment change order folds `different-audiences` into the standing
 `unread`, whose sentence is *one of the two windows reported no view of its
 revision* and whose silence condition is `no-view-reported`. Both its windows
@@ -3174,7 +3173,8 @@ stated — and a note on the member saying it covers two states.
 **Nothing was added to a payload, a browser, a column, a store or the vocabulary
 of kinds.** `broadcast.ts` was not touched and is byte-identical.
 
-**What is left and is filed:** 0308 itself, which is the maintainer's; and that
+**What is left and is filed:** `0308` itself, which is the maintainer's and is
+now on a pull request of its own; and that
 **nothing draws any of this**, which is `Loom portal`'s and has been the open
 question with the most built behind it for five runs.
 

@@ -597,10 +597,9 @@ describe("deploymentChangeOf", () => {
      * as a window nobody opened, and the two are told apart only by `silence`.
      *
      * Asserted as it stands rather than changed. Giving it a standing of its
-     * own contradicts an accepted record, so it is proposed in
-     * [0308](../../decisions/0308-a-comparison-of-two-populations-is-not-a-window-nobody-read.md)
-     * and left for review; the day that is accepted, this test is the one that
-     * says what moved.
+     * own contradicts an accepted record, so it is proposed in a record of its
+     * own and left for review; the day that is accepted, this test is the one
+     * that says what moved.
      */
     it("folds a comparison of two known populations into unread, and tells it apart only by its silence", () => {
       const reading = deploymentChangeOf(

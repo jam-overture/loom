@@ -110,7 +110,8 @@ export type DeploymentChangeSilence =
    * and it arrives here with a door row and two view floors that all
    * contradict the sentence. The cause is on {@link MovedPage.silence} and a
    * surface printing one sentence should print that one. Giving the second a
-   * standing of its own is proposed and deliberately not taken here (0308).
+   * standing of its own is proposed, in a record of its own that is awaiting
+   * review, and is deliberately not taken here.
    */
   | "unread"
   /**
@@ -460,7 +461,8 @@ const movementOf = (at: ComparedStop | null, inflation: number | null): PageMove
  *
  * **That the cause travels is now asserted rather than promised**, by a pair
  * of fixtures standing the two side by side, so the day a fourth standing is
- * taken (0308, proposed) there is a test that says what moved.
+ * taken — proposed, in a record of its own awaiting review — there is a test
+ * that says what moved.
  */
 const standingFor = (silence: ChangeSilence): MovementStanding => {
   switch (silence) {

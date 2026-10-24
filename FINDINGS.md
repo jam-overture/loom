@@ -58025,9 +58025,9 @@ condition the funnel comparison brought the day before.
 ---
 ## 2026-10-20 — the change order maps `different-audiences` to `unread`, and so to the condition `no-view-reported`
 
-**Status (23 October):** **put to the maintainer as
-[0308](decisions/0308-a-comparison-of-two-populations-is-not-a-window-nobody-read.md),
-`Proposed` — architectural, still open.** The entry asked for one of two things:
+**Status (23 October, amended 24 October):** **put to the maintainer as
+`0308`, `Proposed` — architectural, still open, and since 24 October on a pull
+request of its own rather than beside the built work.** The entry asked for one of two things:
 a fourth standing, or a note on `unread`. The fourth standing turns out to
 reverse a clause of 0301, which is accepted, so it is written as a proposal and
 **not built**. The note was written. What the entry did not have, and the
