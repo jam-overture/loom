@@ -397,7 +397,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0305](0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md) | What two forms say is compared over the text they share, and the page figure is a third argument | Accepted | §4c (reader signals) |
 | [0306](0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md) | A ratio names the state it has no quotient in, and the rule is published once | Accepted | §4c (reader signals) |
 | 0307 | *No record on this branch* | — | — |
-| 0308 | *No record on this branch* | — | — |
+| [0308](0308-a-comparison-of-two-populations-is-not-a-window-nobody-read.md) | A comparison of two populations is not a window nobody read | Proposed — **architectural, needs review.** It reverses one clause | §4c (reader signals) |
 | 0309 | *No record on this branch* | — | — |
 | [0310](0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |
 | [0311](0311-a-refusal-whose-key-was-right-is-counted-against-its-project-and-one-without-one-is-not.md) | A refusal whose key was right is counted against its project, and one without one is not | Proposed | §5 (portal), §4c (reader signals) |
