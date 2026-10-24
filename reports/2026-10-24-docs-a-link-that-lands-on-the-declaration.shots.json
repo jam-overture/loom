@@ -1,0 +1,29 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/primitives",
+      "out": "2026-10-24-docs-a-link-that-lands-on-the-declaration-wide-primitives",
+      "viewport": "wide",
+      "waitFor": "#s-LIBRARY_CLASS",
+      "do": [{ "scrollTo": "text=Cut short here" }],
+      "measure": ["text=Cut short here", "#s-LIBRARY_CLASS"]
+    },
+    {
+      "path": "/docs/api-reference/primitives",
+      "out": "2026-10-24-docs-a-link-that-lands-on-the-declaration-phone-primitives",
+      "viewport": "phone",
+      "waitFor": "#s-LIBRARY_CLASS",
+      "do": [{ "scrollTo": "text=Cut short here" }],
+      "measure": ["text=Cut short here"]
+    },
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-10-24-docs-a-link-that-lands-on-the-declaration-wide-signals",
+      "viewport": "wide",
+      "waitFor": "#s-SilenceCondition",
+      "do": [{ "scrollTo": "#s-SilenceCondition >> text=Cut short here" }],
+      "measure": ["#s-SilenceCondition >> text=Cut short here"]
+    }
+  ]
+}

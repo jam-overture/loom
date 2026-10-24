@@ -58318,8 +58318,14 @@ is worth somebody being able to find, not because it is work.
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`, pending the maintainer's
 view on what a reference page is for
 (`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
-**carried from the 21 October entry's remedy 3**, which closed today without
-it because it is a design question rather than a number
+**shape 3 shipped** on 24 October in
+`docs-65-a-link-that-lands-on-the-declaration`: the link lands on the line the
+declaration starts on, *from line 83*, read by parsing the source. **Shape 2 is
+what stays open**, and it is a design question rather than a number.
+Original status below.
+
+**Status:** open — **carried from the 21 October entry's remedy 3**, which
+closed today without it because it is a design question rather than a number
 
 `LIBRARY_CLASS` is the map of every class name the primitive library writes. It
 is 727 lines of reader-facing declaration and the page shows 91 of them.
@@ -59243,3 +59249,57 @@ inside a run. Two things follow for whoever owns the file:
 
 Filed rather than edited: `docs/routines.md` is not this lane's file, and a
 governance section is not something a routine rewrites on one observation.
+
+---
+## 2026-10-24 — a cut block's two numbers are counted in two different files, and the cheap way to print a range would be wrong on a quarter of them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/model.ts`) · **Status:** open — **a stated
+limit**, and nothing on the page is untrue: both numbers are right and they
+answer two different questions
+
+The sentence under a cut block now carries two numbers:
+
+> Cut short here — showing the first **91** lines of **727**. The whole of it is
+> in `src/primitives/stylesheet.ts`, **from line 83**.
+
+**They are counted in two different files.** 91 and 727 are lines of the
+*declaration*, read from `dist/*.d.ts` and counted on the cleaned text the page
+shows — which is the rule the 22 October entry argues for and which is right.
+83 is a line of the *source*, because `dist/` is not in the repository and a
+reader cannot open it.
+
+Measured across the twelve, the two coordinate systems agree on **nine** and
+differ on **three**:
+
+| export | source lines | declaration lines |
+| --- | --- | --- |
+| `RenderDiagnostic` | 322 | 298 |
+| `PrimitiveDefinition` | 180 | 176 |
+| `LoomRenderContext` | 146 | 143 |
+
+The difference is comments the citation rule withholds, and what emit does to a
+declaration. On the other nine — `LIBRARY_CLASS` among them, which spans source
+lines 83–809 and is 727 lines of declaration — they are equal.
+
+Nothing on the page invites a reader to add them, and a reader who did would be
+24 lines out on one of the twelve rather than wrong about anything the page
+says.
+
+### Three shapes, costed
+
+1. **Leave it.** **The recommendation.** The two numbers answer two different
+   questions — *how much am I missing* and *where does it start* — and the
+   sentence never puts them in one arithmetic.
+2. **Link a range rather than a line**: `#L42-L363`, so GitHub highlights the
+   whole extent and a reader can see where it ends without scrolling. It is a
+   better answer to *is the name I came for in here* than a start is. The cost
+   is that the page then prints a **second extent of one thing** in units the
+   sentence's own number is not in. **The cheap version is wrong**: `line +
+   whole − 1` is off on the three above, by 24 lines on `RenderDiagnostic`, so
+   anyone who builds this must read the declaration's end position rather than
+   add — which is the sentence this entry exists for.
+3. **Count `whole` on the source**, so the two agree. Refused rather than
+   costed: `whole` is a claim about the text on the page, and counting withheld
+   comments would tell a reader they are missing lines no reader was ever going
+   to see.
