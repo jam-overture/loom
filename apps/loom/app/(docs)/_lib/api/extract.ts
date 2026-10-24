@@ -365,6 +365,9 @@ const toALineEnd = (cut: string): string => {
   return cut.slice(0, ended).trimEnd()
 }
 
+/** How much was cut, before anything has looked for the file it was cut from. */
+export type ApiCutMeasure = Omit<ApiCut, "source" | "line">
+
 /**
  * A signature as a reader gets it: **cleaned first, then cut.**
  *
@@ -393,13 +396,10 @@ const toALineEnd = (cut: string): string => {
  *
  * **What it cannot know is where the whole of it lives**, which is a fact
  * about a file on disk rather than about a string. So the measure comes back
- * without `source` or `line` and `extractSymbol` fills them in, which is also
- * what keeps this function worth testing against a declaration written out in
- * a test.
+ * as an `ApiCutMeasure` — without `source` or `line` — and `extractSymbol`
+ * fills those in, which is also what keeps this function worth testing against
+ * a declaration written out in a test.
  */
-/** How much was cut, before anything has looked for the file it was cut from. */
-export type ApiCutMeasure = Omit<ApiCut, "source" | "line">
-
 export const publishedSignature = (
   full: string
 ): { readonly signature: string; readonly cut: ApiCutMeasure | undefined } => {
