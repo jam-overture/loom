@@ -129,6 +129,18 @@ that was asked for is not that, and is not rationed.
 
 ## Marketing — not now, but the shape of it
 
+> **Superseded, 24 October 2026, by [`positioning.md`](positioning.md).** The
+> maintainer answered the marketing lane's six standing questions that day, and
+> **two of the three bullets below are now wrong**: he leads on what you can
+> build rather than on the record, and the audience is *"the casual web
+> developer… junior level"* rather than a regulated team. The third bullet, that
+> the site is built in Loom, still holds.
+>
+> The bullets are kept rather than deleted, because this section is what the
+> site was built on for five months and a run that finds the new file without
+> this one cannot tell what changed. **Read `positioning.md` first**; where the
+> two disagree it wins, and so does anything the maintainer has said since.
+
 Deliberately unscoped; the maintainer has it as a later priority. Three things
 worth recording while they are fresh, because they narrow the work later:
 
