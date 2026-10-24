@@ -97,7 +97,8 @@ export const REPOSITORY_URL = "https://github.com/jam-overture/loom"
 export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/decisions"
 
 /**
- * A file in the repository, at the address a reader can open.
+ * A file in the repository, at the address a reader can open — at a line of
+ * it, where the caller knows one.
  *
  * Three places now send a reader to a file rather than to the project: the
  * licence in the footer, every decision record the Architecture section
@@ -106,9 +107,14 @@ export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/dec
  *
  * It takes a repository-relative path — `src/signals/copy.ts`, `LICENSE` —
  * because that is what the things on the other side of it hold. Nothing that
- * resolves a path should have to know this site is reading from GitHub.
+ * resolves a path should have to know this site is reading from GitHub, and
+ * `#L83` is the second thing only this module knows: the line anchor is
+ * GitHub's own spelling, not a fact about a file. `0` is no line, which is how
+ * everything upstream of here says *I could not find it* — and the address
+ * then still opens the file, which is where the link went before any of this.
  */
-export const repositoryFileUrl = (path: string): string => `${REPOSITORY_URL}/blob/main/${path}`
+export const repositoryFileUrl = (path: string, line: number = 0): string =>
+  `${REPOSITORY_URL}/blob/main/${path}${line === 0 ? "" : `#L${line}`}`
 
 export const LICENSE_URL = repositoryFileUrl("LICENSE")
 

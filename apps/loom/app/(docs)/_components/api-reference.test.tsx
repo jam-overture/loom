@@ -48,7 +48,7 @@ const entry: ApiEntry = {
           name: "NO_TEXT",
           kind: "value",
           signature: "const NO_TEXT: TextResolver",
-          cut: { shown: 29, whole: 168, source: "src/render/text.ts" },
+          cut: { shown: 29, whole: 168, source: "src/render/text.ts", line: 41 },
           summary: "",
         },
       ],
@@ -152,10 +152,48 @@ describe("an entry point's reference", () => {
     const link = container.querySelector("#s-NO_TEXT a")
 
     expect(link?.getAttribute("href")).toBe(
-      "https://github.com/jam-overture/loom/blob/main/src/render/text.ts"
+      "https://github.com/jam-overture/loom/blob/main/src/render/text.ts#L41"
     )
     expect(link?.textContent).toContain("src/render/text.ts")
     expect(link?.textContent).toContain(OFF_SITE_MARK)
+  })
+
+  /**
+   * The line in the words, not only in the href.
+   *
+   * A label that says only the path, on a link that lands forty lines down a
+   * file, is a link that did something the reader was not told about — and the
+   * reader who was not going to leave the page gets the number anyway.
+   */
+  it("says which line of it the declaration starts on, in the sentence", () => {
+    const { container } = render(<ApiEntryReference entry={entry} prose={noProse} />)
+    const link = container.querySelector("#s-NO_TEXT a")
+
+    expect(link?.textContent).toContain("src/render/text.ts, from line 41")
+  })
+
+  /**
+   * And where the generator could not place the declaration — a name the file
+   * only re-exports, a module with no file of its own — the sentence keeps the
+   * file and says nothing about a line. The link then opens the file from the
+   * top, which is where it went before any line was read.
+   */
+  it("names no line where there is none to name", () => {
+    const unplaced: ApiEntry = {
+      ...entry,
+      groups: entry.groups.map((group) => ({
+        ...group,
+        symbols: group.symbols.map((symbol) =>
+          symbol.cut === undefined ? symbol : { ...symbol, cut: { ...symbol.cut, line: 0 } }
+        ),
+      })),
+    }
+
+    const { container } = render(<ApiEntryReference entry={unplaced} prose={noProse} />)
+    const link = container.querySelector("#s-NO_TEXT a")
+
+    expect(link?.getAttribute("href")).toBe("https://github.com/jam-overture/loom/blob/main/src/render/text.ts")
+    expect(container.querySelector("#s-NO_TEXT")?.textContent).not.toContain("from line")
   })
 
   /**
@@ -169,7 +207,7 @@ describe("an entry point's reference", () => {
       groups: entry.groups.map((group) => ({
         ...group,
         symbols: group.symbols.map((symbol) =>
-          symbol.cut === undefined ? symbol : { ...symbol, cut: { ...symbol.cut, source: "" } }
+          symbol.cut === undefined ? symbol : { ...symbol, cut: { ...symbol.cut, source: "", line: 0 } }
         ),
       })),
     }

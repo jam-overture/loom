@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 import { REPOSITORY_ROOT } from "./architecture/source"
-import { DOCS_HOME, HOME, LICENSE_NOTICE, OTHER_SURFACES } from "./surfaces"
+import { DOCS_HOME, HOME, LICENSE_NOTICE, LICENSE_URL, OTHER_SURFACES, repositoryFileUrl } from "./surfaces"
 
 /**
  * The list of surfaces, held to the application rather than to a memory of it.
@@ -126,5 +126,41 @@ describe("the licence the footer names", () => {
 
     expect(licence).toContain("MIT License")
     expect(LICENSE_NOTICE).toContain("MIT license")
+  })
+})
+
+/**
+ * The address a link to a file in the repository goes to.
+ *
+ * Three callers hand this a path and one of them now hands it a line as well.
+ * `#L83` is GitHub's spelling of a line and this is the only module that knows
+ * it, which is the arrangement the docblock argues for — so it is the only
+ * module where it can be held to anything.
+ */
+describe("a link to a file in the repository", () => {
+  it("opens the file at the branch a reader can read", () => {
+    expect(repositoryFileUrl("src/signals/copy.ts")).toBe(
+      "https://github.com/jam-overture/loom/blob/main/src/signals/copy.ts"
+    )
+  })
+
+  it("lands on a line where it is given one", () => {
+    expect(repositoryFileUrl("src/primitives/stylesheet.ts", 83)).toBe(
+      "https://github.com/jam-overture/loom/blob/main/src/primitives/stylesheet.ts#L83"
+    )
+  })
+
+  /**
+   * `0` is how everything upstream says *I could not find it*, and the address
+   * it produces is the one the link had before any of this existed: the file,
+   * from the top, which is a worse answer and not a wrong one.
+   */
+  it("opens the file from the top where there is no line", () => {
+    expect(repositoryFileUrl("src/signals/copy.ts", 0)).toBe(repositoryFileUrl("src/signals/copy.ts"))
+  })
+
+  /** The footer's licence link is the caller with no line and never will have one. */
+  it("leaves the licence in the footer where it was", () => {
+    expect(LICENSE_URL).toBe("https://github.com/jam-overture/loom/blob/main/LICENSE")
   })
 })
