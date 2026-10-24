@@ -270,7 +270,7 @@ started until the five above are on `main`:
 
 | # | Unit | Plane | Blocked on |
 | --- | --- | --- | --- |
-| 6 | **The read path.** A repository hands Loom its current tree — snapshot artifact or evaluated module, shape still owed (0275) | connection | unit 5, **0275** |
+| 6 | **The read path.** A repository hands Loom its current tree — ~~snapshot artifact or evaluated module, shape still owed (0275)~~ **a snapshot** ([0312](../decisions/0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md)), the maintainer's choice. **6a done:** a site's build posts `{ "pages": [trees] }` to `/api/pages` with a secret publish key (`lp_…`, minted by an owner on *Connect your site*, shown once, kept as a digest). Every tree is parsed and one bad tree refuses the snapshot; 1 MB and 200 pages at most; a closed project takes none. Pages are kept in `loom_published_pages`, apart from the governed tree store, and a snapshot adds and replaces but never removes. A *Pages* tab lists them by the name their heading gives them. **Still owed:** 6b, this deployment's own site publishing its pages; and *Signals* naming pages from what was published | connection | unit 5, **0275** |
 | 7 | **The queue.** Revisions waiting on a person: what the proposal would change, accept, refuse, revert, and who may release it | governance | unit 6 |
 | 8 | **The pull request.** An accepted revision becomes a PR against their repository. The loop closes here | connection | unit 7 |
 | 9 | **Audiences, then the model seam** | governance, reasoning | unit 8 |

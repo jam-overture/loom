@@ -25,6 +25,8 @@ import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 import { ensurePortalAccountsSchema } from "../app/(portal)/_lib/auth/accounts-postgres"
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
 import { ensureIngestKeysSchema } from "../app/_lib/reader-signals/keys-postgres"
+import { ensurePublishKeysSchema } from "../app/_lib/pages/publish-keys-postgres"
+import { ensurePublishedPagesSchema } from "../app/_lib/pages/published-postgres"
 import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
@@ -145,6 +147,13 @@ try {
    */
   await ensureReaderRefusalsSchema(db)
   /**
+   * What a site published of its pages, and the secret key it publishes them
+   * with (0312). A deployment that has not run this answers every snapshot as
+   * unavailable and keeps nothing.
+   */
+  await ensurePublishKeysSchema(db)
+  await ensurePublishedPagesSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -172,8 +181,8 @@ try {
   console.log(
     "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_projects, " +
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
-      "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys " +
-      "and loom_reader_refusals " +
+      "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys, " +
+      "loom_reader_refusals, loom_publish_keys and loom_published_pages " +
       "are present, and this deployment's pages are in them"
   )
 } finally {
