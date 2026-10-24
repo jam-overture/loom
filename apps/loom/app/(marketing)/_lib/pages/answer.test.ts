@@ -26,11 +26,9 @@ import type { PageContext } from "./home"
  * a stranger who has asked for nothing still meets the page they always met.
  */
 
-const ORIGIN = "https://loom.example"
 const THEME: SiteThemeName = DEFAULT_THEME
 
 const contextFor = (ask?: AskId, approve = false): PageContext => ({
-  origin: ORIGIN,
   theme: THEME,
   ...(ask === undefined ? {} : { ask, approve }),
 })

@@ -58,12 +58,12 @@ const on = { [INTAKE_KEY]: "on" } as const
  */
 const markup = async (addressed: boolean): Promise<string> =>
   renderToStaticMarkup(
-    (await renderSitePage(HOME, { origin: ORIGIN, theme: DEFAULT_THEME }, { addressed })).element
+    (await renderSitePage(HOME, { theme: DEFAULT_THEME }, { addressed })).element
   )
 
 const readersPage = async (addressed: boolean): Promise<string> =>
   renderToStaticMarkup(
-    (await renderSitePage(WHAT_YOU_RUN, { origin: ORIGIN, theme: DEFAULT_THEME }, { addressed }))
+    (await renderSitePage(WHAT_YOU_RUN, { theme: DEFAULT_THEME }, { addressed }))
       .element
   )
 
@@ -282,7 +282,7 @@ describe("the page a counting deployment serves", () => {
 
     try {
       const page = renderToStaticMarkup(
-        renderTree(treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME }), { origin: ORIGIN })
+        renderTree(treeFor(HOME, { theme: DEFAULT_THEME }), { origin: ORIGIN })
           .element
       )
 

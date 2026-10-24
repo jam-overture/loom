@@ -39,7 +39,6 @@ import type { MechanismContext } from "./how-it-works"
  * is the **keys** that are the subject.
  */
 const EVERY_FIELD: Record<keyof Required<MechanismContext>, true> = {
-  origin: true,
   theme: true,
   ask: true,
   approve: true,
@@ -76,7 +75,7 @@ const PAGES = readdirSync(fileURLToPath(new URL(".", import.meta.url)))
  * because it is also an argument that somebody checked.
  *
  * `.field` is what a read looks like in every shape this surface uses it in —
- * `context.theme`, `record.landed`, `askHref(context.origin, …)` — and it is
+ * `context.theme`, `record.landed`, `paletteHref(context.current.path, …)` — and it is
  * not what a declaration looks like. A field consumed only by being spread
  * onward is not matched and is not meant to be: the spread hands it to
  * something, and that something names it or nobody does.
@@ -177,14 +176,25 @@ describe("every field a page may be handed", () => {
 describe("what counts as reading a field", () => {
   it("does not count a field being handed along under its own name", () => {
     expect(reads("const chrome = { counting: context.counting === true }", "counting")).toBe(false)
-    expect(reads("answerBand(ids, { origin: context.origin, theme: context.theme })", "theme")).toBe(
-      false
-    )
+    expect(reads("answerBand(ids, { theme: context.theme, record: latest })", "theme")).toBe(false)
   })
 
   it("counts it where something does something with it", () => {
     expect(reads("SITE_THEMES[context.theme].selection", "theme")).toBe(true)
-    expect(reads("askHref(context.origin, { ask: record.ask })", "origin")).toBe(true)
+    /**
+     * A field read inside a call, which is the shape the sweep is least likely
+     * to see and the one it was wrong about first.
+     *
+     * It was `askHref(context.origin, { ask: record.ask })` until 24 October,
+     * quoted off the one control on this surface that read an origin. That
+     * control pointed at the address it was drawn on and is gone, and no page
+     * of this site is handed an origin any more, so the example was a shape
+     * nothing here writes. An example nothing writes is the thing this file's
+     * own first lesson is about: it looks like a case somebody checked.
+     *
+     * `chrome.ts`' palette switcher is the live one it was replaced with.
+     */
+    expect(reads("paletteHref(context.current.path, palette)", "current")).toBe(true)
     expect(reads("variant: context.ask === ask.id ? \"primary\" : \"secondary\"", "ask")).toBe(true)
   })
 

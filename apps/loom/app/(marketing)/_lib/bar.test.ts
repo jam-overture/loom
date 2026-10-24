@@ -34,9 +34,7 @@ import {
  * notice that the reasoning they inherited was about a different site.
  */
 
-const ORIGIN = "https://loom.example"
-
-const context = (): ChromeContext => ({ origin: ORIGIN, theme: DEFAULT_THEME, current: HOME })
+const context = (): ChromeContext => ({ theme: DEFAULT_THEME, current: HOME })
 
 const header = (): LoomNode => siteHeader(sequentialIdFactory("t"), context())
 

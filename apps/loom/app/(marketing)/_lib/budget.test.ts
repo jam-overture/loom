@@ -182,8 +182,6 @@ const FEWEST_WORDS_ON_THE_SITE = 1_500
  */
 const A_CEILING_IS_BINDING_ABOVE = 0.6
 
-const ORIGIN = "https://loom.example"
-
 /**
  * **One page per route, as of 21 October.**
  *
@@ -201,7 +199,7 @@ const ORIGIN = "https://loom.example"
  * neither is a word.
  */
 const pageOf = (route: SiteRoute): LoomTree =>
-  treeFor(route, { origin: ORIGIN, theme: "minimal" })
+  treeFor(route, { theme: "minimal" })
 
 const bandsOf = (page: LoomTree): readonly ElementNode[] =>
   page.root.children.filter((node): node is ElementNode => node.kind === "element")

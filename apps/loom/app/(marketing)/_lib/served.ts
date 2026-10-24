@@ -2,7 +2,7 @@ import type { LoomTree } from "@jam-overture/loom"
 
 import { ASKS } from "./adapt/asks"
 import { pageTreeFor, type SitePageContext } from "./render"
-import { DEFAULT_THEME, SITE_ROUTES, type SiteRoute } from "./site"
+import { askPath, DEFAULT_THEME, isAskedRoute, SITE_ROUTES, sitePath, type SiteRoute } from "./site"
 
 /**
  * Every state this site can be served in, built once and shared.
@@ -103,8 +103,35 @@ export type ServedPage = {
   readonly route: SiteRoute
   /** The state, as a short string for a failure message: `calmer/yes/put back`. */
   readonly state: string
+  /**
+   * The address a visitor reading this tree is at.
+   *
+   * It is here rather than worked out by whoever needs it, because working it
+   * out means knowing which of this site's three pages is a function of a
+   * request — and a sweep that got that wrong would compare a page against an
+   * address nobody is ever at and find nothing, which is the shape of silent
+   * pass this module already has two paragraphs against.
+   *
+   * On the mechanism page it is the request, spelled by the same function the
+   * site's own controls are spelled by, so a rule about where a link goes is
+   * comparing two strings written by one writer. On the other two it is the
+   * path: they read the whole address and serve the same page either way, which
+   * `addressed.test.ts` measures rather than assumes, so there is no state of
+   * them a visitor arrives at under a query of their own.
+   */
+  readonly address: string
   readonly tree: LoomTree
 }
+
+const addressOf = (route: SiteRoute, ask: AskState): string =>
+  isAskedRoute(route) && ask.ask !== undefined
+    ? askPath({
+        ask: ask.ask,
+        ...(ask.approve === true ? { approve: true } : {}),
+        ...(ask.back === true ? { back: true } : {}),
+        ...(ask.backApprove === true ? { backApprove: true } : {}),
+      })
+    : sitePath(route.path)
 
 const describe = (ask: AskState): string =>
   [
@@ -114,17 +141,20 @@ const describe = (ask: AskState): string =>
   ].join("/")
 
 /**
- * The origin every page in this sweep is built for.
+ * The origin a link read off one of these trees is resolved against.
  *
  * Exported as of 16 October because a second sweep wanted it. `docs-pages.test.ts`
- * reads the links off these same trees, and `pathsLinkedFrom` needs the origin a
- * tree was built for to tell this site's own addresses from anybody else's — so a
- * second literal there would be a sweep that silently found nothing the day this
- * one changed.
+ * reads the links off these same trees, and `pathsLinkedFrom` needs an origin to
+ * tell this site's own addresses from anybody else's — so a second literal there
+ * would be a sweep that silently found nothing the day this one changed.
+ *
+ * **It is no longer the origin these pages are built for**, as of today, because
+ * no page of this site is built for one: a builder is handed a palette and
+ * whatever the address asked for, and every href it writes is a path. So this is
+ * the base a relative href is parsed against and nothing else, and
+ * `routes.test.ts` is what holds the trees to carrying no host of their own.
  */
 export const ORIGIN_FOR_TESTS = "https://loom.example"
-
-const ORIGIN = ORIGIN_FOR_TESTS
 
 /**
  * Every page, in every state, in document order of the routes.
@@ -148,7 +178,8 @@ export const servedPages = async (): Promise<readonly ServedPage[]> => {
       pages.push({
         route,
         state: describe(ask),
-        tree: await pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME, ...ask }),
+        address: addressOf(route, ask),
+        tree: await pageTreeFor(route, { theme: DEFAULT_THEME, ...ask }),
       })
     }
   }

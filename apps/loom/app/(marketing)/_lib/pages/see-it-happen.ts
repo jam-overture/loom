@@ -5,8 +5,9 @@ import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord, Verdict } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
-import { heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
-import { askHref, askPath, DEMO, type SiteThemeName, surfacePath } from "../site"
+import { WHAT_THE_RECORD_HOLDS } from "../docs-pages"
+import { action, heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
+import { askPath, DEMO, type SiteThemeName, sitePath, surfacePath } from "../site"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -27,8 +28,29 @@ import { askHref, askPath, DEMO, type SiteThemeName, surfacePath } from "../site
  * a stranger reads it without meeting one word they would have to look up.
  */
 
+/**
+ * **No origin, as of today, and this band is why no page of this site has one
+ * either.**
+ *
+ * It carried one until this run for a single control, the one
+ * `whatElseARecordKeeps` replaced, and that control was the last caller of
+ * `askHref` in any tree this site builds. Every other link here has been a path since 12 October, when the
+ * three pages became stored rows (0259): a stored row is served from every host
+ * this deployment answers on, so an href with a host in it freezes whichever
+ * one happened to seed it.
+ *
+ * That invariant was true by hand and held by nothing. It is structural now: a
+ * page builder that is never handed an origin cannot write one, which is the
+ * difference between a rule somebody has to remember and a rule the types
+ * enforce. `routes.test.ts` sweeps all 75 served states for an href carrying a
+ * host, so the next way in is red rather than quiet.
+ *
+ * The origin did not stop existing; it stopped being a page's business. It is a
+ * render option now, beside `addressed`, which is where `counting` went on
+ * 21 October for the same reason and after the same kind of week. `render.ts`
+ * has the argument.
+ */
 export type SeeItHappenContext = {
-  readonly origin: string
   readonly theme: SiteThemeName
   /** Which choice the address is asking for, if any. */
   readonly ask?: AskId
@@ -289,37 +311,56 @@ const verdictBadge = (ids: IdFactory, record: ChangeRecord): LoomNode =>
  * The way down a level, offered only to somebody who has just been up here.
  *
  * The five steps above are the record said in words a stranger can read, and
- * that is the right thing to put on a front door. It is not the whole of what
- * this product has: underneath each of those steps is a line the machinery
- * actually wrote, and the mechanism page prints them in full.
+ * that is the right thing to put in front of somebody who has never heard of
+ * any of this. A reader who has just watched those five lines fill in is the
+ * likeliest person on the site to ask whether that is all a record holds, and
+ * the answer is a documentation page rather than a band.
  *
- * Until now it printed the same request every time — the quietest of the five,
- * chosen when that page was written — so a visitor who had just watched *Prove
- * it* add a band, and clicked through to read the record of it, was shown the
- * record of *Turn it down* instead. The two claims a stranger has to believe are
- * that the record is real and that it is of the thing that just happened to
- * them, and the second was quietly false at the one moment it could be checked.
+ * ## What this control was, and the three ways it was wrong
  *
- * The approval travels because the record does, and `context` rather than
- * `record` is where it comes from: see `approve` above for why the record cannot
- * be asked.
+ * It said **See every line the machinery wrote**, and it pointed at
+ * `askHref(context.origin, { ask: record.ask, approve })`. That was a link to
+ * the mechanism page, written while this band was on the front door and the
+ * mechanism page printed the runtime's own lines underneath. The band moved
+ * here on 1 October and the panel it prints was rewritten away on
+ * 26 September, so by the time anybody pressed it:
+ *
+ * 1. **It was a link to the address the page was being served at.** Measured
+ *    over all 75 states this site can be served in: in 12 of them its
+ *    destination resolved to the address being served, path and query alike.
+ *    Pressing it reloaded the page.
+ * 2. **In the other 12 it threw away the undo.** A page served with `back=1`
+ *    got a link without it, so a visitor who had just put a change back and
+ *    pressed this was handed the page with the change still on it. That is the
+ *    failure `answer.ts` already has a paragraph against — *"a control that
+ *    quietly dropped `back=1` would put the change the visitor had just
+ *    reversed back on the page while claiming to do nothing but scroll"* — and
+ *    this is its third recorded instance on this surface.
+ * 3. **It promised something no page of this site may show.** The lines the
+ *    machinery writes are written for a logging system, and the maintainer's
+ *    instruction of 26 September is that no page of this site uses one of those
+ *    words anywhere. `voice.test.ts` holds it over every route. So the promise
+ *    could not be kept here even if somebody wanted to keep it.
+ *
+ * ## What it is now
+ *
+ * The page that answers the question, named in words a stranger has. It is the
+ * same page the closing band's sentence already offers, and this is the other
+ * place a reader asks for it: the closing band is a screen further down and is
+ * read by somebody who got to the end, while this is read by somebody who has
+ * just watched a record appear and wants to know what else is in one.
+ *
+ * `docs-pages.test.ts` holds the destination to being a page this application
+ * serves, headed what this lane thinks it is headed, carrying what this site
+ * sent the reader for. The old destination was held by nothing, which is how it
+ * went on pointing at itself for three weeks.
+ *
+ * **It is a path.** Every other link in a tree on this site has been one since
+ * 12 October (0259), and this control was the last that was not — see
+ * `SeeItHappenContext` for what that cost and what taking it out bought.
  */
-const readTheRecord = (
-  ids: IdFactory,
-  context: SeeItHappenContext,
-  record: ChangeRecord
-): LoomNode =>
-  buildElement(ids, {
-    type: "loom.action",
-    props: {
-      href: askHref(context.origin, {
-        ask: record.ask,
-        approve: context.approve === true,
-      }),
-      ...TERTIARY_CONTROL,
-    },
-    children: [buildText(ids, "See every line the machinery wrote")],
-  })
+const whatElseARecordKeeps = (ids: IdFactory): LoomNode =>
+  action(ids, "What else a record keeps", sitePath(WHAT_THE_RECORD_HOLDS.path), TERTIARY_CONTROL)
 
 const panelActions = (
   ids: IdFactory,
@@ -372,7 +413,7 @@ const panelActions = (
         },
         children: [buildText(ids, reversible ? "Put it back" : "Start again")],
       }),
-      readTheRecord(ids, context, record),
+      whatElseARecordKeeps(ids),
     ]),
   ]
 }

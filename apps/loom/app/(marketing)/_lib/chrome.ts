@@ -88,7 +88,6 @@ export const SIGN_IN_LABEL = "Sign in"
  * about this file rather than as a comparison of two trees.
  */
 export type ChromeContext = {
-  readonly origin: string
   readonly theme: SiteThemeName
   /** The route being rendered, so the menu can mark it rather than drop it. */
   readonly current: SiteRoute

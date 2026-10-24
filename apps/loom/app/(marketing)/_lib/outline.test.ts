@@ -16,9 +16,7 @@ import { DEFAULT_THEME, HOW_IT_WORKS } from "./site"
  * record whose two halves could disagree would be worth less than either.
  */
 
-const ORIGIN = "https://loom.example"
-
-const front = (): LoomTree => treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
+const front = (): LoomTree => treeFor(HOW_IT_WORKS, { theme: DEFAULT_THEME })
 
 /**
  * The page before and after one request, which is all this file ever needed.

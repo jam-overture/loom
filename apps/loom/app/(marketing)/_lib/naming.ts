@@ -206,6 +206,43 @@ const asUrl = (href: string, origin: string): URL | undefined => {
   }
 }
 
+/**
+ * One control of a page, as the two things a rule about where it goes needs.
+ *
+ * `pathsLinkedFrom` below answers *which pages does this site point at*, and
+ * throws away everything that is not a path to do it — the host, the query and
+ * the mark saying the reader is already there. Two rules need exactly those
+ * three, so they read this instead rather than each walking the tree again:
+ *
+ * - **A link in a tree of this site carries no host** (0259). The host is the
+ *   part `pathsLinkedFrom` normalises away, so a sweep built on it cannot see
+ *   an absolute href at all.
+ * - **No control points at the address the page is being served at.** That is a
+ *   question about the query as much as the path, and the one legitimate
+ *   exception is a menu item marked `current`, which is the tree saying *this
+ *   is the page you are on* and is the whole reason the bar does not drop it.
+ *
+ * Both arrived on 24 October with the control that made them necessary. See
+ * `routes.test.ts` for the rules and `pages/see-it-happen.ts` for what was
+ * wrong.
+ */
+export type LinkedControl = {
+  /** The href exactly as the tree carries it, host and query and all. */
+  readonly href: string
+  /** Whether the tree marks this as the page the reader is already on. */
+  readonly current: boolean
+}
+
+/** Every control of a node that offers a way anywhere, in document order. */
+export const linksIn = (node: LoomNode): readonly LinkedControl[] =>
+  elementsIn(node).flatMap((element) => {
+    const href = element.props["href"]
+
+    return typeof href !== "string"
+      ? []
+      : [{ href, current: element.props["current"] === true }]
+  })
+
 /** Every page of this product a node offers a way to, by path. */
 export const pathsLinkedFrom = (node: LoomNode, origin: string): ReadonlySet<string> =>
   new Set(

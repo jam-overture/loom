@@ -90,10 +90,7 @@ describe.each(SITE_THEME_NAMES)("under the %s palette", (name) => {
   ])("names no color of its own on %s", async (_what, given) => {
     const card =
       given ??
-      askedCard(
-        (await askRunFor({ origin: "https://loom.example", theme: name, ask: "problem" }))!.record,
-        "https://loom.example"
-      )
+      askedCard((await askRunFor({ theme: name, ask: "problem" }))!.record, "https://loom.example")
     const slots = Object.values(theme.palette.slots)
     const drawn = coloursIn(shareCardImage(card, theme))
 
@@ -141,11 +138,7 @@ describe("the picture", () => {
    * the one that would break first on a renderer that could not fit them.
    */
   it("draws a page as somebody left it", async () => {
-    const run = await askRunFor({
-      origin: "https://loom.example",
-      theme: "minimal",
-      ask: "problem",
-    })
+    const run = await askRunFor({ theme: "minimal", ask: "problem" })
 
     expect(run).toBeDefined()
 

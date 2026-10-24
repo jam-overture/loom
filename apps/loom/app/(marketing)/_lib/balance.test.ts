@@ -151,8 +151,6 @@ const rowsOf = (page: LoomTree, route: string): readonly Row[] =>
     words: run.words,
   }))
 
-const ORIGIN = "https://loom.example"
-
 /**
  * **One page per route, as of 21 October.**
  *
@@ -169,7 +167,7 @@ const ORIGIN = "https://loom.example"
  * is, in the end, exactly what the deployment loop had become.
  */
 const pageOf = (route: SiteRoute): LoomTree =>
-  treeFor(route, { origin: ORIGIN, theme: "minimal" })
+  treeFor(route, { theme: "minimal" })
 
 const allRows = (): readonly Row[] =>
   SITE_ROUTES.flatMap((route) => rowsOf(pageOf(route), route.path))

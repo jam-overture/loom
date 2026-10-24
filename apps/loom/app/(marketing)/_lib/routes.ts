@@ -38,7 +38,8 @@ import appConfig from "../../../next.config"
  *   only if a group happened to be named for the whole of it.
  * - **It reads a list rather than the site.** `PRODUCT_SURFACES` is checked;
  *   an address typed into a band, a card or an action is not, and the addresses
- *   this site builds for itself go through `internalHref` and `askHref`.
+ *   this site builds for itself go through `sitePath`, `surfacePath` and
+ *   `askPath`.
  *
  * So the gap is not that nobody thought of it. It is that the check was shaped
  * to the four paths in front of whoever wrote it, which is the same shape of

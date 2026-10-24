@@ -111,7 +111,7 @@ afterEach(() => {
 
 const ORIGIN = "https://loom.test"
 
-const page = () => treeFor(HOME, { origin: ORIGIN, theme: "editorial" })
+const page = () => treeFor(HOME, { theme: "editorial" })
 
 /**
  * The front door as a browser gets it, with the component that counts it beside

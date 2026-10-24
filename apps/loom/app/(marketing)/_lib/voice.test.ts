@@ -45,7 +45,7 @@ import { readerCopy, sentencesOf, uses, wordCountOf, wordsOf, type ReaderString 
  */
 const pageWords = async (route: SiteRoute): Promise<string> =>
   withoutPackageNames(
-    wordsOf((await pageTreeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME })).root)
+    wordsOf((await pageTreeFor(route, { theme: DEFAULT_THEME })).root)
   )
 
 /**
@@ -89,7 +89,7 @@ const heroOf = (route: SiteRoute): ElementNode => {
             undefined
           )
 
-  const hero = find(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root)
+  const hero = find(treeFor(route, { theme: DEFAULT_THEME }).root)
 
   if (hero === undefined) throw new Error(`loom: ${route.path} has no hero band`)
 
@@ -536,7 +536,7 @@ describe("every string a reader reads", () => {
   it("read the copy a request puts on the page, and not only the page as published", () => {
     const written = new Set(
       SITE_ROUTES.flatMap((route) =>
-        readerCopy(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root).map(
+        readerCopy(treeFor(route, { theme: DEFAULT_THEME }).root).map(
           ({ field, text }) => `${field}|${text}`
         )
       )
@@ -596,7 +596,7 @@ describe("every string a reader reads", () => {
 const SCANNED_PROPS: readonly string[] = ["title", "body", "label", "caption", "value", "eyebrow"]
 
 const scannedCopyOf = (route: SiteRoute): readonly ReaderString[] =>
-  readerCopy(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root).filter(
+  readerCopy(treeFor(route, { theme: DEFAULT_THEME }).root).filter(
     ({ field }) => SCANNED_PROPS.includes(field.split(".").slice(-1)[0] ?? "")
   )
 

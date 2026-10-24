@@ -69,9 +69,17 @@ export type SitePage = {
 /**
  * The context a page is **stored** under.
  *
- * No origin and no palette, because one row is served from every host this
- * deployment answers on and the palette is what a reader asked for —
- * `./requested.ts` puts both back.
+ * No palette, because the palette is what a reader asked for — `./requested.ts`
+ * puts it back on the root and on the site's own links.
+ *
+ * **And no origin, which as of today is not a thing this context leaves out:
+ * there is nothing left to leave out.** It passed `origin: ""` until this run,
+ * and the empty string was load-bearing:
+ * it was what made every href a page built come out as a path rather than
+ * freezing whichever host happened to seed the row. A page builder is handed no
+ * origin at all now, so there is nothing here to pass and nothing a later run
+ * could pass by mistake. `pages/home.ts` has the account of what the field was
+ * still doing on the context and what was reading it.
  *
  * ## No `counting` either, and as of 21 October no such field
  *
@@ -102,7 +110,7 @@ export type SitePage = {
  * page is stored under was nominally a function of a deployment setting. It was
  * not, and now nothing about it looks as though it could be.
  */
-const storedContext = () => ({ origin: "", theme: "minimal" }) as const
+const storedContext = () => ({ theme: "minimal" }) as const
 
 const idFor = (route: SiteRoute): TreeId => treeFor(route, storedContext()).treeId
 

@@ -79,9 +79,22 @@ import {
  * (0259), and the clean way to put that is that a stored page cannot be a
  * function of a setting a later deployment may have changed — so the fields
  * here are the ones a row can honestly be rebuilt from.
+ *
+ * **The origin went the same way today, and it is the same shape of mistake
+ * one layer down.** It was the other fact about the deployment in here: which
+ * host this page is being served from. A stored row is served from every host
+ * this deployment answers on, so a page that is a function of one of them is a
+ * row that is wrong everywhere else — which is why every link in a tree on this
+ * site became a path on 12 October. After that there was one caller left, a
+ * control on `/how-it-works` that linked to the address it was drawn on, and
+ * the field outlived it by three weeks.
+ *
+ * The origin still decides one thing, and it is a render concern: which origin
+ * this page may frame. So it is a render option beside `addressed`, and a page
+ * builder is handed neither. `pages/see-it-happen.ts` has the control, and
+ * `render.ts` has the seam.
  */
 export type PageContext = {
-  readonly origin: string
   readonly theme: SiteThemeName
   /**
    * What the visitor has asked the page for, off the address.
@@ -1092,7 +1105,6 @@ const closing = (ids: IdFactory): LoomNode =>
 export const homePageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("home")
   const chrome: ChromeContext = {
-    origin: context.origin,
     theme: context.theme,
     current: HOME,
     ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
