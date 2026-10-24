@@ -39,7 +39,7 @@ const verifies =
     Promise.resolve({ ok: true, actor })
 
 const unreachable: VerifyKey = () =>
-  Promise.resolve({ ok: false, detail: "the accounts table is down" })
+  Promise.resolve({ ok: false, failure: "the accounts table is down" })
 
 const wrongKey = verifies(null)
 const rightKey = verifies("ana")
@@ -214,7 +214,7 @@ describe("attemptSignIn", () => {
 
       const outcome = await attemptSignIn(log, POLICY, { subject: SUBJECT, now: T0 }, unreachable)
 
-      expect(outcome).toEqual({ code: "unavailable", detail: "the accounts table is down" })
+      expect(outcome).toEqual({ code: "unverified", failure: "the accounts table is down" })
 
       /**
        * The part with consequences: an outage must not spend a caller's

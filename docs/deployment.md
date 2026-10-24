@@ -167,7 +167,7 @@ itself, in the format a machine reads as fact, as this product.
 
 ## Environment
 
-`apps/loom/.env.example` is the full list with the commentary. Seven variables,
+`apps/loom/.env.example` is the full list with the commentary. Ten variables,
 **one** of which is required:
 
 | Variable                         | Required | Notes                                   |
@@ -178,6 +178,9 @@ itself, in the format a machine reads as fact, as this product.
 | `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
 | `LOOM_SITE_ORIGIN`               | in production | The domain, pinned. See [The domain](#the-domain-and-going-public) |
 | `LOOM_SITE_PROJECT`              | no       | The project the site's readers are counted under. Unset is the deployment's own. See [Reader signals](#8-reader-signals--nothing-arrives-until-you-open-the-door) |
+| `LOOM_SUPABASE_URL`              | for passwords | Supabase project URL. See [Email and password](#email-and-password) |
+| `LOOM_SUPABASE_ANON_KEY`         | for passwords | Supabase anon key. Server-side only |
+| `LOOM_PORTAL_EMAILS`             | for passwords | Comma-separated addresses allowed an account. Unset is nobody |
 
 **Never prefix any of them `NEXT_PUBLIC_`.** 0017 exists partly to keep the model
 key off the client, and a public prefix would undo the whole record in one
@@ -224,6 +227,35 @@ pnpm portal:account ana@example.com prj_a1b2c3 owner
 `viewer`, `approver` or `owner` — an acceptance ceiling on the Gate's own stake
 scale rather than a second permission system. Whoever registers a project is
 made its owner without this.
+
+### Email and password
+
+Signing up, signing in and resetting a password with an email address
+([0310](../decisions/0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md))
+needs Supabase Auth and a list of who may. Without all three variables the
+sign-in page offers keys alone.
+
+1. In Vercel, set `LOOM_SUPABASE_URL` (Supabase → Project Settings → API →
+   Project URL), `LOOM_SUPABASE_ANON_KEY` (same page, the `anon` key) and
+   `LOOM_PORTAL_EMAILS` (for example `ana@example.com,ben@example.com`).
+2. In Supabase → Authentication → URL Configuration, set **Site URL** to the
+   production domain and add `https://<your domain>/**` under **Redirect
+   URLs**. Without it, confirmation and reset links land on Supabase's default
+   instead of `/portal/sign-in` and `/portal/reset-password`.
+3. Redeploy, then sign up at `/portal/sign-up` and follow the confirmation
+   email.
+
+The actor is the address, lowercased. An address that held a key-only account
+under another name is a new actor, so grant it its roles:
+
+```bash
+pnpm portal:account ana@example.com prj_a1b2c3 owner
+```
+
+An address not on the list cannot sign up, is refused at sign-in as if the
+password were wrong, and is never sent a reset email. Supabase's own limit on
+emails per hour applies to confirmation and reset links; its built-in mail
+sender is enough for a handful of people.
 
 **Set the secret, or the portal admits nobody.** This is the one place where
 absent configuration does not degrade gracefully, and that is deliberate: an

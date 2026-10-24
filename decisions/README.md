@@ -396,3 +396,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0304](0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md) | An unwalked window has no share and nothing untouched to give, and the rule belongs to the reading | Accepted | §4c (reader signals) |
 | [0305](0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md) | What two forms say is compared over the text they share, and the page figure is a third argument | Accepted | §4c (reader signals) |
 | [0306](0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md) | A ratio names the state it has no quotient in, and the rule is published once | Accepted | §4c (reader signals) |
+| 0307 | *No record on this branch* | — | — |
+| 0308 | *No record on this branch* | — | — |
+| 0309 | *No record on this branch* | — | — |
+| [0310](0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |
