@@ -336,7 +336,7 @@ imports a store now names an audience the same way it names an application.
 
 **What stays open, and it is a different question.** Whether a host should
 *mint* an audience id at all, or only ever echo back one the control plane gave
-it, is unanswered — and it is not answerable until the composing `TreeSource`
+it, is unanswered — and it is not answerable until the composing `RevisionTrees`
 exists (0263) and something decides where an audience is defined. `newAudienceId`
 is published because its module is; nothing calls it.
 
@@ -59272,3 +59272,85 @@ inside a run. Two things follow for whoever owns the file:
 
 Filed rather than edited: `docs/routines.md` is not this lane's file, and a
 governance section is not something a routine rewrites on one observation.
+
+---
+## 2026-10-24 — the rung from a store to a reading exists, so a reader screen is four lines
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is broken**; this is the answer to the question this lane has put in
+five pull request comments, and it is now a small piece of work rather than an
+open design
+
+For five runs the largest risk in this lane has been that **nothing draws any of
+it**. Part of that was a paused routine, and part of it was this lane's own: a
+screen could not be four lines, because the step from the counters to a
+`PageReading` had never been written and the first consumer would have had to
+work out five separate rules to get it right (0309 lists them).
+
+That step is now [`src/signals/window.ts`](src/signals/window.ts), published from
+`@jam-overture/loom/signals`. A deployment-wide order over pages, from the
+handles `apps/loom/app/(portal)/_lib/reader-signals.ts` already builds:
+
+```ts
+const window = await readReaderWindow({ tallies: readerTallies, regions: readerRegions })
+if (!window.ok) return window
+const { pages, unjoined } = windowReadingsOf(window.value, treesIn(trees), registry)
+const order = deploymentReadingOf(pages.map(readingProgressOf), window.value.pageViews)
+```
+
+`pages` is one reading per page, per revision, per **form** — two forms of a page
+stand as two rows, as they do everywhere else (0290) — and every other reading in
+the subsystem takes it or a list of it from there: reach, copy, action, pace, the
+funnel, the library censuses, the health of the collection.
+
+**Three things a screen has to draw that are not figures.**
+
+- **`unjoined`** names the revisions whose counters have no tree to be read
+  against, with the rows each left unread. `no-tree` is ordinary — counters
+  outlive revisions — and a screen that leaves it out under-reports a deployment
+  silently. `describeUnjoinedCause` has the sentence.
+- **The trees are the screen's to resolve.** `revisionsIn(window)` says which
+  revisions the rows name; `treesIn` makes a source from trees already held. The
+  portal holds a tree store, so this is a lookup rather than a decision.
+- **`window.regions` is `undefined` where no region store was offered**, and `[]`
+  where one holds nothing. *We cannot say where your readers are* and *you have
+  no readers abroad* are not the same sentence.
+
+Filed against a paused routine, which still waits. The reason to file it anyway
+is that the shape of the work has changed: it was *design a reading screen*, and
+it is now *call four functions and draw three states*.
+
+---
+## 2026-10-24 — the region map is the one reading the new rung leaves a caller to assemble
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**nothing is wrong**; a gap named at the moment it was created, and a candidate
+for the next step rather than a fault in it
+
+`windowReadingsOf` (0309) reads the counters into `PageReading`s and every
+reading that takes one, or a list of them, follows in a line. The region rows do
+not: they are carried on the window, they are counted in the form census so a
+form named only by a bucket still gets a reading, and **no map is joined out of
+them.**
+
+That is deliberate for one reason — `regionReadingOf` takes a floor, the floor is
+per-deployment configuration (§7, `regionFloorOf`), and this rung holds no
+configuration and should not start. But it leaves one reading reachable in two
+steps where the others are reachable in one, and the second step is the one with
+a rule in it: a caller that passes no floor gets the default rather than the
+deployment's, and nothing in the types says so.
+
+Two shapes, and the first is probably right:
+
+- **An options argument on the join**, carrying the floor through to a region map
+  per form, so the window answers the same question for regions as it does for
+  parts. It makes the rung hold one piece of configuration it is handed rather
+  than one it reads, which is the line §7 already draws.
+- **A separate `regionReadingsOf(window, options)`**, keeping the join free of
+  configuration entirely and leaving two calls for a screen that wants both.
+
+What tips it either way is whether a surface wants the map **per form**. A
+readership comparison is of one readership (§38) and the forms of a page are two
+populations (0290), so the honest answer is almost certainly yes — which is the
+argument for the first shape, since a caller doing it by hand would have to
+re-derive the form split this rung already did.

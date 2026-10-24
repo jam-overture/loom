@@ -3178,6 +3178,58 @@ of kinds.** `broadcast.ts` was not touched and is byte-identical.
 **nothing draws any of this**, which is `Loom portal`'s and has been the open
 question with the most built behind it for five runs.
 
+### 51. From a store to a question · `Loom signals` · **done, 24 October**
+
+The gap this plan had never closed, and the one the pull request comments have
+named for five runs: **thirty-eight readings, and nothing that turns a store
+into one.** Searched before it was built — the only callers of `store.tallies()`
+anywhere in the repository are the store contract tests, and the portal has both
+handles wired up and reads neither.
+
+**Done**
+([0309](../decisions/0309-a-window-of-counters-is-read-into-the-readings-it-holds-and-the-trees-stay-the-callers.md)),
+as [`src/signals/window.ts`](../src/signals/window.ts): `readReaderWindow`,
+`revisionsIn`, `RevisionTrees`, `treesIn` and `windowReadingsOf`.
+
+- **One read with one scope**, over the counters, the funnel answers, the door
+  rows and the region map, with the stores' own request passed to each
+  unchanged. **The first failure is the answer**: a window half of whose rows
+  arrived is a reading whose rate has a denominator from one read and a
+  numerator from another, and the figures would look plausible.
+- **An absent region store is not an empty map.** `regions` is `undefined` for
+  *no store was offered* and `[]` for *the store holds none* — the second time
+  this run's lane has had to tell two kinds of nothing apart, and the same rule
+  (0240).
+- **The revisions come off all four row sets.** A revision with door rows and no
+  counters is the page a deployment most wants to see: *nothing has counted this
+  yet* rather than *nobody read this*, which the reach reading can only publish
+  about a revision it was handed.
+- **The trees stay the caller's**, through a one-method source shaped like the
+  registry declarations (0114, 0122). This lane holds counters, not pages.
+- **A revision that cannot be joined is published with the rows it left
+  unread** — `no-tree` is ordinary, and `mismatched` (a source answering with
+  another page or revision) is refused rather than read, because counters read
+  against the wrong tree answer every question with confident nonsense.
+- **A window of two forms is split into two readings rather than read as
+  neither**, which is 0290 clause 2 carried out rather than reversed: the
+  ambiguity was never in the rows. One reading per page, per revision, per form,
+  with no two sharing a `readingKeyOf` — and `foreign` nought on every one of
+  them, because each is handed its own revision's rows.
+- **It adds no figure of its own.** No count, no sum, no quotient, no silence.
+
+**What it unlocks, which is the point.** The order over a deployment's pages is
+now four lines, and one test does exactly that over the memory store end to end
+— write what an intake and a rollup write, read it back through this rung, and
+ask which page to fix first. Every reading in the subsystem is reachable from a
+store without any of them changing.
+
+**Nothing was added to a payload, a browser, a column, a store method or the
+vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** that **nothing draws any of this** is still
+`Loom portal`'s, and is now one step shorter — what was missing was a rung, and
+the rung exists.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

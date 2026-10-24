@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4251,7 +4251,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4295,7 +4295,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5180,7 +5180,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5649,7 +5649,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6737,7 +6737,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7312,7 +7312,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7515,7 +7515,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8247,7 +8247,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8626,7 +8626,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8841,7 +8841,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 65,
+      "files": 66,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8854,7 +8854,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12104,6 +12104,91 @@
               "summary": "A fresh view key. Called once per broadcast, never per batch — the whole point is that the batches of one page view agree."
             }
           ]
+        },
+        {
+          "module": "signals/window",
+          "title": "Window",
+          "summary": "The step between a store and a question: read a window of counters, and join it to the trees and the registry the counters were filed against.",
+          "symbols": [
+            {
+              "name": "ReaderWindowSources",
+              "kind": "type",
+              "signature": "type ReaderWindowSources = {\n    /** The counters, the funnel answers and the door rows. */\n    readonly tallies: Pick<ReaderTallyStore, \"tallies\" | \"funnels\" | \"pageViews\">;\n    /**\n     * Where readers were, which is a second store and an optional one.\n     *\n     * A deployment that never configured one is not a deployment whose readers\n     * were nowhere, so an absent store and an empty map are kept apart all the\n     * way to {@link ReaderWindow.regions}.\n     */\n    readonly regions?: Pick<ReaderRegionStore, \"regions\">;\n};",
+              "summary": "The stores a window is read from."
+            },
+            {
+              "name": "ReaderWindow",
+              "kind": "type",
+              "signature": "type ReaderWindow = {\n    readonly tallies: readonly StoredTally[];\n    readonly funnels: readonly StoredFunnel[];\n    readonly pageViews: readonly StoredPageViews[];\n    /**\n     * The region buckets, or `undefined` where no region store was offered.\n     *\n     * `undefined` is *nothing here can say* and `[]` is *the store holds none*,\n     * which is the distinction this subsystem draws everywhere else it has two\n     * such states. A surface that reads them alike reports *we do not\n     * know where your readers are* as *you have no readers abroad*.\n     */\n    readonly regions: readonly StoredRegionCount[] | undefined;\n};",
+              "summary": "One window of counters, as the stores answered."
+            },
+            {
+              "name": "readReaderWindow",
+              "kind": "function",
+              "signature": "const readReaderWindow: (sources: ReaderWindowSources, request?: TallyReadRequest) => Promise<Result<ReaderWindow, ReaderSignalStoreError>>",
+              "summary": "Read one window from the stores, with one scope rather than four."
+            },
+            {
+              "name": "WindowRevision",
+              "kind": "type",
+              "signature": "type WindowRevision = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n};",
+              "summary": "One revision of one page, which is what a tree has to be found for."
+            },
+            {
+              "name": "revisionsIn",
+              "kind": "function",
+              "signature": "const revisionsIn: (window: ReaderWindow) => readonly WindowRevision[]",
+              "summary": "Every revision the window's rows name, deduplicated and in a stable order."
+            },
+            {
+              "name": "RevisionTrees",
+              "kind": "type",
+              "signature": "type RevisionTrees = {\n    /** The tree at that revision, or `undefined` where this source has none. */\n    readonly treeFor: (where: WindowRevision) => LoomTree | undefined;\n};",
+              "summary": "Where the trees come from, as the join needs to see it."
+            },
+            {
+              "name": "treesIn",
+              "kind": "function",
+              "signature": "const treesIn: (trees: Iterable<LoomTree>) => RevisionTrees",
+              "summary": "The trees a caller already holds, as a source."
+            },
+            {
+              "name": "UnjoinedCause",
+              "kind": "type",
+              "signature": "type UnjoinedCause = \n/**\n * The source has no tree at that revision.\n *\n * Ordinary rather than broken: counters outlive the revision they were filed\n * against, so a deployment that has pruned old trees, or scoped its lookup to\n * the revisions it draws, has rows here it cannot read. It is published\n * rather than dropped because the rows are a page's readers, and a screen\n * that silently left them out would under-report a deployment by however many\n * revisions it could not find.\n */\n\"no-tree\"\n/**\n * The source answered with a different page or a different revision from the\n * one asked for.\n *\n * A source's own fault, and the one worth refusing loudly: reading one\n * revision's counters against another revision's tree answers every question\n * on the page with confident nonsense, because the node ids line up often\n * enough to look right. This is the mistake `foreign` was put on a reading to\n * catch, caught one rung earlier where it can still be refused.\n */\n | \"mismatched\";",
+              "summary": "Why a revision the rows name has no reading."
+            },
+            {
+              "name": "UNJOINED_CAUSES",
+              "kind": "value",
+              "signature": "const UNJOINED_CAUSES: readonly UnjoinedCause[]",
+              "summary": "The closed set, for a surface accounting for every revision it cannot draw."
+            },
+            {
+              "name": "describeUnjoinedCause",
+              "kind": "function",
+              "signature": "const describeUnjoinedCause: (cause: UnjoinedCause) => string",
+              "summary": "One line per cause, for a surface saying why a page is not on the screen."
+            },
+            {
+              "name": "UnjoinedRevision",
+              "kind": "type",
+              "signature": "type UnjoinedRevision = WindowRevision & {\n    readonly cause: UnjoinedCause;\n    /** Counter rows left unread, so the cost of not drawing it is a number. */\n    readonly tallies: number;\n};",
+              "summary": "A revision whose rows could not be joined, and why."
+            },
+            {
+              "name": "WindowReadings",
+              "kind": "type",
+              "signature": "type WindowReadings = {\n    /**\n     * One reading per page, per revision, per form — which is what one reading is\n     * — in a stable order.\n     *\n     * Never two of one: the key every reading above this refuses to count twice\n     * on is the key the window was split by, so a caller may sum across this list\n     * on any figure the reading it derives says may be summed.\n     */\n    readonly pages: readonly PageReading[];\n    /** Revisions the rows name that have no reading, in the same order. */\n    readonly unjoined: readonly UnjoinedRevision[];\n};",
+              "summary": "What a window came to once its rows were joined to the pages they are about."
+            },
+            {
+              "name": "windowReadingsOf",
+              "kind": "function",
+              "signature": "const windowReadingsOf: (window: ReaderWindow, trees: RevisionTrees, declarations: PartDeclarations) => WindowReadings",
+              "summary": "Join a window of counters to the pages it is about."
+            }
+          ]
         }
       ]
     },
@@ -12115,7 +12200,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12250,7 +12335,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12312,7 +12397,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12837,7 +12922,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12907,7 +12992,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13329,7 +13414,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1759,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
