@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { ingestKeySchema } from "@/app/_lib/reader-signals/keys"
 
 import { runtimeWordsIn } from "../_test/plain-language"
-import { acceptedFrom, signalAddress, snippetFor } from "./connecting"
+import { acceptedFrom, publishCommandFor, signalAddress, snippetFor } from "./connecting"
 
 const KEY = ingestKeySchema.parse("lk_0123456789abcdef0123456789abcdef")
 
@@ -73,4 +73,17 @@ describe("where deliveries are taken from", () => {
       expect(runtimeWordsIn(acceptedFrom(host))).toEqual([])
     }
   )
+})
+
+describe("the command a build publishes its pages with", () => {
+  it("posts to this deployment's pages address, once, however the origin ends", () => {
+    expect(publishCommandFor("https://loom.test/")).toContain('"https://loom.test/api/pages"')
+  })
+
+  it("reads the key from the build's secrets rather than printing it", () => {
+    const command = publishCommandFor("https://loom.test")
+
+    expect(command).toContain("Bearer $LOOM_PUBLISH_KEY")
+    expect(command).not.toMatch(/lp_[0-9a-f]/u)
+  })
 })

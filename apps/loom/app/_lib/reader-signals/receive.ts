@@ -10,8 +10,11 @@ import {
 } from "@jam-overture/loom/signals"
 import type { ApplicationId } from "@jam-overture/loom/store"
 
+import { readAtMost } from "@/app/_lib/app/read-at-most"
+
 import { attributeDelivery, type AttributionRefusal, type Senders } from "./attribution"
 import { INGEST_KEY_PARAMETER } from "./keys"
+import { keptOrigin, type RefusalCounter, type RefusalReason } from "./refusals"
 import { describeIntakeSwitch, describeRegionSettings, type IntakeSettings } from "./settings"
 
 /**
@@ -64,6 +67,8 @@ export type Filing = {
    * denominator every other number the portal shows is a rate against.
    */
   readonly openings: ReaderOpeningCounter
+  /** The refusals that named this application (0311). Written, never read, by the door. */
+  readonly refusals: Pick<RefusalCounter, "record">
 }
 
 export type Intake = {
@@ -86,55 +91,6 @@ const refuse = (status: number, detail: string, headers: Record<string, string> 
     status,
     headers: { ...NO_STORE, ...headers, "content-type": "text/plain; charset=utf-8" },
   })
-
-/**
- * The body, up to the ceiling and one byte past it.
- *
- * Measured off the bytes rather than off `content-length`, because the header is
- * a number the caller wrote and this is the one endpoint in Loom whose callers
- * are strangers. Reading one byte past the limit is what distinguishes *exactly
- * at the ceiling* from *over it* without reading any more of an over-large body
- * than it takes to know.
- *
- * A caller who sends nothing gets an empty string, which the parser refuses
- * like any other malformed delivery.
- */
-const readAtMost = async (
-  request: Request,
-  limit: number
-): Promise<{ readonly text: string; readonly bytes: number }> => {
-  const body = request.body
-
-  if (body === null) return { text: "", bytes: 0 }
-
-  const reader = body.getReader()
-  const chunks: Uint8Array[] = []
-  let bytes = 0
-
-  try {
-    for (;;) {
-      const { done, value } = await reader.read()
-      if (done) break
-      if (value === undefined) continue
-
-      chunks.push(value)
-      bytes += value.byteLength
-
-      if (bytes > limit) break
-    }
-  } finally {
-    await reader.cancel().catch(() => undefined)
-  }
-
-  const joined = new Uint8Array(bytes)
-  let at = 0
-  for (const chunk of chunks) {
-    joined.set(chunk, at)
-    at += chunk.byteLength
-  }
-
-  return { text: new TextDecoder().decode(joined), bytes }
-}
 
 /**
  * What this delivery is counted into, besides being buffered.
@@ -174,6 +130,26 @@ const countersFor = (request: Request, intake: Intake, filing: Filing): DoorCoun
  * for. The exception is the lookup failing, which is this deployment's fault
  * and not the sender's.
  */
+/**
+ * Counting a refusal is best-effort: a counter that cannot answer must not
+ * change what the sender is told, and the delivery is refused either way. So
+ * the result is dropped rather than turned into a 503 that would read as the
+ * refusal never having happened.
+ */
+const counted = async (
+  intake: Intake,
+  application: ApplicationId,
+  reason: RefusalReason,
+  request: Request,
+  response: Response
+): Promise<Response> => {
+  await intake
+    .filingFor(application)
+    .refusals.record(reason, keptOrigin(request.headers.get("origin")), intake.now())
+
+  return response
+}
+
 const refusalOf = (refusal: AttributionRefusal): Response => {
   switch (refusal.code) {
     case "no-key":
@@ -251,7 +227,18 @@ export const receiveReaderSignals = async (request: Request, intake: Intake): Pr
 
   const attributed = await attributeDelivery(request, intake.senders)
 
-  if (!attributed.ok) return refusalOf(attributed.error)
+  if (!attributed.ok) {
+    const refusal = attributed.error
+
+    switch (refusal.code) {
+      case "closed":
+        return counted(intake, refusal.application, "closed", request, refusalOf(refusal))
+      case "wrong-origin":
+        return counted(intake, refusal.application, "wrong-site", request, refusalOf(refusal))
+      default:
+        return refusalOf(refusal)
+    }
+  }
 
   const filing = intake.filingFor(attributed.value)
 
@@ -260,7 +247,13 @@ export const receiveReaderSignals = async (request: Request, intake: Intake): Pr
   try {
     delivery = JSON.parse(text)
   } catch {
-    return refuse(400, "a delivery is JSON")
+    return counted(
+      intake,
+      attributed.value,
+      "unreadable",
+      request,
+      refuse(400, "a delivery is JSON")
+    )
   }
 
   const kept = await ingestReaderSignals(
@@ -275,9 +268,15 @@ export const receiveReaderSignals = async (request: Request, intake: Intake): Pr
      * sender's, so it is the one refusal here that is a 5xx. Everything else a
      * caller could have avoided.
      */
-    const status = kept.error.code === "unavailable" ? 503 : 400
+    if (kept.error.code === "unavailable") return refuse(503, describeIngestError(kept.error))
 
-    return refuse(status, describeIngestError(kept.error))
+    return counted(
+      intake,
+      attributed.value,
+      "unreadable",
+      request,
+      refuse(400, describeIngestError(kept.error))
+    )
   }
 
   return new Response(null, { status: 204, headers: NO_STORE })

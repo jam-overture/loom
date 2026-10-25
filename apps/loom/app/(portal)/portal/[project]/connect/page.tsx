@@ -8,15 +8,23 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
-import { acceptedFrom, signalAddress, snippetFor } from "@/app/(portal)/_lib/connecting"
+import {
+  acceptedFrom,
+  publishCommandFor,
+  signalAddress,
+  snippetFor,
+} from "@/app/(portal)/_lib/connecting"
+import { plainMoment } from "@/app/(portal)/_lib/when"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
+import { appPublishKeys } from "@/app/_lib/pages/store"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
 
 import { CopyButton } from "./_components/copy-button"
 import { KeyControls } from "./_components/key-controls"
+import { PublishKeyControls } from "./_components/publish-key-controls"
 
 /**
  * *Connect your site*: a project's key, the snippet that carries it, and where
@@ -36,6 +44,10 @@ import { KeyControls } from "./_components/key-controls"
  * does not have. Replacing it stops every page carrying the old one, which is
  * an owner's decision for the reason closing is. Where deliveries are taken
  * from is said here and changed on *Settings*.
+ *
+ * **Publishing pages** (0312) is the last section, and unlike the ingest key
+ * the publish key is a secret: it is shown once, to the owner who made it,
+ * and the screen says only *when* the current one was made.
  *
  * The address is the deployment's as this request reached it, not
  * `siteOrigin()`: it is where the person reading this is talking to the
@@ -74,14 +86,21 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const held =
+  const [held, publishing] =
     application === undefined
-      ? undefined
-      : await readWithin(
-          () => appIngestKeys.keyOf(application.applicationId),
-          unavailable,
-          PORTAL_READ_BUDGET_MS
-        )
+      ? [undefined, undefined]
+      : await Promise.all([
+          readWithin(
+            () => appIngestKeys.keyOf(application.applicationId),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
+          readWithin(
+            () => appPublishKeys.mintedAt(application.applicationId),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
+        ])
 
   const owner = mayAdminister(role)
 
@@ -90,7 +109,12 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
      * A store that cannot answer is said, never drawn as *no key yet*: a person
      * told that would make one, and replace a key that was working.
      */
-    if (!project.ok || !applications.ok || (held !== undefined && !held.ok)) {
+    if (
+      !project.ok ||
+      !applications.ok ||
+      (held !== undefined && !held.ok) ||
+      (publishing !== undefined && !publishing.ok)
+    ) {
       return (
         <StateNotice tone="failure" title="The store did not answer">
           Nothing here is a statement about this project&rsquo;s key. Try again in a moment.
@@ -136,7 +160,10 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
     }
 
     const key = held.value
-    const snippet = snippetFor(signalAddress(await servedOrigin(), key))
+    const origin = await servedOrigin()
+    const snippet = snippetFor(signalAddress(origin, key))
+    const publishCommand = publishCommandFor(origin)
+    const mintedAt = publishing?.ok === true ? publishing.value : null
 
     return (
       <div className="flex max-w-3xl flex-col gap-4">
@@ -181,6 +208,33 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
               Change it in Settings →
             </Link>
           )}
+        </section>
+
+        <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
+          <h2 className="text-sm font-medium tracking-tight">Publish your pages</h2>
+          <p className="text-ink-muted text-xs">
+            Have your build send the pages your site serves, as{" "}
+            <code className="font-mono">{'{ "pages": [ …trees ] }'}</code>, and they show up under
+            Pages by name. Loom keeps what you send and never runs your site&rsquo;s code.
+          </p>
+          <pre className="border-edge-subtle bg-surface-page m-0 overflow-x-auto rounded-md border p-3 font-mono text-[11px] leading-relaxed">
+            {publishCommand}
+          </pre>
+          <div className="flex flex-wrap items-center gap-4">
+            <CopyButton text={publishCommand} label="Copy the command" />
+            <Link
+              href={`/portal/${projectId}/pages`}
+              className="text-ink text-xs no-underline hover:underline"
+            >
+              See what was published →
+            </Link>
+          </div>
+          <p className="text-ink-muted text-xs">
+            {mintedAt === null
+              ? "There is no publish key yet. Unlike the key above it is a secret, shown once to the owner who makes it."
+              : `The current publish key was made on ${plainMoment(new Date(mintedAt).toISOString())}. It is a secret and is not shown again.`}
+          </p>
+          {owner && <PublishKeyControls projectId={projectId} held={mintedAt !== null} />}
         </section>
       </div>
     )
