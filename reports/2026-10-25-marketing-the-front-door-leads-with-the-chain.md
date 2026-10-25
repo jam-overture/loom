@@ -160,3 +160,89 @@ exactly that problem all stop at its boundary.
 
 They are in the pull request comment, where he will see them. The first is
 `usingIt` above.
+
+---
+
+# Appended later the same day — the sentence left standing under the chain
+
+This section is by a second run of this lane, on the same branch. **The first
+screen above is right and this is about the one below it.**
+
+Photographed off the build this report's own pictures were taken from, the band
+directly under the new chain still opened:
+
+> **A governance framework for modern AI-enabled adaptive web pages.**
+> In other words: an AI model can change your live site, but only in the ways
+> you approved first. You can see every change it made, and you can undo any of
+> them.
+
+That is the sentence this lane had put to the maintainer on 24 October as the
+clearest example of the problem he was describing, and his instruction was
+*"Avoid the abstract nouns and wording, it is super confusing and is counter
+productive to our goal."*
+
+**It reads worse after this change than before it, which is why it could not
+wait.** The chain explains the product in six plain rungs; four abstract nouns
+immediately afterwards undo that on the next scroll.
+
+## The fix was already on the page
+
+The plain sentence had been sitting one line below the abstract one since the
+band was written. **Whenever copy needs *in other words*, the words after it are
+the real ones.** So the heading is now the sentence that was explaining it, the
+preamble is gone because it is no longer other words than anything, and nothing
+here claims anything the band did not claim before:
+
+| | |
+| --- | --- |
+| heading | An AI model can only change your live site in the ways you approved first |
+| under it | You can see every change it made, and you can undo any of them. |
+
+**The band is not deleted and this lane may not delete it.**
+`docs/positioning.md` lists it under *wrong as of today*, because it answers
+*what is Loom* with the governance story, and that file also says *rewriting is
+not the same as deleting and this file does not authorise either.* What is fixed
+is the half that is plainly a writing defect and was named as one. Whether a
+page leading with the chain still wants this band at all is the maintainer's.
+
+## The rule caught its author
+
+The first draft of the new heading read *An AI model can change your live site,
+**but only in the ways you approved first***, and `voice.test.ts`' headline rule
+— added by the first unit on this branch, hours earlier — went red on it.
+
+That is the case the rule's own docblock calls its limit: the trailing clause
+there is the most load-bearing fact in the sentence rather than a flourish, and
+the rule cannot tell those apart. The remedy is the one `routines.md` names and
+the one the rule's docblock insists on: **a rewrite, not a comma.** It is one
+clause now and says the same thing.
+
+Worth recording rather than quietly fixing, for two reasons. The rule works on
+the run that wrote it, which is the only real test of a register check. And a
+later run that hits this and reaches for punctuation has the answer in front of
+it.
+
+## Numbers
+
+`pnpm verify`, over the tree being pushed, exit code read out of a file written
+as the last thing on its line:
+
+```
+Test Files  237 passed (237)      Tests  5656 passed (5656)    # framework
+Test Files  355 passed (355)      Tests  6366 passed (6366)    # @loom/app
+Test Files   57 passed  (57)      Tests  1506 passed (1506)    # app/(marketing)
+1305 findings, 0 malformed
+EXIT=0
+```
+
+The band, photographed off that build:
+
+![What is Loom, as the page now puts it](2026-10-25-marketing-what-is-loom.webp)
+
+![The whole front door after it](2026-10-25-marketing-front-door-after-wide.webp)
+
+`built 2026-10-25T11:58:36.462Z`, `scrollWidth 1280 / innerWidth 1280`.
+
+One test file and one assertion more than the section above: the route group was
+1,505 tests when this section began and is 1,506, which is the headline rule
+reading one more headline.

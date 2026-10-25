@@ -505,15 +505,61 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  *
  * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
  */
+/**
+ * What Loom is, in the words that were already underneath the words.
+ *
+ * ## The sentence this band used to open with
+ *
+ * > *A governance framework for modern AI-enabled adaptive web pages.*
+ *
+ * Four abstract nouns in a row, and under it, as a second paragraph:
+ *
+ * > *In other words: an AI model can change your live site, but only in the
+ * > ways you approved first. You can see every change it made, and you can undo
+ * > any of them.*
+ *
+ * **Whenever copy needs *in other words*, the words after it are the real
+ * ones.** The plain version had been sitting one line below the abstract one
+ * since the band was written, which is the whole of the fix: the heading is the
+ * sentence that was already explaining it, and the preamble goes because it is
+ * no longer other words than anything.
+ *
+ * The maintainer, 24 October: *"Avoid the abstract nouns and wording, it is
+ * super confusing and is counter productive to our goal."* That is an
+ * instruction about the writing rather than a positioning decision, so it is
+ * this lane's to act on; nothing here claims anything the band did not claim
+ * before.
+ *
+ * **The first draft of this heading was caught by this run's own rule**, which
+ * is worth recording because it is the case the rule's docblock calls its
+ * limit. *An AI model can change your live site, but only in the ways you
+ * approved first* ends in a comma clause, and that clause is the most
+ * load-bearing fact in the sentence rather than a flourish — the rule cannot
+ * tell those apart and is not meant to. The remedy `routines.md` names is the
+ * one taken: it is one clause now, and it says the same thing.
+ *
+ * ## Why the band stays where it is
+ *
+ * `docs/positioning.md` lists this band under *wrong as of today* — it answers
+ * *what is Loom* with the governance story, and governance is the thing under
+ * the hood now. **It is not deleted, and this lane may not delete it.** That
+ * file says so in as many words: *rewriting is not the same as deleting and
+ * this file does not authorise either: where a band comes off, it comes off
+ * because the maintainer said so.*
+ *
+ * So what is fixed here is the half that is plainly a writing defect and was
+ * named as one. Whether a page that leads with the chain still wants a band
+ * defining Loom as governance three screens down is his.
+ */
 const whatIsIt = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { width: "wide", eyebrow: BAND.whatIsIt },
-    "A governance framework for modern AI-enabled adaptive web pages.",
+    "An AI model can only change your live site in the ways you approved first",
     [
       prose(
         ids,
-        "In other words: an AI model can change your live site, but only in the ways you approved first. You can see every change it made, and you can undo any of them.",
+        "You can see every change it made, and you can undo any of them.",
         { size: "lead", measured: true }
       ),
     ]
