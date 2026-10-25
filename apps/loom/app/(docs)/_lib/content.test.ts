@@ -122,10 +122,56 @@ describe("the navigation and the pages on disk", () => {
     }
   })
 
+  /**
+   * A landing page spells its own slug with the constant rather than with `""`,
+   * which is the whole reason `DOCS_LANDING_SLUG` exists: an empty string in a
+   * call reads as a page that forgot its name.
+   */
   it("declares its metadata from the navigation rather than beside it", () => {
     for (const { section, page } of writtenOrder) {
+      const argument = page.slug === DOCS_LANDING_SLUG ? "DOCS_LANDING_SLUG" : `"${page.slug}"`
+
       expect(sourceOf(section.slug, page.slug), `${section.slug}/${page.slug}`).toContain(
-        `pageMetadata("${section.slug}", "${page.slug}")`
+        `pageMetadata("${section.slug}", ${argument})`
+      )
+    }
+  })
+
+  /**
+   * **Every written section is an address.**
+   *
+   * Four of them were not. `/docs/api-reference` served a page and
+   * `/docs/getting-started` served a 404, along with the three other written
+   * sections — so a reader who shortened an address, or who was handed *the
+   * Architecture section* as a place rather than as a page, arrived nowhere.
+   * Nothing in this repository could have said so: a section with no landing
+   * page is a legal section, the rail draws its title as plain text, and no
+   * link on the site pointed at the address that was missing.
+   *
+   * This is the check that makes it one rule rather than four pages somebody
+   * wrote once. A sixth section added tomorrow with no page of its own fails
+   * here.
+   */
+  it("serves every written section's own address", () => {
+    for (const section of writtenDocsSections) {
+      expect(docsLandingOf(section), section.slug).toBeDefined()
+      expect(existsSync(pageFileFor(section.slug, DOCS_LANDING_SLUG)), section.slug).toBe(true)
+    }
+  })
+
+  /**
+   * A landing page names its own section when it asks for the list of pages in
+   * it, and the section it names is the directory it is in.
+   *
+   * The slug is written twice on one of these pages — once for the metadata and
+   * once for the list — and this is what stops the second one drifting. A page
+   * naming another section's slug would render a perfectly good list of the
+   * wrong pages, which is the sort of wrong nothing else here would notice.
+   */
+  it("lists its own pages on each landing page", () => {
+    for (const section of writtenDocsSections) {
+      expect(sourceOf(section.slug, DOCS_LANDING_SLUG), section.slug).toContain(
+        `<PagesInThisSection section="${section.slug}" />`
       )
     }
   })

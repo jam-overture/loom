@@ -11,7 +11,7 @@ import {
 import { namedExportsIn, publishedNames } from "../api/mentions"
 import { fencesOnPage } from "../fences/extract"
 import { isCheckable } from "../fences/model"
-import { docsEntryAt, docsOrder } from "../nav"
+import { docsEntryAt, docsEntryPoint, docsOrder } from "../nav"
 import { readPageHeadings, readPageSource } from "../search/headings"
 
 /**
@@ -239,8 +239,15 @@ describe("the ways a route is refused rather than rendered", () => {
 describe("the page the route is on", () => {
   const introduction = readPageSource("getting-started", "introduction")
 
+  /**
+   * **The page a reader is given**, which stopped being `docsOrder[0]` on
+   * 25 October: the first entry in the order is now the Getting started
+   * section's own page, and `/docs` deliberately goes past it to the page with
+   * a tree on it. The claim is unchanged and it is asked of the function that
+   * answers it.
+   */
   it("is the first page a reader is given, and it shows the route", () => {
-    expect(docsOrder[0]?.href).toBe("/docs/getting-started/introduction")
+    expect(docsEntryPoint()).toBe("/docs/getting-started/introduction")
     expect(introduction).toContain("<ArrivalRoute />")
   })
 

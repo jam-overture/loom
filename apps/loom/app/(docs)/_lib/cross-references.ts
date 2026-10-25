@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { docsHref, docsSections, writtenDocsSections } from "./nav"
+import { DOCS_LANDING_SLUG, docsHref, docsSections, writtenDocsSections } from "./nav"
 
 /**
  * What one page says about another, in a form a test can check.
@@ -67,12 +67,25 @@ export const internalLinksIn = (source: string): readonly string[] =>
 export const servableHrefs = (): ReadonlySet<string> => {
   const written = readdirSync(docsRoot, { withFileTypes: true })
     .filter((section) => section.isDirectory())
-    .flatMap((section) =>
-      readdirSync(join(docsRoot, section.name), { withFileTypes: true })
+    .flatMap((section) => [
+      /*
+       * A section's own `page.mdx`, where there is one. It is a page like any
+       * other and it is the one a reader reaches by shortening an address, so a
+       * link to `/docs/architecture` is a link to something this site serves.
+       *
+       * This is the same omission the paragraph below describes, met a second
+       * time from the other side: the rule is *a page is a `page.mdx`*, and a
+       * sweep that only looks one directory deep answers it for every page
+       * except the four a reader is most likely to be handed as a place.
+       */
+      ...(existsSync(join(docsRoot, section.name, "page.mdx"))
+        ? [docsHref(section.name, DOCS_LANDING_SLUG)]
+        : []),
+      ...readdirSync(join(docsRoot, section.name), { withFileTypes: true })
         .filter((page) => page.isDirectory())
         .filter((page) => existsSync(join(docsRoot, section.name, page.name, "page.mdx")))
-        .map((page) => docsHref(section.name, page.name))
-    )
+        .map((page) => docsHref(section.name, page.name)),
+    ])
 
   /*
    * The generated half, which the paragraph above describes and this had not
