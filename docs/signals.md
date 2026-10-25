@@ -3299,6 +3299,64 @@ guide at */docs/the-runtime/what-your-readers-do* could print this instead of
 describing it; the region map the §51 rung leaves a caller to assemble; and
 `0308`, which is the maintainer's.
 
+### 53. A batch delivered twice is folded once · `Loom signals` · **done, 25 October**
+
+Not a reading and not a correction of one: a gap in the thing every reading is
+built on. Nothing in the subsystem had ever asked whether two batches in one
+window are the same batch, and three things in the design invite it — a door that
+allows fifty batches per delivery *because* a retry queue draining after an
+outage is worth allowing, a deliverer that reads no response and so never learns
+which deliveries landed, and a buffer whose key is a surrogate.
+
+**Done**
+([0314](../decisions/0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md)),
+in [`src/signals/rollup.ts`](../src/signals/rollup.ts) and reported through
+[`collect.ts`](../src/signals/collect.ts).
+
+- **The damage was asymmetric, which is why nothing had noticed.** Of a tally's
+  nine counters, `views`, `reached` and `engaged` are sets of view keys, and so
+  are `appearances` and both ends of every funnel: a repeat adds a key the set
+  already holds and moves nothing. `dwellMs`, `activations`, `opens`, `closes`
+  and `completions` are occurrences and double. Every rate this subsystem
+  publishes divides the second kind by the first, so a repeat looks like a reader
+  who was twice as interested — and 0158 makes it permanent, with the buffer that
+  could prove otherwise dropped by the same operation that counted it.
+- **Derived, not collected.** The identity is the tree, the revision, the view
+  key, `sentAt`, the audience, whether it is the opening delivery, and every
+  field of every signal. Nothing was added to the wire, the browser, a column, a
+  store or the vocabulary; `broadcast.ts` is byte-identical. A sequence number
+  per page view would make the test exact and costs 7 bytes of wire per delivery
+  for ever — filed with that number rather than built.
+- **Refusing a repeat cannot move a figure a set of view keys was already
+  protecting**, and that is asserted rather than reasoned: the same window is
+  folded with and without the repeat and `views`, `appearances`, the funnel
+  answers and `reached` come back equal. It is what makes this safe to add under
+  figures that are already published.
+- **Only where there is a view key.** Without one a batch holds nothing unique to
+  its sender, so two readers reaching one band in the same millisecond are
+  byte-identical and dropping a reader is the worse mistake. `uncorrelated` goes
+  on saying how many could not be judged.
+- **The promise is exactly as wide as the window**, and says so: two deliveries
+  either side of a collection boundary are two windows' input, bounded by
+  *(retry delay ÷ window length)*, shrinking with the same setting 0147's
+  straddle does.
+- **One loss, pinned by a test rather than argued away.** With a frozen clock, a
+  page whose opening delivery is spent and which records the same press twice
+  with a flush between them sends two batches a fold cannot tell apart.
+  `broadcast.test.ts` drives the real broadcaster to both results.
+- **A separator is an escape now, never a byte in the file.** Four literal `NUL`
+  bytes in `rollup.ts` made the busiest module in this directory binary to
+  `grep` and `ripgrep`, which print no lines and say `binary file matches`.
+  `source-text.test.ts` fails on a control byte anywhere in this lane's source.
+
+**What is left and is filed:** the door counts a repeated *opening* batch twice
+across two deliveries, which cannot be closed the same way — the remedy is for
+the door to remember view keys, and that is the one value nothing is allowed to
+keep — and it touches the region floor, so it is the maintainer's to read; the
+sequence number, with its cost; the one `NUL` byte left in `src/runtime/`, which
+is another lane's; and still that **nothing draws any of this**, which is
+`Loom portal`'s.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
