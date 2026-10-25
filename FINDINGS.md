@@ -60216,3 +60216,78 @@ lane's call and not this one's: a sweep under `tools/` that reads the strings
 anywhere else in the repository. It would have caught both of these on the
 commit that wrote them, and it is one test rather than a convention three lanes
 have to remember.
+
+## 2026-10-25 (evening) — the region map the rung left to a caller is joined now, and the floor it needed is an argument rather than a lookup
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closes the 24 October entry** *the region map is the one reading the new rung
+leaves a caller to assemble*, in
+`signals-54-a-window-answers-where-its-readers-were`, record
+[0315](decisions/0315-a-window-answers-where-its-readers-were-at-a-floor-it-is-handed-and-the-readership-is-published-beside-the-forms.md)
+
+That entry costed two shapes and recommended the first. It is the one taken:
+**an options argument on the join**, so `windowReadingsOf` now answers
+`WindowReadings.regions` and no reading in this subsystem is two steps from a
+store any more.
+
+Three things in the taking that the entry did not have:
+
+- **Both answers rather than one.** The entry argued for a map per form, and
+  that is right — a readership is of one readership (§38) and two forms are two
+  populations (0290) — but a map per form **withholds more than a whole map
+  does**, because the floor bites harder the narrower the group. Fifteen views
+  of France under one form and fourteen under the other are a readership of
+  twenty-nine the whole map names and both split maps suppress. Publishing only
+  the split would have answered the maintainer's own question worse than the two
+  calls it replaced, so `regions.readership` is published beside
+  `regions.maps`.
+- **A map is not held to a tree.** A region map is of arrivals, not of nodes.
+  A revision whose tree has been pruned is `unjoined` for its counters and still
+  has its readers counted, which also keeps the two answers adding to one total.
+- **The window had no repeat guard.** `regionReadingFor` keeps the first row per
+  region and audience **within one revision**; nothing did it across a window,
+  so a caller concatenating two reads would have added a bucket to itself —
+  0158's one permanent error. The dedupe is now on tree, revision, form and
+  region, applied once before both answers, and `regions.duplicated` reports it.
+
+**Nothing reaches a reader**: no payload field, no browser byte, no column, no
+store method, no kind. `broadcast.ts` is byte-identical.
+
+---
+## 2026-10-25 (evening) — a screen can now draw a region map in one call, and the deployment's floor is the one argument nothing will remind it to pass
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is broken**; the second half of the 24 October entry *the rung from a
+store to a reading exists, so a reader screen is four lines*, now that the
+region map is in the rung
+
+`windowReadingsOf(window, trees, registry, options)` answers
+`WindowReadings.regions`, which holds `maps` — one map per revision per form,
+keyed so `readingKeyOf` pairs it with that form's page reading — and
+`readership`, the deployment's whole map. `undefined` there still means *no
+region store was offered*, and `[]` rows still mean *the store holds none*
+(0309 clause 2): **two different sentences, and a screen that draws them alike
+reports *we cannot say where your readers are* as *you have no readers
+abroad*.**
+
+**The one thing a screen must not forget is the floor.** It is
+`options.floor`, and leaving it out is not an error — it is the default of 25,
+which is right for a deployment that never configured one and **wrong for one
+that raised it**. A deployment's own floor is already read in this repository:
+
+```ts
+import { readRegionFloor, REGION_FLOOR_KEY } from "@/app/_lib/reader-signals/settings"
+
+const floor = readRegionFloor(process.env[REGION_FLOOR_KEY]).floor
+```
+
+`regionFloorOf` under the join is raise-only, so passing it can only ever
+withhold more — there is no way for a screen to read a map below the floor, and
+no reason not to pass it.
+
+Worth one line of the screen's own: `RegionReading.floor` says what the map was
+read at and `withheld` says what it is holding back, so *12 views in 2 countries
+too small to name* is a sentence a reader of the screen can be given rather than
+a silence.
+
+---
