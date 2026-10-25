@@ -332,8 +332,16 @@ on three pages rather than argued on one.
 Taken from the `vercel[bot]` comment after opening the pull request, not composed
 from the branch name.
 
-The four addresses to open on it are `/docs/getting-started`,
-`/docs/building-with-loom`, `/docs/the-runtime` and `/docs/architecture`.
+https://loom-git-docs-66-a-section-i-d41b37-jpizzolato36-6341s-projects.vercel.app
+
+The four addresses to open on it, each of which was a 404 before this branch:
+
+- https://loom-git-docs-66-a-section-i-d41b37-jpizzolato36-6341s-projects.vercel.app/docs/getting-started
+- https://loom-git-docs-66-a-section-i-d41b37-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom
+- https://loom-git-docs-66-a-section-i-d41b37-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime
+- https://loom-git-docs-66-a-section-i-d41b37-jpizzolato36-6341s-projects.vercel.app/docs/architecture
+
+The pull request is **#709**.
 
 Every picture above was taken against a build in this container, not fetched from
 the preview: `*.vercel.app` is denied by the environment's egress policy, which
