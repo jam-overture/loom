@@ -3230,6 +3230,75 @@ vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
 `Loom portal`'s, and is now one step shorter — what was missing was a rung, and
 the rung exists.
 
+### 52. What a page collects, said to the reader it collects about · `Loom signals` · **done, 24 October**
+
+Not a reading, and the first unit here that is not. Every one of the readings
+above answers a deployment's question; this answers the reader's, which is the
+shorter one — *what does this page report about me?* — and nothing in this
+subsystem could answer it outside this repository.
+
+It is the half of the argument that had nothing behind it. The six rules are
+here, the sentences on `signal.ts` are here, and the person a deployment would
+have to show them to is reading the *deployment's* site. What a deployment could
+do until today is write the list by hand, and a hand-written list of what a
+product collects is right on the day it is written: `completed` landed on
+1 October, `audience` with 0284, `within` with 0167, and each of them would have
+quietly falsified a paragraph somebody wrote in September.
+
+**Done**
+([0313](../decisions/0313-what-a-page-collects-is-published-to-the-reader-it-collects-about.md)),
+as `collectionNoticeOf` in [`src/signals/notice.ts`](../src/signals/notice.ts).
+
+- **The fields are the schema's own and the compiler holds them.** The tables
+  are keyed by `keyof Required<…>` of the batch and of each member of the signal
+  union, so **a payload field with no sentence for a reader does not compile**.
+  `Required` is the deliberate half: `within`, `view`, `audience` and `first` are
+  sometimes absent and are collected, so they are owed a sentence like any other.
+- **A test drives the real broadcaster**, because a type cannot reach the third
+  end of the claim — a field can be in the schema, described in the table, and
+  never sent, or sent and never described. The suite reads a fixture page the way
+  a reader would (a band on screen, a link pressed, a disclosure opened, a form
+  let go), takes the batches that actually came out, and fails on any field or
+  kind the notice does not name. The mutation is a table with `ms` taken out,
+  which has to come back as `ms`.
+- **It is a ceiling and never an understatement.** `kinds` narrows it, because a
+  host wrote that list explicitly. `types` and `within` do not: a deployment
+  reporting on sections only collects less than its notice says. Overstating
+  costs a reader nothing; understating is the one failure this cannot have. A
+  floor would also have cost either a second spelling of `selectionOf` or an
+  exported name in the browser entry point (0218), and a disclosure is not worth
+  bytes in a reader's browser.
+- **`FieldSubject` has five members and no sixth.** The part, the page, the
+  observation, the page view, the delivery. It is rule 1 as a type rather than a
+  sentence: a field about a person could not be described without adding a
+  member, and adding one is a record.
+- **The sentences are addressed to the reader** — *your address is never stored*,
+  not *the reader's* — which makes this the one module in `src/signals/` that
+  speaks to anybody. A sentence in the third person is one a deployment has to
+  rewrite before it can publish it.
+- **Two numbers are the deployment's and nothing else is**: the collection
+  window, reported as given because `collect.ts` is what refuses one below its
+  minimum, and the region floor through `regionFloorOf` so the notice cannot
+  disagree with the map. No region counting offered is a floor of `null`, which
+  is *nothing about where you are is read* and not *your country is counted and
+  withheld until enough others share it*.
+- **Not a consent gate, and no step toward one.** There is nothing in today's
+  collection to consent to — a signal is anonymous and node-shaped, correlation
+  is scoped to one page view, and neither is configurable (0146). Per-reader
+  identity stays parked; a gate needs a recorded decision per reader, which is a
+  different artefact, and a notice does not become one by being read.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — and nothing was derived from a counter either, which is new here:
+it is the first unit in this plan built for somebody other than a deployment.
+`broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** that nothing prints the notice, which is two
+findings rather than one — a deployment's own privacy page is the host's, and the
+guide at */docs/the-runtime/what-your-readers-do* could print this instead of
+describing it; the region map the §51 rung leaves a caller to assemble; and
+`0308`, which is the maintainer's.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
