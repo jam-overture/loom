@@ -396,11 +396,11 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0304](0304-an-unwalked-window-has-no-share-and-nothing-untouched-to-give-and-the-rule-belongs-to-the-reading.md) | An unwalked window has no share and nothing untouched to give, and the rule belongs to the reading | Accepted | §4c (reader signals) |
 | [0305](0305-what-two-forms-say-is-compared-over-the-text-they-share-and-the-page-figure-is-a-third-argument.md) | What two forms say is compared over the text they share, and the page figure is a third argument | Accepted | §4c (reader signals) |
 | [0306](0306-a-ratio-names-the-state-it-has-no-quotient-in-and-the-rule-is-published-once.md) | A ratio names the state it has no quotient in, and the rule is published once | Accepted | §4c (reader signals) |
-| 0307 | *No record on this branch* | — | — |
+| [0307](0307-a-distance-between-a-mix-and-nothing-is-withheld-and-the-invariant-both-rolls-rest-on-is-asserted.md) | A distance between a mix and nothing is withheld, and the invariant both rolls rest on is asserted | Accepted | §4c (reader signals) |
 | 0308 | *No record on this branch* | — | — |
-| 0309 | *No record on this branch* | — | — |
+| [0309](0309-a-window-of-counters-is-read-into-the-readings-it-holds-and-the-trees-stay-the-callers.md) | A window of counters is read into the readings it holds, and the trees stay the caller's | Accepted | §4c (reader signals) |
 | [0310](0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |
 | [0311](0311-a-refusal-whose-key-was-right-is-counted-against-its-project-and-one-without-one-is-not.md) | A refusal whose key was right is counted against its project, and one without one is not | Proposed | §5 (portal), §4c (reader signals) |
 | [0312](0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md) | A site hands Loom a snapshot of its pages with a secret key, and Loom never runs its code | Accepted | §5 (portal), §1 |
-| 0313 | *No record on this branch* | — | — |
+| [0313](0313-what-a-page-collects-is-published-to-the-reader-it-collects-about.md) | What a page collects is published to the reader it collects about, derived from the configuration and never written by hand | Accepted | §4c (reader signals) |
 | [0314](0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md) | A batch delivered twice is folded once, and the window is how wide that promise is | Accepted | §4c (reader signals) |

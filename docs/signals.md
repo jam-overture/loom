@@ -3134,6 +3134,171 @@ deployment change order; and that **nothing draws any of this**, which is
 `Loom portal`'s and has been the open question with the most built behind it for
 four runs.
 
+### 50. A distance that is not there, and a refusal that is not a silence · `Loom signals` · **done, 23 October**
+
+The second correction run in a row, and both halves are an absence wearing a
+measurement's clothes. One was taken; the other turned out to contradict an
+accepted record and is **proposed rather than built**.
+
+**Done**
+([0307](../decisions/0307-a-distance-between-a-mix-and-nothing-is-withheld-and-the-invariant-both-rolls-rest-on-is-asserted.md)),
+in `weightMovedOver` in
+[`library-reach-change.ts`](../src/signals/library-reach-change.ts), the helper
+both library rolls take their weight distance from.
+
+- **A side with no weight has no distance, and said it had one of nought.** A
+  nought there is the one value a surface reads as *the weights did not move*.
+  The helper now withholds it. 0247's own reading, which this arithmetic comes
+  from, already withholds `moved` in the same state.
+- **Neither roll can reach it**, which was the other half of the filing and is
+  now settled: a door that can scale a page has counted a page view at it, so a
+  measured row has a weight behind it. The clause stays because the helper is
+  exported and an outside caller would otherwise publish `NaN`.
+- **The invariant is a test rather than a sentence.** The word roll rested four
+  quotients on it in prose and nothing checked it; a row-walk now asserts the
+  figure is withheld exactly where the row's silence is set.
+- **No published field changed shape.** Both `weightMoved` fields were already
+  `number | null`.
+
+**Proposed, not built** (`0308`, on a pull request of its own):
+the deployment change order folds `different-audiences` into the standing
+`unread`, whose sentence is *one of the two windows reported no view of its
+revision* and whose silence condition is `no-view-reported`. Both its windows
+reported plenty. 0301 decided that mapping explicitly, so reversing it is
+**architectural — needs review**, and the record says so. What was built in its
+place is two fixtures standing the two kinds of nothing side by side — which
+makes 0301's promise that *the cause travels on the row* checked rather than
+stated — and a note on the member saying it covers two states.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** `0308` itself, which is the maintainer's and is
+now on a pull request of its own; and that
+**nothing draws any of this**, which is `Loom portal`'s and has been the open
+question with the most built behind it for five runs.
+
+### 51. From a store to a question · `Loom signals` · **done, 24 October**
+
+The gap this plan had never closed, and the one the pull request comments have
+named for five runs: **thirty-eight readings, and nothing that turns a store
+into one.** Searched before it was built — the only callers of `store.tallies()`
+anywhere in the repository are the store contract tests, and the portal has both
+handles wired up and reads neither.
+
+**Done**
+([0309](../decisions/0309-a-window-of-counters-is-read-into-the-readings-it-holds-and-the-trees-stay-the-callers.md)),
+as [`src/signals/window.ts`](../src/signals/window.ts): `readReaderWindow`,
+`revisionsIn`, `RevisionTrees`, `treesIn` and `windowReadingsOf`.
+
+- **One read with one scope**, over the counters, the funnel answers, the door
+  rows and the region map, with the stores' own request passed to each
+  unchanged. **The first failure is the answer**: a window half of whose rows
+  arrived is a reading whose rate has a denominator from one read and a
+  numerator from another, and the figures would look plausible.
+- **An absent region store is not an empty map.** `regions` is `undefined` for
+  *no store was offered* and `[]` for *the store holds none* — the second time
+  this run's lane has had to tell two kinds of nothing apart, and the same rule
+  (0240).
+- **The revisions come off all four row sets.** A revision with door rows and no
+  counters is the page a deployment most wants to see: *nothing has counted this
+  yet* rather than *nobody read this*, which the reach reading can only publish
+  about a revision it was handed.
+- **The trees stay the caller's**, through a one-method source shaped like the
+  registry declarations (0114, 0122). This lane holds counters, not pages.
+- **A revision that cannot be joined is published with the rows it left
+  unread** — `no-tree` is ordinary, and `mismatched` (a source answering with
+  another page or revision) is refused rather than read, because counters read
+  against the wrong tree answer every question with confident nonsense.
+- **A window of two forms is split into two readings rather than read as
+  neither**, which is 0290 clause 2 carried out rather than reversed: the
+  ambiguity was never in the rows. One reading per page, per revision, per form,
+  with no two sharing a `readingKeyOf` — and `foreign` nought on every one of
+  them, because each is handed its own revision's rows.
+- **It adds no figure of its own.** No count, no sum, no quotient, no silence.
+
+**What it unlocks, which is the point.** The order over a deployment's pages is
+now four lines, and one test does exactly that over the memory store end to end
+— write what an intake and a rollup write, read it back through this rung, and
+ask which page to fix first. Every reading in the subsystem is reachable from a
+store without any of them changing.
+
+**Nothing was added to a payload, a browser, a column, a store method or the
+vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** that **nothing draws any of this** is still
+`Loom portal`'s, and is now one step shorter — what was missing was a rung, and
+the rung exists.
+
+### 52. What a page collects, said to the reader it collects about · `Loom signals` · **done, 24 October**
+
+Not a reading, and the first unit here that is not. Every one of the readings
+above answers a deployment's question; this answers the reader's, which is the
+shorter one — *what does this page report about me?* — and nothing in this
+subsystem could answer it outside this repository.
+
+It is the half of the argument that had nothing behind it. The six rules are
+here, the sentences on `signal.ts` are here, and the person a deployment would
+have to show them to is reading the *deployment's* site. What a deployment could
+do until today is write the list by hand, and a hand-written list of what a
+product collects is right on the day it is written: `completed` landed on
+1 October, `audience` with 0284, `within` with 0167, and each of them would have
+quietly falsified a paragraph somebody wrote in September.
+
+**Done**
+([0313](../decisions/0313-what-a-page-collects-is-published-to-the-reader-it-collects-about.md)),
+as `collectionNoticeOf` in [`src/signals/notice.ts`](../src/signals/notice.ts).
+
+- **The fields are the schema's own and the compiler holds them.** The tables
+  are keyed by `keyof Required<…>` of the batch and of each member of the signal
+  union, so **a payload field with no sentence for a reader does not compile**.
+  `Required` is the deliberate half: `within`, `view`, `audience` and `first` are
+  sometimes absent and are collected, so they are owed a sentence like any other.
+- **A test drives the real broadcaster**, because a type cannot reach the third
+  end of the claim — a field can be in the schema, described in the table, and
+  never sent, or sent and never described. The suite reads a fixture page the way
+  a reader would (a band on screen, a link pressed, a disclosure opened, a form
+  let go), takes the batches that actually came out, and fails on any field or
+  kind the notice does not name. The mutation is a table with `ms` taken out,
+  which has to come back as `ms`.
+- **It is a ceiling and never an understatement.** `kinds` narrows it, because a
+  host wrote that list explicitly. `types` and `within` do not: a deployment
+  reporting on sections only collects less than its notice says. Overstating
+  costs a reader nothing; understating is the one failure this cannot have. A
+  floor would also have cost either a second spelling of `selectionOf` or an
+  exported name in the browser entry point (0218), and a disclosure is not worth
+  bytes in a reader's browser.
+- **`FieldSubject` has five members and no sixth.** The part, the page, the
+  observation, the page view, the delivery. It is rule 1 as a type rather than a
+  sentence: a field about a person could not be described without adding a
+  member, and adding one is a record.
+- **The sentences are addressed to the reader** — *your address is never stored*,
+  not *the reader's* — which makes this the one module in `src/signals/` that
+  speaks to anybody. A sentence in the third person is one a deployment has to
+  rewrite before it can publish it.
+- **Two numbers are the deployment's and nothing else is**: the collection
+  window, reported as given because `collect.ts` is what refuses one below its
+  minimum, and the region floor through `regionFloorOf` so the notice cannot
+  disagree with the map. No region counting offered is a floor of `null`, which
+  is *nothing about where you are is read* and not *your country is counted and
+  withheld until enough others share it*.
+- **Not a consent gate, and no step toward one.** There is nothing in today's
+  collection to consent to — a signal is anonymous and node-shaped, correlation
+  is scoped to one page view, and neither is configurable (0146). Per-reader
+  identity stays parked; a gate needs a recorded decision per reader, which is a
+  different artefact, and a notice does not become one by being read.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — and nothing was derived from a counter either, which is new here:
+it is the first unit in this plan built for somebody other than a deployment.
+`broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** that nothing prints the notice, which is two
+findings rather than one — a deployment's own privacy page is the host's, and the
+guide at */docs/the-runtime/what-your-readers-do* could print this instead of
+describing it; the region map the §51 rung leaves a caller to assemble; and
+`0308`, which is the maintainer's.
+
 ### 53. A batch delivered twice is folded once · `Loom signals` · **done, 25 October**
 
 Not a reading and not a correction of one: a gap in the thing every reading is
@@ -3191,7 +3356,6 @@ keep — and it touches the region floor, so it is the maintainer's to read; the
 sequence number, with its cost; the one `NUL` byte left in `src/runtime/`, which
 is another lane's; and still that **nothing draws any of this**, which is
 `Loom portal`'s.
-
 
 ## Still not in scope
 
