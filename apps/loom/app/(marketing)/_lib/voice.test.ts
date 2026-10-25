@@ -600,6 +600,77 @@ const scannedCopyOf = (route: SiteRoute): readonly ReaderString[] =>
     ({ field }) => SCANNED_PROPS.includes(field.split(".").slice(-1)[0] ?? "")
   )
 
+/**
+ * A headline, which is the field this site's worst habit lives in.
+ *
+ * `loom.heading` carries its words as a text node and the cell primitives carry
+ * theirs as a `title` prop, so the two spellings are both here. Nothing else
+ * counts: the rule below is deliberately not about every sentence, and
+ * **the boundary was measured rather than chosen.**
+ */
+const isHeadline = (field: string): boolean =>
+  field === "loom.heading#text" || field.endsWith(".title")
+
+const headlinesOf = (route: SiteRoute): readonly ReaderString[] =>
+  readerCopy(treeFor(route, { theme: DEFAULT_THEME }).root).filter(({ field }) =>
+    isHeadline(field)
+  )
+
+/**
+ * **No headline ends in a comma and then a clause**, which is the maintainer's
+ * ruling of 24 October made checkable.
+ *
+ * The sentence that caused it, and his words for it:
+ *
+ * > *"Stop saying stuff like this "You decide what may change, before anyone
+ * > asks"… it's not that what you are saying is incorrect, it's that no one
+ * > talks like that. It is obvious AI written crap and is not allowed."*
+ *
+ * The tell is a trailing clause that carries no fact. It is there for rhythm,
+ * and read aloud it sounds like an advertisement rather than an explanation. It
+ * is the mirror of the habit `docs/routines.md` already bans — *no sentence
+ * opening on a negation to set up a reveal* — and it arrived on this site the
+ * same way that one did: nobody chose it, each run wrote in the register of the
+ * run before it.
+ *
+ * ## Why headlines and not every sentence
+ *
+ * Measured before the rule was written, over the three pages as authored: a
+ * check for *any* sentence ending in a short comma clause flags **34 strings**,
+ * and among them are
+ *
+ * > *"Pick the model you already use, or bring your own."*
+ * > *"Anything else gets rejected, and Loom tells you why."*
+ *
+ * which are the maintainer's own register, built on his own line of 1 October.
+ * A rule that bans those is a rule that bans the thing the site is trying to
+ * sound like. **In a sentence the second clause usually carries a fact; in a
+ * headline it is almost always a flourish**, and the same sweep over headlines
+ * alone caught **9 of 49, every one of them this lane's and none of them his.**
+ *
+ * So the rule is narrow on purpose, and the ones it cannot see are left to
+ * `docs/positioning.md`' table and to whoever is reading the draft.
+ *
+ * **If this fails, the fix is a rewrite and not a comma** — `routines.md` says
+ * it of the em-dash rule and it is truer here, because the flourish survives
+ * losing its punctuation and a headline that drops the comma has bought
+ * nothing.
+ */
+describe("a headline on this site", () => {
+  it.each(SITE_ROUTES)("$path ends none of them on a flourish", (route) => {
+    const trailing = headlinesOf(route)
+      .filter(({ text }) => /,[^,]*$/.test(text.trim()))
+      .map(({ field, text }) => `${field}: ${text}`)
+
+    expect({ route: route.path, trailing }).toEqual({ route: route.path, trailing: [] })
+  })
+
+  /** And it read some: a page with no headline passes the rule over nothing. */
+  it.each(SITE_ROUTES)("$path has headlines for the rule to read", (route) => {
+    expect(headlinesOf(route).length).toBeGreaterThanOrEqual(4)
+  })
+})
+
 describe("the copy a reader scans rather than reads", () => {
   it.each(SITE_ROUTES)("$path keeps a scanned field to something scannable", (route) => {
     const tooLong = scannedCopyOf(route)

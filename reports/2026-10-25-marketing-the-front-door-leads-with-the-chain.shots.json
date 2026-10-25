@@ -1,0 +1,53 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/",
+      "out": "2026-10-25-marketing-front-door-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/",
+      "out": "2026-10-25-marketing-front-door-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/?theme=editorial",
+      "out": "2026-10-25-marketing-front-door-editorial",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-10-25-marketing-front-door-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/",
+      "out": "2026-10-25-marketing-the-chain",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "xpath=//*[text()='Start to finish']/../..",
+      "measure": [
+        "text=Start to finish",
+        "text=Greater user engagement and conversion",
+        "text=A web page that rearranges itself around the people using it"
+      ]
+    },
+    {
+      "path": "/",
+      "out": "2026-10-25-marketing-the-chain-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "clip": "xpath=//*[text()='Start to finish']/../.."
+    }
+  ]
+}

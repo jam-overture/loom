@@ -67,7 +67,7 @@ const hero = (ids: IdFactory): LoomNode =>
       eyebrow: "Before you install anything",
     },
     children: [
-      buildSlot(ids, "heading", [heading(ids, 1, "It runs in your app, not in front of it", { balance: true })]),
+      buildSlot(ids, "heading", [heading(ids, 1, "It runs inside your app rather than in front of it", { balance: true })]),
       prose(
         ids,
         "There is no machine of ours between you and your visitor. You install a package, it runs on your own hardware at your own address, and nothing here has to be reachable for your site to stay up.",
@@ -86,7 +86,7 @@ const whatYouBring = (ids: IdFactory): LoomNode =>
      * that steps in, back out and in again down the length of the page.
      */
     { width: "wide", eyebrow: "What you bring" },
-    "Your own components, never rewritten",
+    "Loom never rewrites your components",
     [
       prose(
         ids,
@@ -117,7 +117,7 @@ const whatLeaves = (ids: IdFactory): LoomNode =>
   splitSection(
     ids,
     { width: "wide", eyebrow: "What leaves your server" },
-    "One request, and only when somebody asks",
+    "Your server calls the model only when somebody asks",
     [
       prose(
         ids,
@@ -174,7 +174,7 @@ const whatIsCounted = (ids: IdFactory): LoomNode =>
   splitSection(
     ids,
     { width: "wide", eyebrow: "What this page counts", anchor: COUNTED_ANCHOR },
-    "Which parts you reach, and never who you are",
+    "It counts which parts you reach and never who you are",
     [
       prose(
         ids,

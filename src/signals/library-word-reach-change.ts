@@ -416,6 +416,10 @@ export type ReaderWords = {
    * The arithmetic a comparison of two readerships uses (0247), over pages
    * rather than regions. **Published and never judged**, and published under a
    * floor as well, because there is no word in it.
+   *
+   * `null` is withheld with the rest of the row, and only that: a measured row
+   * banked a page whose two doors both spoke, so the distance is a number
+   * wherever this roll publishes figures at all (0307).
    */
   readonly weightMoved: number | null
   /** Appearances in excess of openings in the earlier window, over the weighted pages. */
