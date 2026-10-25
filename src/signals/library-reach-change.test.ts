@@ -20,6 +20,7 @@ import {
   pageReadingOf,
   READER_SHARE_CAUSES,
   READING_SIDES,
+  weightMovedOver,
   type KindReachChange,
   type LibraryWindow,
   type PartDeclarations,
@@ -1121,5 +1122,119 @@ describe("a library that gained a form rather than a page", () => {
 
     expect(change.audiences).toEqual({ was: [SKIERS], now: [RIDERS, SKIERS] })
     expect(change.pages).toBe(1)
+  })
+})
+
+/**
+ * The exported helper on its own, which it did not have before (0307).
+ *
+ * It is imported by the two library rolls and by nothing else, and both of them
+ * call it only where their silence is `null` — so the one branch in it that
+ * tells a surface something neither roll can reach, and neither roll's suite
+ * could reach either. A clause nothing can falsify is its own fault (0231), so
+ * the clause is tested here, where the function's own callers are the test.
+ */
+describe("how far the weights moved, as the helper both library rolls divide by", () => {
+  it("is nought where the two sides are weighted alike, however much traffic there is", () => {
+    expect(
+      weightMovedOver(
+        [
+          { was: 100, now: 500 },
+          { was: 100, now: 500 },
+        ],
+        { was: 200, now: 1000 }
+      )
+    ).toBe(0)
+  })
+
+  it("is one where the two sides have no weight in common", () => {
+    expect(
+      weightMovedOver(
+        [
+          { was: 100, now: 0 },
+          { was: 0, now: 100 },
+        ],
+        { was: 100, now: 100 }
+      )
+    ).toBe(1)
+  })
+
+  it("is half the sum of the absolute movements, and not the sum", () => {
+    expect(
+      weightMovedOver(
+        [
+          { was: 80, now: 20 },
+          { was: 20, now: 80 },
+        ],
+        { was: 100, now: 100 }
+      )
+    ).toBeCloseTo(0.6, 10)
+  })
+
+  /**
+   * The three states the finding of 22 October was about. A nought here is the
+   * one value a surface reads as *the weights did not move*, and a side with no
+   * weight at all has no distance to report rather than a distance of nought —
+   * which is what 0247's own reading says in the same state, by withholding
+   * `moved`.
+   */
+  it("withholds the distance where the earlier side has no weight at all", () => {
+    expect(weightMovedOver([{ was: 0, now: 100 }], { was: 0, now: 100 })).toBeNull()
+  })
+
+  it("withholds the distance where the later side has no weight at all", () => {
+    expect(weightMovedOver([{ was: 100, now: 0 }], { was: 100, now: 0 })).toBeNull()
+  })
+
+  it("withholds the distance where neither side has any weight", () => {
+    expect(weightMovedOver([], { was: 0, now: 0 })).toBeNull()
+  })
+
+  /**
+   * The other half of the finding, which was whether either roll can reach the
+   * clause at all. It cannot: a door that can scale a page has counted at least
+   * one page view at it, a row is measured only where every comparable place's
+   * two doors could scale it, and a measured row has at least one comparable
+   * place. So the invariant is asserted rather than left as a sentence in a
+   * comment — if a later change lets a measured row through with no weight on a
+   * side, this says so and the published `null` stops being unreachable.
+   *
+   * **The library is built so that the walk has something to say in both
+   * directions**, and the withheld half is the one that takes building: the
+   * quote stands on two pages, one of which the earlier window's door cannot
+   * scale, so its row is withheld **while carrying the other page's weight**.
+   * A withheld row with no weight at all would be withheld whatever the code
+   * did with it, and a walk over nothing but those cannot tell the row's own
+   * guard from the helper's.
+   */
+  it("is a number on every row either roll publishes figures for, and nothing else", () => {
+    const here = page({ treeId: TREE })
+    const there = page({ treeId: OTHER_TREE, quote: "loom.testimonial" })
+    const scalable = read(there, { opened: 50, appearances: 50, reached: 25 })
+    const change = libraryReachChangeOf(
+      {
+        readings: [read(here, { opened: 10, appearances: 10, reached: 2 }).reading, scalable.reading],
+        rows: [scalable.row],
+      },
+      windowOf([
+        read(here, { opened: 10, appearances: 10, reached: 8 }),
+        read(there, { opened: 50, appearances: 50, reached: 40 }),
+      ])
+    )
+    const rows = [...change.byType, ...change.byRole]
+
+    /** The testimonial, which stands only on the page both doors can scale. */
+    expect(typeRow(change, "loom.testimonial")?.silence).toBeNull()
+    /**
+     * The section, which stands on both — so its row is withheld for the page
+     * the earlier door cannot reach while carrying the other page's weight,
+     * which is the state a walk over withheld rows with no weight cannot see.
+     */
+    expect(typeRow(change, "loom.section")?.silence).toBe("unscaled")
+    expect(typeRow(change, "loom.section")?.countedNow).toBeNull()
+
+    for (const row of rows) {
+      expect(row.weightMoved === null).toBe(row.silence !== null)
+    }
   })
 })
