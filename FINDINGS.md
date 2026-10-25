@@ -59669,3 +59669,41 @@ it, and a module no search can read is one whose every claim has to be taken on
 trust. The remedy is `"\u0000"` in place of the byte — identical at runtime, no
 behaviour to re-test — and then widening `source-text.test.ts`'s `LANE` from
 `src/signals` to `src`, which is the one-line change its own comment names.
+
+---
+## 2026-10-25 — a twelfth counted reading of the mangling: 187 mangled and 141 clean in one body, both `[…](…)` by branch name
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 16 October entry *two more counted readings for the mangling, and
+a 152-character URL that came back clean in the body that mangled a 164* and the
+chain it extends · **Status:** open — **one more pair, measured on purpose**,
+and it is consistent with every previous reading
+
+#708's body, posted tonight. Counted with `len()` over the exact strings, before
+and after posting:
+
+| characters | where | syntax | came back |
+| --- | --- | --- | --- |
+| 82 | the preview deployment | bare | **clean** |
+| 141 | the report, by branch name | `[…](…)` | **clean** |
+| 187 | the record, by branch name | `[…](…)` | mangled |
+
+The 187 came back with `` `` `` injected around the URL inside the parens, which
+is the same injection every previous entry in this chain records. Rendered, the
+line read *record [0314](``https://…md),`` accepted* — the comma swallowed into
+the code span, which is how it was noticed.
+
+**It narrows nothing and contradicts nothing.** 141 clean and 187 mangled sits
+inside the bracket the chain already has: the 16 October entry's 152 came back
+clean and its 164 did not, so the boundary is somewhere in 153–163 and these two
+readings are both outside it. What this pair adds is that **the two were in one
+body**, which rules out one more explanation the chain had left open — that the
+bracket moves with how much text surrounds a link, or with how many links a body
+carries. Two `[…](…)` links by branch name, same body, same post, one mangled and
+one not, differing only in length.
+
+**The remedy used, for whoever hits it next:** the mangled line was rewritten to
+name the file in backticks rather than link it, and the body re-posted via
+`update_pull_request` came back clean. A path in a code span is not a link, which
+is a real loss on a record a reviewer wants to open — the shorter report link
+below it in the same body is still a link, because it fits.
