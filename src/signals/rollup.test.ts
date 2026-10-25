@@ -10,12 +10,28 @@ import {
   dwelled,
   nodeId,
   OTHER_TREE,
+  primitiveType,
   TREE,
   viewed,
   viewKey,
 } from "../testing/reader-signal-contract.js"
 
 import { rollUp, type FunnelPair } from "./rollup.js"
+import type { ReaderSignal } from "./signal.js"
+
+/**
+ * A press at a stamp of its own.
+ *
+ * Spelled out rather than spread onto `activated`, because the stamp is what
+ * tells two presses apart and a helper that defaulted it would be the thing
+ * under test.
+ */
+const pressedAt = (name: string, at: number): ReaderSignal => ({
+  kind: "activated",
+  nodeId: nodeId(name),
+  type: primitiveType("loom.button"),
+  at,
+})
 
 const PAIR: FunnelPair = {
   from: { nodeId: nodeId("pricing"), kind: "viewed" },
@@ -285,11 +301,12 @@ describe("rollUp", () => {
     it("sums two submissions in one page view without counting the view twice", () => {
       const rollup = rollUp([
         batchOf([completed("signup")], { view: viewKey(1) }),
-        batchOf([completed("signup")], { view: viewKey(1) }),
+        batchOf([completed("signup")], { view: viewKey(1), sentAt: 2_000 }),
       ])
 
       expect(tallyFor(rollup, "signup")).toMatchObject({ completions: 2, views: 1 })
       expect(rollup.views).toBe(1)
+      expect(rollup.redelivered).toBe(0)
     })
 
     /**
@@ -410,6 +427,144 @@ describe("rollUp", () => {
       ])
 
       expect(rollup.tallies.filter((tally) => tally.nodeId === nodeId("pricing"))).toHaveLength(2)
+    })
+  })
+
+  /**
+   * The repeat that would otherwise be permanent (0158), and the shape of the
+   * damage is why it needs a guard of its own: a batch arriving twice adds its
+   * view key to a set that already holds it and moves no view counter at all,
+   * while every occurrence counter beside it doubles. So the symptom is not a
+   * number that looks wrong — it is a rate that looks like enthusiasm.
+   */
+  describe("a batch delivered twice", () => {
+    const twice = (batch: ReturnType<typeof batchOf>) => rollUp([batch, batch])
+
+    it("is folded once, so the occurrences do not double", () => {
+      const rollup = twice(
+        batchOf([dwelled("hero", 400), activated("buy"), completed("signup")], {
+          view: viewKey(1),
+        })
+      )
+
+      expect(tallyFor(rollup, "hero")).toMatchObject({ dwellMs: 400 })
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 1 })
+      expect(tallyFor(rollup, "signup")).toMatchObject({ completions: 1 })
+      expect(rollup.redelivered).toBe(1)
+    })
+
+    it("counts both halves of a disclosure once", () => {
+      const rollup = twice(batchOf([disclosedIn("faq", true, "help")], { view: viewKey(1) }))
+
+      expect(tallyFor(rollup, "faq")).toMatchObject({ opens: 1, closes: 0 })
+      expect(tallyFor(rollup, "help")).toMatchObject({ engaged: 1 })
+      expect(rollup.redelivered).toBe(1)
+    })
+
+    /**
+     * The property that makes the refusal safe to add to a subsystem whose
+     * figures are already published: a repeat could never have moved a view
+     * counter, so refusing it cannot move one either. Every number here is what
+     * the same window reports with the repeat left in.
+     */
+    it("changes no figure that a set of view keys was already protecting", () => {
+      const batch = batchOf([viewed("pricing"), activated("buy")], { view: viewKey(1) })
+
+      const folded = rollUp([batch, batch], { pairs: [PAIR] })
+      const once = rollUp([batch], { pairs: [PAIR] })
+
+      expect(folded.views).toBe(once.views)
+      expect(folded.appearances).toEqual(once.appearances)
+      expect(folded.funnels).toEqual(once.funnels)
+      expect(tallyFor(folded, "pricing")?.reached).toBe(tallyFor(once, "pricing")?.reached)
+    })
+
+    it("counts the repeats of a whole delivery, not just the first", () => {
+      const batch = batchOf([activated("buy")], { view: viewKey(1) })
+      const rollup = rollUp([batch, batch, batch, batch])
+
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 1 })
+      expect(rollup.redelivered).toBe(3)
+    })
+
+    /**
+     * Every field of the key, one per case, because a key that ignored any of
+     * them would silently drop a batch that is not a repeat — the one mistake
+     * worse than the one being prevented.
+     */
+    it.each([
+      ["a later flush", { sentAt: 2_000 }],
+      ["another page view", { view: viewKey(2) }],
+      ["another revision", { revision: 2 }],
+      ["another tree", { treeId: OTHER_TREE }],
+      ["the opening delivery", { first: true as const }],
+    ])("is not what %s is, so both are folded", (_what, overrides) => {
+      const rollup = rollUp([
+        batchOf([activated("buy")], { view: viewKey(1) }),
+        batchOf([activated("buy")], { view: viewKey(1), ...overrides }),
+      ])
+
+      expect(rollup.redelivered).toBe(0)
+      expect(
+        rollup.tallies
+          .filter((tally) => tally.nodeId === nodeId("buy"))
+          .reduce((total, tally) => total + tally.activations, 0)
+      ).toBe(2)
+    })
+
+    it("is not what a second press in the same flush is", () => {
+      const rollup = rollUp([
+        batchOf([activated("buy")], { view: viewKey(1) }),
+        batchOf([pressedAt("buy", 1_200)], { view: viewKey(1) }),
+      ])
+
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 2 })
+      expect(rollup.redelivered).toBe(0)
+    })
+
+    /**
+     * The ancestry is read off the live DOM when the press happens, and a page
+     * changes under a reader — a client component mounting or a boundary
+     * resolving moves a control into a band it was not in. So two presses on
+     * one node can differ in nothing but the band they were inside, and each
+     * band is owed its credit.
+     */
+    it("is not what the same press inside another band is, so neither band loses its credit", () => {
+      const rollup = rollUp([
+        batchOf([activatedIn("buy", "pricing")], { view: viewKey(1) }),
+        batchOf([activatedIn("buy", "plans")], { view: viewKey(1) }),
+      ])
+
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 2 })
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ engaged: 1 })
+      expect(tallyFor(rollup, "plans")).toMatchObject({ engaged: 1 })
+      expect(rollup.redelivered).toBe(0)
+    })
+
+    it("is not what a second stretch of the same length is, where the stamps differ", () => {
+      const rollup = rollUp([
+        batchOf([dwelled("hero", 400)], { view: viewKey(1) }),
+        batchOf([dwelled("hero", 400)], { view: viewKey(1), sentAt: 2_000 }),
+      ])
+
+      expect(tallyFor(rollup, "hero")).toMatchObject({ dwellMs: 800 })
+      expect(rollup.redelivered).toBe(0)
+    })
+
+    /**
+     * The stated limit, asserted so that nobody reads the guard as wider than
+     * it is. Without a view key two identical batches are as likely to be two
+     * readers in the same millisecond as one batch arriving twice, and dropping
+     * a reader is the worse mistake — so both are folded and `uncorrelated`
+     * says how many could not be judged.
+     */
+    it("cannot be told from a coincidence where there is no view key", () => {
+      const batch = batchOf([activated("buy")])
+      const rollup = rollUp([batch, batch])
+
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 2 })
+      expect(rollup.redelivered).toBe(0)
+      expect(rollup.uncorrelated).toBe(2)
     })
   })
 

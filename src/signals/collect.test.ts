@@ -227,6 +227,36 @@ describe("collectReaderSignals", () => {
     })
   })
 
+  /**
+   * A retry queue draining into a window that already holds what it is
+   * retrying. The batches are read and forgotten like any others — so `counted`
+   * is all four — and the counters move as if there were two, which is the
+   * repeat `rollup.ts` refuses. The number is on the summary so that an
+   * operator seeing it every run knows to go and find the sender.
+   */
+  it("reports the repeats a window held and does not count them twice", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    const once = batchOf([viewed("pricing"), dwelled("pricing", 400)], { view: viewKey(1) })
+    const twice = batchOf([viewed("pricing"), dwelled("pricing", 600)], { view: viewKey(2) })
+
+    await journal.receive([once, twice, once, twice])
+    time.moveTo(0)
+
+    const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(outcome).toMatchObject({
+      outcome: "collected",
+      removed: 4,
+      summary: { counted: 4, views: 2, redelivered: 2 },
+    })
+    expect(unwrap(await store.tallies({ treeId: TREE }))).toContainEqual(
+      expect.objectContaining({ nodeId: nodeId("pricing"), dwellMs: 1_000, views: 2, reached: 2 })
+    )
+  })
+
   it("counts a ripe window into the counters and empties the buffer", async () => {
     const { journal, store, time } = await ripeBuffer()
 
@@ -449,7 +479,14 @@ describe("collectReaderSignals", () => {
 describe("describeCollection", () => {
   const line = (outcome: CollectionOutcome): string => describeCollection(outcome)
 
-  const summary = { counted: 2, tallies: 1, funnels: 0, views: 2, uncorrelated: 0 }
+  const summary = {
+    counted: 2,
+    tallies: 1,
+    funnels: 0,
+    views: 2,
+    uncorrelated: 0,
+    redelivered: 0,
+  }
 
   it("says what a run counted and what it dropped", () => {
     expect(line({ outcome: "collected", summary, removed: 2, more: false })).toBe(
@@ -467,6 +504,12 @@ describe("describeCollection", () => {
     expect(
       line({ outcome: "collected", summary: { ...summary, uncorrelated: 1 }, removed: 2, more: false })
     ).toContain("1 with no view key")
+  })
+
+  it("names the repeats, because a sender retrying is a thing to go and find", () => {
+    expect(
+      line({ outcome: "collected", summary: { ...summary, redelivered: 1 }, removed: 2, more: false })
+    ).toBe("counted 2 batches into 1 tally over 2 views, 1 delivered again and folded once, and forgot 2")
   })
 
   it("inflects a single batch", () => {

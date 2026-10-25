@@ -173,6 +173,17 @@ export type CollectionSummary = {
    * failure mode here, so the number travels with the run that produced it.
    */
   readonly uncorrelated: number
+  /**
+   * Of the batches counted, how many were a repeat of one already folded in
+   * this window and were therefore folded once (`rollup.ts`).
+   *
+   * A subset of `counted` rather than a number beside it: every one of them was
+   * read from the buffer and is forgotten with the rest. Non-zero every run is
+   * a sender retrying deliveries it already made, which is worth finding — and
+   * the figure is in the run's outcome rather than in a stored row because a
+   * fold's own numbers are not durable, only the counters it produced are.
+   */
+  readonly redelivered: number
 }
 
 export type CollectionOutcome =
@@ -316,6 +327,7 @@ export const collectReaderSignals = async (
     funnels: folded.reduce((total, { rollup }) => total + rollup.funnels.length, 0),
     views: folded.reduce((total, { rollup }) => total + rollup.views, 0),
     uncorrelated: folded.reduce((total, { rollup }) => total + rollup.uncorrelated, 0),
+    redelivered: folded.reduce((total, { rollup }) => total + rollup.redelivered, 0),
   }
 
   /**
@@ -355,6 +367,14 @@ const batches = (count: number): string => `${count} ${count === 1 ? "batch" : "
 const uncorrelated = (summary: CollectionSummary): string =>
   summary.uncorrelated === 0 ? "" : `, ${summary.uncorrelated} with no view key`
 
+/**
+ * Said only when there were some, in the same clause-after-the-count shape
+ * `uncorrelated` uses, because a line that always carries a nought trains an
+ * operator to stop reading it.
+ */
+const redelivered = (summary: CollectionSummary): string =>
+  summary.redelivered === 0 ? "" : `, ${summary.redelivered} delivered again and folded once`
+
 /** One line for an operator, because an outcome nobody can read is one nobody acts on. */
 export const describeCollection = (outcome: CollectionOutcome): string => {
   switch (outcome.outcome) {
@@ -363,7 +383,9 @@ export const describeCollection = (outcome: CollectionOutcome): string => {
         outcome.summary.tallies === 1 ? "tally" : "tallies"
       } over ${outcome.summary.views} ${outcome.summary.views === 1 ? "view" : "views"}${uncorrelated(
         outcome.summary
-      )}, and forgot ${outcome.removed}${outcome.more ? " — more is waiting" : ""}`
+      )}${redelivered(outcome.summary)}, and forgot ${outcome.removed}${
+        outcome.more ? " — more is waiting" : ""
+      }`
     case "nothing-ripe":
       return `nothing old enough to count${
         outcome.waiting === 0 ? "" : `, ${batches(outcome.waiting)} waiting`

@@ -59524,3 +59524,148 @@ menu above it uses. Three shapes:
 **Recommendation: 3 until the prop takes a word, then 2.** Marking it `page`
 today would be this site using the wrong word in the one place it is making a
 claim about saying exactly what is going on.
+
+---
+## 2026-10-25 — the door counts a repeated opening batch twice across two deliveries, and the region floor is what that reaches
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit`, because the
+remedy contradicts a sentence of
+[0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)
+and the second half of it is about a privacy floor rather than a number ·
+**Status:** open — **the half of the repeat that
+[0314](decisions/0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md)
+could not close**
+
+0314 made a repeated batch fold once, in `rollup.ts`, keyed on what the batch
+already carries. The door is a different problem and this is what is left of it.
+
+`openingsOf` in `src/signals/page-views.ts` collects the view keys of the batches
+that carry `first: true` into a `Set`, so **within one delivery** a repeated
+opening counts one arrival and one region count. The door keeps nothing between
+requests, so **across two deliveries** it counts two of each. A host's retry
+queue draining after an outage — the case `MAX_BATCHES_PER_DELIVERY` exists to
+allow — re-sends in a later request by construction.
+
+**Two counters move, and the second is the one worth your reading.**
+
+1. **Arrivals** (`loom_reader_page_views.opened`). Over-counting them makes
+   `doorOf`'s `counted` — `min(appearances, opened)` — sit on an `opened` that is
+   too large, so the drift between the door and the fold reads as a rollup window
+   set too short rather than as a sender retrying. Every share of readers that
+   three library readings take is at the door's scale (0250, 0256, 0265), so the
+   denominator is the one that moves.
+2. **Region buckets** (`loom_reader_regions`). The rule the maintainer set is
+   that a bucket is kept only once enough views are in it, because *country plus
+   a handful of views is a person* — `DEFAULT_REGION_FLOOR` is 25. A retry queue
+   inflates a bucket with arrivals that are not readers, so **a bucket can reach
+   the floor on fewer real readers than the floor was chosen to require.** It
+   does not leak an address and it does not store one; it weakens the one number
+   standing between a country count and a small group of people, which is a
+   different kind of fault from a wrong figure.
+
+**Why it cannot be closed the way the fold's half was.** The fold holds its whole
+window in memory and so can ask whether it has seen a batch. The door cannot: the
+remedy is for it to remember the view keys it has already admitted, and 0146's
+own words in `signal.ts` call that *"the one value nothing is allowed to keep"* —
+which is why `first` exists at all. So this is a record, not a judgement call.
+
+### Three shapes, costed
+
+1. **Nothing.** Defensible today: Loom's own deliverer never retries —
+   `deliver.ts` reads no response and says a page has no retry to attempt — so
+   the exposure is a host writing their own `send`, which the framework invites
+   and does not ship. The cost is that the one host who writes one weakens their
+   own region floor and cannot be told.
+2. **Let the door read the buffer it just wrote.** The buffer already holds the
+   view key as a column for exactly the retention window, so *have I seen this
+   view key* is answerable without keeping anything new — the value's lifetime is
+   unchanged and it is already stored. It costs one indexed read per delivery
+   that carries an opening, plus an index the buffer does not have (its only one
+   leads with the application and the tree). It does not contradict 0146 on its
+   own terms, because nothing is *kept* that was not already kept; it contradicts
+   the sentence that says the door must not look.
+3. **Raise the region floor** and leave the arrival count alone. Cheapest and
+   least honest: it buys margin against a fault nobody has measured, at the cost
+   of withholding countries a deployment legitimately has readers in.
+
+**Recommendation: 2, if you want it closed, and 1 until you say so.** 2 is the
+only shape that fixes the cause, and it needs your word because the sentence it
+steps over is in an accepted record. What would change my mind is a measurement:
+nobody has yet seen a retry queue in the wild here, and 0314's `redelivered`
+figure is the instrument — a deployment whose runs report repeats every day has
+this, and one that never reports any does not.
+
+---
+## 2026-10-25 — a sequence number per page view would make a repeated delivery exact, and it costs 7 bytes of wire per batch for ever
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit` — it is a
+field on the wire, which is the one thing this lane is told to ask about before
+adding · **Status:** open — **not a defect**; it is the alternative
+[0314](decisions/0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md)
+weighed and did not take, filed with its number so the choice stays open
+
+0314 tells a repeated delivery from a real one by deriving an identity from what
+a batch already carries: tree, revision, view key, `sentAt`, audience, whether it
+is the opening delivery, and every field of every signal. It is exact except
+under one condition, which `broadcast.test.ts` pins rather than argues away: with
+a clock that does not advance at all, a page whose opening delivery is already
+spent and which records the same press on the same node twice with a flush
+between them sends two batches a fold cannot tell apart, and one occurrence is
+lost. It needs two flushes and a repeated identical event inside one millisecond
+— no reader does that; a script dispatching synthetic events can.
+
+**The exact fix is a monotonic batch number per page view**, minted by the
+broadcaster beside the view key: `n: 0, 1, 2, …`. Two deliveries of one batch
+carry the same number and two real flushes never do, whatever the clock did.
+
+**What it costs, counted rather than estimated.** `"n":12,` is **7 bytes** of
+JSON at two digits, 6 at one, on every batch of every page view of every
+deployment that switches signals on, for ever. A page view that flushes ten times
+pays 70. Against that, the broadcaster's own cost is unmeasured because it is
+unbuilt — rule 4 says a browser change is measured in bytes before it is
+proposed, and this is the proposal, not the change.
+
+**It also has a shape worth noticing.** A per-view counter is not a per-reader
+id: it resets with the view key, it is derived from nothing about the reader, and
+it is dropped with the raw window. But it is the first field on a batch whose
+*job* is to be an identifier, and a field like that invites being made stable
+later — which is the direction the parked work (per-reader identity, 30
+September) would walk through. It would need the same sentence `view` has.
+
+**Recommendation: do not take it.** The derived test covers every case a browser
+produces, the loss case needs a page actively dispatching synthetic events into
+its own measurement, and 7 bytes per batch on every customer's site is a
+permanent cost for a hypothetical. What would change my mind is a deployment
+reporting repeats every run *and* losing occurrences — the first is now visible
+as `redelivered` and the second is not, which is the honest reason to leave the
+door open rather than close it.
+
+---
+## 2026-10-25 — one source file in `src/runtime/` carries a literal NUL byte, so no content search can read it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`src/runtime/repointing.ts`) · **Status:** open — **small, nothing is broken,
+and the remedy is one character**
+
+`src/signals/rollup.ts` keyed its tallies with template literals holding a
+**literal `NUL` byte** as the separator — the byte written into the file rather
+than an escape. The value was right and the spelling made the busiest module in
+that directory binary to every content search there is: `grep` and `ripgrep`
+report `binary file matches` and print no lines, so every search of the
+repository silently skipped it. Four of them were in it, and the search that
+found them was looking for something else entirely.
+
+It is fixed there, as a single `SEP` constant spelled `"\u0000"`, and
+`src/signals/source-text.test.ts` now fails on a control byte anywhere under
+`src/signals/`
+([0314](decisions/0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md)).
+
+**One occurrence is left, and it is yours:** `src/runtime/repointing.ts`. Counted
+by reading every `.ts` file in the repository as bytes; those two files are the
+only ones in it.
+
+**Why it is worth the minute.** Seven routines audit this repository by searching
+it, and a module no search can read is one whose every claim has to be taken on
+trust. The remedy is `"\u0000"` in place of the byte — identical at runtime, no
+behaviour to re-test — and then widening `source-text.test.ts`'s `LANE` from
+`src/signals` to `src`, which is the one-line change its own comment names.

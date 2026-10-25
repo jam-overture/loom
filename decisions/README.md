@@ -402,3 +402,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0310](0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |
 | [0311](0311-a-refusal-whose-key-was-right-is-counted-against-its-project-and-one-without-one-is-not.md) | A refusal whose key was right is counted against its project, and one without one is not | Proposed | §5 (portal), §4c (reader signals) |
 | [0312](0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md) | A site hands Loom a snapshot of its pages with a secret key, and Loom never runs its code | Accepted | §5 (portal), §1 |
+| 0313 | *No record on this branch* | — | — |
+| [0314](0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md) | A batch delivered twice is folded once, and the window is how wide that promise is | Accepted | §4c (reader signals) |

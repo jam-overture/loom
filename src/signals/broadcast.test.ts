@@ -903,6 +903,63 @@ describe("broadcastReaderSignals", () => {
     })
   })
 
+  /**
+   * What the fold is entitled to assume, asserted against the thing that sends
+   * rather than against a fixture.
+   *
+   * `rollUp` folds a batch once where an identical one came before it in the
+   * same window, because an identical batch is one delivered twice and its
+   * occurrences would otherwise double for ever (0158). That is only safe if a
+   * page cannot *legitimately* send the same batch twice — so this drives the
+   * real broadcaster at the hardest case there is, the same press on the same
+   * node flushed twice, and reads the batches the way the fold reads them.
+   */
+  describe("what a fold may treat as one delivery arriving twice", () => {
+    const press = () => void (byId("n_3").querySelector("span") as HTMLElement).click()
+
+    /** Only the fields `rollup.ts` keys a delivery by. */
+    const asFolded = (batch: ReaderSignalBatch) =>
+      JSON.stringify([batch.sentAt, batch.first ?? false, batch.signals])
+
+    it("sends two distinguishable batches for the same press repeated, as a clock that moves makes it", () => {
+      const batches = start()
+
+      for (const _ of [0, 1, 2]) {
+        press()
+        broadcast?.flush()
+        clock += 1
+      }
+
+      expect(batches).toHaveLength(3)
+      expect(new Set(batches.map(asFolded)).size).toBe(3)
+    })
+
+    /**
+     * **The stated limit, pinned rather than claimed away.** Freeze the clock
+     * and the opening delivery is still distinguishable — it carries `first` —
+     * but the second and third flushes are not, so a fold would read the third
+     * as the second arriving again and drop one press.
+     *
+     * It needs two flushes and a repeated press inside one millisecond with the
+     * opening already spent, which no reader produces and a script dispatching
+     * synthetic events can. Losing one occurrence there is the price of not
+     * doubling every occurrence on every retry, and the trade is written down in
+     * the record rather than hidden here.
+     */
+    it("sends an indistinguishable pair only where the clock does not move at all", () => {
+      const batches = start()
+
+      for (const _ of [0, 1, 2]) {
+        press()
+        broadcast?.flush()
+      }
+
+      expect(batches).toHaveLength(3)
+      expect(batches[0]?.first).toBe(true)
+      expect(asFolded(batches[1] as ReaderSignalBatch)).toBe(asFolded(batches[2] as ReaderSignalBatch))
+    })
+  })
+
   it("reads a page the render seam addressed", () => {
     const { tree } = sampleTree()
     document.body.innerHTML = renderToStaticMarkup(
