@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-import { currentActor } from "@/app/(portal)/_lib/auth/identity"
+import { currentActor, passwordsOffered } from "@/app/(portal)/_lib/auth/identity"
 import { safeReturnPath } from "@/app/(portal)/_lib/auth/paths"
 import { portalAuth } from "@/app/(portal)/_lib/auth/config"
 import { authReadout } from "@/app/(portal)/_lib/signin-view"
@@ -23,7 +23,13 @@ const SignInPage = async ({ searchParams }: { searchParams: Promise<{ from?: str
   /** Already signed in: nothing to do here, and a second sign-in is not a page. */
   if ((await currentActor()) !== null) redirect(destination)
 
-  return <SignInHero readout={authReadout(portalAuth)} destination={destination} />
+  return (
+    <SignInHero
+      readout={authReadout(portalAuth)}
+      destination={destination}
+      passwords={passwordsOffered}
+    />
+  )
 }
 
 export default SignInPage

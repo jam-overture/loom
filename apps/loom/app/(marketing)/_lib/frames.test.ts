@@ -169,7 +169,7 @@ describe("every page of this site", () => {
   it.each(SITE_ROUTES)(
     "$path frames nothing",
     (route) => {
-      const rendered = renderTree(treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }), {
+      const rendered = renderTree(treeFor(route, { theme: DEFAULT_THEME }), {
         origin: ORIGIN,
         addressed: false,
       })

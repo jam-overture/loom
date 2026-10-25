@@ -22,7 +22,7 @@ const brokenReadout: AuthReadout = {
  */
 describe("SignInHero", () => {
   it("carries a link back to the marketing home, so the loop closes", () => {
-    render(<SignInHero readout={okReadout} destination="/portal/pages" />)
+    render(<SignInHero readout={okReadout} destination="/portal/pages" passwords={false} />)
 
     const back = screen.getByRole("link", { name: /back to loom/i })
 
@@ -39,7 +39,9 @@ describe("SignInHero", () => {
    * leaves nothing standing between the link and whoever adds it back next.
    */
   it("offers a visitor without a key no demo, anywhere on the screen", () => {
-    const { container } = render(<SignInHero readout={okReadout} destination="/portal/pages" />)
+    const { container } = render(
+      <SignInHero readout={okReadout} destination="/portal/pages" passwords={false} />
+    )
 
     const hrefs = [...container.querySelectorAll("a")].map((link) => link.getAttribute("href"))
 
@@ -48,7 +50,9 @@ describe("SignInHero", () => {
   })
 
   it("does not name environment variables in the prose a visitor reads first", () => {
-    const { container } = render(<SignInHero readout={brokenReadout} destination="/portal/pages" />)
+    const { container } = render(
+      <SignInHero readout={brokenReadout} destination="/portal/pages" passwords={false} />
+    )
 
     /*
      * The disclosure keeps the operator string in the DOM (find-in-page still
@@ -68,7 +72,9 @@ describe("SignInHero", () => {
   })
 
   it("keeps the operator's message word for word behind the disclosure", () => {
-    const { container } = render(<SignInHero readout={brokenReadout} destination="/portal/pages" />)
+    const { container } = render(
+      <SignInHero readout={brokenReadout} destination="/portal/pages" passwords={false} />
+    )
 
     const disclosure = container.querySelector("details")
     expect(disclosure).not.toBeNull()
@@ -84,7 +90,7 @@ describe("SignInHero", () => {
   })
 
   it("disables the form when the deployment is misconfigured, so nobody can type into a form that will never accept", () => {
-    render(<SignInHero readout={brokenReadout} destination="/portal/pages" />)
+    render(<SignInHero readout={brokenReadout} destination="/portal/pages" passwords={false} />)
 
     /*
      * Two properties in one assertion: the form still shows (an operator
@@ -101,7 +107,7 @@ describe("SignInHero", () => {
 
   it("threads the return path through the form's hidden field, so a redirected visitor lands where they were going", () => {
     const { container } = render(
-      <SignInHero readout={okReadout} destination="/portal/pages/t_1?tab=held" />
+      <SignInHero readout={okReadout} destination="/portal/pages/t_1?tab=held" passwords={false} />
     )
 
     const hidden = container.querySelector('input[name="from"]') as HTMLInputElement | null
@@ -116,7 +122,7 @@ describe("SignInHero", () => {
    * them. The maintainer found it by opening the live site.
    */
   it("says the portal is still being built", () => {
-    render(<SignInHero readout={okReadout} destination="/portal" />)
+    render(<SignInHero readout={okReadout} destination="/portal" passwords={false} />)
 
     expect(screen.getByText("The portal is still being built.")).toBeTruthy()
     expect(screen.getByRole("status")).toBeTruthy()
@@ -129,7 +135,9 @@ describe("SignInHero", () => {
    * tense about a surface that is mostly unbuilt.
    */
   it("puts the banner before the page says what the portal is", () => {
-    const { container } = render(<SignInHero readout={okReadout} destination="/portal" />)
+    const { container } = render(
+      <SignInHero readout={okReadout} destination="/portal" passwords={false} />
+    )
     const text = container.textContent ?? ""
 
     expect(text.indexOf("The portal is still being built.")).toBeGreaterThan(-1)
@@ -142,8 +150,36 @@ describe("SignInHero", () => {
    * conclude the product is broken rather than unfinished.
    */
   it("says it on the path where the deployment cannot accept a key", () => {
-    render(<SignInHero readout={brokenReadout} destination="/portal" />)
+    render(<SignInHero readout={brokenReadout} destination="/portal" passwords={false} />)
 
     expect(screen.getByText("The portal is still being built.")).toBeTruthy()
+  })
+
+  /**
+   * 0310: once a deployment takes passwords, they lead, and the minted key is
+   * folded beneath them rather than gone, because accounts the command line
+   * made still sign in with one.
+   */
+  it("leads with an email and a password, and folds the key away, when passwords are offered", () => {
+    const { container } = render(
+      <SignInHero readout={okReadout} destination="/portal" passwords={true} />
+    )
+
+    expect(screen.getByLabelText(/^email$/i)).toBeTruthy()
+    expect(screen.getByLabelText(/^password$/i)).toBeTruthy()
+    expect(screen.getByRole("link", { name: /forgot your password/i })).toBeTruthy()
+    expect(screen.getByRole("link", { name: /create an account/i }).getAttribute("href")).toBe(
+      "/portal/sign-up"
+    )
+
+    const folded = container.querySelector("details")
+    expect(folded?.textContent).toMatch(/use an access key instead/i)
+    expect(within(folded as HTMLElement).getByLabelText(/access key/i)).toBeTruthy()
+  })
+
+  it("offers no account to create when the deployment takes no passwords", () => {
+    render(<SignInHero readout={okReadout} destination="/portal" passwords={false} />)
+
+    expect(screen.queryByRole("link", { name: /create an account/i })).toBeNull()
   })
 })

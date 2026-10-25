@@ -39,17 +39,17 @@ const ORIGIN = "https://loom.example"
  * one of them.
  */
 const STATES: readonly (readonly [string, PageContext])[] = [
-  ["arrived", { origin: ORIGIN, theme: "minimal" }],
+  ["arrived", { theme: "minimal" }],
   ...ASKS.flatMap((ask): readonly (readonly [string, PageContext])[] => {
     const asked: AskId = ask.id
 
     return [
-      [`${asked}`, { origin: ORIGIN, theme: "minimal", ask: asked }],
-      [`${asked}, allowed`, { origin: ORIGIN, theme: "minimal", ask: asked, approve: true }],
-      [`${asked}, put back`, { origin: ORIGIN, theme: "minimal", ask: asked, back: true }],
+      [`${asked}`, { theme: "minimal", ask: asked }],
+      [`${asked}, allowed`, { theme: "minimal", ask: asked, approve: true }],
+      [`${asked}, put back`, { theme: "minimal", ask: asked, back: true }],
       [
         `${asked}, put back and allowed`,
-        { origin: ORIGIN, theme: "minimal", ask: asked, back: true, backApprove: true },
+        { theme: "minimal", ask: asked, back: true, backApprove: true },
       ],
     ]
   }),
@@ -178,7 +178,7 @@ describe("the way back to what happened", () => {
    * in it.
    */
   it("is absent on the page a stranger arrives at", async () => {
-    const page = await pageFor({ origin: ORIGIN, theme: "minimal" })
+    const page = await pageFor({ theme: "minimal" })
 
     expect(samePageFragmentsIn(page)).not.toContain(ANCHOR.seeItHappen)
   })

@@ -9,6 +9,7 @@ describe("a project's tabs", () => {
   it("names every screen a project has, under that project", () => {
     expect(tabs.map((tab) => tab.href)).toEqual([
       "/portal/prj_shop/signals",
+      "/portal/prj_shop/pages",
       "/portal/prj_shop/connect",
       "/portal/prj_shop/settings",
     ])

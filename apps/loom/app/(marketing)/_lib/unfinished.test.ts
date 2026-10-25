@@ -200,7 +200,7 @@ describe("a surface this site offers that is not finished", () => {
    * than reworded, is caught too.
    */
   it("puts the sentence on the page a stranger arrives at", () => {
-    const said = saidOn(treeFor(HOME, { origin: "https://loom.example", theme: DEFAULT_THEME }))
+    const said = saidOn(treeFor(HOME, { theme: DEFAULT_THEME }))
 
     for (const surface of PRODUCT_SURFACES) {
       if (surface.notYet === undefined) continue

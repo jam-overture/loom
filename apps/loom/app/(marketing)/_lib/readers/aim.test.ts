@@ -27,9 +27,7 @@ import { discloseTargetIn, pressTargetIn, UNDECLARED_DISCLOSING_TYPES } from "./
  * anybody could press.
  */
 
-const ORIGIN = "https://loom.example"
-
-const frontDoor = () => homePageTree({ origin: ORIGIN, theme: DEFAULT_THEME })
+const frontDoor = () => homePageTree({ theme: DEFAULT_THEME })
 
 /**
  * The page the five choices live on, as of 1 October.
@@ -38,7 +36,7 @@ const frontDoor = () => homePageTree({ origin: ORIGIN, theme: DEFAULT_THEME })
  * about the front door's own bands, so the file needs both trees rather than
  * one. The band moved; what it demonstrates about a reader's aim did not.
  */
-const mechanism = () => howItWorksPageTree({ origin: ORIGIN, theme: DEFAULT_THEME })
+const mechanism = () => howItWorksPageTree({ theme: DEFAULT_THEME })
 
 const bandNamed = (page: LoomTree, name: string) => {
   const found = bandsOf(page).find((band) => band.name === name)

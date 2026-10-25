@@ -62,6 +62,29 @@ export type ApiCut = {
    * under `src/`, and a page says nothing rather than linking nowhere.
    */
   readonly source: string
+  /**
+   * Which line of that file the declaration starts on, counting from one.
+   *
+   * A path alone lands a reader at the top of the file, and the files these
+   * links go to are long: `LIBRARY_CLASS` is 727 lines of map starting on line
+   * 83 of a 2,406-line stylesheet. *The whole of it is in
+   * `src/primitives/stylesheet.ts`* was true and sent them to a text file to
+   * run the search they came here to avoid.
+   *
+   * `0` is **no line**, which is the same answer as no source: a module with
+   * no file under `src/`, and a name that file does not declare at the top
+   * level. No file has a line 0, so there is no number a reader could be sent
+   * to by mistake — and a page that has no line says nothing about one rather
+   * than linking to the top of the file and calling it the declaration.
+   *
+   * **The start of the declaration and not the end of it.** A range would
+   * print a second extent of one thing — the source's, in source lines —
+   * beside the extent the sentence above it already gives in the declaration's
+   * own lines, and the two do not agree: emit widens, comments differ, and
+   * `whole` is counted on the text the page shows. One number that is exactly
+   * what it says beats two that have to be explained.
+   */
+  readonly line: number
 }
 
 export type ApiSymbol = {

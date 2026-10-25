@@ -55,10 +55,8 @@ import { readerCopy } from "../words"
  * command appears, and the rule below says so from the other side.
  */
 
-const ORIGIN = "https://loom.example"
-
 const frontDoor = (theme = DEFAULT_THEME): LoomTree =>
-  treeFor(HOME, { origin: ORIGIN, theme })
+  treeFor(HOME, { theme })
 
 /** The text node a `loom.code` panel holds, as `readerCopy` fields it. */
 const PANEL_FIELD = "loom.code#text"

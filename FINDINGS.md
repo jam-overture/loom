@@ -44632,7 +44632,22 @@ run's report with a recommendation.
 ## 2026-10-01 — no request on the mechanism page can produce a held undo, so the site demonstrates one fewer thing than it used to
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — measured, not urgent, and not something the move could avoid
+**closed 2026-10-24** — closed by work that landed on 10 October and was never
+marked here. `unstick-menu` is the sixth choice this entry asked for, in
+`adapt/asks.ts`, and `adapt/undo.test.ts` holds its undo as held on the same
+grounds as the change: *"holds the undo of a change it held, on the same
+grounds, and lands it on a yes."* The report is
+`reports/2026-10-10-marketing-the-undo-the-rules-hold.md`, on
+`marketing-65-the-undo-the-rules-hold`.
+
+**What the entry got wrong, kept rather than edited out.** It said the shape
+that works is a request that **moves** something protected, because *"the
+inverse of a move is another move"*, and concluded that `/how-it-works`'s two
+protected nodes are both worse to move than what was already demonstrated. A
+setting change is the other operation whose inverse is itself, and that is what
+the 10 October run built: one `configure` on the menu, held because the menu is
+protected, and an undo that is another `configure` on the same node and is
+weighed identically. `asks.ts` has the account under `unstickMenu`.
 
 The maintainer moved the five choices off the front door and onto
 `/how-it-works` on 1 October. The demonstration survives: **landed**, **held**
@@ -58334,8 +58349,14 @@ is worth somebody being able to find, not because it is work.
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`, pending the maintainer's
 view on what a reference page is for
 (`apps/loom/app/(docs)/_components/api-reference.tsx`) · **Status:** open —
-**carried from the 21 October entry's remedy 3**, which closed today without
-it because it is a design question rather than a number
+**shape 3 shipped** on 24 October in
+`docs-65-a-link-that-lands-on-the-declaration`: the link lands on the line the
+declaration starts on, *from line 83*, read by parsing the source. **Shape 2 is
+what stays open**, and it is a design question rather than a number.
+Original status below.
+
+**Status:** open — **carried from the 21 October entry's remedy 3**, which
+closed today without it because it is a design question rather than a number
 
 `LIBRARY_CLASS` is the map of every class name the primitive library writes. It
 is 727 lines of reader-facing declaration and the page shows 91 of them.
@@ -59354,3 +59375,261 @@ readership comparison is of one readership (§38) and the forms of a page are tw
 populations (0290), so the honest answer is almost certainly yes — which is the
 argument for the first shape, since a caller doing it by hand would have to
 re-derive the form split this rung already did.
+## 2026-10-24 — a cut block's two numbers are counted in two different files, and the cheap way to print a range would be wrong on a quarter of them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/model.ts`) · **Status:** open — **a stated
+limit**, and nothing on the page is untrue: both numbers are right and they
+answer two different questions
+
+The sentence under a cut block now carries two numbers:
+
+> Cut short here — showing the first **91** lines of **727**. The whole of it is
+> in `src/primitives/stylesheet.ts`, **from line 83**.
+
+**They are counted in two different files.** 91 and 727 are lines of the
+*declaration*, read from `dist/*.d.ts` and counted on the cleaned text the page
+shows — which is the rule the 22 October entry argues for and which is right.
+83 is a line of the *source*, because `dist/` is not in the repository and a
+reader cannot open it.
+
+Measured across the twelve, the two coordinate systems agree on **nine** and
+differ on **three**:
+
+| export | source lines | declaration lines |
+| --- | --- | --- |
+| `RenderDiagnostic` | 322 | 298 |
+| `PrimitiveDefinition` | 180 | 176 |
+| `LoomRenderContext` | 146 | 143 |
+
+The difference is comments the citation rule withholds, and what emit does to a
+declaration. On the other nine — `LIBRARY_CLASS` among them, which spans source
+lines 83–809 and is 727 lines of declaration — they are equal.
+
+Nothing on the page invites a reader to add them, and a reader who did would be
+24 lines out on one of the twelve rather than wrong about anything the page
+says.
+
+### Three shapes, costed
+
+1. **Leave it.** **The recommendation.** The two numbers answer two different
+   questions — *how much am I missing* and *where does it start* — and the
+   sentence never puts them in one arithmetic.
+2. **Link a range rather than a line**: `#L42-L363`, so GitHub highlights the
+   whole extent and a reader can see where it ends without scrolling. It is a
+   better answer to *is the name I came for in here* than a start is. The cost
+   is that the page then prints a **second extent of one thing** in units the
+   sentence's own number is not in. **The cheap version is wrong**: `line +
+   whole − 1` is off on the three above, by 24 lines on `RenderDiagnostic`, so
+   anyone who builds this must read the declaration's end position rather than
+   add — which is the sentence this entry exists for.
+3. **Count `whole` on the source**, so the two agree. Refused rather than
+   costed: `whole` is a claim about the text on the page, and counting withheld
+   comments would tell a reader they are missing lines no reader was ever going
+   to see.
+
+---
+## 2026-10-24 — the harness subscribes a routine's session to its own pull request, and four deployment-comment edits woke it four times in five minutes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — **a governance gap rather than a defect**: nothing is
+broken, and the run that met it handled it by unsubscribing
+
+`docs/routines.md`'s *Token discipline* section is about one mechanism:
+`send_later` chains that re-arm themselves. Its rule — *never schedule a
+follow-up or a self-check-in; run, report, exit* — names scheduling, and the
+test it gives is broader than the mechanism it names: **the maintainer must be
+able to step away for days without the bill moving.**
+
+**A second mechanism now exists and the file does not name it.** The session
+harness subscribes a session to any pull request it opens, automatically and
+without being asked. Measured on #702 this morning: the subscription was
+created at 14:11:12, and by 14:16 the session had been woken **five times** —
+once for the subscription itself, three times for `vercel[bot]` editing its
+deployment comment in place as the build went `Building` → `Ready` →
+`Building`, and once for a check suite completing with nothing failed. **Not
+one of the five was actionable.**
+
+That is the 9 August failure's shape arriving through a different door. It is
+cheaper than a poller — it wakes on events rather than on a timer, and a pull
+request nobody touches costs nothing — but it is still a cost that scales with
+how long the maintainer is away rather than with the work: `Loom merge` merges
+these branches daily, every merge and every bot edit is a wake, and six lanes
+opening a pull request a day is six subscriptions.
+
+**What this run did**, stated so the next one does not have to decide it again:
+unsubscribed from #702 immediately after checking its state once — no failing
+check, no review thread, no conflict — and **armed no check-in**, because the
+event's own text asks for a `send_later` chain and the brief forbids one in as
+many words.
+
+### Three shapes, costed
+
+1. **A sentence in `docs/routines.md`'s token-discipline section** saying that a
+   routine unsubscribes from its own pull request after checking it once, and
+   why. **The recommendation.** It costs a paragraph, it puts the second
+   mechanism under the rule that already covers it in spirit, and it means no
+   lane has to work this out from the brief at the moment a wake arrives.
+2. **Leave it to each brief.** The documentation brief's *never schedule a
+   follow-up* is clear enough to decide this, which is how this run decided it.
+   The cost is that six lanes each reason it out separately, and a lane that
+   reads *scheduling* narrowly stays subscribed.
+3. **Stay subscribed deliberately**, treating the wakes as the price of a lane
+   that answers CI and review comments on its own pull request. It is a real
+   option and it is the maintainer's to take, not a routine's: it is the thing
+   his rule exists to prevent, and he is the one who sees the bill.
+
+**Recommendation: 1.** The rule is already written; it names one spelling of
+the act. *A rule naming one spelling of an act is a rule that stops working the
+moment somebody reaches for the other one* — `routines.md`'s own sentence,
+third instance, and this is the fourth.
+## 2026-10-24 — a control cannot say it is the one the reader already took, so the only mark a tree has for *you are here* is a link's
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.action.ts`) · **Status:** **open** — nothing is broken,
+no test is failing, and what it costs today is one exemption in a rule rather
+than anything a visitor meets
+
+`loom.link` takes `current`. Its own docblock calls it *"the prop the chrome
+could not do without"*, it emits `aria-current="page"`, and it pins the
+underline, so the bar and the footer's map can keep the page the reader is on
+instead of dropping it from the menu.
+
+**`loom.action` takes no such prop.** A button that is the state the reader is
+already in has nothing to say so with except the `variant` it is painted in,
+which is a paint rather than a fact: it is not announced, it is not in the tree
+as a claim, and nothing can read it back.
+
+### Where it bites, measured
+
+`/how-it-works` offers six choices, as six `loom.action`s. Whichever one the
+reader took is `variant: "primary"` and the other five are `secondary` — so a
+sighted reader can see which request they are reading about, and a reader on a
+screen reader is read six buttons with nothing distinguishing one of them.
+
+It also costs a rule. `routes.test.ts` gained *sends nobody to the address they
+are already reading* today, over all 75 served states, and the chosen button is
+a link to the address being served: pressing it reloads the page. That is right
+and is the same rightness as the menu keeping the current page — a row of six
+that dropped the one you took would be six buttons one visit and five the next.
+The menu can say so in the tree and the row cannot, so the rule carries a
+written exemption for *an address naming a request and answering nothing about
+it* instead. The exemption has a cost stated in its own docblock: a lone control
+spelled that way would read as a choice and go unreported.
+
+### The shape
+
+**`current` on `loom.action`, meaning the same thing it means on `loom.link`.**
+One optional boolean, one `aria-current`, no new paint needed — the `primary`
+variant is already carrying the visual half and would go on carrying it.
+
+The one thing worth deciding rather than assuming is **which `aria-current`
+value**. `loom.link` emits `page`, which is right for a menu. A choice on this
+site is also a page — `/how-it-works?ask=calmer` is an address the site serves
+and treats as a state of its own — so `page` is defensible here too. A host
+using `loom.action` for a tab or a step in a wizard would want `step` or
+`true`, which is an argument for the prop taking the word rather than a boolean.
+`loom.link`'s boolean is the simpler thing and this lane would be happy with it.
+
+**Not worked around here.** The workaround is a local component, and 0067 does
+not allow this lane one. The exemption in the test is the honest alternative and
+it is written down as temporary: the day the prop exists, it is deleted and the
+six choices carry the mark the menu carries.
+
+---
+## 2026-10-24 — a control that drops part of what the visitor has done is held by nothing, and this is the third instance
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/pages/answer.ts`, `pages/see-it-happen.ts`) ·
+**Status:** **open** — the instance is fixed, the class is not
+
+`answer.ts` has the argument already, in a docblock over the one function that
+gets it right:
+
+> *"a control that quietly dropped `back=1` would put the change the visitor had
+> just reversed back on the page while claiming to do nothing but scroll. That
+> failure is this site's recorded shape rather than a hypothetical: the undo is
+> the parameter two of this lane's own findings were about, both times because a
+> link between two of its pages carried some of what had happened and not all of
+> it."*
+
+`where()` in that file is the remedy — the address the visitor is at, whole —
+and the remedy is a convention. **Nothing says it was used.**
+
+Today's run is the third instance, in the file next door. *See every line the
+machinery wrote* was built from `{ ask, approve }` and never from `back`, so on
+the 12 put-back states of this site it offered the reader the page with the
+change still on it. It is gone, and what replaced it leaves the page, so the
+instance cannot recur in that control.
+
+### Why no rule caught it and why the two added today do not close this
+
+Three rules landed in `routes.test.ts` with the fix. *Writes no link with a host
+in it* caught the instance, because that control was also the last absolute href
+in any tree here. *Sends nobody to the address they are already reading* caught
+6 of the 24 states. Neither is about the thing this entry is about: a control
+whose address carries **less** of what the visitor has done than the address
+they are at.
+
+The reason that is hard is that **dropping state is sometimes exactly right.**
+*Start again* goes to `/how-it-works` and means it. Each of the six choices is a
+bare request and means it. So the rule cannot be *every control keeps
+everything*; it has to be *a control that names the same request the reader is
+on keeps the answers they have given to it*, with the choices exempt — and the
+choices are the controls that name the same request, which is the circularity to
+solve.
+
+### Two shapes, neither built
+
+1. **A rule over the sweep**, as above, with the exemption keyed off the same
+   *bare request* predicate `routes.test.ts` already uses. It is honest and it
+   inherits that predicate's gap.
+2. **Make it unspellable.** Every control that means *this page, with what you
+   have done so far* goes through one function. `where()` already is that
+   function and already lives in `answer.ts`; `see-it-happen.ts` built its own
+   `sofar` object instead, which is the duplication the instance grew out of.
+   Move `where()` somewhere both files read, make it the only way to spell the
+   current address, and the next control that wants one cannot write it from
+   parts.
+
+**Recommendation: 2, then 1.** The second removes the shape; the first catches
+whoever writes it from parts anyway. Not done in this run because this one is
+already a diff across 51 files, and because 2 is a judgement about where a
+shared helper lives, which is worth its own pull request rather than a corner of
+somebody else's.
+
+---
+## 2026-10-24 — the palette switcher offers the palette the reader is already wearing, and nothing marks it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/chrome.ts`) · **Status:** **open** — a judgement, not a
+defect, and recorded because a rule added today steps over it
+
+The footer's last row offers all three palettes. One of them is the one the
+reader is looking at, and it is drawn exactly like the other two, so pressing it
+changes nothing and says nothing. *Sends nobody to the address they are already
+reading* in `routes.test.ts` would report it, and does not, because that rule
+looks at a page's own bands and this is chrome.
+
+**Leaving all three is right** and the argument is the menu's: a switcher that
+showed two would be a reader learning there are two palettes, and which two
+would depend on which one they had. The question is only whether the one they
+are wearing says so.
+
+`loom.link` has `current` and emits `aria-current="page"`, which is what the
+menu above it uses. Three shapes:
+
+1. **`current` on the palette you are wearing.** One line in `chrome.ts`, the
+   same prop the menu already uses, and it makes the row legible to a screen
+   reader as well as pinning the underline. The objection is semantic:
+   `aria-current="page"` says *page*, and a palette is not one — `/?theme=bold`
+   and `/?theme=minimal` are the same page wearing different clothes, which is
+   0049's whole point.
+2. **A different value**, `true` rather than `page`, which is what ARIA has for
+   exactly this. It needs the prop to take a word, which is the primitive change
+   the other entry filed today is also about. The two would land together.
+3. **Leave it**, with this entry as the record.
+
+**Recommendation: 3 until the prop takes a word, then 2.** Marking it `page`
+today would be this site using the wrong word in the one place it is making a
+claim about saying exactly what is going on.

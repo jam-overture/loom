@@ -37,7 +37,7 @@ const ORIGIN = "https://loom.example"
 
 const markupOf = async (route: SiteRoute): Promise<string> =>
   renderToStaticMarkup(
-    renderTree(await pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }), { origin: ORIGIN })
+    renderTree(await pageTreeFor(route, { theme: DEFAULT_THEME }), { origin: ORIGIN })
       .element
   ).replaceAll("&#x27;", "'")
 
@@ -203,7 +203,7 @@ describe("the four plain words, and the line each one carries", () => {
       .map((_, at) => words.slice(at, at + length).join(" "))
   }
 
-  const homeTree = async () => pageTreeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+  const homeTree = async () => pageTreeFor(HOME, { theme: DEFAULT_THEME })
 
   it("gives every word a line, and renders both", async () => {
     const markup = await markupOf(HOME)

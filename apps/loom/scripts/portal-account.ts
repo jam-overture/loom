@@ -22,11 +22,12 @@ import { resolveConnectionString } from "../app/_lib/app/connection"
 /**
  * Mints an account, and optionally a role in a project.
  *
- * **This is the only way into a deployment**, which is the point rather than an
- * omission ([0285](../../../decisions/0285-an-account-is-a-row-with-a-minted-key-and-a-role-is-a-ceiling-on-the-gates-own-scale.md)).
- * There is no sign-up page and no invitation flow, because the portal is
- * invitation-only and a lifecycle nobody built is worse than an explicit list —
- * the roster's own warning, which outlived the roster.
+ * **It was the only way into a deployment**
+ * ([0285](../../../decisions/0285-an-account-is-a-row-with-a-minted-key-and-a-role-is-a-ceiling-on-the-gates-own-scale.md)),
+ * and it is still the way to grant a role. A deployment that configures
+ * passwords also has a sign-up page for the addresses it lists
+ * ([0310](../../../decisions/0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md));
+ * an address that signs up there is granted its roles here.
  *
  * Whoever runs this has the database, and somebody with the database already
  * has every authority this grants. So the command asserts no permission of its

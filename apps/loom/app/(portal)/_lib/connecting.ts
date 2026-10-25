@@ -68,3 +68,19 @@ export const acceptedFrom = (host: string | undefined): string =>
   host === undefined
     ? "Signals are taken from any site that sends this key, because this project names no site of its own."
     : `Signals are taken from ${host} and nowhere else — not a subdomain, not another port.`
+
+/** Where a site's build sends its pages (0312), on the deployment's own address. */
+export const PAGES_PATH = "/api/pages"
+
+/**
+ * The command a build runs to hand this deployment its pages.
+ *
+ * The key is a shell variable rather than the key itself: it is shown once
+ * and belongs with the build's other secrets, so a command that printed it
+ * would be one more place it was written down.
+ */
+export const publishCommandFor = (origin: string): string =>
+  `curl --fail-with-body -X POST "${origin.replace(/\/+$/u, "")}${PAGES_PATH}" \\
+  -H "authorization: Bearer $LOOM_PUBLISH_KEY" \\
+  -H "content-type: application/json" \\
+  --data @snapshot.json`

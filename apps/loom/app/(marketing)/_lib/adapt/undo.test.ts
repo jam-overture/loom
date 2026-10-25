@@ -46,7 +46,6 @@ const NO_ORIGIN = "https://site.invalid"
 const THEME: SiteThemeName = "minimal"
 
 const contextFor = (context: Partial<PageContext> = {}): PageContext => ({
-  origin: ORIGIN,
   theme: THEME,
   ...context,
 })

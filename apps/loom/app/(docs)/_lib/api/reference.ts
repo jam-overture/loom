@@ -60,7 +60,20 @@ const asCut = (value: unknown, where: string): ApiCut | undefined => {
     throw new Error(`loom: ${where} is cut short at ${shown} of ${whole} lines, which is all of them`)
   }
 
-  return { shown, whole, source: asString(value.source, `${where}.source`) }
+  const source = asString(value.source, `${where}.source`)
+  const line = asNumber(value.line, `${where}.line`)
+
+  /*
+   * The other shape the rule cannot produce: a line in a file that is not
+   * there. `0` is both answers to *where is the rest of it* at once — no file,
+   * and no line in the file — so a line against an empty path is two fields
+   * disagreeing about whether a reader has anywhere to go.
+   */
+  if (source === "" && line !== 0) {
+    throw new Error(`loom: ${where} is at line ${line} of no file`)
+  }
+
+  return { shown, whole, source, line }
 }
 
 const asSymbol = (value: unknown, where: string): ApiSymbol => {

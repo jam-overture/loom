@@ -24,6 +24,9 @@ import type { Senders } from "./attribution"
 import { appIngestKeys } from "./key-store"
 import type { IngestKeyStore } from "./keys"
 import type { Filing, Intake } from "./receive"
+import type { RefusalCounter } from "./refusals"
+import { memoryRefusalCounter } from "./refusals-memory"
+import { postgresRefusalCounter } from "./refusals-postgres"
 import { readIntakeSettings } from "./settings"
 import { subjectOf } from "./subject"
 
@@ -73,6 +76,7 @@ type Kept = {
   readonly journal: ReaderSignalJournal
   readonly regions: ReaderRegionStore
   readonly tallies: ReaderTallyStore
+  readonly refusals: RefusalCounter
 }
 
 /**
@@ -91,6 +95,7 @@ const postgresKept =
     journal: postgresReaderSignalJournal(db, { application }),
     regions: postgresReaderRegionStore(db, { application }),
     tallies: postgresReaderTallyStore(db, { application }),
+    refusals: postgresRefusalCounter(db, { application }),
   })
 
 /**
@@ -110,6 +115,7 @@ const memoryKept = (): ((application: ApplicationId) => Kept) => {
       journal: memoryReaderSignalJournal(),
       regions: memoryReaderRegionStore(),
       tallies: memoryReaderTallyStore(),
+      refusals: memoryRefusalCounter(),
     }
     kept.set(application, made)
 
@@ -128,13 +134,19 @@ const keptFor: (application: ApplicationId) => Kept = ((
 const filingFor = (application: ApplicationId): Filing => {
   const kept = keptFor(application)
 
-  return { journal: kept.journal, regions: kept.regions, openings: kept.tallies }
+  return {
+    journal: kept.journal,
+    regions: kept.regions,
+    openings: kept.tallies,
+    refusals: kept.refusals,
+  }
 }
 
-/** What a screen reads for one application: what is waiting, and what has been counted. */
+/** What a screen reads for one application: what is waiting, what has been counted, and what was turned away. */
 export type Readings = {
   readonly journal: ReaderSignalJournal
   readonly tallies: ReaderTallyStore
+  readonly refusals: Pick<RefusalCounter, "read">
 }
 
 /**
@@ -144,7 +156,7 @@ export type Readings = {
 export const readingsFor = (application: ApplicationId): Readings => {
   const kept = keptFor(application)
 
-  return { journal: kept.journal, tallies: kept.tallies }
+  return { journal: kept.journal, tallies: kept.tallies, refusals: kept.refusals }
 }
 
 /**

@@ -53,7 +53,7 @@ const THEMES = Object.keys(SITE_THEMES) as readonly SiteThemeName[]
  * two thirds of this site's own demonstrated states never exercise.
  */
 const frontDoorIn = async (theme: SiteThemeName) =>
-  pageTreeFor(HOME, { origin: ORIGIN, theme } satisfies PageContext)
+  pageTreeFor(HOME, { theme } satisfies PageContext)
 
 /** Every href the front door offers, as the browser would resolve it. */
 const linksFrom = async (theme: SiteThemeName): Promise<readonly URL[]> =>
@@ -89,7 +89,7 @@ describe("the front door reaches the demonstration", () => {
    * is read the same way: in the markup a browser actually receives.
    */
   it("lands on the band rather than on the page", async () => {
-    const page = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: "minimal" })
+    const page = await pageTreeFor(HOW_IT_WORKS, { theme: "minimal" })
     const markup = renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
 
     expect(markup).toContain(`id="${ANCHOR.seeItHappen}"`)
