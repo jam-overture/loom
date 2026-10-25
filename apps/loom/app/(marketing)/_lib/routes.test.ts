@@ -448,7 +448,15 @@ describe("the route table this check reads", () => {
   it.each([
     "/nope",
     "/doc",
-    "/docs/getting-started",
+    /*
+     * `/docs/getting-started` stood here as *a section address nothing serves*
+     * until 25 October, when every written section of the documentation got a
+     * page of its own and that became an address the application does serve.
+     * The two below keep both halves of what it was testing — a section renamed
+     * and a page renamed — against addresses that are still nobody's.
+     */
+    "/docs/the-runtimes",
+    "/docs/getting-started/first-tree",
     "/docs/getting-started/quickstart/deeper",
     "/lessons/01/held",
     "/portal/sign-in/again",

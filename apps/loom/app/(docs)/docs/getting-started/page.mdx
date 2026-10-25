@@ -1,0 +1,37 @@
+import { PagesInThisSection } from "@/app/(docs)/_components/section-landing"
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { DOCS_LANDING_SLUG } from "@/app/(docs)/_lib/nav"
+
+export const metadata = pageMetadata("getting-started", DOCS_LANDING_SLUG)
+
+# Getting started
+
+Loom lets somebody ask a page to change in plain words, and decides whether to
+let the change through. This section is the shortest way to watch that happen on
+your own machine.
+
+You need Node and a terminal. You do **not** need an AI model, an API key or a
+database for anything in this section: the examples on these pages are driven by
+a fixed set of asks rather than by a model, so the propose box beside each one
+works in your browser as you read.
+
+## The pages in this section
+
+<PagesInThisSection section="getting-started" />
+
+## What you have at the end of them
+
+You have a page that is data rather than markup: a small document listing
+elements, their text and their props, and one function that turns it into React.
+
+Somebody can ask that page for a change in a sentence, and the rules you wrote
+decide what happens to it. The change is applied, or it is set aside for a person
+to answer, or it is refused with a reason you can read. In all three cases you
+can say exactly why.
+
+<Callout kind="note">
+  **Want the guided version?** [Introduction](/docs/getting-started/introduction)
+  opens with the one tree on this site you can ask for a change, and then lays
+  the next hour out as numbered stops with what you have at the end of each. It
+  is the same pages in the same order, with the commentary.
+</Callout>

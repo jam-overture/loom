@@ -1,0 +1,37 @@
+import { PagesInThisSection } from "@/app/(docs)/_components/section-landing"
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { DOCS_LANDING_SLUG } from "@/app/(docs)/_lib/nav"
+
+export const metadata = pageMetadata("building-with-loom", DOCS_LANDING_SLUG)
+
+# Building with Loom
+
+This section is about the half of a Loom page that you write.
+
+The other half is the runtime, and it is the same for everybody. What is yours is
+the vocabulary: the components a page may be built from, the props each of them
+accepts, how they hold each other, where their words and numbers come from, and
+which of them an AI model is allowed to touch. Nothing in Loom knows any of that
+until you say it.
+
+## The pages in this section
+
+[Primitives and the registry](/docs/building-with-loom/primitives) is the one to
+read first: everything else here assumes you know what those two words mean.
+After it, the pages can be read in any order.
+
+<PagesInThisSection section="building-with-loom" />
+
+## The trade you are making
+
+A page here can only name components you registered, with props they declared.
+That is a real loss. You give up building a page out of anything you like, and
+what you get back is a change somebody can read before it happens: a list of
+named operations against named components, rather than a diff of generated
+markup.
+
+The second half of the same trade is worth saying as plainly: **behavior lives in
+the component, not in the tree.** A tree can say which component goes where and
+what text it carries. It cannot say what happens when the button is pressed.
+That is your code, in your repository, under review the way the rest of your code
+is.

@@ -59524,3 +59524,123 @@ menu above it uses. Three shapes:
 **Recommendation: 3 until the prop takes a word, then 2.** Marking it `page`
 today would be this site using the wrong word in the one place it is making a
 claim about saying exactly what is going on.
+
+---
+## 2026-10-25 — the arrival route and the section's own page both answer *what should I read*, and only one of them notices a page added to Getting started
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/arrival/route.ts`) · **Status:** open — **a stated
+limit of what shipped today**; nothing is broken and both lists are correct as
+they stand
+
+Two pages one click apart now answer the same question in two shapes.
+
+`/docs/getting-started` is the section's own page, added today. Its list is
+**derived**: `PagesInThisSection` reads `nav.ts`, which is the list the rail,
+the pager, the search index and the page metadata all already read. A page added
+to the section is in it the moment it is in the rail.
+
+`/docs/getting-started/introduction` carries `<ArrivalRoute />`, and its list is
+**declared**: six stops typed into `SOURCES` in `_lib/arrival/route.ts`, each
+with a sentence saying what you have at the end of it and a checkpoint — one
+published name — checked against that page's own code. The curation is the thing
+that makes the route worth having, and it is why the route cannot be generated.
+
+**Most of the way they could disagree is already held, and this says which part
+is not**, so that nobody rebuilds the half that exists.
+
+`arrival.test.ts` already asserts that the route never sends a reader backwards
+through the rail: the stops' positions in `docsOrder` are in ascending order and
+distinct. A page moved or a section reordered fails there. Every stop's address,
+title and checkpoint is likewise checked against the page it names.
+
+What nothing asserts is **completeness**. A page added to Getting started enters
+the derived list and does not enter the route, and the route stays green —
+because every assertion about it is about the stops it declares rather than
+about the sections it is a path through. A reader who takes the route finishes
+the hour having skipped a page the section's own page sent them to.
+
+The numbers as they stand: Getting started lists **7** pages, the route has
+**6** stops, and **4** of those stops are Getting started pages. The three that
+are not stops are each deliberate — the Introduction is the page the route is
+printed on, the Quickstart is offered in the route's own prose as the way past
+the first three steps, and Scaffolding a project is the same ground as
+*Installation* done by a command.
+
+### Two shapes, costed
+
+1. **Leave it, with both documented.** **The recommendation.** A site is allowed
+   to have a curated path and a listing, and all three omissions above are
+   choices somebody made rather than drift. The cost is that the one failure
+   that matters is invisible, and it is the failure that happens — adding a page
+   to a section is an ordinary act for this lane and editing `arrival/route.ts`
+   is not.
+2. **Assert every page of a section the route passes through is either a stop or
+   named as off-route.** It is the only shape that catches an added page, and it
+   makes the commonest change this lane makes cost a line in
+   `arrival/route.ts`. Worth taking the day a page is added to Getting started
+   and nobody notices; not worth taking before.
+
+## 2026-10-25 — a sweep over the pages on disk read one directory deep, so the four addresses a reader is most likely to shorten were not addresses it knew the site served
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/cross-references.ts`) · **Status:** **closed by**
+`docs-66-a-section-is-an-address` — recorded because it is the second instance
+of one shape and the module's own comment already holds the first
+
+`servableHrefs()` collects every address this site serves, so that a link in one
+page's prose can be checked against it. It built the written half by listing the
+*subdirectories* of each section and asking each for a `page.mdx` — which
+answers *a page is a `page.mdx`* for every page except the one that is the
+section itself, whose file is the section directory's own.
+
+Until today it cost nothing, because no section but the reference had a page of
+its own. The first sentence written on a new landing page — a link from
+`/docs/the-runtime` to `/docs/building-with-loom` — failed a check that was
+right about the rule and looking in one place for it.
+
+**The same omission is already written down in this file's own comment**, met
+from the other side: a generated page has no `page.mdx` at all, so the first
+link to `/docs/api-reference` failed the same check for the same reason. That
+one was fixed by asking `nav.ts` as well as the disk. This one is fixed by
+asking each section directory for its own file as well as its subdirectories',
+which is what `content.test.ts` next door has done since landing pages were
+first modelled.
+
+**The shape, for whoever meets the third instance:** *a sweep that enumerates a
+tree to find the things a rule is about will answer the rule correctly for every
+depth it walks and silently exclude the one it does not.* `content.test.ts`
+had the complete version the whole time, nine lines away, with a comment saying
+why. Two readers of the same directory disagreeing about what a page is, is the
+thing to look for.
+
+---
+## 2026-10-25 — a route sweep used `/docs/getting-started` as its example of an address nothing serves, and today it serves one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/routes.test.ts`) · **Status:** **closed in**
+`docs-66-a-section-is-an-address` — a one-line edit in another lane's file,
+named here and in that branch's report because a cross-lane diff gets said out
+loud
+
+`routes.test.ts` holds the application's route table from the marketing lane,
+and the half of it that makes the sweep worth running is a list of **plausible
+addresses nothing serves** — a resolver that said yes to everything would pass
+every other rule in the file. `/docs/getting-started` was one of the six, as *a
+section address with no page behind it*.
+
+Every written section of the documentation now has a page of its own, so that
+address is served and the assertion went red. The rule is right and its example
+had moved under it.
+
+**What the branch did**, rather than deleting the row: replaced it with two that
+keep both halves of what it was standing for — `/docs/the-runtimes` for a
+section renamed and `/docs/getting-started/first-tree` for a page renamed —
+with a comment above them saying what happened and when. The list is one longer
+than it was and the rule is untouched.
+
+Filed rather than only mentioned because the file is `Loom marketing`'s and the
+lane that edited it is not. If that lane would rather the row had gone
+altogether, or would rather this sort of example were derived from `nav.ts` than
+typed, it is a line to change and this entry is where the reason is written
+down.
