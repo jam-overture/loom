@@ -62,12 +62,29 @@ export type SiteRoute = {
  * marked, and a visitor who cannot tell they are on the front door of a site
  * they are looking at is not a reader this site has.
  */
+/**
+ * **The title and the description lead with what you build, as of 25 October.**
+ *
+ * They are the first words a stranger meets, and for most strangers they are
+ * the *only* words: a search result, a card in a chat, a tab in a row of
+ * twenty. Until today both of them were the record — *every change your AI
+ * makes, written down* — which `docs/positioning.md` settled on 24 October is
+ * the thing under the hood rather than the pitch. A `<title>` is the opening,
+ * so it followed the headline rather than waiting for a second decision.
+ *
+ * Nothing about the record is retracted. It is still the thing Loom does that
+ * nothing else does, it is still on this page, and the description still says
+ * the rules decide. What changed is which half goes first.
+ *
+ * `share.ts` splits a title on ` — ` to keep the wordmark off the card, so the
+ * shape of this one matters as much as its words.
+ */
 export const HOME: SiteRoute = {
   path: "/",
   label: "Home",
-  title: "Loom — every change your AI makes, written down",
+  title: "Loom — pages that rearrange themselves around your readers",
   description:
-    "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules, and every change keeps a record of who asked, what moved, and how to put it back.",
+    "You build the components. Loom builds your page out of them, reports what readers do with it, and lets your AI model rearrange it to suit them. Nothing moves until your rules have allowed it.",
   inMenu: false,
 }
 

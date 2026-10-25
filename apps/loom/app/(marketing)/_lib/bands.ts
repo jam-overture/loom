@@ -14,6 +14,15 @@
  * real page for that reason.
  */
 export const BAND = {
+  /**
+   * The chain, and it is the first band under the hero as of 25 October.
+   *
+   * *Start to finish* rather than a count, for the reason `chain.ts` gives at
+   * length: this page already says *four steps* one band further down and
+   * `/how-it-works` says *five*, and a third number on the front door would
+   * undo the one thing `journey.ts` was written to fix.
+   */
+  chain: "Start to finish",
   whatIsIt: "What is Loom?",
   seeItHappen: "See it happen",
   usingIt: "Using it",

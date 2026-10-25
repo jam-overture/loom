@@ -52,7 +52,7 @@ describe("the headline is the page's own title", () => {
    * assertion that the split took the name out and nothing else.
    */
   it("keeps every other word of the title, in order", () => {
-    expect(cardHeadlineOf(HOME)).toBe("every change your AI makes, written down")
+    expect(cardHeadlineOf(HOME)).toBe("pages that rearrange themselves around your readers")
     expect(cardHeadlineOf(HOW_IT_WORKS)).toBe("How it works")
     expect(cardHeadlineOf(WHAT_YOU_RUN)).toBe("What you run — in your own app, not in front of it")
   })
