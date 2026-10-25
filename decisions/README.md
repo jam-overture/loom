@@ -399,3 +399,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0307](0307-a-distance-between-a-mix-and-nothing-is-withheld-and-the-invariant-both-rolls-rest-on-is-asserted.md) | A distance between a mix and nothing is withheld, and the invariant both rolls rest on is asserted | Accepted | §4c (reader signals) |
 | 0308 | *No record on this branch* | — | — |
 | [0309](0309-a-window-of-counters-is-read-into-the-readings-it-holds-and-the-trees-stay-the-callers.md) | A window of counters is read into the readings it holds, and the trees stay the caller's | Accepted | §4c (reader signals) |
+| [0310](0310-a-person-signs-in-with-an-email-and-a-password-the-provider-holds-and-the-deployment-names-who-may.md) | A person signs in with an email and a password the provider holds, and the deployment names who may | Proposed | §5 (portal) |
+| [0311](0311-a-refusal-whose-key-was-right-is-counted-against-its-project-and-one-without-one-is-not.md) | A refusal whose key was right is counted against its project, and one without one is not | Proposed | §5 (portal), §4c (reader signals) |
+| [0312](0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md) | A site hands Loom a snapshot of its pages with a secret key, and Loom never runs its code | Accepted | §5 (portal), §1 |

@@ -1328,7 +1328,8 @@
               "cut": {
                 "shown": 107,
                 "whole": 159,
-                "source": "src/runtime/analysis.ts"
+                "source": "src/runtime/analysis.ts",
+                "line": 53
               },
               "summary": ""
             },
@@ -4609,7 +4610,8 @@
               "cut": {
                 "shown": 136,
                 "whole": 298,
-                "source": "src/render/diagnostics.ts"
+                "source": "src/render/diagnostics.ts",
+                "line": 42
               },
               "summary": ""
             },
@@ -4764,7 +4766,8 @@
               "cut": {
                 "shown": 111,
                 "whole": 143,
-                "source": "src/render/primitive.ts"
+                "source": "src/render/primitive.ts",
+                "line": 30
               },
               "summary": ""
             },
@@ -5524,7 +5527,8 @@
               "cut": {
                 "shown": 91,
                 "whole": 727,
-                "source": "src/primitives/stylesheet.ts"
+                "source": "src/primitives/stylesheet.ts",
+                "line": 83
               },
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -6879,7 +6883,8 @@
               "cut": {
                 "shown": 105,
                 "whole": 125,
-                "source": "src/sdk/audit.ts"
+                "source": "src/sdk/audit.ts",
+                "line": 200
               },
               "summary": ""
             },
@@ -7092,7 +7097,8 @@
               "cut": {
                 "shown": 82,
                 "whole": 176,
-                "source": "src/sdk/definition.ts"
+                "source": "src/sdk/definition.ts",
+                "line": 66
               },
               "summary": ""
             },
@@ -9455,7 +9461,8 @@
               "cut": {
                 "shown": 107,
                 "whole": 122,
-                "source": "src/signals/copy.ts"
+                "source": "src/signals/copy.ts",
+                "line": 224
               },
               "summary": "What one window of one revision says about how much of the page is read."
             },
@@ -10058,7 +10065,8 @@
               "cut": {
                 "shown": 118,
                 "whole": 133,
-                "source": "src/signals/funnel.ts"
+                "source": "src/signals/funnel.ts",
+                "line": 296
               },
               "summary": "One pair of a revision, as stored and as a share of the readers there were."
             },
@@ -10563,7 +10571,8 @@
               "cut": {
                 "shown": 129,
                 "whole": 140,
-                "source": "src/signals/library-action.ts"
+                "source": "src/signals/library-action.ts",
+                "line": 215
               },
               "summary": "One kind of part, against what the readers who met it did inside it."
             },
@@ -10720,7 +10729,8 @@
               "cut": {
                 "shown": 112,
                 "whole": 142,
-                "source": "src/signals/library-copy-change.ts"
+                "source": "src/signals/library-copy-change.ts",
+                "line": 384
               },
               "summary": "What a change did to the words of a deployment's library, by kind of part."
             },
@@ -10877,7 +10887,8 @@
               "cut": {
                 "shown": 132,
                 "whole": 142,
-                "source": "src/signals/library-reach-change.ts"
+                "source": "src/signals/library-reach-change.ts",
+                "line": 383
               },
               "summary": "One kind of part, held against itself across two windows, among the readers who met it."
             },
@@ -11863,7 +11874,8 @@
               "cut": {
                 "shown": 125,
                 "whole": 180,
-                "source": "src/signals/silences.ts"
+                "source": "src/signals/silences.ts",
+                "line": 426
               },
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
