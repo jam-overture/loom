@@ -59560,3 +59560,64 @@ itself to the table that defines lanes is that, even for a true one-line edit,
 and a lane editing its own brief is worse.
 
 `positioning.md` itself is this lane's and is not part of this finding.
+
+---
+## 2026-10-25 — the front door's headline is copied as a literal into two other lanes' files, and changing it leaves both stale with nothing failing
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/the-heros-two-measures.specimen.ts`) and **`Loom portal`**
+(`app/(portal)/portal/preview/[project]/pages/[tree]/page.tsx`) ·
+**Status:** **open** — nothing is broken and no test failed; both copies are
+now quoting a headline the site has stopped using
+
+The maintainer settled a new headline for the front door on 24 October and it
+shipped today. `copy.ts` holds it as `HEADLINE` and `MAINTAINERS_OWN` holds it
+from the other end, so the one place it is spelled is the one place that
+decides it — and `voice.test.ts` fails if an entry of that list stops being
+rendered. Inside `(marketing)` the swap cost one literal.
+
+Outside it, the old headline and the old eyebrow are **typed out again in two
+other lanes' files**, and neither of them learned anything:
+
+| file | what it carries | lane |
+| --- | --- | --- |
+| `src/primitives/the-heros-two-measures.specimen.ts:75` | `const EYEBROW = "For pages that AI is allowed to change"` | `Loom primitives` |
+| `app/(portal)/portal/preview/[project]/pages/[tree]/page.tsx:76` | `<h1>Make your web page dynamic with AI and Loom</h1>` | `Loom portal` (paused) |
+
+Both were correct the day they were written. Both are now a sentence this site
+does not say, in a file whose owner has no reason to be reading
+`docs/positioning.md`.
+
+### Why this is filed rather than fixed
+
+Neither file is this lane's, and the rule that says so is the point of the
+split. It is also not obvious that either should simply be edited, which is the
+other half of why it is a finding:
+
+- **The specimen's is probably right to be a copy.** A specimen is a fixture
+  photographed against a revision of `src/`, and a fixture that imported a
+  surface's live copy would change what it is measuring every time the surface
+  was reworded. What it may want instead is wording that is plainly a specimen's
+  — *two measures of a hero*, not a real tagline — so nobody reads it as the
+  site's.
+- **The portal's is a preview of a stored page**, so a hard-coded headline there
+  is standing in for whatever row the preview is showing. That lane is paused,
+  so this waits, which is what `docs/routines.md` says a finding against a
+  paused routine does.
+
+### The class, which is the part worth keeping
+
+**A surface's copy quoted as a literal in another lane's file is a quotation
+nothing holds.** The marketing route group has three mechanisms for exactly this
+problem — `FACTS` counts the repository rather than trusting a typed number,
+`journey.ts` owns every step count so no sentence spells one, and
+`MAINTAINERS_OWN` fails when one of his lines stops being rendered — and all
+three stop at the route group boundary. There are two instances today and no
+reason to think the next headline will find fewer.
+
+A cheap shape, offered rather than recommended, because it is the framework
+lane's call and not this one's: a sweep under `tools/` that reads the strings
+`(marketing)` publishes and fails on any of them appearing as a literal
+anywhere else in the repository. It would have caught both of these on the
+commit that wrote them, and it is one test rather than a convention three lanes
+have to remember.

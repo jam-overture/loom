@@ -1,6 +1,7 @@
 import { TREE_OPERATIONS } from "@jam-overture/loom"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
+import { CHAIN, rendersLinkVerbatim } from "./chain"
 import { siteRegistry } from "./registry"
 
 /**
@@ -320,20 +321,47 @@ export const RESERVED_VOCABULARY: readonly string[] = [
  * rendered somewhere on the site, so a line that was rewritten or deleted
  * cannot sit here going on exempting nothing.
  */
+/**
+ * The headline, and it is his of 24 October.
+ *
+ * Three were put to him and he took this one: *"I like the second headline.
+ * Simplest but gets to the point."* `docs/positioning.md` records the exchange
+ * and marks it settled.
+ *
+ * **It replaces a line of his own**, which is the first time an entry of
+ * `MAINTAINERS_OWN` has come off rather than been added to. *Make your web page
+ * dynamic with AI and Loom* was his of 27 September and sat here from the day
+ * the list was written. The list holds his lines verbatim, so a line he has
+ * moved on from leaves with the page rather than staying here as a sentence
+ * nobody renders. The old one survives in `reports/` and in the record of the
+ * conversation; nothing about it was edited.
+ *
+ * Exported rather than written into the hero because the page and this list are
+ * the two readers of it, and a literal spelled in both places is a literal that
+ * gets changed in one of them. The test below only proves the entries are still
+ * rendered; it cannot prove they were not both rewritten together.
+ */
+export const HEADLINE = "A web page that rearranges itself around the people using it"
+
 export const MAINTAINERS_OWN: readonly string[] = [
+  HEADLINE,
   /**
-   * The headline, 27 September. It is the one part of the site arguing a build
-   * case while everything under it argues governance, and that tension is a
-   * standing question in this lane's reports rather than something to resolve
-   * by editing it.
-   */
-  "Make your web page dynamic with AI and Loom",
-  /**
-   * The lead under it. *What your page becomes* and *how it feels to use* are
-   * his, and so is the closing triad; `pages/home.ts` has the whole of why
-   * each was added.
+   * The lead under it, 27 September. *What your page becomes* and *how it feels
+   * to use* are his, and so is the closing triad; `pages/home.ts` has the whole
+   * of why each was added.
+   *
+   * **It survives the headline swap**, and that was checked rather than
+   * assumed. `docs/positioning.md` settles the headline and nothing else about
+   * this band, and his paragraph is the build case rather than the governance
+   * one: it is about what a page becomes, which is what the new headline says.
    */
   "AI already writes the components, but would you trust AI to dynamically change your web page? What your page evolves to is yet to be built. Loom and AI are how your page evolves together.",
+  /**
+   * The one link of the chain published in his words, which is the outcome
+   * claim. See `chain.ts` for why it is the only one, and why the other five
+   * are rendered rather than quoted.
+   */
+  ...CHAIN.filter(rendersLinkVerbatim).map(({ title }) => title),
 ]
 
 /**
