@@ -2,7 +2,7 @@ import { and, asc, desc, eq, gt, lt, sql } from "drizzle-orm"
 import type { PgColumn } from "drizzle-orm/pg-core"
 import { z } from "zod"
 
-import { DEFAULT_AUDIENCE_ID, audienceIdSchema } from "../audience/audience.js"
+import { DEFAULT_AUDIENCE_ID, audienceIdSchema, type AudienceId } from "../audience/audience.js"
 import { nodeIdSchema, treeIdSchema } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
@@ -11,7 +11,7 @@ import {
   type ApplicationId,
   type StoreScope,
 } from "../application/application.js"
-import { err, ok } from "../result.js"
+import { err, ok, type Result } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
 
 import {
@@ -48,7 +48,14 @@ import {
   loomReaderTallies,
 } from "./schema.js"
 import type { StoredPageViews } from "./page-views.js"
-import type { ReaderTallyStore, StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
+import type {
+  AppliedCounters,
+  AudienceCounters,
+  ReaderTallyStore,
+  StoredFunnel,
+  StoredTally,
+  TallyReadRequest,
+} from "./tally.js"
 
 export * from "./migrate.js"
 
@@ -353,257 +360,310 @@ export const postgresReaderTallyStore = (
   scope: StoreScope = {}
 ): ReaderTallyStore => tallyStoreIn(db, scope.application ?? DEFAULT_APPLICATION_ID)
 
-const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTallyStore => ({
+/**
+ * The entries of a window that have anything to write, each with its audience
+ * resolved.
+ *
+ * Two entries naming one audience are left as two: they are two commands in
+ * one transaction, and a command's effect is visible to the next one, so they
+ * add — which is what `ReaderTallyStore.applyWindow` promises and what the
+ * memory store does by writing through a `Map`. Gathering them first would have
+ * been fewer statements and **the same answer**, so it would have been a line
+ * no test could fail on (0231). The guarantee that matters is per command, and
+ * `foldedBy` below is where it is kept: `ON CONFLICT … DO UPDATE` refuses to
+ * affect one row twice inside a single command, which is the disagreement
+ * `counters.ts` was bitten by.
+ */
+const writable = (
+  window: readonly AudienceCounters[]
+): readonly (AppliedCounters & { readonly audience: AudienceId })[] =>
+  window
+    .filter(
+      ({ tallies, funnels, appearances = [] }) =>
+        tallies.length > 0 || funnels.length > 0 || appearances.length > 0
+    )
+    .map((counters) => ({ ...counters, audience: counters.audience ?? DEFAULT_AUDIENCE_ID }))
+
+const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTallyStore => {
   /**
-   * Two upserts in one transaction.
+   * Three upserts per audience, every audience in one transaction.
    *
    * `ON CONFLICT … DO UPDATE SET x = table.x + excluded.x` is what makes
    * applying a rollup additive in one statement rather than a read, an add and
    * a write with a race in the middle. Two rollups running at once is not
    * hypothetical — a scheduled one and a manual one is the ordinary way it
    * happens — and this is the version that is correct when they do.
+   *
+   * **The transaction spans the audiences and not just the statements** (0316).
+   * A window folded per audience and written in separate transactions has a
+   * state between them where some audiences are durable and the rest are not,
+   * and the buffer still holds the window — so the next run adds the durable
+   * ones again, permanently and invisibly. One transaction removes the state.
    */
-  apply: async ({ tallies, funnels, appearances = [] }, at, audience = DEFAULT_AUDIENCE_ID) => {
-    if (tallies.length === 0 && funnels.length === 0 && appearances.length === 0) return ok(undefined)
+  const applyWindow = async (
+    window: readonly AudienceCounters[],
+    at: string
+  ): Promise<Result<void, ReaderSignalStoreError>> => {
+    const groups = writable(window)
+    if (groups.length === 0) return ok(undefined)
 
     const updatedAt = new Date(at)
 
     try {
       await db.transaction(async (tx) => {
-        if (tallies.length > 0) {
-          await tx
-            .insert(loomReaderTallies)
-            .values(
-              foldedBy(tallies, tallyKey, addTallies).map((tally) => ({
-                applicationId: application,
-                audienceId: audience,
-                treeId: tally.treeId,
-                revision: tally.revision,
-                nodeId: tally.nodeId,
-                type: tally.type,
-                views: tally.views,
-                reached: tally.reached,
-                engaged: tally.engaged,
-                dwellMs: tally.dwellMs,
-                activations: tally.activations,
-                opens: tally.opens,
-                closes: tally.closes,
-                completions: tally.completions,
-                updatedAt,
-              }))
-            )
-            .onConflictDoUpdate({
-              target: [
-                loomReaderTallies.applicationId,
-                loomReaderTallies.audienceId,
-                loomReaderTallies.treeId,
-                loomReaderTallies.revision,
-                loomReaderTallies.nodeId,
-              ],
-              set: {
-                type: sql`excluded.type`,
-                views: sql`${loomReaderTallies.views} + excluded.views`,
-                reached: sql`${loomReaderTallies.reached} + excluded.reached`,
-                engaged: sql`${loomReaderTallies.engaged} + excluded.engaged`,
-                dwellMs: sql`${loomReaderTallies.dwellMs} + excluded.dwell_ms`,
-                activations: sql`${loomReaderTallies.activations} + excluded.activations`,
-                opens: sql`${loomReaderTallies.opens} + excluded.opens`,
-                closes: sql`${loomReaderTallies.closes} + excluded.closes`,
-                completions: sql`${loomReaderTallies.completions} + excluded.completions`,
-                updatedAt,
-              },
-            })
-        }
+        for (const { audience, tallies, funnels, appearances = [] } of groups) {
+          if (tallies.length > 0) {
+            await tx
+              .insert(loomReaderTallies)
+              .values(
+                foldedBy(tallies, tallyKey, addTallies).map((tally) => ({
+                  applicationId: application,
+                  audienceId: audience,
+                  treeId: tally.treeId,
+                  revision: tally.revision,
+                  nodeId: tally.nodeId,
+                  type: tally.type,
+                  views: tally.views,
+                  reached: tally.reached,
+                  engaged: tally.engaged,
+                  dwellMs: tally.dwellMs,
+                  activations: tally.activations,
+                  opens: tally.opens,
+                  closes: tally.closes,
+                  completions: tally.completions,
+                  updatedAt,
+                }))
+              )
+              .onConflictDoUpdate({
+                target: [
+                  loomReaderTallies.applicationId,
+                  loomReaderTallies.audienceId,
+                  loomReaderTallies.treeId,
+                  loomReaderTallies.revision,
+                  loomReaderTallies.nodeId,
+                ],
+                set: {
+                  type: sql`excluded.type`,
+                  views: sql`${loomReaderTallies.views} + excluded.views`,
+                  reached: sql`${loomReaderTallies.reached} + excluded.reached`,
+                  engaged: sql`${loomReaderTallies.engaged} + excluded.engaged`,
+                  dwellMs: sql`${loomReaderTallies.dwellMs} + excluded.dwell_ms`,
+                  activations: sql`${loomReaderTallies.activations} + excluded.activations`,
+                  opens: sql`${loomReaderTallies.opens} + excluded.opens`,
+                  closes: sql`${loomReaderTallies.closes} + excluded.closes`,
+                  completions: sql`${loomReaderTallies.completions} + excluded.completions`,
+                  updatedAt,
+                },
+              })
+          }
 
-        if (appearances.length > 0) {
-          /**
-           * In the same transaction as the tallies, because the two numbers a
-           * reading subtracts have to describe the same window: a page-view row
-           * that moved while the counters it is compared against did not would
-           * report a straddle that never happened.
-           */
-          await tx
-            .insert(loomReaderPageViews)
-            .values(
-              foldedBy(appearances, pageViewKey, addPageViewCounts).map((count) => ({
-                applicationId: application,
-                audienceId: audience,
-                treeId: count.treeId,
-                revision: count.revision,
-                appearances: count.views,
-                updatedAt,
-                foldedAt: updatedAt,
-              }))
-            )
-            .onConflictDoUpdate({
-              target: [
-            loomReaderPageViews.applicationId,
-            loomReaderPageViews.audienceId,
-            loomReaderPageViews.treeId,
-            loomReaderPageViews.revision,
-          ],
-              set: {
-                appearances: sql`${loomReaderPageViews.appearances} + excluded.appearances`,
-                updatedAt,
-                /**
-                 * The fold's own timestamp, which only this writer sets (0274).
-                 * The door's upsert below leaves the column out of its `set`
-                 * entirely, so an arrival can never make a stalled collection
-                 * look like a fresh one.
-                 */
-                foldedAt: updatedAt,
-              },
-            })
-        }
+          if (appearances.length > 0) {
+            /**
+             * In the same transaction as the tallies, because the two numbers a
+             * reading subtracts have to describe the same window: a page-view row
+             * that moved while the counters it is compared against did not would
+             * report a straddle that never happened.
+             */
+            await tx
+              .insert(loomReaderPageViews)
+              .values(
+                foldedBy(appearances, pageViewKey, addPageViewCounts).map((count) => ({
+                  applicationId: application,
+                  audienceId: audience,
+                  treeId: count.treeId,
+                  revision: count.revision,
+                  appearances: count.views,
+                  updatedAt,
+                  foldedAt: updatedAt,
+                }))
+              )
+              .onConflictDoUpdate({
+                target: [
+              loomReaderPageViews.applicationId,
+              loomReaderPageViews.audienceId,
+              loomReaderPageViews.treeId,
+              loomReaderPageViews.revision,
+            ],
+                set: {
+                  appearances: sql`${loomReaderPageViews.appearances} + excluded.appearances`,
+                  updatedAt,
+                  /**
+                   * The fold's own timestamp, which only this writer sets (0274).
+                   * The door's upsert below leaves the column out of its `set`
+                   * entirely, so an arrival can never make a stalled collection
+                   * look like a fresh one.
+                   */
+                  foldedAt: updatedAt,
+                },
+              })
+          }
 
-        if (funnels.length > 0) {
-          await tx
-            .insert(loomReaderFunnels)
-            .values(
-              foldedBy(funnels, funnelKey, addFunnelAnswers).map((answer) => ({
-                applicationId: application,
-                audienceId: audience,
-                treeId: answer.treeId,
-                revision: answer.revision,
-                fromNodeId: answer.pair.from.nodeId,
-                fromKind: answer.pair.from.kind,
-                toNodeId: answer.pair.to.nodeId,
-                toKind: answer.pair.to.kind,
-                reached: answer.reached,
-                converted: answer.converted,
-                updatedAt,
-              }))
-            )
-            .onConflictDoUpdate({
-              target: [
-                loomReaderFunnels.applicationId,
-                loomReaderFunnels.audienceId,
-                loomReaderFunnels.treeId,
-                loomReaderFunnels.revision,
-                loomReaderFunnels.fromNodeId,
-                loomReaderFunnels.fromKind,
-                loomReaderFunnels.toNodeId,
-                loomReaderFunnels.toKind,
-              ],
-              set: {
-                reached: sql`${loomReaderFunnels.reached} + excluded.reached`,
-                converted: sql`${loomReaderFunnels.converted} + excluded.converted`,
-                updatedAt,
-              },
-            })
+          if (funnels.length > 0) {
+            await tx
+              .insert(loomReaderFunnels)
+              .values(
+                foldedBy(funnels, funnelKey, addFunnelAnswers).map((answer) => ({
+                  applicationId: application,
+                  audienceId: audience,
+                  treeId: answer.treeId,
+                  revision: answer.revision,
+                  fromNodeId: answer.pair.from.nodeId,
+                  fromKind: answer.pair.from.kind,
+                  toNodeId: answer.pair.to.nodeId,
+                  toKind: answer.pair.to.kind,
+                  reached: answer.reached,
+                  converted: answer.converted,
+                  updatedAt,
+                }))
+              )
+              .onConflictDoUpdate({
+                target: [
+                  loomReaderFunnels.applicationId,
+                  loomReaderFunnels.audienceId,
+                  loomReaderFunnels.treeId,
+                  loomReaderFunnels.revision,
+                  loomReaderFunnels.fromNodeId,
+                  loomReaderFunnels.fromKind,
+                  loomReaderFunnels.toNodeId,
+                  loomReaderFunnels.toKind,
+                ],
+                set: {
+                  reached: sql`${loomReaderFunnels.reached} + excluded.reached`,
+                  converted: sql`${loomReaderFunnels.converted} + excluded.converted`,
+                  updatedAt,
+                },
+              })
+          }
         }
       })
 
       return ok(undefined)
     } catch (cause) {
-      return err(failure(cause, `could not apply ${tallies.length} tallies and ${funnels.length} funnels`))
-    }
-  },
+      const tallies = groups.reduce((total, group) => total + group.tallies.length, 0)
+      const funnels = groups.reduce((total, group) => total + group.funnels.length, 0)
 
-  /**
-   * One upsert, additive in the statement, for the reason the regions are: this
-   * runs on the request path and two readers arriving together is the ordinary
-   * case rather than the unlucky one.
-   *
-   * It touches one column and leaves the other where it was, so a door and a
-   * rollup writing the same row at the same instant cannot lose each other's
-   * number.
-   *
-   * **`folded_at` is absent from the insert and from the `set`**, which is the
-   * whole of what makes it readable as a fold's age (0274): an arrival must
-   * never move it, and a row this write creates attests no fold rather than
-   * attesting one at the moment a reader arrived.
-   */
-  opened: async (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
-    if (openings.length === 0) return ok(undefined)
-
-    const updatedAt = new Date(at)
-
-    try {
-      await db
-        .insert(loomReaderPageViews)
-        .values(
-          foldedBy(openings, pageViewKey, addPageViewCounts).map((count) => ({
-            applicationId: application,
-            audienceId: audience,
-            treeId: count.treeId,
-            revision: count.revision,
-            opened: count.views,
-            updatedAt,
-          }))
+      return err(
+        failure(
+          cause,
+          `could not apply ${tallies} tallies and ${funnels} funnels across ${groups.length} ${
+            groups.length === 1 ? "audience" : "audiences"
+          }`
         )
-        .onConflictDoUpdate({
-          target: [
-                loomReaderPageViews.applicationId,
-                loomReaderPageViews.audienceId,
-                loomReaderPageViews.treeId,
-                loomReaderPageViews.revision,
-              ],
-          set: {
-            opened: sql`${loomReaderPageViews.opened} + excluded.opened`,
-            updatedAt,
-          },
-        })
-
-      return ok(undefined)
-    } catch (cause) {
-      return err(failure(cause, `could not count ${openings.length} page views`))
+      )
     }
-  },
+  }
 
-  tallies: async (request?: TallyReadRequest) => {
-    try {
-      const rows = await db.select().from(loomReaderTallies).where(within(loomReaderTallies, application, request))
-      const parsed = z.array(storedTallySchema).safeParse(rows)
+  return {
+    applyWindow,
 
-      return parsed.success
-        ? ok(parsed.data as readonly StoredTally[])
-        : err<ReaderSignalStoreError>({
-            code: "unavailable",
-            detail: `a stored tally did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
+    apply: (counters, at, audience = DEFAULT_AUDIENCE_ID) =>
+      applyWindow([{ ...counters, audience }], at),
+
+    /**
+     * One upsert, additive in the statement, for the reason the regions are: this
+     * runs on the request path and two readers arriving together is the ordinary
+     * case rather than the unlucky one.
+     *
+     * It touches one column and leaves the other where it was, so a door and a
+     * rollup writing the same row at the same instant cannot lose each other's
+     * number.
+     *
+     * **`folded_at` is absent from the insert and from the `set`**, which is the
+     * whole of what makes it readable as a fold's age (0274): an arrival must
+     * never move it, and a row this write creates attests no fold rather than
+     * attesting one at the moment a reader arrived.
+     */
+    opened: async (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
+      if (openings.length === 0) return ok(undefined)
+
+      const updatedAt = new Date(at)
+
+      try {
+        await db
+          .insert(loomReaderPageViews)
+          .values(
+            foldedBy(openings, pageViewKey, addPageViewCounts).map((count) => ({
+              applicationId: application,
+              audienceId: audience,
+              treeId: count.treeId,
+              revision: count.revision,
+              opened: count.views,
+              updatedAt,
+            }))
+          )
+          .onConflictDoUpdate({
+            target: [
+                  loomReaderPageViews.applicationId,
+                  loomReaderPageViews.audienceId,
+                  loomReaderPageViews.treeId,
+                  loomReaderPageViews.revision,
+                ],
+            set: {
+              opened: sql`${loomReaderPageViews.opened} + excluded.opened`,
+              updatedAt,
+            },
           })
-    } catch (cause) {
-      return err(failure(cause, "could not read reader tallies"))
-    }
-  },
 
-  funnels: async (request?: TallyReadRequest) => {
-    try {
-      const rows = await db.select().from(loomReaderFunnels).where(within(loomReaderFunnels, application, request))
-      const parsed = z.array(storedFunnelSchema).safeParse(rows)
+        return ok(undefined)
+      } catch (cause) {
+        return err(failure(cause, `could not count ${openings.length} page views`))
+      }
+    },
 
-      return parsed.success
-        ? ok(parsed.data as readonly StoredFunnel[])
-        : err<ReaderSignalStoreError>({
-            code: "unavailable",
-            detail: `a stored funnel did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
-          })
-    } catch (cause) {
-      return err(failure(cause, "could not read reader funnels"))
-    }
-  },
+    tallies: async (request?: TallyReadRequest) => {
+      try {
+        const rows = await db.select().from(loomReaderTallies).where(within(loomReaderTallies, application, request))
+        const parsed = z.array(storedTallySchema).safeParse(rows)
 
-  pageViews: async (request?: TallyReadRequest) => {
-    try {
-      const rows = await db
-        .select()
-        .from(loomReaderPageViews)
-        .where(within(loomReaderPageViews, application, request))
-      const parsed = z.array(storedPageViewsSchema).safeParse(rows)
+        return parsed.success
+          ? ok(parsed.data as readonly StoredTally[])
+          : err<ReaderSignalStoreError>({
+              code: "unavailable",
+              detail: `a stored tally did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
+            })
+      } catch (cause) {
+        return err(failure(cause, "could not read reader tallies"))
+      }
+    },
 
-      return parsed.success
-        ? ok(parsed.data as readonly StoredPageViews[])
-        : err<ReaderSignalStoreError>({
-            code: "unavailable",
-            detail: `a stored page-view count did not parse: ${
-              parsed.error.issues[0]?.path.join(".") ?? "unknown"
-            }`,
-          })
-    } catch (cause) {
-      return err(failure(cause, "could not read reader page views"))
-    }
-  },
-})
+    funnels: async (request?: TallyReadRequest) => {
+      try {
+        const rows = await db.select().from(loomReaderFunnels).where(within(loomReaderFunnels, application, request))
+        const parsed = z.array(storedFunnelSchema).safeParse(rows)
+
+        return parsed.success
+          ? ok(parsed.data as readonly StoredFunnel[])
+          : err<ReaderSignalStoreError>({
+              code: "unavailable",
+              detail: `a stored funnel did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
+            })
+      } catch (cause) {
+        return err(failure(cause, "could not read reader funnels"))
+      }
+    },
+
+    pageViews: async (request?: TallyReadRequest) => {
+      try {
+        const rows = await db
+          .select()
+          .from(loomReaderPageViews)
+          .where(within(loomReaderPageViews, application, request))
+        const parsed = z.array(storedPageViewsSchema).safeParse(rows)
+
+        return parsed.success
+          ? ok(parsed.data as readonly StoredPageViews[])
+          : err<ReaderSignalStoreError>({
+              code: "unavailable",
+              detail: `a stored page-view count did not parse: ${
+                parsed.error.issues[0]?.path.join(".") ?? "unknown"
+              }`,
+            })
+      } catch (cause) {
+        return err(failure(cause, "could not read reader page views"))
+      }
+    },
+  }
+}
 
 const storedRegionSchema = z.object({
   audienceId: audienceIdSchema,

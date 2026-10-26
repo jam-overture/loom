@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12176,10 +12176,22 @@
               "summary": "The one write the door makes into the durable counters."
             },
             {
+              "name": "AppliedCounters",
+              "kind": "type",
+              "signature": "type AppliedCounters = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /**\n     * The window's page views, per revision, for the counter the exact count\n     * is compared against.\n     *\n     * Optional, and absent is not none: a caller applying counters it\n     * composed itself — a backfill, a fixture, a test — has no window to\n     * report, and a nought written there would read as *no page views* and\n     * make a reading claim the node counters were exact.\n     */\n    readonly appearances?: readonly RevisionViews[];\n};",
+              "summary": "One fold's output, as a caller hands it over."
+            },
+            {
+              "name": "AudienceCounters",
+              "kind": "type",
+              "signature": "type AudienceCounters = AppliedCounters & {\n    /** The audience this fold was taken over. Omitted is `aud_everyone`. */\n    readonly audience?: AudienceId;\n};",
+              "summary": "One audience's share of a window, which is what {@link ReaderTallyStore.applyWindow} takes a list of."
+            },
+            {
               "name": "ReaderTallyStore",
               "kind": "interface",
-              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a rollup's counters to what is already there, creating rows that do not\n     * exist yet. Atomic over the whole rollup where the backend can be: a partly\n     * applied window is counters that disagree with each other.\n     */\n    readonly apply: (rollup: {\n        readonly tallies: readonly ReaderTally[];\n        readonly funnels: readonly FunnelAnswer[];\n        /**\n         * The window's page views, per revision, for the counter the exact count\n         * is compared against.\n         *\n         * Optional, and absent is not none: a caller applying counters it\n         * composed itself — a backfill, a fixture, a test — has no window to\n         * report, and a nought written there would read as *no page views* and\n         * make a reading claim the node counters were exact.\n         */\n        readonly appearances?: readonly RevisionViews[];\n    }, at: string,\n    /**\n     * The audience whose window this is. Omitted is `aud_everyone`.\n     *\n     * One audience per call, which is what keeps `ReaderTally` free of the\n     * dimension: a window holding two audiences is folded once per audience and\n     * applied twice, so every row in one call belongs to one of them.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
-              "summary": "Counters are not paged."
+              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a whole window's counters to what is already there, every audience in\n     * it, in one atomic write — creating rows that do not exist yet.\n     *\n     * **This is the method a collection run calls, and the atomicity is the\n     * reason it exists rather than a property it happens to have.**\n     *\n     * A window holds whatever arrived in it, so a deployment serving two forms of\n     * a page holds two audiences interleaved and is folded once per audience\n     *. Writing those folds as separate calls leaves a state between them\n     * where some are durable and the rest are not — and because counting and\n     * forgetting are one operation (`collect.ts`), the buffer still holds the\n     * window, so the next run folds it again and **adds the already-durable\n     * audiences a second time.** Of a tally's nine counters, `views`, `reached`\n     * and `engaged` are distinct counts and would move little; `dwellMs`,\n     * `activations`, `opens`, `closes` and `completions` are occurrences and\n     * would double, which every rate in this subsystem divides by the first kind\n     * — so the damage is invisible, permanent and looks like a readership\n     * twice as interested as it was.\n     *\n     * So the window is one write or it is none. A store that cannot be atomic\n     * over several audiences cannot be correct here, which is why this is a\n     * required method rather than a capability a caller probes for.\n     *\n     * Two entries naming one audience are added together, not refused: the\n     * guarantee is the same one `counters.ts` gives for two rows naming one\n     * counter, and it is here so that the two shipped stores cannot disagree\n     * about it.\n     */\n    readonly applyWindow: (window: readonly AudienceCounters[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    /**\n     * One audience's counters, which is {@link applyWindow} over a single entry\n     * and is implemented as exactly that in both shipped stores — so the two\n     * cannot drift on the half that matters.\n     *\n     * Kept because a caller composing counters by hand — a backfill, a fixture, a\n     * migration — has one audience and no window, and should not have to wrap it\n     * in a list to say so.\n     */\n    readonly apply: (counters: AppliedCounters, at: string,\n    /**\n     * The audience whose counters these are. Omitted is `aud_everyone`.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
+              "summary": ""
             }
           ]
         },
@@ -12333,7 +12345,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12468,7 +12480,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12530,7 +12542,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13055,7 +13067,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13125,7 +13137,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13547,7 +13559,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1778,
+        "packageNames": 1780,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

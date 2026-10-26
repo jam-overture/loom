@@ -20,6 +20,7 @@ import {
 } from "../testing/reader-signal-contract.js"
 import { rowSecurityOn } from "../testing/row-security.js"
 
+import { describeWindowApplyContract } from "./applied-window.contract.js"
 import { ensureReaderSignalsSchema } from "./migrate.js"
 import {
   postgresReaderRegionStore,
@@ -52,6 +53,10 @@ describeReaderTallyStoreContract("postgresReaderTallyStore", async () =>
 
 describeReaderRegionStoreContract("postgresReaderRegionStore", async () =>
   postgresReaderRegionStore(await freshDatabase())
+)
+
+describeWindowApplyContract("postgresReaderTallyStore", async () =>
+  postgresReaderTallyStore(await freshDatabase())
 )
 
 const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
@@ -337,6 +342,70 @@ describe("the reader signal tables — Postgres specifics", () => {
       after.ok &&
         Object.fromEntries(after.value.map((row) => [row.audienceId, row.views]))
     ).toEqual({ [DEFAULT_AUDIENCE_ID]: 40, [SKIERS]: 5 })
+  })
+
+  /**
+   * ## The whole window or none of it (0316)
+   *
+   * The reason `applyWindow` exists, and the one assertion only a real database
+   * can make: a window of two audiences whose second write raises must leave the
+   * first audience's counters absent.
+   *
+   * Written as it is because of what the alternative cost. One call per audience
+   * left a state between the calls — the first audience durable, the second not,
+   * and the buffer still holding the window, because counting and forgetting are
+   * one operation. The next run folded the same batches again and added the
+   * first audience a second time, on the five counters of nine that are
+   * occurrences: permanently (0158), and looking exactly like a readership twice
+   * as interested as it was.
+   *
+   * The failure is a `revision` past what an `integer` column holds, which
+   * Postgres raises on the insert of the second group rather than on anything
+   * this code checks — so the rollback under test is the database's and not a
+   * guard of ours.
+   */
+  it("writes neither audience when the second one cannot be written", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderTallyStore(db)
+
+    const applied = await store.applyWindow(
+      [
+        { audience: SKIERS, tallies: [tally({ views: 7 })], funnels: [] },
+        { audience: DEFAULT_AUDIENCE_ID, tallies: [tally({ revision: 2 ** 40 })], funnels: [] },
+      ],
+      AT
+    )
+
+    expect(applied.ok).toBe(false)
+    expect(applied.ok === false && applied.error.detail).toContain("across 2 audiences")
+
+    const rows = await store.tallies()
+
+    expect(rows.ok && rows.value).toEqual([])
+  })
+
+  /**
+   * The same window, written the way it is meant to be, so the test above is
+   * about the rollback and not about a window of two audiences being refused.
+   */
+  it("writes both audiences of a window that can be written", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderTallyStore(db)
+
+    const applied = await store.applyWindow(
+      [
+        { audience: SKIERS, tallies: [tally({ views: 7 })], funnels: [] },
+        { audience: DEFAULT_AUDIENCE_ID, tallies: [tally({ views: 2 })], funnels: [] },
+      ],
+      AT
+    )
+
+    expect(applied.ok).toBe(true)
+    const rows = await store.tallies()
+
+    expect(
+      rows.ok && Object.fromEntries(rows.value.map((row) => [row.audienceId, row.views]))
+    ).toEqual({ [SKIERS]: 7, [DEFAULT_AUDIENCE_ID]: 2 })
   })
 
   it("refuses to hand back a batch whose stored signals no longer parse", async () => {
