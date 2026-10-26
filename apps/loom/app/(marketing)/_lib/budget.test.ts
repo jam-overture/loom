@@ -125,7 +125,28 @@ const MOST_WORDS_IN_A_BAND = 300
 
 const MOST_WORDS_ON_A_PAGE = 1_500
 
-const MOST_WORDS_ON_THE_SITE = 3_300
+/**
+ * **Raised from 3,300 to 3,800 on 26 October, because the site grew a page.**
+ *
+ * The old number was set against a three-page site and it was doing its job:
+ * the widest served reading of those three was 3,179 of 3,300, which is the
+ * margin this file's own rule about binding ceilings asks for. `/why-use-it`
+ * is 524 authored words, so a fourth page could not exist under it at any
+ * length worth writing.
+ *
+ * The method is the one the paragraph above describes rather than a new one:
+ * measure, pick a number a little above, and say so in front of a reviewer who
+ * can overrule it. Measured on the branch that adds the page — **3,248 words
+ * authored and 3,703 in the state that says the most** — so the fourth page is
+ * inside it with about a hundred words of slack, which is roughly the slack the
+ * three-page number carried.
+ *
+ * **It is still binding from below**, which is the clause that makes raising
+ * one cost something: 3,703 of 3,800 is 0.97 against the three fifths this
+ * file requires. A run that wants to raise it again has to add copy a reviewer
+ * agrees is worth the words, exactly as this one did.
+ */
+const MOST_WORDS_ON_THE_SITE = 3_800
 
 /**
  * And the floor, because a cap on its own is passed by deleting the site.

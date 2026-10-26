@@ -236,6 +236,7 @@ describe("every page of this site", () => {
     "/": "../page.tsx",
     "/how-it-works": "../how-it-works/page.tsx",
     "/what-you-run": "../what-you-run/page.tsx",
+    "/why-use-it": "../why-use-it/page.tsx",
   }
 
   const sourceOf = (route: SiteRoute): string =>

@@ -66,6 +66,18 @@ const ROWS: readonly string[] = [
   "loom.feature-grid",
   "loom.stat-grid",
   "loom.milestone-row",
+  /**
+   * One row of a comparison, which is a row in the strongest sense this file
+   * has: its cells are `<td>`s in a `<table>`, so their widths are the table's
+   * columns and their heights are the row's. A cell that says two lines more
+   * than the cell beside it is the hole this rule is about, drawn by the
+   * browser's own table layout rather than by a grid.
+   *
+   * It arrived with `/why-use-it` on 26 October, which is the first page of
+   * this site to use the band. The spread there is three words, against the
+   * twelve this file allows.
+   */
+  "loom.comparison-row",
 ]
 
 /**
@@ -104,6 +116,21 @@ const NOT_ROWS: Readonly<Record<string, string>> = {
    * is a rule about prose and the opposite of the one this file holds.
    */
   "loom.prose": "an inline run of words, not cells",
+  /**
+   * A hero stacks what it is given: the heading region, then its content, down
+   * a column. Two paragraphs in one are a lead and the line under it, which are
+   * not two cells and are not meant to weigh the same.
+   *
+   * Unclassified until 26 October only because no hero on this site had two
+   * children of one type before `/why-use-it`.
+   */
+  "loom.hero": "stacks its own children",
+  /**
+   * The table holds rows, and a row is the full width of the band. Nothing
+   * stretches one row to the height of another, which is the same reason
+   * `loom.milestone-list` is out: the run is read downward.
+   */
+  "loom.comparison-table": "read down, one criterion per row",
 }
 
 /**
