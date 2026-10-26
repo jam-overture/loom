@@ -60216,3 +60216,175 @@ lane's call and not this one's: a sweep under `tools/` that reads the strings
 anywhere else in the repository. It would have caught both of these on the
 commit that wrote them, and it is one test rather than a convention three lanes
 have to remember.
+
+---
+
+## 2026-10-26 — a page that says its own name is stranded by the rule that a band naming a page must offer the way there
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/naming.test.ts`) · **Status:** **open** — **nothing is
+broken**; the instance is worked around and the copy is better for it, so this
+is a false positive recorded before the next run meets it
+
+`naming.ts` holds a rule worth keeping: **a band that names a page offers the
+way there.** It is asked of the band rather than of the page, deliberately — the
+footer of every page links to every other page, so a rule asked of the page
+would be satisfied by the footer and hold nothing.
+
+The case it has no way to say is **a page naming itself.** `/why-use-it` was
+built with its own label as the hero's eyebrow, and every one of the twenty-five
+served states came back stranded:
+
+```
+/why-use-it (no request) loom.hero names /why-use-it as "Why use it": Why use it
+```
+
+The rule is right about every other case and the reading is correct as far as it
+goes: the band carries the name and no link. What it cannot see is that the link
+would go to the page the reader is standing on.
+
+### Why it is filed rather than fixed, which is a judgement and not a rule
+
+The fix is one clause — skip a mention whose `names` is the path of the page it
+was found on — and it is the correct narrowing. It was not taken today for two
+reasons, neither of them that it is hard:
+
+- **The workaround produced better copy.** The eyebrow is *The case for it* now,
+  which says what the band is for instead of repeating the title above it. A rule
+  that pushed a page off a lazy eyebrow earned its keep on this run.
+- **A site-wide naming rule changed in the same pull request as a new page is a
+  diff that is harder to read than either half.** The rule has held for three
+  weeks over three pages and nothing is failing, so it can move on a run of its
+  own.
+
+### What the next run should know
+
+The cost is one line of copy per page and it is paid at the moment somebody
+wants the page's own name in a band — a heading that says *Why use it* rather
+than an eyebrow, most likely. **The remedy is the clause above and not an
+exemption list**, and it is worth saying so here: a `PAGE_NAMES` entry with its
+phrases emptied would silence this and also silence every other page naming that
+one, which is the half of the rule that has caught real staleness twice.
+
+---
+
+## 2026-10-26 — the site's word ceiling was measured against three pages, so a fourth page is red before a word of it is written
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/budget.test.ts`) · **Status:** **open as a question for
+the maintainer** — the ceiling is raised and argued in this pull request, and
+what is filed is the shape rather than the instance
+
+`budget.test.ts` holds the whole site to a word count, and the number is
+deliberately a literal: *"The measurement chose the number once, in a comment,
+in front of a reviewer who can overrule it; the assertion reads a constant."*
+It is also held from below, so a ceiling nothing is near reports itself as
+stale rather than passing quietly. Both halves are right and this entry is not
+an argument against either.
+
+What happened today is that **a new page made it red before the page had any
+copy in it.** The three-page site measured 3,179 of 3,300 in the state that says
+the most, which is the margin the rule about binding ceilings asks for; a fourth
+page of any useful length cannot fit in 121 words. `/why-use-it` is 524 authored
+words and the site now measures 3,703, so the ceiling moved to 3,800 with a
+dated note and the numbers in it.
+
+### The shape, which is what is worth keeping
+
+**A total with no term for how many pages it is a total of is a budget that
+re-decides the size of the site every time somebody adds one.** The per-page,
+per-band and per-cell ceilings in that file do not have this property: they are
+about one thing a reader takes in, and they are the same number whether the site
+has three pages or six. The site total is the one ceiling whose right value
+depends on a count nobody wrote down.
+
+Two shapes, offered rather than recommended, because which one is right is a
+positioning question and positioning is the maintainer's:
+
+- **Per page rather than per site.** `MOST_WORDS_ON_A_PAGE` already exists at
+  1,500 and already binds. A site ceiling could be dropped and nothing about
+  *how much a visitor is asked to read on the page in front of them* would stop
+  being held.
+- **A total with the count in it** — a page allowance times the number of
+  routes. It keeps the site-level reading the maintainer's instruction was
+  about, and it stops a new page being an argument about the ceiling.
+
+The question for him is the one underneath both: **is the total number of words
+on this site a thing he wants capped at all**, now that it is four pages and the
+cap has been raised once? If it is, the second shape says so without a run
+having to re-measure. If it is not, the first is less code.
+
+---
+
+## 2026-10-26 — a two-subject comparison is the one shape of the band that could fit a phone, and it is the shape that does not
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts`, the `.loom-compare` widths) · **Status:**
+**open** — **nothing is broken and no test failed**; the band renders, the page
+does not overflow, and the column the page is arguing for is off the screen
+
+`/why-use-it` is the first page of this site to use `loom.comparison-table`,
+and it uses it with **two subjects**: *On your own* and *With Loom*. Measured
+with the harness on the build this report was photographed from:
+
+```
+2026-10-26-marketing-the-table-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390
+    table  x 15 y 880  451x802
+```
+
+The page is 390 in a 390 viewport, so nothing overflows: the table is 451 wide
+inside its own scroller and **the whole of the second column is past the right
+edge at rest.** A reader on a phone sees seven criteria, seven answers in the
+*On your own* column, and a sliver of tint where the answer is.
+
+### It is the narrow design working as written, against a case it was not measured on
+
+The stylesheet is explicit about what the narrow rendering is for, and the
+reasoning is good. The criterion column drops from 12rem to 9rem below 48rem so
+that 92 pixels of the **next subject** are on screen at rest — *"past the centre
+of that cell and therefore past its mark"* — with scroll snapping on every cell
+but the sticky one, so a reader travels the subjects.
+
+That is the right answer for the band the comments were measured against, which
+is a comparison with three or four subjects: there is no width at which four
+subjects fit a phone, so the question is how well the band says *there is more
+along here*, and a peek plus snapping is a better answer than a fade.
+
+**With two subjects the question is different, because fitting is on the table.**
+The arithmetic, from the two minimums in the stylesheet:
+
+| | at 390 |
+| --- | --- |
+| `.loom-compare-key` min-width, narrow | 9rem = 144px |
+| two answers at `min-width: 7rem` | 224px |
+| cell padding, six edges at `spacing-4` | ≈ 96px |
+| | **≈ 464px into a 390px viewport** |
+
+The minimums alone are 368 of 390, so the band is over the edge on padding. No
+prop on the primitive reaches it: `density: "tight"` changes the padding and
+saves about 24 pixels, which is not the 61 it needs, and it is the wrong lever
+anyway — it is a reading decision, not a fitting one.
+
+### What this lane did instead
+
+Nothing to the band, because it is `src/` and not this lane's. The page already
+carries *What comes with it*, which says the five rows the table marks as
+sentences, so a reader on a phone who scrolls past the table meets the substance
+in prose. That band was written for a different reason — a scan is not an
+explanation — and it happens to be what keeps the phone reading honest.
+
+### What the owner might consider, offered rather than recommended
+
+- **Two subjects could stack rather than scroll.** Below the same breakpoint, a
+  two-column comparison could lay each criterion out as a block — criterion,
+  then the two answers labelled — which is the shape every pricing table on a
+  phone already takes. It is a media query over a count the band cannot read in
+  CSS, which is the hard part.
+- **Or the minimums could be relative below the breakpoint**, so two subjects
+  divide what is left of the viewport rather than each claiming 7rem. That is
+  smaller, and it gives up the peek for the case where there is nothing to peek
+  at.
+
+**The thing worth deciding is the general one**: the narrow rendering has one
+behaviour for a band whose subjects cannot fit and for a band whose subjects
+nearly do, and those are different problems.

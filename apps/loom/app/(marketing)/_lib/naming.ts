@@ -1,7 +1,7 @@
 import type { LoomNode } from "@jam-overture/loom"
 
 import { elementsIn } from "./measure"
-import { DEMO, DOCS, HOME, HOW_IT_WORKS, LESSONS, PORTAL, WHAT_YOU_RUN } from "./site"
+import { DEMO, DOCS, HOME, HOW_IT_WORKS, LESSONS, PORTAL, WHAT_YOU_RUN, WHY_USE_IT } from "./site"
 import { wordCountOf, type ReaderString } from "./words"
 
 /**
@@ -94,6 +94,7 @@ export const PAGE_NAMES: readonly PageName[] = [
     phrases: ["the front door", "the home page", "the landing page"],
     asWritten: false,
   },
+  { path: WHY_USE_IT.path, phrases: [WHY_USE_IT.label], asWritten: true },
   { path: HOW_IT_WORKS.path, phrases: [HOW_IT_WORKS.label], asWritten: true },
   { path: WHAT_YOU_RUN.path, phrases: [WHAT_YOU_RUN.label], asWritten: true },
   { path: DEMO.path, phrases: ["the demo", "the demonstration"], asWritten: false },
