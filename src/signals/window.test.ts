@@ -21,7 +21,7 @@ import { memoryReaderRegionStore, memoryReaderTallyStore } from "./memory.js"
 import type { StoredPageViews } from "./page-views.js"
 import type { PartDeclarations } from "./parts.js"
 import { readingProgressOf } from "./progress.js"
-import type { StoredRegionCount } from "./region.js"
+import { DEFAULT_REGION_FLOOR, UNKNOWN_REGION, type StoredRegionCount } from "./region.js"
 import type { ReaderTally } from "./rollup.js"
 import type { StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
 import {
@@ -33,6 +33,8 @@ import {
   UNJOINED_CAUSES,
   type ReaderWindow,
   type ReaderWindowSources,
+  type WindowReadingOptions,
+  type WindowReadings,
 } from "./window.js"
 
 /**
@@ -150,14 +152,19 @@ const funnel = (
 }
 
 const bucket = (
-  where: { readonly treeId?: TreeId; readonly revision?: number },
+  where: {
+    readonly treeId?: TreeId
+    readonly revision?: number
+    readonly region?: string
+    readonly views?: number
+  },
   audienceId?: AudienceId
 ): StoredRegionCount => {
   const row: Omit<StoredRegionCount, "audienceId"> = {
     treeId: where.treeId ?? TREE,
     revision: where.revision ?? 1,
-    region: region("FR"),
-    views: 120,
+    region: region(where.region ?? "FR"),
+    views: where.views ?? 120,
     updatedAt: "2026-10-24T00:00:00.000Z",
   }
 
@@ -743,5 +750,203 @@ describe("from a store to a question, over the store a deployment has", () => {
       spied.funnels.mock.calls.length,
       spied.pageViews.mock.calls.length,
     ]).toEqual([1, 1, 1])
+  })
+})
+
+/**
+ * The region half, which is the one reading this rung used to leave a caller to
+ * assemble. The cases that matter are not the arithmetic — `region.test.ts`
+ * holds that — they are the three the join is the only place to get wrong: that
+ * the floor it was handed is the floor every map used, that a readership and
+ * its split maps are the same rows read twice rather than two different sets of
+ * rows, and that a bucket handed in twice is not added to itself (0158).
+ */
+describe("where a window's readers were", () => {
+  const joined = (
+    held: Partial<ReaderWindow>,
+    options?: WindowReadingOptions
+  ): WindowReadings =>
+    windowReadingsOf(
+      windowOf(held),
+      treesIn([treeOf(TREE, 1), treeOf(TREE, 2), treeOf(OTHER_TREE, 1)]),
+      DECLARED,
+      options
+    )
+
+  it("says nothing at all where no region store was offered", () => {
+    expect(joined({ tallies: [tally({}, "band")] }).regions).toBeUndefined()
+  })
+
+  it("reads a region store that holds nothing as a readership of no views", () => {
+    const { regions } = joined({ regions: [] })
+
+    expect(regions?.maps).toEqual([])
+    expect(regions?.readership.views).toBe(0)
+    expect(regions?.readership.regions).toEqual([])
+  })
+
+  it("joins one map per revision, per form", () => {
+    const { regions } = joined({
+      regions: [
+        bucket({ revision: 1, region: "FR", views: 90 }, SKIERS),
+        bucket({ revision: 1, region: "FR", views: 80 }, RIDERS),
+        bucket({ revision: 2, region: "DE", views: 70 }, SKIERS),
+      ],
+    })
+
+    expect(
+      regions?.maps.map((map) => [map.revision, map.audienceId, map.reading.views])
+    ).toEqual([
+      [1, RIDERS, 80],
+      [1, SKIERS, 90],
+      [2, SKIERS, 70],
+    ])
+  })
+
+  it("keys a map so it pairs with the page reading of the same form", () => {
+    const { pages, regions } = joined({
+      tallies: [tally({ revision: 1 }, "band", { views: 4 }, SKIERS)],
+      regions: [bucket({ revision: 1, region: "FR", views: 90 }, SKIERS)],
+    })
+
+    const page = pages[0]
+    const map = regions?.maps[0]
+
+    expect(page && map && readingKeyOf(map) === readingKeyOf(page)).toBe(true)
+  })
+
+  it("counts the readers of a revision whose tree is gone, because a map needs none", () => {
+    const { unjoined, regions } = joined({
+      tallies: [tally({ revision: 9 }, "band")],
+      regions: [bucket({ revision: 9, region: "FR", views: 90 })],
+    })
+
+    expect(unjoined.map((row) => [row.revision, row.cause])).toEqual([[9, "no-tree"]])
+    expect(regions?.maps.map((map) => [map.revision, map.reading.views])).toEqual([[9, 90]])
+    expect(regions?.readership.views).toBe(90)
+  })
+
+  it("floors at the default where the caller handed in none", () => {
+    const { regions } = joined({ regions: [bucket({ region: "FR", views: 24 })] })
+
+    expect(regions?.readership.floor).toBe(DEFAULT_REGION_FLOOR)
+    expect(regions?.readership.regions).toEqual([])
+    expect(regions?.readership.withheld).toEqual({ buckets: 1, views: 24 })
+  })
+
+  it("takes the floor it was handed through to the readership and to every map", () => {
+    const { regions } = joined(
+      { regions: [bucket({ region: "FR", views: 40 }, SKIERS)] },
+      { floor: 50 }
+    )
+
+    expect(regions?.readership.floor).toBe(50)
+    expect(regions?.maps[0]?.reading.floor).toBe(50)
+    expect(regions?.maps[0]?.reading.regions).toEqual([])
+    expect(regions?.readership.withheld.views).toBe(40)
+  })
+
+  it("names a country in the readership that both of its forms withhold", () => {
+    const { regions } = joined({
+      regions: [
+        bucket({ region: "FR", views: 15 }, SKIERS),
+        bucket({ region: "FR", views: 14 }, RIDERS),
+      ],
+    })
+
+    expect(regions?.maps.map((map) => map.reading.regions)).toEqual([[], []])
+    expect(regions?.readership.regions).toEqual([{ region: region("FR"), views: 29 }])
+  })
+
+  it("drops a bucket handed in twice rather than adding it to itself", () => {
+    const rows = [
+      bucket({ region: "FR", views: 90 }, SKIERS),
+      bucket({ region: "DE", views: 60 }, SKIERS),
+    ]
+
+    const once = joined({ regions: rows })
+    const twice = joined({ regions: [...rows, ...rows] })
+
+    expect(twice.regions?.duplicated).toBe(2)
+    expect(once.regions?.duplicated).toBe(0)
+    expect(twice.regions?.readership).toEqual(once.regions?.readership)
+    expect(twice.regions?.maps).toEqual(once.regions?.maps)
+  })
+
+  it("tells two forms' rows for one country apart from one row handed in twice", () => {
+    const { regions } = joined({
+      regions: [
+        bucket({ region: "FR", views: 90 }, SKIERS),
+        bucket({ region: "FR", views: 80 }, RIDERS),
+      ],
+    })
+
+    expect(regions?.duplicated).toBe(0)
+    expect(regions?.readership.views).toBe(170)
+  })
+
+  it("loses no view and counts none twice between the maps and the readership", () => {
+    const rows = [
+      bucket({ revision: 1, region: "FR", views: 90 }, SKIERS),
+      bucket({ revision: 1, region: "DE", views: 12 }, SKIERS),
+      bucket({ revision: 1, region: "FR", views: 80 }, RIDERS),
+      bucket({ revision: 2, region: "unknown", views: 3 }, RIDERS),
+      bucket({ treeId: OTHER_TREE, revision: 1, region: "GB", views: 44 }),
+      bucket({ revision: 9, region: "ES", views: 31 }, SKIERS),
+    ]
+
+    const { regions } = joined({ regions: [...rows, ...rows] })
+    const split = (regions?.maps ?? []).reduce((total, map) => total + map.reading.views, 0)
+
+    expect(regions?.readership.views).toBe(260)
+    expect(split).toBe(regions?.readership.views)
+  })
+
+  it("names no form where the rows named none, rather than calling it everyone", () => {
+    const { regions } = joined({ regions: [bucket({ region: "FR", views: 90 })] })
+
+    expect(regions?.maps[0]?.audienceId).toBeNull()
+    expect(regions?.maps[0]?.reading.audienceId).toBeNull()
+    expect(regions?.maps[0]?.reading.audiences).toEqual([])
+  })
+
+  it("says on each map which form it is of, and on the readership which it summed", () => {
+    const { regions } = joined({
+      regions: [
+        bucket({ region: "FR", views: 90 }, SKIERS),
+        bucket({ region: "FR", views: 80 }, RIDERS),
+      ],
+    })
+
+    expect(regions?.maps.map((map) => map.reading.audiences)).toEqual([[RIDERS], [SKIERS]])
+    expect(regions?.readership.audienceId).toBeNull()
+    expect(regions?.readership.audiences).toEqual([RIDERS, SKIERS])
+  })
+
+  it("holds the maps in one order whatever order the rows arrived in", () => {
+    const rows = [
+      bucket({ revision: 2, region: "FR", views: 90 }, SKIERS),
+      bucket({ revision: 1, region: "FR", views: 90 }, SKIERS),
+      bucket({ revision: 1, region: "FR", views: 90 }),
+      bucket({ treeId: OTHER_TREE, revision: 1, region: "FR", views: 90 }, SKIERS),
+    ]
+
+    const keys = (held: readonly StoredRegionCount[]): readonly string[] =>
+      (joined({ regions: held }).regions?.maps ?? []).map(readingKeyOf)
+
+    expect(keys(rows)).toEqual(keys([...rows].reverse()))
+    expect(keys(rows)).toEqual([
+      readingKeyOf({ treeId: TREE, revision: 1, audienceId: null }),
+      readingKeyOf({ treeId: TREE, revision: 1, audienceId: SKIERS }),
+      readingKeyOf({ treeId: TREE, revision: 2, audienceId: SKIERS }),
+      readingKeyOf({ treeId: OTHER_TREE, revision: 1, audienceId: SKIERS }),
+    ])
+  })
+
+  it("never withholds the unplaced bucket, however small it is", () => {
+    const { regions } = joined({ regions: [bucket({ region: "unknown", views: 2 })] })
+
+    expect(regions?.readership.regions).toEqual([{ region: UNKNOWN_REGION, views: 2 }])
+    expect(regions?.readership.withheld).toEqual({ buckets: 0, views: 0 })
   })
 })

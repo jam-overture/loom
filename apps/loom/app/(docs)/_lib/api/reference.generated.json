@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12292,15 +12292,33 @@
               "summary": "A revision whose rows could not be joined, and why."
             },
             {
+              "name": "WindowRegionReading",
+              "kind": "type",
+              "signature": "type WindowRegionReading = WindowRevision & {\n    /**\n     * The form these arrivals were served, or `null` where the rows named none.\n     *\n     * `null` is *no row said*, which is a window written before the column\n     * existed and every window a test builds by hand — not `aud_everyone`,\n     * which would be asserting a name nobody wrote.\n     */\n    readonly audienceId: AudienceId | null;\n    /** The map itself, floored, as {@link regionReadingOf} reads it. */\n    readonly reading: RegionReading;\n};",
+              "summary": "A region map the window joined, keyed so it pairs with the page reading of the same form."
+            },
+            {
+              "name": "WindowRegionReadings",
+              "kind": "type",
+              "signature": "type WindowRegionReadings = {\n    /**\n     * One map per revision, per form, in a stable order.\n     *\n     * **The groups are the region rows' own audience column**, rather than the\n     * forms the other row sets name. Every row is then in exactly one map by\n     * construction, which is what makes {@link WindowRegionReadings.readership}\n     * and these add to the same number of views; grouping by a form named\n     * elsewhere would leave a row naming none in no map at all, and a map holding\n     * no rows is not a form a deployment has arrivals for.\n     */\n    readonly maps: readonly WindowRegionReading[];\n    /**\n     * The deployment's readership, over every row in the window.\n     *\n     * **Published beside the per-form maps rather than instead of them, because\n     * the floor bites harder the narrower the group** — the same sentence\n     * `regionReadingFor` carries. Thirty views of one country split twelve and\n     * eighteen across two forms are a readership the whole map names and both\n     * form maps withhold. A rung that published only the split would answer\n     * *where are my readers* worse than the two calls it replaces.\n     *\n     * Summing two forms' arrivals is right here and wrong on the counters, and\n     * the asymmetry is a published one: a person who arrived arrived once,\n     * whichever form they were served, while adding two forms' node counters is\n     * one number about two pages.\n     */\n    readonly readership: RegionReading;\n    /**\n     * Rows beyond the first for one tree, revision, form and region — dropped\n     * from every map, and counted here.\n     *\n     * A store keeps one row per that key, so this cannot come out of one read: it\n     * is a caller concatenating two windows whose counts are already running\n     * totals. Adding them would double a bucket, which is the one error here that\n     * cannot be undone afterwards, so the first row stands and the fact is\n     * a number. The same rule `regionReadingFor` applies to one revision, applied\n     * once to the whole window so the maps and the readership drop the same rows.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "Where a window's readers were, at the floor the caller handed in."
+            },
+            {
+              "name": "WindowReadingOptions",
+              "kind": "type",
+              "signature": "type WindowReadingOptions = RegionReadingOptions;",
+              "summary": "What the join was asked to read the regions at."
+            },
+            {
               "name": "WindowReadings",
               "kind": "type",
-              "signature": "type WindowReadings = {\n    /**\n     * One reading per page, per revision, per form — which is what one reading is\n     * — in a stable order.\n     *\n     * Never two of one: the key every reading above this refuses to count twice\n     * on is the key the window was split by, so a caller may sum across this list\n     * on any figure the reading it derives says may be summed.\n     */\n    readonly pages: readonly PageReading[];\n    /** Revisions the rows name that have no reading, in the same order. */\n    readonly unjoined: readonly UnjoinedRevision[];\n};",
+              "signature": "type WindowReadings = {\n    /**\n     * One reading per page, per revision, per form — which is what one reading is\n     * — in a stable order.\n     *\n     * Never two of one: the key every reading above this refuses to count twice\n     * on is the key the window was split by, so a caller may sum across this list\n     * on any figure the reading it derives says may be summed.\n     */\n    readonly pages: readonly PageReading[];\n    /** Revisions the rows name that have no reading, in the same order. */\n    readonly unjoined: readonly UnjoinedRevision[];\n    /**\n     * Where the readers were, or `undefined` where no region store was offered.\n     *\n     * The `undefined` is {@link ReaderWindow.regions}' own, carried rather than\n     * collapsed: *we cannot say where your readers are* and *you have no\n     * readers abroad* are two sentences, and `[]` holds the second — a window\n     * whose store answered with nothing reads as a readership of no views rather\n     * than as no readership.\n     *\n     * **A map here is not held to a tree.** The maps are of arrivals, which need\n     * no tree to be read against, so a revision in {@link WindowReadings.unjoined}\n     * still has its readers counted. Dropping them would under-report a\n     * deployment that has pruned old trees by exactly the readers it has least\n     * other record of, and it would make the maps and the readership disagree.\n     */\n    readonly regions: WindowRegionReadings | undefined;\n};",
               "summary": "What a window came to once its rows were joined to the pages they are about."
             },
             {
               "name": "windowReadingsOf",
               "kind": "function",
-              "signature": "const windowReadingsOf: (window: ReaderWindow, trees: RevisionTrees, declarations: PartDeclarations) => WindowReadings",
+              "signature": "const windowReadingsOf: (window: ReaderWindow, trees: RevisionTrees, declarations: PartDeclarations, options?: WindowReadingOptions) => WindowReadings",
               "summary": "Join a window of counters to the pages it is about."
             }
           ]
@@ -12315,7 +12333,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12450,7 +12468,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12512,7 +12530,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13037,7 +13055,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13107,7 +13125,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13529,7 +13547,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1775,
+        "packageNames": 1778,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
