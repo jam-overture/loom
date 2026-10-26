@@ -3357,6 +3357,50 @@ sequence number, with its cost; the one `NUL` byte left in `src/runtime/`, which
 is another lane's; and still that **nothing draws any of this**, which is
 `Loom portal`'s.
 
+### 54. Where a window's readers were, without a caller assembling it · `Loom signals` · **done, 25 October**
+
+The one reading the §51 rung left to a caller, closed — and the floor that
+closing it needed, which is why it was left.
+
+**Done**
+([0315](../decisions/0315-a-window-answers-where-its-readers-were-at-a-floor-it-is-handed-and-the-readership-is-published-beside-the-forms.md)),
+in [`src/signals/window.ts`](../src/signals/window.ts).
+
+- **Every other reading followed from a `PageReading`; the region map did not.**
+  The rows were carried on the window and counted in the form census, and no map
+  was joined out of them, because `regionReadingOf` takes a **floor** and the
+  floor is per-deployment configuration (§7). The rung reads no configuration
+  and still does not: `WindowReadingOptions` is one argument on the call, so it
+  holds configuration it was handed rather than configuration it went looking
+  for. What that closes is the half nothing said out loud — **a caller who
+  passed no floor got the default rather than the deployment's**, and a
+  deployment that had raised its floor would have had its map drawn at 25 by any
+  screen that forgot.
+- **Both answers, because the floor bites harder the narrower the group.**
+  `regions.maps` is one map per revision per form, keyed so `readingKeyOf` pairs
+  it with that form's page reading; `regions.readership` is the deployment's
+  whole map. Thirty views of one country split fifteen and fourteen across two
+  forms are a readership the whole map names and both split maps withhold —
+  so publishing only the split would answer *where are my readers* worse than
+  the two calls it replaces. Summing two forms' arrivals is right here and wrong
+  on the counters, and the asymmetry is 0297's.
+- **A map is not held to a tree.** It is a map of arrivals, not of nodes, so a
+  revision whose tree is gone is `unjoined` for its counters and still has its
+  readers counted. Dropping them would under-report a deployment that has pruned
+  old trees by exactly the readers it has least other record of.
+- **A bucket handed in twice is dropped once, before both answers.** The dedupe
+  is on tree, revision, form and region — the key the store keeps one row per —
+  and `regions.duplicated` reports it. Applied once rather than twice, so the
+  maps and the readership drop the same rows, and the invariant is asserted
+  rather than argued: six buckets over three revisions, two forms and two trees,
+  handed in twice, have their per-form views sum to the readership's exactly.
+- **Nothing reaches a reader.** No payload field, no browser byte, no column, no
+  store method, no kind. `broadcast.ts` is byte-identical.
+
+**What is left and is filed:** still that **nothing draws any of this**, which
+is `Loom portal`'s; the door's repeated opening and the region floor it reaches,
+which is the maintainer's; and `0308`, which is the maintainer's.
+
 ### 55. A window's counters are one write · `Loom signals` · **done, 26 October**
 
 Not a reading. The second gap in the thing every reading is built on, found in

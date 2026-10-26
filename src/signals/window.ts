@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 import { ok, type Result } from "../result.js"
@@ -7,7 +8,13 @@ import { audiencesIn, type MaybeAudienceScoped } from "./audiences.js"
 import type { ReaderSignalStoreError } from "./journal.js"
 import type { StoredPageViews } from "./page-views.js"
 import { pageReadingOf, type PageReading, type PartDeclarations } from "./parts.js"
-import type { ReaderRegionStore, StoredRegionCount } from "./region.js"
+import {
+  regionReadingOf,
+  type ReaderRegionStore,
+  type RegionReading,
+  type RegionReadingOptions,
+  type StoredRegionCount,
+} from "./region.js"
 import type {
   ReaderTallyStore,
   StoredFunnel,
@@ -53,6 +60,29 @@ import type {
  * joined would be a thirty-ninth reading nobody asked for, and the
  * double-count every reading above it already guards would have a second
  * place to go wrong.
+ *
+ * ## The one reading that was two steps, and the one argument it needs
+ *
+ * The region map was the exception and it was a gap named when this was
+ * written. Every other reading follows from a {@link PageReading} or a list of
+ * them; the region rows were carried on the window, counted in the form census
+ * so a form named only by a bucket still got a reading, and joined into nothing
+ * — because {@link regionReadingOf} takes a **floor**, the floor is
+ * per-deployment configuration (§7), and this rung reads no configuration.
+ *
+ * It still does not read any. The floor is {@link WindowReadingOptions},
+ * handed in with the call, and `regionFloorOf` underneath is raise-only — so
+ * the rung holds one piece of configuration it was given rather than one it
+ * went looking for, which is the line §7 already draws. What that closes is
+ * the half that was quietly wrong: a caller who passed nothing got the default
+ * rather than the deployment's floor, and nothing in the types said so.
+ *
+ * {@link WindowReadings.regions} is therefore both answers at once — one map
+ * per revision per form, keyed so `readingKeyOf` pairs it with that form's page
+ * reading, **and** the deployment's readership whole. Both, because the floor
+ * bites harder the narrower the group: thirty views of one country split across
+ * two forms are a readership the whole map names and both split maps withhold
+ * (0297).
  *
  * ## Why the trees are the caller's to resolve
  *
@@ -297,6 +327,167 @@ export type UnjoinedRevision = WindowRevision & {
   readonly tallies: number
 }
 
+/**
+ * A region map the window joined, keyed so it pairs with the page reading of
+ * the same form.
+ *
+ * `treeId`, `revision` and `audienceId` are exactly {@link ReadingOfAudience},
+ * so `readingKeyOf` takes one of these as it takes a {@link PageReading} and a
+ * screen holding both lists pairs them on the one rule (0290) rather than on a
+ * spelling of its own.
+ */
+export type WindowRegionReading = WindowRevision & {
+  /**
+   * The form these arrivals were served, or `null` where the rows named none.
+   *
+   * `null` is *no row said*, which is a window written before the column
+   * existed (0284) and every window a test builds by hand — not `aud_everyone`,
+   * which would be asserting a name nobody wrote (0294).
+   */
+  readonly audienceId: AudienceId | null
+  /** The map itself, floored, as {@link regionReadingOf} reads it. */
+  readonly reading: RegionReading
+}
+
+/** Where a window's readers were, at the floor the caller handed in. */
+export type WindowRegionReadings = {
+  /**
+   * One map per revision, per form, in a stable order.
+   *
+   * **The groups are the region rows' own audience column**, rather than the
+   * forms the other row sets name. Every row is then in exactly one map by
+   * construction, which is what makes {@link WindowRegionReadings.readership}
+   * and these add to the same number of views; grouping by a form named
+   * elsewhere would leave a row naming none in no map at all, and a map holding
+   * no rows is not a form a deployment has arrivals for.
+   */
+  readonly maps: readonly WindowRegionReading[]
+  /**
+   * The deployment's readership, over every row in the window.
+   *
+   * **Published beside the per-form maps rather than instead of them, because
+   * the floor bites harder the narrower the group** — the same sentence
+   * `regionReadingFor` carries. Thirty views of one country split twelve and
+   * eighteen across two forms are a readership the whole map names and both
+   * form maps withhold. A rung that published only the split would answer
+   * *where are my readers* worse than the two calls it replaces.
+   *
+   * Summing two forms' arrivals is right here and wrong on the counters, and
+   * the asymmetry is a published one (0297): a person who arrived arrived once,
+   * whichever form they were served, while adding two forms' node counters is
+   * one number about two pages.
+   */
+  readonly readership: RegionReading
+  /**
+   * Rows beyond the first for one tree, revision, form and region — dropped
+   * from every map, and counted here.
+   *
+   * A store keeps one row per that key, so this cannot come out of one read: it
+   * is a caller concatenating two windows whose counts are already running
+   * totals. Adding them would double a bucket, which is the one error here that
+   * cannot be undone afterwards (0158), so the first row stands and the fact is
+   * a number. The same rule `regionReadingFor` applies to one revision, applied
+   * once to the whole window so the maps and the readership drop the same rows.
+   */
+  readonly duplicated: number
+}
+
+/** What the join was asked to read the regions at. */
+export type WindowReadingOptions = RegionReadingOptions
+
+/**
+ * Region rows grouped by the revision and form they were collected under, with
+ * the repeats of one bucket dropped.
+ *
+ * One pass over the rows and one map, for the reason {@link byRevision} is: a
+ * pass per group would be a walk of the window per form a deployment serves,
+ * which is the quadratic shape rule 4 holds this subsystem to.
+ */
+type RegionGroup = {
+  readonly where: WindowRevision
+  readonly audienceId: AudienceId | null
+  readonly rows: StoredRegionCount[]
+}
+
+const regionGroupsOf = (
+  rows: readonly StoredRegionCount[]
+): {
+  readonly groups: readonly RegionGroup[]
+  readonly kept: readonly StoredRegionCount[]
+  readonly duplicated: number
+} => {
+  const groups = new Map<string, RegionGroup>()
+  const kept: StoredRegionCount[] = []
+  const seen = new Set<string>()
+  let duplicated = 0
+
+  for (const row of rows) {
+    const key = `${revisionKeyOf(row)}\u0000${row.audienceId ?? ""}`
+
+    if (seen.has(`${key}\u0000${row.region}`)) {
+      duplicated += 1
+      continue
+    }
+
+    seen.add(`${key}\u0000${row.region}`)
+    kept.push(row)
+
+    const held = groups.get(key)
+
+    if (held === undefined) {
+      groups.set(key, {
+        where: { treeId: row.treeId, revision: row.revision },
+        audienceId: row.audienceId ?? null,
+        rows: [row],
+      })
+    } else held.rows.push(row)
+  }
+
+  return { groups: [...groups.values()], kept, duplicated }
+}
+
+/** Nulls first, then by name, so two reads of one window are in one order. */
+const inFormOrder = (one: AudienceId | null, other: AudienceId | null): number => {
+  if (one === other) return 0
+  if (one === null) return -1
+  if (other === null) return 1
+
+  return one.localeCompare(other)
+}
+
+/**
+ * Read a window's region rows into the maps they hold.
+ *
+ * The floor is handed in rather than read, which is the line §7 draws: it is
+ * per-deployment configuration, `regionFloorOf` is raise-only, and a rung that
+ * went looking for it would be a reading path that depends on a configuration
+ * store. What this closes is the other half — a caller that passed **no** floor
+ * got the default rather than the deployment's, and nothing in the types said
+ * so.
+ */
+const windowRegionsOf = (
+  rows: readonly StoredRegionCount[],
+  options: WindowReadingOptions
+): WindowRegionReadings => {
+  const { groups, kept, duplicated } = regionGroupsOf(rows)
+
+  const maps = groups.map(
+    ({ where, audienceId, rows: held }): WindowRegionReading => ({
+      ...where,
+      audienceId,
+      reading: { ...regionReadingOf(held, options), audienceId },
+    })
+  )
+
+  return {
+    maps: maps.sort(
+      (one, other) => inRevisionOrder(one, other) || inFormOrder(one.audienceId, other.audienceId)
+    ),
+    readership: regionReadingOf(kept, options),
+    duplicated,
+  }
+}
+
 /** What a window came to once its rows were joined to the pages they are about. */
 export type WindowReadings = {
   /**
@@ -310,6 +501,22 @@ export type WindowReadings = {
   readonly pages: readonly PageReading[]
   /** Revisions the rows name that have no reading, in the same order. */
   readonly unjoined: readonly UnjoinedRevision[]
+  /**
+   * Where the readers were, or `undefined` where no region store was offered.
+   *
+   * The `undefined` is {@link ReaderWindow.regions}' own, carried rather than
+   * collapsed (0309): *we cannot say where your readers are* and *you have no
+   * readers abroad* are two sentences, and `[]` holds the second — a window
+   * whose store answered with nothing reads as a readership of no views rather
+   * than as no readership.
+   *
+   * **A map here is not held to a tree.** The maps are of arrivals, which need
+   * no tree to be read against, so a revision in {@link WindowReadings.unjoined}
+   * still has its readers counted. Dropping them would under-report a
+   * deployment that has pruned old trees by exactly the readers it has least
+   * other record of, and it would make the maps and the readership disagree.
+   */
+  readonly regions: WindowRegionReadings | undefined
 }
 
 /**
@@ -325,6 +532,11 @@ export type WindowReadings = {
  * populations. So the split is made rather than refused, and each form's
  * reading is of its own readers.
  *
+ * **The region maps are joined beside the pages and not under them.** They are
+ * maps of arrivals rather than of nodes, so they need no tree: a revision whose
+ * tree is gone is `unjoined` for its counters and still has its readers
+ * counted. See {@link WindowReadings.regions}.
+ *
  * **Each reading is handed its revision's rows and told which form to read.**
  * Not the window — a reading handed the whole of one would count every other
  * page's rows as `foreign`, which is exactly what that field exists to report —
@@ -336,7 +548,8 @@ export type WindowReadings = {
 export const windowReadingsOf = (
   window: ReaderWindow,
   trees: RevisionTrees,
-  declarations: PartDeclarations
+  declarations: PartDeclarations,
+  options: WindowReadingOptions = {}
 ): WindowReadings => {
   const pages: PageReading[] = []
   const unjoined: UnjoinedRevision[] = []
@@ -391,5 +604,9 @@ export const windowReadingsOf = (
     for (const form of forms) pages.push(pageReadingOf(tree, here, declarations, form))
   }
 
-  return { pages, unjoined }
+  return {
+    pages,
+    unjoined,
+    regions: window.regions === undefined ? undefined : windowRegionsOf(window.regions, options),
+  }
 }
