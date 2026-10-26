@@ -3458,6 +3458,62 @@ byte-identical.
 `src/testing/reader-signal-contract.ts`, which is another lane's file — filed for
 it, and one import away.
 
+### 56. One window, read where the other settings are · `Loom signals` · **done, 26 October**
+
+Not a reading either. The number every other step in this subsystem is timed by,
+read in two places — and the one intake setting with no state for a value that
+cannot be used.
+
+`DEFAULT_READER_SIGNAL_WINDOW_MS` carries the whole argument for an hour in its
+doc comment, and the script that sweeps wrote `60 * 60 * 1000` out again and
+parsed the environment itself. The two numbers agreed, so nothing was broken;
+what the duplication had was a **direction** — the package's copy was the one
+with the reasoning attached, and the script's was the one a deployment's batches
+were actually swept on. It is the third instance of one spelling of a constant
+drifting from another in this subsystem (0218, 0235).
+
+**Done**
+([0317](../decisions/0317-the-window-a-deployment-sweeps-on-is-read-where-its-other-settings-are-and-a-window-it-cannot-read-stops-the-sweep.md)),
+as `readCollectionWindow` in
+[`settings.ts`](../apps/loom/app/_lib/reader-signals/settings.ts) and
+`deploymentNoticeOf` in
+[`notice.ts`](../apps/loom/app/_lib/reader-signals/notice.ts).
+
+- **One reading, beside the other four.** The intake switch, the region switch,
+  the region header and the region floor were all read in one file, each with a
+  three-state reading and a sentence for an operator. The window is now the
+  fifth, with the runtime's own `readerSignalWindowSchema` as its gate — so what
+  a window may be is stated once, in the package, and read rather than restated.
+- **A window that cannot be read stops the sweep**, rather than falling back to
+  the default. An operator who typed a day meant a day: sweeping on an hour
+  because their value could not be parsed would change both what their counters
+  mean and how long a delivery lives, which is a number their readers are told,
+  and it would do it silently. The buffer is still there when the value is
+  fixed.
+- **The door does not refuse on it.** A window is nothing the endpoint reads, and
+  refusing batches as well would lose the deliveries a corrected value would
+  have counted.
+- **A deployment's own notice is one call now.**
+  `deploymentNoticeOf(readIntakeSettings())` hands `collectionNoticeOf` (0313)
+  this deployment's two numbers — the window, and a region floor **only where a
+  country is actually read**, which is the `on` state and no other. A deployment
+  that switched regions off or misspelled the switch counts no region, and the
+  notice says *nothing about where you are is read* rather than naming a floor
+  under a bucket that does not exist. §52 built the value; this is the line that
+  makes it this deployment's rather than the framework's.
+- **An operator can ask what the sweep runs on.** The status gained one
+  sentence, because a buffer growing under a refused sweep looks from outside
+  exactly like a buffer growing under no sweep at all.
+- **Nothing reaches a reader.** No payload field, no browser byte, no column, no
+  migration, no store method, no kind. `broadcast.ts` is byte-identical.
+
+**What is left and is filed:** `windowMs` on that status is the *rate limit's*
+window and not this one, which is two windows with one word for both — the
+rename is one line in `docs/deployment.md`, which is another lane's file, so it
+is filed rather than taken. And the older half this unit could not close: a
+buffer age is a promise only a **scheduled** sweep keeps, and nothing in the
+notice says whether one runs.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

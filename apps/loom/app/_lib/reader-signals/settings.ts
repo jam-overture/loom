@@ -1,4 +1,10 @@
-import { DEFAULT_REGION_FLOOR, regionFloorOf } from "@jam-overture/loom/signals"
+import {
+  DEFAULT_READER_SIGNAL_WINDOW_MS,
+  DEFAULT_REGION_FLOOR,
+  MIN_READER_SIGNAL_WINDOW_MS,
+  readerSignalWindowSchema,
+  regionFloorOf,
+} from "@jam-overture/loom/signals"
 
 import { resolveTrustedHops } from "@/app/(portal)/_lib/auth/subject"
 
@@ -151,6 +157,66 @@ export const describeRegionSettings = (region: RegionSettings): string => {
   return `where readers are is read from ${region.header}; ${floor}`
 }
 
+export const WINDOW_KEY = "LOOM_SIGNAL_WINDOW_MS"
+
+/**
+ * The age a delivery reaches before this deployment counts it and drops it.
+ *
+ * **The number is the runtime's and the reading is here**, which is the point
+ * of this block: `DEFAULT_READER_SIGNAL_WINDOW_MS` carries the whole argument
+ * for an hour in its own doc comment — longer is more accurate, shorter is more
+ * anonymous, and rule 5 makes it a deployment's rather than a constant — and
+ * the sweep used to repeat the arithmetic rather than import it. Two spellings
+ * of one default is the fault this subsystem has been bitten by twice (0218,
+ * 0235), and this one had a direction: the package's copy had the reasoning and
+ * the script's copy was the one a deployment's batches were actually swept on.
+ *
+ * `readerSignalWindowSchema` is the gate, for the same reason — a window below
+ * a minute is refused by the runtime, so the state here is read off the
+ * runtime's own answer instead of a second rule about one setting.
+ *
+ * **A value that is not a window is neither**, as everywhere else in this file.
+ * It is reported with the default beside it so a status line has a number to
+ * print, and the sweep refuses to run on it: an operator who typed a day meant
+ * a day, and sweeping on an hour because their value could not be read would
+ * silently change both what their aggregates mean and the one number a notice
+ * publishes to readers about how long a delivery lives.
+ */
+export type CollectionWindow =
+  | { readonly state: "default"; readonly windowMs: number }
+  | { readonly state: "set"; readonly windowMs: number }
+  /** The default is carried so a status can print a number; nothing sweeps on it. */
+  | { readonly state: "unusable"; readonly given: string; readonly windowMs: number }
+
+export const readCollectionWindow = (value: string | undefined): CollectionWindow => {
+  if (value === undefined || value.trim() === "") {
+    return { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS }
+  }
+
+  const asked = readerSignalWindowSchema.safeParse({ windowMs: Number(value.trim()) })
+
+  return asked.success
+    ? { state: "set", windowMs: asked.data.windowMs }
+    : { state: "unusable", given: value, windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS }
+}
+
+/**
+ * One sentence about the window, for an operator.
+ *
+ * It names the minimum rather than describing it, because the ordinary way this
+ * setting is written wrongly is a units mistake — `60` reads as an hour and
+ * means a minute and a tenth of a second — and a message that says *at least
+ * 60000* tells an operator which units it wanted.
+ */
+export const describeCollectionWindow = (window: CollectionWindow): string =>
+  window.state === "unusable"
+    ? `${WINDOW_KEY} is "${window.given}", which is not a window this runtime will sweep on, so nothing is being counted. ` +
+      `It is whole milliseconds and at least ${MIN_READER_SIGNAL_WINDOW_MS}; remove it to sweep on ${DEFAULT_READER_SIGNAL_WINDOW_MS}.`
+    : window.state === "set"
+      ? `a delivery is counted into the totals and dropped once it is ${window.windowMs}ms old`
+      : `a delivery is counted into the totals and dropped once it is ${window.windowMs}ms old; ` +
+        `set ${WINDOW_KEY} to change it`
+
 export type IntakeSettings = {
   readonly chosen: IntakeSwitch
   /**
@@ -161,6 +227,20 @@ export type IntakeSettings = {
    */
   readonly hops: number
   readonly region: RegionSettings
+  /**
+   * The window this deployment's sweep counts on.
+   *
+   * Read here rather than in the script that sweeps, because it is the one
+   * intake setting that was not: the switch, the region switch, the region
+   * header and the region floor were all read in this file with a state for a
+   * value that could not be used, and the window was read inline with
+   * `Number(…)` and no state at all.
+   *
+   * **The door does not refuse on it.** A window that cannot be read stops the
+   * sweep and nothing else: refusing batches as well would lose the deliveries
+   * a working sweep could still count once the value is fixed.
+   */
+  readonly window: CollectionWindow
 }
 
 export const readIntakeSettings = (
@@ -173,4 +253,5 @@ export const readIntakeSettings = (
     header: regionHeaderOf(env[REGION_HEADER_KEY]),
     floor: readRegionFloor(env[REGION_FLOOR_KEY]),
   },
+  window: readCollectionWindow(env[WINDOW_KEY]),
 })
