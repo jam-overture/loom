@@ -127,34 +127,82 @@ export interface ReaderOpeningCounter {
  * Paging them would be a cursor every caller has to carry for a result that
  * fits in a response.
  */
+/**
+ * One fold's output, as a caller hands it over.
+ *
+ * Every row in it belongs to one audience, which is what keeps `ReaderTally`
+ * free of the dimension (0284): a window holding two audiences is folded once
+ * per audience, and each fold produces one of these.
+ */
+export type AppliedCounters = {
+  readonly tallies: readonly ReaderTally[]
+  readonly funnels: readonly FunnelAnswer[]
+  /**
+   * The window's page views, per revision, for the counter the exact count
+   * is compared against.
+   *
+   * Optional, and absent is not none: a caller applying counters it
+   * composed itself — a backfill, a fixture, a test — has no window to
+   * report, and a nought written there would read as *no page views* and
+   * make a reading claim the node counters were exact.
+   */
+  readonly appearances?: readonly RevisionViews[]
+}
+
+/** One audience's share of a window, which is what {@link ReaderTallyStore.applyWindow} takes a list of. */
+export type AudienceCounters = AppliedCounters & {
+  /** The audience this fold was taken over (0284). Omitted is `aud_everyone`. */
+  readonly audience?: AudienceId
+}
+
 export interface ReaderTallyStore extends ReaderOpeningCounter {
   /**
-   * Add a rollup's counters to what is already there, creating rows that do not
-   * exist yet. Atomic over the whole rollup where the backend can be: a partly
-   * applied window is counters that disagree with each other.
+   * Add a whole window's counters to what is already there, every audience in
+   * it, in one atomic write — creating rows that do not exist yet.
+   *
+   * **This is the method a collection run calls, and the atomicity is the
+   * reason it exists rather than a property it happens to have.**
+   *
+   * A window holds whatever arrived in it, so a deployment serving two forms of
+   * a page holds two audiences interleaved and is folded once per audience
+   * (0284). Writing those folds as separate calls leaves a state between them
+   * where some are durable and the rest are not — and because counting and
+   * forgetting are one operation (`collect.ts`), the buffer still holds the
+   * window, so the next run folds it again and **adds the already-durable
+   * audiences a second time.** Of a tally's nine counters, `views`, `reached`
+   * and `engaged` are distinct counts and would move little; `dwellMs`,
+   * `activations`, `opens`, `closes` and `completions` are occurrences and
+   * would double, which every rate in this subsystem divides by the first kind
+   * — so the damage is invisible, permanent (0158) and looks like a readership
+   * twice as interested as it was (0316).
+   *
+   * So the window is one write or it is none. A store that cannot be atomic
+   * over several audiences cannot be correct here, which is why this is a
+   * required method rather than a capability a caller probes for.
+   *
+   * Two entries naming one audience are added together, not refused: the
+   * guarantee is the same one `counters.ts` gives for two rows naming one
+   * counter, and it is here so that the two shipped stores cannot disagree
+   * about it.
+   */
+  readonly applyWindow: (
+    window: readonly AudienceCounters[],
+    at: string
+  ) => Promise<Result<void, ReaderSignalStoreError>>
+  /**
+   * One audience's counters, which is {@link applyWindow} over a single entry
+   * and is implemented as exactly that in both shipped stores — so the two
+   * cannot drift on the half that matters.
+   *
+   * Kept because a caller composing counters by hand — a backfill, a fixture, a
+   * migration — has one audience and no window, and should not have to wrap it
+   * in a list to say so.
    */
   readonly apply: (
-    rollup: {
-      readonly tallies: readonly ReaderTally[]
-      readonly funnels: readonly FunnelAnswer[]
-      /**
-       * The window's page views, per revision, for the counter the exact count
-       * is compared against.
-       *
-       * Optional, and absent is not none: a caller applying counters it
-       * composed itself — a backfill, a fixture, a test — has no window to
-       * report, and a nought written there would read as *no page views* and
-       * make a reading claim the node counters were exact.
-       */
-      readonly appearances?: readonly RevisionViews[]
-    },
+    counters: AppliedCounters,
     at: string,
     /**
-     * The audience whose window this is (0284). Omitted is `aud_everyone`.
-     *
-     * One audience per call, which is what keeps `ReaderTally` free of the
-     * dimension: a window holding two audiences is folded once per audience and
-     * applied twice, so every row in one call belongs to one of them.
+     * The audience whose counters these are (0284). Omitted is `aud_everyone`.
      */
     audience?: AudienceId
   ) => Promise<Result<void, ReaderSignalStoreError>>

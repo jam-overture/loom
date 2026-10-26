@@ -88,6 +88,38 @@ export const HOME: SiteRoute = {
   inMenu: false,
 }
 
+/**
+ * The build case, and **the page that answers the maintainer's second half.**
+ *
+ * `docs/positioning.md` records his instruction of 24 October in two parts:
+ * *"The building part and why this build is better than traditional methods is
+ * preferred."* The front door leads with his chain, which is the building part.
+ * This is the other one.
+ *
+ * `inMenu: true` and second in the order, which are one judgement rather than
+ * two. The order below is *the order a stranger needs them in*, and a stranger
+ * who has just read the front door has one question before any mechanical one:
+ * why reach for this rather than write it. A reader who does not yet believe
+ * the thing is worth having has no use for how a change travels, which is the
+ * sentence that already put `/how-it-works` ahead of `/what-you-run`.
+ *
+ * The bar carries six items with it. `BAR_CEILING` is eight, which is the
+ * number the maintainer called too many on #166, so this spends one of the two
+ * that were left and says so.
+ *
+ * `share.ts` splits a title on ` — ` and drops the part that is exactly the
+ * wordmark, so *Loom* leads this title rather than sitting inside a clause of
+ * it: a name inside the clause prints twice on the card.
+ */
+export const WHY_USE_IT: SiteRoute = {
+  path: "/why-use-it",
+  label: "Why use it",
+  title: "Loom — why use it instead of building it yourself",
+  description:
+    "Making a page that rearranges itself around its readers takes several separate jobs. You could write every one of them yourself. This is what each one takes, and which of them come with Loom.",
+  inMenu: true,
+}
+
 export const HOW_IT_WORKS: SiteRoute = {
   path: "/how-it-works",
   label: "How it works",
@@ -162,9 +194,11 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
- * built: **what this is, then how it works, then what you would be running.**
- * A reader who does not yet believe the thing is worth having has no use for
- * the news that it installs as a package.
+ * built: **what this is, then why you would want it, then how it works, then
+ * what you would be running.** A reader who does not yet believe the thing is
+ * worth having has no use for the news that it installs as a package, and the
+ * second page is there because believing it is worth having is a step of its
+ * own (`WHY_USE_IT` above says why it is that one and not a later one).
  *
  * The footer renders this list in order, and the front door is first in it
  * although the bar leaves it out, because the footer's map is a map of the site
@@ -183,7 +217,7 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * > that are both gone is not history worth keeping in the file the next run
  * > reads to find out what this site has. They are in `git log`.
  */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN]
+export const SITE_ROUTES: readonly SiteRoute[] = [HOME, WHY_USE_IT, HOW_IT_WORKS, WHAT_YOU_RUN]
 
 /**
  * The paths of {@link SITE_ROUTES}, sorted — **what a sweep's coverage is held

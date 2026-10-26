@@ -60384,3 +60384,369 @@ the section would have shipped today. That is dodging a search budget by making
 reader-facing prose unsearchable, and it is the opposite of what the bullet above
 asks for. It was considered and refused, and it is written down so that the next
 run meeting this wall refuses it too.
+
+---
+
+## 2026-10-26 — a page that says its own name is stranded by the rule that a band naming a page must offer the way there
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/naming.test.ts`) · **Status:** **open** — **nothing is
+broken**; the instance is worked around and the copy is better for it, so this
+is a false positive recorded before the next run meets it
+
+`naming.ts` holds a rule worth keeping: **a band that names a page offers the
+way there.** It is asked of the band rather than of the page, deliberately — the
+footer of every page links to every other page, so a rule asked of the page
+would be satisfied by the footer and hold nothing.
+
+The case it has no way to say is **a page naming itself.** `/why-use-it` was
+built with its own label as the hero's eyebrow, and every one of the twenty-five
+served states came back stranded:
+
+```
+/why-use-it (no request) loom.hero names /why-use-it as "Why use it": Why use it
+```
+
+The rule is right about every other case and the reading is correct as far as it
+goes: the band carries the name and no link. What it cannot see is that the link
+would go to the page the reader is standing on.
+
+### Why it is filed rather than fixed, which is a judgement and not a rule
+
+The fix is one clause — skip a mention whose `names` is the path of the page it
+was found on — and it is the correct narrowing. It was not taken today for two
+reasons, neither of them that it is hard:
+
+- **The workaround produced better copy.** The eyebrow is *The case for it* now,
+  which says what the band is for instead of repeating the title above it. A rule
+  that pushed a page off a lazy eyebrow earned its keep on this run.
+- **A site-wide naming rule changed in the same pull request as a new page is a
+  diff that is harder to read than either half.** The rule has held for three
+  weeks over three pages and nothing is failing, so it can move on a run of its
+  own.
+
+### What the next run should know
+
+The cost is one line of copy per page and it is paid at the moment somebody
+wants the page's own name in a band — a heading that says *Why use it* rather
+than an eyebrow, most likely. **The remedy is the clause above and not an
+exemption list**, and it is worth saying so here: a `PAGE_NAMES` entry with its
+phrases emptied would silence this and also silence every other page naming that
+one, which is the half of the rule that has caught real staleness twice.
+
+---
+
+## 2026-10-26 — the site's word ceiling was measured against three pages, so a fourth page is red before a word of it is written
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/budget.test.ts`) · **Status:** **open as a question for
+the maintainer** — the ceiling is raised and argued in this pull request, and
+what is filed is the shape rather than the instance
+
+`budget.test.ts` holds the whole site to a word count, and the number is
+deliberately a literal: *"The measurement chose the number once, in a comment,
+in front of a reviewer who can overrule it; the assertion reads a constant."*
+It is also held from below, so a ceiling nothing is near reports itself as
+stale rather than passing quietly. Both halves are right and this entry is not
+an argument against either.
+
+What happened today is that **a new page made it red before the page had any
+copy in it.** The three-page site measured 3,179 of 3,300 in the state that says
+the most, which is the margin the rule about binding ceilings asks for; a fourth
+page of any useful length cannot fit in 121 words. `/why-use-it` is 524 authored
+words and the site now measures 3,703, so the ceiling moved to 3,800 with a
+dated note and the numbers in it.
+
+### The shape, which is what is worth keeping
+
+**A total with no term for how many pages it is a total of is a budget that
+re-decides the size of the site every time somebody adds one.** The per-page,
+per-band and per-cell ceilings in that file do not have this property: they are
+about one thing a reader takes in, and they are the same number whether the site
+has three pages or six. The site total is the one ceiling whose right value
+depends on a count nobody wrote down.
+
+Two shapes, offered rather than recommended, because which one is right is a
+positioning question and positioning is the maintainer's:
+
+- **Per page rather than per site.** `MOST_WORDS_ON_A_PAGE` already exists at
+  1,500 and already binds. A site ceiling could be dropped and nothing about
+  *how much a visitor is asked to read on the page in front of them* would stop
+  being held.
+- **A total with the count in it** — a page allowance times the number of
+  routes. It keeps the site-level reading the maintainer's instruction was
+  about, and it stops a new page being an argument about the ceiling.
+
+The question for him is the one underneath both: **is the total number of words
+on this site a thing he wants capped at all**, now that it is four pages and the
+cap has been raised once? If it is, the second shape says so without a run
+having to re-measure. If it is not, the first is less code.
+
+---
+
+## 2026-10-26 — a two-subject comparison is the one shape of the band that could fit a phone, and it is the shape that does not
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts`, the `.loom-compare` widths) · **Status:**
+**open** — **nothing is broken and no test failed**; the band renders, the page
+does not overflow, and the column the page is arguing for is off the screen
+
+`/why-use-it` is the first page of this site to use `loom.comparison-table`,
+and it uses it with **two subjects**: *On your own* and *With Loom*. Measured
+with the harness on the build this report was photographed from:
+
+```
+2026-10-26-marketing-the-table-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390
+    table  x 15 y 880  451x802
+```
+
+The page is 390 in a 390 viewport, so nothing overflows: the table is 451 wide
+inside its own scroller and **the whole of the second column is past the right
+edge at rest.** A reader on a phone sees seven criteria, seven answers in the
+*On your own* column, and a sliver of tint where the answer is.
+
+### It is the narrow design working as written, against a case it was not measured on
+
+The stylesheet is explicit about what the narrow rendering is for, and the
+reasoning is good. The criterion column drops from 12rem to 9rem below 48rem so
+that 92 pixels of the **next subject** are on screen at rest — *"past the centre
+of that cell and therefore past its mark"* — with scroll snapping on every cell
+but the sticky one, so a reader travels the subjects.
+
+That is the right answer for the band the comments were measured against, which
+is a comparison with three or four subjects: there is no width at which four
+subjects fit a phone, so the question is how well the band says *there is more
+along here*, and a peek plus snapping is a better answer than a fade.
+
+**With two subjects the question is different, because fitting is on the table.**
+The arithmetic, from the two minimums in the stylesheet:
+
+| | at 390 |
+| --- | --- |
+| `.loom-compare-key` min-width, narrow | 9rem = 144px |
+| two answers at `min-width: 7rem` | 224px |
+| cell padding, six edges at `spacing-4` | ≈ 96px |
+| | **≈ 464px into a 390px viewport** |
+
+The minimums alone are 368 of 390, so the band is over the edge on padding. No
+prop on the primitive reaches it: `density: "tight"` changes the padding and
+saves about 24 pixels, which is not the 61 it needs, and it is the wrong lever
+anyway — it is a reading decision, not a fitting one.
+
+### What this lane did instead
+
+Nothing to the band, because it is `src/` and not this lane's. The page already
+carries *What comes with it*, which says the five rows the table marks as
+sentences, so a reader on a phone who scrolls past the table meets the substance
+in prose. That band was written for a different reason — a scan is not an
+explanation — and it happens to be what keeps the phone reading honest.
+
+### What the owner might consider, offered rather than recommended
+
+- **Two subjects could stack rather than scroll.** Below the same breakpoint, a
+  two-column comparison could lay each criterion out as a block — criterion,
+  then the two answers labelled — which is the shape every pricing table on a
+  phone already takes. It is a media query over a count the band cannot read in
+  CSS, which is the hard part.
+- **Or the minimums could be relative below the breakpoint**, so two subjects
+  divide what is left of the viewport rather than each claiming 7rem. That is
+  smaller, and it gives up the peek for the case where there is nothing to peek
+  at.
+
+**The thing worth deciding is the general one**: the narrow rendering has one
+behaviour for a band whose subjects cannot fit and for a band whose subjects
+nearly do, and those are different problems.
+## 2026-10-26 — a window of two audiences was written one audience at a time, so a store error part-way through doubled the audiences it had already written
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-55-a-window-is-one-write`**, record
+[0316](decisions/0316-a-windows-counters-are-one-write-because-a-window-written-per-audience-has-a-state-between-the-writes.md)
+
+Filed and closed in one run, because it is a fault in built code rather than a
+gap in a plan, and the entry is here so that the shape of it is searchable from
+outside the record.
+
+`collect.ts` opens with the reason counting and forgetting are one operation:
+*the set of batches rolled up and the set forgotten is the same set, decided
+once, in one place.* **That was true of the fold and false of the write.** A
+window is folded once per audience (0284) and the folds were applied one call
+per audience, so a store error on the second call left the first audience's
+counters durable, the second audience's uncounted, and the buffer un-forgotten —
+the next run folded the same batches again and added the first audience's window
+a second time.
+
+Three things about it worth keeping beside the record:
+
+- **The comment above the loop named it as something else.** It called the
+  re-count *the bounded over-count that comes with adding distinct view counts
+  across windows (0147)*. 0147's bound is one page view straddling a boundary on
+  a distinct count. This was a whole window re-added, and it falls hardest on
+  `dwellMs`, `activations`, `opens`, `closes` and `completions`, which are
+  occurrences and double — the five every rate in this subsystem divides by the
+  other four.
+- **`unavailable` documented the opposite.** *Read or write failed before
+  anything became durable* was false for every window of more than one audience,
+  which is every deployment serving two forms of a page.
+- **Why no test saw it.** `collect.test.ts` had a double whose `apply` always
+  failed, over a window of **one** audience — where the first call is the only
+  call and `unavailable` is exactly right. The regression test now fails a run
+  over two audiences, and it fails on the assertion that nothing became durable.
+
+Closed: the window is one `applyWindow` call now, atomic across the audiences,
+required on `ReaderTallyStore` rather than probed for.
+
+---
+## 2026-10-26 — the `applyWindow` contract suite is in this lane's directory rather than beside the other three, because the file that holds them is not this lane's
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`src/testing/reader-signal-contract.ts`) · **Status:** open — **nothing is
+broken and nothing is untested**; a file lives in the wrong place and the move is
+one import
+
+`src/testing/reader-signal-contract.ts` holds the three suites both reader-signal
+stores are run against — `describeReaderSignalJournalContract`,
+`describeReaderTallyStoreContract` and `describeReaderRegionStoreContract` — and
+it is an emitted, published entry point (0104).
+[0316](decisions/0316-a-windows-counters-are-one-write-because-a-window-written-per-audience-has-a-state-between-the-writes.md)
+adds a fourth, `describeWindowApplyContract`, for the one property those three do
+not reach: a whole window, every audience in it, written once.
+
+It is in **`src/signals/applied-window.contract.ts`** instead, run from
+`memory.contract.test.ts` and `postgres.test.ts` exactly as the other three are.
+The reason is only ownership: `src/testing/` is `Loom daily build`'s and
+`src/signals/` is this lane's, and a routine brief says work needed in another
+lane is filed rather than done.
+
+**The move, if you want it:** append the body of
+`src/signals/applied-window.contract.ts` to `src/testing/reader-signal-contract.ts`
+(it needs `nodeId`, `primitiveType`, `RIDERS`, `SKIERS` and `TREE`, which that
+file already defines, and its own `tallyOf`/`answerOf` fixtures can collapse into
+the `tally` and `PAIR` already there), then change the two importers to take
+`describeWindowApplyContract` from `../testing/reader-signal-contract.js` and
+delete this lane's copy. Nothing else imports it.
+
+**Why it is worth the minute rather than nothing.** Four suites in two files is
+the kind of split that leaves the fifth one written in whichever file the author
+happened to open, and the thing a reader of either file wants is *every property
+both stores must agree about*, in one place.
+
+---
+
+## 2026-10-26 — the bounded tally store forwarded two of its three writes' audience, and a required interface method is why anyone looked
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` /
+`Loom daily build` (`apps/loom/app/_lib/app/bounded-store.ts`) ·
+**Status:** **touched by `signals-55-a-window-is-one-write` and filed for your
+objection** — nothing was broken and nothing is now
+
+Two things happened in one file that is not this lane's, and both are declared
+here rather than left in a diff.
+
+**1. The touch that was unavoidable.**
+[0316](decisions/0316-a-windows-counters-are-one-write-because-a-window-written-per-audience-has-a-state-between-the-writes.md)
+adds `applyWindow` to `ReaderTallyStore` as a **required** method — required
+because a store that cannot be atomic over a window's audiences cannot be
+correct, and an optional one would keep the broken path alive beside the sound
+one. `boundedReaderTallyStore` implements the interface by hand, so it stopped
+compiling. One forwarding line was added. The alternative was to make the method
+optional, which is the worse design, or to open a pull request on red, which the
+brief forbids.
+
+**2. The thing that was found at that line.** `opened` and `apply` were spelled
+
+```ts
+opened: (openings, at) => store.opened(openings, at),
+apply: (rollup, at) => store.apply(rollup, at),
+```
+
+so **the audience argument was dropped**. A write through this handle would have
+been filed under `aud_everyone` whatever audience it named, which is two
+populations added into one counter — the failure 0284 exists to prevent and the
+one nothing afterwards can separate again, because the rows that would say which
+form a reader saw are the rows being summed.
+
+**Nothing writes through this handle today**, which is why it was harmless: the
+door and the collector hold `readerTalliesForWriting`, and
+`boundedReaderTallyStore` wraps the *reading* handle `portalReaderTallies`. So
+this was a trap rather than a defect. It is fixed in the same three lines
+(`opened`, `apply`, `applyWindow` all forward every argument now) with one test
+in `bounded-store.test.ts` that fails if any of them stops, because a line that
+drops an argument looks in a diff exactly like a line that forwards it.
+
+**If you would rather own the fix, revert those three lines and the test and say
+so** — the `applyWindow` line has to stay for the file to compile, and the other
+two are this lane's reading of what *forwards the writes untouched* has to mean.
+## 2026-10-25 (evening) — the region map the rung left to a caller is joined now, and the floor it needed is an argument rather than a lookup
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closes the 24 October entry** *the region map is the one reading the new rung
+leaves a caller to assemble*, in
+`signals-54-a-window-answers-where-its-readers-were`, record
+[0315](decisions/0315-a-window-answers-where-its-readers-were-at-a-floor-it-is-handed-and-the-readership-is-published-beside-the-forms.md)
+
+That entry costed two shapes and recommended the first. It is the one taken:
+**an options argument on the join**, so `windowReadingsOf` now answers
+`WindowReadings.regions` and no reading in this subsystem is two steps from a
+store any more.
+
+Three things in the taking that the entry did not have:
+
+- **Both answers rather than one.** The entry argued for a map per form, and
+  that is right — a readership is of one readership (§38) and two forms are two
+  populations (0290) — but a map per form **withholds more than a whole map
+  does**, because the floor bites harder the narrower the group. Fifteen views
+  of France under one form and fourteen under the other are a readership of
+  twenty-nine the whole map names and both split maps suppress. Publishing only
+  the split would have answered the maintainer's own question worse than the two
+  calls it replaced, so `regions.readership` is published beside
+  `regions.maps`.
+- **A map is not held to a tree.** A region map is of arrivals, not of nodes.
+  A revision whose tree has been pruned is `unjoined` for its counters and still
+  has its readers counted, which also keeps the two answers adding to one total.
+- **The window had no repeat guard.** `regionReadingFor` keeps the first row per
+  region and audience **within one revision**; nothing did it across a window,
+  so a caller concatenating two reads would have added a bucket to itself —
+  0158's one permanent error. The dedupe is now on tree, revision, form and
+  region, applied once before both answers, and `regions.duplicated` reports it.
+
+**Nothing reaches a reader**: no payload field, no browser byte, no column, no
+store method, no kind. `broadcast.ts` is byte-identical.
+
+---
+## 2026-10-25 (evening) — a screen can now draw a region map in one call, and the deployment's floor is the one argument nothing will remind it to pass
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is broken**; the second half of the 24 October entry *the rung from a
+store to a reading exists, so a reader screen is four lines*, now that the
+region map is in the rung
+
+`windowReadingsOf(window, trees, registry, options)` answers
+`WindowReadings.regions`, which holds `maps` — one map per revision per form,
+keyed so `readingKeyOf` pairs it with that form's page reading — and
+`readership`, the deployment's whole map. `undefined` there still means *no
+region store was offered*, and `[]` rows still mean *the store holds none*
+(0309 clause 2): **two different sentences, and a screen that draws them alike
+reports *we cannot say where your readers are* as *you have no readers
+abroad*.**
+
+**The one thing a screen must not forget is the floor.** It is
+`options.floor`, and leaving it out is not an error — it is the default of 25,
+which is right for a deployment that never configured one and **wrong for one
+that raised it**. A deployment's own floor is already read in this repository:
+
+```ts
+import { readRegionFloor, REGION_FLOOR_KEY } from "@/app/_lib/reader-signals/settings"
+
+const floor = readRegionFloor(process.env[REGION_FLOOR_KEY]).floor
+```
+
+`regionFloorOf` under the join is raise-only, so passing it can only ever
+withhold more — there is no way for a screen to read a map below the floor, and
+no reason not to pass it.
+
+Worth one line of the screen's own: `RegionReading.floor` says what the map was
+read at and `withheld` says what it is holding back, so *12 views in 2 countries
+too small to name* is a sentence a reader of the screen can be given rather than
+a silence.
+
+---
