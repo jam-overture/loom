@@ -340,6 +340,23 @@ is a node on the tree at the top of that page: `activated` happened inside
 `n_readersignals8`, which is the section the page's own prose quotes, and inside
 `n_readersignals20`, which is the page.
 
+## The preview
+
+Taken from the `vercel[bot]` comment after opening the pull request, not composed
+from the branch name.
+
+https://loom-git-docs-67-what-a-page-8627ea-jpizzolato36-6341s-projects.vercel.app
+
+The page to open on it, and the panel to scroll to is *What a page may say*:
+
+- https://loom-git-docs-67-what-a-page-8627ea-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-your-readers-do
+
+The pull request is **#713**.
+
+Every picture above was taken against a build in this container, not fetched from
+the preview: `*.vercel.app` is denied by the environment's egress policy, which
+is the open finding of 12 October and still true.
+
 ## Needs your input
 
 **One question, and it is the one the cap's own comment reserves for you.**
