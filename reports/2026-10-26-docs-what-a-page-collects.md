@@ -219,6 +219,127 @@ Standing entries this run met again and did not duplicate:
   (24 October, open, `Loom daily build`). Handled the same way: the pull
   request's state is read once and the session unsubscribes. No check-in armed.
 
+## Test numbers
+
+`pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
+last thing on its line, with nothing piped into `tail` or `tee`.
+
+- framework: **240 files, 5,746 tests passed**
+- application: **366 files, 6,492 tests passed**
+- `findings:check`: 1,320 findings, 0 malformed
+- `reports:check`: 1,981 visuals, 140.9MB, none over 1.1MB, 410 cited by no file
+- `prerender:check`: **137 prerendered pages**, 1,943 text junctions, 0 run
+  together; 3 metadata conventions, 0 unserved
+
+Nothing failed in that run, nothing was skipped, and no test was weakened.
+
+**Four full runs, and the one quoted above is the fourth.** The first was killed
+after a type error was found by hand (below). The second was killed when a stray
+test process from the first turned out to be competing with it for the machine.
+**The third went red, and it is the run this report is mostly about**: two
+failures, one of them the stale compiled fences the new section's ten extra
+lines shifted, and one of them the search index cap. The fourth is the branch as
+it ships, after the section came out.
+
+**A note on reading that third run**, because it is the rule in
+`docs/routines.md` catching something in the act: the harness reported the
+background command as *exit code 0*. The file said `EXIT=1`. The file was right.
+Nothing was lost, because the file is what this lane reads — which is the whole
+reason the rule says to write the status as the last thing on its line.
+
+**Eleven tests are new**: 6 in `signals/notice.test.ts` — every kind covered,
+the fields named being exactly the schema's table for each kind, a sentence on
+every field, the field three rows used to leave out, the shared address left out
+of every row, and the single-kind branch — 4 in `signals/page.test.ts` (the
+example-signal completeness check, the whole delivery, the page-view key, and
+what a pending kind may and may not read) and 1 in
+`_components/reader-signals.test.tsx` (every field in its kind's row, read back
+out of the document).
+
+Four existing assertions were rewritten rather than added to: what a row is
+asked for, what a kind on either list says, whether both lists say the same
+things, and the live block's configuration — the last of which stopped being a
+regular expression over a component's source.
+
+### Four mutations, four killed
+
+Each applied on its own, with the affected tests re-run.
+
+| what was put back | what failed |
+| --- | --- |
+| the rows dropping `within` again — the exact state of 25 October | **4**: the schema-table match, *names the field three rows of this page used to leave out*, the example-signal completeness check, and *reads its fields off the schema once the runtime has it* |
+| the printed delivery losing `view` and `first` | **2**: *is a whole delivery* and *names a page view the schema would accept as one* |
+| the `activated` example losing its ancestry again | **1**: the example-signal completeness check — which is the assertion that found this defect in the first place |
+| the panel printing one field per kind instead of the list | **1**: *prints every field each kind carries, in that kind's row* |
+
+**One of these got away on its first attempt**, and it is worth the paragraph.
+*Is a whole delivery* was first written as two `toContain`s against a field list
+plus a subset check — *every key on the batch is a field the runtime names*.
+Taking `view` and `first` back off the batch left every remaining key still
+named, so it passed, and only the view-key assertion noticed. It is stated the
+other way round now — **which named fields the block does not have**, which must
+be exactly `["audience"]` — so a field going missing from the block fails, and
+so does a field added to a delivery that the block then does not carry. The
+`audience` exception is an exception for a reason rather than by exemption: a
+delivery carries it only where the host serves an audience, nothing on this site
+does, and a notice names it anyway because a notice is a ceiling.
+
+### A type error no test would have found
+
+An earlier shape of `demonstration.ts` returned `Pick<ReaderSignalOptions,
+"kinds">`, where `kinds` is **optional** — a broadcaster asking for nothing in
+particular means every kind. A test spreading it is a type error and is not a
+test failure: vitest does not typecheck, so every test passed and `tsc --noEmit`
+did not. Caught by running the application's typecheck directly rather than
+waiting for the gate, which is worth doing after a change to a shared constant's
+type.
+
+## The pictures
+
+Taken with `pnpm shoot --serve apps/loom` against a build in this container,
+`built 2026-10-26T14:56:53.907Z`.
+
+**There is no *before* picture**, and the reason is worth stating rather than
+leaving as an absence: the old page is on `main`, and photographing it means
+building `main` in a second checkout. What the old rows said is a literal in the
+diff and is quoted above — `activated: "at — when it happened"` — so the claim
+is checkable without a photograph of it.
+
+### The rows, with the fields the schema gives them
+
+![1280: the vocabulary panel on /docs/the-runtime/what-your-readers-do, showing the activated, disclosed and completed rows, each with its field lines beneath the caveat and a real signal under that](2026-10-26-docs-what-a-page-collects-wide-vocabulary.webp)
+
+`disclosed` draws **three** field lines where it drew one — `open`, `at` and
+`within`, measured at `y 474`, `y 492` and `y 510` — and `activated` draws two
+where it drew one. Each line is the field's name in the payload and the
+runtime's own sentence about it, addressed to a reader.
+
+### On a phone, and the overflow this change made worse
+
+![390: the same panel at phone width, the activated row with both field lines and its example signal wrapped across four lines, ending in the within array](2026-10-26-docs-what-a-page-collects-phone-vocabulary.webp)
+
+`scrollWidth 390 / innerWidth 390` — nothing scrolls sideways, taken by a
+browser reporting `hover: none` and `pointer: coarse`.
+
+The example signals grew with the ancestry: an `activated` is about 200
+characters now. In the scroller they sat in, the line ended mid-word at the
+panel's edge with nothing on the screen saying there was more — which is the
+**18 October finding against `loom.code`**, met here in a docs component and made
+worse by the change above it. A reader comparing a row's field list to the signal
+under it has to be able to see the signal, so the block wraps. `break-all`
+rather than wrapping on whitespace, because `JSON.stringify` without spaces has
+none to wrap on.
+
+### The delivery, whole
+
+![1280 clipped to the block: the delivery printed on the page, carrying treeId, revision, sentAt, view, first and five signals, three of which have a within array naming the section and the page](2026-10-26-docs-what-a-page-collects-wide-delivery.webp)
+
+`view` and `first` are the two lines that were not there this morning, and the
+three `within` arrays are the three that were empty of ancestry. Every id in them
+is a node on the tree at the top of that page: `activated` happened inside
+`n_readersignals8`, which is the section the page's own prose quotes, and inside
+`n_readersignals20`, which is the page.
+
 ## Needs your input
 
 **One question, and it is the one the cap's own comment reserves for you.**

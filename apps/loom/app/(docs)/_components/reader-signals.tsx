@@ -126,7 +126,21 @@ export const TheVocabulary = () => {
                 </li>
               ))}
             </ul>
-            <pre className="text-ink-muted m-0 mt-2 overflow-x-auto font-mono text-xs leading-relaxed">
+            {/*
+             * Wrapped rather than scrolled, since 26 October.
+             *
+             * These signals grew: three of the five carry a `within` now, and
+             * an `activated` is about 200 characters. In a scroller the line
+             * ended mid-word at the panel's edge with nothing saying there was
+             * more — which is the 18 October finding against `loom.code`, met
+             * here in a docs component and made worse by the change above it.
+             * A reader comparing the row's field list to the signal under it
+             * has to be able to see the signal.
+             *
+             * `break-all` rather than wrapping on whitespace, because
+             * `JSON.stringify` without spaces has none to wrap on.
+             */}
+            <pre className="text-ink-muted m-0 mt-2 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap">
               {row.example}
             </pre>
           </li>
