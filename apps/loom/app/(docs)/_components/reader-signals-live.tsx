@@ -13,6 +13,10 @@ import { useEffect, useRef, useState } from "react"
 
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
 import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
+import {
+  DEMONSTRATION_KINDS,
+  DEMONSTRATION_TYPES,
+} from "@/app/(docs)/_lib/signals/demonstration"
 
 /**
  * The broadcaster, running, on a page the reader is reading.
@@ -37,22 +41,16 @@ import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
 const SUBJECT_ID = "a-page-a-reader-scrolls"
 
 /**
- * What this demonstration asks for, and why it is not simply everything.
+ * What this demonstration asks for, from the module that holds it.
  *
- * It is the shape the ski prototype wanted and could not have until 0136 was
- * amended: time on screen for the things that *are* the page, and activations
- * for the things inside them a reader aims at. Asking for all four kinds on all
- * types would bury the interesting signals under a `dwelled` for every link on
- * screen, several times a minute — which is the cost the amendment was about.
+ * It lived here while the broadcaster was the only thing that wanted it, and the
+ * paragraph under this block makes a claim about it that a test has to be able
+ * to reach. `demonstration.ts` says why that test used to read this file's
+ * source with a regular expression.
  */
-const KINDS = ["viewed", "dwelled", "activated", "disclosed"] as const
+const KINDS = DEMONSTRATION_KINDS
 
-const TYPES = {
-  viewed: ["loom.section", "loom.faq-list"],
-  dwelled: ["loom.section"],
-  activated: ["loom.action", "loom.link"],
-  disclosed: ["loom.faq"],
-} as const
+const TYPES = DEMONSTRATION_TYPES
 
 /** A second rather than the default five, because a reader is watching this one. */
 const FLUSH_MS = 1000

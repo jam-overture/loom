@@ -1,8 +1,10 @@
 import {
+  DELIVERY_FIELDS,
   READER_SIGNAL_KINDS,
   parseReaderSignalBatch,
   readerSignalBatchSchema,
   readerSignalSchema,
+  viewKeySchema,
 } from "@jam-overture/loom/signals"
 import { describe, expect, it } from "vitest"
 
@@ -39,8 +41,41 @@ describe("the vocabulary block", () => {
     for (const row of produceKinds()) {
       expect(row.means.length, row.kind).toBeGreaterThan(20)
       expect(row.here.length, row.kind).toBeGreaterThan(20)
-      expect(row.carries, row.kind).toContain("—")
+      expect(row.carries.length, row.kind).toBeGreaterThan(0)
       expect(JSON.parse(row.example), row.kind).toMatchObject({ kind: row.kind })
+
+      for (const field of row.carries) {
+        expect(field.field.length, `${row.kind}.${field.field}`).toBeGreaterThan(0)
+        expect(field.says.length, `${row.kind}.${field.field}`).toBeGreaterThan(20)
+      }
+    }
+  })
+
+  /**
+   * The assertion the old one could not make, and the reason this row stopped
+   * being a string.
+   *
+   * It said `activated` carries *at — when it happened* and nothing else, for
+   * the five weeks after `within` landed on all three delegated kinds with
+   * 0167, and `disclosed` named `open` without the two fields beside it. Nothing
+   * noticed: the row was a sentence, and a sentence is as long as its author
+   * left it.
+   *
+   * This asks the page's own example signal — a real object, through the real
+   * schema — which fields it has, and requires each one to be named in the row
+   * or to be one of the three every kind carries. **A field arriving on a kind
+   * is red here on the commit that adds it**, whichever direction it arrives
+   * from.
+   */
+  it("names every field its own example signal turned out to have", () => {
+    const shared = ["kind", "nodeId", "type"]
+
+    for (const row of produceKinds()) {
+      const named = [...shared, ...row.carries.map((field) => field.field)]
+
+      expect(Object.keys(JSON.parse(row.example) as object).sort(), row.kind).toEqual(
+        [...new Set(named)].sort()
+      )
     }
   })
 
@@ -96,6 +131,50 @@ describe("the batch the page prints", () => {
     expect(batch.signals).toBe(READER_SIGNAL_KINDS.length)
     expect(batch.treeId).toMatch(/^t_readersignals/)
     expect(batch.revision).toBe(0)
+  })
+
+  /**
+   * The delivery a reader is shown is a whole delivery.
+   *
+   * It was not until 26 October. A real broadcast mints a page-view key once and
+   * puts it on every batch, and marks the opening one `first` — both since 0146
+   * — and the block printed neither, so the one place on this site where a
+   * reader could see what arrives at their endpoint was missing the two fields
+   * every funnel reading is built on. It was found by `DELIVERY_FIELDS`, which
+   * names them because the schema does.
+   *
+   * Held against the notice's own list rather than against the two names, so a
+   * field added to a delivery is caught here as well as there.
+   */
+  it("is a whole delivery, carrying every field a delivery always carries", () => {
+    const batch = JSON.parse(produceBatch().json) as Readonly<Record<string, unknown>>
+    const named = Object.keys(DELIVERY_FIELDS)
+
+    expect(Object.keys(batch).every((key) => named.includes(key))).toBe(true)
+
+    /**
+     * Stated as *which named fields the block does not have*, rather than as two
+     * `toContain`s.
+     *
+     * A subset check alone was the first version of this and a mutation walked
+     * straight through it: taking `view` and `first` back off the batch left
+     * every remaining key still named, so it passed. Said this way round, a
+     * field going missing from the block fails here, and so does a field added
+     * to a delivery that the block then does not carry.
+     *
+     * `audience` is the exception, and it is one for a reason rather than by
+     * exemption: a delivery carries it only where the host serves an audience,
+     * and nothing on this site does. The notice describes it anyway, because a
+     * notice is a ceiling.
+     */
+    expect(named.filter((field) => !Object.keys(batch).includes(field))).toEqual(["audience"])
+  })
+
+  /** The key is a real one of the real width, minted by the runtime's own minter. */
+  it("names a page view the schema would accept as one", () => {
+    const batch = JSON.parse(produceBatch().json) as { readonly view: unknown }
+
+    expect(viewKeySchema.safeParse(batch.view).success).toBe(true)
   })
 
   /**
@@ -272,8 +351,25 @@ describe("the kind that is agreed on and not built", () => {
 
     expect(row, "completed has fallen off both lists").toBeDefined()
     expect(row?.means.length ?? 0).toBeGreaterThan(20)
-    expect(row?.carries ?? "").toContain("at")
     expect(row?.doesNotMean.length ?? 0).toBeGreaterThan(20)
+  })
+
+  /**
+   * And the one thing that is *not* the same on both lists, which is the half
+   * only the runtime can answer.
+   *
+   * A kind the runtime has gets its fields off the schema; a kind that is only
+   * agreed on has no schema entry, so its row says what it will carry in prose
+   * or says nothing. That asymmetry is the right one — the written sentence is
+   * the thing that goes stale, and it survives only for as long as nothing can
+   * be read instead.
+   */
+  it("reads its fields off the schema once the runtime has it, and not before", () => {
+    const [announced] = produceApproved(vocabulary.filter((kind) => kind !== "completed"))
+    const [live] = produceKinds().filter((row) => row.kind === "completed")
+
+    expect(live?.carries.map((field) => field.field)).toEqual(["at", "within"])
+    expect(announced?.carries, "a pending kind has nothing to read").toBeUndefined()
   })
 
   /**
@@ -290,7 +386,6 @@ describe("the kind that is agreed on and not built", () => {
     const [live] = produceKinds().filter((row) => row.kind === "completed")
 
     expect(announced?.means).toBe(live?.means)
-    expect(announced?.carries).toBe(live?.carries)
     expect(announced?.doesNotMean).toBe(live?.doesNotMean)
   })
 

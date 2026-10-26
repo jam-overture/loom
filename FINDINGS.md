@@ -59938,9 +59938,21 @@ below it in the same body is still a link, because it fits.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom docs`
 (`/docs/the-runtime/what-your-readers-do`) and `Loom demo`
-(`prototypes/ski-apparel`) · **Status:** open — **nothing is broken and nothing
-is failing**; a hand-written paragraph and a derived value now say the same
-thing, and only one of them cannot go stale
+(`prototypes/ski-apparel`) · **Status:** open — **partly met** by
+`docs-67-what-a-page-collects` (26 October), which took the half that needed no
+new prose: every field the vocabulary panel names is read off
+`collectionNoticeOf` now. **The page printing the notice is written, measured and
+not shipped**, because its prose crosses the search index's total cap — the
+26 October entry below carries that. The worked example's half is `Loom demo`'s
+and untouched.
+
+**This entry was right about more than it claimed.** The prose was not merely a
+second copy, it was already wrong: `within` had been on all three delegated
+kinds since 0167 on 17 September and no row on the page said so, `disclosed`
+named `open` without the two fields beside it, and `audience`, `view` and `first`
+had never been named on the site at all. Three rows, five weeks, nothing red —
+and the entry's own sentence names the mechanism exactly. What nobody had done
+was check whether it had already happened
 
 `collectionNoticeOf` (0313) publishes what a published page reports, derived
 from the options the page is broadcast with and from the schema it sends: the
@@ -60216,3 +60228,159 @@ lane's call and not this one's: a sweep under `tools/` that reads the strings
 anywhere else in the repository. It would have caught both of these on the
 commit that wrote them, and it is one test rather than a convention three lanes
 have to remember.
+---
+## 2026-10-26 — the page's own example signals carried no ancestry, so three of five showed a shape no broadcaster with `within` on ever sends
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/signals/page.ts`) · **Status:** **closed by**
+`docs-67-what-a-page-collects` — recorded because of *how* it was found rather
+than because it was hard to fix
+
+*What your readers do* prints one real signal of each kind, built in
+`EXAMPLES` and run through `readerSignalSchema` on the way out. `within` is
+**optional** in the schema — a host may turn the ancestry walk off, and an
+absent `within` means *we did not look* rather than *there was nothing above it*
+(0167) — so three example signals that never had one parsed cleanly and have
+done since September.
+
+Nothing could have noticed. The schema accepts them, the page renders, and the
+JSON looks like JSON.
+
+**What found it was the derived field list.** The row above each signal stopped
+being a sentence somebody typed and started being `SIGNAL_FIELDS`, and the new
+assertion — *the fields a row names are exactly the keys its own example signal
+turned out to have* — went red on `activated` immediately. The row said `at` and
+`within`; the signal under it had `at`.
+
+The ancestry is read off the example tree now, nearest first, by the same walk
+that finds the node the signal is addressed to — one chain, so the ancestry a
+signal prints cannot belong to a different node from the one it names.
+
+**The shape worth keeping: an optional field is the one a produced example
+quietly stops carrying.** A required field going missing takes the producer down
+with a parse error. An optional one is a hole that validates. Every producer on
+this site that builds an example of a schema shape has the same exposure, and
+the cheap defense is the one used here — compare the example's own keys against
+the table, rather than trusting the schema to have an opinion.
+
+---
+
+---
+## 2026-10-26 — the prose search index is 262 bytes under its total cap, so the next page anybody writes on this site crosses it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/build.ts`), **pending the maintainer's
+answer to the question the cap's own comment reserves for him** ·
+**Status:** open — **this is the reason a finished, measured, tested page is not
+in `docs-67-what-a-page-collects`**
+
+`build.test.ts` caps the prose index two ways: **40,000 gzipped bytes per
+section**, because that is what the whole index weighed before it was split, so
+no single fetch the search box makes is bigger than the one fetch it used to
+make; and **80,000 gzipped bytes in total**, which is *the bill* — what a reader
+who leaves the box open eventually receives.
+
+### Where it actually stands, measured
+
+| section | gzipped | raw |
+| --- | --- | --- |
+| `getting-started` | 11,671 | 33,069 |
+| `building-with-loom` | 24,618 | 74,639 |
+| `the-runtime` | **36,042** | 110,141 |
+| `api-reference` | 3,780 | 27,461 |
+| `architecture` | 3,627 | 9,772 |
+| **total** | **79,738** | **255,082** |
+
+**Three numbers are nearly spent at once.** The total has **262 bytes** of
+headroom against 80,000. The raw total has 4,918 against 260,000. And
+`the-runtime` has **3,958** against its own 40,000.
+
+262 gzipped bytes is about 580 characters of English on this site — a short
+paragraph. So this is not a budget with room in it for one more page; it is a
+budget that the next section anybody writes crosses, whoever writes it.
+
+### What crossed it, and what that cost
+
+The *What to tell your readers* section of
+`/docs/the-runtime/what-your-readers-do` — the page that answers the 24 October
+finding — is roughly 2,400 characters of prose around four produced panels. The
+panels cost the index **nothing**, because a component's copy is not in the page
+file; the prose cost **1,081** gzipped bytes, which took the total to **80,819**
+and the suite red.
+
+An editorial pass over the whole page, cutting the new section and replacing a
+paragraph the notice had made redundant, bought **160 bytes**. Gzip is very
+good at English that resembles the English around it, so trimming is not a
+lever: getting under the cap means deleting the section's explanation and
+shipping four tables with no words, against a brief whose first instruction is
+that the plain-language version comes first.
+
+### Three shapes, costed
+
+1. **Raise the total cap.** **Forbidden**, and not by inference:
+   [0157](decisions/0157-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md)
+   considered exactly this and rejected it in the words *forbidden by the test's
+   own comment*. That record's lesson was that a cap firing is information — in
+   its case, that nineteen names nobody imports were being published. Here it is
+   information too, and raising the number would hide it.
+2. **Stop sending a browser the whole site's prose.** **The recommendation, and
+   the shape the cap's own comment names**: *when this one fires, sharding is
+   finished as an answer and the question becomes whether a browser should be
+   sent the whole site's prose at all.* The box already fetches one section at a
+   time; what it does not do is stop. Sharding `the-runtime` by page is the
+   per-section remedy already written down, and the browser *already knows which
+   page a reader is on* — but note that it makes this number **worse**, because
+   the total is measured over files as served and four files of one text cost
+   more than one file of it. So the real question is whether the box should hold
+   every section it has fetched, or fetch on demand and keep the page's own
+   words. **That is a decision about what the search box is, which is above this
+   lane**, and it is the one the comment reserves.
+3. **Ship less prose.** What a budget is for, and what 0157 actually did. It is
+   the wrong trade here: the cost is not removable (the measurement above) and
+   what would be removed is the explanation, not an excess.
+
+### What is on the branch, and what is waiting
+
+Shipped, because it needed no new prose: every field the vocabulary panel names
+is read off the runtime's table; the printed delivery carries `view` and `first`;
+the example signals carry their real ancestry.
+
+Left out, written and measured: the *What to tell your readers* section, the
+`WhatAPageCollects` and `TheNoticeCall` components, `produceNotice`, the test
+holding the notice's printed copy to the site's US-spelling word list, and the
+site's first `](#fragment)` link together with the sweep written to hold it
+(`fragmentLinksIn` and `headingAnchorsIn` over every written page — there was no
+such sweep, because `cross-references.ts` matches an address beginning `/docs`
+and a same-page fragment has no address). **All of it is in this session's branch
+history and none of it needs rediscovering**: once the cap question is answered,
+re-landing is a revert of one commit's worth of removals plus the page section.
+
+### And the part of this that is not about the cap
+
+The notice's sentences live in `src/signals/notice.ts`, written by the lane that
+owns the runtime, and the surface that would publish them is one a stranger
+reads. Two things nothing on this site would have noticed, both of which the
+23 October entry (*the spelling sweep reads 49 pages and cannot read the copy
+every written one of them prints from a component*) is the root cause of:
+
+- **Spelling.** The site is US English everywhere a visitor reads;
+  `content.test.ts` holds forty-nine pages to it and reads a page's **file**.
+  ~3,800 characters of another lane's prose arriving through a component is
+  copy no spelling check has ever had an eye on. They measured clean, and the
+  test that measured them is among the things left out above.
+- **Search — and this one moves the 23 October recommendation.** None of those
+  3,800 characters would be in the search index either, because
+  `search/prose.ts` reads the file. The site's own box could not find the one
+  place on it that says *nothing about your device, your browser or your
+  settings*. That entry costed its three shapes against a spelling rule, where
+  *leave it* is defensible; costed against search as well, **reading the built
+  HTML** stops being the expensive option — `prerender:check` already reads the
+  artefact a reader is served for every prerendered page, and what it reads is
+  exactly the text a search index wants.
+
+**There is a trap here worth naming out loud.** Putting the section's prose
+inside the component would have made it invisible to the index and the cap, and
+the section would have shipped today. That is dodging a search budget by making
+reader-facing prose unsearchable, and it is the opposite of what the bullet above
+asks for. It was considered and refused, and it is written down so that the next
+run meeting this wall refuses it too.

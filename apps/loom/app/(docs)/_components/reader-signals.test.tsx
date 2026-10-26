@@ -73,6 +73,29 @@ describe("the vocabulary panel", () => {
     }
   })
 
+  /**
+   * The fields a kind carries, in its row, from the schema.
+   *
+   * This line was one string per kind and three of the five were wrong — the
+   * three delegated kinds gained `within` with 0167 and no row said so. It is
+   * `beyondTheAddress()` now, and this reads the names back out of the document
+   * so that a field reaching the producer and not the page is red too.
+   */
+  it("prints every field each kind carries, in that kind's row", () => {
+    const container = panel()
+
+    for (const row of produceKinds()) {
+      const inRow = container.querySelector(`[data-kind="${row.kind}"]`)
+
+      expect(row.carries.length, row.kind).toBeGreaterThan(0)
+
+      for (const field of row.carries) {
+        expect(inRow?.querySelector(`[data-field="${field.field}"]`), `${row.kind}.${field.field}`).not.toBeNull()
+        expect(inRow?.textContent, `${row.kind}.${field.field}`).toContain(field.says)
+      }
+    }
+  })
+
   it("prints the real signal under each row", () => {
     const container = panel()
 

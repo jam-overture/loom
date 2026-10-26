@@ -119,7 +119,13 @@ export const TheVocabulary = () => {
             >
               {row.doesNotMean}
             </p>
-            <p className="text-ink-faint m-0 mt-2 font-mono text-xs">{row.carries}</p>
+            <ul className="m-0 mt-2 flex list-none flex-col gap-0.5 p-0">
+              {row.carries.map((field) => (
+                <li key={field.field} className="text-ink-faint m-0 text-xs" data-field={field.field}>
+                  <span className="font-mono">{field.field}</span> — {field.says}
+                </li>
+              ))}
+            </ul>
             <pre className="text-ink-muted m-0 mt-2 overflow-x-auto font-mono text-xs leading-relaxed">
               {row.example}
             </pre>
@@ -173,7 +179,9 @@ export const TheApprovedAddition = () => {
               </span>
               <span className="text-ink text-sm">{row.means}</span>
             </p>
-            <p className="text-ink-faint m-0 mt-1 font-mono text-xs">{row.carries}</p>
+            {row.carries === undefined ? null : (
+              <p className="text-ink-faint m-0 mt-1 font-mono text-xs">{row.carries}</p>
+            )}
             <p className="m-0 mt-1 text-xs">{row.doesNotMean}</p>
           </li>
         ))}
