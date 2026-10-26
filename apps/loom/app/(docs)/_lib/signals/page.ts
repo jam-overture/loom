@@ -1,14 +1,18 @@
 import type { LoomNode, NodeId, PrimitiveType } from "@jam-overture/loom"
 import {
   READER_SIGNAL_KINDS,
+  mintViewKey,
   parseReaderSignalBatch,
   readerSignalSchema,
+  type CollectedField,
   type ReaderSignal,
   type ReaderSignalBatch,
   type ReaderSignalKind,
 } from "@jam-overture/loom/signals"
 
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
+
+import { beyondTheAddress } from "./notice"
 
 /**
  * What *What your readers do* prints, produced rather than typed.
@@ -65,8 +69,18 @@ export type KindRow = {
   readonly means: string
   /** What a reader did, in this page's own example tree. */
   readonly here: string
-  /** The field this kind carries beyond the address every kind carries. */
-  readonly carries: string
+  /**
+   * The fields this kind carries beyond the address every kind carries, read off
+   * the schema.
+   *
+   * It was a sentence somebody typed, and by 26 October three of the five were
+   * wrong: `within` landed on the three delegated kinds with 0167 on
+   * 17 September and no row mentioned it, and `disclosed` named `open` without
+   * the two fields beside it.
+   * `beyondTheAddress()` reads the runtime's own table, so a field added to a
+   * kind arrives in this row on the commit that adds it.
+   */
+  readonly carries: readonly CollectedField[]
   /** The same thing in the words the page opens with, before any of them are named. */
   readonly plainly: string
   /** The sentence that stops a reader over-reading the name. */
@@ -94,7 +108,22 @@ const DESCRIPTIONS: Readonly<
     {
       readonly means: string
       readonly here: string
-      readonly carries: string
+      /**
+       * The field a kind will carry, in prose, **for a kind the runtime has not
+       * got yet and only for that**.
+       *
+       * There is nothing to read for such a kind: `SIGNAL_FIELDS` is keyed by
+       * `ReaderSignalKind`, so a kind that is agreed on and not built has no
+       * entry in it, and a page that wants to describe one ahead of time has to
+       * write the sentence. That is this field, and it is **optional** because
+       * every kind the runtime has reads its fields off the schema instead.
+       *
+       * It held five strings until 26 October and nothing read three of them
+       * correctly. They are gone; a future pending kind brings one back for as
+       * long as it is pending, and loses it on the day the schema can answer
+       * for it.
+       */
+      readonly carries?: string
       readonly plainly: string
       /**
        * The gap between the name and the fact, which every one of these has.
@@ -124,7 +153,6 @@ const DESCRIPTIONS: Readonly<
   viewed: {
     means: "It came into view. Once, the first time, for the life of the page.",
     here: "The reader scrolled far enough for the questions band to be on screen.",
-    carries: "at — when it happened",
     plainly: "which part someone looked at",
     doesNotMean:
       "It does not mean anybody read it. Enough of the element was on screen, in a tab that was in front — so a reader who scrolled straight past is counted exactly like one who stopped, and a node sitting on screen in a tab nobody is looking at is not counted at all.",
@@ -132,7 +160,6 @@ const DESCRIPTIONS: Readonly<
   dwelled: {
     means: "It was on screen this long, since the last batch went out.",
     here: "They stayed on the first section for eleven seconds before scrolling.",
-    carries: "ms — milliseconds, this batch only",
     plainly: "what they stayed on",
     doesNotMean:
       "It does not mean time spent reading. A tab nobody has in front of them accrues nothing, which is as close to attention as a browser gets; a window left open behind another window goes on counting.",
@@ -140,7 +167,6 @@ const DESCRIPTIONS: Readonly<
   activated: {
     means: "A reader used a link, a button or a field inside it.",
     here: "They pressed “See the frames”.",
-    carries: "at — when it happened",
     plainly: "what they pressed",
     doesNotMean:
       "It does not mean the press did anything. The page is watched and the outcome is not, so a control whose handler cancelled it, failed, or did nothing at all reports the same signal as one that worked.",
@@ -148,7 +174,6 @@ const DESCRIPTIONS: Readonly<
   disclosed: {
     means: "A region was opened, or closed.",
     here: "They opened “How long does a frame take?”.",
-    carries: "open — true for opened, false for closed",
     plainly: "what they opened",
     doesNotMean:
       "It does not mean a reader opened it. It is read off the region's own state changing, and your own code changing it — a link that arrives with an answer already expanded, an “open all” — looks identical to a person doing it.",
@@ -156,7 +181,6 @@ const DESCRIPTIONS: Readonly<
   completed: {
     means: "A form inside it was submitted, and the browser let it go.",
     here: "Nothing on the page above can produce one: there is no form in it.",
-    carries: "at — when it happened",
     plainly: "what they finished",
     doesNotMean:
       "It does not mean a server accepted it, and it does not mean every submission is counted. The broadcaster watches the page and never the reply: it reports a form the page let go with its constraints satisfied, so a form posted with fetch — which is most forms in a client-rendered app — reports nothing at all.",
@@ -175,8 +199,8 @@ const DOCUMENTED_KINDS = Object.keys(DESCRIPTIONS) as readonly DocumentedKind[]
  * that no longer exist, which is precisely the failure 0136 exists to prevent
  * and would be an embarrassing one for its own guide to ship.
  */
-const addressOf = (type: string): { readonly nodeId: NodeId; readonly type: PrimitiveType } => {
-  const found = firstOfType(buildSubject().root, type)
+const addressOf = (type: string): SignalAddress => {
+  const [found] = chainTo(type)
 
   if (found === undefined) {
     throw new Error(
@@ -187,18 +211,47 @@ const addressOf = (type: string): { readonly nodeId: NodeId; readonly type: Prim
   return found
 }
 
-const firstOfType = (
-  node: LoomNode,
-  type: string
-): { readonly nodeId: NodeId; readonly type: PrimitiveType } | undefined => {
+/**
+ * The addressed nodes above the first node of a type, nearest first.
+ *
+ * What the broadcaster puts under `within` on the three delegated kinds, read
+ * off the same tree the signal is addressed to. It is not a second walk: the
+ * chain is found once and the address is its head, so the ancestry a signal
+ * prints cannot belong to a different node from the one it names.
+ *
+ * `ancestryOf` in the broadcaster includes the root when the root is addressed
+ * and skips anything it cannot read an address off, which is a slot here. This
+ * is the same rule against the tree rather than against the document.
+ */
+const ancestryOf = (type: string): readonly SignalAddress[] => chainTo(type).slice(1)
+
+/**
+ * The first node of a type and every addressed node above it, nearest first.
+ *
+ * Empty where there is none, which `addressOf` turns into a throw naming the
+ * type — a page whose example signals point at nodes that are not on the tree
+ * above them is the failure 0136 exists to prevent.
+ */
+const chainTo = (type: string): readonly SignalAddress[] => firstOfType(buildSubject().root, type) ?? []
+
+const firstOfType = (node: LoomNode, type: string): readonly SignalAddress[] | undefined => {
   if (node.kind === "text") return undefined
-  if (node.kind === "element" && node.type === type) return { nodeId: node.id, type: node.type }
+
+  const here: readonly SignalAddress[] =
+    node.kind === "element" ? [{ nodeId: node.id, type: node.type }] : []
+
+  if (node.kind === "element" && node.type === type) return here
 
   /** A slot is a node holding children, so both kinds are walked the same way. */
-  return node.children
+  const below = node.children
     .map((child) => firstOfType(child, type))
     .find((found) => found !== undefined)
+
+  return below === undefined ? undefined : [...below, ...here]
 }
+
+/** One addressed node as a signal names it: an id and a type, and nothing else. */
+type SignalAddress = { readonly nodeId: NodeId; readonly type: PrimitiveType }
 
 /**
  * The clock, frozen.
@@ -227,14 +280,30 @@ const AT = 1_757_720_400_000
 const EXAMPLES: Readonly<Record<DocumentedKind, unknown>> = {
   viewed: { kind: "viewed", ...addressOf("loom.faq-list"), at: AT },
   dwelled: { kind: "dwelled", ...addressOf("loom.section"), ms: 11_000 },
-  activated: { kind: "activated", ...addressOf("loom.action"), at: AT + 11_000 },
-  disclosed: { kind: "disclosed", ...addressOf("loom.faq"), open: true, at: AT + 18_000 },
+  activated: {
+    kind: "activated",
+    ...addressOf("loom.action"),
+    at: AT + 11_000,
+    within: ancestryOf("loom.action"),
+  },
+  disclosed: {
+    kind: "disclosed",
+    ...addressOf("loom.faq"),
+    open: true,
+    at: AT + 18_000,
+    within: ancestryOf("loom.faq"),
+  },
   /**
    * Addressed to the section, which is where a form would sit on a page that had
    * one. The shape is real; the scenario is the only invented thing here, and
    * the block that prints it says so.
    */
-  completed: { kind: "completed", ...addressOf("loom.section"), at: AT + 19_000 },
+  completed: {
+    kind: "completed",
+    ...addressOf("loom.section"),
+    at: AT + 19_000,
+    within: ancestryOf("loom.section"),
+  },
 }
 
 /** What this page would show for a kind, whether or not the runtime has it. */
@@ -282,8 +351,10 @@ const acceptedExample = (kind: ReaderSignalKind): ReaderSignal => {
  * file's. A kind added to the runtime appears here on the day it is added, and
  * appears with prose because `DESCRIPTIONS` is allowed to run ahead.
  */
-export const produceKinds = (): readonly KindRow[] =>
-  READER_SIGNAL_KINDS.map((kind) => {
+export const produceKinds = (): readonly KindRow[] => {
+  const fields = beyondTheAddress()
+
+  return READER_SIGNAL_KINDS.map((kind) => {
     const description = DESCRIPTIONS[kind]
 
     if (description === undefined) {
@@ -292,13 +363,26 @@ export const produceKinds = (): readonly KindRow[] =>
       )
     }
 
-    return { kind, ...description, example: JSON.stringify(acceptedExample(kind)) }
+    return {
+      ...description,
+      kind,
+      carries: fields[kind] ?? [],
+      example: JSON.stringify(acceptedExample(kind)),
+    }
   })
+}
 
 export type ApprovedRow = {
   readonly kind: DocumentedKind
   readonly means: string
-  readonly carries: string
+  /**
+   * The field it will carry, written, or nothing.
+   *
+   * The one hand-written field list left on this page, and it is here because a
+   * kind the runtime has not got has no schema entry to read. Absent today: the
+   * runtime has all five, so nothing is on this list at all.
+   */
+  readonly carries?: string
   /**
    * The sentence that stops a reader over-reading it, from the same field the
    * live rows read.
@@ -338,7 +422,7 @@ export const produceApproved = (
     return {
       kind,
       means: description.means,
-      carries: description.carries,
+      ...(description.carries === undefined ? {} : { carries: description.carries }),
       doesNotMean: description.doesNotMean,
     }
   })
@@ -369,6 +453,27 @@ export type BatchShape = {
 }
 
 /**
+ * The page view this delivery belongs to, minted by the runtime's own minter
+ * from a byte source that counts.
+ *
+ * **The block above it was not a whole delivery until 26 October.** A real
+ * broadcast mints a view key once and puts it on every batch, and marks the
+ * opening one `first` — both since 0146 — and this page printed neither, so the
+ * one place a reader could see what arrives at their endpoint was missing the
+ * two fields the funnel readings are built on. The notice further down the page
+ * names them, which is how it was noticed.
+ *
+ * `mintViewKey` takes its randomness as an argument for exactly this, and the
+ * bytes count rather than being random for the same reason {@link AT} is frozen:
+ * a page whose bytes differ per build is a failed prerender check rather than a
+ * documentation improvement. The key is a real key of the real width, and the
+ * schema's pattern is what judges it.
+ */
+const DEMONSTRATED_VIEW = mintViewKey((count) =>
+  Uint8Array.from({ length: count }, (_unused, index) => (index * 17 + 3) % 256)
+)
+
+/**
  * One batch, made of the four example signals and addressed to the real tree.
  *
  * The tree id and revision are read off the example rather than written down,
@@ -382,6 +487,8 @@ const goodBatch = (): ReaderSignalBatch => {
     treeId: tree.treeId,
     revision: tree.revision,
     sentAt: AT + 20_000,
+    view: DEMONSTRATED_VIEW,
+    first: true,
     signals: READER_SIGNAL_KINDS.map((kind) => acceptedExample(kind)),
   }
 }

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url"
 import { READER_SIGNAL_KINDS } from "@jam-overture/loom/signals"
 import { describe, expect, it } from "vitest"
 
+import { DEMONSTRATION_TYPES } from "./demonstration"
 import { produceAddressedMarkup } from "./markup"
 import { produceApproved, produceBatch, produceKinds, produceReadBack } from "./page"
 
@@ -271,18 +272,22 @@ describe("the two entry points", () => {
 
   /**
    * The paragraph under the live block tells a reader which kind is being asked
-   * for about which part of the page. That is a claim about the `TYPES` constant
-   * in the component directly above it, and the two are edited months apart.
+   * for about which part of the page. That is a claim about the configuration
+   * the block broadcasts with, and the two are edited months apart.
+   *
+   * **It used to read the constant out of the component's source with a regular
+   * expression**, because the constant was private to a `"use client"` module
+   * and there was no other way to reach it. It is `demonstration.ts`'s now —
+   * moved there because the notice further down the page is
+   * `collectionNoticeOf` of the same object — so this reads the value instead.
+   * A regex over source is a reader of last resort and it had the usual cost: it
+   * could not see the constant move, so it failed with *no TYPES constant*
+   * rather than with anything about the claim it exists to hold.
    */
   it("describes the live block's configuration as the live block configures it", () => {
-    const types = /const TYPES = \{([\s\S]*?)\n\} as const/.exec(live)?.[1] ?? ""
-
-    expect(types, "the live block no longer has a TYPES constant").not.toBe("")
-
-    const asks = (kind: string): readonly string[] =>
-      [...(new RegExp(`${kind}: \\[([^\\]]*)\\]`).exec(types)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map(
-        (found) => found[1] ?? ""
-      )
+    const asks = (kind: keyof typeof DEMONSTRATION_TYPES): readonly string[] => [
+      ...DEMONSTRATION_TYPES[kind],
+    ]
 
     expect(asks("viewed")).toEqual(["loom.section", "loom.faq-list"])
     expect(asks("dwelled")).toEqual(["loom.section"])

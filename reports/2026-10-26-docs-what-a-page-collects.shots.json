@@ -1,0 +1,50 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-26-docs-what-a-page-collects-wide-vocabulary",
+      "viewport": "wide",
+      "waitFor": "[data-vocabulary]",
+      "do": [
+        {
+          "scrollTo": "[data-kind=\"disclosed\"]"
+        }
+      ],
+      "measure": [
+        "[data-kind=\"disclosed\"]",
+        "[data-kind=\"disclosed\"] [data-field]",
+        "[data-kind=\"activated\"] [data-field]"
+      ]
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-26-docs-what-a-page-collects-phone-vocabulary",
+      "viewport": "phone",
+      "waitFor": "[data-vocabulary]",
+      "do": [
+        {
+          "scrollTo": "[data-kind=\"activated\"]"
+        }
+      ],
+      "measure": [
+        "[data-kind=\"activated\"]",
+        "[data-kind=\"activated\"] [data-field]"
+      ]
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-26-docs-what-a-page-collects-wide-delivery",
+      "viewport": {
+        "width": 1280,
+        "height": 1700
+      },
+      "waitFor": "[data-signals]",
+      "measure": [
+        "[data-signals]"
+      ],
+      "clip": "[data-signals]"
+    }
+  ]
+}
