@@ -4,6 +4,13 @@
 **Section:** §56 · **Record:**
 [0317](../decisions/0317-the-window-a-deployment-sweeps-on-is-read-where-its-other-settings-are-and-a-window-it-cannot-read-stops-the-sweep.md)
 
+**Pull request:** [#714](https://github.com/jam-overture/loom/pull/714) ·
+**Preview:**
+<https://loom-git-signals-56-one-wind-3f50fe-jpizzolato36-6341s-projects.vercel.app>
+
+Nothing on this branch draws a page, so the preview is `main`'s site with a
+settings reading, a notice join and one status sentence behind it.
+
 ## Before anything was built
 
 **One pull request open in the repository, no maintainer comment anywhere.**
