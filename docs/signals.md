@@ -3357,6 +3357,63 @@ sequence number, with its cost; the one `NUL` byte left in `src/runtime/`, which
 is another lane's; and still that **nothing draws any of this**, which is
 `Loom portal`'s.
 
+### 55. A window's counters are one write · `Loom signals` · **done, 26 October**
+
+Not a reading. The second gap in the thing every reading is built on, found in
+the same place §53 found the first and from the opposite direction: §53 was a
+*sender* delivering one batch twice, and this is the *collector* writing one
+window twice.
+
+A window is folded once per audience (0284), and the folds were written one call
+per audience. A store error on the second call left the first audience's counters
+durable, the second's uncounted and **the buffer un-forgotten** — so the next run
+folded the same batches again and added the first audience a second time. The
+comment above that loop called it *the bounded over-count that comes with adding
+distinct view counts across windows (0147)*, and it was not: 0147's bound is one
+page view straddling a boundary on a distinct count, and this was a whole window
+re-added, hardest on the five counters of nine that are occurrences rather than
+distinct counts. Every rate here divides the second kind by the first.
+
+**Done**
+([0316](../decisions/0316-a-windows-counters-are-one-write-because-a-window-written-per-audience-has-a-state-between-the-writes.md)),
+as `applyWindow` on `ReaderTallyStore`, implemented in
+[`postgres.ts`](../src/signals/postgres.ts) and [`memory.ts`](../src/signals/memory.ts)
+and called once per run by [`collect.ts`](../src/signals/collect.ts).
+
+- **The invariant `collect.ts` opens with is now true of the whole function.**
+  *The set of batches rolled up and the set forgotten is the same set, decided
+  once, in one place* was true of the fold and false of the write. It is one
+  write now, so there is no state between the writes to get out of.
+- **`unavailable` means what it says again.** Its own words are *nothing became
+  durable*, and that was false for every window of more than one audience.
+  Nothing new is reported, because there is no longer anything to report — which
+  is the better half of the fix: the alternative was an outcome naming the
+  audiences already counted, and every branch of that outcome is damage.
+- **Required rather than optional.** A store that cannot be atomic over several
+  audiences cannot be correct here, and probing for the capability would keep
+  the broken path alive beside the sound one.
+- **`apply` stays and is `applyWindow` over one entry**, implemented as exactly
+  that in both stores so they cannot drift on the half that matters. Every
+  existing call site compiles untouched.
+- **The atomicity is asserted against real Postgres**, not against a double: a
+  window whose second audience carries a `revision` past what an `integer`
+  column holds raises on that insert, and the first audience's rows are then
+  absent. The rollback under test is the database's.
+- **Nothing was gathered before writing.** Folding two entries of one audience
+  into one would have been fewer statements and the same answer, so it would
+  have been a line no test could fail on (0231). Two entries are two commands in
+  one transaction and so they add, which is what the shared contract asserts of
+  both stores.
+
+**Nothing was added to a payload, a browser, a column, a migration, a store read
+or the vocabulary of kinds.** `broadcast.ts` was not touched and is
+byte-identical.
+
+**What is left and is filed:** the `applyWindow` contract suite sits in
+`src/signals/applied-window.contract.ts` rather than beside the other three in
+`src/testing/reader-signal-contract.ts`, which is another lane's file — filed for
+it, and one import away.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

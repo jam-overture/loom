@@ -302,9 +302,10 @@ export const collectReaderSignals = async (
    * rows being summed.
    *
    * So the ripe batches are grouped by the audience they were filed under and
-   * each group is folded and applied on its own. `rollUp` stays audience-blind:
-   * it is handed one audience's batches and knows nothing about the dimension,
-   * which is what keeps the fold a pure function of a window.
+   * each group is folded on its own, then **all of them are written together**
+   * (0316). `rollUp` stays audience-blind: it is handed one audience's batches
+   * and knows nothing about the dimension, which is what keeps the fold a pure
+   * function of a window.
    *
    * The summary adds up across audiences, because it describes the run rather
    * than any one population.
@@ -331,18 +332,31 @@ export const collectReaderSignals = async (
   }
 
   /**
-   * Applied in sequence rather than together, because each call is atomic over
-   * its own audience's counters and the store's contract says nothing about two
-   * calls. A failure part-way through leaves the audiences already applied
-   * counted and the buffer un-forgotten, which is the outcome this function
-   * already has a name for: the window is re-read and re-folded next run, and
-   * the counters it already moved are the bounded over-count that comes with
-   * adding distinct view counts across windows (0147).
+   * **One write for the whole window, every audience in it** (0316).
+   *
+   * One call per audience is what this was, and it had a state between the
+   * calls that nothing could get out of: the audiences already applied were
+   * durable, the rest were not, and the buffer still held the window — because
+   * counting and forgetting are one operation, which is the invariant at the
+   * top of this file. So the next run folded the same batches again and **added
+   * the already-durable audiences a second time**, permanently (0158), on the
+   * five of nine counters that are occurrences rather than distinct counts.
+   * `unavailable` said *nothing became durable* while that was happening.
+   *
+   * It is one `applyWindow` now, so there is no state to get out of and the
+   * sentence on `unavailable` is true again. Nothing is reported about it
+   * because there is nothing left to report.
    */
-  for (const { audience, rollup } of folded) {
-    const applied = await store.apply(rollup, now, audience)
-    if (!applied.ok) return { outcome: "unavailable", error: applied.error }
-  }
+  const applied = await store.applyWindow(
+    folded.map(({ audience, rollup }) => ({
+      audience,
+      tallies: rollup.tallies,
+      funnels: rollup.funnels,
+      appearances: rollup.appearances,
+    })),
+    now
+  )
+  if (!applied.ok) return { outcome: "unavailable", error: applied.error }
 
   const forgotten = await journal.forget({ before: plan.before })
   if (!forgotten.ok) {

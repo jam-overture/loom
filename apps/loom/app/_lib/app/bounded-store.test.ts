@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { createTree, primitiveTypeSchema, sequentialIdFactory } from "@jam-overture/loom"
 import {
+  createTree,
+  nodeIdSchema,
+  primitiveTypeSchema,
+  sequentialIdFactory,
+  treeIdSchema,
+} from "@jam-overture/loom"
+import {
+  audienceIdSchema,
   DEFAULT_PROJECT_ID,
   memoryApplicationStore,
   memoryProjectStore,
@@ -9,11 +16,14 @@ import {
 } from "@jam-overture/loom/store"
 import { memoryHoldStore } from "@jam-overture/loom/write"
 
+import { memoryReaderTallyStore } from "@jam-overture/loom/signals"
+
 import {
   absent,
   boundedApplicationStore,
   boundedHoldStore,
   boundedProjectStore,
+  boundedReaderTallyStore,
   boundedTreeStore,
 } from "./bounded-store"
 
@@ -37,6 +47,11 @@ const after = <T,>(ms: number, value: T): Promise<T> =>
  * depends on what the deployment's budget happens to be.
  */
 const BUDGET = 40
+
+const AT = "2026-10-26T00:00:00.000Z"
+const SKIERS = audienceIdSchema.parse("aud_skiers")
+const READER_TREE = treeIdSchema.parse("t_bounded")
+const READER_NODE = nodeIdSchema.parse("n_hero")
 
 const ids = sequentialIdFactory("bounded")
 
@@ -167,6 +182,45 @@ describe("the other three stores", () => {
     expect(unavailableIn(await boundedApplicationStore(applications, BUDGET).list())).toBe(
       `unavailable: the store did not answer within ${BUDGET}ms`
     )
+  })
+
+  /**
+   * A bounded store puts a budget on the reads and forwards the writes
+   * untouched, and *untouched* has to include the audience: a write filed under
+   * `aud_everyone` whatever audience it named is two populations in one counter
+   * (0284), and it would look in a diff exactly like forwarding.
+   *
+   * Nothing writes through this handle today — the door and the collector hold
+   * the unbounded one — so this is the assertion that keeps the day one does
+   * from being the day the counters merge.
+   */
+  it("forwards the audience through each of the three writes it does not bound", async () => {
+    const tallies = memoryReaderTallyStore()
+    const store = boundedReaderTallyStore(tallies, BUDGET)
+    const revision = { treeId: READER_TREE, revision: 1 }
+    const tally = {
+      ...revision,
+      nodeId: READER_NODE,
+      type: primitiveTypeSchema.parse("loom.section"),
+      views: 1,
+      reached: 1,
+      engaged: 0,
+      dwellMs: 90,
+      activations: 0,
+      opens: 0,
+      closes: 0,
+      completions: 0,
+    }
+
+    await store.opened([{ ...revision, views: 4 }], AT, SKIERS)
+    await store.apply({ tallies: [tally], funnels: [] }, AT, SKIERS)
+    await store.applyWindow([{ audience: SKIERS, tallies: [tally], funnels: [] }], AT)
+
+    const rows = await tallies.tallies()
+    const views = await tallies.pageViews()
+
+    expect(rows.ok && rows.value.map((row) => row.audienceId)).toEqual([SKIERS])
+    expect(views.ok && views.value.map((row) => row.audienceId)).toEqual([SKIERS])
   })
 })
 

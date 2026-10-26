@@ -404,3 +404,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0312](0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md) | A site hands Loom a snapshot of its pages with a secret key, and Loom never runs its code | Accepted | §5 (portal), §1 |
 | [0313](0313-what-a-page-collects-is-published-to-the-reader-it-collects-about.md) | What a page collects is published to the reader it collects about, derived from the configuration and never written by hand | Accepted | §4c (reader signals) |
 | [0314](0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md) | A batch delivered twice is folded once, and the window is how wide that promise is | Accepted | §4c (reader signals) |
+| 0315 | *No record on this branch* | — | — |
+| [0316](0316-a-windows-counters-are-one-write-because-a-window-written-per-audience-has-a-state-between-the-writes.md) | A window's counters are one write, because a window written per audience has a state between the writes | Accepted | §4c (reader signals) |
