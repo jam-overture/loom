@@ -2,6 +2,13 @@
 
 **26 October 2026 · `Loom marketing` · branch `marketing-17-why-use-it`**
 
+**Preview:**
+<https://loom-git-marketing-17-why-use-it-jpizzolato36-6341s-projects.vercel.app/why-use-it>
+· pull request [#712](https://github.com/jam-overture/loom/pull/712). Not opened
+from this run: `*.vercel.app` is denied by the environment's network policy,
+filed on 27 September. The pictures below are off a local production build of
+this commit, `built 2026-10-26T11:53:33.261Z`.
+
 `docs/positioning.md` records the maintainer's answers of 24 October, and the
 instruction this run is built on is in two parts:
 
