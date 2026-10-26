@@ -4,6 +4,7 @@ import {
   describeReaderTallyStoreContract,
 } from "../testing/reader-signal-contract.js"
 
+import { describeWindowApplyContract } from "./applied-window.contract.js"
 import {
   memoryReaderRegionStore,
   memoryReaderSignalJournal,
@@ -19,3 +20,6 @@ describeReaderSignalJournalContract("memoryReaderSignalJournal", () => memoryRea
 describeReaderTallyStoreContract("memoryReaderTallyStore", () => memoryReaderTallyStore())
 
 describeReaderRegionStoreContract("memoryReaderRegionStore", () => memoryReaderRegionStore())
+
+/** The fourth suite, and the one that is this lane's own file (0316). */
+describeWindowApplyContract("memoryReaderTallyStore", () => memoryReaderTallyStore())

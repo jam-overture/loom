@@ -1,6 +1,6 @@
 import { DEFAULT_AUDIENCE_ID, type AudienceId } from "../audience/audience.js"
 import { cursorPosition, pageEnds } from "../paging.js"
-import { ok } from "../result.js"
+import { ok, type Result } from "../result.js"
 import { systemClock, type Clock } from "../runtime/events.js"
 
 import {
@@ -9,6 +9,7 @@ import {
   type ReaderSignalJournal,
   type ReaderSignalPage,
   type ReaderSignalReadRequest,
+  type ReaderSignalStoreError,
   type ReceivedBatch,
 } from "./journal.js"
 import { funnelKey, inAudience, pageViewKey, regionKey, tallyKey } from "./counters.js"
@@ -16,7 +17,13 @@ import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { ReaderRegionStore, StoredRegionCount } from "./region.js"
 import type { FunnelAnswer, ReaderTally } from "./rollup.js"
 import type { ReaderSignalBatch } from "./signal.js"
-import type { ReaderTallyStore, StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
+import type {
+  AudienceCounters,
+  ReaderTallyStore,
+  StoredFunnel,
+  StoredTally,
+  TallyReadRequest,
+} from "./tally.js"
 
 /**
  * The buffer and the counters, in the process.
@@ -180,14 +187,35 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     })
   }
 
-  return {
-    apply: (rollup, at, audience = DEFAULT_AUDIENCE_ID) => {
-      for (const tally of rollup.tallies) addTally(tally, at, audience)
-      for (const answer of rollup.funnels) addFunnel(answer, at, audience)
-      addPageViews(rollup.appearances ?? [], "appearances", at, audience)
+  /**
+   * Every audience in one go, which is the whole window (0316).
+   *
+   * Nothing here can fail, so there is no partial write to roll back and the
+   * atomicity `ReaderTallyStore.applyWindow` asks for is free. What the
+   * reference implementation is for is the *other* half of that contract: two
+   * entries naming one audience are added rather than refused, which is a
+   * property Postgres has to be written to have and this gets by construction.
+   */
+  const applyWindow = (
+    window: readonly AudienceCounters[],
+    at: string
+  ): Promise<Result<void, ReaderSignalStoreError>> => {
+    for (const counters of window) {
+      const audience = counters.audience ?? DEFAULT_AUDIENCE_ID
 
-      return Promise.resolve(ok(undefined))
-    },
+      for (const tally of counters.tallies) addTally(tally, at, audience)
+      for (const answer of counters.funnels) addFunnel(answer, at, audience)
+      addPageViews(counters.appearances ?? [], "appearances", at, audience)
+    }
+
+    return Promise.resolve(ok(undefined))
+  }
+
+  return {
+    applyWindow,
+
+    apply: (counters, at, audience = DEFAULT_AUDIENCE_ID) =>
+      applyWindow([{ ...counters, audience }], at),
 
     opened: (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
       addPageViews(openings, "opened", at, audience)

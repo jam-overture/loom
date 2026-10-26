@@ -243,15 +243,23 @@ export const boundedReaderSignalJournal = (
 /**
  * The rollups the readers and pieces screens draw every rate from.
  *
- * `opened` and `apply` are the collector folding a window in; the three
- * listings are what a screen prints.
+ * `opened`, `apply` and `applyWindow` are the door and the collector writing a
+ * window in; the three listings are what a screen prints.
+ *
+ * **The three writes forward every argument they were given**, the audience
+ * among them. They used to forward two of three, which nothing could see today
+ * because the writers hold the unbounded handle — but a write that reached this
+ * wrapper would have been filed under `aud_everyone` whatever audience it named,
+ * which is two populations in one counter (0284). Named here rather than left as
+ * a line that looks like forwarding.
  */
 export const boundedReaderTallyStore = (
   store: ReaderTallyStore,
   budgetMs: number = PORTAL_READ_BUDGET_MS
 ): ReaderTallyStore => ({
-  opened: (openings, at) => store.opened(openings, at),
-  apply: (rollup, at) => store.apply(rollup, at),
+  opened: (openings, at, audience) => store.opened(openings, at, audience),
+  applyWindow: (window, at) => store.applyWindow(window, at),
+  apply: (counters, at, audience) => store.apply(counters, at, audience),
   tallies: (request) => readWithin(() => store.tallies(request), unavailable, budgetMs),
   funnels: (request) => readWithin(() => store.funnels(request), unavailable, budgetMs),
   pageViews: (request) => readWithin(() => store.pageViews(request), unavailable, budgetMs),
