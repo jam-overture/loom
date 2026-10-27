@@ -20,6 +20,12 @@ import { ARRIVAL_ROUTE, type ArrivalStep } from "@/app/(docs)/_lib/arrival/route
  * The totals themselves are not — `ARRIVAL_TOTALS` still holds the route to the
  * hour the heading over it promises, and does it at import time rather than on
  * the screen.
+ *
+ * **`data-arrival-route` is a handle rather than a hook.** The screenshot
+ * harness measures the route as one rectangle, and the class names on this
+ * element are about spacing — which is the kind of selector that stops matching
+ * the day somebody changes a margin. Nothing styles it and nothing reads it at
+ * runtime.
  */
 
 const Step = ({ step, position }: { readonly step: ArrivalStep; readonly position: number }) => (
@@ -63,7 +69,7 @@ const Step = ({ step, position }: { readonly step: ArrivalStep; readonly positio
 )
 
 export const ArrivalRoute = () => (
-  <div className="not-prose my-8">
+  <div data-arrival-route="" className="not-prose my-8">
     <ol className="flex flex-col gap-6">
       {ARRIVAL_ROUTE.map((step, position) => (
         <Step key={step.id} step={step} position={position + 1} />

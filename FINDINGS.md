@@ -60750,3 +60750,107 @@ too small to name* is a sentence a reader of the screen can be given rather than
 a silence.
 
 ---
+
+---
+## 2026-10-27 — a curated list is checked against everything it declares and nothing it leaves out, and the arrival route is the second instance
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/arrival/route.ts`) · **Status:** **closes the
+25 October entry** *the arrival route and the section's own page both answer
+what should I read, and only one of them notices a page added to Getting
+started* — shape 2, which that entry recommended against taking *before* the
+failure happened
+
+That entry costed two shapes and said of the second: *worth taking the day a
+page is added to Getting started and nobody notices; not worth taking before.*
+It is taken now, a day early, for a reason the entry did not have: the failure
+is **silent in both directions**, so *the day nobody notices* is not a day
+anybody can be waiting for. A page added to that section and skipped by the
+route does not render differently, break a link, or fail a check — the only
+reader who finds out is the stranger the site exists for, and they find out by
+finishing the hour not knowing something the section's own page told them to
+read.
+
+### The shape, which is the part worth keeping
+
+**Every assertion about a declared list is an assertion about an entry in it.**
+`arrival.test.ts` held nine things about the six stops — the address exists, the
+title matches the rail, the checkpoint is published and printed on the page, the
+anchor is a real heading, the order never doubles back, the sentence has no
+jargon in it, the blocks are counted, the minutes fit the hour. Every one of
+them is of the form *this stop is still true*. Nothing was of the form *this is
+still all of them*, and nothing could be, because a list is silent about what is
+not in it.
+
+The cure is a second list — the pages it leaves out, with a reason each — and
+then the *pair* is held against the site: every page the route passes is in
+exactly one of the two. It is the same cure as the one `nav.ts` already applies
+to the rail and the index, and the second instance of this shape in this
+directory in four days (the 25 October sweep entry is the first: *a sweep that
+enumerates a tree to find the things a rule is about will answer the rule
+correctly for every depth it walks and silently exclude the one it does not*).
+
+**And the reasons are facts rather than sentences**, which is the part that
+cost the thinking. A list of excuses is itself a hand-maintained list, so three
+of the four would have gone stale the same way the thing they are excusing
+would. Each is now checked:
+
+| excuse | what checks it |
+| --- | --- |
+| the route is printed here | the page's source draws `<ArrivalRoute />` |
+| the route offers it in its own prose | the route's page links to that address |
+| a stop covers the same ground | the stop exists **and comes earlier in the rail** |
+
+The third one's second clause is the one worth copying: *covered by* is a claim
+about a reader who has already been through something, so a page excused by a
+stop further along the rail is excused by something the reader has not reached.
+
+### What this does not catch, said out loud
+
+**The route is held responsible for a section only up to the stop it leaves
+from.** It enters *Building with Loom* at its first page and departs for the
+runtime, so the seven pages after that one are outside the account: a page
+appended there is depth the site is allowed to grow, and nothing asks about it.
+The same is true of the eleven runtime pages past *What the Gate decides*, and
+of Architecture, which the route never enters.
+
+The alternative — everything in rail order up to the last stop — was built
+first and measured: it demands a reason for all seven of those pages, and the
+honest reason for each is *a first hour does not go here*, which is a sentence
+no fact can check and therefore the fourth kind of excuse this deliberately has
+not got. Seven unverifiable excuses to catch one page is the wrong trade, and
+the narrow rule still catches every page added **in front of** a stop, which
+includes all of Getting started.
+
+**Whoever disagrees should know what moving the line costs**: the four excuses
+become eleven, and seven of them are judgement the build cannot hold.
+
+---
+## 2026-10-27 — mutation testing before the first commit is how a run loses the work it is testing
+
+**Filed by:** `Loom docs` · **Owned by:** every routine · **Status:** open as a
+line somebody may want in `docs/routines.md`; **nothing was lost permanently**,
+and the cost this run was about twenty minutes of rebuilding a file from the
+session's own transcript
+
+The repository's own standard is that a new assertion is kept only once a
+mutation has been shown to kill it, and the cheap way to apply a mutation is to
+edit the file, run the test, and put the file back. **The putting back is
+`git checkout -- <path>`, and on a branch where the work has not been committed
+yet that is not an undo of the mutation — it is an undo of the morning.**
+
+It happened on this run, to the module this branch exists for. The first
+mutation was planted and killed; the restore took the new module with it; and
+the next three mutations ran against a file that no longer had the code under
+test in it, reporting *is not a function* in a shape that reads at a glance like
+a real failure of the new rules.
+
+**The remedy is one line and it is not a new tool:** commit the unit first, then
+mutate, then `git restore --source=HEAD -- .`. A commit is free on a branch
+nobody has pulled, it makes every restore exact, and it turns *put the file
+back* into something that cannot reach further than the mutation.
+
+Worth a sentence in `docs/routines.md` beside the existing instruction about
+mutation-checking, because the discipline that costs the work is the same
+discipline the repository asks for — and the failure mode is a run that reports
+three mutations as killed when what killed them was the restore.
