@@ -15,11 +15,13 @@ import {
 import type { ElementNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
-import { readingKeyOf } from "./audiences.js"
+import { formKeyOf, readingKeyOf } from "./audiences.js"
+import { readingChangeOf } from "./change.js"
+import { deploymentChangeOf } from "./deployment-change.js"
 import { deploymentReadingOf } from "./deployment.js"
 import { memoryReaderRegionStore, memoryReaderTallyStore } from "./memory.js"
 import type { StoredPageViews } from "./page-views.js"
-import type { PartDeclarations } from "./parts.js"
+import type { PageReading, PartDeclarations } from "./parts.js"
 import { readingProgressOf } from "./progress.js"
 import { DEFAULT_REGION_FLOOR, UNKNOWN_REGION, type StoredRegionCount } from "./region.js"
 import type { ReaderTally } from "./rollup.js"
@@ -29,6 +31,7 @@ import {
   readReaderWindow,
   revisionsIn,
   treesIn,
+  windowPairsOf,
   windowReadingsOf,
   UNJOINED_CAUSES,
   type ReaderWindow,
@@ -948,5 +951,320 @@ describe("where a window's readers were", () => {
 
     expect(regions?.readership.regions).toEqual([{ region: UNKNOWN_REGION, views: 2 }])
     expect(regions?.readership.withheld).toEqual({ buckets: 0, views: 0 })
+  })
+})
+
+/**
+ * The second step of the rung. The cases that matter are not the sorting — they
+ * are the four a caller writing this itself gets wrong: that a form published
+ * three times in one window is one pair and not two, because the only consumer
+ * drops a form it was handed two of; that two forms of one page are two pairs
+ * and not one comparison across populations; that the latest revision handed in
+ * twice does not pair with itself and report that nothing changed; and that
+ * every pair this makes is one the comparison layer cannot refuse for a
+ * mismatched side.
+ */
+describe("the pairs a window holds", () => {
+  const PAIRED = treesIn([
+    treeOf(TREE, 1, SIDE_BY_SIDE),
+    treeOf(TREE, 2, SIDE_BY_SIDE),
+    treeOf(TREE, 3, SIDE_BY_SIDE),
+    treeOf(TREE, 9, SIDE_BY_SIDE),
+    treeOf(TREE, 10, SIDE_BY_SIDE),
+    treeOf(OTHER_TREE, 1, SIDE_BY_SIDE),
+    treeOf(OTHER_TREE, 2, SIDE_BY_SIDE),
+  ])
+
+  const pairsIn = (held: Partial<ReaderWindow>) =>
+    windowPairsOf(windowReadingsOf(windowOf(held), PAIRED, DECLARED).pages)
+
+  /** Throws rather than asserting, so a fixture that changed shape says so here. */
+  const at = (readings: readonly PageReading[], index: number): PageReading => {
+    const reading = readings[index]
+
+    if (reading === undefined) throw new Error(`the window held no reading at ${index}`)
+
+    return reading
+  }
+
+  it("pairs a form's two revisions, earlier side first", () => {
+    const { pairs, unpaired, duplicated } = pairsIn({
+      tallies: [
+        tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+        tally({ revision: 2 }, "band", { views: 10, reached: 10 }),
+      ],
+    })
+
+    expect(duplicated).toBe(0)
+    expect(unpaired).toEqual([])
+    expect(pairs).toHaveLength(1)
+    expect([pairs[0]?.was.revision, pairs[0]?.now.revision]).toEqual([1, 2])
+    expect(pairs[0]?.superseded).toEqual([])
+  })
+
+  it("takes the latest two of three revisions and names the one it left below them", () => {
+    const { pairs } = pairsIn({
+      tallies: [
+        tally({ revision: 3 }, "band", { views: 10 }),
+        tally({ revision: 1 }, "band", { views: 10 }),
+        tally({ revision: 2 }, "band", { views: 10 }),
+      ],
+    })
+
+    expect(pairs).toHaveLength(1)
+    expect([pairs[0]?.was.revision, pairs[0]?.now.revision]).toEqual([2, 3])
+    expect(pairs[0]?.superseded).toEqual([1])
+  })
+
+  /**
+   * The reason the rule above is the latest pair rather than every consecutive
+   * one: `deploymentChangeOf` gates a form handed two different revision pairs
+   * as ambiguous and drops it, so a window with three revisions of a page would
+   * take that page out of the order it is meant to rank.
+   */
+  it("hands the deployment order a form it can read, where every consecutive pair would not", () => {
+    const rows = [
+      tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+      tally({ revision: 2 }, "band", { views: 10, reached: 6 }),
+      tally({ revision: 3 }, "band", { views: 10, reached: 4 }),
+    ]
+    const { pages } = windowReadingsOf(windowOf({ tallies: rows }), PAIRED, DECLARED)
+    const { pairs } = windowPairsOf(pages)
+
+    const read = deploymentChangeOf(
+      pairs.map(({ was, now }) => readingChangeOf(was, now)),
+      []
+    )
+
+    expect(read.ambiguous).toEqual([])
+    expect(read.duplicated).toBe(0)
+    expect(read.compared).toBe(1)
+
+    const everyPair = [
+      readingChangeOf(at(pages, 0), at(pages, 1)),
+      readingChangeOf(at(pages, 1), at(pages, 2)),
+    ]
+
+    expect(deploymentChangeOf(everyPair, []).ambiguous).toEqual([TREE])
+    expect(deploymentChangeOf(everyPair, []).compared).toBe(0)
+  })
+
+  /** A revision is a number and not a label: as text, revision 10 sorts below 2. */
+  it("orders revisions as numbers, so the tenth is later than the second", () => {
+    const { pairs } = pairsIn({
+      tallies: [
+        tally({ revision: 2 }, "band", { views: 10 }),
+        tally({ revision: 10 }, "band", { views: 10 }),
+        tally({ revision: 9 }, "band", { views: 10 }),
+      ],
+    })
+
+    expect(pairs).toHaveLength(1)
+    expect([pairs[0]?.was.revision, pairs[0]?.now.revision]).toEqual([9, 10])
+    expect(pairs[0]?.superseded).toEqual([2])
+  })
+
+  it("makes one pair per form, so two forms of one page are two before-and-afters", () => {
+    const { pairs, unpaired } = pairsIn({
+      tallies: [
+        tally({ revision: 1 }, "band", { views: 10 }, SKIERS),
+        tally({ revision: 2 }, "band", { views: 10 }, SKIERS),
+        tally({ revision: 1 }, "band", { views: 10 }, RIDERS),
+        tally({ revision: 2 }, "band", { views: 10 }, RIDERS),
+      ],
+    })
+
+    expect(unpaired).toEqual([])
+    expect(pairs.map((pair) => pair.audienceId)).toEqual([RIDERS, SKIERS])
+    expect(pairs.every((pair) => pair.was.audienceId === pair.now.audienceId)).toBe(true)
+    expect(new Set(pairs.map(formKeyOf)).size).toBe(2)
+  })
+
+  it("reports a form it holds one revision of rather than dropping the page", () => {
+    const { pairs, unpaired } = pairsIn({
+      tallies: [
+        tally({ revision: 1 }, "band", { views: 10 }),
+        tally({ revision: 2 }, "band", { views: 10 }),
+        tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+      ],
+    })
+
+    expect(pairs.map((pair) => pair.treeId)).toEqual([TREE])
+    expect(unpaired.map((form) => [form.treeId, form.reading.revision])).toEqual([[OTHER_TREE, 1]])
+  })
+
+  /**
+   * The pair spanning the 0284 upgrade is not made, and both of its sides are
+   * named. `crossesAudiences` allows that pair — it is unprovable rather than
+   * proven two populations — and allowing it is not the same as asserting it,
+   * so the caller that knows its own history makes it in one call.
+   */
+  it("does not pair a form that names no audience with one that does, and says so", () => {
+    const window = windowOf({
+      tallies: [
+        tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+        tally({ revision: 2 }, "band", { views: 10, reached: 4 }, SKIERS),
+      ],
+    })
+    const { pages } = windowReadingsOf(window, PAIRED, DECLARED)
+    const { pairs, unpaired } = windowPairsOf(pages)
+
+    expect(pairs).toEqual([])
+    expect(unpaired.map((form) => [form.audienceId, form.reading.revision])).toEqual([
+      [null, 1],
+      [SKIERS, 2],
+    ])
+
+    const sides = unpaired.map((form) => form.reading)
+    const byHand = readingChangeOf(at(sides, 0), at(sides, 1))
+
+    expect(byHand.silence).not.toBe("different-audiences")
+    expect(byHand.audiences).toEqual({ was: null, now: SKIERS })
+  })
+
+  /**
+   * The double-count case. A caller that concatenated two reads of one window
+   * holds the latest revision twice, and pairing it with itself would publish
+   * *nothing changed* about a change that was made.
+   */
+  it("drops a reading handed in twice rather than pairing a revision with itself", () => {
+    const { pages } = windowReadingsOf(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+          tally({ revision: 2 }, "band", { views: 10, reached: 4 }),
+        ],
+      }),
+      PAIRED,
+      DECLARED
+    )
+
+    const { pairs, duplicated } = windowPairsOf([...pages, ...pages])
+
+    expect(duplicated).toBe(2)
+    expect(pairs).toHaveLength(1)
+    expect([pairs[0]?.was.revision, pairs[0]?.now.revision]).toEqual([1, 2])
+    expect(windowPairsOf([at(pages, 1), at(pages, 1)]).pairs).toEqual([])
+  })
+
+  it("keeps the first of two readings of one key, so the answer does not depend on row order", () => {
+    const { pages } = windowReadingsOf(
+      windowOf({ tallies: [tally({ revision: 1 }, "band", { views: 10 })] }),
+      PAIRED,
+      DECLARED
+    )
+    const other = { ...at(pages, 0), views: 99 }
+
+    expect(windowPairsOf([at(pages, 0), other]).unpaired[0]?.reading.views).toBe(10)
+    expect(windowPairsOf([other, at(pages, 0)]).unpaired[0]?.reading.views).toBe(99)
+  })
+
+  /**
+   * The division this rung is for: of the four states `readingChangeOf`
+   * refuses, three are about the two sides and one is about the readers. A pair
+   * made here cannot be in the first three, so a silence off this path is a
+   * silence about a deployment's readers.
+   */
+  it("makes no pair the comparison layer can refuse for a mismatched side", () => {
+    const { pages } = windowReadingsOf(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 2 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 1 }, "band", { views: 10 }, RIDERS),
+          tally({ revision: 2 }, "band", { views: 10 }, RIDERS),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+          tally({ treeId: OTHER_TREE, revision: 2 }, "band", { views: 10 }),
+        ],
+      }),
+      PAIRED,
+      DECLARED
+    )
+    const { pairs } = windowPairsOf(pages)
+
+    expect(pairs).toHaveLength(3)
+    expect(
+      pairs
+        .map(({ was, now }) => readingChangeOf(was, now).silence)
+        .filter(
+          (silence) =>
+            silence === "different-trees" ||
+            silence === "different-audiences" ||
+            silence === "audiences-mixed"
+        )
+    ).toEqual([])
+  })
+
+  it("holds the pairs and the unpaired in one order whatever order the readings arrived in", () => {
+    const { pages } = windowReadingsOf(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 2 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 1 }, "band", { views: 10 }, RIDERS),
+          tally({ revision: 2 }, "band", { views: 10 }, RIDERS),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }, RIDERS),
+        ],
+      }),
+      PAIRED,
+      DECLARED
+    )
+
+    const forwards = windowPairsOf(pages)
+    const backwards = windowPairsOf([...pages].reverse())
+
+    expect(forwards.pairs.map(formKeyOf)).toEqual([
+      formKeyOf({ treeId: TREE, audienceId: RIDERS }),
+      formKeyOf({ treeId: TREE, audienceId: SKIERS }),
+    ])
+    expect(forwards.unpaired.map(formKeyOf)).toEqual([
+      formKeyOf({ treeId: OTHER_TREE, audienceId: RIDERS }),
+      formKeyOf({ treeId: OTHER_TREE, audienceId: SKIERS }),
+    ])
+    expect(backwards.pairs.map(formKeyOf)).toEqual(forwards.pairs.map(formKeyOf))
+    expect(backwards.unpaired.map(formKeyOf)).toEqual(forwards.unpaired.map(formKeyOf))
+  })
+
+  it("reads a deployment's change order out of one store end to end", async () => {
+    const tallies = memoryReaderTallyStore()
+    const at = "2026-10-27T09:00:00.000Z"
+
+    await tallies.apply(
+      {
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+          tally({ revision: 1 }, "cta", { views: 10, reached: 9 }),
+          tally({ revision: 2 }, "band", { views: 10, reached: 10 }),
+          tally({ revision: 2 }, "cta", { views: 10, reached: 2 }),
+        ],
+        funnels: [],
+        appearances: [
+          { treeId: TREE, revision: 1, views: 10 },
+          { treeId: TREE, revision: 2, views: 10 },
+        ],
+      },
+      at
+    )
+    await tallies.opened([{ treeId: TREE, revision: 2, views: 10 }], at)
+
+    const read = await readReaderWindow({ tallies })
+    if (!read.ok) throw new Error("the window was not read")
+
+    const { pages } = windowReadingsOf(read.value, PAIRED, DECLARED)
+    const { pairs } = windowPairsOf(pages)
+    const order = deploymentChangeOf(
+      pairs.map(({ was, now }) => readingChangeOf(was, now)),
+      read.value.pageViews
+    )
+
+    expect(pairs).toHaveLength(1)
+    expect(order.compared).toBe(1)
+    expect(order.ambiguous).toEqual([])
+    expect(order.duplicated).toBe(0)
+    expect(order.arrivals).toBe(10)
+    expect(order.standings.ranked).toBe(1)
+    expect(order.worst?.treeId).toBe(TREE)
+    expect(order.worst?.worsened?.at.before).toBe(nodeId("cta"))
   })
 })

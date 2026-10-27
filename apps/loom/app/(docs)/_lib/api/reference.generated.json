@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12332,6 +12332,30 @@
               "kind": "function",
               "signature": "const windowReadingsOf: (window: ReaderWindow, trees: RevisionTrees, declarations: PartDeclarations, options?: WindowReadingOptions) => WindowReadings",
               "summary": "Join a window of counters to the pages it is about."
+            },
+            {
+              "name": "WindowPair",
+              "kind": "type",
+              "signature": "type WindowPair = PageForm & {\n    /** The earlier side. Its revision is always below `now`'s. */\n    readonly was: PageReading;\n    readonly now: PageReading;\n    /**\n     * Revisions of this form the window holds below `was`, oldest first.\n     *\n     * Empty for the ordinary case of two. A deployment that has published three\n     * times inside one window has an older change in its counters, and this is\n     * how a surface says *and one earlier revision* rather than how it reads one:\n     * the pair for it is two of {@link WindowReadings.pages} and\n     * `readingChangeOf`, which is the same call this makes.\n     */\n    readonly superseded: readonly number[];\n};",
+              "summary": "A page in one form, with the two revisions of it a comparison is of."
+            },
+            {
+              "name": "UnpairedForm",
+              "kind": "type",
+              "signature": "type UnpairedForm = PageForm & {\n    /** The one reading of it, carried so a surface drawing the page still has it. */\n    readonly reading: PageReading;\n};",
+              "summary": "A form the window holds one revision of, so there is nothing to compare it against."
+            },
+            {
+              "name": "WindowPairs",
+              "kind": "type",
+              "signature": "type WindowPairs = {\n    /** One per form that has two revisions in the window, in a stable order. */\n    readonly pairs: readonly WindowPair[];\n    /** The forms that have one, in the same order. */\n    readonly unpaired: readonly UnpairedForm[];\n    /**\n     * Readings handed in twice under one `readingKeyOf`, dropped before pairing.\n     *\n     * Nought for anything {@link windowReadingsOf} produced, which never holds\n     * two readings of one key. It is not nought for a caller that concatenated\n     * two windows' readings, and the repeat has to be dropped rather than paired:\n     * a form whose latest revision arrived twice would otherwise pair that\n     * revision with itself and publish *nothing changed* about a change.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "What a window came to once its readings were paired into before-and-afters."
+            },
+            {
+              "name": "windowPairsOf",
+              "kind": "function",
+              "signature": "const windowPairsOf: (readings: readonly PageReading[]) => WindowPairs",
+              "summary": "Pair a window's readings into the before-and-afters the comparisons take."
             }
           ]
         }
@@ -12345,7 +12369,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12480,7 +12504,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12542,7 +12566,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13067,7 +13091,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13137,7 +13161,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13559,7 +13583,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1780,
+        "packageNames": 1784,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
