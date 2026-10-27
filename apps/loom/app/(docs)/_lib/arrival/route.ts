@@ -1,7 +1,13 @@
 import { namedExportsIn, publishedNames } from "../api/mentions"
 import { fencesOnPage } from "../fences/extract"
 import { isCheckable } from "../fences/model"
-import { docsEntryAt, docsHref, docsOrder, writtenDocsSections } from "../nav"
+import {
+  DOCS_LANDING_SLUG,
+  docsEntryAt,
+  docsHref,
+  docsOrder,
+  writtenDocsSections,
+} from "../nav"
 import { headingAnchor } from "../search/anchor"
 import { readPageSource } from "../search/headings"
 import { readPageProse } from "../search/prose"
@@ -237,3 +243,253 @@ if (ARRIVAL_TOTALS.minutes > ARRIVAL_BUDGET_MINUTES) {
   )
 }
 
+
+/**
+ * ## The pages the route walks past
+ *
+ * The route is six stops and the site has thirty-odd pages, so most of what a
+ * reader goes past on the way is not a stop. That is what a shortcut is. What
+ * nothing said until now is **which** pages it goes past, and why — so a page
+ * added to Getting started joined the rail, joined the section's own list, and
+ * did not join the route, and nothing anywhere went red. A reader taking the
+ * route would simply never hear about it.
+ *
+ * So every page the route passes is now either a stop or **named below, with
+ * the reason it is not one**. A page added in front of one fails the build
+ * until somebody decides which of the two it is, and that is the one failure
+ * the rest of this module cannot see: every other check here is about the stops
+ * the route declares rather than about the pages it declares nothing about.
+ *
+ * **What *passes* means, because the honest answer is narrower than the rail.**
+ * The route is responsible for the pages a reader meets **before it takes them
+ * out of a section**. It enters Getting started at the top and leaves at the
+ * last page, so the whole section is its business. It enters Building with Loom
+ * at *Primitives and the registry* and leaves from there for the runtime — so
+ * the seven pages after it in that section are not pages a reader on the route
+ * goes past, they are the section the route declined to finish. A page appended
+ * to one of those is depth the site is allowed to grow; a page slipped in
+ * *before* the stop the route leaves from is a page the route now walks past in
+ * silence, and that is the one this refuses.
+ *
+ * **The reason is not a sentence we are taken at our word on.** Each excuse is
+ * a *fact about the site* that something checks, so an excuse cannot outlive
+ * what made it true:
+ *
+ * - `the-route-is-printed-here` — the page the route is drawn on. Checked by
+ *   looking for the route's own tag in that page's source.
+ * - `the-route-offers-it-in-its-own-prose` — the route's page links to it in so
+ *   many words. Checked against that page's source, so a paragraph rewritten to
+ *   drop the link takes the excuse down with it.
+ * - `a-stop-covers-the-same-ground` — a stop the reader has **already been
+ *   through** teaches it. Checked against the stops, and against reading order:
+ *   a page excused by a stop further along is a page the reader passes before
+ *   the thing that was supposed to have covered it.
+ *
+ * The sentence beside the excuse is the judgement rather than the fact — why
+ * the hour is better without the page rather than thinner — and its reader is
+ * whoever is looking at a failure.
+ *
+ * **Two kinds of page are off the route by rule rather than by name.** A
+ * section's own page is a listing and the route sends a reader to pages that
+ * teach, so a landing page is never a stop and never needs an excuse. And a
+ * page the route does not reach was never on the way: the route finishes at the
+ * Gate, and the rest of the site is the rest of the site. Both are refused as
+ * excuses, because an excuse that holds nothing up is one more thing to keep
+ * true.
+ */
+
+export type OffRouteExcuse =
+  | { readonly excuse: "the-route-is-printed-here" }
+  | { readonly excuse: "the-route-offers-it-in-its-own-prose" }
+  /** `stop` is the {@link StepSource.id} of the step that covers it. */
+  | { readonly excuse: "a-stop-covers-the-same-ground"; readonly stop: string }
+
+export type OffRoutePage = {
+  readonly section: string
+  readonly page: string
+  /** Why the hour is better without it. A sentence, read by whoever hits a failure. */
+  readonly because: string
+} & OffRouteExcuse
+
+const OFF_ROUTE: readonly OffRoutePage[] = [
+  {
+    section: "getting-started",
+    page: "introduction",
+    excuse: "the-route-is-printed-here",
+    because:
+      "The route is drawn on this page, so a reader looking at it has arrived already — a step sending them here would be the itinerary offering itself as the first destination.",
+  },
+  {
+    section: "getting-started",
+    page: "quickstart",
+    excuse: "the-route-offers-it-in-its-own-prose",
+    because:
+      "It is the first three steps in one file you run rather than three pages you read, and the paragraph above the route offers it to anybody who would rather start that way.",
+  },
+  {
+    section: "getting-started",
+    page: "scaffolding-a-project",
+    excuse: "a-stop-covers-the-same-ground",
+    stop: "install",
+    because:
+      "It is the same ground as Installation with a command doing the typing, and a reader who has been through either one has what the next step needs.",
+  },
+  {
+    section: "the-runtime",
+    page: "proposing-a-change",
+    excuse: "a-stop-covers-the-same-ground",
+    stop: "somebody-asks",
+    because:
+      "Your first change has already walked an ask from a sentence to a page; this is those same four steps in the runtime's own words, which is a second reading rather than a first.",
+  },
+]
+
+/** `section/page`, the one spelling of a page in the two lists above. */
+const whereOf = (page: { readonly section: string; readonly page: string }): string =>
+  `${page.section}/${page.page}`
+
+/** How far along the rail a page is, or `-1` for an address the rail does not carry. */
+const railIndexOf = (section: string, page: string): number =>
+  docsOrder.findIndex((entry) => entry.href === docsHref(section, page))
+
+/**
+ * The pages a reader walking the route goes past, in reading order.
+ *
+ * Per section the route visits, everything up to and including the stop it
+ * leaves that section from — which is the reading of *passes* argued above. A
+ * section with no stop in it is a section the route never enters, so none of it
+ * is here. Landing pages and the generated sections are left out for the other
+ * two reasons: a listing is not a stop, and a reference page is not where a
+ * first hour goes.
+ */
+export const pagesTheRoutePasses = (sources: readonly StepSource[]): readonly string[] => {
+  const leaves = sources.reduce<ReadonlyMap<string, number>>((sections, source) => {
+    const index = railIndexOf(source.section, source.page)
+
+    return new Map(sections).set(source.section, Math.max(index, sections.get(source.section) ?? -1))
+  }, new Map())
+
+  return docsOrder
+    .filter((entry, index) => {
+      const leaving = leaves.get(entry.section.slug)
+
+      return (
+        leaving !== undefined &&
+        index <= leaving &&
+        entry.section.source === "written" &&
+        entry.page.slug !== DOCS_LANDING_SLUG
+      )
+    })
+    .map((entry) => `${entry.section.slug}/${entry.page.slug}`)
+}
+
+/**
+ * Everything wrong with the account the route gives of the pages it passes, as
+ * sentences a person can act on.
+ *
+ * A list rather than a throw, and pure over its three arguments, so the rules
+ * can be held against routes written to break them one at a time — which is
+ * what `arrival.test.ts` does — rather than against whichever shape the site
+ * happens to be in this week. The site's own answer is
+ * {@link ROUTE_ACCOUNT_FAULTS}, and it is empty or this module does not load.
+ */
+export const routeAccountFaults = (
+  sources: readonly StepSource[],
+  skipped: readonly OffRoutePage[],
+  sourceOf: (sectionSlug: string, pageSlug: string) => string = readPageSource
+): readonly string[] => {
+  const stops = new Map(sources.map((source) => [whereOf(source), source] as const))
+  const stopIds = new Map(sources.map((source) => [source.id, source] as const))
+  const passed = pagesTheRoutePasses(sources)
+  const printedOn = skipped.filter((page) => page.excuse === "the-route-is-printed-here")
+  const host = printedOn[0]
+
+  const twice = printedOn.length > 1 ? ["more than one page says the route is printed on it"] : []
+
+  const named = skipped.flatMap((page, position) => {
+    const where = whereOf(page)
+    const index = railIndexOf(page.section, page.page)
+
+    if (skipped.findIndex((other) => whereOf(other) === where) !== position) {
+      return [`${where} is named twice among the pages the route does not stop at`]
+    }
+
+    if (index === -1) {
+      return [`${where} is named as a page the route does not stop at, and it is not a page`]
+    }
+
+    if (page.page === DOCS_LANDING_SLUG) {
+      return [`${where} is a section's own page, which is never a stop and needs no reason`]
+    }
+
+    if (stops.has(where)) {
+      return [`${where} is a stop on the route and also says why the route does not stop there`]
+    }
+
+    if (!passed.includes(where)) {
+      return [`the route does not pass ${where}, so nothing has to say why it is not a stop`]
+    }
+
+    const reason = page.because.trim()
+
+    if (reason.length < 40 || !reason.endsWith(".")) {
+      return [`the reason the route does not stop at ${where} is not a sentence`]
+    }
+
+    if (page.excuse === "the-route-is-printed-here") {
+      return sourceOf(page.section, page.page).includes("<ArrivalRoute />")
+        ? []
+        : [`${where} says the route is printed on it, and it does not draw the route`]
+    }
+
+    if (page.excuse === "the-route-offers-it-in-its-own-prose") {
+      if (host === undefined) {
+        return [
+          `${where} says the route's own prose offers it, and nothing says which page the route is printed on`,
+        ]
+      }
+
+      return sourceOf(host.section, host.page).includes(`(${docsHref(page.section, page.page)})`)
+        ? []
+        : [`${where} says the route's own prose offers it, and ${whereOf(host)} does not link to it`]
+    }
+
+    const covering = stopIds.get(page.stop)
+
+    if (covering === undefined) {
+      return [
+        `${where} is said to be covered by the step "${page.stop}", and the route has no such step`,
+      ]
+    }
+
+    return railIndexOf(covering.section, covering.page) < index
+      ? []
+      : [`${where} is said to be covered by a step the reader does not reach until after it`]
+  })
+
+  const unaccounted = passed
+    .filter((where) => !stops.has(where) && !skipped.some((page) => whereOf(page) === where))
+    .map((where) => `the route passes ${where} and neither stops there nor says why it does not`)
+
+  return [...twice, ...named, ...unaccounted]
+}
+
+export const ROUTE_ACCOUNT_FAULTS: readonly string[] = routeAccountFaults(SOURCES, OFF_ROUTE)
+
+if (ROUTE_ACCOUNT_FAULTS.length > 0) {
+  throw new Error(
+    `loom: the arrival route does not account for every page it passes —\n${ROUTE_ACCOUNT_FAULTS.map(
+      (fault) => `  - ${fault}`
+    ).join("\n")}`
+  )
+}
+
+/**
+ * The two halves of the account, for anything that wants to read it rather than
+ * check it: the pages the route goes past, and the ones it goes past on
+ * purpose.
+ */
+export const ROUTE_ACCOUNT = {
+  passes: pagesTheRoutePasses(SOURCES),
+  skipped: OFF_ROUTE,
+} as const
