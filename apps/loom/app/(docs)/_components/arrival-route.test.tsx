@@ -31,6 +31,13 @@ describe("the route as a reader meets it", () => {
     })
   })
 
+  /** The handle the screenshot harness measures the route by. */
+  it("carries one selector for the whole route", () => {
+    expect(route().container.querySelectorAll("[data-arrival-route] li")).toHaveLength(
+      ARRIVAL_ROUTE.length
+    )
+  })
+
   it("says what each step gets you, in the sentence and not a summary of it", () => {
     const { container } = route()
 

@@ -4,14 +4,26 @@ import {
   ARRIVAL_BUDGET_MINUTES,
   ARRIVAL_ROUTE,
   ARRIVAL_TOTALS,
+  ROUTE_ACCOUNT,
+  ROUTE_ACCOUNT_FAULTS,
   arrivalTotals,
   buildArrivalRoute,
+  type OffRoutePage,
+  pagesTheRoutePasses,
+  routeAccountFaults,
   type StepSource,
 } from "./route"
 import { namedExportsIn, publishedNames } from "../api/mentions"
 import { fencesOnPage } from "../fences/extract"
 import { isCheckable } from "../fences/model"
-import { docsEntryAt, docsEntryPoint, docsOrder } from "../nav"
+import {
+  DOCS_LANDING_SLUG,
+  docsEntryAt,
+  docsEntryPoint,
+  docsHref,
+  docsOrder,
+  docsSections,
+} from "../nav"
 import { readPageHeadings, readPageSource } from "../search/headings"
 
 /**
@@ -278,5 +290,321 @@ describe("the totals, held against a route that is not this one", () => {
     expect(empty.blocks).toBe(0)
     expect(empty.minutes).toBe(0)
     expect(empty.sitePages).toBe(ARRIVAL_TOTALS.sitePages)
+  })
+})
+
+/**
+ * The route is a shortcut, so most of the site is not on it. These are about
+ * the pages it goes **past** — the ones a reader walking it meets and is not
+ * sent to.
+ *
+ * The failure here is quieter than a stale itinerary and it is the one that
+ * actually happens: somebody adds a page to Getting started, the rail carries
+ * it, the section's own page lists it, and the route — six stops typed into a
+ * file nobody edits when they write a page — goes on promising an hour that
+ * never mentions it. Nothing is false on any page. A reader just never hears
+ * about it.
+ *
+ * So the pure function is exercised on routes written to break one rule at a
+ * time, with the page sources handed in, and the site's own account is
+ * recomputed here from the rail rather than read back off the module.
+ */
+
+/** Pages whose source is whatever a test says it is. */
+const pagesSaying =
+  (sources: Readonly<Record<string, string>>) =>
+  (section: string, page: string): string =>
+    sources[`${section}/${page}`] ?? ""
+
+const INTRODUCTION = "getting-started/introduction"
+const QUICKSTART = "getting-started/quickstart"
+
+/** The one step the crafted routes below are built on: Getting started, third page. */
+const oneStop: readonly StepSource[] = [step()]
+
+/**
+ * A complete account of that one-step route: it passes the two pages above
+ * *Installation*, and both are excused.
+ */
+const printedHere: OffRoutePage = {
+  section: "getting-started",
+  page: "introduction",
+  excuse: "the-route-is-printed-here",
+  because: "The route is drawn on this page, so a reader looking at it is already here.",
+}
+
+const offeredInProse: OffRoutePage = {
+  section: "getting-started",
+  page: "quickstart",
+  excuse: "the-route-offers-it-in-its-own-prose",
+  because: "The paragraph above the route offers it to anybody who would rather run one file.",
+}
+
+const introductionSaying = pagesSaying({
+  [INTRODUCTION]: `<ArrivalRoute /> and [Quickstart](${docsHref("getting-started", "quickstart")})`,
+})
+
+const faultsOn = (skipped: readonly OffRoutePage[], sourceOf = introductionSaying): readonly string[] =>
+  routeAccountFaults(oneStop, skipped, sourceOf)
+
+/**
+ * The route as the sources that produced it, rebuilt from the addresses it
+ * printed, so what the assertions below walk is the rendered route rather than
+ * the list beside it in the module.
+ */
+const ROUTE_AS_SOURCES: readonly StepSource[] = ARRIVAL_ROUTE.map((entry) => {
+  const [, section = "", page = ""] = entry.href.split("/").slice(1)
+
+  return { id: entry.id, section, page, done: entry.done, checkpoint: entry.checkpoint }
+})
+
+describe("the pages the route walks past", () => {
+  it("accounts for every one of them, on the site as it stands", () => {
+    expect(ROUTE_ACCOUNT_FAULTS).toEqual([])
+  })
+
+  /**
+   * Recomputed from the rail rather than from `pagesTheRoutePasses`, which is
+   * the function under test: per section the route stops in, every written page
+   * up to the stop it leaves from is either a stop or named with a reason.
+   */
+  it("is every page in a section the route visits, up to where it leaves", () => {
+    const stops = new Set(ARRIVAL_ROUTE.map((entry) => entry.href))
+    const excused = new Set(
+      ROUTE_ACCOUNT.skipped.map((page) => docsHref(page.section, page.page))
+    )
+
+    for (const section of docsSections.filter((candidate) => candidate.source === "written")) {
+      const hrefs = section.pages.map((page) => docsHref(section.slug, page.slug))
+      const last = hrefs.reduce((latest, href, index) => (stops.has(href) ? index : latest), -1)
+
+      if (last === -1) continue
+
+      for (const [index, href] of hrefs.entries()) {
+        if (index > last) continue
+        if (href === docsHref(section.slug, DOCS_LANDING_SLUG)) continue
+
+        expect(stops.has(href) || excused.has(href), href).toBe(true)
+      }
+    }
+  })
+
+  /**
+   * The section the finding was about, stated as numbers rather than left to
+   * the loop above: a page added to Getting started changes one of these three.
+   */
+  it("leaves nothing in Getting started unaccounted for", () => {
+    const passed = pagesTheRoutePasses(ROUTE_AS_SOURCES)
+    const inSection = passed.filter((where) => where.startsWith("getting-started/"))
+
+    expect(inSection).toHaveLength(7)
+    expect(ARRIVAL_ROUTE.filter((entry) => entry.href.startsWith("/docs/getting-started/"))).toHaveLength(4)
+    expect(ROUTE_ACCOUNT.skipped.filter((page) => page.section === "getting-started")).toHaveLength(3)
+  })
+
+  /**
+   * The seven pages after *Primitives and the registry* are the section the
+   * route declined to finish rather than pages it walks past, which is the
+   * narrowing the module argues for. If that argument is ever dropped, this is
+   * the assertion that says the seven became everybody's problem.
+   */
+  it("does not ask about a section's pages after the stop the route leaves from", () => {
+    const passed = pagesTheRoutePasses(ROUTE_AS_SOURCES)
+
+    expect(passed.filter((where) => where.startsWith("building-with-loom/"))).toEqual([
+      "building-with-loom/primitives",
+    ])
+    expect(passed.some((where) => where.startsWith("architecture/"))).toBe(false)
+  })
+
+  it("never counts a section's own page, which is a listing rather than a stop", () => {
+    for (const where of pagesTheRoutePasses(ROUTE_AS_SOURCES)) {
+      expect(where.endsWith("/"), where).toBe(false)
+    }
+  })
+})
+
+describe("the reason a page is not a stop, which is a fact rather than a claim", () => {
+  it("names the page the route is really drawn on", () => {
+    const printed = ROUTE_ACCOUNT.skipped.filter(
+      (page) => page.excuse === "the-route-is-printed-here"
+    )
+
+    expect(printed).toHaveLength(1)
+
+    for (const page of printed) {
+      expect(readPageSource(page.section, page.page)).toContain("<ArrivalRoute />")
+    }
+  })
+
+  it("is offered in the route's own prose where it says it is", () => {
+    const host = ROUTE_ACCOUNT.skipped.find((page) => page.excuse === "the-route-is-printed-here")
+    const prose = readPageSource(host?.section ?? "", host?.page ?? "")
+
+    for (const page of ROUTE_ACCOUNT.skipped) {
+      if (page.excuse !== "the-route-offers-it-in-its-own-prose") continue
+
+      expect(prose, `${page.section}/${page.page}`).toContain(`(${docsHref(page.section, page.page)})`)
+    }
+  })
+
+  it("is covered by a step the reader has already been through", () => {
+    const positions = new Map(docsOrder.map((entry, index) => [entry.href, index] as const))
+
+    for (const page of ROUTE_ACCOUNT.skipped) {
+      if (page.excuse !== "a-stop-covers-the-same-ground") continue
+
+      const stop = ARRIVAL_ROUTE.find((entry) => entry.id === page.stop)
+
+      expect(stop, page.stop).toBeDefined()
+      expect(positions.get(stop?.href ?? "") ?? -1).toBeLessThan(
+        positions.get(docsHref(page.section, page.page)) ?? -1
+      )
+    }
+  })
+
+  it("says why in a sentence, for whoever is reading the failure", () => {
+    for (const page of ROUTE_ACCOUNT.skipped) {
+      expect(page.because.length, `${page.section}/${page.page}`).toBeGreaterThan(40)
+      expect(page.because.trim().endsWith("."), `${page.section}/${page.page}`).toBe(true)
+    }
+  })
+})
+
+describe("the ways an account of the skipped pages is refused", () => {
+  it("accepts the complete one", () => {
+    expect(faultsOn([printedHere, offeredInProse])).toEqual([])
+  })
+
+  it("refuses a page the route passes that nothing says anything about", () => {
+    expect(faultsOn([printedHere])).toEqual([
+      `the route passes ${QUICKSTART} and neither stops there nor says why it does not`,
+    ])
+  })
+
+  it("refuses the same page named twice", () => {
+    expect(faultsOn([printedHere, offeredInProse, offeredInProse])).toContain(
+      `${QUICKSTART} is named twice among the pages the route does not stop at`
+    )
+  })
+
+  it("refuses a reason given for something that is not a page", () => {
+    expect(
+      faultsOn([printedHere, offeredInProse, { ...printedHere, page: "introducing-it" }])
+    ).toContain("getting-started/introducing-it is named as a page the route does not stop at, and it is not a page")
+  })
+
+  it("refuses a reason given for a section's own page", () => {
+    expect(
+      faultsOn([printedHere, offeredInProse, { ...printedHere, page: DOCS_LANDING_SLUG }])
+    ).toContain("getting-started/ is a section's own page, which is never a stop and needs no reason")
+  })
+
+  it("refuses a page that is a stop and also says why it is not one", () => {
+    expect(
+      faultsOn([printedHere, offeredInProse, { ...printedHere, page: "installation" }])
+    ).toContain(
+      "getting-started/installation is a stop on the route and also says why the route does not stop there"
+    )
+  })
+
+  /**
+   * An excuse for a page the route never goes past is an excuse holding nothing
+   * up, and it will go stale without anything noticing — which is the whole
+   * argument the rest of this file is built on.
+   */
+  it("refuses a reason for a page the route does not pass", () => {
+    expect(
+      faultsOn([printedHere, offeredInProse, { ...printedHere, page: "rendering-a-tree" }])
+    ).toContain(
+      "the route does not pass getting-started/rendering-a-tree, so nothing has to say why it is not a stop"
+    )
+  })
+
+  it("refuses a reason that is a label rather than a sentence", () => {
+    expect(faultsOn([printedHere, { ...offeredInProse, because: "covered elsewhere" }])).toEqual([
+      `the reason the route does not stop at ${QUICKSTART} is not a sentence`,
+    ])
+  })
+
+  it("refuses a reason that trails off without a full stop", () => {
+    expect(
+      faultsOn([printedHere, { ...offeredInProse, because: offeredInProse.because.slice(0, -1) }])
+    ).toEqual([`the reason the route does not stop at ${QUICKSTART} is not a sentence`])
+  })
+
+  it("refuses a page that says the route is printed on it and does not draw it", () => {
+    expect(faultsOn([printedHere, offeredInProse], pagesSaying({}))).toContain(
+      `${INTRODUCTION} says the route is printed on it, and it does not draw the route`
+    )
+  })
+
+  it("refuses two pages both saying the route is printed on them", () => {
+    expect(
+      faultsOn([printedHere, offeredInProse, { ...printedHere, page: "quickstart" }])
+    ).toContain("more than one page says the route is printed on it")
+  })
+
+  it("refuses an offer nothing can be checked against", () => {
+    expect(routeAccountFaults(oneStop, [offeredInProse], introductionSaying)).toContain(
+      `${QUICKSTART} says the route's own prose offers it, and nothing says which page the route is printed on`
+    )
+  })
+
+  /**
+   * The failure this excuse exists for: the link in the route's own prose is
+   * rewritten away, and the reason the route gives for skipping the Quickstart
+   * stops being true the same minute.
+   */
+  it("refuses an offer the route's page no longer makes", () => {
+    expect(
+      faultsOn([printedHere, offeredInProse], pagesSaying({ [INTRODUCTION]: "<ArrivalRoute />" }))
+    ).toEqual([
+      `${QUICKSTART} says the route's own prose offers it, and ${INTRODUCTION} does not link to it`,
+    ])
+  })
+
+  it("refuses a page covered by a step the route does not have", () => {
+    expect(
+      faultsOn([
+        printedHere,
+        {
+          section: "getting-started",
+          page: "quickstart",
+          excuse: "a-stop-covers-the-same-ground",
+          stop: "installing-it",
+          because: "The step that teaches this is the one before it in the section.",
+        },
+      ])
+    ).toEqual([
+      `${QUICKSTART} is said to be covered by the step "installing-it", and the route has no such step`,
+    ])
+  })
+
+  /**
+   * *Quickstart* comes before *Installation* in the rail, so a reader passing
+   * it has not reached the step said to cover it. An excuse pointing forwards
+   * is an excuse about a reader who has already finished.
+   */
+  it("refuses a page covered by a step the reader has not reached yet", () => {
+    expect(
+      faultsOn([
+        printedHere,
+        {
+          section: "getting-started",
+          page: "quickstart",
+          excuse: "a-stop-covers-the-same-ground",
+          stop: "a-step",
+          because: "The step after it in the section is said to have taught it already.",
+        },
+      ])
+    ).toEqual([
+      `${QUICKSTART} is said to be covered by a step the reader does not reach until after it`,
+    ])
+  })
+
+  it("asks nothing of a route with no steps in it", () => {
+    expect(pagesTheRoutePasses([])).toEqual([])
+    expect(routeAccountFaults([], [], introductionSaying)).toEqual([])
   })
 })
