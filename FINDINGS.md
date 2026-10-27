@@ -8,6 +8,117 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-27 — the comparison layer's audience guard was already built in both of its two shapes, and the entry asking for it stayed open for ten days
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed on filing** — nothing was built for it, because everything it asked for
+exists. Filed as the reading that closes the 17 October entry *the comparison
+layer still does not check that its two sides are of one form, and the loud half
+and the quiet half want one decision*, so that the next run does not read that
+entry and start the work again.
+
+That entry recommended two things over nine functions: **refuse only a pair that
+proves two populations**, and **carry `audiences: { was, now }` on every
+comparison so a surface can see an unprovable pair for itself.** Checked against
+the code on `main` this morning, function by function:
+
+| | guard | pair carried |
+| --- | --- | --- |
+| `readingChangeOf` | `crossesAudiences` → `different-audiences` | `audiences: ComparedAudiences` |
+| `copyChangeOf` | same | same |
+| `paceChangeOf` | same | same |
+| `actionChangeOf` | same | same |
+| `funnelChangeOf` | same | same |
+| `libraryChangeOf` | none, by design | `audiences: ComparedPopulations` |
+| `libraryCopyChangeOf` | none, by design | same |
+| `libraryReachChangeOf` | none, by design | same |
+| `libraryWordReachChangeOf` | none, by design | same |
+
+The five page-scale comparisons took the guard as **0294** (§37), with
+`crossesAudiences` and `comparedAudiencesOf` published once in `audiences.ts`
+rather than spelled nine times — which is what the entry asked for. The four
+library comparisons are the half the entry called *the loud one*, and the answer
+they got is not a guard: `audiences.ts` carries the argument under its own
+heading *Comparing two **windows** is a fourth question, and it refuses nothing*
+— a window holds every form a deployment served, so a side naming two audiences
+is the ordinary case after 0263, and what those four needed was a **census**
+(`audiencesOf`, `pagesOf`, 0295, 0297). They carry it.
+
+**So the entry was stale rather than wrong**, and what kept it open is worth
+naming: its title says *of one form* and its body argues about the audience, and
+the two halves were then closed by two different records eight days apart
+(0294 for the guard, 0295/0297 for the census). Neither record quotes the entry,
+so nothing linked it to either.
+
+**What today's work adds to it, which is why it is closed rather than just
+noted.** `windowPairsOf` (0318) groups by `formKeyOf` and nothing else, so the
+pair it hands a comparison is of one tree and one audience by construction.
+Three of the four states `readingChangeOf` refuses are unreachable from it. **The
+quiet collapse this entry was filed about — one form's earlier window against
+another form's later one, every figure produced, no silence anywhere — can no
+longer be constructed by a caller that reads its window through the rung.** The
+guard stays for the caller that builds a pair by hand.
+
+---
+## 2026-10-27 — the pairing rung does not assemble the two windows the four library comparisons take, because a form with one revision cannot be put on a side
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **a gap named at the moment it
+was created**, nothing broken and nothing failing; a candidate for a next step
+rather than a defect
+
+`windowPairsOf` (0318) closed the step between a window and the **five
+page-scale** comparisons: each takes two `PageReading`s and a pair is now one
+call away. The **four library** comparisons take something else — two whole
+windows of readings, a library before against a library after — and the rung
+does not assemble them.
+
+It is one line away in appearance and not in fact:
+
+```ts
+libraryChangeOf(pairs.map(({ was }) => was), pairs.map(({ now }) => now))
+```
+
+That composes, and it is wrong in a way the result does not say. It drops every
+form in `unpaired`, which is exactly where **a page published inside the window**
+lands — and a page published inside the window is a page **gained**, which is
+the figure `libraryChangeOf` exists to report (0295, clause on a form gained
+against a page published). So the assembled comparison would report `pagesGained`
+nought on a deployment that published two pages this week.
+
+**And the forms cannot be placed by anything this lane holds.** A form with one
+revision in the window is either newly published — later side only — or unchanged
+since the window began — **both** sides — and nothing in the counters tells those
+apart. A `StoredTally.updatedAt` is when the fold last touched the row and not
+when the page was published; a door row's is the same. The only party that knows
+is the deployment, which knows what it published when.
+
+### Three shapes, costed
+
+1. **Leave it to the caller, with the forms reported.** What 0318 does today:
+   `pairs` and `unpaired` are both published, so a caller holding its own
+   publishing history assembles the two windows in two lines and gets the gained
+   and lost counts right. The cost is that it is the one composition this rung
+   leaves undone, and a caller who does not notice `unpaired` writes the broken
+   line above.
+2. **Take the placing as an argument.** `windowLibrariesOf(pairs, unpaired, { published })`
+   — a predicate or a set saying which forms are new. One argument, no new
+   configuration store, and it is the shape §54 used for the region floor: hold
+   configuration you were handed rather than configuration you went looking for.
+   **This is the recommendation**, and it is a record because it defines what a
+   library window is.
+3. **Derive it from the revision numbers.** A form whose only revision is 1 is
+   newly published; one whose only revision is 7 existed before the window.
+   Refused in the costing: a revision number is a count of revisions and not a
+   date, a deployment that pruned old counters has a form at revision 7 with
+   nothing below it, and a rule that is right most of the time about which pages
+   are new is the kind of figure nobody checks.
+
+### The row for another lane
+
+**None.** Everything here is `src/signals/`.
+
+---
 ## 2026-10-19 — `external` draws an arrow on one of the three primitives that take it, so a control that leaves the site looks exactly like one that does not
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
@@ -56908,7 +57019,12 @@ form that argument should take from here.
 `action-change.ts`, `funnel-change.ts`, and the four library comparisons) ·
 **Extends** the 17 October entry *a change comparison whose two sides name
 different audiences is a cross-population comparison wearing a before-and-after's
-clothes*, which stays open · **Status:** open — **nothing is broken today**; the
+clothes*, which stays open · **Status:** **closed 27 October, by work that had
+already been done** — every shape this entry recommended is in the code, and
+`signals-57-the-pairs-a-window-holds` made the fault it describes
+unconstructible from the rung. The reading is the 27 October entry
+*the comparison layer's audience guard was already built in both of its two
+shapes*. Original status: open — **nothing is broken today**; the
 shape is now settled by having read all nine, and three questions in it are
 answerable without writing code
 
@@ -60054,6 +60170,18 @@ it is bound by. Three shapes:
 ---
 ## 2026-10-24 (evening) — the collection window's default is written twice, and the copy that a deployment actually runs on is the hand-written one
 
+**Status:** **closed by `signals-56-one-window-one-setting`**
+([0317](decisions/0317-the-window-a-deployment-sweeps-on-is-read-where-its-other-settings-are-and-a-window-it-cannot-read-stops-the-sweep.md)).
+Taken as the unit this entry asked for rather than as the one-line import: the
+window is read in `settings.ts` with the other four intake settings, with a
+three-state reading whose gate is the runtime's own `readerSignalWindowSchema`,
+and the sweep refuses to run on a value it cannot read rather than falling back
+to an hour nobody asked for. `deploymentNoticeOf` is the second half the entry
+pointed at — `collectionNoticeOf` of this deployment's own configuration, which
+could not be written honestly while one of its two numbers lived in a script.
+A test reads the script with its comments stripped and fails if the arithmetic
+comes back. Original status below.
+
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`apps/loom/scripts/signals-collect.ts`) · **Status:** open — **nothing is
 broken today and the two numbers agree**; found while reading the intake's
@@ -60844,3 +60972,123 @@ is not a substitute, and this entry exists so that the next run does not
 rediscover the wall by walking into it.
 
 ---
+---
+## 2026-10-26 (evening) — the intake status reports two different windows and has one word for one of them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`docs/deployment.md`) · **Status:** open — **nothing is broken and no test is
+failing**; it is one word on an operator's status page and the fix crosses a
+lane boundary
+
+`GET /api/reader-signals` is the only way to ask a deployment what its mouth is
+doing. Two of the things it reports are windows:
+
+| field | which window |
+| --- | --- |
+| `windowMs` | the **rate limit's** — how long the gate counts a sender's deliveries over |
+| `collection` | the **sweep's** — how old a delivery gets before it is counted into the totals and dropped |
+
+`windowMs` has been the rate limit's since the status existed, and until tonight
+it was the only window on the page, so the bare name cost nothing. `collection`
+is new (0317) and arrived as a *sentence* for exactly this reason: a second
+field called `collectionWindowMs` beside a `windowMs` meaning something else is
+the ambiguity named twice rather than removed.
+
+**The honest fix is a rename**, and it is one line of code and one line of
+documentation:
+
+- `apps/loom/app/_lib/reader-signals/receive.ts` — `windowMs` → `rateWindowMs`
+  on `IntakeStatus` and in `describeIntake`. This lane's file, and this lane
+  would take it.
+- `docs/deployment.md:498` — the sample response in *§9 Reader signals*, which
+  prints `"windowMs": 60000`. **That file is not this lane's**, and a rename
+  that leaves it stale with nothing failing is the worse of the two states.
+
+So it is filed rather than taken, with the whole change spelled out. If its
+owner would rather the field kept its name, the sentence beside it already says
+which window is which and this entry closes as settled.
+
+---
+## 2026-10-26 (evening) — a notice promises how long a delivery is kept, and nothing in it says whether a sweep is scheduled to keep the promise
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/notice.ts`) · **Status:** open — **older and larger than the unit
+that found it**, deliberately not papered over with structure tonight
+
+`CollectionNotice.bufferMs` is how long a delivery lives before it is counted
+and dropped, and `describeBuffer` is the sentence a reader gets:
+
+> a delivery is kept until it is 60 minutes old, **and the deployment's own
+> sweep is what then counts it into totals and deletes it** — the key tying one
+> visit together exists until then and nowhere else
+
+The middle clause is carefully true: the framework cannot promise the *moment*
+a delivery goes, because a host schedules the sweep. **What it does not say is
+that there might be no sweep at all.** `docs/deployment.md`'s §9 is blunt about
+the operational half — *the buffer only empties when you run this* — and a
+deployment that never scheduled it collects batches for ever while its notice
+names an hour.
+
+**0317 made one instance of this reachable and visible**, which is why it is
+worth an entry now: a window that cannot be read refuses the sweep, so a
+deployment can have a working endpoint, a notice naming an hour, and nothing
+sweeping. The operator learns that from the status (`collection` quotes the
+refused value). The reader learns nothing.
+
+**Three shapes, costed.**
+
+1. **Leave it, and keep the disclosure a ceiling on the age rather than on the
+   wall-clock.** The reading that the field already documents: `bufferMs` is
+   when a delivery becomes *ripe*, and ripeness is a property of the delivery.
+   Free, and it is tonight's choice. Its weakness is that no reader of a
+   sentence beginning *a delivery is kept until it is 60 minutes old* hears
+   *…or indefinitely, if nobody runs the sweep*.
+2. **The notice reports the last fold.** §29 already stamps the fold's own
+   timestamp on the door row and judges a stall against a schedule a deployment
+   hands in (0274), so the material exists. It would make the notice a
+   **reading** — a store, a clock — which it is deliberately not (0313), and it
+   would mean a privacy page that cannot render while the database is down.
+   Recommended against for that reason alone.
+3. **The deployment states its schedule, and the notice carries it.** The
+   stall check already takes a schedule a deployment hands in; the notice could
+   take the same number and say *and it is swept at least every N*. Still pure,
+   still one argument, and it moves the promise from the framework to the
+   deployment that is actually making it. **This is the recommendation**, and it
+   is a record rather than a judgement call, because it adds a figure to a
+   published notice.
+
+Not taken tonight: it is a change to what 0313 publishes, it wants its own
+record, and the unit that found it was about a setting rather than about the
+notice's shape.
+
+---
+## 2026-10-26 (evening) — a deployment's own notice is one call now, and the one surface that prints a notice prints the framework's defaults
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/signals/notice.ts`) · **Status:** open — **the
+surface is right about what it is for**, and the value it reads is now the less
+useful of two
+
+`apps/loom/app/(docs)/_lib/signals/notice.ts` calls `collectionNoticeOf()` with
+nothing in it, and says why in its own words: *`collectionNoticeOf()` with
+nothing in it is every kind, which is what* — a documentation page is
+documenting the framework, so the framework's answer is the right one there.
+
+**That is no longer the only answer available.** As of 0317,
+`deploymentNoticeOf(readIntakeSettings())` is this deployment's own notice: the
+window it actually sweeps on, and a region floor only where a country is
+actually read. The two differ on this very deployment the moment anybody sets
+`LOOM_SIGNAL_WINDOW_MS` or `LOOM_SIGNAL_REGION`.
+
+**Which one a page should print depends on what the page is**, and that is the
+docs lane's call rather than this one's:
+
+- A page *documenting what a Loom page can report* wants the framework's — the
+  current call, correct as it stands.
+- A page *telling this site's readers what this site collects* wants the
+  deployment's. There is no such page yet, and the 24 October entry about the
+  two surfaces describing collection in prose is the other half of this.
+
+Filed as an offer, not a defect: the import is
+`@/app/_lib/reader-signals/notice`, it is one function of one argument, and it
+touches no store and no clock.

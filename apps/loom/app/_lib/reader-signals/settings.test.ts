@@ -1,12 +1,21 @@
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+
 import { describe, expect, it } from "vitest"
 
-import { DEFAULT_REGION_FLOOR } from "@jam-overture/loom/signals"
+import {
+  DEFAULT_READER_SIGNAL_WINDOW_MS,
+  DEFAULT_REGION_FLOOR,
+  MIN_READER_SIGNAL_WINDOW_MS,
+} from "@jam-overture/loom/signals"
 
 import {
   DEFAULT_REGION_HEADER,
+  describeCollectionWindow,
   describeIntakeSwitch,
   describeRegionSettings,
   INTAKE_KEY,
+  readCollectionWindow,
   readIntakeSettings,
   readIntakeSwitch,
   readRegionFloor,
@@ -14,6 +23,7 @@ import {
   REGION_FLOOR_KEY,
   REGION_HEADER_KEY,
   REGION_KEY,
+  WINDOW_KEY,
 } from "./settings"
 
 describe("readIntakeSwitch", () => {
@@ -166,5 +176,150 @@ describe("the region an environment configures", () => {
   it("reads the platform's own header on an environment that says nothing", () => {
     expect(readIntakeSettings({}).region.header).toBe(DEFAULT_REGION_HEADER)
     expect(readIntakeSettings({ [REGION_HEADER_KEY]: "  " }).region.header).toBe(DEFAULT_REGION_HEADER)
+  })
+})
+
+describe("readCollectionWindow", () => {
+  /**
+   * The whole point of the unit: the number the sweep runs on is the number the
+   * runtime publishes the argument for, and there is no second copy of it to
+   * drift. This fails if anybody writes an hour out again anywhere.
+   */
+  it("is the runtime's own default when nothing is set", () => {
+    expect(readCollectionWindow(undefined)).toEqual({
+      state: "default",
+      windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS,
+    })
+    expect(readCollectionWindow("   ")).toEqual({
+      state: "default",
+      windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS,
+    })
+  })
+
+  it("takes a window an operator set, and says it was set", () => {
+    expect(readCollectionWindow("900000")).toEqual({ state: "set", windowMs: 900_000 })
+    expect(readCollectionWindow(" 86400000 ")).toEqual({ state: "set", windowMs: 86_400_000 })
+    expect(readCollectionWindow(String(MIN_READER_SIGNAL_WINDOW_MS))).toEqual({
+      state: "set",
+      windowMs: MIN_READER_SIGNAL_WINDOW_MS,
+    })
+  })
+
+  /**
+   * `60` is the units mistake this setting is written wrongly by: it reads as an
+   * hour and means a minute and a tenth of a second. The runtime's own schema is
+   * what refuses it, which is why there is no second rule about it here.
+   */
+  it("refuses a value that is not a window this runtime would sweep on", () => {
+    for (const given of ["60", "0", "-1", "nonsense", "90000.5", "an hour"]) {
+      expect(readCollectionWindow(given)).toEqual({
+        state: "unusable",
+        given,
+        windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS,
+      })
+    }
+  })
+
+  /**
+   * The state is what carries the refusal, not the number — a caller reading
+   * only `windowMs` would sweep on an hour the operator never asked for, so the
+   * two are kept distinguishable and the sweep reads the state.
+   */
+  it("carries the default beside a refused value, so a status has a number to print", () => {
+    const refused = readCollectionWindow("60")
+
+    expect(refused.windowMs).toBe(DEFAULT_READER_SIGNAL_WINDOW_MS)
+    expect(refused.state).not.toBe("default")
+    expect(refused.state).not.toBe("set")
+  })
+})
+
+describe("describeCollectionWindow", () => {
+  it("quotes what was typed and names the units it wanted", () => {
+    const described = describeCollectionWindow(readCollectionWindow("60"))
+
+    expect(described).toContain('"60"')
+    expect(described).toContain(WINDOW_KEY)
+    expect(described).toContain(String(MIN_READER_SIGNAL_WINDOW_MS))
+    expect(described).toContain("nothing is being counted")
+  })
+
+  it("tells an operator how to change a default, and does not nag about one they set", () => {
+    expect(describeCollectionWindow(readCollectionWindow(undefined))).toContain(
+      `set ${WINDOW_KEY}`
+    )
+    expect(describeCollectionWindow(readCollectionWindow("900000"))).not.toContain(
+      `set ${WINDOW_KEY}`
+    )
+    expect(describeCollectionWindow(readCollectionWindow("900000"))).toContain("900000ms")
+  })
+})
+
+describe("the window an environment configures", () => {
+  it("is read off the environment with the rest of the intake's settings", () => {
+    expect(readIntakeSettings({ [WINDOW_KEY]: "900000" }).window).toEqual({
+      state: "set",
+      windowMs: 900_000,
+    })
+    expect(readIntakeSettings({}).window).toEqual({
+      state: "default",
+      windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS,
+    })
+  })
+
+  /**
+   * A window that cannot be read stops the sweep and nothing else. Refusing
+   * batches at the door as well would lose the deliveries a sweep could still
+   * count the moment the value is fixed.
+   */
+  it("does not reach the switch the door reads", () => {
+    const settings = readIntakeSettings({ [INTAKE_KEY]: "on", [WINDOW_KEY]: "nonsense" })
+
+    expect(settings.window.state).toBe("unusable")
+    expect(settings.chosen).toEqual({ state: "on" })
+  })
+})
+
+/**
+ * The fault this unit closes was a second spelling of one default, in a file no
+ * type reaches: a script. So the guard is at the source, because that is where
+ * the duplication would come back.
+ */
+describe("the sweep this deployment runs", () => {
+  /**
+   * Comments out, because the check is about what the script *does* and the
+   * paragraph explaining the duplication names the arithmetic it replaced. A
+   * negative assertion over prose fails on the sentence describing the fix,
+   * which is the test failing for the opposite of its reason.
+   */
+  const codeOf = (path: string): string =>
+    readFileSync(fileURLToPath(new URL(path, import.meta.url)), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "")
+      .replace(/_/g, "")
+
+  const SWEEP = codeOf("../../../scripts/signals-collect.ts")
+
+  it("reads the window from these settings rather than parsing the environment itself", () => {
+    expect(SWEEP).toContain("readCollectionWindow")
+    expect(SWEEP).not.toContain("readerSignalWindowSchema")
+  })
+
+  it("refuses to sweep on a window it could not read, rather than falling back", () => {
+    expect(SWEEP).toContain('state === "unusable"')
+    expect(SWEEP).toContain("process.exit(1)")
+  })
+
+  /**
+   * Both spellings, and underscores stripped first, because the duplication
+   * this closes was `60 * 60 * 1000` and the next one would as easily be
+   * `3_600_000`. Over the code of both files: the one that held the second copy
+   * and the one that holds the only reading.
+   */
+  it("spells an hour nowhere, in either file", () => {
+    for (const code of [SWEEP, codeOf("./settings.ts")]) {
+      expect(code).not.toMatch(/60 ?\* ?60 ?\* ?1000/)
+      expect(code).not.toContain("3600000")
+    }
   })
 })

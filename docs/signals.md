@@ -3458,6 +3458,133 @@ byte-identical.
 `src/testing/reader-signal-contract.ts`, which is another lane's file — filed for
 it, and one import away.
 
+### 56. One window, read where the other settings are · `Loom signals` · **done, 26 October**
+
+Not a reading either. The number every other step in this subsystem is timed by,
+read in two places — and the one intake setting with no state for a value that
+cannot be used.
+
+`DEFAULT_READER_SIGNAL_WINDOW_MS` carries the whole argument for an hour in its
+doc comment, and the script that sweeps wrote `60 * 60 * 1000` out again and
+parsed the environment itself. The two numbers agreed, so nothing was broken;
+what the duplication had was a **direction** — the package's copy was the one
+with the reasoning attached, and the script's was the one a deployment's batches
+were actually swept on. It is the third instance of one spelling of a constant
+drifting from another in this subsystem (0218, 0235).
+
+**Done**
+([0317](../decisions/0317-the-window-a-deployment-sweeps-on-is-read-where-its-other-settings-are-and-a-window-it-cannot-read-stops-the-sweep.md)),
+as `readCollectionWindow` in
+[`settings.ts`](../apps/loom/app/_lib/reader-signals/settings.ts) and
+`deploymentNoticeOf` in
+[`notice.ts`](../apps/loom/app/_lib/reader-signals/notice.ts).
+
+- **One reading, beside the other four.** The intake switch, the region switch,
+  the region header and the region floor were all read in one file, each with a
+  three-state reading and a sentence for an operator. The window is now the
+  fifth, with the runtime's own `readerSignalWindowSchema` as its gate — so what
+  a window may be is stated once, in the package, and read rather than restated.
+- **A window that cannot be read stops the sweep**, rather than falling back to
+  the default. An operator who typed a day meant a day: sweeping on an hour
+  because their value could not be parsed would change both what their counters
+  mean and how long a delivery lives, which is a number their readers are told,
+  and it would do it silently. The buffer is still there when the value is
+  fixed.
+- **The door does not refuse on it.** A window is nothing the endpoint reads, and
+  refusing batches as well would lose the deliveries a corrected value would
+  have counted.
+- **A deployment's own notice is one call now.**
+  `deploymentNoticeOf(readIntakeSettings())` hands `collectionNoticeOf` (0313)
+  this deployment's two numbers — the window, and a region floor **only where a
+  country is actually read**, which is the `on` state and no other. A deployment
+  that switched regions off or misspelled the switch counts no region, and the
+  notice says *nothing about where you are is read* rather than naming a floor
+  under a bucket that does not exist. §52 built the value; this is the line that
+  makes it this deployment's rather than the framework's.
+- **An operator can ask what the sweep runs on.** The status gained one
+  sentence, because a buffer growing under a refused sweep looks from outside
+  exactly like a buffer growing under no sweep at all.
+- **Nothing reaches a reader.** No payload field, no browser byte, no column, no
+  migration, no store method, no kind. `broadcast.ts` is byte-identical.
+
+**What is left and is filed:** `windowMs` on that status is the *rate limit's*
+window and not this one, which is two windows with one word for both — the
+rename is one line in `docs/deployment.md`, which is another lane's file, so it
+is filed rather than taken. And the older half this unit could not close: a
+buffer age is a promise only a **scheduled** sweep keeps, and nothing in the
+notice says whether one runs.
+
+### 57. The pairs a window holds · `Loom signals` · **done, 27 October**
+
+The second step of the §51 rung, and the one it left undone. §51 made every
+reading that is a function of one `PageReading` reachable from a store. **Nine
+of them are functions of two** — `readingChangeOf`, `copyChangeOf`,
+`paceChangeOf`, `actionChangeOf`, `funnelChangeOf` and the four library
+comparisons — and nothing turned a window into a pair, although a window usually
+holds both sides: one page's revision 5 and its revision 9 are two readings in
+the same list. `deploymentChangeOf` has said so in its own docblock since §35:
+*a caller with two windows of counters reads each page's parts, then its
+progress, then its comparison, then this.*
+
+So the comparison half of this subsystem — the half the product's argument rests
+on — was reachable only by a caller that wrote the pairing itself, and a caller
+writing the pairing is a caller writing 0293 again.
+
+**Done**
+([0318](../decisions/0318-a-windows-before-and-after-pairs-are-one-per-form-and-they-are-its-latest-two-revisions.md)),
+as `windowPairsOf` in [`src/signals/window.ts`](../src/signals/window.ts).
+
+- **One pair per form, of that form's latest two revisions**, and the clause is
+  load-bearing rather than tidy. `deploymentChangeOf` gates a form handed two
+  different revision pairs as `ambiguous` and drops it, so a rung publishing
+  every consecutive pair would take every page a deployment published three
+  times inside one window **out of the order that exists to rank it** — and a
+  shorter order looks like a calmer week (0158). The test asserts both halves:
+  these pairs give `ambiguous: []` and `compared: 1`, and every consecutive pair
+  of the same three readings gives `ambiguous: [TREE]` and `compared: 0`.
+- **Grouped by `formKeyOf` and nothing else (0293), so no pair it makes can be
+  refused for a mismatched side.** Of the four states `readingChangeOf` refuses,
+  three need something this cannot produce: two trees, two named audiences, or a
+  side holding two forms and naming none — the last being a reading
+  `windowReadingsOf` does not make, because it splits a revision serving two
+  forms into one reading each. What is left is `nothing-measured`. **A silence
+  off this path is therefore a fact about a deployment's readers and never a
+  mistake in its asking**, which is the division the rung is for.
+- **What it left below the earlier side is on the pair.** `superseded` lists the
+  older revisions of that form, so a surface says *and one earlier revision* and
+  a caller wanting that older pair has two readings and one call. The widest
+  pair is deliberately not available: 3 against 9 is two changes added together
+  and labelled as one.
+- **A form with one revision is reported rather than dropped.** A page published
+  inside the window, a page nobody has changed since it began, and both sides of
+  a deployment that upgraded across 0284 all land in `unpaired`, with the one
+  reading carried.
+- **The pair spanning that upgrade is not produced, and that is the one place
+  this says no.** Rows that never carried the audience column are a form naming
+  none; rows that carry it are a form naming one. `crossesAudiences` allows the
+  comparison between them — unprovable rather than proven two populations — but
+  allowing it is not asserting it, and a rung that paired them would be a tenth
+  spelling of the pairing rule inside the module written to stop there being a
+  second. The caller that knows its own history makes it in one call, and
+  `ComparedAudiences` on the result says what it was read across.
+- **A reading handed in twice is dropped and counted**, first-wins as in
+  `treesIn`. Nought for anything the join produced; not nought for a caller that
+  concatenated two reads — and that caller is who the clause is for, because a
+  form whose latest revision arrived twice would otherwise pair that revision
+  with itself and publish *nothing changed* about a change that was made.
+- **It adds no figure of its own**, which is §51's rule kept: it decides which
+  pairs a window holds and hands each of them its two readings.
+
+**Nothing was added to a payload, a browser, a column, a migration, a store or
+the vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** the two **windows** the four library comparisons
+take are not assembled here, because a form with one revision cannot be put on a
+side — a page published inside the window belongs to the later one, a page
+nobody changed belongs to both, and guessing would publish a page nobody touched
+as a page gained (0295); and still that **nothing draws any of this**, which is
+`Loom portal`'s.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
