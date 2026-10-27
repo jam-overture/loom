@@ -60482,6 +60482,29 @@ on this site a thing he wants capped at all**, now that it is four pages and the
 cap has been raised once? If it is, the second shape says so without a run
 having to re-measure. If it is not, the first is less code.
 
+### 27 October — the second instance, and it is not a page
+
+The ceiling went to **3,900** the next day, and what crossed it was not a fifth
+page. It was **one band** on `/why-use-it` that prints the name of every part in
+the starter library: 107 names, read off the registry, 152 words of which 143
+are the names themselves. Measured on the branch that adds it, the site reads
+**3,855 in the state that says the most**, against 3,703 the day before.
+
+That sharpens the question rather than repeating it, because this band asks a
+reader to read **nothing**. The file's own account of what the number is for is
+*"how much a visitor is asked to read"*, and a field of one-word chips somebody
+scans for the word *Table* is where the proxy and the thing it stands for come
+apart. **The measurement was deliberately not changed** — an exemption written
+by the run that needed one is how a budget erodes, and a rule that counted a
+cell differently from a sentence would be a larger change than the band
+justifies.
+
+So there are now two raises in two days, by the same lane, against a ceiling
+that lane has said twice is the wrong shape. **A third is not a thing to reach
+for**: the next run that finds this red should say so in its report and leave
+the number alone. Either shape above would have let both of these land without
+a run editing a constant.
+
 ---
 
 ## 2026-10-26 — a two-subject comparison is the one shape of the band that could fit a phone, and it is the shape that does not
@@ -60748,5 +60771,76 @@ Worth one line of the screen's own: `RegionReading.floor` says what the map was
 read at and `withheld` says what it is holding back, so *12 views in 2 countries
 too small to name* is a sentence a reader of the screen can be given rather than
 a silence.
+
+---
+
+## 2026-10-27 — the site leads on the building part and may not print one line of the code a reader would write
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/copy.ts`' `RESERVED_VOCABULARY`, held by
+`_lib/voice.test.ts`) · **Status:** **open, and the ruling is the maintainer's**
+— nothing is broken, no test failed, and this is the reason a run that set out
+to show the setup shipped a band of names instead
+
+`docs/positioning.md` records his direction of 24 October:
+
+> *"Don't worry about the controls. That is the stuff under the hood. The
+> building part and why this build is better than traditional methods is
+> preferred."*
+
+The front door leads with his chain, and its second rung says, in this site's
+own words: *"Loom keeps a list of the components an AI model is allowed to use,
+and what each one needs. **That list is the whole of the setup.**"* A junior
+developer reading that has exactly one next question, and it is the one this
+site exists to answer: *what does that look like in my project?*
+
+**It cannot be shown.** His instruction of 26 September is the simpler of the
+two rules this file has carried — *no page of this site uses one of these words,
+anywhere* — and `voice.test.ts` sweeps the words a page **renders**, text nodes
+included, which is correct and is the lesson of 24 August. A code panel is text
+nodes. So the sweep reads a listing the same way it reads a sentence, and the
+setup cannot be printed, because the setup is spelled in the reserved list:
+
+| the line a reader would write | the word that stops it |
+| --- | --- |
+| `definePrimitive({ … })` | `primitive` |
+| `createPrimitiveRegistry([...STARTER_PRIMITIVES, yours])` | `primitive`, `registry` |
+| `renderLoomTree(page, { resolver: registry })` | `tree`, `registry` |
+| `props: z.object({ … }).strict()` | `schema`, in the sentence that would explain it |
+
+The package names are already the one exemption — `@jam-overture/loom-primitives`
+is a reserved word inside a name npm owns — and the note on it says exactly why
+it is safe: *"a sentence that says primitive on its own is untouched by this and
+still fails, which is the property that makes the exemption safe to have."* The
+same property is available here and nobody has asked for it.
+
+### Why this lane did not simply narrow the rule
+
+It is his rule and it was given as an instruction, not derived. Narrowing it is
+a decision about what the site may put in front of a stranger, which is
+positioning, which is his — and the lane that wants the exemption writing the
+exemption is how a register erodes.
+
+Three things are worth having in front of him when he answers:
+
+- **The narrow version is one clause.** *A reserved word inside a code panel is
+  not a reserved word*, held to `loom.code` and nothing else, so prose that says
+  *primitive* on its own still fails everywhere on the site. It is the package
+  exemption's shape, applied to the other place a reader does not read English.
+- **The cost of leaving it is a page the site cannot have.** Not a band — the
+  whole *what you write* answer, which for the audience `positioning.md` names
+  is the most persuasive screen a framework has.
+- **The cost of taking it is real and small.** A visitor who scrolls past a
+  listing sees words they do not know. They see them in a monospace panel that
+  announces itself as code, which is the one place on a page where an unfamiliar
+  word reads as a thing to copy rather than a thing to look up.
+
+### What was built instead, and why it is not the same thing
+
+`/why-use-it` now prints the name of every part in the starter set. It answers
+*what is in there* and it does not answer *what do I write*, and the second is
+the question his instruction is about. The band is worth having either way; it
+is not a substitute, and this entry exists so that the next run does not
+rediscover the wall by walking into it.
 
 ---

@@ -1,0 +1,41 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-27-marketing-why-use-it-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-27-marketing-the-parts",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is(\"Every one of these comes with it\"))",
+      "measure": [
+        "section:has(h2:text-is(\"Every one of these comes with it\"))",
+        "mark, span.loom-badge, [class*=badge]"
+      ]
+    },
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-27-marketing-the-parts-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "measure": [
+        "section:has(h2:text-is(\"Every one of these comes with it\"))",
+        "mark, span.loom-badge, [class*=badge]"
+      ]
+    },
+    {
+      "path": "/why-use-it?palette=bold&fontPack=bold-sans&stylePreset=airy-modern",
+      "out": "2026-10-27-marketing-the-parts-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    }
+  ]
+}
