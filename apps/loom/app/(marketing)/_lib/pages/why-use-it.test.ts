@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 
+import { FACTS } from "../copy"
+import { LIBRARY_PARTS } from "../library"
 import { elementsIn } from "../measure"
 import { siteRegistry } from "../registry"
 import { treeFor } from "../builders"
@@ -159,5 +161,58 @@ describe("what it promises", () => {
     const promised = OUTCOME_WORDS.filter((word) => words.includes(word))
 
     expect(promised).toEqual([])
+  })
+})
+
+/**
+ * The band that shows the set, held to the one thing a reader cannot check.
+ *
+ * A reader can see that there are a lot of them. What they cannot see is
+ * whether the page is showing **the set** or a selection somebody made once:
+ * the difference matters here more than anywhere else on the site, because the
+ * band's caption says *all of them* and a page that said that of ninety would
+ * be a false claim rather than an incomplete one.
+ */
+describe("the set it shows", () => {
+  const chips = () =>
+    elementsOf("loom.badge").map((node) =>
+      node.children
+        .map((child) => (child.kind === "text" ? child.value : ""))
+        .join("")
+    )
+
+  it("prints every part the library registered, and nothing it did not", () => {
+    expect([...chips()].sort((a, b) => a.localeCompare(b))).toEqual([...LIBRARY_PARTS])
+  })
+
+  /**
+   * Read off the registry rather than off a number typed here, so this is a
+   * comparison of two readings of the same thing rather than a tautology: the
+   * figure the band prints comes from `copy.ts`, the chips come from
+   * `library.ts`, and a page claiming a count it does not show is the failure.
+   */
+  it("prints as many as it claims", () => {
+    const claimed = readerCopy(page().root)
+      .map(({ text }) => text)
+      .filter((text) => text.includes(FACTS.primitives))
+
+    expect(claimed.length).toBeGreaterThanOrEqual(1)
+    expect(chips()).toHaveLength(Number(FACTS.primitives))
+  })
+
+  /**
+   * After the argument and before the way out. A reader who has not been told
+   * what the jobs are has no use for a hundred names, and a reader who has
+   * just read them is the one most likely to press *Read the docs*.
+   */
+  it("comes after the explanation and before the next step", () => {
+    const bands = page().root.children.flatMap((node) =>
+      node.kind === "element" && node.type === "loom.section"
+        ? [String(node.props["eyebrow"] ?? "")]
+        : []
+    )
+
+    expect(bands.indexOf("What you build with")).toBeGreaterThan(bands.indexOf("What comes with it"))
+    expect(bands.indexOf("What you build with")).toBeLessThan(bands.indexOf("Next"))
   })
 })

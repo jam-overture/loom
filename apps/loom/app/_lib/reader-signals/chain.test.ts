@@ -4,6 +4,7 @@ import {
   collectReaderSignals,
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
   describeCollection,
   memoryReaderRegionStore,
@@ -52,6 +53,12 @@ const SETTINGS = {
     header: "x-vercel-ip-country",
     floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
   },
+  /**
+   * Nothing on this chain reads it: the window each step below sweeps on is
+   * passed to `collectReaderSignals` by hand, because these tests move a clock
+   * through a minute rather than through this deployment's hour.
+   */
+  window: { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS },
 } as const
 
 const batch = (nodeId: string, dwellMs: number, over: Record<string, unknown> = {}) => ({

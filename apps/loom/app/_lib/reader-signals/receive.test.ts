@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import {
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
   memoryReaderRegionStore,
   memoryReaderSignalJournal,
@@ -34,6 +35,7 @@ import type { RefusalCounter } from "./refusals"
 import { memoryRefusalCounter } from "./refusals-memory"
 import {
   DEFAULT_REGION_HEADER,
+  readCollectionWindow,
   readIntakeSwitch,
   readRegionFloor,
   readRegionSwitch,
@@ -67,6 +69,7 @@ const settingsOf = (over: Partial<IntakeSettings> = {}): IntakeSettings => ({
     header: DEFAULT_REGION_HEADER,
     floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
   },
+  window: { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS },
   ...over,
 })
 
@@ -812,6 +815,36 @@ describe("the status", () => {
 
     expect(status.regions).toContain("5")
     expect(status.regions).toContain(String(DEFAULT_REGION_FLOOR))
+  })
+
+  /**
+   * The sweep is the only thing that turns a buffer into numbers, and a window
+   * it refuses to run on looks from outside exactly like a sweep nobody
+   * scheduled. The status is the only place that distinction can be asked for.
+   */
+  it("says what window the sweep counts on, and when it could not read one", () => {
+    expect(describeIntake(intakeOf()).collection).toContain(
+      String(DEFAULT_READER_SIGNAL_WINDOW_MS)
+    )
+
+    const refused = describeIntake(
+      intakeOf({ settings: settingsOf({ window: readCollectionWindow("60") }) })
+    )
+
+    expect(refused.collection).toContain('"60"')
+    expect(refused.collection).toContain("nothing is being counted")
+  })
+
+  /**
+   * Two different windows with one word for both: `windowMs` is the rate
+   * limit's and the collection window is the sweep's. The sentence is what
+   * tells them apart, so it has to be about the sweep.
+   */
+  it("does not report the rate limit's window as the collection window", () => {
+    const status = describeIntake(intakeOf())
+
+    expect(status.windowMs).toBe(policy.windowMs)
+    expect(status.collection).not.toContain(`${policy.windowMs}ms`)
   })
 
   it("names no secret", () => {

@@ -4,7 +4,15 @@ import type { TreeId } from "../ids.js"
 import { ok, type Result } from "../result.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import { audiencesIn, type MaybeAudienceScoped } from "./audiences.js"
+import {
+  audiencesIn,
+  formKeyOf,
+  formOf,
+  inFormOrder,
+  readingKeyOf,
+  type MaybeAudienceScoped,
+  type PageForm,
+} from "./audiences.js"
 import type { ReaderSignalStoreError } from "./journal.js"
 import type { StoredPageViews } from "./page-views.js"
 import { pageReadingOf, type PageReading, type PartDeclarations } from "./parts.js"
@@ -28,7 +36,9 @@ import type {
  *
  * Thirty-eight readings sit on the other side of this and every one of them is
  * a pure function of a {@link PageReading} — or of a list of them, or of two
- * held against each other. Nothing in this subsystem turned a store into one.
+ * held against each other. Nothing in this subsystem turned a store into one,
+ * and nothing turned a window into the **pair** the last of those three shapes
+ * takes.
  * A caller that wanted *which parts of this page get read* had to know that the
  * counters come from `tallies`, the denominator from `pageViews`, the funnel
  * answers from `funnels` and the map from a second store; that a tree and a
@@ -83,6 +93,16 @@ import type {
  * bites harder the narrower the group: thirty views of one country split across
  * two forms are a readership the whole map names and both split maps withhold
  * (0297).
+ *
+ * ## The second step, which is the pair
+ *
+ * A window joined to its pages answers every reading that is a function of one
+ * {@link PageReading}. Nine comparisons are functions of **two**, and a window
+ * holds both sides of most of them — one page's revision 5 and its revision 9
+ * are two readings in the same list. {@link windowPairsOf} is the step that
+ * says which two, under the one published rule a comparison pairs on (0293),
+ * so that a caller composing *what did this change do* across a deployment
+ * never writes the pairing itself.
  *
  * ## Why the trees are the caller's to resolve
  *
@@ -446,8 +466,16 @@ const regionGroupsOf = (
   return { groups: [...groups.values()], kept, duplicated }
 }
 
-/** Nulls first, then by name, so two reads of one window are in one order. */
-const inFormOrder = (one: AudienceId | null, other: AudienceId | null): number => {
+/**
+ * Nulls first, then by name, so two reads of one window are in one order.
+ *
+ * Orders **audiences** and not forms, which is what it is named for now: the
+ * published rule that orders forms is {@link inFormOrder}, this file imports it
+ * for the pairs below, and the two cannot carry one name. A form is a tree and
+ * an audience (0293) and this takes neither tree, so the old spelling claimed a
+ * rule it was not.
+ */
+const inAudienceOrder = (one: AudienceId | null, other: AudienceId | null): number => {
   if (one === other) return 0
   if (one === null) return -1
   if (other === null) return 1
@@ -481,7 +509,8 @@ const windowRegionsOf = (
 
   return {
     maps: maps.sort(
-      (one, other) => inRevisionOrder(one, other) || inFormOrder(one.audienceId, other.audienceId)
+      (one, other) =>
+        inRevisionOrder(one, other) || inAudienceOrder(one.audienceId, other.audienceId)
     ),
     readership: regionReadingOf(kept, options),
     duplicated,
@@ -608,5 +637,209 @@ export const windowReadingsOf = (
     pages,
     unjoined,
     regions: window.regions === undefined ? undefined : windowRegionsOf(window.regions, options),
+  }
+}
+
+/**
+ * A page in one form, with the two revisions of it a comparison is of.
+ *
+ * It is a {@link PageForm}, so `formKeyOf` takes one of these as it takes a
+ * reading and a surface holding both lists pairs them on the published rule
+ * (0293) rather than on a spelling of its own. The audience is the form's and
+ * therefore both sides' — see {@link windowPairsOf}.
+ *
+ * Not a funnel pair, which is two stops inside one reading (`funnel.ts`). This
+ * is two readings of one page.
+ */
+export type WindowPair = PageForm & {
+  /** The earlier side. Its revision is always below `now`'s. */
+  readonly was: PageReading
+  readonly now: PageReading
+  /**
+   * Revisions of this form the window holds below `was`, oldest first.
+   *
+   * Empty for the ordinary case of two. A deployment that has published three
+   * times inside one window has an older change in its counters, and this is
+   * how a surface says *and one earlier revision* rather than how it reads one:
+   * the pair for it is two of {@link WindowReadings.pages} and
+   * `readingChangeOf`, which is the same call this makes.
+   */
+  readonly superseded: readonly number[]
+}
+
+/**
+ * A form the window holds one revision of, so there is nothing to compare it
+ * against.
+ *
+ * Ordinary rather than broken, and published rather than dropped for the reason
+ * {@link UnjoinedRevision} is: a page published inside the window, a page
+ * nobody has changed since the window began, and the two sides of a deployment
+ * that upgraded across 0284 all land here, and a screen that left them out
+ * would show a deployment fewer pages than it has.
+ */
+export type UnpairedForm = PageForm & {
+  /** The one reading of it, carried so a surface drawing the page still has it. */
+  readonly reading: PageReading
+}
+
+/** What a window came to once its readings were paired into before-and-afters. */
+export type WindowPairs = {
+  /** One per form that has two revisions in the window, in a stable order. */
+  readonly pairs: readonly WindowPair[]
+  /** The forms that have one, in the same order. */
+  readonly unpaired: readonly UnpairedForm[]
+  /**
+   * Readings handed in twice under one `readingKeyOf`, dropped before pairing.
+   *
+   * Nought for anything {@link windowReadingsOf} produced, which never holds
+   * two readings of one key. It is not nought for a caller that concatenated
+   * two windows' readings, and the repeat has to be dropped rather than paired:
+   * a form whose latest revision arrived twice would otherwise pair that
+   * revision with itself and publish *nothing changed* about a change.
+   */
+  readonly duplicated: number
+}
+
+/**
+ * Pair a window's readings into the before-and-afters the comparisons take.
+ *
+ * The second step of this rung and the one it left undone. Nine comparisons in
+ * this subsystem take two sides — `readingChangeOf`, `copyChangeOf`,
+ * `paceChangeOf`, `actionChangeOf`, `funnelChangeOf` and the four library
+ * comparisons — and not one of them could be reached from a store, because
+ * nothing turned a window into a pair. `deploymentChangeOf` says so in its own
+ * words: *a caller with two windows of counters reads each page's parts, then
+ * its progress, then its comparison, then this.* The pairing was the step with
+ * no owner, and a caller writing it is a caller writing 0293 again.
+ *
+ * After this the deployment-wide order over what a change did is three lines:
+ *
+ * ```ts
+ * const { pages } = windowReadingsOf(window, treesIn(trees), registry)
+ * const { pairs } = windowPairsOf(pages)
+ * const order = deploymentChangeOf(
+ *   pairs.map(({ was, now }) => readingChangeOf(was, now)),
+ *   window.pageViews
+ * )
+ * ```
+ *
+ * ## One pair per form, and it is the latest two revisions
+ *
+ * A form with revisions 3, 5 and 9 in the window has two consecutive pairs in
+ * it and this produces one: 5 against 9. Publishing both would make the page
+ * unreadable by the only consumer there is — `deploymentChangeOf` gates a form
+ * handed two different revision pairs as `ambiguous` and drops it, which is
+ * right of it, because *which page did the change hurt most* cannot be answered
+ * about a form that changed twice. So every page a deployment published three
+ * times inside one window would vanish from the order, and the figure it
+ * vanished out of would go on looking right (0158).
+ *
+ * The latest pair rather than the widest one, for the same reason: 3 against 9
+ * is two changes added together and labelled as one, and *what did this change
+ * do* is a question about the change that was made. What the window holds below
+ * `was` is on the pair as {@link WindowPair.superseded}, so nothing is hidden
+ * and an older pair is two readings and one call away.
+ *
+ * ## Paired by the form rule and nothing else, so no pair here can be refused
+ *
+ * The grouping is `formKeyOf` (0293), so both sides of every pair are of one
+ * tree and one audience by construction. Three of the four states
+ * `readingChangeOf` refuses are therefore unreachable from a pair this makes:
+ * `different-trees` needs two trees, `different-audiences` needs two named
+ * audiences, and `audiences-mixed` needs a side that holds two forms and names
+ * none, which is a reading {@link windowReadingsOf} does not produce — it
+ * splits a revision serving two forms into one reading each. What is left is
+ * `nothing-measured`, which is about the readers rather than about the pairing,
+ * and that is the division this rung is for: a comparison that comes back
+ * silent from here is silent about a deployment's readers and not about its
+ * caller.
+ *
+ * **The one pair it will not make, which is deliberate.** A deployment that
+ * upgraded across 0284 has revisions whose rows name no audience and revisions
+ * whose rows name one, and those are two forms under the published rule. So the
+ * comparison spanning the upgrade is not produced, and both of its sides are in
+ * {@link WindowPairs.unpaired}. It is the pair `crossesAudiences` deliberately
+ * allows — unprovable rather than proven alike — and allowing it is not the
+ * same as asserting it: nothing in the rows says the two are one population, a
+ * rung that paired them would be a tenth spelling of the pairing rule, and the
+ * caller who knows its own history makes that comparison in one call, where
+ * `audiences` on the result says what it was read across.
+ *
+ * ## It adds no figure of its own
+ *
+ * Nothing here counts, divides, sums or withholds, which is the rule the first
+ * step of this rung set: it decides **which pairs a window holds** and hands
+ * each of them the two readings it is a pair of. Every one of the nine
+ * comparisons is one call off a pair.
+ *
+ * **It does not assemble the two windows the four library comparisons take**,
+ * and that is a gap rather than an omission. Those compare a whole library
+ * before against a whole library after, and a form with one revision cannot be
+ * put on a side: a page published inside the window belongs to the later one, a
+ * page nobody has changed belongs to both, and nothing in the counters tells
+ * them apart. Guessing would publish a page nobody touched as a page gained
+ * (0295), so the forms are reported and the placing is left to the caller,
+ * which is the only party that knows what it published when.
+ *
+ * Linear in the readings but for one sort per form, which is a sort of that
+ * form's revisions and not of the window: the window sorted whole would be the
+ * shape rule 4 holds this subsystem to, and a deployment's revisions per page
+ * are a handful where its pages are not.
+ */
+export const windowPairsOf = (readings: readonly PageReading[]): WindowPairs => {
+  const forms = new Map<string, PageReading[]>()
+  const seen = new Set<string>()
+  let duplicated = 0
+
+  for (const reading of readings) {
+    const key = readingKeyOf(reading)
+
+    /**
+     * The first of two readings of one key wins and the second is counted, for
+     * the reason it does in `treesIn`: they disagree about what one reading of
+     * one revision is, nothing here can say which is right, and a silent
+     * last-wins would make the answer depend on the order a store returned.
+     */
+    if (seen.has(key)) {
+      duplicated += 1
+      continue
+    }
+
+    seen.add(key)
+
+    const form = formKeyOf(reading)
+    const held = forms.get(form)
+
+    if (held === undefined) forms.set(form, [reading])
+    else held.push(reading)
+  }
+
+  const pairs: WindowPair[] = []
+  const unpaired: UnpairedForm[] = []
+
+  for (const held of forms.values()) {
+    const inOrder = [...held].sort((one, other) => one.revision - other.revision)
+    const now = inOrder.at(-1)
+    const was = inOrder.at(-2)
+
+    if (now === undefined) continue
+
+    if (was === undefined) {
+      unpaired.push({ ...formOf(now), reading: now })
+      continue
+    }
+
+    pairs.push({
+      ...formOf(now),
+      was,
+      now,
+      superseded: inOrder.slice(0, -2).map((reading) => reading.revision),
+    })
+  }
+
+  return {
+    pairs: pairs.sort(inFormOrder),
+    unpaired: unpaired.sort(inFormOrder),
+    duplicated,
   }
 }

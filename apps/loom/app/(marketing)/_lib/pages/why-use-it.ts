@@ -11,6 +11,8 @@ import {
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { COUNTED_ANCHOR } from "../bands"
+import { FACTS } from "../copy"
+import { LIBRARY_PARTS } from "../library"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import {
   action,
@@ -351,6 +353,61 @@ const alreadyWritten = (ids: IdFactory): LoomNode =>
     ]
   )
 
+/**
+ * The set itself, which is the one thing this page's argument asks for and had
+ * no answer to.
+ *
+ * The table two bands up says *Somewhere to keep the shape of the page — you
+ * build it* against a mark in the Loom column, five times over. A reader who
+ * believes it still has a concrete question underneath: **what is actually in
+ * there.** The front door has answered that with a figure since the facts band
+ * was written, `/what-you-run` answers it with *"a starter set comes with it"*,
+ * and until today nothing on this site showed a reader one of them.
+ *
+ * It is the maintainer's direction of 24 October taken literally — *"the
+ * building part… is preferred"* — and the cheapest honest version of it: the
+ * names, read off the library this page is rendered with, in the order
+ * somebody scanning for a table would want them.
+ *
+ * **The names are not written down here**, and `library.ts` has the argument.
+ * A hundred of them typed into this lane would be wrong within a week rather
+ * than merely stale.
+ *
+ * ## Why the pieces are in it as well as the bands
+ *
+ * *Table cell* and *Perk list item* are in this list beside *Hero* and
+ * *Pricing tier*, and a first reading says they are clutter. They are the
+ * granularity the rest of the site is claiming: a change names a part, so a
+ * part a change should be able to name has to be in the set, and a reader who
+ * notices that half the list is small is reading it right. The caption says so
+ * rather than leaving them to look like an oversight.
+ */
+const theParts = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "What you build with" },
+    "Every one of these comes with it",
+    [
+      prose(
+        ids,
+        `All ${FACTS.primitives} come with the install. Some are a whole section of a page and some are one piece inside it.`,
+        { tone: "muted", align: "center", measured: true }
+      ),
+      stack(
+        ids,
+        { direction: "row", gap: "snug", justify: "center", wrap: true },
+        LIBRARY_PARTS.map((part) =>
+          buildElement(ids, {
+            type: "loom.badge",
+            props: { tone: "neutral" },
+            children: [buildText(ids, part)],
+          })
+        )
+      ),
+    ],
+    { align: "center" }
+  )
+
 const closing = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Try it on a page of your own", [
     prose(
@@ -391,6 +448,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         theWork(ids),
         staysYours(ids),
         alreadyWritten(ids),
+        theParts(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
