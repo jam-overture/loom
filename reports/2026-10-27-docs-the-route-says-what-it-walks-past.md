@@ -275,7 +275,26 @@ for a page to be in.
 
 ## The preview
 
-TBD
+Taken from the `vercel[bot]` comment after opening the pull request, not
+composed from the branch name.
+
+https://loom-git-docs-68-the-route-s-5e7d65-jpizzolato36-6341s-projects.vercel.app
+
+The page both pictures are of, and the one the whole unit is about:
+
+- https://loom-git-docs-68-the-route-s-5e7d65-jpizzolato36-6341s-projects.vercel.app/docs/getting-started/introduction
+- https://loom-git-docs-68-the-route-s-5e7d65-jpizzolato36-6341s-projects.vercel.app/docs/getting-started
+
+**It will look exactly like `main`**, which is the point: the account this
+branch adds is held at build time and printed nowhere. The preview deploying at
+all is the evidence that matters — the module throws at import when the route
+does not account for the site, so a green deployment is the check passing.
+
+The pull request is **#717**.
+
+Every picture above was taken against a build in this container, not fetched
+from the preview: `*.vercel.app` is denied by the environment's egress policy,
+which is the open finding of 12 October and still true.
 
 ## Needs your input
 
