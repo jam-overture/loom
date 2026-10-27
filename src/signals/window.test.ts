@@ -1572,24 +1572,59 @@ describe("the two libraries a window holds", () => {
     ]
 
     expect(placingsIn(forms).placingFor({ treeId: TREE, audienceId: null })).toBe("published")
-    expect([...forms].reverse().length).toBe(2)
     expect(
       placingsIn([...forms].reverse()).placingFor({ treeId: TREE, audienceId: null })
     ).toBe("withdrawn")
     expect(placingsIn(forms).placingFor({ treeId: OTHER_TREE, audienceId: null })).toBeUndefined()
   })
 
-  it("holds each side in one order whatever order the forms arrived in", () => {
+  /**
+   * A side is filled with the pairs and then with the forms a placing put
+   * there, which is not the order a form belongs in. The fixture therefore
+   * pairs the page that sorts **second** and places the one that sorts first,
+   * so a side left in the order it was filled is a different list rather than
+   * the same one (0231).
+   */
+  it("holds each side in the published form order rather than in the order it filled them", () => {
     const held = heldIn(
       windowOf({
         tallies: [
           tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+          tally({ treeId: OTHER_TREE, revision: 2 }, "band", { views: 10 }),
           tally({ revision: 1 }, "band", { views: 10 }),
-          tally({ revision: 2 }, "band", { views: 10 }),
         ],
       })
     )
-    const placings = placedAs("unchanged", { treeId: OTHER_TREE, audienceId: null })
+
+    const { was, now } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("unchanged", { treeId: TREE, audienceId: null })
+    )
+
+    expect(treesOn(was)).toEqual([TREE, OTHER_TREE])
+    expect(treesOn(now)).toEqual([TREE, OTHER_TREE])
+  })
+
+  it("holds each side in one order whatever order the forms arrived in", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 2 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 1 }, "band", { views: 10 }, RIDERS),
+          tally({ revision: 2 }, "band", { views: 10 }, RIDERS),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }, RIDERS),
+        ],
+      })
+    )
+    const placings = placedAs(
+      "unchanged",
+      { treeId: OTHER_TREE, audienceId: SKIERS },
+      { treeId: OTHER_TREE, audienceId: RIDERS }
+    )
+    const formsOn = (side: LibraryWindow) => side.readings.map((reading) => formKeyOf(reading))
 
     const forwards = windowLibrariesOf(held, [], placings)
     const backwards = windowLibrariesOf(
@@ -1602,9 +1637,34 @@ describe("the two libraries a window holds", () => {
       placings
     )
 
-    expect(treesOn(forwards.now)).toEqual([TREE, OTHER_TREE])
-    expect(treesOn(backwards.now)).toEqual(treesOn(forwards.now))
-    expect(treesOn(backwards.was)).toEqual(treesOn(forwards.was))
+    expect(formsOn(forwards.now)).toEqual([
+      formKeyOf({ treeId: TREE, audienceId: RIDERS }),
+      formKeyOf({ treeId: TREE, audienceId: SKIERS }),
+      formKeyOf({ treeId: OTHER_TREE, audienceId: RIDERS }),
+      formKeyOf({ treeId: OTHER_TREE, audienceId: SKIERS }),
+    ])
+    expect(formsOn(backwards.now)).toEqual(formsOn(forwards.now))
+    expect(formsOn(backwards.was)).toEqual(formsOn(forwards.was))
+  })
+
+  it("names the forms it could not place in one order whatever order they arrived in", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+          tally({ revision: 1 }, "band", { views: 10 }),
+        ],
+      })
+    )
+
+    const backwards = windowLibrariesOf(
+      { ...held, unpaired: [...held.unpaired].reverse() },
+      [],
+      PLACES_NOTHING
+    )
+
+    expect(held.unpaired.map((form) => form.treeId)).toEqual([TREE, OTHER_TREE])
+    expect(backwards.unplaced.map((form) => form.treeId)).toEqual([TREE, OTHER_TREE])
   })
 
   /**

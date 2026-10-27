@@ -3585,6 +3585,86 @@ nobody changed belongs to both, and guessing would publish a page nobody touched
 as a page gained (0295); and still that **nothing draws any of this**, which is
 `Loom portal`'s.
 
+### 58. The two libraries a window holds · `Loom signals` · **done, 27 October**
+
+The third step of the §51 rung and the gap §57 named the day it was built. §57
+reached five of the nine comparisons: each takes two `PageReading`s and a pair
+is one call away. **The four library comparisons take something else** — two
+whole libraries, every page as it stood against every page as it stands — and
+no arrangement of the pairs alone assembles them.
+
+It is one line away in appearance and not in fact:
+
+```ts
+libraryChangeOf(pairs.map(({ was }) => was), pairs.map(({ now }) => now))
+```
+
+That composes, it runs, and the result does not say what it left out. It drops
+every form in `unpaired`, which is exactly where **a page published inside the
+window** lands — and a page published inside the window is a page *gained*,
+which is the figure `libraryChangeOf` exists to report. So the assembled
+comparison reads `pagesGained: 0` on a deployment that published two pages this
+week, beside a `pages` count that looks right (0158).
+
+**And the counters cannot place those forms.** A form the window holds one
+revision of is a page published, a page withdrawn, or a page nobody touched, and
+no row tells them apart: a `StoredTally.updatedAt` is when the fold last wrote
+the row and not when the page went up, and a revision number is a count of
+revisions and not a date. The only party that knows is the deployment.
+
+`windowLibrariesOf(pairs, rows, placings)`
+([0319](../decisions/0319-the-two-libraries-a-window-holds-are-assembled-from-a-placing-the-deployment-hands-in.md)),
+with the three figures of the rung unchanged — it adds none of its own:
+
+- **A paired form is on both sides and is never asked about**, so there is
+  nothing of a caller's answer to ignore.
+- **An unpaired form is placed by `FormPlacings`**, a `placingFor(form)`
+  function — the shape `RevisionTrees` and `PartDeclarations` already use, held
+  rather than looked for, which is the line §7 draws and the shape §54 took for
+  the region floor. `placingsIn` builds one from a list, keyed by the published
+  form rule (0293), first-wins as `treesIn` is.
+- **Three placings, closed:** `published` is the later side only, `withdrawn`
+  the earlier side only, `unchanged` both sides at the one revision there is.
+  `FORM_PLACINGS` and `describeFormPlacing` are published with them.
+- **A form nobody could place is in `unplaced` and on neither side**, because
+  both guesses are assertions: the later side says a page nobody touched was
+  published, and both sides say a page published this week was always there.
+- **A form named twice across the two lists is dropped and counted**, the pair
+  winning. Carrying it would put two readings of one form on one side, which is
+  `ambiguous` to `pairedWindowOf` — the page out of every figure, and the
+  totals still looking right.
+- **Each side is a `LibraryWindow` and both carry the window's whole set of
+  door rows.** `pageViewsFor` picks each page's own row on the revision and form
+  its reading names, and the two sides name different revisions, so one array
+  answers both.
+
+After this **every one of the nine comparisons is one call off a window**:
+
+```ts
+const { pages } = windowReadingsOf(window, treesIn(trees), registry)
+const held = windowPairsOf(pages)
+const { was, now } = windowLibrariesOf(held, window.pageViews, placingsIn(history))
+
+const kinds = libraryChangeOf(was.readings, now.readings)
+const reach = libraryReachChangeOf(was, now)
+```
+
+**The sides are two generations of revisions and not two halves of a window.**
+An `unchanged` form carries one reading onto both sides, so its views are the
+window's views on both — the page contributed no movement because it was not
+changed, and `viewsWas`/`viewsNow` are the floors a reader checks two windows'
+comparability against rather than numbers to subtract.
+
+**One limit, stated and filed:** a page published *and* then revised inside one
+window has two revisions, so it is paired and lands on both sides rather than
+being counted as a page gained. `pagesGained` is a count of the forms whose
+**only** revision is new.
+
+**Nothing was added to a payload, a browser, a column, a migration, a store or
+the vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left:** that **nothing draws any of this**, which is `Loom portal`'s.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

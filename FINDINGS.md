@@ -63,9 +63,12 @@ guard stays for the caller that builds a pair by hand.
 ## 2026-10-27 — the pairing rung does not assemble the two windows the four library comparisons take, because a form with one revision cannot be put on a side
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/window.ts`) · **Status:** open — **a gap named at the moment it
-was created**, nothing broken and nothing failing; a candidate for a next step
-rather than a defect
+(`src/signals/window.ts`) · **Status:** **closed 27 October (evening)** by
+`windowLibrariesOf` (§58, 0319), which took this entry's second shape with one
+change: the placing is a three-member closed set rather than a predicate,
+because a boolean cannot say *withdrawn*. See the evening entry of the same
+date. Filed as **a gap named at the moment it was created**, nothing broken and
+nothing failing; a candidate for a next step rather than a defect
 
 `windowPairsOf` (0318) closed the step between a window and the **five
 page-scale** comparisons: each takes two `PageReading`s and a pair is now one
@@ -61195,3 +61198,56 @@ docs lane's call rather than this one's:
 Filed as an offer, not a defect: the import is
 `@/app/_lib/reader-signals/notice`, it is one function of one argument, and it
 touches no store and no clock.
+
+---
+## 2026-10-27 (evening) — the two libraries a window holds are assembled now, and the placing is the one argument nothing will remind a caller to pass
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** **closes the 27 October (morning) entry**
+*the pairing rung does not assemble the two windows the four library comparisons
+take, because a form with one revision cannot be put on a side*
+
+That entry costed three shapes and recommended the second — take the placing as
+an argument, the shape §54 used for the region floor. It is built as §58 /
+[`0319`](decisions/0319-the-two-libraries-a-window-holds-are-assembled-from-a-placing-the-deployment-hands-in.md),
+with one change to the recommendation that is worth naming: the entry proposed a
+predicate or a set saying which forms are **new**, and a boolean cannot say
+*withdrawn*. A deployment that retired a page inside the window would have read
+`pagesLost: 0` with no way to say otherwise, so the argument is a three-member
+closed set — `published`, `withdrawn`, `unchanged` — rather than a predicate.
+
+**Every one of the nine comparisons is now one call off a window.** That was the
+point of the rung §51 began, and it is finished.
+
+### What a caller still has to get right, which is why this is filed
+
+`FormPlacings` is handed in, and a caller that hands in a source placing nothing
+gets a smaller library rather than a wrong one — the forms are in `unplaced`,
+which a screen can print. That is the safe failure and it is deliberate.
+
+**It is still the one argument nothing will remind anybody to pass**, exactly as
+the region floor is (§54, and the entry filed with it on 25 October). The two are
+now the same shape and the same hazard, and a surface that draws a deployment's
+comparisons needs both. If a third appears, the three want one *deployment
+reading context* rather than three arguments threaded through three calls —
+filed as a shape to watch rather than as work, because two is not yet a pattern.
+
+### The limit inside the unit, stated rather than smoothed
+
+**A page published and then revised inside one window has two revisions, so it
+is paired and lands on both sides rather than being counted as a page gained.**
+`pagesGained` is therefore a count of the forms whose *only* revision is new.
+
+This is right for what a library comparison is — the sides are two generations
+of revisions, and both generations of that page are in the window — but it is
+not what the words *pages gained* promise a reader of the figure, and nothing in
+the result says which reading it took. It is recorded in 0319's consequences and
+left as it is, because the alternative is a placing that overrides a pair and
+throws away the within-window change it would otherwise report.
+
+### The row for another lane
+
+**None.** Everything here is `src/signals/`. The standing one is unchanged and is
+not filed again: **nothing draws any of this**, and `Loom portal` is paused.
+
+---

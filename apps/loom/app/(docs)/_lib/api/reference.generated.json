@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12356,6 +12356,54 @@
               "kind": "function",
               "signature": "const windowPairsOf: (readings: readonly PageReading[]) => WindowPairs",
               "summary": "Pair a window's readings into the before-and-afters the comparisons take."
+            },
+            {
+              "name": "FormPlacing",
+              "kind": "type",
+              "signature": "type FormPlacing =\n/**\n * First served inside the window: the later library holds it and the earlier\n * one did not.\n *\n * This is the figure a library comparison exists to report — `pagesGained`,\n * and `formsGained` where the page was already served in another form\n *. A deployment that published two pages this week and had them left\n * out would read `pagesGained: 0` beside them.\n */\n\"published\"\n/**\n * Served when the window began and not at its end: the earlier library held\n * it and the later one does not.\n *\n * The mirror, and `pagesLost`. Its counters are in the window because readers\n * reached it before it went, which is exactly why leaving it out understates\n * what the deployment changed.\n */\n | \"withdrawn\"\n/**\n * Served throughout and never republished: both libraries hold it, at the one\n * revision there is.\n *\n * The page contributes no movement — its placements pair with themselves —\n * and it does contribute its size, which is what keeps `pages` a count of the\n * library rather than a count of the pages that changed.\n */\n | \"unchanged\";",
+              "summary": "Where a form the window holds one revision of belongs, which is the one thing in this rung the counters cannot answer."
+            },
+            {
+              "name": "FORM_PLACINGS",
+              "kind": "value",
+              "signature": "const FORM_PLACINGS: readonly FormPlacing[]",
+              "summary": "The closed set, for a surface accounting for every form it was asked about."
+            },
+            {
+              "name": "describeFormPlacing",
+              "kind": "function",
+              "signature": "const describeFormPlacing: (placing: FormPlacing) => string",
+              "summary": "One line per placing, for a surface saying which library a page is in and why."
+            },
+            {
+              "name": "FormPlacings",
+              "kind": "type",
+              "signature": "type FormPlacings = {\n    /** Where that form belongs, or `undefined` where this source cannot say. */\n    readonly placingFor: (form: PageForm) => FormPlacing | undefined;\n};",
+              "summary": "Where the placings come from, as the libraries need to see them."
+            },
+            {
+              "name": "PlacedForm",
+              "kind": "type",
+              "signature": "type PlacedForm = PageForm & {\n    readonly placing: FormPlacing;\n};",
+              "summary": "One form a deployment has placed, as {@link placingsIn} takes them."
+            },
+            {
+              "name": "placingsIn",
+              "kind": "function",
+              "signature": "const placingsIn: (placed: Iterable<PlacedForm>) => FormPlacings",
+              "summary": "The placings a caller already holds, as a source."
+            },
+            {
+              "name": "WindowLibraries",
+              "kind": "type",
+              "signature": "type WindowLibraries = {\n    /** The deployment's pages at the revisions the window opened on. */\n    readonly was: LibraryWindow;\n    /** The same pages at the revisions it closed on. */\n    readonly now: LibraryWindow;\n    /**\n     * Forms held at one revision that the placings could not place, in a stable\n     * order.\n     *\n     * On neither side, because a side is the assertion: putting an unplaceable\n     * form on the later one publishes a page nobody touched as a page gained\n     *, and putting it on both publishes a page that was published this\n     * week as a page that was always there. It is reported for the reason\n     * {@link UnjoinedRevision} and {@link WindowPairs.unpaired} are — a screen\n     * that silently left it out would show a deployment fewer pages than it has\n     * — and a caller that can place it calls again with a source that does.\n     */\n    readonly unplaced: readonly UnpairedForm[];\n    /**\n     * Forms named more than once across `pairs` and `unpaired`, dropped after the\n     * first.\n     *\n     * Nought for anything {@link windowPairsOf} produced, which files each form\n     * in exactly one of the two lists. It is not nought for a caller that\n     * assembled a {@link WindowPairs} of its own or concatenated two, and the\n     * repeat has to be dropped here rather than carried: two readings of one form\n     * on one side are `ambiguous` to `pairedWindowOf`, which takes the page out of\n     * every figure in the comparison — so the page would vanish out of a total\n     * that went on looking right. The pair wins over the unpaired form,\n     * because it is the same form with a revision more.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "The two libraries a window holds, as the four library comparisons take them."
+            },
+            {
+              "name": "windowLibrariesOf",
+              "kind": "function",
+              "signature": "const windowLibrariesOf: (held: WindowPairs, rows: readonly StoredPageViews[], placings: FormPlacings) => WindowLibraries",
+              "summary": "Assemble a window's pairs into the two libraries the library comparisons take."
             }
           ]
         }
@@ -12369,7 +12417,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12504,7 +12552,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12566,7 +12614,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13091,7 +13139,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13161,7 +13209,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13583,7 +13631,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1792,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
