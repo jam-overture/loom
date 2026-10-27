@@ -3,16 +3,17 @@ import { sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-import {
-  collectReaderSignals,
-  describeCollection,
-  readerSignalWindowSchema,
-} from "@jam-overture/loom/signals"
+import { collectReaderSignals, describeCollection } from "@jam-overture/loom/signals"
 import { postgresApplicationStore } from "@jam-overture/loom/postgres"
 import { postgresReaderSignalJournal, postgresReaderTallyStore } from "@jam-overture/loom/signals/postgres"
 import { DEFAULT_APPLICATION_ID, describeApplicationStoreError } from "@jam-overture/loom/store"
 
 import { resolveConnectionString } from "../app/_lib/app/connection"
+import {
+  describeCollectionWindow,
+  readCollectionWindow,
+  WINDOW_KEY,
+} from "../app/_lib/reader-signals/settings"
 
 /**
  * Counts the reader-signal buffer into the durable tallies and drops what it
@@ -41,26 +42,32 @@ const { loadEnvConfig } = nextEnv
 loadEnvConfig(process.cwd())
 
 /**
- * One hour, which is the runtime's own default and is repeated here only so the
- * message below can name it. It is the age a batch reaches before it is counted
- * and dropped, and it is one number for three facts (0158): how long a page view
- * is given to finish, how long a view key lives, and how far the tallies lag the
- * buffer.
+ * The age a batch reaches before it is counted and dropped — one number for
+ * three facts (0158): how long a page view is given to finish, how long a view
+ * key lives, and how far the tallies lag the buffer.
+ *
+ * **Read where the rest of this deployment's intake settings are read** (0317).
+ * This script used to spell an hour out again and parse the environment itself,
+ * so the package's copy of the default was the one with the reasoning attached
+ * and this one was the copy a deployment's batches were actually swept on.
  */
-const DEFAULT_WINDOW_MS = 60 * 60 * 1000
+const sweepWindow = readCollectionWindow(process.env[WINDOW_KEY])
 
-const configured = readerSignalWindowSchema.safeParse({
-  windowMs: Number(process.env.LOOM_SIGNAL_WINDOW_MS ?? DEFAULT_WINDOW_MS),
-})
-
-if (!configured.success) {
+/**
+ * A window that cannot be read stops the sweep rather than falling back to the
+ * default. An operator who typed a day meant a day: sweeping on an hour instead
+ * would change what their counters mean and how long a delivery lives, which is
+ * a number their readers are told, and it would do it silently.
+ */
+if (sweepWindow.state === "unusable") {
   console.error(
-    `LOOM_SIGNAL_WINDOW_MS is not a usable window: ${
-      configured.error.issues[0]?.message ?? "invalid"
-    }\nBelow one minute every page view straddles a boundary, so the view counts stop meaning anything.`
+    `loom: ${describeCollectionWindow(sweepWindow)}\n` +
+      "Below one minute every page view straddles a boundary, so the view counts stop meaning anything."
   )
   process.exit(1)
 }
+
+console.log(`loom: ${describeCollectionWindow(sweepWindow)}`)
 
 const connectionString = resolveConnectionString()
 
@@ -121,7 +128,7 @@ try {
     const outcome = await collectReaderSignals(
       postgresReaderSignalJournal(db, { application }),
       postgresReaderTallyStore(db, { application }),
-      configured.data
+      { windowMs: sweepWindow.windowMs }
     )
 
     console.log(`loom: ${application}: ${describeCollection(outcome)}`)

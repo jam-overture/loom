@@ -60054,6 +60054,18 @@ it is bound by. Three shapes:
 ---
 ## 2026-10-24 (evening) — the collection window's default is written twice, and the copy that a deployment actually runs on is the hand-written one
 
+**Status:** **closed by `signals-56-one-window-one-setting`**
+([0317](decisions/0317-the-window-a-deployment-sweeps-on-is-read-where-its-other-settings-are-and-a-window-it-cannot-read-stops-the-sweep.md)).
+Taken as the unit this entry asked for rather than as the one-line import: the
+window is read in `settings.ts` with the other four intake settings, with a
+three-state reading whose gate is the runtime's own `readerSignalWindowSchema`,
+and the sweep refuses to run on a value it cannot read rather than falling back
+to an hour nobody asked for. `deploymentNoticeOf` is the second half the entry
+pointed at — `collectionNoticeOf` of this deployment's own configuration, which
+could not be written honestly while one of its two numbers lived in a script.
+A test reads the script with its comments stripped and fails if the arithmetic
+comes back. Original status below.
+
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`apps/loom/scripts/signals-collect.ts`) · **Status:** open — **nothing is
 broken today and the two numbers agree**; found while reading the intake's
@@ -60750,3 +60762,124 @@ too small to name* is a sentence a reader of the screen can be given rather than
 a silence.
 
 ---
+
+---
+## 2026-10-26 (evening) — the intake status reports two different windows and has one word for one of them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`docs/deployment.md`) · **Status:** open — **nothing is broken and no test is
+failing**; it is one word on an operator's status page and the fix crosses a
+lane boundary
+
+`GET /api/reader-signals` is the only way to ask a deployment what its mouth is
+doing. Two of the things it reports are windows:
+
+| field | which window |
+| --- | --- |
+| `windowMs` | the **rate limit's** — how long the gate counts a sender's deliveries over |
+| `collection` | the **sweep's** — how old a delivery gets before it is counted into the totals and dropped |
+
+`windowMs` has been the rate limit's since the status existed, and until tonight
+it was the only window on the page, so the bare name cost nothing. `collection`
+is new (0317) and arrived as a *sentence* for exactly this reason: a second
+field called `collectionWindowMs` beside a `windowMs` meaning something else is
+the ambiguity named twice rather than removed.
+
+**The honest fix is a rename**, and it is one line of code and one line of
+documentation:
+
+- `apps/loom/app/_lib/reader-signals/receive.ts` — `windowMs` → `rateWindowMs`
+  on `IntakeStatus` and in `describeIntake`. This lane's file, and this lane
+  would take it.
+- `docs/deployment.md:498` — the sample response in *§9 Reader signals*, which
+  prints `"windowMs": 60000`. **That file is not this lane's**, and a rename
+  that leaves it stale with nothing failing is the worse of the two states.
+
+So it is filed rather than taken, with the whole change spelled out. If its
+owner would rather the field kept its name, the sentence beside it already says
+which window is which and this entry closes as settled.
+
+---
+## 2026-10-26 (evening) — a notice promises how long a delivery is kept, and nothing in it says whether a sweep is scheduled to keep the promise
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/notice.ts`) · **Status:** open — **older and larger than the unit
+that found it**, deliberately not papered over with structure tonight
+
+`CollectionNotice.bufferMs` is how long a delivery lives before it is counted
+and dropped, and `describeBuffer` is the sentence a reader gets:
+
+> a delivery is kept until it is 60 minutes old, **and the deployment's own
+> sweep is what then counts it into totals and deletes it** — the key tying one
+> visit together exists until then and nowhere else
+
+The middle clause is carefully true: the framework cannot promise the *moment*
+a delivery goes, because a host schedules the sweep. **What it does not say is
+that there might be no sweep at all.** `docs/deployment.md`'s §9 is blunt about
+the operational half — *the buffer only empties when you run this* — and a
+deployment that never scheduled it collects batches for ever while its notice
+names an hour.
+
+**0317 made one instance of this reachable and visible**, which is why it is
+worth an entry now: a window that cannot be read refuses the sweep, so a
+deployment can have a working endpoint, a notice naming an hour, and nothing
+sweeping. The operator learns that from the status (`collection` quotes the
+refused value). The reader learns nothing.
+
+**Three shapes, costed.**
+
+1. **Leave it, and keep the disclosure a ceiling on the age rather than on the
+   wall-clock.** The reading that the field already documents: `bufferMs` is
+   when a delivery becomes *ripe*, and ripeness is a property of the delivery.
+   Free, and it is tonight's choice. Its weakness is that no reader of a
+   sentence beginning *a delivery is kept until it is 60 minutes old* hears
+   *…or indefinitely, if nobody runs the sweep*.
+2. **The notice reports the last fold.** §29 already stamps the fold's own
+   timestamp on the door row and judges a stall against a schedule a deployment
+   hands in (0274), so the material exists. It would make the notice a
+   **reading** — a store, a clock — which it is deliberately not (0313), and it
+   would mean a privacy page that cannot render while the database is down.
+   Recommended against for that reason alone.
+3. **The deployment states its schedule, and the notice carries it.** The
+   stall check already takes a schedule a deployment hands in; the notice could
+   take the same number and say *and it is swept at least every N*. Still pure,
+   still one argument, and it moves the promise from the framework to the
+   deployment that is actually making it. **This is the recommendation**, and it
+   is a record rather than a judgement call, because it adds a figure to a
+   published notice.
+
+Not taken tonight: it is a change to what 0313 publishes, it wants its own
+record, and the unit that found it was about a setting rather than about the
+notice's shape.
+
+---
+## 2026-10-26 (evening) — a deployment's own notice is one call now, and the one surface that prints a notice prints the framework's defaults
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/signals/notice.ts`) · **Status:** open — **the
+surface is right about what it is for**, and the value it reads is now the less
+useful of two
+
+`apps/loom/app/(docs)/_lib/signals/notice.ts` calls `collectionNoticeOf()` with
+nothing in it, and says why in its own words: *`collectionNoticeOf()` with
+nothing in it is every kind, which is what* — a documentation page is
+documenting the framework, so the framework's answer is the right one there.
+
+**That is no longer the only answer available.** As of 0317,
+`deploymentNoticeOf(readIntakeSettings())` is this deployment's own notice: the
+window it actually sweeps on, and a region floor only where a country is
+actually read. The two differ on this very deployment the moment anybody sets
+`LOOM_SIGNAL_WINDOW_MS` or `LOOM_SIGNAL_REGION`.
+
+**Which one a page should print depends on what the page is**, and that is the
+docs lane's call rather than this one's:
+
+- A page *documenting what a Loom page can report* wants the framework's — the
+  current call, correct as it stands.
+- A page *telling this site's readers what this site collects* wants the
+  deployment's. There is no such page yet, and the 24 October entry about the
+  two surfaces describing collection in prose is the other half of this.
+
+Filed as an offer, not a defect: the import is
+`@/app/_lib/reader-signals/notice`, it is one function of one argument, and it
+touches no store and no clock.
