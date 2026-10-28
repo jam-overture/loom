@@ -63,9 +63,12 @@ guard stays for the caller that builds a pair by hand.
 ## 2026-10-27 — the pairing rung does not assemble the two windows the four library comparisons take, because a form with one revision cannot be put on a side
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/window.ts`) · **Status:** open — **a gap named at the moment it
-was created**, nothing broken and nothing failing; a candidate for a next step
-rather than a defect
+(`src/signals/window.ts`) · **Status:** **closed 27 October (evening)** by
+`windowLibrariesOf` (§58, 0319), which took this entry's second shape with one
+change: the placing is a three-member closed set rather than a predicate,
+because a boolean cannot say *withdrawn*. See the evening entry of the same
+date. Filed as **a gap named at the moment it was created**, nothing broken and
+nothing failing; a candidate for a next step rather than a defect
 
 `windowPairsOf` (0318) closed the step between a window and the **five
 page-scale** comparisons: each takes two `PageReading`s and a pair is now one
@@ -61148,7 +61151,14 @@ which window is which and this entry closes as settled.
 ## 2026-10-26 (evening) — a notice promises how long a delivery is kept, and nothing in it says whether a sweep is scheduled to keep the promise
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/notice.ts`) · **Status:** open — **older and larger than the unit
+(`src/signals/notice.ts`) · **Status:** **closed by
+`signals-58-the-two-libraries-a-window-holds` (§59)**, record
+[0320](decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)
+— shape 3, the recommendation below: the deployment states how often it sweeps
+and the notice publishes the ceiling that implies, with the weaker sentence in as
+many words where nothing was stated. `describeBuffer` takes the retention whole
+rather than the age, so the sentence this entry is about can no longer be built.
+Original status: open — **older and larger than the unit
 that found it**, deliberately not papered over with structure tonight
 
 `CollectionNotice.bufferMs` is how long a delivery lives before it is counted
@@ -61280,3 +61290,172 @@ that is probably the stronger argument for it than this lane's three tries.
 Whether a pin is worth it is `Loom primitives`' call; the measurement above is
 here so that the next lane to place one starts from a number rather than from
 zero.
+## 2026-10-27 (evening) — the two libraries a window holds are assembled now, and the placing is the one argument nothing will remind a caller to pass
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** **closes the 27 October (morning) entry**
+*the pairing rung does not assemble the two windows the four library comparisons
+take, because a form with one revision cannot be put on a side*
+
+That entry costed three shapes and recommended the second — take the placing as
+an argument, the shape §54 used for the region floor. It is built as §58 /
+[`0319`](decisions/0319-the-two-libraries-a-window-holds-are-assembled-from-a-placing-the-deployment-hands-in.md),
+with one change to the recommendation that is worth naming: the entry proposed a
+predicate or a set saying which forms are **new**, and a boolean cannot say
+*withdrawn*. A deployment that retired a page inside the window would have read
+`pagesLost: 0` with no way to say otherwise, so the argument is a three-member
+closed set — `published`, `withdrawn`, `unchanged` — rather than a predicate.
+
+**Every one of the nine comparisons is now one call off a window.** That was the
+point of the rung §51 began, and it is finished.
+
+### What a caller still has to get right, which is why this is filed
+
+`FormPlacings` is handed in, and a caller that hands in a source placing nothing
+gets a smaller library rather than a wrong one — the forms are in `unplaced`,
+which a screen can print. That is the safe failure and it is deliberate.
+
+**It is still the one argument nothing will remind anybody to pass**, exactly as
+the region floor is (§54, and the entry filed with it on 25 October). The two are
+now the same shape and the same hazard, and a surface that draws a deployment's
+comparisons needs both. If a third appears, the three want one *deployment
+reading context* rather than three arguments threaded through three calls —
+filed as a shape to watch rather than as work, because two is not yet a pattern.
+
+### The limit inside the unit, stated rather than smoothed
+
+**A page published and then revised inside one window has two revisions, so it
+is paired and lands on both sides rather than being counted as a page gained.**
+`pagesGained` is therefore a count of the forms whose *only* revision is new.
+
+This is right for what a library comparison is — the sides are two generations
+of revisions, and both generations of that page are in the window — but it is
+not what the words *pages gained* promise a reader of the figure, and nothing in
+the result says which reading it took. It is recorded in 0319's consequences and
+left as it is, because the alternative is a placing that overrides a pair and
+throws away the within-window change it would otherwise report.
+
+### The row for another lane
+
+**None.** Everything here is `src/signals/`. The standing one is unchanged and is
+not filed again: **nothing draws any of this**, and `Loom portal` is paused.
+
+---
+
+---
+## 2026-10-28 — a deployment states how often it sweeps, and nothing in this repository can check that it does
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/notice.ts`, `src/signals/health.ts`) · **Status:** open — **the
+stated limit of what [0320](decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)
+publishes**; nothing is broken and no test is failing
+
+`LOOM_SIGNAL_SWEEP_MS` is a deployment's claim about a cron outside this
+repository, and the notice publishes a ceiling derived from it: ripeness plus
+one sweep. **A deployment that states ten minutes and sweeps weekly publishes a
+false ceiling to its readers**, and nothing here notices. That is strictly
+better than the sentence before it — which promised a deletion with no interval
+behind it at all — and it is still a claim with no evidence under it.
+
+**The material to check it exists.** §29 stamps the fold's own timestamp on the
+page-view row and judges a stall against a schedule a deployment hands in
+(0274), so *when did the sweep last run* is already a reading. `goneWithinMs` is
+the number that schedule's `foldsWithinMs` wants, which is the join: a
+deployment that states its interval once could have its own claim checked
+against its own fold timestamps.
+
+**Why it was not built with 0320.** It would make the notice a reading — a store
+and a clock behind a privacy page — which 0313 refuses for a reason that still
+holds: a page that cannot render while the database is down is worse for a
+reader than one that publishes a stated interval. So the check belongs
+**beside** the notice rather than inside it.
+
+**The shape, if it is wanted.** A `CollectionFault` member on `health.ts`:
+*this deployment publishes a retention ceiling its own folds contradict* —
+the door row's `foldedAt` against `goneWithinMs`, raised only where a schedule
+was stated and a fold timestamp exists. It is a reading, it is the operator's
+surface rather than the reader's, and it is a record because it adds a member to
+a published closed set (0240).
+
+---
+## 2026-10-28 — a new environment variable is documented in its own doc comment and nowhere an operator reads, and the status sample is four fields behind
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`docs/deployment.md`) · **Status:** open — **nothing is stale that was not
+already**, and it is the same line the 26 October entry asks about
+
+`GET /api/reader-signals` now reports `sweep` beside `regions` and `collection`
+(0320). `docs/deployment.md:498` prints a sample response that carries
+`intake`, `durable`, `maxBytes`, `deliveries`, `windowMs`, `subjects` and
+`detail` — so it was already three fields behind before tonight, and is four
+now. Nothing fails: it is a fenced sample in another lane's file, and a sample
+that omits a field is weaker than one that misnames a field.
+
+**Both halves of this line are one edit.** The 26 October entry asks for
+`windowMs` → `rateWindowMs` in the same sample, which this lane would take in
+`receive.ts` the moment its documented copy can change with it. Whoever takes
+that rename should add the three missing fields while they are in the file:
+
+```json
+{ "intake": "on", "durable": true, "maxBytes": 65536, "deliveries": 120,
+  "rateWindowMs": 60000, "subjects": 3, "detail": "reader signals are being collected",
+  "regions": "…", "collection": "…", "sweep": "…" }
+```
+
+The three sentences are long, so eliding them is probably right for a sample —
+what matters is that the keys are there, because an operator reading the guide is
+counting fields.
+
+**And the setting itself wants a paragraph in §9.** `LOOM_SIGNAL_SWEEP_MS` is
+new (0320) and the place an operator would look for it is `docs/deployment.md`,
+immediately after *Defaults to a **one-hour** window; set
+`LOOM_SIGNAL_WINDOW_MS` to change it* at line 606 — which is the paragraph about
+the window the sweep runs on, in the step that tells a deployment to schedule
+the sweep. The three sentences it needs, for whoever takes it:
+
+- set it to how often the cron in this step actually runs, in whole
+  milliseconds;
+- the notice this deployment publishes to its readers then names a ceiling on
+  how long a delivery lives — the window above plus this interval — instead of
+  only the age at which a delivery ripens;
+- nothing is refused and nothing stops if it is unset or wrong: the cost is the
+  weaker sentence, and `GET /api/reader-signals` says which one is being
+  published.
+
+This lane would have added it, and did not, because `docs/deployment.md` is not
+its file — and a setting introduced in another lane's guide by this lane is the
+cross-lane diff `docs/routines.md` asks to file rather than take.
+
+---
+## 2026-10-28 — three deployment settings are now handed into reading calls one at a time, and a third of them makes it a pattern
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**the shape §58 said would be worth gathering if a third appeared**, and tonight
+is the third
+
+§58 filed two arguments with one shape and one hazard: the region floor (§54)
+and the placing (§58), both per-deployment configuration handed into a reading
+call, with nothing to remind a caller to pass either. Its recommendation was to
+leave them as two, because two is not a pattern, and to gather them if a third
+arrived.
+
+**A third arrived the next morning**, and it is a different kind of third, which
+is worth saying plainly before anybody acts on this entry:
+
+- the region floor and the placing are arguments to **readings**, and a caller
+  that forgets one gets a smaller, honest answer;
+- the sweep interval is an argument to a **notice**, and a caller that forgets
+  it gets a weaker sentence rather than a wrong one — by construction (0320),
+  because the ceiling is unreachable without it.
+
+So the hazard is the same in shape and milder in kind, and `deploymentNoticeOf`
+in `apps/loom/app/_lib/reader-signals/notice.ts` is already the deployment-level
+assembly for the notice's share of it: it reads `IntakeSettings` and hands over
+the window, the floor and the interval in one call.
+
+**What is actually worth considering** is whether the *readings* want the same
+thing: one `DeploymentReadingContext` holding the floor and the placing, read
+once where `readIntakeSettings` is read, so a screen cannot ask a question with
+a floor missing. That is a record, it touches every reading that takes either
+argument, and it is not tonight's unit. Recorded here so the next run does not
+re-derive the count.

@@ -36,6 +36,7 @@ import { memoryRefusalCounter } from "./refusals-memory"
 import {
   DEFAULT_REGION_HEADER,
   readCollectionWindow,
+  readSweepSchedule,
   readIntakeSwitch,
   readRegionFloor,
   readRegionSwitch,
@@ -70,6 +71,7 @@ const settingsOf = (over: Partial<IntakeSettings> = {}): IntakeSettings => ({
     floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
   },
   window: { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS },
+  sweep: { state: "unstated" },
   ...over,
 })
 
@@ -845,6 +847,28 @@ describe("the status", () => {
 
     expect(status.windowMs).toBe(policy.windowMs)
     expect(status.collection).not.toContain(`${policy.windowMs}ms`)
+  })
+
+  /**
+   * The one setting on this status whose whole effect is on what somebody else
+   * reads: nothing is refused and nothing stops, so an operator who never set
+   * it has no other way of learning that their readers are told when a delivery
+   * ripens and not when it goes (0320).
+   */
+  it("says whether anybody was told how often the sweep runs", () => {
+    expect(describeIntake(intakeOf()).sweep).toContain("not stated")
+
+    const stated = describeIntake(
+      intakeOf({ settings: settingsOf({ sweep: readSweepSchedule("600000") }) })
+    )
+
+    expect(stated.sweep).toContain("600000ms")
+
+    const refused = describeIntake(
+      intakeOf({ settings: settingsOf({ sweep: readSweepSchedule("10m") }) })
+    )
+
+    expect(refused.sweep).toContain('"10m"')
   })
 
   it("names no secret", () => {

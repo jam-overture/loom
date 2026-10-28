@@ -14,6 +14,7 @@ import {
   type PageForm,
 } from "./audiences.js"
 import type { ReaderSignalStoreError } from "./journal.js"
+import type { LibraryWindow } from "./library-reach-change.js"
 import type { StoredPageViews } from "./page-views.js"
 import { pageReadingOf, type PageReading, type PartDeclarations } from "./parts.js"
 import {
@@ -103,6 +104,16 @@ import type {
  * says which two, under the one published rule a comparison pairs on (0293),
  * so that a caller composing *what did this change do* across a deployment
  * never writes the pairing itself.
+ *
+ * ## The third step, which is the two libraries
+ *
+ * Five of those nine take two readings and the other four take two whole
+ * libraries, which the pairs alone cannot be arranged into: a form the window
+ * holds one revision of is a page published, a page withdrawn or a page nobody
+ * touched, and no counter row tells them apart. {@link windowLibrariesOf} takes
+ * the placing as an argument — the shape the region floor took, configuration
+ * held rather than looked for — and names the forms nobody could place instead
+ * of guessing one onto a side.
  *
  * ## Why the trees are the caller's to resolve
  *
@@ -772,14 +783,16 @@ export type WindowPairs = {
  * each of them the two readings it is a pair of. Every one of the nine
  * comparisons is one call off a pair.
  *
- * **It does not assemble the two windows the four library comparisons take**,
- * and that is a gap rather than an omission. Those compare a whole library
- * before against a whole library after, and a form with one revision cannot be
- * put on a side: a page published inside the window belongs to the later one, a
- * page nobody has changed belongs to both, and nothing in the counters tells
- * them apart. Guessing would publish a page nobody touched as a page gained
- * (0295), so the forms are reported and the placing is left to the caller,
- * which is the only party that knows what it published when.
+ * **It does not assemble the two windows the four library comparisons take.**
+ * Those compare a whole library before against a whole library after, and a
+ * form with one revision cannot be put on a side out of anything here: a page
+ * published inside the window belongs to the later one, a page nobody has
+ * changed belongs to both, and nothing in the counters tells them apart.
+ * {@link windowLibrariesOf} is that step, and it asks the caller — the only
+ * party that knows what it published when — rather than guessing, because
+ * guessing publishes a page nobody touched as a page gained (0295). What this
+ * owes it is the two lists, which is why {@link WindowPairs.unpaired} is
+ * published rather than dropped.
  *
  * Linear in the readings but for one sort per form, which is a sort of that
  * form's revisions and not of the window: the window sorted whole would be the
@@ -840,6 +853,307 @@ export const windowPairsOf = (readings: readonly PageReading[]): WindowPairs => 
   return {
     pairs: pairs.sort(inFormOrder),
     unpaired: unpaired.sort(inFormOrder),
+    duplicated,
+  }
+}
+
+/**
+ * Where a form the window holds one revision of belongs, which is the one
+ * thing in this rung the counters cannot answer.
+ *
+ * A form with two revisions is in both libraries by construction — its earlier
+ * revision is the page the earlier library held and its later one is the page
+ * the later library holds. A form with **one** is three different pages
+ * wearing one shape, and nothing in a counter row tells them apart: a
+ * `StoredTally.updatedAt` is when the fold last touched the row, not when the
+ * page was published, and a door row's is the same. The only party that knows
+ * is the deployment, which knows what it published when.
+ */
+export type FormPlacing =
+  /**
+   * First served inside the window: the later library holds it and the earlier
+   * one did not.
+   *
+   * This is the figure a library comparison exists to report — `pagesGained`,
+   * and `formsGained` where the page was already served in another form
+   * (0295). A deployment that published two pages this week and had them left
+   * out would read `pagesGained: 0` beside them.
+   */
+  | "published"
+  /**
+   * Served when the window began and not at its end: the earlier library held
+   * it and the later one does not.
+   *
+   * The mirror, and `pagesLost`. Its counters are in the window because readers
+   * reached it before it went, which is exactly why leaving it out understates
+   * what the deployment changed.
+   */
+  | "withdrawn"
+  /**
+   * Served throughout and never republished: both libraries hold it, at the one
+   * revision there is.
+   *
+   * The page contributes no movement — its placements pair with themselves —
+   * and it does contribute its size, which is what keeps `pages` a count of the
+   * library rather than a count of the pages that changed.
+   */
+  | "unchanged"
+
+/** The closed set, for a surface accounting for every form it was asked about. */
+export const FORM_PLACINGS: readonly FormPlacing[] = everyMemberOf<FormPlacing>()([
+  "published",
+  "withdrawn",
+  "unchanged",
+])
+
+/** One line per placing, for a surface saying which library a page is in and why. */
+export const describeFormPlacing = (placing: FormPlacing): string => {
+  switch (placing) {
+    case "published":
+      return "this page was first served inside the window, so only the later library holds it"
+    case "withdrawn":
+      return "this page stopped being served inside the window, so only the earlier library holds it"
+    case "unchanged":
+      return "this page was served throughout the window and never republished, so both hold it"
+  }
+}
+
+/**
+ * Where the placings come from, as the libraries need to see them.
+ *
+ * A function rather than a list, for the reason {@link RevisionTrees} is one
+ * and {@link PartDeclarations} is: a deployment holding its publishing history
+ * in a store, a cache, or a map it built for this call all satisfy it, and so
+ * does a one-line double.
+ *
+ * `undefined` is an answer and not a gap — *this deployment cannot say* — and
+ * the form is reported in {@link WindowLibraries.unplaced} rather than guessed
+ * onto a side.
+ */
+export type FormPlacings = {
+  /** Where that form belongs, or `undefined` where this source cannot say. */
+  readonly placingFor: (form: PageForm) => FormPlacing | undefined
+}
+
+/** One form a deployment has placed, as {@link placingsIn} takes them. */
+export type PlacedForm = PageForm & {
+  readonly placing: FormPlacing
+}
+
+/**
+ * The placings a caller already holds, as a source.
+ *
+ * Keyed by the published form rule (0293), so a page served in two forms is
+ * placed twice and a caller that placed only one of them has the other
+ * reported rather than carried along with it: a page can be published in a
+ * second form while its first form stands unchanged, which is the distinction
+ * `formsGained` exists for.
+ *
+ * The first placing of a form wins and the second is ignored, as in
+ * {@link treesIn}: two answers disagree about one page, nothing here can say
+ * which is right, and a silent last-wins would make the libraries depend on the
+ * order a caller's history came back in.
+ */
+export const placingsIn = (placed: Iterable<PlacedForm>): FormPlacings => {
+  const held = new Map<string, FormPlacing>()
+
+  for (const form of placed) {
+    const key = formKeyOf(form)
+    if (!held.has(key)) held.set(key, form.placing)
+  }
+
+  return { placingFor: (form) => held.get(formKeyOf(form)) }
+}
+
+/** The two libraries a window holds, as the four library comparisons take them. */
+export type WindowLibraries = {
+  /** The deployment's pages at the revisions the window opened on. */
+  readonly was: LibraryWindow
+  /** The same pages at the revisions it closed on. */
+  readonly now: LibraryWindow
+  /**
+   * Forms held at one revision that the placings could not place, in a stable
+   * order.
+   *
+   * On neither side, because a side is the assertion: putting an unplaceable
+   * form on the later one publishes a page nobody touched as a page gained
+   * (0295), and putting it on both publishes a page that was published this
+   * week as a page that was always there. It is reported for the reason
+   * {@link UnjoinedRevision} and {@link WindowPairs.unpaired} are — a screen
+   * that silently left it out would show a deployment fewer pages than it has
+   * — and a caller that can place it calls again with a source that does.
+   */
+  readonly unplaced: readonly UnpairedForm[]
+  /**
+   * Forms named more than once across `pairs` and `unpaired`, dropped after the
+   * first.
+   *
+   * Nought for anything {@link windowPairsOf} produced, which files each form
+   * in exactly one of the two lists. It is not nought for a caller that
+   * assembled a {@link WindowPairs} of its own or concatenated two, and the
+   * repeat has to be dropped here rather than carried: two readings of one form
+   * on one side are `ambiguous` to `pairedWindowOf`, which takes the page out of
+   * every figure in the comparison — so the page would vanish out of a total
+   * that went on looking right (0158). The pair wins over the unpaired form,
+   * because it is the same form with a revision more.
+   */
+  readonly duplicated: number
+}
+
+/**
+ * Assemble a window's pairs into the two libraries the library comparisons
+ * take.
+ *
+ * The third step of this rung, and the one {@link windowPairsOf} named as a gap
+ * the day it was built. Five of the nine comparisons take two **readings**, and
+ * a pair is one of those; the four library comparisons take two whole
+ * **libraries** — every page as it stood before against every page as it stands
+ * now — and a window holds both of those too, but not by any arrangement of its
+ * pairs alone.
+ *
+ * After this, every one of the nine is one call off a window:
+ *
+ * ```ts
+ * const { pages } = windowReadingsOf(window, treesIn(trees), registry)
+ * const held = windowPairsOf(pages)
+ * const { was, now } = windowLibrariesOf(held, window.pageViews, placingsIn(history))
+ *
+ * const kinds = libraryChangeOf(was.readings, now.readings)
+ * const reach = libraryReachChangeOf(was, now)
+ * ```
+ *
+ * ## The one line that composes and is wrong
+ *
+ * ```ts
+ * libraryChangeOf(pairs.map(({ was }) => was), pairs.map(({ now }) => now))
+ * ```
+ *
+ * That type-checks, it runs, and the result does not say what it left out. It
+ * drops every form in {@link WindowPairs.unpaired} — which is exactly where **a
+ * page published inside the window** lands, because a page published inside the
+ * window has one revision in it. So a deployment that published two pages this
+ * week reads `pagesGained: 0`, which is the figure `libraryChangeOf` exists to
+ * report, beside a `pages` count that looks right.
+ *
+ * ## So the placing is asked for, and a form nobody can place is named
+ *
+ * A form with one revision is a page published, a page withdrawn, or a page
+ * nobody touched, and the counters cannot tell them apart —
+ * `StoredTally.updatedAt` is when the fold ran, not when the page went up. The
+ * revision numbers cannot either: a revision number is a count of revisions
+ * rather than a date, and a deployment that has pruned old counters has a form
+ * at revision 7 with nothing below it.
+ *
+ * So {@link FormPlacings} is handed in, which is the line §7 draws and the
+ * shape the region floor took: hold configuration you were handed rather than
+ * configuration you went looking for. A form the source cannot place is in
+ * {@link WindowLibraries.unplaced} and on neither side, because **both guesses
+ * are assertions** — the later side says a page nobody touched was published,
+ * and both sides say a page published this week was always there.
+ *
+ * Paired forms are never asked about. A form with two revisions in the window
+ * has its earlier revision in the earlier library and its later one in the
+ * later library, by construction, so there is nothing for a caller to answer
+ * and nothing of its answer to ignore.
+ *
+ * ## Two generations of revisions, which is not two moments
+ *
+ * The sides are the library at its earlier revisions against the library at its
+ * later ones, and `republished` on the comparison is the published count of how
+ * many pages that moved. It is **not** a window split in half: an `unchanged`
+ * form carries one reading onto both sides, so its views are the window's views
+ * on both — the page contributed no change because it was not changed, and
+ * `LibraryChange.viewsWas` and `viewsNow` are the floors a reader checks the
+ * comparability of two windows against rather than numbers to subtract.
+ *
+ * One consequence worth stating, because it is a limit rather than a rule: a
+ * page published **and** then revised inside one window has two revisions, so it
+ * is paired and lands on both sides rather than being counted as a page gained.
+ * `pagesGained` is therefore a count of the forms whose only revision is new.
+ *
+ * ## The rows are the window's own, and both sides read them
+ *
+ * {@link LibraryWindow.rows} is the whole window of door rows on each side, not
+ * a slice of them. Each page's own row is picked out by `pageViewsFor` on the
+ * revision and the form the reading names (0290), and the two sides name
+ * different revisions, so one array answers both without either side borrowing
+ * the other's arrivals.
+ *
+ * ## It adds no figure of its own
+ *
+ * Nothing here counts, divides, sums or withholds, which is the rule the first
+ * two steps set. It decides **which library each form is in** out of what it was
+ * told, and hands each side the readings it holds.
+ *
+ * Linear in the forms, but for the two sorts that publish them in one order.
+ */
+export const windowLibrariesOf = (
+  held: WindowPairs,
+  rows: readonly StoredPageViews[],
+  placings: FormPlacings
+): WindowLibraries => {
+  const was: PageReading[] = []
+  const now: PageReading[] = []
+  const unplaced: UnpairedForm[] = []
+  const seen = new Set<string>()
+  let duplicated = 0
+
+  const first = (form: PageForm): boolean => {
+    const key = formKeyOf(form)
+
+    if (seen.has(key)) {
+      duplicated += 1
+      return false
+    }
+
+    seen.add(key)
+
+    return true
+  }
+
+  for (const pair of held.pairs) {
+    if (!first(pair)) continue
+
+    was.push(pair.was)
+    now.push(pair.now)
+  }
+
+  for (const form of held.unpaired) {
+    if (!first(form)) continue
+
+    const placing = placings.placingFor(form)
+
+    if (placing === undefined) {
+      unplaced.push(form)
+      continue
+    }
+
+    switch (placing) {
+      case "published":
+        now.push(form.reading)
+        break
+      case "withdrawn":
+        was.push(form.reading)
+        break
+      case "unchanged":
+        was.push(form.reading)
+        now.push(form.reading)
+        break
+    }
+  }
+
+  /**
+   * One published order for both sides, rather than pairs first and then the
+   * forms a placing put there. The comparisons key their pages by form and do
+   * not read the order, so this is for the caller that prints a side.
+   */
+  const inOneOrder = (readings: readonly PageReading[]): readonly PageReading[] =>
+    [...readings].sort((one, other) => inFormOrder(formOf(one), formOf(other)))
+
+  return {
+    was: { readings: inOneOrder(was), rows },
+    now: { readings: inOneOrder(now), rows },
+    unplaced: unplaced.sort(inFormOrder),
     duplicated,
   }
 }

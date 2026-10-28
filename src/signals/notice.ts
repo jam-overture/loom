@@ -47,7 +47,7 @@ import {
  * That is deliberate in one direction only. A disclosure that overstates costs
  * a reader nothing and a deployment a little credit; one that understates is
  * the failure this module exists to make impossible. It also keeps the notice
- * stable: a ceiling changes when the vocabulary or the deployment's own two
+ * stable: a ceiling changes when the vocabulary or the deployment's own three
  * numbers change, where a floor would have to be republished every time
  * somebody added a primitive type to a list.
  *
@@ -62,9 +62,10 @@ import {
  * builds toward it — what a gate would need is a recorded decision, which is a
  * different artefact from this one.
  *
- * **Not a reading.** It touches no store, no clock and no counter. Two numbers
- * come from the deployment's own configuration and everything else is the
- * vocabulary.
+ * **Not a reading.** It touches no store, no clock and no counter. Three
+ * numbers come from the deployment's own configuration — the window a
+ * delivery ripens at, the floor under a published country, and how often its
+ * sweep runs (0320) — and everything else is the vocabulary.
  *
  * ## The voice
  *
@@ -303,6 +304,50 @@ export const describeRegionNotice = (notice: RegionNotice): string =>
     ? "nothing about where you are is read, not even your country"
     : `the country your request arrives from is counted, and nothing finer than the country; a country is published only once at least ${notice.floor} visits are counted in it, and the address it was read from is never stored`
 
+/**
+ * How often the deployment's own sweep runs, or that it has not said.
+ *
+ * The one thing a reader of {@link CollectionNotice.bufferMs} could not find
+ * out. `bufferMs` is the age at which a delivery becomes *ripe* — ready to be
+ * counted into the totals and deleted — and nothing in `src/signals/` deletes
+ * it: a host calls {@link collectReaderSignals} from a cron, a deploy hook or
+ * by hand (0146, 0158). So a deployment that never scheduled the sweep keeps
+ * every delivery for ever while its notice names an hour, and *a delivery is
+ * kept until it is 60 minutes old* was read by somebody with no way of hearing
+ * *…or indefinitely*.
+ *
+ * The deployment is the only party that knows how often it sweeps, so it states
+ * it — the shape `CollectionSchedule` already takes for the operator's half of
+ * the same fact
+ * ([0274](../../decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)).
+ * A framework that guessed an interval would publish a ceiling nobody promised.
+ *
+ * **Two states rather than a nullable number**, because the ceiling has to be
+ * unreachable where no schedule was stated: a surface cannot print *gone within
+ * 70 minutes* on a deployment that promised nothing, which is the one way this
+ * field could make a notice overstate.
+ */
+export type SweepNotice =
+  | {
+      readonly state: "stated"
+      /** The longest the deployment lets pass between sweeps, as it stated it. */
+      readonly everyMs: number
+      /**
+       * The longest a delivery can live: its ripeness window plus one sweep
+       * interval.
+       *
+       * The two add because a delivery is not counted until it ripens and then
+       * not until the next sweep runs, which is the arithmetic
+       * `CollectionSchedule.foldsWithinMs` spells out for the operator's half
+       * of this question (0274) — so **this is the number to hand the stall
+       * check**, and a deployment states the interval once rather than keeping
+       * a reader's ceiling and an operator's threshold in step by hand.
+       */
+      readonly goneWithinMs: number
+    }
+  /** Nothing was stated, so nothing here says when a ripe delivery actually goes. */
+  | { readonly state: "unstated" }
+
 /** What a published page reports, and what it refuses to. */
 export type CollectionNotice = {
   /** The kinds this configuration broadcasts, in the vocabulary's order. */
@@ -321,10 +366,21 @@ export type CollectionNotice = {
    * life of the page-view key, since the key exists in the buffer and nowhere
    * else. **The framework cannot promise the moment it is swept**, because a
    * host schedules the sweep: this is the age at which a delivery becomes ripe,
-   * not a guarantee about when the next run happens.
-   * {@link describeBuffer} says both halves.
+   * not a guarantee about when the next run happens. What the deployment itself
+   * promises about that is {@link CollectionNotice.sweep}, and
+   * {@link describeBuffer} says the two together.
    */
   readonly bufferMs: number
+  /**
+   * How often this deployment sweeps a ripe delivery away, where it has stated
+   * it.
+   *
+   * The half of retention that is not the framework's to promise, and the half
+   * a reader of `bufferMs` alone would assume. {@link describeBuffer} takes the
+   * two together for that reason: an age with no sweep beside it is a sentence
+   * that reads like a deletion and is not one.
+   */
+  readonly sweep: SweepNotice
 }
 
 /** One kind of observation, with the fields it carries. */
@@ -364,15 +420,52 @@ const inWords = (ms: number): string => {
 }
 
 /**
+ * Both halves of how long a delivery lives: the age it ripens at, and how often
+ * the deployment takes the ripe ones away.
+ *
+ * A `Pick` of the notice rather than two arguments, so that the sentence cannot
+ * be built from one of them. The age alone reads as a deletion and is not one.
+ */
+export type DeliveryRetention = Pick<CollectionNotice, "bufferMs" | "sweep">
+
+/**
  * How long a delivery lives, addressed to the reader.
  *
- * Three clauses, and the middle one is the one a notice must not leave out: the
- * deployment's own sweep is what counts a ripe delivery and deletes it, so the
- * age is when a delivery becomes ripe rather than a promise about the minute it
- * goes (`collect.ts`).
+ * It takes the retention whole, because the age is the half the framework knows
+ * and the sweep is the half it cannot promise, and a notice that published the
+ * first without the second said *a delivery is kept until it is 60 minutes old*
+ * to a reader who had no way of hearing *…or for ever, if nobody runs the
+ * sweep*. Where a schedule was stated the sentence ends on a ceiling a reader
+ * can hold the deployment to; where none was, it says that in as many words
+ * rather than leaving the age to be read as a promise.
  */
-export const describeBuffer = (bufferMs: number): string =>
-  `a delivery is kept until it is ${inWords(bufferMs)} old, and the deployment's own sweep is what then counts it into totals and deletes it — the key tying one visit together exists until then and nowhere else; the totals it leaves behind have nobody in them, and they are kept`
+export const describeBuffer = (retention: DeliveryRetention): string => {
+  const ripens = `a delivery is kept until it is ${inWords(retention.bufferMs)} old, and this deployment's own sweep is what then counts it into totals and deletes it`
+  const totals = "the totals it leaves behind have nobody in them, and they are kept"
+
+  return retention.sweep.state === "stated"
+    ? `${ripens}; that sweep runs at least every ${inWords(retention.sweep.everyMs)}, so a delivery is gone within ${inWords(retention.sweep.goneWithinMs)} of arriving — the key tying one visit together exists until then and nowhere else; ${totals}`
+    : `${ripens}; this deployment has not said how often that sweep runs, so nothing here promises when a ripe delivery actually goes — the key tying one visit together exists until the sweep takes it and nowhere else; ${totals}`
+}
+
+/**
+ * What a stated interval becomes on a notice.
+ *
+ * The ceiling is derived here and nowhere else, so that a surface cannot print
+ * a number that disagrees with the age beside it: it is the ripeness window
+ * plus one sweep, which is the same addition the stall check asks a deployment
+ * for in one number (0274).
+ *
+ * **Anything that is not a positive, finite interval is `unstated`** rather
+ * than an error or a nought. A nought would publish *gone within 60 minutes* on
+ * a deployment that sweeps when somebody remembers to, and this module's one
+ * standing rule is that it may overstate what is collected and may never
+ * overstate what is deleted.
+ */
+const sweepNoticeOf = (everyMs: number | undefined, bufferMs: number): SweepNotice =>
+  everyMs === undefined || !Number.isFinite(everyMs) || everyMs <= 0
+    ? { state: "unstated" }
+    : { state: "stated", everyMs, goneWithinMs: bufferMs + everyMs }
 
 /** The configuration a notice is of. */
 export type NoticeRequest = {
@@ -402,6 +495,18 @@ export type NoticeRequest = {
    * minimum is raised to it, by the same helper the region map itself uses.
    */
   readonly region?: { readonly floor?: number }
+  /**
+   * How often this deployment's sweep runs, where it has stated it.
+   *
+   * Absent is *nothing is stated*, which is the honest default: nothing in this
+   * subsystem schedules a sweep, so a notice that assumed one would publish a
+   * ceiling no deployment promised. A value that is not a positive, finite
+   * number of milliseconds is read the same way — the notice may always
+   * promise a reader less than the deployment knows and may never promise more,
+   * and the operator-facing half, where a value that could not be read is said
+   * out loud, is a deployment's own settings (0317).
+   */
+  readonly sweep?: { readonly everyMs: number }
 }
 
 /**
@@ -417,6 +522,7 @@ export type NoticeRequest = {
  */
 export const collectionNoticeOf = (request: NoticeRequest = {}): CollectionNotice => {
   const asked = request.page?.kinds
+  const bufferMs = request.windowMs ?? DEFAULT_READER_SIGNAL_WINDOW_MS
 
   const collects = READER_SIGNAL_KINDS.filter(
     (kind) => asked === undefined || asked.includes(kind)
@@ -433,6 +539,7 @@ export const collectionNoticeOf = (request: NoticeRequest = {}): CollectionNotic
     delivery: fieldsOf(DELIVERY_FIELDS),
     refuses: REFUSALS,
     region: { floor: request.region === undefined ? null : regionFloorOf(request.region.floor) },
-    bufferMs: request.windowMs ?? DEFAULT_READER_SIGNAL_WINDOW_MS,
+    bufferMs,
+    sweep: sweepNoticeOf(request.sweep?.everyMs, bufferMs),
   }
 }

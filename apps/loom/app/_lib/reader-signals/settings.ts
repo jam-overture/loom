@@ -217,6 +217,63 @@ export const describeCollectionWindow = (window: CollectionWindow): string =>
       : `a delivery is counted into the totals and dropped once it is ${window.windowMs}ms old; ` +
         `set ${WINDOW_KEY} to change it`
 
+export const SWEEP_KEY = "LOOM_SIGNAL_SWEEP_MS"
+
+/**
+ * How often this deployment runs the sweep, as it states it.
+ *
+ * **The one intake fact no code in this repository can discover.** The window
+ * above is the age a delivery ripens at; the sweep is `signals-collect.ts`, and
+ * what runs it is a cron, a deploy hook or an operator, outside the
+ * application. So a deployment can have a working endpoint, a notice naming an
+ * hour, and nothing sweeping — and the readers it collects about are told an
+ * age that reads like a deletion.
+ *
+ * Stating it here closes that, and it buys the operator half too: the ceiling
+ * the notice publishes is the ripeness window plus one sweep, which is exactly
+ * the number `CollectionSchedule.foldsWithinMs` asks for when judging whether
+ * collection has stalled (0274). One stated interval, both halves derived.
+ *
+ * **Unstated is the default and is honest.** It publishes an age with *nothing
+ * here promises when it actually goes* beside it, which is what a deployment
+ * that has not told anybody its schedule is in a position to say. A value that
+ * is not whole milliseconds above nought is `unusable` rather than quietly
+ * unstated, as everywhere else in this file — an operator who typed
+ * `LOOM_SIGNAL_SWEEP_MS=10m` meant ten minutes and deserves to be told their
+ * readers were promised nothing.
+ */
+export type SweepSchedule =
+  | { readonly state: "unstated" }
+  | { readonly state: "stated"; readonly everyMs: number }
+  | { readonly state: "unusable"; readonly given: string }
+
+export const readSweepSchedule = (value: string | undefined): SweepSchedule => {
+  if (value === undefined || value.trim() === "") return { state: "unstated" }
+
+  const asked = Number(value.trim())
+
+  return Number.isInteger(asked) && asked > 0
+    ? { state: "stated", everyMs: asked }
+    : { state: "unusable", given: value }
+}
+
+/**
+ * One sentence about the sweep's schedule, for an operator.
+ *
+ * It says what the *readers* are being told, because that is the consequence an
+ * operator cannot see from anywhere else: nothing fails, nothing is refused,
+ * and the only difference an unstated schedule makes is a weaker sentence on a
+ * privacy page.
+ */
+export const describeSweepSchedule = (sweep: SweepSchedule): string =>
+  sweep.state === "unusable"
+    ? `${SWEEP_KEY} is "${sweep.given}", which is not an interval, so readers are told only when a delivery ripens and not when it goes. ` +
+      `It is whole milliseconds above nought; remove it to say nothing.`
+    : sweep.state === "stated"
+      ? `the sweep is stated to run at least every ${sweep.everyMs}ms, and that is published as a ceiling on how long a delivery lives`
+      : `how often the sweep runs is not stated, so readers are told only when a delivery ripens; ` +
+        `set ${SWEEP_KEY} to how often your cron runs to publish a ceiling`
+
 export type IntakeSettings = {
   readonly chosen: IntakeSwitch
   /**
@@ -241,6 +298,15 @@ export type IntakeSettings = {
    * a working sweep could still count once the value is fixed.
    */
   readonly window: CollectionWindow
+  /**
+   * How often this deployment's sweep runs, where it has said.
+   *
+   * Nothing in the application reads it but the notice: the door does not
+   * refuse on it and the sweep does not run on it. It is here because it is a
+   * fact about this deployment's collection, and this is where the facts about
+   * this deployment's collection are read (0317).
+   */
+  readonly sweep: SweepSchedule
 }
 
 export const readIntakeSettings = (
@@ -254,4 +320,5 @@ export const readIntakeSettings = (
     floor: readRegionFloor(env[REGION_FLOOR_KEY]),
   },
   window: readCollectionWindow(env[WINDOW_KEY]),
+  sweep: readSweepSchedule(env[SWEEP_KEY]),
 })
