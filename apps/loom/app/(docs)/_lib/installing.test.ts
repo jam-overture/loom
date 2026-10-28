@@ -13,6 +13,7 @@ import {
   whatYouNeed,
 } from "./installing"
 import { docsOrder } from "./nav"
+import { QUICKSTART_DEPENDENCIES } from "./quickstart/program"
 
 const entry = (over: Partial<Installable> & { readonly name: string }): Installable => ({
   kind: "run",
@@ -262,6 +263,28 @@ describe("the table of what you need", () => {
 
     expect(row?.firstUsedOn).toBeUndefined()
     expect(INSTALLABLE.find((one) => one.name === "react-dom")?.thoughNothingImportsIt).toBeDefined()
+  })
+
+  /**
+   * The site prints **two** install commands, and this is the line between
+   * them.
+   *
+   * The quickstart's is `QUICKSTART_DEPENDENCIES`, and it is right that it is
+   * its own list: it answers a different question — what one file, shown
+   * verbatim and run by `quickstart.test.ts`, imports — rather than what a
+   * reader following the pages needs. What would be wrong is the two drifting
+   * into naming different packages, which is how `zod` came to be installed by
+   * the quickstart and by nothing a reader on the arrival route ever reaches.
+   *
+   * So they are not merged and they are not allowed to disagree: every package
+   * the quickstart installs is one this list has an entry for.
+   */
+  it("knows every package the quickstart's own command installs", () => {
+    expect(QUICKSTART_DEPENDENCIES.length).toBeGreaterThan(1)
+
+    for (const name of QUICKSTART_DEPENDENCIES) {
+      expect(INSTALLABLE.map((one) => one.name), name).toContain(name)
+    }
   })
 
   it("says when each one is wanted, in a sentence", () => {

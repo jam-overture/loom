@@ -61195,3 +61195,126 @@ docs lane's call rather than this one's:
 Filed as an offer, not a defect: the import is
 `@/app/_lib/reader-signals/notice`, it is one function of one argument, and it
 touches no store and no clock.
+
+---
+## 2026-10-28 — the install command and the site's code blocks were two lists, and the one package the arrival route needed was missing from the command
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/installing.ts`) · **Status:** **closed by**
+`docs-69-install-what-the-pages-import` — found by measurement rather than by
+anything going red, which is the half of it worth keeping
+
+*Installation* told a reader to install four packages. The code blocks on this
+site import **eight**. The command was typed into the page; the blocks were
+written on twenty other pages; nothing anywhere knew about both.
+
+| | |
+| --- | --- |
+| in the command | `@jam-overture/loom`, `@jam-overture/loom-primitives`, `react`, `react-dom` |
+| imported by a block | the two above, plus `react`, `zod`, `vitest`, `drizzle-orm`, `postgres`, `@anthropic-ai/sdk` |
+
+**`zod` is the one that was a defect rather than an omission.** It is imported
+on `/docs/building-with-loom/primitives`, which is the arrival route's **fifth
+stop** — the hour this site promises a stranger, and a reader on it has run
+exactly one command. So the sequence the site invites is: run the command,
+follow five pages, paste the block that registers a primitive, and get
+`Cannot find module 'zod'`.
+
+**Three things had to be true at once for nobody to notice**, and each of them
+is a check doing its job:
+
+- The block **compiles**, because `fences/program.ts` type-checks it against
+  *this repository*, which has zod. A test that resolves imports cannot see a
+  fault whose whole content is that a reader's tree is not this one — which is
+  the sentence `teaches.test.ts` already carries about the 27 September door,
+  arriving a second time about a different kind of name.
+- The page's own prose **said so**: *"`zod` is the only hard dependency"*, two
+  screens below the command, in the section that listed the peers. The site was
+  not wrong about what a reader needs. It was wrong about what it told them to
+  type.
+- The **quickstart installs it.** `QUICKSTART_DEPENDENCIES` has had zod since
+  the file was written. The quickstart is off the arrival route by name — *the
+  route's own prose offers it*, the 27 October entry — so a reader who takes
+  the hour never reaches the one command on this site that was right.
+
+### What shipped
+
+`_lib/installing.ts` is the one list of what a reader installs. Three things
+are read off it rather than typed: the command the page prints, the table of
+what each package is for, and — the half that cannot go stale — the page where
+a reader first meets each one, derived from the blocks themselves in reading
+order. A sweep over every code block holds the pair, and the module **throws at
+import**, so a page that starts importing something uninstallable is a build
+failure rather than a page.
+
+The rule that catches this class rather than this instance: **every package
+imported on a page the route stops at must be in the command**, because the
+route passes *Installation* and no other page that installs anything.
+
+### What it is not
+
+Not a dependency manifest, and no version is checked. The question is the one a
+stranger has — *if I do what this site says, in the order it says it, will the
+next block I paste run?*
+
+---
+## 2026-10-28 — the sweep behind the install list reads code blocks, so a package a page only talks about is invisible to it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/installing.ts`) · **Status:** open — **the stated
+limit of what shipped today**, written in the module's own docblock as well as
+here
+
+`importedPackages()` scans the fences of every written page. Two kinds of thing
+it therefore cannot see, both of them real:
+
+- **A package named only in prose.** The old peers table listed
+  `drizzle-orm + postgres` and `@anthropic-ai/sdk` in cells, and both are also
+  imported by a block, which is the only reason the new table could be derived
+  at all. A package mentioned in a sentence and imported nowhere would have no
+  entry and no fault — it is simply not in the list.
+- **A package a *component* imports to produce what a page shows.** The
+  18 generated reference pages and every produced panel on this site are
+  components, and a component's imports are the application's, not a reader's.
+  That is the right line, but it is a line, and it is the same one the
+  23 October spelling entry draws for the same reason.
+
+Neither is a defect today and the measurement says so: eight packages, counted
+by hand and written out in `installing.test.ts` as the case that holds the
+sweep. Recorded because the next person to ask *does this catch everything*
+should get an answer rather than an impression.
+
+---
+## 2026-10-28 — one entry in the install list excuses itself with a sentence, and the route's account refused exactly that shape a day earlier
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/installing.ts`) · **Status:** open — **a judgement
+taken deliberately**, not an oversight; nothing is wrong and the asymmetry is
+worth being able to find
+
+`react-dom` is in the install command and **no block on this site imports it**.
+It is there because a reader rendering in a browser needs it and their
+framework, not their own code, is what reaches for it. The list makes it say
+so, in a field a package is refused without — but what that field holds is a
+*sentence*, and nothing checks it.
+
+**That is the fourth kind of excuse the arrival route's account refused on
+27 October**, one day earlier, in the same route group, for a reason that still
+stands: *the moment one exists, the list stops being held and becomes a list of
+opinions.* So why allow it here.
+
+The honest answer is that the trade is a different size. There it was **seven
+unverifiable excuses to catch one page**, and the alternative — narrowing what
+*passes* means — cost nothing real. Here it is **one** against nine packages,
+and the alternatives both cost more than the sentence does:
+
+1. **Read `react`'s own manifest** and accept a package it pairs with. It is a
+   fact rather than a claim, and it is a fact about one package that would be
+   written to hold one row.
+2. **Drop `react-dom` from the command.** Correct by the sweep's own rule and
+   wrong for the reader, who then finds out at build time what this page could
+   have told them.
+3. **Leave it, with the field naming what it is.** What shipped.
+
+**Recommendation: 3, and 1 the day a second package wants the same excuse.**
+One is a stated exception; two is a convention nobody decided on.

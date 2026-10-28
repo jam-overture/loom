@@ -1,0 +1,29 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-28-docs-install-what-the-pages-import-wide-command",
+      "viewport": { "width": 1280, "height": 1100 },
+      "waitFor": "main pre",
+      "measure": ["main pre", "[data-needs]"]
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-28-docs-install-what-the-pages-import-wide-table",
+      "viewport": { "width": 1280, "height": 1060 },
+      "waitFor": "[data-needs]",
+      "do": [{ "scrollTo": "[data-needs]" }],
+      "measure": ["[data-needs]", "[data-needs] tbody tr"]
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-28-docs-install-what-the-pages-import-phone-table",
+      "viewport": "phone",
+      "waitFor": "[data-needs]",
+      "do": [{ "scrollTo": "[data-needs]" }],
+      "measure": ["[data-needs]"]
+    }
+  ]
+}
