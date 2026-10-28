@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import type { AudienceId } from "../audience/audience.js"
+import { DEFAULT_AUDIENCE_ID, type AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { PrimitiveRole } from "../role.js"
 import {
@@ -15,10 +15,12 @@ import {
 import type { ElementNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
-import { formKeyOf, readingKeyOf } from "./audiences.js"
+import { formKeyOf, readingKeyOf, type PageForm } from "./audiences.js"
 import { readingChangeOf } from "./change.js"
 import { deploymentChangeOf } from "./deployment-change.js"
 import { deploymentReadingOf } from "./deployment.js"
+import { libraryChangeOf } from "./library-change.js"
+import { libraryReachChangeOf, type LibraryWindow } from "./library-reach-change.js"
 import { memoryReaderRegionStore, memoryReaderTallyStore } from "./memory.js"
 import type { StoredPageViews } from "./page-views.js"
 import type { PageReading, PartDeclarations } from "./parts.js"
@@ -27,13 +29,20 @@ import { DEFAULT_REGION_FLOOR, UNKNOWN_REGION, type StoredRegionCount } from "./
 import type { ReaderTally } from "./rollup.js"
 import type { StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
 import {
+  describeFormPlacing,
   describeUnjoinedCause,
+  placingsIn,
   readReaderWindow,
   revisionsIn,
   treesIn,
+  windowLibrariesOf,
   windowPairsOf,
   windowReadingsOf,
+  FORM_PLACINGS,
   UNJOINED_CAUSES,
+  type FormPlacing,
+  type FormPlacings,
+  type PlacedForm,
   type ReaderWindow,
   type ReaderWindowSources,
   type WindowReadingOptions,
@@ -1266,5 +1275,469 @@ describe("the pairs a window holds", () => {
     expect(order.standings.ranked).toBe(1)
     expect(order.worst?.treeId).toBe(TREE)
     expect(order.worst?.worsened?.at.before).toBe(nodeId("cta"))
+  })
+})
+
+describe("the two libraries a window holds", () => {
+  const LIBRARY = treesIn([
+    treeOf(TREE, 1, SIDE_BY_SIDE),
+    treeOf(TREE, 2, SIDE_BY_SIDE),
+    treeOf(OTHER_TREE, 1, SIDE_BY_SIDE),
+    treeOf(OTHER_TREE, 2, SIDE_BY_SIDE),
+  ])
+
+  const heldIn = (window: ReaderWindow) =>
+    windowPairsOf(windowReadingsOf(window, LIBRARY, DECLARED).pages)
+
+  const placedAs = (placing: FormPlacing, ...forms: readonly PageForm[]) =>
+    placingsIn(forms.map((form) => ({ ...form, placing })))
+
+  /** Nothing this deployment can say, which is the source a caller with no history has. */
+  const PLACES_NOTHING: FormPlacings = { placingFor: () => undefined }
+
+  const revisionsOn = (side: LibraryWindow): readonly number[] =>
+    side.readings.map((reading) => reading.revision)
+
+  const treesOn = (side: LibraryWindow): readonly TreeId[] =>
+    side.readings.map((reading) => reading.treeId)
+
+  it("puts a paired form's earlier revision on one side and its later one on the other", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+          tally({ revision: 2 }, "band", { views: 10, reached: 4 }),
+        ],
+      })
+    )
+
+    const { was, now, unplaced, duplicated } = windowLibrariesOf(held, [], PLACES_NOTHING)
+
+    expect(duplicated).toBe(0)
+    expect(unplaced).toEqual([])
+    expect(revisionsOn(was)).toEqual([1])
+    expect(revisionsOn(now)).toEqual([2])
+  })
+
+  it("asks nothing about a paired form, so a placing for one is never read", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }),
+          tally({ revision: 2 }, "band", { views: 10 }),
+        ],
+      })
+    )
+    const placingFor = vi.fn(() => undefined)
+
+    windowLibrariesOf(held, [], { placingFor })
+
+    expect(placingFor).not.toHaveBeenCalled()
+  })
+
+  it("puts a form the deployment says it published inside the window on the later side only", () => {
+    const held = heldIn(
+      windowOf({ tallies: [tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 })] })
+    )
+
+    const { was, now, unplaced } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("published", { treeId: OTHER_TREE, audienceId: null })
+    )
+
+    expect(unplaced).toEqual([])
+    expect(treesOn(was)).toEqual([])
+    expect(treesOn(now)).toEqual([OTHER_TREE])
+  })
+
+  it("puts a form the deployment says it withdrew on the earlier side only", () => {
+    const held = heldIn(
+      windowOf({ tallies: [tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 })] })
+    )
+
+    const { was, now } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("withdrawn", { treeId: OTHER_TREE, audienceId: null })
+    )
+
+    expect(treesOn(was)).toEqual([OTHER_TREE])
+    expect(treesOn(now)).toEqual([])
+  })
+
+  it("puts a form the deployment says it never changed on both sides, at the one revision there is", () => {
+    const held = heldIn(
+      windowOf({ tallies: [tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 })] })
+    )
+
+    const { was, now } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("unchanged", { treeId: OTHER_TREE, audienceId: null })
+    )
+
+    expect(revisionsOn(was)).toEqual([1])
+    expect(revisionsOn(now)).toEqual([1])
+    expect(was.readings[0]).toBe(now.readings[0])
+  })
+
+  /**
+   * Both guesses are assertions — the later side says a page nobody touched
+   * was published, and both sides say a page published this week was always
+   * there — so the form is named and on neither.
+   */
+  it("names a form nobody could place rather than putting it on a side", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }),
+          tally({ revision: 2 }, "band", { views: 10 }),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+        ],
+      })
+    )
+
+    const { was, now, unplaced } = windowLibrariesOf(held, [], PLACES_NOTHING)
+
+    expect(unplaced.map((form) => [form.treeId, form.reading.revision])).toEqual([
+      [OTHER_TREE, 1],
+    ])
+    expect(treesOn(was)).toEqual([TREE])
+    expect(treesOn(now)).toEqual([TREE])
+  })
+
+  /**
+   * The whole of why this step exists. The one-line composition over the pairs
+   * alone type-checks, runs, and reports nought pages gained on a deployment
+   * that published a page this week — because a page published inside the
+   * window has one revision in it and is therefore unpaired.
+   */
+  it("counts a page published inside the window as a page gained, where the pairs alone report nought", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+          tally({ revision: 2 }, "band", { views: 10, reached: 4 }),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10, reached: 5 }),
+        ],
+      })
+    )
+
+    const { was, now } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("published", { treeId: OTHER_TREE, audienceId: null })
+    )
+
+    const read = libraryChangeOf(was.readings, now.readings)
+
+    expect(read.pages).toBe(1)
+    expect(read.pagesGained).toBe(1)
+    expect(read.pagesLost).toBe(0)
+    expect(read.republished).toBe(1)
+
+    const overThePairs = libraryChangeOf(
+      held.pairs.map((pair) => pair.was),
+      held.pairs.map((pair) => pair.now)
+    )
+
+    expect(overThePairs.pagesGained).toBe(0)
+  })
+
+  it("counts a page withdrawn inside the window as a page lost", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }),
+          tally({ revision: 2 }, "band", { views: 10 }),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+        ],
+      })
+    )
+
+    const { was, now } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("withdrawn", { treeId: OTHER_TREE, audienceId: null })
+    )
+    const read = libraryChangeOf(was.readings, now.readings)
+
+    expect(read.pagesLost).toBe(1)
+    expect(read.pagesGained).toBe(0)
+    expect(read.pages).toBe(1)
+  })
+
+  /**
+   * The double-count case for a form on both sides: one reading carried twice
+   * has to be **one** page in the comparison and no movement at all, or a
+   * library of fifty pages where two changed would report every unchanged page
+   * as a page both gained and lost, and its views twice over.
+   */
+  it("counts an unchanged form once, with no movement and no view counted twice", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10, reached: 6 })],
+      })
+    )
+
+    const { was, now } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("unchanged", { treeId: OTHER_TREE, audienceId: null })
+    )
+    const read = libraryChangeOf(was.readings, now.readings)
+
+    expect(read.pages).toBe(1)
+    expect(read.pagesGained).toBe(0)
+    expect(read.pagesLost).toBe(0)
+    expect(read.republished).toBe(0)
+    expect(read.gained).toBe(0)
+    expect(read.lost).toBe(0)
+    expect(read.viewsWas).toBe(10)
+    expect(read.viewsNow).toBe(10)
+    expect(read.viewsNow).toBe(read.viewsWas)
+  })
+
+  /**
+   * The other double-count case, which is a caller's `WindowPairs` rather than
+   * one this module made: two readings of one form on one side are `ambiguous`
+   * to `pairedWindowOf`, which takes the page out of every figure in the
+   * comparison while the totals go on looking right (0158).
+   */
+  it("drops a form named in both lists rather than gating the page out of the comparison", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+          tally({ revision: 2 }, "band", { views: 10, reached: 4 }),
+        ],
+      })
+    )
+    const pair = held.pairs[0]
+
+    if (pair === undefined) throw new Error("the window held no pair")
+
+    const { was, now, duplicated } = windowLibrariesOf(
+      { ...held, unpaired: [{ ...pair, reading: pair.now }] },
+      [],
+      placedAs("published", { treeId: TREE, audienceId: null })
+    )
+
+    expect(duplicated).toBe(1)
+    expect(revisionsOn(was)).toEqual([1])
+    expect(revisionsOn(now)).toEqual([2])
+
+    const read = libraryChangeOf(was.readings, now.readings)
+
+    expect(read.ambiguous).toEqual([])
+    expect(read.pages).toBe(1)
+  })
+
+  /**
+   * A page can be published in a second form while its first form stands
+   * unchanged, which is what `formsGained` is for (0295) — so a placing is per
+   * form and not per page.
+   */
+  it("places two forms of one page apart, so a second form begun is not a page published", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 1 }, "band", { views: 10 }, RIDERS),
+        ],
+      })
+    )
+
+    const { was, now, unplaced } = windowLibrariesOf(
+      held,
+      [],
+      placingsIn([
+        { treeId: TREE, audienceId: SKIERS, placing: "unchanged" },
+        { treeId: TREE, audienceId: RIDERS, placing: "published" },
+      ])
+    )
+    const read = libraryChangeOf(was.readings, now.readings)
+
+    expect(unplaced).toEqual([])
+    expect(read.pagesGained).toBe(1)
+    expect(read.formsGained).toBe(1)
+    expect(read.pages).toBe(1)
+  })
+
+  it("keeps the first placing of a form, so the answer does not depend on the history's order", () => {
+    const forms: readonly PlacedForm[] = [
+      { treeId: TREE, audienceId: null, placing: "published" },
+      { treeId: TREE, audienceId: null, placing: "withdrawn" },
+    ]
+
+    expect(placingsIn(forms).placingFor({ treeId: TREE, audienceId: null })).toBe("published")
+    expect(
+      placingsIn([...forms].reverse()).placingFor({ treeId: TREE, audienceId: null })
+    ).toBe("withdrawn")
+    expect(placingsIn(forms).placingFor({ treeId: OTHER_TREE, audienceId: null })).toBeUndefined()
+  })
+
+  /**
+   * A side is filled with the pairs and then with the forms a placing put
+   * there, which is not the order a form belongs in. The fixture therefore
+   * pairs the page that sorts **second** and places the one that sorts first,
+   * so a side left in the order it was filled is a different list rather than
+   * the same one (0231).
+   */
+  it("holds each side in the published form order rather than in the order it filled them", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+          tally({ treeId: OTHER_TREE, revision: 2 }, "band", { views: 10 }),
+          tally({ revision: 1 }, "band", { views: 10 }),
+        ],
+      })
+    )
+
+    const { was, now } = windowLibrariesOf(
+      held,
+      [],
+      placedAs("unchanged", { treeId: TREE, audienceId: null })
+    )
+
+    expect(treesOn(was)).toEqual([TREE, OTHER_TREE])
+    expect(treesOn(now)).toEqual([TREE, OTHER_TREE])
+  })
+
+  it("holds each side in one order whatever order the forms arrived in", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 2 }, "band", { views: 10 }, SKIERS),
+          tally({ revision: 1 }, "band", { views: 10 }, RIDERS),
+          tally({ revision: 2 }, "band", { views: 10 }, RIDERS),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }, SKIERS),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }, RIDERS),
+        ],
+      })
+    )
+    const placings = placedAs(
+      "unchanged",
+      { treeId: OTHER_TREE, audienceId: SKIERS },
+      { treeId: OTHER_TREE, audienceId: RIDERS }
+    )
+    const formsOn = (side: LibraryWindow) => side.readings.map((reading) => formKeyOf(reading))
+
+    const forwards = windowLibrariesOf(held, [], placings)
+    const backwards = windowLibrariesOf(
+      {
+        ...held,
+        pairs: [...held.pairs].reverse(),
+        unpaired: [...held.unpaired].reverse(),
+      },
+      [],
+      placings
+    )
+
+    expect(formsOn(forwards.now)).toEqual([
+      formKeyOf({ treeId: TREE, audienceId: RIDERS }),
+      formKeyOf({ treeId: TREE, audienceId: SKIERS }),
+      formKeyOf({ treeId: OTHER_TREE, audienceId: RIDERS }),
+      formKeyOf({ treeId: OTHER_TREE, audienceId: SKIERS }),
+    ])
+    expect(formsOn(backwards.now)).toEqual(formsOn(forwards.now))
+    expect(formsOn(backwards.was)).toEqual(formsOn(forwards.was))
+  })
+
+  it("names the forms it could not place in one order whatever order they arrived in", () => {
+    const held = heldIn(
+      windowOf({
+        tallies: [
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+          tally({ revision: 1 }, "band", { views: 10 }),
+        ],
+      })
+    )
+
+    const backwards = windowLibrariesOf(
+      { ...held, unpaired: [...held.unpaired].reverse() },
+      [],
+      PLACES_NOTHING
+    )
+
+    expect(held.unpaired.map((form) => form.treeId)).toEqual([TREE, OTHER_TREE])
+    expect(backwards.unplaced.map((form) => form.treeId)).toEqual([TREE, OTHER_TREE])
+  })
+
+  /**
+   * The door rows are the window's own on both sides, not a slice: each page's
+   * row is picked out by `pageViewsFor` on the revision the reading names, and
+   * the two sides name different revisions.
+   */
+  it("hands the reach comparison one window of door rows that answers both sides", () => {
+    const window = windowOf({
+      tallies: [
+        tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+        tally({ revision: 2 }, "band", { views: 20, reached: 8 }),
+      ],
+      pageViews: [door({ revision: 1 }, 10), door({ revision: 2 }, 20)],
+    })
+
+    const { was, now } = windowLibrariesOf(heldIn(window), window.pageViews, PLACES_NOTHING)
+    const read = libraryReachChangeOf(was, now)
+
+    expect(was.rows).toBe(now.rows)
+    expect(read.pages).toBe(1)
+    expect(read.arrivalsWas).toBe(10)
+    expect(read.arrivalsNow).toBe(20)
+    expect(read.unscaled).toEqual([])
+  })
+
+  it("says one line per placing, and the set is closed", () => {
+    expect(FORM_PLACINGS).toEqual(["published", "withdrawn", "unchanged"])
+    expect(new Set(FORM_PLACINGS.map(describeFormPlacing)).size).toBe(FORM_PLACINGS.length)
+    expect(describeFormPlacing("published")).toContain("later library")
+    expect(describeFormPlacing("withdrawn")).toContain("earlier library")
+    expect(describeFormPlacing("unchanged")).toContain("both")
+  })
+
+  it("reads both libraries out of one store end to end", async () => {
+    const tallies = memoryReaderTallyStore()
+    const at = "2026-10-27T09:00:00.000Z"
+
+    await tallies.apply(
+      {
+        tallies: [
+          tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+          tally({ revision: 2 }, "band", { views: 10, reached: 4 }),
+          tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10, reached: 7 }),
+        ],
+        funnels: [],
+        appearances: [
+          { treeId: TREE, revision: 1, views: 10 },
+          { treeId: TREE, revision: 2, views: 10 },
+          { treeId: OTHER_TREE, revision: 1, views: 10 },
+        ],
+      },
+      at
+    )
+
+    const read = await readReaderWindow({ tallies })
+    if (!read.ok) throw new Error("the window was not read")
+
+    const { pages } = windowReadingsOf(read.value, LIBRARY, DECLARED)
+    const { was, now, unplaced } = windowLibrariesOf(
+      windowPairsOf(pages),
+      read.value.pageViews,
+      placedAs("published", { treeId: OTHER_TREE, audienceId: DEFAULT_AUDIENCE_ID })
+    )
+    const change = libraryChangeOf(was.readings, now.readings)
+
+    expect(unplaced).toEqual([])
+    expect(change.pages).toBe(1)
+    expect(change.pagesGained).toBe(1)
+    expect(change.republished).toBe(1)
+    expect(change.audiences).toEqual({
+      was: [DEFAULT_AUDIENCE_ID],
+      now: [DEFAULT_AUDIENCE_ID],
+    })
   })
 })

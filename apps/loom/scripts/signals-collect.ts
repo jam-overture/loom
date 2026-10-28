@@ -11,7 +11,10 @@ import { DEFAULT_APPLICATION_ID, describeApplicationStoreError } from "@jam-over
 import { resolveConnectionString } from "../app/_lib/app/connection"
 import {
   describeCollectionWindow,
+  describeSweepSchedule,
   readCollectionWindow,
+  readSweepSchedule,
+  SWEEP_KEY,
   WINDOW_KEY,
 } from "../app/_lib/reader-signals/settings"
 
@@ -68,6 +71,16 @@ if (sweepWindow.state === "unusable") {
 }
 
 console.log(`loom: ${describeCollectionWindow(sweepWindow)}`)
+
+/**
+ * This script **is** the sweep, so it is the right place to say whether anybody
+ * was told how often it runs.
+ *
+ * It never refuses on it: an unstated schedule costs a sentence on a privacy
+ * page and nothing a run does (0320). Printed because the operator reading this
+ * output is the one person who knows what the cron interval actually is.
+ */
+console.log(`loom: ${describeSweepSchedule(readSweepSchedule(process.env[SWEEP_KEY]))}`)
 
 const connectionString = resolveConnectionString()
 

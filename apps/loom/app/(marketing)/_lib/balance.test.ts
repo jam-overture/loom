@@ -131,6 +131,19 @@ const NOT_ROWS: Readonly<Record<string, string>> = {
    * `loom.milestone-list` is out: the run is read downward.
    */
   "loom.comparison-table": "read down, one criterion per row",
+  /**
+   * A screen and the marks over it, which are the two kinds of child this
+   * takes and are not cells of anything. The screen is a slot; the marks are
+   * placed at points on it by percentage, so no two of them share a track and
+   * nothing is stretched to match anything.
+   *
+   * Arrived on 28 October with the example page on `/why-use-it`, which is the
+   * first band on any surface of this application to use the frame at all. The
+   * grid inside the screen is still a row and is still held: `allRows()` walks
+   * the whole tree, so the three tiles on the example page are checked exactly
+   * as the three on a band of this site are.
+   */
+  "loom.frame": "a screen and the marks over it, not cells",
 }
 
 /**

@@ -59,6 +59,7 @@ const SETTINGS = {
    * through a minute rather than through this deployment's hour.
    */
   window: { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS },
+  sweep: { state: "unstated" },
 } as const
 
 const batch = (nodeId: string, dwellMs: number, over: Record<string, unknown> = {}) => ({
