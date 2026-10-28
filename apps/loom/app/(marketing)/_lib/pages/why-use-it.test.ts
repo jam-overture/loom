@@ -216,3 +216,34 @@ describe("the set it shows", () => {
     expect(bands.indexOf("What you build with")).toBeLessThan(bands.indexOf("Next"))
   })
 })
+
+/**
+ * The example page, which is the same question answered a second way.
+ *
+ * `example.test.ts` holds what is inside the frame. What belongs here is the
+ * only thing about it that is this page's rather than the example's: **where
+ * it stands.** The set and a page made out of the set are one argument read in
+ * two steps, and the step after them is the one that asks the reader to go and
+ * do it.
+ */
+describe("the page it shows made out of the set", () => {
+  const bands = () =>
+    page().root.children.flatMap((node) =>
+      node.kind === "element" && node.type === "loom.section"
+        ? [String(node.props["eyebrow"] ?? "")]
+        : []
+    )
+
+  it("stands between the set and the way out", () => {
+    expect(bands().indexOf("On a page")).toBeGreaterThan(bands().indexOf("What you build with"))
+    expect(bands().indexOf("On a page")).toBeLessThan(bands().indexOf("Next"))
+  })
+
+  /**
+   * One frame on the page, and it is the only thing on this site inside one.
+   * A second would mean a band had been copied rather than written.
+   */
+  it("is the one framed thing on the page", () => {
+    expect(elementsOf("loom.frame")).toHaveLength(1)
+  })
+})

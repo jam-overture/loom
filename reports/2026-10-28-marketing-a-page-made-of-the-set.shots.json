@@ -1,0 +1,41 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-28-marketing-on-a-page",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is(\"What they look like together\"))"
+    },
+    {
+      "path": "/why-use-it?theme=bold",
+      "out": "2026-10-28-marketing-on-a-page-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is(\"What they look like together\"))"
+    },
+    {
+      "path": "/why-use-it?theme=editorial",
+      "out": "2026-10-28-marketing-on-a-page-editorial",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is(\"What they look like together\"))"
+    },
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-28-marketing-on-a-page-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is(\"What they look like together\"))"
+    },
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-28-marketing-why-use-it-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    }
+  ]
+}

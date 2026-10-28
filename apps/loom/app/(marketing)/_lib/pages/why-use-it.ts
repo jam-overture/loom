@@ -12,6 +12,7 @@ import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { COUNTED_ANCHOR } from "../bands"
 import { FACTS } from "../copy"
+import { examplePage } from "../example"
 import { LIBRARY_PARTS } from "../library"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import {
@@ -195,7 +196,7 @@ const hero = (ids: IdFactory): LoomNode =>
        */
       prose(
         ids,
-        "Making a page that rearranges itself around its readers takes several separate jobs. You could write every one of them in your own application, and it would work.",
+        "Making a page that rearranges itself around its readers takes several separate jobs. You could write every one of them yourself, and it would work.",
         { size: "lead", measured: true }
       ),
     ],
@@ -408,13 +409,51 @@ const theParts = (ids: IdFactory): LoomNode =>
     { align: "center" }
   )
 
+/**
+ * The set at work, which is the question the band above it leaves open.
+ *
+ * `theParts` answers *what is in there* and cannot answer *what do they look
+ * like on a page*, because the only page on this site built out of the
+ * starter set is this site and a visitor is standing on it. So the site shows
+ * them a different one. `example.ts` is the page, the frame and the two marks,
+ * and it carries the whole argument for why it is rendered rather than
+ * photographed.
+ *
+ * It sits here rather than above the chips for one reason: the band after it
+ * is *Try it on a page of your own*, and a reader who has just watched a page
+ * be made out of the list is the likeliest reader this site has to press
+ * something.
+ */
+const onAPage = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "On a page" },
+    "What they look like together",
+    [
+      prose(ids, "Every piece of this is a part from the list above.", {
+        tone: "muted",
+        align: "center",
+        measured: true,
+      }),
+      examplePage(ids),
+    ],
+    { align: "center" }
+  )
+
 const closing = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Try it on a page of your own", [
-    prose(
-      ids,
-      "The site you are reading is a Loom application. Every page of it is put together from the starter components anybody gets when they install it.",
-      { measured: true }
-    ),
+    /**
+     * **Thirteen words shorter since the band above it landed**, and the band
+     * is why. This sentence used to carry the whole claim on its own — *"Every
+     * page of it is put together from the starter components anybody gets when
+     * they install it"* — to a reader who had been shown nothing. A reader who
+     * has just watched a page be assembled out of the list does not need the
+     * claim spelled out a second time, and the site's word ceiling is a real
+     * constraint that a band has to be paid for rather than argued past.
+     */
+    prose(ids, "This site is a Loom application too, built out of the same set.", {
+      measured: true,
+    }),
     stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
       action(ids, "Read the docs", surfacePath(DOCS), { variant: "primary" }),
       action(ids, "Try it yourself", surfacePath(DEMO), { variant: "secondary" }),
@@ -449,6 +488,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         staysYours(ids),
         alreadyWritten(ids),
         theParts(ids),
+        onAPage(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
