@@ -420,7 +420,7 @@ describe("the sweep this deployment runs", () => {
    * thing that fixes it.
    */
   it("judges its own run against the notice, and never refuses on the verdict", () => {
-    expect(SWEEP).toContain("deploymentNoticeOf")
+    expect(SWEEP).toContain("deploymentNoticeOf(")
 
     const uses = SWEEP.split("\n").filter((line) => line.includes("promise"))
 

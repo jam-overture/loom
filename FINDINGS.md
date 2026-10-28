@@ -59463,9 +59463,14 @@ it is now *call four functions and draw three states*.
 ---
 ## 2026-10-24 — the region map is the one reading the new rung leaves a caller to assemble
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
-**nothing is wrong**; a gap named at the moment it was created, and a candidate
-for the next step rather than a fault in it
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-54-where-a-windows-readers-were` (§54)**, record
+[0315](decisions/0315-a-window-answers-where-its-readers-were-at-a-floor-it-is-handed-and-the-readership-is-published-beside-the-forms.md)
+— the maps are joined on the window and the floor is an argument, which is what
+this asked for. The Status line was left as `open` when the 25 October (evening)
+entry closed it, and is corrected here on 28 October: an entry nothing links to
+its closure is the ten-day trap the 27 October entry was filed about, and the
+sweep of this lane's queue found it still reading as work
 
 `windowReadingsOf` (0309) reads the counters into `PageReading`s and every
 reading that takes one, or a list of them, follows in a line. The region rows do
