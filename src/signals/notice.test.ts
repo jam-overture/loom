@@ -20,6 +20,7 @@ import {
   FIELD_SUBJECTS,
   REFUSALS,
   SIGNAL_FIELDS,
+  type DeliveryRetention,
   type Refusal,
 } from "./notice.js"
 import { DEFAULT_REGION_FLOOR } from "./region.js"
@@ -204,11 +205,17 @@ describe("collectionNoticeOf", () => {
   })
 
   describe("how long a delivery lives", () => {
+    /** No schedule stated, which is every deployment that has not set one. */
+    const unswept = (bufferMs: number): DeliveryRetention => ({
+      bufferMs,
+      sweep: { state: "unstated" },
+    })
+
     it("says the deployment's window in minutes, and who sweeps it", () => {
-      const sentence = describeBuffer(DEFAULT_READER_SIGNAL_WINDOW_MS)
+      const sentence = describeBuffer(unswept(DEFAULT_READER_SIGNAL_WINDOW_MS))
 
       expect(sentence).toContain("60 minutes")
-      expect(sentence).toContain("the deployment's own sweep")
+      expect(sentence).toContain("this deployment's own sweep")
     })
 
     /**
@@ -217,12 +224,92 @@ describe("collectionNoticeOf", () => {
      * nought if it were written the obvious way.
      */
     it("says a minute rather than 1 minutes at the collector's floor", () => {
-      expect(describeBuffer(MIN_READER_SIGNAL_WINDOW_MS)).toContain("a minute old")
+      expect(describeBuffer(unswept(MIN_READER_SIGNAL_WINDOW_MS))).toContain("a minute old")
     })
 
     it("falls back to seconds below a minute, where a notice would otherwise read nought", () => {
-      expect(describeBuffer(30_000)).toContain("30 seconds")
-      expect(describeBuffer(1_000)).toContain("a second old")
+      expect(describeBuffer(unswept(30_000))).toContain("30 seconds")
+      expect(describeBuffer(unswept(1_000))).toContain("a second old")
+    })
+
+    /**
+     * The sentence this module exists for, in the state most deployments are
+     * in: the age is a ripeness window and **nothing here promises when the
+     * delivery actually goes**, because nothing in `src/signals/` deletes it.
+     * A notice that stopped at the age would be read as a deletion it cannot
+     * promise.
+     */
+    it("says that nothing promises a deletion where no schedule was stated", () => {
+      const sentence = describeBuffer(unswept(DEFAULT_READER_SIGNAL_WINDOW_MS))
+
+      expect(sentence).toContain("has not said how often that sweep runs")
+      expect(sentence).toContain("nothing here promises when a ripe delivery actually goes")
+      expect(sentence).not.toContain("gone within")
+    })
+
+    it("ends on a ceiling a reader can hold the deployment to where one was stated", () => {
+      const sentence = describeBuffer({
+        bufferMs: DEFAULT_READER_SIGNAL_WINDOW_MS,
+        sweep: { state: "stated", everyMs: 10 * 60_000, goneWithinMs: 70 * 60_000 },
+      })
+
+      expect(sentence).toContain("60 minutes old")
+      expect(sentence).toContain("at least every 10 minutes")
+      expect(sentence).toContain("gone within 70 minutes of arriving")
+      expect(sentence).not.toContain("has not said")
+    })
+  })
+
+  describe("how often the deployment sweeps", () => {
+    it("states nothing where the deployment stated nothing", () => {
+      expect(collectionNoticeOf().sweep).toEqual({ state: "unstated" })
+    })
+
+    /**
+     * The ceiling is the ripeness window **plus one sweep**, because a delivery
+     * is not counted until it ripens and then not until the next run — the
+     * same addition the stall check asks a deployment for in one number (0274).
+     *
+     * The two addends are deliberately different lengths here. Fifteen and five
+     * make twenty; the window counted twice would make thirty and the interval
+     * counted twice ten, and all three are plausible-looking minute figures in
+     * a sentence nobody would check (0158).
+     */
+    it("adds the deployment's own window once, and the interval once", () => {
+      expect(
+        collectionNoticeOf({ windowMs: 15 * 60_000, sweep: { everyMs: 5 * 60_000 } }).sweep
+      ).toEqual({ state: "stated", everyMs: 5 * 60_000, goneWithinMs: 20 * 60_000 })
+    })
+
+    /** The default window is what the ceiling is over where a deployment set none. */
+    it("adds the interval to the default window where the deployment set none", () => {
+      expect(collectionNoticeOf({ sweep: { everyMs: 10 * 60_000 } }).sweep).toEqual({
+        state: "stated",
+        everyMs: 10 * 60_000,
+        goneWithinMs: DEFAULT_READER_SIGNAL_WINDOW_MS + 10 * 60_000,
+      })
+    })
+
+    /**
+     * Nothing accumulates between calls. A ceiling that grew on the second read
+     * of one configuration is the one way this figure could double-count, and
+     * it is the way a ceiling held on a module-level total would.
+     */
+    it("gives one configuration the same ceiling however often it is asked", () => {
+      const request = { windowMs: 15 * 60_000, sweep: { everyMs: 5 * 60_000 } }
+
+      expect(collectionNoticeOf(request).sweep).toEqual(collectionNoticeOf(request).sweep)
+    })
+
+    /**
+     * A notice may promise a reader less than the deployment knows and may
+     * never promise more. A nought would publish *gone within 60 minutes* on a
+     * deployment that sweeps when somebody remembers to.
+     */
+    it("states nothing for an interval that is not a positive, finite length", () => {
+      for (const everyMs of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        expect(collectionNoticeOf({ sweep: { everyMs } }).sweep).toEqual({ state: "unstated" })
+      }
     })
   })
 

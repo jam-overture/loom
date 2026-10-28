@@ -12,10 +12,11 @@ import type { IntakeSettings } from "./settings"
  * hands it **this deployment's own configuration**, read from the environment in
  * [`settings.ts`](./settings.ts) rather than described in prose.
  *
- * Two numbers in a notice are a deployment's rather than the framework's — how
- * long a delivery lives, and the floor under a published country — and the
- * window was the one of those that lived in a sweep script. A privacy page
- * cannot be derived from a `const` in `scripts/`.
+ * Three numbers in a notice are a deployment's rather than the framework's —
+ * how long a delivery takes to ripen, the floor under a published country, and
+ * how often the sweep that deletes a ripe one runs — and the window was the
+ * one of those that lived in a sweep script. A privacy page cannot be derived
+ * from a `const` in `scripts/`.
  *
  * ## What it reads, and what it deliberately does not
  *
@@ -38,6 +39,12 @@ import type { IntakeSettings } from "./settings"
  * to run on it at all — which is a louder failure than a notice can carry, and
  * is why `describeCollectionWindow` exists for the operator who has to fix it.
  *
+ * **A sweep ceiling only where the deployment stated one.** Nothing in this
+ * repository can discover how often a cron outside it runs, so an unstated or
+ * unreadable interval publishes the weaker sentence rather than a ceiling
+ * nobody promised — and `describeSweepSchedule` is the operator's half, as
+ * with the window.
+ *
  * ## What it is not
  *
  * Not a consent gate, not a banner, and not a reading: no store, no clock, no
@@ -57,4 +64,11 @@ export const deploymentNoticeOf = (settings: IntakeSettings): CollectionNotice =
     ...(settings.region.chosen.state === "on"
       ? { region: { floor: settings.region.floor.floor } }
       : {}),
+    /**
+     * Spread for the same reason, and handed over only where the deployment
+     * stated an interval. An unstated or unusable schedule publishes an age
+     * with *nothing here promises when it goes* beside it, which is the honest
+     * sentence for a deployment nobody can prove sweeps at all (0320).
+     */
+    ...(settings.sweep.state === "stated" ? { sweep: { everyMs: settings.sweep.everyMs } } : {}),
   })

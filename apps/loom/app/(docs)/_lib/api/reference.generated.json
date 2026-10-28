@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -11106,9 +11106,15 @@
               "summary": "One or two sentences about where readers are counted from, addressed to the reader."
             },
             {
+              "name": "SweepNotice",
+              "kind": "type",
+              "signature": "type SweepNotice = {\n    readonly state: \"stated\";\n    /** The longest the deployment lets pass between sweeps, as it stated it. */\n    readonly everyMs: number;\n    /**\n     * The longest a delivery can live: its ripeness window plus one sweep\n     * interval.\n     *\n     * The two add because a delivery is not counted until it ripens and then\n     * not until the next sweep runs, which is the arithmetic\n     * `CollectionSchedule.foldsWithinMs` spells out for the operator's half\n     * of this question — so **this is the number to hand the stall\n     * check**, and a deployment states the interval once rather than keeping\n     * a reader's ceiling and an operator's threshold in step by hand.\n     */\n    readonly goneWithinMs: number;\n}\n/** Nothing was stated, so nothing here says when a ripe delivery actually goes. */\n | {\n    readonly state: \"unstated\";\n};",
+              "summary": "How often the deployment's own sweep runs, or that it has not said."
+            },
+            {
               "name": "CollectionNotice",
               "kind": "type",
-              "signature": "type CollectionNotice = {\n    /** The kinds this configuration broadcasts, in the vocabulary's order. */\n    readonly collects: readonly CollectedKind[];\n    /** What travels with every delivery. */\n    readonly delivery: readonly CollectedField[];\n    /** What is never collected, whatever else is configured. */\n    readonly refuses: readonly Refusal[];\n    /** Where readers are counted from, or that they are not. */\n    readonly region: RegionNotice;\n    /**\n     * How long a delivery itself lives before it is counted and dropped, in\n     * milliseconds.\n     *\n     * The deployment's own number (`collect.ts`), and the honest bound on the\n     * life of the page-view key, since the key exists in the buffer and nowhere\n     * else. **The framework cannot promise the moment it is swept**, because a\n     * host schedules the sweep: this is the age at which a delivery becomes ripe,\n     * not a guarantee about when the next run happens.\n     * {@link describeBuffer} says both halves.\n     */\n    readonly bufferMs: number;\n};",
+              "signature": "type CollectionNotice = {\n    /** The kinds this configuration broadcasts, in the vocabulary's order. */\n    readonly collects: readonly CollectedKind[];\n    /** What travels with every delivery. */\n    readonly delivery: readonly CollectedField[];\n    /** What is never collected, whatever else is configured. */\n    readonly refuses: readonly Refusal[];\n    /** Where readers are counted from, or that they are not. */\n    readonly region: RegionNotice;\n    /**\n     * How long a delivery itself lives before it is counted and dropped, in\n     * milliseconds.\n     *\n     * The deployment's own number (`collect.ts`), and the honest bound on the\n     * life of the page-view key, since the key exists in the buffer and nowhere\n     * else. **The framework cannot promise the moment it is swept**, because a\n     * host schedules the sweep: this is the age at which a delivery becomes ripe,\n     * not a guarantee about when the next run happens. What the deployment itself\n     * promises about that is {@link CollectionNotice.sweep}, and\n     * {@link describeBuffer} says the two together.\n     */\n    readonly bufferMs: number;\n    /**\n     * How often this deployment sweeps a ripe delivery away, where it has stated\n     * it.\n     *\n     * The half of retention that is not the framework's to promise, and the half\n     * a reader of `bufferMs` alone would assume. {@link describeBuffer} takes the\n     * two together for that reason: an age with no sweep beside it is a sentence\n     * that reads like a deletion and is not one.\n     */\n    readonly sweep: SweepNotice;\n};",
               "summary": "What a published page reports, and what it refuses to."
             },
             {
@@ -11118,15 +11124,21 @@
               "summary": "One kind of observation, with the fields it carries."
             },
             {
+              "name": "DeliveryRetention",
+              "kind": "type",
+              "signature": "type DeliveryRetention = Pick<CollectionNotice, \"bufferMs\" | \"sweep\">;",
+              "summary": "Both halves of how long a delivery lives: the age it ripens at, and how often the deployment takes the ripe ones away."
+            },
+            {
               "name": "describeBuffer",
               "kind": "function",
-              "signature": "const describeBuffer: (bufferMs: number) => string",
+              "signature": "const describeBuffer: (retention: DeliveryRetention) => string",
               "summary": "How long a delivery lives, addressed to the reader."
             },
             {
               "name": "NoticeRequest",
               "kind": "type",
-              "signature": "type NoticeRequest = {\n    /**\n     * The options the page is broadcast with — the same object, so that a notice\n     * and the page it is about cannot disagree about which kinds are reported.\n     *\n     * Only `kinds` is read. `types` and `within` narrow collection below what the\n     * notice says, which is the ceiling rule above.\n     */\n    readonly page?: Pick<ReaderSignalOptions, \"kinds\">;\n    /**\n     * The window the deployment collects on, from its own `CollectionRequest`\n     * (`collect.ts`). The default when absent.\n     *\n     * Reported as given rather than clamped: `collect.ts` is what refuses a\n     * window below its minimum, and a notice that silently reported a different\n     * number from the one a deployment configured would be a second rule about\n     * one setting.\n     */\n    readonly windowMs?: number;\n    /**\n     * The region counting this deployment's intake does, where it does any.\n     *\n     * Absent is *no country is read*, which is the default: reading one is\n     * something an intake is configured to do (§7). A floor below the published\n     * minimum is raised to it, by the same helper the region map itself uses.\n     */\n    readonly region?: {\n        readonly floor?: number;\n    };\n};",
+              "signature": "type NoticeRequest = {\n    /**\n     * The options the page is broadcast with — the same object, so that a notice\n     * and the page it is about cannot disagree about which kinds are reported.\n     *\n     * Only `kinds` is read. `types` and `within` narrow collection below what the\n     * notice says, which is the ceiling rule above.\n     */\n    readonly page?: Pick<ReaderSignalOptions, \"kinds\">;\n    /**\n     * The window the deployment collects on, from its own `CollectionRequest`\n     * (`collect.ts`). The default when absent.\n     *\n     * Reported as given rather than clamped: `collect.ts` is what refuses a\n     * window below its minimum, and a notice that silently reported a different\n     * number from the one a deployment configured would be a second rule about\n     * one setting.\n     */\n    readonly windowMs?: number;\n    /**\n     * The region counting this deployment's intake does, where it does any.\n     *\n     * Absent is *no country is read*, which is the default: reading one is\n     * something an intake is configured to do (§7). A floor below the published\n     * minimum is raised to it, by the same helper the region map itself uses.\n     */\n    readonly region?: {\n        readonly floor?: number;\n    };\n    /**\n     * How often this deployment's sweep runs, where it has stated it.\n     *\n     * Absent is *nothing is stated*, which is the honest default: nothing in this\n     * subsystem schedules a sweep, so a notice that assumed one would publish a\n     * ceiling no deployment promised. A value that is not a positive, finite\n     * number of milliseconds is read the same way — the notice may always\n     * promise a reader less than the deployment knows and may never promise more,\n     * and the operator-facing half, where a value that could not be read is said\n     * out loud, is a deployment's own settings.\n     */\n    readonly sweep?: {\n        readonly everyMs: number;\n    };\n};",
               "summary": "The configuration a notice is of."
             },
             {
@@ -12356,6 +12368,54 @@
               "kind": "function",
               "signature": "const windowPairsOf: (readings: readonly PageReading[]) => WindowPairs",
               "summary": "Pair a window's readings into the before-and-afters the comparisons take."
+            },
+            {
+              "name": "FormPlacing",
+              "kind": "type",
+              "signature": "type FormPlacing =\n/**\n * First served inside the window: the later library holds it and the earlier\n * one did not.\n *\n * This is the figure a library comparison exists to report — `pagesGained`,\n * and `formsGained` where the page was already served in another form\n *. A deployment that published two pages this week and had them left\n * out would read `pagesGained: 0` beside them.\n */\n\"published\"\n/**\n * Served when the window began and not at its end: the earlier library held\n * it and the later one does not.\n *\n * The mirror, and `pagesLost`. Its counters are in the window because readers\n * reached it before it went, which is exactly why leaving it out understates\n * what the deployment changed.\n */\n | \"withdrawn\"\n/**\n * Served throughout and never republished: both libraries hold it, at the one\n * revision there is.\n *\n * The page contributes no movement — its placements pair with themselves —\n * and it does contribute its size, which is what keeps `pages` a count of the\n * library rather than a count of the pages that changed.\n */\n | \"unchanged\";",
+              "summary": "Where a form the window holds one revision of belongs, which is the one thing in this rung the counters cannot answer."
+            },
+            {
+              "name": "FORM_PLACINGS",
+              "kind": "value",
+              "signature": "const FORM_PLACINGS: readonly FormPlacing[]",
+              "summary": "The closed set, for a surface accounting for every form it was asked about."
+            },
+            {
+              "name": "describeFormPlacing",
+              "kind": "function",
+              "signature": "const describeFormPlacing: (placing: FormPlacing) => string",
+              "summary": "One line per placing, for a surface saying which library a page is in and why."
+            },
+            {
+              "name": "FormPlacings",
+              "kind": "type",
+              "signature": "type FormPlacings = {\n    /** Where that form belongs, or `undefined` where this source cannot say. */\n    readonly placingFor: (form: PageForm) => FormPlacing | undefined;\n};",
+              "summary": "Where the placings come from, as the libraries need to see them."
+            },
+            {
+              "name": "PlacedForm",
+              "kind": "type",
+              "signature": "type PlacedForm = PageForm & {\n    readonly placing: FormPlacing;\n};",
+              "summary": "One form a deployment has placed, as {@link placingsIn} takes them."
+            },
+            {
+              "name": "placingsIn",
+              "kind": "function",
+              "signature": "const placingsIn: (placed: Iterable<PlacedForm>) => FormPlacings",
+              "summary": "The placings a caller already holds, as a source."
+            },
+            {
+              "name": "WindowLibraries",
+              "kind": "type",
+              "signature": "type WindowLibraries = {\n    /** The deployment's pages at the revisions the window opened on. */\n    readonly was: LibraryWindow;\n    /** The same pages at the revisions it closed on. */\n    readonly now: LibraryWindow;\n    /**\n     * Forms held at one revision that the placings could not place, in a stable\n     * order.\n     *\n     * On neither side, because a side is the assertion: putting an unplaceable\n     * form on the later one publishes a page nobody touched as a page gained\n     *, and putting it on both publishes a page that was published this\n     * week as a page that was always there. It is reported for the reason\n     * {@link UnjoinedRevision} and {@link WindowPairs.unpaired} are — a screen\n     * that silently left it out would show a deployment fewer pages than it has\n     * — and a caller that can place it calls again with a source that does.\n     */\n    readonly unplaced: readonly UnpairedForm[];\n    /**\n     * Forms named more than once across `pairs` and `unpaired`, dropped after the\n     * first.\n     *\n     * Nought for anything {@link windowPairsOf} produced, which files each form\n     * in exactly one of the two lists. It is not nought for a caller that\n     * assembled a {@link WindowPairs} of its own or concatenated two, and the\n     * repeat has to be dropped here rather than carried: two readings of one form\n     * on one side are `ambiguous` to `pairedWindowOf`, which takes the page out of\n     * every figure in the comparison — so the page would vanish out of a total\n     * that went on looking right. The pair wins over the unpaired form,\n     * because it is the same form with a revision more.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "The two libraries a window holds, as the four library comparisons take them."
+            },
+            {
+              "name": "windowLibrariesOf",
+              "kind": "function",
+              "signature": "const windowLibrariesOf: (held: WindowPairs, rows: readonly StoredPageViews[], placings: FormPlacings) => WindowLibraries",
+              "summary": "Assemble a window's pairs into the two libraries the library comparisons take."
             }
           ]
         }
@@ -12369,7 +12429,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12504,7 +12564,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12566,7 +12626,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13091,7 +13151,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13161,7 +13221,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13583,7 +13643,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1784,
+        "packageNames": 1794,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
