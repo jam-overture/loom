@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 67,
+      "files": 68,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9396,7 +9396,7 @@
             {
               "name": "CollectionSummary",
               "kind": "type",
-              "signature": "type CollectionSummary = {\n    readonly counted: number;\n    readonly tallies: number;\n    readonly funnels: number;\n    /** Distinct page views the window held. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key, whose occurrences counted and whose views\n     * did not. A rate shown without saying which denominator it used is the\n     * failure mode here, so the number travels with the run that produced it.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Of the batches counted, how many were a repeat of one already folded in\n     * this window and were therefore folded once (`rollup.ts`).\n     *\n     * A subset of `counted` rather than a number beside it: every one of them was\n     * read from the buffer and is forgotten with the rest. Non-zero every run is\n     * a sender retrying deliveries it already made, which is worth finding — and\n     * the figure is in the run's outcome rather than in a stored row because a\n     * fold's own numbers are not durable, only the counters it produced are.\n     */\n    readonly redelivered: number;\n};",
+              "signature": "type CollectionSummary = {\n    readonly counted: number;\n    readonly tallies: number;\n    readonly funnels: number;\n    /** Distinct page views the window held. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key, whose occurrences counted and whose views\n     * did not. A rate shown without saying which denominator it used is the\n     * failure mode here, so the number travels with the run that produced it.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Of the batches counted, how many were a repeat of one already folded in\n     * this window and were therefore folded once (`rollup.ts`).\n     *\n     * A subset of `counted` rather than a number beside it: every one of them was\n     * read from the buffer and is forgotten with the rest. Non-zero every run is\n     * a sender retrying deliveries it already made, which is worth finding — and\n     * the figure is in the run's outcome rather than in a stored row because a\n     * fold's own numbers are not durable, only the counters it produced are.\n     */\n    readonly redelivered: number;\n    /**\n     * How old the oldest delivery the scan found was, in milliseconds, at the\n     * instant this run was taken.\n     *\n     * A fact about the buffer and about no reader, like every other figure here.\n     * It is free: a scan runs from the oldest end, so the first batch it read is\n     * the oldest one there is, and this is one subtraction over it.\n     *\n     * **The run does the subtraction rather than the caller**, because the\n     * caller's clock is not this run's: a surface that read the age against its\n     * own `now` would publish a number nothing had measured.\n     *\n     * Never absent and always at least the ripeness window: a summary exists only\n     * where something was ripe. What it is for is\n     * {@link retentionPromiseOf} — whether the ceiling the deployment publishes\n     * to its readers is one it keeps. A delivery whose stored instant cannot be\n     * read leaves this not a number, and that reading answers *nothing here can\n     * say* on it rather than *kept*.\n     */\n    readonly oldestMs: number;\n};",
               "summary": "The half of the outcome a caller shows or logs, with nothing in it about a reader."
             },
             {
@@ -11814,6 +11814,31 @@
           ]
         },
         {
+          "module": "signals/retention",
+          "title": "Retention",
+          "summary": "Whether the deployment keeps the retention ceiling it publishes to its readers.",
+          "symbols": [
+            {
+              "name": "RetentionPromise",
+              "kind": "type",
+              "signature": "type RetentionPromise = \n/**\n * The deployment stated no sweep interval, so its notice publishes no\n * ceiling.\n *\n * There is nothing for a run to keep or break. The remedy is not a sweep's:\n * an operator states the interval their cron actually runs on, and until they\n * do their readers are told when a delivery ripens and nothing about when it\n * goes.\n */\n{\n    readonly state: \"unpromised\";\n}\n/**\n * The run read no delivery, so nothing here says how old the oldest one is.\n *\n * Either it never reached the buffer — refused on its window, or the store\n * was unavailable — or the one instant it needed could not be read. A buffer\n * the sweep cannot see is a promise nothing can speak for, and the honest\n * answer is silence rather than *kept*.\n */\n | {\n    readonly state: \"unread\";\n}\n/**\n * Nothing in the buffer is old enough to count, so nothing in it can be past\n * the ceiling.\n *\n * The strongest of the three quiet answers and the only one that is a proof.\n * A scan runs from the oldest end, so a run that found nothing ripe found\n * every delivery younger than the ripeness window — and the ceiling is that\n * window plus a sweep, which is longer. An empty buffer lands here too, for\n * the same reason and with nothing waiting.\n */\n | {\n    readonly state: \"unripe\";\n}\n/**\n * The oldest delivery in the buffer is within the ceiling the notice\n * publishes.\n *\n * Both figures travel, because the sentence an operator wants is the\n * comparison and not the verdict: *the oldest here is twelve minutes old and\n * your readers are told seventy*.\n */\n | {\n    readonly state: \"kept\";\n    /** How old the oldest delivery still in the buffer was, in milliseconds. */\n    readonly oldestMs: number;\n    /** The ceiling the notice publishes: the ripeness window plus one sweep. */\n    readonly goneWithinMs: number;\n}\n/**\n * A delivery is older than the ceiling the notice publishes, so that sentence\n * is false and was false for `byMs` before this run.\n *\n * The deployment is either sweeping less often than it stated or not sweeping\n * at all, and the two are the same fault from here. Raising the stated\n * interval makes the published promise true and weaker; sweeping on the\n * interval already stated makes it true and keeps it — and that choice is an\n * operator's, so this names the gap rather than a remedy.\n */\n | {\n    readonly state: \"broken\";\n    readonly oldestMs: number;\n    readonly goneWithinMs: number;\n    /** How far past the ceiling the oldest delivery is. */\n    readonly byMs: number;\n};",
+              "summary": "How a published retention ceiling stood at the moment of one sweep."
+            },
+            {
+              "name": "retentionPromiseOf",
+              "kind": "function",
+              "signature": "const retentionPromiseOf: (outcome: CollectionOutcome, retention: DeliveryRetention) => RetentionPromise",
+              "summary": "Judge one sweep's own evidence against the ceiling its deployment publishes."
+            },
+            {
+              "name": "describeRetentionPromise",
+              "kind": "function",
+              "signature": "const describeRetentionPromise: (promise: RetentionPromise) => string",
+              "summary": "One line for the operator who runs the sweep, because they are the only person who can close the gap."
+            }
+          ]
+        },
+        {
           "module": "signals/rollup",
           "title": "Rollup",
           "summary": "Many views, folded into the durable artefact: per-node-per-revision counters, and the funnel pairs a deployment asked about.",
@@ -12429,7 +12454,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12564,7 +12589,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12626,7 +12651,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13151,7 +13176,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13221,7 +13246,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13643,7 +13668,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1794,
+        "packageNames": 1797,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
