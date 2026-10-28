@@ -61467,9 +61467,14 @@ not filed again: **nothing draws any of this**, and `Loom portal` is paused.
 ## 2026-10-28 — a deployment states how often it sweeps, and nothing in this repository can check that it does
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/notice.ts`, `src/signals/health.ts`) · **Status:** open — **the
-stated limit of what [0320](decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)
-publishes**; nothing is broken and no test is failing
+(`src/signals/notice.ts`, `src/signals/health.ts`) · **Status:** **closed by
+`signals-60-the-ceiling-the-buffer-keeps` (§60)**, record
+[0321](decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)
+— **not in the shape recommended below**, and the two reasons are in the record:
+the door row's `foldedAt` is indirect evidence where the buffer's own oldest row
+is exact, and a `CollectionFault` is per-revision where this fact is
+per-deployment. The check is a run's rather than a reading's, it costs no store
+read at all, and `health.ts` was not touched
 
 `LOOM_SIGNAL_SWEEP_MS` is a deployment's claim about a cron outside this
 repository, and the notice publishes a ceiling derived from it: ripeness plus
@@ -61580,3 +61585,89 @@ once where `readIntakeSettings` is read, so a screen cannot ask a question with
 a floor missing. That is a record, it touches every reading that takes either
 argument, and it is not tonight's unit. Recorded here so the next run does not
 re-derive the count.
+
+---
+## 2026-10-28 (evening) — a stated ceiling is now checked against the buffer, and nothing checks that the ceiling is tight
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/retention.ts`) · **Status:** open — **the stated limit of what
+[0321](decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)
+proves**; nothing is broken and no test is failing
+
+A sweep now compares the oldest delivery it found against the ceiling its
+deployment publishes, so *gone within 65 minutes* can be caught being false.
+**What it cannot catch is a ceiling that is true because it is generous.** A
+deployment that sweeps every five minutes and states a day publishes *gone
+within 25 hours*, keeps that promise with a day of room to spare, and reads
+`kept` on every run.
+
+That is correct and deliberate — a notice may always promise a reader less than
+the deployment knows and may never promise more (0320) — and it means the
+verdict proves the published promise is **kept** and never that it is **tight**.
+A reader comparing two products on their privacy pages cannot tell a deployment
+that sweeps hourly and says so from one that sweeps every minute and hedges.
+
+**The material for the sharper reading exists and the cost is the question.**
+The gap between the stated interval and the observed one is readable over
+several runs — the oldest delivery's age at each sweep is a floor on how long
+ago the last one was — but a run is stateless by design and nothing stores a
+previous run's figure. Storing one would make the sweep's own history a durable
+artefact, which rule 5 reserves for aggregates about readers.
+
+**Recommendation: leave it.** The honest version of this is not a framework
+check at all; it is an operator who states the interval their cron runs on,
+which is what the setting asks for and what the sweep's output now reminds them
+of twice. If it is ever wanted, the cheap shape is a figure rather than a
+verdict: publish the observed interval beside the stated one on the sweep's
+line, and let the operator read the two.
+
+---
+## 2026-10-28 (evening) — the verdict on a published promise reaches an operator's log and nothing else
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**a gap named at the moment it was created**; nothing is broken
+
+`retentionPromiseOf` (§60) is printed by `signals-collect.ts` and by nothing
+else. That is the right first home — the person reading a cron's output is the
+person who schedules the cron — and it is also the surface nobody looks at until
+something else has already gone wrong.
+
+The two places it would be read are both outside this lane's reach today. The
+intake status route is a pure read of settings with no store and no clock, so it
+cannot carry a verdict that needs a run; `health.ts` is the operator's reading
+and this fact is per-deployment rather than per-revision, which is the reason
+0321 did not put it there.
+
+**What would actually close it** is the same thing twelve runs of this lane have
+filed: something that draws any of this. A deployment screen that shows
+collection health has an obvious row for *the ceiling your readers are promised
+is not being kept*, and it would be reading a value that already exists.
+
+**Recommendation: leave it with the rest.** `Loom portal` is paused and this is
+one row on a screen that does not exist. Worth knowing that the value is there
+and costs nothing to read when the screen is built.
+
+---
+## 2026-10-28 (evening) — a script that reads one setting is a script that parses the environment, and the test asserting otherwise named the function instead of the property
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/settings.test.ts`) · **Status:**
+**closed on filing** in `signals-60-the-ceiling-the-buffer-keeps`, and filed
+because the next instance will not be in this file
+
+0317 moved the sweep script's window reading into `settings.ts` and guarded it
+with `expect(SWEEP).toContain("readCollectionWindow")`. §60 needed the whole of
+`IntakeSettings` in that script, so it reads `readIntakeSettings()` — which is
+*more* of the property 0317 wanted and failed the test asserting it, because the
+test named the function rather than the property.
+
+It is now `toContain("readIntakeSettings")` **and**
+`not.toContain("process.env[")`, which is the property itself: this script
+parses no environment at all. The second half is what would have caught the
+original fault and what will catch the next one, and it did not need naming any
+function.
+
+**The general shape, for whoever hits it next:** a guard written as *the right
+helper is called* passes only for as long as that helper is the right one, and
+fails on the change that makes it righter. A guard written as *the wrong thing
+is absent* survives the refactor. Both are one line.

@@ -59,6 +59,7 @@ the portal every day.
 | Whether readers did anything, rather than saw it | `engaged` against `reached` off one row ([0242](../decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)), withheld on a leaf because a leaf has no inside |
 | Whether a change made room to read | two windows' pace compared, with the words and the readers separated by a counterfactual ([0244](../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)) |
 | What a reader is told about how long it is kept | the age a delivery ripens at **and** how often the deployment sweeps, as a ceiling it stated rather than one the framework guessed ([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)) — and the weaker sentence, in as many words, where it has stated nothing |
+| Whether that promise is one the deployment keeps | the oldest delivery a sweep found, against the ceiling the notice publishes ([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)) — free, because a scan already starts at the oldest end — with an unstated interval judged as no claim rather than a broken one, and a delivery exactly on the ceiling as a sweep that ran on time |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -3731,6 +3732,75 @@ judges a stall against a schedule), but checking it inside a notice would make
 the notice a reading, with a store and a clock behind it, which §52 refuses for a
 reason that still holds. And still that **nothing prints any notice to any
 reader**, which is two other lanes'.
+
+### 60. Whether the ceiling a reader is promised is one the deployment keeps · `Loom signals` · **done, 28 October**
+
+The limit §59 published and filed on the same night. A notice now ends on a
+ceiling — *a delivery is gone within 65 minutes of arriving* — and that ceiling
+is the ripeness window plus an interval **an operator typed about a cron outside
+this repository**. A deployment that states five minutes and sweeps weekly
+publishes the sentence to every reader of its privacy page, and nothing
+anywhere noticed.
+
+It is the one direction of overstatement this module exists to prevent. Its
+ceiling rule lets a notice say more is *collected* than is, deliberately,
+because that costs a reader nothing. An overstated **deletion** is the claim a
+reader would most want to rely on.
+
+**The evidence was free and already in the sweep's hands.** `scanFrom` walks the
+buffer from its oldest end, so the first batch a run reads is the oldest
+delivery there is, and `receivedAt` is the one timestamp the buffer vouches for.
+Its age at the instant of the run is a subtraction over something every run has
+looked at and none of them reported — and if it is past the ceiling, a delivery
+existed that readers were told was gone, for the whole of the gap, whatever the
+run then deletes.
+
+**Done**
+([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)),
+as `oldestMs` on `CollectionSummary` in [`collect.ts`](../src/signals/collect.ts)
+and `retentionPromiseOf` in [`retention.ts`](../src/signals/retention.ts).
+
+- **The run does the subtraction, not the caller**, because the caller's clock
+  is not the run's: a surface that aged the delivery against its own `now` would
+  publish a number nothing measured. Never absent — a summary exists only where
+  something was ripe, and the ripe prefix starts at the oldest end.
+- **It is handed the notice's own retention whole**, the same `Pick` the
+  reader's sentence is built from (0320), so the ceiling judged is the ceiling
+  published. A sweep deriving its own could clear a promise nobody made.
+- **Five states, three of which judge nothing and say which refusal they are.**
+  An unstated interval is `unpromised` and wins over a buffer months behind,
+  because there is no claim of the deployment's to measure. A run that never
+  reached the buffer is `unread`. A run that found nothing ripe is `unripe`, and
+  that one is a **proof** rather than a quiet answer: a scan from the oldest end
+  found every delivery younger than the ripeness window, and the ceiling is that
+  window plus a sweep.
+- **A delivery exactly on the ceiling keeps the promise.** The ceiling is where
+  a deployment sweeping on the interval it stated actually sits, so faulting at
+  the boundary would cry wolf on every healthy run. One millisecond past is
+  `broken`, with the gap on the state.
+- **The sweep prints the verdict per application and never exits on it.** The
+  remedy is to sweep more often or to state the interval actually swept on, both
+  an operator's, and a run that exited here would stop the sweep that is the
+  remedy. The script reads this deployment's settings whole now and builds the
+  notice from them, so the only ceiling in the file is the published one.
+- **`health.ts` is not where this went**, and the finding that asked for it
+  there was wrong in a way worth keeping: a fault there is per-revision and this
+  fact is per-deployment, so one false sentence on a privacy page would raise it
+  on every page and count the whole deployment's arrivals as readers whose
+  measurement is wrong. Nothing about the measurement is wrong. A fault there is
+  named by what it costs a reading (0271); this costs a reading nothing.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method, no new kind and **no new read** — the figure is a subtraction over a
+batch the scan already held.
+
+**What is left and is filed:** a deployment that states a generous interval
+publishes a true, weak ceiling and is never faulted for it, which is correct and
+means this proves only that the stated promise is kept rather than that it is
+tight; the verdict reaches an operator's log and no screen, so a deployment that
+does not read its cron output still learns nothing; and still that **nothing
+prints any notice to any reader**, which is two other lanes'.
 
 ## Still not in scope
 
