@@ -60636,6 +60636,39 @@ for**: the next run that finds this red should say so in its report and leave
 the number alone. Either shape above would have let both of these land without
 a run editing a constant.
 
+### 28 October — the third band, and the first one that was paid for
+
+**The ceiling did not move and the band landed anyway**, which is what the
+sentence above asked for and is worth recording as the shape that works.
+
+`/why-use-it` gained a browser frame with a small page inside it, built out of
+the starter set. It is **61 words**: a heading, a caption, two marks, a frame
+label and the example's own copy. The site had **45** of headroom. So the run
+wrote the band and then found the words for it in this lane's own prose on the
+same page:
+
+| | words |
+| --- | --- |
+| the band | **+61** |
+| *Try it on a page of your own*, whose sentence the band now shows | −13 |
+| the hero's *in your own application* | −3 |
+| **site total** | **3,889 of 3,900** |
+
+The first of those two is the honest one and the second is a tightening. The
+closing band used to carry the whole claim on its own — *"Every page of it is
+put together from the starter components anybody gets when they install it"* —
+to a reader who had been shown nothing. A reader who has just watched a page be
+assembled out of the list does not need it spelled out again, so it reads
+*"This site is a Loom application too, built out of the same set."*
+
+**This is the budget working rather than the budget binding**, and it is the
+answer to the question the entry above puts to the maintainer only in the sense
+that it buys another run or two. Two numbers say why it is still a question:
+the site now has **11 words of slack**, and the next band on this site is
+unlikely to find thirteen redundant words waiting for it. A ceiling that can
+only be met by finding something to cut on the same page is a ceiling that will
+be met by cutting something that should have stayed.
+
 ---
 
 ## 2026-10-26 — a two-subject comparison is the one shape of the band that could fit a phone, and it is the shape that does not
@@ -61207,6 +61240,56 @@ Filed as an offer, not a defect: the import is
 touches no store and no clock.
 
 ---
+
+## 2026-10-28 — where a mark goes over a frame is a measurement, and nothing in the repository can take it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.pin.ts`) · **Status:** **open as an offer, not a
+request** — nothing is broken, `loom.frame` and `loom.pin` both did exactly
+what their notes promise, and this is the one thing that cost a run three
+tries
+
+Today `/why-use-it` became the first page on any surface of this application to
+render `loom.frame`, with two `loom.pin` marks over the page inside it. Both
+primitives are good and the band would not exist without them. The legend
+rendering in particular is the thing that made marks possible at all at 390,
+and it needed nothing from this lane.
+
+**`x` and `y` are percentages of a surface whose height the author cannot
+know.** The surface is a slot; what goes in it is a tree; how tall that tree
+renders is a function of the palette, the font pack and the viewport. So a mark
+is placed by guessing, photographing, and guessing again. Measured on the
+production build that shipped this band, at 1280 on `minimal`:
+
+| | top | height | as a share of the screen |
+| --- | --- | --- | --- |
+| the screen inside the frame | 3123 | 447 | — |
+| the row of three tiles | 3479 | 58 | **79.6% – 92.6%** |
+
+A mark at `y: 90` is inside the tiles and on top of their words. A mark at
+`y: 76` is on their top edge. The band ships `y: 72`, which is in the hero's
+own air above them, and the number means nothing on any other page, at any
+other width, or if a fourth tile is added.
+
+### Three shapes, offered rather than recommended
+
+- **Leave it.** A mark is a design decision and a designer with a camera is the
+  right instrument. This is what happened today and it cost one rebuild and two
+  photographs, which is not much.
+- **Let a mark name a node instead of a point.** `at: <id of a node in the
+  surface>` and the renderer places the dot on that element's box. It is the
+  honest version — the author says *point at the tiles* and never writes a
+  percentage — and it is a real piece of work, because a pin would then need
+  the rendered geometry of a sibling subtree rather than only its own props.
+- **An edge rather than a point.** `edge: "above" | "below"` with the `at`
+  above, which is the placement this band actually wanted: beside the thing,
+  not on it.
+
+The second is the one a tree-shaped model would also find easier to write, and
+that is probably the stronger argument for it than this lane's three tries.
+Whether a pin is worth it is `Loom primitives`' call; the measurement above is
+here so that the next lane to place one starts from a number rather than from
+zero.
 ## 2026-10-27 (evening) — the two libraries a window holds are assembled now, and the placing is the one argument nothing will remind a caller to pass
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
