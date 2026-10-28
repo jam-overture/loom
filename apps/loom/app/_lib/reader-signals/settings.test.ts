@@ -14,15 +14,18 @@ import {
   describeCollectionWindow,
   describeIntakeSwitch,
   describeRegionSettings,
+  describeSweepSchedule,
   INTAKE_KEY,
   readCollectionWindow,
   readIntakeSettings,
   readIntakeSwitch,
   readRegionFloor,
   readRegionSwitch,
+  readSweepSchedule,
   REGION_FLOOR_KEY,
   REGION_HEADER_KEY,
   REGION_KEY,
+  SWEEP_KEY,
   WINDOW_KEY,
 } from "./settings"
 
@@ -280,6 +283,78 @@ describe("the window an environment configures", () => {
   })
 })
 
+describe("readSweepSchedule", () => {
+  it("states nothing where nothing was set", () => {
+    expect(readSweepSchedule(undefined)).toEqual({ state: "unstated" })
+    expect(readSweepSchedule("   ")).toEqual({ state: "unstated" })
+  })
+
+  it("takes a whole number of milliseconds above nought", () => {
+    expect(readSweepSchedule("600000")).toEqual({ state: "stated", everyMs: 600_000 })
+    expect(readSweepSchedule(" 60000 ")).toEqual({ state: "stated", everyMs: 60_000 })
+  })
+
+  /**
+   * A value that is not an interval is **neither**, as everywhere else in this
+   * file. The ordinary way this one is written wrongly is a units mistake with
+   * a suffix — `10m` — and reading it as unstated would leave an operator who
+   * configured something looking at a privacy page that promises nothing, with
+   * nothing anywhere saying why.
+   */
+  it("is neither for anything that is not a whole, positive interval", () => {
+    for (const given of ["10m", "0", "-600000", "1.5", "nonsense", "1e3ms"]) {
+      expect(readSweepSchedule(given)).toEqual({ state: "unusable", given })
+    }
+  })
+})
+
+describe("describeSweepSchedule", () => {
+  it("names the key, the value and what readers are told when it could not be read", () => {
+    const sentence = describeSweepSchedule(readSweepSchedule("10m"))
+
+    expect(sentence).toContain(SWEEP_KEY)
+    expect(sentence).toContain('"10m"')
+    expect(sentence).toContain("ripens")
+  })
+
+  it("says the interval and that it is published, where one was stated", () => {
+    expect(describeSweepSchedule(readSweepSchedule("600000"))).toContain("600000ms")
+  })
+
+  it("tells an operator how to publish a ceiling, where none is stated", () => {
+    const sentence = describeSweepSchedule(readSweepSchedule(undefined))
+
+    expect(sentence).toContain("not stated")
+    expect(sentence).toContain(SWEEP_KEY)
+  })
+})
+
+describe("the schedule an environment states", () => {
+  it("is read off the environment with the rest of the intake's settings", () => {
+    expect(readIntakeSettings({ [SWEEP_KEY]: "600000" }).sweep).toEqual({
+      state: "stated",
+      everyMs: 600_000,
+    })
+    expect(readIntakeSettings({}).sweep).toEqual({ state: "unstated" })
+  })
+
+  /**
+   * It reaches neither the door nor the sweep: a schedule nobody stated costs a
+   * sentence on a privacy page and nothing a run does, which is the whole
+   * difference between this setting and the window beside it.
+   */
+  it("stops nothing that the window stops", () => {
+    const settings = readIntakeSettings({ [INTAKE_KEY]: "on", [SWEEP_KEY]: "nonsense" })
+
+    expect(settings.sweep.state).toBe("unusable")
+    expect(settings.chosen).toEqual({ state: "on" })
+    expect(settings.window).toEqual({
+      state: "default",
+      windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS,
+    })
+  })
+})
+
 /**
  * The fault this unit closes was a second spelling of one default, in a file no
  * type reaches: a script. So the guard is at the source, because that is where
@@ -316,6 +391,20 @@ describe("the sweep this deployment runs", () => {
    * `3_600_000`. Over the code of both files: the one that held the second copy
    * and the one that holds the only reading.
    */
+  /**
+   * The script is the sweep, so it is where an operator finds out whether
+   * anybody was told how often it runs — and it must not refuse on it. The
+   * schedule is *called* on exactly one line of the file and that line is a
+   * log, which is the assertion that no branch of this script turns on it: the
+   * window has four exits in here and the schedule may have none.
+   */
+  it("prints the schedule it is the subject of, and never refuses on it", () => {
+    const mentions = SWEEP.split("\n").filter((line) => line.includes("SweepSchedule("))
+
+    expect(mentions).toHaveLength(1)
+    expect(mentions[0]).toContain("console.log")
+  })
+
   it("spells an hour nowhere, in either file", () => {
     for (const code of [SWEEP, codeOf("./settings.ts")]) {
       expect(code).not.toMatch(/60 ?\* ?60 ?\* ?1000/)

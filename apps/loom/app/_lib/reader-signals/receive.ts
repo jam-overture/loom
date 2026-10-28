@@ -19,6 +19,7 @@ import {
   describeCollectionWindow,
   describeIntakeSwitch,
   describeRegionSettings,
+  describeSweepSchedule,
   type IntakeSettings,
 } from "./settings"
 
@@ -315,6 +316,17 @@ export type IntakeStatus = {
    * sentence rather than renaming another lane's documented field.
    */
   readonly collection: string
+  /**
+   * How often this deployment says it sweeps, and what its readers are told as
+   * a result. One sentence, for an operator.
+   *
+   * The only setting here whose whole effect is on somebody else's reading: no
+   * batch is refused and no sweep is changed by it, and what it decides is
+   * whether a notice can say when a delivery goes or only when it ripens
+   * (0320). An operator cannot see that from anywhere else, because nothing
+   * fails.
+   */
+  readonly sweep: string
 }
 
 /**
@@ -343,6 +355,7 @@ export const describeIntake = (intake: Intake): IntakeStatus => {
     subjects: intake.gate.subjects(),
     regions: describeRegionSettings(intake.settings.region),
     collection: describeCollectionWindow(intake.settings.window),
+    sweep: describeSweepSchedule(intake.settings.sweep),
     detail:
       intake.settings.chosen.state === "on" && !intake.durable
         ? "reader signals are being collected into memory, which a serverless deployment forgets; " +
