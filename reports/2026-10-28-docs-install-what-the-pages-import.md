@@ -178,7 +178,7 @@ Standing entries this run met again and did not duplicate:
 last thing on its line, with nothing piped into `tail` or `tee`.
 
 - framework: **240 files, 5,791 tests passed**
-- application: **371 files, 6,723 tests passed**
+- application: **371 files, 6,724 tests passed**
 - `findings:check`: 1,339 findings, 0 malformed
 - `reports:check`: 1,999 visuals, 142.5MB, none over 1.1MB
 - `prerender:check`: **137 prerendered pages**, 1,943 text junctions, 0 run
