@@ -58,6 +58,7 @@ the portal every day.
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Whether readers did anything, rather than saw it | `engaged` against `reached` off one row ([0242](../decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)), withheld on a leaf because a leaf has no inside |
 | Whether a change made room to read | two windows' pace compared, with the words and the readers separated by a counterfactual ([0244](../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)) |
+| What a reader is told about how long it is kept | the age a delivery ripens at **and** how often the deployment sweeps, as a ceiling it stated rather than one the framework guessed ([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)) — and the weaker sentence, in as many words, where it has stated nothing |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -3664,6 +3665,72 @@ being counted as a page gained. `pagesGained` is a count of the forms whose
 the vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
 
 **What is left:** that **nothing draws any of this**, which is `Loom portal`'s.
+
+### 59. How often the deployment sweeps, said to the reader · `Loom signals` · **done, 28 October**
+
+The older half §56 could not close, and the one direction of overstatement the
+notice was built to make impossible.
+
+§52 published what a page collects, and one sentence of it was how long a
+delivery lives: *a delivery is kept until it is 60 minutes old, and the
+deployment's own sweep is what then counts it into totals and deletes it.* Every
+clause is true, and the whole of it reads as a promise the framework cannot
+keep. **`bufferMs` is the age at which a delivery becomes *ripe*, not the age at
+which anything deletes it** — nothing in `src/signals/` deletes one, because
+what calls `collectReaderSignals` is a cron, a deploy hook or an operator,
+outside the application. So a deployment can have a working endpoint, a notice
+naming an hour, and nothing sweeping, and the reader it collects about has no
+way of hearing *…or for ever, if nobody runs the sweep*.
+
+The ceiling rule lets this module overstate what is *collected*, deliberately
+(§52). An overstated **deletion** is the opposite: the claim a reader would most
+want to rely on, and the one this subsystem had the least standing to make.
+
+**Done**
+([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)),
+as `SweepNotice` on `CollectionNotice.sweep` in
+[`notice.ts`](../src/signals/notice.ts), read off the environment as
+`LOOM_SIGNAL_SWEEP_MS` in
+[`settings.ts`](../apps/loom/app/_lib/reader-signals/settings.ts).
+
+- **The deployment states the interval, because nobody else can** — the shape
+  `CollectionSchedule` already takes for the operator's half of the same fact
+  (0274). Read where the rest of this deployment's intake settings are read
+  (0317), with a state for a value that could not be used.
+- **The published figure is a ceiling on a delivery's life**: `goneWithinMs` is
+  the ripeness window plus one sweep, because a delivery is not counted until it
+  ripens and then not until the next run. Derived in one place so no surface can
+  print a ceiling that disagrees with the age beside it — **and it is the number
+  `CollectionSchedule.foldsWithinMs` wants**, so one stated interval gives a
+  reader's ceiling and an operator's stall threshold.
+- **Two states, not a nullable number.** The ceiling is unreachable where
+  nothing was stated, so *gone within 70 minutes* cannot be printed by a
+  deployment that promised nothing. The type rules it out rather than a
+  reviewer.
+- **Anything that is not a positive, finite interval is `unstated`.** A notice
+  may promise a reader less than the deployment knows and may never promise
+  more; the operator hears that a value was refused from
+  `describeSweepSchedule`, which is the split 0317 made for the window.
+- **`describeBuffer` takes the retention whole**, as a `Pick` of the notice
+  rather than a number, so **the age cannot be published without the sweep
+  beside it** — which is what any surface could do until today, and is the
+  sentence this unit exists to stop.
+- **The operator's half is on the status and in the sweep script.** It is the
+  one setting here whose whole effect is on somebody else's reading: nothing is
+  refused, nothing stops, and an operator who never set it has no other way to
+  learn their readers were promised nothing.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** a stated interval is a claim nothing here can
+check — a deployment that states ten minutes and sweeps weekly publishes a false
+ceiling. The material to catch it exists (§29 stamps the fold's own timestamp and
+judges a stall against a schedule), but checking it inside a notice would make
+the notice a reading, with a store and a clock behind it, which §52 refuses for a
+reason that still holds. And still that **nothing prints any notice to any
+reader**, which is two other lanes'.
 
 ## Still not in scope
 

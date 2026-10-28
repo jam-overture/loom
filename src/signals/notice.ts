@@ -366,8 +366,9 @@ export type CollectionNotice = {
    * life of the page-view key, since the key exists in the buffer and nowhere
    * else. **The framework cannot promise the moment it is swept**, because a
    * host schedules the sweep: this is the age at which a delivery becomes ripe,
-   * not a guarantee about when the next run happens.
-   * {@link describeBuffer} says both halves.
+   * not a guarantee about when the next run happens. What the deployment itself
+   * promises about that is {@link CollectionNotice.sweep}, and
+   * {@link describeBuffer} says the two together.
    */
   readonly bufferMs: number
   /**
@@ -502,8 +503,8 @@ export type NoticeRequest = {
    * ceiling no deployment promised. A value that is not a positive, finite
    * number of milliseconds is read the same way — the notice may always
    * promise a reader less than the deployment knows and may never promise more,
-   * and the operator-facing half is where a value that could not be read is
-   * said out loud (`settings.ts`, 0317).
+   * and the operator-facing half, where a value that could not be read is said
+   * out loud, is a deployment's own settings (0317).
    */
   readonly sweep?: { readonly everyMs: number }
 }
