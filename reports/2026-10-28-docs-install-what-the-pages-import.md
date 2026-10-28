@@ -256,11 +256,11 @@ makes it say why.
 Taken from the `vercel[bot]` comment after opening the pull request, not
 composed from the branch name.
 
-<!-- PREVIEW -->
+https://loom-git-docs-69-install-wha-cbf5a3-jpizzolato36-6341s-projects.vercel.app
 
 The page the whole unit is about:
 
-<!-- PREVIEW -->/docs/getting-started/installation
+- https://loom-git-docs-69-install-wha-cbf5a3-jpizzolato36-6341s-projects.vercel.app/docs/getting-started/installation
 
 **The preview deploying at all is evidence**, because the module throws at
 import when the site imports something it does not install — a green deployment
@@ -269,6 +269,8 @@ is the check passing.
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,
 which is the open finding of 12 October and still true.
+
+The pull request is **#720**.
 
 ## Needs your input
 
