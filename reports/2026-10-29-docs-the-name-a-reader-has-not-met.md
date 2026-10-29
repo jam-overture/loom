@@ -315,7 +315,12 @@ from`. Measured at `y 300`, 702×138.
 *Filled in from the `vercel[bot]` comment after the pull request was opened,
 not composed from the branch name.*
 
-PREVIEW_URL_PLACEHOLDER
+https://loom-git-docs-70-the-name-a-58e797-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the unit is about:
+
+- https://loom-git-docs-70-the-name-a-58e797-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-the-gate-decides
+- https://loom-git-docs-70-the-name-a-58e797-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/connecting-a-model
 
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,
@@ -352,3 +357,5 @@ Two standing questions, neither new, neither blocking: whether a list-shaped
 export may be given a list-shaped presentation (22 October), and whether a
 produced table on this site should be composed from the library rather than
 arranged locally (#709).
+
+The pull request is **#723**.
