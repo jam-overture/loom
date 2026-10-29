@@ -8,9 +8,9 @@
  * typechecker reads the code the site invites people to copy.
  */
 
+import { buildElement, buildSlot } from "@jam-overture/loom"
+
 import {
-  buildElement,
-  buildSlot,
   createElement,
   features,
   heading,
@@ -29,7 +29,7 @@ buildElement(ids, {
   children: [hero, features, pricing],
 })
 
-// page.mdx:37 — a program
+// page.mdx:39 — a program
 buildElement(ids, {
   type: "loom.hero",
   props: { align: "center", eyebrow: "The AI-native UI runtime" },
@@ -40,8 +40,8 @@ buildElement(ids, {
   ],
 })
 
-// page.mdx:52 — the inside of an object literal
-const objectAtLine52 = {
+// page.mdx:56 — the inside of an object literal
+const objectAtLine56 = {
 component: ({ loom, children }: LoomPrimitiveProps) =>
   createElement(
     "section",
@@ -52,9 +52,9 @@ component: ({ loom, children }: LoomPrimitiveProps) =>
   )
 }
 
-// page.mdx:70 — the inside of an object literal
-const objectAtLine70 = {
+// page.mdx:74 — the inside of an object literal
+const objectAtLine74 = {
 slots: ["heading", "actions", "media"]
 }
 
-export { objectAtLine52, objectAtLine70 }
+export { objectAtLine56, objectAtLine74, buildElement, buildSlot }

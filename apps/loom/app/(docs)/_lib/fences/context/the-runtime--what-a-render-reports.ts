@@ -9,9 +9,7 @@ import type { RenderOptions, RenderOutput } from "@jam-overture/loom/react"
  * the same story *Rendering a tree* is told from. The second block is the
  * inside of a test, so it is lent the render it is asserting about and `expect`
  * itself.
- *
- * `renderLoomTree` is the runtime's and is imported as such, so the call on the
- * page is checked against its real signature.
+
  */
 
 export declare const tree: LoomTree
@@ -22,5 +20,3 @@ export declare const rendered: RenderOutput
 
 /** The test runner's. Narrow on purpose: the page asserts one thing with it. */
 export declare const expect: (value: unknown) => { readonly toEqual: (other: unknown) => void }
-
-export { renderLoomTree } from "@jam-overture/loom/react"
