@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12441,6 +12441,24 @@
               "kind": "function",
               "signature": "const windowLibrariesOf: (held: WindowPairs, rows: readonly StoredPageViews[], placings: FormPlacings) => WindowLibraries",
               "summary": "Assemble a window's pairs into the two libraries the library comparisons take."
+            },
+            {
+              "name": "DeploymentReadingContext",
+              "kind": "type",
+              "signature": "type DeploymentReadingContext = {\n    /** The trees the window's revisions were filed against, as the caller holds them. */\n    readonly trees: RevisionTrees;\n    /** What each primitive declares it plays and says, from the registry. */\n    readonly declarations: PartDeclarations;\n    /**\n     * The smallest region bucket this deployment will name, in page views.\n     *\n     * Required, and `regionFloorOf` still raises anything below the runtime's own\n     * minimum: a deployment may be more careful than the default and may not be\n     * less. A caller with nothing of its own to say passes\n     * `DEFAULT_REGION_FLOOR` and has said so.\n     */\n    readonly floor: number;\n    /**\n     * Where a form the window holds one revision of belongs.\n     *\n     * A caller that cannot place any of them hands in `placingsIn([])`, which\n     * reports every such form in {@link WindowLibraries.unplaced} rather than\n     * guessing it onto a side. That is the honest shape of *this deployment does\n     * not know what it published when*, and it is one call rather than an\n     * argument left out.\n     */\n    readonly placings: FormPlacings;\n};",
+              "summary": "The configuration a deployment hands a reading of its own window."
+            },
+            {
+              "name": "WindowAssembly",
+              "kind": "type",
+              "signature": "type WindowAssembly = {\n    /** One reading per page, per revision, per form, with the regions beside them. */\n    readonly readings: WindowReadings;\n    /** The before-and-afters, which is what five of the nine comparisons take. */\n    readonly pairs: WindowPairs;\n    /** The two libraries, which is what the other four take. */\n    readonly libraries: WindowLibraries;\n};",
+              "summary": "Everything a window holds, as the readings and the comparisons take it."
+            },
+            {
+              "name": "windowAssemblyOf",
+              "kind": "function",
+              "signature": "const windowAssemblyOf: (window: ReaderWindow, context: DeploymentReadingContext) => WindowAssembly",
+              "summary": "Assemble a window into every subject a reading or a comparison of it takes."
             }
           ]
         }
@@ -12454,7 +12472,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12589,7 +12607,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12651,7 +12669,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13176,7 +13194,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13246,7 +13264,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13668,7 +13686,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1797,
+        "packageNames": 1800,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

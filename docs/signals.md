@@ -60,6 +60,7 @@ the portal every day.
 | Whether a change made room to read | two windows' pace compared, with the words and the readers separated by a counterfactual ([0244](../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)) |
 | What a reader is told about how long it is kept | the age a delivery ripens at **and** how often the deployment sweeps, as a ceiling it stated rather than one the framework guessed ([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)) — and the weaker sentence, in as many words, where it has stated nothing |
 | Whether that promise is one the deployment keeps | the oldest delivery a sweep found, against the ceiling the notice publishes ([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)) — free, because a scan already starts at the oldest end — with an unstated interval judged as no claim rather than a broken one, and a delivery exactly on the ceiling as a sweep that ran on time |
+| What a deployment reads its own window with | one context holding the four facts a reading needs, with the region floor **required** rather than optional ([0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)) — an absent floor is the smallest bucket this runtime will ever name, so a deployment that raised its floor to a hundred had a surface publish buckets of twenty-five about real people; `windowAssemblyOf` composes the three steps of the rung in the one order that does not drop a page published inside the window |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -3801,6 +3802,70 @@ means this proves only that the stated promise is kept rather than that it is
 tight; the verdict reaches an operator's log and no screen, so a deployment that
 does not read its cron output still learns nothing; and still that **nothing
 prints any notice to any reader**, which is two other lanes'.
+
+### 61. One context a deployment reads a window with · `Loom signals` · **done, 29 October**
+
+The shape this lane filed twice and said it would take on the third. §54 handed
+the region floor into a reading as an argument; §58 handed the form placings in
+the same way; §59 added the sweep interval. Each is per-deployment
+configuration, each is held rather than looked for, and **nothing reminds a
+caller to pass any of them.**
+
+One of the three fails unsafely. `regionFloorOf` is raise-only, so a reading
+called with no floor suppresses at the smallest bucket this runtime will ever
+name — a deployment that raised its floor to a hundred, read by a surface that
+forgot the argument, publishes buckets of twenty-five about real people. The
+omission is silent, and in a diff it is indistinguishable from a caller that
+meant the default.
+
+And the three steps of the §51 rung compose in one order that is not the obvious
+one: the libraries take the pairs `windowPairsOf` produced rather than the pairs
+alone, the door rows are the window's whole set on both sides, and the floor
+reaches the regions through the readings.
+
+**Done**
+([0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)),
+as `DeploymentReadingContext` and `windowAssemblyOf` in
+[`window.ts`](../src/signals/window.ts), with
+`deploymentReadingContextOf` in
+[`reading.ts`](../apps/loom/app/_lib/reader-signals/reading.ts).
+
+- **Four facts in one value** — the trees, the declarations, the region floor
+  and the placings — and **the floor is required.** That is the change rather
+  than the gathering: a caller with nothing of its own to say passes
+  `DEFAULT_REGION_FLOOR` and has said so.
+- **The floor is about the rows there are, not the switch as it stands.** A
+  notice is handed a floor only where a region is being read at all (0313); a
+  reading is of rows already collected, and a deployment that switched regions
+  off yesterday still holds last week's buckets.
+- **`windowAssemblyOf(window, context)` returns the readings, the pairs and the
+  two libraries**, composed in the order that does not drop a page published
+  inside the window. Each of the three steps stays published and separately
+  callable.
+- **Two of the three repeat counts are nought from here, by construction**, so
+  nothing the assembly hands on can put two readings of one form on one side of
+  a library — the repeat that takes a page out of every figure while the counts
+  above it look unchanged (0158). Both fields stay published, because they are
+  not nought for the callers they exist for.
+- **No figure is added and no single total of what was dropped is published.**
+  The three `duplicated` counts are rows, readings and forms, and `unjoined`,
+  `unpaired` and `unplaced` are three reasons a page is absent from three
+  different answers. A sum over them is a number in no unit.
+- **The app half reads the one field only this deployment can answer**, where
+  the rest of its intake settings are read (0317), as `deploymentNoticeOf`'s
+  sibling.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** `windowReadingsOf` keeps its optional options
+argument, so the floor hazard is still reachable a step below the assembly — the
+safe route is now the shortest one, which is the direction that holds rather
+than a guarantee; the collection schedule is a fourth per-deployment setting and
+is **not** in the context, because its other half is an instant and a context
+holding a clock reading would answer differently on two calls over one window;
+and still that **nothing draws any of this**, which is `Loom portal`'s.
 
 ## Still not in scope
 

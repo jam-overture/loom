@@ -61560,9 +61560,20 @@ cross-lane diff `docs/routines.md` asks to file rather than take.
 ---
 ## 2026-10-28 — three deployment settings are now handed into reading calls one at a time, and a third of them makes it a pattern
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
-**the shape §58 said would be worth gathering if a third appeared**, and tonight
-is the third
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-61-one-deployment-reading-context`**
+([0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)).
+Taken as the gathering this entry asked about, with one change to its reading:
+the entry rated the hazard mild because a forgotten argument gives a weaker
+answer, and that is true of the placing and the sweep and **not** of the floor.
+`regionFloorOf` is raise-only, so no floor is the *smallest* bucket this runtime
+names — a deployment that raised its floor to a hundred and a surface that
+forgot the argument publish buckets of twenty-five about real people. So the
+floor is a required field of `DeploymentReadingContext` rather than one of three
+gathered conveniences, and that is the unit. The collection schedule is
+**not** in it; see the entry filed beside this one. Original status below:
+open — **the shape §58 said would be worth gathering if a third appeared**, and
+that night was the third.
 
 §58 filed two arguments with one shape and one hazard: the region floor (§54)
 and the placing (§58), both per-deployment configuration handed into a reading
@@ -61676,3 +61687,77 @@ function.
 helper is called* passes only for as long as that helper is the right one, and
 fails on the change that makes it righter. A guard written as *the wrong thing
 is absent* survives the refactor. Both are one line.
+
+---
+## 2026-10-29 — the collection schedule is a fourth per-deployment setting and is deliberately not in the reading context, because its other half is a clock
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/window.ts`) · **Status:** open — **the
+boundary [0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)
+drew, written down so the next run does not re-derive it**; nothing is broken
+and no test is failing
+
+`DeploymentReadingContext` gathers the per-deployment configuration a reading of
+a window takes: the trees, the declarations, the region floor and the form
+placings. **`collectionHealthOf`'s `CollectionSchedule` is a fifth argument of
+the same family and is not in it**, and the reason is worth keeping because it
+is the rule for whatever arrives next.
+
+A `CollectionSchedule` is two things in one value: `foldsWithinMs`, which is
+per-deployment configuration and is exactly the `goneWithinMs` a notice already
+derives (0320), and `at`, which is **the instant the reading is taken**. A
+context holding `at` would answer differently on two calls over one window,
+which is the property every instant in this subsystem is handed in to avoid. So
+either the context splits the schedule in two and a caller reassembles it — a
+field whose only use is to be taken apart — or the context holds a clock
+reading, which it may not.
+
+**What is actually worth considering**, if a screen ever wants collection health
+off the same context: `collectionHealthOf(readings, { at, foldsWithinMs })` takes
+the whole schedule, so the shape that costs nothing is a **function** on the
+context — `scheduleAt(at)` — rather than a field. The deployment's half is held,
+the instant stays the caller's, and nothing about the health reading changes. It
+is a small record, it is not needed until something draws health, and the
+material for it is all in place: the app's `deploymentNoticeOf` already derives
+the number.
+
+The general rule this leaves behind: **a per-deployment fact belongs in the
+context, and an instant never does.** A fourth argument that is one of each is
+two arguments.
+
+---
+## 2026-10-29 — the reading context makes the safe route the shortest one, and the unsafe one is still reachable a step below it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **the stated limit of what 0322
+guarantees**; nothing is broken and no test is failing
+
+`windowAssemblyOf` cannot be called without a region floor, which is the point
+of it. **`windowReadingsOf` can**, because its options argument is still
+optional and three of its four published callers have nothing to say about a
+floor. So a surface that reaches a step below the assembly can still read a
+deployment's regions at the runtime's minimum rather than at the floor that
+deployment set, silently, exactly as before today.
+
+That is deliberate and it is a weaker guarantee than the record would like. The
+three steps of the §51 rung are published because each is separately useful, and
+narrowing `windowReadingsOf`'s signature to make the fourth step safe would take
+the rung's own flexibility away for a hazard the shortest route no longer has.
+
+**Two shapes, if it is ever wanted.**
+
+1. **Make the options argument required on `windowReadingsOf`.** One line, and
+   it costs every caller — including every test in `window.test.ts` — a
+   `{ floor: DEFAULT_REGION_FLOOR }` it has nothing to say with. It is also the
+   only shape that actually closes the hole rather than making it narrower.
+2. **Take the floor off the regions and onto the rows.** The honest version, and
+   much larger: a floor is a property of the deployment that collected a bucket,
+   so a `StoredRegionCount` read out of a store could carry the floor it may be
+   named at, and no reading could choose. It is a store change, a migration, and
+   a record — out of proportion to one optional argument.
+
+**Recommendation: leave it.** The direction that matters is that the safe route
+is now the shortest one, and the one caller that will exist — a portal screen
+reading this deployment's window — gets its floor from
+`deploymentReadingContextOf` and cannot type a number at all. Revisit if a
+second surface ever reads a window a step below the assembly.

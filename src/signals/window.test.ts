@@ -35,11 +35,13 @@ import {
   readReaderWindow,
   revisionsIn,
   treesIn,
+  windowAssemblyOf,
   windowLibrariesOf,
   windowPairsOf,
   windowReadingsOf,
   FORM_PLACINGS,
   UNJOINED_CAUSES,
+  type DeploymentReadingContext,
   type FormPlacing,
   type FormPlacings,
   type PlacedForm,
@@ -1739,5 +1741,174 @@ describe("the two libraries a window holds", () => {
       was: [DEFAULT_AUDIENCE_ID],
       now: [DEFAULT_AUDIENCE_ID],
     })
+  })
+})
+
+describe("a window assembled for the deployment that holds it", () => {
+  const ASSEMBLED = treesIn([
+    treeOf(TREE, 1, SIDE_BY_SIDE),
+    treeOf(TREE, 2, SIDE_BY_SIDE),
+    treeOf(OTHER_TREE, 1, SIDE_BY_SIDE),
+  ])
+
+  /** A deployment that holds its trees and its registry and can place nothing. */
+  const contextOf = (held: Partial<DeploymentReadingContext> = {}): DeploymentReadingContext => ({
+    trees: ASSEMBLED,
+    declarations: DECLARED,
+    floor: DEFAULT_REGION_FLOOR,
+    placings: { placingFor: () => undefined },
+    ...held,
+  })
+
+  const CHANGED = {
+    tallies: [
+      tally({ revision: 1 }, "band", { views: 10, reached: 10 }),
+      tally({ revision: 2 }, "band", { views: 10, reached: 4 }),
+    ],
+    pageViews: [door({ revision: 1 }, 10), door({ revision: 2 }, 10)],
+  }
+
+  it("reads the pages, the pairs and the two libraries off one call", () => {
+    const { readings, pairs, libraries } = windowAssemblyOf(windowOf(CHANGED), contextOf())
+
+    expect(readings.pages.map((page) => page.revision)).toEqual([1, 2])
+    expect(readings.unjoined).toEqual([])
+    expect(pairs.pairs).toHaveLength(1)
+    expect(pairs.unpaired).toEqual([])
+    expect(libraries.was.readings.map((page) => page.revision)).toEqual([1])
+    expect(libraries.now.readings.map((page) => page.revision)).toEqual([2])
+    expect(libraries.unplaced).toEqual([])
+  })
+
+  it("hands the deployment's floor to the regions, so a bucket under it is withheld", () => {
+    const held = windowOf({ ...CHANGED, regions: [bucket({ revision: 1, views: 40 })] })
+
+    const atDefault = windowAssemblyOf(held, contextOf()).readings.regions
+    const raised = windowAssemblyOf(held, contextOf({ floor: 100 })).readings.regions
+
+    expect(atDefault?.readership.regions).toEqual([{ region: region("FR"), views: 40 }])
+    expect(atDefault?.readership.floor).toBe(DEFAULT_REGION_FLOOR)
+    expect(raised?.readership.regions).toEqual([])
+    expect(raised?.readership.withheld).toEqual({ buckets: 1, views: 40 })
+    expect(raised?.readership.views).toBe(40)
+  })
+
+  it("will not take a context with no floor, because the type is the enforcement", () => {
+    const { trees, declarations, placings } = contextOf()
+
+    expect(() =>
+      // @ts-expect-error — an absent floor is the smallest bucket the runtime names, so it is not optional
+      windowAssemblyOf(windowOf(CHANGED), { trees, declarations, placings })
+    ).not.toThrow()
+  })
+
+  it("keeps an absent region store absent, rather than reading it as a readership of nobody", () => {
+    const { readings } = windowAssemblyOf(windowOf(CHANGED), contextOf())
+
+    expect(readings.regions).toBeUndefined()
+    expect(windowAssemblyOf(windowOf({ ...CHANGED, regions: [] }), contextOf()).readings.regions)
+      .toEqual({ maps: [], readership: expect.objectContaining({ views: 0 }), duplicated: 0 })
+  })
+
+  it("carries a form published inside the window onto the later library, which the pairs alone drop", () => {
+    const held = windowOf({
+      ...CHANGED,
+      tallies: [...CHANGED.tallies, tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 })],
+      pageViews: [...CHANGED.pageViews, door({ treeId: OTHER_TREE, revision: 1 }, 10)],
+    })
+
+    const { pairs, libraries } = windowAssemblyOf(
+      held,
+      contextOf({
+        placings: placingsIn([
+          { treeId: OTHER_TREE, audienceId: null, placing: "published" },
+        ]),
+      })
+    )
+
+    expect(libraryChangeOf(libraries.was.readings, libraries.now.readings).pagesGained).toBe(1)
+    /** The one-line composition over the pairs alone, which is the hazard this step exists for. */
+    expect(
+      libraryChangeOf(
+        pairs.pairs.map(({ was }) => was),
+        pairs.pairs.map(({ now }) => now)
+      ).pagesGained
+    ).toBe(0)
+  })
+
+  it("gives both libraries the window's whole set of door rows, so a reach comparison reads", () => {
+    const held = windowOf(CHANGED)
+
+    const { libraries } = windowAssemblyOf(held, contextOf())
+    const reach = libraryReachChangeOf(libraries.was, libraries.now)
+
+    expect(libraries.was.rows).toEqual(held.pageViews)
+    expect(libraries.now.rows).toEqual(held.pageViews)
+    expect(reach.arrivalsWas).toBe(10)
+    expect(reach.arrivalsNow).toBe(10)
+  })
+
+  it("cannot repeat a reading or a form, however many revisions and forms the window holds", () => {
+    const held = windowOf({
+      tallies: [
+        tally({ revision: 1 }, "band", { views: 10 }, SKIERS),
+        tally({ revision: 2 }, "band", { views: 10 }, SKIERS),
+        tally({ revision: 1 }, "band", { views: 10 }, RIDERS),
+        tally({ revision: 2 }, "band", { views: 10 }, RIDERS),
+        tally({ treeId: OTHER_TREE, revision: 1 }, "band", { views: 10 }),
+      ],
+    })
+
+    const { pairs, libraries } = windowAssemblyOf(
+      held,
+      contextOf({
+        placings: placingsIn([
+          { treeId: OTHER_TREE, audienceId: null, placing: "unchanged" },
+        ]),
+      })
+    )
+
+    expect(pairs.duplicated).toBe(0)
+    expect(libraries.duplicated).toBe(0)
+    expect(libraries.was.readings.map(formKeyOf)).toEqual([
+      ...new Set(libraries.was.readings.map(formKeyOf)),
+    ])
+    expect(libraries.now.readings.map(formKeyOf)).toEqual([
+      ...new Set(libraries.now.readings.map(formKeyOf)),
+    ])
+  })
+
+  it("counts a repeated region bucket once and says so, without touching the other two counts", () => {
+    const twice = bucket({ revision: 1, views: 40 })
+
+    const { readings, pairs, libraries } = windowAssemblyOf(
+      windowOf({ ...CHANGED, regions: [twice, twice] }),
+      contextOf()
+    )
+
+    expect(readings.regions?.duplicated).toBe(1)
+    expect(readings.regions?.readership.views).toBe(40)
+    expect(pairs.duplicated).toBe(0)
+    expect(libraries.duplicated).toBe(0)
+  })
+
+  it("answers the same way however often it is asked, because it holds nothing", () => {
+    const held = windowOf({ ...CHANGED, regions: [bucket({ revision: 1, views: 40 })] })
+    const context = contextOf()
+
+    expect(windowAssemblyOf(held, context)).toEqual(windowAssemblyOf(held, context))
+  })
+
+  it("reports a revision whose tree is gone as unjoined and still counts its readers", () => {
+    const held = windowOf({
+      tallies: [tally({ revision: 9 }, "band", { views: 10 })],
+      regions: [bucket({ revision: 9, views: 40 })],
+    })
+
+    const { readings } = windowAssemblyOf(held, contextOf())
+
+    expect(readings.pages).toEqual([])
+    expect(readings.unjoined.map(({ cause }) => cause)).toEqual(["no-tree"])
+    expect(readings.regions?.readership.views).toBe(40)
   })
 })
