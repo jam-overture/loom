@@ -54,7 +54,7 @@ describe("regionPagesOf", () => {
    * swap places between two reads of the same rows, which reads as a change.
    */
   it("breaks a tie by tree id so a refresh does not reorder", () => {
-    const reading = atDefault([row({ views: 40 }), row({ treeId: OTHER_TREE, views: 40 })])
+    const reading = atDefault([row({ treeId: OTHER_TREE, views: 40 }), row({ views: 40 })])
 
     expect(breakdownFor(reading, GB)?.pages.map(({ treeId }) => treeId)).toEqual([
       TREE,
@@ -68,6 +68,26 @@ describe("regionPagesOf", () => {
 
     expect(breakdown?.views).toBe(100)
     expect(breakdown?.pages.map(({ share }) => share)).toEqual([0.75, 0.25])
+  })
+
+  /**
+   * The two candidate denominators differ only where something was withheld,
+   * which is the case this subsystem is mostly in: dividing by the named pages
+   * would make the shares sum to one and the withheld tenth vanish.
+   */
+  it("leaves the withheld part out of the shares rather than out of the denominator", () => {
+    const reading = atDefault([
+      row({ views: 60 }),
+      row({ treeId: OTHER_TREE, views: 30 }),
+      row({ treeId: THIRD_TREE, views: 10 }),
+    ])
+    const breakdown = breakdownFor(reading, GB)
+
+    expect(breakdown?.pages.map(({ share }) => share)).toEqual([0.6, 0.3])
+    expect(breakdown?.withheld).toEqual({ pages: 1, views: 10 })
+    expect(
+      breakdown?.pages.reduce((total, { share }) => total + (share ?? 0), 0)
+    ).toBeCloseTo(0.9, 10)
   })
 
   /**
