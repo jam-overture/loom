@@ -81,6 +81,23 @@ export const siteQuestions = (): readonly SiteQuestion[] => [
   },
   {
     question: "Do I need an account to use this?",
-    answer: `No. Loom runs inside your own application, and the portal comes with it rather than being a service you sign up for. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page opens this site's own portal. On a site of yours it would be your portal, and your list.${PORTAL.notYet === undefined ? "" : ` ${PORTAL.notYet}`}`,
+    /**
+     * **Cut from 94 words to 64 on 29 October**, and the two sentences that
+     * went are the reason the costs band exists.
+     *
+     * It was the longest single string on this site, and two of its five
+     * sentences were not about accounts at all: *"the portal comes with it
+     * rather than being a service you sign up for"* and *"On a site of yours
+     * it would be your portal, and your list."* The first is a statement about
+     * what Loom costs, which the front door now makes in a band of its own
+     * (`costs.ts`); the second restates the clause of `PORTAL.door`
+     * immediately before it, which already says every Loom site has a portal
+     * and whoever runs it writes the list.
+     *
+     * What is left is the question answered, then the two things a reader
+     * cannot work out for themselves: whose portal the button at the top of
+     * this page opens, and that there is not much behind it yet.
+     */
+    answer: `No. Loom runs inside your own application. The ${SIGN_IN_LABEL} button at the top of this page opens this site's own portal. ${PORTAL.door}${PORTAL.notYet === undefined ? "" : ` ${PORTAL.notYet}`}`,
   },
 ]
