@@ -375,9 +375,16 @@ describe("the sweep this deployment runs", () => {
 
   const SWEEP = codeOf("../../../scripts/signals-collect.ts")
 
+  /**
+   * It reads the settings whole now rather than the two it acts on, because it
+   * judges its own run against the notice this deployment publishes and
+   * `deploymentNoticeOf` is handed all of them. So the property to assert got
+   * stronger rather than different: the script parses no environment at all.
+   */
   it("reads the window from these settings rather than parsing the environment itself", () => {
-    expect(SWEEP).toContain("readCollectionWindow")
+    expect(SWEEP).toContain("readIntakeSettings")
     expect(SWEEP).not.toContain("readerSignalWindowSchema")
+    expect(SWEEP).not.toContain("process.env[")
   })
 
   it("refuses to sweep on a window it could not read, rather than falling back", () => {
@@ -403,6 +410,23 @@ describe("the sweep this deployment runs", () => {
 
     expect(mentions).toHaveLength(1)
     expect(mentions[0]).toContain("console.log")
+  })
+
+  /**
+   * The ceiling the run is judged against comes off the notice, so the sweep
+   * cannot clear a promise the readers were never given — and the verdict is
+   * bound once and logged once, which is how this asserts that no branch of the
+   * run turns on it. A sweep that exited on a broken ceiling would stop the
+   * thing that fixes it.
+   */
+  it("judges its own run against the notice, and never refuses on the verdict", () => {
+    expect(SWEEP).toContain("deploymentNoticeOf(")
+
+    const uses = SWEEP.split("\n").filter((line) => line.includes("promise"))
+
+    expect(uses).toHaveLength(2)
+    expect(uses[0]).toContain("retentionPromiseOf(")
+    expect(uses[1]).toContain("console.log")
   })
 
   it("spells an hour nowhere, in either file", () => {

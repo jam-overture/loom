@@ -3,19 +3,22 @@ import { sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-import { collectReaderSignals, describeCollection } from "@jam-overture/loom/signals"
+import {
+  collectReaderSignals,
+  describeCollection,
+  describeRetentionPromise,
+  retentionPromiseOf,
+} from "@jam-overture/loom/signals"
 import { postgresApplicationStore } from "@jam-overture/loom/postgres"
 import { postgresReaderSignalJournal, postgresReaderTallyStore } from "@jam-overture/loom/signals/postgres"
 import { DEFAULT_APPLICATION_ID, describeApplicationStoreError } from "@jam-overture/loom/store"
 
 import { resolveConnectionString } from "../app/_lib/app/connection"
+import { deploymentNoticeOf } from "../app/_lib/reader-signals/notice"
 import {
   describeCollectionWindow,
   describeSweepSchedule,
-  readCollectionWindow,
-  readSweepSchedule,
-  SWEEP_KEY,
-  WINDOW_KEY,
+  readIntakeSettings,
 } from "../app/_lib/reader-signals/settings"
 
 /**
@@ -45,16 +48,26 @@ const { loadEnvConfig } = nextEnv
 loadEnvConfig(process.cwd())
 
 /**
- * The age a batch reaches before it is counted and dropped — one number for
- * three facts (0158): how long a page view is given to finish, how long a view
- * key lives, and how far the tallies lag the buffer.
+ * This deployment's whole intake configuration, read once.
  *
  * **Read where the rest of this deployment's intake settings are read** (0317).
  * This script used to spell an hour out again and parse the environment itself,
  * so the package's copy of the default was the one with the reasoning attached
  * and this one was the copy a deployment's batches were actually swept on.
+ *
+ * All of it rather than the two settings a sweep acts on, because the run now
+ * judges its own evidence against the notice this deployment publishes (0321),
+ * and `deploymentNoticeOf` is what builds that notice. A second assembly of it
+ * here would be a second ceiling, which is the fault above in another file.
  */
-const sweepWindow = readCollectionWindow(process.env[WINDOW_KEY])
+const settings = readIntakeSettings()
+
+/**
+ * The age a batch reaches before it is counted and dropped — one number for
+ * three facts (0158): how long a page view is given to finish, how long a view
+ * key lives, and how far the tallies lag the buffer.
+ */
+const sweepWindow = settings.window
 
 /**
  * A window that cannot be read stops the sweep rather than falling back to the
@@ -80,7 +93,18 @@ console.log(`loom: ${describeCollectionWindow(sweepWindow)}`)
  * page and nothing a run does (0320). Printed because the operator reading this
  * output is the one person who knows what the cron interval actually is.
  */
-console.log(`loom: ${describeSweepSchedule(readSweepSchedule(process.env[SWEEP_KEY]))}`)
+console.log(`loom: ${describeSweepSchedule(settings.sweep)}`)
+
+/**
+ * The retention this deployment publishes to its readers, taken off the notice
+ * itself rather than rebuilt from the two settings behind it.
+ *
+ * It is the ceiling each run below is judged against, and the only reason that
+ * judgement means anything is that it is the same value a reader is shown
+ * (0321): a sweep that derived its own would be able to clear a promise nobody
+ * made.
+ */
+const { bufferMs, sweep } = deploymentNoticeOf(settings)
 
 const connectionString = resolveConnectionString()
 
@@ -145,6 +169,19 @@ try {
     )
 
     console.log(`loom: ${application}: ${describeCollection(outcome)}`)
+
+    /**
+     * Whether this run's own evidence agrees with what its readers are told.
+     *
+     * Printed per application because each has its own buffer, and never a
+     * reason to fail the job: a ceiling that is not being kept is the
+     * operator's to fix by sweeping more often or by stating the interval they
+     * sweep on, and a run that exited here would stop the sweep that is the
+     * remedy.
+     */
+    const promise = retentionPromiseOf(outcome, { bufferMs, sweep })
+
+    console.log(`loom: ${application}: ${describeRetentionPromise(promise)}`)
 
     /**
      * `counted-not-forgotten` fails the job as loudly as the two that changed

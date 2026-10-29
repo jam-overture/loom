@@ -59634,9 +59634,14 @@ it is now *call four functions and draw three states*.
 ---
 ## 2026-10-24 — the region map is the one reading the new rung leaves a caller to assemble
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
-**nothing is wrong**; a gap named at the moment it was created, and a candidate
-for the next step rather than a fault in it
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-54-where-a-windows-readers-were` (§54)**, record
+[0315](decisions/0315-a-window-answers-where-its-readers-were-at-a-floor-it-is-handed-and-the-readership-is-published-beside-the-forms.md)
+— the maps are joined on the window and the floor is an argument, which is what
+this asked for. The Status line was left as `open` when the 25 October (evening)
+entry closed it, and is corrected here on 28 October: an entry nothing links to
+its closure is the ten-day trap the 27 October entry was filed about, and the
+sweep of this lane's queue found it still reading as work
 
 `windowReadingsOf` (0309) reads the counters into `PageReading`s and every
 reading that takes one, or a list of them, follows in a line. The region rows do
@@ -61657,9 +61662,14 @@ not filed again: **nothing draws any of this**, and `Loom portal` is paused.
 ## 2026-10-28 — a deployment states how often it sweeps, and nothing in this repository can check that it does
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/notice.ts`, `src/signals/health.ts`) · **Status:** open — **the
-stated limit of what [0320](decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)
-publishes**; nothing is broken and no test is failing
+(`src/signals/notice.ts`, `src/signals/health.ts`) · **Status:** **closed by
+`signals-60-the-ceiling-the-buffer-keeps` (§60)**, record
+[0321](decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)
+— **not in the shape recommended below**, and the two reasons are in the record:
+the door row's `foldedAt` is indirect evidence where the buffer's own oldest row
+is exact, and a `CollectionFault` is per-revision where this fact is
+per-deployment. The check is a run's rather than a reading's, it costs no store
+read at all, and `health.ts` was not touched
 
 `LOOM_SIGNAL_SWEEP_MS` is a deployment's claim about a cron outside this
 repository, and the notice publishes a ceiling derived from it: ripeness plus
@@ -61740,9 +61750,20 @@ cross-lane diff `docs/routines.md` asks to file rather than take.
 ---
 ## 2026-10-28 — three deployment settings are now handed into reading calls one at a time, and a third of them makes it a pattern
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
-**the shape §58 said would be worth gathering if a third appeared**, and tonight
-is the third
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-61-one-deployment-reading-context`**
+([0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)).
+Taken as the gathering this entry asked about, with one change to its reading:
+the entry rated the hazard mild because a forgotten argument gives a weaker
+answer, and that is true of the placing and the sweep and **not** of the floor.
+`regionFloorOf` is raise-only, so no floor is the *smallest* bucket this runtime
+names — a deployment that raised its floor to a hundred and a surface that
+forgot the argument publish buckets of twenty-five about real people. So the
+floor is a required field of `DeploymentReadingContext` rather than one of three
+gathered conveniences, and that is the unit. The collection schedule is
+**not** in it; see the entry filed beside this one. Original status below:
+open — **the shape §58 said would be worth gathering if a third appeared**, and
+that night was the third.
 
 §58 filed two arguments with one shape and one hazard: the region floor (§54)
 and the placing (§58), both per-deployment configuration handed into a reading
@@ -61770,3 +61791,163 @@ once where `readIntakeSettings` is read, so a screen cannot ask a question with
 a floor missing. That is a record, it touches every reading that takes either
 argument, and it is not tonight's unit. Recorded here so the next run does not
 re-derive the count.
+
+---
+## 2026-10-28 (evening) — a stated ceiling is now checked against the buffer, and nothing checks that the ceiling is tight
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/retention.ts`) · **Status:** open — **the stated limit of what
+[0321](decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)
+proves**; nothing is broken and no test is failing
+
+A sweep now compares the oldest delivery it found against the ceiling its
+deployment publishes, so *gone within 65 minutes* can be caught being false.
+**What it cannot catch is a ceiling that is true because it is generous.** A
+deployment that sweeps every five minutes and states a day publishes *gone
+within 25 hours*, keeps that promise with a day of room to spare, and reads
+`kept` on every run.
+
+That is correct and deliberate — a notice may always promise a reader less than
+the deployment knows and may never promise more (0320) — and it means the
+verdict proves the published promise is **kept** and never that it is **tight**.
+A reader comparing two products on their privacy pages cannot tell a deployment
+that sweeps hourly and says so from one that sweeps every minute and hedges.
+
+**The material for the sharper reading exists and the cost is the question.**
+The gap between the stated interval and the observed one is readable over
+several runs — the oldest delivery's age at each sweep is a floor on how long
+ago the last one was — but a run is stateless by design and nothing stores a
+previous run's figure. Storing one would make the sweep's own history a durable
+artefact, which rule 5 reserves for aggregates about readers.
+
+**Recommendation: leave it.** The honest version of this is not a framework
+check at all; it is an operator who states the interval their cron runs on,
+which is what the setting asks for and what the sweep's output now reminds them
+of twice. If it is ever wanted, the cheap shape is a figure rather than a
+verdict: publish the observed interval beside the stated one on the sweep's
+line, and let the operator read the two.
+
+---
+## 2026-10-28 (evening) — the verdict on a published promise reaches an operator's log and nothing else
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**a gap named at the moment it was created**; nothing is broken
+
+`retentionPromiseOf` (§60) is printed by `signals-collect.ts` and by nothing
+else. That is the right first home — the person reading a cron's output is the
+person who schedules the cron — and it is also the surface nobody looks at until
+something else has already gone wrong.
+
+The two places it would be read are both outside this lane's reach today. The
+intake status route is a pure read of settings with no store and no clock, so it
+cannot carry a verdict that needs a run; `health.ts` is the operator's reading
+and this fact is per-deployment rather than per-revision, which is the reason
+0321 did not put it there.
+
+**What would actually close it** is the same thing twelve runs of this lane have
+filed: something that draws any of this. A deployment screen that shows
+collection health has an obvious row for *the ceiling your readers are promised
+is not being kept*, and it would be reading a value that already exists.
+
+**Recommendation: leave it with the rest.** `Loom portal` is paused and this is
+one row on a screen that does not exist. Worth knowing that the value is there
+and costs nothing to read when the screen is built.
+
+---
+## 2026-10-28 (evening) — a script that reads one setting is a script that parses the environment, and the test asserting otherwise named the function instead of the property
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/settings.test.ts`) · **Status:**
+**closed on filing** in `signals-60-the-ceiling-the-buffer-keeps`, and filed
+because the next instance will not be in this file
+
+0317 moved the sweep script's window reading into `settings.ts` and guarded it
+with `expect(SWEEP).toContain("readCollectionWindow")`. §60 needed the whole of
+`IntakeSettings` in that script, so it reads `readIntakeSettings()` — which is
+*more* of the property 0317 wanted and failed the test asserting it, because the
+test named the function rather than the property.
+
+It is now `toContain("readIntakeSettings")` **and**
+`not.toContain("process.env[")`, which is the property itself: this script
+parses no environment at all. The second half is what would have caught the
+original fault and what will catch the next one, and it did not need naming any
+function.
+
+**The general shape, for whoever hits it next:** a guard written as *the right
+helper is called* passes only for as long as that helper is the right one, and
+fails on the change that makes it righter. A guard written as *the wrong thing
+is absent* survives the refactor. Both are one line.
+
+---
+## 2026-10-29 — the collection schedule is a fourth per-deployment setting and is deliberately not in the reading context, because its other half is a clock
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/window.ts`) · **Status:** open — **the
+boundary [0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)
+drew, written down so the next run does not re-derive it**; nothing is broken
+and no test is failing
+
+`DeploymentReadingContext` gathers the per-deployment configuration a reading of
+a window takes: the trees, the declarations, the region floor and the form
+placings. **`collectionHealthOf`'s `CollectionSchedule` is a fifth argument of
+the same family and is not in it**, and the reason is worth keeping because it
+is the rule for whatever arrives next.
+
+A `CollectionSchedule` is two things in one value: `foldsWithinMs`, which is
+per-deployment configuration and is exactly the `goneWithinMs` a notice already
+derives (0320), and `at`, which is **the instant the reading is taken**. A
+context holding `at` would answer differently on two calls over one window,
+which is the property every instant in this subsystem is handed in to avoid. So
+either the context splits the schedule in two and a caller reassembles it — a
+field whose only use is to be taken apart — or the context holds a clock
+reading, which it may not.
+
+**What is actually worth considering**, if a screen ever wants collection health
+off the same context: `collectionHealthOf(readings, { at, foldsWithinMs })` takes
+the whole schedule, so the shape that costs nothing is a **function** on the
+context — `scheduleAt(at)` — rather than a field. The deployment's half is held,
+the instant stays the caller's, and nothing about the health reading changes. It
+is a small record, it is not needed until something draws health, and the
+material for it is all in place: the app's `deploymentNoticeOf` already derives
+the number.
+
+The general rule this leaves behind: **a per-deployment fact belongs in the
+context, and an instant never does.** A fourth argument that is one of each is
+two arguments.
+
+---
+## 2026-10-29 — the reading context makes the safe route the shortest one, and the unsafe one is still reachable a step below it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **the stated limit of what 0322
+guarantees**; nothing is broken and no test is failing
+
+`windowAssemblyOf` cannot be called without a region floor, which is the point
+of it. **`windowReadingsOf` can**, because its options argument is still
+optional and three of its four published callers have nothing to say about a
+floor. So a surface that reaches a step below the assembly can still read a
+deployment's regions at the runtime's minimum rather than at the floor that
+deployment set, silently, exactly as before today.
+
+That is deliberate and it is a weaker guarantee than the record would like. The
+three steps of the §51 rung are published because each is separately useful, and
+narrowing `windowReadingsOf`'s signature to make the fourth step safe would take
+the rung's own flexibility away for a hazard the shortest route no longer has.
+
+**Two shapes, if it is ever wanted.**
+
+1. **Make the options argument required on `windowReadingsOf`.** One line, and
+   it costs every caller — including every test in `window.test.ts` — a
+   `{ floor: DEFAULT_REGION_FLOOR }` it has nothing to say with. It is also the
+   only shape that actually closes the hole rather than making it narrower.
+2. **Take the floor off the regions and onto the rows.** The honest version, and
+   much larger: a floor is a property of the deployment that collected a bucket,
+   so a `StoredRegionCount` read out of a store could carry the floor it may be
+   named at, and no reading could choose. It is a store change, a migration, and
+   a record — out of proportion to one optional argument.
+
+**Recommendation: leave it.** The direction that matters is that the safe route
+is now the shortest one, and the one caller that will exist — a portal screen
+reading this deployment's window — gets its floor from
+`deploymentReadingContextOf` and cannot type a number at all. Revisit if a
+second surface ever reads a window a step below the assembly.
