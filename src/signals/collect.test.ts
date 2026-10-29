@@ -219,6 +219,38 @@ describe("collectReaderSignals", () => {
   }
 
   /**
+   * ## The age the retention promise is judged on (0321)
+   *
+   * The oldest delivery in the buffer is the **first** batch the scan read and
+   * not the last, and the difference is the whole figure: it is what says
+   * whether the ceiling a notice publishes to its readers is one this
+   * deployment keeps.
+   *
+   * Two deliberately different ages over a one-hour window, because every way
+   * this could be wrong is an addition or an end. The oldest is 7,200,000 and
+   * the newest 5,400,000; the horizon is 3,600,000 and the window counted twice
+   * is 10,800,000. No two of those are equal, so a figure taken off the wrong
+   * end or against the wrong instant fails instead of looking plausible.
+   */
+  it("reports how old the oldest delivery in the buffer was", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    await journal.receive([batchOf([viewed("hero")], { view: viewKey(1) })])
+    time.moveTo(-1.5 * HOUR)
+    await journal.receive([batchOf([viewed("pricing")], { view: viewKey(2) })])
+    time.moveTo(0)
+
+    const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(outcome).toMatchObject({
+      outcome: "collected",
+      summary: { counted: 2, oldestMs: 2 * HOUR },
+    })
+  })
+
+  /**
    * ## One fold per audience (0284)
    *
    * A window holds whatever arrived in it, so once a deployment serves two
@@ -606,6 +638,7 @@ describe("describeCollection", () => {
     views: 2,
     uncorrelated: 0,
     redelivered: 0,
+    oldestMs: 2 * HOUR,
   }
 
   it("says what a run counted and what it dropped", () => {

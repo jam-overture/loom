@@ -1157,3 +1157,149 @@ export const windowLibrariesOf = (
     duplicated,
   }
 }
+
+/**
+ * The configuration a deployment hands a reading of its own window.
+ *
+ * Four facts, in one value. Two of them have been held rather than looked for
+ * since this rung began — the trees the counters were filed against and the
+ * registry's declarations (0309) — and two arrived with the steps that needed
+ * them: the floor under a published region bucket, and where a form the window
+ * holds one revision of belongs (0319).
+ *
+ * All four are the deployment's and none of them is discoverable from a counter
+ * row, which is the line §7 of the plan draws and the reason this is a type
+ * rather than four parameters. What it closes is the one way that line could be
+ * crossed by accident: **a caller could leave the floor out.**
+ *
+ * `regionFloorOf` is raise-only, so an absent floor is the smallest bucket this
+ * runtime will ever name — `DEFAULT_REGION_FLOOR` — and a deployment that
+ * raised its floor to a hundred had a reading publish buckets of twenty-five
+ * about real people, because the argument was optional and nothing in the types
+ * said whose it was. The omission fails in the unsafe direction, silently, and
+ * is indistinguishable in a diff from a caller that meant the default. Here the
+ * floor is required, so passing the default is a sentence a reviewer can read
+ * rather than a space where a number is not.
+ *
+ * **The floor is about the rows there are and not about the switch as it
+ * stands.** A notice is handed a floor only where a deployment is reading a
+ * region at all (0313), because a notice describes what is collected now. A
+ * reading is of rows already collected: a deployment that switched regions off
+ * yesterday still holds last week's buckets, and reading those at the minimum
+ * because nothing is being counted today would publish exactly what the floor
+ * exists to prevent.
+ */
+export type DeploymentReadingContext = {
+  /** The trees the window's revisions were filed against, as the caller holds them. */
+  readonly trees: RevisionTrees
+  /** What each primitive declares it plays and says, from the registry (0114, 0122). */
+  readonly declarations: PartDeclarations
+  /**
+   * The smallest region bucket this deployment will name, in page views.
+   *
+   * Required, and `regionFloorOf` still raises anything below the runtime's own
+   * minimum: a deployment may be more careful than the default and may not be
+   * less (0146). A caller with nothing of its own to say passes
+   * `DEFAULT_REGION_FLOOR` and has said so.
+   */
+  readonly floor: number
+  /**
+   * Where a form the window holds one revision of belongs (0319).
+   *
+   * A caller that cannot place any of them hands in `placingsIn([])`, which
+   * reports every such form in {@link WindowLibraries.unplaced} rather than
+   * guessing it onto a side. That is the honest shape of *this deployment does
+   * not know what it published when*, and it is one call rather than an
+   * argument left out.
+   */
+  readonly placings: FormPlacings
+}
+
+/** Everything a window holds, as the readings and the comparisons take it. */
+export type WindowAssembly = {
+  /** One reading per page, per revision, per form, with the regions beside them. */
+  readonly readings: WindowReadings
+  /** The before-and-afters, which is what five of the nine comparisons take. */
+  readonly pairs: WindowPairs
+  /** The two libraries, which is what the other four take. */
+  readonly libraries: WindowLibraries
+}
+
+/**
+ * Assemble a window into every subject a reading or a comparison of it takes.
+ *
+ * The fourth step of this rung and the one that makes the first three a
+ * question rather than a recipe. Each of them is published and each is
+ * separately useful; what is published nowhere is **the one order they compose
+ * in**, and that order is not free.
+ *
+ * ```ts
+ * const { readings, pairs, libraries } = windowAssemblyOf(window, context)
+ *
+ * const order = deploymentChangeOf(
+ *   pairs.pairs.map(({ was, now }) => readingChangeOf(was, now)),
+ *   window.pageViews
+ * )
+ * const kinds = libraryChangeOf(libraries.was.readings, libraries.now.readings)
+ * ```
+ *
+ * ## What a caller writing those three lines had to get right
+ *
+ * **The libraries take the pairs that `windowPairsOf` produced**, and the
+ * tempting one-liner over `pairs` alone drops every unpaired form — which is
+ * where a page published inside the window lands, and `pagesGained` is the
+ * figure a library comparison exists to report (0319). **The door rows are the
+ * window's whole set on both sides**, not a slice per side, because each page's
+ * own row is picked out on the revision and the form its reading names. **And
+ * the floor reaches the regions through the readings**, which is the one of the
+ * four context fields with no step of its own to be handed to.
+ *
+ * None of those is hard. All of them are invisible when wrong: the result of
+ * getting any of them wrong is a figure that is plausible and a total that goes
+ * on looking right, which is the one error in this subsystem that cannot be
+ * undone afterwards (0158).
+ *
+ * ## The two repeats it cannot have, which is the only safety it adds
+ *
+ * `WindowPairs.duplicated` and `WindowLibraries.duplicated` are **nought from
+ * here, by construction.** `windowReadingsOf` never produces two readings of
+ * one `readingKeyOf`, and `windowPairsOf` files each form in exactly one of its
+ * two lists — so nothing this hands on can put two readings of one form on one
+ * side of a library, which is the repeat that makes a page `ambiguous` to
+ * `pairedWindowOf` and takes it out of every figure in the comparison while the
+ * counts above it look unchanged.
+ *
+ * Both fields stay published and are carried as they come, because they are not
+ * nought for the callers they exist for: a surface that concatenated two
+ * windows' readings, or assembled a {@link WindowPairs} of its own, still has
+ * them counted. {@link WindowRegionReadings.duplicated} is the one that can be
+ * other than nought from here, because a region row repeated under one bucket
+ * key is a repeat in the rows a caller was handed rather than one this made.
+ *
+ * ## It adds no figure, and publishes no total of what was dropped
+ *
+ * Nothing here counts, divides, sums or withholds — the rule all three steps
+ * under it keep. In particular there is deliberately **no one number for what
+ * the assembly left out**: the three `duplicated` counts are a count of region
+ * rows, a count of readings and a count of forms, and `unjoined`, `unpaired`
+ * and `unplaced` are three different reasons a page is absent from three
+ * different answers. A sum over them would be a figure in no unit at all, and
+ * the shortest way to a screen that reports *4 pages dropped* about one page.
+ *
+ * Linear in the window, being three linear passes over it.
+ */
+export const windowAssemblyOf = (
+  window: ReaderWindow,
+  context: DeploymentReadingContext
+): WindowAssembly => {
+  const readings = windowReadingsOf(window, context.trees, context.declarations, {
+    floor: context.floor,
+  })
+  const pairs = windowPairsOf(readings.pages)
+
+  return {
+    readings,
+    pairs,
+    libraries: windowLibrariesOf(pairs, window.pageViews, context.placings),
+  }
+}

@@ -184,6 +184,26 @@ export type CollectionSummary = {
    * fold's own numbers are not durable, only the counters it produced are.
    */
   readonly redelivered: number
+  /**
+   * How old the oldest delivery the scan found was, in milliseconds, at the
+   * instant this run was taken.
+   *
+   * A fact about the buffer and about no reader, like every other figure here.
+   * It is free: a scan runs from the oldest end, so the first batch it read is
+   * the oldest one there is, and this is one subtraction over it.
+   *
+   * **The run does the subtraction rather than the caller**, because the
+   * caller's clock is not this run's: a surface that read the age against its
+   * own `now` would publish a number nothing had measured.
+   *
+   * Never absent and always at least the ripeness window: a summary exists only
+   * where something was ripe. What it is for is
+   * {@link retentionPromiseOf} — whether the ceiling the deployment publishes
+   * to its readers is one it keeps. A delivery whose stored instant cannot be
+   * read leaves this not a number, and that reading answers *nothing here can
+   * say* on it rather than *kept*.
+   */
+  readonly oldestMs: number
 }
 
 export type CollectionOutcome =
@@ -322,8 +342,22 @@ export const collectReaderSignals = async (
     rollup: rollUp(batches, { ...(request.pairs ? { pairs: request.pairs } : {}) }),
   }))
 
+  /**
+   * The oldest delivery in the buffer, which is the first batch the scan read:
+   * it runs from the oldest end and the ripe prefix starts there.
+   *
+   * There is always one wherever a summary is built — `plan.before` is a
+   * position taken off the last ripe batch, so a plan carrying one has a first
+   * — and the unreachable branch is a parse of nothing rather than a nought on
+   * purpose. A nought would say *a delivery that arrived this instant*, which
+   * is the strongest answer the retention reading can give; a figure that is
+   * not a number makes it answer that nothing here can say.
+   */
+  const oldest = plan.ripe[0]?.receivedAt ?? ""
+
   const summary: CollectionSummary = {
     counted: plan.ripe.length,
+    oldestMs: Date.parse(now) - Date.parse(oldest),
     tallies: folded.reduce((total, { rollup }) => total + rollup.tallies.length, 0),
     funnels: folded.reduce((total, { rollup }) => total + rollup.funnels.length, 0),
     views: folded.reduce((total, { rollup }) => total + rollup.views, 0),

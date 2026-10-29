@@ -20,6 +20,7 @@ import {
 } from "../chrome"
 import { CHAIN } from "../chain"
 import { FACTS, HEADLINE, INSTALL_COMMAND, RUNTIME_PACKAGE, STARTER_PACKAGE } from "../copy"
+import { costs } from "../costs"
 import { DECISION_RECORDS, INSTALLATION } from "../docs-pages"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
@@ -730,7 +731,32 @@ const problems = (ids: IdFactory): LoomNode =>
             type: "loom.feature",
             props: {
               title: "Undoing it means finding the commit and hoping",
-              body: "Loom works out how to undo a change at the same time it makes it, and saves both. Putting the page back takes one press, and that gets recorded too.",
+              /**
+               * **Rewritten on 29 October, because the front door was saying
+               * one sentence twice.**
+               *
+               * This read *"Loom works out how to undo a change at the same
+               * time it makes it, and saves both. Putting the page back takes
+               * one press, and that gets recorded too."* The `Undo` gloss in
+               * `journey.ts` opens on that same nineteen-word sentence,
+               * verbatim, and both are rendered on this page — four bands
+               * apart, which is far enough that no run writing either one
+               * would meet the other.
+               *
+               * The gloss is where that sentence belongs: its whole job is to
+               * say what the word means. A problem card's job is to answer the
+               * problem in its own title, so this says what a reader gets
+               * instead of the commit hunt, and says it in its own words.
+               *
+               * **It is still a wide cell's worth of copy**, which the first
+               * attempt at this was not. `loom.mosaic`'s `alternating` rhythm
+               * makes the first and fourth cells two narrow cells across, and
+               * `pages.test.ts` holds the copy to the shape: a 76-character
+               * body in a cell laid out at twice the width draws a card that
+               * is mostly nothing. Short was the budget talking, and the
+               * budget is not a reason to half-fill a card.
+               */
+              body: "There is no commit to go and find. Loom can put the page back the way it was before the change, in one press, and it records that too.",
             },
           }),
         ],
@@ -981,10 +1007,17 @@ const install = (ids: IdFactory): LoomNode =>
        * too wide for a 390 viewport breaks at its own slash instead of going
        * off the end the way the panel's does.
        */
+      /**
+       * **`There is nothing to sign up for.` came off on 29 October**, and the
+       * band below is why. It was this site's only word about what Loom costs
+       * and it was a half of one: it told a reader they would not be asked for
+       * an account and left them to guess at everything else. The band
+       * directly under this one now says both halves plainly, so the sentence
+       * here was the same claim made worse one screen earlier.
+       */
       proseParts(
         ids,
         [
-          "There is nothing to sign up for. ",
           codeSpan(ids, RUNTIME_PACKAGE),
           " is Loom itself. ",
           codeSpan(ids, STARTER_PACKAGE),
@@ -1327,6 +1360,17 @@ export const homePageTree = (context: PageContext): LoomTree => {
         facts(ids),
         questions(ids),
         install(ids),
+        /**
+         * What it costs, new on 29 October and the first thing this site has
+         * ever said about money.
+         *
+         * It is here rather than anywhere else because the band above ends on
+         * a command a reader is meant to run, and *what will this cost me* is
+         * the question that follows one. `costs.ts` carries where the
+         * permission to say it comes from, which is the part of this band that
+         * matters more than its placing.
+         */
+        costs(ids),
         waysIn(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),

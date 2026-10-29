@@ -8,6 +8,177 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-29 — the maintainer answered the pricing question on 24 October and this lane asked it again on 27 October, because the answer was filed in `docs/positioning.md` and the asking happens in a pull request comment
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed on filing** for the pricing question itself, by
+`marketing-20-what-it-costs`; **open as a class**, because nothing stopped it
+and nothing would stop the next one.
+
+`docs/positioning.md` was written on 24 October out of six answers the
+maintainer gave that day. One of them is unambiguous:
+
+> *"Someone installs it, if they want easy hook up for signals and to their AI
+> models, they'll pay for the portal."*
+
+The file's own reading of it, in the same paragraph: **the framework is free
+and installed, the portal is the paid part, and "the front door may say both."**
+
+**On 27 October this lane asked him, on #716:** *"may the site say the framework
+is free and the portal is paid?"* — listed under *Still waiting from last time,
+all three yours*. That run had `docs/positioning.md` in front of it; the file is
+the second item on the brief's read-first list and the report cites it. It read
+the file for the headline, the audience and the chain, and did not notice that
+the question it was about to ask was answered three screens down. The run of
+28 October read the same file and carried three other questions forward without
+noticing either.
+
+So the site went another five days without saying the one commercial fact it
+has been given permission to say, and the maintainer was asked for a ruling he
+had already made.
+
+### Why the file did not prevent it, which is the part worth fixing
+
+**`positioning.md` is organised by what he was asked, and a run arrives
+organised by what it is building.** The six answers sit under headings — *The
+one-line answer*, *Who is reading*, *What it costs*, *Is it ready* — and a run
+writing a band about components reads the three that look relevant. There is
+nothing in the file, and nothing in any test, that says *these questions are
+settled and must not be asked again*.
+
+The pull request comment is the other half. `docs/routines.md` step 9 asks for
+`## Needs your input` with a recommendation per question, and a question that
+goes unanswered is carried to the next run **by being copied out of the last
+comment**, which is a channel with no connection to the file that holds the
+answers. A question can therefore be answered in the file and still be in the
+queue, forever, and the only thing that would catch it is somebody reading both
+documents side by side on the same morning.
+
+### Three shapes, costed
+
+1. **A test over the standing questions.** `positioning.md` grows a list of
+   settled questions as data, and a test in this route group fails if a run
+   carries one of them into a report. Cheap to write, and the wrong shape: the
+   questions live in a pull request comment that nothing in this repository can
+   read, so the test would guard the copy of the list rather than the asking.
+2. **The answered questions move into the file as claims the site must make**,
+   each with the test that holds it. This is what today's work does for the one
+   question: `COST_CLAIMS` is in `costs.ts`, `costs.test.ts` holds the band to
+   making both claims and no third one, and the quotation that authorises them
+   is in the docblock above. An answer that has become a test cannot go on being
+   a question. **This is the recommendation**, and it is per-answer work rather
+   than one change.
+3. **A standing-questions section at the top of `positioning.md`**, listing what
+   is open and what is settled, with dates. One place to look, no machinery.
+   Weakest of the three and the only one that is free: it is a convention, and
+   a convention is what already failed here.
+
+The brief says positioning questions go in the pull request comment, and that
+is right. What this entry is about is the other direction: **an answer arriving
+and nothing retiring the question.**
+
+---
+## 2026-10-29 — the site's word ceiling was counting a record panel against the copy budget, so 455 words of machinery on one page were deciding how much prose the other three could carry
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/budget.test.ts`) · **Status:** **closed by
+`marketing-20-what-it-costs`** for the double count. **The 26 October entry it
+sits under stays open**, because the question it asks the maintainer is a
+different one and today's work does not answer it.
+
+`MOST_WORDS_ON_THE_SITE` is held over two readings of the site: the tree as
+published, and the tree as served in whichever state says the most. It was the
+same number — 3,900 — over both, and the second one was the binding reading.
+
+The two readings differ by the record panel on `/how-it-works`, which is what
+the machinery writes when a visitor asks for a change. Measured on `main` this
+morning: **the site is 3,434 words as written and 3,889 in the served
+reading.** So the clause that said this ceiling was 99% full was describing a
+site 87% full of copy plus a panel nobody wrote.
+
+Those 455 words were **already bounded twice** in the same file —
+`MOST_WORDS_A_REQUEST_ADDS` caps what a request may add to a page, and
+`MOST_WORDS_IN_AN_ANSWERED_BAND` caps the band it lands in. Counting them a
+third time, inside the budget on authored copy, is what made a 50-word band on
+the front door unaffordable.
+
+### Why the page ceiling is right to do this and the site ceiling is not
+
+The file gives one reason for holding both ceilings over the served tree:
+*"a visitor reads one page, and what they read is the served one."* That is
+exactly true of `MOST_WORDS_ON_A_PAGE` and it is why that one is untouched.
+
+It is not true of the site total. **Nobody reads the site.** The figure is four
+pages summed, each in whichever state says the most, which is not a reading any
+visitor is ever shown — it is a bound on how much this lane has written, and
+the thing it should measure is what this lane wrote.
+
+### What changed, and what deliberately did not
+
+The literal is **still 3,900** and the authored sweep still holds the site to
+it, at 3,457 of 3,900. The served sweep now bounds **what the states add** —
+`served − authored ≤ MOST_WORDS_A_REQUEST_ADDS`, which is 455 of 600 — so the
+served site is bounded at 4,500 by composition rather than by a fourth number
+nobody argued for.
+
+**A multiplier over the routes was the first attempt and it was wrong**, which
+is recorded in the test because it looks obviously right. Every route has more
+than one served state, so counting routes whose states differ gives four rather
+than one, a ceiling of 6,300, and a served site at 0.616 of it — a number that
+passes the binding-from-below clause by luck and bounds nothing. The three
+pages that do not answer requests serve the same words in every state.
+Measuring what the states *add* rather than how many states there *are* is the
+difference between a bound and a formality.
+
+### It was found because it was in the way, and that is worth saying
+
+The costs band is 60 words and the site had 11. The honest options were to cut
+copy that should stay, to raise a number this lane had written down a reason
+not to raise, or to ask why the figure was 3,889 when the site is 3,434. The
+third had a defect under it. **If it had not, the band would have been the
+thing that gave way**, and a reviewer should weigh this entry knowing the run
+that wrote it wanted the answer it got.
+
+---
+## 2026-10-29 — the front door says one nineteen-word sentence twice, and the band that duplicates the chain is the maintainer's open question rather than a thing to fix
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**one instance fixed** by `marketing-20-what-it-costs`; **open** for the rest,
+and the rest is held behind a question only the maintainer can answer.
+
+Measured by printing every string the front door renders, longest first, which
+is a reading nobody had taken of this page before today. Three pairs came back
+saying the same thing in nearly the same words:
+
+| | words | the other one |
+| --- | --- | --- |
+| `Undo` gloss, in `journey.ts` | 30 | the fourth problem card, **19 words verbatim in common** |
+| chain rung 1, *You build your components in React* | 25 | *Using it* step 1, sharing *"does not write code into"* and *"does not ask you to rebuild anything"* |
+| chain rung 2, *You tell Loom which ones it can use* | 27 | *Using it* step 2, *"That is all the setup there is"* against *"That list is the whole of the setup"* |
+
+**The first is fixed.** The problem card's body now answers the problem in its
+own title and the gloss keeps the sentence, which is where it belongs.
+
+**The second and third are not, and must not be fixed by this lane today.**
+They are both the *Using it* band against the chain, and whether `Using it`
+stays on the front door at all is a question `docs/positioning.md` records as
+the maintainer's and this lane has carried on two pull requests. Rewriting the
+band he may be about to remove is work thrown away at best; removing it is this
+lane deciding a thing the file says is his.
+
+### What this is evidence of, which is why it is filed rather than noted
+
+The chain landed on 25 October and `docs/positioning.md` is explicit that the
+bands around it were **moved rather than rewritten**, on purpose, because
+"rewriting is not the same as deleting and this file does not authorise
+either." That was the right call. The cost of it is now measurable: the front
+door explains the first two links of the chain twice, eleven bands apart, and a
+reader who scrolls meets the same two facts in two registers.
+
+So this is not a new argument for removing `Using it`. It is the number that
+was missing from the old one, for whoever answers it.
+
+---
 ## 2026-10-27 — the comparison layer's audience guard was already built in both of its two shapes, and the entry asking for it stayed open for ten days
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
@@ -59463,9 +59634,14 @@ it is now *call four functions and draw three states*.
 ---
 ## 2026-10-24 — the region map is the one reading the new rung leaves a caller to assemble
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
-**nothing is wrong**; a gap named at the moment it was created, and a candidate
-for the next step rather than a fault in it
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-54-where-a-windows-readers-were` (§54)**, record
+[0315](decisions/0315-a-window-answers-where-its-readers-were-at-a-floor-it-is-handed-and-the-readership-is-published-beside-the-forms.md)
+— the maps are joined on the window and the floor is an argument, which is what
+this asked for. The Status line was left as `open` when the 25 October (evening)
+entry closed it, and is corrected here on 28 October: an entry nothing links to
+its closure is the ten-day trap the 27 October entry was filed about, and the
+sweep of this lane's queue found it still reading as work
 
 `windowReadingsOf` (0309) reads the counters into `PageReading`s and every
 reading that takes one, or a list of them, follows in a line. The region rows do
@@ -60574,6 +60750,25 @@ one, which is the half of the rule that has caught real staleness twice.
 the maintainer** — the ceiling is raised and argued in this pull request, and
 what is filed is the shape rather than the instance
 
+> **Dated note, 29 October 2026.** **Still open, and the question in it is
+> unchanged**: whether a site-wide total is the right shape now that the site
+> has pages is the maintainer's, it has been carried on three pull requests,
+> and nothing below has been answered.
+>
+> What *has* changed is that **every figure quoted in this entry is a served
+> figure, and the site is 400-odd words smaller than any of them says.** The
+> ceiling was being held over the served tree as well as the authored one, and
+> the served tree carries a record panel the machinery writes: 3,703 and 3,855
+> carry about 455 words of record panel apiece. The entry of 29 October has the
+> measurement and what was done about it. So the clause in this entry about a
+> ceiling 99% full was true of a number that was counting a panel, and the
+> pressure this entry describes was partly an artefact.
+>
+> **It does not dissolve the question.** The authored site is 3,457 of 3,900,
+> which is four or five bands of headroom and not a fifth page, so the shape
+> question arrives again the first time somebody adds a route. It is no longer
+> urgent, and that is the whole of the difference.
+
 `budget.test.ts` holds the whole site to a word count, and the number is
 deliberately a literal: *"The measurement chose the number once, in a comment,
 in front of a reviewer who can overrule it; the assertion reads a constant."*
@@ -61467,9 +61662,14 @@ not filed again: **nothing draws any of this**, and `Loom portal` is paused.
 ## 2026-10-28 — a deployment states how often it sweeps, and nothing in this repository can check that it does
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/notice.ts`, `src/signals/health.ts`) · **Status:** open — **the
-stated limit of what [0320](decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)
-publishes**; nothing is broken and no test is failing
+(`src/signals/notice.ts`, `src/signals/health.ts`) · **Status:** **closed by
+`signals-60-the-ceiling-the-buffer-keeps` (§60)**, record
+[0321](decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)
+— **not in the shape recommended below**, and the two reasons are in the record:
+the door row's `foldedAt` is indirect evidence where the buffer's own oldest row
+is exact, and a `CollectionFault` is per-revision where this fact is
+per-deployment. The check is a run's rather than a reading's, it costs no store
+read at all, and `health.ts` was not touched
 
 `LOOM_SIGNAL_SWEEP_MS` is a deployment's claim about a cron outside this
 repository, and the notice publishes a ceiling derived from it: ripeness plus
@@ -61550,9 +61750,20 @@ cross-lane diff `docs/routines.md` asks to file rather than take.
 ---
 ## 2026-10-28 — three deployment settings are now handed into reading calls one at a time, and a third of them makes it a pattern
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
-**the shape §58 said would be worth gathering if a third appeared**, and tonight
-is the third
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed by `signals-61-one-deployment-reading-context`**
+([0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)).
+Taken as the gathering this entry asked about, with one change to its reading:
+the entry rated the hazard mild because a forgotten argument gives a weaker
+answer, and that is true of the placing and the sweep and **not** of the floor.
+`regionFloorOf` is raise-only, so no floor is the *smallest* bucket this runtime
+names — a deployment that raised its floor to a hundred and a surface that
+forgot the argument publish buckets of twenty-five about real people. So the
+floor is a required field of `DeploymentReadingContext` rather than one of three
+gathered conveniences, and that is the unit. The collection schedule is
+**not** in it; see the entry filed beside this one. Original status below:
+open — **the shape §58 said would be worth gathering if a third appeared**, and
+that night was the third.
 
 §58 filed two arguments with one shape and one hazard: the region floor (§54)
 and the placing (§58), both per-deployment configuration handed into a reading
@@ -61738,3 +61949,161 @@ that run's green is not quoted anywhere in the report. Not written into
 `docs/routines.md` by this lane, because that file is governance and the portal
 routine's reasoning about why a routine cannot write the governance it is bound
 by is the standing answer.
+## 2026-10-28 (evening) — a stated ceiling is now checked against the buffer, and nothing checks that the ceiling is tight
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/retention.ts`) · **Status:** open — **the stated limit of what
+[0321](decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)
+proves**; nothing is broken and no test is failing
+
+A sweep now compares the oldest delivery it found against the ceiling its
+deployment publishes, so *gone within 65 minutes* can be caught being false.
+**What it cannot catch is a ceiling that is true because it is generous.** A
+deployment that sweeps every five minutes and states a day publishes *gone
+within 25 hours*, keeps that promise with a day of room to spare, and reads
+`kept` on every run.
+
+That is correct and deliberate — a notice may always promise a reader less than
+the deployment knows and may never promise more (0320) — and it means the
+verdict proves the published promise is **kept** and never that it is **tight**.
+A reader comparing two products on their privacy pages cannot tell a deployment
+that sweeps hourly and says so from one that sweeps every minute and hedges.
+
+**The material for the sharper reading exists and the cost is the question.**
+The gap between the stated interval and the observed one is readable over
+several runs — the oldest delivery's age at each sweep is a floor on how long
+ago the last one was — but a run is stateless by design and nothing stores a
+previous run's figure. Storing one would make the sweep's own history a durable
+artefact, which rule 5 reserves for aggregates about readers.
+
+**Recommendation: leave it.** The honest version of this is not a framework
+check at all; it is an operator who states the interval their cron runs on,
+which is what the setting asks for and what the sweep's output now reminds them
+of twice. If it is ever wanted, the cheap shape is a figure rather than a
+verdict: publish the observed interval beside the stated one on the sweep's
+line, and let the operator read the two.
+
+---
+## 2026-10-28 (evening) — the verdict on a published promise reaches an operator's log and nothing else
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+**a gap named at the moment it was created**; nothing is broken
+
+`retentionPromiseOf` (§60) is printed by `signals-collect.ts` and by nothing
+else. That is the right first home — the person reading a cron's output is the
+person who schedules the cron — and it is also the surface nobody looks at until
+something else has already gone wrong.
+
+The two places it would be read are both outside this lane's reach today. The
+intake status route is a pure read of settings with no store and no clock, so it
+cannot carry a verdict that needs a run; `health.ts` is the operator's reading
+and this fact is per-deployment rather than per-revision, which is the reason
+0321 did not put it there.
+
+**What would actually close it** is the same thing twelve runs of this lane have
+filed: something that draws any of this. A deployment screen that shows
+collection health has an obvious row for *the ceiling your readers are promised
+is not being kept*, and it would be reading a value that already exists.
+
+**Recommendation: leave it with the rest.** `Loom portal` is paused and this is
+one row on a screen that does not exist. Worth knowing that the value is there
+and costs nothing to read when the screen is built.
+
+---
+## 2026-10-28 (evening) — a script that reads one setting is a script that parses the environment, and the test asserting otherwise named the function instead of the property
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/settings.test.ts`) · **Status:**
+**closed on filing** in `signals-60-the-ceiling-the-buffer-keeps`, and filed
+because the next instance will not be in this file
+
+0317 moved the sweep script's window reading into `settings.ts` and guarded it
+with `expect(SWEEP).toContain("readCollectionWindow")`. §60 needed the whole of
+`IntakeSettings` in that script, so it reads `readIntakeSettings()` — which is
+*more* of the property 0317 wanted and failed the test asserting it, because the
+test named the function rather than the property.
+
+It is now `toContain("readIntakeSettings")` **and**
+`not.toContain("process.env[")`, which is the property itself: this script
+parses no environment at all. The second half is what would have caught the
+original fault and what will catch the next one, and it did not need naming any
+function.
+
+**The general shape, for whoever hits it next:** a guard written as *the right
+helper is called* passes only for as long as that helper is the right one, and
+fails on the change that makes it righter. A guard written as *the wrong thing
+is absent* survives the refactor. Both are one line.
+
+---
+## 2026-10-29 — the collection schedule is a fourth per-deployment setting and is deliberately not in the reading context, because its other half is a clock
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/window.ts`) · **Status:** open — **the
+boundary [0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)
+drew, written down so the next run does not re-derive it**; nothing is broken
+and no test is failing
+
+`DeploymentReadingContext` gathers the per-deployment configuration a reading of
+a window takes: the trees, the declarations, the region floor and the form
+placings. **`collectionHealthOf`'s `CollectionSchedule` is a fifth argument of
+the same family and is not in it**, and the reason is worth keeping because it
+is the rule for whatever arrives next.
+
+A `CollectionSchedule` is two things in one value: `foldsWithinMs`, which is
+per-deployment configuration and is exactly the `goneWithinMs` a notice already
+derives (0320), and `at`, which is **the instant the reading is taken**. A
+context holding `at` would answer differently on two calls over one window,
+which is the property every instant in this subsystem is handed in to avoid. So
+either the context splits the schedule in two and a caller reassembles it — a
+field whose only use is to be taken apart — or the context holds a clock
+reading, which it may not.
+
+**What is actually worth considering**, if a screen ever wants collection health
+off the same context: `collectionHealthOf(readings, { at, foldsWithinMs })` takes
+the whole schedule, so the shape that costs nothing is a **function** on the
+context — `scheduleAt(at)` — rather than a field. The deployment's half is held,
+the instant stays the caller's, and nothing about the health reading changes. It
+is a small record, it is not needed until something draws health, and the
+material for it is all in place: the app's `deploymentNoticeOf` already derives
+the number.
+
+The general rule this leaves behind: **a per-deployment fact belongs in the
+context, and an instant never does.** A fourth argument that is one of each is
+two arguments.
+
+---
+## 2026-10-29 — the reading context makes the safe route the shortest one, and the unsafe one is still reachable a step below it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **the stated limit of what 0322
+guarantees**; nothing is broken and no test is failing
+
+`windowAssemblyOf` cannot be called without a region floor, which is the point
+of it. **`windowReadingsOf` can**, because its options argument is still
+optional and three of its four published callers have nothing to say about a
+floor. So a surface that reaches a step below the assembly can still read a
+deployment's regions at the runtime's minimum rather than at the floor that
+deployment set, silently, exactly as before today.
+
+That is deliberate and it is a weaker guarantee than the record would like. The
+three steps of the §51 rung are published because each is separately useful, and
+narrowing `windowReadingsOf`'s signature to make the fourth step safe would take
+the rung's own flexibility away for a hazard the shortest route no longer has.
+
+**Two shapes, if it is ever wanted.**
+
+1. **Make the options argument required on `windowReadingsOf`.** One line, and
+   it costs every caller — including every test in `window.test.ts` — a
+   `{ floor: DEFAULT_REGION_FLOOR }` it has nothing to say with. It is also the
+   only shape that actually closes the hole rather than making it narrower.
+2. **Take the floor off the regions and onto the rows.** The honest version, and
+   much larger: a floor is a property of the deployment that collected a bucket,
+   so a `StoredRegionCount` read out of a store could carry the floor it may be
+   named at, and no reading could choose. It is a store change, a migration, and
+   a record — out of proportion to one optional argument.
+
+**Recommendation: leave it.** The direction that matters is that the safe route
+is now the shortest one, and the one caller that will exist — a portal screen
+reading this deployment's window — gets its floor from
+`deploymentReadingContextOf` and cannot type a number at all. Revisit if a
+second surface ever reads a window a step below the assembly.
