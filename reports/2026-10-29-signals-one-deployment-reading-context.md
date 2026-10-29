@@ -193,9 +193,34 @@ carries the default), and `viewsWas`/`viewsNow` on a reach comparison that
 publishes `arrivalsWas`/`arrivalsNow`. Both fixed in the test, neither by
 weakening an assertion.
 
-### Mutation testing: MUTANTS planted, DEAD dead, EQUIV equivalent
+### Mutation testing: twelve planted, eleven dead, one equivalent
 
-MUTANT_TABLE
+| planted | what died |
+| --- | --- |
+| the floor never reaches the readings | 1 case |
+| the floor is the runtime's minimum rather than the deployment's | 1 case |
+| the libraries are assembled from the pairs alone | 1 case |
+| each library side is handed no door rows | 1 case |
+| the placings handed in are ignored | 1 case |
+| the pairs are built from no readings | 3 cases |
+| the trees handed to the readings are not the context's | 3 cases |
+| the assembly is cached across calls rather than computed per call | 5 cases |
+| the app hands over the default floor rather than this deployment's | 2 cases |
+| the app drops the floor where the region switch is off | 1 case |
+| the app does not carry the facts the caller holds | 2 cases |
+| the libraries are built from a second, separate pairing of the readings | **nothing — equivalent** |
+
+**The survivor is not a hole.** `windowPairsOf` is a pure function of the
+readings, so pairing them twice produces an equal `WindowPairs`; the only thing
+that differs is object identity, and nothing published depends on it. A case
+asserting that the libraries were built from the same object as `pairs` would be
+asserting the implementation rather than the answer, and would fail the day the
+composition is rewritten without changing a figure. It is equivalent by
+construction rather than untested — every property the second pairing could get
+wrong has its own case above.
+
+Run after the commit, per the finding of 27 October that mutation testing before
+a commit is how a run loses the work it is testing.
 
 **The double-count case, per this lane's standing rule.** This unit adds no
 figure, so the way it would be wrong is handing something on twice. Two cases
