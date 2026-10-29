@@ -31,6 +31,15 @@ export const BAND = {
   asData: "How this page is put together",
   questions: "Questions",
   install: "Install it",
+  /**
+   * What it costs, and it is the first band on this site to say anything about
+   * money.
+   *
+   * It sits directly under `install` because the question it answers is the one
+   * a reader has the moment they are shown a command to run. `costs.ts` has the
+   * whole of what it may claim and where that permission comes from.
+   */
+  costs: "What it costs",
   waysIn: "Keep going",
 } as const
 
