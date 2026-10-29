@@ -9,9 +9,13 @@ import type { IdFactory, LoomNode } from "@jam-overture/loom"
  * teaching is the *shape* of the call — and a node is a node however it was
  * made.
  *
- * `buildElement`, `buildSlot` and `createElement` are not the story's. They are
- * re-exported from where they really live, so the page's calls are checked
- * against the real signatures.
+ * `createElement` and `LoomPrimitiveProps` are not the story's either, and they
+ * are re-exported from where they really live so the page's component is
+ * checked against the real signatures. They are allowed to stay here because
+ * the only blocks that use them are the inside of an object — you cannot write
+ * an `import` in the middle of an object literal. `buildElement` and `buildSlot`
+ * are called from blocks that *could* carry one, so the page carries it;
+ * `lent.ts` is what tells the two cases apart.
  */
 
 /** The id factory the page made two sections ago. */
@@ -27,6 +31,5 @@ export declare const secondaryAction: LoomNode
 export declare const heading: (ids: IdFactory, level: number, text: string) => LoomNode
 export declare const prose: (ids: IdFactory, text: string) => LoomNode
 
-export { buildElement, buildSlot } from "@jam-overture/loom"
 export { createElement } from "react"
 export type { LoomPrimitiveProps } from "@jam-overture/loom/react"

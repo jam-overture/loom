@@ -3,16 +3,15 @@ import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 /**
  * What the Gate decides.
  *
- * Both policies on this page are parsed through `gatePolicySchema`, which is the
- * runtime's and is re-exported here because the page introduces it in prose
- * rather than in an import. So is `interactiveTypesFor`: the page's point is
- * that the list it produces should never be typed by hand, and a stand-in that
- * produced a list of strings would quietly prove the opposite.
+ * The registry this site built is the story's, and it is the only thing here.
  *
- * The registry this site built is the story's.
+ * `gatePolicySchema` and `interactiveTypesFor` used to be re-exported from this
+ * file, because the page introduced them in prose rather than in an import. The
+ * blocks compiled and a reader who copied either one got
+ * `gatePolicySchema is not defined` — this is the last stop on the arrival
+ * route, and that name is what the route promises a reader will have typed by
+ * the end of it. Both imports are on the page now. `lent.ts` is why nothing can
+ * go back.
  */
 
 export declare const docsRegistry: PrimitiveRegistry
-
-export { gatePolicySchema } from "@jam-overture/loom"
-export { interactiveTypesFor } from "@jam-overture/loom/sdk"

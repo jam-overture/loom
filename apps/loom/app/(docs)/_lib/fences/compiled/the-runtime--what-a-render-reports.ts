@@ -8,20 +8,16 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import {
-  expect,
-  options,
-  renderLoomTree,
-  rendered,
-  tree,
-} from "../context/the-runtime--what-a-render-reports"
+import { renderLoomTree } from "@jam-overture/loom/react"
+
+import { expect, options, rendered, tree } from "../context/the-runtime--what-a-render-reports"
 
 // page.mdx:28 — a program
 const { element, diagnostics } = renderLoomTree(tree, options)
 
-// page.mdx:75 — the inside of a function
-const functionAtLine75 = async () => {
+// page.mdx:77 — the inside of a function
+const functionAtLine77 = async () => {
 expect(rendered.diagnostics).toEqual([])
 }
 
-export { element, diagnostics, functionAtLine75 }
+export { element, diagnostics, functionAtLine77, renderLoomTree }

@@ -19,6 +19,8 @@ addressed to a slot it does not place renders nothing at all.
 ## Children: order is the meaning
 
 ```ts
+import { buildElement } from "@jam-overture/loom"
+
 buildElement(ids, {
   type: "loom.page",
   children: [hero, features, pricing],
@@ -35,6 +37,8 @@ alignment — never what is in it.
 ## Slots: the parent decides where
 
 ```ts
+import { buildSlot } from "@jam-overture/loom"
+
 buildElement(ids, {
   type: "loom.hero",
   props: { align: "center", eyebrow: "The AI-native UI runtime" },

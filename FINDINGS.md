@@ -61793,6 +61793,162 @@ argument, and it is not tonight's unit. Recorded here so the next run does not
 re-derive the count.
 
 ---
+## 2026-10-29 — eleven names a page tells a reader to call had their import in a file no reader will ever see, and one of them is what the arrival route promises
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
+filing by `docs-70-the-name-a-reader-has-not-met`** — the eleven imports are on
+the pages and `fences/lent.ts` is what stops a twelfth
+
+A context file lends a page what its story assumes — a `session`, a `db`, an
+`ids` factory the page made two sections ago. Those are the narrator's and a
+reader is not meant to have them. It may also, by a rule written for a good
+reason, **import a name the runtime really provides**: so that a snippet can
+never be made to compile against an invented function.
+
+**That rule asked whether the name was real. It never asked whether the reader
+could get hold of it.** So:
+
+```ts
+// /docs/the-runtime/what-the-gate-decides, block 1
+const policy = gatePolicySchema.parse({ … })
+```
+
+compiled, rendered, and sat on the **last stop of the arrival route** — whose
+promise to a reader is, in the route's own words, that `gatePolicySchema` is
+*the one published name you will have typed by the end of it*. The import was in
+`_lib/fences/context/the-runtime--what-the-gate-decides.ts`. Copy the block and
+you get `gatePolicySchema is not defined`.
+
+### What was in that state, measured
+
+| page | name | used by |
+| --- | --- | --- |
+| `building-with-loom/composition` | `buildElement`, `buildSlot` | 2 program blocks |
+| `the-runtime/connecting-a-model` | `EditIntent`, `InterpretationError`, `LoomTree`, `ProposedChange`, `Result` | the block that writes the interpreter interface out |
+| `the-runtime/what-your-app-has-to-do` | `EditIntent` | the block that builds an intent |
+| `the-runtime/what-a-render-reports` | `renderLoomTree` | the page's only program block |
+| `the-runtime/what-the-gate-decides` | `gatePolicySchema`, `interactiveTypesFor` | both program blocks |
+
+**Two of the five pages are on the arrival route**, and one of the two is its
+final step.
+
+### The part worth keeping
+
+**The context files said so, in their own docblocks, three times.** *"the page
+does not import it"*. *"it is re-exported here because the page introduces it in
+prose rather than in an import"*. *"`renderLoomTree` is the runtime's and is
+imported as such"* — imported *there*, not on the page. Nobody read those
+sentences as a fault, because every check in this repository agreed the block
+compiled. It did: against a module the page is assembled with and a reader is
+not.
+
+It is **28 October one layer in**. That day the install command was missing a
+package the route walks a reader into importing. The package is installed now
+and the *import statement* was still missing. Same cause both times, and it is
+the sentence `teaches.test.ts` already carries about the 27 September door: *a
+test that resolves imports cannot see a fault whose entire content is "a
+reader's tree is not this one."*
+
+### The remedy, and the one exception
+
+`fences/lent.ts` reads every `export … from` in every context file and resolves
+it against the page's own fences: which block first calls the name, which block
+first shows an import that **binds** it, and whether the calling block was one
+an `import` statement could have gone in at all.
+
+The exception is a fact rather than a sentence, which is the shape
+`arrival/route.ts` gives the pages the route walks past: **you cannot write an
+`import` in the middle of an object literal.** A runtime name used only from
+`object-body` and `function-body` fences may still be lent, and the test checks
+that excuse by reading the fences rather than believing the file. Three names
+qualify today and the next entry is about them.
+
+---
+## 2026-10-29 — three names are still lent to blocks that cannot carry an import, so a reader copying a fragment is shown the call and not the door
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+stated limit of the entry above, costed, with a recommendation
+
+The rule the entry above lands is *a runtime name a block invites a reader to
+copy is imported on the page*. Its one exception is real: an `import` statement
+cannot go inside an object literal or a function body. Three names are lent on
+those terms, all three derived rather than listed:
+
+| page | name | the block that uses it |
+| --- | --- | --- |
+| `getting-started/rendering-a-tree` | `renderRequest` | two `function-body` blocks — the inside of a request handler |
+| `building-with-loom/composition` | `createElement` | a `tsx object-body` block — the inside of a component |
+| `building-with-loom/composition` | `LoomPrimitiveProps` (type) | the same block |
+
+**`renderRequest` is the one that matters**, because *Rendering a tree* is the
+**third stop on the arrival route** and `renderRequest` is the call the page is
+about. A reader copies the handler body into their own file and is not shown
+`import { renderRequest } from "@jam-overture/loom/react"` anywhere on the page.
+Nothing is *wrong* on the screen: the page explains in prose what `renderRequest`
+does, and the block it sits in is honestly declared as the inside of something.
+
+### Three shapes, costed
+
+1. **Leave it.** Defensible for `createElement` — a reader writing a React
+   component knows where `createElement` comes from, and `LoomPrimitiveProps` is
+   named in the paragraph beside it. Much weaker for `renderRequest`, which is
+   the one name on that page a reader has never seen before.
+2. **Give the page a program block that shows the import.** One or two lines,
+   costs **no prose** (a fence is not in the prose index), and puts the door
+   beside the call. The objection is that an import block with nothing under it
+   is a block that exists to satisfy a check — which is exactly the thing
+   `model.ts` says about pushing pages towards `sketch`.
+3. **Let a fence declare the file it is a fragment of.** The honest version: a
+   `function-body` fence names the imports its enclosing module would have, the
+   page renders them above the fragment in a dimmed preamble, and `lent.ts`
+   reads them as shown. It is the right answer and it is a decision about what a
+   fence is, which is more than this unit.
+
+**Recommendation: (2) for `renderRequest` only, on the next run that touches
+*Rendering a tree*, and leave the two on *Children and slots* as they are.** The
+asymmetry is the route: a name on a stop the route promises is a name a stranger
+meets with nothing in their hand, and the other two are not. Not taken today
+because the branch already changes five pages' blocks and this one changes what
+a page is *shaped* like.
+
+---
+## 2026-10-29 — a screenshot taken while the merge gate is running turns the gate red, for a reason that has nothing to do with the change
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — cost
+this run one full gate cycle, and the remedy is a sentence in `docs/routines.md`
+rather than code
+
+`pnpm verify` is `build && typecheck && test && findings:check && reports:check
+&& @loom/app verify && prerender:check`. `pnpm shoot` writes `.png` into
+`reports/` and `pnpm reports:shrink` is what stores them as `.webp`. So a run
+that starts the gate and then takes its pictures while it waits — which looks
+like the obvious way to use the time, and is what this run did — has three
+`.png` files sitting in `reports/` by the time `reports:check` gets there:
+
+```
+reports/2026-10-29-docs-…-wide-gate-after.png is not .webp or .svg — run `pnpm reports:shrink`
+3 faults across 2007 visuals in reports/ (144.0MB)
+```
+
+**Everything the branch actually changed had already passed** — 240 files and
+5,816 framework tests green, `findings:check` clean — and because
+`reports:check` sits *before* `pnpm --filter @loom/app verify` in the chain, the
+application suite and `prerender:check` never ran at all. The gate was red and
+the branch was not.
+
+It is the same family as *Reading the merge gate*: a thing a **run** does rather
+than a thing the repository contains, and invisible to anything in the
+repository because the two commands are individually correct.
+
+**Recommendation: a line under *Reading the merge gate* saying that the gate
+reads the working tree, so nothing may write into `reports/`, `FINDINGS.md` or
+any other file it checks while it runs — take the pictures before it or after
+it, never beside it.** Both halves of that were broken today: `FINDINGS.md` was
+appended to during the *first* gate run of the session as well, which is why
+that run's green is not quoted anywhere in the report. Not written into
+`docs/routines.md` by this lane, because that file is governance and the portal
+routine's reasoning about why a routine cannot write the governance it is bound
+by is the standing answer.
 ## 2026-10-28 (evening) — a stated ceiling is now checked against the buffer, and nothing checks that the ceiling is tight
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`

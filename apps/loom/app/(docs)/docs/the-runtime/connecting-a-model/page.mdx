@@ -25,6 +25,8 @@ exact request the guess would have been.
 An interpreter is an interface with one method:
 
 ```ts
+import type { EditIntent, InterpretationError, LoomTree, ProposedChange, Result } from "@jam-overture/loom"
+
 type ChangeInterpreter = {
   interpret: (intent: EditIntent, tree: LoomTree) => Promise<Result<ProposedChange, InterpretationError>>
 }
