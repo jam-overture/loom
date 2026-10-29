@@ -61699,3 +61699,42 @@ asymmetry is the route: a name on a stop the route promises is a name a stranger
 meets with nothing in their hand, and the other two are not. Not taken today
 because the branch already changes five pages' blocks and this one changes what
 a page is *shaped* like.
+
+---
+## 2026-10-29 — a screenshot taken while the merge gate is running turns the gate red, for a reason that has nothing to do with the change
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — cost
+this run one full gate cycle, and the remedy is a sentence in `docs/routines.md`
+rather than code
+
+`pnpm verify` is `build && typecheck && test && findings:check && reports:check
+&& @loom/app verify && prerender:check`. `pnpm shoot` writes `.png` into
+`reports/` and `pnpm reports:shrink` is what stores them as `.webp`. So a run
+that starts the gate and then takes its pictures while it waits — which looks
+like the obvious way to use the time, and is what this run did — has three
+`.png` files sitting in `reports/` by the time `reports:check` gets there:
+
+```
+reports/2026-10-29-docs-…-wide-gate-after.png is not .webp or .svg — run `pnpm reports:shrink`
+3 faults across 2007 visuals in reports/ (144.0MB)
+```
+
+**Everything the branch actually changed had already passed** — 240 files and
+5,816 framework tests green, `findings:check` clean — and because
+`reports:check` sits *before* `pnpm --filter @loom/app verify` in the chain, the
+application suite and `prerender:check` never ran at all. The gate was red and
+the branch was not.
+
+It is the same family as *Reading the merge gate*: a thing a **run** does rather
+than a thing the repository contains, and invisible to anything in the
+repository because the two commands are individually correct.
+
+**Recommendation: a line under *Reading the merge gate* saying that the gate
+reads the working tree, so nothing may write into `reports/`, `FINDINGS.md` or
+any other file it checks while it runs — take the pictures before it or after
+it, never beside it.** Both halves of that were broken today: `FINDINGS.md` was
+appended to during the *first* gate run of the session as well, which is why
+that run's green is not quoted anywhere in the report. Not written into
+`docs/routines.md` by this lane, because that file is governance and the portal
+routine's reasoning about why a routine cannot write the governance it is bound
+by is the standing answer.
