@@ -29,7 +29,7 @@ The counter is also the right one to transpose. A region view is counted once,
 at the moment a page view began, and is never recounted — unlike the per-node
 `views`, which is a distinct count inside a rollup window and is added to the
 next window's
-([0147](0147-counters-are-additive-and-the-view-counts-are-the-one-place-that-is-lossy.md)).
+([0147](0147-a-rollup-is-added-to-what-is-stored-and-a-distinct-view-count-is-therefore-approximate.md)).
 So a cell summed across revisions and across months does not drift.
 
 **What makes it a decision rather than a grouping is the floor.** A region map
