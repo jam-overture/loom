@@ -62192,3 +62192,159 @@ being well built.
 
 Whichever is taken, the half that matters is the **phone**. A hover reveal is
 not an affordance for most of the people reading this site.
+## 2026-10-30 — a census over a window's silences is one call now, and nothing reminds a caller it exists
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/silence-census.ts`, `src/signals/window.ts`) · **Status:** open —
+**the stated limit of what
+[0324](decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)
+reaches**; nothing is broken and no test is failing
+
+`silenceCensusOf` answers *how much of this window is dark, for how many
+distinct reasons, and which pages* off the silences every reading already
+publishes. **It is not a member of `windowAssemblyOf`**, and it cannot be in the
+shape the assembly has: the assembly produces readings, pairs and the two
+libraries (0322), and the census is over the **thirty-nine readings taken from
+those** — which the assembly deliberately does not call, because which of them a
+surface wants is the surface's question.
+
+So a caller assembles the argument itself, one entry per reading:
+
+```
+silenceCensusOf([
+  { meaning: copy.silence === null ? null : meaningOfCopySilence(copy.silence), form: formOf(page) },
+  { meaning: reach.silence === null ? null : meaningOfReachSilence(reach.silence), form: formOf(page) },
+  …
+])
+```
+
+That is correct and it is nineteen `meaningOf…Silence` functions a caller has to
+pick the right one of. The hazard is mild in the direction that matters — a
+wrong vocabulary gives a wrong *sentence* and never a wrong count, because the
+condition and the subject travel with the silence and not with the caller's
+choice — but there is no reminder that the census exists at all, which is the
+same half of the §62 note about the region transpose.
+
+**Two shapes, if it is ever wanted.**
+
+1. **A tagged union of a silence as a surface holds it** — `{ vocabulary:
+   "copy", silence: CopySilence }` — with one `meaningOfSilence` that dispatches
+   over it. One function instead of nineteen, exhaustively checked, and it makes
+   the call sites a line each. It costs a twentieth closed thing to keep in step
+   with the nineteen, and `silences.ts` is already the file that must be edited
+   whenever a set gains a member.
+2. **A reading that returns its own entry.** The honest version and much larger:
+   every reading publishes `{ meaning, form }` beside its `silence`, so no caller
+   maps anything. It touches thirty-nine published types to save a line each,
+   and the field would be derivable from two that are already there.
+
+**Recommendation: leave it until something draws a census.** The counts are the
+part that could be wrong and they cannot be, whichever vocabulary a caller
+names. If a screen is built, shape 1 is the one to take, and it is a morning.
+
+---
+## 2026-10-30 — the silence vocabulary had twenty sets, a relation, a dedup and no caller for three weeks
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/silences.ts`) · **Status:** **closed on filing** by
+`signals-63-what-a-window-cannot-answer`
+([0324](decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)),
+and filed because the shape of it is the lane's own test for whether a reading
+is finished
+
+§17 built the subject-and-condition table and `relateSilences` and
+`distinctSilences` over it, and between 7 October and today **nothing outside
+`silences.ts` and its own test imported one name from it** — not the relation,
+not the dedup, not the table, not one of the nineteen `meaningOf…Silence`
+functions and not one of the sentences. The arithmetic was right, the names were
+right, the tests were thorough, and no question could be asked of it.
+
+The cause was not neglect. `distinctSilences` takes the silences of **one card**
+— which is the call it was shaped for, from the §17 run that found two readings
+printing one state in two voices — and the thing an operator holds is a window.
+A list with no page on its entries has no denominator, so *which distinct reasons
+are in this list* was answerable and *which of my pages answered nothing* was
+not.
+
+**The general shape, which is worth keeping:** a vocabulary is finished when
+something can be asked of it over the unit a deployment actually holds, and a
+set published at the unit one surface needed can sit unused for a month without
+a single test failing. The check that catches it costs nothing — grep for an
+import of a published name outside its own test — and this lane now runs it over
+the subsystem's newest module each time it adds one.
+
+**Nothing is renamed and nothing is superseded.** `distinctSilences` keeps the
+one-card shape, which is still right for one card, and the census is built over
+its rule rather than in place of it.
+---
+## 2026-10-29 (evening) — the region rows answer a second question now, and nothing in the window rung reminds a caller it exists
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **the stated limit of what
+[0323](decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)
+reaches**; nothing is broken and no test is failing
+
+`regionPagesOf` is a reading of the same rows `windowReadingsOf` already carries,
+and it is **not** a member of `windowAssemblyOf`. The reason is in the record:
+the assembly's three members are each an input to a published comparison, a
+transpose is an answer a surface asks for directly, it is deployment-whole and
+has no page reading to pair with, and a fourth figure would be charged to every
+window read.
+
+**The hazard that mattered is closed and the one that is left is
+discoverability.** The floor is a required field, so a caller cannot reach the
+cell floor by forgetting an argument — which is the thing 0322 was written
+about, and it bites harder here than anywhere else in this subsystem because a
+cell is the finest grain anything published is counted at. What is left is that
+a surface holding a window and a context has no reason to know the question is
+answerable: the composition is one line, and the line is only in a record and a
+plan section.
+
+**Two shapes, costed.**
+
+1. **A fourth member on `windowAssemblyOf`.** Every window read computes the
+   transpose, including the twelve readings that have no use for it. Linear in
+   the rows, so the cost is small and real; the larger cost is a fourth figure
+   on a value two days old, which 0322 deliberately kept to three.
+2. **Leave it, and name it where a caller is already looking.** The record, §62
+   of the plan and this entry are three places; a surface author reaching for
+   the region map finds `regionReadingOf` and `regionPagesOf` beside each other
+   in the same module directory and the same entry point.
+
+**Recommendation: leave it.** The composition is one line, the unsafe route is
+not reachable by omission, and the party that would benefit is the screen nobody
+has built yet. Worth revisiting the moment a surface draws the region map: at
+that point a caller exists and the right answer is whatever that caller reaches
+for.
+
+---
+## 2026-10-29 (evening) — a per-form transpose of the region map is deliberately not built, because the value of the reading is in the summing
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a boundary named at the moment it was created**; nothing is
+broken and nothing is asked of anybody
+
+`regionReadingOf` has a sibling, `regionReadingFor`, that picks one revision's
+rows — and one form's, where the caller names an audience — before it floors
+them. `regionPagesOf` has no such sibling, and the asymmetry is a decision
+rather than an omission.
+
+**A cell sums the forms a page was served in** (0297): arrivals are people, a
+reader who arrived arrived once whichever form they were served, and two forms
+of a page in one country are one readership of one page. A per-form transpose
+would split that, and the split costs twice over — it floors each form's cell
+separately, so a page nameable on the sum is withheld on both halves, and it
+publishes a cell of a place, a page **and** a form, which is the finest thing
+anything in this subsystem has ever been counted at.
+
+**What a caller wanting one form can do today**, without a new reading: filter
+the rows by `audienceId` before the call. That is the same thing
+`regionReadingFor` does internally, it is one `filter`, and it is deliberately
+not wrapped — a published helper for it would make the narrow question look as
+sound as the wide one.
+
+**Recommendation: leave it unbuilt.** If a deployment ever asks it, the honest
+answer is probably not a per-form transpose at all but the form comparison this
+lane already has (§44–§48) read beside the whole map. Worth a record if it is
+ever built, because the floor argument changes.
+
