@@ -61866,8 +61866,37 @@ qualify today and the next entry is about them.
 ---
 ## 2026-10-29 — three names are still lent to blocks that cannot carry an import, so a reader copying a fragment is shown the call and not the door
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
-stated limit of the entry above, costed, with a recommendation
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **partly
+closed in `docs-71-where-the-reader-landed`** — one of the three was not
+excused by a fact at all and is now imported on its page; the other two are, and
+stay. Original status below: open — the stated limit of the entry above, costed,
+with a recommendation.
+
+> **Closing note, 30 October.** The recommendation below was *option (2) for
+> `renderRequest` only* — add a program block that shows the import — with
+> option (3), *let a fence declare the file it is a fragment of*, named as "the
+> right answer" and "more than this unit." **Both were answers to a question
+> that had a false premise.** The excuse covered `object-body` **and**
+> `function-body`, and only the first is a fact: `program.ts` lifts a function
+> body's imports out before it wraps it, *"because a reader who is shown a
+> handler wants to know where `parseTree` came from"*, and **the first block of
+> *Rendering a tree* has opened with three imports since the page existed** —
+> twenty lines above the block the finding was about.
+>
+> So `renderRequest` needed no new block and no new machinery: one line at the
+> top of the handler it is already in, and the context file stops lending it.
+> `canCarryAnImport` in `fences/model.ts` now excludes `object-body` alone.
+>
+> `createElement` and `LoomPrimitiveProps` on *Children and slots* **remain
+> lent**, for the reason this entry gives, which survives intact for them: they
+> are called from a `tsx object-body`, and there is no edit to that page that
+> puts an `import` in the middle of an object literal. Option (3) is still the
+> honest answer for those two and is still more than one unit.
+>
+> The general shape worth keeping: **an exception stated as a list is weaker
+> than an exception stated as a fact.** Two kinds were written down because they
+> felt like the same thing — *a fragment cannot carry an import* — and the
+> pipeline had disagreed with one of them, in its own docblock, the whole time.
 
 The rule the entry above lands is *a runtime name a block invites a reader to
 copy is imported on the page*. Its one exception is real: an `import` statement
@@ -62107,3 +62136,220 @@ is now the shortest one, and the one caller that will exist — a portal screen
 reading this deployment's window — gets its floor from
 `deploymentReadingContextOf` and cannot type a number at all. Revisit if a
 second surface ever reads a window a step below the assembly.
+
+---
+## 2026-10-30 — the import for a block was somewhere above it, and this site hands readers the middle of its pages on purpose
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
+filing by `docs-71-where-the-reader-landed`** — fifteen places a reader could be
+sent to are fixed, and `_lib/fences/landing.ts` is what stops a sixteenth
+
+On 29 October the rule *a name the runtime provides is the reader's to import,
+so the page shows the import* was made true, per page, in reading order. The
+report that landed it stated the limit and did not open it:
+
+> *a reader who lands **mid-page** — from search, or from the route's own
+> `checkpointHref`, which anchors on a heading — can still meet a block whose
+> import is two screens up. That is a different finding and this run did not
+> open it.*
+
+**Nobody starts at the top.** Three things on this site hand out a fragment of a
+page, and all three were built deliberately:
+
+- the **search box**, whose results are headings and whose code band
+  (`search/code.ts`) exists, in its own words, *"so a name a reader saw in a
+  block can be found again"* — it matches the block and sends the reader to the
+  **heading above it**;
+- the **contents rail**, on the right of every written page;
+- the **arrival route's `checkpointHref`**, which anchors each step on the
+  heading where its one promised name is first mentioned. Four of the six stops
+  anchor on a heading rather than on a page top.
+
+### What was in that state, measured
+
+**Fifteen** places a reader can be sent to, on **eight** pages, where the first
+block they reach calls a name whose only import on the page is above where they
+landed.
+
+| page | the anchor a reader is sent to | the names |
+| --- | --- | --- |
+| `getting-started/rendering-a-tree` | *It always returns an element* | `renderLoomTree` |
+| `building-with-loom/composition` | *Slots: the parent decides where* | `buildElement` |
+| `building-with-loom/theming` | *The third answer is `undefined`…* | `ResolvedTheme`, `paletteScheme` |
+| `building-with-loom/theming` | *The bar above your page* | `ResolvedTheme` |
+| `building-with-loom/what-ai-may-change` | *The two lists you should not write by hand* | `gatePolicySchema` |
+| `building-with-loom/testing-what-you-built` | *Does your policy hold what you meant to hold?* | `expect`, `it` |
+| `building-with-loom/testing-what-you-built` | *Does your own store keep its promises?* | `memoryTreeStore` |
+| `the-runtime/when-nothing-comes-back` | *Seeing it in your own app* | `modelInterpreter`, `randomIdFactory`, `systemClock` |
+| `the-runtime/what-your-app-has-to-do` | *An ask names the page, and which version of it* | `randomIdFactory`, `systemClock`, `commitIntent` |
+
+**`renderLoomTree` is the one that matters**, because *Rendering a tree* is the
+**third stop on the arrival route** and `renderLoomTree` is the name that step
+promises a reader will have typed. The block under *It always returns an
+element* read
+
+```ts
+const { element, diagnostics, theme } = renderLoomTree(tree, options)
+```
+
+with the import twenty lines up, under no heading at all.
+
+**`expect` and `it` are the pair that proves the rule should not have been about
+the runtime.** A check written over `@jam-overture/loom` alone would have called
+*Testing what you built* clean, and the door a reader is least likely to guess
+is `vitest`'s.
+
+### The remedy
+
+**A block's doors are shown in the section the block is in**, the section being
+the one `search/code.ts` indexes and the rail links to — opened by a `##` or a
+`###` and by nothing else, because those are the only anchors anything on this
+site hands out.
+
+Four modules, each answering one question, and three of them exist because the
+question was about to be answered privately for the second or third time:
+
+- `fences/sections.ts` — **which heading a block is under.** Lifted out of
+  `search/code.ts`, which already had the walk and the level rule;
+  `codeSectionsIn` is now four lines over it.
+- `fences/imports.ts` — **the doors a block shows**, read as what a line *binds*
+  rather than what it says, carrying the form so a fault prints
+  `import postgres from "postgres"` rather than `import { postgres } from
+  "postgres"`.
+- `fences/calls.ts` — **the names a block reads**, as identifiers. A word search
+  for `\bit\b` matches the sentence *"it cannot invent `on fire`"* in a doc
+  comment on *A primitive of your own*, and reported it as a call to vitest's
+  `it`. Both prior readers of this question — `lent.ts`'s and this one — are now
+  the parse.
+- `fences/landing.ts` — the rule, and the sentence a reader would have hit.
+
+**Nothing was written into the prose.** Every one of the nine changes is a line
+inside a fence, and a fence is not in the prose index: the index is **byte-for-
+byte what `main` has**, 254,705 raw and 79,656 gzipped, measured on both.
+
+### The part worth keeping
+
+**The courtesy was already there and nothing was holding anybody to it.**
+`program.ts` hoists and merges a page's imports, and its docblock says why:
+
+> *"`your-first-tree` imports `sequentialIdFactory` once to build a tree and
+> again forty lines later to compare it with the random one, **because a reader
+> who arrives at the second block should not have to scroll up to know where the
+> name came from**."*
+
+That is this rule, written by hand, on one page, by whoever happened to think of
+it — and the machinery that makes it free to obey was built for it. The fifteen
+pages where nobody thought of it looked exactly as finished.
+
+---
+## 2026-10-30 — a section is the unit a reader lands on, and a section can be twenty-nine lines long
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — **the
+stated limit of what `landing.ts` guarantees**; nothing is broken and no test is
+failing
+
+The rule landed above is *a block's doors are shown in the section the block is
+in*. The unit is the section because the section is what a reader can be **sent
+to**, and that is the right unit for the failure it fixes. It is not the same
+thing as *the door is beside the call*.
+
+Six uses on this site satisfy the rule with the door in an earlier block of the
+same section. The furthest apart, measured in source lines between the block
+that shows the door and the block that calls the name:
+
+| lines | name | where |
+| --- | --- | --- |
+| 29 | `expect`, `it`, `gatePolicySchema` | `testing-what-you-built#does-your-policy-hold-what-you-meant-to-hold` |
+| 20 | `createThemeRegistry` | `theming#registering-your-own` |
+| 20 | `sequentialIdFactory` | `testing-what-you-built#does-your-policy-hold-what-you-meant-to-hold` |
+| 13 | `gatePolicySchema` | `what-the-gate-decides#the-deployment-decides-what-is-consequential` |
+
+Twenty-nine lines is about a screen. A reader sent to *Does your policy hold
+what you meant to hold?* reads the heading, two paragraphs and two blocks before
+reaching the third, and the `vitest` import is in the first of those — visible
+if they read down, invisible if they scrolled to the block they recognised.
+
+**Per block is the stricter rule and it was costed on 29 October and rejected**,
+for a reason that still holds: it would put an import line above every four-line
+fragment on *Children and slots*, and the rest of this site has never written
+that way. What has changed since is that `program.ts`'s hoist makes a repeated
+import free *as a program*, which was already true — the objection was never
+compilation, it was how the page reads.
+
+**Recommendation: leave it, and reconsider only with a measurement rather than a
+rule.** The honest version is not *every block* but *every block more than one
+screen below its door*, which is a number this module can already produce and
+nothing on this site can measure in pixels (see the 28 October entry on marks
+over a frame). If a third reader-lands-mid-page defect arrives, this is the
+entry that says what the next unit is.
+
+**Two names remain genuinely out of reach**, and that is the other half of the
+limit: `createElement` and `LoomPrimitiveProps` on *Children and slots* are
+called from a `tsx object-body`, and there is no edit to that page that puts an
+`import` in the middle of an object literal. They are tracked by
+`lentWithoutFault` and the 29 October entry above carries their costing.
+
+**And a third thing, found by a mutation that did not kill.** `LANDING_LEVELS`
+is `[2, 3]` because the rail and the search box both link `###` anchors.
+Narrowing it to `[2]` fails only `sections.test.ts`'s restatement of the levels
+— **no page goes red** — because the one `###` landing on the site today, *The
+third answer is `undefined`…* on *Theming*, sits under a `##` that happens to
+hold the import as well. So the `###` half of the rule is held by one assertion
+rather than by the site, and a reader sent to the next `###` anchor somebody
+writes is the first to depend on it. Nothing to do; worth knowing before
+somebody reads that test as redundant and deletes it.
+
+---
+## 2026-10-30 — `pnpm reports:shrink` reads the git index, so the pictures a run has just taken are the ones it cannot see
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/reports/shrink.ts`, `docs/routines.md`) · **Status:** open — **cost this
+run one confused cycle**; nothing is broken and no test is failing
+
+`docs/routines.md`, under *Storing the picture*, says the command
+
+> *"re-encodes **every raster under `reports/`**"*
+
+and it does not. `tools/reports/shrink.ts` discovers its work with
+
+```ts
+const { stdout } = await run("git", ["ls-files", "-z"], …)
+const rasters = files.filter((file) => file.startsWith(`${REPORTS}/`) && RASTER.test(file))
+```
+
+so it sees **tracked** files only. A run that shoots its pictures and then
+shrinks them — which is the order the section itself gives, and the only order
+that makes sense — gets
+
+```
+nothing to shrink — no raster images under reports/
+```
+
+with six fresh `.png` files sitting in `reports/`. The remedy is `git add` the
+PNGs first, which nothing says.
+
+**It is worse than a missing sentence, because of what fails next.** `pnpm
+verify` runs `reports:check`, which fails on a visual that is not `.webp` — so a
+run that reads the "nothing to shrink" line as *there was nothing to do* carries
+PNGs into the gate and goes red in `reports:check`, two commands later, for a
+reason that names neither the shrink nor the capture. That is the same shape as
+the 29 October entry one step earlier in the sequence, and the two compound: the
+29th's cost a gate cycle for taking pictures *during* the gate, this one costs a
+gate cycle for taking them *before* it and believing the tool.
+
+**Two shapes, and the first is nearly free.**
+
+1. **A sentence in `docs/routines.md`** — *`git add` what the harness wrote
+   before you shrink it* — and a line in the tool's own output when `reports/`
+   holds untracked rasters it is declining to touch: *"3 untracked rasters under
+   reports/ were not shrunk — `git add` them first."* That turns a silent
+   no-op into an instruction.
+2. **Have the tool read the directory** rather than the index, and leave the
+   question of what is tracked to git. It is the shape the documentation already
+   describes, and the reason for `git ls-files` is not stated in the file — it
+   may be deliberate (a scratch PNG under `reports/` that nobody meant to
+   commit), in which case shape 1 is the whole answer.
+
+**Recommendation: shape 1.** Filed rather than fixed because `tools/` and
+`docs/routines.md` are both outside this lane, and the portal routine's standing
+reasoning applies — a routine does not write the governance it is bound by.
