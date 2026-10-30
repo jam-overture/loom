@@ -62193,3 +62193,75 @@ the subsystem's newest module each time it adds one.
 **Nothing is renamed and nothing is superseded.** `distinctSilences` keeps the
 one-card shape, which is still right for one card, and the census is built over
 its rule rather than in place of it.
+---
+## 2026-10-29 (evening) — the region rows answer a second question now, and nothing in the window rung reminds a caller it exists
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **the stated limit of what
+[0323](decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)
+reaches**; nothing is broken and no test is failing
+
+`regionPagesOf` is a reading of the same rows `windowReadingsOf` already carries,
+and it is **not** a member of `windowAssemblyOf`. The reason is in the record:
+the assembly's three members are each an input to a published comparison, a
+transpose is an answer a surface asks for directly, it is deployment-whole and
+has no page reading to pair with, and a fourth figure would be charged to every
+window read.
+
+**The hazard that mattered is closed and the one that is left is
+discoverability.** The floor is a required field, so a caller cannot reach the
+cell floor by forgetting an argument — which is the thing 0322 was written
+about, and it bites harder here than anywhere else in this subsystem because a
+cell is the finest grain anything published is counted at. What is left is that
+a surface holding a window and a context has no reason to know the question is
+answerable: the composition is one line, and the line is only in a record and a
+plan section.
+
+**Two shapes, costed.**
+
+1. **A fourth member on `windowAssemblyOf`.** Every window read computes the
+   transpose, including the twelve readings that have no use for it. Linear in
+   the rows, so the cost is small and real; the larger cost is a fourth figure
+   on a value two days old, which 0322 deliberately kept to three.
+2. **Leave it, and name it where a caller is already looking.** The record, §62
+   of the plan and this entry are three places; a surface author reaching for
+   the region map finds `regionReadingOf` and `regionPagesOf` beside each other
+   in the same module directory and the same entry point.
+
+**Recommendation: leave it.** The composition is one line, the unsafe route is
+not reachable by omission, and the party that would benefit is the screen nobody
+has built yet. Worth revisiting the moment a surface draws the region map: at
+that point a caller exists and the right answer is whatever that caller reaches
+for.
+
+---
+## 2026-10-29 (evening) — a per-form transpose of the region map is deliberately not built, because the value of the reading is in the summing
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a boundary named at the moment it was created**; nothing is
+broken and nothing is asked of anybody
+
+`regionReadingOf` has a sibling, `regionReadingFor`, that picks one revision's
+rows — and one form's, where the caller names an audience — before it floors
+them. `regionPagesOf` has no such sibling, and the asymmetry is a decision
+rather than an omission.
+
+**A cell sums the forms a page was served in** (0297): arrivals are people, a
+reader who arrived arrived once whichever form they were served, and two forms
+of a page in one country are one readership of one page. A per-form transpose
+would split that, and the split costs twice over — it floors each form's cell
+separately, so a page nameable on the sum is withheld on both halves, and it
+publishes a cell of a place, a page **and** a form, which is the finest thing
+anything in this subsystem has ever been counted at.
+
+**What a caller wanting one form can do today**, without a new reading: filter
+the rows by `audienceId` before the call. That is the same thing
+`regionReadingFor` does internally, it is one `filter`, and it is deliberately
+not wrapped — a published helper for it would make the narrow question look as
+sound as the wide one.
+
+**Recommendation: leave it unbuilt.** If a deployment ever asks it, the honest
+answer is probably not a per-form transpose at all but the form comparison this
+lane already has (§44–§48) read beside the whole map. Worth a record if it is
+ever built, because the floor argument changes.
+
