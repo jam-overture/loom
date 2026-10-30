@@ -412,3 +412,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0320](0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md) | A notice publishes when a delivery goes, and the deployment states the sweep that takes it | Accepted | §4c (reader signals) |
 | [0321](0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md) | A sweep judges the published retention ceiling against the oldest delivery it found | Accepted | §4c (reader signals) |
 | [0322](0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md) | A window is read off one deployment context, and the region floor is not optional | Accepted | §4c (reader signals) |
+| 0323 | *No record on this branch* | — | — |
+| [0324](0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md) | What a window could not answer is a census over its silences, and a page is counted once | Accepted | §4c (reader signals) |

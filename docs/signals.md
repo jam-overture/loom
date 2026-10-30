@@ -61,6 +61,7 @@ the portal every day.
 | What a reader is told about how long it is kept | the age a delivery ripens at **and** how often the deployment sweeps, as a ceiling it stated rather than one the framework guessed ([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)) — and the weaker sentence, in as many words, where it has stated nothing |
 | Whether that promise is one the deployment keeps | the oldest delivery a sweep found, against the ceiling the notice publishes ([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)) — free, because a scan already starts at the oldest end — with an unstated interval judged as no claim rather than a broken one, and a delivery exactly on the ceiling as a sweep that ran on time |
 | What a deployment reads its own window with | one context holding the four facts a reading needs, with the region floor **required** rather than optional ([0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)) — an absent floor is the smallest bucket this runtime will ever name, so a deployment that raised its floor to a hundred had a surface publish buckets of twenty-five about real people; `windowAssemblyOf` composes the three steps of the rung in the one order that does not drop a page published inside the window |
+| What a window could not answer, and what each reason cost it | the states its readings are in, as a condition and a subject, with the readings each took and the pages each cost ([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)) — a page counted once however many of its readings report one state, no total over the states because one page is in as many as it has reasons, and a page's own row with a denominator, because *nine of nine readings silent* is a page to fix and *one of nine* is a page that works |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -3866,6 +3867,66 @@ than a guarantee; the collection schedule is a fourth per-deployment setting and
 is **not** in the context, because its other half is an instant and a context
 holding a clock reading would answer differently on two calls over one window;
 and still that **nothing draws any of this**, which is `Loom portal`'s.
+
+### 63. What a window could not answer · `Loom signals` · **done, 30 October**
+
+The vocabulary §17 settled has never been called. A hundred and fourteen names
+across twenty closed sets, each mapped to the condition it reports and the
+subject that condition is true of, with a relation that holds two reasons
+against each other and a dedup over them — and **the only file in the repository
+that imports either is their own test.**
+
+The reason is the shape of the call. `distinctSilences` takes the silences of
+**one card**, and the thing an operator holds is a window of forty pages with
+nine readings over each. Handed that list it answers *which distinct reasons are
+in it* and cannot answer *how much of this window is dark*, *which page*, or *is
+this one door row or forty*. A whole vocabulary that nothing can phrase a
+question against is this lane's definition of unfinished.
+
+**Done**
+([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)),
+as `silenceCensusOf` in
+[`silence-census.ts`](../src/signals/silence-census.ts).
+
+- **One entry per reading rather than one per silence**, with the meaning
+  nullable. That is the only difference from `distinctSilences`' argument and it
+  is the whole reason the second grouping has a denominator: a reading that
+  answered is still a reading of that page, and dropping the nulls before the
+  call makes *nine of this page's nine readings are silent* and *one of one* the
+  same row.
+- **A state is one condition about one subject**, which is `relateSilences`'
+  `one-state` written as a key. Two spellings of one state collapse and keep the
+  first reading's vocabulary; one condition about two subjects stays two, for
+  0240's reason. The key and the relation are **held together by a test**,
+  because calling the relation would turn a grouping into a scan per entry.
+- **What a reason cost is two numbers and they are not each other.** The
+  readings it took, and the pages it cost — each page once however many of its
+  readings report it, which is 0271's rule for a fault reapplied. One page with
+  nine such readings is nine and one; nine pages with one each is nine and nine,
+  and the remedies differ.
+- **The page is a form and not a tree** (0290, 0293), so two forms of one page
+  are two dark pages rather than one.
+- **A reading of no one page is counted apart.** A library census and a
+  deployment order are of something larger than a page and a reading's subject
+  is not its scope, so attributing their silences to a form would be a guess.
+- **No ranking, and the reason is in the record.** A third of the conditions are
+  not faults — `nothing-of-the-kind` means *you do not use that kind of part* —
+  and the two costs are in two units that disagree. Both figures are published
+  and a surface sorts by the one it means, which is the shape §60's finding
+  recommended for a verdict this lane could not take honestly.
+- **No total of pages across the states**, because one page is in as many states
+  as it has reasons. What is published partitions instead, and both identities
+  are tests rather than sentences.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** it is not a member of `windowAssemblyOf`, because
+the assembly produces readings and does not call the thirty-nine readings over
+them — so a caller maps its own readings' `silence` fields through the matching
+`meaningOf…Silence`, and nothing reminds it the census exists; and still that
+**nothing draws any of this**, which is `Loom portal`'s.
 
 ## Still not in scope
 
