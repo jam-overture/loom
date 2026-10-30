@@ -188,6 +188,27 @@ describe("whether the readers who meet a kind of part have time for it", () => {
     expect(found?.counted).toBe(2)
     expect(found?.readers).toBe(20)
     expect(found?.needMs).toBe(2 * 10 * 20 * MS_PER_WORD)
+    /** Two places on one page are one page, which is the other half of counting once. */
+    expect(found?.pages).toBe(1)
+  })
+
+  it("counts a page bearing it once, and two pages as two", () => {
+    const here = page()
+    const far = page({ treeId: OTHER_TREE })
+
+    const found = libraryPaceOf(
+      [
+        readingOf(here, [tally("intro", { reached: 10, dwellMs: 50_000 }, here)]),
+        readingOf(far, [
+          tally("intro", { reached: 10, dwellMs: 50_000 }, far),
+          tally("outro", { reached: 10, dwellMs: 50_000 }, far),
+        ]),
+      ],
+      [row(), row({ treeId: OTHER_TREE })]
+    )
+
+    expect(typeRow(found, "loom.section")?.counted).toBe(3)
+    expect(typeRow(found, "loom.section")?.pages).toBe(2)
   })
 
   it("counts one reading handed over twice once", () => {
@@ -230,6 +251,21 @@ describe("what the door does to a kind's pace", () => {
       libraryPaceOf([readingOf(tree, [tally("intro", { reached: 50, dwellMs: 200_000 }, tree)])], [row()]),
       "loom.section"
     )
+
+    /**
+     * The correction reaches the per-placement verdicts too, which is the half
+     * of it the pooled figure cannot show: at 1,500 ms a reader this section is
+     * skimmed, and corrected for the straddle it is paced.
+     */
+    expect(
+      typeRow(
+        libraryPaceOf(
+          [readingOf(tree, [tally("intro", { reached: 100, dwellMs: 150_000 }, tree)])],
+          [row({ opened: 100, appearances: 200 })]
+        ),
+        "loom.section"
+      )?.standings
+    ).toEqual({ skimmed: 0, paced: 1, lingered: 0, unknown: 1 })
 
     expect(straddled?.readers).toBe(50)
     expect(straddled?.dwellMs).toBe(200_000)
@@ -472,6 +508,46 @@ describe("what the reading publishes over the kinds", () => {
     const found = library().byType.map((entry) => entry.shortMs ?? -1)
 
     expect([...found].sort((one, other) => other - one)).toEqual(found)
+  })
+
+  it("orders by the time missing and not by the ratio, where the two disagree", () => {
+    const TWO_COPY: PartDeclarations = {
+      copyFor: (type) =>
+        type === "loom.section" || type === "loom.note" ? ["body"] : undefined,
+      typesWithRole: () => [],
+    }
+    const tree = treeOf(
+      element("page", "loom.stack", {}, [
+        section("band", 1000),
+        element("note", "loom.note", { body: words(4) }),
+      ])
+    )
+    /**
+     * The note is read at a tenth of the pace and costs nine hundred
+     * milliseconds of nobody's time; the band is read at four tenths and costs
+     * four hours of it. A deployment fixes the band.
+     */
+    const found = libraryPaceOf(
+      [
+        pageReadingOf(
+          tree,
+          [
+            tally("band", { reached: 100, dwellMs: 10_000_000 }, tree),
+            tally("note", { reached: 1, dwellMs: 100, type: primitiveType("loom.note") }, tree),
+          ],
+          TWO_COPY
+        ),
+      ],
+      [row()]
+    )
+
+    expect(found.byType.map((entry) => entry.kind)).toEqual([
+      { by: "type", type: primitiveType("loom.section") },
+      { by: "type", type: primitiveType("loom.note") },
+      { by: "type", type: primitiveType("loom.stack") },
+    ])
+    expect(typeRow(found, "loom.note")?.pace).toBeLessThan(typeRow(found, "loom.section")?.pace ?? 0)
+    expect(found.mostSkimmed?.kind).toEqual({ by: "type", type: primitiveType("loom.section") })
   })
 
   it("keeps a kind that holds a page's root out of the kind to look at first", () => {

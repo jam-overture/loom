@@ -20,8 +20,8 @@
 path. The record is **0325**: `main` holds up to `0324` and `0308` is claimed on
 #706's branch, which `0097` reports as a hole rather than failing on.
 
-**Nineteen open findings owned by this lane were read first and none of them was
-the work.** Most are limits written down with a recommendation to leave them,
+**The open findings owned by this lane were read first and none of them was the
+work.** Most are limits written down with a recommendation to leave them,
 and two — the §62 and §63 discoverability gaps — are revisited below rather than
 taken, because this run made them a third of the same thing. So the queue fell
 through to the plan, and the plan's first item chose this: *the interpretation
@@ -154,3 +154,140 @@ special-case the key.**
 
 ## Test numbers
 
+`pnpm verify` **green**, every stage: `build`, `typecheck`, `test`,
+`findings:check`, `reports:check`, the app's own `verify`, and
+`prerender:check`.
+
+- **5,919 tests in 244 files** in the root suite, all passing, and **6,837 in
+  379 files** in the app's own. `findings:check` reads 1,367 findings with none
+  malformed; `reports:check` reads 2,023 visuals at 144.0MB with none over the
+  cap; `prerender:check` reads 137 pages with 0 junctions run together.
+- **35 new tests** in `library-pace.test.ts`, in six groups: whether the readers
+  who meet a kind have time for it, what the door does to its pace, what it has
+  no pace for, a kind keyed by the part it plays, what the reading publishes
+  over the kinds, and the costing rate.
+- **Nothing was skipped and nothing was weakened.** The three tests that changed
+  outside the new file are `silences.test.ts`'s own enumerations, which gain the
+  twenty-first vocabulary. No assertion anywhere was relaxed.
+- **Three modules changed for `atDoorScale` and no test of them changed**, which
+  is the point of the way it is written: the multiplication stays before the
+  division, so every call is bit-identical to the copy it replaced. All 1,783
+  tests in `src/signals/` pass unaltered.
+- **One generated file regenerated**: `reference.generated.json`, via
+  `pnpm --filter @loom/app docs:api` — 17 entry points and 1,875 exports.
+
+### Twenty-two mutants planted, twenty-two dead — after three survived
+
+The first pass killed **19 of 22**, and all three survivors were real gaps
+rather than equivalent mutants. Run **after** the commit, per the 27 October
+finding that mutation testing before a commit is how a run loses the work it is
+testing.
+
+1. **A page counted once per counted placement.** `pages` was never asserted at
+   all. Closed by *counts a page bearing it once, and two pages as two*, and by
+   a `pages` assertion on the two-places-on-one-page case.
+2. **Each page's straddle dropped on the way into the per-placement verdicts.**
+   The correction has two halves — the readers in the pooled denominator, and
+   the `spentMs` behind each placement's own standing — and only the first was
+   pinned, because the pooled figure cannot show the second. Closed by a page
+   whose section is `skimmed` at 1,500 ms a reader and `paced` once its doubled
+   appearances are corrected for.
+3. **The rows ordered by the ratio rather than by the time missing.** The
+   ordering test asserted `shortMs` descending over a fixture where the two
+   orders happened to agree. Closed by a library where they disagree: a note
+   read at a tenth of the pace costing nine hundred milliseconds, against a band
+   read at four tenths costing four hours.
+
+The second pass killed all twenty-two. The list also includes a nested
+placement counted, a part's own words taken for its subtree's, no door scaling
+at all, the corrected time per reader taken as the numerator, the pace
+inverted, the floor ignored in the verdict, the silence order reversed, a
+floored kind keeping its verdict, the root allowed to win the ranking, a
+negative short time, an open-kind stack that never closes, readers from an
+unscaled page not named, a repeated reading read again, the costing rate
+ignored and then trusted however absurd, an unscaled page listed where nothing
+was counted, and both ways `atDoorScale` could be wrong — dividing by the
+openings, and taking one door where the counterfactual needs two.
+
+### The double-count case, per this lane's standing rule
+
+Every figure here is a sum, so it was tested in both directions at once.
+
+- **A placement inside another of its own kind is counted once.** A section
+  holding a section publishes `nested: 1`, `counted: 1`, and the outer one's
+  forty words — never its own twenty plus the subtree's forty. The mutant that
+  lets the inner one through dies here.
+- **Two placements side by side are counted as two**, which is the opposite
+  error and the under-reporting one, and **two forms of the `null` role row**
+  are the same case at the key where it bites hardest: a three-part page
+  publishes `placements: 3`, `nested: 2` and the page's words once.
+- **One reading handed over twice is read once**, and a second door row for one
+  revision is ignored rather than added — which would double a page's arrivals
+  and halve every pace taken against it.
+- **A page is counted once however many of its places are counted.**
+- **The two partitions, which are what make the counts addable at all.** Every
+  placement is in exactly one of `nested`, `counted` and the silences, and every
+  placement the nesting rule did not set aside has exactly one standing. Both
+  are asserted over every row of both groupings of a four-part library, not over
+  one chosen row.
+- **No figure is published over the kinds**, so there is nothing there to be
+  added twice. The shape of the published object is itself a test, because the
+  thing this record refuses is a field that does not exist.
+
+## Browser cost: nothing
+
+**`broadcast.ts` is byte-identical to `main`** — `git diff origin/main` on that
+file is empty — and the bundle measures **6,513 bytes** minified, the same
+number as the last nine runs. `browser-weight.test.ts` still reports no package
+in the broadcaster's import graph.
+
+`library-pace.ts` is server-side, imports six modules for types and four
+functions, and reaches no store, no clock and no DOM. **No payload field, no
+column, no migration, no store method and no new kind.**
+
+## Open questions
+
+**Nothing blocking.** Five, and four are not new.
+
+1. **#706 / `0308` is six days old.** One reading of one clause, one member on
+   two unions, one line in a switch, and it is the only thing holding that
+   branch. **Recommendation: read it and say yes or no.** If you would rather
+   the two states stayed merged, say so and the finding closes as settled.
+2. **Whether a page the door cannot scale should be kept.** The one judgement
+   in this unit that reverses a neighbouring reading's answer, for a stated
+   reason: the missing correction only makes a kind read as more skimmed, and
+   `skimmed` is the claim 0230 was built to defend. 0256 refuses the same page
+   because a share has no safe direction. **Recommendation: keep it** — a
+   deployment that has not finished wiring its door is exactly the one that
+   needs the verdict, and `unscaled` on the row says how much of it is
+   uncorrected. If you would rather the two readings behaved alike, that is one
+   branch and a superseding record.
+3. **`LOOM_SIGNAL_SWEEP_MS` is unset on this deployment**, so the retention
+   notice publishes the weaker sentence and §60's verdict reads `unpromised` on
+   every run. **Recommendation: set it to the cron's real interval when the cron
+   is scheduled.**
+4. **Seventeen runs with nothing drawing any of it.** Forty-one readings, nine
+   comparisons, an assembly, a context, a census and now a library's pace, and
+   not one of them on a screen. `Loom portal` is paused, so this is yours.
+5. **The second rung.** Three readings now hang off `windowAssemblyOf` without
+   being in it, and the finding above argues the answer is one unit rather than
+   three one-line additions. **Recommendation: leave it until a surface exists**
+   — but a future run of this lane should not take any of the three
+   individually.
+
+## On keeping the parked door cheap to open
+
+**Nothing here makes per-reader identity more expensive to add later, and
+nothing was built toward it.** The finest grain in this reading is *one kind of
+part, on one revision of one page, in one form* — a type or a role, a tree and
+an audience. There is no reader in it at any point, and `readers` is explicitly
+a weight rather than a headcount, for the reason 0256 already refused to round
+one into people.
+
+One thing worth knowing if that door is ever opened: this reading would get
+**better** rather than harder. Its weakest assumption is the one 0230 names —
+dwell counts a part that was merely on screen, and a mean over page views cannot
+tell one reader's four visits from four readers' one. An identified batch would
+sharpen the denominator without changing a single figure's definition. That is
+not an argument for building it; it is one place the parked work would pay off
+if it is ever approved.
