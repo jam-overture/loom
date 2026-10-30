@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 69,
+      "files": 70,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12022,6 +12022,49 @@
           ]
         },
         {
+          "module": "signals/silence-census",
+          "title": "Silence census",
+          "summary": "What a window could not answer, and what each reason cost it.",
+          "symbols": [
+            {
+              "name": "ReadingSilence",
+              "kind": "type",
+              "signature": "type ReadingSilence = {\n    /**\n     * What the reading reported, as the matching `meaningOf…Silence` gives it, or\n     * `null` where it answered.\n     *\n     * Nullable rather than the whole entry being nullable, which is the one way\n     * this differs from `distinctSilences`' argument and the reason the form\n     * grouping has a denominator at all: a reading that answered is still a\n     * reading of that page, and dropping it before the call would make *nine of\n     * nine* and *one of one* the same row.\n     */\n    readonly meaning: SilenceMeaning | null;\n    /**\n     * The page in the form this reading was of, or absent where the reading is of\n     * no one page.\n     *\n     * A library census and an order over a deployment's pages are of something\n     * larger than a page, and their silences are about a kind and about a page\n     * respectively — a reading's subject is not its scope. Those are\n     * counted in {@link SilenceCensus.wide} rather than attributed to a form that\n     * would be a guess.\n     */\n    readonly form?: PageForm | null;\n};",
+              "summary": "One reading's silence, with the page it was a reading of."
+            },
+            {
+              "name": "SilenceStanding",
+              "kind": "type",
+              "signature": "type SilenceStanding = {\n    readonly condition: SilenceCondition;\n    readonly subject: SilenceSubject;\n    /**\n     * The vocabulary of the **first** reading that reported it, kept so that a\n     * surface can still print that reading's own sentence.\n     *\n     * `distinctSilences`' rule, unchanged: the names are right in their own set\n     * and collapsing a state does not make one of them wrong.\n     */\n    readonly vocabulary: SilenceVocabulary;\n    /** Every vocabulary that reported it, each once, in the order they arrived. */\n    readonly vocabularies: readonly SilenceVocabulary[];\n    /** How many readings reported it. */\n    readonly readings: number;\n    /** The pages it cost, each once however many of their readings reported it. */\n    readonly forms: readonly PageForm[];\n    /** How many of the readings that reported it were of no one page. */\n    readonly wide: number;\n};",
+              "summary": "One state the window is in, and what it cost."
+            },
+            {
+              "name": "SilenceGroup",
+              "kind": "type",
+              "signature": "type SilenceGroup = {\n    /** Every reading handed over in this group, silent or not. */\n    readonly readings: number;\n    /** How many of them were silent. */\n    readonly silent: number;\n    /**\n     * The distinct states they are in, in the order they arrived, each keeping the\n     * first reading's vocabulary.\n     */\n    readonly states: readonly SilenceMeaning[];\n};",
+              "summary": "What one group of readings answered."
+            },
+            {
+              "name": "FormSilences",
+              "kind": "type",
+              "signature": "type FormSilences = SilenceGroup & {\n    readonly form: PageForm;\n};",
+              "summary": "What one page in one form answered."
+            },
+            {
+              "name": "SilenceCensus",
+              "kind": "type",
+              "signature": "type SilenceCensus = {\n    /**\n     * Every reading handed over, silent or not, which is the denominator the\n     * caller chose by choosing what to hand in.\n     */\n    readonly readings: number;\n    /** How many of them were silent. `readings = silent + answered`. */\n    readonly silent: number;\n    readonly answered: number;\n    /**\n     * The distinct states, in the order the readings were handed over.\n     *\n     * Their `readings` sum to {@link silent}, because every silent reading is in\n     * exactly one state. Their `forms` do **not** sum to anything.\n     */\n    readonly states: readonly SilenceStanding[];\n    /** The same readings by page, in form order rather than arrival order. */\n    readonly byForm: readonly FormSilences[];\n    /** The readings of no one page, which no form row holds. */\n    readonly wide: SilenceGroup;\n};",
+              "summary": "The states a window is in, and what each of them cost."
+            },
+            {
+              "name": "silenceCensusOf",
+              "kind": "function",
+              "signature": "const silenceCensusOf: (readings: readonly ReadingSilence[]) => SilenceCensus",
+              "summary": "The states a window is in, out of the silences its readings published."
+            }
+          ]
+        },
+        {
           "module": "signals/silences",
           "title": "Silences",
           "summary": "What two readings mean when they both say nothing, and whether they mean the same thing.",
@@ -12527,7 +12570,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12662,7 +12705,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12724,7 +12767,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13249,7 +13292,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13319,7 +13362,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13741,7 +13784,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1808,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
