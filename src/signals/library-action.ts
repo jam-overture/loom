@@ -9,7 +9,7 @@ import {
   type PartAction,
 } from "./action.js"
 import { readingKeyOf } from "./audiences.js"
-import { doorOf, type PageDoor } from "./door.js"
+import { atDoorScale, doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import type { KindReachSilence, UnscaledPage } from "./library-reach.js"
 import {
@@ -673,16 +673,8 @@ const figuresOf = (
     return { ...none, drift, pending, silence: KIND_ACTION_OF_REACH[blocked] }
   }
 
-  const met = weighing.reduce(
-    (sum, terms) =>
-      sum + (terms.reached * terms.door.counted) / terms.door.appearances,
-    0,
-  )
-  const acted = weighing.reduce(
-    (sum, terms) =>
-      sum + (terms.within * terms.door.counted) / terms.door.appearances,
-    0,
-  )
+  const met = weighing.reduce((sum, terms) => sum + atDoorScale(terms.reached, terms.door), 0)
+  const acted = weighing.reduce((sum, terms) => sum + atDoorScale(terms.within, terms.door), 0)
 
   return {
     met,

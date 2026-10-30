@@ -81,3 +81,33 @@ export const doorOf = (row: RevisionPageViews | null): PageDoor => {
 
   return { ...of, silence: null }
 }
+
+/**
+ * A count taken against one page, put on the scale its door counts in.
+ *
+ * `count × counted ÷ appearances`: the count's own sound share of that page's
+ * appearances (0229), weighted by the page views a rollup actually folded
+ * (0250). It is the expression every reader-weighted figure over a library is
+ * built out of, and until now it was **five hand-written copies of it** — one
+ * in a kind's share of readers, two in what readers do inside a kind, two in a
+ * comparison of the first — which is the state this module was created to end
+ * and did not quite reach: {@link PageDoor} held the per-page half of the rule
+ * and the per-placement half stayed at each call site.
+ *
+ * **The multiplication comes before the division**, which is not a style: the
+ * three floats agree to fifteen places in either order and not to sixteen, and
+ * 0229 has already been bitten by exactly that. Written this way the helper is
+ * bit-identical to every copy it replaces.
+ *
+ * `scaledBy` is a **second** door, for the one caller that needs one: a
+ * comparison asks what one side's reading would have come to with the other
+ * side's traffic behind it, so the share is of the door the count came from and
+ * the weight is the other's. It defaults to the door the count came from, which
+ * is every other caller.
+ *
+ * Only ever called for a door with no silence, where `appearances` is
+ * positive — a page the door cannot scale has no term in any of these figures
+ * at all.
+ */
+export const atDoorScale = (count: number, of: PageDoor, scaledBy: PageDoor = of): number =>
+  (count * scaledBy.counted) / of.appearances
