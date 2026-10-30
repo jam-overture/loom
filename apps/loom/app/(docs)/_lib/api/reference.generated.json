@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 69,
+      "files": 70,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -11814,6 +11814,61 @@
           ]
         },
         {
+          "module": "signals/region-pages",
+          "title": "Region pages",
+          "summary": "Which of a deployment's pages the readers of one place opened.",
+          "symbols": [
+            {
+              "name": "RegionPageStanding",
+              "kind": "type",
+              "signature": "type RegionPageStanding = \n/** Every view in the bucket is on a page the breakdown names. */\n\"attributed\"\n/** Some of the bucket's views are on named pages and the rest are withheld. */\n | \"partly-attributed\"\n/**\n * No page in this place cleared the floor, so the bucket's views are named\n * and nothing in it is attributed.\n *\n * The claim worth acting on, and the one that must not be drawn as a place\n * nobody read: the readers are in the map above, and it is the attribution\n * that is withheld rather than the readership that is absent.\n */\n | \"unattributable\";",
+              "summary": "What a screen may say about one region's breakdown by page."
+            },
+            {
+              "name": "REGION_PAGE_STANDINGS",
+              "kind": "value",
+              "signature": "const REGION_PAGE_STANDINGS: readonly RegionPageStanding[]",
+              "summary": "The closed set, for a surface accounting for every breakdown it draws."
+            },
+            {
+              "name": "describeRegionPageStanding",
+              "kind": "function",
+              "signature": "const describeRegionPageStanding: (standing: RegionPageStanding) => string",
+              "summary": "One line per standing, for a surface saying what a breakdown is withholding."
+            },
+            {
+              "name": "RegionPage",
+              "kind": "type",
+              "signature": "type RegionPage = {\n    readonly treeId: TreeId;\n    /**\n     * Page views that began here, summed over the revisions and the forms the\n     * rows named.\n     */\n    readonly views: number;\n    /**\n     * This page's share of **the whole bucket**, including the views the\n     * breakdown withheld.\n     *\n     * The denominator is published rather than left to be derived because the two\n     * candidates differ and the obvious one is wrong: dividing by the named pages\n     * alone makes the shares sum to one and hides the withheld part, so a place\n     * whose attribution is mostly withheld would read as fully attributed.\n     *\n     * Absent only where the bucket's own total is nought, which is reachable on\n     * the unplaced bucket alone — it is named at any size, so rows of no views\n     * produce cells of no views and there is no quotient to take.\n     */\n    readonly share: number | undefined;\n};",
+              "summary": "One page the readers of a place opened."
+            },
+            {
+              "name": "RegionPageBreakdown",
+              "kind": "type",
+              "signature": "type RegionPageBreakdown = {\n    readonly region: ReaderRegion;\n    /** The bucket's own total, which is the map's number unchanged. */\n    readonly views: number;\n    /** Pages with enough readers in this place to name, most-read first. */\n    readonly pages: readonly RegionPage[];\n    /** What was too small to name here, as a total that names no page. */\n    readonly withheld: {\n        readonly pages: number;\n        readonly views: number;\n    };\n    readonly standing: RegionPageStanding;\n};",
+              "summary": "One named region, with the pages its readers opened."
+            },
+            {
+              "name": "RegionPagesOptions",
+              "kind": "type",
+              "signature": "type RegionPagesOptions = {\n    /**\n     * The floor under a named cell, which is the deployment's and is required.\n     *\n     * Raised above `DEFAULT_REGION_FLOOR` and never lowered below it. A caller\n     * with nothing of its own to say passes that constant.\n     */\n    readonly floor: number;\n};",
+              "summary": "What a breakdown is read at."
+            },
+            {
+              "name": "RegionPagesReading",
+              "kind": "type",
+              "signature": "type RegionPagesReading = {\n    /** The map itself, unchanged, so a breakdown's totals cannot disagree with it. */\n    readonly map: RegionReading;\n    /**\n     * One breakdown per named bucket, in the map's order, so a surface drawing\n     * both reads them side by side.\n     */\n    readonly regions: readonly RegionPageBreakdown[];\n};",
+              "summary": "A region map and, for each place it named, what the readers there read."
+            },
+            {
+              "name": "regionPagesOf",
+              "kind": "function",
+              "signature": "const regionPagesOf: (rows: readonly StoredRegionCount[], options: RegionPagesOptions) => RegionPagesReading",
+              "summary": "Rows from the store, read as a map and a breakdown of every place it named."
+            }
+          ]
+        },
+        {
           "module": "signals/retention",
           "title": "Retention",
           "summary": "Whether the deployment keeps the retention ceiling it publishes to its readers.",
@@ -12515,7 +12570,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12650,7 +12705,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12712,7 +12767,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13237,7 +13292,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13307,7 +13362,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13729,7 +13784,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1806,
+        "packageNames": 1814,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
