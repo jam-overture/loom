@@ -350,6 +350,8 @@ confident wrong answer is not.
 So two rules, and the second is the one that gets written wrong:
 
 ```tsx
+import { paletteScheme, type ResolvedTheme } from "@jam-overture/loom"
+
 const MARKS = { light: "/mark-on-light.svg", dark: "/mark-on-dark.svg" } as const
 
 const markFor = (resolved: ResolvedTheme): string | undefined => {
@@ -384,6 +386,7 @@ That strip is not part of your page. No stylesheet reaches it and no primitive
 renders it. One thing changes it, and this is the whole of it:
 
 ```tsx
+import type { ResolvedTheme } from "@jam-overture/loom"
 import { themeGround } from "@jam-overture/loom/react"
 
 const ThemeColor = ({ resolved }: { resolved: ResolvedTheme }) => {

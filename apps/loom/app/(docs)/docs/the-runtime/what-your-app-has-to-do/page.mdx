@@ -66,7 +66,8 @@ Build it once, where your app starts, and hand it to every request.
 An **intent** is the ask. It is a sentence, plus enough context to judge it:
 
 ```ts
-import type { EditIntent } from "@jam-overture/loom"
+import { randomIdFactory, systemClock, type EditIntent } from "@jam-overture/loom"
+import { commitIntent } from "@jam-overture/loom/write"
 
 const intent: EditIntent = {
   intentId: randomIdFactory.intentId(),

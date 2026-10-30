@@ -3,9 +3,11 @@ import { join } from "node:path"
 
 import ts from "typescript"
 
+import { calls } from "./calls"
 import { compiledBaseName, CONTEXT_DIR } from "./compiled"
 import { fencesOnPage, pagesWithFences } from "./extract"
-import type { Fence } from "./model"
+import { importsBinding } from "./imports"
+import { canCarryAnImport } from "./model"
 
 /**
  * The names a page calls and never shows a reader how to get hold of.
@@ -42,23 +44,26 @@ import type { Fence } from "./model"
  * the import. A name the story lends is one the reader does not need, so the
  * context file declares it.**
  *
- * The one exception is a fact rather than a sentence: **an import statement
- * cannot go inside the inside of something.** `object-body` and
- * `function-body` fences are, by their own declaration, a fragment of a larger
- * file — you cannot write `import` in the middle of an object literal — so a
- * runtime name called *only* from those may still be lent. {@link lentFaults}
- * checks that excuse by looking at the fences rather than taking the file's
- * word for it, which is the move `arrival/route.ts` makes for the pages the
- * route walks past.
+ * The one exception is a fact rather than a sentence: **you cannot write an
+ * `import` in the middle of an object literal.** An `object-body` fence is, by
+ * its own declaration, a fragment from inside a value, so a runtime name called
+ * *only* from one may still be lent. {@link lentFaults} checks that excuse by
+ * looking at the fences rather than taking the file's word for it, which is the
+ * move `arrival/route.ts` makes for the pages the route walks past.
+ *
+ * **The excuse was one kind too wide for a day, and `function-body` was the
+ * kind.** It read as the same fact — a fragment cannot carry an import — and it
+ * is not: `program.ts` has lifted the imports out of a function body since it
+ * was written, *"because a reader who is shown a handler wants to know where
+ * `parseTree` came from"*, and the first block of *Rendering a tree* has opened
+ * with three of them since the page existed. So the one name the excuse was
+ * covering — `renderRequest`, on the arrival route's third stop — was not
+ * excused by a fact at all. The repair is a line in the page, and it cost no
+ * machinery, because the machinery was already there.
  *
  * A `sketch` is left out of the demand for the reason the word exists: it
  * carries an ellipsis and has already told the reader it is incomplete.
  */
-
-/** The fences that could carry an `import` line, and so are asked to. */
-const CAN_CARRY_AN_IMPORT: readonly Fence["kind"][] = ["program", "alternative"]
-
-const canCarryAnImport = (fence: Fence): boolean => CAN_CARRY_AN_IMPORT.includes(fence.kind)
 
 export type LentName = {
   readonly section: string
@@ -113,38 +118,6 @@ export const reExportsIn = (
   })
 }
 
-const used = (name: string, code: string): boolean => new RegExp(`\\b${name}\\b`).test(code)
-
-/**
- * Whether a block shows the reader the import that binds a name.
- *
- * The import statements are read out of the block and matched on what they
- * **bind**, not on the text of the line: `import { x as y }` binds `y`, a
- * namespace import binds one name for a whole door, and a default import binds
- * whatever the block chose to call it. A block that merely mentions the name in
- * a string is not showing anybody an import.
- */
-export const importsBinding = (name: string, code: string, language: Fence["language"]): boolean => {
-  const kind = language === "tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS
-  const parsed = ts.createSourceFile(`fence.${language}`, code, ts.ScriptTarget.ESNext, true, kind)
-
-  return parsed.statements.some((statement) => {
-    if (!ts.isImportDeclaration(statement)) return false
-
-    const clause = statement.importClause
-
-    if (clause === undefined) return false
-    if (clause.name?.text === name) return true
-
-    const bindings = clause.namedBindings
-
-    if (bindings === undefined) return false
-    if (ts.isNamespaceImport(bindings)) return bindings.name.text === name
-
-    return bindings.elements.some((element) => element.name.text === name)
-  })
-}
-
 const contextSourceFor = (section: string, page: string): { source: string; fileName: string } | undefined => {
   const fileName = `${compiledBaseName(section, page)}.ts`
   const path = join(CONTEXT_DIR, fileName)
@@ -162,7 +135,7 @@ export const lentNamesOn = (section: string, page: string): readonly LentName[] 
 
   return reExportsIn(context.source, context.fileName).map((entry): LentName => {
     const callers = fences.flatMap((fence, at) =>
-      used(entry.name, fence.code) && !importsBinding(entry.name, fence.code, fence.language)
+      calls(entry.name, fence.code, fence.language) && !importsBinding(entry.name, fence.code, fence.language)
         ? [{ fence, position: at + 1 }]
         : []
     )

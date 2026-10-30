@@ -124,6 +124,7 @@ answers "which of them do I have at all?", which is the registry, written down
 a second time.
 
 ```ts alternative
+import { gatePolicySchema } from "@jam-overture/loom"
 import { interactiveTypesFor, registeredTypesFor } from "@jam-overture/loom/sdk"
 
 export const policy = gatePolicySchema.parse({
