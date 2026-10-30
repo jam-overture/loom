@@ -27,9 +27,9 @@ import type {
  *
  * This is that question: hand over the silences as a surface holds them, one per
  * reading, and get back the states the window is in, with **what each one
- * cost**. It is the twenty-ninth thing taken out of what the subsystem already
- * knows rather than collected: no payload, no browser change, no counter that
- * does not exist, no column and no byte on any wire.
+ * cost**. It is one more thing taken out of what the subsystem already knows
+ * rather than collected: no payload, no browser change, no counter that does
+ * not exist, no column and no byte on any wire.
  *
  * ## A state is one condition about one subject, and that rule is not restated
  *

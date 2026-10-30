@@ -87,6 +87,17 @@ describe("what a window could not answer", () => {
     expect(census.states[0]?.readings).toBe(2)
   })
 
+  it("names a vocabulary once however many of its readings reported one state", () => {
+    const census = silenceCensusOf([
+      { meaning: meaningOfCopySilence("unmeasured"), form: PRICING },
+      { meaning: meaningOfCopySilence("unmeasured"), form: DOCS },
+      { meaning: meaningOfChangeSilence("nothing-measured"), form: PRICING },
+    ])
+
+    expect(census.states[0]?.readings).toBe(2)
+    expect(census.states[0]?.vocabularies).toEqual(["copy"])
+  })
+
   /**
    * The costlier error of the two, and the one 0240 exists for: the same
    * condition said of a page and of a comparison is two sentences.
@@ -178,6 +189,20 @@ describe("what a reason cost", () => {
 
     expect(census.states[0]?.forms).toHaveLength(2)
     expect(new Set(census.states[0]?.forms.map(formKeyOf)).size).toBe(2)
+  })
+
+  /** The same error one grouping down, where it would merge two readerships' rows. */
+  it("gives two forms of one page a row each", () => {
+    const census = silenceCensusOf([
+      { meaning: meaningOfCopySilence("unmeasured"), form: form(TREE, SKIERS) },
+      answered(form(TREE, SKIERS)),
+      answered(form(TREE, RIDERS)),
+    ])
+
+    expect(census.byForm).toHaveLength(2)
+    expect(census.byForm.map((row) => row.form.audienceId)).toEqual([RIDERS, SKIERS])
+    expect(census.byForm.map((row) => row.readings)).toEqual([1, 2])
+    expect(census.byForm.map((row) => row.silent)).toEqual([0, 1])
   })
 
   it("names a reading of no one page as wide rather than attributing it to a page", () => {

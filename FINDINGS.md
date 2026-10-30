@@ -62170,10 +62170,11 @@ and filed because the shape of it is the lane's own test for whether a reading
 is finished
 
 §17 built the subject-and-condition table and `relateSilences` and
-`distinctSilences` over it, and between 7 October and today **the only file in
-this repository that imported any of the three was `silences.test.ts`.** The
-arithmetic was right, the names were right, the tests were thorough, and no
-question could be asked of it.
+`distinctSilences` over it, and between 7 October and today **nothing outside
+`silences.ts` and its own test imported one name from it** — not the relation,
+not the dedup, not the table, not one of the nineteen `meaningOf…Silence`
+functions and not one of the sentences. The arithmetic was right, the names were
+right, the tests were thorough, and no question could be asked of it.
 
 The cause was not neglect. `distinctSilences` takes the silences of **one card**
 — which is the call it was shaped for, from the §17 run that found two readings
