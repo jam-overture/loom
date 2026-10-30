@@ -83,3 +83,20 @@ export const isCheckable = (fence: Fence): boolean =>
 
 /** A block read on its own rather than as part of the page's one program. */
 export const isAlternative = (fence: Fence): boolean => fence.kind === "alternative"
+
+/**
+ * Whether an `import` line could go at the top of a block of this kind.
+ *
+ * One kind cannot, and it is a fact about the language rather than a rule about
+ * the site: there is no edit to a page that puts an `import` in the middle of an
+ * object literal. A **function** body can, even though it is a fragment too,
+ * because `program.ts` lifts those imports out before it puts the wrapper back
+ * on — *"a reader who is shown a handler wants to know where `parseTree` came
+ * from"* — and the first block of *Rendering a tree* has opened with three of
+ * them since the page existed.
+ *
+ * Stated here because two checks need it and they must not disagree: `lent.ts`
+ * asks which blocks may be lent a name, and `landing.ts` asks which blocks owe
+ * a reader a door.
+ */
+export const canCarryAnImport = (fence: Fence): boolean => fence.kind !== "object-body"

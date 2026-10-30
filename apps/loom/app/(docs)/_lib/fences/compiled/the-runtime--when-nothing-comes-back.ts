@@ -63,7 +63,7 @@ const bounded = modelInterpreter({
 
 const outcome = await bounded.interpret(intent, tree)
 
-// page.mdx:206 — a program
+// page.mdx:207 — a program
 const silent = hangingSource("catalogue.services", "What this shop offers.")
 
 const built = createDataRegistry([silent.entry])

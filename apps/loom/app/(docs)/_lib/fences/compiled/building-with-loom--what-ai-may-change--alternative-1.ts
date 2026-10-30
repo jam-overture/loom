@@ -11,8 +11,8 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { interactiveTypesFor, registeredTypesFor } from "@jam-overture/loom/sdk"
 import { gatePolicySchema } from "@jam-overture/loom"
+import { interactiveTypesFor, registeredTypesFor } from "@jam-overture/loom/sdk"
 
 import { registry } from "../context/building-with-loom--what-ai-may-change"
 
@@ -24,4 +24,4 @@ export const policy = gatePolicySchema.parse({
   registeredPrimitiveTypes: registeredTypesFor(registry),
 })
 
-export { interactiveTypesFor, registeredTypesFor, gatePolicySchema }
+export { gatePolicySchema, interactiveTypesFor, registeredTypesFor }

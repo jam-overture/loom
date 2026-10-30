@@ -51,7 +51,7 @@ const intent: EditIntent = {
 
 const outcome = await commitIntent(path, intent)
 
-// page.mdx:140 — a program
+// page.mdx:141 — a program
 const yes = await confirmHeld(path, { proposalId, actor: reviewer.id })
 
 const no = await discardHeld(path, { proposalId, actor: reviewer.id })

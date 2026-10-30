@@ -61,14 +61,14 @@ const markFor = (resolved: ResolvedTheme): string | undefined => {
   return scheme === undefined ? undefined : MARKS[scheme]
 }
 
-// page.mdx:386 — a program
+// page.mdx:388 — a program
 const ThemeColor = ({ resolved }: { resolved: ResolvedTheme }) => {
   const ground = themeGround(resolved)
 
   return ground === undefined ? null : <meta name="theme-color" content={ground.backgroundColor} />
 }
 
-// page.mdx:410 — a program
+// page.mdx:413 — a program
 const theFormEverybodyShows = (
   <>
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />

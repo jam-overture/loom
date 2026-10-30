@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest"
 import { ARRIVAL_ROUTE } from "../arrival/route"
 
 import { fencesOnPage, pagesWithFences } from "./extract"
+import { importsBinding } from "./imports"
 import {
-  importsBinding,
   LENT_NAMES,
   lentFaults,
   lentNamesOn,
@@ -24,7 +24,14 @@ import type { Fence } from "./model"
  * end of its last stop.
  */
 
-const CANNOT_CARRY_AN_IMPORT: readonly Fence["kind"][] = ["object-body", "function-body"]
+/*
+ * One kind, and it is a fact about TypeScript rather than a policy: there is no
+ * edit to a page that puts an `import` inside an object literal. `function-body`
+ * was here for a day and should not have been — `program.ts` lifts a function
+ * body's imports out before it wraps it, so a handler shown to a reader may open
+ * with its doors and the first block of *Rendering a tree* always has.
+ */
+const CANNOT_CARRY_AN_IMPORT: readonly Fence["kind"][] = ["object-body"]
 
 const lent = (over: Partial<LentName> = {}): LentName => ({
   section: "the-runtime",
@@ -130,37 +137,6 @@ describe("reading what a context file re-exports", () => {
   })
 })
 
-describe("whether a block shows an import", () => {
-  const shows = (name: string, code: string) => importsBinding(name, code, "ts")
-
-  it("sees a named import", () => {
-    expect(shows("createTree", 'import { createTree } from "@jam-overture/loom"')).toBe(true)
-  })
-
-  it("matches what the line binds rather than what it says", () => {
-    expect(shows("make", 'import { createTree as make } from "@jam-overture/loom"')).toBe(true)
-    expect(shows("createTree", 'import { createTree as make } from "@jam-overture/loom"')).toBe(false)
-  })
-
-  it("sees a default and a namespace import", () => {
-    expect(shows("Anthropic", 'import Anthropic from "@anthropic-ai/sdk"')).toBe(true)
-    expect(shows("loom", 'import * as loom from "@jam-overture/loom"')).toBe(true)
-  })
-
-  it("sees a type-only import, because a type a reader pastes has to resolve too", () => {
-    expect(shows("LoomTree", 'import type { LoomTree } from "@jam-overture/loom"')).toBe(true)
-  })
-
-  it("is not fooled by the name appearing in the code", () => {
-    expect(shows("createTree", "const tree = createTree(ids)")).toBe(false)
-    expect(shows("createTree", 'const name = "createTree"')).toBe(false)
-  })
-
-  it("reads a tsx block as tsx", () => {
-    expect(importsBinding("Stat", 'import { Stat } from "./stat"\n\nconst a = <Stat x={1} />', "tsx")).toBe(true)
-  })
-})
-
 describe("the sentence a fault says", () => {
   it("says what a reader would see for a value", () => {
     expect(lentFaults([lent()])[0]).toContain('you get "gatePolicySchema is not defined"')
@@ -192,7 +168,7 @@ describe("reading one page", () => {
     expect(lentNamesOn("getting-started", "installation")).toEqual([])
   })
 
-  it("resolves the three the site still lends, each against its own page", () => {
+  it("resolves the names the site still lends, each against its own page", () => {
     const names = lentWithoutFault(LENT_NAMES)
 
     expect(names.map((name) => name.name).sort()).toEqual(
