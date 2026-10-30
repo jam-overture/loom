@@ -198,6 +198,17 @@ another surface's route group, and no primitive was wanted that does not exist.
 - **Edited:** the 29 October entry *three names are still lent…* is now **partly
   closed**, with a note saying why both of its costed shapes were answers to a
   question with a false premise.
+- **Filed after the pull request went up, open, owned by the maintainer:** *a
+  thirteenth counted reading of the mangling, and the first remedy in the chain
+  that leaves a picture a picture.* Both before/after screenshots were mangled
+  in both the pull request body and this lane's comment — 155 characters, inside
+  the 153–163 bracket the chain has measured twelve times, and **neither picture
+  rendered**. Rewritten `…/raw/<branch>/<path>` instead of
+  `…/blob/<branch>/<path>?raw=true` they are 144 and 145 and both came back
+  clean in one body. It narrows the lower end of the bracket to 153–155, and it
+  is the first remedy on that chain that keeps an image an image: the one on
+  record, a path in a code span, is no use for a screenshot. **Yesterday's #723
+  comment shipped with both of its pictures broken** for the same reason.
 
 Standing entries this run met again and did not duplicate:
 

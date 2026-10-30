@@ -62353,3 +62353,63 @@ gate cycle for taking them *before* it and believing the tool.
 **Recommendation: shape 1.** Filed rather than fixed because `tools/` and
 `docs/routines.md` are both outside this lane, and the portal routine's standing
 reasoning applies — a routine does not write the governance it is bound by.
+
+---
+## 2026-10-30 — a thirteenth counted reading of the mangling, and the first remedy in the chain that leaves a picture a picture
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Extends**
+the 25 October entry *a twelfth counted reading of the mangling: 187 mangled and
+141 clean in one body* and the chain it extends · **Status:** open — **one more
+pair, and a workaround that is worth more than the reading**
+
+#727's body and this lane's comment on it, posted tonight. Both carried the same
+two before/after screenshots, written `![…](…)`, and **both pictures were
+mangled in both posts** — `` ` `` injected inside the parens, which is the
+injection every entry in this chain records. Neither image rendered. Counted
+with `len()` over the exact strings:
+
+| characters | the URL | syntax | came back |
+| --- | --- | --- | --- |
+| 155 | `…/blob/<branch>/reports/<file>.webp?raw=true` | `![…](…)` | **mangled** |
+| 145 | `…/raw/<branch>/reports/<file>.webp` | `![…](…)` | **clean** |
+| 144 | the same, for the other picture | `![…](…)` | **clean** |
+
+**It narrows nothing and contradicts nothing.** 155 mangled and 144–145 clean
+sits inside the bracket the chain already has — the 16 October entry put the
+boundary somewhere in 153–163, and 155 is the first *mangled* reading inside it
+rather than above it, which narrows the lower end to **153–155**. The two clean
+ones were in one body with the mangled pair's replacements, same post.
+
+### The part that is worth more than the measurement
+
+**The remedy on record does not work for a screenshot.** The 25 October entry's
+is *name the file in backticks rather than link it* — a real loss on a record a
+reviewer wants to open, and a total one on an image, because a path in a code
+span is not a picture.
+
+**There is a shorter spelling of the same URL.** GitHub serves a repository file
+at both
+
+```
+https://github.com/<owner>/<repo>/blob/<ref>/<path>?raw=true    ← 155 here
+https://github.com/<owner>/<repo>/raw/<ref>/<path>              ← 145 here
+```
+
+and the second is **ten characters shorter for the same bytes** — one fewer
+character in the path segment and no query string. That was enough to cross the
+boundary for both pictures on this branch, and it costs nothing: the image still
+renders, still points at the branch, and still goes stale the same way when the
+branch is deleted.
+
+**For whoever hits it next:** a picture cited from a pull request on this
+repository is `…/raw/<branch>/reports/<file>` and never `…/blob/…?raw=true`.
+A branch name of 31 characters and a visual named after a 39-character report
+slug put the `blob` form over the boundary and the `raw` form under it, so the
+margin is about ten characters either way — which is to say the next long branch
+name will need the filename shortened as well.
+
+**Worth knowing: yesterday's #723 comment shipped with both of its pictures
+broken**, for the same reason, and nothing in the repository could have said so.
+That is the cost this chain keeps paying — a report's visual is the argument it
+is making, and a mangled one is invisible to every check here because it happens
+on GitHub after the post.
