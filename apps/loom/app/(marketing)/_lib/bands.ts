@@ -116,3 +116,35 @@ export const ANCHOR = {
  * hold a second page's would make the key mean two things.
  */
 export const COUNTED_ANCHOR = "what-we-count"
+
+/**
+ * The bands of `/why-use-it` that the chain points at.
+ *
+ * **The chain is the site's map as of today**, and that is what these exist
+ * for. `docs/positioning.md` records the maintainer's six links and calls them
+ * *the message*; `chain.ts` holds them as data and `shownAt` says, for each
+ * one, where on this site a visitor can go and watch it being true. Three of
+ * the six land here, on three different bands of one page, so three of its
+ * bands need an address a link can carry.
+ *
+ * Three constants rather than entries in `ANCHOR` for the reason
+ * `COUNTED_ANCHOR` gives above and in the same words: that map is keyed by
+ * `BandName` and `BandName` is the front door's bands. Grouped rather than
+ * loose because they belong to one page and are read together — a later run
+ * looking for *what can be linked to on `/why-use-it`* gets one answer instead
+ * of grepping for a spelling.
+ *
+ * `chain.test.ts` holds each of them to the half a press depends on: the band
+ * still declares it, read off the markup a browser receives rather than off
+ * the tree. An anchor a band stopped declaring is a link that scrolls nowhere
+ * on a page that renders perfectly, which is the failure `anchors.test.ts` was
+ * written about and the one nothing else reports.
+ */
+export const WHY_USE_IT_ANCHOR = {
+  /** *You still write your components and choose your model.* */
+  staysYours: "what-stays-yours",
+  /** The name of every part in the starter set. */
+  theSet: "what-you-build-with",
+  /** A browser, with a page built out of that set inside it. */
+  onAPage: "on-a-page",
+} as const

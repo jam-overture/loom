@@ -62109,6 +62109,89 @@ reading this deployment's window — gets its floor from
 second surface ever reads a window a step below the assembly.
 
 ---
+## 2026-10-30 — a `loom.milestone` that is a link is pixel-identical to one that is not, and on a phone it stays that way
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.milestone.ts` and the rail primitives beside it) ·
+**Status:** **open** — nothing is broken, no test failed, and the site has
+shipped a sentence of prose standing in for the affordance
+
+The front door's chain is the first band under the headline and it is the
+maintainer's own six links in his own order (`docs/positioning.md`). As of
+today each rung carries an `href` to the band of this site that shows it
+being true. The hrefs are correct and tested. **A reader cannot see that any
+of them exist.**
+
+`loom.milestone` renders a linked rung as an `<a>` whose title carries
+`LIBRARY_CLASS.underline`, and that class is a hover reveal:
+
+```css
+.loom-underline { background-size: 0% 2px; }
+.loom-underline:hover, .loom-underline:focus-visible { background-size: 100% 2px; }
+```
+
+The `<a>` also sets `textDecoration: "none"` inline, so the browser's own
+default is removed as well. At rest a linked milestone and an unlinked one
+produce the same pixels.
+
+**On a phone that is the only state there is.**
+[0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)
+made the harness honest about `hover: none` and `pointer: coarse`, and the
+phone shot of this band taken on the branch that files this shows five links a
+reader has no way to find:
+`reports/2026-10-30-marketing-chain-phone.webp`. Keyboard focus reveals it and
+a mouse reveals it; a finger never does.
+
+### Why this is the library's and not the composition's
+
+**There is no prop that would say it.** `loom.milestone` takes `marker`,
+`title`, `body`, `state` and `href`; `loom.milestone-list` takes `density` and
+`rail`. `body` is a string rather than a slot, so an inline link cannot be
+composed inside a rung either. The composition's only lever is `href`, and
+`href` is the thing with no rest state.
+
+**And the library already disagrees with itself about this.** `loom.card`
+answers it for itself, in one line:
+
+```ts
+const raised = given.elevation === undefined ? linked : given.elevation === "raised"
+```
+
+A linked card lifts while it is sitting still. That is exactly the property
+the rail primitives lack, written by the same library, so this is a gap rather
+than a convention. The same hover-only treatment is in `loom.feature`,
+`loom.listing`, `loom.event` and `loom.feed` — every one of them a block that
+can be a link and cannot look like one.
+
+### What this lane shipped instead, and what to delete when this is met
+
+The band now carries one line of prose under its lead:
+
+> Press a step to see that part of it working on this site.
+
+**It is scaffolding and it is marked as such** in `home.ts` and held by
+`chain.test.ts`. It says in words what the library cannot say in paint. When a
+rail primitive gains a rest state for a linked entry, that sentence comes off
+the site and this lane would rather it did: a page that has to tell a reader
+which parts are pressable has already lost the argument it is making about
+being well built.
+
+### Three shapes, costed, and the recommendation
+
+1. **Default a linked milestone to the lift `loom.card` already uses.** Free
+   at the call site, consistent with the library's own answer, and it changes
+   the look of every existing linked rail. **This is the recommendation** and
+   the breadth is the argument for it rather than against: every one of those
+   rails has the same invisible link today.
+2. **A rest underline on the title**, the way an inline link gets one. Smaller
+   blast radius, and it reads as a link rather than as a pressable row, which
+   for a rung whose body is also inside the `<a>` is the weaker signal.
+3. **A prop the composition sets.** Rejected before filing: a caller who has
+   to opt into *looking like what it is* will forget, and the three lanes that
+   compose rails would each decide separately.
+
+Whichever is taken, the half that matters is the **phone**. A hover reveal is
+not an affordance for most of the people reading this site.
 ## 2026-10-30 — a census over a window's silences is one call now, and nothing reminds a caller it exists
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
