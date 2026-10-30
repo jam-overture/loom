@@ -18,7 +18,7 @@ import {
   siteReadingBand,
   type ChromeContext,
 } from "../chrome"
-import { CHAIN } from "../chain"
+import { CHAIN, shownAt } from "../chain"
 import { FACTS, HEADLINE, INSTALL_COMMAND, RUNTIME_PACKAGE, STARTER_PACKAGE } from "../copy"
 import { costs } from "../costs"
 import { DECISION_RECORDS, INSTALLATION } from "../docs-pages"
@@ -375,6 +375,22 @@ const hero = (ids: IdFactory): LoomNode =>
  * lane may not do, so it is quoted and sits in `MAINTAINERS_OWN`.
  *
  * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
+ *
+ * ## Each rung is the way to the band that shows it, as of 30 October
+ *
+ * The chain was six claims and six dead ends. Five of the six are demonstrated
+ * somewhere on this site already, and a visitor reading the first band under
+ * the headline had no way to find out — the paths existed, nothing pointed
+ * along them. `shownAt` says where each one goes and `chain.test.ts` holds
+ * every destination to being served and to still declaring the anchor.
+ *
+ * It costs no copy, which is the reason it is this rather than a band arguing
+ * the same thing. The press is the argument.
+ *
+ * The sixth is unlinked and `chain.ts` says why at length: it happens on the
+ * reader's page rather than on ours, so the shape of the band is *the work
+ * stops at the second rung, the showing stops at the fifth, and the last one
+ * is what the other five are for.*
  */
 const chain = (ids: IdFactory): LoomNode =>
   section(
@@ -387,15 +403,50 @@ const chain = (ids: IdFactory): LoomNode =>
         "You do the first two. Loom and your AI model do the rest, every time somebody opens your page.",
         { size: "lead", measured: true }
       ),
+      /**
+       * **The hint, and it is here because the library cannot draw the
+       * affordance it stands in for.**
+       *
+       * A `loom.milestone` carrying an `href` renders `.loom-underline`, whose
+       * rest state is `background-size: 0% 2px` — so a rung that is a link is
+       * pixel-identical to a rung that is not until a pointer touches it. On a
+       * phone nothing ever does ([0236](../../../../../decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)
+       * made the harness honest about `hover: none`, and the phone shot of this
+       * band shows five links a reader cannot find). `loom.card` already
+       * answers this for itself by defaulting `elevation` to `raised` when it
+       * is linked; the rail primitives have no equivalent, and that is filed
+       * for `Loom primitives` rather than worked around in `src/`.
+       *
+       * So the composition says in words what the library cannot say in paint.
+       * **When that finding is met this line comes off** — it is scaffolding,
+       * and it is marked as such here so the run that removes the gap knows to
+       * remove the sentence with it.
+       *
+       * *A step* rather than *any step* or *every step*: the last rung has
+       * nowhere to go and never will, and a universal would be a promise this
+       * band breaks once. It also says no number, which is the one thing this
+       * band may not do — see the note above on why nothing here is counted.
+       */
+      prose(ids, "Press a step to see that part of it working on this site.", {
+        size: "small",
+        tone: "muted",
+      }),
       buildElement(ids, {
         type: "loom.milestone-list",
         props: { rail: "line", density: "loose" },
-        children: CHAIN.map((rung) =>
-          buildElement(ids, {
+        children: CHAIN.map((rung) => {
+          const shown = shownAt(rung)
+
+          return buildElement(ids, {
             type: "loom.milestone",
-            props: { marker: rung.actor, title: rung.title, body: rung.body },
+            props: {
+              marker: rung.actor,
+              title: rung.title,
+              body: rung.body,
+              ...(shown === undefined ? {} : { href: shown }),
+            },
           })
-        ),
+        }),
       }),
     ]
   )

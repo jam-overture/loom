@@ -10,7 +10,7 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { COUNTED_ANCHOR } from "../bands"
+import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
 import { FACTS } from "../copy"
 import { examplePage } from "../example"
 import { LIBRARY_PARTS } from "../library"
@@ -276,7 +276,7 @@ const theWork = (ids: IdFactory): LoomNode =>
 const staysYours = (ids: IdFactory): LoomNode =>
   section(
     ids,
-    { width: "wide", eyebrow: "What stays yours" },
+    { width: "wide", eyebrow: "What stays yours", anchor: WHY_USE_IT_ANCHOR.staysYours },
     "You still write your components and choose your model",
     [
       buildElement(ids, {
@@ -386,7 +386,7 @@ const alreadyWritten = (ids: IdFactory): LoomNode =>
 const theParts = (ids: IdFactory): LoomNode =>
   section(
     ids,
-    { width: "wide", eyebrow: "What you build with" },
+    { width: "wide", eyebrow: "What you build with", anchor: WHY_USE_IT_ANCHOR.theSet },
     "Every one of these comes with it",
     [
       prose(
@@ -427,7 +427,7 @@ const theParts = (ids: IdFactory): LoomNode =>
 const onAPage = (ids: IdFactory): LoomNode =>
   section(
     ids,
-    { width: "wide", eyebrow: "On a page" },
+    { width: "wide", eyebrow: "On a page", anchor: WHY_USE_IT_ANCHOR.onAPage },
     "What they look like together",
     [
       prose(ids, "Every piece of this is a part from the list above.", {
