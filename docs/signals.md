@@ -61,6 +61,7 @@ the portal every day.
 | What a reader is told about how long it is kept | the age a delivery ripens at **and** how often the deployment sweeps, as a ceiling it stated rather than one the framework guessed ([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)) — and the weaker sentence, in as many words, where it has stated nothing |
 | Whether that promise is one the deployment keeps | the oldest delivery a sweep found, against the ceiling the notice publishes ([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)) — free, because a scan already starts at the oldest end — with an unstated interval judged as no claim rather than a broken one, and a delivery exactly on the ceiling as a sweep that ran on time |
 | What a deployment reads its own window with | one context holding the four facts a reading needs, with the region floor **required** rather than optional ([0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)) — an absent floor is the smallest bucket this runtime will ever name, so a deployment that raised its floor to a hundred had a surface publish buckets of twenty-five about real people; `windowAssemblyOf` composes the three steps of the rung in the one order that does not drop a page published inside the window |
+| Which pages the readers of one place read | each named region's pages, at a floor on the **cell** rather than on the bucket ([0323](../decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)) — the transpose of the region map, where a place whose readers no page can be attributed to is named as that and never drawn as a place nobody read |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -3866,6 +3867,62 @@ than a guarantee; the collection schedule is a fourth per-deployment setting and
 is **not** in the context, because its other half is an instant and a context
 holding a clock reading would answer differently on two calls over one window;
 and still that **nothing draws any of this**, which is `Loom portal`'s.
+
+### 62. Which pages the readers of a place read · `Loom signals` · **done, 29 October**
+
+The region counter has been read in one direction since it existed. A row is a
+place, a page, a revision, an audience and a count of the page views that
+*began*, and both readings over it group by place and sum the pages away: §7
+answers *where were the readers of this page* and §40 and §54 answer it of a
+revision and of a window.
+
+**The other direction was never asked and needs nothing new to answer it.**
+*Germany is a third of your readers — what are they reading* is the question an
+operator asks second, it is the same rows grouped the other way, and it was
+unaskable. It is also the right counter to transpose: a region view is counted
+once, at the moment a page view began, and is never recounted, so a cell summed
+across revisions and across months does not drift the way a node's `views` does.
+
+**Done**
+([0323](../decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)),
+as `regionPagesOf` in [`region-pages.ts`](../src/signals/region-pages.ts).
+
+- **The floor applies to the cell, which is the whole of the design.** A country
+  with four hundred views is a readership; one view of the careers page inside
+  it is a person. A page is named in a place only where **its own count there**
+  clears the floor, and what did not is a total naming no page — so the numbers
+  still add to the views there were.
+- **A cell is a place and a page**, summing every revision and every form. Across
+  revisions because the question is about the page; across forms because
+  arrivals are people and a reader who arrived arrived once (0297), so a page
+  served in two forms is one page in one place and is named once.
+- **A place the map withheld has no breakdown at all**, because naming a page
+  inside an unnamed place would name the place. **The unplaced bucket is broken
+  down in full**, by the same argument that never withholds it: it names no
+  place, so there is nobody in it to re-identify.
+- **`unattributable` is a third standing and not an absence of readers.** No page
+  in the place above the floor is *this place's readers cannot be attributed to a
+  page*, never *nobody read anything* — the readership is in the map above it.
+  **It will be the commonest standing on a real deployment for some time**, and
+  that is the floor working rather than a fault.
+- **A share is of the whole bucket, withheld views included**, because dividing
+  by the named pages makes the shares sum to one and hides what is withheld.
+- **The map is held rather than restated**, so a breakdown's totals cannot
+  disagree with the map a screen already shows.
+- **The floor is required**, which is 0322 applied at birth rather than
+  retrofitted — and the reading needs no app-side plumbing, because the
+  deployment reading context already carries the one field only the deployment
+  can answer.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** the transpose is not a member of
+`windowAssemblyOf`, so nothing reminds a caller it exists — the required floor
+guards the hazard that matters and discoverability is the part that does not
+hold; and a per-form transpose is deliberately not built, because the value of
+this reading is in the summing and a form-level cell floors harder still.
 
 ## Still not in scope
 
