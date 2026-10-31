@@ -62654,6 +62654,87 @@ ever built, because the floor argument changes.
 
 
 ---
+## 2026-10-31 — `loom.before-after` lays its two regions out independently, so a wipe over anything but two aligned pictures renders unreadable text with every test green
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.before-after.ts`) · **Status:** open — **the band that
+found it shipped another way**, so nothing is blocked; what is asked for is a
+line in the primitive's schema or its note, not a rewrite
+
+`marketing-22` set out to show the site's own headline happening — *a web page
+that rearranges itself around the people using it* — by putting two
+arrangements of the same example page into a `loom.before-after`. The
+primitive's own note names that case:
+
+> *"Two states of one thing, superimposed, with a hard edge between them — the
+> redesign over the old page…"*
+
+It was built, **every test written for it passed**, and the photograph is
+unreadable. The band rendered the headline as:
+
+```
+Fresesh coffee every Friday
+```
+
+### Why, and why no test could see it
+
+A wipe clips one absolutely-positioned layer over another and **the two layers
+are laid out independently.** Two centred headings of different lengths do not
+share a centre line, so the seam fell mid-word. The tiles were worse: the
+second arrangement is a reorder, so *Choose your roast* appeared on both sides
+of the seam at once and read as a rendering fault.
+
+Nothing in the tree is wrong. Both regions hold valid trees of registered
+parts, the props validate, the markup is correct, and the defect exists only in
+the compositing — which is to say **only in a photograph.** This is the third
+time this lane has recorded that shape of failure in eight days and the first
+where the tree was not the thing at fault.
+
+### Why this is the library's and not just this lane's mistake
+
+The primitive **invites non-photographic regions.** `LAYER`'s own note records
+a band that put a `loom.stat-chart` in one, and the fix at the time was to give
+each region the full width:
+
+> *"A single stretched grid column gives any child the whole box — a picture is
+> laid out exactly as it was, and a chart, a table or a card now gets the width
+> the region was always promising it."*
+
+That is an invitation to put laid-out content in a region, and it is safe only
+while the two regions are laid out **the same way.** A chart over the same
+chart with different numbers is fine. A card over a differently-shaped card is
+the defect above, silently. Nothing in the schema, the note or the registry
+says so.
+
+The opaque-layer note two paragraphs below it is the same lesson learned once
+already — *"put a chart in one and the band draws April at nineteen per cent
+and April at nineteen per cent on top of each other… with no diagnostic and
+every test green."* That was fixed with a background. This one cannot be fixed
+with a background.
+
+### Three shapes, costed
+
+1. **A sentence in the note and the `description`** — *the two regions must be
+   laid out identically; this compares two renderings of one layout, not two
+   layouts.* Costs nothing, prevents nothing, and would have stopped this run,
+   because this lane read the note before reaching for the primitive and the
+   note said the opposite.
+2. **A prop that says what the comparison is over**, so the primitive can
+   refuse what it cannot do honestly. Probably not worth it: the thing it would
+   gate on is not expressible in a tree.
+3. **Nothing, and this entry is the record.** Defensible. The failure is loud
+   the moment anybody photographs it, and this lane did.
+
+**Recommendation: the first.** One sentence, in the place the next lane will
+read before it makes the same choice.
+
+### What the band does instead
+
+`loom.split` with a `loom.frame` per arrangement, captioned with the reader
+each is for, stacking on a phone with the order kept. It is better than the
+wipe on its own terms and not only as a fallback: the two frames carry the same
+address in their chrome, which is the claim the band is making, and a reader
+compares two whole pages rather than two halves of one.
 ## 2026-10-31 — every reading in the subsystem is a reading of rows that arrived, and the one state none of them could report now has a name nothing draws
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
