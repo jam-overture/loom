@@ -62738,3 +62738,107 @@ branch on another, which this lane's brief forbids.
 **Recommendation: take it on the first run after #728 has landed**, when all
 three are on `main` and the unit can be one. Nothing is lost by waiting; the
 party that would benefit is still the screen nobody has built.
+## 2026-10-30 (evening) — three library readings spelled the door's per-placement scaling out, and the module that exists to hold that rule held only half of it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed on filing by `signals-64-whether-a-kind-is-read`**, and
+filed rather than just fixed because the shape of it is a check this lane can
+run and had not
+
+[`door.ts`](src/signals/door.ts) was created (0265) so that the scaling three
+library readings share would be written once, and its own module documentation
+says so in as many words: *two spellings of one rule that agree today are a
+thing this subsystem has been bitten by before*. It published `PageDoor` and
+`doorOf`, which is the **per-page** half — `counted = min(appearances,
+opened)`, the weight.
+
+**The per-placement half stayed at each call site.** `count × counted ÷
+appearances` was written out five times across three modules: once in a kind's
+share of readers, twice in what readers do inside a kind, and twice more in the
+reader-weighted comparison of the first, which also has two cross-door terms
+with the same shape. Every copy agreed, including the detail that makes them
+agree — the multiplication before the division, because the three floats agree
+to fifteen places in the other order and not to sixteen (0229).
+
+A sixth copy was about to be written for a kind's pace. `atDoorScale` is now
+published from `door.ts` and all five call it, bit-identically; its optional
+second door is the one thing the comparison's counterfactual terms need and
+nothing else does.
+
+**The check, which is the part worth keeping:** a module whose stated purpose is
+to hold a rule once can hold half of it for a month with every test green,
+because nothing fails when a rule is written twice and both spellings are right.
+Grepping for the *arithmetic* of a published rule — not for its name — is a
+minute's work and it is how this was found.
+
+---
+## 2026-10-30 (evening) — a third reading now hangs off the window assembly without being in it, and the pattern is no longer one gap
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **a pattern named rather than a
+defect**; nothing is broken, no test is failing, and the recommendation is still
+to wait
+
+`windowAssemblyOf` composes a window into the three subjects every reading and
+comparison takes, and its whole value is that the composition order is not free:
+the libraries take the pairs rather than the readings, the door rows are the
+window's whole set on both sides, the floor reaches the regions through the
+readings. A caller that gets one of those wrong gets a figure that is plausible.
+
+**Three readings are now reachable only by a caller that knows they exist.**
+`regionPagesOf` (§62, filed 29 October), `silenceCensusOf` (§63, filed this
+morning) and now `libraryPaceOf`. The first two were filed as one gap each with
+a recommendation to leave them; a third makes it a shape worth naming.
+
+What they have in common is **not** that the assembly forgot them. The assembly
+produces subjects and deliberately produces no figures, and all three are
+figures: a transpose of a counter, a census over readings the assembly does not
+take, and a reading over the parts of the readings it does. Adding any of them
+to `WindowAssembly` would make it the thing it refuses to be, and 0322's
+argument for a required floor does not transfer — none of the three has a
+parameter that is dangerous to omit.
+
+**What is actually missing is a second rung**: something that takes an assembly
+and produces the readings over it, the way the assembly takes a window and
+produces the subjects. That is a real unit and it is not small, because the
+honest version has to decide which of the thirty-odd readings a deployment wants
+by default and what it costs to compute the ones it does not.
+
+**Recommendation: still leave it, and revisit when a surface exists.** The party
+that would benefit is the screen nobody has built. What has changed is that the
+answer, when it comes, is one unit covering all three rather than three one-line
+additions — so a future run should not take any of them individually.
+
+---
+## 2026-10-30 (evening) — the role rows of a library's pace are thinner than every other role figure, and the reason is the nesting rule rather than the registry
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-pace.ts`) · **Status:** open — **the stated limit of what
+[0325](decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)
+guarantees**; nothing is broken and nothing is asked of anybody today
+
+Every role figure in this subsystem is thin because nothing in
+`src/primitives/` declares a role (0114, 0223), so nearly every part is in the
+`null` row. That is a registry fact and the join is at read time (0212), so the
+day a role is declared every counter already stored reinterprets.
+
+**A kind's pace is thinner than that, and for a second reason.** Its figures are
+over a part's **subtree**, so a placement standing inside another of its own
+kind is set aside and the outer one stands for it. With no role declared, every
+part of a page is one kind — so the `null` role row holds the page root and
+nothing else, and `nested` holds the rest of the page. The row is the page's own
+pace wearing a role's name.
+
+It is not wrong. It is the only honest answer available: the alternative counts
+a page's words once per level of its tree. But it means **the `null` row of this
+reading says something different from the `null` row of the other five**, which
+count placements and so stay informative with no role declared. A surface
+drawing the six side by side would put a row of 1 beside rows of 40 and the
+reason is not visible from the row.
+
+**Recommendation: leave it, and do not special-case the `null` row.** It resolves
+itself the moment roles are declared, which is the same thing every other role
+figure is waiting for, and a reading that treated one key differently from the
+others would be the near-duplicate this subsystem has been bitten by. What a
+surface should do in the meantime is read `nested` beside `counted`, which is
+published for exactly this.

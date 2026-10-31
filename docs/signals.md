@@ -62,13 +62,14 @@ the portal every day.
 | Whether that promise is one the deployment keeps | the oldest delivery a sweep found, against the ceiling the notice publishes ([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)) — free, because a scan already starts at the oldest end — with an unstated interval judged as no claim rather than a broken one, and a delivery exactly on the ceiling as a sweep that ran on time |
 | What a deployment reads its own window with | one context holding the four facts a reading needs, with the region floor **required** rather than optional ([0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)) — an absent floor is the smallest bucket this runtime will ever name, so a deployment that raised its floor to a hundred had a surface publish buckets of twenty-five about real people; `windowAssemblyOf` composes the three steps of the rung in the one order that does not drop a page published inside the window |
 | Which pages the readers of one place read | each named region's pages, at a floor on the **cell** rather than on the bucket ([0323](../decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)) — the transpose of the region map, where a place whose readers no page can be attributed to is named as that and never drawn as a place nobody read |
+| Whether readers have time for a kind of part | the time on screen across its places against the time its words take the readers who met them ([0325](../decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)) — a pooled ratio and never a mean of ratios, the outermost placement standing for the ones inside it, and a page the door cannot scale kept rather than refused, because the missing correction only makes a kind read as more skimmed |
 | What a window could not answer, and what each reason cost it | the states its readings are in, as a condition and a subject, with the readings each took and the pages each cost ([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)) — a page counted once however many of its readings report one state, no total over the states because one page is in as many as it has reasons, and a page's own row with a denominator, because *nine of nine readings silent* is a page to fix and *one of nine* is a page that works |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
-| What a reading means when it says nothing | the condition and the subject behind all a hundred and fourteen names, across twenty sets and eighteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
+| What a reading means when it says nothing | the condition and the subject behind all a hundred and eighteen names, across twenty-one sets and eighteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -3984,6 +3985,59 @@ the assembly produces readings and does not call the thirty-nine readings over
 them — so a caller maps its own readings' `silence` fields through the matching
 `meaningOf…Silence`, and nothing reminds it the census exists; and still that
 **nothing draws any of this**, which is `Loom portal`'s.
+
+### 64. Whether a kind of part is read, and not merely reached · `Loom signals` · **done, 30 October**
+
+Five readings stand on one list of page readings and answer five questions
+about one primitive type: the **places** it stands and how many were reached
+(0257), the share of the **readers** who met those places that read it (0256),
+the share of those that acted inside it (0265), and what a change did to two of
+them. **Every one of them is about reach.** A part counts as reached when half
+of it stood half a viewport up the screen, which is a fact about scrolling — and
+the question an author rewriting a band actually has is *did anybody have time
+to read it*, which a page's own reading has answered per part since 0230 and
+which was unaskable of a kind.
+
+**Done**
+([0325](../decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)),
+as `libraryPaceOf` in [`library-pace.ts`](../src/signals/library-pace.ts).
+
+- **A pooled ratio of two reader-millisecond sums**: the time on screen across
+  its places, over the time its words take the readers who met them. What comes
+  out is a mean of the per-placement paces weighted by the words each put in
+  front of readers, which is 0221's rule — a caption two readers hurried past is
+  a worse ratio and a smaller thing than a band four hundred of them did, and a
+  mean of ratios would let the caption drown the band.
+- **The straddle correction is in the readers and nowhere else.** A page view a
+  rollup counted twice carries one page view's seconds, so the numerator is
+  sound as it stands. It is read off **each page's own row**, which is why this
+  takes the rows where a page's reading takes a number.
+- **A page the door cannot scale is kept, where a share of readers refuses it.**
+  The deliberate divergence from 0256, and the reason is that the missing
+  correction only makes the readers more numerous, the pace lower and the
+  verdict `skimmed` — which is the claim 0230 built to be defensible. The row
+  says how many of its readers came from such a page and the reading names the
+  pages.
+- **The outermost placement of a kind on a page stands for the ones inside it**,
+  because a part is judged against its subtree's words. Without it a stack
+  inside a stack is counted twice, and the role row for parts that declare none
+  would count one page's words once per level of its tree.
+- **No pace over the whole library**, because two *different* kinds nest
+  wherever a band holds a paragraph.
+- **`KindPaceSilence` is the twenty-first vocabulary and brings no condition and
+  no subject**, which is evidence for 0240's claim rather than an omission.
+- **`atDoorScale` is published from `door.ts`**, where the per-placement half of
+  the scaling rule had been five hand-written copies across three modules. They
+  all call it now, bit-identically.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** it is not a member of `windowAssemblyOf` either,
+which is now the third reading in that state; and the role rows are thinner here
+than anywhere else, because with no role declared every part of a page is one
+kind and the `null` row is the page's own pace.
 
 ### 65. Nothing arrived, or nothing was let in · `Loom signals` · **done, 31 October**
 
