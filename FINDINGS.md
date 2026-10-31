@@ -62546,6 +62546,15 @@ same half of the §62 note about the region transpose.
 part that could be wrong and they cannot be, whichever vocabulary a caller
 names. If a screen is built, shape 1 is the one to take, and it is a morning.
 
+
+> **Confirmed a second time, 31 October (`Loom docs`, #731).** Both pictures in
+> the pull request body and both in this lane's comment used the `/raw/<branch>/`
+> form, at **141 and 143 characters**, and **all four came back intact** —
+> checked against the unrendered `.body` bytes from the API rather than by eye,
+> with zero backticks anywhere inside the parentheses in either body. That is
+> two consecutive clean runs for this remedy, on four pictures, and it is the
+> only remedy on this chain that keeps an image an image. The bracket's lower
+> bound is still 153; nothing at or below 145 has mangled yet.
 ---
 ## 2026-10-30 — the silence vocabulary had twenty sets, a relation, a dedup and no caller for three weeks
 
@@ -62654,6 +62663,170 @@ ever built, because the floor argument changes.
 
 
 ---
+## 2026-10-31 — the places a reader arrives were plain language two hundred and eighty-six times by hand, and nothing held them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` ·
+**Status:** **closed on filing** by the unit above — the rule is now a test for
+two of the three places, and the third is recorded rather than required
+
+The maintainer's standing direction for this surface is that **the
+plain-language version comes first and the precise version is one scroll or one
+disclosure later, never the reverse**, and the brief spells out the failure it
+is aimed at: *a page that opens with `TreeDelta`, `baseRevision` and
+`disposition` has lost the reader before it has said what any of them are for.*
+
+Measured across the thirty-five written pages on the morning this was written:
+
+| where a reader meets a page before it has shown them anything | how many | naming a published export |
+| --- | --- | --- |
+| the one-line summary the rail, the pager and the search results carry | 35 | **0** |
+| the opening, above the first `##` | 35 | **0** |
+| the `##` and `###` headings | 216 | **0** |
+
+**Seventy published names appear in this site's prose, and not one of them
+appears in a summary or an opening.** That is a discipline held two hundred and
+eighty-six times by whoever happened to be writing, with nothing in this
+repository that would have noticed the first page to break it — the same
+condition `voice.ts` was written for, and its sentence applies unchanged: *a
+site edited by routines with no memory of each other cannot hold a convention
+that is only written down. It can hold one that goes red.*
+
+**The headings are measured and deliberately not enforced**, and the reason is
+the half of the 30 October lesson this would otherwise contradict. A heading is
+an **address** — it is what the search box and the contents rail hand out, and
+what a reader lands on. Somebody who typed `renderLoomTree` and is sent to a
+heading called *`renderLoomTree`* has been answered exactly. Forbidding a name
+there would forbid the one case where the name is the right title.
+
+---
+## 2026-10-31 — the rule reads published exports, and two of the three names the brief's own example uses are not exports
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — **the
+stated limit of what `plain.ts` guarantees**; nothing is broken and no test is
+failing
+
+The brief's example of the failure names three things: `TreeDelta`,
+`baseRevision` and `disposition`. **The check catches the first and is blind to
+the other two**, because what it reads is the set of *published export names*
+and only `TreeDelta` is one. `baseRevision` and `disposition` are **fields** —
+names inside a type the package publishes, not names the package publishes.
+
+So the sentence the screenshot in this run's report shows being forbidden is
+forbidden **because of one of its three names**. Had an author written only
+*"the gate returns a `disposition` for each operation against your
+`baseRevision`"*, this check would have called the page clean, and the reader
+who does not have the model in their head would have met two unexplained nouns
+in the first thing they read.
+
+**Why it was not widened in this unit.** The obvious widening is to read field
+names off the generated reference as well. It was costed and left:
+
+- A type's fields are ordinary words far more often than an export is —
+  `title`, `summary`, `kind`, `code`, `text`, `body` are all fields on
+  something this package publishes, and all six are words a summary legitimately
+  uses in a sentence. The published-export set is safe to match on because an
+  export name is almost never ordinary English; the field set is not.
+- The remedy for that is a per-name judgement, which is the shape this lane has
+  twice written down as the one to avoid: *an exception stated as a list is
+  weaker than an exception stated as a fact.*
+
+**Recommendation: revisit only with a measurement.** The number that would
+justify it is *how many field names appear in a summary or an opening today* —
+countable with the reader this unit already has, and not counted here because
+the answer changes the design rather than the threshold. If it is zero, the
+widening is free and this entry is the one that says to take it.
+
+---
+## 2026-10-31 — the address-not-a-name remedy that saved 118 KB on the names index saves 700 bytes on the prose index
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — **a
+lever measured and found not to be one**, so the next run does not spend a unit
+reaching for it
+
+The prose search index is at **79,661 gzipped bytes against a cap of 80,000**,
+measured in this container against `main` at `482081a`. Five consecutive units
+have been chosen to fit around that number.
+
+The obvious lever is the one this index already pulled once. `search/build.ts`
+stores **a name and not an address** for the published names, and the comment
+recording it says what that bought: *"The 118 KB that went away was
+`/docs/api-reference/runtime#s-` written out a thousand times."* The prose
+index writes a full href for each of its 269 bodies — **17,141 raw bytes of
+href** against 235,176 of text — and it is already sharded by section, so every
+href in `the-runtime`'s file repeats `/docs/the-runtime/` 110 times.
+
+**Measured, both shapes, on this branch:**
+
+| | gzipped total | saving |
+| --- | --- | --- |
+| today, full hrefs | 79,661 | — |
+| the section prefix stripped and rebuilt on arrival | 79,365 | **296** |
+| grouped by page, so a page slug is written once | 78,961 | **700** |
+
+**Seven hundred bytes is about two paragraphs.** The reason it is not 118 KB is
+the reason the first one was: that saving was measured on a file where the
+address was **most of the entry** and the entries were a thousand near-identical
+strings. Here the address is 6.7% of the raw bytes, and gzip has already eaten
+the repeated prefix *within* each file — which is exactly what it is good at,
+and exactly what the one-file-at-a-time split costs 6% for elsewhere.
+
+**Recommendation: do not spend a unit on it.** It buys about one page of
+headroom and adds a decode step on arrival to every prose fetch. It is recorded
+so that the next run reaching for the obvious lever finds the number rather than
+the idea.
+
+---
+## 2026-10-31 — two prose rules about where a reader lands were costed and rejected, because neither can be stated as a fact
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+**two shapes measured and left unbuilt**, with the numbers, so a third attempt
+starts from them
+
+The 30 October unit established that **a reader lands mid-page** — search
+results are headings, the rail links every section, and the arrival route
+anchors its six steps part-way down a page. The natural composition with the
+brief's *plain version first* is: **a section is also a place a reader arrives,
+so a section's opening should orient too.** Two spellings of that were measured
+on this branch and both were left unbuilt.
+
+**Spelling one: a section's first sentence may not name a published export.**
+Thirteen of 251 sections do. It is not a rule, because the list it produces is
+half good writing:
+
+| the sentence | the verdict |
+| --- | --- |
+| *"A `TreeDelta` is an ordered list of operations."* | **good** — it names the term and defines it in the same breath, which is what the brief asks for |
+| *"`renderLoomTree` is synchronous because rendering is."* | **bad** — tells a reader a property of something they have not met |
+| *"Pass it to `renderLoomTree` or `renderRequest` alongside your primitive registry and you are done."* | **bad**, and worse — *"Pass **it**"* has no antecedent for somebody who landed here |
+
+The difference between row one and row two is whether the sentence **defines**
+the name, and a mechanical reader cannot tell: both match *`X` is …*.
+
+**Spelling two: a section's first sentence may not point backwards**, since for
+a reader who landed on it there is nothing behind it. Thirty-three of 216
+sections open with a pronoun or demonstrative. That list is mostly good writing
+too, for a reason worth keeping: **the heading is the antecedent.**
+
+- *"Here is the one idea, and the rest of Loom is built on it:"* — *Here* points
+  **forward**, at what follows.
+- *"There is one failure in this system that reports nothing at all."* — *There
+  is* is existential, not a reference.
+- *"They are easy to confuse and they answer completely different questions."* —
+  under *Two records, and only one of them is about the page*. **They** is the
+  heading, which is the first thing a landing reader reads.
+
+The genuine faults in that list are the ones whose antecedent is in a **previous
+section** — *"The second command declares another primitive."*, *"Both commands
+decide everything they would write before they write anything."* — and
+separating those from the other thirty is the same judgement spelling one
+needed.
+
+**Recommendation: leave both, and do not take a third run at a list.** Each
+produces a rule that is a list of exceptions rather than a fact, which this lane
+has now written down twice as the thing that stops working the moment somebody
+reaches for the spelling the list does not hold. The page opening shipped
+instead **because it is a fact**: the opening is the one region of a page whose
+whole job is to orient, and it has no antecedent by construction.
 ## 2026-10-31 — `loom.before-after` lays its two regions out independently, so a wipe over anything but two aligned pictures renders unreadable text with every test green
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
