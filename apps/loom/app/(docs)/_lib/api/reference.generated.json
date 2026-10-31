@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 70,
+      "files": 71,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9004,6 +9004,55 @@
               "kind": "function",
               "signature": "const actionChangeOf: (was: PageReading, now: PageReading) => ActionChange",
               "summary": "What a change did to what readers do on a page, off two `PageReading`s and nothing else."
+            }
+          ]
+        },
+        {
+          "module": "signals/arriving",
+          "title": "Arriving",
+          "summary": "Whether nothing is arriving because nothing is posting, or because this deployment's door is turning it away.",
+          "symbols": [
+            {
+              "name": "TurnedAwayTally",
+              "kind": "type",
+              "signature": "type TurnedAwayTally<TReason extends string = string> = {\n    readonly reason: TReason;\n    /** Deliveries turned away for this reason, cumulative since the counter existed. */\n    readonly refused: number;\n    /** When the newest of them was turned away, in epoch milliseconds. */\n    readonly lastAt: number;\n    /**\n     * The site the newest of them came from, as an origin, or `null` where it\n     * named none.\n     *\n     * Carried because for the commonest reason it is the whole remedy: *from\n     * `https://loomjs.org`* beside a project that names `www.loomjs.org` needs no\n     * other explanation.\n     */\n    readonly lastOrigin: string | null;\n};",
+              "summary": "One reason a door turned deliveries away, as a deployment's own counter holds it."
+            },
+            {
+              "name": "NewestTurnedAway",
+              "kind": "type",
+              "signature": "type NewestTurnedAway<TReason extends string = string> = {\n    readonly reason: TReason;\n    readonly origin: string | null;\n    /** When it was turned away, in epoch milliseconds, as the counter holds it. */\n    readonly atMs: number;\n    /**\n     * How long before the instant handed in it was turned away, or `null` where\n     * no instant was.\n     *\n     * The one number that tells a live fault from a fixed one: a cumulative\n     * counter cannot say whether its own figure is current, and a deployment that\n     * was misconfigured a month ago and fixed it still holds every refusal it\n     * ever counted. Negative where the counter is ahead of the instant, by the\n     * same subtraction rather than by a special case.\n     */\n    readonly sinceMs: number | null;\n};",
+              "summary": "The newest delivery this door turned away, which is the one an operator acts on."
+            },
+            {
+              "name": "ArrivalStandingName",
+              "kind": "type",
+              "signature": "type ArrivalStandingName =\n/**\n * Nothing offered a count of what the door turned away, so the question\n * cannot be answered either way.\n *\n * The refusal rather than the gap, and it wins over every other state for the\n * reason an absent region store is not an empty map: a window with\n * nothing in it and no refusal counter beside it is *two* states, and calling\n * it `silent` would publish the more comforting one. A deployment that keeps\n * no such counter — or whose store was not reachable on this read — gets the\n * figures it does have and no verdict.\n */\n\"unasked\"\n/**\n * Nothing has been collected and nothing has been turned away.\n *\n * No page is posting to this deployment at all: the snippet is absent, or the\n * broadcaster was never called, or the signals never left the browser. The\n * strongest of the quiet answers, because the door is the one place a\n * delivery cannot arrive without being seen, and it saw none.\n */\n | \"silent\"\n/**\n * Nothing has been collected and deliveries have been turned away.\n *\n * **The state this reading exists for.** A page is posting and this door is\n * refusing it, and every other reading in the subsystem is reporting that\n * nobody read anything. It is the one standing here that no amount of age on\n * the counter can weaken: whenever those refusals happened, nothing has ever\n * been collected, so there is no window in which this deployment was working.\n */\n | \"turned-away\"\n/** Something has been collected and nothing has been turned away. */\n | \"collecting\"\n/**\n * Something has been collected and deliveries have been turned away.\n *\n * Both are true and neither is the whole picture: a second sender with a\n * stale key, one page of several carrying the wrong snippet, or a\n * misconfiguration since fixed. `newest.sinceMs` is what tells those apart\n * and this standing deliberately does not try to.\n */\n | \"mixed\";",
+              "summary": "Whether anything is arriving at this deployment, and why not."
+            },
+            {
+              "name": "ARRIVAL_STANDINGS",
+              "kind": "value",
+              "signature": "const ARRIVAL_STANDINGS: readonly ArrivalStandingName[]",
+              "summary": "The closed set, in the order a surface reads them: the refusal, then the two quiet states, then the two live ones."
+            },
+            {
+              "name": "ArrivalStanding",
+              "kind": "type",
+              "signature": "type ArrivalStanding<TReason extends string = string> = {\n    readonly standing: ArrivalStandingName;\n    /**\n     * Revisions anything at all was collected about, which is **not** a count of\n     * readers.\n     *\n     * A revision stands here if the window held one counter, one funnel answer,\n     * one door row or one region bucket for it, so a deployment whose senders\n     * never mark an opening still reads as collecting — which it is. Reading this\n     * off `arrivals` instead would call that deployment `turned-away` and send an\n     * operator after a gate that is letting everything through.\n     */\n    readonly collected: number;\n    /**\n     * Page views counted at the door across every revision read, added.\n     *\n     * The headcount behind `collected`, carried through unchanged. Nought with a\n     * positive `collected` is an ordinary state and its own fault already\n     * (`door-unscaled`), not a sign that nothing arrived.\n     */\n    readonly arrivals: number;\n    /**\n     * Deliveries turned away, added across the reasons, or `null` where nothing\n     * offered a count.\n     *\n     * The two kinds of nothing kept apart: `null` is *nobody counted*, and\n     * `0` is *the counter was read and holds none*.\n     */\n    readonly refused: number | null;\n    /** The newest delivery turned away, or `null` where none was. */\n    readonly newest: NewestTurnedAway<TReason> | null;\n    /**\n     * Tallies beyond the first for one reason, dropped.\n     *\n     * A store keys its rows by the reason, so this is nought from every store in\n     * this repository. It is counted because the one lie a sum can be told is a\n     * row handed in twice, and a count that has been added cannot be unadded\n     * — a caller that concatenated two reads would otherwise publish twice\n     * the refusals with nothing saying so.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "What is arriving at a deployment, what is being turned away, and what that means together."
+            },
+            {
+              "name": "arrivalStandingOf",
+              "kind": "function",
+              "signature": "const arrivalStandingOf: <TReason extends string>(health: Pick<CollectionHealth, \"pages\" | \"arrivals\">, turnedAway: readonly TurnedAwayTally<TReason>[] | undefined, at?: number) => ArrivalStanding<TReason>",
+              "summary": "Read a window's health and a door's refusals together, into the one question neither can answer alone."
+            },
+            {
+              "name": "describeArrivalStanding",
+              "kind": "function",
+              "signature": "const describeArrivalStanding: (standing: ArrivalStanding) => string",
+              "summary": "One line for the operator setting a deployment up, because they are the only person who can close the gap."
             }
           ]
         },
@@ -12570,7 +12619,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12705,7 +12754,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12767,7 +12816,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13292,7 +13341,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13362,7 +13411,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13784,7 +13833,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1821,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

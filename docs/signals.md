@@ -3985,6 +3985,64 @@ them — so a caller maps its own readings' `silence` fields through the matchin
 `meaningOf…Silence`, and nothing reminds it the census exists; and still that
 **nothing draws any of this**, which is `Loom portal`'s.
 
+### 65. Nothing arrived, or nothing was let in · `Loom signals` · **done, 31 October**
+
+Every reading in this subsystem is a reading of rows that arrived, and nothing
+had ever been written down about what that costs. A counter never written is
+indistinguishable from a counter written with a nought — so the commonest
+failure a new deployment has, **a snippet posting from an origin its project
+does not name**, makes forty-one readings and nine comparisons all say the same
+wrong thing: *nobody read this page.*
+
+The evidence that it is wrong has existed since
+[0311](../decisions/0311-a-refusal-whose-key-was-right-is-counted-against-its-project-and-one-without-one-is-not.md),
+whose own context names this exact question as the reason it was built — *is my
+page posting and being turned away, or not posting at all?* The door counts what
+it refused, per reason, with the newest one's origin beside it. **Nothing joined
+the two**, so no verdict, standing, fault or sentence anywhere in `src/signals/`
+could tell the two silences apart.
+
+**Done**
+([0326](../decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)),
+as `arrivalStandingOf` in [`arriving.ts`](../src/signals/arriving.ts).
+
+- **Five standings, two dimensions crossed and one refusal.** `silent` and
+  `collecting` where nothing was turned away; `turned-away` and `mixed` where
+  something was; `unasked` where nothing offered a count, which wins over all
+  four on 0240's rule that an absent store is not an empty map. `refused` is
+  `number | null` for the same reason.
+- **`turned-away` is the state it exists for**, and the one standing no amount
+  of age on a cumulative counter can weaken: whenever those refusals happened,
+  nothing has ever been collected, so there is no window in which the deployment
+  was working.
+- **It judges on what was collected, never on the arrivals.** A deployment whose
+  senders never mark an opening has counters and no door rows — `door-unscaled`
+  — and reads `arrivals: 0` while collection plainly works. Judged on arrivals it
+  would read `turned-away` and send an operator after a gate letting everything
+  through. Both figures are published; only one is the question.
+- **The reasons stay the deployment's**, through a type parameter. Nothing moves
+  out of the app's `refusals.ts`, no type crosses into `src/`, and
+  `describeArrivalStanding` prints the reason as the deployment spelled it.
+- **Not a collection fault.** All seven of those are about one revision of one
+  page because all seven come off that revision's rows; a refusal is about no
+  page at all, because the door turns a delivery away before anything reads
+  which tree it named.
+- **The instant is optional and no standing turns on age.** `newest.sinceMs` is
+  the one number that tells a live fault from a fixed one, and it is published
+  rather than judged (0274).
+- **A reason handed in twice is folded once**, with the rest counted in
+  `duplicated` (0158).
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method, no new kind, and `silences.ts` untouched.
+
+**What is left and is filed:** it is not a member of `windowAssemblyOf` and for
+a reason the three readings filed under that pattern do not share — an assembly
+is of a window's rows and a refusal is not in a window; and the screen that
+would draw it is already built and already reads one of its two inputs, which is
+`Loom portal`'s.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

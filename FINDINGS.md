@@ -62652,3 +62652,89 @@ answer is probably not a per-form transpose at all but the form comparison this
 lane already has (§44–§48) read beside the whole map. Worth a record if it is
 ever built, because the floor argument changes.
 
+
+---
+## 2026-10-31 — every reading in the subsystem is a reading of rows that arrived, and the one state none of them could report now has a name nothing draws
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/page.tsx`) · **Status:** open
+— **a screen that is one call from an answer it is already half-holding**;
+nothing is broken and no test is failing
+
+[0326](decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)
+published `arrivalStandingOf`, which tells *no page is posting to this
+deployment* from *a page is posting and this door is refusing it*. Until today
+nothing in `src/signals/` could: a counter never written reads like a counter
+written with a nought, so a snippet posting from an origin its project does not
+name makes every reading in the subsystem report that nobody read anything.
+
+**The *Signals* screen already reads one of the two inputs.** It calls
+`readings.refusals.read()` and prints one sentence per reason through
+`turnedAwayOf`, and it reads this application's door rows through
+`boundedReaderTallyStore(...).pageViews()`. What it does not do is put them
+together, so a person looking at a page of nought-view pages beside a box
+saying *12 deliveries came from a site this project does not take signals from*
+has to draw the conclusion themselves.
+
+The standing takes `Pick<CollectionHealth, "pages" | "arrivals">`, so the screen
+needs a health reading it does not currently take. **In the state that matters
+that is nearly free**: a deployment nothing has been collected about has no
+trees to join, so `collectionHealthOf([], rows)` is the whole of it, and that is
+exactly the deployment this answer is for.
+
+**Recommendation: draw the standing above both boxes, not beside them.**
+`describeArrivalStanding` is one line and is written for the operator setting a
+site up; the per-reason sentences `turnedAwayOf` already produces are the
+remedy under it. The one thing worth not doing is wording a second set of
+reason sentences — the portal's are good, they are the only ones in the
+repository, and the framework deliberately does not word them.
+
+---
+## 2026-10-31 — a refusal is not in a window, which is why this reading is outside the assembly for a reason the other three are not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/arriving.ts`, `src/signals/window.ts`) · **Status:** open — **a
+boundary named at the moment it was created**; nothing is broken and nothing is
+asked of anybody today
+
+Three readings now hang off `windowAssemblyOf` without being in it —
+`regionPagesOf` (§62), `silenceCensusOf` (§63) and `libraryPaceOf` (§64) — and
+the 30 October entry asks that a future run take all three at once rather than
+any of them individually. **`arrivalStandingOf` is not a fourth instance of
+that pattern**, and the distinction is worth writing down before somebody
+bundles it with them.
+
+The other three are figures over a window's own rows, and what is missing for
+them is a second rung that turns an assembly into the readings over it. This one
+is a join of a window's rows with **the door's refusal counter, which is not in
+a window at all** — it is the deployment's own table, written on the request
+path, keyed by application and reason, and holding nothing a window holds. An
+assembly that reached it would be reaching a second store on a second scope, and
+`ReaderWindow` is deliberately four row sets read with one scope (0309).
+
+So the second rung, when it is built, should take this reading's *result* as an
+argument if it wants it, and must not try to compute it.
+
+**Recommendation: leave it, and do not count it as a fourth.** What it shares
+with the three is only that nothing draws it.
+
+---
+## 2026-10-31 — the second rung the three orphaned readings need cannot be built today, because its third member is not on `main`
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **a sequencing fact rather than a
+defect**, and the reason this morning's run did not take the work the last one
+recommended
+
+The 30 October entry recommends that a future run take `regionPagesOf`,
+`silenceCensusOf` and `libraryPaceOf` into one second rung rather than adding
+any of them individually. This morning's run read that first and could not do
+it: **`libraryPaceOf` exists only on #728's branch.** `main` holds the first
+two. Building the rung off `main` would have covered two of the three and left
+the third to be added one line at a time, which is the exact shape the entry
+asks a run not to produce — and building it on top of #728 would be stacking one
+branch on another, which this lane's brief forbids.
+
+**Recommendation: take it on the first run after #728 has landed**, when all
+three are on `main` and the unit can be one. Nothing is lost by waiting; the
+party that would benefit is still the screen nobody has built.
