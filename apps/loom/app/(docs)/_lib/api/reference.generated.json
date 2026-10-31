@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 70,
+      "files": 72,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9004,6 +9004,55 @@
               "kind": "function",
               "signature": "const actionChangeOf: (was: PageReading, now: PageReading) => ActionChange",
               "summary": "What a change did to what readers do on a page, off two `PageReading`s and nothing else."
+            }
+          ]
+        },
+        {
+          "module": "signals/arriving",
+          "title": "Arriving",
+          "summary": "Whether nothing is arriving because nothing is posting, or because this deployment's door is turning it away.",
+          "symbols": [
+            {
+              "name": "TurnedAwayTally",
+              "kind": "type",
+              "signature": "type TurnedAwayTally<TReason extends string = string> = {\n    readonly reason: TReason;\n    /** Deliveries turned away for this reason, cumulative since the counter existed. */\n    readonly refused: number;\n    /** When the newest of them was turned away, in epoch milliseconds. */\n    readonly lastAt: number;\n    /**\n     * The site the newest of them came from, as an origin, or `null` where it\n     * named none.\n     *\n     * Carried because for the commonest reason it is the whole remedy: *from\n     * `https://loomjs.org`* beside a project that names `www.loomjs.org` needs no\n     * other explanation.\n     */\n    readonly lastOrigin: string | null;\n};",
+              "summary": "One reason a door turned deliveries away, as a deployment's own counter holds it."
+            },
+            {
+              "name": "NewestTurnedAway",
+              "kind": "type",
+              "signature": "type NewestTurnedAway<TReason extends string = string> = {\n    readonly reason: TReason;\n    readonly origin: string | null;\n    /** When it was turned away, in epoch milliseconds, as the counter holds it. */\n    readonly atMs: number;\n    /**\n     * How long before the instant handed in it was turned away, or `null` where\n     * no instant was.\n     *\n     * The one number that tells a live fault from a fixed one: a cumulative\n     * counter cannot say whether its own figure is current, and a deployment that\n     * was misconfigured a month ago and fixed it still holds every refusal it\n     * ever counted. Negative where the counter is ahead of the instant, by the\n     * same subtraction rather than by a special case.\n     */\n    readonly sinceMs: number | null;\n};",
+              "summary": "The newest delivery this door turned away, which is the one an operator acts on."
+            },
+            {
+              "name": "ArrivalStandingName",
+              "kind": "type",
+              "signature": "type ArrivalStandingName =\n/**\n * Nothing offered a count of what the door turned away, so the question\n * cannot be answered either way.\n *\n * The refusal rather than the gap, and it wins over every other state for the\n * reason an absent region store is not an empty map: a window with\n * nothing in it and no refusal counter beside it is *two* states, and calling\n * it `silent` would publish the more comforting one. A deployment that keeps\n * no such counter — or whose store was not reachable on this read — gets the\n * figures it does have and no verdict.\n */\n\"unasked\"\n/**\n * Nothing has been collected and nothing has been turned away.\n *\n * No page is posting to this deployment at all: the snippet is absent, or the\n * broadcaster was never called, or the signals never left the browser. The\n * strongest of the quiet answers, because the door is the one place a\n * delivery cannot arrive without being seen, and it saw none.\n */\n | \"silent\"\n/**\n * Nothing has been collected and deliveries have been turned away.\n *\n * **The state this reading exists for.** A page is posting and this door is\n * refusing it, and every other reading in the subsystem is reporting that\n * nobody read anything. It is the one standing here that no amount of age on\n * the counter can weaken: whenever those refusals happened, nothing has ever\n * been collected, so there is no window in which this deployment was working.\n */\n | \"turned-away\"\n/** Something has been collected and nothing has been turned away. */\n | \"collecting\"\n/**\n * Something has been collected and deliveries have been turned away.\n *\n * Both are true and neither is the whole picture: a second sender with a\n * stale key, one page of several carrying the wrong snippet, or a\n * misconfiguration since fixed. `newest.sinceMs` is what tells those apart\n * and this standing deliberately does not try to.\n */\n | \"mixed\";",
+              "summary": "Whether anything is arriving at this deployment, and why not."
+            },
+            {
+              "name": "ARRIVAL_STANDINGS",
+              "kind": "value",
+              "signature": "const ARRIVAL_STANDINGS: readonly ArrivalStandingName[]",
+              "summary": "The closed set, in the order a surface reads them: the refusal, then the two quiet states, then the two live ones."
+            },
+            {
+              "name": "ArrivalStanding",
+              "kind": "type",
+              "signature": "type ArrivalStanding<TReason extends string = string> = {\n    readonly standing: ArrivalStandingName;\n    /**\n     * Revisions anything at all was collected about, which is **not** a count of\n     * readers.\n     *\n     * A revision stands here if the window held one counter, one funnel answer,\n     * one door row or one region bucket for it, so a deployment whose senders\n     * never mark an opening still reads as collecting — which it is. Reading this\n     * off `arrivals` instead would call that deployment `turned-away` and send an\n     * operator after a gate that is letting everything through.\n     */\n    readonly collected: number;\n    /**\n     * Page views counted at the door across every revision read, added.\n     *\n     * The headcount behind `collected`, carried through unchanged. Nought with a\n     * positive `collected` is an ordinary state and its own fault already\n     * (`door-unscaled`), not a sign that nothing arrived.\n     */\n    readonly arrivals: number;\n    /**\n     * Deliveries turned away, added across the reasons, or `null` where nothing\n     * offered a count.\n     *\n     * The two kinds of nothing kept apart: `null` is *nobody counted*, and\n     * `0` is *the counter was read and holds none*.\n     */\n    readonly refused: number | null;\n    /** The newest delivery turned away, or `null` where none was. */\n    readonly newest: NewestTurnedAway<TReason> | null;\n    /**\n     * Tallies beyond the first for one reason, dropped.\n     *\n     * A store keys its rows by the reason, so this is nought from every store in\n     * this repository. It is counted because the one lie a sum can be told is a\n     * row handed in twice, and a count that has been added cannot be unadded\n     * — a caller that concatenated two reads would otherwise publish twice\n     * the refusals with nothing saying so.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "What is arriving at a deployment, what is being turned away, and what that means together."
+            },
+            {
+              "name": "arrivalStandingOf",
+              "kind": "function",
+              "signature": "const arrivalStandingOf: <TReason extends string>(health: Pick<CollectionHealth, \"pages\" | \"arrivals\">, turnedAway: readonly TurnedAwayTally<TReason>[] | undefined, at?: number) => ArrivalStanding<TReason>",
+              "summary": "Read a window's health and a door's refusals together, into the one question neither can answer alone."
+            },
+            {
+              "name": "describeArrivalStanding",
+              "kind": "function",
+              "signature": "const describeArrivalStanding: (standing: ArrivalStanding) => string",
+              "summary": "One line for the operator setting a deployment up, because they are the only person who can close the gap."
             }
           ]
         },
@@ -9752,6 +9801,12 @@
               "kind": "function",
               "signature": "const doorOf: (row: RevisionPageViews | null) => PageDoor",
               "summary": "The page's door, with the three reasons tried in the order a page's own reading tries them in."
+            },
+            {
+              "name": "atDoorScale",
+              "kind": "function",
+              "signature": "const atDoorScale: (count: number, of: PageDoor, scaledBy?: PageDoor) => number",
+              "summary": "A count taken against one page, put on the scale its door counts in."
             }
           ]
         },
@@ -10739,6 +10794,55 @@
               "kind": "function",
               "signature": "const libraryCopyChangeOf: (was: readonly PageReading[], now: readonly PageReading[]) => LibraryCopyChange",
               "summary": "What a change did to the words of a kind of part, across every page it stands on."
+            }
+          ]
+        },
+        {
+          "module": "signals/library-pace",
+          "title": "Library pace",
+          "summary": "Whether the readers who meet a kind of part have time for what it says.",
+          "symbols": [
+            {
+              "name": "KindPaceSilence",
+              "kind": "type",
+              "signature": "type KindPaceSilence =\n/**\n * The census's own two reasons, which were already a kind's and are reused as\n * values rather than said again.\n *\n * `unread` here is *no place this kind stands reported a view*, which is what\n * a page's own reading calls `unreached` at a part.\n */\nKindSilence\n/**\n * Nothing countable is said anywhere it stands that readers reached, and\n * something in it declares no `copy`.\n *\n * The same state as a part's `unreadable`, at a kind — and **also** the state\n * of a kind whose pace was computed and is not low enough to be safe: words\n * nobody counted can only make a part more skimmed, so `skimmed` stands and\n * anything above it is a claim resting on a floor. That is `paceStandingOf`'s\n * asymmetry, unchanged, and {@link KindPace.floored} says how many placements\n * caused it.\n */\n | \"unreadable\"\n/**\n * It says nothing that takes time to read, anywhere it stands, and nothing\n * went uncounted either.\n *\n * A spacer, a rule, a stack that only holds other parts. Kept apart from\n * `unreadable` because *there are none* and *nobody said* are different\n * answers.\n */\n | \"wordless\";",
+              "summary": "Why a kind of part has no pace."
+            },
+            {
+              "name": "KIND_PACE_SILENCES",
+              "kind": "value",
+              "signature": "const KIND_PACE_SILENCES: readonly KindPaceSilence[]",
+              "summary": ""
+            },
+            {
+              "name": "describeKindPaceSilence",
+              "kind": "function",
+              "signature": "const describeKindPaceSilence: (silence: KindPaceSilence) => string",
+              "summary": "One line per silence, for a surface saying why a kind has no pace."
+            },
+            {
+              "name": "KindPace",
+              "kind": "type",
+              "signature": "type KindPace = {\n    readonly kind: KindKey;\n    /** What part a type plays, or `null`. Always `null` on a role row, which carries it as its key. */\n    readonly role: PrimitiveRole | null;\n    /** Element nodes of this kind across the readings, as the census counts them. */\n    readonly placements: number;\n    /**\n     * Placements standing inside another placement of the same kind, which are in\n     * no term here.\n     *\n     * The outer one's words and seconds already include theirs. Nought on most\n     * type rows and the ordinary state of a role row, because a page's parts\n     * nearly all declare no role and so are all one kind.\n     */\n    readonly nested: number;\n    /** Placements in the figures: not nested, reached, and saying something counted. */\n    readonly counted: number;\n    /** Why the rest have no pace of their own. The counts add to `placements − nested − counted`. */\n    readonly silences: Readonly<Record<PaceSilence, number>>;\n    /**\n     * Every placement a page could be read for, by its own verdict.\n     *\n     * The census view of the same set the two figures above partition: the counts\n     * add to `placements − nested`, and `unknown` is a placement with no pace of\n     * its own *or* one whose words are a floor.\n     */\n    readonly standings: Readonly<Record<PaceStanding, number>>;\n    /** Revisions bearing a counted placement. */\n    readonly pages: number;\n    /** Counted placements whose words are a floor, because a type in them declares no `copy`. */\n    readonly floored: number;\n    /**\n     * Counted placements that are a page's root, which is why a kind holding the\n     * whole page is out of {@link LibraryPace.mostSkimmed}.\n     *\n     * By words it would win every ranking it was entered in, for the reason a\n     * page's own reading keeps its root out of `mostSkimmed`: the page contains\n     * every part.\n     */\n    readonly whole: number;\n    /**\n     * Page views that reached a counted placement, at the door's scale, counted\n     * once per place it stands.\n     *\n     * **Not a count of people and deliberately not rounded into one**: it\n     * is a weight, and a reader who met three placements of one kind is three of\n     * them. `null` under a silence.\n     */\n    readonly readers: number | null;\n    /**\n     * Time on screen across the counted placements, added, exactly as the rows\n     * hold it.\n     *\n     * Sound without a correction: a page view a rollup counted twice carries one\n     * page view's dwell. **Nests across kinds** — a band's seconds are its\n     * paragraph's too — so it is never added across rows.\n     */\n    readonly dwellMs: number;\n    /**\n     * The time its words take the readers who met it: `readers × wordsWithin ×\n     * msPerWord`, added over the counted placements.\n     *\n     * The denominator, in the same reader-milliseconds {@link dwellMs} is in.\n     * `null` under a silence.\n     */\n    readonly needMs: number | null;\n    /** `dwellMs ÷ readers`: the time the typical reader who met a place of it had there. `null` under a silence. */\n    readonly spentMs: number | null;\n    /**\n     * `needMs − dwellMs` where positive: the reading time its readers did not\n     * have, and the key the rows are ordered by.\n     *\n     * By the **amount** and not by the ratio, for the reason a deployment's falls\n     * are ordered by the readers they lose. Nought where readers had time\n     * enough, and `null` under a silence.\n     */\n    readonly shortMs: number | null;\n    /** `dwellMs ÷ needMs`. `1` is exactly time enough. `null` under a silence. */\n    readonly pace: number | null;\n    /** The verdict, by `paceStandingOf` — so a floor can hold up anything but `skimmed`. */\n    readonly standing: PaceStanding;\n    /**\n     * Of {@link readers}, those on a page the door could not scale, so no\n     * straddle correction was applied to them.\n     *\n     * It biases the pace **down**, towards `skimmed`, which is why the row is\n     * published rather than withheld. `LibraryPace.unscaled` names the pages.\n     */\n    readonly unscaled: number;\n    readonly silence: KindPaceSilence | null;\n};",
+              "summary": "One kind of part, against the time its readers had for what it says."
+            },
+            {
+              "name": "LibraryPace",
+              "kind": "type",
+              "signature": "type LibraryPace = {\n    /**\n     * Every type that stands anywhere, most reading time missing first.\n     *\n     * Then the lower pace, then by type, so two kinds that ask the same do not\n     * reorder on a refresh. A kind with no pace sorts after one whose pace is\n     * nought, because `null` is *nothing can be said* and not *nobody had any\n     * time for it*.\n     */\n    readonly byType: readonly KindPace[];\n    /** Every role in the vocabulary, then the row for parts whose type declared none, in the same order. */\n    readonly byRole: readonly KindPace[];\n    /** Readings counted, which is revisions of pages and not trees. */\n    readonly pages: number;\n    /** Distinct trees across them. */\n    readonly trees: number;\n    /** Element nodes across them, which is the sum of every type row's placements. */\n    readonly placements: number;\n    /** Placements standing inside another of their own type, across the type rows. */\n    readonly nested: number;\n    /** Pages whose door could scale them, which is where the correction comes from. */\n    readonly scaled: number;\n    /**\n     * The pages bearing a counted placement that the door could not scale, by\n     * tree and newest revision first.\n     *\n     * The actionable half of every {@link KindPace.unscaled} above: one of these\n     * pages is why. Empty is the healthy state, and a page here still has every\n     * figure it contributed to — see the module documentation on why this reading\n     * keeps it where a share of readers refuses it.\n     */\n    readonly unscaled: readonly UnscaledPage[];\n    /**\n     * The type whose readers are shortest of the time its words take, which is\n     * the kind to rewrite first.\n     *\n     * By {@link KindPace.shortMs} and never by the ratio, and **never a kind that\n     * holds a page's root**, for the reason a page's own reading keeps its root\n     * out of the same ranking. A type and never a role, because a type is the\n     * thing an author can replace.\n     */\n    readonly mostSkimmed: KindPace | null;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page twice, and a page twice\n     * doubles both terms of every ratio here while looking like twice the\n     * evidence.\n     */\n    readonly duplicated: number;\n    /** Door rows for one revision beyond the first, which were ignored. */\n    readonly duplicatedRows: number;\n    /**\n     * Types whose readings disagreed about the role they play, where the first\n     * reading's answer stands.\n     *\n     * Raised here rather than fetched from the census, because every role row\n     * below is about neither library when it is set. Detected off the same\n     * readings by the same rule as the other library readings, so they cannot\n     * disagree about it.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n    /** The costing rate that was applied, which is the default unless one was given. */\n    readonly wordsPerMinute: number;\n};",
+              "summary": "What a deployment's library asks of its readers' time, by kind of part."
+            },
+            {
+              "name": "LibraryPaceOptions",
+              "kind": "type",
+              "signature": "type LibraryPaceOptions = {\n    /**\n     * The costing rate, where {@link READING_WORDS_PER_MINUTE} is wrong for this\n     * deployment's text. Refused the way a page's own reading refuses it.\n     */\n    readonly wordsPerMinute?: number;\n};",
+              "summary": ""
+            },
+            {
+              "name": "libraryPaceOf",
+              "kind": "function",
+              "signature": "const libraryPaceOf: (readings: readonly PageReading[], rows: readonly StoredPageViews[], options?: LibraryPaceOptions) => LibraryPace",
+              "summary": ""
             }
           ]
         },
@@ -12090,7 +12194,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-pace\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "summary": "Which reading published a silence."
             },
             {
@@ -12113,7 +12217,7 @@
                 "shown": 125,
                 "whole": 180,
                 "source": "src/signals/silences.ts",
-                "line": 426
+                "line": 430
               },
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
@@ -12212,6 +12316,12 @@
               "kind": "function",
               "signature": "const meaningOfKindCopyChangeSilence: (silence: KindCopyChangeSilence) => SilenceMeaning",
               "summary": "What a comparison of two windows' words at the scale of a library reports."
+            },
+            {
+              "name": "meaningOfKindPaceSilence",
+              "kind": "function",
+              "signature": "const meaningOfKindPaceSilence: (silence: KindPaceSilence) => SilenceMeaning",
+              "summary": "What a kind of part's pace reports, of one kind."
             },
             {
               "name": "meaningOfPaceSilence",
@@ -12570,7 +12680,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12705,7 +12815,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12767,7 +12877,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13292,7 +13402,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13362,7 +13472,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13784,7 +13894,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1814,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
