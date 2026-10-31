@@ -15,7 +15,13 @@ import { readAtMost } from "@/app/_lib/app/read-at-most"
 import { attributeDelivery, type AttributionRefusal, type Senders } from "./attribution"
 import { INGEST_KEY_PARAMETER } from "./keys"
 import { keptOrigin, type RefusalCounter, type RefusalReason } from "./refusals"
-import { describeIntakeSwitch, describeRegionSettings, type IntakeSettings } from "./settings"
+import {
+  describeCollectionWindow,
+  describeIntakeSwitch,
+  describeRegionSettings,
+  describeSweepSchedule,
+  type IntakeSettings,
+} from "./settings"
 
 /**
  * The mouth: what a browser's batches actually arrive at.
@@ -294,6 +300,33 @@ export type IntakeStatus = {
   readonly detail: string
   /** Whether where readers are is counted, and under what floor. One sentence, for an operator. */
   readonly regions: string
+  /**
+   * The window the sweep counts a delivery into the totals at, and whether the
+   * value it was given could be read. One sentence, for an operator.
+   *
+   * It is the one setting here that is **not** about the door: nothing on this
+   * endpoint reads it, and a window that cannot be read refuses the sweep and
+   * admits every batch regardless (`settings.ts`). It is reported anyway,
+   * because the status is the only way to ask a deployment what it is doing
+   * with what it kept, and a buffer growing under a refused sweep looks from
+   * outside exactly like a buffer growing under no sweep at all.
+   *
+   * `windowMs` above is the *rate limit's* window and not this one. They are
+   * two different windows with one word for both, which this field says in a
+   * sentence rather than renaming another lane's documented field.
+   */
+  readonly collection: string
+  /**
+   * How often this deployment says it sweeps, and what its readers are told as
+   * a result. One sentence, for an operator.
+   *
+   * The only setting here whose whole effect is on somebody else's reading: no
+   * batch is refused and no sweep is changed by it, and what it decides is
+   * whether a notice can say when a delivery goes or only when it ripens
+   * (0320). An operator cannot see that from anywhere else, because nothing
+   * fails.
+   */
+  readonly sweep: string
 }
 
 /**
@@ -321,6 +354,8 @@ export const describeIntake = (intake: Intake): IntakeStatus => {
     windowMs: policy.windowMs,
     subjects: intake.gate.subjects(),
     regions: describeRegionSettings(intake.settings.region),
+    collection: describeCollectionWindow(intake.settings.window),
+    sweep: describeSweepSchedule(intake.settings.sweep),
     detail:
       intake.settings.chosen.state === "on" && !intake.durable
         ? "reader signals are being collected into memory, which a serverless deployment forgets; " +

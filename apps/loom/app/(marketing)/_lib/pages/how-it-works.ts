@@ -15,7 +15,7 @@ import {
   WHAT_THE_RECORD_HOLDS,
   WHAT_YOUR_APP_DOES,
 } from "../docs-pages"
-import { JOURNEY, STEPS_CAPITALISED } from "../journey"
+import { JOURNEY, STEPS } from "../journey"
 import {
   action,
   heading,
@@ -98,7 +98,7 @@ const hero = (ids: IdFactory): LoomNode =>
 export const MECHANISM_JOURNEY_EYEBROW = "End to end"
 
 const journey = (ids: IdFactory): LoomNode =>
-  section(ids, { width: "wide", eyebrow: MECHANISM_JOURNEY_EYEBROW }, `${STEPS_CAPITALISED} steps, every time`, [
+  section(ids, { width: "wide", eyebrow: MECHANISM_JOURNEY_EYEBROW }, `The same ${STEPS} steps every time`, [
     buildElement(ids, {
       type: "loom.milestone-list",
       props: { rail: "line", density: "loose" },
@@ -140,7 +140,7 @@ export const SHORT_ANSWERS: readonly ShortAnswer[] = [
   {
     /** Replaces the retired `/the-rules`, which was 1,382 words. */
     eyebrow: "Your rules",
-    heading: "You decide what may change, before anyone asks",
+    heading: "You choose what the AI is allowed to change",
     body: "A rule is a line you write once: this part may be rearranged, that part may not, and anything bigger than this waits for a person. They are read the same way every time, whether or not somebody is watching.",
     example: "Say the price may never be edited, and then no request edits the price. Not yours, not a visitor's, not the AI's.",
   },

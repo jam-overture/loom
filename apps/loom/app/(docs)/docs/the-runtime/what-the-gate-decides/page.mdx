@@ -59,6 +59,8 @@ Only you know that `commerce.checkout` matters more than `layout.stack`.
 So a deployment writes a policy:
 
 ```ts
+import { gatePolicySchema } from "@jam-overture/loom"
+
 const policy = gatePolicySchema.parse({
   policyId: "acme-storefront",
   protectedPrimitiveTypes: ["commerce.checkout", "legal.consent-notice"],
@@ -70,6 +72,8 @@ const policy = gatePolicySchema.parse({
 legible:
 
 ```ts
+import { interactiveTypesFor } from "@jam-overture/loom/sdk"
+
 const docsGatePolicy = gatePolicySchema.parse({
   policyId: "loom-docs",
   protectedPrimitiveTypes: ["loom.heading"],

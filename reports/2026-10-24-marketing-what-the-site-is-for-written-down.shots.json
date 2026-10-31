@@ -1,0 +1,9 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    { "path": "/", "out": "2026-10-24-marketing-headlines-front-door", "viewport": "wide", "waitFor": "h1", "fullPage": true },
+    { "path": "/what-you-run", "out": "2026-10-24-marketing-headlines-what-you-run", "viewport": "wide", "waitFor": "h1", "fullPage": true },
+    { "path": "/how-it-works", "out": "2026-10-24-marketing-headlines-how-it-works", "viewport": "wide", "waitFor": "h1", "fullPage": true }
+  ]
+}

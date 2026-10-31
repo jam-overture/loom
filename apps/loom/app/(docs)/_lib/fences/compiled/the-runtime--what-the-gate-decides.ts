@@ -8,11 +8,10 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import {
-  docsRegistry,
-  gatePolicySchema,
-  interactiveTypesFor,
-} from "../context/the-runtime--what-the-gate-decides"
+import { gatePolicySchema } from "@jam-overture/loom"
+import { interactiveTypesFor } from "@jam-overture/loom/sdk"
+
+import { docsRegistry } from "../context/the-runtime--what-the-gate-decides"
 
 // page.mdx:61 — a program
 const policy = gatePolicySchema.parse({
@@ -21,11 +20,11 @@ const policy = gatePolicySchema.parse({
   protectedPropKeys: ["price"],
 })
 
-// page.mdx:72 — a program
+// page.mdx:74 — a program
 const docsGatePolicy = gatePolicySchema.parse({
   policyId: "loom-docs",
   protectedPrimitiveTypes: ["loom.heading"],
   interactiveTypes: interactiveTypesFor(docsRegistry),
 })
 
-export { policy, docsGatePolicy }
+export { policy, docsGatePolicy, gatePolicySchema, interactiveTypesFor }

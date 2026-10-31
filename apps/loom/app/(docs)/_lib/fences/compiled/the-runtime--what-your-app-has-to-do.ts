@@ -9,6 +9,7 @@
  */
 
 import { fixedPolicy, randomIdFactory, systemClock } from "@jam-overture/loom"
+import type { EditIntent } from "@jam-overture/loom"
 import { postgresHoldStore, postgresTreeStore } from "@jam-overture/loom/postgres"
 import { commitIntent, confirmHeld, discardHeld } from "@jam-overture/loom/write"
 import type { WritePath } from "@jam-overture/loom/write"
@@ -23,7 +24,6 @@ import {
   reviewer,
   session,
 } from "../context/the-runtime--what-your-app-has-to-do"
-import type { EditIntent } from "../context/the-runtime--what-your-app-has-to-do"
 
 // page.mdx:30 — a program
 const path: WritePath = {
@@ -51,10 +51,10 @@ const intent: EditIntent = {
 
 const outcome = await commitIntent(path, intent)
 
-// page.mdx:138 — a program
+// page.mdx:141 — a program
 const yes = await confirmHeld(path, { proposalId, actor: reviewer.id })
 
 const no = await discardHeld(path, { proposalId, actor: reviewer.id })
 
 export { path, intent, outcome, yes, no, fixedPolicy, randomIdFactory, systemClock, postgresHoldStore, postgresTreeStore, commitIntent, confirmHeld, discardHeld }
-export type { WritePath }
+export type { EditIntent, WritePath }

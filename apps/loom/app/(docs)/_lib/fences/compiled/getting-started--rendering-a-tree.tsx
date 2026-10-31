@@ -10,12 +10,11 @@
 
 import { createThemeRegistry } from "@jam-overture/loom"
 import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
-import { renderLoomTree } from "@jam-overture/loom/react"
+import { renderLoomTree, renderRequest } from "@jam-overture/loom/react"
 
 import {
   notFound,
   options,
-  renderRequest,
   request,
   resolver,
   source,
@@ -42,8 +41,8 @@ return <main>{rendered.element}</main>
 // page.mdx:45 — a program
 const { element, diagnostics, theme } = renderLoomTree(tree, options)
 
-// page.mdx:73 — the inside of an object literal
-const objectAtLine73 = {
+// page.mdx:75 — the inside of an object literal
+const objectAtLine75 = {
 props: {
   "loom:theme": {
     palette: "minimal",
@@ -53,8 +52,8 @@ props: {
 }
 }
 
-// page.mdx:118 — the inside of a function
-const functionAtLine118 = async () => {
+// page.mdx:120 — the inside of a function
+const functionAtLine120 = async () => {
 const served = await renderRequest(request, { source, resolver, validator, themes })
 
 if (!served.ok) return notFound()
@@ -62,4 +61,4 @@ if (!served.ok) return notFound()
 return <main>{served.value.element}</main>
 }
 
-export { functionAtLine12, element, diagnostics, theme, objectAtLine73, functionAtLine118, createThemeRegistry, createStarterPrimitiveRegistry, renderLoomTree }
+export { functionAtLine12, element, diagnostics, theme, objectAtLine75, functionAtLine120, createThemeRegistry, createStarterPrimitiveRegistry, renderLoomTree, renderRequest }

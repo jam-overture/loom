@@ -126,6 +126,22 @@ export const publishedNames: ReadonlySet<string> = new Set(
   apiEntries.flatMap((entry) => entry.groups.flatMap((group) => group.symbols.map((s) => s.name)))
 )
 
+/**
+ * The published names a piece of code holds — a fenced block, or one span
+ * between backticks.
+ *
+ * Exported because a second claim about this site now needs the same answer,
+ * and the alternative is a fourth reader of the same question. `plain.ts` asks
+ * which names a page's *orientation* holds; this file asks which page names a
+ * given export. Both are "the published names in this code", and the rules
+ * with a wrong answer — the dot in `result.ok`, an identifier that is only part
+ * of a longer one — are the ones worth having in a single place. The sweep in
+ * September that cost a run a day was four scanners disagreeing about where a
+ * fence began; this is the same economy applied one layer in.
+ */
+export const publishedNamesIn = (code: string): readonly string[] =>
+  identifiersIn(code).filter((name) => publishedNames.has(name))
+
 const mentionOn = (
   section: DocsSection,
   page: DocsPage,

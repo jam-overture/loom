@@ -19,7 +19,7 @@ export const policy = gatePolicySchema.parse({
   protectedPrimitiveTypes: ["commerce.checkout", "commerce.price-tag"],
 })
 
-// page.mdx:162 — a program
+// page.mdx:163 — a program
 const runtime: CompositionRuntime = {
   interpreter,
   policySource: fixedPolicy(policy),

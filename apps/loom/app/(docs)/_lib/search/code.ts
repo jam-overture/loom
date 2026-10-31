@@ -1,6 +1,5 @@
-import { fenceSpansIn, outsideFences } from "../fences/spans"
+import { blockSectionsIn } from "../fences/sections"
 
-import { headingAnchor } from "./anchor"
 import { readPageSource } from "./headings"
 
 /**
@@ -47,56 +46,22 @@ export type CodeSection = {
   readonly code: string
 }
 
-/** The heading levels the search indexes, and so the levels that open a section. */
-const INDEXED_LEVELS: readonly number[] = [2, 3]
-
-const HEADING = /^(#{1,6})\s+(.+?)\s*$/
-
-const stripInline = (text: string): string => text.replace(/[`*_]/g, "")
-
 /**
  * The code in a page's source, gathered under the heading it sits beneath.
  *
- * One walk down the page rather than two: `outsideFences` says where the
- * headings are and `fenceSpansIn` says where the blocks are, both keyed to the
- * same line numbers, so the anchor in force when a block opens is the anchor
- * that block belongs to.
+ * Which heading that is, is `fences/sections.ts` and no longer this module's:
+ * the walk and the rule that a `####` does not open a section were wanted in
+ * three places, and the one that matters here is *a reader can be sent to this
+ * anchor* — which is the same sentence `landing.ts` needs to ask whether the
+ * import for a block's names is where the reader landed.
  *
- * A heading below `###` does not open a section, for the reason `prose.ts`
- * gives — an `####` is a label inside a section a reader was already sent to,
- * and code that stopped there would be findable by nothing.
+ * What is still this module's is the one thing it wants and the others do not:
+ * a block with nothing in it is nothing to find, so it is dropped.
  */
-export const codeSectionsIn = (source: string): readonly CodeSection[] => {
-  const blocks = new Map(fenceSpansIn(source).map((span) => [span.opensAt, span.code]))
-
-  const gathered = outsideFences(source).reduce<{
-    readonly anchor: string
-    readonly sections: readonly CodeSection[]
-  }>(
-    (state, line, index) => {
-      const block = blocks.get(index + 1)
-
-      if (block !== undefined) {
-        return block.trim() === ""
-          ? state
-          : { ...state, sections: [...state.sections, { anchor: state.anchor, code: block }] }
-      }
-
-      const heading = HEADING.exec(line)
-
-      if (heading === null) return state
-
-      const level = (heading[1] ?? "").length
-
-      if (!INDEXED_LEVELS.includes(level)) return state
-
-      return { ...state, anchor: headingAnchor(stripInline(heading[2] ?? "")) }
-    },
-    { anchor: "", sections: [] }
-  )
-
-  return gathered.sections
-}
+export const codeSectionsIn = (source: string): readonly CodeSection[] =>
+  blockSectionsIn(source)
+    .filter((block) => block.code.trim() !== "")
+    .map(({ anchor, code }): CodeSection => ({ anchor, code }))
 
 /**
  * Every section's code on a written page, keyed by the anchor it sits under.

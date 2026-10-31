@@ -9,7 +9,9 @@ import {
   docsNeighbours,
   docsOrder,
   docsPagesIn,
+  docsSectionAt,
   docsSections,
+  writtenDocsSections,
   type DocsSection,
 } from "./nav"
 
@@ -70,8 +72,23 @@ describe("the navigation model", () => {
     )
   })
 
-  it("enters at the first page of the first section", () => {
-    expect(docsEntryPoint()).toBe(docsOrder[0]?.href)
+  /**
+   * It is the first page *inside* the first section, which stopped being
+   * `docsOrder[0]` the day every written section got a page of its own.
+   *
+   * The distinction is the one thing a stranger feels here. A section's own page
+   * lists what is in the section; the page after it is the one with a tree on it
+   * and an explanation of what Loom is. A reader arriving at the documentation
+   * for the first time is owed the second, which is the address `/docs` has
+   * pointed at all along.
+   */
+  it("enters at the first page inside the first section, not at its landing page", () => {
+    const first = docsOrder[0]
+
+    expect(first?.page.slug).toBe(DOCS_LANDING_SLUG)
+    expect(docsEntryPoint()).not.toBe(first?.href)
+    expect(docsEntryPoint()).toBe(docsOrder[1]?.href)
+    expect(docsEntryAt(docsEntryPoint())?.page.slug).not.toBe(DOCS_LANDING_SLUG)
   })
 
   it("gives every page a summary that reads as a sentence", () => {
@@ -92,7 +109,7 @@ describe("the navigation model", () => {
  */
 describe("a section's own page", () => {
   const sectionAt = (slug: string): DocsSection => {
-    const section = docsSections.find((candidate) => candidate.slug === slug)
+    const section = docsSectionAt(slug)
 
     if (section === undefined) throw new Error(`loom: there is no ${slug} section`)
 
@@ -129,13 +146,45 @@ describe("a section's own page", () => {
     expect(inside.some((page) => page.slug === DOCS_LANDING_SLUG)).toBe(false)
   })
 
-  it("is what a section is asked for, and absent where there is none", () => {
+  /**
+   * **Every section has one now**, which is the change of 25 October. Until
+   * then the reference was the only section with a page of its own and the four
+   * written sections each had an address that served a 404.
+   *
+   * The two halves either side of it are what the rest of the site reads: a
+   * section is asked for its landing page by `docsLandingOf`, and the pages
+   * *inside* it never include that page — so the rail lists what is under the
+   * section's name without listing the name twice.
+   */
+  it("is what every section is asked for, and is never one of the pages inside it", () => {
     expect(docsLandingOf(reference)?.title).toBe("API reference")
 
-    const written = sectionAt("getting-started")
+    for (const section of docsSections) {
+      const landing = docsLandingOf(section)
 
-    expect(docsLandingOf(written)).toBeUndefined()
-    expect(docsPagesIn(written)).toEqual(written.pages)
+      expect(landing, section.slug).toBeDefined()
+      expect(landing?.title, section.slug).toBe(section.title)
+      expect(docsPagesIn(section), section.slug).toHaveLength(section.pages.length - 1)
+      expect(
+        docsPagesIn(section).some((page) => page.slug === DOCS_LANDING_SLUG),
+        section.slug
+      ).toBe(false)
+    }
+  })
+
+  /**
+   * The written sections' landing pages are addressed the same way the
+   * reference's is, and `docsSectionAt` is how anything finds the section a
+   * page belongs to by name.
+   */
+  it("is addressed as the section on every written section too", () => {
+    for (const section of writtenDocsSections) {
+      expect(docsHref(section.slug, DOCS_LANDING_SLUG), section.slug).toBe(`/docs/${section.slug}`)
+      expect(docsEntryAt(`/docs/${section.slug}`)?.page.slug, section.slug).toBe(DOCS_LANDING_SLUG)
+      expect(docsSectionAt(section.slug), section.slug).toBe(section)
+    }
+
+    expect(docsSectionAt("nothing-is-called-this")).toBeUndefined()
   })
 
   it("counts the doors in its heading rather than spelling the number", () => {

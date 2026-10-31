@@ -1,0 +1,27 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/what-the-gate-decides#the-deployment-decides-what-is-consequential",
+      "out": "2026-10-29-docs-the-name-a-reader-has-not-met-wide-gate-after",
+      "viewport": { "width": 1280, "height": 1000 },
+      "waitFor": "main pre.p-4",
+      "measure": ["main pre.p-4"]
+    },
+    {
+      "path": "/docs/the-runtime/connecting-a-model#the-slot-and-what-goes-in-it",
+      "out": "2026-10-29-docs-the-name-a-reader-has-not-met-wide-interface",
+      "viewport": { "width": 1280, "height": 1000 },
+      "waitFor": "main pre.p-4",
+      "measure": ["main pre.p-4"]
+    },
+    {
+      "path": "/docs/the-runtime/what-the-gate-decides#the-deployment-decides-what-is-consequential",
+      "out": "2026-10-29-docs-the-name-a-reader-has-not-met-phone-gate",
+      "viewport": "phone",
+      "waitFor": "main pre.p-4",
+      "measure": ["main pre.p-4"]
+    }
+  ]
+}

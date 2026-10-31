@@ -58,12 +58,18 @@ the portal every day.
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Whether readers did anything, rather than saw it | `engaged` against `reached` off one row ([0242](../decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)), withheld on a leaf because a leaf has no inside |
 | Whether a change made room to read | two windows' pace compared, with the words and the readers separated by a counterfactual ([0244](../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md)) |
+| What a reader is told about how long it is kept | the age a delivery ripens at **and** how often the deployment sweeps, as a ceiling it stated rather than one the framework guessed ([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)) — and the weaker sentence, in as many words, where it has stated nothing |
+| Whether that promise is one the deployment keeps | the oldest delivery a sweep found, against the ceiling the notice publishes ([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)) — free, because a scan already starts at the oldest end — with an unstated interval judged as no claim rather than a broken one, and a delivery exactly on the ceiling as a sweep that ran on time |
+| What a deployment reads its own window with | one context holding the four facts a reading needs, with the region floor **required** rather than optional ([0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)) — an absent floor is the smallest bucket this runtime will ever name, so a deployment that raised its floor to a hundred had a surface publish buckets of twenty-five about real people; `windowAssemblyOf` composes the three steps of the rung in the one order that does not drop a page published inside the window |
+| Which pages the readers of one place read | each named region's pages, at a floor on the **cell** rather than on the bucket ([0323](../decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)) — the transpose of the region map, where a place whose readers no page can be attributed to is named as that and never drawn as a place nobody read |
+| Whether readers have time for a kind of part | the time on screen across its places against the time its words take the readers who met them ([0325](../decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)) — a pooled ratio and never a mean of ratios, the outermost placement standing for the ones inside it, and a page the door cannot scale kept rather than refused, because the missing correction only makes a kind read as more skimmed |
+| What a window could not answer, and what each reason cost it | the states its readings are in, as a condition and a subject, with the readings each took and the pages each cost ([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)) — a page counted once however many of its readings report one state, no total over the states because one page is in as many as it has reasons, and a page's own row with a denominator, because *nine of nine readings silent* is a page to fix and *one of nine* is a page that works |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
-| What a reading means when it says nothing | the condition and the subject behind all a hundred and fourteen names, across twenty sets and eighteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
+| What a reading means when it says nothing | the condition and the subject behind all a hundred and eighteen names, across twenty-one sets and eighteen conditions ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -3133,6 +3139,963 @@ figure. `broadcast.ts` was not touched and is byte-identical.
 deployment change order; and that **nothing draws any of this**, which is
 `Loom portal`'s and has been the open question with the most built behind it for
 four runs.
+
+### 50. A distance that is not there, and a refusal that is not a silence · `Loom signals` · **done, 23 October**
+
+The second correction run in a row, and both halves are an absence wearing a
+measurement's clothes. One was taken; the other turned out to contradict an
+accepted record and is **proposed rather than built**.
+
+**Done**
+([0307](../decisions/0307-a-distance-between-a-mix-and-nothing-is-withheld-and-the-invariant-both-rolls-rest-on-is-asserted.md)),
+in `weightMovedOver` in
+[`library-reach-change.ts`](../src/signals/library-reach-change.ts), the helper
+both library rolls take their weight distance from.
+
+- **A side with no weight has no distance, and said it had one of nought.** A
+  nought there is the one value a surface reads as *the weights did not move*.
+  The helper now withholds it. 0247's own reading, which this arithmetic comes
+  from, already withholds `moved` in the same state.
+- **Neither roll can reach it**, which was the other half of the filing and is
+  now settled: a door that can scale a page has counted a page view at it, so a
+  measured row has a weight behind it. The clause stays because the helper is
+  exported and an outside caller would otherwise publish `NaN`.
+- **The invariant is a test rather than a sentence.** The word roll rested four
+  quotients on it in prose and nothing checked it; a row-walk now asserts the
+  figure is withheld exactly where the row's silence is set.
+- **No published field changed shape.** Both `weightMoved` fields were already
+  `number | null`.
+
+**Proposed, not built** (`0308`, on a pull request of its own):
+the deployment change order folds `different-audiences` into the standing
+`unread`, whose sentence is *one of the two windows reported no view of its
+revision* and whose silence condition is `no-view-reported`. Both its windows
+reported plenty. 0301 decided that mapping explicitly, so reversing it is
+**architectural — needs review**, and the record says so. What was built in its
+place is two fixtures standing the two kinds of nothing side by side — which
+makes 0301's promise that *the cause travels on the row* checked rather than
+stated — and a note on the member saying it covers two states.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** `0308` itself, which is the maintainer's and is
+now on a pull request of its own; and that
+**nothing draws any of this**, which is `Loom portal`'s and has been the open
+question with the most built behind it for five runs.
+
+### 51. From a store to a question · `Loom signals` · **done, 24 October**
+
+The gap this plan had never closed, and the one the pull request comments have
+named for five runs: **thirty-eight readings, and nothing that turns a store
+into one.** Searched before it was built — the only callers of `store.tallies()`
+anywhere in the repository are the store contract tests, and the portal has both
+handles wired up and reads neither.
+
+**Done**
+([0309](../decisions/0309-a-window-of-counters-is-read-into-the-readings-it-holds-and-the-trees-stay-the-callers.md)),
+as [`src/signals/window.ts`](../src/signals/window.ts): `readReaderWindow`,
+`revisionsIn`, `RevisionTrees`, `treesIn` and `windowReadingsOf`.
+
+- **One read with one scope**, over the counters, the funnel answers, the door
+  rows and the region map, with the stores' own request passed to each
+  unchanged. **The first failure is the answer**: a window half of whose rows
+  arrived is a reading whose rate has a denominator from one read and a
+  numerator from another, and the figures would look plausible.
+- **An absent region store is not an empty map.** `regions` is `undefined` for
+  *no store was offered* and `[]` for *the store holds none* — the second time
+  this run's lane has had to tell two kinds of nothing apart, and the same rule
+  (0240).
+- **The revisions come off all four row sets.** A revision with door rows and no
+  counters is the page a deployment most wants to see: *nothing has counted this
+  yet* rather than *nobody read this*, which the reach reading can only publish
+  about a revision it was handed.
+- **The trees stay the caller's**, through a one-method source shaped like the
+  registry declarations (0114, 0122). This lane holds counters, not pages.
+- **A revision that cannot be joined is published with the rows it left
+  unread** — `no-tree` is ordinary, and `mismatched` (a source answering with
+  another page or revision) is refused rather than read, because counters read
+  against the wrong tree answer every question with confident nonsense.
+- **A window of two forms is split into two readings rather than read as
+  neither**, which is 0290 clause 2 carried out rather than reversed: the
+  ambiguity was never in the rows. One reading per page, per revision, per form,
+  with no two sharing a `readingKeyOf` — and `foreign` nought on every one of
+  them, because each is handed its own revision's rows.
+- **It adds no figure of its own.** No count, no sum, no quotient, no silence.
+
+**What it unlocks, which is the point.** The order over a deployment's pages is
+now four lines, and one test does exactly that over the memory store end to end
+— write what an intake and a rollup write, read it back through this rung, and
+ask which page to fix first. Every reading in the subsystem is reachable from a
+store without any of them changing.
+
+**Nothing was added to a payload, a browser, a column, a store method or the
+vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** that **nothing draws any of this** is still
+`Loom portal`'s, and is now one step shorter — what was missing was a rung, and
+the rung exists.
+
+### 52. What a page collects, said to the reader it collects about · `Loom signals` · **done, 24 October**
+
+Not a reading, and the first unit here that is not. Every one of the readings
+above answers a deployment's question; this answers the reader's, which is the
+shorter one — *what does this page report about me?* — and nothing in this
+subsystem could answer it outside this repository.
+
+It is the half of the argument that had nothing behind it. The six rules are
+here, the sentences on `signal.ts` are here, and the person a deployment would
+have to show them to is reading the *deployment's* site. What a deployment could
+do until today is write the list by hand, and a hand-written list of what a
+product collects is right on the day it is written: `completed` landed on
+1 October, `audience` with 0284, `within` with 0167, and each of them would have
+quietly falsified a paragraph somebody wrote in September.
+
+**Done**
+([0313](../decisions/0313-what-a-page-collects-is-published-to-the-reader-it-collects-about.md)),
+as `collectionNoticeOf` in [`src/signals/notice.ts`](../src/signals/notice.ts).
+
+- **The fields are the schema's own and the compiler holds them.** The tables
+  are keyed by `keyof Required<…>` of the batch and of each member of the signal
+  union, so **a payload field with no sentence for a reader does not compile**.
+  `Required` is the deliberate half: `within`, `view`, `audience` and `first` are
+  sometimes absent and are collected, so they are owed a sentence like any other.
+- **A test drives the real broadcaster**, because a type cannot reach the third
+  end of the claim — a field can be in the schema, described in the table, and
+  never sent, or sent and never described. The suite reads a fixture page the way
+  a reader would (a band on screen, a link pressed, a disclosure opened, a form
+  let go), takes the batches that actually came out, and fails on any field or
+  kind the notice does not name. The mutation is a table with `ms` taken out,
+  which has to come back as `ms`.
+- **It is a ceiling and never an understatement.** `kinds` narrows it, because a
+  host wrote that list explicitly. `types` and `within` do not: a deployment
+  reporting on sections only collects less than its notice says. Overstating
+  costs a reader nothing; understating is the one failure this cannot have. A
+  floor would also have cost either a second spelling of `selectionOf` or an
+  exported name in the browser entry point (0218), and a disclosure is not worth
+  bytes in a reader's browser.
+- **`FieldSubject` has five members and no sixth.** The part, the page, the
+  observation, the page view, the delivery. It is rule 1 as a type rather than a
+  sentence: a field about a person could not be described without adding a
+  member, and adding one is a record.
+- **The sentences are addressed to the reader** — *your address is never stored*,
+  not *the reader's* — which makes this the one module in `src/signals/` that
+  speaks to anybody. A sentence in the third person is one a deployment has to
+  rewrite before it can publish it.
+- **Two numbers are the deployment's and nothing else is**: the collection
+  window, reported as given because `collect.ts` is what refuses one below its
+  minimum, and the region floor through `regionFloorOf` so the notice cannot
+  disagree with the map. No region counting offered is a floor of `null`, which
+  is *nothing about where you are is read* and not *your country is counted and
+  withheld until enough others share it*.
+- **Not a consent gate, and no step toward one.** There is nothing in today's
+  collection to consent to — a signal is anonymous and node-shaped, correlation
+  is scoped to one page view, and neither is configurable (0146). Per-reader
+  identity stays parked; a gate needs a recorded decision per reader, which is a
+  different artefact, and a notice does not become one by being read.
+
+**Nothing was added to a payload, a browser, a column, a store or the vocabulary
+of kinds** — and nothing was derived from a counter either, which is new here:
+it is the first unit in this plan built for somebody other than a deployment.
+`broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** that nothing prints the notice, which is two
+findings rather than one — a deployment's own privacy page is the host's, and the
+guide at */docs/the-runtime/what-your-readers-do* could print this instead of
+describing it; the region map the §51 rung leaves a caller to assemble; and
+`0308`, which is the maintainer's.
+
+### 53. A batch delivered twice is folded once · `Loom signals` · **done, 25 October**
+
+Not a reading and not a correction of one: a gap in the thing every reading is
+built on. Nothing in the subsystem had ever asked whether two batches in one
+window are the same batch, and three things in the design invite it — a door that
+allows fifty batches per delivery *because* a retry queue draining after an
+outage is worth allowing, a deliverer that reads no response and so never learns
+which deliveries landed, and a buffer whose key is a surrogate.
+
+**Done**
+([0314](../decisions/0314-a-batch-delivered-twice-is-folded-once-and-the-window-is-how-wide-that-promise-is.md)),
+in [`src/signals/rollup.ts`](../src/signals/rollup.ts) and reported through
+[`collect.ts`](../src/signals/collect.ts).
+
+- **The damage was asymmetric, which is why nothing had noticed.** Of a tally's
+  nine counters, `views`, `reached` and `engaged` are sets of view keys, and so
+  are `appearances` and both ends of every funnel: a repeat adds a key the set
+  already holds and moves nothing. `dwellMs`, `activations`, `opens`, `closes`
+  and `completions` are occurrences and double. Every rate this subsystem
+  publishes divides the second kind by the first, so a repeat looks like a reader
+  who was twice as interested — and 0158 makes it permanent, with the buffer that
+  could prove otherwise dropped by the same operation that counted it.
+- **Derived, not collected.** The identity is the tree, the revision, the view
+  key, `sentAt`, the audience, whether it is the opening delivery, and every
+  field of every signal. Nothing was added to the wire, the browser, a column, a
+  store or the vocabulary; `broadcast.ts` is byte-identical. A sequence number
+  per page view would make the test exact and costs 7 bytes of wire per delivery
+  for ever — filed with that number rather than built.
+- **Refusing a repeat cannot move a figure a set of view keys was already
+  protecting**, and that is asserted rather than reasoned: the same window is
+  folded with and without the repeat and `views`, `appearances`, the funnel
+  answers and `reached` come back equal. It is what makes this safe to add under
+  figures that are already published.
+- **Only where there is a view key.** Without one a batch holds nothing unique to
+  its sender, so two readers reaching one band in the same millisecond are
+  byte-identical and dropping a reader is the worse mistake. `uncorrelated` goes
+  on saying how many could not be judged.
+- **The promise is exactly as wide as the window**, and says so: two deliveries
+  either side of a collection boundary are two windows' input, bounded by
+  *(retry delay ÷ window length)*, shrinking with the same setting 0147's
+  straddle does.
+- **One loss, pinned by a test rather than argued away.** With a frozen clock, a
+  page whose opening delivery is spent and which records the same press twice
+  with a flush between them sends two batches a fold cannot tell apart.
+  `broadcast.test.ts` drives the real broadcaster to both results.
+- **A separator is an escape now, never a byte in the file.** Four literal `NUL`
+  bytes in `rollup.ts` made the busiest module in this directory binary to
+  `grep` and `ripgrep`, which print no lines and say `binary file matches`.
+  `source-text.test.ts` fails on a control byte anywhere in this lane's source.
+
+**What is left and is filed:** the door counts a repeated *opening* batch twice
+across two deliveries, which cannot be closed the same way — the remedy is for
+the door to remember view keys, and that is the one value nothing is allowed to
+keep — and it touches the region floor, so it is the maintainer's to read; the
+sequence number, with its cost; the one `NUL` byte left in `src/runtime/`, which
+is another lane's; and still that **nothing draws any of this**, which is
+`Loom portal`'s.
+
+### 54. Where a window's readers were, without a caller assembling it · `Loom signals` · **done, 25 October**
+
+The one reading the §51 rung left to a caller, closed — and the floor that
+closing it needed, which is why it was left.
+
+**Done**
+([0315](../decisions/0315-a-window-answers-where-its-readers-were-at-a-floor-it-is-handed-and-the-readership-is-published-beside-the-forms.md)),
+in [`src/signals/window.ts`](../src/signals/window.ts).
+
+- **Every other reading followed from a `PageReading`; the region map did not.**
+  The rows were carried on the window and counted in the form census, and no map
+  was joined out of them, because `regionReadingOf` takes a **floor** and the
+  floor is per-deployment configuration (§7). The rung reads no configuration
+  and still does not: `WindowReadingOptions` is one argument on the call, so it
+  holds configuration it was handed rather than configuration it went looking
+  for. What that closes is the half nothing said out loud — **a caller who
+  passed no floor got the default rather than the deployment's**, and a
+  deployment that had raised its floor would have had its map drawn at 25 by any
+  screen that forgot.
+- **Both answers, because the floor bites harder the narrower the group.**
+  `regions.maps` is one map per revision per form, keyed so `readingKeyOf` pairs
+  it with that form's page reading; `regions.readership` is the deployment's
+  whole map. Thirty views of one country split fifteen and fourteen across two
+  forms are a readership the whole map names and both split maps withhold —
+  so publishing only the split would answer *where are my readers* worse than
+  the two calls it replaces. Summing two forms' arrivals is right here and wrong
+  on the counters, and the asymmetry is 0297's.
+- **A map is not held to a tree.** It is a map of arrivals, not of nodes, so a
+  revision whose tree is gone is `unjoined` for its counters and still has its
+  readers counted. Dropping them would under-report a deployment that has pruned
+  old trees by exactly the readers it has least other record of.
+- **A bucket handed in twice is dropped once, before both answers.** The dedupe
+  is on tree, revision, form and region — the key the store keeps one row per —
+  and `regions.duplicated` reports it. Applied once rather than twice, so the
+  maps and the readership drop the same rows, and the invariant is asserted
+  rather than argued: six buckets over three revisions, two forms and two trees,
+  handed in twice, have their per-form views sum to the readership's exactly.
+- **Nothing reaches a reader.** No payload field, no browser byte, no column, no
+  store method, no kind. `broadcast.ts` is byte-identical.
+
+**What is left and is filed:** still that **nothing draws any of this**, which
+is `Loom portal`'s; the door's repeated opening and the region floor it reaches,
+which is the maintainer's; and `0308`, which is the maintainer's.
+
+### 55. A window's counters are one write · `Loom signals` · **done, 26 October**
+
+Not a reading. The second gap in the thing every reading is built on, found in
+the same place §53 found the first and from the opposite direction: §53 was a
+*sender* delivering one batch twice, and this is the *collector* writing one
+window twice.
+
+A window is folded once per audience (0284), and the folds were written one call
+per audience. A store error on the second call left the first audience's counters
+durable, the second's uncounted and **the buffer un-forgotten** — so the next run
+folded the same batches again and added the first audience a second time. The
+comment above that loop called it *the bounded over-count that comes with adding
+distinct view counts across windows (0147)*, and it was not: 0147's bound is one
+page view straddling a boundary on a distinct count, and this was a whole window
+re-added, hardest on the five counters of nine that are occurrences rather than
+distinct counts. Every rate here divides the second kind by the first.
+
+**Done**
+([0316](../decisions/0316-a-windows-counters-are-one-write-because-a-window-written-per-audience-has-a-state-between-the-writes.md)),
+as `applyWindow` on `ReaderTallyStore`, implemented in
+[`postgres.ts`](../src/signals/postgres.ts) and [`memory.ts`](../src/signals/memory.ts)
+and called once per run by [`collect.ts`](../src/signals/collect.ts).
+
+- **The invariant `collect.ts` opens with is now true of the whole function.**
+  *The set of batches rolled up and the set forgotten is the same set, decided
+  once, in one place* was true of the fold and false of the write. It is one
+  write now, so there is no state between the writes to get out of.
+- **`unavailable` means what it says again.** Its own words are *nothing became
+  durable*, and that was false for every window of more than one audience.
+  Nothing new is reported, because there is no longer anything to report — which
+  is the better half of the fix: the alternative was an outcome naming the
+  audiences already counted, and every branch of that outcome is damage.
+- **Required rather than optional.** A store that cannot be atomic over several
+  audiences cannot be correct here, and probing for the capability would keep
+  the broken path alive beside the sound one.
+- **`apply` stays and is `applyWindow` over one entry**, implemented as exactly
+  that in both stores so they cannot drift on the half that matters. Every
+  existing call site compiles untouched.
+- **The atomicity is asserted against real Postgres**, not against a double: a
+  window whose second audience carries a `revision` past what an `integer`
+  column holds raises on that insert, and the first audience's rows are then
+  absent. The rollback under test is the database's.
+- **Nothing was gathered before writing.** Folding two entries of one audience
+  into one would have been fewer statements and the same answer, so it would
+  have been a line no test could fail on (0231). Two entries are two commands in
+  one transaction and so they add, which is what the shared contract asserts of
+  both stores.
+
+**Nothing was added to a payload, a browser, a column, a migration, a store read
+or the vocabulary of kinds.** `broadcast.ts` was not touched and is
+byte-identical.
+
+**What is left and is filed:** the `applyWindow` contract suite sits in
+`src/signals/applied-window.contract.ts` rather than beside the other three in
+`src/testing/reader-signal-contract.ts`, which is another lane's file — filed for
+it, and one import away.
+
+### 56. One window, read where the other settings are · `Loom signals` · **done, 26 October**
+
+Not a reading either. The number every other step in this subsystem is timed by,
+read in two places — and the one intake setting with no state for a value that
+cannot be used.
+
+`DEFAULT_READER_SIGNAL_WINDOW_MS` carries the whole argument for an hour in its
+doc comment, and the script that sweeps wrote `60 * 60 * 1000` out again and
+parsed the environment itself. The two numbers agreed, so nothing was broken;
+what the duplication had was a **direction** — the package's copy was the one
+with the reasoning attached, and the script's was the one a deployment's batches
+were actually swept on. It is the third instance of one spelling of a constant
+drifting from another in this subsystem (0218, 0235).
+
+**Done**
+([0317](../decisions/0317-the-window-a-deployment-sweeps-on-is-read-where-its-other-settings-are-and-a-window-it-cannot-read-stops-the-sweep.md)),
+as `readCollectionWindow` in
+[`settings.ts`](../apps/loom/app/_lib/reader-signals/settings.ts) and
+`deploymentNoticeOf` in
+[`notice.ts`](../apps/loom/app/_lib/reader-signals/notice.ts).
+
+- **One reading, beside the other four.** The intake switch, the region switch,
+  the region header and the region floor were all read in one file, each with a
+  three-state reading and a sentence for an operator. The window is now the
+  fifth, with the runtime's own `readerSignalWindowSchema` as its gate — so what
+  a window may be is stated once, in the package, and read rather than restated.
+- **A window that cannot be read stops the sweep**, rather than falling back to
+  the default. An operator who typed a day meant a day: sweeping on an hour
+  because their value could not be parsed would change both what their counters
+  mean and how long a delivery lives, which is a number their readers are told,
+  and it would do it silently. The buffer is still there when the value is
+  fixed.
+- **The door does not refuse on it.** A window is nothing the endpoint reads, and
+  refusing batches as well would lose the deliveries a corrected value would
+  have counted.
+- **A deployment's own notice is one call now.**
+  `deploymentNoticeOf(readIntakeSettings())` hands `collectionNoticeOf` (0313)
+  this deployment's two numbers — the window, and a region floor **only where a
+  country is actually read**, which is the `on` state and no other. A deployment
+  that switched regions off or misspelled the switch counts no region, and the
+  notice says *nothing about where you are is read* rather than naming a floor
+  under a bucket that does not exist. §52 built the value; this is the line that
+  makes it this deployment's rather than the framework's.
+- **An operator can ask what the sweep runs on.** The status gained one
+  sentence, because a buffer growing under a refused sweep looks from outside
+  exactly like a buffer growing under no sweep at all.
+- **Nothing reaches a reader.** No payload field, no browser byte, no column, no
+  migration, no store method, no kind. `broadcast.ts` is byte-identical.
+
+**What is left and is filed:** `windowMs` on that status is the *rate limit's*
+window and not this one, which is two windows with one word for both — the
+rename is one line in `docs/deployment.md`, which is another lane's file, so it
+is filed rather than taken. And the older half this unit could not close: a
+buffer age is a promise only a **scheduled** sweep keeps, and nothing in the
+notice says whether one runs.
+
+### 57. The pairs a window holds · `Loom signals` · **done, 27 October**
+
+The second step of the §51 rung, and the one it left undone. §51 made every
+reading that is a function of one `PageReading` reachable from a store. **Nine
+of them are functions of two** — `readingChangeOf`, `copyChangeOf`,
+`paceChangeOf`, `actionChangeOf`, `funnelChangeOf` and the four library
+comparisons — and nothing turned a window into a pair, although a window usually
+holds both sides: one page's revision 5 and its revision 9 are two readings in
+the same list. `deploymentChangeOf` has said so in its own docblock since §35:
+*a caller with two windows of counters reads each page's parts, then its
+progress, then its comparison, then this.*
+
+So the comparison half of this subsystem — the half the product's argument rests
+on — was reachable only by a caller that wrote the pairing itself, and a caller
+writing the pairing is a caller writing 0293 again.
+
+**Done**
+([0318](../decisions/0318-a-windows-before-and-after-pairs-are-one-per-form-and-they-are-its-latest-two-revisions.md)),
+as `windowPairsOf` in [`src/signals/window.ts`](../src/signals/window.ts).
+
+- **One pair per form, of that form's latest two revisions**, and the clause is
+  load-bearing rather than tidy. `deploymentChangeOf` gates a form handed two
+  different revision pairs as `ambiguous` and drops it, so a rung publishing
+  every consecutive pair would take every page a deployment published three
+  times inside one window **out of the order that exists to rank it** — and a
+  shorter order looks like a calmer week (0158). The test asserts both halves:
+  these pairs give `ambiguous: []` and `compared: 1`, and every consecutive pair
+  of the same three readings gives `ambiguous: [TREE]` and `compared: 0`.
+- **Grouped by `formKeyOf` and nothing else (0293), so no pair it makes can be
+  refused for a mismatched side.** Of the four states `readingChangeOf` refuses,
+  three need something this cannot produce: two trees, two named audiences, or a
+  side holding two forms and naming none — the last being a reading
+  `windowReadingsOf` does not make, because it splits a revision serving two
+  forms into one reading each. What is left is `nothing-measured`. **A silence
+  off this path is therefore a fact about a deployment's readers and never a
+  mistake in its asking**, which is the division the rung is for.
+- **What it left below the earlier side is on the pair.** `superseded` lists the
+  older revisions of that form, so a surface says *and one earlier revision* and
+  a caller wanting that older pair has two readings and one call. The widest
+  pair is deliberately not available: 3 against 9 is two changes added together
+  and labelled as one.
+- **A form with one revision is reported rather than dropped.** A page published
+  inside the window, a page nobody has changed since it began, and both sides of
+  a deployment that upgraded across 0284 all land in `unpaired`, with the one
+  reading carried.
+- **The pair spanning that upgrade is not produced, and that is the one place
+  this says no.** Rows that never carried the audience column are a form naming
+  none; rows that carry it are a form naming one. `crossesAudiences` allows the
+  comparison between them — unprovable rather than proven two populations — but
+  allowing it is not asserting it, and a rung that paired them would be a tenth
+  spelling of the pairing rule inside the module written to stop there being a
+  second. The caller that knows its own history makes it in one call, and
+  `ComparedAudiences` on the result says what it was read across.
+- **A reading handed in twice is dropped and counted**, first-wins as in
+  `treesIn`. Nought for anything the join produced; not nought for a caller that
+  concatenated two reads — and that caller is who the clause is for, because a
+  form whose latest revision arrived twice would otherwise pair that revision
+  with itself and publish *nothing changed* about a change that was made.
+- **It adds no figure of its own**, which is §51's rule kept: it decides which
+  pairs a window holds and hands each of them its two readings.
+
+**Nothing was added to a payload, a browser, a column, a migration, a store or
+the vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left and is filed:** the two **windows** the four library comparisons
+take are not assembled here, because a form with one revision cannot be put on a
+side — a page published inside the window belongs to the later one, a page
+nobody changed belongs to both, and guessing would publish a page nobody touched
+as a page gained (0295); and still that **nothing draws any of this**, which is
+`Loom portal`'s.
+
+### 58. The two libraries a window holds · `Loom signals` · **done, 27 October**
+
+The third step of the §51 rung and the gap §57 named the day it was built. §57
+reached five of the nine comparisons: each takes two `PageReading`s and a pair
+is one call away. **The four library comparisons take something else** — two
+whole libraries, every page as it stood against every page as it stands — and
+no arrangement of the pairs alone assembles them.
+
+It is one line away in appearance and not in fact:
+
+```ts
+libraryChangeOf(pairs.map(({ was }) => was), pairs.map(({ now }) => now))
+```
+
+That composes, it runs, and the result does not say what it left out. It drops
+every form in `unpaired`, which is exactly where **a page published inside the
+window** lands — and a page published inside the window is a page *gained*,
+which is the figure `libraryChangeOf` exists to report. So the assembled
+comparison reads `pagesGained: 0` on a deployment that published two pages this
+week, beside a `pages` count that looks right (0158).
+
+**And the counters cannot place those forms.** A form the window holds one
+revision of is a page published, a page withdrawn, or a page nobody touched, and
+no row tells them apart: a `StoredTally.updatedAt` is when the fold last wrote
+the row and not when the page went up, and a revision number is a count of
+revisions and not a date. The only party that knows is the deployment.
+
+`windowLibrariesOf(pairs, rows, placings)`
+([0319](../decisions/0319-the-two-libraries-a-window-holds-are-assembled-from-a-placing-the-deployment-hands-in.md)),
+with the three figures of the rung unchanged — it adds none of its own:
+
+- **A paired form is on both sides and is never asked about**, so there is
+  nothing of a caller's answer to ignore.
+- **An unpaired form is placed by `FormPlacings`**, a `placingFor(form)`
+  function — the shape `RevisionTrees` and `PartDeclarations` already use, held
+  rather than looked for, which is the line §7 draws and the shape §54 took for
+  the region floor. `placingsIn` builds one from a list, keyed by the published
+  form rule (0293), first-wins as `treesIn` is.
+- **Three placings, closed:** `published` is the later side only, `withdrawn`
+  the earlier side only, `unchanged` both sides at the one revision there is.
+  `FORM_PLACINGS` and `describeFormPlacing` are published with them.
+- **A form nobody could place is in `unplaced` and on neither side**, because
+  both guesses are assertions: the later side says a page nobody touched was
+  published, and both sides say a page published this week was always there.
+- **A form named twice across the two lists is dropped and counted**, the pair
+  winning. Carrying it would put two readings of one form on one side, which is
+  `ambiguous` to `pairedWindowOf` — the page out of every figure, and the
+  totals still looking right.
+- **Each side is a `LibraryWindow` and both carry the window's whole set of
+  door rows.** `pageViewsFor` picks each page's own row on the revision and form
+  its reading names, and the two sides name different revisions, so one array
+  answers both.
+
+After this **every one of the nine comparisons is one call off a window**:
+
+```ts
+const { pages } = windowReadingsOf(window, treesIn(trees), registry)
+const held = windowPairsOf(pages)
+const { was, now } = windowLibrariesOf(held, window.pageViews, placingsIn(history))
+
+const kinds = libraryChangeOf(was.readings, now.readings)
+const reach = libraryReachChangeOf(was, now)
+```
+
+**The sides are two generations of revisions and not two halves of a window.**
+An `unchanged` form carries one reading onto both sides, so its views are the
+window's views on both — the page contributed no movement because it was not
+changed, and `viewsWas`/`viewsNow` are the floors a reader checks two windows'
+comparability against rather than numbers to subtract.
+
+**One limit, stated and filed:** a page published *and* then revised inside one
+window has two revisions, so it is paired and lands on both sides rather than
+being counted as a page gained. `pagesGained` is a count of the forms whose
+**only** revision is new.
+
+**Nothing was added to a payload, a browser, a column, a migration, a store or
+the vocabulary of kinds.** `broadcast.ts` was not touched and is byte-identical.
+
+**What is left:** that **nothing draws any of this**, which is `Loom portal`'s.
+
+### 59. How often the deployment sweeps, said to the reader · `Loom signals` · **done, 28 October**
+
+The older half §56 could not close, and the one direction of overstatement the
+notice was built to make impossible.
+
+§52 published what a page collects, and one sentence of it was how long a
+delivery lives: *a delivery is kept until it is 60 minutes old, and the
+deployment's own sweep is what then counts it into totals and deletes it.* Every
+clause is true, and the whole of it reads as a promise the framework cannot
+keep. **`bufferMs` is the age at which a delivery becomes *ripe*, not the age at
+which anything deletes it** — nothing in `src/signals/` deletes one, because
+what calls `collectReaderSignals` is a cron, a deploy hook or an operator,
+outside the application. So a deployment can have a working endpoint, a notice
+naming an hour, and nothing sweeping, and the reader it collects about has no
+way of hearing *…or for ever, if nobody runs the sweep*.
+
+The ceiling rule lets this module overstate what is *collected*, deliberately
+(§52). An overstated **deletion** is the opposite: the claim a reader would most
+want to rely on, and the one this subsystem had the least standing to make.
+
+**Done**
+([0320](../decisions/0320-a-notice-publishes-when-a-delivery-goes-and-the-deployment-states-the-sweep-that-takes-it.md)),
+as `SweepNotice` on `CollectionNotice.sweep` in
+[`notice.ts`](../src/signals/notice.ts), read off the environment as
+`LOOM_SIGNAL_SWEEP_MS` in
+[`settings.ts`](../apps/loom/app/_lib/reader-signals/settings.ts).
+
+- **The deployment states the interval, because nobody else can** — the shape
+  `CollectionSchedule` already takes for the operator's half of the same fact
+  (0274). Read where the rest of this deployment's intake settings are read
+  (0317), with a state for a value that could not be used.
+- **The published figure is a ceiling on a delivery's life**: `goneWithinMs` is
+  the ripeness window plus one sweep, because a delivery is not counted until it
+  ripens and then not until the next run. Derived in one place so no surface can
+  print a ceiling that disagrees with the age beside it — **and it is the number
+  `CollectionSchedule.foldsWithinMs` wants**, so one stated interval gives a
+  reader's ceiling and an operator's stall threshold.
+- **Two states, not a nullable number.** The ceiling is unreachable where
+  nothing was stated, so *gone within 70 minutes* cannot be printed by a
+  deployment that promised nothing. The type rules it out rather than a
+  reviewer.
+- **Anything that is not a positive, finite interval is `unstated`.** A notice
+  may promise a reader less than the deployment knows and may never promise
+  more; the operator hears that a value was refused from
+  `describeSweepSchedule`, which is the split 0317 made for the window.
+- **`describeBuffer` takes the retention whole**, as a `Pick` of the notice
+  rather than a number, so **the age cannot be published without the sweep
+  beside it** — which is what any surface could do until today, and is the
+  sentence this unit exists to stop.
+- **The operator's half is on the status and in the sweep script.** It is the
+  one setting here whose whole effect is on somebody else's reading: nothing is
+  refused, nothing stops, and an operator who never set it has no other way to
+  learn their readers were promised nothing.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** a stated interval is a claim nothing here can
+check — a deployment that states ten minutes and sweeps weekly publishes a false
+ceiling. The material to catch it exists (§29 stamps the fold's own timestamp and
+judges a stall against a schedule), but checking it inside a notice would make
+the notice a reading, with a store and a clock behind it, which §52 refuses for a
+reason that still holds. And still that **nothing prints any notice to any
+reader**, which is two other lanes'.
+
+### 60. Whether the ceiling a reader is promised is one the deployment keeps · `Loom signals` · **done, 28 October**
+
+The limit §59 published and filed on the same night. A notice now ends on a
+ceiling — *a delivery is gone within 65 minutes of arriving* — and that ceiling
+is the ripeness window plus an interval **an operator typed about a cron outside
+this repository**. A deployment that states five minutes and sweeps weekly
+publishes the sentence to every reader of its privacy page, and nothing
+anywhere noticed.
+
+It is the one direction of overstatement this module exists to prevent. Its
+ceiling rule lets a notice say more is *collected* than is, deliberately,
+because that costs a reader nothing. An overstated **deletion** is the claim a
+reader would most want to rely on.
+
+**The evidence was free and already in the sweep's hands.** `scanFrom` walks the
+buffer from its oldest end, so the first batch a run reads is the oldest
+delivery there is, and `receivedAt` is the one timestamp the buffer vouches for.
+Its age at the instant of the run is a subtraction over something every run has
+looked at and none of them reported — and if it is past the ceiling, a delivery
+existed that readers were told was gone, for the whole of the gap, whatever the
+run then deletes.
+
+**Done**
+([0321](../decisions/0321-a-sweep-judges-the-published-retention-ceiling-against-the-oldest-delivery-it-found.md)),
+as `oldestMs` on `CollectionSummary` in [`collect.ts`](../src/signals/collect.ts)
+and `retentionPromiseOf` in [`retention.ts`](../src/signals/retention.ts).
+
+- **The run does the subtraction, not the caller**, because the caller's clock
+  is not the run's: a surface that aged the delivery against its own `now` would
+  publish a number nothing measured. Never absent — a summary exists only where
+  something was ripe, and the ripe prefix starts at the oldest end.
+- **It is handed the notice's own retention whole**, the same `Pick` the
+  reader's sentence is built from (0320), so the ceiling judged is the ceiling
+  published. A sweep deriving its own could clear a promise nobody made.
+- **Five states, three of which judge nothing and say which refusal they are.**
+  An unstated interval is `unpromised` and wins over a buffer months behind,
+  because there is no claim of the deployment's to measure. A run that never
+  reached the buffer is `unread`. A run that found nothing ripe is `unripe`, and
+  that one is a **proof** rather than a quiet answer: a scan from the oldest end
+  found every delivery younger than the ripeness window, and the ceiling is that
+  window plus a sweep.
+- **A delivery exactly on the ceiling keeps the promise.** The ceiling is where
+  a deployment sweeping on the interval it stated actually sits, so faulting at
+  the boundary would cry wolf on every healthy run. One millisecond past is
+  `broken`, with the gap on the state.
+- **The sweep prints the verdict per application and never exits on it.** The
+  remedy is to sweep more often or to state the interval actually swept on, both
+  an operator's, and a run that exited here would stop the sweep that is the
+  remedy. The script reads this deployment's settings whole now and builds the
+  notice from them, so the only ceiling in the file is the published one.
+- **`health.ts` is not where this went**, and the finding that asked for it
+  there was wrong in a way worth keeping: a fault there is per-revision and this
+  fact is per-deployment, so one false sentence on a privacy page would raise it
+  on every page and count the whole deployment's arrivals as readers whose
+  measurement is wrong. Nothing about the measurement is wrong. A fault there is
+  named by what it costs a reading (0271); this costs a reading nothing.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method, no new kind and **no new read** — the figure is a subtraction over a
+batch the scan already held.
+
+**What is left and is filed:** a deployment that states a generous interval
+publishes a true, weak ceiling and is never faulted for it, which is correct and
+means this proves only that the stated promise is kept rather than that it is
+tight; the verdict reaches an operator's log and no screen, so a deployment that
+does not read its cron output still learns nothing; and still that **nothing
+prints any notice to any reader**, which is two other lanes'.
+
+### 61. One context a deployment reads a window with · `Loom signals` · **done, 29 October**
+
+The shape this lane filed twice and said it would take on the third. §54 handed
+the region floor into a reading as an argument; §58 handed the form placings in
+the same way; §59 added the sweep interval. Each is per-deployment
+configuration, each is held rather than looked for, and **nothing reminds a
+caller to pass any of them.**
+
+One of the three fails unsafely. `regionFloorOf` is raise-only, so a reading
+called with no floor suppresses at the smallest bucket this runtime will ever
+name — a deployment that raised its floor to a hundred, read by a surface that
+forgot the argument, publishes buckets of twenty-five about real people. The
+omission is silent, and in a diff it is indistinguishable from a caller that
+meant the default.
+
+And the three steps of the §51 rung compose in one order that is not the obvious
+one: the libraries take the pairs `windowPairsOf` produced rather than the pairs
+alone, the door rows are the window's whole set on both sides, and the floor
+reaches the regions through the readings.
+
+**Done**
+([0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)),
+as `DeploymentReadingContext` and `windowAssemblyOf` in
+[`window.ts`](../src/signals/window.ts), with
+`deploymentReadingContextOf` in
+[`reading.ts`](../apps/loom/app/_lib/reader-signals/reading.ts).
+
+- **Four facts in one value** — the trees, the declarations, the region floor
+  and the placings — and **the floor is required.** That is the change rather
+  than the gathering: a caller with nothing of its own to say passes
+  `DEFAULT_REGION_FLOOR` and has said so.
+- **The floor is about the rows there are, not the switch as it stands.** A
+  notice is handed a floor only where a region is being read at all (0313); a
+  reading is of rows already collected, and a deployment that switched regions
+  off yesterday still holds last week's buckets.
+- **`windowAssemblyOf(window, context)` returns the readings, the pairs and the
+  two libraries**, composed in the order that does not drop a page published
+  inside the window. Each of the three steps stays published and separately
+  callable.
+- **Two of the three repeat counts are nought from here, by construction**, so
+  nothing the assembly hands on can put two readings of one form on one side of
+  a library — the repeat that takes a page out of every figure while the counts
+  above it look unchanged (0158). Both fields stay published, because they are
+  not nought for the callers they exist for.
+- **No figure is added and no single total of what was dropped is published.**
+  The three `duplicated` counts are rows, readings and forms, and `unjoined`,
+  `unpaired` and `unplaced` are three reasons a page is absent from three
+  different answers. A sum over them is a number in no unit.
+- **The app half reads the one field only this deployment can answer**, where
+  the rest of its intake settings are read (0317), as `deploymentNoticeOf`'s
+  sibling.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** `windowReadingsOf` keeps its optional options
+argument, so the floor hazard is still reachable a step below the assembly — the
+safe route is now the shortest one, which is the direction that holds rather
+than a guarantee; the collection schedule is a fourth per-deployment setting and
+is **not** in the context, because its other half is an instant and a context
+holding a clock reading would answer differently on two calls over one window;
+and still that **nothing draws any of this**, which is `Loom portal`'s.
+
+### 62. Which pages the readers of a place read · `Loom signals` · **done, 29 October**
+
+The region counter has been read in one direction since it existed. A row is a
+place, a page, a revision, an audience and a count of the page views that
+*began*, and both readings over it group by place and sum the pages away: §7
+answers *where were the readers of this page* and §40 and §54 answer it of a
+revision and of a window.
+
+**The other direction was never asked and needs nothing new to answer it.**
+*Germany is a third of your readers — what are they reading* is the question an
+operator asks second, it is the same rows grouped the other way, and it was
+unaskable. It is also the right counter to transpose: a region view is counted
+once, at the moment a page view began, and is never recounted, so a cell summed
+across revisions and across months does not drift the way a node's `views` does.
+
+**Done**
+([0323](../decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)),
+as `regionPagesOf` in [`region-pages.ts`](../src/signals/region-pages.ts).
+
+- **The floor applies to the cell, which is the whole of the design.** A country
+  with four hundred views is a readership; one view of the careers page inside
+  it is a person. A page is named in a place only where **its own count there**
+  clears the floor, and what did not is a total naming no page — so the numbers
+  still add to the views there were.
+- **A cell is a place and a page**, summing every revision and every form. Across
+  revisions because the question is about the page; across forms because
+  arrivals are people and a reader who arrived arrived once (0297), so a page
+  served in two forms is one page in one place and is named once.
+- **A place the map withheld has no breakdown at all**, because naming a page
+  inside an unnamed place would name the place. **The unplaced bucket is broken
+  down in full**, by the same argument that never withholds it: it names no
+  place, so there is nobody in it to re-identify.
+- **`unattributable` is a third standing and not an absence of readers.** No page
+  in the place above the floor is *this place's readers cannot be attributed to a
+  page*, never *nobody read anything* — the readership is in the map above it.
+  **It will be the commonest standing on a real deployment for some time**, and
+  that is the floor working rather than a fault.
+- **A share is of the whole bucket, withheld views included**, because dividing
+  by the named pages makes the shares sum to one and hides what is withheld.
+- **The map is held rather than restated**, so a breakdown's totals cannot
+  disagree with the map a screen already shows.
+- **The floor is required**, which is 0322 applied at birth rather than
+  retrofitted — and the reading needs no app-side plumbing, because the
+  deployment reading context already carries the one field only the deployment
+  can answer.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** the transpose is not a member of
+`windowAssemblyOf`, so nothing reminds a caller it exists — the required floor
+guards the hazard that matters and discoverability is the part that does not
+hold; and a per-form transpose is deliberately not built, because the value of
+this reading is in the summing and a form-level cell floors harder still.
+
+### 63. What a window could not answer · `Loom signals` · **done, 30 October**
+
+The vocabulary §17 settled has never been called. A hundred and fourteen names
+across twenty closed sets, each mapped to the condition it reports and the
+subject that condition is true of, with a relation that holds two reasons
+against each other and a dedup over them — and **the only file in the repository
+that imports either is their own test.**
+
+The reason is the shape of the call. `distinctSilences` takes the silences of
+**one card**, and the thing an operator holds is a window of forty pages with
+nine readings over each. Handed that list it answers *which distinct reasons are
+in it* and cannot answer *how much of this window is dark*, *which page*, or *is
+this one door row or forty*. A whole vocabulary that nothing can phrase a
+question against is this lane's definition of unfinished.
+
+**Done**
+([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)),
+as `silenceCensusOf` in
+[`silence-census.ts`](../src/signals/silence-census.ts).
+
+- **One entry per reading rather than one per silence**, with the meaning
+  nullable. That is the only difference from `distinctSilences`' argument and it
+  is the whole reason the second grouping has a denominator: a reading that
+  answered is still a reading of that page, and dropping the nulls before the
+  call makes *nine of this page's nine readings are silent* and *one of one* the
+  same row.
+- **A state is one condition about one subject**, which is `relateSilences`'
+  `one-state` written as a key. Two spellings of one state collapse and keep the
+  first reading's vocabulary; one condition about two subjects stays two, for
+  0240's reason. The key and the relation are **held together by a test**,
+  because calling the relation would turn a grouping into a scan per entry.
+- **What a reason cost is two numbers and they are not each other.** The
+  readings it took, and the pages it cost — each page once however many of its
+  readings report it, which is 0271's rule for a fault reapplied. One page with
+  nine such readings is nine and one; nine pages with one each is nine and nine,
+  and the remedies differ.
+- **The page is a form and not a tree** (0290, 0293), so two forms of one page
+  are two dark pages rather than one.
+- **A reading of no one page is counted apart.** A library census and a
+  deployment order are of something larger than a page and a reading's subject
+  is not its scope, so attributing their silences to a form would be a guess.
+- **No ranking, and the reason is in the record.** A third of the conditions are
+  not faults — `nothing-of-the-kind` means *you do not use that kind of part* —
+  and the two costs are in two units that disagree. Both figures are published
+  and a surface sorts by the one it means, which is the shape §60's finding
+  recommended for a verdict this lane could not take honestly.
+- **No total of pages across the states**, because one page is in as many states
+  as it has reasons. What is published partitions instead, and both identities
+  are tests rather than sentences.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** it is not a member of `windowAssemblyOf`, because
+the assembly produces readings and does not call the thirty-nine readings over
+them — so a caller maps its own readings' `silence` fields through the matching
+`meaningOf…Silence`, and nothing reminds it the census exists; and still that
+**nothing draws any of this**, which is `Loom portal`'s.
+
+### 64. Whether a kind of part is read, and not merely reached · `Loom signals` · **done, 30 October**
+
+Five readings stand on one list of page readings and answer five questions
+about one primitive type: the **places** it stands and how many were reached
+(0257), the share of the **readers** who met those places that read it (0256),
+the share of those that acted inside it (0265), and what a change did to two of
+them. **Every one of them is about reach.** A part counts as reached when half
+of it stood half a viewport up the screen, which is a fact about scrolling — and
+the question an author rewriting a band actually has is *did anybody have time
+to read it*, which a page's own reading has answered per part since 0230 and
+which was unaskable of a kind.
+
+**Done**
+([0325](../decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)),
+as `libraryPaceOf` in [`library-pace.ts`](../src/signals/library-pace.ts).
+
+- **A pooled ratio of two reader-millisecond sums**: the time on screen across
+  its places, over the time its words take the readers who met them. What comes
+  out is a mean of the per-placement paces weighted by the words each put in
+  front of readers, which is 0221's rule — a caption two readers hurried past is
+  a worse ratio and a smaller thing than a band four hundred of them did, and a
+  mean of ratios would let the caption drown the band.
+- **The straddle correction is in the readers and nowhere else.** A page view a
+  rollup counted twice carries one page view's seconds, so the numerator is
+  sound as it stands. It is read off **each page's own row**, which is why this
+  takes the rows where a page's reading takes a number.
+- **A page the door cannot scale is kept, where a share of readers refuses it.**
+  The deliberate divergence from 0256, and the reason is that the missing
+  correction only makes the readers more numerous, the pace lower and the
+  verdict `skimmed` — which is the claim 0230 built to be defensible. The row
+  says how many of its readers came from such a page and the reading names the
+  pages.
+- **The outermost placement of a kind on a page stands for the ones inside it**,
+  because a part is judged against its subtree's words. Without it a stack
+  inside a stack is counted twice, and the role row for parts that declare none
+  would count one page's words once per level of its tree.
+- **No pace over the whole library**, because two *different* kinds nest
+  wherever a band holds a paragraph.
+- **`KindPaceSilence` is the twenty-first vocabulary and brings no condition and
+  no subject**, which is evidence for 0240's claim rather than an omission.
+- **`atDoorScale` is published from `door.ts`**, where the per-placement half of
+  the scaling rule had been five hand-written copies across three modules. They
+  all call it now, bit-identically.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** it is not a member of `windowAssemblyOf` either,
+which is now the third reading in that state; and the role rows are thinner here
+than anywhere else, because with no role declared every part of a page is one
+kind and the `null` row is the page's own pace.
+
+### 65. Nothing arrived, or nothing was let in · `Loom signals` · **done, 31 October**
+
+Every reading in this subsystem is a reading of rows that arrived, and nothing
+had ever been written down about what that costs. A counter never written is
+indistinguishable from a counter written with a nought — so the commonest
+failure a new deployment has, **a snippet posting from an origin its project
+does not name**, makes forty-one readings and nine comparisons all say the same
+wrong thing: *nobody read this page.*
+
+The evidence that it is wrong has existed since
+[0311](../decisions/0311-a-refusal-whose-key-was-right-is-counted-against-its-project-and-one-without-one-is-not.md),
+whose own context names this exact question as the reason it was built — *is my
+page posting and being turned away, or not posting at all?* The door counts what
+it refused, per reason, with the newest one's origin beside it. **Nothing joined
+the two**, so no verdict, standing, fault or sentence anywhere in `src/signals/`
+could tell the two silences apart.
+
+**Done**
+([0326](../decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)),
+as `arrivalStandingOf` in [`arriving.ts`](../src/signals/arriving.ts).
+
+- **Five standings, two dimensions crossed and one refusal.** `silent` and
+  `collecting` where nothing was turned away; `turned-away` and `mixed` where
+  something was; `unasked` where nothing offered a count, which wins over all
+  four on 0240's rule that an absent store is not an empty map. `refused` is
+  `number | null` for the same reason.
+- **`turned-away` is the state it exists for**, and the one standing no amount
+  of age on a cumulative counter can weaken: whenever those refusals happened,
+  nothing has ever been collected, so there is no window in which the deployment
+  was working.
+- **It judges on what was collected, never on the arrivals.** A deployment whose
+  senders never mark an opening has counters and no door rows — `door-unscaled`
+  — and reads `arrivals: 0` while collection plainly works. Judged on arrivals it
+  would read `turned-away` and send an operator after a gate letting everything
+  through. Both figures are published; only one is the question.
+- **The reasons stay the deployment's**, through a type parameter. Nothing moves
+  out of the app's `refusals.ts`, no type crosses into `src/`, and
+  `describeArrivalStanding` prints the reason as the deployment spelled it.
+- **Not a collection fault.** All seven of those are about one revision of one
+  page because all seven come off that revision's rows; a refusal is about no
+  page at all, because the door turns a delivery away before anything reads
+  which tree it named.
+- **The instant is optional and no standing turns on age.** `newest.sinceMs` is
+  the one number that tells a live fault from a fixed one, and it is published
+  rather than judged (0274).
+- **A reason handed in twice is folded once**, with the rest counted in
+  `duplicated` (0158).
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method, no new kind, and `silences.ts` untouched.
+
+**What is left and is filed:** it is not a member of `windowAssemblyOf` and for
+a reason the three readings filed under that pattern do not share — an assembly
+is of a window's rows and a refusal is not in a window; and the screen that
+would draw it is already built and already reads one of its two inputs, which is
+`Loom portal`'s.
 
 ## Still not in scope
 

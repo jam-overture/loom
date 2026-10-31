@@ -119,8 +119,28 @@ export const TheVocabulary = () => {
             >
               {row.doesNotMean}
             </p>
-            <p className="text-ink-faint m-0 mt-2 font-mono text-xs">{row.carries}</p>
-            <pre className="text-ink-muted m-0 mt-2 overflow-x-auto font-mono text-xs leading-relaxed">
+            <ul className="m-0 mt-2 flex list-none flex-col gap-0.5 p-0">
+              {row.carries.map((field) => (
+                <li key={field.field} className="text-ink-faint m-0 text-xs" data-field={field.field}>
+                  <span className="font-mono">{field.field}</span> — {field.says}
+                </li>
+              ))}
+            </ul>
+            {/*
+             * Wrapped rather than scrolled, since 26 October.
+             *
+             * These signals grew: three of the five carry a `within` now, and
+             * an `activated` is about 200 characters. In a scroller the line
+             * ended mid-word at the panel's edge with nothing saying there was
+             * more — which is the 18 October finding against `loom.code`, met
+             * here in a docs component and made worse by the change above it.
+             * A reader comparing the row's field list to the signal under it
+             * has to be able to see the signal.
+             *
+             * `break-all` rather than wrapping on whitespace, because
+             * `JSON.stringify` without spaces has none to wrap on.
+             */}
+            <pre className="text-ink-muted m-0 mt-2 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap">
               {row.example}
             </pre>
           </li>
@@ -173,7 +193,9 @@ export const TheApprovedAddition = () => {
               </span>
               <span className="text-ink text-sm">{row.means}</span>
             </p>
-            <p className="text-ink-faint m-0 mt-1 font-mono text-xs">{row.carries}</p>
+            {row.carries === undefined ? null : (
+              <p className="text-ink-faint m-0 mt-1 font-mono text-xs">{row.carries}</p>
+            )}
             <p className="m-0 mt-1 text-xs">{row.doesNotMean}</p>
           </li>
         ))}

@@ -217,7 +217,7 @@ part you wrote.
 Now ask the same question twice, under two policies:
 
 ```ts
-import { describe } from "vitest"
+import { describe, expect, it } from "vitest"
 import { gatePolicySchema } from "@jam-overture/loom"
 
 describe("the price on a plan", () => {
@@ -282,6 +282,7 @@ offered without the thing that makes it safe to take. So the suite Loom runs
 against its own implementations is published for you to run against yours:
 
 ```ts
+import { memoryTreeStore } from "@jam-overture/loom/store"
 import { describeTreeStoreContract } from "@jam-overture/loom/testing/contracts"
 
 describeTreeStoreContract("memoryTreeStore", () => memoryTreeStore())

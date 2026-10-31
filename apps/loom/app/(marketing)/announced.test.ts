@@ -74,6 +74,7 @@ const PAGE_MODULES: Readonly<Record<string, () => Promise<PageModule>>> = {
   "/": () => import("./page"),
   "/how-it-works": () => import("./how-it-works/page"),
   "/what-you-run": () => import("./what-you-run/page"),
+  "/why-use-it": () => import("./why-use-it/page"),
 }
 
 const ORIGIN = siteOrigin()

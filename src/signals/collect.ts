@@ -173,6 +173,37 @@ export type CollectionSummary = {
    * failure mode here, so the number travels with the run that produced it.
    */
   readonly uncorrelated: number
+  /**
+   * Of the batches counted, how many were a repeat of one already folded in
+   * this window and were therefore folded once (`rollup.ts`).
+   *
+   * A subset of `counted` rather than a number beside it: every one of them was
+   * read from the buffer and is forgotten with the rest. Non-zero every run is
+   * a sender retrying deliveries it already made, which is worth finding — and
+   * the figure is in the run's outcome rather than in a stored row because a
+   * fold's own numbers are not durable, only the counters it produced are.
+   */
+  readonly redelivered: number
+  /**
+   * How old the oldest delivery the scan found was, in milliseconds, at the
+   * instant this run was taken.
+   *
+   * A fact about the buffer and about no reader, like every other figure here.
+   * It is free: a scan runs from the oldest end, so the first batch it read is
+   * the oldest one there is, and this is one subtraction over it.
+   *
+   * **The run does the subtraction rather than the caller**, because the
+   * caller's clock is not this run's: a surface that read the age against its
+   * own `now` would publish a number nothing had measured.
+   *
+   * Never absent and always at least the ripeness window: a summary exists only
+   * where something was ripe. What it is for is
+   * {@link retentionPromiseOf} — whether the ceiling the deployment publishes
+   * to its readers is one it keeps. A delivery whose stored instant cannot be
+   * read leaves this not a number, and that reading answers *nothing here can
+   * say* on it rather than *kept*.
+   */
+  readonly oldestMs: number
 }
 
 export type CollectionOutcome =
@@ -291,9 +322,10 @@ export const collectReaderSignals = async (
    * rows being summed.
    *
    * So the ripe batches are grouped by the audience they were filed under and
-   * each group is folded and applied on its own. `rollUp` stays audience-blind:
-   * it is handed one audience's batches and knows nothing about the dimension,
-   * which is what keeps the fold a pure function of a window.
+   * each group is folded on its own, then **all of them are written together**
+   * (0316). `rollUp` stays audience-blind: it is handed one audience's batches
+   * and knows nothing about the dimension, which is what keeps the fold a pure
+   * function of a window.
    *
    * The summary adds up across audiences, because it describes the run rather
    * than any one population.
@@ -310,27 +342,55 @@ export const collectReaderSignals = async (
     rollup: rollUp(batches, { ...(request.pairs ? { pairs: request.pairs } : {}) }),
   }))
 
+  /**
+   * The oldest delivery in the buffer, which is the first batch the scan read:
+   * it runs from the oldest end and the ripe prefix starts there.
+   *
+   * There is always one wherever a summary is built — `plan.before` is a
+   * position taken off the last ripe batch, so a plan carrying one has a first
+   * — and the unreachable branch is a parse of nothing rather than a nought on
+   * purpose. A nought would say *a delivery that arrived this instant*, which
+   * is the strongest answer the retention reading can give; a figure that is
+   * not a number makes it answer that nothing here can say.
+   */
+  const oldest = plan.ripe[0]?.receivedAt ?? ""
+
   const summary: CollectionSummary = {
     counted: plan.ripe.length,
+    oldestMs: Date.parse(now) - Date.parse(oldest),
     tallies: folded.reduce((total, { rollup }) => total + rollup.tallies.length, 0),
     funnels: folded.reduce((total, { rollup }) => total + rollup.funnels.length, 0),
     views: folded.reduce((total, { rollup }) => total + rollup.views, 0),
     uncorrelated: folded.reduce((total, { rollup }) => total + rollup.uncorrelated, 0),
+    redelivered: folded.reduce((total, { rollup }) => total + rollup.redelivered, 0),
   }
 
   /**
-   * Applied in sequence rather than together, because each call is atomic over
-   * its own audience's counters and the store's contract says nothing about two
-   * calls. A failure part-way through leaves the audiences already applied
-   * counted and the buffer un-forgotten, which is the outcome this function
-   * already has a name for: the window is re-read and re-folded next run, and
-   * the counters it already moved are the bounded over-count that comes with
-   * adding distinct view counts across windows (0147).
+   * **One write for the whole window, every audience in it** (0316).
+   *
+   * One call per audience is what this was, and it had a state between the
+   * calls that nothing could get out of: the audiences already applied were
+   * durable, the rest were not, and the buffer still held the window — because
+   * counting and forgetting are one operation, which is the invariant at the
+   * top of this file. So the next run folded the same batches again and **added
+   * the already-durable audiences a second time**, permanently (0158), on the
+   * five of nine counters that are occurrences rather than distinct counts.
+   * `unavailable` said *nothing became durable* while that was happening.
+   *
+   * It is one `applyWindow` now, so there is no state to get out of and the
+   * sentence on `unavailable` is true again. Nothing is reported about it
+   * because there is nothing left to report.
    */
-  for (const { audience, rollup } of folded) {
-    const applied = await store.apply(rollup, now, audience)
-    if (!applied.ok) return { outcome: "unavailable", error: applied.error }
-  }
+  const applied = await store.applyWindow(
+    folded.map(({ audience, rollup }) => ({
+      audience,
+      tallies: rollup.tallies,
+      funnels: rollup.funnels,
+      appearances: rollup.appearances,
+    })),
+    now
+  )
+  if (!applied.ok) return { outcome: "unavailable", error: applied.error }
 
   const forgotten = await journal.forget({ before: plan.before })
   if (!forgotten.ok) {
@@ -355,6 +415,14 @@ const batches = (count: number): string => `${count} ${count === 1 ? "batch" : "
 const uncorrelated = (summary: CollectionSummary): string =>
   summary.uncorrelated === 0 ? "" : `, ${summary.uncorrelated} with no view key`
 
+/**
+ * Said only when there were some, in the same clause-after-the-count shape
+ * `uncorrelated` uses, because a line that always carries a nought trains an
+ * operator to stop reading it.
+ */
+const redelivered = (summary: CollectionSummary): string =>
+  summary.redelivered === 0 ? "" : `, ${summary.redelivered} delivered again and folded once`
+
 /** One line for an operator, because an outcome nobody can read is one nobody acts on. */
 export const describeCollection = (outcome: CollectionOutcome): string => {
   switch (outcome.outcome) {
@@ -363,7 +431,9 @@ export const describeCollection = (outcome: CollectionOutcome): string => {
         outcome.summary.tallies === 1 ? "tally" : "tallies"
       } over ${outcome.summary.views} ${outcome.summary.views === 1 ? "view" : "views"}${uncorrelated(
         outcome.summary
-      )}, and forgot ${outcome.removed}${outcome.more ? " — more is waiting" : ""}`
+      )}${redelivered(outcome.summary)}, and forgot ${outcome.removed}${
+        outcome.more ? " — more is waiting" : ""
+      }`
     case "nothing-ripe":
       return `nothing old enough to count${
         outcome.waiting === 0 ? "" : `, ${batches(outcome.waiting)} waiting`

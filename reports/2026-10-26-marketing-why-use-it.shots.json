@@ -1,0 +1,63 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-26-marketing-why-use-it-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-26-marketing-why-use-it-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/why-use-it?theme=editorial",
+      "out": "2026-10-26-marketing-why-use-it-editorial",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/why-use-it?theme=bold",
+      "out": "2026-10-26-marketing-why-use-it-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    },
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-26-marketing-the-table",
+      "viewport": "wide",
+      "waitFor": "table",
+      "clip": "xpath=//table/ancestor::section[1]",
+      "measure": [
+        "table",
+        "table tbody tr",
+        "text=On your own",
+        "text=With Loom"
+      ]
+    },
+    {
+      "path": "/why-use-it",
+      "out": "2026-10-26-marketing-the-table-phone",
+      "viewport": "phone",
+      "waitFor": "table",
+      "clip": "xpath=//table/ancestor::section[1]",
+      "measure": ["table", "table tbody tr"]
+    },
+    {
+      "path": "/",
+      "out": "2026-10-26-marketing-the-bar",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "nav.loom-nav",
+      "measure": ["nav.loom-nav", "nav.loom-nav a"]
+    }
+  ]
+}

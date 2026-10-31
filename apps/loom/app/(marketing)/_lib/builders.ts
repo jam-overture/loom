@@ -3,7 +3,8 @@ import type { LoomTree } from "@jam-overture/loom"
 import { homePageTree } from "./pages/home"
 import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { whatYouRunPageTree } from "./pages/what-you-run"
-import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, type SiteRoute } from "./site"
+import { whyUseItPageTree } from "./pages/why-use-it"
+import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, WHY_USE_IT, type SiteRoute } from "./site"
 
 /**
  * Which builder makes which page, and nothing else.
@@ -32,6 +33,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [HOME.path, homePageTree],
   [HOW_IT_WORKS.path, howItWorksPageTree],
   [WHAT_YOU_RUN.path, whatYouRunPageTree],
+  [WHY_USE_IT.path, whyUseItPageTree],
 ])
 
 /** The page as it is written, before anything the visitor asked for. */

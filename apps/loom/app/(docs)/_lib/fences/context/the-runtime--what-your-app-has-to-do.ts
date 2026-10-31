@@ -9,8 +9,9 @@ import type { LoomDatabase } from "@jam-overture/loom/postgres"
  * chose. Every one of those is the story's, and a reader is meant to substitute
  * their own.
  *
- * What is not the story's is `commitIntent`, the write path and the seven ways a
- * write can end — and the page imports all of them itself.
+ * What is not the story's is `commitIntent`, the write path, the seven ways a
+ * write can end and the shape of an intent — and the page imports all of them
+ * itself.
  */
 
 /** The connection a deployment opened at startup. */
@@ -30,5 +31,3 @@ export declare const reviewer: { readonly id: string }
 
 /** The proposal a person was asked about. */
 export declare const proposalId: ProposalId
-
-export type { EditIntent } from "@jam-overture/loom"

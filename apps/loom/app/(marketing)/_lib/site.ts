@@ -62,13 +62,62 @@ export type SiteRoute = {
  * marked, and a visitor who cannot tell they are on the front door of a site
  * they are looking at is not a reader this site has.
  */
+/**
+ * **The title and the description lead with what you build, as of 25 October.**
+ *
+ * They are the first words a stranger meets, and for most strangers they are
+ * the *only* words: a search result, a card in a chat, a tab in a row of
+ * twenty. Until today both of them were the record — *every change your AI
+ * makes, written down* — which `docs/positioning.md` settled on 24 October is
+ * the thing under the hood rather than the pitch. A `<title>` is the opening,
+ * so it followed the headline rather than waiting for a second decision.
+ *
+ * Nothing about the record is retracted. It is still the thing Loom does that
+ * nothing else does, it is still on this page, and the description still says
+ * the rules decide. What changed is which half goes first.
+ *
+ * `share.ts` splits a title on ` — ` to keep the wordmark off the card, so the
+ * shape of this one matters as much as its words.
+ */
 export const HOME: SiteRoute = {
   path: "/",
   label: "Home",
-  title: "Loom — every change your AI makes, written down",
+  title: "Loom — pages that rearrange themselves around your readers",
   description:
-    "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules, and every change keeps a record of who asked, what moved, and how to put it back.",
+    "You build the components. Loom builds your page out of them, reports what readers do with it, and lets your AI model rearrange it to suit them. Nothing moves until your rules have allowed it.",
   inMenu: false,
+}
+
+/**
+ * The build case, and **the page that answers the maintainer's second half.**
+ *
+ * `docs/positioning.md` records his instruction of 24 October in two parts:
+ * *"The building part and why this build is better than traditional methods is
+ * preferred."* The front door leads with his chain, which is the building part.
+ * This is the other one.
+ *
+ * `inMenu: true` and second in the order, which are one judgement rather than
+ * two. The order below is *the order a stranger needs them in*, and a stranger
+ * who has just read the front door has one question before any mechanical one:
+ * why reach for this rather than write it. A reader who does not yet believe
+ * the thing is worth having has no use for how a change travels, which is the
+ * sentence that already put `/how-it-works` ahead of `/what-you-run`.
+ *
+ * The bar carries six items with it. `BAR_CEILING` is eight, which is the
+ * number the maintainer called too many on #166, so this spends one of the two
+ * that were left and says so.
+ *
+ * `share.ts` splits a title on ` — ` and drops the part that is exactly the
+ * wordmark, so *Loom* leads this title rather than sitting inside a clause of
+ * it: a name inside the clause prints twice on the card.
+ */
+export const WHY_USE_IT: SiteRoute = {
+  path: "/why-use-it",
+  label: "Why use it",
+  title: "Loom — why use it instead of building it yourself",
+  description:
+    "Making a page that rearranges itself around its readers takes several separate jobs. You could write every one of them yourself. This is what each one takes, and which of them come with Loom.",
+  inMenu: true,
 }
 
 export const HOW_IT_WORKS: SiteRoute = {
@@ -145,9 +194,11 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
- * built: **what this is, then how it works, then what you would be running.**
- * A reader who does not yet believe the thing is worth having has no use for
- * the news that it installs as a package.
+ * built: **what this is, then why you would want it, then how it works, then
+ * what you would be running.** A reader who does not yet believe the thing is
+ * worth having has no use for the news that it installs as a package, and the
+ * second page is there because believing it is worth having is a step of its
+ * own (`WHY_USE_IT` above says why it is that one and not a later one).
  *
  * The footer renders this list in order, and the front door is first in it
  * although the bar leaves it out, because the footer's map is a map of the site
@@ -166,7 +217,7 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * > that are both gone is not history worth keeping in the file the next run
  * > reads to find out what this site has. They are in `git log`.
  */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN]
+export const SITE_ROUTES: readonly SiteRoute[] = [HOME, WHY_USE_IT, HOW_IT_WORKS, WHAT_YOU_RUN]
 
 /**
  * The paths of {@link SITE_ROUTES}, sorted — **what a sweep's coverage is held

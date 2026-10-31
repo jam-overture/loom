@@ -1,0 +1,36 @@
+import { PagesInThisSection } from "@/app/(docs)/_components/section-landing"
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { DOCS_LANDING_SLUG } from "@/app/(docs)/_lib/nav"
+
+export const metadata = pageMetadata("the-runtime", DOCS_LANDING_SLUG)
+
+# The runtime
+
+Somebody has asked your page for a change. This section is everything that
+happens between the asking and the page looking different.
+
+These pages assume you have read
+[Building with Loom](/docs/building-with-loom), or at least that you know what a
+primitive and a registry are. Each one takes a step of that sequence and answers
+the same three questions about it: what the runtime does, what it hands to your
+own code, and what a person sees when it goes wrong.
+
+## The pages in this section
+
+[Proposing a change](/docs/the-runtime/proposing-a-change) and
+[What the Gate decides](/docs/the-runtime/what-the-gate-decides) are the two to
+read first, because everything else here happens either side of them. The rest
+are each about one thing the sequence touches, and they can be read when you
+need them.
+
+<PagesInThisSection section="the-runtime" />
+
+## It assumes you want to run this for real
+
+The rest of the site can leave out the database, the model and the waiting; this
+section cannot. A page here will tell you which table gets created, how long a
+call is given before the runtime stops waiting, and which of three people has to
+fix something that went wrong.
+
+Where a page needs something from an earlier one, it links back to it rather than
+explaining it again.

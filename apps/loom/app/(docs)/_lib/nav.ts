@@ -163,6 +163,12 @@ const architectureSection: DocsSection = {
   source: "written",
   pages: [
     {
+      slug: DOCS_LANDING_SLUG,
+      title: "Architecture",
+      summary:
+        "Why Loom is shaped the way it is, and where the reasoning and the rulings behind it are kept.",
+    },
+    {
       slug: "how-it-fits-together",
       title: "How it fits together",
       summary:
@@ -189,6 +195,12 @@ const orderedSections: readonly DocsSection[] = [
     title: "Getting started",
     source: "written",
     pages: [
+      {
+        slug: DOCS_LANDING_SLUG,
+        title: "Getting started",
+        summary:
+          "The path from an empty directory to a page somebody can ask for a change, and what you need before you start.",
+      },
       {
         slug: "introduction",
         title: "Introduction",
@@ -236,6 +248,12 @@ const orderedSections: readonly DocsSection[] = [
     title: "Building with Loom",
     source: "written",
     pages: [
+      {
+        slug: DOCS_LANDING_SLUG,
+        title: "Building with Loom",
+        summary:
+          "The parts you write yourself: your own primitives, how they hold each other, where their content comes from, and which of them AI may change.",
+      },
       {
         slug: "primitives",
         title: "Primitives and the registry",
@@ -291,6 +309,12 @@ const orderedSections: readonly DocsSection[] = [
     title: "The runtime",
     source: "written",
     pages: [
+      {
+        slug: DOCS_LANDING_SLUG,
+        title: "The runtime",
+        summary:
+          "What happens after somebody asks for a change: who decides, what is written down, and what your own code is asked to do.",
+      },
       {
         slug: "proposing-a-change",
         title: "Proposing a change",
@@ -378,6 +402,17 @@ const orderedSections: readonly DocsSection[] = [
 export const docsSections: readonly DocsSection[] = orderedSections
 
 /**
+ * The section a slug names, where the documentation has one.
+ *
+ * `undefined` rather than a throw, because the two callers want different
+ * things from a slug nothing matches: a landing page naming a section that does
+ * not exist should fail the build while somebody is looking at the file, and a
+ * test asking which section a page is in wants to say so itself.
+ */
+export const docsSectionAt = (slug: string): DocsSection | undefined =>
+  docsSections.find((section) => section.slug === slug)
+
+/**
  * The written sections, for the checks that are about files on disk.
  *
  * Derived rather than listed, because a section that appeared in one list and
@@ -440,9 +475,21 @@ export const docsNeighbours = (href: string): DocsNeighbours => {
   return { ...(previous ? { previous } : {}), ...(next ? { next } : {}) }
 }
 
-/** Where `/` sends a reader: the first page of the first section. */
+/**
+ * Where `/docs` sends a reader: the first page **inside** the first section.
+ *
+ * Not `docsOrder[0]`, which it was until every written section got a page of
+ * its own. A section's own page says what the section is for and lists what is
+ * in it, which is the right screen for somebody who shortened an address or
+ * pressed the section's name in the rail — and the wrong one for a stranger
+ * arriving at the documentation for the first time. They are owed the page that
+ * says what Loom is, with a tree on it they can ask for a change.
+ *
+ * So the redirect skips a landing page rather than stopping at it, and the
+ * address it has pointed at all along is the address it still points at.
+ */
 export const docsEntryPoint = (): string => {
-  const first = docsOrder[0]
+  const first = docsOrder.find((entry) => entry.page.slug !== DOCS_LANDING_SLUG)
 
   if (first === undefined) throw new Error("loom: the documentation has no pages")
 

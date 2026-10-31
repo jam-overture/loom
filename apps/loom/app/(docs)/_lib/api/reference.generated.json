@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 65,
+      "files": 72,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9004,6 +9004,55 @@
               "kind": "function",
               "signature": "const actionChangeOf: (was: PageReading, now: PageReading) => ActionChange",
               "summary": "What a change did to what readers do on a page, off two `PageReading`s and nothing else."
+            }
+          ]
+        },
+        {
+          "module": "signals/arriving",
+          "title": "Arriving",
+          "summary": "Whether nothing is arriving because nothing is posting, or because this deployment's door is turning it away.",
+          "symbols": [
+            {
+              "name": "TurnedAwayTally",
+              "kind": "type",
+              "signature": "type TurnedAwayTally<TReason extends string = string> = {\n    readonly reason: TReason;\n    /** Deliveries turned away for this reason, cumulative since the counter existed. */\n    readonly refused: number;\n    /** When the newest of them was turned away, in epoch milliseconds. */\n    readonly lastAt: number;\n    /**\n     * The site the newest of them came from, as an origin, or `null` where it\n     * named none.\n     *\n     * Carried because for the commonest reason it is the whole remedy: *from\n     * `https://loomjs.org`* beside a project that names `www.loomjs.org` needs no\n     * other explanation.\n     */\n    readonly lastOrigin: string | null;\n};",
+              "summary": "One reason a door turned deliveries away, as a deployment's own counter holds it."
+            },
+            {
+              "name": "NewestTurnedAway",
+              "kind": "type",
+              "signature": "type NewestTurnedAway<TReason extends string = string> = {\n    readonly reason: TReason;\n    readonly origin: string | null;\n    /** When it was turned away, in epoch milliseconds, as the counter holds it. */\n    readonly atMs: number;\n    /**\n     * How long before the instant handed in it was turned away, or `null` where\n     * no instant was.\n     *\n     * The one number that tells a live fault from a fixed one: a cumulative\n     * counter cannot say whether its own figure is current, and a deployment that\n     * was misconfigured a month ago and fixed it still holds every refusal it\n     * ever counted. Negative where the counter is ahead of the instant, by the\n     * same subtraction rather than by a special case.\n     */\n    readonly sinceMs: number | null;\n};",
+              "summary": "The newest delivery this door turned away, which is the one an operator acts on."
+            },
+            {
+              "name": "ArrivalStandingName",
+              "kind": "type",
+              "signature": "type ArrivalStandingName =\n/**\n * Nothing offered a count of what the door turned away, so the question\n * cannot be answered either way.\n *\n * The refusal rather than the gap, and it wins over every other state for the\n * reason an absent region store is not an empty map: a window with\n * nothing in it and no refusal counter beside it is *two* states, and calling\n * it `silent` would publish the more comforting one. A deployment that keeps\n * no such counter — or whose store was not reachable on this read — gets the\n * figures it does have and no verdict.\n */\n\"unasked\"\n/**\n * Nothing has been collected and nothing has been turned away.\n *\n * No page is posting to this deployment at all: the snippet is absent, or the\n * broadcaster was never called, or the signals never left the browser. The\n * strongest of the quiet answers, because the door is the one place a\n * delivery cannot arrive without being seen, and it saw none.\n */\n | \"silent\"\n/**\n * Nothing has been collected and deliveries have been turned away.\n *\n * **The state this reading exists for.** A page is posting and this door is\n * refusing it, and every other reading in the subsystem is reporting that\n * nobody read anything. It is the one standing here that no amount of age on\n * the counter can weaken: whenever those refusals happened, nothing has ever\n * been collected, so there is no window in which this deployment was working.\n */\n | \"turned-away\"\n/** Something has been collected and nothing has been turned away. */\n | \"collecting\"\n/**\n * Something has been collected and deliveries have been turned away.\n *\n * Both are true and neither is the whole picture: a second sender with a\n * stale key, one page of several carrying the wrong snippet, or a\n * misconfiguration since fixed. `newest.sinceMs` is what tells those apart\n * and this standing deliberately does not try to.\n */\n | \"mixed\";",
+              "summary": "Whether anything is arriving at this deployment, and why not."
+            },
+            {
+              "name": "ARRIVAL_STANDINGS",
+              "kind": "value",
+              "signature": "const ARRIVAL_STANDINGS: readonly ArrivalStandingName[]",
+              "summary": "The closed set, in the order a surface reads them: the refusal, then the two quiet states, then the two live ones."
+            },
+            {
+              "name": "ArrivalStanding",
+              "kind": "type",
+              "signature": "type ArrivalStanding<TReason extends string = string> = {\n    readonly standing: ArrivalStandingName;\n    /**\n     * Revisions anything at all was collected about, which is **not** a count of\n     * readers.\n     *\n     * A revision stands here if the window held one counter, one funnel answer,\n     * one door row or one region bucket for it, so a deployment whose senders\n     * never mark an opening still reads as collecting — which it is. Reading this\n     * off `arrivals` instead would call that deployment `turned-away` and send an\n     * operator after a gate that is letting everything through.\n     */\n    readonly collected: number;\n    /**\n     * Page views counted at the door across every revision read, added.\n     *\n     * The headcount behind `collected`, carried through unchanged. Nought with a\n     * positive `collected` is an ordinary state and its own fault already\n     * (`door-unscaled`), not a sign that nothing arrived.\n     */\n    readonly arrivals: number;\n    /**\n     * Deliveries turned away, added across the reasons, or `null` where nothing\n     * offered a count.\n     *\n     * The two kinds of nothing kept apart: `null` is *nobody counted*, and\n     * `0` is *the counter was read and holds none*.\n     */\n    readonly refused: number | null;\n    /** The newest delivery turned away, or `null` where none was. */\n    readonly newest: NewestTurnedAway<TReason> | null;\n    /**\n     * Tallies beyond the first for one reason, dropped.\n     *\n     * A store keys its rows by the reason, so this is nought from every store in\n     * this repository. It is counted because the one lie a sum can be told is a\n     * row handed in twice, and a count that has been added cannot be unadded\n     * — a caller that concatenated two reads would otherwise publish twice\n     * the refusals with nothing saying so.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "What is arriving at a deployment, what is being turned away, and what that means together."
+            },
+            {
+              "name": "arrivalStandingOf",
+              "kind": "function",
+              "signature": "const arrivalStandingOf: <TReason extends string>(health: Pick<CollectionHealth, \"pages\" | \"arrivals\">, turnedAway: readonly TurnedAwayTally<TReason>[] | undefined, at?: number) => ArrivalStanding<TReason>",
+              "summary": "Read a window's health and a door's refusals together, into the one question neither can answer alone."
+            },
+            {
+              "name": "describeArrivalStanding",
+              "kind": "function",
+              "signature": "const describeArrivalStanding: (standing: ArrivalStanding) => string",
+              "summary": "One line for the operator setting a deployment up, because they are the only person who can close the gap."
             }
           ]
         },
@@ -9396,7 +9445,7 @@
             {
               "name": "CollectionSummary",
               "kind": "type",
-              "signature": "type CollectionSummary = {\n    readonly counted: number;\n    readonly tallies: number;\n    readonly funnels: number;\n    /** Distinct page views the window held. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key, whose occurrences counted and whose views\n     * did not. A rate shown without saying which denominator it used is the\n     * failure mode here, so the number travels with the run that produced it.\n     */\n    readonly uncorrelated: number;\n};",
+              "signature": "type CollectionSummary = {\n    readonly counted: number;\n    readonly tallies: number;\n    readonly funnels: number;\n    /** Distinct page views the window held. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key, whose occurrences counted and whose views\n     * did not. A rate shown without saying which denominator it used is the\n     * failure mode here, so the number travels with the run that produced it.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Of the batches counted, how many were a repeat of one already folded in\n     * this window and were therefore folded once (`rollup.ts`).\n     *\n     * A subset of `counted` rather than a number beside it: every one of them was\n     * read from the buffer and is forgotten with the rest. Non-zero every run is\n     * a sender retrying deliveries it already made, which is worth finding — and\n     * the figure is in the run's outcome rather than in a stored row because a\n     * fold's own numbers are not durable, only the counters it produced are.\n     */\n    readonly redelivered: number;\n    /**\n     * How old the oldest delivery the scan found was, in milliseconds, at the\n     * instant this run was taken.\n     *\n     * A fact about the buffer and about no reader, like every other figure here.\n     * It is free: a scan runs from the oldest end, so the first batch it read is\n     * the oldest one there is, and this is one subtraction over it.\n     *\n     * **The run does the subtraction rather than the caller**, because the\n     * caller's clock is not this run's: a surface that read the age against its\n     * own `now` would publish a number nothing had measured.\n     *\n     * Never absent and always at least the ripeness window: a summary exists only\n     * where something was ripe. What it is for is\n     * {@link retentionPromiseOf} — whether the ceiling the deployment publishes\n     * to its readers is one it keeps. A delivery whose stored instant cannot be\n     * read leaves this not a number, and that reading answers *nothing here can\n     * say* on it rather than *kept*.\n     */\n    readonly oldestMs: number;\n};",
               "summary": "The half of the outcome a caller shows or logs, with nothing in it about a reader."
             },
             {
@@ -9683,7 +9732,7 @@
             {
               "name": "DeploymentChangeSilence",
               "kind": "type",
-              "signature": "type DeploymentChangeSilence =\n/**\n * One of the two windows reported no view of its revision, so there was\n * nothing to compare.\n *\n * The comparison's own reason, carried through on the row rather than\n * restated: a surface that wants to say which window was quiet reads the\n * floors beside it.\n */\n\"unread\"\n/**\n * The two readings are of two different pages, so the comparison is not a\n * movement of anything.\n *\n * A caller's pairing fault and never a state of a deployment's readers. It is\n * in the standings rather than dropped, because an order that silently shed a\n * mispaired comparison would answer *your deployment has thirty-nine pages*.\n */\n | \"mispaired\"\n/**\n * There is no page-view row at the door for the later revision, so this\n * page's movement cannot be put on the same scale as another's.\n *\n * Not a page that was not measured. Its comparison is as good as any other's\n * and every share in it stands; what is missing is the one number that makes\n * two pages' movements the same kind of figure.\n */\n | \"unscaled\"\n/**\n * The later window's door row is there and nothing in it says a page view\n * ever began.\n *\n * Either nobody read the new revision, or the senders are not marking their\n * openings — and the page-view reading publishes both numbers, so the\n * diagnosis is a subtraction a surface can make.\n */\n | \"unopened\"\n/**\n * A stop reports more readers in the later window than the door has ever seen\n * appear, which no rollup produces.\n *\n * A reading assembled by hand or by a sender that is not one. The share\n * movements are published and the scaled figures are withheld, because they\n * are the ones the disagreement makes absurd.\n */\n | \"inconsistent\"\n/**\n * One of the two windows holds two forms of the page and named neither, so\n * that side was read as neither population.\n *\n * The comparison's own `audiences-mixed`, named here rather than\n * folded into `unread` for the reason that record exists: a refused reading\n * publishes a view floor of nought, so *one of the two windows reported no\n * view of its revision* was printed about a window holding every reader of\n * both forms. A caller reads the cause off {@link MovedPage.silence} either\n * way; the standing is what a screen groups by, and grouping a fault in the\n * asking under a fact about readers is what sends a deployment to look for a\n * broken sender.\n *\n * It is the one standing here a caller fixes by asking again:\n * split both windows by audience (`byAudience`) and compare each form.\n */\n | \"unsplit\";",
+              "signature": "type DeploymentChangeSilence =\n/**\n * One of the two windows reported no view of its revision, so there was\n * nothing to compare.\n *\n * The comparison's own reason, carried through on the row rather than\n * restated: a surface that wants to say which window was quiet reads the\n * floors beside it.\n *\n * **It covers two comparison silences and the sentence above is true of only\n * one of them.** `nothing-measured` is this; `different-audiences` is a pair\n * of windows that both reported plenty and are of two populations,\n * and it arrives here with a door row and two view floors that all\n * contradict the sentence. The cause is on {@link MovedPage.silence} and a\n * surface printing one sentence should print that one. Giving the second a\n * standing of its own is proposed, in a record of its own that is awaiting\n * review, and is deliberately not taken here.\n */\n\"unread\"\n/**\n * The two readings are of two different pages, so the comparison is not a\n * movement of anything.\n *\n * A caller's pairing fault and never a state of a deployment's readers. It is\n * in the standings rather than dropped, because an order that silently shed a\n * mispaired comparison would answer *your deployment has thirty-nine pages*.\n */\n | \"mispaired\"\n/**\n * There is no page-view row at the door for the later revision, so this\n * page's movement cannot be put on the same scale as another's.\n *\n * Not a page that was not measured. Its comparison is as good as any other's\n * and every share in it stands; what is missing is the one number that makes\n * two pages' movements the same kind of figure.\n */\n | \"unscaled\"\n/**\n * The later window's door row is there and nothing in it says a page view\n * ever began.\n *\n * Either nobody read the new revision, or the senders are not marking their\n * openings — and the page-view reading publishes both numbers, so the\n * diagnosis is a subtraction a surface can make.\n */\n | \"unopened\"\n/**\n * A stop reports more readers in the later window than the door has ever seen\n * appear, which no rollup produces.\n *\n * A reading assembled by hand or by a sender that is not one. The share\n * movements are published and the scaled figures are withheld, because they\n * are the ones the disagreement makes absurd.\n */\n | \"inconsistent\"\n/**\n * One of the two windows holds two forms of the page and named neither, so\n * that side was read as neither population.\n *\n * The comparison's own `audiences-mixed`, named here rather than\n * folded into `unread` for the reason that record exists: a refused reading\n * publishes a view floor of nought, so *one of the two windows reported no\n * view of its revision* was printed about a window holding every reader of\n * both forms. A caller reads the cause off {@link MovedPage.silence} either\n * way; the standing is what a screen groups by, and grouping a fault in the\n * asking under a fact about readers is what sends a deployment to look for a\n * broken sender.\n *\n * It is the one standing here a caller fixes by asking again:\n * split both windows by audience (`byAudience`) and compare each form.\n */\n | \"unsplit\";",
               "summary": "A reason a page is in neither order."
             },
             {
@@ -9752,6 +9801,12 @@
               "kind": "function",
               "signature": "const doorOf: (row: RevisionPageViews | null) => PageDoor",
               "summary": "The page's door, with the three reasons tried in the order a page's own reading tries them in."
+            },
+            {
+              "name": "atDoorScale",
+              "kind": "function",
+              "signature": "const atDoorScale: (count: number, of: PageDoor, scaledBy?: PageDoor) => number",
+              "summary": "A count taken against one page, put on the scale its door counts in."
             }
           ]
         },
@@ -10743,6 +10798,55 @@
           ]
         },
         {
+          "module": "signals/library-pace",
+          "title": "Library pace",
+          "summary": "Whether the readers who meet a kind of part have time for what it says.",
+          "symbols": [
+            {
+              "name": "KindPaceSilence",
+              "kind": "type",
+              "signature": "type KindPaceSilence =\n/**\n * The census's own two reasons, which were already a kind's and are reused as\n * values rather than said again.\n *\n * `unread` here is *no place this kind stands reported a view*, which is what\n * a page's own reading calls `unreached` at a part.\n */\nKindSilence\n/**\n * Nothing countable is said anywhere it stands that readers reached, and\n * something in it declares no `copy`.\n *\n * The same state as a part's `unreadable`, at a kind — and **also** the state\n * of a kind whose pace was computed and is not low enough to be safe: words\n * nobody counted can only make a part more skimmed, so `skimmed` stands and\n * anything above it is a claim resting on a floor. That is `paceStandingOf`'s\n * asymmetry, unchanged, and {@link KindPace.floored} says how many placements\n * caused it.\n */\n | \"unreadable\"\n/**\n * It says nothing that takes time to read, anywhere it stands, and nothing\n * went uncounted either.\n *\n * A spacer, a rule, a stack that only holds other parts. Kept apart from\n * `unreadable` because *there are none* and *nobody said* are different\n * answers.\n */\n | \"wordless\";",
+              "summary": "Why a kind of part has no pace."
+            },
+            {
+              "name": "KIND_PACE_SILENCES",
+              "kind": "value",
+              "signature": "const KIND_PACE_SILENCES: readonly KindPaceSilence[]",
+              "summary": ""
+            },
+            {
+              "name": "describeKindPaceSilence",
+              "kind": "function",
+              "signature": "const describeKindPaceSilence: (silence: KindPaceSilence) => string",
+              "summary": "One line per silence, for a surface saying why a kind has no pace."
+            },
+            {
+              "name": "KindPace",
+              "kind": "type",
+              "signature": "type KindPace = {\n    readonly kind: KindKey;\n    /** What part a type plays, or `null`. Always `null` on a role row, which carries it as its key. */\n    readonly role: PrimitiveRole | null;\n    /** Element nodes of this kind across the readings, as the census counts them. */\n    readonly placements: number;\n    /**\n     * Placements standing inside another placement of the same kind, which are in\n     * no term here.\n     *\n     * The outer one's words and seconds already include theirs. Nought on most\n     * type rows and the ordinary state of a role row, because a page's parts\n     * nearly all declare no role and so are all one kind.\n     */\n    readonly nested: number;\n    /** Placements in the figures: not nested, reached, and saying something counted. */\n    readonly counted: number;\n    /** Why the rest have no pace of their own. The counts add to `placements − nested − counted`. */\n    readonly silences: Readonly<Record<PaceSilence, number>>;\n    /**\n     * Every placement a page could be read for, by its own verdict.\n     *\n     * The census view of the same set the two figures above partition: the counts\n     * add to `placements − nested`, and `unknown` is a placement with no pace of\n     * its own *or* one whose words are a floor.\n     */\n    readonly standings: Readonly<Record<PaceStanding, number>>;\n    /** Revisions bearing a counted placement. */\n    readonly pages: number;\n    /** Counted placements whose words are a floor, because a type in them declares no `copy`. */\n    readonly floored: number;\n    /**\n     * Counted placements that are a page's root, which is why a kind holding the\n     * whole page is out of {@link LibraryPace.mostSkimmed}.\n     *\n     * By words it would win every ranking it was entered in, for the reason a\n     * page's own reading keeps its root out of `mostSkimmed`: the page contains\n     * every part.\n     */\n    readonly whole: number;\n    /**\n     * Page views that reached a counted placement, at the door's scale, counted\n     * once per place it stands.\n     *\n     * **Not a count of people and deliberately not rounded into one**: it\n     * is a weight, and a reader who met three placements of one kind is three of\n     * them. `null` under a silence.\n     */\n    readonly readers: number | null;\n    /**\n     * Time on screen across the counted placements, added, exactly as the rows\n     * hold it.\n     *\n     * Sound without a correction: a page view a rollup counted twice carries one\n     * page view's dwell. **Nests across kinds** — a band's seconds are its\n     * paragraph's too — so it is never added across rows.\n     */\n    readonly dwellMs: number;\n    /**\n     * The time its words take the readers who met it: `readers × wordsWithin ×\n     * msPerWord`, added over the counted placements.\n     *\n     * The denominator, in the same reader-milliseconds {@link dwellMs} is in.\n     * `null` under a silence.\n     */\n    readonly needMs: number | null;\n    /** `dwellMs ÷ readers`: the time the typical reader who met a place of it had there. `null` under a silence. */\n    readonly spentMs: number | null;\n    /**\n     * `needMs − dwellMs` where positive: the reading time its readers did not\n     * have, and the key the rows are ordered by.\n     *\n     * By the **amount** and not by the ratio, for the reason a deployment's falls\n     * are ordered by the readers they lose. Nought where readers had time\n     * enough, and `null` under a silence.\n     */\n    readonly shortMs: number | null;\n    /** `dwellMs ÷ needMs`. `1` is exactly time enough. `null` under a silence. */\n    readonly pace: number | null;\n    /** The verdict, by `paceStandingOf` — so a floor can hold up anything but `skimmed`. */\n    readonly standing: PaceStanding;\n    /**\n     * Of {@link readers}, those on a page the door could not scale, so no\n     * straddle correction was applied to them.\n     *\n     * It biases the pace **down**, towards `skimmed`, which is why the row is\n     * published rather than withheld. `LibraryPace.unscaled` names the pages.\n     */\n    readonly unscaled: number;\n    readonly silence: KindPaceSilence | null;\n};",
+              "summary": "One kind of part, against the time its readers had for what it says."
+            },
+            {
+              "name": "LibraryPace",
+              "kind": "type",
+              "signature": "type LibraryPace = {\n    /**\n     * Every type that stands anywhere, most reading time missing first.\n     *\n     * Then the lower pace, then by type, so two kinds that ask the same do not\n     * reorder on a refresh. A kind with no pace sorts after one whose pace is\n     * nought, because `null` is *nothing can be said* and not *nobody had any\n     * time for it*.\n     */\n    readonly byType: readonly KindPace[];\n    /** Every role in the vocabulary, then the row for parts whose type declared none, in the same order. */\n    readonly byRole: readonly KindPace[];\n    /** Readings counted, which is revisions of pages and not trees. */\n    readonly pages: number;\n    /** Distinct trees across them. */\n    readonly trees: number;\n    /** Element nodes across them, which is the sum of every type row's placements. */\n    readonly placements: number;\n    /** Placements standing inside another of their own type, across the type rows. */\n    readonly nested: number;\n    /** Pages whose door could scale them, which is where the correction comes from. */\n    readonly scaled: number;\n    /**\n     * The pages bearing a counted placement that the door could not scale, by\n     * tree and newest revision first.\n     *\n     * The actionable half of every {@link KindPace.unscaled} above: one of these\n     * pages is why. Empty is the healthy state, and a page here still has every\n     * figure it contributed to — see the module documentation on why this reading\n     * keeps it where a share of readers refuses it.\n     */\n    readonly unscaled: readonly UnscaledPage[];\n    /**\n     * The type whose readers are shortest of the time its words take, which is\n     * the kind to rewrite first.\n     *\n     * By {@link KindPace.shortMs} and never by the ratio, and **never a kind that\n     * holds a page's root**, for the reason a page's own reading keeps its root\n     * out of the same ranking. A type and never a role, because a type is the\n     * thing an author can replace.\n     */\n    readonly mostSkimmed: KindPace | null;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page twice, and a page twice\n     * doubles both terms of every ratio here while looking like twice the\n     * evidence.\n     */\n    readonly duplicated: number;\n    /** Door rows for one revision beyond the first, which were ignored. */\n    readonly duplicatedRows: number;\n    /**\n     * Types whose readings disagreed about the role they play, where the first\n     * reading's answer stands.\n     *\n     * Raised here rather than fetched from the census, because every role row\n     * below is about neither library when it is set. Detected off the same\n     * readings by the same rule as the other library readings, so they cannot\n     * disagree about it.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n    /** The costing rate that was applied, which is the default unless one was given. */\n    readonly wordsPerMinute: number;\n};",
+              "summary": "What a deployment's library asks of its readers' time, by kind of part."
+            },
+            {
+              "name": "LibraryPaceOptions",
+              "kind": "type",
+              "signature": "type LibraryPaceOptions = {\n    /**\n     * The costing rate, where {@link READING_WORDS_PER_MINUTE} is wrong for this\n     * deployment's text. Refused the way a page's own reading refuses it.\n     */\n    readonly wordsPerMinute?: number;\n};",
+              "summary": ""
+            },
+            {
+              "name": "libraryPaceOf",
+              "kind": "function",
+              "signature": "const libraryPaceOf: (readings: readonly PageReading[], rows: readonly StoredPageViews[], options?: LibraryPaceOptions) => LibraryPace",
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "signals/library-reach",
           "title": "Library reach",
           "summary": "Of the readers who met a kind of part, the share that read it.",
@@ -10907,7 +11011,7 @@
             {
               "name": "weightMovedOver",
               "kind": "function",
-              "signature": "const weightMovedOver: (weights: readonly {\n    readonly was: number;\n    readonly now: number;\n}[], totals: {\n    readonly was: number;\n    readonly now: number;\n}) => number",
+              "signature": "const weightMovedOver: (weights: readonly {\n    readonly was: number;\n    readonly now: number;\n}[], totals: {\n    readonly was: number;\n    readonly now: number;\n}) => number | null",
               "summary": "Half the sum of the absolute movements in each place's share of its side's weight, which is the figure a comparison of two readerships publishes, over places rather than regions."
             },
             {
@@ -10986,7 +11090,7 @@
             {
               "name": "ReaderWords",
               "kind": "type",
-              "signature": "type ReaderWords = {\n    /**\n     * Passages both revisions say word for word, across the places of this kind\n     * that stand in both windows.\n     *\n     * The count and not the word total is what says whether there is anything to\n     * compare, because a passage may hide every word it has.\n     */\n    readonly passages: number;\n    /** The words those passages say, which is the mass this reading is about. */\n    readonly carried: number;\n    /**\n     * Of {@link passages}, those with a verdict on **both** sides, which is the\n     * set every figure below is taken over.\n     *\n     * One number and not two, which is what makes the two levels comparable: a\n     * passage nothing can be said about in either window is in neither mass, so\n     * the two sides are read over exactly the same text.\n     */\n    readonly spoken: number;\n    /** The words those passages say: the universe of both masses. */\n    readonly comparable: number;\n    /** Carried words `unknown` on one side or the other, which are in no mass. */\n    readonly unspoken: number;\n    /**\n     * Comparable passages whose word count is a floor, because the part saying\n     * them declares no `copy`.\n     *\n     * Non-nought is what withholds every difference here and leaves the two\n     * levels standing as floors. **A count of passages and not of words**,\n     * because the commonest floor of all is a part that declares no `copy` at\n     * all and whose visible words are therefore nought: a trigger counted in\n     * words would miss exactly the case it exists for.\n     */\n    readonly floored: number;\n    /** The visible words in those passages, which is the part of the mass that is certain. */\n    readonly flooredWords: number;\n    /**\n     * Page views at the door's scale across the pages bearing a comparable word\n     * of it, in the earlier window, added **once per page**.\n     *\n     * The denominator of {@link typicalWas} and the weight behind it.\n     */\n    readonly countedWas: number | null;\n    /** The same for the later window. */\n    readonly countedNow: number | null;\n    /**\n     * Reader-words in the earlier window at the door's scale:\n     * `Σ readers × words` per page, scaled by `counted ÷ appearances`.\n     *\n     * **Not a count of people and deliberately not rounded into one**.\n     */\n    readonly reachedWas: number | null;\n    /** The same for the later window. */\n    readonly reachedNow: number | null;\n    /**\n     * `reachedWas ÷ countedWas` — the carried words the typical reader who met it\n     * reached, in the earlier window.\n     *\n     * A floor under a floor, and exact otherwise. `null` where a silence says why\n     * there is none.\n     */\n    readonly typicalWas: number | null;\n    /** The same in the later window, over the same words. */\n    readonly typicalNow: number | null;\n    /** `typicalNow − typicalWas`, in words per reader. Withheld under a floor. */\n    readonly shift: number | null;\n    /**\n     * The movement stated at the later window's scale: `shift × countedNow`.\n     *\n     * Reader-words and never people, exactly as {@link reachedNow} is — the\n     * figure this reading ranks by, for the reason a page's falls are ranked by\n     * the readers they lose.\n     */\n    readonly wordsMoved: number | null;\n    /**\n     * The later window's per-page rates at the earlier window's weights: the\n     * words there would have been if no page's traffic had moved.\n     *\n     * Isolates the readers. Withheld under a floor, because the only use of a\n     * counterfactual is a subtraction.\n     */\n    readonly ifTrafficHeld: number | null;\n    /**\n     * The earlier window's per-page rates at the later window's weights: the\n     * words there would have been if no reader had read differently.\n     *\n     * Isolates the mix of pages.\n     */\n    readonly ifReadingHeld: number | null;\n    /**\n     * How far the weights moved: half the sum of the absolute movements in each\n     * page's share of its side's total weight, in `[0, 1]`.\n     *\n     * The arithmetic a comparison of two readerships uses, over pages\n     * rather than regions. **Published and never judged**, and published under a\n     * floor as well, because there is no word in it.\n     */\n    readonly weightMoved: number | null;\n    /** Appearances in excess of openings in the earlier window, over the weighted pages. */\n    readonly driftWas: number;\n    /** The same for the later window. */\n    readonly driftNow: number;\n    /** Openings in the earlier window, over the weighted pages, whose reading no rollup has folded. */\n    readonly pendingWas: number;\n    /** The same for the later window. */\n    readonly pendingNow: number;\n    /**\n     * Comparable passages reporting more readers than their page had appearances,\n     * on either side, which no rollup produces.\n     *\n     * Node counters older than the page-view column, or a caller that\n     * concatenated two reads. A surface should show the words comparison\n     * instead where it is non-nought.\n     */\n    readonly unreconciled: number;\n    /**\n     * Nobody's visit spanned a window on either side, nothing is waiting to be\n     * folded, nothing is unreconciled and no word is a floor — so both levels are\n     * exact.\n     *\n     * False under any silence. It says nothing about the weights: a comparison\n     * can be exact on both sides and still be weighted differently, which is what\n     * {@link weightMoved} is for.\n     */\n    readonly exact: boolean;\n};",
+              "signature": "type ReaderWords = {\n    /**\n     * Passages both revisions say word for word, across the places of this kind\n     * that stand in both windows.\n     *\n     * The count and not the word total is what says whether there is anything to\n     * compare, because a passage may hide every word it has.\n     */\n    readonly passages: number;\n    /** The words those passages say, which is the mass this reading is about. */\n    readonly carried: number;\n    /**\n     * Of {@link passages}, those with a verdict on **both** sides, which is the\n     * set every figure below is taken over.\n     *\n     * One number and not two, which is what makes the two levels comparable: a\n     * passage nothing can be said about in either window is in neither mass, so\n     * the two sides are read over exactly the same text.\n     */\n    readonly spoken: number;\n    /** The words those passages say: the universe of both masses. */\n    readonly comparable: number;\n    /** Carried words `unknown` on one side or the other, which are in no mass. */\n    readonly unspoken: number;\n    /**\n     * Comparable passages whose word count is a floor, because the part saying\n     * them declares no `copy`.\n     *\n     * Non-nought is what withholds every difference here and leaves the two\n     * levels standing as floors. **A count of passages and not of words**,\n     * because the commonest floor of all is a part that declares no `copy` at\n     * all and whose visible words are therefore nought: a trigger counted in\n     * words would miss exactly the case it exists for.\n     */\n    readonly floored: number;\n    /** The visible words in those passages, which is the part of the mass that is certain. */\n    readonly flooredWords: number;\n    /**\n     * Page views at the door's scale across the pages bearing a comparable word\n     * of it, in the earlier window, added **once per page**.\n     *\n     * The denominator of {@link typicalWas} and the weight behind it.\n     */\n    readonly countedWas: number | null;\n    /** The same for the later window. */\n    readonly countedNow: number | null;\n    /**\n     * Reader-words in the earlier window at the door's scale:\n     * `Σ readers × words` per page, scaled by `counted ÷ appearances`.\n     *\n     * **Not a count of people and deliberately not rounded into one**.\n     */\n    readonly reachedWas: number | null;\n    /** The same for the later window. */\n    readonly reachedNow: number | null;\n    /**\n     * `reachedWas ÷ countedWas` — the carried words the typical reader who met it\n     * reached, in the earlier window.\n     *\n     * A floor under a floor, and exact otherwise. `null` where a silence says why\n     * there is none.\n     */\n    readonly typicalWas: number | null;\n    /** The same in the later window, over the same words. */\n    readonly typicalNow: number | null;\n    /** `typicalNow − typicalWas`, in words per reader. Withheld under a floor. */\n    readonly shift: number | null;\n    /**\n     * The movement stated at the later window's scale: `shift × countedNow`.\n     *\n     * Reader-words and never people, exactly as {@link reachedNow} is — the\n     * figure this reading ranks by, for the reason a page's falls are ranked by\n     * the readers they lose.\n     */\n    readonly wordsMoved: number | null;\n    /**\n     * The later window's per-page rates at the earlier window's weights: the\n     * words there would have been if no page's traffic had moved.\n     *\n     * Isolates the readers. Withheld under a floor, because the only use of a\n     * counterfactual is a subtraction.\n     */\n    readonly ifTrafficHeld: number | null;\n    /**\n     * The earlier window's per-page rates at the later window's weights: the\n     * words there would have been if no reader had read differently.\n     *\n     * Isolates the mix of pages.\n     */\n    readonly ifReadingHeld: number | null;\n    /**\n     * How far the weights moved: half the sum of the absolute movements in each\n     * page's share of its side's total weight, in `[0, 1]`.\n     *\n     * The arithmetic a comparison of two readerships uses, over pages\n     * rather than regions. **Published and never judged**, and published under a\n     * floor as well, because there is no word in it.\n     *\n     * `null` is withheld with the rest of the row, and only that: a measured row\n     * banked a page whose two doors both spoke, so the distance is a number\n     * wherever this roll publishes figures at all.\n     */\n    readonly weightMoved: number | null;\n    /** Appearances in excess of openings in the earlier window, over the weighted pages. */\n    readonly driftWas: number;\n    /** The same for the later window. */\n    readonly driftNow: number;\n    /** Openings in the earlier window, over the weighted pages, whose reading no rollup has folded. */\n    readonly pendingWas: number;\n    /** The same for the later window. */\n    readonly pendingNow: number;\n    /**\n     * Comparable passages reporting more readers than their page had appearances,\n     * on either side, which no rollup produces.\n     *\n     * Node counters older than the page-view column, or a caller that\n     * concatenated two reads. A surface should show the words comparison\n     * instead where it is non-nought.\n     */\n    readonly unreconciled: number;\n    /**\n     * Nobody's visit spanned a window on either side, nothing is waiting to be\n     * folded, nothing is unreconciled and no word is a floor — so both levels are\n     * exact.\n     *\n     * False under any silence. It says nothing about the weights: a comparison\n     * can be exact on both sides and still be weighted differently, which is what\n     * {@link weightMoved} is for.\n     */\n    readonly exact: boolean;\n};",
               "summary": "The words one reader got to, before and after, with the evidence behind both sides."
             },
             {
@@ -11031,6 +11135,121 @@
               "kind": "function",
               "signature": "const memoryReaderRegionStore: () => ReaderRegionStore",
               "summary": "Where readers were, in the process."
+            }
+          ]
+        },
+        {
+          "module": "signals/notice",
+          "title": "Notice",
+          "summary": "What a published page reports, written for the people it reports about.",
+          "symbols": [
+            {
+              "name": "FieldSubject",
+              "kind": "type",
+              "signature": "type FieldSubject =\n/** The part of the page the observation is about. */\n\"part\"\n/** Which page, which revision of it, and which form was served. */\n | \"page\"\n/** What was observed about the part — when, how long, open or closed. */\n | \"observation\"\n/**\n * The one visit the delivery belongs to.\n *\n * The narrowest scope anything here is correlated at, and the only one about\n * a visit rather than about a page.\n */\n | \"page-view\"\n/** The delivery itself — when it was sent, and what it carried. */\n | \"delivery\";",
+              "summary": "What one field of a delivery is about."
+            },
+            {
+              "name": "FIELD_SUBJECTS",
+              "kind": "value",
+              "signature": "const FIELD_SUBJECTS: readonly FieldSubject[]",
+              "summary": "The closed set, for a surface grouping a notice by what its fields are about."
+            },
+            {
+              "name": "describeFieldSubject",
+              "kind": "function",
+              "signature": "const describeFieldSubject: (subject: FieldSubject) => string",
+              "summary": "One line per subject, addressed to the reader, for a surface grouping a notice."
+            },
+            {
+              "name": "CollectedField",
+              "kind": "type",
+              "signature": "type CollectedField = {\n    /** The field's name in the delivery, which is what a reader comparing this to a payload sees. */\n    readonly field: string;\n    /** What it is about. */\n    readonly subject: FieldSubject;\n    /** One sentence, addressed to the reader. */\n    readonly says: string;\n};",
+              "summary": "One field of a payload, and what it says."
+            },
+            {
+              "name": "SIGNAL_FIELDS",
+              "kind": "value",
+              "signature": "const SIGNAL_FIELDS: {\n    readonly [Kind in ReaderSignalKind]: FieldsOf<Extract<ReaderSignal, {\n        kind: Kind;\n    }>>;\n}",
+              "summary": "Every kind's fields."
+            },
+            {
+              "name": "DELIVERY_FIELDS",
+              "kind": "value",
+              "signature": "const DELIVERY_FIELDS: FieldsOf<ReaderSignalBatch>",
+              "summary": "What travels with a delivery, whatever observations are in it."
+            },
+            {
+              "name": "Refusal",
+              "kind": "type",
+              "signature": "type Refusal = \n/**\n * No identifier for a person or a device, and nothing standing in for one.\n *\n * The first clause of rule 1. The second half of the sentence is the half\n * that matters to somebody who has read a privacy policy before: an\n * identifier nobody set is still an identifier.\n */\n\"no-identifier\"\n/** No signature derived from a device, a browser or its settings. */\n | \"no-fingerprint\"\n/** Nothing the page said to you and nothing you said to it. */\n | \"no-content\"\n/** No cursor, no scroll trace, no recording. */\n | \"no-pointer-path\"\n/** Nothing that joins one visit to another. */\n | \"no-stitching\"\n/** Nothing derived from your address outlives the request it arrived on. */\n | \"no-address\";",
+              "summary": "Something a reader signal never carries, whatever a deployment configures."
+            },
+            {
+              "name": "REFUSALS",
+              "kind": "value",
+              "signature": "const REFUSALS: readonly Refusal[]",
+              "summary": "The closed set, for a surface listing what is refused."
+            },
+            {
+              "name": "describeRefusal",
+              "kind": "function",
+              "signature": "const describeRefusal: (refusal: Refusal) => string",
+              "summary": "One line per refusal, addressed to the reader."
+            },
+            {
+              "name": "RegionNotice",
+              "kind": "type",
+              "signature": "type RegionNotice = {\n    /**\n     * The page views a country needs before it is published at all, or `null`\n     * where no country is read.\n     *\n     * `null` is *nothing about where you are is read*, which is a different\n     * sentence from *your country is counted and will not be published until\n     * enough others share it* — and the difference is the whole of what a floor\n     * is for. A country with a handful of views in it is a person (§7).\n     */\n    readonly floor: number | null;\n};",
+              "summary": "Where a deployment counts its readers from, or that it does not."
+            },
+            {
+              "name": "describeRegionNotice",
+              "kind": "function",
+              "signature": "const describeRegionNotice: (notice: RegionNotice) => string",
+              "summary": "One or two sentences about where readers are counted from, addressed to the reader."
+            },
+            {
+              "name": "SweepNotice",
+              "kind": "type",
+              "signature": "type SweepNotice = {\n    readonly state: \"stated\";\n    /** The longest the deployment lets pass between sweeps, as it stated it. */\n    readonly everyMs: number;\n    /**\n     * The longest a delivery can live: its ripeness window plus one sweep\n     * interval.\n     *\n     * The two add because a delivery is not counted until it ripens and then\n     * not until the next sweep runs, which is the arithmetic\n     * `CollectionSchedule.foldsWithinMs` spells out for the operator's half\n     * of this question — so **this is the number to hand the stall\n     * check**, and a deployment states the interval once rather than keeping\n     * a reader's ceiling and an operator's threshold in step by hand.\n     */\n    readonly goneWithinMs: number;\n}\n/** Nothing was stated, so nothing here says when a ripe delivery actually goes. */\n | {\n    readonly state: \"unstated\";\n};",
+              "summary": "How often the deployment's own sweep runs, or that it has not said."
+            },
+            {
+              "name": "CollectionNotice",
+              "kind": "type",
+              "signature": "type CollectionNotice = {\n    /** The kinds this configuration broadcasts, in the vocabulary's order. */\n    readonly collects: readonly CollectedKind[];\n    /** What travels with every delivery. */\n    readonly delivery: readonly CollectedField[];\n    /** What is never collected, whatever else is configured. */\n    readonly refuses: readonly Refusal[];\n    /** Where readers are counted from, or that they are not. */\n    readonly region: RegionNotice;\n    /**\n     * How long a delivery itself lives before it is counted and dropped, in\n     * milliseconds.\n     *\n     * The deployment's own number (`collect.ts`), and the honest bound on the\n     * life of the page-view key, since the key exists in the buffer and nowhere\n     * else. **The framework cannot promise the moment it is swept**, because a\n     * host schedules the sweep: this is the age at which a delivery becomes ripe,\n     * not a guarantee about when the next run happens. What the deployment itself\n     * promises about that is {@link CollectionNotice.sweep}, and\n     * {@link describeBuffer} says the two together.\n     */\n    readonly bufferMs: number;\n    /**\n     * How often this deployment sweeps a ripe delivery away, where it has stated\n     * it.\n     *\n     * The half of retention that is not the framework's to promise, and the half\n     * a reader of `bufferMs` alone would assume. {@link describeBuffer} takes the\n     * two together for that reason: an age with no sweep beside it is a sentence\n     * that reads like a deletion and is not one.\n     */\n    readonly sweep: SweepNotice;\n};",
+              "summary": "What a published page reports, and what it refuses to."
+            },
+            {
+              "name": "CollectedKind",
+              "kind": "type",
+              "signature": "type CollectedKind = {\n    readonly kind: ReaderSignalKind;\n    /** What the page observed, addressed to the reader. */\n    readonly observes: string;\n    /** Every field that kind carries, including the ones it sometimes omits. */\n    readonly carries: readonly CollectedField[];\n};",
+              "summary": "One kind of observation, with the fields it carries."
+            },
+            {
+              "name": "DeliveryRetention",
+              "kind": "type",
+              "signature": "type DeliveryRetention = Pick<CollectionNotice, \"bufferMs\" | \"sweep\">;",
+              "summary": "Both halves of how long a delivery lives: the age it ripens at, and how often the deployment takes the ripe ones away."
+            },
+            {
+              "name": "describeBuffer",
+              "kind": "function",
+              "signature": "const describeBuffer: (retention: DeliveryRetention) => string",
+              "summary": "How long a delivery lives, addressed to the reader."
+            },
+            {
+              "name": "NoticeRequest",
+              "kind": "type",
+              "signature": "type NoticeRequest = {\n    /**\n     * The options the page is broadcast with — the same object, so that a notice\n     * and the page it is about cannot disagree about which kinds are reported.\n     *\n     * Only `kinds` is read. `types` and `within` narrow collection below what the\n     * notice says, which is the ceiling rule above.\n     */\n    readonly page?: Pick<ReaderSignalOptions, \"kinds\">;\n    /**\n     * The window the deployment collects on, from its own `CollectionRequest`\n     * (`collect.ts`). The default when absent.\n     *\n     * Reported as given rather than clamped: `collect.ts` is what refuses a\n     * window below its minimum, and a notice that silently reported a different\n     * number from the one a deployment configured would be a second rule about\n     * one setting.\n     */\n    readonly windowMs?: number;\n    /**\n     * The region counting this deployment's intake does, where it does any.\n     *\n     * Absent is *no country is read*, which is the default: reading one is\n     * something an intake is configured to do (§7). A floor below the published\n     * minimum is raised to it, by the same helper the region map itself uses.\n     */\n    readonly region?: {\n        readonly floor?: number;\n    };\n    /**\n     * How often this deployment's sweep runs, where it has stated it.\n     *\n     * Absent is *nothing is stated*, which is the honest default: nothing in this\n     * subsystem schedules a sweep, so a notice that assumed one would publish a\n     * ceiling no deployment promised. A value that is not a positive, finite\n     * number of milliseconds is read the same way — the notice may always\n     * promise a reader less than the deployment knows and may never promise more,\n     * and the operator-facing half, where a value that could not be read is said\n     * out loud, is a deployment's own settings.\n     */\n    readonly sweep?: {\n        readonly everyMs: number;\n    };\n};",
+              "summary": "The configuration a notice is of."
+            },
+            {
+              "name": "collectionNoticeOf",
+              "kind": "function",
+              "signature": "const collectionNoticeOf: (request?: NoticeRequest) => CollectionNotice",
+              "summary": "What a page broadcast with these options reports, as a deployment may publish it."
             }
           ]
         },
@@ -11699,6 +11918,86 @@
           ]
         },
         {
+          "module": "signals/region-pages",
+          "title": "Region pages",
+          "summary": "Which of a deployment's pages the readers of one place opened.",
+          "symbols": [
+            {
+              "name": "RegionPageStanding",
+              "kind": "type",
+              "signature": "type RegionPageStanding = \n/** Every view in the bucket is on a page the breakdown names. */\n\"attributed\"\n/** Some of the bucket's views are on named pages and the rest are withheld. */\n | \"partly-attributed\"\n/**\n * No page in this place cleared the floor, so the bucket's views are named\n * and nothing in it is attributed.\n *\n * The claim worth acting on, and the one that must not be drawn as a place\n * nobody read: the readers are in the map above, and it is the attribution\n * that is withheld rather than the readership that is absent.\n */\n | \"unattributable\";",
+              "summary": "What a screen may say about one region's breakdown by page."
+            },
+            {
+              "name": "REGION_PAGE_STANDINGS",
+              "kind": "value",
+              "signature": "const REGION_PAGE_STANDINGS: readonly RegionPageStanding[]",
+              "summary": "The closed set, for a surface accounting for every breakdown it draws."
+            },
+            {
+              "name": "describeRegionPageStanding",
+              "kind": "function",
+              "signature": "const describeRegionPageStanding: (standing: RegionPageStanding) => string",
+              "summary": "One line per standing, for a surface saying what a breakdown is withholding."
+            },
+            {
+              "name": "RegionPage",
+              "kind": "type",
+              "signature": "type RegionPage = {\n    readonly treeId: TreeId;\n    /**\n     * Page views that began here, summed over the revisions and the forms the\n     * rows named.\n     */\n    readonly views: number;\n    /**\n     * This page's share of **the whole bucket**, including the views the\n     * breakdown withheld.\n     *\n     * The denominator is published rather than left to be derived because the two\n     * candidates differ and the obvious one is wrong: dividing by the named pages\n     * alone makes the shares sum to one and hides the withheld part, so a place\n     * whose attribution is mostly withheld would read as fully attributed.\n     *\n     * Absent only where the bucket's own total is nought, which is reachable on\n     * the unplaced bucket alone — it is named at any size, so rows of no views\n     * produce cells of no views and there is no quotient to take.\n     */\n    readonly share: number | undefined;\n};",
+              "summary": "One page the readers of a place opened."
+            },
+            {
+              "name": "RegionPageBreakdown",
+              "kind": "type",
+              "signature": "type RegionPageBreakdown = {\n    readonly region: ReaderRegion;\n    /** The bucket's own total, which is the map's number unchanged. */\n    readonly views: number;\n    /** Pages with enough readers in this place to name, most-read first. */\n    readonly pages: readonly RegionPage[];\n    /** What was too small to name here, as a total that names no page. */\n    readonly withheld: {\n        readonly pages: number;\n        readonly views: number;\n    };\n    readonly standing: RegionPageStanding;\n};",
+              "summary": "One named region, with the pages its readers opened."
+            },
+            {
+              "name": "RegionPagesOptions",
+              "kind": "type",
+              "signature": "type RegionPagesOptions = {\n    /**\n     * The floor under a named cell, which is the deployment's and is required.\n     *\n     * Raised above `DEFAULT_REGION_FLOOR` and never lowered below it. A caller\n     * with nothing of its own to say passes that constant.\n     */\n    readonly floor: number;\n};",
+              "summary": "What a breakdown is read at."
+            },
+            {
+              "name": "RegionPagesReading",
+              "kind": "type",
+              "signature": "type RegionPagesReading = {\n    /** The map itself, unchanged, so a breakdown's totals cannot disagree with it. */\n    readonly map: RegionReading;\n    /**\n     * One breakdown per named bucket, in the map's order, so a surface drawing\n     * both reads them side by side.\n     */\n    readonly regions: readonly RegionPageBreakdown[];\n};",
+              "summary": "A region map and, for each place it named, what the readers there read."
+            },
+            {
+              "name": "regionPagesOf",
+              "kind": "function",
+              "signature": "const regionPagesOf: (rows: readonly StoredRegionCount[], options: RegionPagesOptions) => RegionPagesReading",
+              "summary": "Rows from the store, read as a map and a breakdown of every place it named."
+            }
+          ]
+        },
+        {
+          "module": "signals/retention",
+          "title": "Retention",
+          "summary": "Whether the deployment keeps the retention ceiling it publishes to its readers.",
+          "symbols": [
+            {
+              "name": "RetentionPromise",
+              "kind": "type",
+              "signature": "type RetentionPromise = \n/**\n * The deployment stated no sweep interval, so its notice publishes no\n * ceiling.\n *\n * There is nothing for a run to keep or break. The remedy is not a sweep's:\n * an operator states the interval their cron actually runs on, and until they\n * do their readers are told when a delivery ripens and nothing about when it\n * goes.\n */\n{\n    readonly state: \"unpromised\";\n}\n/**\n * The run read no delivery, so nothing here says how old the oldest one is.\n *\n * Either it never reached the buffer — refused on its window, or the store\n * was unavailable — or the one instant it needed could not be read. A buffer\n * the sweep cannot see is a promise nothing can speak for, and the honest\n * answer is silence rather than *kept*.\n */\n | {\n    readonly state: \"unread\";\n}\n/**\n * Nothing in the buffer is old enough to count, so nothing in it can be past\n * the ceiling.\n *\n * The strongest of the three quiet answers and the only one that is a proof.\n * A scan runs from the oldest end, so a run that found nothing ripe found\n * every delivery younger than the ripeness window — and the ceiling is that\n * window plus a sweep, which is longer. An empty buffer lands here too, for\n * the same reason and with nothing waiting.\n */\n | {\n    readonly state: \"unripe\";\n}\n/**\n * The oldest delivery in the buffer is within the ceiling the notice\n * publishes.\n *\n * Both figures travel, because the sentence an operator wants is the\n * comparison and not the verdict: *the oldest here is twelve minutes old and\n * your readers are told seventy*.\n */\n | {\n    readonly state: \"kept\";\n    /** How old the oldest delivery still in the buffer was, in milliseconds. */\n    readonly oldestMs: number;\n    /** The ceiling the notice publishes: the ripeness window plus one sweep. */\n    readonly goneWithinMs: number;\n}\n/**\n * A delivery is older than the ceiling the notice publishes, so that sentence\n * is false and was false for `byMs` before this run.\n *\n * The deployment is either sweeping less often than it stated or not sweeping\n * at all, and the two are the same fault from here. Raising the stated\n * interval makes the published promise true and weaker; sweeping on the\n * interval already stated makes it true and keeps it — and that choice is an\n * operator's, so this names the gap rather than a remedy.\n */\n | {\n    readonly state: \"broken\";\n    readonly oldestMs: number;\n    readonly goneWithinMs: number;\n    /** How far past the ceiling the oldest delivery is. */\n    readonly byMs: number;\n};",
+              "summary": "How a published retention ceiling stood at the moment of one sweep."
+            },
+            {
+              "name": "retentionPromiseOf",
+              "kind": "function",
+              "signature": "const retentionPromiseOf: (outcome: CollectionOutcome, retention: DeliveryRetention) => RetentionPromise",
+              "summary": "Judge one sweep's own evidence against the ceiling its deployment publishes."
+            },
+            {
+              "name": "describeRetentionPromise",
+              "kind": "function",
+              "signature": "const describeRetentionPromise: (promise: RetentionPromise) => string",
+              "summary": "One line for the operator who runs the sweep, because they are the only person who can close the gap."
+            }
+          ]
+        },
+        {
           "module": "signals/rollup",
           "title": "Rollup",
           "summary": "Many views, folded into the durable artefact: per-node-per-revision counters, and the funnel pairs a deployment asked about.",
@@ -11730,7 +12029,7 @@
             {
               "name": "Rollup",
               "kind": "type",
-              "signature": "type Rollup = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /** Distinct page views seen, across every tree and revision in the input. */\n    readonly views: number;\n    /**\n     * The same page views, per tree and revision — one appearance each, in this\n     * window.\n     *\n     * Held apart from `views` because it is the number the durable page-view\n     * counter keeps, and it is only worth keeping beside the exact count of page\n     * views that *began*: the difference between the two is the straddle that\n     * makes a distinct count added across windows generous, measured rather than\n     * bounded. A revision whose batches carried no view key is absent\n     * rather than nought — there is nothing to compare, and a zero row would read\n     * as *no readers* rather than as *nobody minted a key*.\n     */\n    readonly appearances: readonly RevisionViews[];\n    /**\n     * Batches that carried no view key.\n     *\n     * Their occurrences are counted like any other; their views are not, because\n     * there is no honest number to add. Treating each uncorrelated batch as its\n     * own view would inflate every denominator by however often a page happened\n     * to flush, which is a number about the network rather than about readers.\n     * Reported so a portal can say the rate is computed over fewer views than the\n     * totals, instead of showing a rate that is quietly wrong.\n     */\n    readonly uncorrelated: number;\n};",
+              "signature": "type Rollup = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /** Distinct page views seen, across every tree and revision in the input. */\n    readonly views: number;\n    /**\n     * The same page views, per tree and revision — one appearance each, in this\n     * window.\n     *\n     * Held apart from `views` because it is the number the durable page-view\n     * counter keeps, and it is only worth keeping beside the exact count of page\n     * views that *began*: the difference between the two is the straddle that\n     * makes a distinct count added across windows generous, measured rather than\n     * bounded. A revision whose batches carried no view key is absent\n     * rather than nought — there is nothing to compare, and a zero row would read\n     * as *no readers* rather than as *nobody minted a key*.\n     */\n    readonly appearances: readonly RevisionViews[];\n    /**\n     * Batches that carried no view key.\n     *\n     * Their occurrences are counted like any other; their views are not, because\n     * there is no honest number to add. Treating each uncorrelated batch as its\n     * own view would inflate every denominator by however often a page happened\n     * to flush, which is a number about the network rather than about readers.\n     * Reported so a portal can say the rate is computed over fewer views than the\n     * totals, instead of showing a rate that is quietly wrong.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Batches this fold refused as a repeat of one it had already folded.\n     *\n     * A sender may deliver the same batch twice — a host's retry queue draining\n     * after an outage is the case `MAX_BATCHES_PER_DELIVERY` exists to allow, and\n     * an edge network replaying a `POST` is the case nobody writes. What that\n     * costs is **asymmetric and therefore invisible**: `views`, `reached`,\n     * `engaged` and `appearances` are sets of view keys, so a repeat adds the key\n     * it already holds and moves nothing, while `dwellMs`, `activations`, `opens`,\n     * `closes` and `completions` are occurrences and double. Every rate this\n     * subsystem publishes divides the second kind by the first, so a repeat does\n     * not look like noise — it looks like a reader who was twice as interested,\n     * and the cost of it is permanent.\n     *\n     * So a batch identical to one already folded in this window is folded once and\n     * counted here. **Only where it carries a view key**: without one, two\n     * identical batches are as likely to be two readers in the same millisecond as\n     * one batch arriving twice, and dropping a reader to avoid a repeat is the\n     * worse of the two mistakes.\n     *\n     * Reported rather than silent, because the number is a fact about a\n     * deployment's senders and not about its readers: a window with repeats in it\n     * every run is a retry loop somebody should find.\n     */\n    readonly redelivered: number;\n};",
               "summary": ""
             },
             {
@@ -11827,6 +12126,49 @@
           ]
         },
         {
+          "module": "signals/silence-census",
+          "title": "Silence census",
+          "summary": "What a window could not answer, and what each reason cost it.",
+          "symbols": [
+            {
+              "name": "ReadingSilence",
+              "kind": "type",
+              "signature": "type ReadingSilence = {\n    /**\n     * What the reading reported, as the matching `meaningOf…Silence` gives it, or\n     * `null` where it answered.\n     *\n     * Nullable rather than the whole entry being nullable, which is the one way\n     * this differs from `distinctSilences`' argument and the reason the form\n     * grouping has a denominator at all: a reading that answered is still a\n     * reading of that page, and dropping it before the call would make *nine of\n     * nine* and *one of one* the same row.\n     */\n    readonly meaning: SilenceMeaning | null;\n    /**\n     * The page in the form this reading was of, or absent where the reading is of\n     * no one page.\n     *\n     * A library census and an order over a deployment's pages are of something\n     * larger than a page, and their silences are about a kind and about a page\n     * respectively — a reading's subject is not its scope. Those are\n     * counted in {@link SilenceCensus.wide} rather than attributed to a form that\n     * would be a guess.\n     */\n    readonly form?: PageForm | null;\n};",
+              "summary": "One reading's silence, with the page it was a reading of."
+            },
+            {
+              "name": "SilenceStanding",
+              "kind": "type",
+              "signature": "type SilenceStanding = {\n    readonly condition: SilenceCondition;\n    readonly subject: SilenceSubject;\n    /**\n     * The vocabulary of the **first** reading that reported it, kept so that a\n     * surface can still print that reading's own sentence.\n     *\n     * `distinctSilences`' rule, unchanged: the names are right in their own set\n     * and collapsing a state does not make one of them wrong.\n     */\n    readonly vocabulary: SilenceVocabulary;\n    /** Every vocabulary that reported it, each once, in the order they arrived. */\n    readonly vocabularies: readonly SilenceVocabulary[];\n    /** How many readings reported it. */\n    readonly readings: number;\n    /** The pages it cost, each once however many of their readings reported it. */\n    readonly forms: readonly PageForm[];\n    /** How many of the readings that reported it were of no one page. */\n    readonly wide: number;\n};",
+              "summary": "One state the window is in, and what it cost."
+            },
+            {
+              "name": "SilenceGroup",
+              "kind": "type",
+              "signature": "type SilenceGroup = {\n    /** Every reading handed over in this group, silent or not. */\n    readonly readings: number;\n    /** How many of them were silent. */\n    readonly silent: number;\n    /**\n     * The distinct states they are in, in the order they arrived, each keeping the\n     * first reading's vocabulary.\n     */\n    readonly states: readonly SilenceMeaning[];\n};",
+              "summary": "What one group of readings answered."
+            },
+            {
+              "name": "FormSilences",
+              "kind": "type",
+              "signature": "type FormSilences = SilenceGroup & {\n    readonly form: PageForm;\n};",
+              "summary": "What one page in one form answered."
+            },
+            {
+              "name": "SilenceCensus",
+              "kind": "type",
+              "signature": "type SilenceCensus = {\n    /**\n     * Every reading handed over, silent or not, which is the denominator the\n     * caller chose by choosing what to hand in.\n     */\n    readonly readings: number;\n    /** How many of them were silent. `readings = silent + answered`. */\n    readonly silent: number;\n    readonly answered: number;\n    /**\n     * The distinct states, in the order the readings were handed over.\n     *\n     * Their `readings` sum to {@link silent}, because every silent reading is in\n     * exactly one state. Their `forms` do **not** sum to anything.\n     */\n    readonly states: readonly SilenceStanding[];\n    /** The same readings by page, in form order rather than arrival order. */\n    readonly byForm: readonly FormSilences[];\n    /** The readings of no one page, which no form row holds. */\n    readonly wide: SilenceGroup;\n};",
+              "summary": "The states a window is in, and what each of them cost."
+            },
+            {
+              "name": "silenceCensusOf",
+              "kind": "function",
+              "signature": "const silenceCensusOf: (readings: readonly ReadingSilence[]) => SilenceCensus",
+              "summary": "The states a window is in, out of the silences its readings published."
+            }
+          ]
+        },
+        {
           "module": "signals/silences",
           "title": "Silences",
           "summary": "What two readings mean when they both say nothing, and whether they mean the same thing.",
@@ -11852,7 +12194,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-pace\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "summary": "Which reading published a silence."
             },
             {
@@ -11875,7 +12217,7 @@
                 "shown": 125,
                 "whole": 180,
                 "source": "src/signals/silences.ts",
-                "line": 426
+                "line": 430
               },
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
@@ -11976,6 +12318,12 @@
               "summary": "What a comparison of two windows' words at the scale of a library reports."
             },
             {
+              "name": "meaningOfKindPaceSilence",
+              "kind": "function",
+              "signature": "const meaningOfKindPaceSilence: (silence: KindPaceSilence) => SilenceMeaning",
+              "summary": "What a kind of part's pace reports, of one kind."
+            },
+            {
               "name": "meaningOfPaceSilence",
               "kind": "function",
               "signature": "const meaningOfPaceSilence: (silence: PaceSilence) => SilenceMeaning",
@@ -12073,10 +12421,22 @@
               "summary": "The one write the door makes into the durable counters."
             },
             {
+              "name": "AppliedCounters",
+              "kind": "type",
+              "signature": "type AppliedCounters = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /**\n     * The window's page views, per revision, for the counter the exact count\n     * is compared against.\n     *\n     * Optional, and absent is not none: a caller applying counters it\n     * composed itself — a backfill, a fixture, a test — has no window to\n     * report, and a nought written there would read as *no page views* and\n     * make a reading claim the node counters were exact.\n     */\n    readonly appearances?: readonly RevisionViews[];\n};",
+              "summary": "One fold's output, as a caller hands it over."
+            },
+            {
+              "name": "AudienceCounters",
+              "kind": "type",
+              "signature": "type AudienceCounters = AppliedCounters & {\n    /** The audience this fold was taken over. Omitted is `aud_everyone`. */\n    readonly audience?: AudienceId;\n};",
+              "summary": "One audience's share of a window, which is what {@link ReaderTallyStore.applyWindow} takes a list of."
+            },
+            {
               "name": "ReaderTallyStore",
               "kind": "interface",
-              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a rollup's counters to what is already there, creating rows that do not\n     * exist yet. Atomic over the whole rollup where the backend can be: a partly\n     * applied window is counters that disagree with each other.\n     */\n    readonly apply: (rollup: {\n        readonly tallies: readonly ReaderTally[];\n        readonly funnels: readonly FunnelAnswer[];\n        /**\n         * The window's page views, per revision, for the counter the exact count\n         * is compared against.\n         *\n         * Optional, and absent is not none: a caller applying counters it\n         * composed itself — a backfill, a fixture, a test — has no window to\n         * report, and a nought written there would read as *no page views* and\n         * make a reading claim the node counters were exact.\n         */\n        readonly appearances?: readonly RevisionViews[];\n    }, at: string,\n    /**\n     * The audience whose window this is. Omitted is `aud_everyone`.\n     *\n     * One audience per call, which is what keeps `ReaderTally` free of the\n     * dimension: a window holding two audiences is folded once per audience and\n     * applied twice, so every row in one call belongs to one of them.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
-              "summary": "Counters are not paged."
+              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a whole window's counters to what is already there, every audience in\n     * it, in one atomic write — creating rows that do not exist yet.\n     *\n     * **This is the method a collection run calls, and the atomicity is the\n     * reason it exists rather than a property it happens to have.**\n     *\n     * A window holds whatever arrived in it, so a deployment serving two forms of\n     * a page holds two audiences interleaved and is folded once per audience\n     *. Writing those folds as separate calls leaves a state between them\n     * where some are durable and the rest are not — and because counting and\n     * forgetting are one operation (`collect.ts`), the buffer still holds the\n     * window, so the next run folds it again and **adds the already-durable\n     * audiences a second time.** Of a tally's nine counters, `views`, `reached`\n     * and `engaged` are distinct counts and would move little; `dwellMs`,\n     * `activations`, `opens`, `closes` and `completions` are occurrences and\n     * would double, which every rate in this subsystem divides by the first kind\n     * — so the damage is invisible, permanent and looks like a readership\n     * twice as interested as it was.\n     *\n     * So the window is one write or it is none. A store that cannot be atomic\n     * over several audiences cannot be correct here, which is why this is a\n     * required method rather than a capability a caller probes for.\n     *\n     * Two entries naming one audience are added together, not refused: the\n     * guarantee is the same one `counters.ts` gives for two rows naming one\n     * counter, and it is here so that the two shipped stores cannot disagree\n     * about it.\n     */\n    readonly applyWindow: (window: readonly AudienceCounters[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    /**\n     * One audience's counters, which is {@link applyWindow} over a single entry\n     * and is implemented as exactly that in both shipped stores — so the two\n     * cannot drift on the half that matters.\n     *\n     * Kept because a caller composing counters by hand — a backfill, a fixture, a\n     * migration — has one audience and no window, and should not have to wrap it\n     * in a list to say so.\n     */\n    readonly apply: (counters: AppliedCounters, at: string,\n    /**\n     * The audience whose counters these are. Omitted is `aud_everyone`.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
+              "summary": ""
             }
           ]
         },
@@ -12116,6 +12476,199 @@
               "summary": "A fresh view key. Called once per broadcast, never per batch — the whole point is that the batches of one page view agree."
             }
           ]
+        },
+        {
+          "module": "signals/window",
+          "title": "Window",
+          "summary": "The step between a store and a question: read a window of counters, and join it to the trees and the registry the counters were filed against.",
+          "symbols": [
+            {
+              "name": "ReaderWindowSources",
+              "kind": "type",
+              "signature": "type ReaderWindowSources = {\n    /** The counters, the funnel answers and the door rows. */\n    readonly tallies: Pick<ReaderTallyStore, \"tallies\" | \"funnels\" | \"pageViews\">;\n    /**\n     * Where readers were, which is a second store and an optional one.\n     *\n     * A deployment that never configured one is not a deployment whose readers\n     * were nowhere, so an absent store and an empty map are kept apart all the\n     * way to {@link ReaderWindow.regions}.\n     */\n    readonly regions?: Pick<ReaderRegionStore, \"regions\">;\n};",
+              "summary": "The stores a window is read from."
+            },
+            {
+              "name": "ReaderWindow",
+              "kind": "type",
+              "signature": "type ReaderWindow = {\n    readonly tallies: readonly StoredTally[];\n    readonly funnels: readonly StoredFunnel[];\n    readonly pageViews: readonly StoredPageViews[];\n    /**\n     * The region buckets, or `undefined` where no region store was offered.\n     *\n     * `undefined` is *nothing here can say* and `[]` is *the store holds none*,\n     * which is the distinction this subsystem draws everywhere else it has two\n     * such states. A surface that reads them alike reports *we do not\n     * know where your readers are* as *you have no readers abroad*.\n     */\n    readonly regions: readonly StoredRegionCount[] | undefined;\n};",
+              "summary": "One window of counters, as the stores answered."
+            },
+            {
+              "name": "readReaderWindow",
+              "kind": "function",
+              "signature": "const readReaderWindow: (sources: ReaderWindowSources, request?: TallyReadRequest) => Promise<Result<ReaderWindow, ReaderSignalStoreError>>",
+              "summary": "Read one window from the stores, with one scope rather than four."
+            },
+            {
+              "name": "WindowRevision",
+              "kind": "type",
+              "signature": "type WindowRevision = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n};",
+              "summary": "One revision of one page, which is what a tree has to be found for."
+            },
+            {
+              "name": "revisionsIn",
+              "kind": "function",
+              "signature": "const revisionsIn: (window: ReaderWindow) => readonly WindowRevision[]",
+              "summary": "Every revision the window's rows name, deduplicated and in a stable order."
+            },
+            {
+              "name": "RevisionTrees",
+              "kind": "type",
+              "signature": "type RevisionTrees = {\n    /** The tree at that revision, or `undefined` where this source has none. */\n    readonly treeFor: (where: WindowRevision) => LoomTree | undefined;\n};",
+              "summary": "Where the trees come from, as the join needs to see it."
+            },
+            {
+              "name": "treesIn",
+              "kind": "function",
+              "signature": "const treesIn: (trees: Iterable<LoomTree>) => RevisionTrees",
+              "summary": "The trees a caller already holds, as a source."
+            },
+            {
+              "name": "UnjoinedCause",
+              "kind": "type",
+              "signature": "type UnjoinedCause = \n/**\n * The source has no tree at that revision.\n *\n * Ordinary rather than broken: counters outlive the revision they were filed\n * against, so a deployment that has pruned old trees, or scoped its lookup to\n * the revisions it draws, has rows here it cannot read. It is published\n * rather than dropped because the rows are a page's readers, and a screen\n * that silently left them out would under-report a deployment by however many\n * revisions it could not find.\n */\n\"no-tree\"\n/**\n * The source answered with a different page or a different revision from the\n * one asked for.\n *\n * A source's own fault, and the one worth refusing loudly: reading one\n * revision's counters against another revision's tree answers every question\n * on the page with confident nonsense, because the node ids line up often\n * enough to look right. This is the mistake `foreign` was put on a reading to\n * catch, caught one rung earlier where it can still be refused.\n */\n | \"mismatched\";",
+              "summary": "Why a revision the rows name has no reading."
+            },
+            {
+              "name": "UNJOINED_CAUSES",
+              "kind": "value",
+              "signature": "const UNJOINED_CAUSES: readonly UnjoinedCause[]",
+              "summary": "The closed set, for a surface accounting for every revision it cannot draw."
+            },
+            {
+              "name": "describeUnjoinedCause",
+              "kind": "function",
+              "signature": "const describeUnjoinedCause: (cause: UnjoinedCause) => string",
+              "summary": "One line per cause, for a surface saying why a page is not on the screen."
+            },
+            {
+              "name": "UnjoinedRevision",
+              "kind": "type",
+              "signature": "type UnjoinedRevision = WindowRevision & {\n    readonly cause: UnjoinedCause;\n    /** Counter rows left unread, so the cost of not drawing it is a number. */\n    readonly tallies: number;\n};",
+              "summary": "A revision whose rows could not be joined, and why."
+            },
+            {
+              "name": "WindowRegionReading",
+              "kind": "type",
+              "signature": "type WindowRegionReading = WindowRevision & {\n    /**\n     * The form these arrivals were served, or `null` where the rows named none.\n     *\n     * `null` is *no row said*, which is a window written before the column\n     * existed and every window a test builds by hand — not `aud_everyone`,\n     * which would be asserting a name nobody wrote.\n     */\n    readonly audienceId: AudienceId | null;\n    /** The map itself, floored, as {@link regionReadingOf} reads it. */\n    readonly reading: RegionReading;\n};",
+              "summary": "A region map the window joined, keyed so it pairs with the page reading of the same form."
+            },
+            {
+              "name": "WindowRegionReadings",
+              "kind": "type",
+              "signature": "type WindowRegionReadings = {\n    /**\n     * One map per revision, per form, in a stable order.\n     *\n     * **The groups are the region rows' own audience column**, rather than the\n     * forms the other row sets name. Every row is then in exactly one map by\n     * construction, which is what makes {@link WindowRegionReadings.readership}\n     * and these add to the same number of views; grouping by a form named\n     * elsewhere would leave a row naming none in no map at all, and a map holding\n     * no rows is not a form a deployment has arrivals for.\n     */\n    readonly maps: readonly WindowRegionReading[];\n    /**\n     * The deployment's readership, over every row in the window.\n     *\n     * **Published beside the per-form maps rather than instead of them, because\n     * the floor bites harder the narrower the group** — the same sentence\n     * `regionReadingFor` carries. Thirty views of one country split twelve and\n     * eighteen across two forms are a readership the whole map names and both\n     * form maps withhold. A rung that published only the split would answer\n     * *where are my readers* worse than the two calls it replaces.\n     *\n     * Summing two forms' arrivals is right here and wrong on the counters, and\n     * the asymmetry is a published one: a person who arrived arrived once,\n     * whichever form they were served, while adding two forms' node counters is\n     * one number about two pages.\n     */\n    readonly readership: RegionReading;\n    /**\n     * Rows beyond the first for one tree, revision, form and region — dropped\n     * from every map, and counted here.\n     *\n     * A store keeps one row per that key, so this cannot come out of one read: it\n     * is a caller concatenating two windows whose counts are already running\n     * totals. Adding them would double a bucket, which is the one error here that\n     * cannot be undone afterwards, so the first row stands and the fact is\n     * a number. The same rule `regionReadingFor` applies to one revision, applied\n     * once to the whole window so the maps and the readership drop the same rows.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "Where a window's readers were, at the floor the caller handed in."
+            },
+            {
+              "name": "WindowReadingOptions",
+              "kind": "type",
+              "signature": "type WindowReadingOptions = RegionReadingOptions;",
+              "summary": "What the join was asked to read the regions at."
+            },
+            {
+              "name": "WindowReadings",
+              "kind": "type",
+              "signature": "type WindowReadings = {\n    /**\n     * One reading per page, per revision, per form — which is what one reading is\n     * — in a stable order.\n     *\n     * Never two of one: the key every reading above this refuses to count twice\n     * on is the key the window was split by, so a caller may sum across this list\n     * on any figure the reading it derives says may be summed.\n     */\n    readonly pages: readonly PageReading[];\n    /** Revisions the rows name that have no reading, in the same order. */\n    readonly unjoined: readonly UnjoinedRevision[];\n    /**\n     * Where the readers were, or `undefined` where no region store was offered.\n     *\n     * The `undefined` is {@link ReaderWindow.regions}' own, carried rather than\n     * collapsed: *we cannot say where your readers are* and *you have no\n     * readers abroad* are two sentences, and `[]` holds the second — a window\n     * whose store answered with nothing reads as a readership of no views rather\n     * than as no readership.\n     *\n     * **A map here is not held to a tree.** The maps are of arrivals, which need\n     * no tree to be read against, so a revision in {@link WindowReadings.unjoined}\n     * still has its readers counted. Dropping them would under-report a\n     * deployment that has pruned old trees by exactly the readers it has least\n     * other record of, and it would make the maps and the readership disagree.\n     */\n    readonly regions: WindowRegionReadings | undefined;\n};",
+              "summary": "What a window came to once its rows were joined to the pages they are about."
+            },
+            {
+              "name": "windowReadingsOf",
+              "kind": "function",
+              "signature": "const windowReadingsOf: (window: ReaderWindow, trees: RevisionTrees, declarations: PartDeclarations, options?: WindowReadingOptions) => WindowReadings",
+              "summary": "Join a window of counters to the pages it is about."
+            },
+            {
+              "name": "WindowPair",
+              "kind": "type",
+              "signature": "type WindowPair = PageForm & {\n    /** The earlier side. Its revision is always below `now`'s. */\n    readonly was: PageReading;\n    readonly now: PageReading;\n    /**\n     * Revisions of this form the window holds below `was`, oldest first.\n     *\n     * Empty for the ordinary case of two. A deployment that has published three\n     * times inside one window has an older change in its counters, and this is\n     * how a surface says *and one earlier revision* rather than how it reads one:\n     * the pair for it is two of {@link WindowReadings.pages} and\n     * `readingChangeOf`, which is the same call this makes.\n     */\n    readonly superseded: readonly number[];\n};",
+              "summary": "A page in one form, with the two revisions of it a comparison is of."
+            },
+            {
+              "name": "UnpairedForm",
+              "kind": "type",
+              "signature": "type UnpairedForm = PageForm & {\n    /** The one reading of it, carried so a surface drawing the page still has it. */\n    readonly reading: PageReading;\n};",
+              "summary": "A form the window holds one revision of, so there is nothing to compare it against."
+            },
+            {
+              "name": "WindowPairs",
+              "kind": "type",
+              "signature": "type WindowPairs = {\n    /** One per form that has two revisions in the window, in a stable order. */\n    readonly pairs: readonly WindowPair[];\n    /** The forms that have one, in the same order. */\n    readonly unpaired: readonly UnpairedForm[];\n    /**\n     * Readings handed in twice under one `readingKeyOf`, dropped before pairing.\n     *\n     * Nought for anything {@link windowReadingsOf} produced, which never holds\n     * two readings of one key. It is not nought for a caller that concatenated\n     * two windows' readings, and the repeat has to be dropped rather than paired:\n     * a form whose latest revision arrived twice would otherwise pair that\n     * revision with itself and publish *nothing changed* about a change.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "What a window came to once its readings were paired into before-and-afters."
+            },
+            {
+              "name": "windowPairsOf",
+              "kind": "function",
+              "signature": "const windowPairsOf: (readings: readonly PageReading[]) => WindowPairs",
+              "summary": "Pair a window's readings into the before-and-afters the comparisons take."
+            },
+            {
+              "name": "FormPlacing",
+              "kind": "type",
+              "signature": "type FormPlacing =\n/**\n * First served inside the window: the later library holds it and the earlier\n * one did not.\n *\n * This is the figure a library comparison exists to report — `pagesGained`,\n * and `formsGained` where the page was already served in another form\n *. A deployment that published two pages this week and had them left\n * out would read `pagesGained: 0` beside them.\n */\n\"published\"\n/**\n * Served when the window began and not at its end: the earlier library held\n * it and the later one does not.\n *\n * The mirror, and `pagesLost`. Its counters are in the window because readers\n * reached it before it went, which is exactly why leaving it out understates\n * what the deployment changed.\n */\n | \"withdrawn\"\n/**\n * Served throughout and never republished: both libraries hold it, at the one\n * revision there is.\n *\n * The page contributes no movement — its placements pair with themselves —\n * and it does contribute its size, which is what keeps `pages` a count of the\n * library rather than a count of the pages that changed.\n */\n | \"unchanged\";",
+              "summary": "Where a form the window holds one revision of belongs, which is the one thing in this rung the counters cannot answer."
+            },
+            {
+              "name": "FORM_PLACINGS",
+              "kind": "value",
+              "signature": "const FORM_PLACINGS: readonly FormPlacing[]",
+              "summary": "The closed set, for a surface accounting for every form it was asked about."
+            },
+            {
+              "name": "describeFormPlacing",
+              "kind": "function",
+              "signature": "const describeFormPlacing: (placing: FormPlacing) => string",
+              "summary": "One line per placing, for a surface saying which library a page is in and why."
+            },
+            {
+              "name": "FormPlacings",
+              "kind": "type",
+              "signature": "type FormPlacings = {\n    /** Where that form belongs, or `undefined` where this source cannot say. */\n    readonly placingFor: (form: PageForm) => FormPlacing | undefined;\n};",
+              "summary": "Where the placings come from, as the libraries need to see them."
+            },
+            {
+              "name": "PlacedForm",
+              "kind": "type",
+              "signature": "type PlacedForm = PageForm & {\n    readonly placing: FormPlacing;\n};",
+              "summary": "One form a deployment has placed, as {@link placingsIn} takes them."
+            },
+            {
+              "name": "placingsIn",
+              "kind": "function",
+              "signature": "const placingsIn: (placed: Iterable<PlacedForm>) => FormPlacings",
+              "summary": "The placings a caller already holds, as a source."
+            },
+            {
+              "name": "WindowLibraries",
+              "kind": "type",
+              "signature": "type WindowLibraries = {\n    /** The deployment's pages at the revisions the window opened on. */\n    readonly was: LibraryWindow;\n    /** The same pages at the revisions it closed on. */\n    readonly now: LibraryWindow;\n    /**\n     * Forms held at one revision that the placings could not place, in a stable\n     * order.\n     *\n     * On neither side, because a side is the assertion: putting an unplaceable\n     * form on the later one publishes a page nobody touched as a page gained\n     *, and putting it on both publishes a page that was published this\n     * week as a page that was always there. It is reported for the reason\n     * {@link UnjoinedRevision} and {@link WindowPairs.unpaired} are — a screen\n     * that silently left it out would show a deployment fewer pages than it has\n     * — and a caller that can place it calls again with a source that does.\n     */\n    readonly unplaced: readonly UnpairedForm[];\n    /**\n     * Forms named more than once across `pairs` and `unpaired`, dropped after the\n     * first.\n     *\n     * Nought for anything {@link windowPairsOf} produced, which files each form\n     * in exactly one of the two lists. It is not nought for a caller that\n     * assembled a {@link WindowPairs} of its own or concatenated two, and the\n     * repeat has to be dropped here rather than carried: two readings of one form\n     * on one side are `ambiguous` to `pairedWindowOf`, which takes the page out of\n     * every figure in the comparison — so the page would vanish out of a total\n     * that went on looking right. The pair wins over the unpaired form,\n     * because it is the same form with a revision more.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "The two libraries a window holds, as the four library comparisons take them."
+            },
+            {
+              "name": "windowLibrariesOf",
+              "kind": "function",
+              "signature": "const windowLibrariesOf: (held: WindowPairs, rows: readonly StoredPageViews[], placings: FormPlacings) => WindowLibraries",
+              "summary": "Assemble a window's pairs into the two libraries the library comparisons take."
+            },
+            {
+              "name": "DeploymentReadingContext",
+              "kind": "type",
+              "signature": "type DeploymentReadingContext = {\n    /** The trees the window's revisions were filed against, as the caller holds them. */\n    readonly trees: RevisionTrees;\n    /** What each primitive declares it plays and says, from the registry. */\n    readonly declarations: PartDeclarations;\n    /**\n     * The smallest region bucket this deployment will name, in page views.\n     *\n     * Required, and `regionFloorOf` still raises anything below the runtime's own\n     * minimum: a deployment may be more careful than the default and may not be\n     * less. A caller with nothing of its own to say passes\n     * `DEFAULT_REGION_FLOOR` and has said so.\n     */\n    readonly floor: number;\n    /**\n     * Where a form the window holds one revision of belongs.\n     *\n     * A caller that cannot place any of them hands in `placingsIn([])`, which\n     * reports every such form in {@link WindowLibraries.unplaced} rather than\n     * guessing it onto a side. That is the honest shape of *this deployment does\n     * not know what it published when*, and it is one call rather than an\n     * argument left out.\n     */\n    readonly placings: FormPlacings;\n};",
+              "summary": "The configuration a deployment hands a reading of its own window."
+            },
+            {
+              "name": "WindowAssembly",
+              "kind": "type",
+              "signature": "type WindowAssembly = {\n    /** One reading per page, per revision, per form, with the regions beside them. */\n    readonly readings: WindowReadings;\n    /** The before-and-afters, which is what five of the nine comparisons take. */\n    readonly pairs: WindowPairs;\n    /** The two libraries, which is what the other four take. */\n    readonly libraries: WindowLibraries;\n};",
+              "summary": "Everything a window holds, as the readings and the comparisons take it."
+            },
+            {
+              "name": "windowAssemblyOf",
+              "kind": "function",
+              "signature": "const windowAssemblyOf: (window: ReaderWindow, context: DeploymentReadingContext) => WindowAssembly",
+              "summary": "Assemble a window into every subject a reading or a comparison of it takes."
+            }
+          ]
         }
       ]
     },
@@ -12127,7 +12680,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12262,7 +12815,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12324,7 +12877,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12849,7 +13402,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12919,7 +13472,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13341,7 +13894,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1746,
+        "packageNames": 1830,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

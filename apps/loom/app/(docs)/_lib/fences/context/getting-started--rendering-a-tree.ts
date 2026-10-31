@@ -9,9 +9,13 @@ import type { RenderOptions, RenderRequest, TreeSource } from "@jam-overture/loo
  * assembled at startup, and `notFound` is the framework's. All of those are the
  * story's.
  *
- * `renderRequest` is not, and the page does not import it — it is introduced in
- * prose as the thing that loads, parses and renders — so it comes from where it
- * really lives and the call is checked against its real signature.
+ * `renderRequest` is not the story's and is **not lent**. It was, until the
+ * excuse for lending it turned out to be false: a `function-body` fence can
+ * carry an import, because `program.ts` lifts one out before it puts the wrapper
+ * back on, and the first block on this page has opened with three of them since
+ * the page existed. So the handler shows its own door, which is what a reader
+ * copying it needs, and this file holds only what a reader is meant to
+ * substitute.
  */
 
 export declare const tree: LoomTree
@@ -28,5 +32,3 @@ export declare const request: RenderRequest
 
 /** The framework's own. In Next it ends the request rather than returning. */
 export declare const notFound: () => never
-
-export { renderRequest } from "@jam-overture/loom/react"

@@ -63,7 +63,15 @@ describe("the number of steps, as the site states it", () => {
       }
     }
 
-    expect(mechanism).toContain(`${spellCapitalised(JOURNEY.length)} steps, every time`)
+    /**
+     * The heading, as the page spells it.
+     *
+     * It read `${spellCapitalised(JOURNEY.length)} steps, every time` until
+     * 24 October, when the maintainer banned a headline that ends in a comma
+     * and then a clause: *"no one talks like that."* `voice.test.ts` holds the
+     * shape now, and this holds the count, which is what this file is for.
+     */
+    expect(mechanism).toContain(`The same ${spell(JOURNEY.length)} steps every time`)
 
     /**
      * The second sentence this checked — *the five steps above*, written by the

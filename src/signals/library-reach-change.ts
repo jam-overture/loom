@@ -3,7 +3,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
 import { inFormOrder, type ComparedPopulations, type PageForm } from "./audiences.js"
-import { doorOf, type PageDoor } from "./door.js"
+import { atDoorScale, doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import { pairedWindowOf, partsByNodeIn, type PairedWindow } from "./library-change.js"
 import type { UnscaledPage } from "./library-reach.js"
@@ -777,14 +777,25 @@ export const readerShareCauseOf = (
  * weight, which is the figure a comparison of two readerships publishes
  * (0247), over places rather than regions.
  *
- * Nought where either side has no weight at all, which a silence has already
- * accounted for.
+ * **`null` where either side has no weight at all**, because there is no
+ * distance between a mix and nothing to have one
+ * ([0307](../../decisions/0307-a-distance-between-a-mix-and-nothing-is-withheld-and-the-invariant-both-rolls-rest-on-is-asserted.md)).
+ * A nought here is the one value a surface reads as *the weights did not move*,
+ * which is the opposite sentence; 0247's own reading withholds `moved` in the
+ * same state for the same reason.
+ *
+ * **Neither roll can reach it**, and that is asserted rather than described:
+ * both compute this only where their silence is `null`, and a door that can
+ * scale a page has counted at least one page view at it ([`door.ts`](door.ts)),
+ * so a measured row has a weight behind it. The guard is here because the
+ * helper is exported and a caller outside the two rolls would otherwise divide
+ * by nought.
  */
 export const weightMovedOver = (
   weights: readonly { readonly was: number; readonly now: number }[],
   totals: { readonly was: number; readonly now: number }
-): number => {
-  if (totals.was === 0 || totals.now === 0) return 0
+): number | null => {
+  if (totals.was === 0 || totals.now === 0) return null
 
   return (
     weights.reduce(
@@ -931,11 +942,11 @@ const add = (
    * one's `shareNow` is drawing the same number, and three floats multiplied
    * and divided in two orders agree to fifteen places and not to sixteen.
    */
-  into.metWas += (reachedWas * doors.was.counted) / doors.was.appearances
-  into.metNow += (reachedNow * doors.now.counted) / doors.now.appearances
+  into.metWas += atDoorScale(reachedWas, doors.was)
+  into.metNow += atDoorScale(reachedNow, doors.now)
   /** The same term with the other side's weight, which is the whole of a counterfactual. */
-  into.heldTraffic += (reachedNow * doors.was.counted) / doors.now.appearances
-  into.heldReading += (reachedWas * doors.now.counted) / doors.was.appearances
+  into.heldTraffic += atDoorScale(reachedNow, doors.now, doors.was)
+  into.heldReading += atDoorScale(reachedWas, doors.was, doors.now)
   into.weights.push({ was: doors.was.counted, now: doors.now.counted })
   into.driftWas += doors.was.drift
   into.driftNow += doors.now.drift

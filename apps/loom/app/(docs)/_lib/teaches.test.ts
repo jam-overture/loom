@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest"
 import { REPOSITORY_ROOT } from "./architecture/source"
 import { apiEntries } from "./api/reference"
 import { entryPoints } from "./entry-points"
+import { installCommands } from "./installing"
 import { packageOf, PUBLISHED_AS } from "./packages"
 import { readQuickstartSource } from "./quickstart/program"
 
@@ -147,19 +148,38 @@ describe("what the site tells a reader to import", () => {
    * Installation is where a stranger starts, so the package they will not
    * otherwise know to install has to be on it — in the command, not only in a
    * table further down.
+   *
+   * **The command is read rather than matched out of the page**, as of
+   * 28 October. It was a fenced block and this test read the fence, which held
+   * the two published names against the one copy a reader sees and said
+   * nothing about the other six packages the site's code blocks import — the
+   * gap `_lib/installing.ts` was written for. The page prints the command from
+   * that list now, so this asserts the list and the absence of a second copy,
+   * which is the shape the quickstart's own check took a month earlier.
    */
   it("puts every package in the install command on the page a stranger starts from", () => {
     const installation = pages().find((page) => page.path.includes("getting-started/installation"))
 
     expect(installation).toBeDefined()
+    expect(installation?.text).toContain("<InstallCommand />")
 
-    const command = installation?.text.match(/```bash\n(?<line>[^`]*)```/u)?.groups?.line ?? ""
+    const command = installCommands().join("\n")
 
     expect(command).toContain("@jam-overture/loom")
 
     for (const published of PUBLISHED_AS.values()) {
       expect(command, published).toContain(packageOf(published))
     }
+  })
+
+  it("prints that command from the list and not from a second copy on the page", () => {
+    const installation = pages().find((page) => page.path.includes("getting-started/installation"))
+
+    const fenced = [...(installation?.text ?? "").matchAll(/```[a-z]*\n(?<body>[\s\S]*?)```/gu)].map(
+      (match) => match.groups?.body ?? ""
+    )
+
+    expect(fenced.filter((body) => body.includes("pnpm add"))).toEqual([])
   })
 })
 

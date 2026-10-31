@@ -1,0 +1,51 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/getting-started/rendering-a-tree#it-always-returns-an-element",
+      "out": "2026-10-30-docs-where-the-reader-landed-wide-returns-after",
+      "viewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "waitFor": "main pre.p-4",
+      "measure": [
+        "main pre.p-4"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/rendering-a-tree#serving-a-page-rather-than-rendering-a-value",
+      "out": "2026-10-30-docs-where-the-reader-landed-wide-handler-after",
+      "viewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "waitFor": "main pre.p-4",
+      "measure": [
+        "main pre.p-4"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/testing-what-you-built#does-your-own-store-keep-its-promises",
+      "out": "2026-10-30-docs-where-the-reader-landed-wide-store-after",
+      "viewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "waitFor": "main pre.p-4",
+      "measure": [
+        "main pre.p-4"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/rendering-a-tree#it-always-returns-an-element",
+      "out": "2026-10-30-docs-where-the-reader-landed-phone-returns",
+      "viewport": "phone",
+      "waitFor": "main pre.p-4",
+      "measure": [
+        "main pre.p-4"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/getting-started/introduction",
+      "out": "2026-10-27-docs-the-route-says-what-it-walks-past-wide-route",
+      "viewport": {
+        "width": 1280,
+        "height": 1150
+      },
+      "waitFor": "[data-arrival-route]",
+      "do": [
+        {
+          "scrollTo": "[data-arrival-route]"
+        }
+      ],
+      "measure": [
+        "nav[aria-label=\"Documentation\"]",
+        "[data-arrival-route]",
+        "[data-arrival-route] li"
+      ]
+    },
+    {
+      "path": "/docs/getting-started",
+      "out": "2026-10-27-docs-the-route-says-what-it-walks-past-wide-section",
+      "viewport": {
+        "width": 1280,
+        "height": 1250
+      },
+      "waitFor": "nav[aria-label=\"Documentation\"]",
+      "measure": [
+        "nav[aria-label=\"Documentation\"]",
+        "main ul li"
+      ]
+    }
+  ]
+}

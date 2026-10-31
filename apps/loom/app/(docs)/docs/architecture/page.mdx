@@ -1,0 +1,31 @@
+import { PagesInThisSection } from "@/app/(docs)/_components/section-landing"
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { DOCS_LANDING_SLUG } from "@/app/(docs)/_lib/nav"
+
+export const metadata = pageMetadata("architecture", DOCS_LANDING_SLUG)
+
+# Architecture
+
+This section is a map rather than an explanation, and it is the smallest section
+on the site on purpose.
+
+Read it when you want to know **why** rather than **how**, and expect to be sent
+somewhere else for the reasoning.
+
+## The pages in this section
+
+<PagesInThisSection section="architecture" />
+
+## Why nothing here argues the case
+
+Loom's reasoning is written down in two places that were built for it. A
+**course** teaches the ideas in order, with exercises, and is meant to be worked
+through. A **record** holds every ruling that has been made, written on the day
+it was made, saying what was rejected as well as what was chosen. Both are kept
+in the repository beside the code they decide.
+
+A third copy of an argument is a third copy to keep true, and the copy on a
+documentation site is the one that goes stale. Nothing breaks when a page here
+drifts away from the ruling it describes, so nothing tells anybody. The pages
+above may name a ruling, count them and say what you would be deciding by
+opening one. The argument itself stays where it is written.

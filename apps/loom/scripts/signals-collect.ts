@@ -6,13 +6,20 @@ import postgres from "postgres"
 import {
   collectReaderSignals,
   describeCollection,
-  readerSignalWindowSchema,
+  describeRetentionPromise,
+  retentionPromiseOf,
 } from "@jam-overture/loom/signals"
 import { postgresApplicationStore } from "@jam-overture/loom/postgres"
 import { postgresReaderSignalJournal, postgresReaderTallyStore } from "@jam-overture/loom/signals/postgres"
 import { DEFAULT_APPLICATION_ID, describeApplicationStoreError } from "@jam-overture/loom/store"
 
 import { resolveConnectionString } from "../app/_lib/app/connection"
+import { deploymentNoticeOf } from "../app/_lib/reader-signals/notice"
+import {
+  describeCollectionWindow,
+  describeSweepSchedule,
+  readIntakeSettings,
+} from "../app/_lib/reader-signals/settings"
 
 /**
  * Counts the reader-signal buffer into the durable tallies and drops what it
@@ -41,26 +48,63 @@ const { loadEnvConfig } = nextEnv
 loadEnvConfig(process.cwd())
 
 /**
- * One hour, which is the runtime's own default and is repeated here only so the
- * message below can name it. It is the age a batch reaches before it is counted
- * and dropped, and it is one number for three facts (0158): how long a page view
- * is given to finish, how long a view key lives, and how far the tallies lag the
- * buffer.
+ * This deployment's whole intake configuration, read once.
+ *
+ * **Read where the rest of this deployment's intake settings are read** (0317).
+ * This script used to spell an hour out again and parse the environment itself,
+ * so the package's copy of the default was the one with the reasoning attached
+ * and this one was the copy a deployment's batches were actually swept on.
+ *
+ * All of it rather than the two settings a sweep acts on, because the run now
+ * judges its own evidence against the notice this deployment publishes (0321),
+ * and `deploymentNoticeOf` is what builds that notice. A second assembly of it
+ * here would be a second ceiling, which is the fault above in another file.
  */
-const DEFAULT_WINDOW_MS = 60 * 60 * 1000
+const settings = readIntakeSettings()
 
-const configured = readerSignalWindowSchema.safeParse({
-  windowMs: Number(process.env.LOOM_SIGNAL_WINDOW_MS ?? DEFAULT_WINDOW_MS),
-})
+/**
+ * The age a batch reaches before it is counted and dropped — one number for
+ * three facts (0158): how long a page view is given to finish, how long a view
+ * key lives, and how far the tallies lag the buffer.
+ */
+const sweepWindow = settings.window
 
-if (!configured.success) {
+/**
+ * A window that cannot be read stops the sweep rather than falling back to the
+ * default. An operator who typed a day meant a day: sweeping on an hour instead
+ * would change what their counters mean and how long a delivery lives, which is
+ * a number their readers are told, and it would do it silently.
+ */
+if (sweepWindow.state === "unusable") {
   console.error(
-    `LOOM_SIGNAL_WINDOW_MS is not a usable window: ${
-      configured.error.issues[0]?.message ?? "invalid"
-    }\nBelow one minute every page view straddles a boundary, so the view counts stop meaning anything.`
+    `loom: ${describeCollectionWindow(sweepWindow)}\n` +
+      "Below one minute every page view straddles a boundary, so the view counts stop meaning anything."
   )
   process.exit(1)
 }
+
+console.log(`loom: ${describeCollectionWindow(sweepWindow)}`)
+
+/**
+ * This script **is** the sweep, so it is the right place to say whether anybody
+ * was told how often it runs.
+ *
+ * It never refuses on it: an unstated schedule costs a sentence on a privacy
+ * page and nothing a run does (0320). Printed because the operator reading this
+ * output is the one person who knows what the cron interval actually is.
+ */
+console.log(`loom: ${describeSweepSchedule(settings.sweep)}`)
+
+/**
+ * The retention this deployment publishes to its readers, taken off the notice
+ * itself rather than rebuilt from the two settings behind it.
+ *
+ * It is the ceiling each run below is judged against, and the only reason that
+ * judgement means anything is that it is the same value a reader is shown
+ * (0321): a sweep that derived its own would be able to clear a promise nobody
+ * made.
+ */
+const { bufferMs, sweep } = deploymentNoticeOf(settings)
 
 const connectionString = resolveConnectionString()
 
@@ -121,10 +165,23 @@ try {
     const outcome = await collectReaderSignals(
       postgresReaderSignalJournal(db, { application }),
       postgresReaderTallyStore(db, { application }),
-      configured.data
+      { windowMs: sweepWindow.windowMs }
     )
 
     console.log(`loom: ${application}: ${describeCollection(outcome)}`)
+
+    /**
+     * Whether this run's own evidence agrees with what its readers are told.
+     *
+     * Printed per application because each has its own buffer, and never a
+     * reason to fail the job: a ceiling that is not being kept is the
+     * operator's to fix by sweeping more often or by stating the interval they
+     * sweep on, and a run that exited here would stop the sweep that is the
+     * remedy.
+     */
+    const promise = retentionPromiseOf(outcome, { bufferMs, sweep })
+
+    console.log(`loom: ${application}: ${describeRetentionPromise(promise)}`)
 
     /**
      * `counted-not-forgotten` fails the job as loudly as the two that changed

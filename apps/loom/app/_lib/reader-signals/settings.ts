@@ -1,4 +1,10 @@
-import { DEFAULT_REGION_FLOOR, regionFloorOf } from "@jam-overture/loom/signals"
+import {
+  DEFAULT_READER_SIGNAL_WINDOW_MS,
+  DEFAULT_REGION_FLOOR,
+  MIN_READER_SIGNAL_WINDOW_MS,
+  readerSignalWindowSchema,
+  regionFloorOf,
+} from "@jam-overture/loom/signals"
 
 import { resolveTrustedHops } from "@/app/(portal)/_lib/auth/subject"
 
@@ -151,6 +157,123 @@ export const describeRegionSettings = (region: RegionSettings): string => {
   return `where readers are is read from ${region.header}; ${floor}`
 }
 
+export const WINDOW_KEY = "LOOM_SIGNAL_WINDOW_MS"
+
+/**
+ * The age a delivery reaches before this deployment counts it and drops it.
+ *
+ * **The number is the runtime's and the reading is here**, which is the point
+ * of this block: `DEFAULT_READER_SIGNAL_WINDOW_MS` carries the whole argument
+ * for an hour in its own doc comment — longer is more accurate, shorter is more
+ * anonymous, and rule 5 makes it a deployment's rather than a constant — and
+ * the sweep used to repeat the arithmetic rather than import it. Two spellings
+ * of one default is the fault this subsystem has been bitten by twice (0218,
+ * 0235), and this one had a direction: the package's copy had the reasoning and
+ * the script's copy was the one a deployment's batches were actually swept on.
+ *
+ * `readerSignalWindowSchema` is the gate, for the same reason — a window below
+ * a minute is refused by the runtime, so the state here is read off the
+ * runtime's own answer instead of a second rule about one setting.
+ *
+ * **A value that is not a window is neither**, as everywhere else in this file.
+ * It is reported with the default beside it so a status line has a number to
+ * print, and the sweep refuses to run on it: an operator who typed a day meant
+ * a day, and sweeping on an hour because their value could not be read would
+ * silently change both what their aggregates mean and the one number a notice
+ * publishes to readers about how long a delivery lives.
+ */
+export type CollectionWindow =
+  | { readonly state: "default"; readonly windowMs: number }
+  | { readonly state: "set"; readonly windowMs: number }
+  /** The default is carried so a status can print a number; nothing sweeps on it. */
+  | { readonly state: "unusable"; readonly given: string; readonly windowMs: number }
+
+export const readCollectionWindow = (value: string | undefined): CollectionWindow => {
+  if (value === undefined || value.trim() === "") {
+    return { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS }
+  }
+
+  const asked = readerSignalWindowSchema.safeParse({ windowMs: Number(value.trim()) })
+
+  return asked.success
+    ? { state: "set", windowMs: asked.data.windowMs }
+    : { state: "unusable", given: value, windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS }
+}
+
+/**
+ * One sentence about the window, for an operator.
+ *
+ * It names the minimum rather than describing it, because the ordinary way this
+ * setting is written wrongly is a units mistake — `60` reads as an hour and
+ * means a minute and a tenth of a second — and a message that says *at least
+ * 60000* tells an operator which units it wanted.
+ */
+export const describeCollectionWindow = (window: CollectionWindow): string =>
+  window.state === "unusable"
+    ? `${WINDOW_KEY} is "${window.given}", which is not a window this runtime will sweep on, so nothing is being counted. ` +
+      `It is whole milliseconds and at least ${MIN_READER_SIGNAL_WINDOW_MS}; remove it to sweep on ${DEFAULT_READER_SIGNAL_WINDOW_MS}.`
+    : window.state === "set"
+      ? `a delivery is counted into the totals and dropped once it is ${window.windowMs}ms old`
+      : `a delivery is counted into the totals and dropped once it is ${window.windowMs}ms old; ` +
+        `set ${WINDOW_KEY} to change it`
+
+export const SWEEP_KEY = "LOOM_SIGNAL_SWEEP_MS"
+
+/**
+ * How often this deployment runs the sweep, as it states it.
+ *
+ * **The one intake fact no code in this repository can discover.** The window
+ * above is the age a delivery ripens at; the sweep is `signals-collect.ts`, and
+ * what runs it is a cron, a deploy hook or an operator, outside the
+ * application. So a deployment can have a working endpoint, a notice naming an
+ * hour, and nothing sweeping — and the readers it collects about are told an
+ * age that reads like a deletion.
+ *
+ * Stating it here closes that, and it buys the operator half too: the ceiling
+ * the notice publishes is the ripeness window plus one sweep, which is exactly
+ * the number `CollectionSchedule.foldsWithinMs` asks for when judging whether
+ * collection has stalled (0274). One stated interval, both halves derived.
+ *
+ * **Unstated is the default and is honest.** It publishes an age with *nothing
+ * here promises when it actually goes* beside it, which is what a deployment
+ * that has not told anybody its schedule is in a position to say. A value that
+ * is not whole milliseconds above nought is `unusable` rather than quietly
+ * unstated, as everywhere else in this file — an operator who typed
+ * `LOOM_SIGNAL_SWEEP_MS=10m` meant ten minutes and deserves to be told their
+ * readers were promised nothing.
+ */
+export type SweepSchedule =
+  | { readonly state: "unstated" }
+  | { readonly state: "stated"; readonly everyMs: number }
+  | { readonly state: "unusable"; readonly given: string }
+
+export const readSweepSchedule = (value: string | undefined): SweepSchedule => {
+  if (value === undefined || value.trim() === "") return { state: "unstated" }
+
+  const asked = Number(value.trim())
+
+  return Number.isInteger(asked) && asked > 0
+    ? { state: "stated", everyMs: asked }
+    : { state: "unusable", given: value }
+}
+
+/**
+ * One sentence about the sweep's schedule, for an operator.
+ *
+ * It says what the *readers* are being told, because that is the consequence an
+ * operator cannot see from anywhere else: nothing fails, nothing is refused,
+ * and the only difference an unstated schedule makes is a weaker sentence on a
+ * privacy page.
+ */
+export const describeSweepSchedule = (sweep: SweepSchedule): string =>
+  sweep.state === "unusable"
+    ? `${SWEEP_KEY} is "${sweep.given}", which is not an interval, so readers are told only when a delivery ripens and not when it goes. ` +
+      `It is whole milliseconds above nought; remove it to say nothing.`
+    : sweep.state === "stated"
+      ? `the sweep is stated to run at least every ${sweep.everyMs}ms, and that is published as a ceiling on how long a delivery lives`
+      : `how often the sweep runs is not stated, so readers are told only when a delivery ripens; ` +
+        `set ${SWEEP_KEY} to how often your cron runs to publish a ceiling`
+
 export type IntakeSettings = {
   readonly chosen: IntakeSwitch
   /**
@@ -161,6 +284,29 @@ export type IntakeSettings = {
    */
   readonly hops: number
   readonly region: RegionSettings
+  /**
+   * The window this deployment's sweep counts on.
+   *
+   * Read here rather than in the script that sweeps, because it is the one
+   * intake setting that was not: the switch, the region switch, the region
+   * header and the region floor were all read in this file with a state for a
+   * value that could not be used, and the window was read inline with
+   * `Number(…)` and no state at all.
+   *
+   * **The door does not refuse on it.** A window that cannot be read stops the
+   * sweep and nothing else: refusing batches as well would lose the deliveries
+   * a working sweep could still count once the value is fixed.
+   */
+  readonly window: CollectionWindow
+  /**
+   * How often this deployment's sweep runs, where it has said.
+   *
+   * Nothing in the application reads it but the notice: the door does not
+   * refuse on it and the sweep does not run on it. It is here because it is a
+   * fact about this deployment's collection, and this is where the facts about
+   * this deployment's collection are read (0317).
+   */
+  readonly sweep: SweepSchedule
 }
 
 export const readIntakeSettings = (
@@ -173,4 +319,6 @@ export const readIntakeSettings = (
     header: regionHeaderOf(env[REGION_HEADER_KEY]),
     floor: readRegionFloor(env[REGION_FLOOR_KEY]),
   },
+  window: readCollectionWindow(env[WINDOW_KEY]),
+  sweep: readSweepSchedule(env[SWEEP_KEY]),
 })

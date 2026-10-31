@@ -157,6 +157,31 @@ export type Rollup = {
    * totals, instead of showing a rate that is quietly wrong.
    */
   readonly uncorrelated: number
+  /**
+   * Batches this fold refused as a repeat of one it had already folded.
+   *
+   * A sender may deliver the same batch twice — a host's retry queue draining
+   * after an outage is the case `MAX_BATCHES_PER_DELIVERY` exists to allow, and
+   * an edge network replaying a `POST` is the case nobody writes. What that
+   * costs is **asymmetric and therefore invisible**: `views`, `reached`,
+   * `engaged` and `appearances` are sets of view keys, so a repeat adds the key
+   * it already holds and moves nothing, while `dwellMs`, `activations`, `opens`,
+   * `closes` and `completions` are occurrences and double. Every rate this
+   * subsystem publishes divides the second kind by the first, so a repeat does
+   * not look like noise — it looks like a reader who was twice as interested,
+   * and the cost of it is permanent (0158).
+   *
+   * So a batch identical to one already folded in this window is folded once and
+   * counted here. **Only where it carries a view key**: without one, two
+   * identical batches are as likely to be two readers in the same millisecond as
+   * one batch arriving twice, and dropping a reader to avoid a repeat is the
+   * worse of the two mistakes.
+   *
+   * Reported rather than silent, because the number is a fact about a
+   * deployment's senders and not about its readers: a window with repeats in it
+   * every run is a retry loop somebody should find.
+   */
+  readonly redelivered: number
 }
 
 export const EMPTY_ROLLUP: Rollup = {
@@ -165,6 +190,7 @@ export const EMPTY_ROLLUP: Rollup = {
   views: 0,
   appearances: [],
   uncorrelated: 0,
+  redelivered: 0,
 }
 
 /**
@@ -180,8 +206,79 @@ const withinOf = (signal: ReaderSignalBatch["signals"][number]): readonly Signal
     ? signal.within
     : []
 
+/**
+ * What joins the parts of every composite key in this module.
+ *
+ * A byte no tree id, node id, kind or decimal number can contain, so no two
+ * different tuples can spell one key. **Written as an escape and never as a
+ * literal control byte**: a raw `NUL` in a source file makes the whole file
+ * binary to every content search there is, which is how four of these sat in
+ * this module unreadable by `grep` for a month.
+ *
+ * One constant rather than one per key, because four spellings of a separator
+ * that agree today are four chances to disagree tomorrow — the fault the upsert
+ * keys of the counter tables were moved into `counters.ts` to avoid.
+ */
+const SEP = "\u0000"
+
 /** A tree and revision, as one string, because a tally is keyed by the pair. */
-const revisionKey = (treeId: TreeId, revision: number): string => `${treeId} ${revision}`
+const revisionKey = (treeId: TreeId, revision: number): string => `${treeId}${SEP}${revision}`
+
+/**
+ * One signal, as every field that could tell it from another.
+ *
+ * Spelled out per kind rather than serialised, because `JSON.stringify` of a
+ * parsed object is a key whose stability depends on property order — which is
+ * the order the sender's JSON happened to use. Two deliveries of one batch would
+ * then be two keys, and the repeat this is here to find would be folded twice.
+ *
+ * `within` is in it because a page changes under a reader: a client component
+ * mounting or a boundary resolving moves a control into a band it was not in,
+ * and the ancestry is read off the live DOM when the event happens. So two
+ * presses on one node can differ in nothing but the band they were inside, and
+ * each owes its band a credit. `rollup.test.ts` holds that case, so the clause
+ * is checked rather than assumed.
+ */
+const signalKey = (signal: ReaderSignalBatch["signals"][number]): string => {
+  const address = `${signal.kind}${SEP}${signal.nodeId}${SEP}${signal.type}`
+  const within = withinOf(signal)
+    .map((region) => `${region.nodeId}${SEP}${region.type}`)
+    .join(SEP)
+
+  if (signal.kind === "dwelled") return `${address}${SEP}${signal.ms}`
+  if (signal.kind === "disclosed") {
+    return `${address}${SEP}${signal.at}${SEP}${signal.open ? "open" : "shut"}${SEP}${within}`
+  }
+
+  return `${address}${SEP}${signal.at}${SEP}${within}`
+}
+
+/**
+ * A whole batch, as what distinguishes it from every other batch of its page
+ * view.
+ *
+ * The envelope and the contents both, and `sentAt` is the part that does the
+ * work: within one page view the broadcaster flushes what the ledger holds and
+ * clears it, so a second delivery of the *same* content at the *same* stamp is
+ * something no page does — it is one batch that arrived twice. A real second
+ * flush carries a later stamp, different contents, or both, and so a different
+ * key.
+ *
+ * It is a key and not a digest. A 32-bit hash of this would collide on roughly
+ * one window in a few million and lose a real batch when it did, which is a
+ * worse failure than the one being prevented; the memory a window of full keys
+ * costs is stated in {@link rollUp}.
+ */
+const batchKey = (batch: ReaderSignalBatch, view: ViewKey): string =>
+  [
+    batch.treeId,
+    batch.revision,
+    view,
+    batch.sentAt,
+    batch.audience ?? "",
+    batch.first === true ? "first" : "",
+    ...batch.signals.map(signalKey),
+  ].join(SEP)
 
 type Accumulating = {
   readonly treeId: TreeId
@@ -205,7 +302,7 @@ const accumulatorFor = (
   nodeId: NodeId,
   type: PrimitiveType
 ): Accumulating => {
-  const key = `${revisionKey(batch.treeId, batch.revision)} ${nodeId}`
+  const key = `${revisionKey(batch.treeId, batch.revision)}${SEP}${nodeId}`
   const existing = into.get(key)
   if (existing !== undefined) {
     /**
@@ -248,7 +345,7 @@ const accumulatorFor = (
  * about before it has seen the batches.
  */
 const endKey = (treeId: TreeId, revision: number, nodeId: NodeId, kind: ReaderSignalKind): string =>
-  `${revisionKey(treeId, revision)} ${nodeId} ${kind}`
+  `${revisionKey(treeId, revision)}${SEP}${nodeId}${SEP}${kind}`
 
 const tallyOf = (accumulating: Accumulating): ReaderTally => ({
   treeId: accumulating.treeId,
@@ -299,6 +396,16 @@ export type RollupOptions = {
  * section" means nothing once a proposal has moved it, and adding two revisions
  * of a node together is exactly the mistake that makes *before versus after a
  * change* unreadable.
+ *
+ * **A batch delivered twice is folded once**, where it carries a view key, and
+ * the repeats are reported as {@link Rollup.redelivered}. The guarantee is
+ * exactly as wide as the window: two deliveries of one batch that land either
+ * side of a collection boundary are two windows' input and are counted twice,
+ * bounded by *(retry delay ÷ window length)* — the same shape of bound already
+ * stated for the page views that straddle one (0147), and shrinking with the
+ * same setting. The one-operation rule is untouched (0158): applying one
+ * window's rollup twice still doubles it, because that is two runs rather than
+ * two batches, and nothing here can see the other run.
  */
 export const rollUp = (
   batches: readonly ReaderSignalBatch[],
@@ -318,12 +425,38 @@ export const rollUp = (
     { readonly treeId: TreeId; readonly revision: number; readonly views: Set<ViewKey> }
   >()
   const views = new Set<ViewKey>()
+  /**
+   * The batches this fold has already taken, so a repeat is not taken again.
+   *
+   * A window of 5,000 batches of a few signals each holds a few hundred
+   * kilobytes of keys, against the per-node view sets a 6,000-node page already
+   * puts beside them; `MAX_COLLECTION_SCAN` batches of ten signals is the worst
+   * case and is a few megabytes. It is a `Set` of strings and one lookup per
+   * batch, so the fold stays linear in the signals it was handed (rule 4).
+   */
+  const taken = new Set<string>()
   let uncorrelated = 0
+  let redelivered = 0
 
   for (const batch of batches) {
     const { view } = batch
     if (view === undefined) uncorrelated += 1
     else views.add(view)
+
+    /**
+     * Before anything is counted, and only where there is a view key to make
+     * the judgement safe. Nothing above this point can move twice — `views` is
+     * a set and the key is already in it — so the refusal changes no figure a
+     * repeat could not already have changed.
+     */
+    if (view !== undefined) {
+      const identity = batchKey(batch, view)
+      if (taken.has(identity)) {
+        redelivered += 1
+        continue
+      }
+      taken.add(identity)
+    }
 
     const key = revisionKey(batch.treeId, batch.revision)
     const touched = revisions.get(key)
@@ -384,5 +517,6 @@ export const rollUp = (
       .filter(({ views: seen }) => seen.size > 0)
       .map(({ treeId, revision, views: seen }) => ({ treeId, revision, views: seen.size })),
     uncorrelated,
+    redelivered,
   }
 }

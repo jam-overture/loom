@@ -8,26 +8,20 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import Anthropic from "@anthropic-ai/sdk"
 import { dataCatalogue, modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
+import type { EditIntent, InterpretationError, LoomTree, ProposedChange, Result } from "@jam-overture/loom"
+import Anthropic from "@anthropic-ai/sdk"
 import { anthropicModelClient } from "@jam-overture/loom/anthropic"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { registry, sources, themes } from "../context/the-runtime--connecting-a-model"
-import type {
-  EditIntent,
-  InterpretationError,
-  LoomTree,
-  ProposedChange,
-  Result,
-} from "../context/the-runtime--connecting-a-model"
 
 // page.mdx:27 — a program
 type ChangeInterpreter = {
   interpret: (intent: EditIntent, tree: LoomTree) => Promise<Result<ProposedChange, InterpretationError>>
 }
 
-// page.mdx:43 — a program
+// page.mdx:45 — a program
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export const interpreter = modelInterpreter({
@@ -39,5 +33,5 @@ export const interpreter = modelInterpreter({
   dataCatalogue: dataCatalogue(sources),
 })
 
-export { anthropic, Anthropic, dataCatalogue, modelInterpreter, randomIdFactory, systemClock, anthropicModelClient, catalogueOf }
-export type { ChangeInterpreter }
+export { anthropic, dataCatalogue, modelInterpreter, randomIdFactory, systemClock, Anthropic, anthropicModelClient, catalogueOf }
+export type { ChangeInterpreter, EditIntent, InterpretationError, LoomTree, ProposedChange, Result }

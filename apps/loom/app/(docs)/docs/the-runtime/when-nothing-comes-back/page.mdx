@@ -177,6 +177,7 @@ reach by waiting for it, which is how it ends up being the one nobody has
 designed. So the runtime publishes a client that never replies:
 
 ```ts
+import { modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
 import { hangingModelClient } from "@jam-overture/loom/testing"
 
 const neverReplies = hangingModelClient()

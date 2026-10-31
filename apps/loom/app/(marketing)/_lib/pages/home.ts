@@ -18,7 +18,9 @@ import {
   siteReadingBand,
   type ChromeContext,
 } from "../chrome"
-import { FACTS, INSTALL_COMMAND, RUNTIME_PACKAGE, STARTER_PACKAGE } from "../copy"
+import { CHAIN, shownAt } from "../chain"
+import { FACTS, HEADLINE, INSTALL_COMMAND, RUNTIME_PACKAGE, STARTER_PACKAGE } from "../copy"
+import { costs } from "../costs"
 import { DECISION_RECORDS, INSTALLATION } from "../docs-pages"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
@@ -136,34 +138,46 @@ const hero = (ids: IdFactory): LoomNode =>
       backdrop: "grid",
       align: "center",
       stature: "tall",
-      eyebrow: "For pages that AI is allowed to change",
+      /**
+       * **The eyebrow says whose stack this is, as of 25 October.**
+       *
+       * It read *For pages that AI is allowed to change* from 20 August, which
+       * is the governance story in six words at the very top of the page.
+       * `docs/positioning.md` settled on 24 October that the governance is
+       * under the hood and the build case is the pitch, and that the reader is
+       * *"a junior level developer"* who builds web pages. The first words such
+       * a reader meets should tell them it is for their stack, which is also
+       * the first link of the chain in the band below.
+       */
+      eyebrow: "A framework for React and TypeScript",
     },
     children: [
       buildSlot(ids, "heading", [
         /**
-         * **The frame, and it is the maintainer's of 27 September.**
+         * **The headline, and it is the maintainer's of 24 October.**
          *
-         * The headline this replaces was his line of 21 August, verbatim —
-         * *"AI creates components, Loom creates experiences."* His verdict on
-         * it was that it does not grab you: it is the *conclusion* of an
-         * argument nobody has been given yet, so a stranger meets a contrast
-         * between two words before they have any reason to care about either.
+         * Three were put to him on #704 and he took this one: *"I like the
+         * second headline. Simplest but gets to the point."*
+         * `docs/positioning.md` records it as settled. The literal is
+         * `HEADLINE` in `copy.ts`, beside the list of his lines, because the
+         * page and that list are its two readers.
          *
-         * His direction was to open on the reimagining — *we need to rethink
-         * how we build web apps in the AI age* — and to make the components
-         * line the **explanation underneath it** rather than the claim itself.
-         * That is what this is. The 21 August line is not gone; it is the first
-         * two sentences of the paragraph below, unpacked.
+         * **It replaces a headline of his own**, *Make your web page dynamic
+         * with AI and Loom*, which he wrote on 27 September and which sat here
+         * for four weeks. That one was the only part of the page arguing a
+         * build case while everything under it argued governance, and this
+         * lane carried the tension as a standing question in six reports rather
+         * than resolving it by editing his sentence. His answers of 24 October
+         * resolved it the other way: the build case is the pitch and the
+         * governance is under the hood, so the headline that was out of step
+         * with the page is now the one the page is being rebuilt around.
          *
-         * It is a claim about the world rather than about this product, which
-         * is the point of a manifesto opening and is also its risk: a visitor
-         * who disagrees with the premise is gone. The paragraph under it has
-         * one job — earn the premise in three sentences — and that is why it
-         * leads with what AI already does rather than with what Loom is.
-         *
-         * **Positioning is the maintainer's**, so the alternatives were offered
-         * on the pull request rather than chosen here. This wording is a draft
-         * of his direction, not an invention of it.
+         * **What it claims is small and that is why it works.** It says what a
+         * reader gets rather than what the product is, it names no mechanism,
+         * and it survives the headline rule in `voice.test.ts` without
+         * punctuation tricks: no trailing clause, no inversion, nothing a
+         * person would not say out loud. The band directly under it is the
+         * chain, which is where the claim gets earned.
          */
         /**
          * **`align` is set here because the hero's own `align` does not reach
@@ -184,7 +198,7 @@ const hero = (ids: IdFactory): LoomNode =>
          * where it stands does not change meaning when the band around it
          * learns to say the same thing.
          */
-        heading(ids, 1, "Make your web page dynamic with AI and Loom", {
+        heading(ids, 1, HEADLINE, {
           balance: true,
           align: "center",
         }),
@@ -303,6 +317,140 @@ const hero = (ids: IdFactory): LoomNode =>
  * one card grid, and a second one directly under the hero would make the first
  * screen and a half read as a specification sheet.
  */
+/**
+ * **The chain, which is the first thing under the hero as of 25 October.**
+ *
+ * `docs/positioning.md` records the maintainer's answers of 24 October, and two
+ * of them are what this band is:
+ *
+ * > React/TypeScript components > Loom framework / Primitives > Loom designed
+ * > web page > Signals broadcasting to your AI model > AI reacting to signals
+ * > and redesigning page > Greater user engagement and conversion
+ *
+ * and *"A page that explains those six in order, in words a junior developer
+ * reads once, is the site."* The six links are in `chain.ts` with his wording
+ * beside each rendering, and `chain.test.ts` holds this band to his order.
+ *
+ * ## Why it goes above everything that argues for the product
+ *
+ * His other answer that day was *"Don't worry about the controls. That is the
+ * stuff under the hood. The building part and why this build is better than
+ * traditional methods is preferred."* So the band a visitor meets after the
+ * headline is **what you can build**, and the rules, the record, the refusals
+ * and the undo are what they meet after that.
+ *
+ * That reverses the order this page has had since August and it is the point of
+ * the change. *What is Loom?* used to be the second band and opened *"A
+ * governance framework for modern AI-enabled adaptive web pages"*, which is a
+ * true sentence answering a question nobody has asked yet. It has not been
+ * rewritten and it has not come off: it is the band after this one, which is
+ * where it is right.
+ *
+ * ## The marker column names the actor, and that is the argument
+ *
+ * `loom.milestone`'s `marker` is free text, so it carries *who does this one*
+ * rather than a number. Two reasons, and the second is the load-bearing one.
+ *
+ * It makes the shape of the chain readable at a glance: **You, You, Loom, Your
+ * page, Your AI model, Your readers.** The work stops at the second rung, which
+ * is the sell and is the same shape `usingIt` carries two bands down.
+ *
+ * And **a number here would break the one thing `journey.ts` exists to hold.**
+ * This page says *Four steps* in the band about what you do, and the page one
+ * press away says *five steps* about what happens to one change. Those two are
+ * different things and the distinction is fragile; a visitor who reads a third
+ * count on the first screen has been shown that this site cannot count the
+ * thing it offers to count for them. So nothing here is numbered and no
+ * sentence on this site says how long the chain is.
+ *
+ * ## The lead, and the one claim
+ *
+ * The lead says the two-and-four split in words, because the marker column says
+ * it to somebody who is reading and not to somebody who is scanning.
+ *
+ * The last rung is his phrasing, verbatim, and it is the only outcome this site
+ * promises. `docs/positioning.md`: *"Greater user engagement and conversion is
+ * the maintainer's own phrasing and is the payoff the site is allowed to
+ * promise."* Writing a better-sounding version of it is exactly the thing this
+ * lane may not do, so it is quoted and sits in `MAINTAINERS_OWN`.
+ *
+ * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
+ *
+ * ## Each rung is the way to the band that shows it, as of 30 October
+ *
+ * The chain was six claims and six dead ends. Five of the six are demonstrated
+ * somewhere on this site already, and a visitor reading the first band under
+ * the headline had no way to find out — the paths existed, nothing pointed
+ * along them. `shownAt` says where each one goes and `chain.test.ts` holds
+ * every destination to being served and to still declaring the anchor.
+ *
+ * It costs no copy, which is the reason it is this rather than a band arguing
+ * the same thing. The press is the argument.
+ *
+ * The sixth is unlinked and `chain.ts` says why at length: it happens on the
+ * reader's page rather than on ours, so the shape of the band is *the work
+ * stops at the second rung, the showing stops at the fifth, and the last one
+ * is what the other five are for.*
+ */
+const chain = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: BAND.chain },
+    "What happens between your components and your readers",
+    [
+      prose(
+        ids,
+        "You do the first two. Loom and your AI model do the rest, every time somebody opens your page.",
+        { size: "lead", measured: true }
+      ),
+      /**
+       * **The hint, and it is here because the library cannot draw the
+       * affordance it stands in for.**
+       *
+       * A `loom.milestone` carrying an `href` renders `.loom-underline`, whose
+       * rest state is `background-size: 0% 2px` — so a rung that is a link is
+       * pixel-identical to a rung that is not until a pointer touches it. On a
+       * phone nothing ever does ([0236](../../../../../decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)
+       * made the harness honest about `hover: none`, and the phone shot of this
+       * band shows five links a reader cannot find). `loom.card` already
+       * answers this for itself by defaulting `elevation` to `raised` when it
+       * is linked; the rail primitives have no equivalent, and that is filed
+       * for `Loom primitives` rather than worked around in `src/`.
+       *
+       * So the composition says in words what the library cannot say in paint.
+       * **When that finding is met this line comes off** — it is scaffolding,
+       * and it is marked as such here so the run that removes the gap knows to
+       * remove the sentence with it.
+       *
+       * *A step* rather than *any step* or *every step*: the last rung has
+       * nowhere to go and never will, and a universal would be a promise this
+       * band breaks once. It also says no number, which is the one thing this
+       * band may not do — see the note above on why nothing here is counted.
+       */
+      prose(ids, "Press a step to see that part of it working on this site.", {
+        size: "small",
+        tone: "muted",
+      }),
+      buildElement(ids, {
+        type: "loom.milestone-list",
+        props: { rail: "line", density: "loose" },
+        children: CHAIN.map((rung) => {
+          const shown = shownAt(rung)
+
+          return buildElement(ids, {
+            type: "loom.milestone",
+            props: {
+              marker: rung.actor,
+              title: rung.title,
+              body: rung.body,
+              ...(shown === undefined ? {} : { href: shown }),
+            },
+          })
+        }),
+      }),
+    ]
+  )
+
 const vocabulary = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.section",
@@ -409,15 +557,61 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  *
  * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
  */
+/**
+ * What Loom is, in the words that were already underneath the words.
+ *
+ * ## The sentence this band used to open with
+ *
+ * > *A governance framework for modern AI-enabled adaptive web pages.*
+ *
+ * Four abstract nouns in a row, and under it, as a second paragraph:
+ *
+ * > *In other words: an AI model can change your live site, but only in the
+ * > ways you approved first. You can see every change it made, and you can undo
+ * > any of them.*
+ *
+ * **Whenever copy needs *in other words*, the words after it are the real
+ * ones.** The plain version had been sitting one line below the abstract one
+ * since the band was written, which is the whole of the fix: the heading is the
+ * sentence that was already explaining it, and the preamble goes because it is
+ * no longer other words than anything.
+ *
+ * The maintainer, 24 October: *"Avoid the abstract nouns and wording, it is
+ * super confusing and is counter productive to our goal."* That is an
+ * instruction about the writing rather than a positioning decision, so it is
+ * this lane's to act on; nothing here claims anything the band did not claim
+ * before.
+ *
+ * **The first draft of this heading was caught by this run's own rule**, which
+ * is worth recording because it is the case the rule's docblock calls its
+ * limit. *An AI model can change your live site, but only in the ways you
+ * approved first* ends in a comma clause, and that clause is the most
+ * load-bearing fact in the sentence rather than a flourish — the rule cannot
+ * tell those apart and is not meant to. The remedy `routines.md` names is the
+ * one taken: it is one clause now, and it says the same thing.
+ *
+ * ## Why the band stays where it is
+ *
+ * `docs/positioning.md` lists this band under *wrong as of today* — it answers
+ * *what is Loom* with the governance story, and governance is the thing under
+ * the hood now. **It is not deleted, and this lane may not delete it.** That
+ * file says so in as many words: *rewriting is not the same as deleting and
+ * this file does not authorise either: where a band comes off, it comes off
+ * because the maintainer said so.*
+ *
+ * So what is fixed here is the half that is plainly a writing defect and was
+ * named as one. Whether a page that leads with the chain still wants a band
+ * defining Loom as governance three screens down is his.
+ */
 const whatIsIt = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { width: "wide", eyebrow: BAND.whatIsIt },
-    "A governance framework for modern AI-enabled adaptive web pages.",
+    "An AI model can only change your live site in the ways you approved first",
     [
       prose(
         ids,
-        "In other words: an AI model can change your live site, but only in the ways you approved first. You can see every change it made, and you can undo any of them.",
+        "You can see every change it made, and you can undo any of them.",
         { size: "lead", measured: true }
       ),
     ]
@@ -460,7 +654,7 @@ const USING_IT: readonly UsingItStep[] = [
   },
   {
     marker: "4",
-    title: "Adapt your page, on your rules",
+    title: "Adapt your page within your rules",
     body: "Define your acceptance policy up front, so an AI model can only make changes you already approved. Anything else gets rejected, and Loom tells you why.",
     state: "current",
   },
@@ -566,14 +760,14 @@ const problems = (ids: IdFactory): LoomNode =>
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              title: "It writes code, and somebody has to read all of it",
+              title: "Somebody has to read every line it writes",
               body: "When a tool writes components for you, somebody still has to read, review and own every line. Loom does not write code. It rearranges components you already built.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              title: "Nobody can say what changed, or why",
+              title: "Nobody can tell you what changed or why",
               body: "Ask most tools what changed last Tuesday and the best answer is a diff.",
             },
           }),
@@ -588,7 +782,32 @@ const problems = (ids: IdFactory): LoomNode =>
             type: "loom.feature",
             props: {
               title: "Undoing it means finding the commit and hoping",
-              body: "Loom works out how to undo a change at the same time it makes it, and saves both. Putting the page back takes one press, and that gets recorded too.",
+              /**
+               * **Rewritten on 29 October, because the front door was saying
+               * one sentence twice.**
+               *
+               * This read *"Loom works out how to undo a change at the same
+               * time it makes it, and saves both. Putting the page back takes
+               * one press, and that gets recorded too."* The `Undo` gloss in
+               * `journey.ts` opens on that same nineteen-word sentence,
+               * verbatim, and both are rendered on this page — four bands
+               * apart, which is far enough that no run writing either one
+               * would meet the other.
+               *
+               * The gloss is where that sentence belongs: its whole job is to
+               * say what the word means. A problem card's job is to answer the
+               * problem in its own title, so this says what a reader gets
+               * instead of the commit hunt, and says it in its own words.
+               *
+               * **It is still a wide cell's worth of copy**, which the first
+               * attempt at this was not. `loom.mosaic`'s `alternating` rhythm
+               * makes the first and fourth cells two narrow cells across, and
+               * `pages.test.ts` holds the copy to the shape: a 76-character
+               * body in a cell laid out at twice the width draws a card that
+               * is mostly nothing. Short was the budget talking, and the
+               * budget is not a reason to half-fill a card.
+               */
+              body: "There is no commit to go and find. Loom can put the page back the way it was before the change, in one press, and it records that too.",
             },
           }),
         ],
@@ -839,10 +1058,17 @@ const install = (ids: IdFactory): LoomNode =>
        * too wide for a 390 viewport breaks at its own slash instead of going
        * off the end the way the panel's does.
        */
+      /**
+       * **`There is nothing to sign up for.` came off on 29 October**, and the
+       * band below is why. It was this site's only word about what Loom costs
+       * and it was a half of one: it told a reader they would not be asked for
+       * an account and left them to guess at everything else. The band
+       * directly under this one now says both halves plainly, so the sentence
+       * here was the same claim made worse one screen earlier.
+       */
       proseParts(
         ids,
         [
-          "There is nothing to sign up for. ",
           codeSpan(ids, RUNTIME_PACKAGE),
           " is Loom itself. ",
           codeSpan(ids, STARTER_PACKAGE),
@@ -1121,8 +1347,16 @@ export const homePageTree = (context: PageContext): LoomTree => {
       children: [
         siteHeader(ids, chrome),
         hero(ids),
+        /**
+         * The chain, then what it is, then what you do about it.
+         *
+         * `chain(ids)` is new on 25 October and the two bands after it have not
+         * moved relative to each other. What moved is the four plain words,
+         * which were the third band and are now the sixth: see the note on
+         * `vocabulary` below.
+         */
+        chain(ids),
         whatIsIt(ids),
-        vocabulary(ids),
         usingIt(ids),
         /**
          * Third band, and deliberately before anything that argues for the
@@ -1149,6 +1383,25 @@ export const homePageTree = (context: PageContext): LoomTree => {
          */
         problems(ids),
         /**
+         * **The four plain words, moved down from the third band on 25 October.**
+         *
+         * They are the governance story — *Ask · Check · Record · Undo* — and
+         * `docs/positioning.md` names them as the first of the two things on
+         * this page that are *"wrong as of today"*: not wrong in what they say,
+         * wrong in being the third thing a stranger meets. The same file is
+         * explicit that **rewriting is not deleting and neither is authorised
+         * here**, so the band is unchanged, every word of it, and it reads
+         * where it belongs: after the chain has said what Loom builds, after
+         * the band that says what you do, and beside the band about what is
+         * hard. Nothing points at it, so no address broke in the move.
+         *
+         * The second of the two is `problems` above, whose heading argues the
+         * audit case. It has not been rewritten either, and it no longer meets
+         * a reader who has not been told what Loom builds, which is what
+         * `positioning.md` says is wrong with it.
+         */
+        vocabulary(ids),
+        /**
          * A rule rather than the diamond this band wants: `loom.divider`'s
          * `diamond` and `dots` ornaments collapse to a mark at the start of the
          * line instead of spanning it, filed as a finding on 19 August. The
@@ -1158,6 +1411,17 @@ export const homePageTree = (context: PageContext): LoomTree => {
         facts(ids),
         questions(ids),
         install(ids),
+        /**
+         * What it costs, new on 29 October and the first thing this site has
+         * ever said about money.
+         *
+         * It is here rather than anywhere else because the band above ends on
+         * a command a reader is meant to run, and *what will this cost me* is
+         * the question that follows one. `costs.ts` carries where the
+         * permission to say it comes from, which is the part of this band that
+         * matters more than its placing.
+         */
+        costs(ids),
         waysIn(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),

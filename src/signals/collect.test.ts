@@ -31,7 +31,7 @@ import type {
 } from "./journal.js"
 import { memoryReaderSignalJournal, memoryReaderTallyStore } from "./memory.js"
 import type { FunnelPair } from "./rollup.js"
-import type { ReaderTallyStore } from "./tally.js"
+import type { AudienceCounters, ReaderTallyStore } from "./tally.js"
 
 const HOUR = 60 * 60 * 1000
 const NOON = Date.parse("2026-09-14T12:00:00.000Z")
@@ -74,8 +74,60 @@ const forgetFails = (journal: ReaderSignalJournal): ReaderSignalJournal => ({
 
 const applyFails = (store: ReaderTallyStore): ReaderTallyStore => ({
   ...store,
+  applyWindow: () => Promise.resolve(err(BROKEN)),
   apply: () => Promise.resolve(err(BROKEN)),
 })
+
+/**
+ * A store that refuses the window the first time it is asked and takes it
+ * afterwards, which is what a connection that went away and came back is.
+ *
+ * It writes nothing on the refusal, because that is the contract `applyWindow`
+ * is required for (0316) — so this double is the honest one, and the run after
+ * it is the run that would have double-counted when a window was written one
+ * audience at a time.
+ */
+const failsOnce = (store: ReaderTallyStore): ReaderTallyStore => {
+  let refused = false
+
+  return {
+    ...store,
+    applyWindow: (window, at) => {
+      if (refused) return store.applyWindow(window, at)
+      refused = true
+
+      return Promise.resolve(err(BROKEN))
+    },
+  }
+}
+
+/** A store that says how it was written to, so a window can be shown to be one write. */
+const watchingWrites = (store: ReaderTallyStore) => {
+  const seen: (readonly AudienceCounters[])[] = []
+  let applies = 0
+
+  return {
+    store: {
+      ...store,
+      applyWindow: (window: readonly AudienceCounters[], at: string) => {
+        seen.push(window)
+
+        return store.applyWindow(window, at)
+      },
+      apply: (
+        counters: Parameters<ReaderTallyStore["apply"]>[0],
+        at: string,
+        audience?: Parameters<ReaderTallyStore["apply"]>[2]
+      ) => {
+        applies += 1
+
+        return store.apply(counters, at, audience)
+      },
+    },
+    windows: () => seen,
+    applies: () => applies,
+  }
+}
 
 /** A journal that counts its reads, to show a refusal never reached one. */
 const counting = (journal: ReaderSignalJournal) => {
@@ -167,6 +219,38 @@ describe("collectReaderSignals", () => {
   }
 
   /**
+   * ## The age the retention promise is judged on (0321)
+   *
+   * The oldest delivery in the buffer is the **first** batch the scan read and
+   * not the last, and the difference is the whole figure: it is what says
+   * whether the ceiling a notice publishes to its readers is one this
+   * deployment keeps.
+   *
+   * Two deliberately different ages over a one-hour window, because every way
+   * this could be wrong is an addition or an end. The oldest is 7,200,000 and
+   * the newest 5,400,000; the horizon is 3,600,000 and the window counted twice
+   * is 10,800,000. No two of those are equal, so a figure taken off the wrong
+   * end or against the wrong instant fails instead of looking plausible.
+   */
+  it("reports how old the oldest delivery in the buffer was", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    await journal.receive([batchOf([viewed("hero")], { view: viewKey(1) })])
+    time.moveTo(-1.5 * HOUR)
+    await journal.receive([batchOf([viewed("pricing")], { view: viewKey(2) })])
+    time.moveTo(0)
+
+    const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(outcome).toMatchObject({
+      outcome: "collected",
+      summary: { counted: 2, oldestMs: 2 * HOUR },
+    })
+  })
+
+  /**
    * ## One fold per audience (0284)
    *
    * A window holds whatever arrived in it, so once a deployment serves two
@@ -204,6 +288,74 @@ describe("collectReaderSignals", () => {
   })
 
   /**
+   * ## One write for the window, not one per audience (0316)
+   *
+   * The folds stay per audience and the *write* does not, which is the whole of
+   * what this changed. Asserted as a count of calls because it is a property of
+   * the run rather than of the counters: a window of two audiences that reaches
+   * the store twice has a state between the two writes, and the assertion that
+   * there is no such state is that there is no second write.
+   */
+  it("writes a window of two audiences once, with both folds in it", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const watched = watchingWrites(memoryReaderTallyStore())
+
+    await journal.receive([
+      batchOf([viewed("pricing"), dwelled("pricing", 400)], { view: viewKey(1), audience: SKIERS }),
+      batchOf([viewed("pricing"), dwelled("pricing", 600)], { view: viewKey(2), audience: RIDERS }),
+    ])
+    time.moveTo(0)
+
+    const outcome = await collectReaderSignals(journal, watched.store, { clock: time.clock })
+
+    expect(outcome.outcome).toBe("collected")
+    expect(watched.applies()).toBe(0)
+    expect(watched.windows()).toHaveLength(1)
+    expect(watched.windows()[0]?.map((counters) => counters.audience)).toEqual([SKIERS, RIDERS])
+  })
+
+  /**
+   * The regression this is all for, run end to end.
+   *
+   * The first run cannot write, so nothing is durable and the buffer keeps the
+   * window — the ordinary `unavailable`. The second run folds the same batches
+   * again and writes them, and **each audience is counted exactly once**. With a
+   * write per audience, the first run would have left the first audience durable
+   * and the second run would have added it again: 800 against a row that saw
+   * 400, on a counter no later run could correct (0158).
+   */
+  it("counts each audience once over a run that failed and a run that worked", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    await journal.receive([
+      batchOf([viewed("pricing"), dwelled("pricing", 400)], { view: viewKey(1), audience: SKIERS }),
+      batchOf([viewed("pricing"), dwelled("pricing", 600)], { view: viewKey(2), audience: RIDERS }),
+    ])
+    time.moveTo(0)
+
+    const first = await collectReaderSignals(journal, failsOnce(store), { clock: time.clock })
+
+    expect(first).toEqual({ outcome: "unavailable", error: BROKEN })
+    expect(unwrap(await store.tallies())).toEqual([])
+    expect(unwrap(await journal.read()).batches).toHaveLength(2)
+
+    const second = await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(second).toMatchObject({ outcome: "collected", removed: 2 })
+
+    const rows = unwrap(await store.tallies({ treeId: TREE }))
+
+    expect(Object.fromEntries(rows.map((row) => [row.audienceId, row.dwellMs]))).toEqual({
+      [SKIERS]: 400,
+      [RIDERS]: 600,
+    })
+    expect(rows.every((row) => row.views === 1)).toBe(true)
+  })
+
+  /**
    * The summary describes the run, not a population, so it adds up across the
    * audiences the window held — two folds of one tally each is two tallies.
    */
@@ -225,6 +377,36 @@ describe("collectReaderSignals", () => {
       removed: 2,
       summary: { counted: 2, tallies: 2, views: 2, uncorrelated: 0 },
     })
+  })
+
+  /**
+   * A retry queue draining into a window that already holds what it is
+   * retrying. The batches are read and forgotten like any others — so `counted`
+   * is all four — and the counters move as if there were two, which is the
+   * repeat `rollup.ts` refuses. The number is on the summary so that an
+   * operator seeing it every run knows to go and find the sender.
+   */
+  it("reports the repeats a window held and does not count them twice", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    const once = batchOf([viewed("pricing"), dwelled("pricing", 400)], { view: viewKey(1) })
+    const twice = batchOf([viewed("pricing"), dwelled("pricing", 600)], { view: viewKey(2) })
+
+    await journal.receive([once, twice, once, twice])
+    time.moveTo(0)
+
+    const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(outcome).toMatchObject({
+      outcome: "collected",
+      removed: 4,
+      summary: { counted: 4, views: 2, redelivered: 2 },
+    })
+    expect(unwrap(await store.tallies({ treeId: TREE }))).toContainEqual(
+      expect.objectContaining({ nodeId: nodeId("pricing"), dwellMs: 1_000, views: 2, reached: 2 })
+    )
   })
 
   it("counts a ripe window into the counters and empties the buffer", async () => {
@@ -449,7 +631,15 @@ describe("collectReaderSignals", () => {
 describe("describeCollection", () => {
   const line = (outcome: CollectionOutcome): string => describeCollection(outcome)
 
-  const summary = { counted: 2, tallies: 1, funnels: 0, views: 2, uncorrelated: 0 }
+  const summary = {
+    counted: 2,
+    tallies: 1,
+    funnels: 0,
+    views: 2,
+    uncorrelated: 0,
+    redelivered: 0,
+    oldestMs: 2 * HOUR,
+  }
 
   it("says what a run counted and what it dropped", () => {
     expect(line({ outcome: "collected", summary, removed: 2, more: false })).toBe(
@@ -467,6 +657,12 @@ describe("describeCollection", () => {
     expect(
       line({ outcome: "collected", summary: { ...summary, uncorrelated: 1 }, removed: 2, more: false })
     ).toContain("1 with no view key")
+  })
+
+  it("names the repeats, because a sender retrying is a thing to go and find", () => {
+    expect(
+      line({ outcome: "collected", summary: { ...summary, redelivered: 1 }, removed: 2, more: false })
+    ).toBe("counted 2 batches into 1 tally over 2 views, 1 delivered again and folded once, and forgot 2")
   })
 
   it("inflects a single batch", () => {
