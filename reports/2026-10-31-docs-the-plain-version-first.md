@@ -282,7 +282,12 @@ boundary moved.
 *Filled in from the `vercel[bot]` comment after the pull request was opened, not
 composed from the branch name.*
 
-PREVIEW_URL_PLACEHOLDER
+https://loom-git-docs-72-the-plain-v-c4b17b-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the unit is most about:
+
+- https://loom-git-docs-72-the-plain-v-c4b17b-jpizzolato36-6341s-projects.vercel.app/docs/getting-started/introduction
+- https://loom-git-docs-72-the-plain-v-c4b17b-jpizzolato36-6341s-projects.vercel.app/docs/api-reference
 
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,
@@ -332,4 +337,4 @@ export may be given a list-shaped presentation (22 October), and whether a
 produced table on this site should be composed from the library rather than
 arranged locally (#709).
 
-The pull request is **PR_NUMBER_PLACEHOLDER**.
+The pull request is **#731**.
