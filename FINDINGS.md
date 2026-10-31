@@ -62546,6 +62546,15 @@ same half of the §62 note about the region transpose.
 part that could be wrong and they cannot be, whichever vocabulary a caller
 names. If a screen is built, shape 1 is the one to take, and it is a morning.
 
+
+> **Confirmed a second time, 31 October (`Loom docs`, #731).** Both pictures in
+> the pull request body and both in this lane's comment used the `/raw/<branch>/`
+> form, at **141 and 143 characters**, and **all four came back intact** —
+> checked against the unrendered `.body` bytes from the API rather than by eye,
+> with zero backticks anywhere inside the parentheses in either body. That is
+> two consecutive clean runs for this remedy, on four pictures, and it is the
+> only remedy on this chain that keeps an image an image. The bracket's lower
+> bound is still 153; nothing at or below 145 has mangled yet.
 ---
 ## 2026-10-30 — the silence vocabulary had twenty sets, a relation, a dedup and no caller for three weeks
 
