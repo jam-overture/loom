@@ -191,11 +191,11 @@ Standing entries this run met again and did not duplicate:
 `pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
 last thing on its line, with nothing piped into `tail` or `tee`.
 
-- framework: **241 files, 5,840 tests passed**
-- application: **380 files, 6,844 tests passed**, of which **140 files and
+- framework: **243 files, 5,884 tests passed**
+- application: **380 files, 6,855 tests passed**, of which **140 files and
   2,112 tests** are `(docs)`
 - `findings:check`: 1,368 findings, 0 malformed
-- `reports:check`: 2,022 visuals, 144.0MB, none over 1.1MB
+- `reports:check`: 2,027 visuals, 144.2MB, none over 1.1MB, 411 cited by no file
 - `prerender:check`: **137 prerendered pages**, 1,943 text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
