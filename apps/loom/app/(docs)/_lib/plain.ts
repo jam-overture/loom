@@ -1,6 +1,6 @@
 import { publishedNamesIn } from "./api/mentions"
 import { outsideFences } from "./fences/spans"
-import { docsHref, docsSections, writtenDocsSections } from "./nav"
+import { DOCS_LANDING_SLUG, docsHref, docsSections, writtenDocsSections } from "./nav"
 import { readPageSource } from "./search/headings"
 
 /**
@@ -160,6 +160,54 @@ const openingSentence = (prose: string): string => {
 }
 
 /**
+ * The summaries this surface writes, which is not all of them.
+ *
+ * A summary is one hand-written line whichever way the page under it is built,
+ * so the written/generated split that decides whether a page has an *opening*
+ * is the wrong split for this one — and a mutation is what said so. The API
+ * reference's landing page has a summary somebody wrote in `nav.ts`, and a name
+ * put into it was missed by a check reading written sections alone.
+ *
+ * **What is still excluded is the sixteen doors, and excluding them is the
+ * point.** Their summaries are `entry.summary` — the runtime's own text,
+ * arriving from its declaration files — so a rule over them would be this
+ * lane's test going red because another lane wrote a sentence. That is the
+ * shape `search/build.test.ts` already names as the mistake worth avoiding
+ * (*"this lane's number about somebody else's growth"*), and it is the same
+ * landing-page exclusion `search/build.ts` makes for `family`, for the same
+ * reason: `/docs/api-reference` is the section rather than one of the doors
+ * inside it.
+ */
+export const summariesRead = (): readonly { where: string; href: string; summary: string }[] =>
+  docsSections.flatMap((section) =>
+    section.pages.flatMap((page) =>
+      section.source === "written" || page.slug === DOCS_LANDING_SLUG
+        ? [
+            {
+              where: `${section.slug}/${page.slug}`,
+              href: docsHref(section.slug, page.slug),
+              summary: page.summary,
+            },
+          ]
+        : []
+    )
+  )
+
+/** One place, as a fault where it names an export and as nothing where it does not. */
+const fault = (
+  where: string,
+  href: string,
+  place: PlainPlace,
+  text: string
+): readonly PlainFault[] => {
+  const names = namesNamedIn(text)
+
+  return names.length === 0
+    ? []
+    : [{ where, href, place, names, text: place === "summary" ? text : openingSentence(text) }]
+}
+
+/**
  * Every place on this site where a reader is handed an export's name before the
  * page has said what it is for.
  *
@@ -168,33 +216,19 @@ const openingSentence = (prose: string): string => {
  * renders an orientation, so there is no page for a throw to fail, and a check
  * over the whole site reads better as a count than as the first thing it met.
  */
-export const plainFaults = (): readonly PlainFault[] =>
-  writtenDocsSections.flatMap((section) =>
-    section.pages.flatMap((page) => {
-      const where = `${section.slug}/${page.slug}`
-      const href = docsHref(section.slug, page.slug)
-      const opening = openingOf(readPageSource(section.slug, page.slug))
-
-      return [
-        { place: "summary" as const, text: page.summary },
-        { place: "opening" as const, text: opening },
-      ].flatMap(({ place, text }) => {
-        const names = namesNamedIn(text)
-
-        return names.length === 0
-          ? []
-          : [
-              {
-                where,
-                href,
-                place,
-                names,
-                text: place === "summary" ? text : openingSentence(text),
-              },
-            ]
-      })
-    })
-  )
+export const plainFaults = (): readonly PlainFault[] => [
+  ...summariesRead().flatMap(({ where, href, summary }) => fault(where, href, "summary", summary)),
+  ...writtenDocsSections.flatMap((section) =>
+    section.pages.flatMap((page) =>
+      fault(
+        `${section.slug}/${page.slug}`,
+        docsHref(section.slug, page.slug),
+        "opening",
+        openingOf(readPageSource(section.slug, page.slug))
+      )
+    )
+  ),
+]
 
 /**
  * The sentence a fault prints.

@@ -8,6 +8,7 @@ import {
   pagesWithoutAnOpening,
   plainFaults,
   plainFaultSentence,
+  summariesRead,
   writtenHeadings,
 } from "./plain"
 
@@ -76,6 +77,31 @@ describe("the plain version first", () => {
    */
   it("reads the headings the recorded measurement is about", () => {
     expect(writtenHeadings().length).toBeGreaterThan(150)
+  })
+
+  /**
+   * The boundary a mutation moved, and it is worth a test of its own because it
+   * is the one place this check reads a file it does not write.
+   */
+  describe("which summaries it is about", () => {
+    it("reads a landing page's summary even where the pages under it are generated", () => {
+      const landing = summariesRead().find(({ href }) => href === "/docs/api-reference")
+
+      expect(landing?.summary).not.toBe(undefined)
+    })
+
+    /**
+     * The sixteen doors take `entry.summary` from the runtime's declaration
+     * files. A rule over them is this lane's test going red because another
+     * lane wrote a sentence, which `search/build.test.ts` already names as the
+     * mistake to avoid.
+     */
+    it("leaves the reference's own doors to the lane that writes them", () => {
+      const read = summariesRead().map(({ href }) => href)
+
+      expect(read).toContain("/docs/api-reference")
+      expect(read.some((href) => href.startsWith("/docs/api-reference/"))).toBe(false)
+    })
   })
 
   describe("a page's opening", () => {
