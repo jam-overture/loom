@@ -3,7 +3,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
 import { inFormOrder, type ComparedPopulations, type PageForm } from "./audiences.js"
-import { doorOf, type PageDoor } from "./door.js"
+import { atDoorScale, doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import { pairedWindowOf, partsByNodeIn, type PairedWindow } from "./library-change.js"
 import type { UnscaledPage } from "./library-reach.js"
@@ -942,11 +942,11 @@ const add = (
    * one's `shareNow` is drawing the same number, and three floats multiplied
    * and divided in two orders agree to fifteen places and not to sixteen.
    */
-  into.metWas += (reachedWas * doors.was.counted) / doors.was.appearances
-  into.metNow += (reachedNow * doors.now.counted) / doors.now.appearances
+  into.metWas += atDoorScale(reachedWas, doors.was)
+  into.metNow += atDoorScale(reachedNow, doors.now)
   /** The same term with the other side's weight, which is the whole of a counterfactual. */
-  into.heldTraffic += (reachedNow * doors.was.counted) / doors.now.appearances
-  into.heldReading += (reachedWas * doors.now.counted) / doors.was.appearances
+  into.heldTraffic += atDoorScale(reachedNow, doors.now, doors.was)
+  into.heldReading += atDoorScale(reachedWas, doors.was, doors.now)
   into.weights.push({ was: doors.was.counted, now: doors.now.counted })
   into.driftWas += doors.was.drift
   into.driftNow += doors.now.drift

@@ -4,7 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
 import { readingKeyOf } from "./audiences.js"
-import { doorOf, type PageDoor } from "./door.js"
+import { atDoorScale, doorOf, type PageDoor } from "./door.js"
 import { kindKeyOf, type KindKey, type KindSilence } from "./library.js"
 import {
   pageViewsFor,
@@ -471,7 +471,7 @@ const add = (into: Tallying, part: PartReading, door: PageDoor, revision: string
 
   into.openings += door.opened
   into.counted += door.counted
-  into.met += (reached * door.counted) / door.appearances
+  into.met += atDoorScale(reached, door)
   into.atMostMet += Math.min(reached, door.opened)
   into.drift += door.drift
   into.pending += door.pending

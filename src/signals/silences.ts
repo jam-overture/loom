@@ -13,6 +13,7 @@ import type { DeploymentSilence } from "./deployment.js"
 import type { KindActionSilence } from "./library-action.js"
 import type { KindChangeSilence } from "./library-change.js"
 import type { KindCopyChangeSilence } from "./library-copy-change.js"
+import type { KindPaceSilence } from "./library-pace.js"
 import type { KindReachChangeSilence } from "./library-reach-change.js"
 import type { KindReachSilence } from "./library-reach.js"
 import type { KindWordReachChangeSilence } from "./library-word-reach-change.js"
@@ -159,6 +160,7 @@ export type SilenceVocabulary =
   | "library-action"
   | "library-change"
   | "library-copy-change"
+  | "library-pace"
   | "library-reach"
   | "library-reach-change"
   | "library-word-reach-change"
@@ -182,6 +184,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "library-action",
     "library-change",
     "library-copy-change",
+    "library-pace",
     "library-reach",
     "library-reach-change",
     "library-word-reach-change",
@@ -214,6 +217,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     "library-action": "kind",
     "library-change": "kind",
     "library-copy-change": "kind",
+    "library-pace": "kind",
     "library-reach": "kind",
     "library-reach-change": "kind",
     "library-word-reach-change": "kind",
@@ -225,8 +229,8 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Eighteen of them against a hundred and fourteen members across the twenty
- * sets, which is the overlap this module exists to state. None of them replaces a set's own name:
+ * Eighteen of them against a hundred and eighteen members across the
+ * twenty-one sets, which is the overlap this module exists to state. None of them replaces a set's own name:
  * a reading still reports its own vocabulary, and this is what that vocabulary
  * means.
  *
@@ -1065,6 +1069,29 @@ export const meaningOfKindCopyChangeSilence = (
       return meaning("library-copy-change", "no-view-reported")
     case "floored":
       return meaning("library-copy-change", "words-a-floor")
+  }
+}
+
+/**
+ * What a kind of part's pace reports, of one kind (0325).
+ *
+ * **The twenty-first set, and the first to bring neither a condition nor a
+ * subject of its own.** Its two census reasons were already a kind's and are
+ * reused as values; its other two are the states a part's own pace reports,
+ * said here of a kind — the same move `library-reach` made with the door's
+ * three states, and this table is again what says the two are one state at two
+ * subjects (0240).
+ */
+export const meaningOfKindPaceSilence = (silence: KindPaceSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unread":
+      return meaning("library-pace", "no-view-reported")
+    case "unplaced":
+      return meaning("library-pace", "nothing-of-the-kind")
+    case "unreadable":
+      return meaning("library-pace", "words-a-floor")
+    case "wordless":
+      return meaning("library-pace", "says-nothing")
   }
 }
 
