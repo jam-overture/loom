@@ -12,7 +12,7 @@ import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
 import { FACTS } from "../copy"
-import { examplePage } from "../example"
+import { examplePage, rearrangedExample } from "../example"
 import { LIBRARY_PARTS } from "../library"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import {
@@ -440,6 +440,51 @@ const onAPage = (ids: IdFactory): LoomNode =>
     { align: "center" }
   )
 
+/**
+ * The headline of this site, happening to a page the reader has just met.
+ *
+ * `onAPage` above answers *what do the parts look like together* and leaves
+ * the question this whole site is named for untouched: the page it shows is
+ * fixed. A reader who has just been told that a page rearranges itself around
+ * the people using it has been given a still photograph of one.
+ *
+ * So this band hands them the same page and a different reader. It is
+ * deliberately the **same fictional product** as the band above rather than a
+ * new one: a second invented company would read as a second example, and the
+ * claim being made is about one page having two arrangements.
+ *
+ * `rearrangedExample` carries the whole argument for the shape.
+ */
+const forAReader = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "Who is reading it", anchor: WHY_USE_IT_ANCHOR.forAReader },
+    "The same page arranged for someone else",
+    [
+      /**
+       * Two sentences, and the first one points back at the band above rather
+       * than describing the picture.
+       *
+       * A reader who has just been shown a page and is now shown two needs to
+       * be told that one of them is the page they were shown, or the band is
+       * two examples instead of one example twice. The captions over the
+       * frames say who each is for; this says which is which.
+       *
+       * It read *"Drag the handle to see what the page gives them"* while the
+       * band was a wipe, and the wipe is gone. A sentence describing a control
+       * that is not there is the worst line this site could carry, on a page
+       * arguing that Loom can say what a thing actually is.
+       */
+      prose(
+        ids,
+        "The page on the left is the one above. On the right is what a visitor who came looking for a gift gets.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      rearrangedExample(ids),
+    ],
+    { align: "center" }
+  )
+
 const closing = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Try it on a page of your own", [
     /**
@@ -489,6 +534,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         alreadyWritten(ids),
         theParts(ids),
         onAPage(ids),
+        forAReader(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),

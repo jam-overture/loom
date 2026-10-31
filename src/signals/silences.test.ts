@@ -26,6 +26,7 @@ import {
   KIND_ACTION_SILENCES,
   KIND_CHANGE_SILENCES,
   KIND_COPY_CHANGE_SILENCES,
+  KIND_PACE_SILENCES,
   KIND_REACH_CHANGE_SILENCES,
   KIND_WORD_REACH_CHANGE_SILENCES,
   KIND_REACH_SILENCES,
@@ -48,6 +49,7 @@ import {
   meaningOfKindActionSilence,
   meaningOfKindChangeSilence,
   meaningOfKindCopyChangeSilence,
+  meaningOfKindPaceSilence,
   meaningOfKindReachChangeSilence,
   meaningOfKindWordReachChangeSilence,
   meaningOfKindReachSilence,
@@ -175,6 +177,7 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...KIND_ACTION_SILENCES.map(meaningOfKindActionSilence),
   ...KIND_CHANGE_SILENCES.map(meaningOfKindChangeSilence),
   ...KIND_COPY_CHANGE_SILENCES.map(meaningOfKindCopyChangeSilence),
+  ...KIND_PACE_SILENCES.map(meaningOfKindPaceSilence),
   ...KIND_REACH_SILENCES.map(meaningOfKindReachSilence),
   ...KIND_REACH_CHANGE_SILENCES.map(meaningOfKindReachChangeSilence),
   ...KIND_WORD_REACH_CHANGE_SILENCES.map(meaningOfKindWordReachChangeSilence),
@@ -200,6 +203,7 @@ describe("what a reading means when it says nothing", () => {
         KIND_ACTION_SILENCES.length +
         KIND_CHANGE_SILENCES.length +
         KIND_COPY_CHANGE_SILENCES.length +
+        KIND_PACE_SILENCES.length +
         KIND_REACH_SILENCES.length +
         KIND_REACH_CHANGE_SILENCES.length +
         KIND_WORD_REACH_CHANGE_SILENCES.length +
@@ -276,6 +280,11 @@ describe("what a reading means when it says nothing", () => {
         [
           "library-copy-change",
           KIND_COPY_CHANGE_SILENCES.map((of) => meaningOfKindCopyChangeSilence(of).condition),
+          [],
+        ],
+        [
+          "library-pace",
+          KIND_PACE_SILENCES.map((of) => meaningOfKindPaceSilence(of).condition),
           [],
         ],
         [
@@ -393,6 +402,7 @@ describe("what a reading means when it says nothing", () => {
       "comparison",
       "comparison",
       "comparison",
+      "kind",
       "kind",
       "kind",
       "kind",

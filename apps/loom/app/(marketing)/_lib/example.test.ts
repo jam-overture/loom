@@ -1,8 +1,8 @@
-import { sequentialIdFactory, type ElementNode } from "@jam-overture/loom"
+import { sequentialIdFactory, type ElementNode, type LoomNode } from "@jam-overture/loom"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
-import { examplePage, MARKS } from "./example"
+import { ARRANGEMENTS, ARRANGEMENT_LABEL, examplePage, MARKS, rearrangedExample } from "./example"
 import { LIBRARY_PARTS, partNameOf } from "./library"
 import { elementsIn } from "./measure"
 import { siteRegistry } from "./registry"
@@ -99,5 +99,127 @@ describe("the example page", () => {
     )
 
     expect(pressable).toEqual([])
+  })
+})
+
+/**
+ * The comparison band, which is the same page a second time and is held to
+ * being the *same* page.
+ *
+ * Everything above is about one arrangement. What is checkable here is the
+ * relationship between two of them, and it is the half a reader is being
+ * asked to believe: that the right-hand screen is this screen rearranged and
+ * not a different product with a different pitch.
+ */
+/** Every string a reader would see under a node, in tree order. */
+const textIn = (node: LoomNode): readonly string[] =>
+  node.kind === "text"
+    ? [node.value]
+    : node.kind === "element" || node.kind === "slot"
+      ? node.children.flatMap((child) => textIn(child))
+      : []
+
+describe("the same page arranged for someone else", () => {
+  const compared = rearrangedExample(sequentialIdFactory("compared"))
+  const comparedElements = elementsIn(compared)
+
+  /**
+   * `loom.before-after` takes its height from the after region and stretches
+   * the before region to match, so an arrangement with one more tile than the
+   * other crops rather than reporting anything. Measured by the primitive's
+   * own note and held here, because the failure is a silently cut-off screen
+   * on a page nobody runs a test against by eye.
+   */
+  it("gives both arrangements the same number of tiles", () => {
+    expect(ARRANGEMENTS.forAGift.offers).toHaveLength(ARRANGEMENTS.asBuilt.offers.length)
+  })
+
+  /**
+   * The sentence that does not move. A comparison in which every string
+   * differs is two pages rather than one page twice, and this is the line a
+   * reader uses to work out which it is looking at.
+   */
+  it("keeps one line identical, so the page reads as the same page", () => {
+    expect(ARRANGEMENTS.forAGift.line).toBe(ARRANGEMENTS.asBuilt.line)
+  })
+
+  it("changes the heading, or there is nothing to compare", () => {
+    expect(ARRANGEMENTS.forAGift.heading).not.toBe(ARRANGEMENTS.asBuilt.heading)
+  })
+
+  /**
+   * At least one tile survives the rearrangement. A right-hand screen sharing
+   * no tile with the left is a replacement rather than a rearrangement, and
+   * the four things this site says a change can be do not include *swap the
+   * whole page*.
+   */
+  it("carries at least one tile across both arrangements", () => {
+    const built = ARRANGEMENTS.asBuilt.offers.map((offer) => offer.title)
+    const kept = ARRANGEMENTS.forAGift.offers.filter((offer) => built.includes(offer.title))
+
+    expect(kept).not.toEqual([])
+  })
+
+  it("says who each arrangement is for rather than which came first", () => {
+    const labels = Object.values(ARRANGEMENT_LABEL).map((label) => label.toLowerCase())
+
+    expect(labels.some((label) => label.includes("before") || label.includes("after"))).toBe(false)
+  })
+
+  /**
+   * A caption over each frame, and the band is nothing without them. Two
+   * screens with no indication of who each belongs to is a before and an
+   * after, and the claim is about people rather than about time.
+   */
+  it("captions both arrangements", () => {
+    const said = textIn(compared)
+
+    expect(said).toContain(ARRANGEMENT_LABEL.asBuilt)
+    expect(said).toContain(ARRANGEMENT_LABEL.forAGift)
+  })
+
+  /**
+   * The captions are this site's voice and the frames are a coffee company's.
+   * A caption that slipped inside a frame would read as the fictional
+   * product's own copy, which is the one thing that would make a reader
+   * doubt the example.
+   */
+  it("keeps the captions outside the frames", () => {
+    const framed = comparedElements
+      .filter((element) => element.type === "loom.frame")
+      .flatMap((frame) => textIn(frame))
+
+    expect(framed).not.toContain(ARRANGEMENT_LABEL.asBuilt)
+    expect(framed).not.toContain(ARRANGEMENT_LABEL.forAGift)
+  })
+
+  it("is built from registered parts and nothing else", () => {
+    const registered = new Set(catalogueOf(siteRegistry).map((entry) => entry.type))
+
+    expect(
+      [...new Set(comparedElements.map((element) => element.type))].filter(
+        (type) => !registered.has(type)
+      )
+    ).toEqual([])
+  })
+
+  /**
+   * Two frames at the same address, which is the claim the band makes with no
+   * words at all: one page, two readers. Two different addresses would say
+   * the reader had been sent somewhere else.
+   */
+  it("shows both arrangements at the same address", () => {
+    const addresses = comparedElements
+      .filter((element) => element.type === "loom.frame")
+      .map((frame) => frame.props["label"])
+
+    expect(addresses).toHaveLength(2)
+    expect(new Set(addresses).size).toBe(1)
+  })
+
+  it("carries nothing a reader can press", () => {
+    expect(
+      comparedElements.filter((element) => typeof element.props["href"] === "string")
+    ).toEqual([])
   })
 })

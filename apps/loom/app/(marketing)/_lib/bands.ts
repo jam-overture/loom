@@ -147,4 +147,10 @@ export const WHY_USE_IT_ANCHOR = {
   theSet: "what-you-build-with",
   /** A browser, with a page built out of that set inside it. */
   onAPage: "on-a-page",
+  /**
+   * The same page arranged for a reader it was not built for, wiped by a
+   * handle. It is the band that earns the site's headline, so it is the one an
+   * outside link is most likely to want.
+   */
+  forAReader: "for-a-reader",
 } as const

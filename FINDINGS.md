@@ -62827,3 +62827,272 @@ has now written down twice as the thing that stops working the moment somebody
 reaches for the spelling the list does not hold. The page opening shipped
 instead **because it is a fact**: the opening is the one region of a page whose
 whole job is to orient, and it has no antecedent by construction.
+## 2026-10-31 — `loom.before-after` lays its two regions out independently, so a wipe over anything but two aligned pictures renders unreadable text with every test green
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.before-after.ts`) · **Status:** open — **the band that
+found it shipped another way**, so nothing is blocked; what is asked for is a
+line in the primitive's schema or its note, not a rewrite
+
+`marketing-22` set out to show the site's own headline happening — *a web page
+that rearranges itself around the people using it* — by putting two
+arrangements of the same example page into a `loom.before-after`. The
+primitive's own note names that case:
+
+> *"Two states of one thing, superimposed, with a hard edge between them — the
+> redesign over the old page…"*
+
+It was built, **every test written for it passed**, and the photograph is
+unreadable. The band rendered the headline as:
+
+```
+Fresesh coffee every Friday
+```
+
+### Why, and why no test could see it
+
+A wipe clips one absolutely-positioned layer over another and **the two layers
+are laid out independently.** Two centred headings of different lengths do not
+share a centre line, so the seam fell mid-word. The tiles were worse: the
+second arrangement is a reorder, so *Choose your roast* appeared on both sides
+of the seam at once and read as a rendering fault.
+
+Nothing in the tree is wrong. Both regions hold valid trees of registered
+parts, the props validate, the markup is correct, and the defect exists only in
+the compositing — which is to say **only in a photograph.** This is the third
+time this lane has recorded that shape of failure in eight days and the first
+where the tree was not the thing at fault.
+
+### Why this is the library's and not just this lane's mistake
+
+The primitive **invites non-photographic regions.** `LAYER`'s own note records
+a band that put a `loom.stat-chart` in one, and the fix at the time was to give
+each region the full width:
+
+> *"A single stretched grid column gives any child the whole box — a picture is
+> laid out exactly as it was, and a chart, a table or a card now gets the width
+> the region was always promising it."*
+
+That is an invitation to put laid-out content in a region, and it is safe only
+while the two regions are laid out **the same way.** A chart over the same
+chart with different numbers is fine. A card over a differently-shaped card is
+the defect above, silently. Nothing in the schema, the note or the registry
+says so.
+
+The opaque-layer note two paragraphs below it is the same lesson learned once
+already — *"put a chart in one and the band draws April at nineteen per cent
+and April at nineteen per cent on top of each other… with no diagnostic and
+every test green."* That was fixed with a background. This one cannot be fixed
+with a background.
+
+### Three shapes, costed
+
+1. **A sentence in the note and the `description`** — *the two regions must be
+   laid out identically; this compares two renderings of one layout, not two
+   layouts.* Costs nothing, prevents nothing, and would have stopped this run,
+   because this lane read the note before reaching for the primitive and the
+   note said the opposite.
+2. **A prop that says what the comparison is over**, so the primitive can
+   refuse what it cannot do honestly. Probably not worth it: the thing it would
+   gate on is not expressible in a tree.
+3. **Nothing, and this entry is the record.** Defensible. The failure is loud
+   the moment anybody photographs it, and this lane did.
+
+**Recommendation: the first.** One sentence, in the place the next lane will
+read before it makes the same choice.
+
+### What the band does instead
+
+`loom.split` with a `loom.frame` per arrangement, captioned with the reader
+each is for, stacking on a phone with the order kept. It is better than the
+wipe on its own terms and not only as a fallback: the two frames carry the same
+address in their chrome, which is the claim the band is making, and a reader
+compares two whole pages rather than two halves of one.
+## 2026-10-31 — every reading in the subsystem is a reading of rows that arrived, and the one state none of them could report now has a name nothing draws
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/page.tsx`) · **Status:** open
+— **a screen that is one call from an answer it is already half-holding**;
+nothing is broken and no test is failing
+
+[0326](decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)
+published `arrivalStandingOf`, which tells *no page is posting to this
+deployment* from *a page is posting and this door is refusing it*. Until today
+nothing in `src/signals/` could: a counter never written reads like a counter
+written with a nought, so a snippet posting from an origin its project does not
+name makes every reading in the subsystem report that nobody read anything.
+
+**The *Signals* screen already reads one of the two inputs.** It calls
+`readings.refusals.read()` and prints one sentence per reason through
+`turnedAwayOf`, and it reads this application's door rows through
+`boundedReaderTallyStore(...).pageViews()`. What it does not do is put them
+together, so a person looking at a page of nought-view pages beside a box
+saying *12 deliveries came from a site this project does not take signals from*
+has to draw the conclusion themselves.
+
+The standing takes `Pick<CollectionHealth, "pages" | "arrivals">`, so the screen
+needs a health reading it does not currently take. **In the state that matters
+that is nearly free**: a deployment nothing has been collected about has no
+trees to join, so `collectionHealthOf([], rows)` is the whole of it, and that is
+exactly the deployment this answer is for.
+
+**Recommendation: draw the standing above both boxes, not beside them.**
+`describeArrivalStanding` is one line and is written for the operator setting a
+site up; the per-reason sentences `turnedAwayOf` already produces are the
+remedy under it. The one thing worth not doing is wording a second set of
+reason sentences — the portal's are good, they are the only ones in the
+repository, and the framework deliberately does not word them.
+
+---
+## 2026-10-31 — a refusal is not in a window, which is why this reading is outside the assembly for a reason the other three are not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/arriving.ts`, `src/signals/window.ts`) · **Status:** open — **a
+boundary named at the moment it was created**; nothing is broken and nothing is
+asked of anybody today
+
+Three readings now hang off `windowAssemblyOf` without being in it —
+`regionPagesOf` (§62), `silenceCensusOf` (§63) and `libraryPaceOf` (§64) — and
+the 30 October entry asks that a future run take all three at once rather than
+any of them individually. **`arrivalStandingOf` is not a fourth instance of
+that pattern**, and the distinction is worth writing down before somebody
+bundles it with them.
+
+The other three are figures over a window's own rows, and what is missing for
+them is a second rung that turns an assembly into the readings over it. This one
+is a join of a window's rows with **the door's refusal counter, which is not in
+a window at all** — it is the deployment's own table, written on the request
+path, keyed by application and reason, and holding nothing a window holds. An
+assembly that reached it would be reaching a second store on a second scope, and
+`ReaderWindow` is deliberately four row sets read with one scope (0309).
+
+So the second rung, when it is built, should take this reading's *result* as an
+argument if it wants it, and must not try to compute it.
+
+**Recommendation: leave it, and do not count it as a fourth.** What it shares
+with the three is only that nothing draws it.
+
+---
+## 2026-10-31 — the second rung the three orphaned readings need cannot be built today, because its third member is not on `main`
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **a sequencing fact rather than a
+defect**, and the reason this morning's run did not take the work the last one
+recommended
+
+The 30 October entry recommends that a future run take `regionPagesOf`,
+`silenceCensusOf` and `libraryPaceOf` into one second rung rather than adding
+any of them individually. This morning's run read that first and could not do
+it: **`libraryPaceOf` exists only on #728's branch.** `main` holds the first
+two. Building the rung off `main` would have covered two of the three and left
+the third to be added one line at a time, which is the exact shape the entry
+asks a run not to produce — and building it on top of #728 would be stacking one
+branch on another, which this lane's brief forbids.
+
+**Recommendation: take it on the first run after #728 has landed**, when all
+three are on `main` and the unit can be one. Nothing is lost by waiting; the
+party that would benefit is still the screen nobody has built.
+## 2026-10-30 (evening) — three library readings spelled the door's per-placement scaling out, and the module that exists to hold that rule held only half of it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed on filing by `signals-64-whether-a-kind-is-read`**, and
+filed rather than just fixed because the shape of it is a check this lane can
+run and had not
+
+[`door.ts`](src/signals/door.ts) was created (0265) so that the scaling three
+library readings share would be written once, and its own module documentation
+says so in as many words: *two spellings of one rule that agree today are a
+thing this subsystem has been bitten by before*. It published `PageDoor` and
+`doorOf`, which is the **per-page** half — `counted = min(appearances,
+opened)`, the weight.
+
+**The per-placement half stayed at each call site.** `count × counted ÷
+appearances` was written out five times across three modules: once in a kind's
+share of readers, twice in what readers do inside a kind, and twice more in the
+reader-weighted comparison of the first, which also has two cross-door terms
+with the same shape. Every copy agreed, including the detail that makes them
+agree — the multiplication before the division, because the three floats agree
+to fifteen places in the other order and not to sixteen (0229).
+
+A sixth copy was about to be written for a kind's pace. `atDoorScale` is now
+published from `door.ts` and all five call it, bit-identically; its optional
+second door is the one thing the comparison's counterfactual terms need and
+nothing else does.
+
+**The check, which is the part worth keeping:** a module whose stated purpose is
+to hold a rule once can hold half of it for a month with every test green,
+because nothing fails when a rule is written twice and both spellings are right.
+Grepping for the *arithmetic* of a published rule — not for its name — is a
+minute's work and it is how this was found.
+
+---
+## 2026-10-30 (evening) — a third reading now hangs off the window assembly without being in it, and the pattern is no longer one gap
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`) · **Status:** open — **a pattern named rather than a
+defect**; nothing is broken, no test is failing, and the recommendation is still
+to wait
+
+`windowAssemblyOf` composes a window into the three subjects every reading and
+comparison takes, and its whole value is that the composition order is not free:
+the libraries take the pairs rather than the readings, the door rows are the
+window's whole set on both sides, the floor reaches the regions through the
+readings. A caller that gets one of those wrong gets a figure that is plausible.
+
+**Three readings are now reachable only by a caller that knows they exist.**
+`regionPagesOf` (§62, filed 29 October), `silenceCensusOf` (§63, filed this
+morning) and now `libraryPaceOf`. The first two were filed as one gap each with
+a recommendation to leave them; a third makes it a shape worth naming.
+
+What they have in common is **not** that the assembly forgot them. The assembly
+produces subjects and deliberately produces no figures, and all three are
+figures: a transpose of a counter, a census over readings the assembly does not
+take, and a reading over the parts of the readings it does. Adding any of them
+to `WindowAssembly` would make it the thing it refuses to be, and 0322's
+argument for a required floor does not transfer — none of the three has a
+parameter that is dangerous to omit.
+
+**What is actually missing is a second rung**: something that takes an assembly
+and produces the readings over it, the way the assembly takes a window and
+produces the subjects. That is a real unit and it is not small, because the
+honest version has to decide which of the thirty-odd readings a deployment wants
+by default and what it costs to compute the ones it does not.
+
+**Recommendation: still leave it, and revisit when a surface exists.** The party
+that would benefit is the screen nobody has built. What has changed is that the
+answer, when it comes, is one unit covering all three rather than three one-line
+additions — so a future run should not take any of them individually.
+
+---
+## 2026-10-30 (evening) — the role rows of a library's pace are thinner than every other role figure, and the reason is the nesting rule rather than the registry
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-pace.ts`) · **Status:** open — **the stated limit of what
+[0325](decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)
+guarantees**; nothing is broken and nothing is asked of anybody today
+
+Every role figure in this subsystem is thin because nothing in
+`src/primitives/` declares a role (0114, 0223), so nearly every part is in the
+`null` row. That is a registry fact and the join is at read time (0212), so the
+day a role is declared every counter already stored reinterprets.
+
+**A kind's pace is thinner than that, and for a second reason.** Its figures are
+over a part's **subtree**, so a placement standing inside another of its own
+kind is set aside and the outer one stands for it. With no role declared, every
+part of a page is one kind — so the `null` role row holds the page root and
+nothing else, and `nested` holds the rest of the page. The row is the page's own
+pace wearing a role's name.
+
+It is not wrong. It is the only honest answer available: the alternative counts
+a page's words once per level of its tree. But it means **the `null` row of this
+reading says something different from the `null` row of the other five**, which
+count placements and so stay informative with no role declared. A surface
+drawing the six side by side would put a row of 1 beside rows of 40 and the
+reason is not visible from the row.
+
+**Recommendation: leave it, and do not special-case the `null` row.** It resolves
+itself the moment roles are declared, which is the same thing every other role
+figure is waiting for, and a reading that treated one key differently from the
+others would be the near-duplicate this subsystem has been bitten by. What a
+surface should do in the meantime is read `nested` beside `counted`, which is
+published for exactly this.
