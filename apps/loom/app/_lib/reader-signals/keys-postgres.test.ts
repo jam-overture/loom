@@ -1,10 +1,8 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
-import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
+import { pgliteTemplate } from "../../../../../tools/pglite/template"
 import { mintIngestKey } from "./keys"
 import { describeIngestKeyStoreContract } from "./keys.contract"
 import { ensureIngestKeysSchema, loomIngestKeys, postgresIngestKeyStore } from "./keys-postgres"
@@ -16,12 +14,7 @@ import { ensureIngestKeysSchema, loomIngestKeys, postgresIngestKeyStore } from "
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureIngestKeysSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureIngestKeysSchema)
 
 describeIngestKeyStoreContract("postgresIngestKeyStore", async () =>
   postgresIngestKeyStore(await freshDatabase())

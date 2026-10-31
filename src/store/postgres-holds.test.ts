@@ -1,15 +1,13 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { describeHoldStoreContract, heldProposalFixture } from "../testing/hold-contract.js"
 import { rowSecurityOn } from "../testing/row-security.js"
 import { treeIdSchema, type ProposalId } from "../ids.js"
 
 import { ensureHoldStoreSchema } from "./migrate.js"
 import { postgresHoldStore } from "./postgres-holds.js"
-import type { LoomDatabase } from "./database.js"
 import { loomHolds } from "./schema.js"
 
 /**
@@ -21,12 +19,8 @@ import { loomHolds } from "./schema.js"
 /** A fresh WASM Postgres per test costs seconds, not milliseconds — see `postgres.test.ts`. */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureHoldStoreSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureHoldStoreSchema)
+const emptyDatabase = pgliteTemplate()
 
 describeHoldStoreContract("postgresHoldStore", async () => postgresHoldStore(await freshDatabase()))
 
@@ -233,7 +227,7 @@ describe("postgresHoldStore beyond the contract", () => {
    * answer a reader waits out rather than investigates.
    */
   it("reports a database that is not there as unavailable rather than throwing", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     const store = postgresHoldStore(db)
 
     const held = await store.hold(heldProposalFixture())

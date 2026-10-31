@@ -1,14 +1,13 @@
-import { PGlite } from "@electric-sql/pglite"
-import { drizzle } from "drizzle-orm/pglite"
 import { sql } from "drizzle-orm"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { describeTreeStoreContract, appendOf, removalOf } from "../testing/store-contract.js"
 import { rowSecurityOn } from "../testing/row-security.js"
 import { sampleTree } from "../testing/fixtures.js"
 
 import { ensureTreeStoreSchema } from "./migrate.js"
-import { postgresTreeStore, type LoomDatabase } from "./postgres.js"
+import { postgresTreeStore } from "./postgres.js"
 import { loomRevisions, loomTrees } from "./schema.js"
 
 /**
@@ -28,12 +27,8 @@ import { loomRevisions, loomTrees } from "./schema.js"
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureTreeStoreSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureTreeStoreSchema)
+const emptyDatabase = pgliteTemplate()
 
 describeTreeStoreContract("postgresTreeStore", async () => postgresTreeStore(await freshDatabase()))
 
@@ -56,7 +51,7 @@ const PRE_0029_REVISIONS = `CREATE TABLE loom_revisions (
 
 describe("ensureTreeStoreSchema on a database that predates 0029", () => {
   it("adds answered_by to a table that was created without it", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await db.execute(sql.raw(PRE_0029_REVISIONS))
 
     await ensureTreeStoreSchema(db)
@@ -74,7 +69,7 @@ describe("ensureTreeStoreSchema on a database that predates 0029", () => {
   })
 
   it("leaves rows written before the column existed unattributed rather than failing to read them", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await db.execute(sql.raw(PRE_0029_REVISIONS))
     await ensureTreeStoreSchema(db)
 
@@ -91,7 +86,7 @@ describe("ensureTreeStoreSchema on a database that predates 0029", () => {
   })
 
   it("is a no-op run twice, so a redeploy does not need to know whether it ran", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await db.execute(sql.raw(PRE_0029_REVISIONS))
 
     await ensureTreeStoreSchema(db)
@@ -115,7 +110,7 @@ describe("ensureTreeStoreSchema locks the tables it creates", () => {
 
   /** A database deployed before the statement existed is locked by the next push. */
   it("locks tables that were created without it", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await db.execute(sql.raw(PRE_0029_REVISIONS))
     expect(await rowSecurityOn(db, "loom_revisions")).toBe(false)
 

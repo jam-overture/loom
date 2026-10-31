@@ -1,10 +1,8 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
-import type { LoomDatabase } from "../store/database.js"
 import {
   batchOf,
   describeReaderRegionStoreContract,
@@ -36,12 +34,8 @@ import type { ReaderTally } from "./rollup.js"
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureReaderSignalsSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureReaderSignalsSchema)
+const emptyDatabase = pgliteTemplate()
 
 describeReaderSignalJournalContract("postgresReaderSignalJournal", async () =>
   postgresReaderSignalJournal(await freshDatabase())
@@ -245,7 +239,7 @@ describe("the reader signal tables — Postgres specifics", () => {
    * fold after the upgrade fills it in.
    */
   it("adds the fold's timestamp to a page-view table that predates it, without inventing one", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
 
     await db.execute(
       sql.raw(`CREATE TABLE loom_reader_page_views (
@@ -295,7 +289,7 @@ describe("the reader signal tables — Postgres specifics", () => {
    * that names the same audience.
    */
   it("adds the audience to tables that predate it, filing their rows under everyone", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
 
     await db.execute(
       sql.raw(`CREATE TABLE loom_reader_tallies (
