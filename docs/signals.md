@@ -4097,6 +4097,68 @@ is of a window's rows and a refusal is not in a window; and the screen that
 would draw it is already built and already reads one of its two inputs, which is
 `Loom portal`'s.
 
+### 66. The three readings a caller had to know existed · `Loom signals` · **done, 31 October**
+
+[0322](../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)
+built the rung between a store and a question, and after it **forty of the
+forty-two readings are one call with one argument**. Three were not, and each was
+filed as a gap on the day it was built: `regionPagesOf` (§62),
+`silenceCensusOf` (§63) and `libraryPaceOf` (§64). The 30 October entry stopped
+filing them one at a time and named the shape — what is missing is a **second
+rung**, and a run should take all three at once rather than adding any of them
+individually.
+
+What they share is not that the assembly forgot them. The assembly publishes
+subjects and deliberately publishes no figures; all three of these are figures.
+What they share is that each needs something the assembly does not publish — so
+each has a composition a caller has to get right, and **all three of those
+compositions type-check, run, and are wrong without saying so.**
+
+**Done**
+([0327](../decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)),
+as `windowFiguresOf` in [`window-figures.ts`](../src/signals/window-figures.ts).
+
+- **A real defect, found by writing the composition down.** `regionPagesOf` has
+  never deduplicated its rows, because it was written to take whatever rows a
+  caller chose, and `windowRegionsOf` always has. So a window holding a bucket
+  twice produced **two readerships of one window** — and a doubled bucket is
+  worse than a wrong number, because the floor exists so that a place with too
+  few readers is not named (0146) and a bucket counted twice **clears a floor it
+  should not have cleared**. `distinctRegionRows` is now published from
+  `window.ts` and both callers use it, which is 0265's fix for the door's
+  scaling rule applied a day later to this one.
+- **`?? []` is the wrong collapse**, so the region figure is `undefined` or a
+  reading, carried exactly as the window carries it: *we cannot say where your
+  readers are* and *you have no readers abroad* are two sentences (0240, 0309).
+- **A kind's pace is over the window's readings and not over a library side.**
+  Every other reading of a kind takes `libraries.was` or `libraries.now`, so the
+  nearest line to hand drops the earlier revision of every page revised inside
+  the window and every form the placings could not place.
+- **The census is over the caller's entries plus the pace's own rows**, with the
+  list published beside it so `census.readings === silences.length` is an
+  identity. A denominator is *the readings somebody is looking at* and a rung
+  cannot know what a surface draws, so the caller chooses by what it hands in.
+  The caller's entries come first, so its vocabulary wins a shared state (0324).
+- **Each kind row is attributed to no page**, because a kind is not a page and a
+  reading's subject is not its scope (0324, 0240).
+- **It composes and does not count**, and publishes no total of what the three
+  left out: a withheld bucket, a kind with no pace and a silent reading are three
+  absences in three units.
+- **It does not decide which of the forty-two readings a deployment wants**,
+  which is what made the honest version look large. The three it takes are picked
+  by a rule — a figure that is not one call on a subject the assembly publishes.
+- **`arrivalStandingOf` is not a fourth member**, which is the 31 October finding
+  upheld: a refusal is not in a window at all (0309, 0326).
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** still **nothing draws any of it**, which is
+`Loom portal`'s and is now nineteen runs old; and the rung publishes no census a
+screen can use without the screen handing in its own readings' silences, which
+is deliberate and stated in the type.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

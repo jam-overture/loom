@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 72,
+      "files": 73,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12567,6 +12567,18 @@
               "summary": "What the join was asked to read the regions at."
             },
             {
+              "name": "DistinctRegionRows",
+              "kind": "type",
+              "signature": "type DistinctRegionRows = {\n    /** The first row for each tree, revision, form and region, in the order they arrived. */\n    readonly kept: readonly StoredRegionCount[];\n    /** Rows beyond the first for one of those keys, which are in {@link kept} nowhere. */\n    readonly duplicated: number;\n};",
+              "summary": "The rows one region map may be read from, and the repeats it dropped."
+            },
+            {
+              "name": "distinctRegionRows",
+              "kind": "function",
+              "signature": "const distinctRegionRows: (rows: readonly StoredRegionCount[]) => DistinctRegionRows",
+              "summary": "The rows of a window with the repeats of one bucket dropped, which is the one thing every reading of a region row set has to do first."
+            },
+            {
               "name": "WindowReadings",
               "kind": "type",
               "signature": "type WindowReadings = {\n    /**\n     * One reading per page, per revision, per form — which is what one reading is\n     * — in a stable order.\n     *\n     * Never two of one: the key every reading above this refuses to count twice\n     * on is the key the window was split by, so a caller may sum across this list\n     * on any figure the reading it derives says may be summed.\n     */\n    readonly pages: readonly PageReading[];\n    /** Revisions the rows name that have no reading, in the same order. */\n    readonly unjoined: readonly UnjoinedRevision[];\n    /**\n     * Where the readers were, or `undefined` where no region store was offered.\n     *\n     * The `undefined` is {@link ReaderWindow.regions}' own, carried rather than\n     * collapsed: *we cannot say where your readers are* and *you have no\n     * readers abroad* are two sentences, and `[]` holds the second — a window\n     * whose store answered with nothing reads as a readership of no views rather\n     * than as no readership.\n     *\n     * **A map here is not held to a tree.** The maps are of arrivals, which need\n     * no tree to be read against, so a revision in {@link WindowReadings.unjoined}\n     * still has its readers counted. Dropping them would under-report a\n     * deployment that has pruned old trees by exactly the readers it has least\n     * other record of, and it would make the maps and the readership disagree.\n     */\n    readonly regions: WindowRegionReadings | undefined;\n};",
@@ -12669,6 +12681,31 @@
               "summary": "Assemble a window into every subject a reading or a comparison of it takes."
             }
           ]
+        },
+        {
+          "module": "signals/window-figures",
+          "title": "Window figures",
+          "summary": "The second rung: the figures a window holds about **itself**, rather than about one of the subjects the assembly under this publishes.",
+          "symbols": [
+            {
+              "name": "WindowFigures",
+              "kind": "type",
+              "signature": "type WindowFigures = {\n    /**\n     * Where the readers were and what the readers of each place read, or\n     * `undefined` where no region store was offered.\n     *\n     * Its `map` is the assembly's `readings.regions.readership` — the same rows at\n     * the same floor — so a surface drawing both cannot show two readerships of\n     * one window.\n     */\n    readonly regions: RegionPagesReading | undefined;\n    /** What the library asks of its readers' time, by kind of part, over every reading the window holds. */\n    readonly pace: LibraryPace;\n    /**\n     * The states this window is in, over the caller's readings and the pace's own\n     * rows.\n     *\n     * `census.readings === silences.length`, which is the identity that says the\n     * denominator is the published list and nothing else.\n     */\n    readonly census: SilenceCensus;\n    /**\n     * Every entry the census was taken over, the caller's first and then the\n     * pace's, so a caller may slice it and take a census of its own.\n     */\n    readonly silences: readonly ReadingSilence[];\n};",
+              "summary": "What a window says about itself, once its subjects have been assembled."
+            },
+            {
+              "name": "WindowFigureOptions",
+              "kind": "type",
+              "signature": "type WindowFigureOptions = LibraryPaceOptions & {\n    /**\n     * The silences of the readings the caller took over this window's subjects,\n     * one entry per reading and each already mapped through its own vocabulary's\n     * `meaningOf…Silence`.\n     *\n     * A reading that answered is handed in with `meaning: null` rather than left\n     * out, which is what gives a page's readings a denominator. Left out\n     * entirely, the census is over the pace's rows alone — which is a true census\n     * of what this rung computed and not of what a screen shows.\n     */\n    readonly silences?: readonly ReadingSilence[];\n};",
+              "summary": "What the figures are read at, beyond what the context already says."
+            },
+            {
+              "name": "windowFiguresOf",
+              "kind": "function",
+              "signature": "const windowFiguresOf: (window: ReaderWindow, assembly: WindowAssembly, context: DeploymentReadingContext, options?: WindowFigureOptions) => WindowFigures",
+              "summary": "Read the figures a window holds about itself off one call."
+            }
+          ]
         }
       ]
     },
@@ -12680,7 +12717,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12815,7 +12852,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12877,7 +12914,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13402,7 +13439,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13472,7 +13509,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13894,7 +13931,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1830,
+        "packageNames": 1835,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

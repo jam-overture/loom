@@ -63096,3 +63096,78 @@ figure is waiting for, and a reading that treated one key differently from the
 others would be the near-duplicate this subsystem has been bitten by. What a
 surface should do in the meantime is read `nested` beside `counted`, which is
 published for exactly this.
+
+---
+## 2026-10-31 (evening) — the second rung is built, so the three orphaned readings and the sequencing fact both close
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window-figures.ts`) · **Status:** **closed on filing by
+`signals-66-the-second-rung`**, closing the 30 October entry *a third reading
+now hangs off the window assembly without being in it* and the 31 October entry
+*the second rung cannot be built today*
+
+`#728` landed, so `libraryPaceOf` is on `main` with `regionPagesOf` and
+`silenceCensusOf`, and the unit could be one. `windowFiguresOf` takes the
+window, the assembly and the context and publishes all three
+([0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)).
+
+**The part worth keeping is what writing the composition down found.** The 30
+October entry said nothing was broken, no test was failing, and the party that
+would benefit was a screen nobody has built. Two of those three were true. The
+third was not: `regionPagesOf` has never deduplicated its rows and
+`windowRegionsOf` always has, so a window holding one bucket twice produced **two
+readerships of one window** — and the floored one is the dangerous half, because
+a doubled bucket **clears a floor it should not have cleared** and names a place
+with too few readers in it to name (0146). Nothing failed, because both
+spellings are right about the rows they were written for.
+
+**The check, which is the same one as yesterday's:** a composition nobody has
+written down is a rule nobody has compared. Both readings had tests, both were
+correct, and the disagreement was only visible from the line that calls them
+both. Writing the caller is how it was found, and it is the second time this
+week that a rule written twice was the defect.
+
+---
+## 2026-10-31 (evening) — the second rung publishes no census a screen can use on its own, and that is the honest shape rather than a gap
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window-figures.ts`) · **Status:** open — **a stated limit of
+[0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)**;
+nothing is broken and nothing is asked of anybody today
+
+`WindowFigures.census` is over the entries the caller handed in plus the rows of
+the pace the rung took. A caller that hands in nothing gets a census of five
+rows — a true census of what this rung computed, and not of *how much of this
+window is dark*, which is what 0324 built the census for.
+
+**That is deliberate and cannot be fixed here.** A census's denominator is the
+readings somebody is looking at, and a rung cannot know what a surface draws.
+The alternative is the rung computing all forty-two readings so that it can take
+a census over them, which is the policy decision the 30 October entry correctly
+said made the honest version large, and which no surface has asked for.
+
+**Recommendation: leave it, and when a screen exists, have the screen hand in
+the silences of the readings it drew.** The list the census was taken over is
+published beside it, so a surface may also slice the rung's own entries out and
+take a narrower one. What a future run must not do is give the rung a default
+set of readings to be a census over — that is the surface's choice wearing the
+framework's name.
+
+---
+## 2026-10-31 (evening) — nineteen runs of readings and nothing draws any of them, which is the oldest open thing in this lane
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**restated rather than new**, and restated because the count has changed shape
+rather than just grown
+
+Forty-two readings, nine comparisons, an assembly, a deployment context, a
+census, an arrival standing and now a second rung over three of them. The
+earlier entries under this heading asked for a screen per reading. **This one
+asks for less than that**: the rung means a surface needs *one* call to get the
+regions by page, the pace by kind and the census, where before it needed three
+calls and had to know which rows each was entitled to.
+
+**Recommendation, unchanged in substance and cheaper in effort than it was: the
+arrival standing first** — one line above two boxes the *Signals* page already
+draws — because an operator whose door is refusing everything cannot use any of
+the others. Then `windowFiguresOf`, which is now one call.
