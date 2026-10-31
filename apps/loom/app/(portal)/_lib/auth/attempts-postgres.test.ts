@@ -1,10 +1,8 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
-import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
+import { pgliteTemplate } from "../../../../../../tools/pglite/template"
 import { describeAttemptLogContract } from "./attempts.contract"
 import {
   ensureSignInAttemptsSchema,
@@ -21,12 +19,7 @@ import {
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureSignInAttemptsSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureSignInAttemptsSchema)
 
 describeAttemptLogContract("postgresAttemptLog", async () =>
   postgresAttemptLog(await freshDatabase())

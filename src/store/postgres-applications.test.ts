@@ -2,11 +2,11 @@ import { PGlite } from "@electric-sql/pglite"
 import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { applicationIdSchema } from "../application/application.js"
 import { describeApplicationStoreContract, applicationFixture } from "../testing/application-contract.js"
 import { rowSecurityOn } from "../testing/row-security.js"
 
-import type { LoomDatabase } from "./database.js"
 import { ensureApplicationStoreSchema } from "./migrate.js"
 import { postgresApplicationStore } from "./postgres-applications.js"
 
@@ -23,12 +23,7 @@ import { postgresApplicationStore } from "./postgres-applications.js"
 /** A fresh WASM Postgres per test costs seconds, not milliseconds. */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureApplicationStoreSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureApplicationStoreSchema)
 
 describeApplicationStoreContract(
   "postgresApplicationStore",

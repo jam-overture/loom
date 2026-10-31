@@ -9,7 +9,7 @@
     "start": "next start",
     "typecheck": "pnpm --filter @jam-overture/loom build && tsc --noEmit",
     "test": "vitest run",
-    "verify": "pnpm build && pnpm typecheck && pnpm test",
+    "verify": "pnpm build && tsc --noEmit && pnpm test",
     "docs:api": "pnpm --filter @jam-overture/loom build && tsx \"app/(docs)/_lib/api/generate.ts\"",
     "docs:fences": "tsx \"app/(docs)/_lib/fences/generate.ts\"",
     "db:push": "pnpm --filter @jam-overture/loom build && tsx scripts/db-push.ts",

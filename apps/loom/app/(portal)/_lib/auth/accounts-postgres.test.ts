@@ -1,11 +1,10 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
 import type { LoomDatabase } from "@jam-overture/loom/postgres"
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { pgliteTemplate } from "../../../../../../tools/pglite/template"
 import { actorSchema } from "./accounts"
 import {
   describeAccountStoreContract,
@@ -29,12 +28,7 @@ import {
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensurePortalAccountsSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensurePortalAccountsSchema)
 
 describeAccountStoreContract("postgresAccountStore", async () =>
   postgresAccountStore(await freshDatabase())

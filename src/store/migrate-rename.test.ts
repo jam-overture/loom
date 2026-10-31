@@ -1,8 +1,7 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import type { LoomDatabase } from "./database.js"
 import {
   ensureApplicationStoreSchema,
@@ -30,6 +29,8 @@ import {
 
 /** A fresh WASM Postgres per test costs seconds, not milliseconds. */
 vi.setConfig({ testTimeout: 30_000 })
+
+const emptyDatabase = pgliteTemplate()
 
 /** The schema as it stood after #608, written out rather than imported. */
 const asItWas = async (db: LoomDatabase): Promise<void> => {
@@ -60,7 +61,7 @@ const tableExists = async (db: LoomDatabase, table: string): Promise<boolean> =>
 
 describe("the rename, on a database that has the old table", () => {
   it("carries the rows into the new name with nothing lost", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await asItWas(db)
     await db.execute(
       sql.raw(
@@ -99,7 +100,7 @@ describe("the rename, on a database that has the old table", () => {
   })
 
   it("leaves a loom_projects behind that is the grouping, not the old table", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await asItWas(db)
 
     await ensureApplicationStoreSchema(db)
@@ -127,7 +128,7 @@ describe("the rename, on a database that has the old table", () => {
 
 describe("the ids every scoped table names", () => {
   it("carries prj_default to app_default and leaves other applications alone", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await ensureTreeStoreSchema(db)
     await ensureHoldStoreSchema(db)
 
@@ -152,7 +153,7 @@ describe("the ids every scoped table names", () => {
   })
 
   it("is safe to run twice", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await ensureTreeStoreSchema(db)
     await db.execute(
       sql.raw(
@@ -174,7 +175,7 @@ describe("the ids every scoped table names", () => {
 
 describe("the rename, on a database that never had the old table", () => {
   it("creates both tables and renames nothing", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
 
     await ensureApplicationStoreSchema(db)
     await ensureProjectStoreSchema(db)
@@ -184,7 +185,7 @@ describe("the rename, on a database that never had the old table", () => {
   })
 
   it("is a no-op run a second time", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await ensureApplicationStoreSchema(db)
     await ensureProjectStoreSchema(db)
     await db.execute(

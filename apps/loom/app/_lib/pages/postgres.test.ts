@@ -1,11 +1,10 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
 import type { LoomDatabase } from "@jam-overture/loom/postgres"
 import { applicationIdSchema } from "@jam-overture/loom/store"
 
+import { pgliteTemplate } from "../../../../../tools/pglite/template"
 import { pageFixture } from "./fixtures"
 import { describePublishKeyStoreContract } from "./publish-keys.contract"
 import { ensurePublishKeysSchema, postgresPublishKeyStore } from "./publish-keys-postgres"
@@ -19,13 +18,7 @@ import {
 /** Against PGlite, for the keys suite's reason: the upserts and the unique index are what a fake would wave through. */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensurePublishKeysSchema(db)
-  await ensurePublishedPagesSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensurePublishKeysSchema, ensurePublishedPagesSchema)
 
 describePublishKeyStoreContract("postgresPublishKeyStore", async () =>
   postgresPublishKeyStore(await freshDatabase())

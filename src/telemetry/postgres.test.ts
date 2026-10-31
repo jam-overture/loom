@@ -1,10 +1,8 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { proposalIdSchema, treeIdSchema } from "../ids.js"
-import type { LoomDatabase } from "../store/database.js"
 import { describeTelemetryJournalContract, sampleEpisode } from "../testing/journal-contract.js"
 import { rowSecurityOn } from "../testing/row-security.js"
 import { FIXED_INSTANT } from "../testing/doubles.js"
@@ -20,12 +18,8 @@ import { loomTelemetry } from "./schema.js"
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureTelemetrySchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureTelemetrySchema)
+const emptyDatabase = pgliteTemplate()
 
 describeTelemetryJournalContract("postgresTelemetryJournal", async () =>
   postgresTelemetryJournal(await freshDatabase())
@@ -203,7 +197,7 @@ describe("ensureTelemetrySchema", () => {
 
   /** A table created before the statement existed is locked by the next push. */
   it("locks a journal that was created without it", async () => {
-    const db = drizzle(new PGlite())
+    const db = await emptyDatabase()
     await db.execute(
       sql.raw(`CREATE TABLE loom_telemetry (
         seq bigserial PRIMARY KEY,

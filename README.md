@@ -436,7 +436,9 @@ The runtime compiles to `dist/` and every entry point resolves there (0030), so
 the application consumes it as an ordinary Node package rather than as TypeScript
 source. `apps/loom` builds the runtime before its own typecheck and build,
 because a clean clone has no `dist` and a build order that is not written down is
-one that fails somewhere else.
+one that fails somewhere else. Its `verify` runs the build first and then calls
+`tsc` directly rather than `pnpm typecheck`, because the build has just compiled
+the runtime and compiling it a second time bought nothing.
 
 ## Deploying
 

@@ -1,7 +1,6 @@
-import { PGlite } from "@electric-sql/pglite"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { heldProposalFixture } from "../testing/hold-contract.js"
 import { sampleEpisode } from "../testing/journal-contract.js"
 import { policyNamed, recordingOf } from "../testing/policy-log-contract.js"
@@ -59,12 +58,7 @@ const MINE = applicationIdSchema.parse("app_mine")
 const YOURS = applicationIdSchema.parse("app_yours")
 
 describe("the review queue, which is the one 0220 named", () => {
-  const shared = async () => {
-    const db = drizzle(new PGlite())
-    await ensureHoldStoreSchema(db)
-
-    return db
-  }
+  const shared = pgliteTemplate(ensureHoldStoreSchema)
 
   const stores = async () => {
     const db = await shared()
@@ -154,9 +148,10 @@ describe("the review queue, which is the one 0220 named", () => {
 })
 
 describe("the policy log", () => {
+  const shared = pgliteTemplate(ensurePolicyLogSchema)
+
   const stores = async () => {
-    const db = drizzle(new PGlite())
-    await ensurePolicyLogSchema(db)
+    const db = await shared()
 
     return {
       mine: postgresPolicyLog(db, { application: MINE }),
@@ -212,9 +207,10 @@ describe("the policy log", () => {
 })
 
 describe("the journal", () => {
+  const shared = pgliteTemplate(ensureTelemetrySchema)
+
   const stores = async () => {
-    const db = drizzle(new PGlite())
-    await ensureTelemetrySchema(db)
+    const db = await shared()
 
     return {
       mine: postgresTelemetryJournal(db, { application: MINE }),
@@ -281,12 +277,7 @@ describe("the journal", () => {
 describe("the reader tables", () => {
   const AT = "2026-10-12T00:00:00.000Z"
 
-  const shared = async () => {
-    const db = drizzle(new PGlite())
-    await ensureReaderSignalsSchema(db)
-
-    return db
-  }
+  const shared = pgliteTemplate(ensureReaderSignalsSchema)
 
   const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
     treeId: TREE,

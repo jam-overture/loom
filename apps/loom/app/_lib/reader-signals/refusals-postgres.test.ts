@@ -1,11 +1,9 @@
-import { PGlite } from "@electric-sql/pglite"
 import { sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
-import type { LoomDatabase } from "@jam-overture/loom/postgres"
 import { applicationIdSchema } from "@jam-overture/loom/store"
 
+import { pgliteTemplate } from "../../../../../tools/pglite/template"
 import { describeRefusalCounterContract } from "./refusals.contract"
 import { ensureReaderRefusalsSchema, postgresRefusalCounter } from "./refusals-postgres"
 
@@ -15,12 +13,8 @@ import { ensureReaderRefusalsSchema, postgresRefusalCounter } from "./refusals-p
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensureReaderRefusalsSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensureReaderRefusalsSchema)
+const emptyDatabase = pgliteTemplate()
 
 describeRefusalCounterContract("postgresRefusalCounter", async () => {
   const db = await freshDatabase()
@@ -64,7 +58,7 @@ describe("the refusals table — Postgres specifics", () => {
   })
 
   it("reports a table that is not there as unavailable rather than throwing", async () => {
-    const counter = postgresRefusalCounter(drizzle(new PGlite()), { application: SHOP })
+    const counter = postgresRefusalCounter(await emptyDatabase(), { application: SHOP })
 
     expect((await counter.read()).ok).toBe(false)
     expect((await counter.record("closed", null, 1)).ok).toBe(false)

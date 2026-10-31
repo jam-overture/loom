@@ -1,7 +1,6 @@
-import { PGlite } from "@electric-sql/pglite"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { policyFingerprintOf } from "../runtime/policy-fingerprint.js"
 import { policyHistoryOf } from "../runtime/policy-log.js"
 import {
@@ -11,7 +10,6 @@ import {
 } from "../testing/policy-log-contract.js"
 import { rowSecurityOn } from "../testing/row-security.js"
 
-import type { LoomDatabase } from "./database.js"
 import { ensurePolicyLogSchema } from "./migrate.js"
 import { postgresPolicyLog } from "./postgres-policy-log.js"
 import { loomPolicyRevisions } from "./schema.js"
@@ -23,12 +21,7 @@ import { loomPolicyRevisions } from "./schema.js"
  */
 vi.setConfig({ testTimeout: 30_000 })
 
-const freshDatabase = async (): Promise<LoomDatabase> => {
-  const db = drizzle(new PGlite())
-  await ensurePolicyLogSchema(db)
-
-  return db
-}
+const freshDatabase = pgliteTemplate(ensurePolicyLogSchema)
 
 describePolicyLogContract("postgresPolicyLog", async () =>
   postgresPolicyLog(await freshDatabase())

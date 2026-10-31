@@ -1,7 +1,6 @@
-import { PGlite } from "@electric-sql/pglite"
-import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
+import { pgliteTemplate } from "../../tools/pglite/template.js"
 import { sequentialIdFactory } from "../ids.js"
 import { TREE_STORE_DDL } from "../store/migrate.js"
 import { ensureTreeStoreSchema } from "../store/migrate.js"
@@ -125,12 +124,7 @@ describe("the migration a database that predates applications gets", () => {
 describe("two applications in one database", () => {
   vi.setConfig({ testTimeout: 30_000 })
 
-  const shared = async () => {
-    const db = drizzle(new PGlite())
-    await ensureTreeStoreSchema(db)
-
-    return db
-  }
+  const shared = pgliteTemplate(ensureTreeStoreSchema)
 
   it("lets the same tree id exist in both, which is what 'unique within an application' means", async () => {
     const db = await shared()
