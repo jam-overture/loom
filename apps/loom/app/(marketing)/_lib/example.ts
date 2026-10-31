@@ -83,22 +83,94 @@ import { heading, prose } from "./nodes"
 /** The fictional product, which is a coffee subscription and is not Loom. */
 const ADDRESS = "fernhill.coffee"
 
-const OPENING = {
-  heading: "Fresh coffee every Friday",
-  line: "Posted the morning it is ground.",
-} as const
-
 /** One tile of the example's grid. */
 type Offer = {
   readonly title: string
   readonly body: string
 }
 
-const OFFERS: readonly Offer[] = [
-  { title: "Choose your roast", body: "Light, medium or dark." },
-  { title: "Pause any week", body: "No phone call." },
-  { title: "No contract", body: "Stop whenever you like." },
-]
+/**
+ * One arrangement of the example page.
+ *
+ * It was a pair of loose constants until the comparison band needed a second
+ * arrangement, and two arrangements spelled as two sets of loose constants is
+ * how the two drift into being two different pages. A type with one shape is
+ * what makes *the same page, arranged differently* checkable rather than
+ * asserted: `example.test.ts` holds the pair to the same number of tiles and
+ * to a line neither of them changes.
+ */
+type Arrangement = {
+  readonly heading: string
+  /**
+   * The line under the heading, and **it is the same string in both
+   * arrangements.**
+   *
+   * A comparison in which everything differs is two pages side by side, and
+   * the claim this band is making is about one page. The sentence that does
+   * not move is what a reader uses to work out that it did not move.
+   */
+  readonly line: string
+  readonly offers: readonly Offer[]
+}
+
+/** The line neither arrangement touches. See `Arrangement.line`. */
+const STEADY_LINE = "Posted the morning it is ground."
+
+/**
+ * The page as its author built it, which is the arrangement the band above
+ * this one has shown since 28 October.
+ */
+const AS_BUILT: Arrangement = {
+  heading: "Fresh coffee every Friday",
+  line: STEADY_LINE,
+  offers: [
+    { title: "Choose your roast", body: "Light, medium or dark." },
+    { title: "Pause any week", body: "No phone call." },
+    { title: "No contract", body: "Stop whenever you like." },
+  ],
+}
+
+/**
+ * The same page for a reader who arrived looking for a gift.
+ *
+ * **Three tiles in both arrangements, on purpose.** `loom.before-after` takes
+ * its height from the after region and stretches the before region to match,
+ * so a fourth tile on one side would crop the other rather than reporting
+ * anything. `example.test.ts` holds the count rather than leaving it to
+ * whoever edits this next.
+ *
+ * What differs is a tile that was not there, two that moved along to make room
+ * for it, one that came off, and a heading. Those are the things this site
+ * says a page can do, and an example of adaptation that showed something the
+ * product cannot do would be the worst sentence on the site.
+ */
+const FOR_A_GIFT: Arrangement = {
+  heading: "Send fresh coffee every Friday",
+  line: STEADY_LINE,
+  offers: [
+    { title: "Send it as a gift", body: "With a note you write." },
+    { title: "Choose your roast", body: "Light, medium or dark." },
+    { title: "Pause any week", body: "No phone call." },
+  ],
+}
+
+/** Both arrangements, for the checks that read them as a pair. */
+export const ARRANGEMENTS = { asBuilt: AS_BUILT, forAGift: FOR_A_GIFT } as const
+
+/**
+ * The corner chips, which say **who** each arrangement is for rather than
+ * which came first.
+ *
+ * *Before* and *After* would be the ordinary labels and they answer the wrong
+ * question. The headline this band is earning is *a web page that rearranges
+ * itself around the people using it*, so the thing a reader has to come away
+ * with is that the right-hand page belongs to a person, not to a later
+ * timestamp.
+ */
+export const ARRANGEMENT_LABEL = {
+  asBuilt: "As you built it",
+  forAGift: "For a visitor buying a gift",
+} as const
 
 /**
  * A mark over the example, named by the part it is pointing at.
@@ -149,7 +221,7 @@ export const MARKS: readonly Mark[] = [
   { type: "loom.feature-grid", x: 50, y: 72, side: "start" },
 ]
 
-const opening = (ids: IdFactory): LoomNode =>
+const opening = (ids: IdFactory, arrangement: Arrangement, level: number): LoomNode =>
   buildElement(ids, {
     type: "loom.hero",
     props: { align: "center", stature: "standard" },
@@ -161,23 +233,30 @@ const opening = (ids: IdFactory): LoomNode =>
      */
     children: [
       buildSlot(ids, "heading", [
-        heading(ids, 3, OPENING.heading, { balance: true, align: "center" }),
+        heading(ids, level, arrangement.heading, { balance: true, align: "center" }),
       ]),
-      prose(ids, OPENING.line, { size: "lead", align: "center", measured: true }),
+      prose(ids, arrangement.line, { size: "lead", align: "center", measured: true }),
     ],
   })
 
-const offers = (ids: IdFactory): LoomNode =>
+const offers = (ids: IdFactory, arrangement: Arrangement): LoomNode =>
   buildElement(ids, {
     type: "loom.feature-grid",
     props: { columns: "three", density: "loose" },
-    children: OFFERS.map((offer) =>
+    children: arrangement.offers.map((offer) =>
       buildElement(ids, {
         type: "loom.feature",
         props: { title: offer.title, body: offer.body, surface: "card" },
       })
     ),
   })
+
+/** The screen itself, without the chrome: what goes in a surface or a region. */
+const screen = (
+  ids: IdFactory,
+  arrangement: Arrangement,
+  level: number
+): readonly LoomNode[] => [opening(ids, arrangement, level), offers(ids, arrangement)]
 
 const mark = (ids: IdFactory, { type, x, y, side }: Mark, index: number): LoomNode =>
   buildElement(ids, {
@@ -198,7 +277,84 @@ export const examplePage = (ids: IdFactory): LoomNode =>
     type: "loom.frame",
     props: { chrome: "browser", label: ADDRESS },
     children: [
-      buildSlot(ids, "surface", [opening(ids), offers(ids)]),
+      buildSlot(ids, "surface", screen(ids, AS_BUILT, 3)),
       ...MARKS.map((entry, index) => mark(ids, entry, index)),
     ],
   })
+
+/**
+ * The same page, built twice, for two different readers.
+ *
+ * ## What it is for
+ *
+ * The headline of this site is the maintainer's of 24 October — *a web page
+ * that rearranges itself around the people using it* — and until today
+ * **nothing a visitor could look at showed one doing it.** The band above
+ * shows a page built out of the starter set and that page is fixed. The
+ * demonstration on `/how-it-works` is Loom rearranging Loom, which is the
+ * strongest thing this project has and is also the one page a stranger has no
+ * way to recognise as having changed, because they have never seen it before.
+ *
+ * So this is a page they have just been shown, a reader it was not built for,
+ * and the arrangement that reader gets. It costs no model call, it is the same
+ * composed tree as everything else on this site, and it wears whichever
+ * palette the visitor asked for.
+ *
+ * ## It was a wipe for an hour, and the photograph is why it is not
+ *
+ * The first build of this band was one frame holding a `loom.before-after`,
+ * on the primitive's own stated case — *"the redesign over the old page"* —
+ * and every test written for it passed. The picture is in the report and it
+ * is unreadable.
+ *
+ * A wipe clips one layer over another, and **the two layers are laid out
+ * independently.** Two centred headings of different lengths do not share a
+ * centre line, so the seam fell mid-word and the band read
+ * `Fresesh coffee every Friday`. The tiles were worse: the arrangement is a
+ * reorder, so the same tile appeared on both sides of the seam at once and
+ * read as a rendering fault rather than as a comparison.
+ *
+ * **A wipe compares two states that occupy the same pixels.** That is two
+ * photographs of one scene, and it is not two arrangements of a page, because
+ * the whole content of the claim is that the second one is laid out
+ * differently. Filed for `Loom primitives` with the picture, because the
+ * primitive invites non-photographic regions and garbles them in silence.
+ *
+ * ## So they stand side by side
+ *
+ * `loom.split` gives each arrangement its own frame at its own size, and
+ * stacks them on a phone with the order kept. Each frame keeps the same
+ * address in its chrome, which is the claim — one page, two readers — and a
+ * caption over each says which reader it is.
+ */
+export const rearrangedExample = (ids: IdFactory): LoomNode => {
+  const side = (arrangement: Arrangement, label: string): readonly LoomNode[] => [
+    /**
+     * The caption is the band's, not the fictional product's, so it sits
+     * **over** the frame rather than inside it. A line of this site's own
+     * voice printed inside a browser chrome belonging to a coffee company is
+     * the one thing that would make a reader doubt the whole example.
+     */
+    prose(ids, label, { tone: "muted", align: "center" }),
+    buildElement(ids, {
+      type: "loom.frame",
+      props: { chrome: "browser", label: ADDRESS },
+      children: [buildSlot(ids, "surface", screen(ids, arrangement, 3))],
+    }),
+  ]
+
+  return buildElement(ids, {
+    type: "loom.split",
+    /**
+     * `align: "stretch"`, so the two frames are the same height whatever the
+     * copy inside them does. Left to themselves they take their own heights
+     * and the band reads as two unrelated screenshots rather than as one page
+     * twice.
+     */
+    props: { ratio: "even", align: "stretch" },
+    children: [
+      buildSlot(ids, "start", side(AS_BUILT, ARRANGEMENT_LABEL.asBuilt)),
+      buildSlot(ids, "end", side(FOR_A_GIFT, ARRANGEMENT_LABEL.forAGift)),
+    ],
+  })
+}

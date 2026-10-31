@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import { FACTS } from "../copy"
 import { LIBRARY_PARTS } from "../library"
+import type { ElementNode } from "@jam-overture/loom"
+
 import { elementsIn } from "../measure"
 import { siteRegistry } from "../registry"
 import { treeFor } from "../builders"
@@ -240,10 +242,46 @@ describe("the page it shows made out of the set", () => {
   })
 
   /**
-   * One frame on the page, and it is the only thing on this site inside one.
-   * A second would mean a band had been copied rather than written.
+   * **Two frames, and the guard is that they are not the same frame.**
+   *
+   * This read `toHaveLength(1)` until the comparison band landed, on the
+   * reason *"a second would mean a band had been copied rather than
+   * written"*. That reason is still the one worth holding and a count of one
+   * is no longer the way to hold it: the second frame is written rather than
+   * copied, and the thing that says so is that one of them is a still page
+   * with marks over it and the other is a comparison with none.
+   *
+   * A count would have gone green for a band that was genuinely a duplicate,
+   * which is the failure the original line was about. These four do not.
    */
-  it("is the one framed thing on the page", () => {
-    expect(elementsOf("loom.frame")).toHaveLength(1)
+  it("shows three frames and they are not the same frame", () => {
+    expect(elementsOf("loom.frame")).toHaveLength(3)
+  })
+
+  /**
+   * The marks name the parts under them, which is the band above's argument
+   * and not this one's. On the pair they would also have to be drawn twice
+   * and would be the only thing on the two screens that differed for a reason
+   * having nothing to do with the reader.
+   */
+  it("keeps the marks on the still page and off both arrangements", () => {
+    const [still, ...compared] = elementsOf("loom.frame")
+
+    expect(
+      elementsIn(still as ElementNode).filter((node) => node.type === "loom.pin")
+    ).not.toEqual([])
+    expect(
+      compared.flatMap((frame) => elementsIn(frame).filter((node) => node.type === "loom.pin"))
+    ).toEqual([])
+  })
+
+  /**
+   * The one a duplicated band would fail. Two frames rendering the same words
+   * is the thing nobody wants and the thing a count of frames cannot see.
+   */
+  it("does not say the same thing in any two frames", () => {
+    const said = elementsOf("loom.frame").map((frame) => JSON.stringify(readerCopy(frame)))
+
+    expect(new Set(said).size).toBe(said.length)
   })
 })
