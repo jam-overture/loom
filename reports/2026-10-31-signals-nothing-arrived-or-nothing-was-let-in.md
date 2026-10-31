@@ -210,20 +210,57 @@ none of the ten open ones was this.
 `findings:check`, `reports:check`, the app's own `verify`, and
 `prerender:check`.
 
-- **PLACEHOLDER_ROOT** in the root suite, all passing, and **PLACEHOLDER_APP**
-  in the app's own. `findings:check` PLACEHOLDER_FINDINGS; `reports:check`
-  PLACEHOLDER_REPORTS; `prerender:check` PLACEHOLDER_PRERENDER.
+- **5,916 tests in 244 files** in the root suite, all passing, and **6,837 in
+  379 files** in the app's own. `findings:check` reads 1,367 findings with none
+  malformed; `reports:check` reads 2,023 visuals at 144.0MB with none over the
+  cap; `prerender:check` reads 137 pages with 1,945 text junctions and 0 run
+  together.
 - **32 new tests** in `arriving.test.ts`, in four groups: which of two silences
   a quiet deployment is in, the newest refusal, the case it would double-count,
   and the operator's line.
 - **Nothing was skipped and nothing was weakened.** No test anywhere else
   changed — the unit adds a module and one line to `index.ts`, and alters no
   existing behaviour.
-- **One failure on the first run, fixed:** `tools/decisions/decisions.test.ts`
-  caught a citation in `arriving.ts` pointing `0311` at a filename I had written
-  from memory rather than read. The check exists for exactly that and it worked.
+**Two failures on the way, both caught by checks that exist for them and both
+fixed before the commit.** Saying so plainly because neither is visible in the
+final diff:
 
-### PLACEHOLDER_MUTANTS
+1. `tools/decisions/decisions.test.ts` caught a citation in `arriving.ts`
+   pointing `0311` at a filename I had written from memory rather than read.
+2. `app/(docs)/_lib/architecture/architecture.test.ts` caught **0326's
+   alternatives being invisible to the parser**, because I wrote them as a
+   numbered list and the parser reads a bullet or a paragraph with a bold lead.
+   It is the better failure of the two: the page would have shown a shorter
+   list of roads not taken and looked complete, which is the error that module's
+   own documentation says is the worst way for it to be wrong. Converted to
+   bullets.
+
+### Twenty-three mutants planted, twenty-three dead
+
+All dead on the first pass, which has not happened on this branch's last few
+siblings and is worth reading sceptically rather than as a result — so the list
+is here in full.
+
+**The ones that matter, because each is a figure that would have looked
+plausible:** the standing judged on `arrivals` rather than on what was
+collected; the two quiet standings swapped and the two live ones swapped; a
+reason handed in twice summed rather than folded; the last row of a repeated
+reason kept instead of the first; `refused` taken as a count of reasons rather
+than a sum of their counts; an empty counter read as no counter at all, and
+`null` refusals published as a nought.
+
+**The newest refusal, which is the part an operator acts on:** the oldest named
+instead of the newest, the largest named instead of the newest, a tie reordered,
+a reason reporting a nought taken as a refusal, the age subtracted the wrong way
+round, an unstated instant reported as a nought age, and a counter ahead of the
+instant clamped rather than subtracted.
+
+**The sentence:** the reason dropped from the line, no site named printed as a
+blank, and both singulars pluralised.
+
+Run **after** the commit, per the 27 October finding that mutation testing
+before a commit is how a run loses the work it is testing. `git status` was
+clean before and after.
 
 ## Browser cost: nothing
 
