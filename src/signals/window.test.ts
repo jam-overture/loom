@@ -35,6 +35,7 @@ import {
   readReaderWindow,
   revisionsIn,
   treesIn,
+  distinctRegionRows,
   windowAssemblyOf,
   windowLibrariesOf,
   windowPairsOf,
@@ -1741,6 +1742,49 @@ describe("the two libraries a window holds", () => {
       was: [DEFAULT_AUDIENCE_ID],
       now: [DEFAULT_AUDIENCE_ID],
     })
+  })
+})
+
+describe("the region rows one map may be read from", () => {
+  it("keeps the first row for each tree, revision, form and region", () => {
+    const rows = [bucket({ views: 40 }), bucket({ revision: 2, views: 30 })]
+
+    expect(distinctRegionRows(rows)).toEqual({ kept: rows, duplicated: 0 })
+  })
+
+  it("drops a repeat of one bucket rather than adding it, and counts it", () => {
+    const first = bucket({ views: 40 })
+    const { kept, duplicated } = distinctRegionRows([first, bucket({ views: 7 }), first])
+
+    expect(kept).toEqual([first])
+    expect(duplicated).toBe(2)
+  })
+
+  it("holds two forms of one bucket apart, because they are two rows the store writes", () => {
+    const rows = [bucket({ views: 40 }, SKIERS), bucket({ views: 40 }, RIDERS)]
+
+    expect(distinctRegionRows(rows).kept).toEqual(rows)
+  })
+
+  it("holds two places and two revisions of one form apart", () => {
+    const rows = [
+      bucket({ region: "FR" }),
+      bucket({ region: "DE" }),
+      bucket({ region: "FR", revision: 2 }),
+    ]
+
+    expect(distinctRegionRows(rows).kept).toEqual(rows)
+  })
+
+  it("is the rule the window's own maps were built with", () => {
+    const first = bucket({ views: 40 })
+    const held = windowOf({ regions: [first, first] })
+    const readings = windowReadingsOf(held, treesIn([]), NOTHING_DECLARED, {
+      floor: DEFAULT_REGION_FLOOR,
+    })
+
+    expect(readings.regions?.duplicated).toBe(distinctRegionRows(held.regions ?? []).duplicated)
+    expect(readings.regions?.readership.views).toBe(40)
   })
 })
 

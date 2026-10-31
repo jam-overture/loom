@@ -440,6 +440,57 @@ type RegionGroup = {
   readonly rows: StoredRegionCount[]
 }
 
+/** The rows one region map may be read from, and the repeats it dropped. */
+export type DistinctRegionRows = {
+  /** The first row for each tree, revision, form and region, in the order they arrived. */
+  readonly kept: readonly StoredRegionCount[]
+  /** Rows beyond the first for one of those keys, which are in {@link kept} nowhere. */
+  readonly duplicated: number
+}
+
+/**
+ * The rows of a window with the repeats of one bucket dropped, which is the one
+ * thing every reading of a region row set has to do first.
+ *
+ * A store keeps one row per tree, revision, form and region, so this cannot
+ * come out of one read: it is a caller concatenating two windows whose counts
+ * are already running totals. **Adding them doubles a bucket**, which is the one
+ * error in this subsystem that cannot be undone afterwards (0158), and a doubled
+ * bucket is worse than a wrong number — it clears a floor it should not have
+ * cleared, so a place with too few readers to name gets named.
+ *
+ * Published because it is used twice and was written once. {@link
+ * WindowRegionReadings} folds it into the maps it builds; a reading that takes
+ * the **rows** rather than the maps — which is `regionPagesOf`, because a
+ * breakdown by page needs the cells and a map does not hold them — has to apply
+ * the same rule to the same rows or the two answers disagree about one window.
+ * Two spellings of one rule that agree today are a thing this subsystem has
+ * been bitten by before (0265).
+ *
+ * Linear in the rows, with one set.
+ */
+export const distinctRegionRows = (
+  rows: readonly StoredRegionCount[]
+): DistinctRegionRows => {
+  const kept: StoredRegionCount[] = []
+  const seen = new Set<string>()
+  let duplicated = 0
+
+  for (const row of rows) {
+    const key = `${revisionKeyOf(row)}\u0000${row.audienceId ?? ""}\u0000${row.region}`
+
+    if (seen.has(key)) {
+      duplicated += 1
+      continue
+    }
+
+    seen.add(key)
+    kept.push(row)
+  }
+
+  return { kept, duplicated }
+}
+
 const regionGroupsOf = (
   rows: readonly StoredRegionCount[]
 ): {
@@ -448,21 +499,10 @@ const regionGroupsOf = (
   readonly duplicated: number
 } => {
   const groups = new Map<string, RegionGroup>()
-  const kept: StoredRegionCount[] = []
-  const seen = new Set<string>()
-  let duplicated = 0
+  const { kept, duplicated } = distinctRegionRows(rows)
 
-  for (const row of rows) {
+  for (const row of kept) {
     const key = `${revisionKeyOf(row)}\u0000${row.audienceId ?? ""}`
-
-    if (seen.has(`${key}\u0000${row.region}`)) {
-      duplicated += 1
-      continue
-    }
-
-    seen.add(`${key}\u0000${row.region}`)
-    kept.push(row)
-
     const held = groups.get(key)
 
     if (held === undefined) {
