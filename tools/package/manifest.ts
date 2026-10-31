@@ -110,7 +110,7 @@ export const publishedSpecifier = (fileDir: string, specifier: string): string =
  * anything the runtime has not, and a host that upgrades one and not the other
  * is the case neither of them is tested in.
  */
-export const VERSION = "0.1.0"
+export const VERSION = "0.2.0"
 
 /** The range the peer dependency carries. Pre-1.0, a minor is allowed to break. */
 export const RUNTIME_RANGE = `~${VERSION}`

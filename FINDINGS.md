@@ -8,6 +8,56 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-31 — the version is written in three places and only one of them is held to anything, found by bumping it
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework`
+(`tools/package/manifest.ts`, `tools/package/package.test.ts`) · **Status:**
+open — **the 0.2.0 release moved all three by hand and nothing would have
+caught a miss**
+
+Publishing `0.2.0` meant editing a version in three unconnected places:
+
+| where | what it feeds |
+| --- | --- |
+| `package.json` `version` | the framework's published version |
+| `tools/package/manifest.ts` `VERSION` | the **library's** published version, and `RUNTIME_RANGE` = `~${VERSION}` |
+| the installation page's callout | *"Both packages are on npm at `0.1.0`"* |
+
+**Only the third is guarded.** `absences.test.ts` holds the callout to
+`publishedVersion()`, which reads the root manifest — so bumping the root
+turned the docs test red and the miss was caught. That test is the reason this
+release did not ship a stale page.
+
+**The second is guarded by nothing that could fail.**
+`tools/package/package.test.ts` asserts `built["version"]` is `VERSION` and
+that `RUNTIME_RANGE` contains `VERSION` — both read the same constant, so the
+pair agrees with itself whatever it says, and agrees with the framework's
+manifest never. `publishedVersion()`'s own doc comment calls the root manifest
+*"the one manifest that sets it"* and for the library that is not true.
+
+**What a forgotten bump ships**, which is worse than a stale sentence: the
+library publishes as `0.1.0` — a version already on the registry, so npm
+refuses it and the release stops, which is the lucky case. The unlucky one is a
+third bump later where the numbers differ but neither collides: a library at
+`0.2.0` declaring `peerDependencies: { "@jam-overture/loom": "~0.1.0" }` while
+the framework is at `0.3.0`, which resolves to nothing in a host's install and
+is exactly the failure `docs/publishing-primitives.md` says the peer range
+exists to prevent.
+
+**The remedy is to delete the constant rather than test it.**
+`tools/package/manifest.ts` can read the root manifest the way
+`absences.ts` already does — one `readFileSync` against
+`../../package.json` — and then there is no second place to forget. A test
+holding two copies equal is the weaker answer and still leaves the copy. The
+docs callout genuinely is a third copy and genuinely needs its test, because
+prose cannot be derived.
+
+Not done in the release branch: it is a change to how the library's manifest is
+assembled, `pnpm package:primitives` is the one thing standing between it and
+the registry, and a release is the wrong moment to rewrite that. The release
+moved the number by hand and this entry is why that was safe **this** time.
+
+---
 ## 2026-10-29 — the maintainer answered the pricing question on 24 October and this lane asked it again on 27 October, because the answer was filed in `docs/positioning.md` and the asking happens in a pull request comment
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
