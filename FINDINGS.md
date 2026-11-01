@@ -8,12 +8,80 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-01 — `docs/publishing-primitives.md` says the package is 620 files and the tool that assembles it says 772
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework`
+(`docs/publishing-primitives.md`) · **Status:** open — **nothing is broken; one
+number in a document disagrees with the command it describes**
+
+Noticed while running `pnpm package:primitives` for
+`framework-76-one-version-one-manifest`, not looked for.
+
+*What is in the package* opens: **"620 files: every primitive and every
+composition, as `.js` with a `.d.ts` beside it."** The command prints
+`@jam-overture/loom-primitives@0.2.0 assembled — 772 files, 386 rewritten`, and
+`dist/primitives` holds 193 `.js`, 193 `.d.ts` and 386 maps — 772 together,
+386 once the maps are dropped, which the same section says happens two
+paragraphs later.
+
+So 620 matches neither reading, and **this entry deliberately does not say which
+number is right**, because that is the question rather than the answer. *Every
+primitive and every composition as `.js` with a `.d.ts` beside it* is 386 today.
+772 is what the command scans, maps included. 620 is what some earlier tree had.
+Whether the sentence should carry the count the command prints, the count the
+tarball contains, or no count at all is the call — and a document that quotes a
+number which drifts is the same class of problem
+[the 2026-10-31 entry](#2026-10-31--the-version-is-written-in-three-places-and-only-one-of-them-is-held-to-anything-found-by-bumping-it)
+was about, one directory over.
+
+Not fixed in that branch, because a release-safety change is the wrong place to
+bury a documentation judgement, and because guessing the intended number is
+exactly what filing this avoids. `Readiness.files` already carries the live
+count and `report.ts` already prints it; a sentence that said *"what
+`pnpm package:primitives` reports"* instead of a figure would not need this
+entry again.
+
+---
 ## 2026-10-31 — the version is written in three places and only one of them is held to anything, found by bumping it
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom framework`
 (`tools/package/manifest.ts`, `tools/package/package.test.ts`) · **Status:**
-open — **the 0.2.0 release moved all three by hand and nothing would have
-caught a miss**
+**closed by `framework-76-one-version-one-manifest`** — the second copy is
+deleted rather than tested, which is what this entry asked for. `VERSION` and
+`RUNTIME_RANGE` are gone from `tools/package/manifest.ts`; `versionOf` reads the
+root manifest, `runtimeRangeOf` derives the peer range from whatever version it
+is handed, and `manifestFacts` gathers both facts the published manifest cannot
+derive out of one read — the shape `licenseIdOf` already had, which moved into
+`manifest.ts` beside it so the two derivations sit together and the seam is
+testable without a build.
+
+Proven rather than asserted: with the root manifest moved to `0.3.0`,
+`pnpm package:primitives` assembled `@jam-overture/loom-primitives@0.3.0` with
+`peerDependencies: { "@jam-overture/loom": "~0.3.0" }` and the readiness table
+reported the peer as not yet on the registry. Before this, the library would
+have stayed at `0.2.0` silently.
+
+**There is deliberately no test that the two versions agree**, because there are
+no longer two versions — a test holding two copies equal is the weaker answer
+and leaves the copy, as this entry said. What is held instead is that the fact
+is *derived*: `manifestFacts` is handed a manifest that is not this
+repository's and the version it carries has to come out, which no literal on the
+path can satisfy. The two assertions that could not fail are gone, and the
+fixture version in `package.test.ts` is now `9.9.9` — one no release could
+carry, so no case can assert against it by accident.
+
+**The third copy is untouched and still needs its test**, which it has: the
+installation page's callout is prose and cannot be derived, and
+`absences.test.ts` holds it to `publishedVersion()`. That function's doc comment
+calls the root manifest *"the one manifest that sets it"* — a claim this entry
+noted was false for the library, and which is now true. Left as it stands
+rather than edited, both because it needs no change and because `(docs)` is not
+this lane.
+
+Original status below.
+
+**Status:** open — **the 0.2.0 release moved all three by hand and nothing would
+have caught a miss**
 
 Publishing `0.2.0` meant editing a version in three unconnected places:
 
