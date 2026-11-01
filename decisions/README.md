@@ -419,5 +419,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0327](0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md) | The figures a window holds about itself are a second rung, and a region row set is deduplicated once | Accepted | §4c (reader signals) |
 | [0328](0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md) | The marketing site has no demonstration and no mechanism page | Accepted — supersedes 0081 | §4d |
 | 0329 | *No record on this branch* | — | — |
-| 0330 | *No record on this branch* | — | — |
+| [0330](0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md) | The page to fix first is not the page to fix when its own fault made the fall | Accepted | §4c (reader signals) |
 | [0331](0331-a-marketing-page-is-served-per-request-because-the-store-governs-it.md) | A marketing page is served per request because the store governs it | Accepted | §4d, §5 |
