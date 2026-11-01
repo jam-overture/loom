@@ -2,9 +2,37 @@ import { readFile } from "node:fs/promises"
 
 import { describe, expect, it } from "vitest"
 
-import { rewrite, licenseIdOf, withoutMapComment } from "./build.js"
+import { rewrite, withoutMapComment } from "./build.js"
 import { describeError, describeReadiness, type Readiness } from "./report.js"
-import { ENTRY_POINTS, manifest, publishedSpecifier, runtimeTarget, RUNTIME_RANGE, VERSION } from "./manifest.js"
+import {
+  ENTRY_POINTS,
+  licenseIdOf,
+  manifest,
+  manifestFacts,
+  publishedSpecifier,
+  runtimeRangeOf,
+  runtimeTarget,
+  versionOf,
+  type ManifestFacts,
+} from "./manifest.js"
+
+/** The framework's manifest, which is the source of every fact held here. */
+const rootManifest = async (): Promise<string> => readFile(new URL("../../package.json", import.meta.url), "utf8")
+
+/**
+ * The facts a caller supplies `manifest` with.
+ *
+ * The version is deliberately one no release could ever carry. A case about
+ * `files` or `publishConfig` has no business depending on what the repository
+ * is at, and a fixture that looks like a real version is a fixture somebody
+ * eventually asserts against by accident — which is the whole class of mistake
+ * this file stopped making on 1 November.
+ */
+const facts = (over: Partial<ManifestFacts> = {}): ManifestFacts => ({
+  license: "MIT",
+  version: "9.9.9",
+  ...over,
+})
 
 /**
  * What has to be true for `@jam-overture/loom-primitives` to resolve in somebody else's
@@ -85,7 +113,7 @@ describe("where a specifier points once it is published", () => {
      * the workspace map here would pass on a door npm never opens.
      */
     const root: { exports?: Record<string, unknown>; publishConfig?: { exports?: Record<string, unknown> } } =
-      JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"))
+      JSON.parse(await rootManifest())
     const published = Object.keys(root.publishConfig?.exports ?? root.exports ?? {})
 
     for (const { specifier } of ENTRY_POINTS) {
@@ -127,12 +155,11 @@ describe("what the rewrite does to a file", () => {
 
 describe("what the manifest promises", () => {
   it("keeps the runtime a peer and pins it to the version they ship together at", () => {
-    const built: Record<string, unknown> = manifest("MIT")
+    const built: Record<string, unknown> = manifest(facts())
     const peers = built["peerDependencies"] as Record<string, string>
 
-    expect(built["version"]).toBe(VERSION)
-    expect(peers["@jam-overture/loom"]).toBe(RUNTIME_RANGE)
-    expect(RUNTIME_RANGE).toContain(VERSION)
+    expect(built["version"]).toBe("9.9.9")
+    expect(peers["@jam-overture/loom"]).toBe("~9.9.9")
     /**
      * A dependency rather than a peer would put a second runtime in a host's
      * tree, which is two `PrimitiveType` brands and a registry that refuses its
@@ -143,8 +170,67 @@ describe("what the manifest promises", () => {
     expect(built["dependencies"]).not.toHaveProperty("react")
   })
 
+  /**
+   * **The case this file did not have, and the reason the constant is gone.**
+   *
+   * Until 1 November the library's version was `VERSION`, a literal in
+   * `manifest.ts`, and the two assertions above read that same literal on both
+   * sides — so they agreed with themselves whatever it said, and with the
+   * framework never. Releasing `0.2.0` moved it by hand in three places and
+   * nothing here would have caught a miss.
+   *
+   * **There is deliberately no test that the two versions agree, because there
+   * are no longer two versions.** A test holding two copies equal is the weaker
+   * answer and leaves the copy. What is worth holding instead is that the fact
+   * is *derived*: this hands `manifestFacts` a manifest that is not this
+   * repository's and expects the version it carries to come out, which a
+   * literal anywhere on the path cannot satisfy.
+   */
+  it("derives the published version from the manifest it is given, not from a literal", () => {
+    expect(manifestFacts(`{"version":"4.5.6","license":"MIT"}`, true)).toEqual({
+      license: "MIT",
+      version: "4.5.6",
+    })
+    expect(manifest(manifestFacts(`{"version":"4.5.6","license":"MIT"}`, true))["version"]).toBe("4.5.6")
+  })
+
+  /**
+   * The license is conditional on the repository shipping the text and the
+   * version is conditional on nothing, so a tree with no LICENSE still
+   * publishes at the right version rather than failing both facts at once.
+   */
+  it("says UNLICENSED without a license file, and still reads the version", () => {
+    expect(manifestFacts(`{"version":"4.5.6","license":"MIT"}`, false)).toEqual({
+      license: "UNLICENSED",
+      version: "4.5.6",
+    })
+  })
+
+  /**
+   * The range is the version it is given and not a version of its own, held on
+   * a value no repository could be at so the case says something whatever the
+   * release is.
+   */
+  it("pins the peer range to whatever version it is handed", () => {
+    expect(runtimeRangeOf("9.9.9")).toBe("~9.9.9")
+    expect(runtimeRangeOf("1.0.0-rc.1")).toBe("~1.0.0-rc.1")
+  })
+
+  /**
+   * A manifest with no version is a repository too broken to publish from, and
+   * the alternative to throwing is worse than a crash: `JSON.stringify` drops
+   * an `undefined` field, so a fallback here writes a `package.json` with no
+   * `version` at all and the failure moves to `npm publish`.
+   */
+  it("reads a version out of a manifest, and refuses to guess one that is not there", () => {
+    expect(versionOf(`{"version":"0.2.0"}`)).toBe("0.2.0")
+    expect(versionOf(`{"version":"1.0.0-rc.1"}`)).toBe("1.0.0-rc.1")
+    expect(() => versionOf(`{}`)).toThrow(/no .?version/)
+    expect(() => versionOf(`{"version":""}`)).toThrow(/no .?version/)
+  })
+
   it("publishes publicly, which a scoped package does not do by default", () => {
-    expect(manifest("MIT")["publishConfig"]).toEqual({ access: "public" })
+    expect(manifest(facts())["publishConfig"]).toEqual({ access: "public" })
   })
 
   /**
@@ -156,7 +242,7 @@ describe("what the manifest promises", () => {
     expect(licenseIdOf(`{"license":"MIT"}`)).toBe("MIT")
     expect(licenseIdOf(`{"license":"Apache-2.0"}`)).toBe("Apache-2.0")
     expect(licenseIdOf(`{}`)).toBe("SEE LICENSE IN LICENSE")
-    expect(manifest("MIT")["license"]).toBe("MIT")
+    expect(manifest(facts())["license"]).toBe("MIT")
   })
 
   /**
@@ -165,10 +251,8 @@ describe("what the manifest promises", () => {
    * than restated here.
    */
   it("agrees with the runtime on the license and the floor it runs on", async () => {
-    const root: { license?: string; engines?: { node?: string } } = JSON.parse(
-      await readFile(new URL("../../package.json", import.meta.url), "utf8")
-    )
-    const built: Record<string, unknown> = manifest(root.license ?? "")
+    const root: { license?: string; engines?: { node?: string } } = JSON.parse(await rootManifest())
+    const built: Record<string, unknown> = manifest(facts({ license: root.license ?? "" }))
 
     expect(built["license"]).toBe(root.license)
     expect(built["engines"]).toEqual(root.engines)
@@ -176,7 +260,7 @@ describe("what the manifest promises", () => {
 
   /** Only what is built, plus the two files a reader opens first. */
   it("ships the build and the two documents, and nothing else", () => {
-    expect(manifest("MIT")["files"]).toEqual(["dist", "README.md", "LICENSE"])
+    expect(manifest(facts())["files"]).toEqual(["dist", "README.md", "LICENSE"])
   })
 })
 
@@ -266,7 +350,7 @@ describe("what it declares about the framework beside it", () => {
   const root = async (): Promise<{
     peerDependencies?: Record<string, string>
     dependencies?: Record<string, string>
-  }> => JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"))
+  }> => JSON.parse(await rootManifest())
 
   /**
    * A library that accepts React 20 while the framework beside it accepts only
@@ -274,7 +358,7 @@ describe("what it declares about the framework beside it", () => {
    * one tree. Narrower is safe and wider is a promise nothing has tested.
    */
   it("does not accept a React the framework refuses", async () => {
-    const built: Record<string, unknown> = manifest("MIT")
+    const built: Record<string, unknown> = manifest(facts())
     const peers = built["peerDependencies"] as Record<string, string>
 
     expect(peers["react"]).toBe((await root()).peerDependencies?.["react"])
@@ -286,7 +370,7 @@ describe("what it declares about the framework beside it", () => {
    * framework's range rather than restated.
    */
   it("depends on the zod the framework depends on", async () => {
-    const built: Record<string, unknown> = manifest("MIT")
+    const built: Record<string, unknown> = manifest(facts())
     const deps = built["dependencies"] as Record<string, string>
 
     expect(deps["zod"]).toBe((await root()).dependencies?.["zod"])

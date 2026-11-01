@@ -1,7 +1,7 @@
 import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { join, posix, relative, sep } from "node:path"
 
-import { manifest, publishedSpecifier, runtimeTarget } from "./manifest.js"
+import { manifest, manifestFacts, publishedSpecifier, runtimeTarget } from "./manifest.js"
 
 /**
  * Assembling `packages/primitives/` from a build of the runtime — the work, with
@@ -94,9 +94,9 @@ export type AssemblyError = { readonly code: "no-build" } | { readonly code: "un
 export const assemble = async (): Promise<{ ok: true; value: Assembled } | { ok: false; error: AssemblyError }> => {
   if (!(await exists(SOURCE))) return { ok: false, error: { code: "no-build" } }
 
-  const license = (await exists(join(ROOT, "LICENSE")))
-    ? licenseIdOf(await readFile(join(ROOT, "package.json"), "utf8"))
-    : undefined
+  /** One read of the framework's manifest; `manifestFacts` says what comes out of it and why. */
+  const hasLicenseFile = await exists(join(ROOT, "LICENSE"))
+  const facts = manifestFacts(await readFile(join(ROOT, "package.json"), "utf8"), hasLicenseFile)
 
   await rm(OUT, { recursive: true, force: true })
   await mkdir(OUT, { recursive: true })
@@ -164,13 +164,13 @@ export const assemble = async (): Promise<{ ok: true; value: Assembled } | { ok:
 
   await writeFile(
     join(TARGET, "package.json"),
-    `${JSON.stringify(manifest(license ?? "UNLICENSED"), null, 2)}\n`,
+    `${JSON.stringify(manifest(facts), null, 2)}\n`,
     "utf8"
   )
 
-  if (license !== undefined) await cp(join(ROOT, "LICENSE"), join(TARGET, "LICENSE"))
+  if (hasLicenseFile) await cp(join(ROOT, "LICENSE"), join(TARGET, "LICENSE"))
 
-  const built: Record<string, unknown> = manifest(license ?? "UNLICENSED")
+  const built: Record<string, unknown> = manifest(facts)
   const peers = built["peerDependencies"] as Record<string, string>
   const [peer = ""] = Object.keys(peers).filter((name) => name !== "react")
 
@@ -179,7 +179,7 @@ export const assemble = async (): Promise<{ ok: true; value: Assembled } | { ok:
     value: {
       files: sources.length,
       rewritten,
-      license: license !== undefined,
+      license: hasLicenseFile,
       packageName: String(built["name"]),
       version: String(built["version"]),
       peer,
@@ -187,25 +187,3 @@ export const assemble = async (): Promise<{ ok: true; value: Assembled } | { ok:
     },
   }
 }
-
-/**
- * What the package says its license is — read from the runtime's own manifest
- * rather than parsed out of the LICENSE file.
- *
- * The first version of this read an SPDX identifier off the LICENSE's first
- * line, which was a convention this tool invented and the repository did not
- * follow: the file `Loom daily build` shipped opens `MIT License`, the
- * conventional header, which is not a bare identifier. Two packages out of one
- * repository disagreeing about their license is the failure that would have
- * caused, and the fix is to stop having a second source of truth — `license`
- * in the root manifest is what npm publishes for the framework, so it is what
- * this publishes for the library.
- */
-export const licenseIdOf = (rootManifest: string): string => {
-  const parsed: { license?: unknown } = JSON.parse(rootManifest)
-
-  return typeof parsed.license === "string" && parsed.license.length > 0
-    ? parsed.license
-    : "SEE LICENSE IN LICENSE"
-}
-
