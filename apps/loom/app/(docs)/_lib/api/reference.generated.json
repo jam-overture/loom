@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4293,10 +4293,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 61,
+      "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4633,6 +4633,19 @@
               "kind": "value",
               "signature": "const DISCLOSED_ATTRIBUTE = \"data-loom-disclosed\"",
               "summary": "The attribute a disclosure control stamps on its own button: `\"true\"` when the region it names is open, `\"false\"` when it is closed."
+            }
+          ]
+        },
+        {
+          "module": "render/document-theme",
+          "title": "Document theme",
+          "summary": "Mounting a theme on the **document element** rather than on a tree.",
+          "symbols": [
+            {
+              "name": "themeDocumentCss",
+              "kind": "function",
+              "signature": "const themeDocumentCss: (theme: ResolvedTheme, ramp?: RampMode) => string",
+              "summary": "A resolved theme as the `:root` rule a host puts on its own document."
             }
           ]
         },
@@ -5183,7 +5196,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5666,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6754,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7331,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7534,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8266,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8645,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8873,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12766,7 +12779,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12901,7 +12914,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12963,7 +12976,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13488,7 +13501,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13558,7 +13571,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13980,7 +13993,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1842,
+        "packageNames": 1843,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

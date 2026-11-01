@@ -1,5 +1,12 @@
 import { createThemeRegistry, type JsonObject, type ResolvedTheme, type ThemeRegistry } from "@jam-overture/loom"
-import { resolveTheme, themeGround, themeStyle, THEME_PROP_KEY, type ThemeGround } from "@jam-overture/loom/react"
+import {
+  resolveTheme,
+  themeDocumentCss,
+  themeGround,
+  themeStyle,
+  THEME_PROP_KEY,
+  type ThemeGround,
+} from "@jam-overture/loom/react"
 import type { CSSProperties } from "react"
 
 /**
@@ -112,7 +119,8 @@ export const SHELL_GROUND: ThemeGround = ground
 export const GEIST_HREF = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap"
 
 /**
- * The mounted theme as a `:root` rule, and why it is not a style attribute.
+ * The mounted theme as a `:root` rule, from the framework that decides what one
+ * holds.
  *
  * A style attribute is how every *surface* mounts a theme, because on a surface
  * the root primitive is an element inside a document some layout already
@@ -130,28 +138,12 @@ export const GEIST_HREF = "https://fonts.googleapis.com/css2?family=Geist:wght@4
  * So the declarations go where they are actually true — on `:root`, which *is*
  * the document element — and the page renders no document of its own.
  *
- * The literals here are the same literals `themeStyle` produces and are derived
- * the same way, from the one resolved theme. Only the serialisation differs: a
- * CSS text block rather than a React style object. Nothing is restated, so
- * there is no second source of truth for a re-theme to miss (0049).
+ * **The serialising was this module's own until 1 November and is the
+ * framework's now.** It was written here first, by the lane that met the
+ * problem, and `themeDocumentCss` is the same rule with the same two halves in
+ * the same order — every variable `themeStyle` mounts, then the ground. What
+ * moved with it is the reason the ground is in it at all: `color-scheme` is a
+ * declaration only the document element can make good on, and a shell that held
+ * the only copy of that rule meant three public surfaces had nothing to apply.
  */
-const cssProperty = (key: string): string =>
-  key.startsWith("--") ? key : key.replace(/[A-Z]/g, (capital) => `-${capital.toLowerCase()}`)
-
-const declarations = (properties: Readonly<Record<string, unknown>>): readonly string[] =>
-  Object.entries(properties)
-    .filter(([, value]) => value !== undefined)
-    .map(([key, value]) => `  ${cssProperty(key)}: ${String(value)};`)
-
-/**
- * `:root` carries the variables and the ground together, so the paper reaches
- * the overscroll area a phone exposes past the end of a short page. A ground on
- * a wrapper inside the document would leave the browser's own white there, which
- * is invisible under this palette and would not be under the next one.
- */
-export const SHELL_ROOT_CSS = [
-  ":root {",
-  ...declarations(SHELL_THEME_STYLE as Readonly<Record<string, unknown>>),
-  ...declarations(SHELL_GROUND as Readonly<Record<string, unknown>>),
-  "}",
-].join("\n")
+export const SHELL_ROOT_CSS = themeDocumentCss(shellTheme)

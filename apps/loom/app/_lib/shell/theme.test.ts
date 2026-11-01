@@ -1,15 +1,9 @@
 import { describe, expect, it } from "vitest"
 
 import { minimalPalette, minimalSansFontPack, preciseStylePreset } from "@jam-overture/loom"
+import { themeDocumentCss } from "@jam-overture/loom/react"
 
-import {
-  GEIST_HREF,
-  SHELL_GROUND,
-  SHELL_ROOT_CSS,
-  SHELL_SELECTION,
-  SHELL_THEME_STYLE,
-  shellTheme,
-} from "./theme"
+import { GEIST_HREF, SHELL_GROUND, SHELL_ROOT_CSS, SHELL_SELECTION, shellTheme } from "./theme"
 
 /**
  * What the shell knows about how the product looks.
@@ -80,44 +74,21 @@ describe("the shell's theme", () => {
   })
 
   /**
-   * The `:root` rule, held against the style object it is serialised from.
+   * The `:root` rule, held against the framework's answer for this theme.
    *
-   * Two serialisations of one resolved theme, so the only thing that can go
-   * wrong between them is the serialising — a camelCase key written into CSS
-   * unconverted, or a value dropped. Both are silent: the declaration is
-   * discarded by the parser and the element renders as though nobody had styled
-   * it, which is this unit's own defect arriving one layer down.
+   * The serialising moved into `themeDocumentCss` on 1 November and the cases
+   * that hold it — every property declared, no camelCase surviving, a `:root`
+   * rule rather than a bare list — moved with it, to
+   * `src/render/document-theme.test.ts`. What is this module's to assert is
+   * that the shell asks for the rule instead of composing one, which is the
+   * thing a re-theme or a fourth declaration on `ThemeGround` would silently
+   * leave behind here.
+   *
+   * Held as equality rather than by reading the CSS, because a weaker check
+   * passes against a hand-rolled copy that happens to agree today, and the
+   * reason the copy went is that it would not have agreed tomorrow.
    */
-  it("serialises every property it mounts, and nothing else", () => {
-    const declared = [...SHELL_ROOT_CSS.matchAll(/^ {2}([a-z0-9-]+):/gm)].flatMap((match) =>
-      match[1] === undefined ? [] : [match[1]]
-    )
-
-    const expected = [
-      ...Object.keys(SHELL_THEME_STYLE),
-      ...Object.keys(SHELL_GROUND).map((key) => key.replace(/[A-Z]/g, (capital) => `-${capital.toLowerCase()}`)),
-    ]
-
-    expect(new Set(declared)).toEqual(new Set(expected))
-    expect(declared).toHaveLength(expected.length)
-  })
-
-  /**
-   * No camelCase survives the conversion. `backgroundColor: #fff` is not a
-   * declaration any browser applies, and nothing reports it.
-   */
-  it("leaves no camelCase property in the CSS", () => {
-    expect(SHELL_ROOT_CSS).not.toMatch(/^ {2}[a-z]+[A-Z]/m)
-  })
-
-  /**
-   * And it is a `:root` rule rather than a bare list of declarations, which is
-   * the whole reason it exists: `:root` is the document element, and a page
-   * outside every route group cannot render an `<html>` of its own to put them
-   * on.
-   */
-  it("is a :root rule", () => {
-    expect(SHELL_ROOT_CSS.startsWith(":root {")).toBe(true)
-    expect(SHELL_ROOT_CSS.trimEnd().endsWith("}")).toBe(true)
+  it("mounts the rule the framework composes, rather than one of its own", () => {
+    expect(SHELL_ROOT_CSS).toBe(themeDocumentCss(shellTheme))
   })
 })

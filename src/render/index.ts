@@ -18,6 +18,7 @@ export * from "./behaviour.js"
 export * from "./control.js"
 export * from "./decorative.js"
 export * from "./diagnostics.js"
+export * from "./document-theme.js"
 export * from "./editable.js"
 export * from "./frame.js"
 /**

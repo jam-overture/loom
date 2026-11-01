@@ -422,3 +422,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0330](0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md) | The page to fix first is not the page to fix when its own fault made the fall | Accepted | §4c (reader signals) |
 | [0331](0331-a-marketing-page-is-served-per-request-because-the-store-governs-it.md) | A marketing page is served per request because the store governs it | Accepted | §4d, §5 |
 | [0332](0332-every-model-call-for-a-project-is-paid-with-that-projects-own-key-kept-sealed.md) | Every model call for a project is paid with that project's own key, kept sealed | Accepted | §5 (portal), the reasoning plane |
+| [0333](0333-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md) | The browser's own furniture is outside the tree, so a host is handed a `:root` rule for its document | Accepted | §4b |
