@@ -8,12 +8,80 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-01 — `docs/publishing-primitives.md` says the package is 620 files and the tool that assembles it says 772
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework`
+(`docs/publishing-primitives.md`) · **Status:** open — **nothing is broken; one
+number in a document disagrees with the command it describes**
+
+Noticed while running `pnpm package:primitives` for
+`framework-76-one-version-one-manifest`, not looked for.
+
+*What is in the package* opens: **"620 files: every primitive and every
+composition, as `.js` with a `.d.ts` beside it."** The command prints
+`@jam-overture/loom-primitives@0.2.0 assembled — 772 files, 386 rewritten`, and
+`dist/primitives` holds 193 `.js`, 193 `.d.ts` and 386 maps — 772 together,
+386 once the maps are dropped, which the same section says happens two
+paragraphs later.
+
+So 620 matches neither reading, and **this entry deliberately does not say which
+number is right**, because that is the question rather than the answer. *Every
+primitive and every composition as `.js` with a `.d.ts` beside it* is 386 today.
+772 is what the command scans, maps included. 620 is what some earlier tree had.
+Whether the sentence should carry the count the command prints, the count the
+tarball contains, or no count at all is the call — and a document that quotes a
+number which drifts is the same class of problem
+[the 2026-10-31 entry](#2026-10-31--the-version-is-written-in-three-places-and-only-one-of-them-is-held-to-anything-found-by-bumping-it)
+was about, one directory over.
+
+Not fixed in that branch, because a release-safety change is the wrong place to
+bury a documentation judgement, and because guessing the intended number is
+exactly what filing this avoids. `Readiness.files` already carries the live
+count and `report.ts` already prints it; a sentence that said *"what
+`pnpm package:primitives` reports"* instead of a figure would not need this
+entry again.
+
+---
 ## 2026-10-31 — the version is written in three places and only one of them is held to anything, found by bumping it
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom framework`
 (`tools/package/manifest.ts`, `tools/package/package.test.ts`) · **Status:**
-open — **the 0.2.0 release moved all three by hand and nothing would have
-caught a miss**
+**closed by `framework-76-one-version-one-manifest`** — the second copy is
+deleted rather than tested, which is what this entry asked for. `VERSION` and
+`RUNTIME_RANGE` are gone from `tools/package/manifest.ts`; `versionOf` reads the
+root manifest, `runtimeRangeOf` derives the peer range from whatever version it
+is handed, and `manifestFacts` gathers both facts the published manifest cannot
+derive out of one read — the shape `licenseIdOf` already had, which moved into
+`manifest.ts` beside it so the two derivations sit together and the seam is
+testable without a build.
+
+Proven rather than asserted: with the root manifest moved to `0.3.0`,
+`pnpm package:primitives` assembled `@jam-overture/loom-primitives@0.3.0` with
+`peerDependencies: { "@jam-overture/loom": "~0.3.0" }` and the readiness table
+reported the peer as not yet on the registry. Before this, the library would
+have stayed at `0.2.0` silently.
+
+**There is deliberately no test that the two versions agree**, because there are
+no longer two versions — a test holding two copies equal is the weaker answer
+and leaves the copy, as this entry said. What is held instead is that the fact
+is *derived*: `manifestFacts` is handed a manifest that is not this
+repository's and the version it carries has to come out, which no literal on the
+path can satisfy. The two assertions that could not fail are gone, and the
+fixture version in `package.test.ts` is now `9.9.9` — one no release could
+carry, so no case can assert against it by accident.
+
+**The third copy is untouched and still needs its test**, which it has: the
+installation page's callout is prose and cannot be derived, and
+`absences.test.ts` holds it to `publishedVersion()`. That function's doc comment
+calls the root manifest *"the one manifest that sets it"* — a claim this entry
+noted was false for the library, and which is now true. Left as it stands
+rather than edited, both because it needs no change and because `(docs)` is not
+this lane.
+
+Original status below.
+
+**Status:** open — **the 0.2.0 release moved all three by hand and nothing would
+have caught a miss**
 
 Publishing `0.2.0` meant editing a version in three unconnected places:
 
@@ -63346,3 +63414,334 @@ links and frames that 404. The surface should come down last.
 [0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)
 `Superseded by 0328`. It is deliberately not marked today: it is about where
 the demo lives, and it still lives there.
+
+---
+## 2026-11-01 — there is a cap on how long one signature may be and none on how many go on a page, and one address sends more than the whole search corpus
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/weight.ts`) · **Status:** **closed on filing by
+`docs-73-what-a-page-costs`** — both caps exist now; what stays open is the
+number the generated one is a trigger for, and the entry below carries it
+
+`api/extract.ts` carries `SIGNATURE_CAP = 6000` and the reason it gives is a
+reader: a declaration that ran to a screen and a half is cut, and the page says
+how much it kept. **Nothing capped how many of them go on one page.** Six
+symbols in the whole reference are cut by the per-symbol rule;
+`/docs/api-reference/signals` renders five hundred and sixty-eight uncut ones.
+
+This surface holds **five caps on what the search box sends** — the largest of
+them 80,000 compressed bytes for the prose of all thirty-five written pages at
+once — and **no number at all on a page.**
+
+### What a page of this site actually weighs
+
+Measured against a production build in this container, served locally.
+
+| page | HTML | gzipped |
+| --- | --- | --- |
+| `/docs/api-reference/signals` | **1,914,446** | **308,898** |
+| `/docs/api-reference/runtime` | 1,428,536 | 160,113 |
+| `/docs/building-with-loom/theming` | 537,630 | 104,795 |
+| `/docs` | 35,749 | — |
+| *the whole site's search prose, capped at* | — | *80,000* |
+
+**One address sends a reader almost four times the entire search corpus,
+compressed, before they have typed anything.**
+
+### Where the bytes are, which is not where anybody would guess
+
+`weight.ts` counts the text a page renders, off the same sources the pages read.
+
+| | pages | prose | code | total |
+| --- | --- | --- | --- | --- |
+| written | 35 | 208,399 | 29,734 | **238,133** |
+| generated | 18 | 26,777 | 812,665 | **839,442** |
+
+- **`/docs/api-reference/signals` is 452,513 bytes of text on its own — 1.9
+  times all thirty-five written pages put together.**
+- **1,924 bytes of it are prose. 450,589 are signatures.** The heaviest page on
+  this documentation site is **99.6% a thing nobody here wrote**, and no editing
+  on this surface moves it.
+- It is not that signals publishes the most names. `runtime` publishes **600**
+  symbols to signals' 568 and weighs 135,722 bytes, because its declarations
+  average 166 bytes and signals' average 733.
+
+### What shipped
+
+Two caps, and the split is the one the names cap already settled.
+
+**`WRITTEN_PAGE_CAP = 24_000` is this lane's in both directions.** It moves when
+somebody writes a long page here and this surface is the one that would raise
+it. Today's heaviest written page is *Where the content comes from* at 19,255.
+
+**`GENERATED_PAGE_CAP = 600_000` is a trigger and nothing else** — this lane's
+number about another lane's growth, in the shape `search/build.test.ts` names.
+Its comment says the remedy rather than the number: when it fires, cut the page
+along the line it grows on. A reference page is already fifty-four groups with
+a heading each, the groups are modules rather than an invented grouping, and the
+browser already knows which group a reader is on — the same two sentences that
+made the contents file and the words file shard.
+
+### The part worth keeping
+
+**The per-symbol cap reads like a bound on a page and is not one.** 568 × 6,000
+is 3.4MB, five and a half times the cap now held, and the test asserts that
+rather than arguing it: a run that lowered `SIGNATURE_CAP` far enough to make
+the page cap redundant would make the suite say so.
+
+---
+## 2026-11-01 — `weight.ts` counts bytes rather than characters and nothing would notice if it stopped
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/weight.ts`) · **Status:** open — **a mutation that
+did not kill**; nothing is broken and no test is failing
+
+`bytes()` encodes before it counts, for the reason `search/build.test.ts`
+records learning on 21 September: `"…".length` is 1 and what goes down the wire
+is 3, and this site's prose is full of ellipses, em-dashes and curly quotes.
+
+**Replacing it with `text.length` fails nothing.** The seventh mutation this run
+applied did exactly that and all fifteen tests passed. What it changes:
+
+| | bytes | characters | kinder by |
+| --- | --- | --- | --- |
+| heaviest written page | 19,255 | 19,119 | 0.7% |
+| heaviest generated page | 452,513 | 451,657 | 0.2% |
+| every written page | 238,133 | 236,304 | 0.8% |
+
+**The reason it cannot be killed by a cap is the reason it does not matter
+much**: no cap here sits within 1% of its number, by design, and a cap that did
+would be a cap that fires on the next sentence somebody writes. The honest
+remedy is a test over `bytes()` itself with a string whose two counts differ,
+and it was not written because a one-line test of a one-line function is the
+kind of coverage that reads as diligence and holds nothing — the function would
+have to be *called* wrongly for the site's numbers to move, which is what the
+mutation shows nothing sees.
+
+**Recommendation: leave it, and know the number is a 0.8% underestimate if the
+spelling ever drifts.** Recorded rather than fixed so that the next run reading
+`bytes()` and wondering whether anything holds it finds the answer.
+
+---
+## 2026-11-01 — the demo removal lists a `(docs)` row that points at a fictional origin, and the one real row must come after the deletion rather than before it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom demo` / `Loom daily build` ·
+**Status:** open — **a correction to the 31 October entry's order, not new
+work**; nothing is blocked on this lane
+
+The 31 October entry *the maintainer asked for the demo and the how-it-works
+page to go* lists two `(docs)` files under *order matters*, with the reasoning
+that they point at `/demo` and would frame or link a 404 once the surface is
+deleted. Checked this run, both halves of that are wrong in opposite
+directions.
+
+**`(docs)/_lib/reporting/catalogue.ts` is not a prerequisite.** Its one `/demo`
+is `${SELF_ORIGIN}/demo` where `SELF_ORIGIN` is `"https://loom.example"` — a
+made-up origin the reporting bench uses to demonstrate *a frame from your own
+origin, whose sandbox grants it nothing*. It has never pointed at this
+deployment and cannot 404 for a reader. Nothing has to change before the route
+group comes down. (Its `title: "Our own demo"` reads a little stale afterwards,
+which is a sentence and not an order dependency.)
+
+**`(docs)/_lib/surfaces.ts` must come *after*, not before.** `surfaces.test.ts`
+derives the expected list from `readdirSync(apps/loom/app/)` on every run, so
+removing `/demo` from `OTHER_SURFACES` while `app/(demo)/` still exists turns
+this lane's suite red — and `pnpm verify` is the merge gate for four surfaces.
+It is one line and it belongs in the same pull request that deletes the route
+group, or in the one straight after it.
+
+**So `Loom demo` is not waiting on this lane for anything.** Recorded here
+rather than as an edit, because the useful output is the corrected order and an
+edit would have been churn against a fictional URL.
+---
+## 2026-11-01 (evening) — the one performance fix this lane was told was its own would have frozen every marketing page, and nothing would have been red
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed** by 0331 and #742 — the guarantee is now declared and swept
+
+This corrects the last paragraph of **the 1 November library-stylesheet
+finding**, filed this morning by this same lane. That paragraph reads:
+
+> All four marketing routes are `ƒ` … The cause is that each route awaits
+> `searchParams` (the palette) and `servedOrigin()` (a `headers()` read). That
+> is the ~100ms, not the seconds, and **it is `Loom marketing`'s own to fix**.
+
+**It is not a fix and it must not be done.** The original entry is left as it
+stands, per the append-only rule; this is the dated note that overrules its
+last paragraph.
+
+### What was measured, with `next build`
+
+| `/what-you-run` | reported as |
+| --- | --- |
+| as it shipped this morning | `ƒ` |
+| with the page component's `searchParams` read removed | `ƒ` |
+| with the `generateMetadata` read removed as well | **`○`** |
+
+`○` means the page's stored row is read **once at build time** and that copy
+is served until the next deployment.
+[0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+is the record that makes these pages the store's: the portal governs them, and
+an accepted change is a new revision the next reader is meant to get. A
+prerendered marketing site is a portal governing pages nobody is served.
+
+### Why it was worth a record rather than a comment
+
+Two things make this a trap rather than a mistake somebody would notice:
+
+1. **The load-bearing read is not in the page file.** Removing the palette
+   from the component leaves the route `ƒ`, because `generateMetadata` still
+   awaits `searchParams`. A run doing the obvious thing sees no change and
+   concludes correctly that it broke nothing — while leaving the surface one
+   edit from frozen.
+2. **Staleness is not a failing test.** The row is served either way. Nothing
+   in this repository asserts that a row was read recently, so the bottom of
+   that path is green.
+
+[0331](decisions/0331-a-marketing-page-is-served-per-request-because-the-store-governs-it.md)
+records it, every route now declares `force-dynamic` as a literal beside a
+comment naming 0259, and `(marketing)/_lib/governed.test.ts` reads the three
+route files and fails if one loses either. Verified by removing the
+declaration from one route and watching that case go red.
+
+### What this means for the maintainer's instruction
+
+**There is no performance work left on this surface.** The 2.4MB is the
+stylesheet finding and is `Loom primitives`'. The ~100ms is the cost of 0259
+and is not recoverable while 0259 holds. A later run reading this morning's
+finding should read 0331 before acting on its last paragraph.
+
+---
+---
+## 2026-11-01 (evening) — a governed page cannot be cached today because nothing tells a cache that a row was appended to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` and
+`Loom portal` (paused) · **Status:** open — **the only shape that recovers the
+per-request cost without contradicting 0259**
+
+0331 closes the door on prerendering a page the store governs. It leaves one
+door open and this is it, recorded so the next performance pass starts from a
+shape rather than from the measurement again.
+
+**The cost.** Every marketing request makes one query — `siteStore.head` for
+the page's row — and renders the tree. ~100ms per request, on a pool where
+every query waits for the last. It is not the maintainer's reported *several
+seconds*, and it is the whole of what is left after the stylesheet is fixed.
+
+**Why a cache is not simply switchable on.** `revalidate`, a cache tag or a
+short TTL would each serve a row that is up to the window stale, which is the
+same defect as prerendering with a smaller number on it. What makes a cache
+correct here is **invalidation on append**: the store gains a new revision,
+and whatever is holding the rendered page is told. That is one line in the
+place that appends and nothing in the place that renders.
+
+**Why it is not this lane's.** The append happens in `src/` and in
+`(portal)`; the thing to invalidate is a Next.js cache entry belonging to
+`(marketing)`. A surface cannot invalidate on an event it never sees, and
+`Loom marketing` may not edit either of the other two.
+
+**What it is worth.** ~100ms on every marketing page view, and more on the
+portal's own screens, which make several queries each. It is worth nothing at
+all until the stylesheet finding lands, because 2.4MB over a real network
+dwarfs it — **so it is explicitly second**, and filed now only because the
+measurement and the reasoning are in hand today.
+
+`Loom portal` is paused, so this waits rather than being reassigned.
+## 2026-11-01 — two readings ranked the same pages in the same unit, and the fault at the top of one was the reason the other put it there
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** **closed on filing by
+`signals-67-the-page-to-fix-or-the-measurement`**
+
+[0250](decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)
+publishes *the page to fix first* and
+[0271](decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)
+publishes *the page to look at first*, over the same window, over the same
+pages, both as headcounts at the door's scale. Nothing joined them, and the
+overlap is not a tidiness problem — it is a wrong errand, in one direction.
+
+**A tree and a window that do not belong together leave most of a page
+reporting `skipped` (0212), which is not a quiet page but a cliff.** So
+`rows-mishandled` manufactures the steepest fall in the deployment, puts the
+page at the head of the order under the sentence *this page loses more readers
+than any other*, and sends an operator to rewrite a page that is fine. A
+stalled fold does the gentler version: the fall is of one window and its scale
+of another.
+
+**The obvious fix was also wrong, and that is the part worth keeping.** *Any
+fault takes the page out of the order* is one line, and two of the seven faults
+demonstrably do not reach the ranking key — `counts-inflated` is already divided
+out of it, and `actions-uncredited` spends a counter no fall is made of. A
+reading that pulled a real fall off a screen because a page's presses are not
+credited would be a verdict worth ignoring, so the join publishes `both`
+([0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)).
+
+**The check, which is the third in a week of the same kind:** the defect was
+only visible from the line that calls both readings, and `spoilsTheLoss` is the
+rule written down once rather than twice. The double-count guard found a second
+one on its own — the join is a map and cannot hold a key twice, but the
+published orders walk the caller's own lists, so a page a caller named twice
+stood in an order twice while every count above it stayed right.
+
+---
+## 2026-11-01 — the deployment now says what to do about reading and says nothing about converting, and the funnel is the one per-page reading the window rung does not reach
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`, `src/signals/funnel.ts`) · **Status:** open — **the
+stated limit of [0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)**;
+nothing is broken and nothing is asked of anybody today
+
+`deploymentAgendaOf` answers *what should this deployment do next* out of a fall
+in reading progress and a fault in collection. **A page whose conversion
+collapsed is in neither list**: the order ranks where readers stop reading
+(0221, 0250), and a form nobody submits is not a fall between two siblings. So
+the agenda's `work: "none"` is true of a page whose pricing band every reader
+reaches and nobody buys from.
+
+**Two facts a future run should hold together before building it.**
+
+- **The unit question is the same one 0330 settled by refusing.** Readers lost
+  at a fall and conversions not made are two quantities, so a third arm cannot
+  be merged into either order — it would be a third order, with its own key.
+- **The funnel reading is the one per-page reading the window rung does not
+  reach.** `windowAssemblyOf` publishes the readings, the pairs and the two
+  libraries; a funnel is read by `funnelReachOf(reading, window.funnels,
+  window.pageViews)`, which is the only three-argument per-page reading left and
+  is **not** one of the three
+  [0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)
+  took. It is safe as written — it filters by revision, scopes by audience and
+  deduplicates its pairs itself — so this is not the hazard those three were.
+  It is a composition a conversion arm would have to write per reading.
+
+**Recommendation: take the two together or not at all.** A run that adds a
+conversion order should publish the funnel readings off the assembly in the same
+unit of work, so the arm and its input land once; a run that adds only the
+funnel join leaves the agenda still silent about the half of the product that
+pays. What a future run must not do is rank a conversion loss inside the page
+order.
+
+---
+## 2026-11-01 — the recommendation for the Signals screen has changed shape a third time, and is now two calls rather than nineteen
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**an amendment to the standing entry *nineteen runs of readings and nothing
+draws any of them*, not a new ask**
+
+The 31 October (evening) entry asked for `arrivalStandingOf` first and then
+`windowFiguresOf`. Both still stand. **What has changed is that the deployment's
+own fix-list is now one call on two readings a screen would already be holding**
+([0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)),
+and it is the reading a *Signals* page should open with once the door's standing
+is drawn: one line saying *repair this measurement* or *rewrite this page*, with
+the page named.
+
+**Why it is worth moving up the list.** Drawing
+[0250](decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)'s
+order on its own is now a known hazard rather than a thin screen: the head of it
+can be a page whose own collection fault manufactured its fall, and the sentence
+printed over it is *this page loses more readers than any other*. A screen that
+draws the order should draw it through the agenda, or at minimum mark a row with
+`spoilsTheLoss`.
+
+**Recommendation, in order: the arrival standing, then the agenda, then
+`windowFiguresOf`.** Nothing in this lane is blocked on any of it.
