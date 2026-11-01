@@ -63346,3 +63346,99 @@ links and frames that 404. The surface should come down last.
 [0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)
 `Superseded by 0328`. It is deliberately not marked today: it is about where
 the demo lives, and it still lives there.
+
+---
+---
+## 2026-11-01 (evening) — the one performance fix this lane was told was its own would have frozen every marketing page, and nothing would have been red
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed** by 0331 and #TBD — the guarantee is now declared and swept
+
+This corrects the last paragraph of **the 1 November library-stylesheet
+finding**, filed this morning by this same lane. That paragraph reads:
+
+> All four marketing routes are `ƒ` … The cause is that each route awaits
+> `searchParams` (the palette) and `servedOrigin()` (a `headers()` read). That
+> is the ~100ms, not the seconds, and **it is `Loom marketing`'s own to fix**.
+
+**It is not a fix and it must not be done.** The original entry is left as it
+stands, per the append-only rule; this is the dated note that overrules its
+last paragraph.
+
+### What was measured, with `next build`
+
+| `/what-you-run` | reported as |
+| --- | --- |
+| as it shipped this morning | `ƒ` |
+| with the page component's `searchParams` read removed | `ƒ` |
+| with the `generateMetadata` read removed as well | **`○`** |
+
+`○` means the page's stored row is read **once at build time** and that copy
+is served until the next deployment.
+[0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
+is the record that makes these pages the store's: the portal governs them, and
+an accepted change is a new revision the next reader is meant to get. A
+prerendered marketing site is a portal governing pages nobody is served.
+
+### Why it was worth a record rather than a comment
+
+Two things make this a trap rather than a mistake somebody would notice:
+
+1. **The load-bearing read is not in the page file.** Removing the palette
+   from the component leaves the route `ƒ`, because `generateMetadata` still
+   awaits `searchParams`. A run doing the obvious thing sees no change and
+   concludes correctly that it broke nothing — while leaving the surface one
+   edit from frozen.
+2. **Staleness is not a failing test.** The row is served either way. Nothing
+   in this repository asserts that a row was read recently, so the bottom of
+   that path is green.
+
+[0331](decisions/0331-a-marketing-page-is-served-per-request-because-the-store-governs-it.md)
+records it, every route now declares `force-dynamic` as a literal beside a
+comment naming 0259, and `(marketing)/_lib/governed.test.ts` reads the three
+route files and fails if one loses either. Verified by removing the
+declaration from one route and watching that case go red.
+
+### What this means for the maintainer's instruction
+
+**There is no performance work left on this surface.** The 2.4MB is the
+stylesheet finding and is `Loom primitives`'. The ~100ms is the cost of 0259
+and is not recoverable while 0259 holds. A later run reading this morning's
+finding should read 0331 before acting on its last paragraph.
+
+---
+---
+## 2026-11-01 (evening) — a governed page cannot be cached today because nothing tells a cache that a row was appended to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` and
+`Loom portal` (paused) · **Status:** open — **the only shape that recovers the
+per-request cost without contradicting 0259**
+
+0331 closes the door on prerendering a page the store governs. It leaves one
+door open and this is it, recorded so the next performance pass starts from a
+shape rather than from the measurement again.
+
+**The cost.** Every marketing request makes one query — `siteStore.head` for
+the page's row — and renders the tree. ~100ms per request, on a pool where
+every query waits for the last. It is not the maintainer's reported *several
+seconds*, and it is the whole of what is left after the stylesheet is fixed.
+
+**Why a cache is not simply switchable on.** `revalidate`, a cache tag or a
+short TTL would each serve a row that is up to the window stale, which is the
+same defect as prerendering with a smaller number on it. What makes a cache
+correct here is **invalidation on append**: the store gains a new revision,
+and whatever is holding the rendered page is told. That is one line in the
+place that appends and nothing in the place that renders.
+
+**Why it is not this lane's.** The append happens in `src/` and in
+`(portal)`; the thing to invalidate is a Next.js cache entry belonging to
+`(marketing)`. A surface cannot invalidate on an event it never sees, and
+`Loom marketing` may not edit either of the other two.
+
+**What it is worth.** ~100ms on every marketing page view, and more on the
+portal's own screens, which make several queries each. It is worth nothing at
+all until the stylesheet finding lands, because 2.4MB over a real network
+dwarfs it — **so it is explicitly second**, and filed now only because the
+measurement and the reasoning are in hand today.
+
+`Loom portal` is paused, so this waits rather than being reassigned.
