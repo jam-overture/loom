@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata, Viewport } from "next"
 
 import { Search } from "@/app/(docs)/_components/search"
@@ -105,6 +106,7 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
       {children}
 
       <SiteFooter />
+      <SpeedInsights />
     </body>
   </html>
 )

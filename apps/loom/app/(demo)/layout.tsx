@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GeistSans } from "geist/font/sans"
 import type { Metadata, Viewport } from "next"
 
@@ -62,6 +63,7 @@ const DemoLayout = ({ children }: { readonly children: React.ReactNode }) => (
         skip to the controls
       </a>
       {children}
+      <SpeedInsights />
     </body>
   </html>
 )

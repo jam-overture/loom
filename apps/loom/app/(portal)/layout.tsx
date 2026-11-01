@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GeistSans } from "geist/font/sans"
 import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
@@ -72,7 +73,10 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   if (ownChrome) {
     return (
       <html lang="en" className={GeistSans.variable}>
-        <body className="min-h-screen">{children}</body>
+        <body className="min-h-screen">
+          {children}
+          <SpeedInsights />
+        </body>
       </html>
     )
   }
@@ -140,6 +144,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
             {children}
           </main>
         </div>
+        <SpeedInsights />
       </body>
     </html>
   )
