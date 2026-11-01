@@ -1,7 +1,5 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
-
 import { proposalIdSchema } from "@jam-overture/loom"
 import { confirmHeld, discardHeld } from "@jam-overture/loom/write"
 
@@ -32,6 +30,11 @@ const ALREADY = plainState("already-answered")
  * A *yes* goes through `confirmHeld`, which checks the Gate's rules once more
  * against the page as it now stands: an answer is permission to proceed, not
  * permission to skip the check.
+ *
+ * Nothing is revalidated. The answer is shown where the change was, and a
+ * revalidation re-renders the screen it was given on, which would take the
+ * change and its answer off it together. Every screen these change reads
+ * per request, so the next visit to *Waiting* or to the page is current.
  */
 export const answerAction = async (
   _previous: AnswerReport | null,
@@ -60,7 +63,6 @@ export const answerAction = async (
     const discarded = await discardHeld(write.path, answer)
 
     await write.finish()
-    revalidatePath(`/portal/${site.projectId}/waiting`)
 
     if (!discarded.ok) return { refusal: ALREADY.meaning }
 
@@ -79,7 +81,6 @@ export const answerAction = async (
   const outcome = await confirmHeld(write.path, answer)
 
   await write.finish()
-  revalidatePath(`/portal/${site.projectId}/waiting`)
 
   return {
     report: askedReport(reportOf(outcome, write.weighedAgainst), site.application.applicationId),
