@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { runsIn } from "./measure"
 import { treeFor } from "./render"
-import { SITE_ROUTES, type SiteRoute } from "./site"
+import { PRODUCT_SURFACES, SITE_ROUTES, type SiteRoute } from "./site"
 
 /**
  * How much each card in a row says, against how much the one beside it says.
@@ -278,7 +278,14 @@ describe("a row of cards says about the same amount in each card", () => {
     const waysIn = SITE_ROUTES.filter((route) => route.path === "/")
       .flatMap((route) => rowsOf(pageOf(route), route.path))
       .filter((row) => row.container === "loom.grid" && row.cell === "loom.card")
-      .filter((row) => row.words.length === 4)
+      /**
+       * **Read off `PRODUCT_SURFACES` rather than typed, as of 31 October.**
+       * It was `=== 4`, and 0328 took the demonstration out of that list, so
+       * the filter matched nothing and the case passed its own `> 0` guard
+       * only by failing it. A hand-written count of a list this site derives
+       * is the thing that goes stale on somebody else's run.
+       */
+      .filter((row) => row.words.length === PRODUCT_SURFACES.length)
 
     expect(waysIn.length).toBeGreaterThan(0)
 

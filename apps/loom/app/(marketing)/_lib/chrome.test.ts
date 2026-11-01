@@ -19,7 +19,7 @@ import {
   DEFAULT_THEME,
   DOCS,
   HOME,
-  HOW_IT_WORKS,
+  WHY_USE_IT,
   PORTAL,
   PRODUCT_SURFACES,
   readingNeighbors,
@@ -358,7 +358,7 @@ describe("the footer", () => {
  */
 describe("the band that says what to read next", () => {
   it("names itself, so the outline has a row for it rather than a hole", () => {
-    const band = bandOn(HOW_IT_WORKS)
+    const band = bandOn(WHY_USE_IT)
 
     expect(band.kind === "element" ? band.type : "").toBe("loom.section")
     expect(band.kind === "element" ? band.props["eyebrow"] : "").toBe(READ_NEXT_EYEBROW)
@@ -371,7 +371,7 @@ describe("the band that says what to read next", () => {
    * the measurement rather than repeating it.
    */
   it("gives each way on a card of its own, in a grid that gives it a width", () => {
-    const band = bandOn(HOW_IT_WORKS)
+    const band = bandOn(WHY_USE_IT)
 
     expect(ofType(band, "loom.grid")).toHaveLength(1)
     expect(ofType(band, "loom.card")).toHaveLength(2)
@@ -406,7 +406,7 @@ describe("the band that says what to read next", () => {
   })
 
   it("says which way each card goes, in words rather than in a glyph", () => {
-    const words = wordsOf(bandOn(HOW_IT_WORKS))
+    const words = wordsOf(bandOn(WHY_USE_IT))
 
     expect(words).toContain(BEFORE_LABEL)
     expect(words).toContain(NEXT_LABEL)
@@ -449,7 +449,7 @@ describe("the band that says what to read next", () => {
    * where it now happens.
    */
   it("carries the visitor's palette along the site and not into another surface", () => {
-    const band = bandOn(HOW_IT_WORKS)
+    const band = bandOn(WHY_USE_IT)
 
     for (const href of hrefsIn(band)) expect(href, href).not.toContain("theme=")
 

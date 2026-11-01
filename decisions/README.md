@@ -170,7 +170,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0078](0078-the-front-door-speaks-the-visitors-language.md) | The front door speaks the visitor's language, and a test holds it there | Accepted | §4d |
 | [0079](0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md) | A layout only CSS can express belongs in the stylesheet, width query and all | Accepted | §4b |
 | [0080](0080-a-doc-comment-in-src-is-written-to-a-stranger.md) | A doc comment in `src/` is written to a stranger | Accepted | §4c |
-| [0081](0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md) | The front door demonstrates statelessly, and the address is the whole of the state | Accepted | §4d |
+| [0081](0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md) | The front door demonstrates statelessly, and the address is the whole of the state | Superseded by [0328](0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md) | §4d |
 | [0082](0082-a-refusal-says-what-became-of-the-repair.md) | A refusal says what became of the repair | Accepted | §2 |
 | [0083](0083-a-scoped-request-sends-the-scope.md) | A scoped request sends the scope, not the page it sits on | Accepted | §2 |
 | [0084](0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md) | In a two-dimensional band, rows are nodes and columns are positions | Accepted | §4b |
@@ -417,3 +417,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0325](0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md) | A kind's pace is a pooled ratio over its outermost placements, and an unscaled page is kept | Accepted | §4c (reader signals) |
 | [0326](0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md) | A quiet window and a refusing door are two states, and a refusal names no page | Accepted | §4c (reader signals) |
 | [0327](0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md) | The figures a window holds about itself are a second rung, and a region row set is deduplicated once | Accepted | §4c (reader signals) |
+| [0328](0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md) | The marketing site has no demonstration and no mechanism page | Accepted — supersedes 0081 | §4d |

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { asRequested, sameSiteHrefs } from "./requested"
 import { treeFor } from "./builders"
 import { elementsIn } from "./measure"
-import { HOME, HOW_IT_WORKS, SITE_THEMES, SITE_THEME_NAMES, WHAT_YOU_RUN } from "./site"
+import { HOME, SITE_THEMES, SITE_THEME_NAMES, WHAT_YOU_RUN, WHY_USE_IT } from "./site"
 
 /**
  * The layer that puts the reader's palette back onto a page that does not carry
@@ -21,7 +21,7 @@ import { HOME, HOW_IT_WORKS, SITE_THEMES, SITE_THEME_NAMES, WHAT_YOU_RUN } from 
  * is allowed to touch, and every one of them is a bug this had on the way in.
  */
 
-const ROUTES = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN] as const
+const ROUTES = [HOME, WHY_USE_IT, WHAT_YOU_RUN] as const
 
 const STORED = { origin: "", theme: "minimal" } as const
 
@@ -99,8 +99,8 @@ describe("the addresses it rewrites", () => {
    * meaning rather than the reader's.
    */
   it("leaves a link that names its own palette alone", () => {
-    const worn = asRequested(treeFor(HOW_IT_WORKS, STORED), { theme: "bold" })
-    const offered = hrefsIn(worn).filter((href) => href.startsWith(`${HOW_IT_WORKS.path}?theme=`))
+    const worn = asRequested(treeFor(WHY_USE_IT, STORED), { theme: "bold" })
+    const offered = hrefsIn(worn).filter((href) => href.startsWith(`${WHY_USE_IT.path}?theme=`))
 
     /*
      * The distinct palettes offered, not the list — a link to the page the
@@ -110,7 +110,7 @@ describe("the addresses it rewrites", () => {
      * it; overwriting them with the reader's would leave only one.
      */
     expect([...new Set(offered)].sort()).toEqual(
-      SITE_THEME_NAMES.map((name) => `${HOW_IT_WORKS.path}?theme=${name}`).sort()
+      SITE_THEME_NAMES.map((name) => `${WHY_USE_IT.path}?theme=${name}`).sort()
     )
   })
 

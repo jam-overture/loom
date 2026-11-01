@@ -19,7 +19,7 @@ import { appStore, appStoreForWriting, siteStore } from "@/app/_lib/app/store"
 
 import { treeFor } from "./builders"
 import { pageTreeFor } from "./render"
-import { HOME, HOW_IT_WORKS, SITE_ROUTES, WHAT_YOU_RUN } from "./site"
+import { HOME, SITE_ROUTES, WHAT_YOU_RUN, WHY_USE_IT } from "./site"
 import { seedSitePages, sitePagesStored, storedIdFor, storedPageFor } from "./stored"
 
 /**
@@ -169,7 +169,7 @@ describe("the rows this site is", () => {
     )
 
     expect(swept).toContain("home.ts")
-    expect(swept).toContain("how-it-works.ts")
+    expect(swept).toContain("why-use-it.ts")
     expect(swept).toContain("what-you-run.ts")
     expect(swept.length).toBeGreaterThanOrEqual(SITE_ROUTES.length)
   })
@@ -279,8 +279,8 @@ describe("what the route serves", () => {
    * portal is a window onto rows nobody reads.
    */
   it("is a change somebody made in the store", async () => {
-    const before = await storedPageFor(HOW_IT_WORKS)
-    if (before === undefined) throw new Error("loom: /how-it-works is not stored")
+    const before = await storedPageFor(WHY_USE_IT)
+    if (before === undefined) throw new Error("loom: /why-use-it is not stored")
 
     const heading = headingIn(before)
 
@@ -295,7 +295,7 @@ describe("what the route serves", () => {
 
     if (!appended.ok) throw new Error("loom: the store refused the change")
 
-    const served = await pageTreeFor(HOW_IT_WORKS, CONTEXT)
+    const served = await pageTreeFor(WHY_USE_IT, CONTEXT)
 
     expect({
       revision: served.revision,

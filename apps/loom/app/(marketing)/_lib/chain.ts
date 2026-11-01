@@ -45,8 +45,8 @@
  * anyway: the first two are yours and the rest happen without you.
  */
 
-import { ANCHOR, COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "./bands"
-import { HOW_IT_WORKS, sitePath, WHAT_YOU_RUN, WHY_USE_IT } from "./site"
+import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "./bands"
+import { sitePath, WHAT_YOU_RUN, WHY_USE_IT } from "./site"
 
 /** One link of the chain: his wording, and what a reader actually meets. */
 export type ChainLink = {
@@ -129,7 +129,16 @@ export const CHAIN: readonly ChainLink[] = [
     actor: "Your AI model",
     title: "Your AI model rearranges it to suit them",
     body: "It reads what your page saw and proposes a different arrangement. Loom checks that against your rules before anything moves.",
-    shown: { path: HOW_IT_WORKS.path, anchor: ANCHOR.seeItHappen },
+    /**
+     * **It pointed at the demonstration until 31 October**, and
+     * [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+     * removed it. This is the band that replaces it and it is a better answer
+     * to this rung than the one it replaces: the demonstration rearranged
+     * *this* site, which a stranger has never seen before and so cannot tell
+     * has changed. *The same page arranged for someone else* rearranges a page
+     * they were shown one band earlier.
+     */
+    shown: { path: WHY_USE_IT.path, anchor: WHY_USE_IT_ANCHOR.forAReader },
   },
   /**
    * **The one rung this site cannot show, and it is the last one.**

@@ -1,10 +1,6 @@
 import type { LoomTree } from "@jam-overture/loom"
 import { renderLoomTree, type RenderOutput } from "@jam-overture/loom/react"
 
-import { askById, type Ask } from "./adapt/asks"
-import type { ChangeRecord } from "./adapt/record"
-import { runAsk, type AskRun } from "./adapt/run"
-import { runUndo } from "./adapt/undo"
 import { siteFrameOrigins } from "./frames"
 import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
@@ -12,12 +8,7 @@ import { treeFor, type SitePageContext } from "./builders"
 import { asRequested } from "./requested"
 import { storedPageFor } from "./stored"
 
-import {
-  ASKED_ROUTE,
-  isAskedRoute,
-  siteOrigin,
-  type SiteRoute,
-} from "./site"
+import { siteOrigin, type SiteRoute } from "./site"
 
 /**
  * Route → tree → rendered page, in one place.
@@ -54,93 +45,10 @@ import {
 export type { PageBuilder, SitePageContext } from "./builders"
 export { SITE_PAGES, treeFor } from "./builders"
 
-/** One request, and the undo of it when the visitor asked for that too. */
-export type FrontDoorRun = AskRun & {
-  /** What the rules said about putting it back, once the visitor has asked to. */
-  readonly undone?: ChangeRecord
-}
-
-/**
- * The change, and then — if the visitor pressed the button — the undo of it.
- *
- * The undo runs against the page the change left rather than against the
- * published one, which is the only honest way round: an inverse is written for
- * one arrangement of a page, and putting it back means putting *this* back.
- *
- * It is skipped when the change did not land. There is nothing to reverse, and
- * `runAsk` returns no inverse to reverse it with — a refusal and a hold both
- * leave the page exactly as it was, and the panel says so in the fifth rung.
- */
-const walk = async (page: LoomTree, ask: Ask, context: SitePageContext): Promise<FrontDoorRun> => {
-  const run = await runAsk(page, ask, context.approve === true)
-
-  if (context.back !== true || run.undo === undefined) return run
-
-  const back = await runUndo(run.page, ask, run.undo, context.backApprove === true)
-
-  return { ...run, page: back.page, undone: back.record }
-}
-
-/**
- * The page as the visitor's ask leaves it, with the record of what happened
- * standing on it.
- *
- * **Twice, and the second time is the one you see.** A change is worked out
- * against the page it is handed, and the panel that reports the change is part
- * of that page — so the first pass runs against a page whose panel is still
- * empty, purely to find out what happens. The second runs against the page with
- * that answer already written into it, and returns *its* result. What the
- * visitor reads is therefore the record of the change that produced the exact
- * page it is sitting on, rather than a record of a slightly different page that
- * nobody ever saw.
- *
- * The two passes agree because nothing the rules weigh is a function of how big
- * the page is: breadth, removal size and depth are all counted absolutely. That
- * is a property of today's rules rather than a law, so `adapt.test.ts` holds the
- * two records against each other for every choice, and `undo.test.ts` does the
- * same for the undo — which matters more here, because a second card in the
- * panel is a bigger page for the undo to be judged against than the page the
- * first pass judged. A stake factor that started measuring a *fraction* of the
- * page would break this, and the tests are where it would be found rather than
- * on the landing page.
- */
-export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun | undefined> => {
-  const ask = askById(context.ask)
-  if (ask === undefined) return undefined
-
-  const probe = await walk(treeFor(ASKED_ROUTE, context), ask, context)
-  const staged = treeFor(ASKED_ROUTE, {
-    ...context,
-    record: probe.record,
-    ...(probe.undone === undefined ? {} : { undone: probe.undone }),
-  })
-
-  return walk(staged, ask, context)
-}
-
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
 ): Promise<LoomTree> => {
-  /**
-   * **The mechanism page is where a request is made and answered, as of
-   * 1 October.** The maintainer: *"Remove the see it happen section from the
-   * main landing page and only let it exist in the How it works section."*
-   *
-   * So this page does what the front door used to: it runs the visitor's
-   * request against **itself**, and renders the page the request produced.
-   *
-   * **It runs that request twice and nothing else**, as of 13 October. A third
-   * and a fourth run used to happen here: `trailFor` resolved a `PaperTrail`
-   * for every asked request, and the band that printed it was rewritten away on
-   * 26 September. The field stayed on the context, the resolution stayed on
-   * this path, and the comment that stood here said the trail was *"still
-   * printed"* of a page that had stopped printing it.
-   *
-   * `pages/handed.test.ts` is what now holds it, and it holds the general
-   * thing rather than this one: a field on the context is a promise that some
-   * page reads it.
-   */
   /**
    * **The published page comes from the store as of 12 October**
    * ([0259](../../../../../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
@@ -157,31 +65,15 @@ export const pageTreeFor = async (
    * the reader's palette back on the root and on the site's own links, which is
    * the whole of what a request decides here. `./requested.ts` has the
    * argument for where that line falls.
-   */
-  /**
-   * **A page being asked a question is built, and every other page is read.**
    *
-   * This is the line 0259 said only this lane could draw, and the mechanism
-   * page is where it falls. Its demonstration panel is written from the record
-   * of the change that was *just run against it* — `askRunFor` builds the page
-   * twice for exactly that reason, so that what a visitor reads is the record
-   * of the page it is sitting on. A record of a run that has not happened yet
-   * is not a thing a store can hold, and a stored page with an empty panel in
-   * it would be a worse answer than building one.
-   *
-   * So an ask goes down the path it always did. **Unasked, the mechanism page
-   * is read from the store like the other two** — which is the state it is in
-   * for every visitor who has not pressed anything, and the state the portal
-   * governs.
+   * **Every page of this site takes this path, as of 31 October.** One route
+   * used to branch before it: the page carrying the demonstration built itself
+   * twice when a visitor had asked it for something, because a panel written
+   * from the record of a change just run against the page is not a thing a
+   * store can hold. [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+   * removed the demonstration, so there is no page whose shape depends on
+   * anything but its own stored row and the palette.
    */
-  if (isAskedRoute(route) && context.ask !== undefined) {
-    const run = await askRunFor(context)
-
-    return asRequested(run === undefined ? treeFor(route, context) : run.page, {
-      theme: context.theme,
-    })
-  }
-
   const published = (await storedPageFor(route)) ?? treeFor(route, context)
 
   return asRequested(published, { theme: context.theme })

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { splitSection } from "./nodes"
 import { pageTreeFor } from "./render"
-import { DEFAULT_THEME, HOW_IT_WORKS, type SiteRoute, WHAT_YOU_RUN } from "./site"
+import { DEFAULT_THEME, type SiteRoute, WHAT_YOU_RUN } from "./site"
 
 /**
  * The rule that keeps a band from being a headline over a half-empty page.
@@ -29,7 +29,6 @@ import { DEFAULT_THEME, HOW_IT_WORKS, type SiteRoute, WHAT_YOU_RUN } from "./sit
 
 /** The two pages the rule is stated over: the site's interior, where prose-only bands live. */
 const INTERIOR: readonly (readonly [string, SiteRoute])[] = [
-  ["how it works", HOW_IT_WORKS],
   ["what you run", WHAT_YOU_RUN],
 ]
 

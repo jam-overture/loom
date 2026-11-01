@@ -13,7 +13,7 @@ import {
   STEPS,
 } from "./journey"
 import { pageTreeFor, renderTree } from "./render"
-import { HOME, HOW_IT_WORKS, DEFAULT_THEME, type SiteRoute } from "./site"
+import { HOME, DEFAULT_THEME, type SiteRoute } from "./site"
 import { wordsOf } from "./words"
 
 /**
@@ -53,32 +53,12 @@ const OTHER_COUNTS: readonly string[] = ["two", "three", "four", "five", "six", 
 )
 
 describe("the number of steps, as the site states it", () => {
-  it("is spelled the same way on the front door and on the mechanism page", async () => {
+  it("is spelled one way, on the one page that states it", async () => {
     const home = await markupOf(HOME)
-    const mechanism = await markupOf(HOW_IT_WORKS)
 
-    for (const markup of [home, mechanism]) {
-      for (const wrong of OTHER_COUNTS) {
-        expect(markup).not.toContain(`${wrong} steps`)
-      }
+    for (const wrong of OTHER_COUNTS) {
+      expect(home).not.toContain(`${wrong} steps`)
     }
-
-    /**
-     * The heading, as the page spells it.
-     *
-     * It read `${spellCapitalised(JOURNEY.length)} steps, every time` until
-     * 24 October, when the maintainer banned a headline that ends in a comma
-     * and then a clause: *"no one talks like that."* `voice.test.ts` holds the
-     * shape now, and this holds the count, which is what this file is for.
-     */
-    expect(mechanism).toContain(`The same ${spell(JOURNEY.length)} steps every time`)
-
-    /**
-     * The second sentence this checked — *the five steps above*, written by the
-     * record band pointing back up the page — went with that band on
-     * 26 September. What is left is the heading, plus the sweep above that no
-     * page of this site names a different number.
-     */
   })
 
   /**
@@ -100,14 +80,6 @@ describe("the number of steps, as the site states it", () => {
     }
   })
 
-  it("names every step of the list, in order, on the mechanism page", async () => {
-    const mechanism = await markupOf(HOW_IT_WORKS)
-
-    const positions = JOURNEY.map((step) => mechanism.indexOf(step.title))
-
-    expect(positions.every((at) => at >= 0)).toBe(true)
-    expect([...positions].sort((a, b) => a - b)).toEqual(positions)
-  })
 })
 
 /**

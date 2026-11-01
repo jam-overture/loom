@@ -24,12 +24,9 @@ import {
   section,
   splitSection,
   stack,
-  TERTIARY_CONTROL,
 } from "../nodes"
 import {
-  DEMO,
   DOCS,
-  HOW_IT_WORKS,
   SITE_THEMES,
   sitePath,
   surfacePath,
@@ -496,13 +493,17 @@ const closing = (ids: IdFactory): LoomNode =>
      * claim spelled out a second time, and the site's word ceiling is a real
      * constraint that a band has to be paid for rather than argued past.
      */
-    prose(ids, "This site is a Loom application too, built out of the same set.", {
-      measured: true,
-    }),
+    proseParts(
+      ids,
+      [
+        "This site is a Loom application too, built out of the same set. Putting it in a project you already have is what ",
+        inlineLink(ids, "the docs", surfacePath(DOCS)),
+        " are for.",
+      ],
+      { measured: true }
+    ),
     stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
       action(ids, "Read the docs", surfacePath(DOCS), { variant: "primary" }),
-      action(ids, "Try it yourself", surfacePath(DEMO), { variant: "secondary" }),
-      action(ids, "How it works", sitePath(HOW_IT_WORKS.path), TERTIARY_CONTROL),
     ]),
   ])
 

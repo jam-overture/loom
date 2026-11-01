@@ -1,15 +1,9 @@
 import type { Metadata } from "next"
 
-import { askById, type Ask } from "./adapt/asks"
-import type { ChangeRecord } from "./adapt/record"
 import { askedFor } from "./addressed"
-import { toneFor } from "./pages/answer"
 import {
   ADDRESS_PARAMS,
-  ASKED_ROUTE,
-  HOME,
   internalHref,
-  isAskedRoute,
   isPublicDeployment,
   siteOrigin,
   type SiteRoute,
@@ -144,33 +138,6 @@ export const publishedCard = (route: SiteRoute, origin: string): ShareCard => ({
 })
 
 /**
- * `ASKED_ROUTE` as a visitor left it, as a card.
- *
- * The three lines are the three the answer band prints above the fold, in the
- * same order and off the same fields: the verdict as its label, the request
- * verbatim, and what the rules decided. That is deliberate — a card and the page
- * it opens should not be two accounts of one event — and it is what makes the
- * card impossible to write a sentence into.
- *
- * **It is handed one record and never two.** An address that carries an undo
- * reaches two verdicts, and the one on the card is the second: a link to
- * `?ask=unstick-menu&approve=1&back=1` is a link to a page whose last word is
- * *the rules are holding the putting-back too*, and a card reporting the first
- * verdict would be a card of the state before the thing the link is of. The
- * record's own `asked` is *Put it back.* there, so the headline still quotes a
- * request this repository ships and the card still writes nothing.
- */
-export const askedCard = (record: ChangeRecord, origin: string): ShareCard => ({
-  wordmark: WORDMARK,
-  eyebrow: record.verdictLabel,
-  tone: toneFor(record),
-  headline: `“${record.asked}”`,
-  supporting: record.verdictLine,
-  footnote: record.measured,
-  address: displayAddress(origin, ASKED_ROUTE.path),
-})
-
-/**
  * What the address is asking for, when it is asking for anything.
  *
  * **All four answers, and not the two a card happened to need.** `back` and
@@ -184,12 +151,6 @@ export const askedCard = (record: ChangeRecord, origin: string): ShareCard => ({
 export type ShareContext = {
   readonly origin: string
   readonly theme: SiteThemeName
-  readonly ask?: Ask
-  readonly approve?: boolean
-  /** Whether the visitor had pressed *Put it back* when they copied the address. */
-  readonly back?: boolean
-  /** And whether they had answered the rules holding that. */
-  readonly backApprove?: boolean
 }
 
 /**
@@ -210,22 +171,6 @@ export const shareImageHref = (route: SiteRoute, context: ShareContext): string 
 
   url.searchParams.set("page", route.path)
   url.searchParams.set(ADDRESS_PARAMS.theme, context.theme)
-
-  if (context.ask !== undefined && isAskedRoute(route)) {
-    /**
-     * Spelled off `ADDRESS_PARAMS` rather than typed, and the four are written
-     * in the order a visitor reaches them.
-     *
-     * The picture's address and the page's address are one convention with one
-     * set of names — `shareImageFor` reads this query through `askedFor`, the
-     * same function every page reads its own with — and this site has already
-     * paid twice for a parameter written in one spelling and read in another.
-     */
-    url.searchParams.set(ADDRESS_PARAMS.ask, context.ask.id)
-    if (context.approve === true) url.searchParams.set(ADDRESS_PARAMS.approve, "1")
-    if (context.back === true) url.searchParams.set(ADDRESS_PARAMS.back, "1")
-    if (context.backApprove === true) url.searchParams.set(ADDRESS_PARAMS.backApprove, "1")
-  }
 
   return url.toString()
 }
@@ -252,12 +197,11 @@ export const shareImageHref = (route: SiteRoute, context: ShareContext): string 
  * on purpose: the one that was written here said five.
  */
 const wordsFor = (
-  route: SiteRoute,
-  context: ShareContext
-): { readonly title: string; readonly description: string } =>
-  context.ask !== undefined && isAskedRoute(route)
-    ? { title: context.ask.utterance, description: HOME.description }
-    : { title: route.title, description: route.description }
+  route: SiteRoute
+): { readonly title: string; readonly description: string } => ({
+  title: route.title,
+  description: route.description,
+})
 
 const OPEN_GRAPH_IMAGE = { width: 1200, height: 630 } as const
 
@@ -273,7 +217,7 @@ const OPEN_GRAPH_IMAGE = { width: 1200, height: 630 } as const
  * actually for.
  */
 export const pageMetadata = (route: SiteRoute, context: ShareContext): Metadata => {
-  const { title, description } = wordsFor(route, context)
+  const { title, description } = wordsFor(route)
   const canonical = internalHref(context.origin, route.path)
 
   return {
@@ -347,18 +291,6 @@ export const routeMetadata =
   (route: SiteRoute) =>
   async ({ searchParams }: { readonly searchParams: PageSearchParams }): Promise<Metadata> => {
     const state = askedFor(await searchParams)
-    const ask = askById(state.ask)
 
-    return pageMetadata(route, {
-      origin: siteOrigin(),
-      theme: state.theme,
-      ...(ask === undefined
-        ? {}
-        : {
-            ask,
-            approve: state.approve === true,
-            back: state.back === true,
-            backApprove: state.backApprove === true,
-          }),
-    })
+    return pageMetadata(route, { origin: siteOrigin(), theme: state.theme })
   }

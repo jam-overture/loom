@@ -1,8 +1,7 @@
 import type { LoomTree } from "@jam-overture/loom"
 
-import { ASKS } from "./adapt/asks"
-import { pageTreeFor, type SitePageContext } from "./render"
-import { askPath, DEFAULT_THEME, isAskedRoute, SITE_ROUTES, sitePath, type SiteRoute } from "./site"
+import { pageTreeFor } from "./render"
+import { DEFAULT_THEME, SITE_ROUTES, sitePath, type SiteRoute } from "./site"
 
 /**
  * Every state this site can be served in, built once and shared.
@@ -36,40 +35,6 @@ import { askPath, DEFAULT_THEME, isAskedRoute, SITE_ROUTES, sitePath, type SiteR
  * next rule will find it.
  */
 
-/**
- * What the visitor can have asked for, which is the only part of a request that
- * changes what a page says.
- *
- * Three fields rather than the whole context: the choice, whether they said yes
- * to a change the rules held, and whether they then asked for it back. Every
- * other field of `SitePageContext` is either the origin, the palette — neither
- * of which is a word — or something the site supplies to itself.
- */
-type AskState = Pick<SitePageContext, "ask" | "approve" | "back" | "backApprove">
-
-/**
- * No request, then every request crossed with both answers a visitor can give.
- *
- * `back` and `backApprove` move together because the undo is weighed by the
- * same rules as anything else and a visitor who asks for a change back is asked
- * the same question about it. Asking for it back without answering is a state of
- * the page, and it is the `back: true` half of that pair rather than a third
- * value.
- *
- * It is a cross product rather than a hand-written list for the reason the
- * register sweep is written over `SITE_ROUTES` rather than page by page: a sixth
- * choice added to `asks.ts` is swept the moment it exists, and a list somebody
- * has to remember to extend is a list that eventually describes the site of a
- * fortnight ago.
- */
-export const ASK_STATES: readonly AskState[] = [
-  {},
-  ...ASKS.flatMap((ask) =>
-    [false, true].flatMap((approve) =>
-      [false, true].map((back) => ({ ask: ask.id, approve, back, backApprove: back }))
-    )
-  ),
-]
 
 /**
  * **The deployment is no longer a dimension of this sweep, as of 21 October.**
@@ -123,22 +88,19 @@ export type ServedPage = {
   readonly tree: LoomTree
 }
 
-const addressOf = (route: SiteRoute, ask: AskState): string =>
-  isAskedRoute(route) && ask.ask !== undefined
-    ? askPath({
-        ask: ask.ask,
-        ...(ask.approve === true ? { approve: true } : {}),
-        ...(ask.back === true ? { back: true } : {}),
-        ...(ask.backApprove === true ? { backApprove: true } : {}),
-      })
-    : sitePath(route.path)
+/**
+ * The one state a page of this site has, and there were 50.
+ *
+ * The sweep used to cross every route with every pre-written request and both
+ * answers a visitor could give it, because the demonstration made a page a
+ * function of its address. With that removed
+ * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md))
+ * a route has one tree, and the string survives so that every failure message
+ * this module has ever printed keeps its shape.
+ */
+const NO_REQUEST = "no request"
 
-const describe = (ask: AskState): string =>
-  [
-    ask.ask ?? "no request",
-    ...(ask.ask === undefined ? [] : [ask.approve === true ? "yes" : "no"]),
-    ...(ask.back === true ? ["put back"] : []),
-  ].join("/")
+const addressOf = (route: SiteRoute): string => sitePath(route.path)
 
 /**
  * The origin a link read off one of these trees is resolved against.
@@ -174,21 +136,19 @@ export const servedPages = async (): Promise<readonly ServedPage[]> => {
   const pages: ServedPage[] = []
 
   for (const route of SITE_ROUTES) {
-    for (const ask of ASK_STATES) {
-      pages.push({
-        route,
-        state: describe(ask),
-        address: addressOf(route, ask),
-        tree: await pageTreeFor(route, { theme: DEFAULT_THEME, ...ask }),
-      })
-    }
+    pages.push({
+      route,
+      state: NO_REQUEST,
+      address: addressOf(route),
+      tree: await pageTreeFor(route, { theme: DEFAULT_THEME }),
+    })
   }
 
   return pages
 }
 
 /** How many states the sweep above covers, stated so a caller can check it. */
-export const SERVED_STATE_COUNT = SITE_ROUTES.length * ASK_STATES.length
+export const SERVED_STATE_COUNT = SITE_ROUTES.length
 
 /** What a sweep came back with, in the two shapes a caller has its own expectation for. */
 export type SweepCover = {

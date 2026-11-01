@@ -9,26 +9,23 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { ANCHOR, COUNTED_ANCHOR } from "../bands"
+import { COUNTED_ANCHOR } from "../bands"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import {
   action,
   heading,
-  inlineLink,
   prose,
-  proseParts,
   section,
   splitSection,
   stack,
   TERTIARY_CONTROL,
+  inlineLink,
+  proseParts,
 } from "../nodes"
 import {
-  DEMO,
   DOCS,
-  HOW_IT_WORKS,
   REPOSITORY_URL,
   SITE_THEMES,
-  sitePath,
   surfacePath,
   WHAT_YOU_RUN,
 } from "../site"
@@ -124,37 +121,28 @@ const whatLeaves = (ids: IdFactory): LoomNode =>
         "When a person asks for a change in their own words, your server sends the model you chose an outline of the page. It also sends the list of pieces that model may use. It does not send your code, your data, or anything about who is reading."
       ),
       /**
-       * The only sentence on this site that names another page of it, and the
-       * first one anywhere on this site that carries its own link.
+       * A sentence that names another page of this site and carries its own
+       * link, which is the shape `loom.inline-link` was asked for.
        *
-       * It named the front door for a day after the band it is about had moved
-       * to `/how-it-works`, which is the failure `naming.ts` exists to catch.
-       * The link carries that band's own anchor rather than the page's address,
-       * so the paragraph goes red the day the band moves again instead of going
-       * quietly wrong.
+       * It said something else until 31 October: *"the ready-made changes on
+       * the How it works page do not send anything at all"*, pointing at the
+       * demonstration, which
+       * [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+       * removed. The claim it was making — that a page can rearrange with
+       * nothing leaving your server — is still true and is still this band's
+       * subject, so the sentence is rewritten rather than deleted and points
+       * at the band that now shows it.
        *
-       * **It was a control under the paragraph until today**, and the comment
-       * standing here said why: a link on the words *the ready-made changes* is
-       * what the sentence wants, `loom.link` could not be one, and it was filed
-       * for `Loom primitives` on 4 October rather than worked around. #517
-       * answered it with `loom.inline-link`, so the sentence gets the link and
-       * the band loses the button that was standing in for it.
-       *
-       * The words the link is on are the words a reader would press. *See the
-       * ready-made changes* was a label for a button and is not a phrase this
-       * sentence contains, so no copy moved into the link: the four words of
-       * that label are simply gone.
+       * The link carries that band's own anchor rather than the page's
+       * address, so the paragraph goes red the day the band moves instead of
+       * going quietly wrong (`naming.ts`).
        */
       proseParts(
         ids,
         [
-          "The ",
-          inlineLink(
-            ids,
-            "ready-made changes",
-            `${sitePath(HOW_IT_WORKS.path)}#${ANCHOR.seeItHappen}`
-          ),
-          " on the How it works page do not send anything at all. They are worked out on your own server, which is why they still work on a deployment with no model configured.",
+          "A page that rearranges itself is worked out on your own server, and nothing leaves it to be drawn. What your deployment sends, and to whom, is set out in ",
+          inlineLink(ids, "the docs", surfacePath(DOCS)),
+          ".",
         ],
         { tone: "muted" }
       ),
@@ -228,14 +216,7 @@ const closing = (ids: IdFactory): LoomNode =>
       { measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
-      action(
-        ids,
-        "How a change travels",
-        sitePath(HOW_IT_WORKS.path),
-        { variant: "primary" }
-      ),
-      action(ids, "Read the docs", surfacePath(DOCS), { variant: "secondary" }),
-      action(ids, "Try it yourself", surfacePath(DEMO), TERTIARY_CONTROL),
+      action(ids, "Read the docs", surfacePath(DOCS), { variant: "primary" }),
       action(ids, "Read the source", REPOSITORY_URL, { ...TERTIARY_CONTROL, external: true }),
     ]),
   ])

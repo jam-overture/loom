@@ -4,9 +4,8 @@ import { ImageResponse } from "next/og"
 import { describe, expect, it } from "vitest"
 
 import { siteThemes } from "./registry"
-import { askRunFor } from "./render"
 import { CARD_PAIRINGS, ink, SHARE_IMAGE_SIZE, shareCardImage } from "./share-card"
-import { askedCard, publishedCard, type ShareCard } from "./share"
+import { publishedCard, type ShareCard } from "./share"
 import { HOME, SITE_ROUTES, SITE_THEME_NAMES, SITE_THEMES, type SiteThemeName } from "./site"
 
 /**
@@ -84,19 +83,16 @@ describe.each(SITE_THEME_NAMES)("under the %s palette", (name) => {
    * the renderer — a primitive can only emit `var(--loom-…)` — and here there is
    * no renderer to enforce it, so it is enforced by measurement instead.
    */
-  it.each([
-    ["the front door", publishedCard(HOME, "https://loom.example")],
-    ["a page somebody rearranged", undefined],
-  ])("names no color of its own on %s", async (_what, given) => {
-    const card =
-      given ??
-      askedCard((await askRunFor({ theme: name, ask: "problem" }))!.record, "https://loom.example")
-    const slots = Object.values(theme.palette.slots)
-    const drawn = coloursIn(shareCardImage(card, theme))
+  it.each(SITE_ROUTES.map((route) => [route.path, publishedCard(route, "https://loom.example")] as const))(
+    "names no color of its own on %s",
+    async (_what, card) => {
+      const slots = Object.values(theme.palette.slots)
+      const drawn = coloursIn(shareCardImage(card, theme))
 
-    expect(drawn.length).toBeGreaterThan(0)
-    expect([...new Set(drawn)].filter((color) => !slots.includes(color))).toEqual([])
-  })
+      expect(drawn.length).toBeGreaterThan(0)
+      expect([...new Set(drawn)].filter((color) => !slots.includes(color))).toEqual([])
+    }
+  )
 
   /**
    * Not one size or weight is written down either. The proof is that the drawing
@@ -131,19 +127,4 @@ describe("the picture", () => {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(1000)
   })
 
-  /**
-   * The state the whole run is for: an address somebody sent after asking the
-   * page for something. It draws four more strings than a published card — the
-   * verdict, the quoted request, the reasoning and the measurement — so it is
-   * the one that would break first on a renderer that could not fit them.
-   */
-  it("draws a page as somebody left it", async () => {
-    const run = await askRunFor({ theme: "minimal", ask: "problem" })
-
-    expect(run).toBeDefined()
-
-    const bytes = await png(askedCard(run!.record, "https://loom.example"), themeFor("minimal"))
-
-    expect(bytes.byteLength).toBeGreaterThan(1000)
-  })
 })

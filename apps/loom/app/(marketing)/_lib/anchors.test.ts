@@ -2,13 +2,11 @@ import type { LoomTree } from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import { ASKS, type AskId } from "./adapt/asks"
 import { ANCHOR } from "./bands"
 import { elementsIn } from "./measure"
 import { anchorsIn as anchorsDeclaredIn } from "./naming"
-import type { PageContext } from "./pages/home"
 import { pageTreeFor, renderTree } from "./render"
-import { HOW_IT_WORKS } from "./site"
+import { HOME, SITE_ROUTES, type SiteRoute } from "./site"
 
 /**
  * A link that stays on the page, held to the one thing that can make it fail.
@@ -38,24 +36,21 @@ const ORIGIN = "https://loom.example"
  * arrival and dropped from the approved page would pass any test that looked at
  * one of them.
  */
-const STATES: readonly (readonly [string, PageContext])[] = [
-  ["arrived", { theme: "minimal" }],
-  ...ASKS.flatMap((ask): readonly (readonly [string, PageContext])[] => {
-    const asked: AskId = ask.id
+/**
+ * Every page of this site, which is every state one has.
+ *
+ * It was the mechanism page crossed with each pre-written request and each
+ * answer a visitor could give it — the band's controls appear and change as a
+ * change is asked for, approved and put back, so the anchors they point at had
+ * to be checked in each. [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+ * removed the band, so a page has one state and the sweep is over the routes.
+ */
+const STATES: readonly (readonly [string, SiteRoute])[] = SITE_ROUTES.map((route) => [
+  route.path,
+  route,
+])
 
-    return [
-      [`${asked}`, { theme: "minimal", ask: asked }],
-      [`${asked}, allowed`, { theme: "minimal", ask: asked, approve: true }],
-      [`${asked}, put back`, { theme: "minimal", ask: asked, back: true }],
-      [
-        `${asked}, put back and allowed`,
-        { theme: "minimal", ask: asked, back: true, backApprove: true },
-      ],
-    ]
-  }),
-]
-
-const pageFor = async (context: PageContext): Promise<LoomTree> => pageTreeFor(HOW_IT_WORKS, context)
+const pageFor = async (route: SiteRoute): Promise<LoomTree> => pageTreeFor(route, { theme: "minimal" })
 
 const markupFor = (page: LoomTree): string =>
   renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
@@ -89,7 +84,7 @@ const resolved = (href: string): URL | undefined => {
   }
 }
 
-const samePageFragmentsIn = (page: LoomTree): readonly string[] =>
+const samePageFragmentsIn = (page: LoomTree, route: SiteRoute): readonly string[] =>
   elementsIn(page.root).flatMap((element) => {
     const href = element.props["href"]
 
@@ -98,14 +93,14 @@ const samePageFragmentsIn = (page: LoomTree): readonly string[] =>
     const url = resolved(href)
 
     if (url === undefined || url.origin !== ORIGIN) return []
-    if (url.pathname !== HOW_IT_WORKS.path) return []
+    if (url.pathname !== route.path) return []
 
     return url.hash === "" ? [] : [url.hash.slice(1)]
   })
 
 describe("the anchors this site links to", () => {
-  it.each(STATES)("%s renders every anchor it declares as an id", async (_name, context) => {
-    const page = await pageFor(context)
+  it.each(STATES)("%s renders every anchor it declares as an id", async (_name, route) => {
+    const page = await pageFor(route)
     const markup = markupFor(page)
 
     for (const anchor of anchorsIn(page)) {
@@ -125,11 +120,11 @@ describe("the anchors this site links to", () => {
    * stops being rendered in one of the states, or a new control is written
    * against a fragment nobody declared.
    */
-  it.each(STATES)("%s can reach every fragment it points at", async (_name, context) => {
-    const page = await pageFor(context)
+  it.each(STATES)("%s can reach every fragment it points at", async (_name, route) => {
+    const page = await pageFor(route)
     const declared = anchorsIn(page)
 
-    for (const fragment of samePageFragmentsIn(page)) {
+    for (const fragment of samePageFragmentsIn(page, route)) {
       expect({ fragment, declared: declared.includes(fragment) }).toEqual({
         fragment,
         declared: true,
@@ -141,8 +136,8 @@ describe("the anchors this site links to", () => {
    * Two elements answering to one name is a link that lands on whichever the
    * browser met first, which is a page-order dependency nobody writes down.
    */
-  it.each(STATES)("%s answers to each of its anchors once", async (_name, context) => {
-    const declared = anchorsIn(await pageFor(context))
+  it.each(STATES)("%s answers to each of its anchors once", async (_name, route) => {
+    const declared = anchorsIn(await pageFor(route))
 
     expect(declared).toEqual([...new Set(declared)])
   })
@@ -153,83 +148,12 @@ describe("the anchors this site links to", () => {
    * is the same check one layer earlier, and the one that says *which* band
    * went.
    */
-  it.each(Object.entries(ANCHOR))(
-    "%s is on the front door in every state",
+  it.each(Object.entries(ANCHOR) as readonly (readonly [string, string])[])(
+    "%s is on the front door",
     async (_band, anchor) => {
-      for (const [, context] of STATES) {
-        const declared = anchorsIn(await pageFor(context))
+      const declared = anchorsIn(await pageFor(HOME))
 
-        expect({ anchor, onThePage: declared.includes(anchor) }).toEqual({
-          anchor,
-          onThePage: true,
-        })
-      }
-    }
-  )
-})
-
-describe("the way back to what happened", () => {
-  /**
-   * The control itself, and the premise underneath it: it is offered exactly
-   * when there is something to go back to.
-   *
-   * A visitor who has not asked for anything is not looking at a notice, so a
-   * link to the record of their change would be a link to a panel with nothing
-   * in it.
-   */
-  it("is absent on the page a stranger arrives at", async () => {
-    const page = await pageFor({ theme: "minimal" })
-
-    expect(samePageFragmentsIn(page)).not.toContain(ANCHOR.seeItHappen)
-  })
-
-  it.each(STATES.filter(([name]) => name !== "arrived"))(
-    "%s offers it",
-    async (_name, context) => {
-      const page = await pageFor(context)
-
-      expect(samePageFragmentsIn(page)).toContain(ANCHOR.seeItHappen)
-    }
-  )
-
-  /**
-   * The failure this link could cause, asserted so it cannot.
-   *
-   * It is the only control in the notice that goes nowhere, so it must carry
-   * every answer the visitor has already given. A link that dropped `back=1`
-   * would put a change the visitor had just reversed back onto the page, while
-   * claiming to do nothing but scroll — the site undoing an undo on the one
-   * band whose whole subject is that nothing gets dropped.
-   */
-  it.each(STATES.filter(([name]) => name !== "arrived"))(
-    "%s keeps the whole of the address the visitor is at",
-    async (_name, context) => {
-      const page = await pageFor(context)
-      const link = elementsIn(page.root)
-        .flatMap((element) =>
-          typeof element.props["href"] === "string" &&
-          element.props["href"].endsWith(`#${ANCHOR.seeItHappen}`)
-            ? [element.props["href"]]
-            : []
-        )
-        .at(0)
-
-      if (link === undefined) throw new Error("loom: the notice offers no way back")
-
-      /* A path, not a URL, since 12 October — this site's own links carry no origin (0259). */
-      const url = new URL(link, "https://site.invalid")
-
-      expect({
-        ask: url.searchParams.get("ask"),
-        approve: url.searchParams.get("approve"),
-        back: url.searchParams.get("back"),
-        backYes: url.searchParams.get("back-yes"),
-      }).toEqual({
-        ask: context.ask ?? null,
-        approve: context.approve === true ? "1" : null,
-        back: context.back === true ? "1" : null,
-        backYes: context.backApprove === true ? "1" : null,
-      })
+      expect({ anchor, onThePage: declared.includes(anchor) }).toEqual({ anchor, onThePage: true })
     }
   )
 })

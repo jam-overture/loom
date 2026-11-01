@@ -10,10 +10,8 @@ import {
 } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
-import { ASKS } from "./adapt/asks"
-import { askRunFor, treeFor } from "./render"
+import { treeFor } from "./render"
 import {
-  HOW_IT_WORKS,
   SITE_ROUTES,
   SITE_THEMES,
   SITE_THEME_NAMES,
@@ -51,8 +49,6 @@ import {
  * change that separates the two slots fails `the premise`, and the ban it
  * justifies can be lifted in the same commit that makes it wrong.
  */
-
-const ORIGIN = "https://loom.example"
 
 const isElement = (node: LoomNode): node is ElementNode => node.kind === "element"
 
@@ -107,36 +103,23 @@ const apart = (palette: Palette, first: PaletteSlot, second: PaletteSlot): numbe
   return difference
 }
 
-/** Every page of this site, in every state a visitor can put it in. */
-const everyState = async (): Promise<readonly LoomTree[]> => {
-  const published = SITE_THEME_NAMES.flatMap((theme) =>
-    SITE_ROUTES.map((route) => treeFor(route, { theme }))
-  )
-
-  /**
-   * The states only a request produces, which is where three of the six were.
-   *
-   * The notice at the top of the page and the panel's own row exist only once
-   * the visitor has asked for something, so a sweep over the published pages
-   * alone would have reported this site clean while half of it was wrong. Each
-   * ask is run with the visitor's yes, because that is the state the controls
-   * under it are drawn in.
-   */
-  const asked = await Promise.all(
-    ASKS.map(async (ask) => {
-      const context = { origin: ORIGIN, theme: "minimal" as SiteThemeName, ask: ask.id, approve: true }
-      const run = await askRunFor(context)
-
-      return treeFor(HOW_IT_WORKS, {
-        ...context,
-        ...(run === undefined ? {} : { record: run.record }),
-        ...(run?.undone === undefined ? {} : { undone: run.undone }),
-      })
-    })
-  )
-
-  return [...published, ...asked]
-}
+/**
+ * Every page of this site, in every state a visitor can put it in.
+ *
+ * It was the published pages **plus** one tree per pre-written request, and
+ * the comment here said why: *"the notice at the top of the page and the
+ * panel's own row exist only once the visitor has asked for something, so a
+ * sweep over the published pages alone would have reported this site clean
+ * while half of it was wrong."* That was true and is the reason this file
+ * exists.
+ *
+ * [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+ * removed the requests and the panel, so the published pages **are** every
+ * state. The sweep is unchanged in what it asks of each tree; what shrank is
+ * the site, not the check.
+ */
+const everyState = async (): Promise<readonly LoomTree[]> =>
+  SITE_THEME_NAMES.flatMap((theme) => SITE_ROUTES.map((route) => treeFor(route, { theme })))
 
 describe("the premise", () => {
   /**
@@ -213,7 +196,7 @@ describe("every control a visitor can reach", () => {
   it("is found at all, on every page and in every state", async () => {
     const states = await everyState()
 
-    expect(states.length).toBe(SITE_ROUTES.length * SITE_THEME_NAMES.length + ASKS.length)
+    expect(states.length).toBe(SITE_ROUTES.length * SITE_THEME_NAMES.length)
     expect(states.every((page) => controlsIn(page).length > 0)).toBe(true)
   })
 })
