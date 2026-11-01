@@ -23,6 +23,7 @@ import {
   HEALTH_STANDINGS,
   pageReadingOf,
   remedyOf,
+  spoilsTheLoss,
   type CollectionSchedule,
   type PageReading,
   type PartDeclarations,
@@ -802,6 +803,35 @@ describe("collectionHealthOf", () => {
         expect(FAULT_REMEDIES).toContain(remedyOf(fault))
         expect(describeCollectionFault(fault).length).toBeGreaterThan(0)
       }
+    })
+
+    /**
+     * The second half of a fault, and the one the order of a deployment's pages
+     * reads (0250): whether the fall a deployment was about to act on is
+     * evidence of anything. Answered for every member here rather than where it
+     * is consumed, because a fault vocabulary written in two places is this
+     * subsystem's commonest defect.
+     */
+    it("says of every fault whether it reaches the loss an order of pages is ranked on", () => {
+      expect(COLLECTION_FAULTS.map((fault) => [fault, spoilsTheLoss(fault)])).toEqual([
+        ["door-unscaled", true],
+        ["openings-unmarked", true],
+        ["counts-inflated", false],
+        ["collection-stalled", true],
+        ["actions-uncredited", false],
+        ["rows-mishandled", true],
+        ["audiences-mixed", true],
+      ])
+    })
+
+    /**
+     * The two the key survives, and they are the whole reason this is not *any
+     * fault*: the ranking key already divides a short window's inflation out,
+     * and an uncredited sender spends a counter no fall is made of.
+     */
+    it("leaves the corrected fault and the one on another counter out", () => {
+      expect(spoilsTheLoss("counts-inflated")).toBe(false)
+      expect(spoilsTheLoss("actions-uncredited")).toBe(false)
     })
 
     it("gives every standing a sentence", () => {

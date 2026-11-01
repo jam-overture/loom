@@ -19,6 +19,7 @@
 
 export * from "./action-change.js"
 export * from "./action.js"
+export * from "./agenda.js"
 export * from "./arriving.js"
 export * from "./audiences.js"
 export * from "./broadcast.js"
