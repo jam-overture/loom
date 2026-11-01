@@ -5,7 +5,7 @@ import { ruleSentence, STAKES, type PlainState } from "./vocabulary"
 import { plainMoment } from "./when"
 
 /**
- * One change on a project's *Waiting* tab (0329): what was asked, of which
+ * One change on a project's *Waiting* tab (0329): what was proposed, of which
  * page, why the Gate stopped, and whether the person looking may answer it.
  *
  * Its own reading rather than `waiting.ts`'s, which links each change to

@@ -3,6 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { portalTelemetry, telemetryForWriting } from "./telemetry"
 import { applicationIdSchema, DEFAULT_APPLICATION_ID } from "@jam-overture/loom/store"
 
+import { modelKeySchema } from "@/app/_lib/models/model-keys"
+
+import { projectModel } from "./interpreter"
 import { beginWrite } from "./write"
 
 /**
@@ -122,12 +125,10 @@ describe("beginWrite", () => {
      * answer within a budget. A spy on the wrapper's `record` would never fire
      * and this test would hold vacuously.
      */
-    const failing = vi
-      .spyOn(telemetryForWriting, "record")
-      .mockResolvedValue({
-        ok: false,
-        error: { code: "unavailable", detail: "no journal" },
-      } as never)
+    const failing = vi.spyOn(telemetryForWriting, "record").mockResolvedValue({
+      ok: false,
+      error: { code: "unavailable", detail: "no journal" },
+    } as never)
 
     write.path.runtime.events.emit({
       treeId: "t_throws" as never,
@@ -183,6 +184,21 @@ describe("beginWrite", () => {
     expect(shop.store).not.toBe(blog.store)
     expect(shop.holds).not.toBe(blog.holds)
     expect(beginWrite(applicationIdSchema.parse("app_shop")).path.store).toBe(shop.store)
+  })
+
+  /** 0332: a project's model is the one handed in, and a write without one composes nothing. */
+  it("composes with the project's own model, and with none when it is given none", async () => {
+    const model = projectModel(modelKeySchema.parse("sk-ant-api03-abcdefghijklmnopqrstuvwxyz"))
+    const withModel = beginWrite(DEFAULT_APPLICATION_ID, model).path.runtime
+    const without = beginWrite(DEFAULT_APPLICATION_ID).path.runtime
+
+    expect(withModel.interpreter).toBe(model.interpreter)
+    expect(withModel.repairer).toBe(model.repairer)
+    expect(without.repairer).toBeUndefined()
+    expect(await without.interpreter.interpret({} as never, {} as never)).toMatchObject({
+      ok: false,
+      error: { code: "interpreter-misconfigured" },
+    })
   })
 })
 

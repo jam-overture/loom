@@ -7,57 +7,56 @@ import {
   systemClock,
   type ChangeInterpreter,
   type ChangeRepairer,
+  type ModelClient,
 } from "@jam-overture/loom"
 import { anthropicModelClient } from "@jam-overture/loom/anthropic"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
+import type { ModelKey } from "@/app/_lib/models/model-keys"
+
 import { portalRegistry } from "./registry"
 
 /**
- * What turns an utterance into a delta here.
+ * The model a project's changes are worked out with, paid for with that
+ * project's own key (0332). Nothing here reads the deployment's environment:
+ * a project with no key has no model, and no other project's key or this
+ * deployment's is used in its place.
  *
- * The key is read once, at module scope, and never leaves the server — 0017's
- * first and least arguable reason for putting composition behind a server-side
- * path. Two names are honoured because the scheduled agent that builds this repo
- * reserves the standard one for itself; `LOOM_ANTHROPIC_API_KEY` is what
- * actually reaches a subprocess.
- *
- * With no key, the portal runs and says so. That is deliberate: a seam whose
- * absence shows up as `interpreter-misconfigured` in the UI is more honest than
- * a portal that fails to boot, and it keeps every read path — which is most of
- * §5 — usable without a model.
+ * Built per call rather than held, because the key is the project's and a
+ * module-scope client would be one project's key serving everybody's.
  */
+export type ProjectModel = {
+  /** The connection itself, for a caller asking the model something other than a change. */
+  readonly client: ModelClient
+  readonly interpreter: ChangeInterpreter
+  /** A refusal gets one more attempt with the same model (0006). */
+  readonly repairer: ChangeRepairer
+}
 
-const apiKey = process.env["LOOM_ANTHROPIC_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"]
+export const projectModel = (key: ModelKey): ProjectModel => {
+  const client = anthropicModelClient(new Anthropic({ apiKey: key }).messages)
+  const model = modelInterpreter({
+    client,
+    idFactory: randomIdFactory,
+    clock: systemClock,
+    /** 0013: the model is told what this deployment registered, and nothing else. */
+    catalogue: catalogueOf(portalRegistry),
+  })
 
-const unconfigured: ChangeInterpreter = {
+  return { client, interpreter: model, repairer: model }
+}
+
+/**
+ * The interpreter a write that composes nothing is given. Answering a held
+ * change re-runs the Gate over a proposal that already exists, so it needs no
+ * model and spends nobody's key; this says so if anything ever asks it to.
+ */
+export const noInterpreter: ChangeInterpreter = {
   interpret: () =>
     Promise.resolve(
       err({
         code: "interpreter-misconfigured",
-        detail: "no model is configured; set LOOM_ANTHROPIC_API_KEY to compose changes",
+        detail: "this write was begun without a model, so it cannot compose a change",
       })
     ),
 }
-
-/** One client, used for both jobs, so a repair does not open a second connection. */
-const model = apiKey
-  ? modelInterpreter({
-      client: anthropicModelClient(new Anthropic({ apiKey }).messages),
-      idFactory: randomIdFactory,
-      clock: systemClock,
-      /** 0013: the model is told what this deployment registered, and nothing else. */
-      catalogue: catalogueOf(portalRegistry),
-    })
-  : undefined
-
-export const portalInterpreter: ChangeInterpreter = model ?? unconfigured
-
-/**
- * A refusal gets one more attempt, and only when there is a model to attempt it
- * (0006). Wiring it here rather than inside the interpreter keeps "this
- * deployment lets AI have a second go" a visible choice at the composition root.
- */
-export const portalRepairer: ChangeRepairer | undefined = model
-
-export const isInterpreterConfigured = model !== undefined

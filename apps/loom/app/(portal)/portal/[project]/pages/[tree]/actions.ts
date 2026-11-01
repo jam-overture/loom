@@ -2,95 +2,70 @@
 
 import { revalidatePath } from "next/cache"
 
-import { randomIdFactory, treeIdSchema } from "@jam-overture/loom"
-import { commitIntent } from "@jam-overture/loom/write"
+import { treeIdSchema } from "@jam-overture/loom"
 
-import {
-  askedReport,
-  governedCopyOf,
-  intentFor,
-  mayAsk,
-  requestOf,
-} from "@/app/(portal)/_lib/asking"
-import { reportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"
-import { beginWrite } from "@/app/(portal)/_lib/write"
+import type { WriteReport } from "@/app/(portal)/_lib/outcome"
+import { mayPropose, proposedReport } from "@/app/(portal)/_lib/proposing/report"
+import { runOnPage } from "@/app/(portal)/_lib/proposing/run"
+import { publishedRowOf } from "@/app/(portal)/_lib/published-view"
+import { modelKeyOf } from "@/app/_lib/models/store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { siteFor } from "../../_lib/owned-site"
 
-/** What asking says back: what happened to the request, or why it was not made. */
-export type AskReport = {
+/** What looking says back: what the AI proposed and what became of it, or why nothing was. */
+export type LookReport = {
   readonly refusal?: string
-  readonly report?: WriteReport
-  /** What was typed, so a refused request is still in the box to correct. */
-  readonly request?: string
+  readonly report?: WriteReport & { readonly request?: string }
 }
 
 /**
- * A person asking for a change to one of their site's pages (0329).
+ * Set the AI looking at one page now, rather than waiting for the schedule
+ * (0329 clause 5).
  *
  * The page is read from what the site published, never from the form, so a
- * request cannot name a tree the project does not hold; the copy it is asked
- * against is the project's own (clause 3). From there it is the write path's:
- * the interpreter drafts, the Gate applies, holds or refuses, and the screen
- * says which in `outcome.ts`'s words.
+ * run cannot name a tree the project does not hold. It is paid for with the
+ * project's own key (0332), and a project without one is told where to set it.
  */
-export const askAction = async (
-  _previous: AskReport | null,
+export const lookAction = async (
+  _previous: LookReport | null,
   form: FormData
-): Promise<AskReport> => {
-  const typed = String(form.get("request") ?? "")
-  const site = await siteFor(form, mayAsk)
+): Promise<LookReport> => {
+  const site = await siteFor(form, mayPropose)
 
-  if (!site.ok) {
+  if (!site.ok) return { refusal: site.report.detail ?? "That is not a project you can change." }
+
+  const application = site.application.applicationId
+  const key = await modelKeyOf(application)
+
+  if (!key.ok) return { refusal: "The store did not answer. Nothing was proposed." }
+  if (key.value.kind !== "set") {
     return {
-      refusal: site.report.detail ?? "That is not a project you can change.",
-      request: typed,
+      refusal: "This project has no model key that Loom can use. An owner sets one in Settings.",
     }
   }
 
-  const request = requestOf(typed)
-
-  if (!request.ok) return { refusal: request.error, request: typed }
-
   const treeId = treeIdSchema.safeParse(form.get("treeId"))
-  const published = await publishedPagesFor(site.application.applicationId).list()
+  const published = await publishedPagesFor(application).list()
 
-  if (!published.ok) {
-    return { refusal: "The store did not answer. Nothing was asked.", request: typed }
-  }
+  if (!published.ok) return { refusal: "The store did not answer. Nothing was proposed." }
 
   const page = treeId.success
-    ? published.value.find((held) => held.tree.treeId === treeId.data)?.tree
+    ? published.value.find((held) => held.tree.treeId === treeId.data)
     : undefined
 
   if (page === undefined) {
-    return { refusal: "That is not a page this project's site has published.", request: typed }
+    return { refusal: "That is not a page this project's site has published." }
   }
 
-  const write = beginWrite(site.application.applicationId)
-  const copy = await governedCopyOf(write.path.store, page)
+  const { run, weighedAgainst } = await runOnPage({
+    application,
+    key: key.value.key,
+    published: page.tree,
+    name: publishedRowOf(page).name,
+  })
 
-  if (!copy.ok) {
-    return { refusal: "The store did not answer. Nothing was asked.", request: typed }
-  }
+  revalidatePath(`/portal/${site.projectId}/pages/${page.tree.treeId}`)
 
-  const outcome = await commitIntent(
-    write.path,
-    intentFor({
-      ids: randomIdFactory,
-      page: copy.value,
-      request: request.value,
-      actor: site.actor,
-      at: new Date(),
-    })
-  )
-
-  await write.finish()
-
-  revalidatePath(`/portal/${site.projectId}/pages/${page.treeId}`)
-
-  return {
-    report: askedReport(reportOf(outcome, write.weighedAgainst), site.application.applicationId),
-  }
+  return { report: proposedReport(run, weighedAgainst, application) }
 }
