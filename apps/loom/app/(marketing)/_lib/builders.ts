@@ -1,10 +1,11 @@
 import type { LoomTree } from "@jam-overture/loom"
 
+import type { AddressedState } from "./addressed"
+
 import { homePageTree } from "./pages/home"
-import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { whatYouRunPageTree } from "./pages/what-you-run"
 import { whyUseItPageTree } from "./pages/why-use-it"
-import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, WHY_USE_IT, type SiteRoute } from "./site"
+import { HOME, WHAT_YOU_RUN, WHY_USE_IT, type SiteRoute } from "./site"
 
 /**
  * Which builder makes which page, and nothing else.
@@ -25,13 +26,24 @@ import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, WHY_USE_IT, type SiteRoute } from "./
  *
  * `render.ts` re-exports all three names, so nothing that used them moved.
  */
-export type SitePageContext = MechanismContext
+/**
+ * What a page builder is handed.
+ *
+ * It was `MechanismContext` — the demonstration page's own context, carrying
+ * the four parameters that named a change in progress — because that page had
+ * the widest context and every other builder took a subset of it. With the
+ * demonstration removed
+ * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md))
+ * there is one field left and no page needs more, so this is the address
+ * itself rather than an alias for whichever page happened to read the most of
+ * it.
+ */
+export type SitePageContext = AddressedState
 
 export type PageBuilder = (context: SitePageContext) => LoomTree
 
 export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, PageBuilder>([
   [HOME.path, homePageTree],
-  [HOW_IT_WORKS.path, howItWorksPageTree],
   [WHAT_YOU_RUN.path, whatYouRunPageTree],
   [WHY_USE_IT.path, whyUseItPageTree],
 ])

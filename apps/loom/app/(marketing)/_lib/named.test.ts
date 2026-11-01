@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
 
-import { PRODUCT_SURFACES, RETIRED_ROUTES, SITE_ROUTES } from "./site"
+import { PRODUCT_SURFACES, RETIRED_ROUTES, SITE_ROUTES, WITHDRAWN_ROUTES } from "./site"
 
 /**
  * The pages this route group's prose names, held against the pages it serves.
@@ -131,6 +131,12 @@ const PATH_IN_PROSE = /`(\/[a-z][a-z0-9-]*(?:\/[a-z0-9-]+)*)`/g
 const SERVED_ROOTS: ReadonlySet<string> = new Set([
   ...SITE_ROUTES.map((route) => route.path),
   ...PRODUCT_SURFACES.map((surface) => surface.path),
+  /**
+   * The pages 0328 removed, which this lane's history names in 72 places.
+   * `WITHDRAWN_ROUTES` carries the whole argument for why they are a category
+   * of their own rather than rows in `RETIRED_ROUTES`.
+   */
+  ...WITHDRAWN_ROUTES,
   "/api",
 ])
 

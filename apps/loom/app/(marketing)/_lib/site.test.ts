@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest"
 import { servedBy } from "./routes"
 import {
   DEFAULT_THEME,
-  DEMO,
   DOCS,
   internalHref,
   otherThemes,
@@ -239,20 +238,16 @@ describe("the rest of the product", () => {
   })
 
   /**
-   * The demonstration is the one surface that is the product rather than a
-   * description of it, so it is offered first — and it can only be offered at
-   * all because it costs a visitor nothing.
-   *
-   * `Loom demo` moved it to a public `/demo` on 21 August and filed the three
-   * facts that make it safe to put on the busiest page the project has: it
-   * works with no model configured, a page view allocates nothing per visitor,
-   * and the first click is one button. The flag below is the only one of the
-   * three this lane can assert from here; the other two are that lane's, and
-   * they are why the link exists.
+   * **It led with the demonstration until 31 October**
+   * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)),
+   * on the argument that the surface a stranger can try without an account
+   * belongs first. That argument is unchanged and the documentation is now
+   * the surface it picks out: `/demo` is no longer offered by this site, and
+   * `/docs` is the one a visitor opens without being asked for anything.
    */
-  it("leads with the one a visitor can try without an account", () => {
-    expect(PRODUCT_SURFACES[0]).toBe(DEMO)
-    expect(DEMO.guarded).toBe(false)
+  it("leads with the one a visitor can open without an account", () => {
+    expect(PRODUCT_SURFACES[0]).toBe(DOCS)
+    expect(DOCS.guarded).toBe(false)
   })
 
   /**

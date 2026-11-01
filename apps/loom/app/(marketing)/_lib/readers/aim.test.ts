@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest"
 import { action, prose, section } from "../nodes"
 import { bandsOf } from "../outline"
 import { homePageTree } from "../pages/home"
-import { howItWorksPageTree } from "../pages/how-it-works"
+import { whyUseItPageTree } from "../pages/why-use-it"
 import { DEFAULT_THEME } from "../site"
 
 import { discloseTargetIn, pressTargetIn, UNDECLARED_DISCLOSING_TYPES } from "./aim"
@@ -36,7 +36,14 @@ const frontDoor = () => homePageTree({ theme: DEFAULT_THEME })
  * about the front door's own bands, so the file needs both trees rather than
  * one. The band moved; what it demonstrates about a reader's aim did not.
  */
-const mechanism = () => howItWorksPageTree({ theme: DEFAULT_THEME })
+/**
+ * A page with a band that has something to press in it.
+ *
+ * It was `/how-it-works` and the band was the demonstration, which carried
+ * five choices and an undo. 0328 removed both, so this is `/why-use-it` and
+ * the band is the one that sends a reader on.
+ */
+const mechanism = () => whyUseItPageTree({ theme: DEFAULT_THEME })
 
 const bandNamed = (page: LoomTree, name: string) => {
   const found = bandsOf(page).find((band) => band.name === name)
@@ -62,7 +69,7 @@ const pageOf = (band: (ids: IdFactory) => LoomNode): LoomTree => {
 describe("the thing a reader pressed", () => {
   it("is inside the band and is never the band itself", () => {
     const page = mechanism()
-    const band = bandNamed(page, "See it happen")
+    const band = bandNamed(page, "Next")
     const aim = pressTargetIn(page, band.id, band.name)
 
     expect(aim.at.nodeId).not.toBe(band.id)
@@ -77,7 +84,7 @@ describe("the thing a reader pressed", () => {
    */
   it("names the regions above it nearest first, ending at the page", () => {
     const page = mechanism()
-    const band = bandNamed(page, "See it happen")
+    const band = bandNamed(page, "Next")
     const within = pressTargetIn(page, band.id, band.name).within
 
     expect(within.at(-1)?.nodeId).toBe(page.root.id)
@@ -264,7 +271,7 @@ describe("the thing a reader opened", () => {
 
   it("stops the build and names the band when the band holds nothing that opens", () => {
     const page = mechanism()
-    const band = bandNamed(page, "See it happen")
+    const band = bandNamed(page, "Next")
 
     expect(() => discloseTargetIn(page, band.id, band.name)).toThrow(/opened something/)
   })

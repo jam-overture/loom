@@ -234,7 +234,6 @@ describe("every page of this site", () => {
    */
   const PAGE_SOURCES: Readonly<Record<string, string>> = {
     "/": "../page.tsx",
-    "/how-it-works": "../how-it-works/page.tsx",
     "/what-you-run": "../what-you-run/page.tsx",
     "/why-use-it": "../why-use-it/page.tsx",
   }

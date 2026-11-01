@@ -63221,3 +63221,128 @@ calls and had to know which rows each was entitled to.
 arrival standing first** — one line above two boxes the *Signals* page already
 draws — because an operator whose door is refusing everything cannot use any of
 the others. Then `windowFiguresOf`, which is now one call.
+
+---
+## 2026-11-01 — the library stylesheet is serialised once per primitive into the RSC payload, so a Loom page ships 2.4MB where the same page's markup is 50KB
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts`' `libraryStylesheet`, and the ~90 primitives
+that call it) · **Status:** open — **this is the maintainer's reported
+performance problem, measured to its cause**, and the fix is in one function
+
+The maintainer, 31 October 2026:
+
+> *"the performance across the site is pretty slow. Lets make sure to
+> prioritize improving the performance. For example, just switching to 'Why use
+> it' takes several seconds."*
+
+### What was measured
+
+A production build, `next start`, local, so no network is in these numbers:
+
+| | `/why-use-it` (built in Loom) | `/docs` (MDX) |
+| --- | --- | --- |
+| **HTML served** | **2,418 KB** | 35 KB |
+| of which RSC flight payload | 2,255 KB | 33 KB |
+| rendered `<style>` | 47 KB | 0 |
+| copies of the library stylesheet **in the flight payload** | **42** | 0 |
+| server time per request | ~100 ms | ~6 ms |
+
+**The server is not the problem.** A hundred milliseconds is not several
+seconds. What takes several seconds is 2.4MB crossing a real network, and
+**93% of that one page is the same 47KB stylesheet, 42 times over.**
+
+### Why it happens
+
+`libraryStylesheet()` builds a `<style href precedence>` element carrying the
+whole of `CSS` as its children, and every primitive that needs styling calls
+it beside its own root. React's `precedence` hoisting then **de-duplicates it
+in the DOM** — the served HTML has exactly one `<style>` — which is why this
+has never shown up in a screenshot, a test or a Lighthouse run against the
+markup.
+
+It does not de-duplicate it in **the server-to-client stream**. Each of the 42
+elements is serialised in full, and `self.__next_f.push` carries all 42 copies
+to the browser so React can hydrate. The page is correct, the tests are green,
+and the reader downloads the stylesheet 42 times.
+
+### Why it is the framework's and not a surface's
+
+Nothing a composition does changes it. A page's cost is a function of **how
+many styled primitives it holds**, so the better the page the worse it gets —
+which is the opposite of the property anybody wants. Every Loom-built surface
+pays it: `(marketing)`, `(demo)`, `(portal)` and `(lessons)` all render through
+the same library, and `(docs)` is cheap only because its pages are MDX.
+
+### Three shapes, costed
+
+1. **Emit the stylesheet once, at the tree root.** The renderer already walks
+   the tree and already mounts the theme
+   ([0121](decisions/0121-part-of-a-tree-is-rendered-by-the-seam-and-the-seam-mounts-the-theme.md));
+   one `<style>` beside the root is the same hoisting with one copy in the
+   stream. The risk is a primitive rendered outside a tree — `loom.plate`'s
+   screenshot path, the share-card renderer — which would lose its styles, so
+   those callers need the same single emission.
+2. **Serve it as a file.** `<link rel="stylesheet" href="/loom.css"
+   precedence="loom">` is a few hundred bytes per copy instead of 47KB, so even
+   42 of them cost ~20KB, and the browser caches it across pages. It needs the
+   framework to publish the CSS as a static asset, which is a packaging change
+   and the reason this is second rather than first.
+3. **Leave it.** Not defensible at 2.4MB for a 50KB page.
+
+**Recommendation: the first, and the second after it.** The first is contained
+in `src/` and fixes every surface at once; the second is what makes a
+second page view free.
+
+### What this lane did about it
+
+Nothing, because `src/` is not this lane's and a one-line change there is still
+a change nobody asked this lane to review.
+[0328](decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+took a page and the demonstration off the site the same day, which removed
+~250KB from the front door and ~150KB from `/why-use-it` — real, and about 6%
+of the problem. **The other 94% is this finding.**
+
+### One more thing, smaller and also real
+
+All four marketing routes are `ƒ` — server-rendered on demand — while every
+`(docs)` page is `○` static. The cause is that each route awaits `searchParams`
+(the palette) and `servedOrigin()` (a `headers()` read). That is the ~100ms,
+not the seconds, and it is `Loom marketing`'s own to fix; it is recorded here
+rather than separately because whoever measures this page next will see both
+and should know which one matters.
+
+---
+---
+## 2026-11-01 — `/demo` is no longer offered by the marketing site and four lanes still refer to it
+
+**Filed by:** `Loom marketing` · **Owned by:** four lanes, listed below ·
+**Status:** open — **the decision is taken and recorded
+([0328](decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md));
+what is outstanding is everything outside `app/(marketing)/`**
+
+The maintainer, 31 October: *"Please remove the Demo page/link, and How it
+works page/link."*
+
+`Loom marketing` has done its half — `/how-it-works` is deleted, the
+demonstration with it, and no page of the marketing site links to `/demo`. The
+surface itself is still served, because deleting it touches four other lanes
+and two of the rows below are in `src/`, which this lane may not edit under
+any circumstances.
+
+| what | where | owner |
+| --- | --- | --- |
+| the surface itself, ~60 files | `apps/loom/app/(demo)/` | `Loom demo` / `Loom daily build` |
+| a framed `/demo` in the reporting catalogue, and the surface entry | `(docs)/_lib/reporting/catalogue.ts`, `(docs)/_lib/surfaces.ts` | `Loom docs` |
+| `/demo` in a state notice and its test | `(portal)/_components/state-notice.test.tsx` | `Loom portal` |
+| `href: "/demo"` in two compositions, and the `loom.embed` worked example | `src/primitives/compositions/hero-shot-band.ts`, `cta-overlay-band.ts`, `loom.embed.ts` | `Loom primitives` |
+| `/demo` shot lists and the framing argument | `tools/screenshot/`, `tools/specimen/` | `Loom daily build` |
+
+**Order matters.** The two compositions and the `(docs)` catalogue point at
+`/demo`; deleting the route group before they are changed turns those into
+links and frames that 404. The surface should come down last.
+
+**When the last row lands**, mark
+[0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)
+`Superseded by 0328`. It is deliberately not marked today: it is about where
+the demo lives, and it still lives there.

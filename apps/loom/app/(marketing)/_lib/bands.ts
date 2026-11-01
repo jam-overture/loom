@@ -24,7 +24,6 @@ export const BAND = {
    */
   chain: "Start to finish",
   whatIsIt: "What is Loom?",
-  seeItHappen: "See it happen",
   usingIt: "Using it",
   problems: "What this is for",
   facts: "Where it is today",
@@ -100,7 +99,6 @@ export type BandName = keyof typeof BAND
  * an `id` on an element for its own sake.
  */
 export const ANCHOR = {
-  seeItHappen: "see-it-happen",
 } as const satisfies Partial<Record<BandName, string>>
 
 /**

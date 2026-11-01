@@ -1,6 +1,6 @@
 # 0081. The front door demonstrates statelessly, and the address is the whole of the state
 
-**Status:** Accepted
+**Status:** Superseded by [0328](0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
 **Date:** 2026-08-21
 **Section:** §4d
 

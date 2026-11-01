@@ -5,21 +5,17 @@ import { PALETTE_SLOTS, type ElementNode, type LoomNode } from "@jam-overture/lo
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import { ASKS } from "../adapt/asks"
 import { BAND } from "../bands"
 import { PALETTE_SWITCHER_LABEL, READ_NEXT_EYEBROW } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
 import { DOC_PAGES } from "../docs-pages"
 import { unhonored } from "../frames"
-import { SHORT_ANSWERS } from "./how-it-works"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import { asRequested } from "../requested"
 
 import {
   DEFAULT_THEME,
-  DEMO,
   HOME,
-  HOW_IT_WORKS,
   PRODUCT_SURFACES,
   readingNeighbors,
   SITE_ROUTES,
@@ -417,128 +413,6 @@ describe("the words that are not engineering's to write", () => {
  * that could not happen. A surface added by another run is not a run that will
  * think to look here, so the assertion is the thing that has to.
  */
-/**
- * Where the site sends someone who wants to *try* it, rather than read about it.
- *
- * The demonstration is the one surface that is the product working, and until
- * 22 August nothing under this route group linked to it from anywhere — it sat
- * at `/portal/demo`, a public page behind the one path that reads as private,
- * and the front door had no route to the artifact that exists to convince
- * people. `Loom demo` moved it to a public `/demo` and filed exactly that.
- *
- * Three placements, and each is a different reader, which is why all three are
- * held rather than one being taken as enough:
- *
- * - **The opening band of the front door**, for the reader who is not going to
- *   scroll. The sentence above the button promises they can ask for a change in
- *   their own words, and this is the only place on the site that keeps it.
- * - **The band that demonstrates**, for the reader who just watched the
- *   sequence run and wants a turn.
- * - **The foot of the mechanism page**, for the reader who has read all five
- *   steps and wants to see one.
- *
- * Each is asserted where the link *is* rather than that the page contains the
- * href somewhere: the chrome links every surface from every page, so a check of
- * the whole markup would pass with all three of these deleted.
- */
-describe("the way to the demonstration", () => {
-  const DEMO_HREF = surfacePath(DEMO)
-
-  const bandWith = (node: LoomNode, holds: (found: ElementNode) => boolean): ElementNode[] => [
-    ...(node.kind === "element" && holds(node) ? [node] : []),
-    ...(node.kind === "text" ? [] : node.children.flatMap((child) => bandWith(child, holds))),
-  ]
-
-  const hrefsIn = (node: LoomNode): readonly string[] =>
-    bandWith(node, () => true).flatMap((found) =>
-      typeof found.props["href"] === "string" ? [found.props["href"]] : []
-    )
-
-  const bandOf = (route: SiteRoute, holds: (found: ElementNode) => boolean): ElementNode => {
-    const found = bandWith(treeFor(route, { theme: DEFAULT_THEME }).root, holds)[0]
-
-    if (found === undefined) throw new Error(`loom: ${route.path} has no such band`)
-
-    return found
-  }
-
-  it("is offered in the front door's opening band, before anything is scrolled", () => {
-    const hero = bandOf(HOME, (found) => found.type === "loom.hero")
-
-    expect(hrefsIn(hero)).toContain(DEMO_HREF)
-  })
-
-  /**
-   * The band that demonstrates points at the band that *is* the demonstration,
-   * and this asserts the two halves of that separately.
-   *
-   * It used to point at `/demo`, and the site pointing at the demonstration is
-   * exactly what §4d says it should stop doing. So the link is now a fragment on
-   * this same page, and a fragment link is the one shape that can be wrong while
-   * looking perfectly right: a band renamed on one side leaves a control that
-   * silently does nothing, and nothing else on the page would say so. Checking
-   * that some band *holds* the anchor is therefore the assertion that matters,
-   * not that the href was spelled.
-   */
-  /**
-   * **The demonstration is a link now, not a band.**
-   *
-   * Three assertions stood here until 1 October: that the band which
-   * demonstrates offered a fragment link onward, that something on the page
-   * held that anchor, and that the band below framed `/demo` rather than
-   * pointing at it — §4d's *embeds the demonstration rather than describing
-   * it*, which was the reason the demonstration is public at all (0056).
-   *
-   * The maintainer removed the frame: *"get rid of the demo injected into the
-   * main landing page. If people want to get to the demo, they can click the
-   * demo link."* So what replaces them is the property that instruction
-   * actually asks for — **the demonstration is still one click from the front
-   * door** — which is the thing that would quietly stop being true if the link
-   * went the way the frame did.
-   *
-   * It is deliberately not pinned to a band. The bar, the footer's map, the
-   * band of ways in and this band all offer it, and a test naming one of them
-   * would fail the day the page is rearranged while a reader could still get
-   * there perfectly well.
-   */
-  it("still offers the demonstration, from somewhere on the front door", () => {
-    const tree = treeFor(HOME, { theme: DEFAULT_THEME })
-
-    expect(hrefsIn(tree.root)).toContain(DEMO_HREF)
-  })
-
-  it("frames nothing, now that the demonstration is a link", () => {
-    const tree = treeFor(HOME, { theme: DEFAULT_THEME })
-
-    expect(bandWith(tree.root, (found) => found.type === "loom.embed")).toHaveLength(0)
-  })
-
-  /**
-   * Every state of that band, not the untouched one. The band is rebuilt for
-   * each choice and again when a held change is approved, and a link that
-   * survived only the state nobody arrives at having used would be worse than
-   * no link — the reader likeliest to want a turn is the one who has just had
-   * a change happen in front of them.
-   */
-  it.each([undefined, ...ASKS.map((ask) => ask.id)])(
-    "survives the front door being asked for %s",
-    async (ask) => {
-      const page = await pageTreeFor(HOME, {
-        theme: DEFAULT_THEME,
-        ...(ask === undefined ? {} : { ask }),
-      })
-
-      expect(hrefsIn(page.root)).toContain(DEMO_HREF)
-    }
-  )
-
-  it("closes the mechanism page, for the reader who has read all five steps", () => {
-    const closing = bandOf(HOW_IT_WORKS, (found) => found.props["tone"] === "accent")
-
-    expect(hrefsIn(closing)).toContain(DEMO_HREF)
-  })
-})
-
 describe("a surface added to the product", () => {
   const home = markupOf(HOME, DEFAULT_THEME)
 
@@ -680,98 +554,6 @@ describe("the band that says what this is for", () => {
   })
 })
 
-/**
- * The mechanism page's bands, held against the page the route serves.
- *
- * This block used to assert the raw record panel — seven `loom.code` panels and
- * the treeId of the front door printed inside one of them. The maintainer
- * retired that panel on 26 September: 341 lines of JSON on the first page of the
- * reading order, in a vocabulary a visitor does not have.
- *
- * What the block protected is still worth protecting and is not about the
- * panel: **a page whose central bands quietly vanish when a caller forgets
- * something is the failure mode this site keeps finding, and it is silent every
- * time.** So the same question is asked of the page as it is now — the four
- * short answers that replaced four pages, each of which is the whole of what
- * this site says about its subject.
- */
-describe("the mechanism page's short answers", () => {
-  const served = async (theme: SiteThemeName) =>
-    renderTree(await pageTreeFor(HOW_IT_WORKS, { theme }), { origin: ORIGIN })
-
-  const eyebrowsOf = async (): Promise<readonly string[]> => {
-    const tree = await pageTreeFor(HOW_IT_WORKS, { theme: DEFAULT_THEME })
-
-    return tree.root.children.flatMap((child) =>
-      child.kind === "element" && typeof child.props["eyebrow"] === "string"
-        ? [child.props["eyebrow"]]
-        : []
-    )
-  }
-
-  it("carries every answer that replaced a page", async () => {
-    const eyebrows = await eyebrowsOf()
-
-    for (const answer of SHORT_ANSWERS) {
-      expect({ eyebrow: answer.eyebrow, onThePage: eyebrows.includes(answer.eyebrow) }).toEqual({
-        eyebrow: answer.eyebrow,
-        onThePage: true,
-      })
-    }
-  })
-
-  /**
-   * The length rule, which is the maintainer's instruction made checkable.
-   *
-   * Each of these bands replaced a page of between 951 and 1,382 words. The
-   * thing that would undo the day's work is not a band disappearing — it is a
-   * band growing a third paragraph, then a fourth, until the page is the four
-   * pages again with different headings. A band is one answer and one example.
-   */
-  it.each(SHORT_ANSWERS)("keeps $eyebrow to one answer and one example", (answer) => {
-    expect(answer.body.split(/\s+/).length).toBeLessThanOrEqual(60)
-    expect(answer.example.split(/\s+/).length).toBeLessThanOrEqual(30)
-  })
-
-  describe.each(THEMES)("wearing %s", (theme) => {
-    it("renders with nothing the runtime could not honor", async () => {
-      expect(unhonored((await served(theme)).diagnostics)).toEqual([])
-    })
-
-    it("names no color of its own, anywhere below the root", async () => {
-      const body = belowRoot(renderToStaticMarkup((await served(theme)).element))
-
-      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
-      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
-    })
-  })
-})
-
-/**
- * Every panel of data on this site, swept as one.
- *
- * `loom.code` scrolls sideways by default, which is right for a command and
- * wrong for everything this site has ever put in one. The primitive gained
- * `wrap` on 12 September answering a finding this lane filed on the 3rd, and
- * three weeks later not one panel here set it — because nothing said it had to,
- * and a panel whose right-hand end is behind a gesture renders cleanly, emits
- * no diagnostic, measures no overflow and passes every test on this page.
- *
- * **This site served none of them between 26 September and 11 October**, which
- * was the cut of the 26th rather than a regression: seven were the mechanism
- * page's raw record and the eighth was the front door's *how this page is put
- * together* band, and the maintainer's direction retired the lot. The rule was
- * kept rather than deleted with them, written so it holds whatever the count
- * is, and waiting for the day somebody added a panel back.
- *
- * **That day was 11 October and the panel is the install line**, which is the
- * one thing on this site the rule below was *not* written for: the default is
- * right for a command, and `wrap: false` is now the answer a panel here can
- * give rather than a thing no panel had ever said. The sweep is held at one for
- * the reason it was held at zero — a sweep that silently stops finding things
- * passes forever — and the count is the thing to change the day a second panel
- * is deliberate.
- */
 describe("the panels that print data", () => {
   const everyPanel = async (): Promise<readonly ElementNode[]> => {
     const found = (node: LoomNode): readonly ElementNode[] =>

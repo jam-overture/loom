@@ -9,9 +9,7 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import type { AskId } from "../adapt/asks"
-import type { ChangeRecord } from "../adapt/record"
-import { ANCHOR, BAND } from "../bands"
+import { BAND, WHY_USE_IT_ANCHOR } from "../bands"
 import {
   siteFooter,
   siteHeader,
@@ -29,18 +27,16 @@ import {
   code,
   codeSpan,
   heading,
-  inlineLink,
   prose,
   proseParts,
   section,
   stack,
   TERTIARY_CONTROL,
+  inlineLink,
 } from "../nodes"
 import {
-  DEMO,
   DOCS,
   HOME,
-  HOW_IT_WORKS,
   LESSONS,
   NPM_PACKAGE_URL,
   PORTAL,
@@ -51,6 +47,7 @@ import {
   type SiteThemeName,
   surfacePath,
   WHAT_YOU_RUN,
+  WHY_USE_IT,
 } from "../site"
 
 /**
@@ -98,37 +95,6 @@ import {
  */
 export type PageContext = {
   readonly theme: SiteThemeName
-  /**
-   * What the visitor has asked the page for, off the address.
-   *
-   * Optional because two of the site's three pages have no such thing and
-   * because the landing page has to be buildable *before* the ask is run —
-   * the change is worked out against a page, so a page has to exist first.
-   */
-  readonly ask?: AskId
-  /**
-   * Whether the visitor has answered a change the rules held back.
-   *
-   * It changes nothing about how the page is *built* and everything about what
-   * is run against it, which is why it sits here beside `ask` rather than in the
-   * runner: both are what the address said, and the address is what a page of
-   * this site is a function of.
-   */
-  readonly approve?: boolean
-  /**
-   * Whether the visitor has pressed *Put it back* on a change that landed, and
-   * whether they have answered the rules holding the undo itself back.
-   *
-   * Two more things the address says, for the same reason as the two above: the
-   * undo is a change of its own (0032) and it is judged by the same rules, so it
-   * can be held for a person exactly as the change it reverses can.
-   */
-  readonly back?: boolean
-  readonly backApprove?: boolean
-  /** What happened, once it has. See `render.ts` for why this arrives in a second pass. */
-  readonly record?: ChangeRecord
-  /** And what happened when the visitor put it back, once they have. */
-  readonly undone?: ChangeRecord
 }
 
 const hero = (ids: IdFactory): LoomNode =>
@@ -253,26 +219,18 @@ const hero = (ids: IdFactory): LoomNode =>
       buildSlot(ids, "actions", [
         action(
           ids,
-          "See how a change travels",
-          sitePath(HOW_IT_WORKS.path),
+          "See what you can build",
+          sitePath(WHY_USE_IT.path),
           { variant: "primary", scale: "large" }
         ),
         /**
-         * The second action is the demo rather than the repository, as of
-         * 22 August.
-         *
-         * The sentence directly above it promises the reader they can ask for a
-         * change *in their own words*, and until today the nearest thing this
-         * site offered was a link to GitHub. Sending someone who has just read
-         * that promise to a source tree is answering "can I try it?" with "here
-         * is the code", which is the wrong answer to a question nobody asked.
-         *
-         * Nothing is lost by moving it: the repository is still the closing
-         * band's second action, a card in the facts band, and a named group in
-         * the footer. It is reachable three ways from this page and none of
-         * them is the first screen.
+         * **The second action was the demonstration until 31 October**
+         * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)),
+         * and it is the documentation now. It is the only other surface a
+         * stranger can open without an account, and it is where a reader who
+         * has decided they want this goes next.
          */
-        action(ids, "Try it yourself", surfacePath(DEMO), {
+        action(ids, "Read the docs", surfacePath(DOCS), {
           variant: "secondary",
           scale: "large",
         }),
@@ -1151,7 +1109,6 @@ const install = (ids: IdFactory): LoomNode =>
  * promised it could not.
  */
 const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
-  [DEMO.path]: { title: "Try it yourself" },
   [DOCS.path]: { title: "Read the docs" },
   [LESSONS.path]: { title: "Take the course" },
   [PORTAL.path]: { title: "Open the portal" },
@@ -1300,6 +1257,18 @@ const closing = (ids: IdFactory): LoomNode =>
      * the sentence on `/what-you-run`, so the paragraph goes red the day the
      * band moves again rather than going quietly wrong (`naming.ts`).
      */
+    /**
+     * **It was a sentence with a link in it until 31 October**, and the link
+     * went to the demonstration: *every one of them is a piece the AI could be
+     * asked to move*, where *asked to move* opened the band that let a visitor
+     * do it. [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+     * removed the band, and a sentence that invites a reader to go and watch
+     * it happen with nowhere to send them is worse than the plain claim.
+     *
+     * So the claim stays and the invitation goes. It is still the one place on
+     * this site that says the page a reader is standing on is the thing being
+     * described, which is why it was not deleted with the link.
+     */
     proseParts(
       ids,
       [
@@ -1307,7 +1276,7 @@ const closing = (ids: IdFactory): LoomNode =>
         inlineLink(
           ids,
           "asked to move",
-          `${sitePath(HOW_IT_WORKS.path)}#${ANCHOR.seeItHappen}`
+          `${sitePath(WHY_USE_IT.path)}#${WHY_USE_IT_ANCHOR.forAReader}`
         ),
         ". None of it is code you would have to read afterwards.",
       ],
@@ -1316,8 +1285,8 @@ const closing = (ids: IdFactory): LoomNode =>
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
       action(
         ids,
-        "See how a change travels",
-        sitePath(HOW_IT_WORKS.path),
+        "See what you can build",
+        sitePath(WHY_USE_IT.path),
         { variant: "primary", scale: "large" }
       ),
       action(ids, "Read the source", REPOSITORY_URL, {
@@ -1333,7 +1302,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
   const chrome: ChromeContext = {
     theme: context.theme,
     current: HOME,
-    ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
   }
 
   return createTree(
@@ -1363,23 +1331,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * product. The hero has made the claim and the four words have named
          * the steps; the next thing a visitor meets should be the claim being
          * true, not four features explaining why it would be.
-         */
-        /**
-         * The same claim with the training wheels off, directly under the band
-         * that has been apologising for them since 22 August.
-         *
-         * The band above runs five requests written in advance, because a text
-         * box on the most-loaded page the project has is a model call for every
-         * visitor. This one is the demonstration itself, framed — §4d's
-         * *embeds the demonstration rather than describing it*, which is the
-         * reason the demonstration is public at all (0056). It was built and
-         * withdrawn on 4 September over a sandbox that had no `allow-forms`;
-         * 0135 settled that on 12 September and this is the rebuild.
-         *
-         * Here rather than lower down because the likeliest person on this site
-         * to want a turn is the one who has just watched the sequence run, and
-         * because the frame loads lazily — a visitor who never scrolls this far
-         * never fetches it.
          */
         problems(ids),
         /**

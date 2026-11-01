@@ -1,6 +1,5 @@
 import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
-import type { AskId } from "./adapt/asks"
 import { LICENSE_NOTICE } from "./copy"
 import { action, link, prose, stack } from "./nodes"
 import {
@@ -91,20 +90,16 @@ export type ChromeContext = {
   readonly theme: SiteThemeName
   /** The route being rendered, so the menu can mark it rather than drop it. */
   readonly current: SiteRoute
-  /** What the visitor has asked the front door for, when they are on it. */
-  readonly ask?: AskId
-  readonly approve?: boolean
 }
 
 /**
- * The same page, wearing another palette — and still the page the visitor made.
+ * The same page, wearing another palette.
  *
- * The switcher used to rebuild the route's address from scratch, which quietly
- * threw away whatever the visitor had asked the front door for: change the
- * palette halfway through watching a change and the page snapped back to how it
- * had arrived. That is the worst possible moment to lose it, because the two
- * claims are being made at once — a re-theme touches only the root, and it is
- * the *same* page underneath.
+ * This once had to carry the demonstration's state across a re-theme, because
+ * rebuilding the address from scratch threw away whatever the visitor had
+ * asked the front door for. The palette is the whole of an address now
+ * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)),
+ * so there is nothing left to carry and this is a path and a parameter.
  */
 const inAnotherPalette = (context: ChromeContext, palette: SiteThemeName): string =>
   paletteHref(context.current.path, palette)
@@ -145,16 +140,27 @@ export const MARK_PATH = "M5 5h14v6H5z M21 5h6v14H21z M13 21h14v6H13z M5 13h6v14
 /**
  * The most things the bar across the top may carry, counting its action.
  *
- * Eight, because eight is the number the maintainer looked at on #166 and said
- * was too many. It is written here as the one place that answers *how many*,
- * and `bar.test.ts` is what makes it a rule rather than a note: a page or a
+ * **Seven as of 31 October, and it was eight.** Eight is the number the
+ * maintainer looked at on #166 and called too many, and the ceiling was set
+ * *at* it — so the bar was allowed to hold the number he had rejected. That
+ * went unnoticed while the site could not reach eight anyway.
+ *
+ * [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+ * took a page and a surface out, and `bar.test.ts`'s reachability rule went
+ * red: everything this site can flag into the bar is now three pages, three
+ * surfaces and the action, which is seven, and a ceiling nothing can reach is
+ * decoration. Seven is both reachable and under his number, so the rule binds
+ * again and binds tighter than it did.
+ *
+ * It is written here as the one place that answers *how many*, and
+ * `bar.test.ts` is what makes it a rule rather than a note: a page or a
  * surface flagged into a full bar fails the gate on the run that flags it,
  * naming what the bar already holds.
  *
  * It does not say which items. That is each page's and each surface's own
  * `inMenu`, argued where the thing being left in or out is defined.
  */
-export const BAR_CEILING = 8
+export const BAR_CEILING = 7
 
 const wordmark = (ids: IdFactory): LoomNode =>
   buildElement(ids, {

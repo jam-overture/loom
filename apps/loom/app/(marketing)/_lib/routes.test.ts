@@ -342,26 +342,6 @@ describe("the addresses this site points at", () => {
       return JSON.stringify([url.pathname, askedFor(Object.fromEntries(url.searchParams))])
     }
 
-    /** A choice: an address that names a request and answers nothing about it. */
-    const isABareRequest = (href: string): boolean => {
-      let url: URL
-
-      try {
-        url = new URL(href, `${ORIGIN}/`)
-      } catch {
-        return false
-      }
-
-      const read = askedFor(Object.fromEntries(url.searchParams))
-
-      return (
-        read.ask !== undefined &&
-        read.approve !== true &&
-        read.back !== true &&
-        read.backApprove !== true
-      )
-    }
-
     const circular = pages.flatMap((page) => {
       const here = asPage(page.address)
 
@@ -370,7 +350,6 @@ describe("the addresses this site points at", () => {
           .filter(
             (control) =>
               !control.current &&
-              !isABareRequest(control.href) &&
               here !== undefined &&
               asPage(control.href) === here
           )
@@ -508,7 +487,7 @@ describe("the route table this check reads", () => {
     ["[lesson]", { kind: "one" }],
     ["[...rest]", { kind: "many" }],
     ["[[...rest]]", { kind: "maybe-many" }],
-    ["how-it-works", { kind: "literal", value: "how-it-works" }],
+    ["why-use-it", { kind: "literal", value: "why-use-it" }],
     ["llms.txt", { kind: "literal", value: "llms.txt" }],
   ])("reads %s as the segment it is", (name, segment) => {
     expect(segmentFor(name)).toEqual(segment)

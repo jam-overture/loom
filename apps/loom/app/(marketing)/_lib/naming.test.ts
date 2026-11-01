@@ -251,39 +251,4 @@ describe("the pages this site names", () => {
     expect(sweepShare(pages, (page) => linksOn(page).length).each).toBeGreaterThanOrEqual(0.3)
   })
 
-  /**
-   * The paragraph the module was written for, named here rather than left to
-   * the sweep.
-   *
-   * A sweep says *nothing is wrong*. It does not say *this sentence is the
-   * reason*, and the next run to read this file should be able to see what the
-   * rules are about without reconstructing it from a failure that is not
-   * happening.
-   */
-  it("sends a reader who is told about the ready-made changes to them", () => {
-    const sentences = pages
-      .filter((page) => page.route.path === "/what-you-run")
-      .flatMap((page) =>
-        page.tree.root.children.flatMap((band) => {
-          if (band.kind !== "element") return []
-
-          const says = mentionsIn(readerCopy(band)).filter(
-            (mention) => mention.inASentence && mention.names === "/how-it-works"
-          )
-
-          return says.length === 0
-            ? []
-            : [{ band: band.props["eyebrow"], fragments: crossPageFragmentsIn(band, page.route.path, ORIGIN, SITE_PATHS) }]
-        })
-      )
-
-    expect(sentences.length).toBeGreaterThan(0)
-
-    for (const { band, fragments } of sentences) {
-      expect({ band, into: fragments.map((link) => `${link.to}#${link.fragment}`) }).toEqual({
-        band: "What leaves your server",
-        into: ["/how-it-works#see-it-happen"],
-      })
-    }
   })
-})

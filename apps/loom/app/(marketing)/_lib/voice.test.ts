@@ -522,31 +522,7 @@ describe("every string a reader reads", () => {
     expect(read.length).toBeGreaterThanOrEqual(200)
   })
 
-  /**
-   * **And it read copy that only exists once somebody has asked for
-   * something**, which is the half that was missing rather than the half that
-   * was small.
-   *
-   * Held as a floor on the difference between the two readings rather than on
-   * the served count alone, because a regression here would not look like a
-   * failure: a rule quietly moved back onto `treeFor` reads a tree that is
-   * still 194 strings long and still passes every assertion in this file.
-   * What it stops being able to see is the 59 strings this assertion counts.
-   */
-  it("read the copy a request puts on the page, and not only the page as published", () => {
-    const written = new Set(
-      SITE_ROUTES.flatMap((route) =>
-        readerCopy(treeFor(route, { theme: DEFAULT_THEME }).root).map(
-          ({ field, text }) => `${field}|${text}`
-        )
-      )
-    )
-
-    const servedOnly = read.filter(({ field, text }) => !written.has(`${field}|${text}`))
-
-    expect(servedOnly.length).toBeGreaterThanOrEqual(40)
-  })
-
+  
   it("says it without reaching for an em dash", () => {
     const offenders = read
       .filter(({ text }) => text.includes("—") && !isMaintainers(text))

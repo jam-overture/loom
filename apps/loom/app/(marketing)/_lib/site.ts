@@ -120,15 +120,6 @@ export const WHY_USE_IT: SiteRoute = {
   inMenu: true,
 }
 
-export const HOW_IT_WORKS: SiteRoute = {
-  path: "/how-it-works",
-  label: "How it works",
-  title: "How it works — Loom",
-  description:
-    "Someone asks for a change. Before anything moves it is measured and checked against rules you wrote. Then it is written down — every time, whether it happened or not.",
-  inMenu: true,
-}
-
 /**
  * The page for the question every other page hands the reader and none of them
  * takes back.
@@ -217,7 +208,7 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * > that are both gone is not history worth keeping in the file the next run
  * > reads to find out what this site has. They are in `git log`.
  */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, WHY_USE_IT, HOW_IT_WORKS, WHAT_YOU_RUN]
+export const SITE_ROUTES: readonly SiteRoute[] = [HOME, WHY_USE_IT, WHAT_YOU_RUN]
 
 /**
  * The paths of {@link SITE_ROUTES}, sorted — **what a sweep's coverage is held
@@ -297,58 +288,62 @@ export type RetiredRoute = {
 }
 
 /** The seven, in the order the retired site read them. */
+/**
+ * **Five of these seven were absorbed into a page that is itself gone**, as of
+ * [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md).
+ *
+ * They stay on the list rather than coming off it, because what this list is
+ * for is a sweep over the site's prose: a sentence naming the retired `/the-rules` is
+ * still a sentence naming a page nobody can open, and that is as true now as
+ * it was when the page was folded into `/how-it-works`. `absorbedBy` says
+ * where each went and now also says that the destination went too, which is
+ * the trail a reader of this file needs rather than a row quietly rewritten.
+ */
 export const RETIRED_ROUTES: readonly RetiredRoute[] = [
-  { path: "/the-rules", absorbedBy: "/how-it-works, 'Your rules'" },
-  { path: "/the-record", absorbedBy: "/how-it-works, 'The record'" },
-  { path: "/when-it-goes-wrong", absorbedBy: "/how-it-works, 'When the answer is no'" },
-  { path: "/putting-it-back", absorbedBy: "/how-it-works, 'Putting it back'" },
-  { path: "/who-can-ask", absorbedBy: "/how-it-works, 'Who is asking'" },
+  { path: "/the-rules", absorbedBy: "/how-it-works, removed by 0328" },
+  { path: "/the-record", absorbedBy: "/how-it-works, removed by 0328" },
+  { path: "/when-it-goes-wrong", absorbedBy: "/how-it-works, removed by 0328" },
+  { path: "/putting-it-back", absorbedBy: "/how-it-works, removed by 0328" },
+  { path: "/who-can-ask", absorbedBy: "/how-it-works, removed by 0328" },
   { path: "/your-components", absorbedBy: "/what-you-run, 'What you bring'" },
   { path: "/what-readers-do", absorbedBy: "/what-you-run, 'What this page counts'" },
+
 ]
 
 /**
- * The one page of this site a visitor can ask for a change to.
+ * Pages this route group's own history names and no longer offers.
  *
- * It is `/how-it-works` and it used to be the front door. The maintainer moved
- * the band on 1 October — *"Remove the see it happen section from the main
- * landing page and only let it exist in the How it works section"* — and this
- * constant exists because that move has now been found half-applied twice:
+ * **This is not `RETIRED_ROUTES` and the difference is the point.** A retired
+ * route was *absorbed*: its content moved into a band of a page that still
+ * exists, so a sentence naming it is one word away from crediting a live page
+ * with the wrong address, and `named.test.ts` requires every such sentence to
+ * say `retired` for exactly that reason.
  *
- * | found | what was still pointed at the front door |
- * | --- | --- |
- * | 9 October | the reading of the address, so *Put it back* did nothing for eight days |
- * | 11 October | the card a shared link unfurls as, and the picture behind it |
+ * These two were **removed**
+ * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)).
+ * There is no band they moved to and no claim to mis-credit. What names them
+ * is 72 mentions across 37 files of dated narrative — *"on 1 October the band
+ * moved"*, *"photographed on the front door, `/how-it-works` and
+ * `/what-you-run`"* — which is this lane's record of how it got here, and the
+ * reason every decision in these files can be read rather than guessed at.
  *
- * Neither was a hard thing to get right. Both were the same easy thing to get
- * wrong: *which page runs a request* was written as `route.path === HOME.path`
- * in one file and `HOW_IT_WORKS` in another, so moving the band meant finding
- * every place that had quietly decided it already. A comparison spelled out at
- * the point of use is a decision nobody can grep for.
+ * Requiring the word `retired` in all 72 would rewrite that history to satisfy
+ * a rule written about a different hazard. So they are a category of their
+ * own, named here so that the next run can see the distinction was made on
+ * purpose rather than finding two paths quietly added to a list of served
+ * ones.
  *
- * So it is one name, and the four things that need the answer read it: the
- * renderer that runs the request, the writer of an address, the words a shared
- * link unfurls with, and the picture it unfurls as. A fifth page taking the
- * band is one line here.
+ * **What is still checked**: `named.test.ts` holds that this route group names
+ * no path outside these three sets, so a typo or a page invented in a comment
+ * is still caught. What is not checked is tense, which was never checkable —
+ * the sentences making a present-tense claim about `/how-it-works` were found
+ * and rewritten by hand on 31 October.
  *
- * **It is deliberately not a field on `SiteRoute`.** `inMenu` is a choice each
- * route makes and three routes answer differently; this is a fact about the
- * site of which there is exactly one, and a boolean on every route would invite
- * a second page to set it — which is a state this site has no meaning for,
- * because the band is the demonstration and there is one of those.
+ * `/demo` is here rather than among the served because **this list is about
+ * what this route group offers**, which `named.test.ts` states as its own
+ * scope. The surface still answers until the lanes that own it take it down.
  */
-export const ASKED_ROUTE: SiteRoute = HOW_IT_WORKS
-
-/**
- * Whether this is that page.
- *
- * A predicate rather than letting each caller write the comparison, because the
- * comparison is the thing that was written four times and went stale in three
- * of them. Compared by path and not by identity: a card is drawn from a route
- * looked up out of a query string, and `SITE_ROUTES.find` hands back the same
- * object only for as long as nobody passes a copy.
- */
-export const isAskedRoute = (route: SiteRoute): boolean => route.path === ASKED_ROUTE.path
+export const WITHDRAWN_ROUTES: readonly string[] = ["/how-it-works", "/demo"]
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -646,7 +641,14 @@ export const PORTAL: GuardedSurface = {
  * rather than a description of it, and this site's own recorded position is
  * that the marketing site is the demonstration and not a brochure about it.
  */
-export const PRODUCT_SURFACES: readonly Surface[] = [DEMO, DOCS, LESSONS, PORTAL]
+/**
+ * **`DEMO` is not in this list as of 31 October**
+ * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)).
+ * The surface still answers at `/demo` until the lanes that own it take it
+ * down, and no page of this site points at it in the meantime. A live page
+ * nobody links to is the honest intermediate state; a dangling link is not.
+ */
+export const PRODUCT_SURFACES: readonly Surface[] = [DOCS, LESSONS, PORTAL]
 
 /**
  * The palettes a visitor may see the site in.
@@ -866,25 +868,27 @@ export const internalHref = (origin: string, path: string, theme?: SiteThemeName
 }
 
 /**
- * The five words an address of this site is made of.
+ * The one word an address of this site is made of, and it was five.
  *
- * `askedHref` writes them and `askedFor` reads them, and both take the spelling
- * from here, because a page that writes `back` and reads `back-yes` is a control
- * that does nothing and a build that is green. Four of the five are ours to
- * choose; `back-yes` is the spelling the record page's own sequence already
- * uses, so the two pages name approval the same way.
+ * `paletteHref` writes it and `askedFor` reads it, and both take the spelling
+ * from here, because a page that writes one spelling and reads another is a
+ * control that does nothing and a build that is green.
  *
- * The names are written out literally in `addressed.test.ts` rather than
+ * The other four named the demonstration's state —
+ * [0081](../../../../../decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)
+ * made the address the whole of it — and went with the band
+ * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)).
+ * It stays a record of one rather than becoming a bare literal: the reason
+ * this file holds the spelling at all is that two sides have to agree on it,
+ * and that is as true of one parameter as of five.
+ *
+ * The name is written out literally in `addressed.test.ts` rather than
  * compared against this record, which is the 8 October entry of this lane's own
  * findings applied to itself: a test that interpolates the constant it is
  * meant to pin is green on any misspelling.
  */
 export const ADDRESS_PARAMS = {
   theme: "theme",
-  ask: "ask",
-  approve: "approve",
-  back: "back",
-  backApprove: "back-yes",
 } as const
 
 /**
@@ -899,78 +903,6 @@ export const ADDRESS_PARAMS = {
  */
 export const readYes = (given: string | readonly string[] | undefined): boolean =>
   (typeof given === "string" ? given : given?.[0]) === "1"
-
-/**
- * `ASKED_ROUTE`, with what the visitor has asked of it written into the address.
- *
- * The band that lets a visitor rearrange that page keeps nothing: no session,
- * no cookie, nothing on the server between one request and the next. What the
- * page looks like is a function of its address, which is why
- * `/how-it-works?ask=costs` can be copied, shared, bookmarked and reloaded a
- * week later and still be the page it was, and why two people looking at the
- * site cannot rearrange it under each other.
- *
- * It said *the front door* and gave `/?ask=costs` as the example until
- * 11 October, which was true until the band moved on 1 October.
- */
-export type AskedFor = {
-  readonly theme?: SiteThemeName
-  readonly ask?: string
-  readonly approve?: boolean
-  /** Whether the visitor has pressed *Put it back* on the change above. */
-  readonly back?: boolean
-  /** And whether they have answered the rules holding *that* back. */
-  readonly backApprove?: boolean
-}
-
-/**
- * A page of this site with a request written into its address.
- *
- * Two pages read those parameters and they have to read the same ones the same
- * way, because one links to the other carrying them. Written twice they would
- * be two spellings of one convention, and this lane's recorded failure three
- * runs running is a pair of individually correct things that had never been read
- * next to each other. So there is one spelling and the path is the argument.
- */
-/**
- * The base a path is parsed against when there is no origin to parse it
- * against.
- *
- * Never read and never in the output: `origin` is empty exactly when the
- * caller wants a path, and a path is not a URL, so one has to be borrowed to
- * get at `searchParams` at all. `.invalid` is reserved by RFC 2606 and resolves
- * nowhere, so a leak would be loud rather than quietly pointing at a real host.
- */
-const NO_ORIGIN = "https://site.invalid"
-
-const askedHref = (origin: string, path: string, options: AskedFor): string => {
-  const url = new URL(path, `${origin === "" ? NO_ORIGIN : origin}/`)
-
-  if (options.theme !== undefined) url.searchParams.set(ADDRESS_PARAMS.theme, options.theme)
-  if (options.ask !== undefined) url.searchParams.set(ADDRESS_PARAMS.ask, options.ask)
-  if (options.approve === true) url.searchParams.set(ADDRESS_PARAMS.approve, "1")
-  /**
-   * Two parameters rather than one with three values, because they answer two
-   * questions a visitor asks at two different moments — *put it back*, and then
-   * *yes, I mean it* — and an address that said `back=yes` would be spelling the
-   * second in a word that reads like the first.
-   *
-   * `-yes` is the suffix the record page's sequence already uses for exactly
-   * this, so the two pages name approval the same way.
-   */
-  if (options.back === true) url.searchParams.set(ADDRESS_PARAMS.back, "1")
-  if (options.backApprove === true) url.searchParams.set(ADDRESS_PARAMS.backApprove, "1")
-
-  /*
-   * **A path when the caller gave no origin**, which is how the three site
-   * pages are seeded (`./stored.ts`): one stored row is served from every host
-   * this deployment answers on, so an absolute href in it would freeze
-   * whichever host wrote it. Metadata still passes an origin and still gets an
-   * absolute URL, which is what a canonical link and a share card are obliged
-   * to give.
-   */
-  return origin === "" ? `${url.pathname}${url.search}${url.hash}` : url.toString()
-}
 
 /**
  * A link into another surface of the product.
@@ -1013,44 +945,6 @@ export const surfaceHref = (origin: string, surface: Surface): string =>
  *
  * The absolute pair above is untouched and is still what metadata uses.
  */
-/**
- * The page a request is run against, with the request in the address.
- *
- * The page keeps nothing, so what it shows is a function of its address.
- * `/how-it-works` on its own is the page it has always been. With an ask in the
- * address it rearranges for that request and prints its record, which is what
- * lets one visitor hand another the record of the change they just watched
- * rather than of a different one.
- *
- * `approve` travels with it because the record does. A change the rules held
- * and the visitor then allowed has a line the held one does not, and a link
- * that dropped the approval would open a page whose record is one line shorter
- * than the panel the visitor followed it from.
- *
- * **There were two of these until 12 October**, and the second was
- * `mechanismHref`. They were different functions in September, when `askHref`
- * wrote an address of the front door and `mechanismHref` wrote one of
- * `/how-it-works`; the maintainer moved the band on 1 October and the two
- * destinations became the same page, after which 19 call sites across 8 files
- * were choosing between two names for one body. `ASKED_ROUTE` is now the single
- * answer to *which page*, so the name that says what the address **carries** is
- * the one that survived. Filed on 11 October, collapsed here, and the deletion
- * is the point: a second name is a decision every later call site has to make
- * again.
- *
- * **And then there were none**, as of 24 October. The absolute spelling,
- * `askHref`, is gone with the last thing that called it: one control on
- * `/how-it-works` that linked to the address it was drawn on. The reason this
- * docblock gave for keeping it — *"metadata still needs an absolute URL"* —
- * named a caller that does not exist, because the canonical link, the share
- * card and the sitemap all go through `internalHref`.
- *
- * So what is left is the path, which is what a link in a tree has to be (0259),
- * and this site now has no way to spell an address of itself with a host in it.
- * `routes.test.ts` sweeps all 75 served states for one anyway, because a
- * literal is still a literal.
- */
-export const askPath = (options: AskedFor = {}): string => askedHref("", ASKED_ROUTE.path, options)
 
 export const sitePath = (path: string): string => path
 

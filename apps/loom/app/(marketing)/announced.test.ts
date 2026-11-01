@@ -2,8 +2,6 @@ import type { Metadata } from "next"
 
 import { describe, expect, it } from "vitest"
 
-import { askById } from "./_lib/adapt/asks"
-import { askRunFor } from "./_lib/render"
 import { shareImageFor } from "./_lib/share-image"
 import {
   cardHeadlineOf,
@@ -14,8 +12,6 @@ import {
   type PageSearchParams,
 } from "./_lib/share"
 import {
-  ASKED_ROUTE,
-  HOME,
   SITE_ROUTES,
   SITE_THEME_NAMES,
   siteOrigin,
@@ -72,7 +68,6 @@ type PageModule = {
  */
 const PAGE_MODULES: Readonly<Record<string, () => Promise<PageModule>>> = {
   "/": () => import("./page"),
-  "/how-it-works": () => import("./how-it-works/page"),
   "/what-you-run": () => import("./what-you-run/page"),
   "/why-use-it": () => import("./why-use-it/page"),
 }
@@ -86,8 +81,6 @@ const ORIGIN = siteOrigin()
  * on its own — so an assertion about *whether a page reads a request at all*
  * is not also an assertion about a verdict.
  */
-const ask = "shorter"
-const utterance = askById(ask)!.utterance
 
 const announcedBy = async (
   route: SiteRoute,
@@ -198,13 +191,24 @@ describe("every page takes the one factory", () => {
    * factory that read the palette and nothing else — is only visible on an
    * address carrying a request.
    */
+  /**
+   * Every address this site writes, which is a palette or nothing.
+   *
+   * It was six states, four of them naming a pre-written request, and the
+   * comment here said why: *"a page keeping a reader of its own agrees with
+   * the factory on `{}` whatever it reads, because there is nothing in `{}` to
+   * read differently"* — the defect it was written for, a route reading the
+   * palette and nothing else, is only visible on an address carrying more.
+   *
+   * [0328](../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+   * left one parameter, so the last row is a parameter this site does not have:
+   * a route that read its address by hand would still agree with the factory
+   * on `{}`, and this is the row that would catch it.
+   */
   const ADDRESSES: readonly (readonly [string, Record<string, string>])[] = [
     ["nothing asked", {}],
     ["a palette", { theme: "bold" }],
-    ["a request", { ask }],
-    ["a request the visitor allowed", { ask, approve: "1" }],
-    ["an undo", { ask: "unstick-menu", approve: "1", back: "1" }],
-    ["an undo the visitor allowed", { ask: "unstick-menu", approve: "1", back: "1", "back-yes": "1" }],
+    ["a parameter this site no longer has", { ask: "shorter", approve: "1" }],
   ]
 
   describe.each(SITE_ROUTES)("$path", (route) => {
@@ -217,114 +221,4 @@ describe("every page takes the one factory", () => {
     })
   })
 
-  /**
-   * The half the shape above cannot catch. A page agreeing with the factory is
-   * a page announced the way the factory announces it, which says nothing about
-   * whether the factory lands a request on the right page; what this asks is
-   * that it lands on exactly one, and names the constant rather than the path.
-   */
-  it("announces a request on one page of this site and no other", async () => {
-    const titles = await Promise.all(
-      SITE_ROUTES.map(async (route) => [route.path, (await announcedBy(route, { ask })).title])
-    )
-
-    expect(titles.filter(([, title]) => title === utterance).map(([path]) => path)).toEqual([
-      ASKED_ROUTE.path,
-    ])
-  })
-})
-
-/**
- * The page a visitor can ask for a change to, which is `/how-it-works`.
- *
- * These are the four assertions that used to be written against the front door,
- * pointed at the constant instead of at a path — so the next time the band
- * moves, the pages it moved between are not what has to be edited.
- */
-describe("the page that is asked for things", () => {
-  it("titles a rearranged address with the request that made it", async () => {
-    expect((await announcedBy(ASKED_ROUTE, { ask })).title).toBe(utterance)
-  })
-
-  it("draws the arrangement rather than the published page", async () => {
-    const plain = new URL(pictureIn(await announcedBy(ASKED_ROUTE)))
-    const asked = new URL(pictureIn(await announcedBy(ASKED_ROUTE, { ask, approve: "1" })))
-
-    expect(plain.searchParams.get("ask")).toBeNull()
-    expect(asked.searchParams.get("ask")).toBe(ask)
-    expect(asked.searchParams.get("approve")).toBe("1")
-  })
-
-  /**
-   * The card a rearranged address unfurls as is the verdict the rules reached,
-   * run for real — so the request has to survive all the way to the drawing, not
-   * merely into the query string.
-   */
-  it("carries the request as far as the card", async () => {
-    const asked = new URL(pictureIn(await announcedBy(ASKED_ROUTE, { ask })))
-    const { card } = await shareImageFor(asked.searchParams, ORIGIN)
-
-    expect(card.headline).toBe(`“${utterance}”`)
-    expect(card.eyebrow).toBeDefined()
-  })
-
-  /**
-   * The published front door, which is what `/` now announces and did not until
-   * today. It is asserted from this side as well as from the sweep above,
-   * because *the page that does not rearrange says nothing about a request* is
-   * the half of this move a reader of the site would notice: a link to
-   * `/?ask=shorter&approve=1` unfurled as a request and opened a page that had
-   * not been asked anything.
-   */
-  it("is the only page a request changes the announcement of", async () => {
-    expect(await announcedBy(HOME, { ask, approve: "1" })).toEqual(await announcedBy(HOME))
-  })
-})
-
-/**
- * The undo, which is the one state of this site a competitor cannot screenshot
- * and the one that had no card.
- *
- * `ShareContext` carried `ask` and `approve` and not `back` or `back-yes` — the
- * same two-of-four the routes carried for the eight days *Put it back* did
- * nothing — so every address of a held or landed undo unfurled as the change
- * going through. The request below is the one whose undo the rules hold:
- * `unstick-menu` changes a setting on a protected piece, and the change that
- * reverses a setting change is another setting change on the same piece, so it
- * is weighed the same way and held the same way.
- */
-describe("an address that carries an undo", () => {
-  const held = { ask: "unstick-menu", approve: "1", back: "1" } as const
-
-  it("asks the picture for the undo as well as the change", async () => {
-    const picture = new URL(pictureIn(await announcedBy(ASKED_ROUTE, held)))
-
-    expect(picture.searchParams.get("back")).toBe("1")
-    expect(picture.searchParams.get("back-yes")).toBeNull()
-  })
-
-  it("unfurls as the verdict on the putting-back, not on the change", async () => {
-    const picture = new URL(pictureIn(await announcedBy(ASKED_ROUTE, held)))
-    const { card } = await shareImageFor(picture.searchParams, ORIGIN)
-    const run = await askRunFor({
-      theme: "minimal",
-      ask: "unstick-menu",
-      approve: true,
-      back: true,
-    })
-
-    expect(run?.undone).toBeDefined()
-    expect(card.eyebrow).toBe(run!.undone!.verdictLabel)
-    expect(card.supporting).toBe(run!.undone!.verdictLine)
-    expect(card.headline).toBe(`“${run!.undone!.asked}”`)
-  })
-
-  /**
-   * The card moved, and the title did not. What a link is *about* is what
-   * somebody asked for; what happened to it is the card's half to report, which
-   * is how one title covers all four states of an address.
-   */
-  it("still titles itself with the request, not with the undo", async () => {
-    expect((await announcedBy(ASKED_ROUTE, held)).title).toBe(askById("unstick-menu")!.utterance)
-  })
 })
