@@ -5,7 +5,7 @@ import { buildElement, createTree, sequentialIdFactory } from "@jam-overture/loo
 import { pageFixture } from "@/app/_lib/pages/fixtures"
 
 import { UNTITLED } from "./page-name"
-import { publishedRowOf } from "./published-view"
+import { pageNamesOf, publishedRowOf } from "./published-view"
 
 const AT = Date.UTC(2026, 9, 24, 14, 5)
 
@@ -30,5 +30,20 @@ describe("a published page, as the Pages screen shows it", () => {
       name: UNTITLED,
       derived: false,
     })
+  })
+})
+
+describe("the names published pages give themselves", () => {
+  it("names each page by id, and leaves out one that has no heading", () => {
+    const ids = sequentialIdFactory("bare")
+    const bare = createTree(buildElement(ids, { type: "loom.stack" }), ids)
+    const home = pageFixture("home", "Welcome")
+
+    expect(
+      pageNamesOf([
+        { tree: home, receivedAt: AT },
+        { tree: bare, receivedAt: AT },
+      ])
+    ).toEqual(new Map([[home.treeId, "Welcome"]]))
   })
 })

@@ -133,6 +133,13 @@ export const storedIdFor = (route: SiteRoute): TreeId | undefined =>
   sitePagesStored().find((page) => page.route.path === route.path)?.treeId
 
 /**
+ * Every page this site serves, as the trees its code authors them — what
+ * the seed writes, and what `pages:publish` hands the portal (0312).
+ */
+export const sitePageTrees = (): readonly LoomTree[] =>
+  sitePagesStored().map(({ route }) => treeFor(route, storedContext()))
+
+/**
  * Write any of this site's pages the store does not have. **Run by `db:push`.**
  *
  * `create` is guarded by `absent`: the store is asked first, and only a
@@ -145,8 +152,7 @@ export const storedIdFor = (route: SiteRoute): TreeId | undefined =>
  * round trips a reader waits for.
  */
 export const seedSitePages = async (): Promise<void> => {
-  for (const { route } of sitePagesStored()) {
-    const tree = treeFor(route, storedContext())
+  for (const tree of sitePageTrees()) {
     const existing = await appStoreForWriting.head(tree.treeId)
     if (!absent(existing)) continue
 

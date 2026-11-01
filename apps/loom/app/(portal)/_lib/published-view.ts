@@ -31,3 +31,18 @@ export const publishedRowOf = ({ tree, receivedAt }: PublishedPage): PublishedRo
     received: plainMoment(new Date(receivedAt).toISOString()),
   }
 }
+
+/**
+ * The names a project's published pages give themselves, by id, for a screen
+ * that otherwise knows a page only by the id a signal carried.
+ *
+ * Only pages that named themselves: *Untitled page* beside an id says less
+ * than the id alone.
+ */
+export const pageNamesOf = (published: readonly PublishedPage[]): ReadonlyMap<string, string> =>
+  new Map(
+    published
+      .map(({ tree }) => pageNameOf(tree))
+      .filter((page) => page.derived)
+      .map((page) => [page.treeId, page.name] as const)
+  )

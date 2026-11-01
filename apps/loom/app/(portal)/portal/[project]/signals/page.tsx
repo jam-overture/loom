@@ -8,11 +8,13 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
+import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import { turnedAwayOf, type TurnedAway } from "@/app/(portal)/_lib/turned-away"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { boundedReaderSignalJournal, boundedReaderTallyStore } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { readWithin } from "@/app/_lib/app/bounded-store"
+import { publishedPagesFor } from "@/app/_lib/pages/store"
 import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
 /**
@@ -32,12 +34,12 @@ import { readingsFor } from "@/app/_lib/reader-signals/intake"
  * arrived, because *nothing arrived* and *everything was turned away* are the
  * two answers a person setting up their site cannot tell apart otherwise.
  *
- * ## What it does not show
- *
- * **Page names.** A customer's pages are rendered on their own site and this
- * deployment does not hold them until the read path (unit 6), so a page is
- * shown by the address its renderer gave it rather than by a name looked up
- * in a store that would be the wrong project's.
+ * **Page names** come from what the project's site published (0312): a
+ * page it published is shown by its own heading with its id beneath, and one
+ * it has not is shown by the id its renderer gave it. The names are read from
+ * this project's published pages alone, never from a store that would be the
+ * wrong project's, and a failure to read them costs the names and nothing
+ * else.
  */
 
 /** Enough to see a batch you just sent land, and no more than one bounded read returns. */
@@ -75,12 +77,28 @@ const TurnedAwayList = ({ turnedAway }: { turnedAway: TurnedAway | undefined }) 
     </section>
   )
 
+/** A page by the name it published under, with its id beneath; by its id alone otherwise. */
+const PageCell = ({ treeId, names }: { treeId: string; names: ReadonlyMap<string, string> }) => {
+  const name = names.get(treeId)
+
+  return name === undefined ? (
+    <td className="py-1.5 font-mono">{treeId}</td>
+  ) : (
+    <td className="py-1.5">
+      {name}
+      <span className="text-ink-muted block font-mono text-[11px]">{treeId}</span>
+    </td>
+  )
+}
+
 const Received = ({
   arrivals,
   turnedAway,
+  names,
 }: {
   arrivals: Arrivals
   turnedAway: TurnedAway | undefined
+  names: ReadonlyMap<string, string>
 }) => (
   <div className="flex flex-col gap-6">
     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -123,7 +141,7 @@ const Received = ({
             {arrivals.recent.map((arrival, index) => (
               <tr key={`${arrival.receivedAt}-${index}`} className="border-edge-subtle border-t">
                 <td className="py-1.5">{plainMoment(arrival.receivedAt)}</td>
-                <td className="py-1.5 font-mono">{arrival.treeId}</td>
+                <PageCell treeId={arrival.treeId} names={names} />
                 <td className="py-1.5">{arrival.revision}</td>
                 <td className="py-1.5 text-right">{arrival.signals}</td>
               </tr>
@@ -150,7 +168,7 @@ const Received = ({
           <tbody>
             {arrivals.pages.map((page) => (
               <tr key={`${page.treeId}-${page.revision}`} className="border-edge-subtle border-t">
-                <td className="py-1.5 font-mono">{page.treeId}</td>
+                <PageCell treeId={page.treeId} names={names} />
                 <td className="py-1.5">{page.revision}</td>
                 <td className="py-1.5 text-right">{page.opened.toLocaleString("en-GB")}</td>
                 <td className="py-1.5 text-right">{plainMoment(page.lastMoved)}</td>
@@ -189,9 +207,9 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
    */
   const readings = application === undefined ? undefined : readingsFor(application.applicationId)
 
-  const [rows, newest, refusals] =
-    readings === undefined
-      ? [undefined, undefined, undefined]
+  const [rows, newest, refusals, published] =
+    readings === undefined || application === undefined
+      ? [undefined, undefined, undefined, undefined]
       : await Promise.all([
           boundedReaderTallyStore(readings.tallies).pageViews(),
           boundedReaderSignalJournal(readings.journal).read({ direction: "older", limit: RECENT }),
@@ -199,9 +217,14 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
             () => readings.refusals.read(),
             (detail) => ({ code: "unavailable" as const, detail })
           ),
+          readWithin(
+            () => publishedPagesFor(application.applicationId).list(),
+            (detail) => ({ code: "unavailable" as const, detail })
+          ),
         ])
 
   const turnedAway = refusals?.ok === true ? turnedAwayOf(refusals.value) : undefined
+  const names = published?.ok === true ? pageNamesOf(published.value) : new Map<string, string>()
 
   const connect = `/portal/${projectId}/connect`
 
@@ -250,7 +273,7 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
       )
     }
 
-    return <Received arrivals={arrivals} turnedAway={turnedAway} />
+    return <Received arrivals={arrivals} turnedAway={turnedAway} names={names} />
   })()
 
   return (
