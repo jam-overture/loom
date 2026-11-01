@@ -63802,3 +63802,86 @@ draws the order should draw it through the agenda, or at minimum mark a row with
 
 **Recommendation, in order: the arrival standing, then the agenda, then
 `windowFiguresOf`.** Nothing in this lane is blocked on any of it.
+
+---
+## 2026-11-01 (evening) — the conversion arm and its input are built, and the funnel is reachable from a store for the first time
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/conversion.ts`, `src/signals/window-funnels.ts`) · **Status:**
+**closed on filing by `signals-68-the-order-the-agenda-was-silent-about`**,
+closing the 1 November entry *the deployment now says what to do about reading
+and says nothing about converting*
+
+That entry's recommendation was *take the arm and its input in one unit of work,
+or neither*, and both are in one
+([0333](decisions/0333-a-deployments-conversions-are-a-third-order-ranked-on-the-loss-between-the-two-ends.md)):
+`windowFunnelsOf` publishes a window's funnel answers off its assembly, and
+`deploymentConversionOf` ranks the pages by the readers each loses between the
+two ends of its sharpest question.
+
+**What the unit found that the entry did not predict.** The funnel answer is not
+only the one per-page reading the window rung could not be asked for — it is the
+input of a **comparison** nothing could reach either. `funnelChangeOf` takes two
+answers and the assembly publishes pairs of *readings*, so a caller comparing
+two revisions' funnels had to write the composition twice per pair. The pairs
+are published here with each side reused from the readings' own answers, which
+also makes two answers of one revision on one screen impossible.
+
+**One judgement in it that a reasonable person could make differently**, and it
+is stated in the record rather than buried: only the loss *between* the two ends
+is ranked, never the loss before the first one. The argument is that a reader who
+never reached the ask stopped reading, and the order of falls
+([0250](decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md))
+already ranks that reader — so ranking it here puts one page near the head of two
+orders for one event. If the call is wrong, the cost is a funnel whose readers
+never arrive looking healthy in this order, which `entry` on the pair already
+says out loud.
+
+---
+## 2026-11-01 (evening) — the agenda has a third order to join and a vocabulary whose four members say *page or measurement*
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`, `src/signals/health.ts`, `src/signals/conversion.ts`)
+· **Status:** open — **the stated limit of
+[0333](decisions/0333-a-deployments-conversions-are-a-third-order-ranked-on-the-loss-between-the-two-ends.md)**;
+nothing is broken, and the deployment's fix-list is still silent about
+converting
+
+`deploymentConversionOf` exists, so the half of the product that pays now has an
+order of its own. **The agenda does not take it**, which means the one call that
+answers *what should this deployment do next*
+([0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md))
+still prints `work: "none"` over a page whose pricing band every reader reaches
+and nobody buys from.
+
+**Why this was not done in the same unit, which is the part a future run should
+weigh rather than assume.** Joining it is not a third list. It is two questions
+of analysis:
+
+- **Is a conversion leak `page` work, or work of its own?** A leak is a page
+  problem rather than a measurement problem, so the cheap answer is that it
+  folds into the existing `page` member. But `AgendaWork` was written to mean
+  *rewrite the page* where the page's **reading** falls, and `both` means
+  *rewrite it and fix a fault that does not reach the fall*. A third dimension
+  gives eight combinations over a flat set of four, and renaming `both` is a
+  change to an accepted vocabulary rather than an addition to it.
+- **Does each fault reach a conversion loss?** `spoilsTheLoss` answers that for
+  a fall, fault by fault, and the answers are **not** transferable. Two examples
+  from the table: `actions-uncredited` is `no` for a fall because a fall is made
+  of `reached` — but a funnel question whose second end asks for `activated` is
+  about presses, so the same fault may well reach a conversion loss.
+  `counts-inflated` is `no` for a fall because the ranking key divides the
+  inflation out, and the conversion key divides the same inflation out of the
+  same door row, so that one does transfer. A table written by analogy rather
+  than by argument is how a fault vocabulary comes to be wrong in one of its two
+  places, which has cost this subsystem a real bug twice.
+
+**Recommendation.** Take it as its own unit, in this order: answer the fault
+question first and publish it beside the fault vocabulary as
+`spoilsTheConversion`, because that is where the existing one lives and the
+answer is a statement about a fault; then decide the vocabulary, and if `work`
+has to say three things, supersede 0330's `AgendaWork` with a new record rather
+than widening the set in place. What a run must not do is fold the conversion
+order into `page` without answering the fault question, because the row would
+then carry a `spoiled` flag that is true of one of its two orders and silent
+about the other.

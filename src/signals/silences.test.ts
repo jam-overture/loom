@@ -9,6 +9,7 @@ import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 import {
   ACTION_CHANGE_SILENCES,
   CHANGE_SILENCES,
+  CONVERSION_SILENCES,
   COPY_CHANGE_SILENCES,
   COPY_SILENCES,
   copyChangeOf,
@@ -38,6 +39,7 @@ import {
   libraryReadingOf,
   meaningOfActionChangeSilence,
   meaningOfChangeSilence,
+  meaningOfConversionSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
   meaningOfDeploymentChangeSilence,
@@ -165,6 +167,7 @@ const readingOf = (
 const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...ACTION_CHANGE_SILENCES.map(meaningOfActionChangeSilence),
   ...CHANGE_SILENCES.map(meaningOfChangeSilence),
+  ...CONVERSION_SILENCES.map(meaningOfConversionSilence),
   ...COPY_SILENCES.map(meaningOfCopySilence),
   ...COPY_CHANGE_SILENCES.map(meaningOfCopyChangeSilence),
   ...DEPLOYMENT_SILENCES.map(meaningOfDeploymentSilence),
@@ -191,6 +194,7 @@ describe("what a reading means when it says nothing", () => {
     expect(EVERY_MEANING).toHaveLength(
       ACTION_CHANGE_SILENCES.length +
         CHANGE_SILENCES.length +
+        CONVERSION_SILENCES.length +
         COPY_SILENCES.length +
         COPY_CHANGE_SILENCES.length +
         DEPLOYMENT_SILENCES.length +
@@ -324,6 +328,11 @@ describe("what a reading means when it says nothing", () => {
           FORM_COPY_SILENCES.map((of) => meaningOfFormCopySilence(of).condition),
           [],
         ],
+        [
+          "conversion",
+          CONVERSION_SILENCES.map((of) => meaningOfConversionSilence(of).condition),
+          ["questions-stale"],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -394,6 +403,7 @@ describe("what a reading means when it says nothing", () => {
     expect(SILENCE_VOCABULARIES.map((vocabulary) => SUBJECT_OF_VOCABULARY[vocabulary])).toEqual([
       "comparison",
       "comparison",
+      "page",
       "page",
       "comparison",
       "page",
