@@ -6,6 +6,18 @@ import { siteOrigin, WHY_USE_IT } from "@/app/(marketing)/_lib/site"
 import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
+/**
+ * Served per request, because the page is a stored tree the portal governs
+ * (0259). Prerendering it would read the row once at build time and serve that
+ * copy until the next deployment.
+ *
+ * Until 1 November nothing declared this: the palette's `searchParams` read
+ * here and in `generateMetadata` was the whole of why Next.js served it on
+ * demand, and removing both turns the route `○` with no test going red.
+ * `_lib/governed.ts` has the measurement and the argument; 0331 records it.
+ */
+export const dynamic = "force-dynamic"
+
 export const generateMetadata = routeMetadata(WHY_USE_IT)
 
 /**
