@@ -98,9 +98,12 @@ const PagesPage = async ({ params }: { params: Promise<{ project: string }> }) =
           {published.value.map(publishedRowOf).map((row) => (
             <tr key={row.treeId} className="border-edge-subtle border-t">
               <td className="py-1.5">
-                <span className={row.derived ? undefined : "text-ink-muted italic"}>
+                <Link
+                  href={`/portal/${projectId}/pages/${row.treeId}`}
+                  className={row.derived ? "text-ink" : "text-ink-muted italic"}
+                >
                   {row.name}
-                </span>
+                </Link>
                 <span className="text-ink-muted block font-mono text-[11px]">{row.treeId}</span>
               </td>
               <td className="py-1.5">{row.revision}</td>

@@ -1,15 +1,27 @@
 import { projectIdSchema, type Application, type ProjectId } from "@jam-overture/loom/store"
 
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
-import { actorSchema } from "@/app/(portal)/_lib/auth/accounts"
+import { actorSchema, type Actor } from "@/app/(portal)/_lib/auth/accounts"
 import { requireActor, roleOf } from "@/app/(portal)/_lib/auth/identity"
-import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
+import { mayAdminister, type Role } from "@/app/(portal)/_lib/auth/roles"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 
 /** What an owner's change on one of a project's screens says back. */
 export type ProjectReport = {
   readonly detail?: string
 }
+
+export type SiteFor =
+  | {
+      readonly ok: true
+      readonly projectId: ProjectId
+      readonly application: Application
+      /** Who is making the change, for the record of it. */
+      readonly actor: Actor
+      /** Their role in the project, for a change whose authority depends on more than the role. */
+      readonly role: Role
+    }
+  | { readonly ok: false; readonly report: ProjectReport }
 
 /**
  * The open project, and the one application in it, that an owner's change
@@ -28,12 +40,16 @@ export type ProjectReport = {
  * project, because reopening a project does not reopen what closed with it
  * (0289 clause 4).
  */
-export const ownedSite = async (
-  form: FormData
-): Promise<
-  | { readonly ok: true; readonly projectId: ProjectId; readonly application: Application }
-  | { readonly ok: false; readonly report: ProjectReport }
-> => {
+export const ownedSite = (form: FormData): Promise<SiteFor> => siteFor(form, mayAdminister)
+
+/**
+ * The same, for a change that a role other than owner may make: asking for a
+ * change to a page is open to anybody who could accept one (0329 clause 1).
+ */
+export const siteFor = async (
+  form: FormData,
+  permitted: (role: Role) => boolean
+): Promise<SiteFor> => {
   const actor = await requireActor("/portal")
   const asked = projectIdSchema.safeParse(String(form.get("projectId") ?? ""))
   const refused = {
@@ -44,9 +60,10 @@ export const ownedSite = async (
   if (!asked.success) return refused
 
   const projectId = asked.data
-  const role = await roleOf(actorSchema.parse(actor), projectId)
+  const member = actorSchema.parse(actor)
+  const role = await roleOf(member, projectId)
 
-  if (role === null || role === undefined || !mayAdminister(role)) return refused
+  if (role === null || role === undefined || !permitted(role)) return refused
 
   const [project, applications] = await Promise.all([
     portalProjects.get(projectId),
@@ -75,5 +92,5 @@ export const ownedSite = async (
     }
   }
 
-  return { ok: true, projectId, application }
+  return { ok: true, projectId, application, actor: member, role }
 }

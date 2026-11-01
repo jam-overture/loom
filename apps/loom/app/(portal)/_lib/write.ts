@@ -5,12 +5,12 @@ import {
   type EventSink,
   type StakeFactor,
 } from "@jam-overture/loom"
-import { postgresHoldStore } from "@jam-overture/loom/postgres"
+import { postgresHoldStore, postgresTreeStore } from "@jam-overture/loom/postgres"
+import { memoryTreeStore, type ApplicationId, type TreeStore } from "@jam-overture/loom/store"
 import { collectTelemetry } from "@jam-overture/loom/telemetry"
 import { memoryHoldStore, type HoldStore, type WritePath } from "@jam-overture/loom/write"
 
-import { boundedHoldStore } from "@/app/_lib/app/bounded-store"
-import { appStoreForWriting } from "@/app/_lib/app/store"
+import { boundedHoldStore, boundedTreeStore } from "@/app/_lib/app/bounded-store"
 
 import { portalDatabase } from "./database"
 import { portalInterpreter, portalRepairer } from "./interpreter"
@@ -26,27 +26,38 @@ import { telemetryForWriting } from "./telemetry"
  * it, so the enforcement is that no other module is handed the store for
  * writing.
  *
- * It takes `appStoreForWriting` rather than the handle the screens read
- * through, which is the one new thing here as of 13 October: the screens' handle
- * answers a read within a budget and that is exactly wrong inside a write.
- * `_lib/app/bounded-store.ts` has the argument.
+ * It takes the unbounded handles rather than the ones the screens read
+ * through: the screens' handles answer a read within a budget and that is
+ * exactly wrong inside a write. `_lib/app/bounded-store.ts` has the argument.
  *
  * A write is now begun rather than referenced, because the event sink is the one
  * part of it that cannot be process-wide: telemetry is collected while the change
  * is composed and written once, at the end, by a caller who can await it (0024).
- * Everything else — the store, the holds, the interpreter — is still shared.
+ *
+ * **A write is begun for one project's application** (0329 clause 3). The tree
+ * store and the hold store it writes through are scoped to that application at
+ * construction, so a proposal about one project's page cannot read, hold or
+ * append against another's by naming the wrong tree id.
  */
 
-const CARRIER_KEY = Symbol.for("loom.portal.holds")
+const CARRIER_KEY = Symbol.for("loom.portal.governed")
 
-type Carrier = { [CARRIER_KEY]?: HoldStore }
+/** One application's governed pages and the changes waiting on them. */
+type Governed = {
+  readonly trees: TreeStore
+  readonly holds: HoldStore
+}
+
+type Carrier = { [CARRIER_KEY]?: Map<ApplicationId, Governed> }
 
 const carrier = globalThis as unknown as Carrier
 
+const governed = (carrier[CARRIER_KEY] ??= new Map())
+
 /**
- * Custody of the changes the Gate would not make alone: Postgres when one is
- * configured, memory when not — the same choice, on the same handle, as the tree
- * store.
+ * One application's pages and the changes the Gate would not make alone:
+ * Postgres when one is configured, memory when not. Memoised per application
+ * for memory's sake, where a second construction is a second, empty map.
  *
  * A `Map` keeps a hold for exactly as long as the process that made it. That is
  * true durability under `pnpm dev` and a fiction on a serverless host, where the
@@ -54,14 +65,10 @@ const carrier = globalThis as unknown as Carrier
  * queue: the confirmation arrives at an instance that has never heard of the
  * proposal, and the reviewer is told `not-held` — whose own comment admits it
  * means "never held, already answered, or expired" and has no fourth reading for
- * *the machine that was holding this went away*, which is the true one.
- *
- * So the review queue — the one thing this portal shows that no repository, log
- * or build output has ever seen — was empty by construction on the deployment
- * anybody actually looks at. Filed by the framework routine on 23 August, owned
- * here because choosing a store is a deployment decision the surface makes and
- * not one the runtime should make for it (0088). No schema step: `db:push`
- * already creates `loom_holds`.
+ * *the machine that was holding this went away*, which is the true one. Choosing
+ * the store is a deployment decision the surface makes and not one the runtime
+ * should make for it (0088). No schema step: `db:push` already creates
+ * `loom_trees`, `loom_revisions` and `loom_holds`, each with its application.
  *
  * One consequence is worth stating rather than discovering. `release` is a take,
  * and with Postgres behind it that is enforced by the statement rather than by
@@ -71,19 +78,40 @@ const carrier = globalThis as unknown as Carrier
  * card is for, and why it is worded as somebody having answered rather than as
  * something having gone wrong.
  */
-export const holdsForWriting: HoldStore = (carrier[CARRIER_KEY] ??=
-  portalDatabase === undefined ? memoryHoldStore() : postgresHoldStore(portalDatabase))
+const governedFor = (application: ApplicationId): Governed => {
+  const known = governed.get(application)
+
+  if (known !== undefined) return known
+
+  const made: Governed =
+    portalDatabase === undefined
+      ? { trees: memoryTreeStore(), holds: memoryHoldStore() }
+      : {
+          trees: postgresTreeStore(portalDatabase, { application }),
+          holds: postgresHoldStore(portalDatabase, { application }),
+        }
+
+  governed.set(application, made)
+
+  return made
+}
+
+/** One project's governed pages, read with a budget, for the screens that draw them. */
+export const governedPagesFor = (application: ApplicationId): TreeStore =>
+  boundedTreeStore(governedFor(application).trees)
 
 /**
- * The same custody, read with a budget, for the screens that draw the queue.
+ * One project's held changes, read with a budget, for the screens that draw the
+ * queue.
  *
- * The write path above takes the unbounded handle and this is what a screen
- * imports — the split `_lib/app/bounded-store.ts` argues for, and the hold
- * store is where it matters most: giving up on `get` inside a `release` would
- * tell a reviewer their change was not held when it was, which is the one
- * sentence on that screen that must never be wrong.
+ * The write path takes the unbounded handle and this is what a screen imports
+ * — the split `_lib/app/bounded-store.ts` argues for, and the hold store is
+ * where it matters most: giving up on `get` inside a `release` would tell a
+ * reviewer their change was not held when it was, which is the one sentence on
+ * that screen that must never be wrong.
  */
-export const portalHolds: HoldStore = boundedHoldStore(holdsForWriting)
+export const holdsFor = (application: ApplicationId): HoldStore =>
+  boundedHoldStore(governedFor(application).holds)
 
 /**
  * Whether a change waiting for an answer outlives the process holding it.
@@ -134,7 +162,8 @@ export type PortalWrite = {
   readonly weighedAgainst: (proposalId: string) => readonly StakeFactor[]
 }
 
-export const beginWrite = (): PortalWrite => {
+export const beginWrite = (application: ApplicationId): PortalWrite => {
+  const { trees, holds } = governedFor(application)
   const collector = collectTelemetry(telemetryForWriting)
 
   /**
@@ -170,8 +199,8 @@ export const beginWrite = (): PortalWrite => {
 
   return {
     path: {
-      store: appStoreForWriting,
-      holds: holdsForWriting,
+      store: trees,
+      holds,
       runtime: {
         interpreter: portalInterpreter,
         policySource: fixedPolicy(portalPolicy),
