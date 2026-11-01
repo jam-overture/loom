@@ -647,6 +647,32 @@ deployment has been told to post, or pages are posting and you have not run this
 yet. The collector says which of its own — it reports nothing ripe rather than
 nothing at all — and `GET /api/reader-signals` answers the first two.
 
+### 10. The site's own pages — publish them to see them by name
+
+A project's *Pages* tab, and the page names on its *Signals* screen, come from
+what its site published to `/api/pages`
+([0312](../decisions/0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md)).
+Until something is published, *Signals* shows each page by its id.
+
+This deployment's own site publishes the same way a customer's build would.
+On the *Connect your site* screen of the project the site counts under (the
+one `LOOM_SITE_PROJECT` names, from step 8), an owner presses *Make a publish
+key*. The key is shown once, so copy it then. Then, from `apps/loom`:
+
+```bash
+LOOM_PUBLISH_KEY=lp_… pnpm pages:publish https://www.loomjs.org
+```
+
+It sends every page the site's code authors, and prints the deployment's
+answer: `loom: published 4 pages`, or why they were refused. Run it again
+whenever a page is added or its heading changes. A page left out of a later
+run keeps its last version rather than disappearing.
+
+The key is a secret, unlike the ingest key: anybody holding it can change what
+the portal believes your pages are. It is read from the environment so it
+stays out of your shell history. Making a new one on the same screen ends the
+old one.
+
 ### If the password leaks
 
 Rotate it in Project Settings → Database → Reset database password, then update

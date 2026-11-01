@@ -16,7 +16,8 @@
     "telemetry:prune": "pnpm --filter @jam-overture/loom build && tsx scripts/telemetry-prune.ts",
     "signals:collect": "pnpm --filter @jam-overture/loom build && tsx scripts/signals-collect.ts",
     "portal:account": "pnpm --filter @jam-overture/loom build && tsx scripts/portal-account.ts",
-    "signals:key": "pnpm --filter @jam-overture/loom build && tsx scripts/signals-key.ts"
+    "signals:key": "pnpm --filter @jam-overture/loom build && tsx scripts/signals-key.ts",
+    "pages:publish": "pnpm --filter @jam-overture/loom build && tsx scripts/pages-publish.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

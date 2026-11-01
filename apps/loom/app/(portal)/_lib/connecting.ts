@@ -1,6 +1,7 @@
 import { LOOM_TREE_ATTRIBUTE } from "@jam-overture/loom/react"
 import { DEFAULT_READER_SIGNAL_PATH } from "@jam-overture/loom/signals/broadcast"
 
+import { pagesAddress } from "@/app/_lib/pages/publish"
 import { INGEST_KEY_PARAMETER, type IngestKey } from "@/app/_lib/reader-signals/keys"
 
 /**
@@ -69,9 +70,6 @@ export const acceptedFrom = (host: string | undefined): string =>
     ? "Signals are taken from any site that sends this key, because this project names no site of its own."
     : `Signals are taken from ${host} and nowhere else — not a subdomain, not another port.`
 
-/** Where a site's build sends its pages (0312), on the deployment's own address. */
-export const PAGES_PATH = "/api/pages"
-
 /**
  * The command a build runs to hand this deployment its pages.
  *
@@ -80,7 +78,7 @@ export const PAGES_PATH = "/api/pages"
  * would be one more place it was written down.
  */
 export const publishCommandFor = (origin: string): string =>
-  `curl --fail-with-body -X POST "${origin.replace(/\/+$/u, "")}${PAGES_PATH}" \\
+  `curl --fail-with-body -X POST "${pagesAddress(origin)}" \\
   -H "authorization: Bearer $LOOM_PUBLISH_KEY" \\
   -H "content-type: application/json" \\
   --data @snapshot.json`
