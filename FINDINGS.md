@@ -63352,7 +63352,7 @@ the demo lives, and it still lives there.
 ## 2026-11-01 (evening) — the one performance fix this lane was told was its own would have frozen every marketing page, and nothing would have been red
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-**closed** by 0331 and #TBD — the guarantee is now declared and swept
+**closed** by 0331 and #742 — the guarantee is now declared and swept
 
 This corrects the last paragraph of **the 1 November library-stylesheet
 finding**, filed this morning by this same lane. That paragraph reads:
