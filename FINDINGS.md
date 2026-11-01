@@ -63346,3 +63346,103 @@ links and frames that 404. The surface should come down last.
 [0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)
 `Superseded by 0328`. It is deliberately not marked today: it is about where
 the demo lives, and it still lives there.
+
+---
+## 2026-11-01 — two readings ranked the same pages in the same unit, and the fault at the top of one was the reason the other put it there
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** **closed on filing by
+`signals-67-the-page-to-fix-or-the-measurement`**
+
+[0250](decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)
+publishes *the page to fix first* and
+[0271](decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)
+publishes *the page to look at first*, over the same window, over the same
+pages, both as headcounts at the door's scale. Nothing joined them, and the
+overlap is not a tidiness problem — it is a wrong errand, in one direction.
+
+**A tree and a window that do not belong together leave most of a page
+reporting `skipped` (0212), which is not a quiet page but a cliff.** So
+`rows-mishandled` manufactures the steepest fall in the deployment, puts the
+page at the head of the order under the sentence *this page loses more readers
+than any other*, and sends an operator to rewrite a page that is fine. A
+stalled fold does the gentler version: the fall is of one window and its scale
+of another.
+
+**The obvious fix was also wrong, and that is the part worth keeping.** *Any
+fault takes the page out of the order* is one line, and two of the seven faults
+demonstrably do not reach the ranking key — `counts-inflated` is already divided
+out of it, and `actions-uncredited` spends a counter no fall is made of. A
+reading that pulled a real fall off a screen because a page's presses are not
+credited would be a verdict worth ignoring, so the join publishes `both`
+([0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)).
+
+**The check, which is the third in a week of the same kind:** the defect was
+only visible from the line that calls both readings, and `spoilsTheLoss` is the
+rule written down once rather than twice. The double-count guard found a second
+one on its own — the join is a map and cannot hold a key twice, but the
+published orders walk the caller's own lists, so a page a caller named twice
+stood in an order twice while every count above it stayed right.
+
+---
+## 2026-11-01 — the deployment now says what to do about reading and says nothing about converting, and the funnel is the one per-page reading the window rung does not reach
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`, `src/signals/funnel.ts`) · **Status:** open — **the
+stated limit of [0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)**;
+nothing is broken and nothing is asked of anybody today
+
+`deploymentAgendaOf` answers *what should this deployment do next* out of a fall
+in reading progress and a fault in collection. **A page whose conversion
+collapsed is in neither list**: the order ranks where readers stop reading
+(0221, 0250), and a form nobody submits is not a fall between two siblings. So
+the agenda's `work: "none"` is true of a page whose pricing band every reader
+reaches and nobody buys from.
+
+**Two facts a future run should hold together before building it.**
+
+- **The unit question is the same one 0330 settled by refusing.** Readers lost
+  at a fall and conversions not made are two quantities, so a third arm cannot
+  be merged into either order — it would be a third order, with its own key.
+- **The funnel reading is the one per-page reading the window rung does not
+  reach.** `windowAssemblyOf` publishes the readings, the pairs and the two
+  libraries; a funnel is read by `funnelReachOf(reading, window.funnels,
+  window.pageViews)`, which is the only three-argument per-page reading left and
+  is **not** one of the three
+  [0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)
+  took. It is safe as written — it filters by revision, scopes by audience and
+  deduplicates its pairs itself — so this is not the hazard those three were.
+  It is a composition a conversion arm would have to write per reading.
+
+**Recommendation: take the two together or not at all.** A run that adds a
+conversion order should publish the funnel readings off the assembly in the same
+unit of work, so the arm and its input land once; a run that adds only the
+funnel join leaves the agenda still silent about the half of the product that
+pays. What a future run must not do is rank a conversion loss inside the page
+order.
+
+---
+## 2026-11-01 — the recommendation for the Signals screen has changed shape a third time, and is now two calls rather than nineteen
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**an amendment to the standing entry *nineteen runs of readings and nothing
+draws any of them*, not a new ask**
+
+The 31 October (evening) entry asked for `arrivalStandingOf` first and then
+`windowFiguresOf`. Both still stand. **What has changed is that the deployment's
+own fix-list is now one call on two readings a screen would already be holding**
+([0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)),
+and it is the reading a *Signals* page should open with once the door's standing
+is drawn: one line saying *repair this measurement* or *rewrite this page*, with
+the page named.
+
+**Why it is worth moving up the list.** Drawing
+[0250](decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)'s
+order on its own is now a known hazard rather than a thin screen: the head of it
+can be a page whose own collection fault manufactured its fall, and the sentence
+printed over it is *this page loses more readers than any other*. A screen that
+draws the order should draw it through the agenda, or at minimum mark a row with
+`spoilsTheLoss`.
+
+**Recommendation, in order: the arrival standing, then the agenda, then
+`windowFiguresOf`.** Nothing in this lane is blocked on any of it.

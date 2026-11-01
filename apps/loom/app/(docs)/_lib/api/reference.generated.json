@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5183,7 +5183,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5653,7 +5653,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6741,7 +6741,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7318,7 +7318,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7521,7 +7521,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8253,7 +8253,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8632,7 +8632,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8847,7 +8847,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 73,
+      "files": 74,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8860,7 +8860,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9004,6 +9004,49 @@
               "kind": "function",
               "signature": "const actionChangeOf: (was: PageReading, now: PageReading) => ActionChange",
               "summary": "What a change did to what readers do on a page, off two `PageReading`s and nothing else."
+            }
+          ]
+        },
+        {
+          "module": "signals/agenda",
+          "title": "Agenda",
+          "summary": "Whether the page at the head of a deployment's fix-list is a page to rewrite or a measurement to repair.",
+          "symbols": [
+            {
+              "name": "AgendaWork",
+              "kind": "type",
+              "signature": "type AgendaWork = \n/**\n * Rewrite the page: it is in the order, and nothing in its collection reaches\n * the figure that put it there.\n */\n\"page\"\n/**\n * Repair the measurement: it is faulted, and either the order never ranked it\n * or a fault reaches the loss it was ranked by.\n */\n | \"collection\"\n/**\n * Both, and in that order.\n *\n * The page is ranked, the rank is evidence, and there is also a fault on it\n * that {@link spoilsTheLoss} says does not reach the ranking key. A surface\n * may draw it in either list; it is one page and is counted once.\n */\n | \"both\"\n/**\n * Nothing either reading asks for.\n *\n * Sound collection and no fall — or no fall anybody could read, which is the\n * same row in this reading and two different sentences on it:\n * {@link AgendaRow.order}'s standing says which.\n */\n | \"none\";",
+              "summary": "What the next thing to do about one page is."
+            },
+            {
+              "name": "AGENDA_WORK",
+              "kind": "value",
+              "signature": "const AGENDA_WORK: readonly AgendaWork[]",
+              "summary": ""
+            },
+            {
+              "name": "describeAgendaWork",
+              "kind": "function",
+              "signature": "const describeAgendaWork: (work: AgendaWork) => string",
+              "summary": "One line per member, for a surface saying what a row is asking for."
+            },
+            {
+              "name": "AgendaRow",
+              "kind": "type",
+              "signature": "type AgendaRow = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the readings named none.\n     *\n     * Two forms of one page are two rows, which is what both readings under this\n     * publish and what `readingKeyOf` joins them on: the two forms' losses are\n     * losses from two populations and a join that merged them would be asking one\n     * question of two readerships.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly work: AgendaWork;\n    /**\n     * Whether a fault reaches the loss the order ranked this page by.\n     *\n     * **False on a page the order did not rank**, and that is a claim rather than\n     * a default: there is no loss on such a row to be spoiled, and `true` would\n     * read as *the figure is wrong* where the honest sentence is *there is no\n     * figure*. The standing on {@link AgendaRow.order} is where that is said.\n     */\n    readonly spoiled: boolean;\n    /** The page as the order has it, carried whole and unchanged. */\n    readonly order: RankedPage;\n    /** The page as the health reading has it, carried whole and unchanged. */\n    readonly health: PageHealth;\n};",
+              "summary": "One page of a deployment, as both readings have it."
+            },
+            {
+              "name": "DeploymentAgenda",
+              "kind": "type",
+              "signature": "type DeploymentAgenda = {\n    /**\n     * Every page both readings named, by tree id and newest revision first.\n     *\n     * The same order `CollectionHealth.pages` and an order's `unranked` are in, so\n     * a surface holding all three can draw them side by side.\n     */\n    readonly rows: readonly AgendaRow[];\n    /**\n     * Pages to rewrite, worst first, in the order's own order.\n     *\n     * {@link AgendaWork} `page` and `both`. A row's place here is the place the\n     * order gave it, unchanged — nothing is re-ranked, because the ranking\n     * rule lives in one place.\n     */\n    readonly page: readonly AgendaRow[];\n    /**\n     * Pages whose collection to repair, worst first, in the health reading's own\n     * order: the priced faults by the readers each costs, then the ones the door\n     * cannot price.\n     *\n     * {@link AgendaWork} `collection` and `both`.\n     */\n    readonly collection: readonly AgendaRow[];\n    /**\n     * Pages the order ranked and a fault spoiled — a **slice** of\n     * {@link DeploymentAgenda.collection} and not a fourth list, so nothing here\n     * is counted twice.\n     *\n     * The sharpest rows in the deployment: each one is high in a fix-list for a\n     * figure its own fault may have produced. Each carries the rank it was taken\n     * out of.\n     */\n    readonly contested: readonly AgendaRow[];\n    /**\n     * The one thing to do first, or `null` where both readings ask for nothing.\n     *\n     * A contested page before a ranked one, because while one exists the order\n     * itself is not evidence; then the head of the order, which is the order's own\n     * answer, now that it is safe to act on; then the worst fault, for a\n     * deployment with nothing ranked at all.\n     */\n    readonly first: AgendaRow | null;\n    /** How many pages ask for each kind of work, over every row. */\n    readonly work: Readonly<Record<AgendaWork, number>>;\n    /**\n     * Distinct trees across the rows, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand,\n     * as they do in both readings under this.\n     */\n    readonly trees: number;\n    /**\n     * Rows one reading named and the other did not, which is two windows handed\n     * in as one.\n     *\n     * Nought for a caller that read one window. Anything else is a caller holding\n     * an order of one and a health reading of another, and the join below it is\n     * then of the intersection — so this is published rather than refused, and it\n     * is published as two counts because which side is short says which read is\n     * the stale one.\n     */\n    readonly unpaired: {\n        /** Rows the order named that the health reading has no page for. */\n        readonly order: number;\n        /** Rows the health reading named that the order has no page for. */\n        readonly health: number;\n    };\n    /**\n     * Readings of a page beyond the first, on either side, which were dropped.\n     *\n     * A caller that concatenated two reads. Dropped rather than added, because a\n     * page twice in an order is the one way an order can lie about how much there\n     * is to fix, and a count that has been added cannot be unadded.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "A deployment's pages, in the two orders that say what to do about them."
+            },
+            {
+              "name": "deploymentAgendaOf",
+              "kind": "function",
+              "signature": "const deploymentAgendaOf: (order: DeploymentReading, health: CollectionHealth) => DeploymentAgenda",
+              "summary": "Join an order of a deployment's pages to the health of its collection, and publish the two orders that come out."
             }
           ]
         },
@@ -10300,6 +10343,12 @@
               "kind": "function",
               "signature": "const remedyOf: (fault: CollectionFault) => FaultRemedy",
               "summary": "Whose hand this fault falls to, which is the half of a fault a person acts on."
+            },
+            {
+              "name": "spoilsTheLoss",
+              "kind": "function",
+              "signature": "const spoilsTheLoss: (fault: CollectionFault) => boolean",
+              "summary": "Whether a fault reaches the figure an order of a deployment's pages is ranked on, which is readers lost at the sharpest fall, deflated to the door's scale."
             },
             {
               "name": "HealthStanding",
@@ -12717,7 +12766,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12852,7 +12901,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12914,7 +12963,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13439,7 +13488,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13509,7 +13558,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13931,7 +13980,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1835,
+        "packageNames": 1842,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
