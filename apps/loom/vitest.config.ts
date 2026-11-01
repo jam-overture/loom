@@ -32,13 +32,45 @@ const shared = {
   test: { exclude: ["node_modules", ".next"] },
 }
 
+/**
+ * The suites that open a PGlite database, by the names they all share.
+ */
+const postgres = ["**/*postgres.test.ts", "**/*.live.test.ts"]
+
 export default defineConfig({
   ...shared,
   test: {
+    /**
+     * A node file runs in a worker that has already loaded what the previous
+     * file loaded. Isolating every file meant importing the runtime and each
+     * surface's `_lib` afresh 287 times, which was most of what the node half
+     * spent: 175s of loading against 180s of testing. Those files are functions
+     * of their arguments, so a warm module cache is scenery to them.
+     *
+     * Two kinds of file keep a worker each, on the threads pool. A rendering
+     * file, because Testing Library's `screen` is bound to the document of the
+     * first file that imported it, and a document left over from another file
+     * is exactly the leak `dom-setup.ts` exists to prevent. A Postgres suite,
+     * because it sets its own timeout with `vi.setConfig`, and in Vitest 3 that
+     * only reaches the first file a worker runs. Isolation is a property of the
+     * pool rather than of the project, which is why the halves are on
+     * different pools.
+     */
+    poolOptions: { forks: { isolate: false }, threads: { isolate: true } },
     projects: [
       {
         ...shared,
-        test: { ...shared.test, name: "node", include: ["**/*.test.ts"], environment: "node" },
+        test: {
+          ...shared.test,
+          name: "node",
+          include: ["**/*.test.ts"],
+          exclude: [...shared.test.exclude, ...postgres],
+          environment: "node",
+        },
+      },
+      {
+        ...shared,
+        test: { ...shared.test, name: "postgres", include: postgres, environment: "node", pool: "threads" },
       },
       {
         ...shared,
@@ -48,6 +80,7 @@ export default defineConfig({
           name: "dom",
           include: ["**/*.test.tsx"],
           environment: "jsdom",
+          pool: "threads",
           setupFiles: ["./test/dom-setup.ts"],
         },
       },
