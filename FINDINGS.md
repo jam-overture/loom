@@ -18,7 +18,7 @@ and each surface decides when
 This answers the judgement `Loom marketing` left for this lane in
 [the 8 October entry](#2026-10-08--the-strip-above-the-page-is-answered-and-the-furniture-around-it-is-not-because-nothing-applies-the-colorscheme-that-themeground-already-computed),
 which asked where the boundary of a tree is and declined to guess. The answer is
-[0333](decisions/0333-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)
+[0334](decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)
 and it is the second of the two candidates that entry named:
 
 **The root primitive must not declare `color-scheme`, and the reason is not

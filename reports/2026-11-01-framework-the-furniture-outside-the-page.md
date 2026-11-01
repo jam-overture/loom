@@ -44,7 +44,7 @@ Every variable `themeStyle` mounts, then the ground, as a `:root` rule a host
 puts in a `<style>`. `:root` **is** the document element, which is what makes
 the declarations good.
 
-Recorded as [0333](../decisions/0333-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md).
+Recorded as [0334](../decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md).
 
 ## The picture
 
@@ -126,7 +126,7 @@ that mounts a document rule, with nothing to update anywhere.
 
 ## Records
 
-**[0333](../decisions/0333-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)** —
+**[0334](../decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)** —
 the browser's own furniture is outside the tree, so a host is handed a `:root`
 rule for its document. Accepted, §4b. Nothing superseded.
 

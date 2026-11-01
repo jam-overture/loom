@@ -1,8 +1,15 @@
-# 0333. The browser's own furniture is outside the tree, so a host is handed a `:root` rule for its document
+# 0334. The browser's own furniture is outside the tree, so a host is handed a `:root` rule for its document
 
 **Status:** Accepted
 **Date:** 2026-11-01
 **Section:** §4b
+
+> **Renumbered on 2026-11-01**, from 0333, when `main` was merged into the
+> branch that carries it (#745). `main` had meanwhile accepted a different 0333
+> — *a deployment's conversions are a third order, ranked on the loss between
+> the two ends* (#746) — and two records sharing a number is fatal (0097). This
+> record was written on 1 November and nothing in it changed but its number;
+> the references on this branch were updated with it.
 
 ## Context
 

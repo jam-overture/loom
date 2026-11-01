@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5196,7 +5196,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5666,7 +5666,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6754,7 +6754,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7331,7 +7331,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7534,7 +7534,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8266,7 +8266,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8645,7 +8645,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8860,7 +8860,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 74,
+      "files": 76,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8873,7 +8873,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9521,6 +9521,61 @@
               "kind": "function",
               "signature": "const describeCollection: (outcome: CollectionOutcome) => string",
               "summary": "One line for an operator, because an outcome nobody can read is one nobody acts on."
+            }
+          ]
+        },
+        {
+          "module": "signals/conversion",
+          "title": "Conversion",
+          "summary": "Which of a deployment's pages loses the most readers between an ask and its answer.",
+          "symbols": [
+            {
+              "name": "ConversionSilence",
+              "kind": "type",
+              "signature": "type ConversionSilence =\n/**\n * The reading holds two forms of the page and named neither, so it read\n * neither population's answers.\n *\n * Checked before everything else, because it is the cause of the noughts\n * underneath it: two forms of a page share a tree and a revision and\n * are told apart by a column, so a funnel answer handed both with\n * neither asked for reads no pair at all — which is indistinguishable from a\n * page nothing asks anything of, and would be published as one.\n *\n * The remedy is the caller's and it is the only one here that is: split the\n * window by audience and read each form on its own.\n */\n\"unsplit\"\n/**\n * There is no page-view row at the door for this revision, so its loss cannot\n * be put on the same scale as another page's.\n *\n * Not a page that was not measured. Every figure inside its funnel answer\n * stands; what is missing is the one number that makes two pages comparable.\n */\n | \"unscaled\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Either nobody read this revision, or the senders are not marking their\n * openings — and the reading publishes both counts, so the diagnosis is a\n * subtraction a surface can make.\n */\n | \"unopened\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"uncounted\"\n/**\n * Every question this revision is asked names a part it no longer has.\n *\n * Removed by a change, renamed, or moved to another tree: the counts against\n * those ends cannot move again and the noughts they report are not reader\n * facts. **The sentence a surface should print is not about readers at\n * all** — it is *re-point these questions* — which is why this is held apart\n * from a funnel nobody answered.\n *\n * Reported only where **every** question is stale. A revision with one sound\n * question and three stale ones is ranked on the sound one, with the three\n * counted on the row.\n */\n | \"stale\"\n/**\n * Nobody reached the start of any question this revision is asked.\n *\n * The questions name parts the page has and no reader has got to one of them\n * in this window. There is no conversion to lose rather than a conversion\n * everybody failed, and the two print as opposite sentences.\n */\n | \"unanswered\"\n/**\n * More readers reached its sharpest ask than have ever appeared on the page.\n *\n * No rollup produces this: a view that satisfied an end in a window is a view\n * that appeared in it. A funnel row older than the page-view column, or a\n * caller that concatenated two reads of the counters, does. The counts are\n * published and the scaled figure is withheld, because the scale is the part\n * that is not true.\n */\n | \"inconsistent\";",
+              "summary": "A reason a page's conversion loss is withheld rather than ranked."
+            },
+            {
+              "name": "CONVERSION_SILENCES",
+              "kind": "value",
+              "signature": "const CONVERSION_SILENCES: readonly ConversionSilence[]",
+              "summary": ""
+            },
+            {
+              "name": "ConversionStanding",
+              "kind": "type",
+              "signature": "type ConversionStanding = \n/** In the order, by the readers it loses between the two ends of its sharpest ask. */\n\"ranked\"\n/**\n * Every reader who reached one of its asks went on to answer it.\n *\n * The cheerful answer, and a thin window produces it as well: two readers who\n * both converted leak nobody either. The arrivals travel with the row, so the\n * two are told apart on the row rather than by this word.\n */\n | \"unleaked\"\n/**\n * Nothing asks this version of the page for anything.\n *\n * **Not a silence**, which is the distinction worth keeping: no figure is\n * being withheld, because no question was written. A deployment reading it is\n * being told that the page has no funnel to measure rather than that its\n * funnel could not be measured, and those are opposite instructions.\n */\n | \"unasked\" | ConversionSilence;",
+              "summary": "Where one page stands in the order, or why it is not in it."
+            },
+            {
+              "name": "CONVERSION_STANDINGS",
+              "kind": "value",
+              "signature": "const CONVERSION_STANDINGS: readonly ConversionStanding[]",
+              "summary": ""
+            },
+            {
+              "name": "describeConversionStanding",
+              "kind": "function",
+              "signature": "const describeConversionStanding: (standing: ConversionStanding) => string",
+              "summary": "One line per standing, for a surface naming why a page is where it is."
+            },
+            {
+              "name": "LeakingPage",
+              "kind": "type",
+              "signature": "type LeakingPage = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     *\n     * Two forms of one page stand here as two rows, as they do in the order of\n     * falls: both are live, both are asked the same question, and the two\n     * answers are of two populations. Nothing is summed across them.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: ConversionStanding;\n    /** Page views counted at the door, exact, or `null` where this revision has no row. */\n    readonly opened: number | null;\n    /** This page's own straddle rate, which is what scales its loss. */\n    readonly inflation: number | null;\n    /** How many questions this revision is asked, as the reading read them. */\n    readonly questions: number;\n    /** Of those, how many name a part this revision no longer has. */\n    readonly stalePairs: number;\n    /**\n     * The ask that loses the most readers between its two ends, carried whole and\n     * unchanged.\n     *\n     * `null` where no question of this revision could be ranked — which is every\n     * standing but `ranked`, `unleaked` and `inconsistent`.\n     */\n    readonly at: PairReach | null;\n    /** Readers lost between that ask's two ends, as the window's counters have it. */\n    readonly lost: number | null;\n    /**\n     * The same loss on the door's scale, which is the key the order is on.\n     *\n     * Not a count of people and not rounded into one. Withheld where the page has\n     * no rankable question, or no row to scale one by.\n     */\n    readonly readers: number | null;\n    /**\n     * Of the readers who reached that ask, the share that answered it, carried\n     * through from the pair unchanged.\n     *\n     * Sound without any correction, because both of its counts come off the same\n     * row — so it is published even for a page whose scaled figure is withheld as\n     * inconsistent.\n     */\n    readonly rate: number | null;\n};",
+              "summary": "One revision of one page, as the order of conversions has it."
+            },
+            {
+              "name": "DeploymentConversion",
+              "kind": "type",
+              "signature": "type DeploymentConversion = {\n    /**\n     * Every page with a leak and a scale for it, worst first.\n     *\n     * Most readers lost at the door's scale, then the worse rate, then by tree id\n     * and newest revision first — so two pages that leak the same do not reorder\n     * on a refresh.\n     */\n    readonly ranked: readonly LeakingPage[];\n    /** Every other page, by tree id and newest revision first. */\n    readonly unranked: readonly LeakingPage[];\n    /** The head of the order, which is the funnel to look at first. */\n    readonly worst: LeakingPage | null;\n    /** How many pages stand in each state, over the ranked and the unranked alike. */\n    readonly standings: Readonly<Record<ConversionStanding, number>>;\n    /**\n     * Distinct trees across every page read, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand\n     * in the order, as they do in the order of falls.\n     */\n    readonly trees: number;\n    /**\n     * Page views counted at the door across the pages handed in, added.\n     *\n     * Exact and addable, for the reason no other figure here is: a page view\n     * began on one revision of one tree and was counted once. It is a\n     * weight rather than a deployment total — this sees the pages its caller\n     * read, not the deployment's.\n     */\n    readonly arrivals: number;\n    /**\n     * Funnel questions across the pages handed in, added.\n     *\n     * A question belongs to one revision of one page in one form, so two pages'\n     * questions are two questions even where both name the same two ends: the\n     * same ask of two pages has two answers.\n     */\n    readonly questions: number;\n    /** Of those, how many name a part the revision asking them no longer has. */\n    readonly stalePairs: number;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page twice, and a page twice\n     * in an order is the one way an order can lie about how much there is to fix\n     *.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "A deployment's pages, in the order their conversions should be looked at."
+            },
+            {
+              "name": "deploymentConversionOf",
+              "kind": "function",
+              "signature": "const deploymentConversionOf: (funnels: readonly FunnelReach[]) => DeploymentConversion",
+              "summary": "A deployment's pages, in the order their funnels should be looked at."
             }
           ]
         },
@@ -12256,7 +12311,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-pace\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"conversion\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-pace\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
               "summary": "Which reading published a silence."
             },
             {
@@ -12277,9 +12332,9 @@
               "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * The two readings are of two audiences, so they are of two populations.\n *\n * The sibling of `two-pages`, and the pair is why this is its own condition.\n * Two pages make every figure absurd; two forms of one page compare cleanly\n * and carry a sentence about a readership that was varied rather than held\n * still. Reported only where both readings name an audience and the two\n * differ.\n */\n | \"two-audiences\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n *\n * A press is filed against the control and credited to the addressed ancestors\n * the signal carries, so a sender whose delegated signals have no\n * `within` adds occurrences and no reader anywhere. The counters are present\n * and look healthy; what is wrong is that every share built on them is a\n * nought that is a filing rule rather than a measurement.\n *\n * The one condition here about a **nought that is not an absence**, which is\n * why no earlier set could report it. The occurrence counts survive it intact,\n * because they are filed against the part a reader used and need no ancestry.\n */\n | \"no-action-credited\"\n/**\n * There is none of it in the pages read.\n *\n * Not a measurement that is missing: the thing being asked about is absent\n * from the library, which only a reading keyed by a vocabulary can say. A role\n * no primitive declares and a type nothing places are both this, and the\n * instruction it carries is the opposite of every other condition here —\n * there is nothing to measure rather than nothing measured.\n */\n | \"nothing-of-the-kind\"\n/**\n * It has nothing inside it, so there is nothing a reader could act in.\n *\n * A press is filed against the control and credited to the addressed\n * ancestors it happened inside, so a part with no element part under it\n * reports a nought for ever — which is the state `says-nothing` is for a\n * page's words, one counter across.\n *\n * **The second condition here about the shape of the page rather than about\n * the window**, and the pair is what makes the claim above still hold: these\n * are states of the world, and the way a new one arrives is with a reading\n * that can be in one nothing before it could. A reading of what readers *did*\n * to a **kind** of part is the first that can report it, because a kind is\n * answered over the places it stands and the question does not exist where\n * none of them has an inside.\n */\n | \"nothing-inside\"\n/**\n * Its counters are there and not one of them reports being reached.\n *\n * Readers arrived — the window holds page views — and every part of what the\n * figure is about has a row whose reach is nought. A part that reported\n * something other than coming into view is `unknown` and never `skipped`\n *, because a reader who pressed something inside a band no `viewed`\n * ever named plainly had it in front of them, and a mean taken over nought\n * reader-words would print *nobody read any of this* as a measurement.\n *\n * **The sibling of `no-action-credited`, and the pair is the reason this is\n * its own condition rather than a second spelling of `no-view-reported`.**\n * That is a nought which is a filing rule, this is a nought which is a\n * missing report, and `no-view-reported` is a nought which is a reader who\n * was not there. A deployment handed the wrong one of the three looks in the\n * wrong place: at its funnel pairs, at its senders, or at nothing, because\n * quiet traffic is not a fault.\n */\n | \"no-reach-reported\"\n…",
               "cut": {
                 "shown": 125,
-                "whole": 180,
+                "whole": 198,
                 "source": "src/signals/silences.ts",
-                "line": 430
+                "line": 434
               },
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
@@ -12426,6 +12481,12 @@
               "kind": "function",
               "signature": "const meaningOfFormCopySilence: (silence: FormCopySilence) => SilenceMeaning",
               "summary": "What a comparison of what two forms *say* reports."
+            },
+            {
+              "name": "meaningOfConversionSilence",
+              "kind": "function",
+              "signature": "const meaningOfConversionSilence: (silence: ConversionSilence) => SilenceMeaning",
+              "summary": "What an order of a deployment's conversions reports."
             },
             {
               "name": "SilenceRelation",
@@ -12768,6 +12829,31 @@
               "summary": "Read the figures a window holds about itself off one call."
             }
           ]
+        },
+        {
+          "module": "signals/window-funnels",
+          "title": "Window funnels",
+          "summary": "The one reading of a window that the assembly cannot be asked for in one call, published in one call.",
+          "symbols": [
+            {
+              "name": "FunnelPairing",
+              "kind": "type",
+              "signature": "type FunnelPairing = {\n    readonly was: FunnelReach;\n    readonly now: FunnelReach;\n};",
+              "summary": "Two revisions of one form, as their funnels answered."
+            },
+            {
+              "name": "WindowFunnels",
+              "kind": "type",
+              "signature": "type WindowFunnels = {\n    /**\n     * One answer per reading the window holds, in the readings' own order.\n     *\n     * Never two of one reading, because the readings are never two of one: the\n     * key a window is split by is the key an answer is of.\n     */\n    readonly pages: readonly FunnelReach[];\n    /**\n     * One before-and-after per form the window paired, in the pairs' own order.\n     *\n     * What a comparison of two windows' funnels takes, which could not be\n     * reached from a store before: the pairing exists and the answers it needs\n     * did not.\n     */\n    readonly pairs: readonly FunnelPairing[];\n};",
+              "summary": "A window's funnels, read against the pages and the arrivals the window holds."
+            },
+            {
+              "name": "windowFunnelsOf",
+              "kind": "function",
+              "signature": "const windowFunnelsOf: (window: ReaderWindow, assembly: WindowAssembly) => WindowFunnels",
+              "summary": "Read a window's funnels off the window and its assembly."
+            }
+          ]
         }
       ]
     },
@@ -12779,7 +12865,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -12914,7 +13000,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -12976,7 +13062,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13501,7 +13587,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13571,7 +13657,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13993,7 +14079,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1843,
+        "packageNames": 1855,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
