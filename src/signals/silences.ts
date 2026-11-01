@@ -2,6 +2,7 @@ import { everyMemberOf } from "../closed-set.js"
 
 import type { ActionChangeSilence } from "./action-change.js"
 import type { ChangeSilence } from "./change.js"
+import type { ConversionSilence } from "./conversion.js"
 import type { CopyChangeSilence } from "./copy-change.js"
 import type { CopySilence } from "./copy.js"
 import type { FormActionSilence } from "./form-action.js"
@@ -27,7 +28,7 @@ import type { ReachSilence } from "./reach.js"
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are twenty of them. Each set's names are right in its own
+ * absent, and there are twenty-two of them. Each set's names are right in its own
  * sentence, and across them they overlap in two ways that a surface drawing
  * two readings on one card has to resolve and nothing until now would resolve
  * for it.
@@ -148,6 +149,7 @@ export const describeSilenceSubject = (subject: SilenceSubject): string => {
 export type SilenceVocabulary =
   | "action-change"
   | "change"
+  | "conversion"
   | "copy"
   | "copy-change"
   | "deployment"
@@ -172,6 +174,7 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
   everyMemberOf<SilenceVocabulary>()([
     "action-change",
     "change",
+    "conversion",
     "copy",
     "copy-change",
     "deployment",
@@ -205,6 +208,7 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
   Object.freeze({
     "action-change": "comparison",
     change: "comparison",
+    conversion: "page",
     copy: "page",
     "copy-change": "comparison",
     deployment: "page",
@@ -607,6 +611,24 @@ export type SilenceCondition =
    * a caller can do to it.
    */
   | "no-audience-named"
+  /**
+   * Every question it is asked names a part the page no longer has.
+   *
+   * A funnel question is written against two node ids and the page is then
+   * revised: the parts are removed, renamed or moved to another tree, and the
+   * counts against those ends cannot move again (0212). The noughts they report
+   * are indistinguishable from a funnel readers abandon, which is why the state
+   * has to be named rather than drawn.
+   *
+   * **The second condition here about the questions a deployment wrote rather
+   * than about the deployment, the window or the shape of the page** — the
+   * first being a page nothing asks anything of, which a comparison already
+   * reports as nothing carried. Only a reading keyed by what was asked can be
+   * in either, and the instruction this one carries is the opposite of a
+   * measurement to look at: the questions are what is out of date, and
+   * re-pointing them is the whole of the remedy.
+   */
+  | "questions-stale"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -627,6 +649,7 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "two-revisions",
   "one-population",
   "no-audience-named",
+  "questions-stale",
 ])
 
 /**
@@ -675,6 +698,8 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "both readings are of one audience, so there is no second population"
     case "no-audience-named":
       return "nothing recorded which audience it was of"
+    case "questions-stale":
+      return "every question it is asked names a part the page no longer has"
   }
 }
 
@@ -1291,6 +1316,44 @@ export const meaningOfFormCopySilence = (silence: FormCopySilence): SilenceMeani
       return meaning("form-copy", "no-reach-reported")
     case "floored":
       return meaning("form-copy", "words-a-floor")
+  }
+}
+
+/**
+ * What an order of a deployment's conversions reports (0333).
+ *
+ * **The twenty-second set, and the second whose subject is what a deployment
+ * asked rather than what it measured.** Three members are the door's three
+ * (0229) at the page subject, `unsplit` is the window fault the split of two
+ * forms brought (0300), and `inconsistent` is the alarm every reading of
+ * counters against page views raises.
+ *
+ * Two are worth reading twice. `unanswered` is `no-reach-reported` said of a
+ * funnel end rather than of a part — a counter that is there and reports
+ * nobody arriving at it — and `stale` is the one condition this set brings:
+ * every question asked of a page that the page no longer has the parts for.
+ *
+ * **A page nothing asks anything of is not in this set at all.** It is a
+ * standing and not a silence: no figure is withheld, because no question was
+ * written, and the sentence is *there is nothing here to measure* rather than
+ * *this could not be measured*.
+ */
+export const meaningOfConversionSilence = (silence: ConversionSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unsplit":
+      return meaning("conversion", "two-forms-unsplit")
+    case "unscaled":
+      return meaning("conversion", "no-arrivals-counted")
+    case "unopened":
+      return meaning("conversion", "no-openings-marked")
+    case "uncounted":
+      return meaning("conversion", "no-window-folded")
+    case "stale":
+      return meaning("conversion", "questions-stale")
+    case "unanswered":
+      return meaning("conversion", "no-reach-reported")
+    case "inconsistent":
+      return meaning("conversion", "readers-above-views")
   }
 }
 

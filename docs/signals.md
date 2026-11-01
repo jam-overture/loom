@@ -4220,6 +4220,59 @@ method and no new kind.
 `Loom portal`'s and is now twenty runs old — and this reading is the one a
 *Signals* screen would open with, so it is named in the recommendation.
 
+### 68. The order the agenda was silent about · `Loom signals` · **done, 1 November**
+
+[0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)
+answered *what should this deployment do next* out of a fall in reading and a
+fault in collection, and said in its own limit what it could not answer: **a
+page whose conversion collapsed is in neither list.** A fall is between two
+siblings on the reach counter, so a pricing band every reader reaches and
+nobody buys from reads `work: "none"`. The finding filed that day named the two
+facts a run had to hold together — a conversion loss is a **third** order with
+its own key, and the funnel answer is the one per-page reading the window rung
+cannot be asked for — and recommended taking the arm and its input in one unit
+of work or neither.
+
+**Done**
+([0333](../decisions/0333-a-deployments-conversions-are-a-third-order-ranked-on-the-loss-between-the-two-ends.md)),
+as `windowFunnelsOf` in [`window-funnels.ts`](../src/signals/window-funnels.ts)
+and `deploymentConversionOf` in [`conversion.ts`](../src/signals/conversion.ts).
+
+- **Only the loss between the two ends is ranked**, and that is the whole of
+  what keeps this order from being a second spelling of
+  [0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)'s.
+  A reader who never reached the ask stopped *reading*, which is where the fall
+  already puts them; ranking that loss here would put one page near the head of
+  two orders for one event.
+- **One argument, because the funnel answer already carries the door.** The
+  order of falls takes door rows beside its readings since a reading of where
+  reading stops holds no arrivals. This one has no row set to match up wrongly.
+- **Two of the nine states that keep a page out of the order are about the
+  questions a deployment wrote** rather than about any measurement: `unasked`,
+  which is not a silence because nothing is withheld, and `stale`, where every
+  question names a part the revision no longer has. No reading before this one
+  could be in either.
+- **A pair's side is the same answer object as the reading of that form**, so a
+  screen drawing a funnel and the comparison of two revisions cannot show two
+  answers of one revision — and `funnelChangeOf` is reachable from a store for
+  the first time.
+- **The silence vocabulary has twenty-two sets** and one new condition,
+  `questions-stale`. Six of the set's seven members map onto conditions already
+  published.
+- **No deployment-wide conversion rate.** The artefact is an order; the two
+  figures that are added are arrivals and counts of questions, each addable for
+  a reason of its own.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** **the agenda does not take this order yet** —
+joining it is a third arm on a vocabulary whose four members say *page or
+measurement*, and it needs the per-fault answer `spoilsTheLoss` gives for a
+fall; and still **nothing draws any of it**, which is `Loom portal`'s and is now
+twenty-one runs old.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
