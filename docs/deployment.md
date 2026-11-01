@@ -664,7 +664,7 @@ LOOM_PUBLISH_KEY=lp_… pnpm pages:publish https://www.loomjs.org
 ```
 
 It sends every page the site's code authors, and prints the deployment's
-answer: `loom: published 4 pages`, or why they were refused. Run it again
+answer, such as `loom: published 3 pages`, or why they were refused. Run it again
 whenever a page is added or its heading changes. A page left out of a later
 run keeps its last version rather than disappearing.
 
@@ -672,6 +672,13 @@ The key is a secret, unlike the ingest key: anybody holding it can change what
 the portal believes your pages are. It is read from the environment so it
 stays out of your shell history. Making a new one on the same screen ends the
 old one.
+
+Once a page is published, an approver or owner can open it from *Pages* and
+ask for a change in plain words
+([0329](../decisions/0329-a-person-asks-for-a-change-on-a-published-page-and-it-is-governed-on-a-copy-that-starts-as-that-page.md)).
+That needs `LOOM_ANTHROPIC_API_KEY`; without it the page says so instead of
+offering the box. A change is made to Loom's copy of the page, and your site
+keeps serving what it published.
 
 ### If the password leaks
 

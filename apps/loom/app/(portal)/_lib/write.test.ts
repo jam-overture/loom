@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { portalTelemetry, telemetryForWriting } from "./telemetry"
+import { applicationIdSchema, DEFAULT_APPLICATION_ID } from "@jam-overture/loom/store"
+
 import { beginWrite } from "./write"
 
 /**
@@ -10,7 +12,7 @@ import { beginWrite } from "./write"
  */
 describe("beginWrite", () => {
   it("records what the runtime narrated, and only once the write finishes", async () => {
-    const write = beginWrite()
+    const write = beginWrite(DEFAULT_APPLICATION_ID)
     const treeId = "t_wiring"
 
     write.path.runtime.events.emit({
@@ -36,7 +38,7 @@ describe("beginWrite", () => {
    * is the event the runtime emits while it is deciding.
    */
   it("keeps what the Gate weighed, so a screen can say why and not only what", async () => {
-    const write = beginWrite()
+    const write = beginWrite(DEFAULT_APPLICATION_ID)
 
     write.path.runtime.events.emit({
       treeId: "t_weighed" as never,
@@ -66,7 +68,7 @@ describe("beginWrite", () => {
    * being told about the one that was refused.
    */
   it("keeps one write's assessments apart, so a repair's reasons are not the refusal's", async () => {
-    const write = beginWrite()
+    const write = beginWrite(DEFAULT_APPLICATION_ID)
     const assess = (proposalId: string, code: string): void => {
       write.path.runtime.events.emit({
         treeId: "t_two" as never,
@@ -98,7 +100,7 @@ describe("beginWrite", () => {
    * whether there is a disposition at all.
    */
   it("answers with nothing for a proposal it never heard about", async () => {
-    expect(beginWrite().weighedAgainst("p_never")).toEqual([])
+    expect(beginWrite(DEFAULT_APPLICATION_ID).weighedAgainst("p_never")).toEqual([])
   })
 
   /**
@@ -113,7 +115,7 @@ describe("beginWrite", () => {
    * which is the only arrangement that can tell the two orderings apart.
    */
   it("keeps the reasoning even when the journal refuses the same event", async () => {
-    const write = beginWrite()
+    const write = beginWrite(DEFAULT_APPLICATION_ID)
     /**
      * On the unbounded handle, because that is the one the write path takes as
      * of 13 October — `portalTelemetry` is the screens' handle and its reads
@@ -122,7 +124,10 @@ describe("beginWrite", () => {
      */
     const failing = vi
       .spyOn(telemetryForWriting, "record")
-      .mockResolvedValue({ ok: false, error: { code: "unavailable", detail: "no journal" } } as never)
+      .mockResolvedValue({
+        ok: false,
+        error: { code: "unavailable", detail: "no journal" },
+      } as never)
 
     write.path.runtime.events.emit({
       treeId: "t_throws" as never,
@@ -163,11 +168,21 @@ describe("beginWrite", () => {
   })
 
   it("gives each write its own sink, so one request cannot flush another's", async () => {
-    const first = beginWrite()
-    const second = beginWrite()
+    const first = beginWrite(DEFAULT_APPLICATION_ID)
+    const second = beginWrite(DEFAULT_APPLICATION_ID)
 
     expect(first.path.runtime.events).not.toBe(second.path.runtime.events)
     expect(first.path.store).toBe(second.path.store)
+  })
+
+  /** 0329 clause 3: one project's write cannot reach another's pages or holds. */
+  it("gives each project its own pages and holds, and the same ones every time", () => {
+    const shop = beginWrite(applicationIdSchema.parse("app_shop")).path
+    const blog = beginWrite(applicationIdSchema.parse("app_blog")).path
+
+    expect(shop.store).not.toBe(blog.store)
+    expect(shop.holds).not.toBe(blog.holds)
+    expect(beginWrite(applicationIdSchema.parse("app_shop")).path.store).toBe(shop.store)
   })
 })
 
@@ -184,8 +199,8 @@ describe("beginWrite", () => {
  * So the assertion is the one thing a running deployment cannot tell you: on a
  * host with a database, holds do not live in this process.
  */
-describe("portalHolds", () => {
-  const CARRIER_KEY = Symbol.for("loom.portal.holds")
+describe("holdsFor", () => {
+  const CARRIER_KEY = Symbol.for("loom.portal.governed")
 
   type Carrier = { [CARRIER_KEY]?: unknown }
 
@@ -200,6 +215,7 @@ describe("portalHolds", () => {
    * for the wrong reason in whichever direction the assertion is written.
    */
   const built: string[] = []
+  const SHOP = applicationIdSchema.parse("app_shop")
 
   const holdStoreWith = async (database: unknown): Promise<unknown> => {
     forget()
@@ -212,17 +228,19 @@ describe("portalHolds", () => {
     }))
 
     vi.doMock("@jam-overture/loom/postgres", () => ({
-      postgresHoldStore: (handle: unknown) => {
-        built.push(`holds:${String((handle as { marker?: string }).marker)}`)
+      postgresHoldStore: (handle: unknown, scope: { application?: string }) => {
+        built.push(
+          `holds:${String((handle as { marker?: string }).marker)}:${String(scope.application)}`
+        )
 
         return { hold: () => {}, get: () => {}, forTree: () => {}, release: () => {} }
       },
       postgresTreeStore: () => ({ create: () => Promise.resolve(undefined) }),
     }))
 
-    const { portalHolds } = await import("./write")
+    const { holdsFor } = await import("./write")
 
-    return portalHolds
+    return holdsFor(SHOP)
   }
 
   beforeEach(forget)
@@ -237,7 +255,7 @@ describe("portalHolds", () => {
   it("keeps holds in the database when this deployment has one", async () => {
     await holdStoreWith({ marker: "a database handle" })
 
-    expect(built).toEqual(["holds:a database handle"])
+    expect(built).toEqual(["holds:a database handle:app_shop"])
   })
 
   /**
