@@ -3,55 +3,49 @@ import { drizzle, type PgliteDatabase } from "drizzle-orm/pglite"
 import { onTestFinished } from "vitest"
 
 /**
- * A fresh PGlite for every test, without paying for a fresh PGlite every test.
+ * A fresh database for every test, without paying for a fresh PGlite every test.
  *
- * PGlite is Postgres compiled to WebAssembly, and the Postgres suites booted
- * one per test and migrated it: some five hundred boots, three quarters of what
- * `pnpm verify` spent in tests on 24 October 2026. Starting a database from a
- * data directory that has already been prepared is several times cheaper, and
- * it is still a separate database: nothing one test writes reaches the next,
- * which is the isolation the per-test boot was for.
+ * PGlite is Postgres compiled to WebAssembly, and the Postgres suites booted and
+ * migrated one per test and never closed it: some five hundred boots at one to
+ * three seconds each, three quarters of what `pnpm verify` spent in tests on
+ * 24 October 2026. Emptying a database that is already up and migrating it
+ * again costs tens of milliseconds.
  *
- * So a suite names how its database is prepared, once. The first call runs
- * those steps on a database of its own and dumps its data directory; every call
- * then starts a new database from that dump. Nothing is booted until a test
- * asks, so a step that fails fails the test that asked.
+ * So a suite names how its database is prepared, once, and each call hands the
+ * test a PGlite on which `public` has just been dropped, recreated and
+ * prepared. Every table, row, index, sequence and row-security setting a test
+ * can see lives in `public`, so nothing one test wrote is there for the next,
+ * which is the isolation the per-test boot was for. Nothing in this repository
+ * creates roles, extensions or schemas of its own; one that did would want
+ * resetting here too.
  *
- * Each database is closed when the test that asked for it finishes. The suites
- * never closed theirs, and every open one is a WebAssembly heap the next boot
- * competes with: boots got steadily slower within a file while they were left
- * open. That makes this callable only from inside a running test, which is
- * where every suite already calls it.
+ * The PGlite goes back to the template when the test that asked for it
+ * finishes, so a test that asks twice gets two separate databases, and the
+ * next test reuses both. That makes this callable only from inside a running
+ * test, which is where every suite calls it.
  *
- * With no steps the template is an empty database — for the suites that
- * create an older schema by hand before migrating it.
+ * With no steps the database is empty — for the suites that create an older
+ * schema by hand before migrating it.
  */
 
 export type Preparation = (db: PgliteDatabase) => Promise<void>
 
-/** The prepared database, dumped once; the instance that produced it is not kept. */
-const prepared = async (steps: readonly Preparation[]): Promise<Blob> => {
-  const pg = await PGlite.create()
-  const db = drizzle(pg)
-
-  for (const step of steps) await step(db)
-
-  const dump = await pg.dumpDataDir("none")
-  await pg.close()
-
-  return dump
-}
-
 export const pgliteTemplate = (...steps: readonly Preparation[]): (() => Promise<PgliteDatabase>) => {
-  let template: Promise<Blob> | undefined
+  const idle: PGlite[] = []
 
   return async () => {
-    template ??= prepared(steps)
+    const pg = idle.pop() ?? (await PGlite.create())
 
-    const pg = await PGlite.create({ loadDataDir: await template })
+    onTestFinished(() => {
+      idle.push(pg)
+    })
 
-    onTestFinished(() => pg.close())
+    await pg.exec("DROP SCHEMA public CASCADE; CREATE SCHEMA public")
 
-    return drizzle(pg)
+    const db = drizzle(pg)
+
+    for (const step of steps) await step(db)
+
+    return db
   }
 }

@@ -13,18 +13,13 @@ const createNotes = async (db: PgliteDatabase): Promise<void> => {
 const bodies = async (db: PgliteDatabase): Promise<readonly unknown[]> =>
   (await db.execute(sql`SELECT body FROM notes ORDER BY body`)).rows.map((row) => row["body"])
 
+const tablesIn = async (db: PgliteDatabase): Promise<readonly unknown[]> =>
+  (await db.execute(sql`SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename`)).rows.map(
+    (row) => row["tablename"]
+  )
+
 describe("pgliteTemplate", () => {
-  it("runs the steps once, however many databases are asked for", async () => {
-    const step = vi.fn(createNotes)
-    const database = pgliteTemplate(step)
-
-    await database()
-    await database()
-
-    expect(step).toHaveBeenCalledOnce()
-  })
-
-  it("gives back a database the steps have already run on, in order", async () => {
+  it("hands out a database the steps have already run on, in order", async () => {
     const database = pgliteTemplate(createNotes, async (db) => {
       await db.execute(sql`INSERT INTO notes (body) VALUES ('seeded')`)
     })
@@ -32,7 +27,19 @@ describe("pgliteTemplate", () => {
     expect(await bodies(await database())).toEqual(["seeded"])
   })
 
-  it("keeps what one database is given out of the next", async () => {
+  it("starts from an empty database when given no steps", async () => {
+    expect(await tablesIn(await pgliteTemplate()())).toEqual([])
+  })
+
+  it("runs nothing until a test asks", () => {
+    const step = vi.fn(createNotes)
+
+    pgliteTemplate(step)
+
+    expect(step).not.toHaveBeenCalled()
+  })
+
+  it("gives a test that asks twice two databases, not one", async () => {
     const database = pgliteTemplate(createNotes)
     const first = await database()
     const second = await database()
@@ -41,24 +48,25 @@ describe("pgliteTemplate", () => {
 
     expect(await bodies(first)).toEqual(["first"])
     expect(await bodies(second)).toEqual([])
-    expect(await bodies(await database())).toEqual([])
   })
 
-  it("boots nothing until a database is asked for", () => {
-    const step = vi.fn(createNotes)
+  describe("across tests that share a template", () => {
+    const database = pgliteTemplate(createNotes)
 
-    pgliteTemplate(step)
+    it("lets one test write rows and tables", async () => {
+      const db = await database()
 
-    expect(step).not.toHaveBeenCalled()
-  })
+      await db.execute(sql`INSERT INTO notes (body) VALUES ('left behind')`)
+      await db.execute(sql`CREATE TABLE stray (id integer)`)
 
-  it("starts from an empty database when given no steps", async () => {
-    const db = await pgliteTemplate()()
+      expect(await tablesIn(db)).toEqual(["notes", "stray"])
+    })
 
-    const tables = await db.execute(
-      sql`SELECT count(*)::int AS n FROM pg_tables WHERE schemaname = 'public'`
-    )
+    it("hands the next test none of it", async () => {
+      const db = await database()
 
-    expect(tables.rows[0]?.["n"]).toBe(0)
+      expect(await tablesIn(db)).toEqual(["notes"])
+      expect(await bodies(db)).toEqual([])
+    })
   })
 })
