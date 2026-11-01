@@ -6,44 +6,45 @@ import { DEFAULT_APPLICATION_ID, projectIdSchema } from "@jam-overture/loom/stor
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
-import { mayAsk } from "@/app/(portal)/_lib/asking"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { isInterpreterConfigured } from "@/app/(portal)/_lib/interpreter"
+import { mayPropose } from "@/app/(portal)/_lib/proposing/report"
 import { publishedRowOf } from "@/app/(portal)/_lib/published-view"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { absent, readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
+import { modelKeyOf } from "@/app/_lib/models/store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
-import { AskForm } from "./_components/ask-form"
+import { LookForm } from "./_components/look-form"
 
 /**
- * One published page, and the place to ask for a change to it (0329).
+ * One published page, and what Loom proposes for it (0329).
  *
  * It says two versions because there are two: the one the site last
  * published, and the one Loom's copy of the page has reached through the
- * changes asked for here. They start equal and part when a change is made,
+ * changes proposed for it. They start equal and part when a change is made,
  * and until unit 8 turns an accepted change into a pull request, the site
  * keeps serving the published one.
  *
- * The request box is offered only where it can be answered: to a role that
- * could accept a change, on an open project, on a deployment with a model.
- * Each of the others is said, so nobody types a request that goes nowhere.
+ * Loom looks at every page once a day by itself. *Look now* is offered only
+ * where it can run: to a role that could accept a change, on an open project
+ * with a model key of its own (0332). Each of the others is said, so nobody
+ * presses a button that goes nowhere.
  */
 /**
  * Where Loom's copy stands against what the site published. This
  * deployment's own site serves its copy (0259), so there a change is live;
- * every other site keeps serving what it published (0329 clause 6).
+ * every other site keeps serving what it published (0329 clause 7).
  */
 const copyStanding = (copied: number | undefined, published: number, servesCopy: boolean) => {
-  if (copied === undefined) return "Nothing has been asked of this page yet."
-  if (copied === published) return "Nothing asked for here has changed it yet."
+  if (copied === undefined) return "Loom has not proposed anything for this page yet."
+  if (copied === published) return "Nothing Loom proposed has changed it yet."
 
   return servesCopy
-    ? `Changes asked for here have taken it to version ${copied}, and this deployment's own site serves that version.`
-    : `Changes asked for here have taken Loom's copy to version ${copied}. Your site still serves the published one.`
+    ? `Changes Loom proposed have taken it to version ${copied}, and this deployment's own site serves that version.`
+    : `Changes Loom proposed have taken its copy to version ${copied}. Your site still serves the published one.`
 }
 
 const PageScreen = async ({ params }: { params: Promise<{ project: string; tree: string }> }) => {
@@ -67,9 +68,9 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const [published, copy] =
+  const [published, copy, key] =
     application === undefined
-      ? [undefined, undefined]
+      ? [undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => publishedPagesFor(application.applicationId).list(),
@@ -77,6 +78,7 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
             PORTAL_READ_BUDGET_MS
           ),
           governedPagesFor(application.applicationId).head(treeId.data),
+          modelKeyOf(application.applicationId),
         ])
 
   if (
@@ -104,33 +106,49 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
   const row = publishedRowOf(page)
   const closed = project.value.closedAt !== undefined || application.closedAt !== undefined
 
-  const asking = (() => {
+  const looking = (() => {
     if (closed) {
       return (
         <p className="text-ink-muted text-xs">
-          This project is closed, so nothing can be asked of its pages. Reopen it in Settings.
+          This project is closed, so Loom proposes nothing for its pages. Reopen it in Settings.
         </p>
       )
     }
 
-    if (!mayAsk(role)) {
+    if (key === undefined || !key.ok) {
       return (
         <p className="text-ink-muted text-xs">
-          You can read this page. Asking for a change is for an approver or an owner of the project.
+          The store did not say whether this project has a model key. Try again in a moment.
         </p>
       )
     }
 
-    if (!isInterpreterConfigured) {
+    if (key.value.kind !== "set") {
       return (
         <p className="text-ink-muted text-xs">
-          This deployment has no model to work out a change, so nothing can be asked yet. Whoever
-          runs it sets LOOM_ANTHROPIC_API_KEY.
+          {key.value.kind === "none"
+            ? "Loom proposes changes with the project's own Anthropic key, and this project has none yet."
+            : "This project's model key can no longer be read, so it has to be set again."}{" "}
+          <Link href={`/portal/${projectId}/settings`}>An owner sets it in Settings.</Link>
         </p>
       )
     }
 
-    return <AskForm projectId={projectId} treeId={row.treeId} />
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-ink-muted text-xs">
+          Once a day Loom reads what readers did on this page and, when the figures support it,
+          proposes one change. A change it may not make alone waits under Waiting.
+        </p>
+        {mayPropose(role) ? (
+          <LookForm projectId={projectId} treeId={row.treeId} />
+        ) : (
+          <p className="text-ink-muted text-xs">
+            An approver or an owner can also have it look now.
+          </p>
+        )}
+      </div>
+    )
   })()
 
   return (
@@ -162,8 +180,8 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
       </section>
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
-        <h2 className="text-sm font-medium tracking-tight">Ask for a change</h2>
-        {asking}
+        <h2 className="text-sm font-medium tracking-tight">What Loom proposes</h2>
+        {looking}
       </section>
     </Screen>
   )

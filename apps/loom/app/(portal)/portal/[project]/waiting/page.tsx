@@ -18,10 +18,10 @@ import { publishedPagesFor } from "@/app/_lib/pages/store"
 import { AnswerControls } from "./_components/answer-controls"
 
 /**
- * *Waiting*: the changes asked of this project's pages that the Gate would
- * not make alone (0329) — unit 7's queue.
+ * *Waiting*: the changes proposed for this project's pages that the Gate
+ * would not make alone (0329) — unit 7's queue.
  *
- * Each says what was asked, of which page, by whom, why it stopped and how
+ * Each says what was proposed and why, of which page, by whom, why it stopped and how
  * much is at stake, and offers *Accept* and *Turn down* to a person whose
  * role may accept a change of that stake. Anybody else is told which role can.
  *
@@ -93,7 +93,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
             </Link>
           }
         >
-          A change asked of one of your pages waits here when it needs a person to say yes.
+          A change Loom proposes for one of your pages waits here when it needs a person to say yes.
         </StateNotice>
       )
     }
@@ -125,7 +125,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
               </div>
               <p className="m-0 text-sm">&ldquo;{row.asked}&rdquo;</p>
               {row.askedBy === null ? null : (
-                <p className="text-ink-muted m-0 text-xs">Asked by {row.askedBy}</p>
+                <p className="text-ink-muted m-0 text-xs">Proposed by {row.askedBy}</p>
               )}
               <p className="text-ink-secondary m-0 text-xs">{row.why}</p>
               <p className="text-ink-muted m-0 text-xs">

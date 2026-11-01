@@ -43,8 +43,9 @@ export type SiteFor =
 export const ownedSite = (form: FormData): Promise<SiteFor> => siteFor(form, mayAdminister)
 
 /**
- * The same, for a change that a role other than owner may make: asking for a
- * change to a page is open to anybody who could accept one (0329 clause 1).
+ * The same, for a change that a role other than owner may make: setting the AI
+ * looking at a page, or answering a held change, is open to anybody who could
+ * accept one (0329).
  */
 export const siteFor = async (
   form: FormData,

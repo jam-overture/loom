@@ -3,9 +3,9 @@
 import { proposalIdSchema } from "@jam-overture/loom"
 import { confirmHeld, discardHeld } from "@jam-overture/loom/write"
 
-import { askedReport, mayAsk } from "@/app/(portal)/_lib/asking"
 import { mayAccept } from "@/app/(portal)/_lib/auth/roles"
 import { reportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"
+import { mayPropose, siteReport } from "@/app/(portal)/_lib/proposing/report"
 import { plainState } from "@/app/(portal)/_lib/vocabulary"
 import { beginWrite } from "@/app/(portal)/_lib/write"
 
@@ -40,7 +40,7 @@ export const answerAction = async (
   _previous: AnswerReport | null,
   form: FormData
 ): Promise<AnswerReport> => {
-  const site = await siteFor(form, mayAsk)
+  const site = await siteFor(form, mayPropose)
 
   if (!site.ok) return { refusal: site.report.detail ?? "That is not a project you can change." }
 
@@ -83,6 +83,6 @@ export const answerAction = async (
   await write.finish()
 
   return {
-    report: askedReport(reportOf(outcome, write.weighedAgainst), site.application.applicationId),
+    report: siteReport(reportOf(outcome, write.weighedAgainst), site.application.applicationId),
   }
 }

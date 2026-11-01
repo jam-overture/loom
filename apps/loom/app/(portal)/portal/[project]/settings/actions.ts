@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 
 import { readRename, type NamingFault } from "@/app/(portal)/_lib/registering"
 import { portalApplicationsForWriting, portalProjectsForWriting } from "@/app/(portal)/_lib/store"
+import { readModelKey } from "@/app/_lib/models/model-keys"
+import { removeModelKey, setModelKey } from "@/app/_lib/models/store"
 
 import { ownedSite } from "../_lib/owned-site"
 
@@ -60,4 +62,53 @@ export const saveSettingsAction = async (
   revalidatePath("/portal", "layout")
 
   return { faults: [] }
+}
+
+export type ModelKeyReport = {
+  readonly fault?: string
+  readonly saved?: boolean
+}
+
+/**
+ * An owner setting the project's own Anthropic key, which every model call
+ * made for this project is paid with (0332). Sealed before it is stored, and
+ * never shown again beyond its last four characters.
+ */
+export const saveModelKeyAction = async (
+  _previous: ModelKeyReport | null,
+  form: FormData
+): Promise<ModelKeyReport> => {
+  const site = await ownedSite(form)
+
+  if (!site.ok) return { fault: site.report.detail ?? "That is not a project you can change." }
+
+  const key = readModelKey(form.get("key"))
+
+  if (!key.ok) return { fault: key.error }
+
+  const kept = await setModelKey(site.application.applicationId, key.value, Date.now())
+
+  if (!kept.ok) return { fault: "The key could not be kept, so nothing changed. Try again." }
+
+  revalidatePath(`/portal/${site.projectId}`, "layout")
+
+  return { saved: true }
+}
+
+/** An owner removing the project's key, after which Loom proposes nothing for it. */
+export const removeModelKeyAction = async (
+  _previous: ModelKeyReport | null,
+  form: FormData
+): Promise<ModelKeyReport> => {
+  const site = await ownedSite(form)
+
+  if (!site.ok) return { fault: site.report.detail ?? "That is not a project you can change." }
+
+  const removed = await removeModelKey(site.application.applicationId)
+
+  if (!removed.ok) return { fault: "The key could not be removed. Try again." }
+
+  revalidatePath(`/portal/${site.projectId}`, "layout")
+
+  return {}
 }

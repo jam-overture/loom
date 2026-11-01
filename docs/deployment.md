@@ -167,13 +167,14 @@ itself, in the format a machine reads as fact, as this product.
 
 ## Environment
 
-`apps/loom/.env.example` is the full list with the commentary. Ten variables,
+`apps/loom/.env.example` is the full list with the commentary. Eleven variables,
 **one** of which is required:
 
 | Variable                         | Required | Notes                                   |
 | -------------------------------- | -------- | --------------------------------------- |
 | `LOOM_PORTAL_SESSION_SECRET`     | **yes**  | Signs sessions. ≥ 32 chars              |
-| `LOOM_ANTHROPIC_API_KEY`         | no       | Falls back to `ANTHROPIC_API_KEY`       |
+| `LOOM_ANTHROPIC_API_KEY`         | no       | The demo's and the docs' model. Falls back to `ANTHROPIC_API_KEY`. Projects use their own key |
+| `CRON_SECRET`                    | for proposals | Lets Vercel's daily schedule start Loom's proposals. See [The site's own pages](#10-the-sites-own-pages--publish-them-to-see-them-by-name) |
 | `DATABASE_URL`                   | no       | Absent means memory — see below         |
 | `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
 | `LOOM_SITE_ORIGIN`               | in production | The domain, pinned. See [The domain](#the-domain-and-going-public) |
@@ -673,12 +674,27 @@ the portal believes your pages are. It is read from the environment so it
 stays out of your shell history. Making a new one on the same screen ends the
 old one.
 
-Once a page is published, an approver or owner can open it from *Pages* and
-ask for a change in plain words
-([0329](../decisions/0329-a-person-asks-for-a-change-on-a-published-page-and-it-is-governed-on-a-copy-that-starts-as-that-page.md)).
-That needs `LOOM_ANTHROPIC_API_KEY`; without it the page says so instead of
-offering the box. A change is made to Loom's copy of the page, and your site
-keeps serving what it published.
+Once a page is published and readers have arrived on it, Loom proposes
+changes to it by itself
+([0329](../decisions/0329-loom-proposes-changes-to-a-published-page-from-what-its-readers-did-on-a-copy-that-starts-as-that-page.md)):
+once a day it reads what readers did on each page and, when the figures
+support one, raises a change. A change it may not make alone waits on the
+project's *Waiting* tab for an approver or owner. An approver or owner can also
+press *Look now* on a page. A change is made to Loom's copy of the page, and
+your site keeps serving what it published.
+
+Two things have to be in place:
+
+- **The project's own Anthropic key.** An owner sets it on the project's
+  *Settings* ([0332](../decisions/0332-every-model-call-for-a-project-is-paid-with-that-projects-own-key-kept-sealed.md)).
+  Every model call for the project is paid with it, and a project without one
+  has nothing proposed. The deployment's `LOOM_ANTHROPIC_API_KEY` is never used
+  for a project. The key is sealed under `LOOM_PORTAL_SESSION_SECRET`, so
+  replacing that secret means each owner sets their key again.
+- **`CRON_SECRET`** on Vercel, any random string of 16 characters or more
+  (`openssl rand -hex 32`). The daily run is scheduled in `apps/loom/vercel.json`
+  and Vercel sends this secret with it; without it `/api/proposals` refuses to
+  run, so nobody else can spend your projects' keys by calling it.
 
 ### If the password leaks
 

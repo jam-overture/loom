@@ -13,7 +13,7 @@ import { memoryHoldStore, type HoldStore, type WritePath } from "@jam-overture/l
 import { boundedHoldStore, boundedTreeStore } from "@/app/_lib/app/bounded-store"
 
 import { portalDatabase } from "./database"
-import { portalInterpreter, portalRepairer } from "./interpreter"
+import { noInterpreter, type ProjectModel } from "./interpreter"
 import { portalPolicy, portalPropsVocabulary } from "./policy"
 import { telemetryForWriting } from "./telemetry"
 
@@ -162,7 +162,14 @@ export type PortalWrite = {
   readonly weighedAgainst: (proposalId: string) => readonly StakeFactor[]
 }
 
-export const beginWrite = (application: ApplicationId): PortalWrite => {
+/**
+ * Begin a write for one project's application.
+ *
+ * `model` is that project's own (0332), handed in by the caller that read its
+ * key. A write that composes nothing — answering a held change — is begun
+ * without one and spends nobody's key.
+ */
+export const beginWrite = (application: ApplicationId, model?: ProjectModel): PortalWrite => {
   const { trees, holds } = governedFor(application)
   const collector = collectTelemetry(telemetryForWriting)
 
@@ -202,7 +209,7 @@ export const beginWrite = (application: ApplicationId): PortalWrite => {
       store: trees,
       holds,
       runtime: {
-        interpreter: portalInterpreter,
+        interpreter: model?.interpreter ?? noInterpreter,
         policySource: fixedPolicy(portalPolicy),
         events: sink,
         clock: systemClock,
@@ -219,7 +226,7 @@ export const beginWrite = (application: ApplicationId): PortalWrite => {
          * is one of them.
          */
         ...(portalPropsVocabulary ? { propsVocabulary: portalPropsVocabulary } : {}),
-        ...(portalRepairer ? { repairer: portalRepairer } : {}),
+        ...(model ? { repairer: model.repairer } : {}),
       },
     },
     finish: async () => {
