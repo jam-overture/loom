@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata, Viewport } from "next"
 import Link from "next/link"
 import type { ReactNode } from "react"
@@ -88,6 +89,7 @@ const LessonsLayout = ({ children }: { readonly children: ReactNode }) => (
           {children}
         </ProgressProvider>
       </div>
+      <SpeedInsights />
     </body>
   </html>
 )

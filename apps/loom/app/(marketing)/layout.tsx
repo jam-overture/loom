@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 
@@ -58,8 +59,8 @@ export const metadata: Metadata = {
 const GEIST = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap"
 
 /**
- * The one thing this layout mounts, and the only code of this site that runs in
- * a browser.
+ * The one thing this layout mounts besides Vercel Speed Insights, and the only
+ * code of this site's own that runs in a browser.
  *
  * It is here rather than on a page because a broadcaster's subject is *a
  * visit*, not a page: it is started once against the tree the document
@@ -97,6 +98,7 @@ const RootLayout = async ({ children }: { readonly children: ReactNode }) => {
       <body>
         {children}
         {url === null ? null : <CountReaders url={url} />}
+        <SpeedInsights />
       </body>
     </html>
   )
