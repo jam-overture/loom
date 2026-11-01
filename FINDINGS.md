@@ -63346,3 +63346,142 @@ links and frames that 404. The surface should come down last.
 [0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)
 `Superseded by 0328`. It is deliberately not marked today: it is about where
 the demo lives, and it still lives there.
+
+---
+## 2026-11-01 — there is a cap on how long one signature may be and none on how many go on a page, and one address sends more than the whole search corpus
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/weight.ts`) · **Status:** **closed on filing by
+`docs-73-what-a-page-costs`** — both caps exist now; what stays open is the
+number the generated one is a trigger for, and the entry below carries it
+
+`api/extract.ts` carries `SIGNATURE_CAP = 6000` and the reason it gives is a
+reader: a declaration that ran to a screen and a half is cut, and the page says
+how much it kept. **Nothing capped how many of them go on one page.** Six
+symbols in the whole reference are cut by the per-symbol rule;
+`/docs/api-reference/signals` renders five hundred and sixty-eight uncut ones.
+
+This surface holds **five caps on what the search box sends** — the largest of
+them 80,000 compressed bytes for the prose of all thirty-five written pages at
+once — and **no number at all on a page.**
+
+### What a page of this site actually weighs
+
+Measured against a production build in this container, served locally.
+
+| page | HTML | gzipped |
+| --- | --- | --- |
+| `/docs/api-reference/signals` | **1,914,446** | **308,898** |
+| `/docs/api-reference/runtime` | 1,428,536 | 160,113 |
+| `/docs/building-with-loom/theming` | 537,630 | 104,795 |
+| `/docs` | 35,749 | — |
+| *the whole site's search prose, capped at* | — | *80,000* |
+
+**One address sends a reader almost four times the entire search corpus,
+compressed, before they have typed anything.**
+
+### Where the bytes are, which is not where anybody would guess
+
+`weight.ts` counts the text a page renders, off the same sources the pages read.
+
+| | pages | prose | code | total |
+| --- | --- | --- | --- | --- |
+| written | 35 | 208,399 | 29,734 | **238,133** |
+| generated | 18 | 26,777 | 812,665 | **839,442** |
+
+- **`/docs/api-reference/signals` is 452,513 bytes of text on its own — 1.9
+  times all thirty-five written pages put together.**
+- **1,924 bytes of it are prose. 450,589 are signatures.** The heaviest page on
+  this documentation site is **99.6% a thing nobody here wrote**, and no editing
+  on this surface moves it.
+- It is not that signals publishes the most names. `runtime` publishes **600**
+  symbols to signals' 568 and weighs 135,722 bytes, because its declarations
+  average 166 bytes and signals' average 733.
+
+### What shipped
+
+Two caps, and the split is the one the names cap already settled.
+
+**`WRITTEN_PAGE_CAP = 24_000` is this lane's in both directions.** It moves when
+somebody writes a long page here and this surface is the one that would raise
+it. Today's heaviest written page is *Where the content comes from* at 19,255.
+
+**`GENERATED_PAGE_CAP = 600_000` is a trigger and nothing else** — this lane's
+number about another lane's growth, in the shape `search/build.test.ts` names.
+Its comment says the remedy rather than the number: when it fires, cut the page
+along the line it grows on. A reference page is already fifty-four groups with
+a heading each, the groups are modules rather than an invented grouping, and the
+browser already knows which group a reader is on — the same two sentences that
+made the contents file and the words file shard.
+
+### The part worth keeping
+
+**The per-symbol cap reads like a bound on a page and is not one.** 568 × 6,000
+is 3.4MB, five and a half times the cap now held, and the test asserts that
+rather than arguing it: a run that lowered `SIGNATURE_CAP` far enough to make
+the page cap redundant would make the suite say so.
+
+---
+## 2026-11-01 — `weight.ts` counts bytes rather than characters and nothing would notice if it stopped
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/weight.ts`) · **Status:** open — **a mutation that
+did not kill**; nothing is broken and no test is failing
+
+`bytes()` encodes before it counts, for the reason `search/build.test.ts`
+records learning on 21 September: `"…".length` is 1 and what goes down the wire
+is 3, and this site's prose is full of ellipses, em-dashes and curly quotes.
+
+**Replacing it with `text.length` fails nothing.** The seventh mutation this run
+applied did exactly that and all fifteen tests passed. What it changes:
+
+| | bytes | characters | kinder by |
+| --- | --- | --- | --- |
+| heaviest written page | 19,255 | 19,119 | 0.7% |
+| heaviest generated page | 452,513 | 451,657 | 0.2% |
+| every written page | 238,133 | 236,304 | 0.8% |
+
+**The reason it cannot be killed by a cap is the reason it does not matter
+much**: no cap here sits within 1% of its number, by design, and a cap that did
+would be a cap that fires on the next sentence somebody writes. The honest
+remedy is a test over `bytes()` itself with a string whose two counts differ,
+and it was not written because a one-line test of a one-line function is the
+kind of coverage that reads as diligence and holds nothing — the function would
+have to be *called* wrongly for the site's numbers to move, which is what the
+mutation shows nothing sees.
+
+**Recommendation: leave it, and know the number is a 0.8% underestimate if the
+spelling ever drifts.** Recorded rather than fixed so that the next run reading
+`bytes()` and wondering whether anything holds it finds the answer.
+
+---
+## 2026-11-01 — the demo removal lists a `(docs)` row that points at a fictional origin, and the one real row must come after the deletion rather than before it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom demo` / `Loom daily build` ·
+**Status:** open — **a correction to the 31 October entry's order, not new
+work**; nothing is blocked on this lane
+
+The 31 October entry *the maintainer asked for the demo and the how-it-works
+page to go* lists two `(docs)` files under *order matters*, with the reasoning
+that they point at `/demo` and would frame or link a 404 once the surface is
+deleted. Checked this run, both halves of that are wrong in opposite
+directions.
+
+**`(docs)/_lib/reporting/catalogue.ts` is not a prerequisite.** Its one `/demo`
+is `${SELF_ORIGIN}/demo` where `SELF_ORIGIN` is `"https://loom.example"` — a
+made-up origin the reporting bench uses to demonstrate *a frame from your own
+origin, whose sandbox grants it nothing*. It has never pointed at this
+deployment and cannot 404 for a reader. Nothing has to change before the route
+group comes down. (Its `title: "Our own demo"` reads a little stale afterwards,
+which is a sentence and not an order dependency.)
+
+**`(docs)/_lib/surfaces.ts` must come *after*, not before.** `surfaces.test.ts`
+derives the expected list from `readdirSync(apps/loom/app/)` on every run, so
+removing `/demo` from `OTHER_SURFACES` while `app/(demo)/` still exists turns
+this lane's suite red — and `pnpm verify` is the merge gate for four surfaces.
+It is one line and it belongs in the same pull request that deletes the route
+group, or in the one straight after it.
+
+**So `Loom demo` is not waiting on this lane for anything.** Recorded here
+rather than as an edit, because the useful output is the corrected order and an
+edit would have been churn against a fictional URL.
