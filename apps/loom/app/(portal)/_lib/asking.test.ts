@@ -7,7 +7,11 @@ import {
   sequentialIdFactory,
   type IntentId,
 } from "@jam-overture/loom"
-import { memoryTreeStore } from "@jam-overture/loom/store"
+import {
+  applicationIdSchema,
+  DEFAULT_APPLICATION_ID,
+  memoryTreeStore,
+} from "@jam-overture/loom/store"
 import {
   buildProposal,
   collectingEventSink,
@@ -18,7 +22,14 @@ import { commitIntent, memoryHoldStore } from "@jam-overture/loom/write"
 
 import { pageFixture } from "@/app/_lib/pages/fixtures"
 
-import { governedCopyOf, intentFor, MAX_REQUEST_LENGTH, mayAsk, requestOf } from "./asking"
+import {
+  askedReport,
+  governedCopyOf,
+  intentFor,
+  MAX_REQUEST_LENGTH,
+  mayAsk,
+  requestOf,
+} from "./asking"
 import { reportOf } from "./outcome"
 import { portalPolicy } from "./policy"
 
@@ -158,5 +169,25 @@ describe("asking for a change to a published page", () => {
     expect(reportOf(outcome).tone).toBe("applied")
     expect(await trees.head(published.treeId)).toMatchObject({ ok: true, value: { revision: 4 } })
     expect(published.revision).toBe(3)
+  })
+})
+
+describe("what an asked-for change means for the site", () => {
+  const applied = { tone: "applied", headline: "Applied", meaning: "general", detail: "d" } as const
+
+  it("says a customer's site keeps serving what it published", () => {
+    expect(askedReport(applied, applicationIdSchema.parse("app_shop")).meaning).toMatch(
+      /keeps serving what it published/u
+    )
+  })
+
+  it("says this deployment's own site serves the copy, so the change is live", () => {
+    expect(askedReport(applied, DEFAULT_APPLICATION_ID).meaning).toMatch(/so it is live/u)
+  })
+
+  it("keeps the general sentence for an outcome the site does not change with", () => {
+    const refused = { ...applied, tone: "rejected" } as const
+
+    expect(askedReport(refused, DEFAULT_APPLICATION_ID).meaning).toBe("general")
   })
 })

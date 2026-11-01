@@ -2,7 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { treeIdSchema } from "@jam-overture/loom"
-import { projectIdSchema } from "@jam-overture/loom/store"
+import { DEFAULT_APPLICATION_ID, projectIdSchema } from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
@@ -32,6 +32,20 @@ import { AskForm } from "./_components/ask-form"
  * could accept a change, on an open project, on a deployment with a model.
  * Each of the others is said, so nobody types a request that goes nowhere.
  */
+/**
+ * Where Loom's copy stands against what the site published. This
+ * deployment's own site serves its copy (0259), so there a change is live;
+ * every other site keeps serving what it published (0329 clause 6).
+ */
+const copyStanding = (copied: number | undefined, published: number, servesCopy: boolean) => {
+  if (copied === undefined) return "Nothing has been asked of this page yet."
+  if (copied === published) return "Nothing asked for here has changed it yet."
+
+  return servesCopy
+    ? `Changes asked for here have taken it to version ${copied}, and this deployment's own site serves that version.`
+    : `Changes asked for here have taken Loom's copy to version ${copied}. Your site still serves the published one.`
+}
+
 const PageScreen = async ({ params }: { params: Promise<{ project: string; tree: string }> }) => {
   const route = await params
   const asked = projectIdSchema.safeParse(route.project)
@@ -139,11 +153,11 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
           Your site last published version {row.revision}, on {row.received}.
         </p>
         <p className="text-ink-muted text-xs">
-          {copy.ok
-            ? copy.value.revision === row.revision
-              ? "Nothing asked for here has changed it yet."
-              : `Changes asked for here have taken Loom's copy to version ${copy.value.revision}. Your site still serves the published one.`
-            : "Nothing has been asked of this page yet."}
+          {copyStanding(
+            copy.ok ? copy.value.revision : undefined,
+            row.revision,
+            application.applicationId === DEFAULT_APPLICATION_ID
+          )}
         </p>
       </section>
 

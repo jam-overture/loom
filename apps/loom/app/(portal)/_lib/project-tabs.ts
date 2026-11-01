@@ -12,13 +12,16 @@ import type { NavItem } from "./nav"
  * - **Signals** first, because *is anything arriving* is the question a
  *   person opens a project to ask, and it is where the project's own address
  *   lands them.
- * - **Pages**, what the site last published (0312).
+ * - **Pages**, what the site last published (0312), and where a change to one
+ *   is asked for (0329).
+ * - **Waiting**, the changes asked for that need a person to say yes (0329).
  * - **Connect your site**, the key and the snippet.
  * - **Settings**, everything an owner changes about the project.
  */
 export const projectTabs = (projectId: string): readonly NavItem[] => [
   { label: "Signals", href: `/portal/${projectId}/signals` },
   { label: "Pages", href: `/portal/${projectId}/pages` },
+  { label: "Waiting", href: `/portal/${projectId}/waiting` },
   { label: "Connect your site", href: `/portal/${projectId}/connect` },
   { label: "Settings", href: `/portal/${projectId}/settings` },
 ]

@@ -66,6 +66,13 @@ against.
    change is a new revision of the copy, recorded and shown on the page, and
    the site is not changed.
 
+7. **A held change waits on a *Waiting* tab**, oldest first, saying what was
+   asked, of which page, by whom, why the Gate stopped and what is at stake.
+   *Accept* and *Turn down* are offered to a role whose ceiling covers the
+   change's stake, and both answers need it: a role that could turn down what
+   it cannot accept could stop an owner's change by answering first. *Accept*
+   runs the Gate again against the page as it then stands.
+
 ## Alternatives considered
 
 - **The AI proposes on its own, from *Signals*.** It is the product's thesis,
@@ -92,5 +99,8 @@ against.
 - When a site publishes a newer version of a page than the copy began from,
   the copy does not follow it. Reconciling the two is owed before unit 8 opens
   pull requests, and is a record of its own.
-- The queue itself, a *Waiting* tab where held changes are accepted or refused
-  within each role's ceiling, is the next pull request.
+- This deployment's own application is the exception to clause 6: its
+  governed pages are the ones its marketing site renders (0259), so a change
+  asked of them is live. Its project has no members, so in practice nobody can
+  ask, and the screens say *live* there rather than *your site keeps serving
+  what it published*.

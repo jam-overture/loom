@@ -5,7 +5,13 @@ import { revalidatePath } from "next/cache"
 import { randomIdFactory, treeIdSchema } from "@jam-overture/loom"
 import { commitIntent } from "@jam-overture/loom/write"
 
-import { governedCopyOf, intentFor, mayAsk, requestOf } from "@/app/(portal)/_lib/asking"
+import {
+  askedReport,
+  governedCopyOf,
+  intentFor,
+  mayAsk,
+  requestOf,
+} from "@/app/(portal)/_lib/asking"
 import { reportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"
 import { beginWrite } from "@/app/(portal)/_lib/write"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
@@ -84,5 +90,7 @@ export const askAction = async (
 
   revalidatePath(`/portal/${site.projectId}/pages/${page.treeId}`)
 
-  return { report: reportOf(outcome, write.weighedAgainst) }
+  return {
+    report: askedReport(reportOf(outcome, write.weighedAgainst), site.application.applicationId),
+  }
 }

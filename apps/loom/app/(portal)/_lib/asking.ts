@@ -6,9 +6,16 @@ import {
   type LoomTree,
   type Result,
 } from "@jam-overture/loom"
-import type { StoreError, TreeStore } from "@jam-overture/loom/store"
+import {
+  DEFAULT_APPLICATION_ID,
+  type ApplicationId,
+  type StoreError,
+  type TreeStore,
+} from "@jam-overture/loom/store"
 
 import { ceilingOf, type Role } from "./auth/roles"
+import type { WriteReport } from "./outcome"
+import type { OutcomeTone } from "./vocabulary"
 
 /**
  * A person asking for a change to one of their site's pages (0329), as the
@@ -77,4 +84,31 @@ export const intentFor = ({
   actor,
   utterance: request,
   observedAt: at.toISOString(),
+})
+
+/**
+ * What a change asked for here means for the site, in place of the portal's
+ * general sentence, which speaks of screens this portal no longer has.
+ *
+ * Only this deployment's own application serves its copy: its governed pages
+ * are the ones its marketing site renders (0259). Every other project's site
+ * keeps serving what it published (clause 6).
+ */
+const askedMeaning = (tone: OutcomeTone, servesCopy: boolean): string | undefined => {
+  switch (tone) {
+    case "applied":
+      return servesCopy
+        ? "Loom's copy of this page has the change, and this deployment's own site serves that copy, so it is live."
+        : "Loom's copy of this page has the change. Your site keeps serving what it published."
+    case "awaiting":
+      return "It is under Waiting until an approver or owner who may accept it says yes or no."
+    default:
+      return undefined
+  }
+}
+
+/** A write's report, saying what it means for this project's site. */
+export const askedReport = (report: WriteReport, application: ApplicationId): WriteReport => ({
+  ...report,
+  meaning: askedMeaning(report.tone, application === DEFAULT_APPLICATION_ID) ?? report.meaning,
 })

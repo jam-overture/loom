@@ -18,6 +18,8 @@ export type SiteFor =
       readonly application: Application
       /** Who is making the change, for the record of it. */
       readonly actor: Actor
+      /** Their role in the project, for a change whose authority depends on more than the role. */
+      readonly role: Role
     }
   | { readonly ok: false; readonly report: ProjectReport }
 
@@ -90,5 +92,5 @@ export const siteFor = async (
     }
   }
 
-  return { ok: true, projectId, application, actor: member }
+  return { ok: true, projectId, application, actor: member, role }
 }
