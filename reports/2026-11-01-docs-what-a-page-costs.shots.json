@@ -1,0 +1,30 @@
+{
+  "baseUrl": "http://127.0.0.1:3111",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-11-01-docs-what-a-page-costs-wide-signals",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-11-01-docs-what-a-page-costs-phone-signals",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/api-reference/runtime",
+      "out": "2026-11-01-docs-what-a-page-costs-wide-runtime",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/building-with-loom/where-content-comes-from",
+      "out": "2026-11-01-docs-what-a-page-costs-wide-heaviest-written",
+      "viewport": "wide",
+      "waitFor": "h1"
+    }
+  ]
+}
