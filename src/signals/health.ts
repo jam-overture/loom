@@ -352,6 +352,77 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
   }
 }
 
+/**
+ * Whether a fault reaches the figure an order of a deployment's pages is ranked
+ * on, which is readers lost at the sharpest fall, deflated to the door's scale
+ * (0250).
+ *
+ * The order is
+ * [0250](../../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)
+ * and the join that reads this is
+ * [`agenda.ts`](agenda.ts).
+ *
+ * The second half of a fault, beside {@link remedyOf}'s first: that one says
+ * whose hand the fault falls to, and this says whether the fall a deployment
+ * was about to act on is evidence of anything. It is **here rather than beside
+ * the order** because it is a statement about a fault, and a fault vocabulary
+ * written in two places is this subsystem's own commonest defect.
+ *
+ * ## Why it is not simply *every fault*
+ *
+ * A fault spoils every **rate** on its page, which is what makes the health
+ * reading worth ranking by headcount. It does not follow that it spoils *this*
+ * figure, and two of the seven plainly do not:
+ *
+ * - **`counts-inflated` is already corrected for.** The key the order is on is
+ *   `lost ÷ (1 + inflation)`, and the inflation comes off the door row, where
+ *   an opening is counted once and exactly (0219). The fault says the page's
+ *   absolute counts are not worth printing; the ranking key is not one of them.
+ * - **`actions-uncredited` is about a different counter.** A fall is between two
+ *   siblings on `reached`, and an uncredited sender spends its `engaged`
+ *   (0242). Every band on the page reads *untouched* and not one fall moves.
+ *
+ * Taking a page out of the order for either of those would send an operator to
+ * repair a sender when what the rows said was *four hundred readers stop here*,
+ * and it would be the over-caution that makes a verdict worth ignoring.
+ *
+ * ## Why three of the five cannot be seen today
+ *
+ * `door-unscaled`, `openings-unmarked` and `audiences-mixed` are `true` here and
+ * **cannot co-occur with a rank**, because the order already refuses those
+ * pages as `unscaled`, `unopened` and `unsplit`. They are answered anyway: this
+ * says what the fault does to the figure, not what today's standings happen to
+ * let through, so the day a standing changes the two readings do not silently
+ * come apart.
+ *
+ * The two that can be seen are the two worth seeing. `rows-mishandled` is a
+ * tree and a window that do not belong together, which leaves most of the page
+ * reading `skipped` — so it manufactures the steepest fall in the deployment and
+ * puts the page at the head of the order (0212). `collection-stalled` reads a
+ * fall off counters the fold has not caught up to and scales it by a door that
+ * has, so the loss is of one window and the scale is of another; it understates
+ * rather than overstates, which makes a stalled page's rank a floor on its
+ * trouble rather than a measure of it.
+ */
+export const spoilsTheLoss = (fault: CollectionFault): boolean => {
+  switch (fault) {
+    case "door-unscaled":
+      return true
+    case "openings-unmarked":
+      return true
+    case "counts-inflated":
+      return false
+    case "collection-stalled":
+      return true
+    case "actions-uncredited":
+      return false
+    case "rows-mishandled":
+      return true
+    case "audiences-mixed":
+      return true
+  }
+}
+
 /** Where one revision of one page stands. */
 export type HealthStanding =
   /** Measured, with nothing wrong that these rows can see. */
