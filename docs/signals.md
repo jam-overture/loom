@@ -64,6 +64,7 @@ the portal every day.
 | Which pages the readers of one place read | each named region's pages, at a floor on the **cell** rather than on the bucket ([0323](../decisions/0323-the-pages-a-places-readers-read-are-published-at-a-floor-on-the-cell.md)) — the transpose of the region map, where a place whose readers no page can be attributed to is named as that and never drawn as a place nobody read |
 | Whether readers have time for a kind of part | the time on screen across its places against the time its words take the readers who met them ([0325](../decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)) — a pooled ratio and never a mean of ratios, the outermost placement standing for the ones inside it, and a page the door cannot scale kept rather than refused, because the missing correction only makes a kind read as more skimmed |
 | What a window could not answer, and what each reason cost it | the states its readings are in, as a condition and a subject, with the readings each took and the pages each cost ([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)) — a page counted once however many of its readings report one state, no total over the states because one page is in as many as it has reasons, and a page's own row with a denominator, because *nine of nine readings silent* is a page to fix and *one of nine* is a page that works |
+| Whether the page to fix first is a page to fix | the order of pages held against the faults in the collection, as two orders and the overlap between them ([0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)) — because a tree and a window that do not belong together manufacture the steepest fall in the deployment, and *rewrite this page* was then the wrong errand; with no reader count over it, the two orders being in two units |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -4158,6 +4159,66 @@ method and no new kind.
 `Loom portal`'s and is now nineteen runs old; and the rung publishes no census a
 screen can use without the screen handing in its own readings' silences, which
 is deliberate and stated in the type.
+
+### 67. The page to fix, or the measurement that said so · `Loom signals` · **done, 1 November**
+
+Two readings answer *what should this deployment do next* and they had never
+met. [0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md)
+orders the pages by the readers each loses at its sharpest fall and publishes
+the head as **the page to fix first**;
+[0271](../decisions/0271-a-fault-in-a-deployments-collection-is-named-by-what-it-costs-and-a-pages-readers-are-counted-once.md)
+names the faults in the deployment's own collection and publishes the worst as
+**the page to look at first**. Same window, same pages, same scale, two lists,
+and the overlap found by eye.
+
+**The overlap is a wrong instruction and it goes one way.** A tree and a window
+that do not belong together leave most of a page reporting `skipped` (0212) —
+which is not a quiet page, it is a cliff. So the fault **manufactures the
+steepest fall in the deployment**, puts the page at the head of the order under
+the sentence *this page loses more readers than any other*, and sends an
+operator to rewrite a page that is fine.
+
+**Done**
+([0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)),
+as `deploymentAgendaOf` in [`agenda.ts`](../src/signals/agenda.ts), with
+`spoilsTheLoss` published beside `remedyOf` in
+[`health.ts`](../src/signals/health.ts).
+
+- **The obvious fix is wrong too.** *Any fault takes a page out of the order* is
+  one line and it is over-caution: `counts-inflated` is already divided out of
+  the ranking key, which is `lost ÷ (1 + inflation)` off an exact door row, and
+  `actions-uncredited` spends `engaged` where a fall is made of `reached`. A
+  page carrying either keeps its place with the fault named beside it, which is
+  `AgendaWork` **`both`** — the member that stops the reading pulling a real
+  fall off a screen because a page's presses are not credited.
+- **The question is about a fault and not about a page**, so the answer lives
+  beside the fault vocabulary. `spoilsTheLoss` answers all seven, including the
+  three that cannot co-occur with a rank today because the order already refuses
+  those pages — so the day a standing changes, the two readings do not silently
+  come apart.
+- **A contested page leaves the order and is findable where it went**, carrying
+  the whole rank it was taken out of, which is 0301's and 0326's rule about
+  every refusal this subsystem makes. `contested` is a slice of `collection`
+  and not a fourth list.
+- **It publishes no reader count at all.** The two orders are in two units —
+  readers lost at one fall, and a page's whole readership — so a sum over them
+  would be a figure in neither (0327). Every figure here is a count of pages,
+  and every reader figure is the source reading's own on the source reading's
+  own row.
+- **The deduplication is in two places**, and the test for it is what found why:
+  the join is a map and cannot hold a key twice, but the published orders walk
+  the caller's own lists, so a page the caller named twice stood in an order
+  twice while every count above it stayed right.
+- **Two windows handed in as one** are counted in `unpaired`, as two counts
+  rather than one, because which side is short says which read is stale.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** still **nothing draws any of it**, which is
+`Loom portal`'s and is now twenty runs old — and this reading is the one a
+*Signals* screen would open with, so it is named in the recommendation.
 
 ## Still not in scope
 
