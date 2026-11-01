@@ -343,5 +343,18 @@ Nothing failed, nothing was skipped, and no test was weakened.
 
 ## The preview
 
-*Filled in from the `vercel[bot]` comment after the pull request was opened, not
+*Taken from the `vercel[bot]` comment after the pull request was opened, not
 composed from the branch name.*
+
+https://loom-git-docs-73-what-a-page-costs-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the unit is most about:
+
+- https://loom-git-docs-73-what-a-page-costs-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/signals
+- https://loom-git-docs-73-what-a-page-costs-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/where-content-comes-from
+
+Every picture above was taken against a build in this container, not fetched
+from the preview: `*.vercel.app` is denied by the environment's egress policy,
+which is the open finding of 12 October and still true.
+
+The pull request is **#743**.
