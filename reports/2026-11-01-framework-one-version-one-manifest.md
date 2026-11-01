@@ -2,7 +2,14 @@
 
 **Date:** 2026-11-01 · **Routine:** `Loom framework` (`Loom daily build`) ·
 **Section:** §1 (process — publishing the primitive library) ·
-**Branch:** `framework-76-one-version-one-manifest`
+**Branch:** `framework-76-one-version-one-manifest` · **PR:** #740
+
+**Preview:**
+`loom-git-framework-76-one-ve-1f77b0-jpizzolato36-6341s-projects.vercel.app`,
+which Vercel reports `success`. Not opened from this run: `*.vercel.app` is
+denied by the environment's network policy, filed on 27 September. It should be
+byte-identical to `main` either way — nothing this branch touches is rendered,
+and the only file outside `tools/` is a test.
 
 ## What was completed
 
