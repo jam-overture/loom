@@ -245,12 +245,12 @@ describe("what the site tells a stranger to install", () => {
    * red on the run that renames the package, and no longer dependent on what
    * else the machine has done.
    *
-   * `license` is a parameter of that manifest and nothing here asks about it,
-   * so the argument is a placeholder rather than a claim.
+   * `license` and `version` are parameters of that manifest and nothing here
+   * asks about either, so both arguments are placeholders rather than claims.
    */
   const published = (): readonly string[] => [
     nameOf("../../../../../package.json"),
-    String(manifest("UNSET").name),
+    String(manifest({ license: "UNSET", version: "UNSET" }).name),
   ]
 
   it("names the packages this repository actually publishes", () => {

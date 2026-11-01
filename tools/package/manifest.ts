@@ -102,18 +102,49 @@ export const publishedSpecifier = (fileDir: string, specifier: string): string =
 }
 
 /**
- * The version both packages go out at, together.
+ * The version both packages go out at, together — **read off the framework's
+ * manifest rather than restated here.**
  *
  * `@jam-overture/loom-primitives` is compiled against a specific runtime and its peer range
  * says so. They are not independently versioned until there is a reason for
  * them to be, and pre-1.0 they move as a pair: the library cannot promise
  * anything the runtime has not, and a host that upgrades one and not the other
  * is the case neither of them is tested in.
+ *
+ * **This was a constant until 1 November, and a constant is a second place to
+ * forget.** Releasing `0.2.0` meant moving a version by hand in three
+ * unconnected places, and of the three only the installation page's callout was
+ * held to anything that could fail — a test reading the root manifest. The copy
+ * here was guarded by assertions that read this same constant on both sides, so
+ * they agreed with themselves whatever it said and with the framework never.
+ *
+ * What a forgotten bump would have shipped is worse than a stale sentence: a
+ * library at `0.2.0` declaring `peerDependencies: { "@jam-overture/loom":
+ * "~0.1.0" }` while the framework is at `0.3.0` resolves to nothing in a host's
+ * install, which is the exact failure `docs/publishing-primitives.md` says the
+ * peer range exists to prevent.
+ *
+ * So the copy is gone rather than tested. This is the same move `licenseIdOf`
+ * already made for `license`, for the same reason, and it is pure for the same
+ * reason: the caller reads the file, so a test can hand it a manifest without
+ * one existing on disk.
+ *
+ * @throws if the manifest carries no version. There is no honest fallback —
+ * `JSON.stringify` drops an `undefined` field, so a guess here is a published
+ * `package.json` with no `version` at all, and the build stopping is the
+ * cheapest place for that to be noticed.
  */
-export const VERSION = "0.2.0"
+export const versionOf = (rootManifest: string): string => {
+  const parsed: { version?: unknown } = JSON.parse(rootManifest)
+
+  if (typeof parsed.version !== "string" || parsed.version === "")
+    throw new Error("the framework's manifest carries no `version`, so the library has none to publish at")
+
+  return parsed.version
+}
 
 /** The range the peer dependency carries. Pre-1.0, a minor is allowed to break. */
-export const RUNTIME_RANGE = `~${VERSION}`
+export const runtimeRangeOf = (version: string): string => `~${version}`
 
 /**
  * React's range, and it is the framework's rather than a looser one.
@@ -134,19 +165,41 @@ const REACT_RANGE = "^19.0.0"
 export type Manifest = Readonly<Record<string, unknown>>
 
 /**
+ * The two fields this file cannot derive on its own, read off the repository by
+ * whoever calls it.
+ *
+ * Both are strings and neither is interchangeable with the other, so they
+ * arrive named rather than positional: a swapped pair would compile, publish a
+ * package licensed `0.2.0` under the version `MIT`, and fail nothing here.
+ */
+export type ManifestFacts = {
+  /**
+   * The SPDX identifier, from `licenseIdOf` — or `UNLICENSED` when the
+   * repository has no LICENSE file to publish beside the package, which is a
+   * fact about the working tree rather than about the manifest.
+   */
+  readonly license: string
+  /** The framework's own version, from {@link versionOf}. */
+  readonly version: string
+}
+
+/**
  * The published `package.json`.
  *
  * It is generated rather than committed for the reason the decision index is:
- * three of its fields — the version, the peer range and the files list — are
- * facts about something else in the repository, and a copy of a fact is a copy
- * that goes stale silently. `license` is the exception and is deliberately a
- * parameter: it is not this repository's decision to make
- * (`docs/rollout.md` names it as the maintainer's), and a package published
- * without one is a package nobody may legally use.
+ * four of its fields — the version, the peer range, the license and the files
+ * list — are facts about something else in the repository, and a copy of a fact
+ * is a copy that goes stale silently.
+ *
+ * The version and the license arrive as {@link ManifestFacts} rather than being
+ * read here, which keeps this function pure and is what lets `package.test.ts`
+ * ask what the manifest says at a version without a release happening. Neither
+ * is this repository's decision to make: `docs/rollout.md` names the license as
+ * the maintainer's, and the version is the framework's.
  */
-export const manifest = (license: string): Manifest => ({
+export const manifest = ({ license, version }: ManifestFacts): Manifest => ({
   name: "@jam-overture/loom-primitives",
-  version: VERSION,
+  version,
   description:
     "The starter primitive library for Loom — 98 registered primitives and 44 starting compositions, themed from the palette and renderable on a server.",
   license,
@@ -172,7 +225,7 @@ export const manifest = (license: string): Manifest => ({
    * each in a host's tree or nothing works.
    */
   dependencies: { zod: "^3.24.1" },
-  peerDependencies: { "@jam-overture/loom": RUNTIME_RANGE, react: REACT_RANGE },
+  peerDependencies: { "@jam-overture/loom": runtimeRangeOf(version), react: REACT_RANGE },
   engines: { node: ">=22.0.0" },
   publishConfig: { access: "public" },
   /**
@@ -184,4 +237,45 @@ export const manifest = (license: string): Manifest => ({
  */
   repository: { type: "git", url: "git+https://github.com/jam-overture/loom.git", directory: "src/primitives" },
   keywords: ["loom", "primitives", "ui", "react", "server-components", "design-system", "ai"],
+})
+
+/**
+ * What the package says its license is — read from the runtime's own manifest
+ * rather than parsed out of the LICENSE file.
+ *
+ * The first version of this read an SPDX identifier off the LICENSE's first
+ * line, which was a convention this tool invented and the repository did not
+ * follow: the file `Loom daily build` shipped opens `MIT License`, the
+ * conventional header, which is not a bare identifier. Two packages out of one
+ * repository disagreeing about their license is the failure that would have
+ * caused, and the fix is to stop having a second source of truth — `license`
+ * in the root manifest is what npm publishes for the framework, so it is what
+ * this publishes for the library.
+ */
+export const licenseIdOf = (rootManifest: string): string => {
+  const parsed: { license?: unknown } = JSON.parse(rootManifest)
+
+  return typeof parsed.license === "string" && parsed.license.length > 0
+    ? parsed.license
+    : "SEE LICENSE IN LICENSE"
+}
+
+/**
+ * Everything the published manifest needs that only the repository knows, out
+ * of one read of it.
+ *
+ * It exists so the seam is testable without a build. `assemble` used to gather
+ * these two facts inline, which meant the only proof that the version reaching
+ * {@link manifest} came off the framework's manifest — rather than from a
+ * literal somebody typed — was running the whole assembly, and that needs a
+ * compiled `dist/primitives` this suite deliberately does not depend on.
+ *
+ * `hasLicenseFile` is a fact about the working tree and not about the manifest,
+ * which is why it is a second parameter rather than something read here: a
+ * package published with a license it does not ship the text of is worse than
+ * one that says `UNLICENSED` honestly.
+ */
+export const manifestFacts = (rootManifest: string, hasLicenseFile: boolean): ManifestFacts => ({
+  license: hasLicenseFile ? licenseIdOf(rootManifest) : "UNLICENSED",
+  version: versionOf(rootManifest),
 })
