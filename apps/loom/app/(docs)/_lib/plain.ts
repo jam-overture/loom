@@ -1,3 +1,4 @@
+import { publishedFieldsIn } from "./api/fields"
 import { publishedNamesIn } from "./api/mentions"
 import { outsideFences } from "./fences/spans"
 import { DOCS_LANDING_SLUG, docsHref, docsSections, writtenDocsSections } from "./nav"
@@ -69,6 +70,32 @@ import { readPageSource } from "./search/headings"
  * their headings *are* export names by construction, and `search/generated.ts`
  * already carries the argument for why that section answers every question
  * differently from a written one.
+ *
+ * ## The second vocabulary, and why it took a measurement to add
+ *
+ * **A name does not have to be an export to be a noun a reader cannot look
+ * up.** The brief's example names three things and the export rule caught one
+ * of them: `baseRevision` and `disposition` are *fields* — lines inside a type
+ * the package publishes, with no page of their own and nowhere on this site to
+ * look them up. The gap was filed the day the export rule shipped, with a
+ * recommendation to revisit it only with a measurement, because the obvious
+ * widening reads 823 field names of which 429 are a single ordinary English
+ * word.
+ *
+ * The measurement came back on 2 November and it said: **widen to the camelCase
+ * half and nothing else.** `api/fields.ts` carries the numbers and the
+ * argument — the short version is that no English word is camelCase, so that
+ * half is jargon by construction rather than by opinion. Of its 292 names, 20
+ * are printed on these pages today, `baseRevision` three times, and **not one
+ * in a summary, an opening or a heading.** The same discipline, held the same
+ * number of times by nobody in particular, with nothing to notice the first
+ * page to break it.
+ *
+ * A fault keeps the two apart rather than pooling them, because the **remedy**
+ * differs. An export has a reference page, so an author who must name it in an
+ * opening has somewhere to link. A field has no page at all, so the only remedy
+ * is the one the brief asks for: say what it is for in a sentence a person
+ * could repeat, then name it.
  */
 
 /** Where a reader meets a page before the page has shown them anything. */
@@ -80,8 +107,16 @@ export type PlainFault = {
   readonly where: string
   readonly href: string
   readonly place: PlainPlace
-  /** The names, in the order the text names them. */
+  /** The published exports it names, in the order the text names them. */
   readonly names: readonly string[]
+  /**
+   * The published types' own camelCase field names it names, in order.
+   *
+   * Kept apart from `names` rather than pooled with them, because an export has
+   * a reference page an author can link to and a field has nowhere on this site
+   * to go — so the sentence a failure prints has two different things to say.
+   */
+  readonly fields: readonly string[]
   /** What the reader would have read, for a failure worth reading. */
   readonly text: string
 }
@@ -136,6 +171,19 @@ export const openingOf = (source: string): string => {
  */
 export const namesNamedIn = (prose: string): readonly string[] =>
   [...prose.matchAll(INLINE_CODE)].flatMap((span) => publishedNamesIn(span[1] ?? ""))
+
+/**
+ * The published types' camelCase field names a piece of prose names, in order,
+ * reading backticks alone.
+ *
+ * The same walk over the same spans, handed to `api/fields.ts` instead of
+ * `api/mentions.ts`. Two readers rather than one because the two vocabularies
+ * are two different sets with two different arguments behind them — but one
+ * identifier rule underneath both, which is `mentions.ts`'s and is what keeps
+ * `delta.baseRevision` from firing either.
+ */
+export const fieldsNamedIn = (prose: string): readonly string[] =>
+  [...prose.matchAll(INLINE_CODE)].flatMap((span) => publishedFieldsIn(span[1] ?? ""))
 
 /**
  * The first sentence of a piece of prose, for a fault that quotes what the
@@ -193,7 +241,14 @@ export const summariesRead = (): readonly { where: string; href: string; summary
     )
   )
 
-/** One place, as a fault where it names an export and as nothing where it does not. */
+/**
+ * One place, as a fault where it hands a reader a name they have not met and as
+ * nothing where it does not.
+ *
+ * Either vocabulary is enough to make a fault. A place that names one export
+ * and four fields is **one** fault naming five things, not five faults — the
+ * author is going to open one file and rewrite one paragraph.
+ */
 const fault = (
   where: string,
   href: string,
@@ -201,10 +256,20 @@ const fault = (
   text: string
 ): readonly PlainFault[] => {
   const names = namesNamedIn(text)
+  const fields = fieldsNamedIn(text)
 
-  return names.length === 0
+  return names.length === 0 && fields.length === 0
     ? []
-    : [{ where, href, place, names, text: place === "summary" ? text : openingSentence(text) }]
+    : [
+        {
+          where,
+          href,
+          place,
+          names,
+          fields,
+          text: place === "summary" ? text : openingSentence(text),
+        },
+      ]
 }
 
 /**
@@ -237,12 +302,35 @@ export const plainFaults = (): readonly PlainFault[] => [
  * because the author who broke this rule is reading a test failure and needs to
  * know which of a page's two openings it was about.
  */
-export const plainFaultSentence = (fault: PlainFault): string =>
-  `loom: ${fault.where} — the ${
+const quoted = (names: readonly string[]): string => names.map((name) => `\`${name}\``).join(", ")
+
+export const plainFaultSentence = (fault: PlainFault): string => {
+  /**
+   * The field half carries its own clause, because it is the half whose remedy
+   * an author will not guess. Told that an opening names `TreeDelta` too early,
+   * the obvious fix is to link the reference page; told that it names
+   * `baseRevision`, the author needs to know there is no page to link to and
+   * the only way out is a sentence saying what it is for.
+   */
+  const named = [
+    ...(fault.names.length === 0 ? [] : [quoted(fault.names)]),
+    ...(fault.fields.length === 0
+      ? []
+      : [
+          `${quoted(fault.fields)} (${
+            fault.fields.length === 1
+              ? "a field, with no page of its own"
+              : "fields, with no page of their own"
+          })`,
+        ]),
+  ].join(" and ")
+
+  return `loom: ${fault.where} — the ${
     fault.place === "summary" ? "summary the rail carries" : "opening, above the first heading"
-  } names ${fault.names.map((name) => `\`${name}\``).join(", ")} before the page has said what ${
-    fault.names.length === 1 ? "it is" : "they are"
+  } names ${named} before the page has said what ${
+    fault.names.length + fault.fields.length === 1 ? "it is" : "they are"
   } for: "${fault.text}"`
+}
 
 /**
  * Every written page's orientation, for the other half of the rule.
