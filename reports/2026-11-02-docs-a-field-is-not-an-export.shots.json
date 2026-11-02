@@ -1,0 +1,30 @@
+{
+  "baseUrl": "http://127.0.0.1:3111",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/proposing-a-change",
+      "out": "2026-11-02-docs-a-field-is-not-an-export-wide-opening",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/the-runtime/proposing-a-change#what-a-proposal-carries",
+      "out": "2026-11-02-docs-a-field-is-not-an-export-wide-defined",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/getting-started/introduction",
+      "out": "2026-11-02-docs-a-field-is-not-an-export-wide-introduction",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/the-runtime/proposing-a-change",
+      "out": "2026-11-02-docs-a-field-is-not-an-export-phone-opening",
+      "viewport": "phone",
+      "waitFor": "h1"
+    }
+  ]
+}
