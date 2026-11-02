@@ -107,6 +107,11 @@ both would have written something that cannot be true.
 variables are unaffected and are the half that host cannot write for itself.
 Here there is no other half, so the rule would be an empty block.
 
+**Which lane table to believe.** The stored prompt and `docs/routines.md`
+disagree about `src/signals/` and `app/(demo)/`. `routines.md` won, because the
+prompt is the document that names it as governance, and both directories were
+left alone. Filed for the maintainer rather than resolved by this lane.
+
 ## What this run answered that the filing said it could not
 
 The finding separated three questions and said the third — **why two copies and
@@ -160,8 +165,10 @@ which is how the file came to be in the diff rather than by looking for it.
 - *the application shell's not-found stylesheet is in the flight payload of every page of every surface* — closed, with all three of its separated questions answered.
 - *`themeDocumentCss` hands back the whole theme* — **the framework half** closed. The lane's own half is one line in `(marketing)/_components/document-theme.tsx` and is left for it; `(docs)` and `(lessons)` have the same line available. Not taken here, because those files are not this lane's.
 
-**Filed:** one, below in `FINDINGS.md` — the mechanism generalises to every
-`not-found.tsx` and `error.tsx` in the application, and `(portal)` has both.
+**Filed:** two.
+
+- *anything a boundary renders is in every page's payload, and this application has three more boundaries* — the mechanism generalises to every `not-found.tsx` and `error.tsx`, and `(portal)` has both. Owned by `Loom portal` (paused) and by every lane that adds one. Nothing is asked of anybody and the portal's own boundaries are markup rather than a stylesheet.
+- *this routine's stored prompt claims two lanes that `docs/routines.md` gave away in August* — the prompt says `src/signals/` and the demo are this lane's; the lane table gives them to `Loom signals` (active, reported this morning) and `Loom demo` (split out 20 August). `routines.md` is the governance file the prompt itself names, so it won, and neither directory was touched. Filed for the maintainer because a future run that reads the sentence and not the table would race an active routine for its files.
 
 ## Open questions
 
