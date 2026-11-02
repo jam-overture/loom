@@ -64058,9 +64058,41 @@ next run reaching for the index finds the measurement rather than the idea.
 ## 2026-11-02 — the application shell's not-found stylesheet is in the flight payload of every page of every surface, and on three of them it is the largest single thing in the response
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`apps/loom/app/not-found.tsx`, the application shell) · **Status:** open —
-**nothing is wrong on any page a reader opens**; this is weight, and on the
-light surfaces it is most of it
+(`apps/loom/app/not-found.tsx`, the application shell) · **Status:**
+**closed by `framework-78-the-dress-a-boundary-fetches`**, 2 November, recorded
+as [0338](decisions/0338-a-not-found-boundarys-dress-is-served-because-every-page-carries-the-boundary.md).
+The two blocks are served at `/not-found.css` and linked; nothing inlines them.
+Measured before and after on a production build: `/docs` 35,749 → 20,562 B
+(−42.5%), `/lessons/1` 31,475 → 8,907 B (−71.7%), `/portal/sign-in` 26,767 →
+19,239 B (−28.1%), `/lessons` −22.0%, `/?theme=bold` −0.5%. No copy of the
+stylesheet remains in any response.
+
+**Both of this entry's three separated questions are answered, including the
+one it said this lane could not answer from outside the shell.**
+
+*Why two copies and not one:* one per not-found boundary Next inserts, and the
+count is Next's route shape rather than anything about the CSS or the shell —
+**two** on most routes, **three** under a dynamic segment (`/lessons/1`, which
+is `[lesson]`, and which this entry had not sampled: it was the worst page in
+the application at 69.2%), and **one** under `(portal)`, which supplies a
+`not-found.tsx` of its own and so takes the inner boundary off the shell's.
+
+*Why it was in every payload at all:* the `<style>` was already inside the
+component, which is this entry's second proposed shape and was why the
+measurement looked impossible. The root not-found boundary sits in the RSC tree
+of every route and a boundary's fallback is a prop on a client component, so
+React renders it on the server and serialises the result whether or not anything
+404s. **Inside the component is not a condition.** That generalises to every
+`not-found.tsx` and `error.tsx` in this application and is the reason the fix is
+an address rather than a smaller stylesheet.
+
+*Which shape:* the first one this entry named — route-served rather than inline.
+`force-static`, so it is prerendered and costs no server time; `precedence` kept
+on the link, because React waits for a stylesheet it was given one for and a
+fetched stylesheet is otherwise how the 6 October flash-of-unstyled defect comes
+back. The address is a constant and `not-found.test.tsx` holds the route
+directory against it, so a renamed route fails the build rather than serving the
+one page outside every layout undressed.
 
 Found while weighing this lane's own addition rather than looked for. The run
 that put a `:root` rule on the marketing document counted `:root {` blocks in
@@ -64109,9 +64141,37 @@ outside the lane and neither has been costed.
 ## 2026-11-02 — `themeDocumentCss` hands back the whole theme, so a surface whose every pixel is already a tree mounts its variables twice
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`src/render/document-theme.ts`) · **Status:** open — **a question about the
-published shape, not a defect**; the function is correct and this lane took it
-as published
+(`src/render/document-theme.ts`) · **Status:** **the framework half is closed by
+`framework-78-the-dress-a-boundary-fetches`**, 2 November, recorded as
+[0337](decisions/0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md);
+**open for `Loom marketing`**, whose half is one line and is nothing anybody is
+blocked on
+
+`themeGroundCss(theme)` ships from `@jam-overture/loom/react` beside
+`themeDocumentCss`, returning the same `:root` rule with the ground alone. Both
+serialise through one private helper, so neither is a second source for the
+rule's shape.
+
+**A second export rather than a flag**, which this entry offered as the
+alternative and is the better of the two for a reason the entry did not have to
+hand: `ramp` decides how the *variables* are written and has nothing to say
+about the ground, so a flag would leave a parameter read on one setting and
+ignored on the other, and a caller passing both would have written something
+that cannot be true.
+
+**It returns `undefined` when the palette has no ground**, mirroring
+`themeGround` for its reason. `themeDocumentCss` still returns its rule in that
+case — the variables are unaffected and are the half that host cannot write for
+itself — and here there is no other half, so a rule would be an empty block.
+
+**`Loom marketing`'s line**, whenever that lane is next in the file:
+`DocumentTheme` in `(marketing)/_components/document-theme.tsx` swaps
+`themeDocumentCss(theme)` for `themeGroundCss(theme)` and handles the
+`undefined` it already handles for an unthemed page. Worth ~1,976 bytes on a
+page this lane measured at 2.4MB, so the arithmetic this entry did is unchanged
+and the reason to take it is the seam rather than the saving. `(docs)` and
+`(lessons)` are the same shape and have the same line available. **Not taken
+here**, because those three files are not this lane's.
 
 [0334](decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)
 is right about the boundary and `themeDocumentCss` is the right seam. This is
@@ -64352,3 +64412,58 @@ next runs.
 **Recommended: the second**, and only because the first depends on a schedule
 nobody inside a run can see. It is one function and one emission, both covered
 by tests that already exist, and the diff is readable in a minute.
+
+---
+## 2026-11-02 (evening) — anything a boundary renders is in every page's payload, and this application has three more boundaries
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused)
+(`apps/loom/app/(portal)/not-found.tsx`, `error.tsx`) and every lane that adds
+one · **Extends** this morning's entry *the application shell's not-found
+stylesheet is in the flight payload of every page of every surface*, which is
+closed · **Status:** open — **nothing is broken, nothing is measured as
+expensive, and nothing is blocked**; this is a mechanism written down once so the
+next lane does not rediscover it
+
+The closed entry's third question was *why two copies and not one*, and the
+answer turned out to be the generalisable part rather than the fix. Writing it
+down, because it is counter-intuitive in a way that cost one lane a morning:
+
+**Next keeps a `not-found` and an `error` boundary in the RSC tree of every route
+beneath them, and a boundary's fallback is a prop on a client component.** React
+therefore renders that fallback *on the server* and serialises the result into
+the flight payload of every response — whether or not anything 404s, and whether
+or not anything throws. The copies are one per boundary Next inserts: measured on
+this build, **two** on most routes, **three** under a dynamic segment
+(`/lessons/1`) and **one** under `(portal)`, which has a `not-found.tsx` of its
+own.
+
+**The part that misleads:** the shell's `<style>` was already inside the
+not-found component's own subtree, which is the shape that looks like it would
+fix this. *Inside the component* is not a condition. A boundary's markup is not
+lazy, and no amount of pushing it down the tree makes it so.
+
+So the rule, for any lane adding or growing a boundary: **keep anything bulky
+behind an address rather than in the boundary's markup.** 0338 is the worked
+example — a 7,263-byte stylesheet became a ~90-byte `<link>` and the copy count
+stopped mattering.
+
+### What this means for `(portal)`, concretely and in that lane's own time
+
+`(portal)/not-found.tsx` and `(portal)/error.tsx` both compose `Screen`,
+`StateNotice` and `TechnicalDetail` with Tailwind classes. **There is no 7KB
+string in either**, which is why this is a note and not a defect — the shell's
+case was bad because it carried a stylesheet as text, and these carry markup.
+
+**It is unmeasured.** `/portal/sign-in` is 19,239 bytes after this evening's
+change and this lane has not asked how much of that is the two boundaries'
+serialised markup, because measuring it means reading a route group that is not
+this lane's. The instrument is two lines: count a marker from `StateNotice` in
+the served response of a portal page that is not a 404, and divide. If the answer
+is small, close this with the number — a measured *nothing to do* is worth more
+than an open question.
+
+### Needs your input
+
+Nothing. `Loom portal` is paused and this waits for it, at no cost: the rule is
+written down, which is the whole point of the entry, and the portal's own
+boundaries are markup rather than a stylesheet. No exception is being asked for.
