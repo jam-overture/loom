@@ -33,8 +33,9 @@ it that turned out to be worth building.
 
 ## The wide rule, measured, and why it is not the answer
 
-Reading **every** field name of every published type — 823 that are not exports
-— against the thirty-five openings and the summaries the rail carries:
+Reading **every** field name of every published type — 823 that were not
+exports when the branch was cut — against the thirty-five openings and the
+summaries the rail carries:
 
 **Eleven hits. Not one of them is a defect.**
 
@@ -62,10 +63,10 @@ an exception stated as a list.**
 
 | | how many |
 | --- | --- |
-| names the package publishes | 1,855 |
-| declared inside a published `type`, `interface` or `class`, not exports | 823 |
-| **of those, camelCase — now checked** | **292** |
-| of those, one lowercase word — out of reach | 531 |
+| names the package publishes | 1,860 |
+| declared inside a published `type`, `interface` or `class`, not exports | 826 |
+| **of those, camelCase — now checked** | **294** |
+| of those, one lowercase word — out of reach | 532 |
 | printed somewhere in this site's written prose | 20 |
 | **in a summary, an opening or a heading** | **0** |
 
@@ -316,20 +317,66 @@ export may be given a list-shaped presentation (22 October), and whether a
 produced table on this site should be composed from the library rather than
 arranged locally (#709).
 
+## The merge, and the figures that moved
+
+**`Loom merge` brought `main` in at 16:37** (`d1fa53a`), picking up #747, #748
+and #749. Both regenerators were run on the merged head —
+`pnpm decisions:index` and `pnpm docs:api` — because `merge=ours` is the trap
+`docs/routines.md` names and a stale generated file fails somewhere that names
+neither the merge nor the file. **Neither produced a diff**: this branch never
+touched `decisions/README.md` or `reference.generated.json`, so `main`'s copies
+came through the merge intact. 0335 and 0336 are both in the index.
+
+The reference did move, and so did four numbers in this report. **Re-measured
+on the merged head**, with the tables above already carrying the new figures:
+
+| | at `749e4c1` | at `d1fa53a` |
+| --- | --- | --- |
+| names the package publishes | 1,855 | **1,860** |
+| field names that are not exports | 823 | **826** |
+| of those, camelCase | 292 | **294** |
+| cut declarations / lines hidden | 11 / 514 | 11 / 514 |
+| camelCase fields printed in this site's prose | 20 | 20 |
+
+**And it found a mistake in this branch's own test**, which is the part worth
+the paragraph. `fields.test.ts` asserted `cutDeclarations.length` is **exactly
+11**. That is this lane's test going red because another lane published a long
+type — the shape `search/build.ts` and `weight.ts` both name as the one to
+avoid, *this lane's number about somebody else's growth*, and the reason
+`GENERATED_PAGE_CAP` is written as a trigger rather than a figure to defend. It
+survived the merge by luck: 57 exports arrived and not one of them was cut.
+
+It is now a floor (`toBeGreaterThan(5)`) plus the two claims this lane can
+honestly make — that `RenderDiagnostic` is among them and that every one hides
+lines. The exact count is in this report, where it is dated, and in the module's
+doc comment, where it now says *eleven of them on 2 November* rather than
+*eleven*.
+
 ## The gate
 
 `pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
 last thing on its line, with nothing piped into `tail` or `tee`.
 
-- framework: **251 files, 6,041 tests passed**
-- application: **387 files, 6,236 tests passed**, of which **142 files and
+**Run twice: once on the branch as cut, and again on the merged head** after
+`Loom merge` brought `main` in. The numbers below are the second run,
+`d1fa53a`.
+
+- framework: **252 files, 6,069 tests passed**
+- application: **388 files, 6,273 tests passed**, of which **142 files and
   2,155 tests** are `(docs)`
-- `findings:check`: 1,396 findings, 0 malformed
-- `reports:check`: 2,049 visuals, 145.6MB, none over 1.1MB, 411 cited by no file
-- `prerender:check`: **137 prerendered pages**, 1,945 text junctions, 0 run
+- `findings:check`: 1,403 findings, 0 malformed
+- `reports:check`: 2,054 visuals, 145.7MB, none over 1.1MB, 411 cited by no file
+- `prerender:check`: **137 prerendered pages**, 1,947 text junctions, 0 run
   together; 3 metadata conventions, 0 unserved
 
-Nothing failed, nothing was skipped, and no test was weakened.
+The first run, on `0fed261` before the merge, was also exit 0: 251 files /
+6,041 tests framework, 387 / 6,236 application.
+
+Nothing failed, nothing was skipped, and no test was weakened. The one test
+changed after the merge is this branch's own `cutDeclarations` count, loosened
+from an equality to a floor for the reason given above — a strictly weaker
+assertion about **another lane's** growth, alongside two new ones about the
+property this lane actually owns.
 
 ## The preview
 
