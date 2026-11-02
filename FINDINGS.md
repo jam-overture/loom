@@ -63673,8 +63673,31 @@ finding should read 0331 before acting on its last paragraph.
 ## 2026-11-01 (evening) — a governed page cannot be cached today because nothing tells a cache that a row was appended to
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom framework` and
-`Loom portal` (paused) · **Status:** open — **the only shape that recovers the
-per-request cost without contradicting 0259**
+`Loom portal` (paused) · **Status:** open — **the framework half shipped on
+2 November in `framework-77-told-that-the-row-moved`
+([0335](decisions/0335-a-cache-over-a-governed-page-is-told-the-row-moved-by-the-handle-that-appended.md));
+this deployment still does not cache, and what is left is two lines in a paused
+lane** — see the 2 November entry at the bottom of this file for them
+
+What is published: `treeCacheTag`, `cachingTreeStore` and
+`invalidatingTreeStore` from `@jam-overture/loom/store`. No window, no
+duration, nothing remembered that was refused — an entry leaves because the row
+moved. Three things in it this entry did not predict:
+
+- **The invalidation is on the store, not on the event stream.** `change-committed`
+  exists and would have worked for every change that goes through a
+  composition. What a cache has to be told is *this row is not what it was*,
+  which is true of a revert, a reseed and a migration too, so the handle that
+  appends is what announces.
+- **The cache is on the read rather than on the page**, which is why 0331 needs
+  no amendment. Every route keeps `force-dynamic`, the palette and the served
+  origin stay per-request, and what is recovered is the query that was measured.
+  Caching the rendered page is rejected in the record, with the reason.
+- **The lane boundary is not where this entry put it.** `siteStore` is declared
+  in `app/_lib/app/store.ts`, which is the shell's, so `(marketing)` is asked
+  for nothing and never was. The boundary that actually bites is
+  `(portal)/_lib/write.ts`, which builds its own application-scoped store and
+  appends through it.
 
 0331 closes the door on prerendering a page the store governs. It leaves one
 door open and this is it, recorded so the next performance pass starts from a
@@ -63970,3 +63993,125 @@ run out, neither of which has arrived:
 arrives is cheaper than generalising now, and generalising a table of seven
 booleans into a mechanism is how the argument per fault stops being written down,
 which is the thing that has cost this subsystem a real bug twice.
+## 2026-11-02 — the cache a governed page needs is built and this deployment cannot switch it on, because the portal appends through a store the shell never sees
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused)
+(`apps/loom/app/(portal)/_lib/write.ts`), with the last line `Loom framework`'s
+· **Closes the framework half of** the 1 November entry *a governed page cannot
+be cached today because nothing tells a cache that a row was appended to* ·
+**Status:** open — **nothing is broken and nothing is slower than it was**; this
+is a capability that is one edit away from paying
+
+[0335](decisions/0335-a-cache-over-a-governed-page-is-told-the-row-moved-by-the-handle-that-appended.md)
+publishes `treeCacheTag`, `cachingTreeStore` and `invalidatingTreeStore`. A
+reader is answered from a cache; a writer expires the tree's tag; there is no
+window anywhere in it, so the reader after an append is served the append.
+
+**What stopped the deployment taking it.** A cache over `siteStore` is correct
+only if **every** handle that can append to one of those rows is the
+invalidating one. Two can:
+
+| appends through | lane | invalidates? |
+| --- | --- | --- |
+| `appStoreForWriting` (`app/_lib/app/store.ts`) | shell | would, trivially — **and has no `append` caller at all today**; it is `head` and `create` for seeding |
+| `governedFor(application).trees` (`(portal)/_lib/write.ts`) | `Loom portal` | **no**, and this is the one that matters |
+
+`beginWrite(DEFAULT_APPLICATION_ID)` is a live path, and the marketing pages are
+rows of the default application — so a change accepted in the portal moves
+exactly the row a marketing request would be holding, through a store built
+inside that lane from `postgresTreeStore(portalDatabase, { application })`.
+Caching anyway would serve last week's page after somebody accepted a change,
+which is [0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)'s
+own failure arriving by a third door and worse than the ~100ms it saves.
+
+So the partial wiring was built, tried and taken back out, and nothing in
+`apps/` changed on that branch.
+
+**The two lines.** In `(portal)/_lib/write.ts`, inside `governedFor`:
+
+```ts
+import { invalidatingTreeStore } from "@jam-overture/loom/store"
+
+trees: invalidatingTreeStore(
+  postgresTreeStore(portalDatabase, { application }),
+  expireTreeCacheTag
+)
+```
+
+— and the same wrap on the `memoryTreeStore()` branch beside it, so the two
+arms do not differ in what they announce.
+
+`expireTreeCacheTag` is the host's; it does not exist yet because the module
+holding it would have been unused. It is `revalidateTag(tag, { expire: 0 })` —
+immediate rather than a named profile, because a stale-while-revalidate expiry
+hands the reader *after* an append the revision *before* it. **`Loom framework`
+will add that module and the one line on `siteStore` in the same run that the
+portal's wrap lands**, and the deployment identity belongs in the cache key
+there: a deploy-time seed cannot expire a tag, so `VERCEL_URL` as a key part is
+what covers it.
+
+### Needs your input
+
+Nothing blocking, and one question that is only the maintainer's: **this waits
+for `Loom portal` to resume.** If that is far off, a one-line exception letting
+`Loom framework` make the wrap in that file would switch the cache on in a
+single run — but a paused lane's directory is explicitly not open season
+(`docs/routines.md`), so it is asked rather than assumed.
+
+---
+## 2026-11-02 — the maintainer's reported performance problem is one function in a lane whose last report is 11 October
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 1 November entry *the library stylesheet is serialised once per
+primitive into the RSC payload, so a Loom page ships 2.4MB where the same page's
+markup is 50KB* · **Status:** open — **nothing is broken and nothing is
+blocked; this is a scheduling question only you can answer**
+
+### The measurement, restated because the ratio is the point
+
+`Loom marketing` measured `/why-use-it` on a production build: **2,418KB
+served, of which 2,255KB is the flight payload, of which 93% is one 47KB
+stylesheet carried 42 times.** Server time was ~100ms. Your report was *several
+seconds*, and 2.4MB over a real network is what several seconds is. The ~100ms
+is the other 1 November entry and is **6% of the problem at most**.
+
+### Why it has not moved
+
+The fix is in `libraryStylesheet()` and the ~90 primitives that call it, which
+is `src/primitives/` — `Loom primitives`' lane. That routine's most recent
+report in `reports/` is **11 October**, and `src/primitives/` has had **one**
+commit touching it since 1 October, which arrived on another lane's pull
+request. The entry is correctly filed and is waiting on a lane that is not
+currently producing.
+
+**This lane did not take it**, and the reason is the rule rather than the
+difficulty: `docs/routines.md` gives that directory to its owner, and reaching
+into it is the thing the lane table exists to stop.
+
+### What is actually needed, in case it decides the scheduling
+
+Two of the finding's three shapes need the same change, and it is **one line in
+one function**, not ninety:
+
+- `libraryStylesheet()` stops carrying the CSS as children — either returning
+  nothing, with the renderer emitting one copy beside the tree root, or
+  returning a `<link>` at a few hundred bytes a copy.
+- **The ~90 call sites do not change** under either shape. They go on calling
+  it; what it returns is what changes.
+
+The renderer half of the first shape is this lane's and is small — the seam
+already mounts the theme beside the root node (0121). It is not built, because
+building it alone makes the page one copy **worse**: React dedupes in the DOM
+and not in the stream, so a copy at the root is a 43rd copy until the 42 stop.
+
+### Needs your input
+
+**Three ways to clear it.** Resume or re-point `Loom primitives` at this entry
+as its next unit; or say that `Loom framework` may make the one-line change in
+`src/primitives/stylesheet.ts` together with the renderer half, as an exception
+recorded here; or leave it, which costs 2.4MB a page view until the owning lane
+next runs.
+
+**Recommended: the second**, and only because the first depends on a schedule
+nobody inside a run can see. It is one function and one emission, both covered
+by tests that already exist, and the diff is readable in a minute.

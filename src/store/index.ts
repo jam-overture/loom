@@ -25,6 +25,7 @@ export * from "../project/store.js"
 export * from "../application/store.js"
 
 export * from "./attribution.js"
+export * from "./cache.js"
 export * from "./driver.js"
 export * from "./errors.js"
 export * from "./memory.js"
