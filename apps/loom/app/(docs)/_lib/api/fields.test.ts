@@ -86,6 +86,15 @@ describe("the names a published type declares inside itself", () => {
     it("reads nothing from a declaration that fits on one line", () => {
       expect(declaredNamesIn("type Revision = string")).toEqual([])
     })
+
+    /**
+     * The indent is how *inside* is detected, and a mutation that dropped it
+     * survived — the lines it would then admit do not occur in anything tsc
+     * emits, so the boundary is asserted here rather than left to luck.
+     */
+    it("reads nothing at the left margin, because that is not inside anything", () => {
+      expect(declaredNamesIn("baseRevision: string")).toEqual([])
+    })
   })
 
   describe("the set, against the reference the site really renders", () => {

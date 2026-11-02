@@ -6,6 +6,7 @@ import { writtenDocsSections } from "./nav"
 import { readPageSource } from "./search/headings"
 import {
   everyDocsPage,
+  faultIn,
   fieldsNamedIn,
   namesNamedIn,
   openingOf,
@@ -104,6 +105,65 @@ describe("the plain version first", () => {
 
     expect(printed.size).toBeGreaterThan(10)
     expect(printed).toContain("baseRevision")
+  })
+
+  /**
+   * **Non-vacuity of the decision itself**, which is a different claim from
+   * non-vacuity of the readers above and the one three mutations walked
+   * straight through.
+   *
+   * `plainFaults()` is empty and is meant to stay empty, so every assertion
+   * over it is satisfied by a decision that reports nothing. Switching the
+   * field half off, and flipping the `&&` that holds the two halves together to
+   * an `||` — which turns *both* rules off — were each invisible to this file
+   * until these four cases existed. The site cannot exercise a rule it keeps,
+   * so the one place that decides is handed a situation written here.
+   */
+  describe("the one place that decides, given a situation this site does not have", () => {
+    const given = (text: string) =>
+      faultIn("getting-started/introduction", "/docs/getting-started/introduction", "opening", text)
+
+    it("reports an export named before the page has said what it is for", () => {
+      expect(given("A `TreeDelta` is an ordered list.")).toEqual([
+        {
+          where: "getting-started/introduction",
+          href: "/docs/getting-started/introduction",
+          place: "opening",
+          names: ["TreeDelta"],
+          fields: [],
+          text: "A `TreeDelta` is an ordered list.",
+        },
+      ])
+    })
+
+    it("reports a field named before the page has said what it is for", () => {
+      expect(given("Each change carries a `baseRevision`.")).toEqual([
+        {
+          where: "getting-started/introduction",
+          href: "/docs/getting-started/introduction",
+          place: "opening",
+          names: [],
+          fields: ["baseRevision"],
+          text: "Each change carries a `baseRevision`.",
+        },
+      ])
+    })
+
+    /**
+     * One place naming both is one fault carrying both, which is what the author
+     * needs: they open one file and rewrite one paragraph.
+     */
+    it("reports one fault, not two, where a place names both", () => {
+      const found = given("A `TreeDelta` carries a `baseRevision`.")
+
+      expect(found.length).toBe(1)
+      expect(found[0]?.names).toEqual(["TreeDelta"])
+      expect(found[0]?.fields).toEqual(["baseRevision"])
+    })
+
+    it("reports nothing about plain words", () => {
+      expect(given("A change is a list of edits, each one against a revision.")).toEqual([])
+    })
   })
 
   /**

@@ -248,8 +248,17 @@ export const summariesRead = (): readonly { where: string; href: string; summary
  * Either vocabulary is enough to make a fault. A place that names one export
  * and four fields is **one** fault naming five things, not five faults — the
  * author is going to open one file and rewrite one paragraph.
+ *
+ * **Exported because `plainFaults()` is empty and is supposed to stay that
+ * way**, which makes every assertion over it satisfiable by a reader that
+ * finds nothing. Two mutations proved that on 2 November: the field half
+ * replaced with an empty list, and the `&&` holding the two halves together
+ * flipped to `||` — which switches *both* rules off — and the suite passed both
+ * times. The site cannot exercise a rule it keeps, so the one place that
+ * decides is handed a situation written in a test instead, which is the split
+ * the rest of this surface's checks are already built on.
  */
-const fault = (
+export const faultIn = (
   where: string,
   href: string,
   place: PlainPlace,
@@ -282,10 +291,10 @@ const fault = (
  * over the whole site reads better as a count than as the first thing it met.
  */
 export const plainFaults = (): readonly PlainFault[] => [
-  ...summariesRead().flatMap(({ where, href, summary }) => fault(where, href, "summary", summary)),
+  ...summariesRead().flatMap(({ where, href, summary }) => faultIn(where, href, "summary", summary)),
   ...writtenDocsSections.flatMap((section) =>
     section.pages.flatMap((page) =>
-      fault(
+      faultIn(
         `${section.slug}/${page.slug}`,
         docsHref(section.slug, page.slug),
         "opening",
