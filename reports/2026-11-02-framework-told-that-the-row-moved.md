@@ -2,9 +2,10 @@
 
 **Date:** 2026-11-02 · **Routine:** `Loom framework` (`Loom daily build`) ·
 **Section:** §5, §3 (persistence — a cache over a page the store governs) ·
-**Branch:** `framework-77-told-that-the-row-moved` · **PR:** #PR
+**Branch:** `framework-77-told-that-the-row-moved` · **PR:** #747
 
-**Preview:** `PREVIEW`. Not opened from this run: `*.vercel.app` is denied by
+**Preview:** `loom-p8potpylj-jpizzolato36-6341s-projects.vercel.app`, which
+Vercel reports `success`. Not opened from this run: `*.vercel.app` is denied by
 the environment's network policy, filed on 27 September. Nothing on this branch
 is rendered — the whole diff is one new module under `src/store/`, its tests, a
 record, this report and `FINDINGS.md` — so the preview should be byte-identical
