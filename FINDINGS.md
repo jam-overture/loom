@@ -8,6 +8,63 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-01 (evening) — the furniture outside a page is answered now, and the one line that applies it is each surface's
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom lessons` and `Loom portal` (paused) · **Status:** open — **the framework
+half is shipped and nothing is blocked**; what is left is one line per surface,
+and each surface decides when
+
+This answers the judgement `Loom marketing` left for this lane in
+[the 8 October entry](#2026-10-08--the-strip-above-the-page-is-answered-and-the-furniture-around-it-is-not-because-nothing-applies-the-colorscheme-that-themeground-already-computed),
+which asked where the boundary of a tree is and declined to guess. The answer is
+[0334](decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)
+and it is the second of the two candidates that entry named:
+
+**The root primitive must not declare `color-scheme`, and the reason is not
+taste — it cannot reach the thing the declaration is for.** A tree ends at the
+element the root primitive renders. The scrollbar beside the document, the
+canvas past the end of a short page and an unstyled form control all belong to
+the document element, which no tree ever contains. So the one-line fix that
+looked available to `Loom primitives` would have closed the entry, passed every
+test and fixed none of the three. **Nothing is asked of `src/primitives/`.**
+
+**What is published:** `themeDocumentCss(theme, ramp?)` from
+`@jam-overture/loom/react`. It returns the `:root` rule a host puts in a
+`<style>` on its own document — every variable `themeStyle` mounts, then the
+three `themeGround` returns. `:root` *is* the document element, which is what
+makes the declarations good.
+
+**The line each surface takes**, in its own root layout, where `theme` is
+whatever that surface already resolved:
+
+```tsx
+<style dangerouslySetInnerHTML={{ __html: themeDocumentCss(theme) }} />
+```
+
+Three things worth knowing before taking it, so nobody has to find them twice:
+
+- **A page cannot render its own `<html>`.** It gets one nested inside the real
+  one, and the variables reach the page only through the HTML parser's error
+  recovery. It happens to work, and no test can see that it only happens to —
+  React hoists a rendered `<html>`'s attributes onto the document element under
+  jsdom. A `<style>` needs no element of the host's own.
+- **`(marketing)` resolves its palette per request from the address** and its
+  layout deliberately does not read it, which is the arrangement the 8 October
+  entry said it would not argue with. A rule rendered by the *page* is hoisted
+  into the head by React and lands in the same place, so the layout need not
+  learn the palette.
+- **`(docs)` and `(demo)` carry `color-scheme` as a stylesheet constant today.**
+  That is correct for exactly as long as each wears the palette the constant was
+  written for, and silent in both directions when it stops. Replacing it is the
+  same one line and is not urgent.
+
+The application shell took it in the same change and is the reason the shape was
+known — it had written the rule by hand, and `SHELL_ROOT_CSS` is now
+`themeDocumentCss(shellTheme)` with byte-identical output, checked rather than
+assumed.
+
+---
 ## 2026-11-01 — `docs/publishing-primitives.md` says the package is 620 files and the tool that assembles it says 772
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom framework`
