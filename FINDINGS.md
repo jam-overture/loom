@@ -11,9 +11,10 @@ list and it is not a report.
 ## 2026-11-01 (evening) — the furniture outside a page is answered now, and the one line that applies it is each surface's
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,
-`Loom lessons` and `Loom portal` (paused) · **Status:** open — **the framework
-half is shipped and nothing is blocked**; what is left is one line per surface,
-and each surface decides when
+`Loom lessons` and `Loom portal` (paused) · **Status:** **`Loom marketing`'s row
+is closed, 2 November**, by `marketing-25-the-furniture-around-the-page`; **open
+for the other three** — the framework half is shipped and nothing is blocked,
+what is left is one line per surface, and each surface decides when
 
 This answers the judgement `Loom marketing` left for this lane in
 [the 8 October entry](#2026-10-08--the-strip-above-the-page-is-answered-and-the-furniture-around-it-is-not-because-nothing-applies-the-colorscheme-that-themeground-already-computed),
@@ -63885,3 +63886,97 @@ than widening the set in place. What a run must not do is fold the conversion
 order into `page` without answering the fault question, because the row would
 then carry a `spoiled` flag that is true of one of its two orders and silent
 about the other.
+
+---
+## 2026-11-02 — the application shell's not-found stylesheet is in the flight payload of every page of every surface, and on three of them it is the largest single thing in the response
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`apps/loom/app/not-found.tsx`, the application shell) · **Status:** open —
+**nothing is wrong on any page a reader opens**; this is weight, and on the
+light surfaces it is most of it
+
+Found while weighing this lane's own addition rather than looked for. The run
+that put a `:root` rule on the marketing document counted `:root {` blocks in
+the served response to see what its own rule cost, and there were four on a page
+that should have had one.
+
+`not-found.tsx` renders one `<style>` carrying `SHELL_ROOT_CSS` concatenated
+with `NOT_FOUND_STYLE` — 7,263 bytes, identified by its tail
+(`.not-found__way-out:focus-visible`) and by its canvas, which is the shell
+palette's `#ffffff` on a page served `bold`. Next keeps the not-found boundary
+in the RSC tree of every route, so the string is serialised into the flight
+payload whether or not anything 404s. Measured off a production build,
+`next start`, locally:
+
+```
+/docs                    35,727 B    2 copies   14,526 B   40.7%
+/lessons                 68,701 B    2 copies   14,526 B   21.1%
+/portal/sign-in          26,737 B    1 copy      7,263 B   27.2%
+/?theme=bold          2,884,608 B    2 copies   14,526 B    0.5%
+```
+
+**Three things worth separating, because they have different answers.**
+
+- **It is not a wrong colour.** The rule only becomes a `<style>` in the
+  document if the boundary renders, so no reader is served the shell's light
+  `:root` over a dark page today. It is bytes.
+- **It is the biggest single item on the three light surfaces**, and on `/docs`
+  it is more than twice the rest of the page put together. Those are the
+  surfaces whose weight nobody has had reason to look at, because the lane that
+  measured weight on 1 November was measuring a Loom-built page where this is
+  0.5% and the stylesheet-per-primitive defect is 93%.
+- **Why two copies and not one** is the part this lane cannot answer from
+  outside the shell. One copy appears on `/portal/sign-in` and two on the other
+  four surfaces sampled, which suggests a boundary nested twice rather than
+  anything about the CSS.
+
+**Not fixed here**, and the reason is the ordinary one: `not-found.tsx` is the
+application shell and the shell is `Loom daily build`'s. The shapes this lane
+would look at first, named so nobody has to rediscover them — serving the two
+blocks as a route-served stylesheet rather than as inline children; or
+rendering the `<style>` inside the not-found component's own subtree so it is
+only in the payload of a response that is actually a 404. Both are guesses from
+outside the lane and neither has been costed.
+
+---
+## 2026-11-02 — `themeDocumentCss` hands back the whole theme, so a surface whose every pixel is already a tree mounts its variables twice
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`src/render/document-theme.ts`) · **Status:** open — **a question about the
+published shape, not a defect**; the function is correct and this lane took it
+as published
+
+[0334](decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)
+is right about the boundary and `themeDocumentCss` is the right seam. This is
+about one sentence of its docblock: *"the variables are the half a host cannot
+write for itself, so withholding the rule over it would cost a page its whole
+palette."* That is true of the host 0334 was written for — the application
+shell, whose chrome is furniture with no theme mounted on it.
+
+**It is not true of a surface that is a tree all the way to its edges.**
+`(marketing)` mounts every `--loom-*` on the root primitive already, so the copy
+on `:root` is read by nothing inside the page. What the document actually needs
+is the three declarations `themeGround` returns, and there is no published way
+to ask for those as a rule.
+
+Measured on `/?theme=bold`, production build:
+
+```
+the rule in the head                1,976 B
+the same rule in the flight payload 1,976 B
+response                        2,884,608 B   → 0.14%
+```
+
+**So this is filed rather than worked around**, and the arithmetic is the reason
+it is worth saying out loud rather than acting on: a tenth of a percent does not
+justify this lane hand-writing a three-declaration rule, which would be a copy of
+a decision the palette owns kept somewhere the palette cannot reach — the hazard
+0197 and 0334 both exist to refuse. Taking the published function and filing the
+shape is the cheaper half of the trade in both directions.
+
+**What would answer it**, if the lane that owns the function agrees it is worth
+answering: a second export beside `themeDocumentCss` returning the `:root` rule
+with the ground alone, or an option on it. The two callers today want different
+halves — the shell wants the variables because it has none, and a Loom-built
+surface wants the ground because it already has the variables — which is the
+shape of a flag rather than of a new decision. Nothing is blocked either way.

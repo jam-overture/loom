@@ -4,6 +4,7 @@ import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { siteOrigin, WHY_USE_IT } from "@/app/(marketing)/_lib/site"
 import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
+import { DocumentTheme } from "@/app/(marketing)/_components/document-theme"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
 /**
@@ -41,6 +42,7 @@ const WhyUseItPage = async ({ searchParams }: { readonly searchParams: SearchPar
     <>
       <StructuredData route={WHY_USE_IT} origin={siteOrigin()} />
       <BrowserBar theme={rendered.theme} />
+      <DocumentTheme theme={rendered.theme} />
       {rendered.element}
     </>
   )
