@@ -57,7 +57,15 @@ const INLINE_CODE = /`([^`]+)`/g
  */
 const IDENTIFIER = /(?:^|[^A-Za-z0-9_$.])([A-Za-z_$][A-Za-z0-9_$]*)/g
 
-const identifiersIn = (code: string): readonly string[] =>
+/**
+ * Exported because a third claim about this site asks the same question of a
+ * different vocabulary. `fields.ts` reads the names a published *type* holds
+ * rather than the names the package publishes, and the two must agree about
+ * what an identifier is — above all about the dot, because
+ * `delta.baseRevision` shows a reader exactly where the name lives and is the
+ * one spelling neither rule should fire on.
+ */
+export const identifiersIn = (code: string): readonly string[] =>
   [...code.matchAll(IDENTIFIER)].map((match) => match[1] ?? "")
 
 /**

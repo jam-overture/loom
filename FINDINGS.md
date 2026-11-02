@@ -63911,6 +63911,150 @@ then carry a `spoiled` flag that is true of one of its two orders and silent
 about the other.
 
 ---
+## 2026-11-02 — the brief's own example names three things and the plain-language rule could see one, and the measurement says widen to the half of a vocabulary that cannot be English
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/fields.ts`) · **Status:** **closed on filing by
+`docs-74-a-field-is-not-an-export`**, closing the 31 October entry *the rule
+reads published exports, and two of the three names the brief's own example
+uses are not exports*
+
+That entry's recommendation was **revisit only with a measurement**, and it
+named the number that would decide it: *how many field names appear in a
+summary or an opening today.* Taken here, against the generated reference and
+the thirty-five written pages.
+
+**The wide answer is eleven, and none of them is a defect.** Reading every
+field name of every published type — 823 names that are not exports — against
+the summaries and the openings:
+
+| the hit | why it is not a defect |
+| --- | --- |
+| `loom` ×3, `primitives` ×1 | the matcher reading `` `@jam-overture/loom/primitives` `` as prose. Both **are** field names on something this package publishes |
+| `resolver`, `validator` on *Rendering a tree* | the sentence that names them is the sentence that defines them: *`resolver` answers "what component is this node"* |
+| `theme`, `system`, `signal` | the same shape, on two other pages |
+
+So the wide rule buys nothing and costs four false positives on the one
+construction this site writes in every installation paragraph. The entry's own
+costing predicted the ordinary-English half; it did not predict the specifier
+half, and that is the half that would have made the rule intolerable rather
+than merely noisy.
+
+### The subset that is a fact rather than a list
+
+**No English word is camelCase.** That is the same *kind* of claim holding the
+published-export set up — *an export name is almost never ordinary English* —
+and it is this lane's twice-written preference stated once more: an exception
+stated as a fact is stronger than an exception stated as a list.
+
+| | how many |
+| --- | --- |
+| names the package publishes | 1,855 |
+| declared inside a published `type`, `interface` or `class`, not exports | 823 |
+| **of those, camelCase — now checked** | **292** |
+| of those, one lowercase word — out of reach | 531 |
+| printed somewhere in this site's written prose | 20 |
+| **in a summary, an opening or a heading** | **0** |
+
+`policyId` appears eight times, `treeId` and `idFactory` seven each,
+**`baseRevision` three** — and never in a place a reader meets before the page
+has explained anything. The same discipline the export rule found, held the
+same number of times by nobody in particular, with nothing to notice the first
+page to break it. **No segment of any of the seventeen published specifiers is
+camelCase**, so the narrow rule cannot make the mistake the wide one makes.
+
+### What is still out of reach, and it is a third of the brief's example
+
+**`disposition` is one lowercase word and nothing here catches it.** It is a
+field on `RuntimeEvent`, `RepairRequest`, `CompositionOutcome` and
+`WriteOutcome`; it is exactly the unexplained noun the brief complains about;
+and the rule that would catch it is the rule that also flags *body*, *summary*,
+*code*, *theme* and 425 others. The brief names three things and this site can
+now see two.
+
+A second limit with a number rather than a sentence: **eleven published types
+are cut by `SIGNATURE_CAP` and 514 lines of them are not in the file this
+reader reads** — `RenderDiagnostic` shows 136 of 298. Whatever those lines
+declare, this check has never heard of.
+
+**Nothing is recommended as a next unit.** The measurement that would justify
+reaching for `disposition` is how often a single-word field turns up in an
+orientation, and it is zero, so the cost of leaving it is nothing.
+
+---
+## 2026-11-02 — the decision at the centre of the plain-language rule was held by nothing, and flipping one `&&` switched both vocabularies off with the suite green
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/plain.ts`) · **Status:** **closed on filing by
+`docs-74-a-field-is-not-an-export`** — and it is a **correction to what shipped
+on 31 October**, not only to what shipped today
+
+`plainFaults()` returns the empty list and is meant to keep returning it. That
+is the property the rule exists to defend, and it is also what made every
+assertion over it satisfiable by **a decision that reports nothing**. Two
+mutations against the committed branch went through forty-six tests unharmed:
+
+| what was put in | what failed |
+| --- | --- |
+| the field half of the decision replaced with an empty list | **nothing** |
+| `names.length === 0 && fields.length === 0` flipped to `\|\|`, which switches **both** rules off | **nothing** |
+
+The second one is the one worth reading twice. With `\|\|`, a place naming an
+export and no field returns no fault — so the export rule that has held this
+surface since 31 October was switched off, and the suite was green. The
+vacuity is **not** something today's unit introduced; the one-vocabulary
+version had exactly the same hole, and nothing had pointed a mutation at it.
+
+**The remedy is the split the rest of this surface already uses**: the site
+cannot exercise a rule it keeps, so the one place that decides is exported and
+handed a situation written in a test — an export named too early, a field named
+too early, one place naming both reported as **one** fault, and plain words
+reported as nothing. Four cases, and they kill both mutations.
+
+**The general version, because this is the third time this lane has met it.**
+`landing.ts`, `weight.ts` and now `plain.ts` all publish a site-wide list that
+is empty by design. *An assertion that a list is empty is not a test of the
+thing that fills it* — and the cheap guard is always the same: export the one
+pure decision and give it the situation the site does not have. Worth applying
+to the next check of this shape before a mutation has to find it.
+
+---
+## 2026-11-02 — a reader who meets a field name on these pages cannot look it up, and the names index cannot hold the answer at its present shape
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/build.ts`) · **Status:** open — **a lever
+measured and found to be over budget**, so the next run does not spend a unit
+discovering that
+
+The rule shipped today says an opening may not hand a reader `baseRevision`
+before the page has said what it is for. The reason it may not is that **there
+is nowhere to send them**: the API reference is generated from the names the
+package *publishes*, a field is a line inside one of those names, and typing
+`baseRevision` into the search box finds the three pages whose prose happens to
+print it and nothing that says what it is.
+
+The obvious answer is to put the 292 names in the names index, each pointing at
+the declarations that hold it. **Measured on this branch**, as a field → owning
+declaration map beside the existing entries:
+
+| | raw | gzipped |
+| --- | --- | --- |
+| the names file today | 36,174 | 10,238 |
+| **its caps** | **40,000** | **12,000** |
+| with 292 fields and their 649 pairs | 61,067 | 14,183 |
+| the delta | **+24,893** | **+3,945** |
+
+**Over both caps, and not by a little.** Today's headroom is 3,826 raw bytes
+and the addition wants 24,893 — the names file would have to grow by 69% to
+answer a question it has never been asked.
+
+**Recommendation: not as an index entry.** The cheap shape, if this is ever
+wanted, is the one the reference page already has the data for — a field's
+owning declaration is on the page that renders that declaration, so the answer
+is an **anchor within a signature** rather than a row in a file every reader
+downloads. That costs nothing at the door and is a change to how a reference
+page is drawn, which is a unit of its own. Recorded with the numbers so the
+next run reaching for the index finds the measurement rather than the idea.
 ## 2026-11-02 — the application shell's not-found stylesheet is in the flight payload of every page of every surface, and on three of them it is the largest single thing in the response
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`

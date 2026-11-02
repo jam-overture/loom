@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest"
 
+import { publishedFields } from "./api/fields"
 import { publishedNames } from "./api/mentions"
+import { writtenDocsSections } from "./nav"
+import { readPageSource } from "./search/headings"
 import {
   everyDocsPage,
+  faultIn,
+  fieldsNamedIn,
   namesNamedIn,
   openingOf,
   pagesWithoutAnOpening,
@@ -32,8 +37,20 @@ describe("the plain version first", () => {
    * the pages and the sentences instead of `expected 1 to be 0` — the author
    * who broke it is looking at a test failure and wants the file to open.
    */
-  it("hands a reader no export's name before the page has said what it is for", () => {
+  it("hands a reader no name before the page has said what it is for", () => {
     expect(plainFaults().map(plainFaultSentence)).toEqual([])
+  })
+
+  /**
+   * The same claim, stated about the vocabulary that was added second, so a
+   * failure says which rule went red.
+   *
+   * Two hundred and ninety-two camelCase field names, twenty of them printed
+   * somewhere on these pages and `baseRevision` three times — and none of them
+   * in a place a reader meets before the page has explained anything.
+   */
+  it("hands a reader no field name either, which has no page to look it up on", () => {
+    expect(plainFaults().filter(({ fields }) => fields.length > 0)).toEqual([])
   })
 
   /**
@@ -65,6 +82,97 @@ describe("the plain version first", () => {
       "renderLoomTree",
       "createTree",
     ])
+  })
+
+  /**
+   * The same guard for the second vocabulary, and it has to be the stronger
+   * version: the field reader is pointed at the names **this site really
+   * prints**, not at a sentence written here. Twenty of the two hundred and
+   * ninety-two appear in these pages' prose, so a reader that comes back empty
+   * from the whole site is broken rather than vindicated.
+   */
+  it("finds the field names this site prints, so finding none in an opening means something", () => {
+    expect(publishedFields.size).toBeGreaterThan(200)
+    expect(fieldsNamedIn("Each delta carries a `baseRevision`.")).toEqual(["baseRevision"])
+
+    const printed = new Set(
+      writtenDocsSections.flatMap((section) =>
+        section.pages.flatMap((page) =>
+          fieldsNamedIn(readPageSource(section.slug, page.slug))
+        )
+      )
+    )
+
+    expect(printed.size).toBeGreaterThan(10)
+    expect(printed).toContain("baseRevision")
+  })
+
+  /**
+   * **Non-vacuity of the decision itself**, which is a different claim from
+   * non-vacuity of the readers above and the one three mutations walked
+   * straight through.
+   *
+   * `plainFaults()` is empty and is meant to stay empty, so every assertion
+   * over it is satisfied by a decision that reports nothing. Switching the
+   * field half off, and flipping the `&&` that holds the two halves together to
+   * an `||` — which turns *both* rules off — were each invisible to this file
+   * until these four cases existed. The site cannot exercise a rule it keeps,
+   * so the one place that decides is handed a situation written here.
+   */
+  describe("the one place that decides, given a situation this site does not have", () => {
+    const given = (text: string) =>
+      faultIn("getting-started/introduction", "/docs/getting-started/introduction", "opening", text)
+
+    it("reports an export named before the page has said what it is for", () => {
+      expect(given("A `TreeDelta` is an ordered list.")).toEqual([
+        {
+          where: "getting-started/introduction",
+          href: "/docs/getting-started/introduction",
+          place: "opening",
+          names: ["TreeDelta"],
+          fields: [],
+          text: "A `TreeDelta` is an ordered list.",
+        },
+      ])
+    })
+
+    it("reports a field named before the page has said what it is for", () => {
+      expect(given("Each change carries a `baseRevision`.")).toEqual([
+        {
+          where: "getting-started/introduction",
+          href: "/docs/getting-started/introduction",
+          place: "opening",
+          names: [],
+          fields: ["baseRevision"],
+          text: "Each change carries a `baseRevision`.",
+        },
+      ])
+    })
+
+    /**
+     * One place naming both is one fault carrying both, which is what the author
+     * needs: they open one file and rewrite one paragraph.
+     */
+    it("reports one fault, not two, where a place names both", () => {
+      const found = given("A `TreeDelta` carries a `baseRevision`.")
+
+      expect(found.length).toBe(1)
+      expect(found[0]?.names).toEqual(["TreeDelta"])
+      expect(found[0]?.fields).toEqual(["baseRevision"])
+    })
+
+    it("reports nothing about plain words", () => {
+      expect(given("A change is a list of edits, each one against a revision.")).toEqual([])
+    })
+  })
+
+  /**
+   * The third place, measured and deliberately not enforced — recorded for the
+   * field vocabulary the same way it is for the export one, because a heading is
+   * an address and somebody who typed a name should be able to land on it.
+   */
+  it("records that no heading names a field either, without forbidding one", () => {
+    expect(writtenHeadings().flatMap(fieldsNamedIn)).toEqual([])
   })
 
   /**
@@ -201,6 +309,7 @@ describe("the plain version first", () => {
       href: "/docs/getting-started/introduction",
       place: "opening" as const,
       names: ["TreeDelta"] as const,
+      fields: [] as const,
       text: "A `TreeDelta` is an ordered list of operations.",
     }
 
@@ -222,6 +331,38 @@ describe("the plain version first", () => {
       expect(plainFaultSentence({ ...fault, names: ["TreeDelta", "createTree"] })).toContain(
         "what they are for"
       )
+    })
+
+    /**
+     * The clause an author will not guess the remedy for. Told that an opening
+     * names `TreeDelta`, the obvious fix is to link the reference page; told
+     * that it names `baseRevision`, they need to know there is no page to link
+     * to.
+     */
+    it("says a field has no page of its own, because that changes the remedy", () => {
+      const sentence = plainFaultSentence({ ...fault, names: [], fields: ["baseRevision"] })
+
+      expect(sentence).toContain("`baseRevision`")
+      expect(sentence).toContain("a field, with no page of its own")
+      expect(sentence).toContain("what it is for")
+    })
+
+    it("says it of several fields in the plural", () => {
+      expect(
+        plainFaultSentence({ ...fault, names: [], fields: ["baseRevision", "treeId"] })
+      ).toContain("fields, with no page of their own")
+    })
+
+    /**
+     * One place that hands a reader an export and two fields is **one** fault
+     * naming three things, and the count has to agree across both halves — the
+     * author opens one file and rewrites one paragraph.
+     */
+    it("counts both vocabularies when it agrees about one name and several", () => {
+      const both = { ...fault, names: ["TreeDelta"] as const, fields: ["baseRevision"] }
+
+      expect(plainFaultSentence(both)).toContain("what they are for")
+      expect(plainFaultSentence(both)).toContain("`TreeDelta` and `baseRevision`")
     })
   })
 })
