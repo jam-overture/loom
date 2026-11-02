@@ -4,6 +4,19 @@
 (`Loom daily build`) · **Section:** §4 (the application shell), §4b (the
 document rule) · **Branch:** `framework-78-the-dress-a-boundary-fetches`
 
+**Preview:**
+`loom-git-framework-78-the-dr-ecf5a1-jpizzolato36-6341s-projects.vercel.app/no-such-address`,
+which Vercel reports `Ready`; combined status `success`, `mergeable_state:
+clean`. Taken from Vercel's own comment on #752 rather than composed, which is
+what the 16 October entry warns against.
+
+**Not opened from this run.** It was tried once rather than assumed: the
+environment's network policy denied `*.vercel.app` with a 403 from the proxy,
+which is the 27 September entry, still open and still the maintainer's. The
+measurements in this report are from a local production build and `next start`
+instead — which is the right instrument for them anyway, since they are byte
+counts of served responses.
+
 ![The 404's dress was on every page of every surface, and is now on the 404](2026-11-02-framework-the-dress-a-boundary-fetches.svg)
 
 ## What was completed
