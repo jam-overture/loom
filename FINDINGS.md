@@ -63921,7 +63921,7 @@ a vocabulary whose four members say page or measurement*
 That entry asked for the fault question first and warned that a table written by
 analogy is how a fault vocabulary comes to be wrong in one of its two places. It
 was right to warn, and **its own two worked examples were both wrong**
-([0335](decisions/0335-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)):
+([0336](decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)):
 
 - It supposed `actions-uncredited` **may well** reach a conversion loss, since a
   question whose second end asks for `activated` is about presses. It cannot. A
@@ -63962,7 +63962,7 @@ same record.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/health.ts`) · **Status:** open — **the stated shape of
-[0335](decisions/0335-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)**;
+[0336](decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)**;
 nothing is broken, and nothing is asked of anybody today
 
 `CollectionFault` has seven members and three published answers each: `remedyOf`

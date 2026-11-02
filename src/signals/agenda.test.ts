@@ -193,7 +193,7 @@ const question = (
  *
  * The funnel rows default to none, which is a deployment that asks its readers
  * nothing — every page `unasked` in the order of conversions, which is where the
- * join stood before the third order existed (0335).
+ * join stood before the third order existed (0336).
  */
 const agendaOf = (
   readings: readonly PageReading[],
@@ -530,7 +530,7 @@ describe("deploymentAgendaOf", () => {
 })
 
 /**
- * The third order, joined (0335). What is being tested is not that a list
+ * The third order, joined (0336). What is being tested is not that a list
  * arrived but that the join asks each order whether *its own* figure survived
  * the faults on the row — because the two answers differ, and reading one off
  * the other is the 0330 defect put back by a shortcut.

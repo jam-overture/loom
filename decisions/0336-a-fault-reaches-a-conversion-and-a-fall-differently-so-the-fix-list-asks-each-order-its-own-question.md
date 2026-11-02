@@ -1,10 +1,18 @@
-# 0335 — A fault reaches a conversion and a fall differently, so the fix-list asks each order its own question
+# 0336 — A fault reaches a conversion and a fall differently, so the fix-list asks each order its own question
 
 **Status:** Accepted
 
 **Date:** 2 November 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-11-02**, from 0335, when the branch that carried it (#748)
+> was merged. `main` had meanwhile accepted a different 0335 — *a cache over a
+> governed page is told the row moved, by the handle that appended* (#747) —
+> and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> This record was written on 2 November and nothing in it changed but its
+> number; the citations on the branch were updated with it.
 
 ## Context
 

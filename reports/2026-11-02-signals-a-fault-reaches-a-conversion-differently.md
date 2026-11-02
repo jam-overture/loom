@@ -137,7 +137,7 @@ for whichever run next has a reason to touch this vocabulary.
 
 ## Records added
 
-- **[0335](../decisions/0335-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)
+- **[0336](../decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)
   — A fault reaches a conversion and a fall differently, so the fix-list asks
   each order its own question.** Accepted. It supersedes nothing: every member of
   0330's vocabulary keeps its name and its meaning, and `AgendaRow.spoiled`
@@ -190,7 +190,7 @@ src/signals/health.test.ts              52 tests passed (4 new)
 **Nothing failed and nothing was skipped or weakened.** Two tests did fail on
 the way, both from repository rules rather than from the logic, and both were
 fixed rather than relaxed: `tools/decisions/decisions.test.ts` rejected a
-citation of 0335 before the record existed and then rejected a wrong filename in
+citation of 0336 before the record existed and then rejected a wrong filename in
 one of its links, and `src/documentation.test.ts` rejected three doc comments in
 which a record number had become part of a published sentence — the maintainer's
 rule that a casual reader of the API reference should never meet a bare `(0007)`

@@ -836,7 +836,7 @@ describe("collectionHealthOf", () => {
     })
 
     /**
-     * The same half of a fault, asked about the other order (0333, 0335).
+     * The same half of a fault, asked about the other order (0333, 0336).
      * Answered for every member here for the reason its sibling is: the join
      * that reads both must not be able to transfer one answer to the other
      * question.

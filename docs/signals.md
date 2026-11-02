@@ -4286,7 +4286,7 @@ loss — because a table written by analogy is how a fault vocabulary comes to b
 wrong in one of its two places.
 
 **Done**
-([0335](../decisions/0335-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)),
+([0336](../decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)),
 as `spoilsTheConversion` in [`health.ts`](../src/signals/health.ts) and a third
 argument to `deploymentAgendaOf` in [`agenda.ts`](../src/signals/agenda.ts).
 

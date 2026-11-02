@@ -59,7 +59,7 @@ import {
  * as a fall is, so `page` covers both and the row says which evidence it has.
  * Widening the set to a third dimension would give eight combinations over a
  * flat set of four and would rename `both`, which is a change to an accepted
- * vocabulary rather than an addition to it (0330, 0335).
+ * vocabulary rather than an addition to it (0330, 0336).
  *
  * ## It publishes no reader count, and that is the rule rather than an omission
  *
@@ -89,7 +89,7 @@ import {
  * repair a sender while four hundred readers a day stop at a band.
  *
  * **The two answers are not interchangeable and this reading asks each
- * separately**, which is the defect 0335 was written to make impossible. Only
+ * separately**, which is the defect 0336 was written to make impossible. Only
  * one of the seven survives the conversion key, and it is not the same one: a
  * rollup window shorter than the visits being measured *manufactures* a
  * conversion loss, because `converted` is a conjunction inside one window and a
@@ -140,7 +140,7 @@ import {
  * that type-checks, runs, and says `none` about the half of the product that
  * pays — which is the hazard this subsystem has now recorded in four places. A
  * deployment that asks nothing of its readers hands in the order it gets, in
- * which every page is `unasked`, and reads exactly as it did before 0335.
+ * which every page is `unasked`, and reads exactly as it did before 0336.
  *
  * Pure, linear in the three readings, and reaches no store, clock or DOM.
  */
@@ -152,7 +152,7 @@ import {
  * the same axis as *which part of the page*. A page that loses readers while
  * they read and a page that loses them at an ask are both `page`; the row's own
  * {@link AgendaRow.order} and {@link AgendaRow.conversion} say which, and they
- * say it in the two readings' own figures (0335).
+ * say it in the two readings' own figures (0336).
  */
 export type AgendaWork =
   /**
@@ -233,7 +233,7 @@ export type AgendaRow = {
    *
    * Its name and its meaning are unchanged (0330), and it says nothing about the
    * other order — {@link AgendaRow.spoiledConversion} does, and no surface may
-   * read one off the other (0335).
+   * read one off the other (0336).
    */
   readonly spoiled: boolean
   /**
@@ -247,7 +247,7 @@ export type AgendaRow = {
    * **It is not {@link AgendaRow.spoiled} with the word changed.** The two can
    * disagree on one row, and the fault that makes them disagree is the ordinary
    * one — a rollup window shorter than the visits being measured is divided out
-   * of a fall and manufactures a leak (0147, 0335).
+   * of a fall and manufactures a leak (0147, 0336).
    */
   readonly spoiledConversion: boolean
   /** The page as the order of falls has it, carried whole and unchanged. */
@@ -285,7 +285,7 @@ export type DeploymentAgenda = {
    * The second half of the page writer's work, and a list of its own rather
    * than rows appended to {@link DeploymentAgenda.page}, because the two keys
    * are readers in two units and merging them would publish a rank in neither
-   * (0327, 0335). A page may stand in both lists, and is one page in every
+   * (0327, 0336). A page may stand in both lists, and is one page in every
    * count here.
    */
   readonly converting: readonly AgendaRow[]
@@ -306,7 +306,7 @@ export type DeploymentAgenda = {
    * figure its own fault may have produced. Each carries the ranks it was taken
    * out of, and says which of the two was withdrawn —
    * {@link AgendaRow.spoiled}, {@link AgendaRow.spoiledConversion} or both,
-   * since a fault need not reach both keys (0335).
+   * since a fault need not reach both keys (0336).
    */
   readonly contested: readonly AgendaRow[]
   /**
@@ -409,7 +409,7 @@ const byKey = <Row extends ReadingOfAudience>(
  *
  * `evidence` is *at least one rank this deployment may act on* — a fall no fault
  * reaches, or a leak no fault reaches. The two are asked separately because the
- * two answers differ (0335), and `ranked` is *either order put the page in it*,
+ * two answers differ (0336), and `ranked` is *either order put the page in it*,
  * because a page with a rank nobody may act on is collection work whichever
  * order gave it.
  */
@@ -427,7 +427,7 @@ const workOf = (ranked: boolean, faulted: boolean, evidence: boolean): AgendaWor
  * fill both lists would put a page whose fall a fault manufactured into the
  * order of falls on the strength of its sound leak, and the other way round.
  * That is the 0330 defect reintroduced by a shortcut, and it is the one thing a
- * reader of this file should not simplify back (0335).
+ * reader of this file should not simplify back (0336).
  */
 const asksToRewriteTheFall = (row: AgendaRow): boolean =>
   row.order.standing === "ranked" && !row.spoiled

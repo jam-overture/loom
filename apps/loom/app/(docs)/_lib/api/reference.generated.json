@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5196,7 +5196,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5666,7 +5666,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6754,7 +6754,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7331,7 +7331,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7531,10 +7531,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 38,
+      "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7854,6 +7854,37 @@
               "kind": "function",
               "signature": "const attributeTree: (reader: TreeReader, tree: LoomTree, request?: AttributionRequest) => Promise<Result<TreeAttribution, StoreError>>",
               "summary": "Attributes every node in a tree, walking that tree's log backwards."
+            }
+          ]
+        },
+        {
+          "module": "store/cache",
+          "title": "Cache",
+          "summary": "Serving a stored page without reading its row every time, and being told the moment the row moves.",
+          "symbols": [
+            {
+              "name": "treeCacheTag",
+              "kind": "function",
+              "signature": "const treeCacheTag: (treeId: TreeId) => string",
+              "summary": "The tag a cached reading of one tree carries."
+            },
+            {
+              "name": "TreeCache",
+              "kind": "interface",
+              "signature": "interface TreeCache {\n    readonly readThrough: (key: readonly string[], tags: readonly string[], load: () => Promise<unknown>) => Promise<unknown>;\n}",
+              "summary": "Where a host's cache is reached, and the one obligation on it."
+            },
+            {
+              "name": "cachingTreeStore",
+              "kind": "function",
+              "signature": "const cachingTreeStore: (store: TreeStore, cache: TreeCache) => TreeStore",
+              "summary": "A handle whose `head` is answered from a cache, and whose other reads are not."
+            },
+            {
+              "name": "invalidatingTreeStore",
+              "kind": "function",
+              "signature": "const invalidatingTreeStore: (store: TreeStore, invalidate: (tag: string) => void) => TreeStore",
+              "summary": "A handle that tells a cache the log grew, every time it does."
             }
           ]
         },
@@ -8266,7 +8297,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8645,7 +8676,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8873,7 +8904,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12871,7 +12902,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13006,7 +13037,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13068,7 +13099,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13593,7 +13624,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13663,7 +13694,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14085,7 +14116,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1856,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
