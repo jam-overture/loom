@@ -64467,3 +64467,58 @@ than an open question.
 Nothing. `Loom portal` is paused and this waits for it, at no cost: the rule is
 written down, which is the whole point of the entry, and the portal's own
 boundaries are markup rather than a stylesheet. No exception is being asked for.
+
+---
+## 2026-11-02 (evening) — this routine's stored prompt claims two lanes that `docs/routines.md` gave away in August
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` (the stored
+prompt for `Loom framework` / `Loom daily build`) · **Status:** open —
+**nothing was done wrong and nothing is blocked**; this run followed
+`docs/routines.md` and stayed out of both, and the entry exists so the next one
+does not have to work it out again
+
+The prompt this routine runs from says, under *Your lane*:
+
+> **`src/` except `src/primitives/`**, plus the migration above and the demo.
+> […] **The demo**, which is yours.
+
+`docs/routines.md`, which the same prompt instructs this routine to read first
+as governance, says something different in two places:
+
+| | the prompt | `docs/routines.md` |
+| --- | --- | --- |
+| `src/signals/` | this lane's, by omission from the exception | **`Loom signals`'**, and that routine is active — it reported this morning |
+| `apps/loom/app/(demo)/` | *"the demo, which is yours"* | **`Loom demo`'s**, split out of this routine on 20 August |
+
+`routines.md` is right in both cases and gives its reasons: `Loom signals` owns
+`src/signals/` and `docs/signals.md`, and `Loom demo` was split out because *"a
+demo is judged by whether it lands, not by whether it is correct, and those are
+different objectives that pull in different directions"* — this routine had
+built one and your verdict was that it was clunky.
+
+**So the prompt is a snapshot of the lane table from before two splits.** This
+run resolved it the only way it can be resolved from inside a run: the prompt
+names `routines.md` as the governance file, so `routines.md` wins on lanes, and
+nothing in `src/signals/` or `app/(demo)/` was touched.
+
+**It is worth your thirty seconds anyway**, because the failure mode is
+asymmetric. A future run that reads the prompt's sentence and not the table —
+or that reads the table and believes the prompt overrides it, since the prompt
+is what it exists to carry out — reaches into an active routine's directory and
+races it for the same files, which is the one thing the lane table exists to
+stop. The prompt's own §4 *the demo, which is yours* sits in a numbered priority
+list, which makes it read as an instruction rather than as background.
+
+The migration section at the top of the prompt is stale in the same way and
+harmlessly so: `apps/loom` has existed since 19 August and all four route groups
+are in place, which `routines.md` records. A run spends a little time confirming
+that before it can start, and that is all it costs.
+
+### Needs your input
+
+**One edit, whenever convenient:** in the `Loom framework` prompt, change the
+lane line to `src/` except `src/primitives/` **and `src/signals/`**, drop *and
+the demo* and the later *The demo, which is yours*, and replace the migration
+section with a line saying it landed on 19 August. Nothing is blocked until then
+and no run is at risk that reads `routines.md` first, which this one is
+instructed to do.
