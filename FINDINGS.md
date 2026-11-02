@@ -63885,3 +63885,88 @@ than widening the set in place. What a run must not do is fold the conversion
 order into `page` without answering the fault question, because the row would
 then carry a `spoiled` flag that is true of one of its two orders and silent
 about the other.
+
+---
+## 2026-11-02 — the fall's fault table could not be transferred to the conversion, and both guesses at it were backwards
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/agenda.ts`) · **Status:**
+**closed on filing by `signals-69-a-fault-reaches-a-conversion-differently`**,
+closing the 1 November (evening) entry *the agenda has a third order to join and
+a vocabulary whose four members say page or measurement*
+
+That entry asked for the fault question first and warned that a table written by
+analogy is how a fault vocabulary comes to be wrong in one of its two places. It
+was right to warn, and **its own two worked examples were both wrong**
+([0335](decisions/0335-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)):
+
+- It supposed `actions-uncredited` **may well** reach a conversion loss, since a
+  question whose second end asks for `activated` is about presses. It cannot. A
+  funnel end is satisfied out of the `(tree, revision, nodeId, kind)` view sets
+  `rollupOf` keeps, and the ancestry a delegated signal carries feeds exactly one
+  counter, `engaged` (0167). No funnel figure is made of it.
+- It supposed `counts-inflated` **does** transfer as `false`, since the
+  conversion key divides the same inflation out of the same door row. It does
+  not. A fall is a difference of two independent distinct-view counts, so the
+  straddle is in both ends and the division puts the difference back on the
+  door's scale (0219). `converted` is a **conjunction inside one rollup window**,
+  so a conversion split across two windows is lost rather than double-counted
+  (0147) — and the division corrects the scale of a count rather than a count
+  that was never made.
+
+**The part worth keeping, beyond the two answers.** `counts-inflated` is the one
+fault of the seven a fall is explicitly safe from, and it is the fault a
+conversion is least safe from; it is also one of only three that can be seen on a
+ranked page at all. So the single most likely wrong row in a transferred table
+was the single most consequential one, and every symptom of the mistake would
+have been a page in the wrong order with a true-looking number on it. The remedy
+that generalises is not *check the table*: it is that a figure's exposure to a
+fault is a property of **what the counter is made of**, and a counter built by
+intersecting two sets inside one window has an error no scaling of the window's
+drift can reach.
+
+**What was not taken, and is a judgement rather than an omission.**
+`AgendaRow.spoiled` keeps 0330's name while its sibling is `spoiledConversion`,
+so the pair is asymmetric where `spoiledLoss` / `spoiledConversion` would read
+better. Renaming a published field whose meaning is unchanged buys legibility
+with churn and a superseded record, so the asymmetry is stated on both members
+instead. **Recommendation:** a run that touches this vocabulary for another
+reason — an eighth fault, or a sixth kind — should take the rename then, in the
+same record.
+
+---
+## 2026-11-02 — the fault vocabulary now has three published statements per member, and two of the three are about a figure somewhere else
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`) · **Status:** open — **the stated shape of
+[0335](decisions/0335-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)**;
+nothing is broken, and nothing is asked of anybody today
+
+`CollectionFault` has seven members and three published answers each: `remedyOf`
+(whose hand it falls to), `spoilsTheLoss` (whether it reaches the key an order of
+falls is ranked on) and `spoilsTheConversion` (whether it reaches the key an
+order of conversions is ranked on). The first is a statement about the fault. The
+other two are statements about **ranking keys that live in other files**, kept
+here because a fault vocabulary written in two places is this subsystem's
+commonest defect — which is the right trade and is also why this is worth
+writing down.
+
+**What a future run should hold.** Every new ranked order over these pages adds a
+fourth, fifth and sixth answer to a seven-member vocabulary, and each one is a
+per-fault argument from what its counter is made of. Two signs that the shape has
+run out, neither of which has arrived:
+
+- **An answer that needs a figure rather than a boolean.** `counts-inflated`
+  reaches a conversion key by an amount `PairReach.rateAtMost` already bounds for
+  the rate. Today the page simply leaves the order, which is the safe call and
+  loses a real ranking. A bound on the key — *this page's leak is between n and
+  m* — would be a reading rather than a fault answer, and it belongs beside the
+  funnel, not here.
+- **A fourth order whose key is not a headcount at the door's scale.** All three
+  today are, which is what lets one `contested` slice serve them. One that is not
+  would need its own.
+
+**Recommendation: nothing, yet.** Adding a fourth answer when a fourth order
+arrives is cheaper than generalising now, and generalising a table of seven
+booleans into a mechanism is how the argument per fault stops being written down,
+which is the thing that has cost this subsystem a real bug twice.

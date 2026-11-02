@@ -395,6 +395,13 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
  * let through, so the day a standing changes the two readings do not silently
  * come apart.
  *
+ * ## Its sibling answers the same question about the other order
+ *
+ * {@link spoilsTheConversion} is this for the order of a deployment's
+ * conversions (0333), and it is **not this function with a word changed**: a
+ * short window is corrected for here and manufactures the loss there. Neither
+ * answer may be read off the other.
+ *
  * The two that can be seen are the two worth seeing. `rows-mishandled` is a
  * tree and a window that do not belong together, which leaves most of the page
  * reading `skipped` — so it manufactures the steepest fall in the deployment and
@@ -412,6 +419,95 @@ export const spoilsTheLoss = (fault: CollectionFault): boolean => {
       return true
     case "counts-inflated":
       return false
+    case "collection-stalled":
+      return true
+    case "actions-uncredited":
+      return false
+    case "rows-mishandled":
+      return true
+    case "audiences-mixed":
+      return true
+  }
+}
+
+/**
+ * Whether a fault reaches the figure an order of a deployment's conversions is
+ * ranked on, which is readers lost **between** the two ends of a question,
+ * deflated to the door's scale.
+ *
+ * The order is
+ * [0333](../../decisions/0333-a-deployments-conversions-are-a-third-order-ranked-on-the-loss-between-the-two-ends.md)
+ * and the join that reads this is [`agenda.ts`](agenda.ts).
+ *
+ * The sibling of {@link spoilsTheLoss}, and it is here for the same reason that
+ * one is: the question is about a fault, and a fault vocabulary written in two
+ * places is this subsystem's commonest defect.
+ *
+ * ## It is not {@link spoilsTheLoss} with the word changed
+ *
+ * The two answers differ on one fault and agree on another for a different
+ * reason, and both of those were found by arguing from what the counters are
+ * made of rather than by analogy — which is the way a fault vocabulary comes to
+ * be right in one of its two places and wrong in the other.
+ *
+ * - **`counts-inflated` is `false` for a fall and `true` here.** A fall is a
+ *   difference of two independent distinct-view counts, so a short window
+ *   inflates both ends of the subtraction and `lost ÷ (1 + inflation)` puts the
+ *   difference back on the door's scale (0219, 0250). A conversion is **not** a
+ *   difference of two independent counts: `converted` is a *conjunction inside
+ *   one rollup window*, so a page view that satisfied the first end in one
+ *   window and the second in the next contributes `reached 1, converted 0` and
+ *   its conversion is lost rather than double-counted (0147). A window shorter
+ *   than the visits being measured therefore **manufactures the very loss this
+ *   order ranks**, and dividing by the straddle corrects the scale of the count
+ *   and not the count. `PairReach.rateAtMost` bounds that error for the rate;
+ *   nothing bounds it for the key, which is why the page leaves the order.
+ * - **`actions-uncredited` is `false` in both places and not for the same
+ *   reason.** A fall survives it because a fall is made of `reached` and an
+ *   uncredited sender spends `engaged` (0242). A conversion survives it because
+ *   **no funnel figure is made of `engaged` at all**: an end is satisfied by the
+ *   node a signal names and the kind it is, and the ancestry a signal carries
+ *   feeds exactly one counter, which is `engaged` (0167). A question whose
+ *   second end asks for `activated` on a control is answered from the control's
+ *   own signal, so the fault cannot touch it.
+ *
+ * ## The four that transfer, and why
+ *
+ * `door-unscaled` leaves the loss with no scale to be comparable on;
+ * `openings-unmarked` leaves it with no denominator; `audiences-mixed` reads one
+ * question of two populations (0300). All three are `true` and, exactly as in
+ * {@link spoilsTheLoss}, **none of them can co-occur with a conversion rank
+ * today**, because the order already refuses those pages as `unscaled`,
+ * `unopened` and `unsplit`. They are answered anyway, so that the day a
+ * standing changes the two readings do not silently come apart.
+ *
+ * `rows-mishandled` is `true` for both halves of what it names. A tree and a
+ * window that do not belong together answers this revision's questions with
+ * another revision's counters (0212), and a row handed in twice doubles
+ * `reached` and `converted` together, which doubles the loss while leaving the
+ * rate intact — so the ranking key moves and the figure beside it does not say
+ * so (0147).
+ *
+ * `collection-stalled` is `true` for the reason it is for a fall: the counts are
+ * of one window and the scale is of another, because a fold that has stopped
+ * freezes the funnel rows while the door goes on counting arrivals. It
+ * understates, so a stalled page's place is a floor on its trouble rather than a
+ * measure of it.
+ *
+ * ## Which can be seen on a ranked page
+ *
+ * Three, where a fall has two: `counts-inflated`, `collection-stalled` and
+ * `rows-mishandled`. The extra one is the fault a fall is explicitly safe from,
+ * which is the whole reason this answer could not be transferred.
+ */
+export const spoilsTheConversion = (fault: CollectionFault): boolean => {
+  switch (fault) {
+    case "door-unscaled":
+      return true
+    case "openings-unmarked":
+      return true
+    case "counts-inflated":
+      return true
     case "collection-stalled":
       return true
     case "actions-uncredited":

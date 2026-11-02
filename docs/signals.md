@@ -4273,6 +4273,70 @@ measurement*, and it needs the per-fault answer `spoilsTheLoss` gives for a
 fall; and still **nothing draws any of it**, which is `Loom portal`'s and is now
 twenty-one runs old.
 
+### 69. The fault that reaches one order and not the other · `Loom signals` · **done, 2 November**
+
+[0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)
+answers *what should this deployment do next* and
+[0333](../decisions/0333-a-deployments-conversions-are-a-third-order-ranked-on-the-loss-between-the-two-ends.md)
+built the order it was silent about, both on 1 November, with the join left for
+its own unit. The finding that day named the two questions that join is, and
+said plainly what a run must not do: fold the conversion order into `page`
+without first answering, fault by fault, whether a fault reaches a conversion
+loss — because a table written by analogy is how a fault vocabulary comes to be
+wrong in one of its two places.
+
+**Done**
+([0335](../decisions/0335-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)),
+as `spoilsTheConversion` in [`health.ts`](../src/signals/health.ts) and a third
+argument to `deploymentAgendaOf` in [`agenda.ts`](../src/signals/agenda.ts).
+
+- **Both of the finding's own guesses at the table were wrong, in opposite
+  directions**, and the rollup is what says so. `actions-uncredited` cannot
+  reach a conversion: a funnel end is satisfied by the node a signal names and
+  the kind it is, and the ancestry a delegated signal carries feeds `engaged`
+  and nothing else (0167) — the same answer as for a fall, by a different
+  argument. And `counts-inflated` **does** reach one: a fall is a difference of
+  two independent distinct counts, so the key divides the straddle back out
+  (0219), where `converted` is a conjunction inside one rollup window, so a
+  conversion split across two windows is *lost* rather than double-counted
+  (0147). A short window manufactures the loss this order ranks, and no division
+  corrects a count that was never made.
+- **So one row can be sound evidence in one order and an artefact in the
+  other**, which is the fact the whole unit is built around. A page carrying
+  `counts-inflated` keeps its place among the falls, loses it among the
+  conversions, and is named in `contested` saying which half was withdrawn.
+- **`AgendaWork` keeps its four members, their names and their meanings, and
+  nothing is superseded.** The vocabulary answers *whose hand*, not *which part
+  of the page*: a leak is the page writer's work exactly as a fall is. The
+  alternative — a third dimension over a flat set of four, with `both` renamed —
+  is a change of direction in an accepted vocabulary, and the record says why it
+  was not worth one.
+- **Each page order is filled by its own predicate rather than off `work`**, and
+  that is the one line in the file a reader should not simplify: `work` is `page`
+  or `both` wherever *some* rank is evidence, so reading it to fill both lists
+  puts a page whose leak a fault manufactured into the conversion order on the
+  strength of its sound fall.
+- **Falls before leaks in `first`**, on a causal argument rather than a
+  comparison of magnitudes, which is unavailable across two units: a reader who
+  never reached an ask stopped reading, and 0333 leaves that reader in the order
+  of falls.
+- **The third argument is required.** An argument a caller may omit is a
+  fix-list that type-checks, runs and answers `none` about the half of the
+  product that pays. A deployment that asks its readers nothing hands in the
+  order it gets, every page `unasked`, and reads exactly as it did before.
+- **`spoilsTheLoss` ⇒ `spoilsTheConversion` over today's seven**, one-way, and
+  published as a test rather than relied on as a rule.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** the fault vocabulary now carries three published
+statements per member and the symmetry of the two `spoiled` names was not taken
+(`spoiled` / `spoiledConversion`, deliberately, rather than a rename); and still
+**nothing draws any of it**, which is `Loom portal`'s and is now twenty-two runs
+old.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

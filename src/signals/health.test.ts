@@ -23,6 +23,7 @@ import {
   HEALTH_STANDINGS,
   pageReadingOf,
   remedyOf,
+  spoilsTheConversion,
   spoilsTheLoss,
   type CollectionSchedule,
   type PageReading,
@@ -832,6 +833,65 @@ describe("collectionHealthOf", () => {
     it("leaves the corrected fault and the one on another counter out", () => {
       expect(spoilsTheLoss("counts-inflated")).toBe(false)
       expect(spoilsTheLoss("actions-uncredited")).toBe(false)
+    })
+
+    /**
+     * The same half of a fault, asked about the other order (0333, 0335).
+     * Answered for every member here for the reason its sibling is: the join
+     * that reads both must not be able to transfer one answer to the other
+     * question.
+     */
+    it("says of every fault whether it reaches the loss an order of conversions is ranked on", () => {
+      expect(COLLECTION_FAULTS.map((fault) => [fault, spoilsTheConversion(fault)])).toEqual([
+        ["door-unscaled", true],
+        ["openings-unmarked", true],
+        ["counts-inflated", true],
+        ["collection-stalled", true],
+        ["actions-uncredited", false],
+        ["rows-mishandled", true],
+        ["audiences-mixed", true],
+      ])
+    })
+
+    /**
+     * The one disagreement, and it is the whole reason this answer could not be
+     * read off the other. A fall is a difference of two independent distinct
+     * counts, so a short window inflates both ends and the ranking key divides
+     * the straddle back out (0219, 0250). A conversion is a conjunction inside
+     * one rollup window, so a conversion split across two windows is lost
+     * rather than double-counted (0147) — a short window manufactures the loss
+     * this order ranks, and no division corrects a count that was never made.
+     */
+    it("disagrees with the fall about a rollup window shorter than the visits", () => {
+      expect(spoilsTheLoss("counts-inflated")).toBe(false)
+      expect(spoilsTheConversion("counts-inflated")).toBe(true)
+    })
+
+    /**
+     * The one they agree on for different reasons, which is the other way a
+     * table written by analogy goes wrong. A fall survives an uncredited sender
+     * because a fall is made of `reached`; a conversion survives it because the
+     * ancestry a signal carries feeds `engaged` and nothing else, while a funnel
+     * end is satisfied by the node a signal names and the kind it is (0167).
+     */
+    it("keeps an uncredited sender out of both orders' keys", () => {
+      expect(spoilsTheLoss("actions-uncredited")).toBe(false)
+      expect(spoilsTheConversion("actions-uncredited")).toBe(false)
+    })
+
+    /**
+     * One-way containment, published as a property rather than relied on: every
+     * fault that reaches a fall reaches a conversion, and not the reverse. It is
+     * a fact about today's seven and **not** a licence to read one answer off
+     * the other — a fault added to the vocabulary could hold for a conversion
+     * and not for a fall, and this test is what would say so.
+     */
+    it("reaches every conversion a fall reaches, and one more", () => {
+      const falls = COLLECTION_FAULTS.filter(spoilsTheLoss)
+      const leaks = COLLECTION_FAULTS.filter(spoilsTheConversion)
+
+      expect(falls.every(spoilsTheConversion)).toBe(true)
+      expect(leaks.filter((fault) => !spoilsTheLoss(fault))).toEqual(["counts-inflated"])
     })
 
     it("gives every standing a sentence", () => {
