@@ -71,19 +71,27 @@ const queryOf = (state: AddressedState): string => `${ADDRESS_PARAMS.theme}=${st
 const addressOf = (state: AddressedState): AddressParams => ({ [ADDRESS_PARAMS.theme]: state.theme })
 
 /**
- * The two tags a route sends beside the tree, taken back off.
+ * The three tags a route sends beside the tree, taken back off.
  *
- * Neither draws anything a visitor sees — one is the graph a crawler reads and
- * the other is the colour of the strip of browser above the page — and React
- * hoists them *between* the library's stylesheet and the page, so what is left
- * after removing them is exactly the markup the library produced. Written as
- * the two literals rather than built from the components' own constants, which
- * keeps this from being a comparison of a name against itself.
+ * None of them draws anything a visitor sees — one is the graph a crawler
+ * reads, one is the colour of the strip of browser above the page, and one is
+ * the rule that tells the document which way round its palette is — and React
+ * hoists all three *between* the library's stylesheet and the page, so what is
+ * left after removing them is exactly the markup the library produced. Written
+ * as the three literals rather than built from the components' own constants,
+ * which keeps this from being a comparison of a name against itself.
+ *
+ * The third arrived on 2 November. It is the one of the three whose *content*
+ * is a palette rather than a name, which is why the pattern matches the element
+ * and not what is inside it: a rule that reported the wrong palette would be
+ * stripped here exactly as a correct one is, and holding it to the palette
+ * served is `document-theme.test.tsx`'s whole subject.
  */
 const withoutTheTagsBeside = (markup: string): string =>
   markup
     .replace(/<meta name="theme-color"[^>]*\/>/, "")
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, "")
+    .replace(/<style data-precedence="default" data-href="loom-marketing-document">[\s\S]*?<\/style>/, "")
 
 /** What a route serves for an address, as the markup a visitor is sent. */
 const servedFor = async (route: SiteRoute, params: AddressParams): Promise<string> => {

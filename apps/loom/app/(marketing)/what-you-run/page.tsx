@@ -4,6 +4,7 @@ import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { siteOrigin, WHAT_YOU_RUN } from "@/app/(marketing)/_lib/site"
 import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
+import { DocumentTheme } from "@/app/(marketing)/_components/document-theme"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
 /**
@@ -37,20 +38,24 @@ const WhatYouRunPage = async ({ searchParams }: { readonly searchParams: SearchP
   })
 
   /**
-   * The two tags beside the tree: the graph a crawler and an assistant read,
-   * and the colour the strip of browser above the page is told to be.
+   * The three tags beside the tree: the graph a crawler and an assistant read,
+   * the colour the strip of browser above the page is told to be, and the rule
+   * that tells the document which way round its palette is.
    *
    * A fragment rather than a wrapper, so the page's own markup is unchanged and
-   * the tree is still the whole of what a visitor *sees* — neither of these
+   * the tree is still the whole of what a visitor *sees* — none of the three
    * draws anything. See `_components/structured-data.tsx` for why this surface
-   * renders a tag of its own at all, and `_components/browser-bar.tsx` for the
-   * one thing on this site that is allowed to name a colour, and why the page
-   * rather than the layout is where it can be named.
+   * renders a tag of its own at all, `_components/browser-bar.tsx` for the one
+   * thing on this site that is allowed to name a colour, and
+   * `_components/document-theme.tsx` for what a tree cannot reach — all three
+   * on the page rather than in the layout, because the layout does not read the
+   * palette out of the address.
    */
   return (
     <>
       <StructuredData route={WHAT_YOU_RUN} origin={siteOrigin()} />
       <BrowserBar theme={rendered.theme} />
+      <DocumentTheme theme={rendered.theme} />
       {rendered.element}
     </>
   )
