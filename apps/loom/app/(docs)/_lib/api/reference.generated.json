@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5196,7 +5196,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5666,7 +5666,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6754,7 +6754,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7331,7 +7331,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7534,7 +7534,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8297,7 +8297,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8676,7 +8676,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8904,7 +8904,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9059,7 +9059,7 @@
             {
               "name": "AgendaWork",
               "kind": "type",
-              "signature": "type AgendaWork = \n/**\n * Rewrite the page: it is in the order, and nothing in its collection reaches\n * the figure that put it there.\n */\n\"page\"\n/**\n * Repair the measurement: it is faulted, and either the order never ranked it\n * or a fault reaches the loss it was ranked by.\n */\n | \"collection\"\n/**\n * Both, and in that order.\n *\n * The page is ranked, the rank is evidence, and there is also a fault on it\n * that {@link spoilsTheLoss} says does not reach the ranking key. A surface\n * may draw it in either list; it is one page and is counted once.\n */\n | \"both\"\n/**\n * Nothing either reading asks for.\n *\n * Sound collection and no fall — or no fall anybody could read, which is the\n * same row in this reading and two different sentences on it:\n * {@link AgendaRow.order}'s standing says which.\n */\n | \"none\";",
+              "signature": "type AgendaWork = \n/**\n * Rewrite the page: an order ranked it, and nothing in its collection reaches\n * the figure that put it there.\n *\n * Either order — readers stopping where they read, readers stopping at an ask,\n * or both. The sentence an operator acts on is the same one and the part of\n * the page is on the row.\n */\n\"page\"\n/**\n * Repair the measurement: it is faulted, and either no order ranked it or a\n * fault reaches every loss it was ranked by.\n */\n | \"collection\"\n/**\n * Both, and in that order.\n *\n * At least one order ranked the page, that rank is evidence —\n * {@link spoilsTheLoss} or {@link spoilsTheConversion} says no fault on the\n * row reaches the key it was ranked by — and there is also a fault. A surface\n * may draw it in either list; it is one page and is counted once.\n */\n | \"both\"\n/**\n * Nothing any of the three readings asks for.\n *\n * Sound collection, no fall and no leak — or none anybody could read, which\n * is the same row in this reading and several different sentences on it: the\n * standings on {@link AgendaRow.order} and {@link AgendaRow.conversion} say\n * which.\n */\n | \"none\";",
               "summary": "What the next thing to do about one page is."
             },
             {
@@ -9077,19 +9077,19 @@
             {
               "name": "AgendaRow",
               "kind": "type",
-              "signature": "type AgendaRow = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the readings named none.\n     *\n     * Two forms of one page are two rows, which is what both readings under this\n     * publish and what `readingKeyOf` joins them on: the two forms' losses are\n     * losses from two populations and a join that merged them would be asking one\n     * question of two readerships.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly work: AgendaWork;\n    /**\n     * Whether a fault reaches the loss the order ranked this page by.\n     *\n     * **False on a page the order did not rank**, and that is a claim rather than\n     * a default: there is no loss on such a row to be spoiled, and `true` would\n     * read as *the figure is wrong* where the honest sentence is *there is no\n     * figure*. The standing on {@link AgendaRow.order} is where that is said.\n     */\n    readonly spoiled: boolean;\n    /** The page as the order has it, carried whole and unchanged. */\n    readonly order: RankedPage;\n    /** The page as the health reading has it, carried whole and unchanged. */\n    readonly health: PageHealth;\n};",
+              "signature": "type AgendaRow = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the readings named none.\n     *\n     * Two forms of one page are two rows, which is what both readings under this\n     * publish and what `readingKeyOf` joins them on: the two forms' losses are\n     * losses from two populations and a join that merged them would be asking one\n     * question of two readerships.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly work: AgendaWork;\n    /**\n     * Whether a fault reaches the loss the order of falls ranked this page by.\n     *\n     * **False on a page that order did not rank**, and that is a claim rather than\n     * a default: there is no loss on such a row to be spoiled, and `true` would\n     * read as *the figure is wrong* where the honest sentence is *there is no\n     * figure*. The standing on {@link AgendaRow.order} is where that is said.\n     *\n     * Its name and its meaning are unchanged, and it says nothing about the\n     * other order — {@link AgendaRow.spoiledConversion} does, and no surface may\n     * read one off the other.\n     */\n    readonly spoiled: boolean;\n    /**\n     * Whether a fault reaches the loss the order of conversions ranked this page\n     * by.\n     *\n     * False on a page that order did not rank, on the same terms and for the same\n     * reason as {@link AgendaRow.spoiled}: the standing on\n     * {@link AgendaRow.conversion} is where *there is no figure* is said.\n     *\n     * **It is not {@link AgendaRow.spoiled} with the word changed.** The two can\n     * disagree on one row, and the fault that makes them disagree is the ordinary\n     * one — a rollup window shorter than the visits being measured is divided out\n     * of a fall and manufactures a leak.\n     */\n    readonly spoiledConversion: boolean;\n    /** The page as the order of falls has it, carried whole and unchanged. */\n    readonly order: RankedPage;\n    /** The page as the order of conversions has it, carried whole and unchanged. */\n    readonly conversion: LeakingPage;\n    /** The page as the health reading has it, carried whole and unchanged. */\n    readonly health: PageHealth;\n};",
               "summary": "One page of a deployment, as both readings have it."
             },
             {
               "name": "DeploymentAgenda",
               "kind": "type",
-              "signature": "type DeploymentAgenda = {\n    /**\n     * Every page both readings named, by tree id and newest revision first.\n     *\n     * The same order `CollectionHealth.pages` and an order's `unranked` are in, so\n     * a surface holding all three can draw them side by side.\n     */\n    readonly rows: readonly AgendaRow[];\n    /**\n     * Pages to rewrite, worst first, in the order's own order.\n     *\n     * {@link AgendaWork} `page` and `both`. A row's place here is the place the\n     * order gave it, unchanged — nothing is re-ranked, because the ranking\n     * rule lives in one place.\n     */\n    readonly page: readonly AgendaRow[];\n    /**\n     * Pages whose collection to repair, worst first, in the health reading's own\n     * order: the priced faults by the readers each costs, then the ones the door\n     * cannot price.\n     *\n     * {@link AgendaWork} `collection` and `both`.\n     */\n    readonly collection: readonly AgendaRow[];\n    /**\n     * Pages the order ranked and a fault spoiled — a **slice** of\n     * {@link DeploymentAgenda.collection} and not a fourth list, so nothing here\n     * is counted twice.\n     *\n     * The sharpest rows in the deployment: each one is high in a fix-list for a\n     * figure its own fault may have produced. Each carries the rank it was taken\n     * out of.\n     */\n    readonly contested: readonly AgendaRow[];\n    /**\n     * The one thing to do first, or `null` where both readings ask for nothing.\n     *\n     * A contested page before a ranked one, because while one exists the order\n     * itself is not evidence; then the head of the order, which is the order's own\n     * answer, now that it is safe to act on; then the worst fault, for a\n     * deployment with nothing ranked at all.\n     */\n    readonly first: AgendaRow | null;\n    /** How many pages ask for each kind of work, over every row. */\n    readonly work: Readonly<Record<AgendaWork, number>>;\n    /**\n     * Distinct trees across the rows, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand,\n     * as they do in both readings under this.\n     */\n    readonly trees: number;\n    /**\n     * Rows one reading named and the other did not, which is two windows handed\n     * in as one.\n     *\n     * Nought for a caller that read one window. Anything else is a caller holding\n     * an order of one and a health reading of another, and the join below it is\n     * then of the intersection — so this is published rather than refused, and it\n     * is published as two counts because which side is short says which read is\n     * the stale one.\n     */\n    readonly unpaired: {\n        /** Rows the order named that the health reading has no page for. */\n        readonly order: number;\n        /** Rows the health reading named that the order has no page for. */\n        readonly health: number;\n    };\n    /**\n     * Readings of a page beyond the first, on either side, which were dropped.\n     *\n     * A caller that concatenated two reads. Dropped rather than added, because a\n     * page twice in an order is the one way an order can lie about how much there\n     * is to fix, and a count that has been added cannot be unadded.\n     */\n    readonly duplicated: number;\n};",
+              "signature": "type DeploymentAgenda = {\n    /**\n     * Every page all three readings named, by tree id and newest revision first.\n     *\n     * The same order `CollectionHealth.pages` and an order's `unranked` are in, so\n     * a surface holding all of them can draw them side by side.\n     */\n    readonly rows: readonly AgendaRow[];\n    /**\n     * Pages whose **reading** falls, worst first, in the order of falls' own\n     * order.\n     *\n     * Every row here is {@link AgendaWork} `page` or `both`, and the converse does\n     * not hold: a page that only leaks is `page` work and stands in\n     * {@link DeploymentAgenda.converting} instead. A row's place here is the place\n     * the order gave it, unchanged — nothing is re-ranked, because the\n     * ranking rule lives in one place.\n     */\n    readonly page: readonly AgendaRow[];\n    /**\n     * Pages whose **asks** leak, worst first, in the order of conversions' own\n     * order.\n     *\n     * The second half of the page writer's work, and a list of its own rather\n     * than rows appended to {@link DeploymentAgenda.page}, because the two keys\n     * are readers in two units and merging them would publish a rank in neither\n     *. A page may stand in both lists, and is one page in every\n     * count here.\n     */\n    readonly converting: readonly AgendaRow[];\n    /**\n     * Pages whose collection to repair, worst first, in the health reading's own\n     * order: the priced faults by the readers each costs, then the ones the door\n     * cannot price.\n     *\n     * {@link AgendaWork} `collection` and `both`.\n     */\n    readonly collection: readonly AgendaRow[];\n    /**\n     * Pages an order ranked and a fault spoiled — a **slice** of\n     * {@link DeploymentAgenda.collection} and not a further list, so nothing here\n     * is counted twice.\n     *\n     * The sharpest rows in the deployment: each one is high in a fix-list for a\n     * figure its own fault may have produced. Each carries the ranks it was taken\n     * out of, and says which of the two was withdrawn —\n     * {@link AgendaRow.spoiled}, {@link AgendaRow.spoiledConversion} or both,\n     * since a fault need not reach both keys.\n     */\n    readonly contested: readonly AgendaRow[];\n    /**\n     * The one thing to do first, or `null` where the three readings ask for\n     * nothing.\n     *\n     * A contested page before a ranked one, because while one exists an order is\n     * not evidence; then the head of the order of falls, which is that order's own\n     * answer, now that it is safe to act on; then the head of the order of\n     * conversions; then the worst fault, for a deployment with nothing ranked at\n     * all.\n     *\n     * **Falls before leaks, and the reason is causal rather than a comparison of\n     * magnitudes** — there is no comparing them, since the two keys are readers in\n     * two units. A reader who never reached an ask stopped *reading*, and the\n     * order of falls is deliberately where that reader is left; so a leak\n     * is a question about readers who did arrive, and rewriting an ask that\n     * readers do not reach is work on a part of the page nobody sees.\n     */\n    readonly first: AgendaRow | null;\n    /** How many pages ask for each kind of work, over every row. */\n    readonly work: Readonly<Record<AgendaWork, number>>;\n    /**\n     * Distinct trees across the rows, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand,\n     * as they do in both readings under this.\n     */\n    readonly trees: number;\n    /**\n     * Rows one reading named and the other did not, which is two windows handed\n     * in as one.\n     *\n     * Nought for a caller that read one window. Anything else is a caller holding\n     * an order of one and a health reading of another, and the join below it is\n     * then of the intersection — so this is published rather than refused, and it\n     * is published as two counts because which side is short says which read is\n     * the stale one.\n     */\n    readonly unpaired: {\n        /** Rows the order of falls named that some other reading has no page for. */\n        readonly order: number;\n        /** Rows the health reading named that some other reading has no page for. */\n        readonly health: number;\n        /**\n         * Rows the order of conversions named that some other reading has no page\n         * for.\n         *\n         * Nought for a caller that read one window, including a deployment that\n         * asks nothing of its readers: a page with no question is `unasked` in that\n         * order rather than absent from it, so the three page sets match.\n         */\n        readonly conversion: number;\n    };\n    /**\n     * Readings of a page beyond the first, on any side, which were dropped.\n     *\n     * A caller that concatenated two reads. Dropped rather than added, because a\n     * page twice in an order is the one way an order can lie about how much there\n     * is to fix, and a count that has been added cannot be unadded.\n     */\n    readonly duplicated: number;\n};",
               "summary": "A deployment's pages, in the two orders that say what to do about them."
             },
             {
               "name": "deploymentAgendaOf",
               "kind": "function",
-              "signature": "const deploymentAgendaOf: (order: DeploymentReading, health: CollectionHealth) => DeploymentAgenda",
+              "signature": "const deploymentAgendaOf: (order: DeploymentReading, conversion: DeploymentConversion, health: CollectionHealth) => DeploymentAgenda",
               "summary": "Join an order of a deployment's pages to the health of its collection, and publish the two orders that come out."
             }
           ]
@@ -10448,6 +10448,12 @@
               "kind": "function",
               "signature": "const spoilsTheLoss: (fault: CollectionFault) => boolean",
               "summary": "Whether a fault reaches the figure an order of a deployment's pages is ranked on, which is readers lost at the sharpest fall, deflated to the door's scale."
+            },
+            {
+              "name": "spoilsTheConversion",
+              "kind": "function",
+              "signature": "const spoilsTheConversion: (fault: CollectionFault) => boolean",
+              "summary": "Whether a fault reaches the figure an order of a deployment's conversions is ranked on, which is readers lost **between** the two ends of a question, deflated to the door's scale."
             },
             {
               "name": "HealthStanding",
@@ -12896,7 +12902,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13031,7 +13037,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13093,7 +13099,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13618,7 +13624,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13688,7 +13694,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14110,7 +14116,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1859,
+        "packageNames": 1860,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

@@ -18,15 +18,19 @@ import {
   collectionHealthOf,
   COUNTS_INFLATED_ABOVE,
   deploymentAgendaOf,
+  deploymentConversionOf,
   deploymentReadingOf,
   describeAgendaWork,
+  funnelReachOf,
   readingProgressOf,
   pageReadingOf,
   type CollectionSchedule,
   type DeploymentAgenda,
+  type FunnelPair,
   type PageReading,
   type PartDeclarations,
   type ReaderTally,
+  type StoredFunnel,
   type StoredPageViews,
 } from "./index.js"
 
@@ -157,19 +161,61 @@ const schedule = (over: Partial<CollectionSchedule> = {}): CollectionSchedule =>
   ...over,
 })
 
-/** The route a surface takes: one window, two readings, one join. */
+/**
+ * A question this deployment asks of a page: of the readers who saw its first
+ * band, how many finished the form at the bottom.
+ */
+const asking = (from: string, to: string): FunnelPair => ({
+  from: { nodeId: nodeId(from), kind: "viewed" },
+  to: { nodeId: nodeId(to), kind: "completed" },
+})
+
+/** One question of one revision, as the window's funnel row has it. */
+const question = (
+  treeId: TreeId,
+  revision: number,
+  from: string,
+  to: string,
+  reached: number,
+  converted: number
+): StoredFunnel => ({
+  audienceId: DEFAULT_AUDIENCE_ID,
+  treeId,
+  revision,
+  pair: asking(from, to),
+  reached,
+  converted,
+  updatedAt: "2026-11-01T06:00:00.000Z",
+})
+
+/**
+ * The route a surface takes: one window, three readings, one join.
+ *
+ * The funnel rows default to none, which is a deployment that asks its readers
+ * nothing — every page `unasked` in the order of conversions, which is where the
+ * join stood before the third order existed (0336).
+ */
 const agendaOf = (
   readings: readonly PageReading[],
   rows: readonly StoredPageViews[],
-  over?: CollectionSchedule
+  over?: CollectionSchedule,
+  funnels: readonly StoredFunnel[] = []
 ): DeploymentAgenda =>
   deploymentAgendaOf(
     deploymentReadingOf(
       readings.map((page) => readingProgressOf(page)),
       rows
     ),
+    deploymentConversionOf(readings.map((page) => funnelReachOf(page, funnels, rows))),
     collectionHealthOf(readings, rows, over)
   )
+
+/** The order of conversions a caller gets for a deployment that asks nothing. */
+const asksNothing = (
+  readings: readonly PageReading[],
+  rows: readonly StoredPageViews[]
+): ReturnType<typeof deploymentConversionOf> =>
+  deploymentConversionOf(readings.map((page) => funnelReachOf(page, [], rows)))
 
 const named = (row: { readonly treeId: TreeId; readonly revision: number }): string =>
   `${row.treeId}@${String(row.revision)}`
@@ -328,14 +374,22 @@ describe("deploymentAgendaOf", () => {
     const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], [exact(TREE, 1, 100)])
     const health = collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)])
 
+    const leaking = asksNothing([leaky(TREE)], [exact(TREE, 1, 100)])
+
     const doubledOrder = deploymentAgendaOf(
       { ...order, ranked: [...order.ranked, ...order.ranked] },
+      leaking,
       health
     )
-    const doubledHealth = deploymentAgendaOf(order, {
+    const doubledHealth = deploymentAgendaOf(order, leaking, {
       ...health,
       pages: [...health.pages, ...health.pages],
     })
+    const doubledConversion = deploymentAgendaOf(
+      order,
+      { ...leaking, unranked: [...leaking.unranked, ...leaking.unranked] },
+      health
+    )
 
     expect(doubledOrder.rows.length).toBe(1)
     expect(doubledOrder.duplicated).toBe(1)
@@ -344,13 +398,18 @@ describe("deploymentAgendaOf", () => {
 
     expect(doubledHealth.rows.length).toBe(1)
     expect(doubledHealth.duplicated).toBe(1)
-    expect(doubledHealth.unpaired).toEqual({ order: 0, health: 0 })
+    expect(doubledHealth.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
+
+    expect(doubledConversion.rows.length).toBe(1)
+    expect(doubledConversion.duplicated).toBe(1)
+    expect(doubledConversion.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
   })
 
   it("does not put a page in a list twice because the order named it twice", () => {
     const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], [exact(TREE, 1, 100)])
     const agenda = deploymentAgendaOf(
       { ...order, ranked: [...order.ranked, ...order.ranked] },
+      asksNothing([leaky(TREE)], [exact(TREE, 1, 100)]),
       collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)])
     )
 
@@ -366,18 +425,31 @@ describe("deploymentAgendaOf", () => {
         both.map((page) => readingProgressOf(page)),
         rows
       ),
+      asksNothing(both, rows),
       collectionHealthOf([leaky(TREE)], rows)
     )
     const shortOrder = deploymentAgendaOf(
       deploymentReadingOf([readingProgressOf(leaky(TREE))], rows),
+      asksNothing(both, rows),
+      collectionHealthOf(both, rows)
+    )
+    const shortConversion = deploymentAgendaOf(
+      deploymentReadingOf(
+        both.map((page) => readingProgressOf(page)),
+        rows
+      ),
+      asksNothing([leaky(TREE)], rows),
       collectionHealthOf(both, rows)
     )
 
-    expect(shortHealth.unpaired).toEqual({ order: 1, health: 0 })
+    expect(shortHealth.unpaired).toEqual({ order: 1, health: 0, conversion: 1 })
     expect(shortHealth.rows.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
 
-    expect(shortOrder.unpaired).toEqual({ order: 0, health: 1 })
+    expect(shortOrder.unpaired).toEqual({ order: 0, health: 1, conversion: 1 })
     expect(shortOrder.rows.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+
+    expect(shortConversion.unpaired).toEqual({ order: 1, health: 1, conversion: 0 })
+    expect(shortConversion.rows.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
   })
 
   it("reads two forms of one page as two rows, because their losses are from two readerships", () => {
@@ -432,22 +504,190 @@ describe("deploymentAgendaOf", () => {
     expect(agenda).toEqual({
       rows: [],
       page: [],
+      converting: [],
       collection: [],
       contested: [],
       first: null,
       work: { page: 0, collection: 0, both: 0, none: 0 },
       trees: 0,
-      unpaired: { order: 0, health: 0 },
+      unpaired: { order: 0, health: 0, conversion: 0 },
       duplicated: 0,
     })
   })
 
-  it("carries both readings' own rows rather than re-spelling either's figures", () => {
-    const agenda = agendaOf([leaky(TREE)], [exact(TREE, 1, 100)])
-    const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], [exact(TREE, 1, 100)])
-    const health = collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)])
+  it("carries all three readings' own rows rather than re-spelling any of their figures", () => {
+    const rows = [exact(TREE, 1, 100)]
+    const asked = [question(TREE, 1, "band1", "band2", 80, 20)]
+    const agenda = agendaOf([leaky(TREE)], rows, undefined, asked)
+    const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], rows)
+    const health = collectionHealthOf([leaky(TREE)], rows)
+    const conversion = deploymentConversionOf([funnelReachOf(leaky(TREE), asked, rows)])
 
     expect(agenda.rows[0]?.order).toEqual(order.ranked[0])
     expect(agenda.rows[0]?.health).toEqual(health.pages[0])
+    expect(agenda.rows[0]?.conversion).toEqual(conversion.ranked[0])
+  })
+})
+
+/**
+ * The third order, joined (0336). What is being tested is not that a list
+ * arrived but that the join asks each order whether *its own* figure survived
+ * the faults on the row — because the two answers differ, and reading one off
+ * the other is the 0330 defect put back by a shortcut.
+ */
+describe("the conversions a deployment's fix-list was silent about", () => {
+  it("sends an operator to a page nobody leaves and nobody answers, which no order of falls can name", () => {
+    const sound = reading(TREE, 1, [100, 100])
+    const agenda = agendaOf(
+      [sound],
+      [exact(TREE, 1, 100)],
+      undefined,
+      [question(TREE, 1, "band1", "band2", 80, 20)]
+    )
+
+    /** The page readers read to the end of: nothing falls, so the old join said `none`. */
+    expect(agenda.rows[0]?.order.standing).toBe("unbroken")
+    expect(agenda.page).toEqual([])
+
+    expect(agenda.rows[0]?.work).toBe("page")
+    expect(agenda.converting.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.converting[0]?.conversion.lost).toBe(60)
+    expect(agenda.converting[0]?.conversion.readers).toBe(60)
+    expect(agenda.first?.work).toBe("page")
+    expect(named(agenda.first!)).toBe(named({ treeId: TREE, revision: 1 }))
+    expect(agenda.contested).toEqual([])
+  })
+
+  it("asks for nothing about a page whose readers are asked nothing, which is not a page nobody answered", () => {
+    const agenda = agendaOf([reading(TREE, 1, [100, 100])], [exact(TREE, 1, 100)])
+
+    expect(agenda.rows[0]?.conversion.standing).toBe("unasked")
+    expect(agenda.rows[0]?.work).toBe("none")
+    expect(agenda.converting).toEqual([])
+    expect(agenda.first).toBeNull()
+  })
+
+  it("keeps a short window's fall and withdraws its leak, because one key divides the straddle out and the other is made of it", () => {
+    const agenda = agendaOf(
+      [leaky(TREE)],
+      [door(TREE, 1, 100, 200)],
+      undefined,
+      [question(TREE, 1, "band1", "band2", 80, 20)]
+    )
+    const row = agenda.rows[0]
+
+    expect(row?.health.faults).toEqual(["counts-inflated"])
+    expect(row?.order.standing).toBe("ranked")
+    expect(row?.conversion.standing).toBe("ranked")
+
+    /** The one fault whose two answers disagree, and this is the disagreement. */
+    expect(row?.spoiled).toBe(false)
+    expect(row?.spoiledConversion).toBe(true)
+
+    expect(row?.work).toBe("both")
+    expect(agenda.page.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.converting).toEqual([])
+    expect(agenda.contested.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+
+    /** The rank it was taken out of travels with it, as a fall's does (0301, 0326). */
+    expect(agenda.contested[0]?.conversion.readers).toBe(30)
+  })
+
+  it("keeps both ranks where a sender credits no action, because no funnel figure is made of that counter", () => {
+    const agenda = agendaOf(
+      [uncredited(TREE)],
+      [exact(TREE, 1, 100)],
+      undefined,
+      [question(TREE, 1, "band1", "band2", 80, 20)]
+    )
+    const row = agenda.rows[0]
+
+    expect(row?.health.faults).toEqual(["actions-uncredited"])
+    expect(row?.spoiled).toBe(false)
+    expect(row?.spoiledConversion).toBe(false)
+    expect(row?.work).toBe("both")
+    expect(agenda.page.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.converting.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.contested).toEqual([])
+  })
+
+  it("withdraws both ranks where a caller's tree and window do not belong together", () => {
+    const agenda = agendaOf(
+      [mishandled(TREE)],
+      [exact(TREE, 1, 100)],
+      undefined,
+      [question(TREE, 1, "band1", "band2", 80, 20)]
+    )
+    const row = agenda.rows[0]
+
+    expect(row?.health.faults).toEqual(["rows-mishandled"])
+    expect(row?.spoiled).toBe(true)
+    expect(row?.spoiledConversion).toBe(true)
+    expect(row?.work).toBe("collection")
+    expect(agenda.page).toEqual([])
+    expect(agenda.converting).toEqual([])
+    expect(agenda.contested.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+  })
+
+  it("puts the worst fall before the worst leak, because a reader who never reached an ask stopped reading", () => {
+    const falls = leaky(TREE)
+    const leaks = reading(OTHER_TREE, 1, [100, 100])
+    const agenda = agendaOf(
+      [falls, leaks],
+      [exact(TREE, 1, 100), exact(OTHER_TREE, 1, 100)],
+      undefined,
+      [question(OTHER_TREE, 1, "band1", "band2", 99, 1)]
+    )
+
+    expect(agenda.page.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.converting.map(named)).toEqual([named({ treeId: OTHER_TREE, revision: 1 })])
+
+    /** The leak is the larger headcount and the fall still comes first: two units, one rule. */
+    expect(agenda.converting[0]?.conversion.readers).toBe(98)
+    expect(agenda.page[0]?.order.readers).toBe(60)
+    expect(named(agenda.first!)).toBe(named({ treeId: TREE, revision: 1 }))
+  })
+
+  it("counts a page once where both page orders rank it", () => {
+    const agenda = agendaOf(
+      [leaky(TREE)],
+      [exact(TREE, 1, 100)],
+      undefined,
+      [question(TREE, 1, "band1", "band2", 80, 20)]
+    )
+
+    const counted = AGENDA_WORK.reduce((sum, work) => sum + agenda.work[work], 0)
+
+    expect(agenda.page.length).toBe(1)
+    expect(agenda.converting.length).toBe(1)
+    expect(agenda.page[0]).toBe(agenda.converting[0])
+    expect(counted).toBe(agenda.rows.length)
+    expect(agenda.work).toEqual({ page: 1, collection: 0, both: 0, none: 0 })
+  })
+
+  it("does not put a page in the conversion order twice because that order named it twice", () => {
+    const rows = [exact(TREE, 1, 100)]
+    const asked = [question(TREE, 1, "band1", "band2", 80, 20)]
+    const conversion = deploymentConversionOf([funnelReachOf(leaky(TREE), asked, rows)])
+    const agenda = deploymentAgendaOf(
+      deploymentReadingOf([readingProgressOf(leaky(TREE))], rows),
+      { ...conversion, ranked: [...conversion.ranked, ...conversion.ranked] },
+      collectionHealthOf([leaky(TREE)], rows)
+    )
+
+    expect(agenda.converting.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.duplicated).toBe(1)
+  })
+
+  it("keeps the contested rows a slice of the collection order where only the leak was withdrawn", () => {
+    const agenda = agendaOf(
+      [leaky(TREE)],
+      [door(TREE, 1, 100, 200)],
+      undefined,
+      [question(TREE, 1, "band1", "band2", 80, 20)]
+    )
+
+    expect(agenda.contested.length).toBe(1)
+    expect(agenda.contested.every((row) => agenda.collection.includes(row))).toBe(true)
   })
 })
