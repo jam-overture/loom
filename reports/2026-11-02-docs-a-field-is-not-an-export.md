@@ -336,7 +336,12 @@ Nothing failed, nothing was skipped, and no test was weakened.
 *Taken from the `vercel[bot]` comment after the pull request was opened, not
 composed from the branch name.*
 
-PREVIEW_URL_PLACEHOLDER
+https://loom-git-docs-74-a-field-is-73d164-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the unit is most about:
+
+- https://loom-git-docs-74-a-field-is-73d164-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/proposing-a-change#what-a-proposal-carries
+- https://loom-git-docs-74-a-field-is-73d164-jpizzolato36-6341s-projects.vercel.app/docs/getting-started/introduction
 
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,
