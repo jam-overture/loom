@@ -63674,8 +63674,31 @@ finding should read 0331 before acting on its last paragraph.
 ## 2026-11-01 (evening) — a governed page cannot be cached today because nothing tells a cache that a row was appended to
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom framework` and
-`Loom portal` (paused) · **Status:** open — **the only shape that recovers the
-per-request cost without contradicting 0259**
+`Loom portal` (paused) · **Status:** open — **the framework half shipped on
+2 November in `framework-77-told-that-the-row-moved`
+([0335](decisions/0335-a-cache-over-a-governed-page-is-told-the-row-moved-by-the-handle-that-appended.md));
+this deployment still does not cache, and what is left is two lines in a paused
+lane** — see the 2 November entry at the bottom of this file for them
+
+What is published: `treeCacheTag`, `cachingTreeStore` and
+`invalidatingTreeStore` from `@jam-overture/loom/store`. No window, no
+duration, nothing remembered that was refused — an entry leaves because the row
+moved. Three things in it this entry did not predict:
+
+- **The invalidation is on the store, not on the event stream.** `change-committed`
+  exists and would have worked for every change that goes through a
+  composition. What a cache has to be told is *this row is not what it was*,
+  which is true of a revert, a reseed and a migration too, so the handle that
+  appends is what announces.
+- **The cache is on the read rather than on the page**, which is why 0331 needs
+  no amendment. Every route keeps `force-dynamic`, the palette and the served
+  origin stay per-request, and what is recovered is the query that was measured.
+  Caching the rendered page is rejected in the record, with the reason.
+- **The lane boundary is not where this entry put it.** `siteStore` is declared
+  in `app/_lib/app/store.ts`, which is the shell's, so `(marketing)` is asked
+  for nothing and never was. The boundary that actually bites is
+  `(portal)/_lib/write.ts`, which builds its own application-scoped store and
+  appends through it.
 
 0331 closes the door on prerendering a page the store governs. It leaves one
 door open and this is it, recorded so the next performance pass starts from a
@@ -63980,3 +64003,208 @@ with the ground alone, or an option on it. The two callers today want different
 halves — the shell wants the variables because it has none, and a Loom-built
 surface wants the ground because it already has the variables — which is the
 shape of a flag rather than of a new decision. Nothing is blocked either way.
+## 2026-11-02 — the fall's fault table could not be transferred to the conversion, and both guesses at it were backwards
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/agenda.ts`) · **Status:**
+**closed on filing by `signals-69-a-fault-reaches-a-conversion-differently`**,
+closing the 1 November (evening) entry *the agenda has a third order to join and
+a vocabulary whose four members say page or measurement*
+
+That entry asked for the fault question first and warned that a table written by
+analogy is how a fault vocabulary comes to be wrong in one of its two places. It
+was right to warn, and **its own two worked examples were both wrong**
+([0336](decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)):
+
+- It supposed `actions-uncredited` **may well** reach a conversion loss, since a
+  question whose second end asks for `activated` is about presses. It cannot. A
+  funnel end is satisfied out of the `(tree, revision, nodeId, kind)` view sets
+  `rollupOf` keeps, and the ancestry a delegated signal carries feeds exactly one
+  counter, `engaged` (0167). No funnel figure is made of it.
+- It supposed `counts-inflated` **does** transfer as `false`, since the
+  conversion key divides the same inflation out of the same door row. It does
+  not. A fall is a difference of two independent distinct-view counts, so the
+  straddle is in both ends and the division puts the difference back on the
+  door's scale (0219). `converted` is a **conjunction inside one rollup window**,
+  so a conversion split across two windows is lost rather than double-counted
+  (0147) — and the division corrects the scale of a count rather than a count
+  that was never made.
+
+**The part worth keeping, beyond the two answers.** `counts-inflated` is the one
+fault of the seven a fall is explicitly safe from, and it is the fault a
+conversion is least safe from; it is also one of only three that can be seen on a
+ranked page at all. So the single most likely wrong row in a transferred table
+was the single most consequential one, and every symptom of the mistake would
+have been a page in the wrong order with a true-looking number on it. The remedy
+that generalises is not *check the table*: it is that a figure's exposure to a
+fault is a property of **what the counter is made of**, and a counter built by
+intersecting two sets inside one window has an error no scaling of the window's
+drift can reach.
+
+**What was not taken, and is a judgement rather than an omission.**
+`AgendaRow.spoiled` keeps 0330's name while its sibling is `spoiledConversion`,
+so the pair is asymmetric where `spoiledLoss` / `spoiledConversion` would read
+better. Renaming a published field whose meaning is unchanged buys legibility
+with churn and a superseded record, so the asymmetry is stated on both members
+instead. **Recommendation:** a run that touches this vocabulary for another
+reason — an eighth fault, or a sixth kind — should take the rename then, in the
+same record.
+
+---
+## 2026-11-02 — the fault vocabulary now has three published statements per member, and two of the three are about a figure somewhere else
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`) · **Status:** open — **the stated shape of
+[0336](decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)**;
+nothing is broken, and nothing is asked of anybody today
+
+`CollectionFault` has seven members and three published answers each: `remedyOf`
+(whose hand it falls to), `spoilsTheLoss` (whether it reaches the key an order of
+falls is ranked on) and `spoilsTheConversion` (whether it reaches the key an
+order of conversions is ranked on). The first is a statement about the fault. The
+other two are statements about **ranking keys that live in other files**, kept
+here because a fault vocabulary written in two places is this subsystem's
+commonest defect — which is the right trade and is also why this is worth
+writing down.
+
+**What a future run should hold.** Every new ranked order over these pages adds a
+fourth, fifth and sixth answer to a seven-member vocabulary, and each one is a
+per-fault argument from what its counter is made of. Two signs that the shape has
+run out, neither of which has arrived:
+
+- **An answer that needs a figure rather than a boolean.** `counts-inflated`
+  reaches a conversion key by an amount `PairReach.rateAtMost` already bounds for
+  the rate. Today the page simply leaves the order, which is the safe call and
+  loses a real ranking. A bound on the key — *this page's leak is between n and
+  m* — would be a reading rather than a fault answer, and it belongs beside the
+  funnel, not here.
+- **A fourth order whose key is not a headcount at the door's scale.** All three
+  today are, which is what lets one `contested` slice serve them. One that is not
+  would need its own.
+
+**Recommendation: nothing, yet.** Adding a fourth answer when a fourth order
+arrives is cheaper than generalising now, and generalising a table of seven
+booleans into a mechanism is how the argument per fault stops being written down,
+which is the thing that has cost this subsystem a real bug twice.
+## 2026-11-02 — the cache a governed page needs is built and this deployment cannot switch it on, because the portal appends through a store the shell never sees
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused)
+(`apps/loom/app/(portal)/_lib/write.ts`), with the last line `Loom framework`'s
+· **Closes the framework half of** the 1 November entry *a governed page cannot
+be cached today because nothing tells a cache that a row was appended to* ·
+**Status:** open — **nothing is broken and nothing is slower than it was**; this
+is a capability that is one edit away from paying
+
+[0335](decisions/0335-a-cache-over-a-governed-page-is-told-the-row-moved-by-the-handle-that-appended.md)
+publishes `treeCacheTag`, `cachingTreeStore` and `invalidatingTreeStore`. A
+reader is answered from a cache; a writer expires the tree's tag; there is no
+window anywhere in it, so the reader after an append is served the append.
+
+**What stopped the deployment taking it.** A cache over `siteStore` is correct
+only if **every** handle that can append to one of those rows is the
+invalidating one. Two can:
+
+| appends through | lane | invalidates? |
+| --- | --- | --- |
+| `appStoreForWriting` (`app/_lib/app/store.ts`) | shell | would, trivially — **and has no `append` caller at all today**; it is `head` and `create` for seeding |
+| `governedFor(application).trees` (`(portal)/_lib/write.ts`) | `Loom portal` | **no**, and this is the one that matters |
+
+`beginWrite(DEFAULT_APPLICATION_ID)` is a live path, and the marketing pages are
+rows of the default application — so a change accepted in the portal moves
+exactly the row a marketing request would be holding, through a store built
+inside that lane from `postgresTreeStore(portalDatabase, { application })`.
+Caching anyway would serve last week's page after somebody accepted a change,
+which is [0259](decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)'s
+own failure arriving by a third door and worse than the ~100ms it saves.
+
+So the partial wiring was built, tried and taken back out, and nothing in
+`apps/` changed on that branch.
+
+**The two lines.** In `(portal)/_lib/write.ts`, inside `governedFor`:
+
+```ts
+import { invalidatingTreeStore } from "@jam-overture/loom/store"
+
+trees: invalidatingTreeStore(
+  postgresTreeStore(portalDatabase, { application }),
+  expireTreeCacheTag
+)
+```
+
+— and the same wrap on the `memoryTreeStore()` branch beside it, so the two
+arms do not differ in what they announce.
+
+`expireTreeCacheTag` is the host's; it does not exist yet because the module
+holding it would have been unused. It is `revalidateTag(tag, { expire: 0 })` —
+immediate rather than a named profile, because a stale-while-revalidate expiry
+hands the reader *after* an append the revision *before* it. **`Loom framework`
+will add that module and the one line on `siteStore` in the same run that the
+portal's wrap lands**, and the deployment identity belongs in the cache key
+there: a deploy-time seed cannot expire a tag, so `VERCEL_URL` as a key part is
+what covers it.
+
+### Needs your input
+
+Nothing blocking, and one question that is only the maintainer's: **this waits
+for `Loom portal` to resume.** If that is far off, a one-line exception letting
+`Loom framework` make the wrap in that file would switch the cache on in a
+single run — but a paused lane's directory is explicitly not open season
+(`docs/routines.md`), so it is asked rather than assumed.
+
+---
+## 2026-11-02 — the maintainer's reported performance problem is one function in a lane whose last report is 11 October
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 1 November entry *the library stylesheet is serialised once per
+primitive into the RSC payload, so a Loom page ships 2.4MB where the same page's
+markup is 50KB* · **Status:** open — **nothing is broken and nothing is
+blocked; this is a scheduling question only you can answer**
+
+### The measurement, restated because the ratio is the point
+
+`Loom marketing` measured `/why-use-it` on a production build: **2,418KB
+served, of which 2,255KB is the flight payload, of which 93% is one 47KB
+stylesheet carried 42 times.** Server time was ~100ms. Your report was *several
+seconds*, and 2.4MB over a real network is what several seconds is. The ~100ms
+is the other 1 November entry and is **6% of the problem at most**.
+
+### Why it has not moved
+
+The fix is in `libraryStylesheet()` and the ~90 primitives that call it, which
+is `src/primitives/` — `Loom primitives`' lane. That routine's most recent
+report in `reports/` is **11 October**, and `src/primitives/` has had **one**
+commit touching it since 1 October, which arrived on another lane's pull
+request. The entry is correctly filed and is waiting on a lane that is not
+currently producing.
+
+**This lane did not take it**, and the reason is the rule rather than the
+difficulty: `docs/routines.md` gives that directory to its owner, and reaching
+into it is the thing the lane table exists to stop.
+
+### What is actually needed, in case it decides the scheduling
+
+Two of the finding's three shapes need the same change, and it is **one line in
+one function**, not ninety:
+
+- `libraryStylesheet()` stops carrying the CSS as children — either returning
+  nothing, with the renderer emitting one copy beside the tree root, or
+  returning a `<link>` at a few hundred bytes a copy.
+- **The ~90 call sites do not change** under either shape. They go on calling
+  it; what it returns is what changes.
+
+The renderer half of the first shape is this lane's and is small — the seam
+already mounts the theme beside the root node (0121). It is not built, because
+building it alone makes the page one copy **worse**: React dedupes in the DOM
+and not in the stream, so a copy at the root is a 43rd copy until the 42 stop.
+
+### Needs your input
+
+**Three ways to clear it.** Resume or re-point `Loom primitives` at this entry
+as its next unit; or say that `Loom framework` may make the one-line change in
+`src/primitives/stylesheet.ts` together with the renderer half, as an exception
+recorded here; or leave it, which costs 2.4MB a page view until the owning lane
+next runs.
+
+**Recommended: the second**, and only because the first depends on a schedule
+nobody inside a run can see. It is one function and one emission, both covered
+by tests that already exist, and the diff is readable in a minute.
