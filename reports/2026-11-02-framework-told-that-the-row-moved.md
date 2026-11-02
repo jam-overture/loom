@@ -4,9 +4,13 @@
 **Section:** §5, §3 (persistence — a cache over a page the store governs) ·
 **Branch:** `framework-77-told-that-the-row-moved` · **PR:** #747
 
-**Preview:** `loom-p8potpylj-jpizzolato36-6341s-projects.vercel.app`, which
-Vercel reports `success`. Not opened from this run: `*.vercel.app` is denied by
-the environment's network policy, filed on 27 September. Nothing on this branch
+**Preview:**
+`loom-git-framework-77-told-t-4c731a-jpizzolato36-6341s-projects.vercel.app`,
+which Vercel reports `Ready`. Taken from Vercel's own comment on #747 rather
+than composed, which is what the 16 October entry warns against; the branch
+alias rather than the deployment-unique host, so it stays current as the branch
+moves. Not opened from this run: `*.vercel.app` is denied by the environment's
+network policy, filed on 27 September. Nothing on this branch
 is rendered — the whole diff is one new module under `src/store/`, its tests, a
 record, this report and `FINDINGS.md` — so the preview should be byte-identical
 to `main`.
