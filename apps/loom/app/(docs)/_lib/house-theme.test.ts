@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url"
 import { minimalSansFontPack } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
+import { coloursIn, HOUSE_THEME, housePalette, LIGHT_SELECTOR } from "./chrome-palette"
+import { selectorDeclarations } from "./chrome-css"
 import { docsExamples } from "./examples/catalogue"
 import { docsThemes } from "./loom/registry"
 
@@ -19,7 +21,12 @@ import { docsThemes } from "./loom/registry"
 
 const THEME_PROP = "loom:theme"
 
-const HOUSE = { palette: "minimal", fontPack: "minimal-sans", stylePreset: "precise" } as const
+/**
+ * One statement of the three ids, in `chrome-palette.ts`, because the chrome
+ * check needs the same triple to read a ground off and two copies of it is the
+ * hazard this whole file is about.
+ */
+const HOUSE = HOUSE_THEME
 
 const globals = (): string =>
   readFileSync(fileURLToPath(new URL("../globals.css", import.meta.url)), "utf8")
@@ -133,17 +140,38 @@ describe("the chrome around them", () => {
    * change gives the docs chrome a grey fill back, the site stops looking like
    * the theme it says it wears, and no other test here would notice.
    */
-  it("keeps its structural surfaces on the page color", () => {
-    const source = globals()
+  /**
+   * **Read off the palette and not off a hex typed here**, which is the 3
+   * November change and the reason this file no longer proves the chrome by
+   * itself. `expect(globals()).toContain("--surface-page: #ffffff")` fails when
+   * somebody edits the stylesheet, which nobody was worried about, and passes
+   * for ever when the palette moves, which is the only thing it was written
+   * for. `chrome-palette.ts` holds every colour in the sheet against its slot;
+   * what is left here is the pair of claims that module cannot make, because
+   * they are about what the *palette* decided rather than whether the chrome
+   * followed it.
+   */
+  const chrome = (): ReadonlyMap<string, string> => coloursIn(selectorDeclarations(globals(), LIGHT_SELECTOR))
 
-    expect(source).toContain("--surface-page: #ffffff")
-    expect(source).toContain("--surface-sunken: #ffffff")
-    expect(source).toContain("--surface-raised: #ffffff")
+  it("keeps its structural surfaces on the page color", () => {
+    const canvas = housePalette.slots["bg-canvas"]
+
+    expect(housePalette.slots["bg-surface"], "the palette stopped being outline-first").toBe(canvas)
+    expect(housePalette.slots["bg-overlay"]).toBe(canvas)
+
+    for (const variable of ["--surface-page", "--surface-sunken", "--surface-raised"]) {
+      expect(chrome().get(variable), `${variable} is not the canvas`).toBe(canvas)
+    }
   })
 
   it("spends the green only where the palette spends it", () => {
-    expect(globals()).toContain("--accent-ring: #72e3ad")
-    expect(globals()).toContain("--accent: #0a0a0a")
+    expect(housePalette.slots["accent"], "accent is ink, and a brand green in it would be the page's largest element").toBe(
+      housePalette.slots["fg-default"]
+    )
+
+    expect(chrome().get("--accent")).toBe(housePalette.slots["accent"])
+    expect(chrome().get("--accent-ring")).toBe(housePalette.slots["border-accent"])
+    expect(chrome().get("--accent-ring")).not.toBe(chrome().get("--accent"))
   })
 })
 

@@ -12,9 +12,36 @@ list and it is not a report.
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,
 `Loom lessons` and `Loom portal` (paused) · **Status:** **`Loom marketing`'s row
-is closed, 2 November**, by `marketing-25-the-furniture-around-the-page`; **open
-for the other three** — the framework half is shipped and nothing is blocked,
-what is left is one line per surface, and each surface decides when
+is closed, 2 November**, by `marketing-25-the-furniture-around-the-page`;
+**`Loom docs`' row is closed, 3 November**, by
+`docs-76-the-chrome-was-checked-against-itself` — **and not by taking the
+line**, which is set out below; **open for the other two** — the framework half
+is shipped and nothing is blocked, what is left is one line per surface, and
+each surface decides when
+
+> **`Loom docs`, 3 November.** This surface already satisfies what 0334 asks:
+> `color-scheme` is declared on `:root` in `globals.css`, which *is* the
+> document element, and no root primitive declares it. The row's actual
+> complaint about `(docs)` is the next sentence of the entry — that the value is
+> *a stylesheet constant*, correct only while the site wears the palette it was
+> written for and **silent in both directions when it stops**. That silence is
+> what closed: the declaration is now held against
+> `themeGround(resolved).colorScheme` for the resolved house theme, so a palette
+> whose ground reports `dark` makes the suite red rather than leaving a light
+> scrollbar on a dark page.
+>
+> **`themeDocumentCss` was considered and not taken, for the reason the 2
+> November entry below gives against it.** That function returns every
+> `--loom-*` variable as well as the three ground declarations. On `(marketing)`
+> the complaint is that the variables are already on the root primitive and the
+> copy is read by nothing; on `(docs)` it is worse — the chrome reads
+> `--surface-page` and `--ink`, not `--loom-*`, and the examples carry their own
+> themes mounted on their own trees, so **every one of those variables would be
+> read by nothing at all.** Taking the line would put a theme's worth of bytes
+> on every page of this surface to replace one word that is now checked. If the
+> framework lane would rather each surface took the line uniformly, say so and
+> this lane will; the dark half would still be the site's own, because there is
+> no registered dark `minimal` to resolve.
 
 This answers the judgement `Loom marketing` left for this lane in
 [the 8 October entry](#2026-10-08--the-strip-above-the-page-is-answered-and-the-furniture-around-it-is-not-because-nothing-applies-the-colorscheme-that-themeground-already-computed),
@@ -64774,6 +64801,98 @@ lane's**, whatever it is counting. The question to ask of any number taken from
 it is a floor, a trigger or a dated sentence, never an equality.
 
 ---
+## 2026-11-03 — the documentation chrome is a copy of a registered palette, and the only thing checking it was a second copy
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/globals.css`, `_lib/chrome-palette.ts`) ·
+**Status:** **closed on filing by `docs-76-the-chrome-was-checked-against-itself`**
+
+Everything on this site that is an example is a real tree and takes its colours
+from a registered theme. Everything **around** the examples is ordinary CSS,
+hand-transcribed out of the same `minimal` palette, and it has to be: a
+stylesheet cannot import TypeScript and chrome is furniture with no theme
+mounted on it (0067). `globals.css` says so in nearly every block — *transcribed
+from `minimal`*, *`border-default` and `border-strong`, exactly*, *black, exactly
+as the palette has it*.
+
+**The only thing holding any of that to the palette was three assertions of this
+shape:**
+
+```ts
+expect(globals()).toContain("--surface-page: #ffffff")
+```
+
+That is a copy checked against a second copy. It fails when somebody edits the
+stylesheet, which is the case nobody was worried about, and **passes for ever
+when the palette moves**, which is the only case it was written for.
+`browser-bar-chrome.test.ts` is the same shape one step along: a real chain from
+the browser bar to `--surface-page`, with the palette at neither end of it.
+
+### It had already failed, and had been failing for ten weeks
+
+`--ink-faint` was declared `#6f6f7a`, with a comment saying `fg-subtle` was
+`#8a8a94`, missed AA at 3.42:1, and that the chrome was therefore departing from
+it. **That finding was fixed in the palette on 20 August** by
+[0074](decisions/0074-a-palette-slot-that-carries-text-meets-aa.md) — to
+`#6e6e78`, which is the value this line had departed *to* by hand, at 5.0:1
+against white. So the reason was gone, the departure stayed, and the comment
+went on citing a number this repository no longer held anywhere.
+
+**The `(portal)` lane hit the same change on the same day and did not have this
+problem**, because its three tokens are checked against the registered palette:
+the 20 August entry *two files in other lanes had to change so `pnpm verify`
+would pass* records `#8a8a94` → `#6e6e78` in `app/(portal)/globals.css` *because
+a test went red*. Its closing sentence is the one this entry is an application
+of: **a test that fails when a fact changes is not a tax, it is the fact being
+checked.** The docs chrome was converted to `minimal` later and never got that
+test.
+
+### Measured, both directions
+
+With `minimal`'s `bg-canvas` and `bg-surface` moved to `#fdfdfc` and the package
+rebuilt:
+
+| | on `main` | on this branch |
+| --- | --- | --- |
+| `house-theme`, `browser-bar-chrome`, `chrome` | **38 passed** | — |
+| the same, plus `chrome-palette` | — | **2 failed**, naming `--surface-page` and `--surface-sunken`, the slot each copies, and the new value |
+
+The mutation was restored and the package rebuilt; nothing in `src/` is in this
+branch's diff.
+
+### The remedy, and the two rules that keep it from going vacuous
+
+`_lib/chrome-palette.ts` names, for **all thirty-three colours** in the two
+palette blocks, one of three things: the slot it is a copy of, the slot it
+deliberately differs from with the reason, or why the palette has no such
+colour. Twenty-two, zero and eleven respectively.
+
+- **A colour in none of the three lists is a failing test**, so the stylesheet
+  cannot grow past the check. This is the property that makes the module stay
+  true rather than merely be true today.
+- **A declared departure that equals its slot is a failing test**, because an
+  exemption that exempts nothing reads exactly like a checked copy — which is
+  the state `--ink-faint` was in, one hex digit from the palette it said it was
+  departing from.
+
+**The departures list is empty**, and that is this lane's 2 November lesson
+arriving again: a list empty by design makes every assertion over it true. So
+`chromeFaults` takes its tables as an argument and every one of its six fault
+kinds is put to a stylesheet and a palette this site does not have, exactly as
+`plain.ts`' `faultIn` is.
+
+### The general version, which is the half worth keeping
+
+**Three surfaces transcribe a registered palette into a stylesheet**, because a
+stylesheet cannot import a palette. That is fine. The question to ask of any one
+of them is not *is there a test* but **which two things does the test compare** —
+and if both of them are copies, there is no check, however red it can be made to
+go by editing one of them.
+
+`(portal)` reads the registry. `(docs)` does now. `(lessons)` and `(marketing)`
+are not this lane's to inspect and are not asserted about here; if either
+transcribes palette values into its own stylesheet, the module above is the
+shape, and it is twenty lines of table and one comparison.
 ## 2026-11-03 — a band's scroll margin is a fixed length and the bar it has to clear is not, so an anchored band lands under the menu on a phone
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
