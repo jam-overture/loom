@@ -64352,3 +64352,53 @@ next runs.
 **Recommended: the second**, and only because the first depends on a schedule
 nobody inside a run can see. It is one function and one emission, both covered
 by tests that already exist, and the diff is readable in a minute.
+
+---
+## 2026-11-02 (evening) — a test asserting how many of another lane's declarations are cut is this lane's number about somebody else's growth, and it survived a merge by luck
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/fields.test.ts`) · **Status:** **closed on
+filing by `docs-75-a-number-about-another-lanes-growth`** — a correction to
+`docs-74`, which **merged as #750 at 16:40 before the correction was pushed**,
+so the bad assertion reached `main` and this is a fresh unit rather than a
+second push to a finished pull request
+
+`fields.ts` reads the declarations `SIGNATURE_CAP` cut, because the names below
+a cut are names this check can never flag, and the honest way to state that
+limit is a number. The test shipped this morning asserted the number:
+
+```ts
+expect(cutDeclarations.length).toBe(11)
+```
+
+**Eleven is not this lane's number.** It is how many types another lane happens
+to have published that run past 6,000 characters, and it moves when `src/`
+grows. `search/build.ts` named that shape first — *this lane's number about
+somebody else's growth* — and `weight.ts` wrote `GENERATED_PAGE_CAP` as a
+trigger with a remedy in the comment for exactly this reason. The rule was
+already written down twice in this directory and the test broke it anyway.
+
+**It survived its own branch's merge by luck.** `Loom merge` brought `main` in
+the same afternoon with #747, #748 and #749 on it; the published set went from
+1,855 names to 1,860, **and not one of the new declarations was long enough to
+be cut.** Had one been, this lane's suite — the merge gate for four surfaces —
+would have gone red for a reason having nothing to do with the change that
+turned it red.
+
+**The remedy is the one both earlier instances reached**: assert the property,
+date the figure. `toBeGreaterThan(5)`, plus the two claims this lane can make
+on its own — `RenderDiagnostic` is among them, and every cut hides lines. The
+count itself is in the report, where it carries a date, and in the module's doc
+comment, which now says *eleven of them on 2 November*.
+
+**The morning entry above is left exactly as it was measured**, at `749e4c1`,
+rather than edited to today's figures. It is dated and it was true; the
+movement is recorded here, which is this repository's own convention for
+amending a record instead of rewriting one — and it is the same argument as the
+fix: a number belongs where it can carry a date.
+
+**The general version, which is the useful half.** Three checks in this
+directory read the generated reference, and a figure read from it is **another
+lane's**, whatever it is counting. The question to ask of any number taken from
+`reference.generated.json` is *would I defend this if `src/` doubled* — if not,
+it is a floor, a trigger or a dated sentence, never an equality.
