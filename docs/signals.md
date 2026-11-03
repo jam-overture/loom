@@ -4465,6 +4465,67 @@ appearances and the swap would turn a sound nought into a `NaN`; and still
 **nothing draws any of it**, which is `Loom portal`'s and is now twenty-four
 runs old.
 
+> **Closed by §72, and the `NaN` half of that sentence was wrong.** Neither key
+> can reach a door with no appearances: both ladders refuse it two rungs earlier,
+> as `unbroken`/`unmoved` or as `inconsistent`. What the swap actually cost was
+> the last place, and the clause that mattered was a different one.
+
+### 72. One rule for the door's scale, and the last place it is taken in · `Loom signals` · **done, 3 November**
+
+`door.ts` exists so that the scaling every reader-weighted figure shares is
+written once
+([0265](../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md)),
+and §71's finding found that it had not reached everybody: grepping for the
+**arithmetic** rather than for the name turned up the same rule written a second
+time in two ranking keys as `count ÷ (1 + inflation)` — the order of falls
+([0250](../decisions/0250-a-deployment-is-ordered-by-readers-lost-at-the-doors-scale-and-a-page-the-door-cannot-scale-is-out-of-the-order.md))
+and the order of movements
+([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)).
+
+**Done**
+([0344](../decisions/0344-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)):
+`atDoorScale` is total, both keys read it, and the precondition is off its doc
+comment.
+
+- **The hazard the finding named is not reachable, and that is now tested.** It
+  said the swap would turn a sound nought into a `NaN` because neither key
+  refuses a door whose appearances are nought. Neither key can *get* there: a
+  page that lost nobody has no steepest fall and leaves the order before the key,
+  and a page that lost anybody lost more than ever appeared and leaves it as
+  `inconsistent`. The totality is what lets the precondition come off, so that a
+  third key adopting the rule needs no guard beside it — a belt rather than a fix.
+- **The clause that was load-bearing is the other one: an identity scale is
+  taken exactly.** Where the weight equals the appearances it divides — every
+  page with no drift — `count × n ÷ n` is the count mathematically and not in
+  floats. An order of movements ranks on a share movement times a count, which is
+  **not** a whole number, and its own rule is that the magnitude is the
+  comparison's published figure *because deriving it twice is how two screens come
+  to disagree about which band a change hurt.* Ten readers reaching a band and
+  four the next, against twenty-four and six, is a movement of
+  3.6000000000000005; without this clause the swap would have printed 3.6 beside
+  it.
+- **Otherwise the published spelling is the nearer of the two, and it is checked
+  rather than claimed.** Over the 22,100 integer triples in `opened ≤ 40`,
+  `appearances ≤ 40` where the scale is not the identity, it is never further from
+  the exact value than the division-first spelling and is strictly closer in
+  4,963 — asserted in `door.test.ts` against whole-number arithmetic, because two
+  doubles that differ in their last place cannot say which of them is nearer.
+- **A fold that ran twice leaves both keys exactly where they were.** Thirty
+  openings, forty appearances and sixteen readers lost come to twelve; folded
+  twice they come to twelve through this rule and to 11.999999999999998 through
+  the other.
+- **`atDoorScale` is tested where it lives**, which it was not: five callers and
+  no test of its own.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes minified, 2,982 gzipped. No payload field, no
+column, no migration, no store method and no new kind.
+
+**What is left and is filed:** the rule is now load-bearing for three published
+orders, so the sweep that says which spelling is nearer the exact value is what a
+future change to it has to keep passing; and still **nothing draws any of it**,
+which is `Loom portal`'s and is now twenty-five runs old.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

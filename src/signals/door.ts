@@ -88,16 +88,16 @@ export const doorOf = (row: RevisionPageViews | null): PageDoor => {
  * `count × counted ÷ appearances`: the count's own sound share of that page's
  * appearances (0229), weighted by the page views a rollup actually folded
  * (0250). It is the expression every reader-weighted figure over a library is
- * built out of, and until now it was **five hand-written copies of it** — one
- * in a kind's share of readers, two in what readers do inside a kind, two in a
- * comparison of the first — which is the state this module was created to end
- * and did not quite reach: {@link PageDoor} held the per-page half of the rule
- * and the per-placement half stayed at each call site.
+ * built out of, and it was **five hand-written copies of it** — one in a kind's
+ * share of readers, two in what readers do inside a kind, two in a comparison of
+ * the first — which is the state this module was created to end and did not
+ * quite reach: {@link PageDoor} held the per-page half of the rule and the
+ * per-placement half stayed at each call site.
  *
- * **The multiplication comes before the division**, which is not a style: the
- * three floats agree to fifteen places in either order and not to sixteen, and
- * 0229 has already been bitten by exactly that. Written this way the helper is
- * bit-identical to every copy it replaces.
+ * Three **ranking keys** then turned out to be the same rule written a sixth,
+ * seventh and eighth time as `count ÷ (1 + inflation)` — the order of
+ * conversions (0333), of falls (0250) and of movements (0291). All three read
+ * this one now (0344).
  *
  * `scaledBy` is a **second** door, for the one caller that needs one: a
  * comparison asks what one side's reading would have come to with the other
@@ -105,9 +105,33 @@ export const doorOf = (row: RevisionPageViews | null): PageDoor => {
  * the weight is the other's. It defaults to the door the count came from, which
  * is every other caller.
  *
- * Only ever called for a door with no silence, where `appearances` is
- * positive — a page the door cannot scale has no term in any of these figures
- * at all.
+ * **Total, and the two short-circuits are the reason three ranking keys can
+ * share it** (0344). It was documented as *only ever called for a door with no
+ * silence, where `appearances` is positive*, and that precondition is what kept
+ * the orders of falls and of movements writing the rule a second time by hand as
+ * `count ÷ (1 + inflation)` — a division-first spelling that is total where this
+ * one divided by nothing. Both cases are now answered here:
+ *
+ * - **A door that folded nothing has nothing to divide out.** With no
+ *   appearances there is no scale to put the count on and no straddle in it to
+ *   remove, so the count is its own figure. The alternative is a `NaN` in a
+ *   ranking key, which sorts wherever the comparator leaves it.
+ * - **A scale that is the identity is taken exactly.** Where the weight equals
+ *   the appearances it divides — every page with no drift, which is most of
+ *   them — `count × n ÷ n` is the count mathematically and **not** in floats:
+ *   `0.1 × 3 ÷ 3` is `0.10000000000000002`. A movement of a share is not a whole
+ *   number, so a page the door has nothing to correct would have had its
+ *   published figure moved by the correction. Returning the count says the same
+ *   thing and says it in the last place too.
+ *
+ * **The multiplication comes before the division** otherwise, which is not a
+ * style: the three floats agree to fifteen places in either order and not to
+ * sixteen, and 0229 has already been bitten by exactly that. Over 22,100 integer
+ * triples where the scale is not the identity, this spelling is never further
+ * from the exact value than the division-first one and is strictly closer in
+ * 4,963 of them.
  */
 export const atDoorScale = (count: number, of: PageDoor, scaledBy: PageDoor = of): number =>
-  (count * scaledBy.counted) / of.appearances
+  of.appearances === 0 || scaledBy.counted === of.appearances
+    ? count
+    : (count * scaledBy.counted) / of.appearances

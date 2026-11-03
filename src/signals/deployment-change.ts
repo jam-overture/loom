@@ -4,6 +4,7 @@ import type { TreeId } from "../ids.js"
 
 import type { ChangeSilence, ComparedStop, ReadingChange } from "./change.js"
 import { formKeyOf, readingKeyOf } from "./audiences.js"
+import { atDoorScale, doorOf, type PageDoor } from "./door.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 
 /**
@@ -43,10 +44,12 @@ import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./pa
  * rows — and then it is multiplied by a count that does, so the straddle walks
  * straight back into the ranking key at the last step.
  *
- * So the key here is that figure put **on the scale the door counts in**:
- * `readers ÷ (1 + inflation)`, where the inflation is the later window's own
- * `drift ÷ opened` off that revision's own door row, picked out with the rule
- * published beside the counter rather than written again
+ * So the key here is that figure put **on the scale the door counts in**, by
+ * `atDoorScale` off that revision's own door row
+ * ([0265](../../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md),
+ * [0344](../../decisions/0344-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)).
+ * The row is the later window's and is picked out with the rule published beside
+ * the counter rather than written again
  * ([0219](../../decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)).
  * What comes out is not a count of people and is deliberately not rounded into
  * one.
@@ -438,14 +441,26 @@ const pairKeyOf = (change: ReadingChange): string =>
  * The magnitude is taken of the comparison's own ranking figure rather than
  * multiplied up again here, because deriving it twice is how two screens come to
  * disagree about which band a change hurt.
+ *
+ * **A `null` door is *do not scale this one*** and not *this page has no door*:
+ * the caller hands one in for a ranked row and withholds it for a row whose
+ * counters disagree with the door row, which publishes the movement's share
+ * without a headcount against it.
+ *
+ * The scale itself is the rule published beside the counter (0344). It was
+ * `Math.abs(at.readersKept) ÷ (1 + inflation)` here, which is the same rule by a
+ * different route — and this figure is a share movement times a count, so it is
+ * **not a whole number**: on a page with no drift the two routes differ in the
+ * last place, and the published rule is the one that leaves a figure the door has
+ * nothing to correct exactly as it found it.
  */
-const movementOf = (at: ComparedStop | null, inflation: number | null): PageMovement | null =>
+const movementOf = (at: ComparedStop | null, scale: PageDoor | null): PageMovement | null =>
   at === null
     ? null
     : {
         at,
         share: Math.abs(at.improvement),
-        readers: inflation === null ? null : Math.abs(at.readersKept) / (1 + inflation),
+        readers: scale === null ? null : atDoorScale(Math.abs(at.readersKept), scale),
       }
 
 /**
@@ -527,11 +542,13 @@ const rowOf = (change: ReadingChange, door: RevisionPageViews | null): MovedPage
     }
   }
 
+  const scale = doorOf(door)
+
   return {
     ...where,
     standing: "ranked",
-    worsened: movementOf(change.mostLost, door.inflation),
-    improved: movementOf(change.mostKept, door.inflation),
+    worsened: movementOf(change.mostLost, scale),
+    improved: movementOf(change.mostKept, scale),
   }
 }
 

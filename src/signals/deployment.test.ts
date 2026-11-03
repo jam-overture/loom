@@ -248,6 +248,44 @@ describe("deploymentReadingOf", () => {
         expect(row.readers ?? 0).toBeLessThanOrEqual(row.opened ?? 0)
       }
     })
+
+    /**
+     * The key is the rule published beside the counter and not a second spelling
+     * of it (0344). The figures below are what it came to before the swap and
+     * after it, and they are the same figures: what moves is the last place on a
+     * page with drift, which no order is taken on.
+     */
+    it("reads the scale off the one published rule, and the order does not move", () => {
+      const reading = deploymentReadingOf(PAGES, ROWS)
+
+      expect(reading.ranked.map((row) => row.readers)).toEqual([200, 100])
+      expect(reading.ranked.map((row) => row.treeId)).toEqual([OTHER_TREE, TREE])
+    })
+
+    /**
+     * The double-count case this lane tests every counting unit against (0158),
+     * and it is the reason the key is at the door's scale at all. One readership
+     * read through two rollup windows: every distinct count against the page
+     * doubles and so do the appearances the door saw, while the openings are
+     * counted once at the door (0219).
+     *
+     * **The key does not move at all, and not merely nearly.** The doubled
+     * reading is the same quotient scaled by two above and below, so the two
+     * figures agree in their last place as well. The spelling this key used until
+     * 0344 did not: thirty openings, forty appearances and sixteen readers lost
+     * come to twelve through both routes, and folded twice they come to twelve
+     * through this one and to 11.999999999999998 through the other, which is a
+     * deployment told its worst page improved by two quadrillionths of a reader
+     * because a rollup ran.
+     */
+    it("gives one readership the same key whether a window folded it once or twice", () => {
+      const once = deploymentReadingOf([page(TREE, 1, [100, 84])], [door(TREE, 1, 30, 40)])
+      const twice = deploymentReadingOf([page(TREE, 1, [200, 168])], [door(TREE, 1, 30, 80)])
+
+      expect(once.ranked[0]).toMatchObject({ lost: 16, readers: 12 })
+      expect(twice.ranked[0]).toMatchObject({ lost: 32, readers: 12 })
+      expect(32 / (1 + 50 / 30)).not.toBe(12)
+    })
   })
 
   describe("ranking two pages that lose the same", () => {
@@ -302,6 +340,31 @@ describe("deploymentReadingOf", () => {
 
       expect(reading.unranked.map((row) => row.standing)).toEqual(["unopened"])
       expect(reading.unranked[0]).toMatchObject({ opened: 0, inflation: null, readers: null })
+    })
+
+    /**
+     * The fourth door state, which this order never names and never needs to.
+     *
+     * A row that has opened page views and folded none of them is `uncounted` in
+     * the door's own vocabulary, and a reading that divided by its appearances
+     * would divide by nothing. **This order cannot reach its key there**, by two
+     * rungs it already had: a page that lost nobody has no steepest fall and
+     * leaves as `unbroken`, and a page that lost anybody lost more than appeared
+     * and leaves as `inconsistent`. So the published rule being total (0344) is a
+     * belt here rather than a fix — which is worth a test, because the hazard was
+     * filed as live and it is not.
+     */
+    it("never reaches its key through a door that folded nothing, whatever the page lost", () => {
+      const unfolded = door(TREE, 1, 10, 0)
+
+      expect(deploymentReadingOf([page(TREE, 1, [100, 100])], [unfolded]).unranked[0]).toMatchObject(
+        { standing: "unbroken", readers: null }
+      )
+      expect(deploymentReadingOf([page(TREE, 1, [100, 40])], [unfolded]).unranked[0]).toMatchObject({
+        standing: "inconsistent",
+        readers: null,
+      })
+      expect(deploymentReadingOf([page(TREE, 1, [100, 40])], [unfolded]).ranked).toEqual([])
     })
 
     it("reports a page that loses nobody as read rather than as a page it cannot speak for", () => {
