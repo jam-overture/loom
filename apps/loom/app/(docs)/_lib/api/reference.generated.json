@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5202,7 +5202,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5672,7 +5672,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6760,7 +6760,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7337,7 +7337,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7537,10 +7537,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 39,
+      "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7945,6 +7945,49 @@
           ]
         },
         {
+          "module": "store/history",
+          "title": "History",
+          "summary": "The tree as it was, asked of one handle.",
+          "symbols": [
+            {
+              "name": "SeedSource",
+              "kind": "type",
+              "signature": "type SeedSource = (treeId: TreeId) => LoomTree | undefined;",
+              "summary": "Where a host's trees started, by id, or `undefined` for a tree it cannot prove the beginning of."
+            },
+            {
+              "name": "seedRegistry",
+              "kind": "function",
+              "signature": "const seedRegistry: (seeds: ReadonlyMap<TreeId, () => LoomTree>) => SeedSource",
+              "summary": "A seed source over a fixed set of trees."
+            },
+            {
+              "name": "TreeVersion",
+              "kind": "type",
+              "signature": "type TreeVersion = TreeAtRevision | {\n    readonly outcome: \"unseeded\";\n    readonly treeId: TreeId;\n    readonly revision: number;\n};",
+              "summary": "The tree as it was, or why not."
+            },
+            {
+              "name": "describeTreeVersion",
+              "kind": "function",
+              "signature": "const describeTreeVersion: (version: TreeVersion) => string",
+              "summary": "One sentence per answer, extending `describeTreeAt` with the host's case."
+            },
+            {
+              "name": "TreeHistory",
+              "kind": "type",
+              "signature": "type TreeHistory = {\n    readonly at: (treeId: TreeId, revision: number) => Promise<Result<TreeVersion, StoreError>>;\n    /**\n     * The same question about several revisions of one tree, folded once. Keyed by\n     * revision, as `treesAt` is, and the two-revision case is what it exists for:\n     * a before-and-after reading is one revision against another.\n     */\n    readonly atEach: (treeId: TreeId, revisions: readonly number[]) => Promise<Result<ReadonlyMap<number, TreeVersion>, StoreError>>;\n};",
+              "summary": "A reader and the seeds that make its log foldable."
+            },
+            {
+              "name": "historyOf",
+              "kind": "function",
+              "signature": "const historyOf: (reader: TreeReader, seeds: SeedSource) => TreeHistory",
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "store/memory",
           "title": "Memory",
           "summary": "A store in memory: the log, the snapshot, and the invariant that ties them.",
@@ -8303,7 +8346,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8682,7 +8725,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8910,7 +8953,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12933,7 +12976,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13068,7 +13111,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13130,7 +13173,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13655,7 +13698,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13725,7 +13768,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14147,7 +14190,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1864,
+        "packageNames": 1870,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
