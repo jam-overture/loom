@@ -12,11 +12,13 @@ import type { WeighedAgainst } from "../outcome"
 import { portalRegistry } from "../registry"
 import { beginWrite } from "../write"
 import { proposeFor, type ProposeError, type Proposed } from "./propose"
+import { followsItsSite, pageCopiesFor, turnedDownFor } from "./stores"
 import { sweep, type SweepReport } from "./sweep"
 
 /**
  * One run of the AI over one page, wired to this deployment: the project's own
- * model, its own governed pages and holds, and the readings its door filed.
+ * model, its own governed pages, copies and holds, what was turned down on its
+ * pages, and the readings its door filed.
  * The page screen's button and the daily sweep both run it, so the two can
  * never propose by different rules.
  */
@@ -41,6 +43,9 @@ export const runOnPage = async ({
 
   const run = await proposeFor({
     path: write.path,
+    copies: pageCopiesFor(application),
+    turnedDown: turnedDownFor(application),
+    follows: followsItsSite(application),
     client: model.client,
     sources: { tallies: readingsFor(application).tallies },
     declarations: portalRegistry,

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import { heldProposalFixture } from "@jam-overture/loom/testing/contracts"
 
+import { treeIdSchema } from "@jam-overture/loom"
+
 import { queueRowOf } from "./queue"
 import { STAKES } from "./vocabulary"
 
@@ -10,7 +12,7 @@ const held = heldProposalFixture({ actor: "jonathan", heldAt: "2026-11-01T09:30:
 
 describe("a waiting change, as the Waiting tab shows it", () => {
   it("says what was asked, by whom, when, why it stopped and what is at stake", () => {
-    const row = queueRowOf(held, new Map([[held.treeId, "Welcome"]]), "owner")
+    const row = queueRowOf(held, new Map([[held.treeId, "Welcome"]]), "owner", [])
 
     expect(row).toMatchObject({
       proposalId: held.proposalId,
@@ -25,11 +27,26 @@ describe("a waiting change, as the Waiting tab shows it", () => {
   })
 
   it("names the page by its id when it published no name", () => {
-    expect(queueRowOf(held, new Map(), "owner").page).toBe(held.treeId)
+    expect(queueRowOf(held, new Map(), "owner", []).page).toBe(held.treeId)
   })
 
   it("is answerable by a role whose ceiling covers its stake, and says who can otherwise", () => {
-    expect(queueRowOf(held, new Map(), "approver").waitsOn).toBeNull()
-    expect(queueRowOf(held, new Map(), "viewer").waitsOn).toBe("approver")
+    expect(queueRowOf(held, new Map(), "approver", []).waitsOn).toBeNull()
+    expect(queueRowOf(held, new Map(), "viewer", []).waitsOn).toBe("approver")
+  })
+
+  it("reads as made for the page the site serves while the page has had one copy", () => {
+    const row = queueRowOf(held, new Map(), "owner", [])
+
+    expect(row).toMatchObject({ standing: "current", standingSentence: null })
+  })
+
+  it("names its page and says it no longer fits when it waits on an older copy", () => {
+    const later = treeIdSchema.parse("t_later")
+    const copies = [{ pageId: held.treeId, copyId: later, startedAt: Date.parse(held.heldAt) }]
+    const row = queueRowOf(held, new Map([[held.treeId, "Welcome"]]), "owner", copies)
+
+    expect(row).toMatchObject({ pageId: held.treeId, page: "Welcome", standing: "conflicts" })
+    expect(row.standingSentence).toMatch(/can only be turned down/u)
   })
 })

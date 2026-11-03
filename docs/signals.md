@@ -32,7 +32,7 @@ the portal every day.
 | Content | **none** — no text, no URLs, no typed values, nothing about the reader |
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
-| Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
+| Browser cost | **6.4 KB** minified, 2.9 KB gzipped, measured 2 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -4336,6 +4336,68 @@ statements per member and the symmetry of the two `spoiled` names was not taken
 (`spoiled` / `spoiledConversion`, deliberately, rather than a rename); and still
 **nothing draws any of it**, which is `Loom portal`'s and is now twenty-two runs
 old.
+
+### 70. The fix-list, read off one window · `Loom signals` · **done, 2 November**
+
+Three rungs were built so that every reading of a window is one call with one
+argument: the assembly turns a window into the subjects, `windowFiguresOf`
+publishes the three readings the assembly deliberately does not, and
+`windowFunnelsOf` publishes the funnel answers. **The fix-list was what was
+left** — three readings, over two row sets, with a per-page reading derived
+under one of them, and a caller writing the composition by hand.
+
+[0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)
+had rejected a home for that line on the ground that *both of its inputs are one
+call with one argument, so there is nothing here a caller can get wrong*. That
+was true of two inputs;
+[0336](../decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)
+made it three.
+
+**Done**
+([0343](../decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)),
+as `windowAgendaOf` in [`window-agenda.ts`](../src/signals/window-agenda.ts),
+which publishes the progress readings, the order of falls, the order of
+conversions, the health reading and the join over them.
+
+- **The collection schedule is required and may be `null`**, and this is the
+  whole of what the rung adds. `collectionHealthOf`'s third argument is
+  optional, rightly; the composed line omitted it, and the cost is not a missing
+  row. `collection-stalled` is never raised, and since a stalled fold reaches
+  both ranking keys, the fall and the leak it manufactured are never withdrawn
+  either. **Two readings of one window, differing by one omitted argument, say
+  the opposite thing about the same page** — `work: "page"` with both orders
+  ranked where no schedule was stated, `work: "collection"` with the page
+  `contested` where one was. The omission sends an operator to rewrite a page
+  whose numbers are an artefact of its own stopped collection, which is the
+  precise failure the fix-list exists to prevent.
+- **A reading with a published call of its own is handed in; a reading that is
+  one call over the assembly's readings is made.** That is the rule the rung is
+  built on, stated so the next reading added to it does not re-derive it. The
+  funnel answers are taken, because answering them again would put two answers
+  of one revision on one screen; the progress readings and the health reading
+  are made, because neither has a call of its own and the progress line is the
+  hazardous one — the nearest line to hand maps a side of a library and silently
+  drops a revision.
+- **All four readings are published, not only the join**, and the join's rows
+  carry the published rows by identity: `rows[0].conversion` *is*
+  `conversion.ranked[0]`.
+- **`unpaired` and `duplicated` are nought by construction**, since the three
+  readings are over one assembly's one set of readings. Both stay published and
+  are carried as they come, for the caller that assembled a reading of its own.
+- **The context is not taken, and gains no fifth field.** The schedule is half
+  per-deployment configuration and half the instant the reading is taken, and a
+  context holding a clock would answer differently on two calls over one window.
+  The 29 October boundary is closed with an answer rather than a `scheduleAt`.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** `collectionHealthOf` keeps its optional third
+argument, so the step below the rung can still read a deployment's health
+judging no fold at all; **nothing composes the three rungs into one call**, which
+is deliberate; and still **nothing draws any of it**, which is `Loom portal`'s
+and is now twenty-three runs old.
 
 ### 71. The leak the order throws away, kept as the part a straddle cannot explain · `Loom signals` · **done, 3 November**
 

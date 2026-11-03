@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4646,6 +4646,12 @@
               "kind": "function",
               "signature": "const themeDocumentCss: (theme: ResolvedTheme, ramp?: RampMode) => string",
               "summary": "A resolved theme as the `:root` rule a host puts on its own document."
+            },
+            {
+              "name": "themeGroundCss",
+              "kind": "function",
+              "signature": "const themeGroundCss: (theme: ResolvedTheme) => string | undefined",
+              "summary": "The ground alone, as the same `:root` rule — for a host whose page is already a tree to its edges."
             }
           ]
         },
@@ -5196,7 +5202,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5666,7 +5672,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6754,7 +6760,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7331,7 +7337,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7534,7 +7540,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8297,7 +8303,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8676,7 +8682,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8891,7 +8897,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 76,
+      "files": 77,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8904,7 +8910,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12849,6 +12855,25 @@
           ]
         },
         {
+          "module": "signals/window-agenda",
+          "title": "Window agenda",
+          "summary": "The deployment's fix-list, off one window, in one call.",
+          "symbols": [
+            {
+              "name": "WindowAgenda",
+              "kind": "type",
+              "signature": "type WindowAgenda = {\n    /**\n     * Where reading stops on each page the window holds, in the readings' own\n     * order.\n     *\n     * Published because it is drawn: a screen that names the page to fix next\n     * shows the run of parts the fall is in, and these are the readings the order\n     * below was ranked from rather than a second set of them.\n     */\n    readonly progress: readonly ReadingProgress[];\n    /**\n     * The pages by the readers each loses at its sharpest fall, worst first.\n     *\n     * `duplicated` and `duplicatedRows` are nought from here: the assembly never\n     * holds two readings of one page, and the window's door rows are its own set.\n     */\n    readonly order: DeploymentReading;\n    /**\n     * The pages by the readers each loses between the two ends of its sharpest\n     * question, worst first.\n     *\n     * Read off the funnel answers handed in, so a page is in this order exactly\n     * where that answer put it.\n     */\n    readonly conversion: DeploymentConversion;\n    /**\n     * What is wrong with what this deployment collects, page by page.\n     *\n     * Judged against the schedule handed in, and judging no fold at all where\n     * that was `null`.\n     */\n    readonly health: CollectionHealth;\n    /**\n     * The fix-list: the two orders of pages, the measurements to repair, and the\n     * one thing to do first.\n     *\n     * Its `unpaired` counts are nought by construction and its `duplicated` is\n     * nought by construction, which is the whole of what this rung guarantees\n     * beyond saving the lines.\n     */\n    readonly agenda: DeploymentAgenda;\n};",
+              "summary": "A deployment's fix-list and each of the readings it was joined from."
+            },
+            {
+              "name": "windowAgendaOf",
+              "kind": "function",
+              "signature": "const windowAgendaOf: (window: ReaderWindow, assembly: WindowAssembly, funnels: WindowFunnels, schedule: CollectionSchedule | null) => WindowAgenda",
+              "summary": "Read a deployment's fix-list off a window, its assembly and its funnels."
+            }
+          ]
+        },
+        {
           "module": "signals/window-figures",
           "title": "Window figures",
           "summary": "The second rung: the figures a window holds about **itself**, rather than about one of the subjects the assembly under this publishes.",
@@ -12908,7 +12933,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13043,7 +13068,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13105,7 +13130,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13630,7 +13655,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13700,7 +13725,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14122,7 +14147,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1861,
+        "packageNames": 1864,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
