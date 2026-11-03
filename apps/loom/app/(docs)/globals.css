@@ -18,12 +18,19 @@
    honest description of what is happening, and the copy is named in
    each block so a later reader can diff it against the source.
 
-   Three departures, each argued where it is made: `--ink-faint` takes
-   a darker step than `fg-subtle` (an open AA finding), the two
-   non-green states keep an amber and a red because a refusal that
-   cannot be told from an acceptance is a broken page rather than a
-   restrained one, and dark is the site's own inversion because the
-   registered palette is light-only.
+   **A later reader is no longer the mechanism.** `_lib/chrome-palette.ts`
+   names, for every colour below, the palette slot it is a copy of, and
+   `pnpm verify` reads the registry and this file and compares them. Until
+   3 November the only check on these values compared them to hexes typed
+   into a test, which is a copy checked against a second copy — and it had
+   already let `--ink-faint` sit ten weeks away from the slot it copies.
+
+   Two departures, each argued where it is made: the two non-green states
+   keep an amber and a red because a refusal that cannot be told from an
+   acceptance is a broken page rather than a restrained one, and dark is
+   the site's own inversion because the registered palette is light-only.
+   A colour added below has to join one of the module's three lists or
+   the suite says so.
    ══════════════════════════════════════════════════════════════════ */
 
 @font-face {
@@ -99,15 +106,23 @@
     --ink: #0a0a0a;
     --ink-muted: #52525b;
     /*
-     * **A departure, and the only one in the neutrals.** `fg-subtle` is
-     * `#8a8a94`, which is 3.42:1 on white and misses AA — filed on 20 August
-     * against every registered palette, this one included. Chrome is not a
-     * Loom tree, so nothing forces the site to inherit a value the finding
-     * already calls wrong; this is the same hue two steps down, at 5.0:1.
+     * `fg-subtle`, exactly — and it was a departure from it until 3 November.
+     *
+     * The departure's reason was real and is gone: `fg-subtle` was `#8a8a94`,
+     * 3.42:1 on white, filed on 20 August against every registered palette.
+     * **0074 fixed it in the palette that same day**, to the `#6e6e78` below
+     * at 5.0:1, which is the value this line had been departing *to* by hand.
+     * The chrome then went on declaring its own near-identical grey for ten
+     * weeks, with a comment citing a number the repository no longer held
+     * anywhere — because the only thing checking this colour was a test that
+     * compared the stylesheet to a hex typed into the test.
+     *
      * Every uppercase row label in a verdict panel and every section header in
-     * the sidebar is drawn with it, and they are labels rather than ornament.
+     * the sidebar is drawn with it, and they are labels rather than ornament,
+     * which is why the AA miss mattered enough to depart over in the first
+     * place. `_lib/chrome-palette.ts` is what now reads the palette instead.
      */
-    --ink-faint: #6f6f7a;
+    --ink-faint: #6e6e78;
     --ink-inverse: #ffffff;
 
     /*

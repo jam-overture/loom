@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { guardedRoots, propertiesNamedIn, remPx, rootProperties, soleDeclaration } from "./chrome-css"
+import {
+  guardedRoots,
+  propertiesNamedIn,
+  remPx,
+  rootProperties,
+  selectorDeclarations,
+  soleDeclaration,
+} from "./chrome-css"
 
 /**
  * The reader itself, against stylesheets written for the purpose.
@@ -161,5 +168,52 @@ describe("a length in rem", () => {
     expect(() => remPx("calc(var(--chrome) + 1px)")).toThrow(/not a plain rem length/)
     expect(() => remPx("1px")).toThrow(/not a plain rem length/)
     expect(() => remPx("calc(100vh - 3.5rem)")).toThrow(/not a plain rem length/)
+  })
+})
+
+/**
+ * The other reader, which is the palette's rather than the chrome's.
+ *
+ * `rootProperties` above answers *what is the chrome's height*, so it reads
+ * `:root` and custom properties only. This one answers *what colours does this
+ * site paint its furniture*, which needs the two things that one excludes on
+ * purpose — a selector that is not `:root`, and `color-scheme`, which is not a
+ * custom property.
+ */
+describe("the declarations one selector makes", () => {
+  it("reads a selector that is not :root", () => {
+    expect([...selectorDeclarations(SHEET, '[data-theme="dark"]')]).toEqual([["--edge", "#2b2b31"]])
+  })
+
+  it("merges the unguarded blocks of one selector, as rootProperties does", () => {
+    const read = selectorDeclarations(SHEET, ":root")
+
+    expect(read.get("--edge")).toBe("#d4d4d9")
+    expect(read.get("--chrome-inset")).toBe("calc(var(--chrome) + var(--chrome-clearance))")
+  })
+
+  /* The whole reason this is a second function: a theme block's one declaration
+     that is not a custom property is the one that governs the furniture outside
+     the page (0334), and `rootProperties` would not hand it back. */
+  it("reads a declaration that is not a custom property", () => {
+    const sheet = `
+      :root {
+        --ink: #0a0a0a;
+        color-scheme: light;
+      }
+    `
+
+    expect(selectorDeclarations(sheet, ":root").get("color-scheme")).toBe("light")
+  })
+
+  it("leaves a block inside a media query to guardedRoots", () => {
+    expect(selectorDeclarations(SHEET, ":root").has("--chrome-bar-band")).toBe(false)
+  })
+
+  /* A selector nobody declares is a table pointing at a block that is not
+     there, and a reader handing back an empty map would make every claim about
+     it pass. */
+  it("refuses a selector the sheet does not declare, rather than answering nothing", () => {
+    expect(() => selectorDeclarations(SHEET, '[data-theme="sepia"]')).toThrow(/no unguarded/)
   })
 })

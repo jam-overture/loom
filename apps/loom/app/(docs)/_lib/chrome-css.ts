@@ -213,3 +213,45 @@ export const remPx = (value: string): number => {
 
   return Number(found[1]) * REM_PX
 }
+
+/**
+ * Every declaration one selector makes, at every width, including the ones
+ * that are not custom properties.
+ *
+ * `rootProperties` above is deliberately narrower in both directions — only
+ * `:root`, and only `--…` — because its readers are about the chrome's height
+ * and nothing about a height is a theme value. This one is the other question:
+ * **what the site's palette blocks say.** `chrome-palette.ts` is its reader,
+ * and it needs the two things `rootProperties` excludes on purpose: the dark
+ * theme's block, which is a different selector, and `color-scheme`, which is
+ * not a custom property and is the one declaration in those blocks that
+ * governs furniture no stylesheet of this site's can reach.
+ *
+ * Added as a second function rather than by widening the first, so that
+ * widening what a palette check reads cannot change what a chrome-height check
+ * is handed. The brace and comment handling is the only thing shared, and it is
+ * shared rather than copied.
+ *
+ * The selector is matched literally — `[data-theme="dark"]` is a selector and
+ * not a pattern — and a block inside a media query is left out for
+ * `rootProperties`' reason: there is no single value for a property declared
+ * twice under two conditions.
+ */
+export const selectorDeclarations = (css: string, selector: string): ReadonlyMap<string, string> => {
+  const literal = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const blocks = [
+    ...withoutMediaRules(withoutComments(css)).matchAll(new RegExp(`${literal}\\s*\\{([^}]*)\\}`, "g")),
+  ]
+
+  if (blocks.length === 0) {
+    throw new Error(`chrome-css: globals.css has no unguarded "${selector}" block, so there is nothing to read`)
+  }
+
+  return new Map(
+    blocks.flatMap((block) =>
+      [...(block[1] ?? "").matchAll(/([\w-]+):\s*([^;]+);/g)].map(
+        (declared) => [declared[1] ?? "", (declared[2] ?? "").trim()] as const
+      )
+    )
+  )
+}
