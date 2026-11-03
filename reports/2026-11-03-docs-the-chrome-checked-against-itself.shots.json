@@ -1,0 +1,27 @@
+{
+  "baseUrl": "http://localhost:3100",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/theming#every-palette-declares-every-slot",
+      "out": "2026-11-03-docs-the-chrome-checked-against-itself-wide-slots",
+      "viewport": {
+        "width": 1280,
+        "height": 1080
+      },
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/the-runtime/what-the-gate-decides",
+      "out": "2026-11-03-docs-the-chrome-checked-against-itself-wide-verdicts",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/the-runtime/what-the-gate-decides",
+      "out": "2026-11-03-docs-the-chrome-checked-against-itself-phone-verdicts",
+      "viewport": "phone",
+      "waitFor": "h1"
+    }
+  ]
+}

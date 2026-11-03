@@ -12,8 +12,8 @@ import {
   coloursIn,
   DARK_SELECTOR,
   describeChromeFault,
+  HOUSE_SLOTS,
   HOUSE_THEME,
-  housePalette,
   LIGHT_SELECTOR,
   siteChromeSituation,
   type ChromeSituation,
@@ -64,7 +64,7 @@ describe("the colours this site's furniture is painted in", () => {
 
   it("name slots the palette actually has", () => {
     for (const entry of [...CHROME_SLOTS, ...CHROME_DEPARTURES]) {
-      expect(housePalette.slots[entry.slot], `${entry.variable} names "${entry.slot}"`).toBeTypeOf("string")
+      expect(HOUSE_SLOTS[entry.slot], `${entry.variable} names "${entry.slot}"`).toBeTypeOf("string")
     }
   })
 

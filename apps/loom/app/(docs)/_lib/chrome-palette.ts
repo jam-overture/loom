@@ -92,6 +92,16 @@ export const HOUSE_THEME = { palette: "minimal", fontPack: "minimal-sans", style
 /** The palette the furniture is a copy of, read from the registry's own module. */
 export const housePalette: Palette = minimalPalette
 
+/**
+ * Its slots, by name.
+ *
+ * Widened to `string | undefined` on purpose rather than cast to `string`: a
+ * palette's slots are a `Partial`, and `no-such-slot` exists precisely because
+ * a table can name one the palette has stopped declaring. Casting that away
+ * would turn this module's second fault kind into an unreachable branch.
+ */
+export const HOUSE_SLOTS: Readonly<Record<string, string | undefined>> = housePalette.slots
+
 /** The two blocks that carry this site's colours, as the stylesheet writes them. */
 export const LIGHT_SELECTOR = ":root"
 export const DARK_SELECTOR = '[data-theme="dark"]'
@@ -223,7 +233,7 @@ export type ChromeSituation = {
   /** The colours one block declares, as the stylesheet writes them. */
   readonly declared: ReadonlyMap<string, string>
   /** The palette's slots, as the registry has them. */
-  readonly slots: Readonly<Record<string, string>>
+  readonly slots: Readonly<Record<string, string | undefined>>
   readonly transcriptions: readonly ChromeTranscription[]
   readonly departures: readonly ChromeDeparture[]
   readonly own: readonly ChromeOwn[]
@@ -328,7 +338,7 @@ export const describeChromeFault = (fault: ChromeFault): string => {
 /** The real situation: this site's stylesheet, against the registered palette. */
 export const siteChromeSituation = (css: string): ChromeSituation => ({
   declared: coloursIn(selectorDeclarations(css, LIGHT_SELECTOR)),
-  slots: housePalette.slots as Readonly<Record<string, string>>,
+  slots: HOUSE_SLOTS,
   transcriptions: CHROME_SLOTS,
   departures: CHROME_DEPARTURES,
   own: CHROME_OWN,
