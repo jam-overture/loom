@@ -1,7 +1,6 @@
-import { execFile } from "node:child_process"
 import { readFile, rm, writeFile } from "node:fs/promises"
-import { promisify } from "node:util"
 
+import { governedFiles } from "./governed.js"
 import { describeShrinkerError, loadShrinker } from "./shrinker.js"
 import { nameOf, STORED_EXTENSION } from "./visuals.js"
 
@@ -18,9 +17,11 @@ import { nameOf, STORED_EXTENSION } from "./visuals.js"
  * `--scale` is what the pictures were captured at, not what they will be stored
  * at. It defaults to 2 because that is the harness default and what every
  * specimen in `src/` declares; a run that shot at 1 should say so.
+ *
+ * **Which files it reads is `governed.ts`'**, and is the same set the gate
+ * checks — including the pictures a run has just written and not yet added,
+ * which this command could not see until 3 November.
  */
-
-const run = promisify(execFile)
 
 function fail(message: string): never {
   process.stderr.write(`loom reports:shrink: ${message}\n`)
@@ -41,8 +42,9 @@ const RASTER_MENTION = /\.(?:png|jpe?g|gif)/i
 const shrinker = await loadShrinker()
 if (!shrinker.ok) fail(describeShrinkerError(shrinker.error))
 
-const { stdout } = await run("git", ["ls-files", "-z"], { cwd: root, maxBuffer: 64 * 1024 * 1024 })
-const files = stdout.split("\0").filter((line) => line.length > 0)
+const governed = await governedFiles(root)
+if (!governed.ok) fail(governed.error.reason)
+const files = governed.value
 const rasters = files.filter((file) => file.startsWith(`${REPORTS}/`) && RASTER.test(file))
 
 if (rasters.length === 0) {
@@ -93,10 +95,16 @@ for (const file of rasters) {
 }
 
 /**
- * The citations, in one pass over every tracked file that is not itself an
+ * The citations, in one pass over every governed file that is not itself an
  * image. Scoped to the names that were converted rather than to a pattern, so
  * that a `.png` this command did not touch keeps pointing at the file that is
  * still there.
+ *
+ * The set matters here for a second reason, found with the first: a report
+ * written this run is itself untracked, so under the old reading its citations
+ * were the ones left pointing at the `.png` this command had just deleted —
+ * precisely the 404 the paragraph at the top says the two jobs move together to
+ * prevent.
  */
 let citing = 0
 if (renames.size > 0 && !dryRun) {

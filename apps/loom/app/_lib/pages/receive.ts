@@ -35,6 +35,12 @@ export type PublishDoor = {
     application: ApplicationId
   ) => Promise<Result<Application | null, { readonly detail: string }>>
   readonly pagesFor: (application: ApplicationId) => Pick<PublishedPageStore, "publish">
+  /**
+   * Told once a snapshot is kept, so the project's copies of its pages can
+   * follow it (0340). Told and not awaited: what follows is the deployment's
+   * business, and a build is answered once its pages are kept.
+   */
+  readonly kept: (application: ApplicationId, trees: readonly LoomTree[]) => void
   readonly now: () => number
 }
 
@@ -139,6 +145,8 @@ export const receivePages = async (request: Request, door: PublishDoor): Promise
   const kept = await door.pagesFor(named.value).publish(snapshot.value, door.now())
 
   if (!kept.ok) return answer(503, `pages are unavailable: ${kept.error.detail}`)
+
+  door.kept(named.value, snapshot.value)
 
   const count = snapshot.value.length
 

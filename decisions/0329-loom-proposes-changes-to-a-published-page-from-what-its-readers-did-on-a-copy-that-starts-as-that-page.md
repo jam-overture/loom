@@ -104,11 +104,12 @@ clause 3 keeps apart from the governed tree store on purpose.
 - No new tables for the queue: `loom_trees`, `loom_revisions` and `loom_holds`
   already carry an application column.
 - A change that was turned down leaves the copy where it was, so the next day's
-  sweep may propose it again. Remembering what was refused, and why, is owed.
+  sweep may propose it again. What was refused, and why, is now remembered and
+  weighed ([0341](0341-a-turned-down-change-is-remembered-and-the-ai-weighs-a-new-proposal-against-it.md)).
 - When a site publishes a newer version of a page than the copy began from,
-  the copy does not follow it and nothing more is proposed for that page.
-  Reconciling the two is owed before unit 8 opens pull requests, and is a
-  record of its own.
+  the copy did not follow it. It now starts again from it where no accepted
+  change has moved it, and a waiting change is checked against the newer
+  version ([0340](0340-a-pages-copy-starts-again-from-a-newer-published-version-and-a-waiting-change-is-checked-against-it.md)).
 - A page served in two forms (0263) has nothing proposed for it: its readers
   are two populations and picking one is a decision not taken here.
 - This deployment's own application is the exception to clause 7: its
