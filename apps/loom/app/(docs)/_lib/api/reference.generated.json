@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4646,6 +4646,12 @@
               "kind": "function",
               "signature": "const themeDocumentCss: (theme: ResolvedTheme, ramp?: RampMode) => string",
               "summary": "A resolved theme as the `:root` rule a host puts on its own document."
+            },
+            {
+              "name": "themeGroundCss",
+              "kind": "function",
+              "signature": "const themeGroundCss: (theme: ResolvedTheme) => string | undefined",
+              "summary": "The ground alone, as the same `:root` rule — for a host whose page is already a tree to its edges."
             }
           ]
         },
@@ -5196,7 +5202,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5666,7 +5672,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6754,7 +6760,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7331,7 +7337,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7534,7 +7540,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8297,7 +8303,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8676,7 +8682,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8904,7 +8910,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12902,7 +12908,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13037,7 +13043,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13099,7 +13105,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13624,7 +13630,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13694,7 +13700,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14116,7 +14122,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
