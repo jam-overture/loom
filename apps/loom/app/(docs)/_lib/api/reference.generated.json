@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5196,7 +5196,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5666,7 +5666,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6754,7 +6754,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7331,7 +7331,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7534,7 +7534,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8297,7 +8297,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8676,7 +8676,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8904,7 +8904,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9593,13 +9593,13 @@
             {
               "name": "LeakingPage",
               "kind": "type",
-              "signature": "type LeakingPage = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     *\n     * Two forms of one page stand here as two rows, as they do in the order of\n     * falls: both are live, both are asked the same question, and the two\n     * answers are of two populations. Nothing is summed across them.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: ConversionStanding;\n    /** Page views counted at the door, exact, or `null` where this revision has no row. */\n    readonly opened: number | null;\n    /** This page's own straddle rate, which is what scales its loss. */\n    readonly inflation: number | null;\n    /** How many questions this revision is asked, as the reading read them. */\n    readonly questions: number;\n    /** Of those, how many name a part this revision no longer has. */\n    readonly stalePairs: number;\n    /**\n     * The ask that loses the most readers between its two ends, carried whole and\n     * unchanged.\n     *\n     * `null` where no question of this revision could be ranked — which is every\n     * standing but `ranked`, `unleaked` and `inconsistent`.\n     */\n    readonly at: PairReach | null;\n    /** Readers lost between that ask's two ends, as the window's counters have it. */\n    readonly lost: number | null;\n    /**\n     * The same loss on the door's scale, which is the key the order is on.\n     *\n     * Not a count of people and not rounded into one. Withheld where the page has\n     * no rankable question, or no row to scale one by.\n     */\n    readonly readers: number | null;\n    /**\n     * Of the readers who reached that ask, the share that answered it, carried\n     * through from the pair unchanged.\n     *\n     * Sound without any correction, because both of its counts come off the same\n     * row — so it is published even for a page whose scaled figure is withheld as\n     * inconsistent.\n     */\n    readonly rate: number | null;\n};",
+              "signature": "type LeakingPage = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     *\n     * Two forms of one page stand here as two rows, as they do in the order of\n     * falls: both are live, both are asked the same question, and the two\n     * answers are of two populations. Nothing is summed across them.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: ConversionStanding;\n    /** Page views counted at the door, exact, or `null` where this revision has no row. */\n    readonly opened: number | null;\n    /** This page's own straddle rate, which is what scales its loss. */\n    readonly inflation: number | null;\n    /** How many questions this revision is asked, as the reading read them. */\n    readonly questions: number;\n    /** Of those, how many name a part this revision no longer has. */\n    readonly stalePairs: number;\n    /**\n     * The ask that loses the most readers between its two ends, carried whole and\n     * unchanged.\n     *\n     * `null` where no question of this revision could be ranked — which is every\n     * standing but `ranked`, `unleaked` and `inconsistent`.\n     */\n    readonly at: PairReach | null;\n    /** Readers lost between that ask's two ends, as the window's counters have it. */\n    readonly lost: number | null;\n    /**\n     * The same loss on the door's scale, which is the key the order is on, and\n     * the **most** that loss could be.\n     *\n     * Not a count of people and not rounded into one. Withheld where the page has\n     * no rankable question, or no row to scale one by.\n     *\n     * It is {@link PairLeak.atMost} carried through unchanged, so the figure this\n     * order ranks on and the figure the funnel answer publishes cannot come to\n     * disagree.\n     */\n    readonly readers: number | null;\n    /**\n     * The least that loss could be, given the straddle this page's own door\n     * measured.\n     *\n     * {@link PairLeak.atLeast}, carried through on the same terms as\n     * {@link LeakingPage.readers}: both or neither. It equals `readers` wherever\n     * nobody's visit spanned two windows, and falls away from it as a\n     * deployment's rollup window shortens relative to how long its readers stay.\n     *\n     * The figure to print where a page's measurement is under suspicion: a\n     * `counts-inflated` deployment has every conversion key withdrawn from\n     * its order, and this one number is the part of it a straddle cannot have\n     * manufactured.\n     */\n    readonly readersAtLeast: number | null;\n    /**\n     * Of the readers who reached that ask, the share that answered it, carried\n     * through from the pair unchanged.\n     *\n     * Sound without any correction, because both of its counts come off the same\n     * row — so it is published even for a page whose scaled figure is withheld as\n     * inconsistent.\n     */\n    readonly rate: number | null;\n};",
               "summary": "One revision of one page, as the order of conversions has it."
             },
             {
               "name": "DeploymentConversion",
               "kind": "type",
-              "signature": "type DeploymentConversion = {\n    /**\n     * Every page with a leak and a scale for it, worst first.\n     *\n     * Most readers lost at the door's scale, then the worse rate, then by tree id\n     * and newest revision first — so two pages that leak the same do not reorder\n     * on a refresh.\n     */\n    readonly ranked: readonly LeakingPage[];\n    /** Every other page, by tree id and newest revision first. */\n    readonly unranked: readonly LeakingPage[];\n    /** The head of the order, which is the funnel to look at first. */\n    readonly worst: LeakingPage | null;\n    /** How many pages stand in each state, over the ranked and the unranked alike. */\n    readonly standings: Readonly<Record<ConversionStanding, number>>;\n    /**\n     * Distinct trees across every page read, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand\n     * in the order, as they do in the order of falls.\n     */\n    readonly trees: number;\n    /**\n     * Page views counted at the door across the pages handed in, added.\n     *\n     * Exact and addable, for the reason no other figure here is: a page view\n     * began on one revision of one tree and was counted once. It is a\n     * weight rather than a deployment total — this sees the pages its caller\n     * read, not the deployment's.\n     */\n    readonly arrivals: number;\n    /**\n     * Funnel questions across the pages handed in, added.\n     *\n     * A question belongs to one revision of one page in one form, so two pages'\n     * questions are two questions even where both name the same two ends: the\n     * same ask of two pages has two answers.\n     */\n    readonly questions: number;\n    /** Of those, how many name a part the revision asking them no longer has. */\n    readonly stalePairs: number;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page twice, and a page twice\n     * in an order is the one way an order can lie about how much there is to fix\n     *.\n     */\n    readonly duplicated: number;\n};",
+              "signature": "type DeploymentConversion = {\n    /**\n     * Every page with a leak and a scale for it, worst first.\n     *\n     * Most readers lost at the door's scale, then the worse rate, then by tree id\n     * and newest revision first — so two pages that leak the same do not reorder\n     * on a refresh.\n     */\n    readonly ranked: readonly LeakingPage[];\n    /** Every other page, by tree id and newest revision first. */\n    readonly unranked: readonly LeakingPage[];\n    /** The head of the order, which is the funnel to look at first. */\n    readonly worst: LeakingPage | null;\n    /**\n     * Whether the page named {@link DeploymentConversion.worst} is first however\n     * the straddle fell: its floor is at or above every other ranked page's\n     * ceiling.\n     *\n     * The order is on a ceiling, so two pages whose intervals overlap could be\n     * either way round and the order has to pick one. This says whether that pick\n     * was forced. `true` where nothing can overtake the head — including the\n     * order of one, where there is nothing to overtake it — `false` where the next\n     * page's ceiling reaches the head's floor, and `null` where no page is ranked\n     * at all.\n     *\n     * One comparison rather than a second order, and deliberately so: ranking on\n     * the floor instead would be a different key for the same question, and the key\n     * is the one the record that built this order named. What a surface does with a\n     * `false` is say so — *these two are too close to call at your rollup window* —\n     * which is a truer sentence than either order alone.\n     */\n    readonly worstSecure: boolean | null;\n    /** How many pages stand in each state, over the ranked and the unranked alike. */\n    readonly standings: Readonly<Record<ConversionStanding, number>>;\n    /**\n     * Distinct trees across every page read, which is not the number of pages.\n     *\n     * Two revisions of one tree are two live versions of one page and both stand\n     * in the order, as they do in the order of falls.\n     */\n    readonly trees: number;\n    /**\n     * Page views counted at the door across the pages handed in, added.\n     *\n     * Exact and addable, for the reason no other figure here is: a page view\n     * began on one revision of one tree and was counted once. It is a\n     * weight rather than a deployment total — this sees the pages its caller\n     * read, not the deployment's.\n     */\n    readonly arrivals: number;\n    /**\n     * Funnel questions across the pages handed in, added.\n     *\n     * A question belongs to one revision of one page in one form, so two pages'\n     * questions are two questions even where both name the same two ends: the\n     * same ask of two pages has two answers.\n     */\n    readonly questions: number;\n    /** Of those, how many name a part the revision asking them no longer has. */\n    readonly stalePairs: number;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     *\n     * A caller that concatenated two reads holds one page twice, and a page twice\n     * in an order is the one way an order can lie about how much there is to fix\n     *.\n     */\n    readonly duplicated: number;\n};",
               "summary": "A deployment's pages, in the order their conversions should be looked at."
             },
             {
@@ -10256,14 +10256,20 @@
               "summary": "A count of page views, put as a share of the readers there were."
             },
             {
+              "name": "PairLeak",
+              "kind": "type",
+              "signature": "type PairLeak = {\n    /**\n     * The least it could be: the readers who reached the first end, at the most\n     * the true rate could be, on the door's scale.\n     *\n     * Never above {@link PairLeak.atMost} and never below nought. This is the\n     * figure a straddle cannot manufacture — a page carrying it is losing at\n     * least this many readers however short the deployment's rollup window is.\n     */\n    readonly atLeast: number;\n    /**\n     * The most it could be: `reached − converted` on the door's scale, which is\n     * the key an order of conversions is on.\n     */\n    readonly atMost: number;\n};",
+              "summary": "The readers one pair loses between its two ends, on the scale its page's door counts in, as the interval the straddle leaves it in."
+            },
+            {
               "name": "PairReach",
               "kind": "type",
-              "signature": "type PairReach = {\n    readonly pair: FunnelPair;\n    /**\n     * Page views that satisfied `from`, exactly as stored: added across rollup\n     * windows and therefore generous.\n     */\n    readonly reached: number;\n    /**\n     * Page views that satisfied both ends, exactly as stored.\n     *\n     * Added across windows like everything else, and **the one counter here that\n     * a straddle can lose rather than duplicate** — see the module note. Never\n     * above {@link PairReach.reached}, because every window's answer satisfies\n     * that and a sum of such answers does too.\n     */\n    readonly converted: number;\n    /** When the funnel row last moved. */\n    readonly updatedAt: string;\n    /**\n     * Where each end stands against the revision's tree.\n     *\n     * The pair as a deployment wrote it is on {@link PairReach.pair}; this is\n     * what the revision makes of it.\n     */\n    readonly ends: PairEnds;\n    /**\n     * Either end is {@link EndStanding.absent}, so the question is about a part\n     * this revision does not have.\n     *\n     * The counts are still published and every figure that needed the missing end\n     * is withheld. A surface draws this pair as a question to re-point rather\n     * than as a funnel to fix — see the module note for which figures survive\n     * which end.\n     */\n    readonly stale: boolean;\n    /**\n     * An end the tree does not have, with a count against it: `reached` on an\n     * absent `from`, or `converted` on an absent `to`.\n     *\n     * Readers satisfied a question about a part this revision has no node for,\n     * which rows written by the same deployment cannot produce. What can is a\n     * tree and a window that do not belong together — the alarm\n     * `PageReading.orphaned` raises for the node counters, raised here for the\n     * pairs. Every figure is withheld on the stale end either way; this says the\n     * staleness is not the ordinary one and the reading itself is suspect.\n     *\n     * It is not {@link PairReach.unreconciled}, which is a count above the page\n     * views there were to hold it. The two are independent and both can be set.\n     */\n    readonly orphaned: boolean;\n    /**\n     * `converted ÷ reached` — of the readers who got to the first end, the share\n     * that finished.\n     *\n     * Two counts off one row, so the straddle over-count is in both and very\n     * nearly divides out. What does *not* divide out is the conversion a straddle\n     * splits across two windows and loses, so this is a **floor** on the true\n     * rate wherever {@link FunnelReach.exact} is false.\n     *\n     * `null` where nothing reached the first end: the question has no answer\n     * rather than the answer nought. `null` too where either end is absent, for\n     * the same reason one level up — there is no question, rather than a question\n     * nobody answered.\n     */\n    readonly rate: number | null;\n    /**\n     * The most the true rate could be, given the straddle §8 measured.\n     *\n     * A page view that straddled a window could have had its conversion split\n     * and lost, so the true `converted` is at most `converted + split` where\n     * `split` is the smaller of the drift and the conversions still missing. The\n     * same straddle inflates `reached`, so the true `reached` is at least\n     * `reached − drift`. Both worst cases together, capped at 1.\n     *\n     * It closes onto {@link PairReach.rate} where nobody's visit spanned two\n     * windows, and it opens wide where a deployment's rollup window is short\n     * relative to how long readers stay — which is the first time the rollup\n     * window's length can be read off a funnel rather than argued about.\n     *\n     * `null` under a silence, where there is no measured drift to bound it with,\n     * and `null` wherever {@link PairReach.rate} is.\n     */\n    readonly rateAtMost: number | null;\n    /**\n     * Of the readers who arrived, the share that got to the first end.\n     *\n     * Withheld where `from` is absent, and **given where only `to` is** — the\n     * readers who reached the first end reached it whatever became of the second.\n     */\n    readonly entry: FunnelShare;\n    /** Of the readers who arrived, the share that got to both. Withheld where either end is absent. */\n    readonly conversion: FunnelShare;\n    /**\n     * The share of arrivals that never reached the first end.\n     *\n     * `null` under a silence, where {@link PairReach.unreconciled}, or where\n     * `from` is absent — a nought there would read as *every reader failed to\n     * reach it*, which is the inversion this standing exists to stop. Where it is\n     * given it is one of three shares that sum to 1.\n     */\n    readonly lostBefore: number | null;\n    /**\n     * The share of arrivals that reached the first end and did not convert.\n     *\n     * `null` on the same terms as {@link PairReach.lostBefore}.\n     */\n    readonly lostBetween: number | null;\n    /**\n     * Which of the two stages cost more readers, by headcount rather than by\n     * share, which is the ranking rule for a fall between two siblings at its\n     * two-element case.\n     *\n     * `null` where neither is worse: the two losses are equal, which includes the\n     * funnel that loses nobody. It is *neither stage is the one to look at*\n     * rather than *there is nothing to look at*, and the two losses are published\n     * beside it either way.\n     */\n    readonly worse: FunnelStage | null;\n…",
+              "signature": "type PairReach = {\n    readonly pair: FunnelPair;\n    /**\n     * Page views that satisfied `from`, exactly as stored: added across rollup\n     * windows and therefore generous.\n     */\n    readonly reached: number;\n    /**\n     * Page views that satisfied both ends, exactly as stored.\n     *\n     * Added across windows like everything else, and **the one counter here that\n     * a straddle can lose rather than duplicate** — see the module note. Never\n     * above {@link PairReach.reached}, because every window's answer satisfies\n     * that and a sum of such answers does too.\n     */\n    readonly converted: number;\n    /** When the funnel row last moved. */\n    readonly updatedAt: string;\n    /**\n     * Where each end stands against the revision's tree.\n     *\n     * The pair as a deployment wrote it is on {@link PairReach.pair}; this is\n     * what the revision makes of it.\n     */\n    readonly ends: PairEnds;\n    /**\n     * Either end is {@link EndStanding.absent}, so the question is about a part\n     * this revision does not have.\n     *\n     * The counts are still published and every figure that needed the missing end\n     * is withheld. A surface draws this pair as a question to re-point rather\n     * than as a funnel to fix — see the module note for which figures survive\n     * which end.\n     */\n    readonly stale: boolean;\n    /**\n     * An end the tree does not have, with a count against it: `reached` on an\n     * absent `from`, or `converted` on an absent `to`.\n     *\n     * Readers satisfied a question about a part this revision has no node for,\n     * which rows written by the same deployment cannot produce. What can is a\n     * tree and a window that do not belong together — the alarm\n     * `PageReading.orphaned` raises for the node counters, raised here for the\n     * pairs. Every figure is withheld on the stale end either way; this says the\n     * staleness is not the ordinary one and the reading itself is suspect.\n     *\n     * It is not {@link PairReach.unreconciled}, which is a count above the page\n     * views there were to hold it. The two are independent and both can be set.\n     */\n    readonly orphaned: boolean;\n    /**\n     * `converted ÷ reached` — of the readers who got to the first end, the share\n     * that finished.\n     *\n     * Two counts off one row, so the straddle over-count is in both and very\n     * nearly divides out. What does *not* divide out is the conversion a straddle\n     * splits across two windows and loses, so this is a **floor** on the true\n     * rate wherever {@link FunnelReach.exact} is false.\n     *\n     * `null` where nothing reached the first end: the question has no answer\n     * rather than the answer nought. `null` too where either end is absent, for\n     * the same reason one level up — there is no question, rather than a question\n     * nobody answered.\n     */\n    readonly rate: number | null;\n    /**\n     * The most the true rate could be, given the straddle §8 measured.\n     *\n     * A page view that straddled a window could have had its conversion split\n     * and lost, so the true `converted` is at most `converted + split` where\n     * `split` is the smaller of the drift and the conversions still missing. The\n     * same straddle inflates `reached`, so the true `reached` is at least\n     * `reached − drift`. Both worst cases together, capped at 1.\n     *\n     * It closes onto {@link PairReach.rate} where nobody's visit spanned two\n     * windows, and it opens wide where a deployment's rollup window is short\n     * relative to how long readers stay — which is the first time the rollup\n     * window's length can be read off a funnel rather than argued about.\n     *\n     * `null` under a silence, where there is no measured drift to bound it with,\n     * and `null` wherever {@link PairReach.rate} is.\n     */\n    readonly rateAtMost: number | null;\n    /**\n     * The readers this pair loses between its two ends, bounded and on the door's\n     * scale, or `null` where there is no such loss to put a scale on.\n     *\n     * `null` on the same terms as {@link PairReach.rateAtMost} — there is no\n     * question, or nobody reached its first end, or the door cannot scale this\n     * revision — and `null` too where {@link PairReach.unreconciled}, because a\n     * count above the page views there were to hold it has no sound scale even\n     * though its rate stands.\n     */\n    readonly leak: PairLeak | null;\n    /**\n     * Of the readers who arrived, the share that got to the first end.\n     *\n     * Withheld where `from` is absent, and **given where only `to` is** — the\n     * readers who reached the first end reached it whatever became of the second.\n     */\n    readonly entry: FunnelShare;\n    /** Of the readers who arrived, the share that got to both. Withheld where either end is absent. */\n    readonly conversion: FunnelShare;\n    /**\n     * The share of arrivals that never reached the first end.\n     *\n     * `null` under a silence, where {@link PairReach.unreconciled}, or where\n     * `from` is absent — a nought there would read as *every reader failed to\n     * reach it*, which is the inversion this standing exists to stop. Where it is\n     * given it is one of three shares that sum to 1.\n     */\n    readonly lostBefore: number | null;\n    /**\n     * The share of arrivals that reached the first end and did not convert.\n     *\n     * `null` on the same terms as {@link PairReach.lostBefore}.\n     */\n    readonly lostBetween: number | null;\n…",
               "cut": {
                 "shown": 118,
-                "whole": 133,
+                "whole": 144,
                 "source": "src/signals/funnel.ts",
-                "line": 296
+                "line": 347
               },
               "summary": "One pair of a revision, as stored and as a share of the readers there were."
             },
@@ -12902,7 +12908,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13037,7 +13043,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13099,7 +13105,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13624,7 +13630,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13694,7 +13700,7 @@
       "files": 98,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14116,7 +14122,7 @@
       "files": 78,
       "narrower": [],
       "standing": {
-        "packageNames": 1860,
+        "packageNames": 1861,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

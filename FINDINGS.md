@@ -58696,7 +58696,12 @@ predicted above.
 ## 2026-10-21 — two forms of a page can now be compared, and the same question about its words and its actions is a mirror of it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/forms.ts`) · **Status:** open — **a gap named by the record that
+(`src/signals/forms.ts`) · **Status:** **closed by
+`signals-71-a-leak-is-a-range`** — both mirrors were built, in the order this
+entry asked for: what two forms' readers *do* as `form-action.ts` (§46) and what
+two forms *say* as `form-copy.ts` (§48), with the shared guards published from
+`audiences.ts` rather than copied. Closed on 3 November on reading the directory.
+Original status: open — **a gap named by the record that
 filled the first of three**, nothing broken and nothing asked of anybody
 
 0302 compares two forms of one page on each part's **reach**. The same join
@@ -63152,9 +63157,13 @@ with the three is only that nothing draws it.
 ## 2026-10-31 — the second rung the three orphaned readings need cannot be built today, because its third member is not on `main`
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/window.ts`) · **Status:** open — **a sequencing fact rather than a
-defect**, and the reason this morning's run did not take the work the last one
-recommended
+(`src/signals/window.ts`) · **Status:** **closed by
+`signals-71-a-leak-is-a-range`** — #728 landed and the rung was built that
+evening as `windowFiguresOf` (§66, 0327), with all three readings members of it;
+closed on 3 November because the condition was met by a run that was not reading
+this entry as its own work. Original status: open — **a sequencing fact rather
+than a defect**, and the reason this morning's run did not take the work the last
+one recommended
 
 The 30 October entry recommends that a future run take `regionPagesOf`,
 `silenceCensusOf` and `libraryPaceOf` into one second rung rather than adding
@@ -64402,3 +64411,136 @@ directory read the generated reference, and a figure read from it is **another
 lane's**, whatever it is counting. The question to ask of any number taken from
 `reference.generated.json` is *would I defend this if `src/` doubled* — if not,
 it is a floor, a trigger or a dated sentence, never an equality.
+
+---
+## 2026-11-03 — the ranking key an order of conversions throws away is a ceiling, and the floor under it was already paid for
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/funnel.ts`, `src/signals/conversion.ts`) · **Status:**
+**closed on filing by `signals-71-a-leak-is-a-range`**, closing the first of the
+two shapes the 2 November entry *the fault vocabulary now has three published
+statements per member* said to watch for
+
+That entry named the shape and said it did not belong in the fault vocabulary:
+*an answer that needs a figure rather than a boolean — `counts-inflated` reaches
+a conversion key by an amount `PairReach.rateAtMost` already bounds for the rate;
+today the page simply leaves the order, which is the safe call and loses a real
+ranking. A bound on the key would be a reading rather than a fault answer, and it
+belongs beside the funnel, not here.* It is built there
+([0342](decisions/0342-a-conversion-leak-is-an-interval-and-the-key-an-order-ranks-on-is-its-ceiling.md)):
+`PairLeak` on every `PairReach`, and `readersAtLeast` beside `readers` on every
+ranked page.
+
+**The rest of that entry stands untouched.** Its recommendation was *nothing, yet*
+about adding a fourth per-fault answer to a seven-member vocabulary, and nothing
+here adds one. `spoilsTheConversion` is unchanged, `counts-inflated` still
+withdraws the page from the order, and the second shape it named — a fourth order
+whose key is not a headcount at the door's scale — has still not arrived.
+
+**What the unit found that the entry did not predict.** The entry treated the key
+as an estimate that a bound would sit around. It is not an estimate: **it is
+already the ceiling.** `atDoorScale(reached − converted)` is
+`atDoorScale(reached) × (1 − rate)`, and `rate` is a floor on the true rate, so
+the published key is the loss at the most it could be. The work was not bracketing
+a figure but naming what the figure had been all along and publishing the other end
+of it.
+
+**And one line of it is a trap worth having written down.** The two ends have to
+**meet exactly** where there was no straddle to lose a conversion in, which means
+they must be one expression over two rates — the reach put on the door's scale once
+and then taken at each bound. Spelling the ceiling the obvious way instead, as the
+loss rather than as the reach times a rate, is the same number and breaks the
+interval: at a drift of nought, `reached × (1 − converted ÷ reached)` and
+`reached − converted` differ in the last place for three readers and one
+conversion, and the floor comes out four hundred quadrillionths **above** its own
+ceiling. 0229 has been bitten by this arithmetic twice and this is the third; the
+general form is that **a bound and the figure it bounds have to be arrived at by
+one route**, not by two routes that agree on paper.
+
+---
+## 2026-11-03 — two ranking keys still spell the door's scale by hand, and they must not be changed to the published rule without a guard
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/deployment.ts`, `src/signals/deployment-change.ts`) ·
+**Status:** open — **nothing is broken and no figure is wrong today**; this is a
+near-duplicate named with the reason the obvious fix is unsafe
+
+[`door.ts`](src/signals/door.ts) was created (0265) so that the scaling every
+reader-weighted figure shares would be written once, and the 30 October entry
+closed the half of it that had stayed at five call sites. Grepping for the
+*arithmetic* rather than the name finds **three more**, all of them ranking keys:
+
+| where | written | what it is |
+| --- | --- | --- |
+| `conversion.ts` | `lost ÷ (1 + inflation)` | the order of conversions' key (0333) — **now `atDoorScale`** |
+| `deployment.ts` | `at.lost ÷ (1 + door.inflation)` | the order of falls' key (0250) |
+| `deployment-change.ts` | `abs(at.readersKept) ÷ (1 + inflation)` | the order of movements' key (0318) |
+
+All three are `atDoorScale` mathematically: `1 + inflation` is
+`appearances ÷ opened`, so `count ÷ (1 + inflation)` is `count × opened ÷
+appearances`, and `counted` is `min(appearances, opened)`, which is `opened`
+wherever a straddle is what is being divided out.
+
+**Only the first could take the published rule, and the reason is the edge rather
+than the arithmetic.** `atDoorScale` is documented as *only ever called for a door
+with no silence, where `appearances` is positive* — it divides by `appearances`.
+`conversion.ts` refuses a door whose appearances are nought (`uncounted`) before it
+ever reaches its key, so the swap is safe there and is taken. **The other two do
+not.** Neither has an `uncounted` standing: `deployment.ts` reaches its key with
+`opened > 0` and `appearances === 0` wherever the page's loss is nought, and
+`deployment-change.ts` reaches its own with the same hole. Today both answer a
+sound nought. Swapped to `atDoorScale` they would answer `NaN`, and a `NaN` in a
+ranking key sorts wherever the comparator leaves it.
+
+So the division-first spelling is not merely an older style in those two files —
+**it is the spelling that is total**, and the published rule is the one with a
+precondition. That is worth knowing before somebody completes the tidy.
+
+**Two shapes, and the second is the one to take.**
+
+1. **Guard at each call site**, `appearances === 0 ? 0 : atDoorScale(…)`. Three
+   lines, and it puts a second rule beside the first — which is what `door.ts`
+   exists to stop.
+2. **Give `atDoorScale` the total definition** and drop the precondition from its
+   doc comment: `of.appearances === 0 ? count : (count * scaledBy.counted) / of.appearances`,
+   which is the honest reading of *a page whose rollups folded nothing has nothing
+   to divide out*. It is bit-identical for all five existing callers, because each
+   is already called only where appearances is positive. Then all three keys read
+   the one rule.
+
+**Recommendation: the second, and not in this unit.** It changes a published
+function five live readings call, which wants its own change and its own test over
+the five, rather than riding along with a reading of a funnel.
+
+---
+## 2026-11-03 — the second rung the three orphaned readings needed was built on 31 October, and the entry asking for it is still open
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`FINDINGS.md`) · **Status:** **closed on filing by
+`signals-71-a-leak-is-a-range`** — housekeeping, and filed because it cost this
+run time rather than because anything is wrong
+
+The 31 October entry *the second rung the three orphaned readings need cannot be
+built today, because its third member is not on `main`* recommended taking
+`regionPagesOf`, `silenceCensusOf` and `libraryPaceOf` into one rung **on the
+first run after #728 has landed**. #728 landed, the rung was built that evening as
+`windowFiguresOf` (§66,
+[0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)),
+and all three readings are members of it. The entry was never closed, so it reads
+to a fresh session like the top of the queue.
+
+**The general shape, which is the part worth keeping.** An entry whose status is a
+*sequencing* fact — *this cannot be built until X lands* — is the one kind of open
+finding that goes stale without anybody being wrong, because the condition is met
+by a run that is not reading it as its own work. Two others in this file are in
+that state today and are correct to be open. The check is cheap and this run did
+not do it first: **before trusting an open entry that says "cannot be built yet",
+grep for the name it says is missing.**
+
+**A second entry was stale for a plainer reason and is closed with it**: the
+21 October entry *two forms of a page can now be compared, and the same question
+about its words and its actions is a mirror of it* asked for two mirrors in a
+stated order, and both were built — `form-action.ts` (§46) and `form-copy.ts`
+(§48). Neither closure is this unit's work. Both are a minute each and they are
+the difference between a queue and a list.
+

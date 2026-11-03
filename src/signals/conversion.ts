@@ -3,7 +3,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
 import { audienceScopeRead, readingKeyOf } from "./audiences.js"
-import type { FunnelReach, PairReach } from "./funnel.js"
+import type { FunnelReach, PairLeak, PairReach } from "./funnel.js"
 
 /**
  * Which of a deployment's pages loses the most readers between an ask and its
@@ -32,10 +32,26 @@ import type { FunnelReach, PairReach } from "./funnel.js"
  * stop short of the pricing band would otherwise stand near the head of both
  * orders for one event.
  *
- * So the key is `reached − converted`, scaled to the door exactly as a fall is:
- * `lost ÷ (1 + inflation)` off that page's own door row, because the straddle
- * rate is each page's own and ranking the raw losses would rank partly by how
- * long readers stay (0219).
+ * So the key is `reached − converted`, put on the scale that page's own door
+ * counts in by `atDoorScale`, because the straddle rate is each page's own and
+ * ranking the raw losses would rank partly by how long readers stay (0219).
+ *
+ * ## The key is a ceiling, and the floor beside it is published
+ *
+ * That key is the **most** the leak could be rather than an estimate of it. The
+ * straddle inflates both counts of the subtraction and scaling puts that back,
+ * but a straddle also splits a conversion across two windows and **loses** it
+ * (0147) — and no division puts back a count that was never made. So
+ * {@link LeakingPage.readers} is a ceiling, {@link LeakingPage.readersAtLeast}
+ * is the floor underneath it, and the two meet wherever nobody's visit spanned
+ * two windows. Both come off {@link PairLeak}, which is where the bounds the
+ * funnel already published are joined to the door's scale.
+ *
+ * What the floor buys is the one sentence this order could not say before: *this
+ * page is losing at least this many readers, however short your rollup window
+ * is.* It is also what makes {@link DeploymentConversion.worstSecure}
+ * answerable — whether the page named first is first however the straddle fell,
+ * which a ranking on a ceiling alone cannot say.
  *
  * ## One argument, because the funnel answer already carries the door
  *
@@ -247,12 +263,32 @@ export type LeakingPage = {
   /** Readers lost between that ask's two ends, as the window's counters have it. */
   readonly lost: number | null
   /**
-   * The same loss on the door's scale, which is the key the order is on.
+   * The same loss on the door's scale, which is the key the order is on, and
+   * the **most** that loss could be.
    *
    * Not a count of people and not rounded into one. Withheld where the page has
    * no rankable question, or no row to scale one by.
+   *
+   * It is {@link PairLeak.atMost} carried through unchanged, so the figure this
+   * order ranks on and the figure the funnel answer publishes cannot come to
+   * disagree.
    */
   readonly readers: number | null
+  /**
+   * The least that loss could be, given the straddle this page's own door
+   * measured.
+   *
+   * {@link PairLeak.atLeast}, carried through on the same terms as
+   * {@link LeakingPage.readers}: both or neither. It equals `readers` wherever
+   * nobody's visit spanned two windows, and falls away from it as a
+   * deployment's rollup window shortens relative to how long its readers stay.
+   *
+   * The figure to print where a page's measurement is under suspicion: a
+   * `counts-inflated` deployment (0336) has every conversion key withdrawn from
+   * its order, and this one number is the part of it a straddle cannot have
+   * manufactured.
+   */
+  readonly readersAtLeast: number | null
   /**
    * Of the readers who reached that ask, the share that answered it, carried
    * through from the pair unchanged.
@@ -278,6 +314,25 @@ export type DeploymentConversion = {
   readonly unranked: readonly LeakingPage[]
   /** The head of the order, which is the funnel to look at first. */
   readonly worst: LeakingPage | null
+  /**
+   * Whether the page named {@link DeploymentConversion.worst} is first however
+   * the straddle fell: its floor is at or above every other ranked page's
+   * ceiling.
+   *
+   * The order is on a ceiling, so two pages whose intervals overlap could be
+   * either way round and the order has to pick one. This says whether that pick
+   * was forced. `true` where nothing can overtake the head — including the
+   * order of one, where there is nothing to overtake it — `false` where the next
+   * page's ceiling reaches the head's floor, and `null` where no page is ranked
+   * at all.
+   *
+   * One comparison rather than a second order, and deliberately so: ranking on
+   * the floor instead would be a different key for the same question, and the key
+   * is the one the record that built this order named. What a surface does with a
+   * `false` is say so — *these two are too close to call at your rollup window* —
+   * which is a truer sentence than either order alone.
+   */
+  readonly worstSecure: boolean | null
   /** How many pages stand in each state, over the ranked and the unranked alike. */
   readonly standings: Readonly<Record<ConversionStanding, number>>
   /**
@@ -377,7 +432,7 @@ const rowOf = (reach: FunnelReach): LeakingPage => {
     questions: reach.pairs.length,
     stalePairs: reach.stalePairs,
   }
-  const nothing = { at: null, lost: null, readers: null, rate: null }
+  const nothing = { at: null, lost: null, readers: null, readersAtLeast: null, rate: null }
 
   if (audienceScopeRead(reach).reading === "mixed") {
     return { ...where, ...nothing, standing: "unsplit" }
@@ -396,23 +451,27 @@ const rowOf = (reach: FunnelReach): LeakingPage => {
 
   const lost = lostIn(at)
   const carried = { at, lost, rate: at.rate }
+  const unscaled = { readers: null, readersAtLeast: null }
 
-  if (lost === 0) return { ...where, ...carried, readers: null, standing: "unleaked" }
+  if (lost === 0) return { ...where, ...carried, ...unscaled, standing: "unleaked" }
 
   /**
    * A reading whose counts cannot be reconciled with the page views there were
    * to hold them keeps its counts and loses its scale, which is the half of the
-   * row that is not true. The door's three are already past, so the inflation
-   * is a number here and the division below needs no guard of its own.
+   * row that is not true — and the pair withholds its leak on exactly those
+   * terms, so the absent interval is the check rather than a second spelling of
+   * it. The door's three are already past, so a pair this far in has a leak
+   * unless its counts and its row disagree.
    */
-  if (at.unreconciled || reach.inflation === null) {
-    return { ...where, ...carried, readers: null, standing: "inconsistent" }
+  if (at.leak === null) {
+    return { ...where, ...carried, ...unscaled, standing: "inconsistent" }
   }
 
   return {
     ...where,
     ...carried,
-    readers: lost / (1 + reach.inflation),
+    readers: at.leak.atMost,
+    readersAtLeast: at.leak.atLeast,
     standing: "ranked",
   }
 }
@@ -429,6 +488,27 @@ const worseOf = (one: LeakingPage, other: LeakingPage): number =>
   (one.rate ?? 1) - (other.rate ?? 1) ||
   one.treeId.localeCompare(other.treeId) ||
   other.revision - one.revision
+
+/**
+ * Whether the head of the order is beyond the straddle's reach.
+ *
+ * The ranked rows are sorted by their ceilings, so the only page that can
+ * overtake the head is the one immediately after it: nothing further down has a
+ * higher ceiling to do it with. One comparison answers the whole order.
+ *
+ * The two `null` checks are the narrowing rather than a case — a ranked row
+ * carries both ends of its interval or it is not ranked — and they are written
+ * out so that a row which somehow lacks one is reported as *not secure* rather
+ * than as secure by a default.
+ */
+const headSecure = (ranked: readonly LeakingPage[]): boolean | null => {
+  const [head, next] = ranked
+
+  if (head === undefined) return null
+  if (next === undefined) return true
+
+  return head.readersAtLeast !== null && next.readers !== null && head.readersAtLeast >= next.readers
+}
 
 /** Tree id, then newest revision first, then form — the order the readings are published in. */
 const byPage = (one: LeakingPage, other: LeakingPage): number =>
@@ -477,6 +557,7 @@ export const deploymentConversionOf = (
     ranked,
     unranked: read.filter((row) => row.standing !== "ranked").sort(byPage),
     worst: ranked[0] ?? null,
+    worstSecure: headSecure(ranked),
     standings,
     trees: new Set(read.map((row) => row.treeId)).size,
     arrivals: read.reduce((sum, row) => sum + (row.opened ?? 0), 0),

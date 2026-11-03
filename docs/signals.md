@@ -4337,6 +4337,72 @@ statements per member and the symmetry of the two `spoiled` names was not taken
 **nothing draws any of it**, which is `Loom portal`'s and is now twenty-two runs
 old.
 
+### 71. The leak the order throws away, kept as the part a straddle cannot explain · `Loom signals` · **done, 3 November**
+
+[0336](../decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)
+found that `counts-inflated` — a rollup window short relative to how long
+readers stay — reaches the key an order of conversions ranks on and does not
+reach the key an order of falls ranks on. A fall is a difference of two
+independent distinct counts, so the straddle divides back out; **a conversion is
+a conjunction inside one rollup window**, so a visit that met one end in one
+window and the other in the next is reported `reached 1, converted 0` and the
+conversion is *lost* (0147). A short window manufactures the very loss the order
+ranks, so the fix-list withdraws the page.
+
+The finding that day said that is the safe call and that it loses a real
+ranking, and named what was missing: a **bound** on the key, since
+`PairReach.rateAtMost` already bounds the rate, published as a reading beside
+the funnel rather than as an eighth answer in the fault vocabulary.
+
+**Done**
+([0342](../decisions/0342-a-conversion-leak-is-an-interval-and-the-key-an-order-ranks-on-is-its-ceiling.md)),
+as `PairLeak` on every `PairReach` in [`funnel.ts`](../src/signals/funnel.ts),
+and as `readersAtLeast` and `worstSecure` in
+[`conversion.ts`](../src/signals/conversion.ts).
+
+- **The key 0333 named is a ceiling, not an estimate.** `reached` and
+  `converted` are both generous under a straddle and the straddle very nearly
+  divides out of their ratio; what does not divide out is the conversion the
+  straddle split and lost. So the loss between two ends is overstated by exactly
+  the conversions that went missing, and scaling the subtraction by the door
+  corrects how many page views were counted twice while putting back nothing.
+- **The floor beside it is free.** The true rate is between `rate` and
+  `rateAtMost`, so the readers who reached the first end — on the door's scale —
+  taken at each of those two rates are the two ends of the loss. No counter, no
+  column, no payload field and no browser byte.
+- **Both ends are one expression over two rates**, and that is the one line in
+  the file a reader should not simplify. Spelling the ceiling as the loss
+  instead — `atDoorScale(reached − converted)`, the same number — makes the two
+  ends differ in the last place at a drift of nought: three readers and one
+  conversion give a floor four hundred quadrillionths **above** its own ceiling.
+  The published key moves in its last place for some rows as a result, and
+  nothing orders on a sixteenth decimal.
+- **`worstSecure` says whether the head of the order was forced.** The order is
+  on a ceiling, so two pages whose intervals overlap could be either way round.
+  It is `true` where the head's floor clears the next page's ceiling, `false`
+  where it does not, and `null` where nothing is ranked — one comparison, because
+  the rows are sorted by their ceilings and nothing below the second has a
+  higher one.
+- **Nothing is superseded.** The order still ranks on the ceiling and
+  `counts-inflated` still withdraws the page. The floor is a figure beside the
+  key, and a future order ranked on a floor would be a new record.
+- **`funnel.ts` stopped keeping its own copy of the door's per-page rule.** It
+  held a local `Measured`, a `NOTHING_MEASURED` and a `silenceOf` ordering the
+  same three states the same way as `doorOf` — which is what `door.ts` exists to
+  hold once (0265) — and now calls `doorOf`, which is also what gives the leak a
+  door to scale against.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes minified, 2,982 gzipped. No payload field, no
+column, no migration, no store method and no new kind.
+
+**What is left and is filed:** two other ranking keys still spell the door's
+scale by hand (`deployment.ts`, `deployment-change.ts`) and **must not** be
+changed to `atDoorScale` without a guard, because neither refuses a door with no
+appearances and the swap would turn a sound nought into a `NaN`; and still
+**nothing draws any of it**, which is `Loom portal`'s and is now twenty-four
+runs old.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
