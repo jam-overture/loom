@@ -4,6 +4,12 @@
 (`Loom daily build`) · **Section:** §2 (the store) · **Branch:**
 `framework-80-a-seed-a-reader-can-ask-for`
 
+**Preview:**
+`loom-git-framework-80-a-seed-b3e9a4-jpizzolato36-6341s-projects.vercel.app`,
+on [#759](https://github.com/jam-overture/loom/pull/759). Taken from Vercel's
+own comment rather than composed from the branch name, which is the 16 October
+entry.
+
 **Nothing on this branch changes a page**, so there is nothing on the preview
 that is not on `main` — the unit is a published seam in `src/store/`. The
 diagram is the visual, and every number on it was measured rather than
