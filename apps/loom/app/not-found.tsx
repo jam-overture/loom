@@ -1,6 +1,6 @@
 import { MARK_ARMS, MARK_VIEW_BOX } from "@/app/_lib/shell/mark"
-import { NOT_FOUND_STYLE } from "@/app/_lib/shell/not-found-style"
-import { GEIST_HREF, SHELL_ROOT_CSS } from "@/app/_lib/shell/theme"
+import { NOT_FOUND_STYLESHEET_PATH } from "@/app/_lib/shell/not-found-style"
+import { GEIST_HREF } from "@/app/_lib/shell/theme"
 
 /**
  * The one page that belongs to no surface.
@@ -40,20 +40,26 @@ const NotFound = () => (
      * that rendered its own `<html>` to hold them put it *inside* Next's — where
      * only the HTML parser's error recovery got the theme onto the page at all.
      *
-     * Two blocks, one element. `SHELL_ROOT_CSS` is the mounted theme and
-     * `NOT_FOUND_STYLE` is what reads it, and they are concatenated rather than
-     * served separately so there is no order in which one can arrive without
-     * the other.
+     * **A link rather than the rules themselves**, and the reason is not this
+     * page — it is every other one. Next keeps the root not-found boundary in
+     * the RSC tree of every route, so what this component returns is rendered on
+     * the server and serialised into the flight payload of all four surfaces
+     * whether or not anything 404s. Removing them took `/docs` from 35,749 to
+     * 20,562 bytes and `/lessons/1` from 31,475 to 8,907. `not-found-style.ts`
+     * holds the measurements and the address, and `/not-found.css` serves the
+     * same two blocks in the same order.
+     *
+     * `precedence` still, for the reason it was here before and one more: React
+     * waits for a stylesheet it is given a precedence for, so the page a reader
+     * sees is dressed on arrival rather than flashing through the browser's own
+     * defaults — which is the defect this unit closed, and the one thing a
+     * fetched stylesheet could have reintroduced.
      */}
     <title>Not found · Loom</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
     <link rel="stylesheet" href={GEIST_HREF} precedence="default" />
-    <style
-      href="loom-shell-not-found"
-      precedence="default"
-      dangerouslySetInnerHTML={{ __html: `${SHELL_ROOT_CSS}\n${NOT_FOUND_STYLE}` }}
-    />
+    <link rel="stylesheet" href={NOT_FOUND_STYLESHEET_PATH} precedence="default" />
 
     <div className="not-found">
       {/*

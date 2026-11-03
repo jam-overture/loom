@@ -177,10 +177,18 @@ describe("the names a published type declares inside itself", () => {
    * The limit that has a number instead of a sentence: the names below a cut
    * declaration are not in the file this module reads, so they are names it will
    * never flag.
+   *
+   * **Asserted as a floor rather than as a count**, and that correction was
+   * made the same day it shipped. `toBe(11)` is this lane's test going red
+   * because another lane published a long type — the shape `search/build.ts`
+   * and `weight.ts` both name as the mistake to avoid (*"this lane's number
+   * about somebody else's growth"*). What this lane can honestly claim is that
+   * the limit is **real and not small**; the exact figure belongs in a report,
+   * where it is dated.
    */
   describe("the declarations it is only shown part of", () => {
-    it("names the eleven that are cut, and how many lines each one hides", () => {
-      expect(cutDeclarations.length).toBe(11)
+    it("finds cut declarations, each hiding lines this module cannot read", () => {
+      expect(cutDeclarations.length).toBeGreaterThan(5)
       expect(cutDeclarations.map(({ name }) => name)).toContain("RenderDiagnostic")
       expect(cutDeclarations.every(({ hidden }) => hidden > 0)).toBe(true)
     })
