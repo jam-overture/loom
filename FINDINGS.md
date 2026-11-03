@@ -62243,7 +62243,12 @@ is absent* survives the refactor. Both are one line.
 ## 2026-10-29 — the collection schedule is a fourth per-deployment setting and is deliberately not in the reading context, because its other half is a clock
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/health.ts`, `src/signals/window.ts`) · **Status:** open — **the
+(`src/signals/health.ts`, `src/signals/window.ts`) · **Status:**
+**closed by `signals-70-the-fix-list-off-one-window`** — the fix-list rung takes
+the whole schedule as a required argument, so the context gains no fifth field
+and the `scheduleAt(at)` shape below has no caller to need it
+([0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)).
+Original status: open — **the
 boundary [0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)
 drew, written down so the next run does not re-derive it**; nothing is broken
 and no test is failing
@@ -64414,6 +64419,147 @@ nobody inside a run can see. It is one function and one emission, both covered
 by tests that already exist, and the diff is readable in a minute.
 
 ---
+## 2026-11-02 (evening) — the fix-list is one call now, and the argument it makes required is the one whose absence reverses its answer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window-agenda.ts`) · **Status:**
+**closed on filing by `signals-70-the-fix-list-off-one-window`**, closing the
+29 October entry *the collection schedule is a fourth per-deployment setting and
+is deliberately not in the reading context*
+
+That entry drew a boundary and named the shape worth considering *if a screen
+ever wants collection health off the same context*: a function on the context,
+`scheduleAt(at)`, so that the deployment's half is held and the instant stays the
+caller's. The boundary holds and the shape was not taken
+([0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)):
+the rung takes the whole schedule as a required argument, so a context function
+would save a caller nothing and would make every caller reading regions state a
+fold window. **The context is unchanged and gains no fifth field.**
+
+**What the unit found that the entry did not predict, and it is the whole reason
+the rung is worth more than the lines it saves.** The entry treated the optional
+schedule as a reading that judges less. It is worse than that. A stalled fold
+reaches **both** ranking keys (0336), so omitting the schedule does not merely
+drop `collection-stalled` — it leaves the fall and the leak that the stall
+manufactured ranked. Two readings of one window, differing by one omitted
+argument:
+
+| the schedule | `work` | the orders | `contested` |
+| --- | --- | --- | --- |
+| stated | `collection` | both withdrawn | the page |
+| omitted | `page` | both ranked | empty |
+
+So the hand-written composition prints *rewrite this page* over a page whose
+numbers are an artefact of its own stopped collection — the precise failure
+[0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)
+exists to prevent, arriving through the one argument nothing reminds anybody of.
+The two readings are asserted side by side in `window-agenda.test.ts`, which is
+the test worth keeping out of the fifteen.
+
+**The check, which is the same one the last three rungs each produced.** A
+composition nobody has written down is a rule nobody has compared. The hazard
+was not in `collectionHealthOf`, which is right, nor in `deploymentAgendaOf`,
+which is right; it was only visible from the line that calls them both, and that
+line existed only inside a doc comment. **Every rung built over this subsystem
+has found a real defect in the composition it wrote down** — the region dedup on
+28 October, the two funnel answers of one revision on 1 November, and this. The
+remedy that generalises: when a doc comment shows a caller a multi-call
+composition, the comment is a defect report about a missing unit.
+
+---
+## 2026-11-02 (evening) — `collectionHealthOf` keeps the optional argument the rung above it made required, so the step below is still the unsafe one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`) · **Status:** open — **the stated limit of
+[0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)**;
+nothing is broken and nothing is asked of anybody today
+
+`windowAgendaOf` requires a `CollectionSchedule` or an explicit `null`, and the
+reason is in the entry above: the omission reverses what the fix-list says about
+a page. **`collectionHealthOf` itself still takes it optionally**, so a surface
+that reads a deployment's health a step below the rung can still read it judging
+no fold at all, silently, exactly as before today.
+
+This is the same weaker guarantee the region floor was left at on 29 October, and
+for the same reason — the safe route is the shortest one, and narrowing the
+published reading costs every caller of it, including every test in
+`health.test.ts`, a `null` it has nothing to say with. It is recorded rather than
+fixed so that the next run does not re-derive the trade.
+
+**Two shapes, if it is ever wanted.**
+
+1. **Make the third argument required and nullable on `collectionHealthOf`.**
+   One line plus every call site, and the only shape that closes the hole rather
+   than making it narrower.
+2. **Leave it, and have the one surface that will exist read the rung.** A
+   portal screen reading this deployment's window gets its schedule through
+   `windowAgendaOf` and cannot leave it out.
+
+**Recommendation: the second**, and revisit if a second surface ever reads
+health a step below the rung.
+
+---
+## 2026-11-02 (evening) — the three rungs over a window are three calls and nothing composes them, which is deliberate rather than a fourth gap
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window-figures.ts`, `src/signals/window-funnels.ts`,
+`src/signals/window-agenda.ts`) · **Status:** open — **a shape named at the
+moment it was completed**; nothing is broken and nothing is asked of anybody
+today
+
+A caller that wants everything a window can say writes four lines: the assembly,
+then the figures, the funnels and the fix-list. Each is one call over arguments
+it already holds, and **nothing composes the four.** A reader of this directory
+will see the pattern that produced three rungs in eight days and reach for a
+fifth call over them; this is why that is not the next unit.
+
+The three rungs differ in what they are *of*. The figures rung is the figures a
+window holds about itself; the funnels rung is one per-page reading and its
+pairs; the fix-list is a deployment-wide join over four readings. A single entry
+point over them would have to answer *which of the forty-two readings does a
+deployment want by default, and what does it cost to compute the ones it does
+not* — which is the policy decision
+[0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)
+correctly said made the honest version large, and which **no surface has asked
+for**. The three rungs exist because each removed a hazard a caller could not
+see. A fourth would remove three lines.
+
+**What would change the answer:** a screen, drawing all of it, that can say which
+readings it actually opens with. Then the composition is a known set rather than
+a guess, and it is one line. `Loom portal` is paused and this is the twenty-third
+run filing a variant of that sentence.
+
+**Recommendation: leave it, and do not build a fourth rung before a surface
+exists.** What a future run must not do is give such a call a default set of
+readings — that is the surface's choice wearing the framework's name.
+
+---
+## 2026-11-02 (evening) — the plan's own browser-cost figure was a third out of date, and the test that guards the import graph said so too
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`docs/signals.md`, `src/signals/browser-weight.test.ts`) · **Status:**
+**closed on filing by `signals-70-the-fix-list-off-one-window`**, and filed
+because the shape is one the docs lane named this morning and this lane then
+walked into
+
+`docs/signals.md`'s *what is already built* table said the broadcaster costs
+**4.8 KB**. It costs 6,513 bytes minified and 2,981 gzipped, measured today and
+byte-identical to yesterday's measurement — a third more than the table claimed,
+and the figure every report of this lane has printed correctly for weeks while
+the plan beside them went on saying the old one. The test's own doc comment said
+*it is 4.8 KB now* in the present tense for the same reason.
+
+**Both are now written so they cannot go stale the same way.** The table carries
+the figure *and the date it was measured on*; the comment says *it was 4.8 KB
+when that was fixed*, which is a historical claim about a record and needs no
+refreshing. The table also no longer says the byte count is what
+`browser-weight.test.ts` guards — that test walks the import graph and fails on a
+package, which is a different and stronger promise than any number.
+
+**The general shape, which is this morning's lesson from another lane arriving
+here:** a number in prose is only safe where it can carry a date or a record. The
+sentence *it is 4.8 KB now* had neither, was true when written, and had no way to
+fail. Nothing in this repository was red for a month because of it.
 ## 2026-11-02 (evening) — anything a boundary renders is in every page's payload, and this application has three more boundaries
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused)
