@@ -4,6 +4,7 @@ import { useActionState } from "react"
 import { useFormStatus } from "react-dom"
 
 import { toneClasses } from "@/app/(portal)/_lib/outcome"
+import { MAX_REASON_LENGTH } from "@/app/(portal)/_lib/proposing/turned-down"
 
 import { answerAction, type AnswerReport } from "../actions"
 
@@ -32,13 +33,19 @@ const Answer = ({ value, label }: { value: "accept" | "refuse"; label: string })
  *
  * Once answered the buttons give way to the answer, because the change is no
  * longer waiting and a second press could only be told so.
+ *
+ * A reason can go with *Turn down*, and Loom reads it before it proposes for
+ * the page again (0341). *Accept* is not offered for a change that no longer
+ * fits the version the site serves (0340).
  */
 export const AnswerControls = ({
   projectId,
   proposalId,
+  acceptable,
 }: {
   projectId: string
   proposalId: string
+  acceptable: boolean
 }) => {
   const [answer, action] = useActionState<AnswerReport | null, FormData>(answerAction, null)
 
@@ -55,8 +62,17 @@ export const AnswerControls = ({
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="proposalId" value={proposalId} />
+      <label className="text-ink-muted flex flex-col gap-1 text-xs">
+        Why turn it down? Optional. Loom reads this before it proposes for this page again.
+        <textarea
+          name="reason"
+          rows={2}
+          maxLength={MAX_REASON_LENGTH}
+          className="border-edge text-ink bg-surface-base rounded-md border p-2 text-xs"
+        />
+      </label>
       <div className="flex gap-2">
-        <Answer value="accept" label="Accept" />
+        {acceptable ? <Answer value="accept" label="Accept" /> : null}
         <Answer value="refuse" label="Turn down" />
       </div>
       {answer?.refusal === undefined ? null : (

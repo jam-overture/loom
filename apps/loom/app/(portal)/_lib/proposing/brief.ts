@@ -11,6 +11,7 @@ import {
 } from "@jam-overture/loom"
 
 import { evidenceText, type Evidence } from "./evidence"
+import type { TurnedDown } from "./turned-down"
 
 /**
  * The AI deciding what to change about one page, from what its readers did
@@ -38,6 +39,10 @@ export const BRIEF_SYSTEM_PROMPT = [
   "in one or two plain sentences an editor could carry out. Prefer changing words, order or emphasis",
   "over adding new sections. Do not propose a change the figures do not support:",
   'if nothing stands out, answer "nothing" and say why.',
+  "You may also be given changes a person already turned down on this page, with their reason when",
+  "they gave one. Do not propose one of those again, or anything that amounts to it, unless the figures",
+  "now argue for it clearly more strongly than any reason it was turned down for. If you do propose it",
+  'again, say in "again" what has changed since it was turned down. Otherwise leave "again" out.',
 ].join(" ")
 
 const replySchema = z.discriminatedUnion("outcome", [
@@ -45,6 +50,7 @@ const replySchema = z.discriminatedUnion("outcome", [
     outcome: z.literal("change"),
     request: z.string().min(1),
     evidence: z.string().min(1),
+    again: z.string().min(1).optional(),
   }),
   z.object({ outcome: z.literal("nothing"), reason: z.string().min(1) }),
 ])
@@ -58,6 +64,11 @@ const REPLY_JSON_SCHEMA: JsonObject = {
     request: { type: "string", description: "The change to make, naming the part by its id." },
     evidence: { type: "string", description: "The figure that supports it, in one sentence." },
     reason: { type: "string", description: "Why nothing should change, when outcome is nothing." },
+    again: {
+      type: "string",
+      description:
+        "Only when the change was turned down before: what has changed since, in one sentence.",
+    },
   },
 }
 
@@ -68,9 +79,14 @@ export type Brief =
 
 export type BriefError = { readonly code: "model" | "unreadable"; readonly detail: string }
 
-/** The request the interpreter is handed: the change, then the figure that argues for it. */
-export const requestOf = (change: string, evidence: string): string => {
-  const request = `${change.trim()} (Why: ${evidence.trim()})`
+/**
+ * The request the interpreter is handed: the change, then the figure that
+ * argues for it, then, for a change turned down before, why it is back (0341).
+ */
+export const requestOf = (change: string, evidence: string, again?: string): string => {
+  const request = `${change.trim()} (Why: ${evidence.trim()})${
+    again === undefined ? "" : ` (Turned down before. Proposed again because: ${again.trim()})`
+  }`
 
   return request.length <= MAX_REQUEST_LENGTH
     ? request
@@ -92,15 +108,53 @@ export const briefFrom = (text: string): Result<Brief, BriefError> => {
   }
 
   return parsed.data.outcome === "change"
-    ? ok({ kind: "change", request: requestOf(parsed.data.request, parsed.data.evidence) })
+    ? ok({
+        kind: "change",
+        request: requestOf(parsed.data.request, parsed.data.evidence, parsed.data.again),
+      })
     : ok({ kind: "nothing", reason: parsed.data.reason })
 }
 
-/** Ask the project's model what to change about a page, with the page's evidence. */
+const DAY = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+})
+
+/**
+ * What was turned down on the page, newest first, as the model reads it. Pure.
+ * Empty when nothing was, so a page with no history reads exactly as before.
+ */
+export const turnedDownText = (turnedDown: readonly TurnedDown[]): string =>
+  turnedDown.length === 0
+    ? ""
+    : [
+        "Changes a person turned down on this page before, newest first:",
+        ...turnedDown.map(
+          (entry) =>
+            `- On ${DAY.format(entry.at)}: "${entry.request}". ${
+              entry.reason === null ? "No reason was given." : `Their reason: ${entry.reason}`
+            }`
+        ),
+      ].join("\n")
+
+/** The message the model is given: the page, its evidence, and what was turned down on it. Pure. */
+export const briefMessage = (
+  pageName: string,
+  evidence: Evidence,
+  turnedDown: readonly TurnedDown[]
+): string =>
+  [`The page "${pageName}".`, evidenceText(evidence), turnedDownText(turnedDown)]
+    .filter((part) => part !== "")
+    .join("\n\n")
+
+/** Ask the project's model what to change about a page, with its evidence and its history. */
 export const briefFor = async (
   client: ModelClient,
   pageName: string,
-  evidence: Evidence
+  evidence: Evidence,
+  turnedDown: readonly TurnedDown[]
 ): Promise<Result<Brief, BriefError>> => {
   const completion = await withCeiling(
     CEILING_MS,
@@ -112,7 +166,7 @@ export const briefFor = async (
           maxTokens: MAX_TOKENS,
           effort: "medium",
           system: BRIEF_SYSTEM_PROMPT,
-          userMessage: `The page "${pageName}".\n\n${evidenceText(evidence)}`,
+          userMessage: briefMessage(pageName, evidence, turnedDown),
           outputSchema: REPLY_JSON_SCHEMA,
         },
         { signal }
