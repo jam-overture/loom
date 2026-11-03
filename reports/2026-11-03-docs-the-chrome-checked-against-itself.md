@@ -206,8 +206,9 @@ here.
 - **The commit author line** (23 October). Checked with `git config user.email`
   before the first commit: `noreply@anthropic.com`, the session default.
 - **Mutation testing before the first commit** (27 October). Followed — the unit
-  was committed as `7489304` before the first mutation, and every restore was
-  `git restore --source=HEAD -- .`.
+  was committed as `7489304` before the first mutation, every restore was
+  `git restore --source=HEAD -- .`, and the whole set was re-run against the
+  branch head after the typecheck fix.
 - **A screenshot taken while the merge gate is running turns the gate red**
   (29 October, this lane's own). Followed: every picture was taken and shrunk,
   and `FINDINGS.md` and this report were written, **before** the gate was
@@ -254,7 +255,10 @@ now #6e6e78`. On `main`, that same stylesheet is green.
 ### Twelve mutations, twelve killed
 
 Each applied on its own against the branch's committed code, restored with
-`git restore --source=HEAD -- .`, with the suite re-run between.
+`git restore --source=HEAD -- .`, with the suite re-run between. Run once
+against `7489304` before the typecheck fix and **again in full against the
+branch head `e46cb90`** after it, since a fix that lands after a mutation run
+is a mutation run that no longer describes the code.
 
 | what was put in | what failed |
 | --- | --- |
