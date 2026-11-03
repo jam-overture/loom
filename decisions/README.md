@@ -426,3 +426,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0334](0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md) | The browser's own furniture is outside the tree, so a host is handed a `:root` rule for its document | Accepted | §4b |
 | [0335](0335-a-cache-over-a-governed-page-is-told-the-row-moved-by-the-handle-that-appended.md) | A cache over a governed page is told the row moved, by the handle that appended | Accepted | §5, §3 |
 | [0336](0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md) | A fault reaches a conversion and a fall differently, so the fix-list asks each order its own question | Accepted | §4c (reader signals) |
+| 0337 | *No record on this branch* | — | — |
+| 0338 | *No record on this branch* | — | — |
+| [0339](0339-the-reports-commands-read-one-set-of-files-and-it-includes-what-a-run-has-just-written.md) | The `reports/` commands read one set of files, and it includes what a run has just written | Accepted | §4 (the framework's own tooling) |

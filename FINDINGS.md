@@ -60342,8 +60342,16 @@ door open rather than close it.
 ## 2026-10-25 — one source file in `src/runtime/` carries a literal NUL byte, so no content search can read it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`src/runtime/repointing.ts`) · **Status:** open — **small, nothing is broken,
-and the remedy is one character**
+(`src/runtime/repointing.ts`) · **Status:** **closed by
+`framework-79-one-governed-set`** — the character, and the widening it named.
+`SEP = "\u0000"` in `repointing.ts`, and `src/signals/source-text.test.ts`'s
+`LANE` is now `src` rather than `src/signals`, so the sweep covers the directory
+the hazard is about rather than the one its first instance happened to be in.
+**Zero control bytes remain in any `.ts` file in the repository**, counted by
+reading every one as bytes. The widened check was confirmed to fail on a NUL
+planted in `src/runtime/` before being left green, rather than assumed to.
+**One line of this is in the filing lane's file**, which that lane asked for in
+writing here; nothing else under `src/signals/` was touched
 
 `src/signals/rollup.ts` keyed its tallies with template literals holding a
 **literal `NUL` byte** as the separator — the byte written into the file rather
@@ -62479,8 +62487,47 @@ somebody reads that test as redundant and deletes it.
 ## 2026-10-30 — `pnpm reports:shrink` reads the git index, so the pictures a run has just taken are the ones it cannot see
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/reports/shrink.ts`, `docs/routines.md`) · **Status:** open — **cost this
-run one confused cycle**; nothing is broken and no test is failing
+(`tools/reports/shrink.ts`, `docs/routines.md`) · **Status:** **closed by
+`framework-79-one-governed-set`** — **shape 2, and this entry's recommendation
+of shape 1 was declined**, because the doubt it rested on is answerable from the
+repository. Recorded as
+[0339](decisions/0339-the-reports-commands-read-one-set-of-files-and-it-includes-what-a-run-has-just-written.md)
+
+> **The reason shape 1 was not taken.** This entry recommended the sentence and
+> the warning line, on the ground that the reason for `git ls-files` is not
+> stated and *may be deliberate — a scratch PNG under `reports/` that nobody
+> meant to commit.* It is not deliberate. `tools/reports/survey.ts`, the sibling
+> module the gate itself runs through, already asks for `--cached --others
+> --exclude-standard` **and says why in a comment**: *a 5MB PNG written a moment
+> ago and not yet added is invisible to `ls-files` alone, and that is exactly the
+> state a run is in when it has just taken its screenshots.* So there is no
+> scratch-file case to protect — an untracked raster under `reports/` is a fault
+> **the gate already fails on**, which was reproduced before anything was
+> changed. The narrower set was not a choice; it was the one call that never got
+> the fix.
+>
+> **What was wrong was the pair, not either call.** The gate's advice was advice
+> the other command could not take: `reports:shrink` printed *nothing to shrink
+> — no raster images under reports/* and `reports:check` then failed on the same
+> file saying *run `pnpm reports:shrink`*. The set is now defined once in
+> `tools/reports/governed.ts` and both commands read it, and
+> `governed.test.ts` fails if any other module in that directory names
+> `ls-files` — so the third command cannot pick a third set. That sweep was
+> confirmed to fail on a planted second mention.
+>
+> **A second defect was in the same line and nobody had filed it.** The citation
+> rewrite also read the tracked files only, and a report written *this run* is
+> untracked — so a run that applied this entry's `git add` workaround to its
+> pictures but not to its report had its pictures converted and its citation left
+> pointing at the `.png` just deleted. That is the 404 the command exists to
+> prevent. Both halves are demonstrated in the report.
+>
+> **Nothing in `docs/routines.md` changes, and that is the outcome rather than an
+> omission.** The sentence this entry called wrong — *re-encodes every raster
+> under `reports/`* — is now true of the tool. The documentation was right and
+> the tool was wrong, so the fix belonged in the tool; and the entry's own
+> closing reasoning, that a routine does not write the governance it is bound by,
+> is better served by not editing that file at all.
 
 `docs/routines.md`, under *Storing the picture*, says the command
 

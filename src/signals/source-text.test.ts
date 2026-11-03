@@ -20,13 +20,18 @@ import { describe, expect, it } from "vitest"
  * double-counts. `"\u0000"` is the same byte to the runtime and leaves the file
  * text, so there is nothing to trade.
  *
- * **Scoped to `src/signals/`, which is this lane's.** One other file in the
- * repository has the same byte — `src/runtime/repointing.ts`, one occurrence —
- * and it belongs to `Loom daily build`; it is filed in `FINDINGS.md` with this
- * remedy rather than changed here. Widening this check to `src/` is the one-line
- * change that follows it being closed.
+ * **Scoped to `src/`, which is every lane's.** It was `src/signals/` when it was
+ * written, because the one other occurrence in the repository —
+ * `src/runtime/repointing.ts` — belonged to `Loom daily build` and was filed in
+ * `FINDINGS.md` rather than changed from here. That entry is closed, so this is
+ * the widening it named: the check now covers the directory the hazard is about
+ * rather than the directory its first instance happened to be in.
+ *
+ * Kept here, in the lane that found it, rather than moved somewhere more
+ * central. Where a sweep lives says who noticed, and nothing about it needs to
+ * be `src/signals/`-specific to be run from here.
  */
-const LANE = "src/signals"
+const LANE = "src"
 
 const sourceFiles = (directory: string): readonly string[] =>
   readdirSync(directory).flatMap((entry) => {
@@ -41,7 +46,7 @@ describe(`${LANE} source text`, () => {
   const files = sourceFiles(LANE)
 
   it("has files to check, so a passing run is not an empty one", () => {
-    expect(files.length).toBeGreaterThan(40)
+    expect(files.length).toBeGreaterThan(400)
   })
 
   /**
