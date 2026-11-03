@@ -80,6 +80,43 @@ export const PROSE_PROPS: readonly string[] = [
   "state",
 ]
 
+/**
+ * The one element on this site whose children are **source** and not sentences.
+ *
+ * Every rule in this lane that reads the page reads text nodes, which was
+ * exactly right while the only panel on the site printed `npm install …`. As of
+ * 3 November `/why-use-it` prints two TypeScript files, and the two kinds of
+ * rule that read them part company:
+ *
+ * - **What a reader is asked to understand** still covers them. A code panel
+ *   can put a word in front of a stranger that they have to look up, and
+ *   `RESERVED_VOCABULARY` reading it is why the published region imports from
+ *   `@jam-overture/loom/sdk` and not from the subpath whose last segment is a
+ *   word this site does not say. The em-dash rule reads them too. Neither is
+ *   relaxed anywhere.
+ * - **What a reader is asked to read** does not. `budget.test.ts` says in its
+ *   own docblock that its numbers are *"a proxy for how much a visitor is asked
+ *   to read"*, and `voice.test.ts`' thirty-word rule is *one idea per
+ *   sentence*. Source has no sentences, its line breaks are its own, and a
+ *   fifty-eight-word `definePrimitive` call is not an essay a visitor reads
+ *   straight down. Measuring it as prose is a category error, and the two ways
+ *   out of it are this or shortening real code until a word count is happy —
+ *   which is the thing `routines.md` means by satisfying a rule and buying
+ *   nothing.
+ *
+ * **The exclusion is bounded rather than open**, which is the half that keeps it
+ * from being a weakening: `written.test.ts` gives the two panels a budget of
+ * their own, in lines and characters, so source cannot grow on this page just
+ * because the prose ledger stopped counting it.
+ *
+ * A panel's `caption` is prose and stays counted. It is the filename a reader
+ * reads, it is in `PROSE_PROPS`, and nothing here touches props.
+ */
+export const SOURCE_PANEL = "loom.code"
+
+/** The field `readerCopy` gives the text inside a source panel. */
+export const SOURCE_PANEL_TEXT = `${SOURCE_PANEL}#text`
+
 /** Text nodes and prose props, in document order. */
 export const wordsOf = (node: LoomNode): string => {
   if (node.kind === "text") return node.value

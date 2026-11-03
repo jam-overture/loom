@@ -64774,6 +64774,60 @@ lane's**, whatever it is counting. The question to ask of any number taken from
 it is a floor, a trigger or a dated sentence, never an equality.
 
 ---
+## 2026-11-03 — a band's scroll margin is a fixed length and the bar it has to clear is not, so an anchored band lands under the menu on a phone
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/anchor.ts`) · **Status:** open — **nothing is blocked**, the
+band this was found on shipped and its heading is readable on both viewports.
+What is lost is the eyebrow above the heading, on the viewport where the page
+has least room to lose anything
+
+Found while repointing the second link of the maintainer's chain at a new band
+on `/why-use-it`, which made this the first anchor on this site that a visitor
+is actually sent to from another page rather than from the contents rail.
+
+**The mechanism.** `anchoredStyle` gives any element carrying an anchor
+`scroll-margin-block-start: space(6)`, which is the right idea and a fixed
+length. The thing it has to clear is `loom.nav` with `position: "sticky"`,
+whose height is whatever its contents come to. The two numbers are set in
+different files and nothing compares them.
+
+**Measured on a production build of `marketing-26-what-you-write`**, landing on
+`/why-use-it#what-you-write`, boxes read off the page with `pnpm shoot`'s
+`measure`:
+
+| viewport | sticky bar | band top | eyebrow | clearance |
+| --- | --- | --- | --- | --- |
+| 1280 wide | `y 0` `h 64` | `y 48` | `y 62`–`77` | **2px under the bar** |
+| 390 phone | `y 0` `h 55` | `y 27` | `y 41`–`56` (hidden) | **14px under the bar** |
+
+So the desktop grazes it and the phone loses the label. The heading itself is
+clear on both — `y 108` and `y 71` — which is why this is a polish finding and
+not a broken link.
+
+**It is every anchored band on the site**, not this one: `what-stays-yours`,
+`what-you-build-with`, `on-a-page`, `for-a-reader` and the counting anchor on
+`/what-you-run` all have the same margin against the same bar. Nobody had seen
+it because every one of them was reached by scrolling, where a sticky bar is
+already overhead and the reader's eye is moving.
+
+**Why this lane did not fix it.** The two candidates are both outside
+`(marketing)`. A larger constant in `anchor.ts` is a guess at a height the
+primitive cannot see and would be wrong the moment a host's bar is a different
+size. `scroll-margin-block-start` set from the bar's own measured height wants
+the two primitives to know about each other, which is a question about the
+library rather than a line this lane could take. Hard-coding an offset in the
+route group would be a copy of a decision the library owns, kept where the
+library cannot reach it. That is the hazard
+[0197](decisions/0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md)
+names in as many words — *"the host writes it itself, and what it writes is a
+constant while the theme is data"* — and the one
+[0334](decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)
+answered by publishing a function instead. **Filed rather than guessed at.**
+
+One thing worth having before choosing: a `scroll-margin` large enough for the
+bar is dead space on every anchor reached by scrolling, so whatever is chosen is
+a trade between the two ways a reader arrives, not a free fix.
 ## 2026-11-03 — the ranking key an order of conversions throws away is a ceiling, and the floor under it was already paid for
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`

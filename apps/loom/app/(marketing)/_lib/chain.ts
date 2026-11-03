@@ -108,7 +108,7 @@ export const CHAIN: readonly ChainLink[] = [
     actor: "You",
     title: "You tell Loom which ones it can use",
     body: "Loom keeps a list of the components an AI model is allowed to use, and what each one needs. That list is the whole of the setup.",
-    shown: { path: WHY_USE_IT.path, anchor: WHY_USE_IT_ANCHOR.theSet },
+    shown: { path: WHY_USE_IT.path, anchor: WHY_USE_IT_ANCHOR.whatYouWrite },
   },
   {
     link: "Loom designed web page",
