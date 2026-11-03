@@ -4,9 +4,9 @@ import {
   err,
   fixedPolicy,
   ok,
+  proposalIdSchema,
   sequentialIdFactory,
   type IntentId,
-  type LoomTree,
 } from "@jam-overture/loom"
 import { memoryTreeStore } from "@jam-overture/loom/store"
 import {
@@ -23,13 +23,19 @@ import { pageFixture } from "@/app/_lib/pages/fixtures"
 import { reportOf } from "../outcome"
 import { portalPolicy } from "../policy"
 import { elementIdsOf, NOTHING_DECLARED, readersOn } from "./fixtures"
-import { governedCopyOf, intentFor, PROPOSER, proposeFor, type ProposeFor } from "./propose"
+import { memoryPageCopyStore } from "./copies-memory"
+import { holdStandingOf } from "./following"
+import { intentFor, PROPOSER, proposeFor, type ProposeFor } from "./propose"
+import { memoryTurnedDownStore } from "./turned-down-memory"
 
 const AT = new Date(Date.UTC(2026, 10, 1))
+const LATER = new Date(Date.UTC(2026, 10, 2))
 const PUBLISHED = pageFixture("home", "Welcome", 3)
 const [, HEADING] = elementIdsOf(PUBLISHED)
 
 if (HEADING === undefined) throw new Error("the fixture has a heading")
+
+const NOTHING = JSON.stringify({ outcome: "nothing", reason: "All read." })
 
 const CHANGE = JSON.stringify({
   outcome: "change",
@@ -72,6 +78,9 @@ const pathFor = (confidence = 0.9): WritePath => {
 
 const given = (path: WritePath, overrides: Partial<ProposeFor> = {}): ProposeFor => ({
   path,
+  copies: memoryPageCopyStore(),
+  turnedDown: memoryTurnedDownStore(),
+  follows: true,
   client: scriptedModelClient(CHANGE),
   sources: readersOn(PUBLISHED, 100, 50),
   declarations: NOTHING_DECLARED,
@@ -80,38 +89,6 @@ const given = (path: WritePath, overrides: Partial<ProposeFor> = {}): ProposeFor
   name: "Home",
   at: AT,
   ...overrides,
-})
-
-describe("the governed copy of a page", () => {
-  it("starts as the published tree, exactly, the first time anything is proposed", async () => {
-    const trees = memoryTreeStore()
-
-    expect(await governedCopyOf(trees, PUBLISHED)).toEqual(ok(PUBLISHED))
-    expect(await trees.head(PUBLISHED.treeId)).toEqual(ok(PUBLISHED))
-  })
-
-  it("is the copy already held, not the page as published again", async () => {
-    const trees = memoryTreeStore()
-    const later = { ...pageFixture("home", "Welcome back", 4), treeId: PUBLISHED.treeId }
-
-    await governedCopyOf(trees, PUBLISHED)
-
-    expect(await governedCopyOf(trees, later)).toEqual(ok(PUBLISHED))
-  })
-
-  it("reads what another run made when two start at once", async () => {
-    const trees = memoryTreeStore()
-    const racing = {
-      head: trees.head,
-      create: async (tree: LoomTree) => {
-        await trees.create(tree)
-
-        return trees.create(tree)
-      },
-    }
-
-    expect(await governedCopyOf(racing, PUBLISHED)).toEqual(ok(PUBLISHED))
-  })
 })
 
 describe("the intent a proposal becomes", () => {
@@ -176,12 +153,58 @@ describe("proposeFor", () => {
     )
   })
 
-  it("proposes nothing when the site has published past the copy", async () => {
-    const path = pathFor()
-    await governedCopyOf(path.store, pageFixture("home", "Welcome", 2))
+  it("follows a newer published version, carrying a waiting change that still fits it", async () => {
+    const path = pathFor(0.5)
+    const copies = memoryPageCopyStore()
+    const newer = { ...pageFixture("home", "Welcome back", 5), treeId: PUBLISHED.treeId }
 
-    expect(await proposeFor(given(path))).toEqual(
-      ok({ kind: "passed", passed: { kind: "behind", copy: 2 } })
+    await proposeFor(given(path, { copies }))
+
+    expect(await proposeFor(given(path, { copies, published: newer, at: LATER }))).toEqual(
+      ok({ kind: "passed", passed: { kind: "waiting" } })
+    )
+
+    const listed = await copies.list()
+    if (!listed.ok) throw new Error("expected copies")
+    const [copy] = listed.value
+
+    expect(copy).toMatchObject({ pageId: PUBLISHED.treeId, startedAt: LATER.getTime() })
+    if (copy === undefined) return
+
+    const carried = await path.holds.forTree(copy.copyId)
+    if (!carried.ok) throw new Error("expected holds")
+
+    expect(carried.value.held.map((held) => holdStandingOf(held, listed.value))).toEqual(["stale"])
+    expect(await path.holds.forTree(PUBLISHED.treeId)).toEqual(ok({ held: [], unreadable: [] }))
+  })
+
+  it("leaves the copy where it is when this deployment's own site serves it", async () => {
+    const path = pathFor()
+    const newer = { ...pageFixture("home", "Welcome back", 5), treeId: PUBLISHED.treeId }
+
+    await proposeFor(given(path, { client: scriptedModelClient(NOTHING) }))
+
+    expect(await proposeFor(given(path, { follows: false, published: newer }))).toEqual(
+      ok({ kind: "passed", passed: { kind: "apart" } })
+    )
+  })
+
+  it("shows the model what was turned down on the page before", async () => {
+    const turnedDown = memoryTurnedDownStore()
+    const client = scriptedModelClient(NOTHING)
+
+    await turnedDown.record({
+      proposalId: proposalIdSchema.parse("p_before"),
+      pageId: PUBLISHED.treeId,
+      request: "Remove the heading.",
+      reason: "We need it.",
+      by: "jonathan",
+      at: AT.getTime(),
+    })
+    await proposeFor(given(pathFor(), { client, turnedDown }))
+
+    expect(client.requests[0]?.userMessage).toMatch(
+      /"Remove the heading\."\. Their reason: We need it\.$/u
     )
   })
 
@@ -197,7 +220,7 @@ describe("proposeFor", () => {
 
   it("changes nothing when the model finds nothing worth changing", async () => {
     const path = pathFor()
-    const client = scriptedModelClient(JSON.stringify({ outcome: "nothing", reason: "All read." }))
+    const client = scriptedModelClient(NOTHING)
 
     expect(await proposeFor(given(path, { client }))).toEqual(
       ok({ kind: "passed", passed: { kind: "nothing", reason: "All read." } })

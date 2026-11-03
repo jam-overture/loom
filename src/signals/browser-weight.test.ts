@@ -9,10 +9,10 @@ import { describe, expect, it } from "vitest"
  *
  * It was 66 KB minified when it first shipped, and 59 KB of that was the schema
  * library, reached through one innocent import of an id schema to test two
- * attribute values. It is 4.8 KB now (0136). Nothing about the mistake is
- * visible in a diff — it is one import line, and every test stays green — so
- * this walks the modules `broadcast.ts` actually loads and fails if any of them
- * reaches `zod`.
+ * attribute values. It was 4.8 KB when that was fixed (0136). Nothing about the
+ * mistake is visible in a diff — it is one import line, and every test stays
+ * green — so this walks the modules `broadcast.ts` actually loads and fails if
+ * any of them reaches `zod`.
  *
  * Type-only imports are skipped, because the compiler erases them and they
  * cost a browser nothing.

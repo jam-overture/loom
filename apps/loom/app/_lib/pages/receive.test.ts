@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { err, ok } from "@jam-overture/loom"
+import { err, ok, type LoomTree } from "@jam-overture/loom"
 import {
   DEFAULT_APPLICATION_ID,
   projectIdSchema,
@@ -58,6 +58,7 @@ const fixtureOf = async (
       applicationOf: (id: ApplicationId) =>
         Promise.resolve(ok(id === application?.applicationId ? application : null)),
       pagesFor: () => pages,
+      kept: () => undefined,
       now: () => AT + 1,
       ...over,
     },
@@ -90,6 +91,23 @@ describe("receivePages", () => {
     expect((await listed(pages)).map((page) => page.tree.treeId).sort()).toEqual(
       [HOME.treeId, PRICING.treeId].sort()
     )
+  })
+
+  it("tells the deployment what it kept, for the project's copies to follow, and only then", async () => {
+    const told: (readonly string[])[] = []
+    const kept = (_application: ApplicationId, trees: readonly LoomTree[]) => {
+      told.push(trees.map((tree) => tree.treeId))
+    }
+    const { door, key } = await fixtureOf({ kept })
+    const refused = await fixtureOf({
+      kept,
+      pagesFor: () => ({ publish: () => Promise.resolve(err(DOWN)) }),
+    })
+
+    await receivePages(post({ pages: [HOME] }, `Bearer ${key}`), door)
+    await receivePages(post({ pages: [PRICING] }, `Bearer ${refused.key}`), refused.door)
+
+    expect(told).toEqual([[HOME.treeId]])
   })
 
   it("says one page, not one pages", async () => {

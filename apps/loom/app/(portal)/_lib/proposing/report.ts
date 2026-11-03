@@ -38,9 +38,9 @@ export const passedSentence = (passed: Passed): string => {
     case "waiting":
       return "A change to this page is already under Waiting. Loom proposes another once that one is answered."
     case "unshipped":
-      return `Loom's copy has a change your site does not serve yet (version ${passed.copy}). Until it does, what readers do says nothing about that change.`
-    case "behind":
-      return `Your site has published a newer version than Loom's copy (version ${passed.copy}), and Loom does not yet bring its copy up to date.`
+      return `Loom's copy has an accepted change your site does not serve yet (version ${passed.copy}). Until it does, what readers do says nothing about that change.`
+    case "apart":
+      return "This deployment's own site serves Loom's copy of this page, so a different version sent for it is not followed."
     case "silent":
       return silenceSentence(passed.silence)
     case "nothing":

@@ -1,8 +1,11 @@
+import { after } from "next/server"
+
 import { err, ok } from "@jam-overture/loom"
 import type { LoomDatabase } from "@jam-overture/loom/postgres"
 import { describeApplicationStoreError, type ApplicationId } from "@jam-overture/loom/store"
 
 import { portalDatabase } from "@/app/(portal)/_lib/database"
+import { followSite } from "@/app/(portal)/_lib/proposing/follow-site"
 import { appApplications } from "@/app/_lib/app/store"
 
 import type { PublishKeyStore } from "./publish-keys"
@@ -68,5 +71,9 @@ export const appPublishDoor: PublishDoor = {
       : err({ detail: describeApplicationStoreError(found.error) })
   },
   pagesFor: publishedPagesFor,
+  /** After the build is answered, inside the same invocation, so the platform does not cut it off. */
+  kept: (application, trees) => {
+    after(() => followSite(application, trees))
+  },
   now: () => Date.now(),
 }
