@@ -12,6 +12,7 @@ import { DOC_PAGES } from "../docs-pages"
 import { unhonored } from "../frames"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import { asRequested } from "../requested"
+import { WRITTEN_FILES } from "../written"
 
 import {
   DEFAULT_THEME,
@@ -576,14 +577,24 @@ describe("the panels that print data", () => {
    * a page this test forgot to walk would otherwise read as the same green as a
    * panel that wraps — which is exactly how the eight went unset for three
    * weeks.
+   *
+   * **It was the install line alone until 3 November**, and the pin did its job
+   * that day: `/why-use-it` grew the two source panels of *What you write* and
+   * this went red naming both. They are listed here as what `written.ts`
+   * publishes rather than as two more string literals, because a second copy of
+   * a file this repository already holds twice is the thing that module exists
+   * to stop. The install line stays written out, since nothing else holds it.
    */
-  it("is the install line and nothing else, counted rather than assumed", async () => {
+  it("is the install line and the two source panels, counted rather than assumed", async () => {
     const panels = await everyPanel()
     const printed = panels.flatMap((panel) =>
       panel.children.flatMap((child) => (child.kind === "text" ? [child.value] : []))
     )
 
-    expect(printed).toEqual(["npm install @jam-overture/loom @jam-overture/loom-primitives"])
+    expect(printed).toEqual([
+      "npm install @jam-overture/loom @jam-overture/loom-primitives",
+      ...WRITTEN_FILES.map((file) => file.source),
+    ])
   })
 
   /**

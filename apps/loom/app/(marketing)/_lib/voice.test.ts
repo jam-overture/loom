@@ -5,7 +5,15 @@ import { MAINTAINERS_OWN, PACKAGES, RESERVED_VOCABULARY } from "./copy"
 import { pageTreeFor, treeFor } from "./render"
 import { SERVED_STATE_COUNT, servedPages, sweepCover, sweepShare, type ServedPage } from "./served"
 import { DEFAULT_THEME, HOME, PAGES_AT_LEAST, SITE_PATHS, SITE_ROUTES, type SiteRoute } from "./site"
-import { readerCopy, sentencesOf, uses, wordCountOf, wordsOf, type ReaderString } from "./words"
+import {
+  readerCopy,
+  sentencesOf,
+  SOURCE_PANEL_TEXT,
+  uses,
+  wordCountOf,
+  wordsOf,
+  type ReaderString,
+} from "./words"
 
 /**
  * Who the site is written for, held to by a test.
@@ -534,10 +542,24 @@ describe("every string a reader reads", () => {
   /**
    * Thirty words, the number this file has held an opening band to since it was
    * written, now over the whole site. One idea per sentence.
+   *
+   * **A source panel has no sentences, so it is not read for them.**
+   * `SOURCE_PANEL` in `words.ts` carries the reasoning; what matters here is
+   * how narrow the exclusion is. It is this rule and nothing else: the em-dash
+   * rule above still reads the panels, so does `RESERVED_VOCABULARY` over every
+   * page, and so does every rule over a panel's `caption`. The guard below
+   * holds all three, so the day somebody widens this by copying it, a test says
+   * so.
+   *
+   * Without it, `register.tsx` reads as one seventy-word sentence, because
+   * `sentencesOf` splits on a full stop followed by a space and TypeScript puts
+   * its stops inside `z.object()`. The alternative was cutting real code until
+   * the arithmetic came out, and a reader cannot be shown a shorter
+   * registration than the one that works.
    */
   it("keeps every sentence to one idea", () => {
     const offenders = read.flatMap((string) =>
-      isMaintainers(string.text)
+      isMaintainers(string.text) || string.field === SOURCE_PANEL_TEXT
         ? []
         : sentencesOf(string.text)
             .filter((sentence) => wordCountOf(sentence) > 30)
@@ -632,6 +654,73 @@ const headlinesOf = (route: SiteRoute): readonly ReaderString[] =>
  * losing its punctuation and a headline that drops the comma has bought
  * nothing.
  */
+/**
+ * The one exclusion in this file, held from the other side.
+ *
+ * `keeps every sentence to one idea` skips the text inside a source panel, and
+ * an exclusion that nobody checks is an exclusion that grows. So this states
+ * what is still covered, in the three ways it could quietly stop being: the
+ * vocabulary sweep over every page reads the panels, the em-dash rule reads
+ * them, and the sweep has panels in it to read. The shape is the one
+ * `routines.md` asks for — a test over an empty list passes, and this lane has
+ * filed that failure once already.
+ */
+describe("the panels that print source", () => {
+  let pages: readonly ServedPage[] = []
+
+  beforeAll(async () => {
+    pages = await servedPages()
+  })
+
+  const panelText = (): readonly string[] =>
+    pages.flatMap((page) =>
+      readerCopy(page.tree.root)
+        .filter(({ field }) => field === SOURCE_PANEL_TEXT)
+        .map(({ text }) => text)
+    )
+
+  it("are on the site for the rules below to read", () => {
+    const panels = panelText()
+
+    expect(panels.length).toBeGreaterThan(0)
+    expect(panels.some((text) => text.includes("definePrimitive"))).toBe(true)
+  })
+
+  /**
+   * The rule the excluded one does not cover for, and the reason the published
+   * region imports `definePrimitive` from `@jam-overture/loom/sdk`: the subpath
+   * that ends in a word this site does not say would fail here, and the import
+   * `@jam-overture/loom/react` beside it passes because `LoomPrimitiveProps` has
+   * no word boundary in front of the part that would match.
+   */
+  it("say no word to a stranger that the rest of the site may not say", () => {
+    const text = withoutPackageNames(panelText().join(" "))
+
+    for (const term of RESERVED_VOCABULARY) {
+      expect({ term, uses: uses(text, term) }).toEqual({ term, uses: false })
+    }
+  })
+
+  it("reach for no em dash either", () => {
+    expect(panelText().filter((text) => text.includes("—"))).toEqual([])
+  })
+
+  /** And a caption is prose: it is read by every rule in this file. */
+  it("caption the file a reader would save, in words the rest of the site could use", () => {
+    const captions = pages.flatMap((page) =>
+      readerCopy(page.tree.root)
+        .filter(({ field }) => field.endsWith(".caption"))
+        .map(({ text }) => text)
+    )
+
+    expect(captions.length).toBeGreaterThan(0)
+
+    for (const term of RESERVED_VOCABULARY) {
+      expect({ term, uses: uses(captions.join(" "), term) }).toEqual({ term, uses: false })
+    }
+  })
+})
+
 describe("a headline on this site", () => {
   it.each(SITE_ROUTES)("$path ends none of them on a flourish", (route) => {
     const trailing = headlinesOf(route)
