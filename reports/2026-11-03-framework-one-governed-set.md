@@ -4,9 +4,14 @@
 **Section:** §4 (the framework's own tooling) · **Branch:**
 `framework-79-one-governed-set`
 
-**Preview:** added to this report by its own commit once Vercel has reported it
-on the pull request, taken from Vercel's own comment rather than composed from
-the branch name — which is the 16 October entry.
+**Preview:**
+`loom-git-framework-79-one-go-b183b1-jpizzolato36-6341s-projects.vercel.app`,
+on #755. Taken from Vercel's own comment rather than composed from the branch
+name, which is the 16 October entry.
+
+**Nothing on this branch changes a page**, so there is nothing on the preview to
+look at that is not on `main` — the unit is the repository's own tooling. The
+diagram below is the visual, and the two reproductions in it were run locally.
 
 ![The gate and the command that satisfies it were reading two different sets of files](2026-11-03-framework-one-governed-set.svg)
 
