@@ -1,13 +1,19 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { treeIdSchema } from "@jam-overture/loom"
-import { DEFAULT_APPLICATION_ID, projectIdSchema } from "@jam-overture/loom/store"
+import { treeIdSchema, type TreeId } from "@jam-overture/loom"
+import {
+  DEFAULT_APPLICATION_ID,
+  projectIdSchema,
+  type ApplicationId,
+} from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { currentCopyOf } from "@/app/(portal)/_lib/proposing/copies"
 import { mayPropose } from "@/app/(portal)/_lib/proposing/report"
+import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { publishedRowOf } from "@/app/(portal)/_lib/published-view"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
@@ -47,6 +53,22 @@ const copyStanding = (copied: number | undefined, published: number, servesCopy:
     : `Changes Loom proposed have taken its copy to version ${copied}. Your site still serves the published one.`
 }
 
+/**
+ * The copy proposals for this page are made against now: the newest one, since
+ * a copy starts again when the site publishes a newer version (0340).
+ */
+const currentCopyFor = async (application: ApplicationId, pageId: TreeId) => {
+  const copies = await readWithin(
+    () => pageCopiesFor(application).list(),
+    unavailable,
+    PORTAL_READ_BUDGET_MS
+  )
+
+  return copies.ok
+    ? governedPagesFor(application).head(currentCopyOf(copies.value, pageId).copyId)
+    : copies
+}
+
 const PageScreen = async ({ params }: { params: Promise<{ project: string; tree: string }> }) => {
   const route = await params
   const asked = projectIdSchema.safeParse(route.project)
@@ -77,7 +99,7 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
             unavailable,
             PORTAL_READ_BUDGET_MS
           ),
-          governedPagesFor(application.applicationId).head(treeId.data),
+          currentCopyFor(application.applicationId, treeId.data),
           modelKeyOf(application.applicationId),
         ])
 

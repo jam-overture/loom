@@ -6,6 +6,7 @@ import { projectIdSchema } from "@jam-overture/loom/store"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import { queueRowOf } from "@/app/(portal)/_lib/queue"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
@@ -22,7 +23,7 @@ import { AnswerControls } from "./_components/answer-controls"
  * would not make alone (0329) — unit 7's queue.
  *
  * Each says what was proposed and why, of which page, by whom, why it stopped and how
- * much is at stake, and offers *Accept* and *Turn down* to a person whose
+ * much is at stake, whether it was proposed for an older version of the page (0340), and offers *Accept* and *Turn down* to a person whose
  * role may accept a change of that stake. Anybody else is told which role can.
  *
  * Oldest first, as the store lists them, so whatever has waited longest is
@@ -48,13 +49,18 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const [waiting, published] =
+  const [waiting, published, copies] =
     application === undefined
-      ? [undefined, undefined]
+      ? [undefined, undefined, undefined]
       : await Promise.all([
           holdsFor(application.applicationId).waiting(),
           readWithin(
             () => publishedPagesFor(application.applicationId).list(),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
+          readWithin(
+            () => pageCopiesFor(application.applicationId).list(),
             unavailable,
             PORTAL_READ_BUDGET_MS
           ),
@@ -63,7 +69,12 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
   const names = published?.ok === true ? pageNamesOf(published.value) : new Map<string, string>()
 
   const body = (() => {
-    if (!project.ok || !applications.ok || (waiting !== undefined && !waiting.ok)) {
+    if (
+      !project.ok ||
+      !applications.ok ||
+      (waiting !== undefined && !waiting.ok) ||
+      (copies !== undefined && !copies.ok)
+    ) {
       return (
         <StateNotice tone="failure" title="The store did not answer">
           Nothing here is a statement about what is waiting. Try again in a moment.
@@ -71,7 +82,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
       )
     }
 
-    if (application === undefined || waiting === undefined) {
+    if (application === undefined || waiting === undefined || copies === undefined) {
       return (
         <StateNotice tone="failure" title="There is no single site to read">
           This project does not hold exactly one site, so nothing can wait on it. Tell whoever runs
@@ -108,7 +119,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
           </p>
         )}
         {held
-          .map((change) => queueRowOf(change, names, role))
+          .map((change) => queueRowOf(change, names, role, copies.value))
           .map((row) => (
             <section
               key={row.proposalId}
@@ -116,7 +127,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link
-                  href={`/portal/${projectId}/pages/${row.treeId}`}
+                  href={`/portal/${projectId}/pages/${row.pageId}`}
                   className="text-ink text-xs no-underline hover:underline"
                 >
                   {row.page}
@@ -124,6 +135,13 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
                 <span className="text-ink-muted text-xs">{row.since}</span>
               </div>
               <p className="m-0 text-sm">&ldquo;{row.asked}&rdquo;</p>
+              {row.standingSentence === null ? null : (
+                <p
+                  className={`m-0 text-xs ${row.standing === "conflicts" ? "text-refuse-ink" : "text-ink-secondary"}`}
+                >
+                  {row.standingSentence}
+                </p>
+              )}
               {row.askedBy === null ? null : (
                 <p className="text-ink-muted m-0 text-xs">Proposed by {row.askedBy}</p>
               )}
@@ -132,7 +150,11 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
                 {row.stakes.label}. {row.stakes.meaning}
               </p>
               {row.waitsOn === null ? (
-                <AnswerControls projectId={projectId} proposalId={row.proposalId} />
+                <AnswerControls
+                  projectId={projectId}
+                  proposalId={row.proposalId}
+                  acceptable={row.standing !== "conflicts"}
+                />
               ) : (
                 <p className="text-ink-muted m-0 text-xs">Waiting on an {row.waitsOn}.</p>
               )}

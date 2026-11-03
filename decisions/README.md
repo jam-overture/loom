@@ -429,7 +429,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0337](0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md) | A host whose page is already a tree is handed the ground alone | Accepted | §4b |
 | [0338](0338-a-not-found-boundarys-dress-is-served-because-every-page-carries-the-boundary.md) | A not-found boundary's dress is served, because every page carries the boundary | Accepted | §4 (the application shell) |
 | 0339 | *No record on this branch* | — | — |
-| 0340 | *No record on this branch* | — | — |
-| 0341 | *No record on this branch* | — | — |
+| [0340](0340-a-pages-copy-starts-again-from-a-newer-published-version-and-a-waiting-change-is-checked-against-it.md) | A page's copy starts again from a newer published version, and a waiting change is checked against it | Accepted | §5 (portal), §3 (write path) |
+| [0341](0341-a-turned-down-change-is-remembered-and-the-ai-weighs-a-new-proposal-against-it.md) | A turned-down change is remembered, and the AI weighs a new proposal against it | Accepted | §5 (portal), the reasoning plane |
 | 0342 | *No record on this branch* | — | — |
 | [0343](0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md) | A deployment's fix-list is read off one window, and states its collection schedule or says it has none | Accepted | §4c (reader signals) |

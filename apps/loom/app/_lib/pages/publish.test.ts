@@ -30,6 +30,7 @@ const doorWithKey = async () => {
     keys,
     applicationOf: () => Promise.resolve(ok(SITE)),
     pagesFor: () => pages,
+    kept: () => undefined,
     now: () => 2,
   }
 

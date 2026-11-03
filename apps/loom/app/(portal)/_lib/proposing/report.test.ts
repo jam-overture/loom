@@ -22,7 +22,7 @@ describe("passedSentence", () => {
   it.each<[string, Passed, RegExp]>([
     ["a change is waiting", { kind: "waiting" }, /already under Waiting/u],
     ["the copy is ahead", { kind: "unshipped", copy: 4 }, /does not serve yet \(version 4\)/u],
-    ["the copy is behind", { kind: "behind", copy: 2 }, /newer version than Loom's copy/u],
+    ["this deployment serves its copy", { kind: "apart" }, /serves Loom's copy of this page/u],
     [
       "too few read it",
       { kind: "silent", silence: { kind: "too-few", opened: 3 } },
