@@ -20,12 +20,14 @@ import { apiEntries } from "./reference"
  * ## Why this is not simply "the field names"
  *
  * Because most field names are ordinary English and a rule over all of them
- * would be a rule somebody turns off. Measured on this reference:
+ * would be a rule somebody turns off. Measured on 2 November, against the
+ * reference as this branch has it — **the figures move whenever another lane
+ * publishes, which is why not one of them is asserted anywhere**:
  *
  * | | how many |
  * | --- | --- |
- * | names the package publishes | 1,855 |
- * | names declared inside a published type, that are not exports | 823 |
+ * | names the package publishes | 1,860 |
+ * | names declared inside a published type, that are not exports | 826 |
  * | of those, a single short lowercase word | 429 |
  *
  * `code`, `data`, `body`, `name`, `kind`, `text`, `page`, `error`, `count`,
@@ -45,7 +47,7 @@ import { apiEntries } from "./reference"
  * twice written down as the one to prefer: **an exception stated as a fact is
  * stronger than an exception stated as a list.**
  *
- * So what is read here is the camelCase half: **292 names**, of which 20 are
+ * So what is read here is the camelCase half: **294 names**, of which 20 are
  * printed somewhere in this site's written prose today — `policyId` eight
  * times, `treeId` and `idFactory` seven each, and **`baseRevision` three** —
  * and **none of them in a summary, an opening or a heading.** The vocabulary is
@@ -106,7 +108,7 @@ export const declaredNamesIn = (signature: string): readonly string[] =>
  *
  * A capital letter after a lowercase one. That is the whole rule, and it is a
  * fact about the spelling rather than an opinion about the word — which is the
- * only reason a check over 292 names is safe to point at thirty-five pages
+ * only reason a check over 294 names is safe to point at thirty-five pages
  * nobody is going to re-read.
  */
 export const isJargon = (name: string): boolean => /^[a-z][a-z0-9]*[A-Z]/.test(name)
@@ -129,11 +131,12 @@ const HOLDS_NAMES: ReadonlySet<string> = new Set(["type", "interface", "class"])
  * The declarations a reader is only shown part of, so the gap is a number.
  *
  * `SIGNATURE_CAP` cuts a declaration that ran past 6,000 characters, and the
- * names below the cut are not in this file to be read. Eleven published types
- * are cut and **514 lines of them are not on the page** — `RenderDiagnostic`
- * shows 136 of 298. Whatever those lines declare is outside what this check can
- * see, which is a limit worth a number rather than a sentence: a name this
- * module has never heard of is a name it will not flag.
+ * names below the cut are not in this file to be read. Published types are
+ * cut — eleven of them on 2 November, hiding **514 lines that are not on the
+ * page**, of which `RenderDiagnostic` alone is 162. Whatever those lines
+ * declare is outside what this check can see, which is a limit worth a number
+ * rather than a sentence: a name this module has never heard of is a name it
+ * will not flag.
  */
 export const cutDeclarations: readonly { readonly name: string; readonly hidden: number }[] =
   apiEntries.flatMap((entry) =>
