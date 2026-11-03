@@ -62243,7 +62243,12 @@ is absent* survives the refactor. Both are one line.
 ## 2026-10-29 — the collection schedule is a fourth per-deployment setting and is deliberately not in the reading context, because its other half is a clock
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/health.ts`, `src/signals/window.ts`) · **Status:** open — **the
+(`src/signals/health.ts`, `src/signals/window.ts`) · **Status:**
+**closed by `signals-70-the-fix-list-off-one-window`** — the fix-list rung takes
+the whole schedule as a required argument, so the context gains no fifth field
+and the `scheduleAt(at)` shape below has no caller to need it
+([0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)).
+Original status: open — **the
 boundary [0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)
 drew, written down so the next run does not re-derive it**; nothing is broken
 and no test is failing
@@ -64058,9 +64063,41 @@ next run reaching for the index finds the measurement rather than the idea.
 ## 2026-11-02 — the application shell's not-found stylesheet is in the flight payload of every page of every surface, and on three of them it is the largest single thing in the response
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`apps/loom/app/not-found.tsx`, the application shell) · **Status:** open —
-**nothing is wrong on any page a reader opens**; this is weight, and on the
-light surfaces it is most of it
+(`apps/loom/app/not-found.tsx`, the application shell) · **Status:**
+**closed by `framework-78-the-dress-a-boundary-fetches`**, 2 November, recorded
+as [0338](decisions/0338-a-not-found-boundarys-dress-is-served-because-every-page-carries-the-boundary.md).
+The two blocks are served at `/not-found.css` and linked; nothing inlines them.
+Measured before and after on a production build: `/docs` 35,749 → 20,562 B
+(−42.5%), `/lessons/1` 31,475 → 8,907 B (−71.7%), `/portal/sign-in` 26,767 →
+19,239 B (−28.1%), `/lessons` −22.0%, `/?theme=bold` −0.5%. No copy of the
+stylesheet remains in any response.
+
+**Both of this entry's three separated questions are answered, including the
+one it said this lane could not answer from outside the shell.**
+
+*Why two copies and not one:* one per not-found boundary Next inserts, and the
+count is Next's route shape rather than anything about the CSS or the shell —
+**two** on most routes, **three** under a dynamic segment (`/lessons/1`, which
+is `[lesson]`, and which this entry had not sampled: it was the worst page in
+the application at 69.2%), and **one** under `(portal)`, which supplies a
+`not-found.tsx` of its own and so takes the inner boundary off the shell's.
+
+*Why it was in every payload at all:* the `<style>` was already inside the
+component, which is this entry's second proposed shape and was why the
+measurement looked impossible. The root not-found boundary sits in the RSC tree
+of every route and a boundary's fallback is a prop on a client component, so
+React renders it on the server and serialises the result whether or not anything
+404s. **Inside the component is not a condition.** That generalises to every
+`not-found.tsx` and `error.tsx` in this application and is the reason the fix is
+an address rather than a smaller stylesheet.
+
+*Which shape:* the first one this entry named — route-served rather than inline.
+`force-static`, so it is prerendered and costs no server time; `precedence` kept
+on the link, because React waits for a stylesheet it was given one for and a
+fetched stylesheet is otherwise how the 6 October flash-of-unstyled defect comes
+back. The address is a constant and `not-found.test.tsx` holds the route
+directory against it, so a renamed route fails the build rather than serving the
+one page outside every layout undressed.
 
 Found while weighing this lane's own addition rather than looked for. The run
 that put a `:root` rule on the marketing document counted `:root {` blocks in
@@ -64109,9 +64146,37 @@ outside the lane and neither has been costed.
 ## 2026-11-02 — `themeDocumentCss` hands back the whole theme, so a surface whose every pixel is already a tree mounts its variables twice
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`src/render/document-theme.ts`) · **Status:** open — **a question about the
-published shape, not a defect**; the function is correct and this lane took it
-as published
+(`src/render/document-theme.ts`) · **Status:** **the framework half is closed by
+`framework-78-the-dress-a-boundary-fetches`**, 2 November, recorded as
+[0337](decisions/0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md);
+**open for `Loom marketing`**, whose half is one line and is nothing anybody is
+blocked on
+
+`themeGroundCss(theme)` ships from `@jam-overture/loom/react` beside
+`themeDocumentCss`, returning the same `:root` rule with the ground alone. Both
+serialise through one private helper, so neither is a second source for the
+rule's shape.
+
+**A second export rather than a flag**, which this entry offered as the
+alternative and is the better of the two for a reason the entry did not have to
+hand: `ramp` decides how the *variables* are written and has nothing to say
+about the ground, so a flag would leave a parameter read on one setting and
+ignored on the other, and a caller passing both would have written something
+that cannot be true.
+
+**It returns `undefined` when the palette has no ground**, mirroring
+`themeGround` for its reason. `themeDocumentCss` still returns its rule in that
+case — the variables are unaffected and are the half that host cannot write for
+itself — and here there is no other half, so a rule would be an empty block.
+
+**`Loom marketing`'s line**, whenever that lane is next in the file:
+`DocumentTheme` in `(marketing)/_components/document-theme.tsx` swaps
+`themeDocumentCss(theme)` for `themeGroundCss(theme)` and handles the
+`undefined` it already handles for an unthemed page. Worth ~1,976 bytes on a
+page this lane measured at 2.4MB, so the arithmetic this entry did is unchanged
+and the reason to take it is the seam rather than the saving. `(docs)` and
+`(lessons)` are the same shape and have the same line available. **Not taken
+here**, because those three files are not this lane's.
 
 [0334](decisions/0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md)
 is right about the boundary and `themeDocumentCss` is the right seam. This is
@@ -64352,3 +64417,302 @@ next runs.
 **Recommended: the second**, and only because the first depends on a schedule
 nobody inside a run can see. It is one function and one emission, both covered
 by tests that already exist, and the diff is readable in a minute.
+
+---
+## 2026-11-02 (evening) — the fix-list is one call now, and the argument it makes required is the one whose absence reverses its answer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window-agenda.ts`) · **Status:**
+**closed on filing by `signals-70-the-fix-list-off-one-window`**, closing the
+29 October entry *the collection schedule is a fourth per-deployment setting and
+is deliberately not in the reading context*
+
+That entry drew a boundary and named the shape worth considering *if a screen
+ever wants collection health off the same context*: a function on the context,
+`scheduleAt(at)`, so that the deployment's half is held and the instant stays the
+caller's. The boundary holds and the shape was not taken
+([0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)):
+the rung takes the whole schedule as a required argument, so a context function
+would save a caller nothing and would make every caller reading regions state a
+fold window. **The context is unchanged and gains no fifth field.**
+
+**What the unit found that the entry did not predict, and it is the whole reason
+the rung is worth more than the lines it saves.** The entry treated the optional
+schedule as a reading that judges less. It is worse than that. A stalled fold
+reaches **both** ranking keys (0336), so omitting the schedule does not merely
+drop `collection-stalled` — it leaves the fall and the leak that the stall
+manufactured ranked. Two readings of one window, differing by one omitted
+argument:
+
+| the schedule | `work` | the orders | `contested` |
+| --- | --- | --- | --- |
+| stated | `collection` | both withdrawn | the page |
+| omitted | `page` | both ranked | empty |
+
+So the hand-written composition prints *rewrite this page* over a page whose
+numbers are an artefact of its own stopped collection — the precise failure
+[0330](decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)
+exists to prevent, arriving through the one argument nothing reminds anybody of.
+The two readings are asserted side by side in `window-agenda.test.ts`, which is
+the test worth keeping out of the fifteen.
+
+**The check, which is the same one the last three rungs each produced.** A
+composition nobody has written down is a rule nobody has compared. The hazard
+was not in `collectionHealthOf`, which is right, nor in `deploymentAgendaOf`,
+which is right; it was only visible from the line that calls them both, and that
+line existed only inside a doc comment. **Every rung built over this subsystem
+has found a real defect in the composition it wrote down** — the region dedup on
+28 October, the two funnel answers of one revision on 1 November, and this. The
+remedy that generalises: when a doc comment shows a caller a multi-call
+composition, the comment is a defect report about a missing unit.
+
+---
+## 2026-11-02 (evening) — `collectionHealthOf` keeps the optional argument the rung above it made required, so the step below is still the unsafe one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`) · **Status:** open — **the stated limit of
+[0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)**;
+nothing is broken and nothing is asked of anybody today
+
+`windowAgendaOf` requires a `CollectionSchedule` or an explicit `null`, and the
+reason is in the entry above: the omission reverses what the fix-list says about
+a page. **`collectionHealthOf` itself still takes it optionally**, so a surface
+that reads a deployment's health a step below the rung can still read it judging
+no fold at all, silently, exactly as before today.
+
+This is the same weaker guarantee the region floor was left at on 29 October, and
+for the same reason — the safe route is the shortest one, and narrowing the
+published reading costs every caller of it, including every test in
+`health.test.ts`, a `null` it has nothing to say with. It is recorded rather than
+fixed so that the next run does not re-derive the trade.
+
+**Two shapes, if it is ever wanted.**
+
+1. **Make the third argument required and nullable on `collectionHealthOf`.**
+   One line plus every call site, and the only shape that closes the hole rather
+   than making it narrower.
+2. **Leave it, and have the one surface that will exist read the rung.** A
+   portal screen reading this deployment's window gets its schedule through
+   `windowAgendaOf` and cannot leave it out.
+
+**Recommendation: the second**, and revisit if a second surface ever reads
+health a step below the rung.
+
+---
+## 2026-11-02 (evening) — the three rungs over a window are three calls and nothing composes them, which is deliberate rather than a fourth gap
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window-figures.ts`, `src/signals/window-funnels.ts`,
+`src/signals/window-agenda.ts`) · **Status:** open — **a shape named at the
+moment it was completed**; nothing is broken and nothing is asked of anybody
+today
+
+A caller that wants everything a window can say writes four lines: the assembly,
+then the figures, the funnels and the fix-list. Each is one call over arguments
+it already holds, and **nothing composes the four.** A reader of this directory
+will see the pattern that produced three rungs in eight days and reach for a
+fifth call over them; this is why that is not the next unit.
+
+The three rungs differ in what they are *of*. The figures rung is the figures a
+window holds about itself; the funnels rung is one per-page reading and its
+pairs; the fix-list is a deployment-wide join over four readings. A single entry
+point over them would have to answer *which of the forty-two readings does a
+deployment want by default, and what does it cost to compute the ones it does
+not* — which is the policy decision
+[0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)
+correctly said made the honest version large, and which **no surface has asked
+for**. The three rungs exist because each removed a hazard a caller could not
+see. A fourth would remove three lines.
+
+**What would change the answer:** a screen, drawing all of it, that can say which
+readings it actually opens with. Then the composition is a known set rather than
+a guess, and it is one line. `Loom portal` is paused and this is the twenty-third
+run filing a variant of that sentence.
+
+**Recommendation: leave it, and do not build a fourth rung before a surface
+exists.** What a future run must not do is give such a call a default set of
+readings — that is the surface's choice wearing the framework's name.
+
+---
+## 2026-11-02 (evening) — the plan's own browser-cost figure was a third out of date, and the test that guards the import graph said so too
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`docs/signals.md`, `src/signals/browser-weight.test.ts`) · **Status:**
+**closed on filing by `signals-70-the-fix-list-off-one-window`**, and filed
+because the shape is one the docs lane named this morning and this lane then
+walked into
+
+`docs/signals.md`'s *what is already built* table said the broadcaster costs
+**4.8 KB**. It costs 6,513 bytes minified and 2,981 gzipped, measured today and
+byte-identical to yesterday's measurement — a third more than the table claimed,
+and the figure every report of this lane has printed correctly for weeks while
+the plan beside them went on saying the old one. The test's own doc comment said
+*it is 4.8 KB now* in the present tense for the same reason.
+
+**Both are now written so they cannot go stale the same way.** The table carries
+the figure *and the date it was measured on*; the comment says *it was 4.8 KB
+when that was fixed*, which is a historical claim about a record and needs no
+refreshing. The table also no longer says the byte count is what
+`browser-weight.test.ts` guards — that test walks the import graph and fails on a
+package, which is a different and stronger promise than any number.
+
+**The general shape, which is this morning's lesson from another lane arriving
+here:** a number in prose is only safe where it can carry a date or a record. The
+sentence *it is 4.8 KB now* had neither, was true when written, and had no way to
+fail. Nothing in this repository was red for a month because of it.
+## 2026-11-02 (evening) — anything a boundary renders is in every page's payload, and this application has three more boundaries
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused)
+(`apps/loom/app/(portal)/not-found.tsx`, `error.tsx`) and every lane that adds
+one · **Extends** this morning's entry *the application shell's not-found
+stylesheet is in the flight payload of every page of every surface*, which is
+closed · **Status:** open — **nothing is broken, nothing is measured as
+expensive, and nothing is blocked**; this is a mechanism written down once so the
+next lane does not rediscover it
+
+The closed entry's third question was *why two copies and not one*, and the
+answer turned out to be the generalisable part rather than the fix. Writing it
+down, because it is counter-intuitive in a way that cost one lane a morning:
+
+**Next keeps a `not-found` and an `error` boundary in the RSC tree of every route
+beneath them, and a boundary's fallback is a prop on a client component.** React
+therefore renders that fallback *on the server* and serialises the result into
+the flight payload of every response — whether or not anything 404s, and whether
+or not anything throws. The copies are one per boundary Next inserts: measured on
+this build, **two** on most routes, **three** under a dynamic segment
+(`/lessons/1`) and **one** under `(portal)`, which has a `not-found.tsx` of its
+own.
+
+**The part that misleads:** the shell's `<style>` was already inside the
+not-found component's own subtree, which is the shape that looks like it would
+fix this. *Inside the component* is not a condition. A boundary's markup is not
+lazy, and no amount of pushing it down the tree makes it so.
+
+So the rule, for any lane adding or growing a boundary: **keep anything bulky
+behind an address rather than in the boundary's markup.** 0338 is the worked
+example — a 7,263-byte stylesheet became a ~90-byte `<link>` and the copy count
+stopped mattering.
+
+### What this means for `(portal)`, concretely and in that lane's own time
+
+`(portal)/not-found.tsx` and `(portal)/error.tsx` both compose `Screen`,
+`StateNotice` and `TechnicalDetail` with Tailwind classes. **There is no 7KB
+string in either**, which is why this is a note and not a defect — the shell's
+case was bad because it carried a stylesheet as text, and these carry markup.
+
+**It is unmeasured.** `/portal/sign-in` is 19,239 bytes after this evening's
+change and this lane has not asked how much of that is the two boundaries'
+serialised markup, because measuring it means reading a route group that is not
+this lane's. The instrument is two lines: count a marker from `StateNotice` in
+the served response of a portal page that is not a 404, and divide. If the answer
+is small, close this with the number — a measured *nothing to do* is worth more
+than an open question.
+
+### Needs your input
+
+Nothing. `Loom portal` is paused and this waits for it, at no cost: the rule is
+written down, which is the whole point of the entry, and the portal's own
+boundaries are markup rather than a stylesheet. No exception is being asked for.
+
+---
+## 2026-11-02 (evening) — this routine's stored prompt claims two lanes that `docs/routines.md` gave away in August
+
+**Filed by:** `Loom framework` · **Owned by:** `@jonathanbravecredit` (the stored
+prompt for `Loom framework` / `Loom daily build`) · **Status:** open —
+**nothing was done wrong and nothing is blocked**; this run followed
+`docs/routines.md` and stayed out of both, and the entry exists so the next one
+does not have to work it out again
+
+The prompt this routine runs from says, under *Your lane*:
+
+> **`src/` except `src/primitives/`**, plus the migration above and the demo.
+> […] **The demo**, which is yours.
+
+`docs/routines.md`, which the same prompt instructs this routine to read first
+as governance, says something different in two places:
+
+| | the prompt | `docs/routines.md` |
+| --- | --- | --- |
+| `src/signals/` | this lane's, by omission from the exception | **`Loom signals`'**, and that routine is active — it reported this morning |
+| `apps/loom/app/(demo)/` | *"the demo, which is yours"* | **`Loom demo`'s**, split out of this routine on 20 August |
+
+`routines.md` is right in both cases and gives its reasons: `Loom signals` owns
+`src/signals/` and `docs/signals.md`, and `Loom demo` was split out because *"a
+demo is judged by whether it lands, not by whether it is correct, and those are
+different objectives that pull in different directions"* — this routine had
+built one and your verdict was that it was clunky.
+
+**So the prompt is a snapshot of the lane table from before two splits.** This
+run resolved it the only way it can be resolved from inside a run: the prompt
+names `routines.md` as the governance file, so `routines.md` wins on lanes, and
+nothing in `src/signals/` or `app/(demo)/` was touched.
+
+**It is worth your thirty seconds anyway**, because the failure mode is
+asymmetric. A future run that reads the prompt's sentence and not the table —
+or that reads the table and believes the prompt overrides it, since the prompt
+is what it exists to carry out — reaches into an active routine's directory and
+races it for the same files, which is the one thing the lane table exists to
+stop. The prompt's own §4 *the demo, which is yours* sits in a numbered priority
+list, which makes it read as an instruction rather than as background.
+
+The migration section at the top of the prompt is stale in the same way and
+harmlessly so: `apps/loom` has existed since 19 August and all four route groups
+are in place, which `routines.md` records. A run spends a little time confirming
+that before it can start, and that is all it costs.
+
+### Needs your input
+
+**One edit, whenever convenient:** in the `Loom framework` prompt, change the
+lane line to `src/` except `src/primitives/` **and `src/signals/`**, drop *and
+the demo* and the later *The demo, which is yours*, and replace the migration
+section with a line saying it landed on 19 August. Nothing is blocked until then
+and no run is at risk that reads `routines.md` first, which this one is
+instructed to do.
+## 2026-11-02 (evening) — a test asserting how many of another lane's declarations are cut is this lane's number about somebody else's growth, and it survived a merge by luck
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/fields.test.ts`) · **Status:** **closed on
+filing by `docs-75-a-number-about-another-lanes-growth`** — a correction to
+`docs-74`, which **merged as #750 at 16:40 before the correction was pushed**,
+so the bad assertion reached `main` and this is a fresh unit rather than a
+second push to a finished pull request
+
+`fields.ts` reads the declarations `SIGNATURE_CAP` cut, because the names below
+a cut are names this check can never flag, and the honest way to state that
+limit is a number. The test shipped this morning asserted the number:
+
+```ts
+expect(cutDeclarations.length).toBe(11)
+```
+
+**Eleven is not this lane's number.** It is how many types another lane happens
+to have published that run past 6,000 characters, and it moves when `src/`
+grows. `search/build.ts` named that shape first — *this lane's number about
+somebody else's growth* — and `weight.ts` wrote `GENERATED_PAGE_CAP` as a
+trigger with a remedy in the comment for exactly this reason. The rule was
+already written down twice in this directory and the test broke it anyway.
+
+**It survived its own branch's merge by luck.** `Loom merge` brought `main` in
+the same afternoon with #747, #748 and #749 on it; the published set went from
+1,855 names to 1,860, **and not one of the new declarations was long enough to
+be cut.** Had one been, this lane's suite — the merge gate for four surfaces —
+would have gone red for a reason having nothing to do with the change that
+turned it red.
+
+**The remedy is the one both earlier instances reached**: assert the property,
+date the figure. `toBeGreaterThan(5)`, plus the two claims this lane can make
+on its own — `RenderDiagnostic` is among them, and every cut hides lines. The
+count itself is in the report, where it carries a date, and in the module's doc
+comment, which now says *eleven of them on 2 November*.
+
+**The morning entry above is left exactly as it was measured**, at `749e4c1`,
+rather than edited to today's figures. It is dated and it was true; the
+movement is recorded here, which is this repository's own convention for
+amending a record instead of rewriting one — and it is the same argument as the
+fix: a number belongs where it can carry a date.
+
+**The general version, which is the useful half.** Three checks in this
+directory read the generated reference, and a figure read from it is **another
+lane's**, whatever it is counting. The question to ask of any number taken from
+`reference.generated.json` is *would I defend this if `src/` doubled* — if not,
+it is a floor, a trigger or a dated sentence, never an equality.

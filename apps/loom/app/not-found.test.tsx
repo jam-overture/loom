@@ -1,10 +1,27 @@
+import { existsSync } from "node:fs"
+import { join } from "node:path"
+import { fileURLToPath } from "node:url"
+
 import { render, screen } from "@testing-library/react"
 import { isValidElement, type ReactNode } from "react"
 import { describe, expect, it } from "vitest"
 
 import { minimalPalette } from "@jam-overture/loom"
 
+import { NOT_FOUND_STYLESHEET_PATH } from "./_lib/shell/not-found-style"
+import { GET } from "./not-found.css/route"
 import NotFound from "./not-found"
+
+/**
+ * A path beside this file, on disk.
+ *
+ * Through a parameter rather than written at the call site, which is the
+ * convention `(marketing)/_lib/document-theme.test.tsx` sets out at length:
+ * Vite rewrites `new URL(..., import.meta.url)` before the file runs, turning a
+ * literal into an `http:` asset URL that `fileURLToPath` refuses and an
+ * interpolation into a glob that refuses the module at transform time.
+ */
+const beside = (path: string): string => fileURLToPath(new URL(path, import.meta.url))
 
 /**
  * Every intrinsic element in what a component returned, by tag.
@@ -111,22 +128,59 @@ describe("the page that belongs to no surface", () => {
   })
 
   /**
-   * The theme arrives as a `:root` rule in the hoisted stylesheet, which is
-   * where the declarations are actually true: `:root` *is* the document
-   * element, so the canvas reaches the overscroll area a phone exposes past the
-   * end of a short page.
+   * **The dress is linked, not carried.** The rules were inline until 2
+   * November, which put them in the flight payload of every page of every
+   * surface — the boundary this component fills sits in the RSC tree of every
+   * route, so what it returns is serialised whether or not anything 404s. The
+   * assertion that the palette reaches `:root` has not gone anywhere; it moved
+   * to the response that now carries it, below.
+   *
+   * `precedence` is what keeps this a fetch and not a flash: React waits for a
+   * stylesheet it was given one for.
    */
-  it("mounts the palette and its scheme on :root", () => {
-    render(<NotFound />)
+  it("links its stylesheet at the address the route serves, and inlines none of it", () => {
+    const { container } = render(<NotFound />)
 
-    const mounted = [...document.head.querySelectorAll("style")]
-      .map((element) => element.textContent ?? "")
-      .join("\n")
+    const linked = [...document.head.querySelectorAll("link[rel=stylesheet]")].map((element) => ({
+      href: element.getAttribute("href"),
+      precedence: element.getAttribute("data-precedence"),
+    }))
 
-    expect(mounted).toContain(`--loom-bg-canvas: ${minimalPalette.slots["bg-canvas"]};`)
-    expect(mounted).toContain(`color: ${minimalPalette.slots["fg-default"]};`)
-    expect(mounted).toContain("color-scheme: light;")
-    expect(mounted).toContain(":root {")
+    expect(linked).toContainEqual({ href: NOT_FOUND_STYLESHEET_PATH, precedence: "default" })
+    expect(document.head.querySelectorAll("style")).toHaveLength(0)
+    expect(`${document.head.innerHTML}${container.innerHTML}`).not.toContain(":root {")
+  })
+
+  /**
+   * A route's address is its directory name, which no import can read — so the
+   * one thing holding the link and the route together is a string, and this is
+   * what holds the string to the tree. A renamed or deleted route would
+   * otherwise serve the one page outside every layout in the browser's own
+   * defaults, which is the defect this unit closed arriving by a new door.
+   */
+  it("is served by a route at exactly that address", () => {
+    expect(existsSync(beside(join(".", NOT_FOUND_STYLESHEET_PATH, "route.ts")))).toBe(true)
+  })
+
+  /**
+   * The theme arrives as a `:root` rule, which is where the declarations are
+   * actually true: `:root` *is* the document element, so the canvas reaches the
+   * overscroll area a phone exposes past the end of a short page.
+   *
+   * Asserted on the served body rather than on a rendered head, because that is
+   * now where it is true. Both blocks in one response and in this order, so
+   * there is no sequence in which the rules arrive without the theme they read.
+   */
+  it("serves the mounted palette and the page's own rules, in that order", async () => {
+    const response = GET()
+    const css = await response.text()
+
+    expect(response.headers.get("content-type")).toBe("text/css; charset=utf-8")
+    expect(css).toContain(":root {")
+    expect(css).toContain(`--loom-bg-canvas: ${minimalPalette.slots["bg-canvas"]};`)
+    expect(css).toContain(`color: ${minimalPalette.slots["fg-default"]};`)
+    expect(css).toContain("color-scheme: light;")
+    expect(css.indexOf(":root {")).toBeLessThan(css.indexOf(".not-found__way-out"))
   })
 
   /**

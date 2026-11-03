@@ -79,13 +79,13 @@ import { readPageSource } from "./search/headings"
  * the package publishes, with no page of their own and nowhere on this site to
  * look them up. The gap was filed the day the export rule shipped, with a
  * recommendation to revisit it only with a measurement, because the obvious
- * widening reads 823 field names of which 429 are a single ordinary English
+ * widening reads 826 field names of which 429 are a single ordinary English
  * word.
  *
  * The measurement came back on 2 November and it said: **widen to the camelCase
  * half and nothing else.** `api/fields.ts` carries the numbers and the
  * argument — the short version is that no English word is camelCase, so that
- * half is jargon by construction rather than by opinion. Of its 292 names, 20
+ * half is jargon by construction rather than by opinion. Of its 294 names, 20
  * are printed on these pages today, `baseRevision` three times, and **not one
  * in a summary, an opening or a heading.** The same discipline, held the same
  * number of times by nobody in particular, with nothing to notice the first

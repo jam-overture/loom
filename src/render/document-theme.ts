@@ -72,6 +72,9 @@ const declaration = (key: string, value: unknown): readonly string[] =>
 const declarations = (properties: Readonly<Record<string, unknown>>): readonly string[] =>
   Object.entries(properties).flatMap(([key, value]) => declaration(key, value))
 
+/** The declarations given, as one rule on the document element. */
+const rootRule = (lines: readonly string[]): string => [":root {", ...lines, "}"].join("\n")
+
 /**
  * A resolved theme as the `:root` rule a host puts on its own document.
  *
@@ -100,9 +103,51 @@ const declarations = (properties: Readonly<Record<string, unknown>>): readonly s
  * function's own and a re-theme has no second source of truth to miss.
  */
 export const themeDocumentCss = (theme: ResolvedTheme, ramp: RampMode = "fluid"): string =>
-  [
-    ":root {",
+  rootRule([
     ...declarations(themeStyle(theme, ramp) as Readonly<Record<string, unknown>>),
     ...declarations(themeGround(theme) ?? {}),
-    "}",
-  ].join("\n")
+  ])
+
+/**
+ * The ground alone, as the same `:root` rule — for a host whose page is already
+ * a tree to its edges.
+ *
+ * `themeDocumentCss` above answers a host that has no tree: the
+ * application shell draws its own frame, mounts nothing, and needs every
+ * variable as well as the ground. A *surface* is the other host, and it is not
+ * the same host. `(marketing)` composes a tree whose root primitive already
+ * mounts every `--loom-*` below it, so the variables in the document rule are
+ * read by nothing inside the page — they are a second copy of a mounting that
+ * already happened, in the one place no primitive looks. What that page actually
+ * needs from the document is the three declarations a tree cannot reach:
+ * `background-color`, `color` and `color-scheme`, on the element the scrollbar
+ * and the overscroll canvas belong to.
+ *
+ * `Loom marketing` measured the duplicate at 1,976 bytes on `/?theme=bold` and
+ * filed the shape rather than hand-writing the shorter rule, which was the right
+ * call twice over: a three-declaration rule written in a surface is a copy of a
+ * decision the palette owns, kept where the palette cannot reach it, and that is
+ * the hazard [`themeGround`](./theme.ts) and the docblock above both exist to
+ * refuse. The answer is to publish the half, not to let a caller rebuild it.
+ *
+ * **A second export rather than a flag on the first**, because the two differ in
+ * their inputs and not only in their output. `ramp` decides how the variables
+ * are written and has nothing to say about the ground, so a flag would leave a
+ * parameter that is read on one setting and silently ignored on the other —
+ * and a caller passing both would have written something that cannot be true.
+ * Two functions, one private serialiser, and neither has an argument it
+ * disregards.
+ *
+ * **`undefined` when the palette has no ground**, which mirrors `themeGround`
+ * exactly and for its reason: a palette whose body-copy pair cannot be read gets
+ * no ground rather than a guessed one. `themeDocumentCss` still returns its rule
+ * in that case because the variables are the half the host cannot write for
+ * itself and they are unaffected. Here there is no other half, so a rule would
+ * be an empty block — and *nothing to say* is a state a caller should have to
+ * answer rather than render. Every registered palette resolves both ends.
+ */
+export const themeGroundCss = (theme: ResolvedTheme): string | undefined => {
+  const ground = themeGround(theme)
+
+  return ground === undefined ? undefined : rootRule(declarations(ground))
+}

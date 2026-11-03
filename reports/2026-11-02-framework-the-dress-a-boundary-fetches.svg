@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 480" width="880" height="480" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .ok { fill: #86efac; stroke: #16a34a; }
+    .bad { fill: #fca5a5; stroke: #dc2626; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .warmt { fill: #92400e; }
+    text { font-size: 13px; }
+    .h { font-size: 15px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; }
+    .mono { font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (prefers-color-scheme: dark) {
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .ok { fill: #15803d; stroke: #4ade80 }
+      .bad { fill: #b91c1c; stroke: #f87171 }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 } .warmt { fill: #fbbf24 }
+    }
+  </style>
+
+  <text class="h t" x="24" y="30">The 404's dress was on every page of every surface, and is now on the 404</text>
+  <text class="m" x="24" y="52">Whole served responses, production build and `next start`, before and after. The links the fix adds are netted off.</text>
+  <text class="m" x="24" y="72">One copy per not-found boundary Next inserts — the count is the route's shape, not the stylesheet's.</text>
+
+  <rect class="bad" x="300" y="88" width="11" height="11" rx="2"/>
+  <text class="k badt" x="318" y="98">BEFORE — inlined in the flight payload</text>
+  <rect class="ok" x="560" y="88" width="11" height="11" rx="2"/>
+  <text class="k okt" x="578" y="98">AFTER — linked at /not-found.css</text>
+
+  <text class="mono t" x="24" y="132">/lessons/1</text>
+  <text class="k m" x="24" y="147">3 copies</text>
+  <rect class="bad" x="300" y="120" width="154" height="11" rx="2"/>
+  <rect class="ok" x="300" y="135" width="44" height="11" rx="2"/>
+  <text class="mono m" x="748" y="129">31,475</text>
+  <text class="mono okt" x="748" y="144">8,907  −71.7%</text>
+  <text class="mono t" x="24" y="178">/docs</text>
+  <text class="k m" x="24" y="193">2 copies</text>
+  <rect class="bad" x="300" y="166" width="175" height="11" rx="2"/>
+  <rect class="ok" x="300" y="181" width="101" height="11" rx="2"/>
+  <text class="mono m" x="748" y="175">35,749</text>
+  <text class="mono okt" x="748" y="190">20,562  −42.5%</text>
+  <text class="mono t" x="24" y="224">/portal/sign-in</text>
+  <text class="k m" x="24" y="239">1 copy</text>
+  <rect class="bad" x="300" y="212" width="131" height="11" rx="2"/>
+  <rect class="ok" x="300" y="227" width="94" height="11" rx="2"/>
+  <text class="mono m" x="748" y="221">26,767</text>
+  <text class="mono okt" x="748" y="236">19,239  −28.1%</text>
+  <text class="mono t" x="24" y="270">/lessons</text>
+  <text class="k m" x="24" y="285">2 copies</text>
+  <rect class="bad" x="300" y="258" width="336" height="11" rx="2"/>
+  <rect class="ok" x="300" y="273" width="262" height="11" rx="2"/>
+  <text class="mono m" x="748" y="267">68,756</text>
+  <text class="mono okt" x="748" y="282">53,657  −22.0%</text>
+  <text class="mono t" x="24" y="316">/docs/…/proposing-a-change</text>
+  <text class="k m" x="24" y="331">2 copies</text>
+  <rect class="bad" x="300" y="304" width="400" height="11" rx="2"/>
+  <rect class="ok" x="300" y="319" width="326" height="11" rx="2"/>
+  <text class="mono m" x="748" y="313">81,774</text>
+  <text class="mono okt" x="748" y="328">66,645  −18.5%</text>
+  <text class="mono t" x="24" y="362">/?theme=bold</text>
+  <text class="k m" x="24" y="377">2 copies</text>
+  <rect class="bad" x="300" y="350" width="440" height="11" rx="2"/>
+  <rect class="ok" x="300" y="365" width="440" height="11" rx="2"/>
+  <text class="k warmt" x="740" y="359" dx="6">off scale — 2.88MB, 93% is the primitives stylesheet</text>
+  <text class="mono m" x="748" y="359">2,885,439</text>
+  <text class="mono okt" x="748" y="374">2,870,374  −0.5%</text>
+
+  <text class="m" x="24" y="436">The stylesheet itself is 7,263 B, served once, when a response is actually a 404. In the payload it was ~7.6KB a copy, escaped.</text>
+  <text class="m" x="24" y="456">0338 · closes the finding `Loom marketing` filed 2 November · the bars are bytes, clipped at 90,000 so the five light pages are readable.</text>
+</svg>
