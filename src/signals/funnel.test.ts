@@ -868,6 +868,111 @@ describe("funnelReachOf", () => {
     })
   })
 
+  describe("the leak between the two ends", () => {
+    it("takes the readers who reached the ask at each end of the rate's interval", () => {
+      /**
+       * Eighty page views reached the ask and twenty answered it, over a
+       * hundred openings the rollups counted as a hundred and twenty-five
+       * appearances. Sixty-four readers reached it at the door's scale; the
+       * stored rate says a quarter of them answered and the ceiling says it
+       * could have been four fifths.
+       */
+      const reach = funnelReachOf(WHERE, [funnel("band", "form", 80, 20)], [views(100, 125)])
+      const [only] = reach.pairs
+
+      expect(only?.rate).toBe(0.25)
+      expect(only?.rateAtMost).toBeCloseTo(0.818, 3)
+      /** 60 lost on the door's scale, which is the key an order of conversions is on. */
+      expect(only?.leak?.atMost).toBe(48)
+      expect(only?.leak?.atLeast).toBeCloseTo(11.636, 3)
+    })
+
+    it("closes the interval to a point where nobody's visit spanned two windows", () => {
+      const reach = funnelReachOf(WHERE, [funnel("band", "form", 80, 20)], [views(100, 100)])
+      const [only] = reach.pairs
+
+      expect(reach.exact).toBe(true)
+      expect(only?.leak?.atMost).toBe(60)
+      expect(only?.leak?.atLeast).toBe(60)
+    })
+
+    it("holds the ceiling and spends the floor where a rollup folded one visit twice", () => {
+      /**
+       * One readership read through two rollup windows. A hundred page views
+       * began; eighty reached the ask and twenty answered it. Folded once, that
+       * is what the counters say. Folded so that every visit appeared in two
+       * windows and each conversion was met in both, the counters say a hundred
+       * and sixty reached it and forty answered — and the door says two hundred
+       * appearances against a hundred openings, which is what puts the
+       * subtraction back on the scale it belongs on.
+       */
+      const once = funnelReachOf(WHERE, [funnel("band", "form", 80, 20)], [views(100, 100)])
+      const twice = funnelReachOf(WHERE, [funnel("band", "form", 160, 40)], [views(100, 200)])
+
+      expect(once.pairs[0]?.leak?.atMost).toBe(60)
+      expect(twice.pairs[0]?.leak?.atMost).toBe(60)
+      /**
+       * The ceiling survives the doubling exactly. What the doubling costs is
+       * the floor: at a drift of a hundred every one of the sixty could have
+       * been a conversion split across the two windows, so the counters cannot
+       * rule out a page that leaks nobody.
+       */
+      expect(once.pairs[0]?.leak?.atLeast).toBe(60)
+      expect(twice.pairs[0]?.leak?.atLeast).toBe(0)
+    })
+
+    it("withholds the interval where more readers reached the ask than ever appeared", () => {
+      const reach = funnelReachOf(WHERE, [funnel("band", "form", 90, 10)], [views(40, 50)])
+      const [only] = reach.pairs
+
+      expect(only?.unreconciled).toBe(true)
+      /** The rate is two counts off one row and stands; the scale under it does not. */
+      expect(only?.rate).toBe(10 / 90)
+      expect(only?.leak).toBeNull()
+    })
+
+    it("withholds the interval where the question names a part the page no longer has", () => {
+      const reach = funnelReachOf(WHERE, [funnel("band", "gone", 40, 10)], [views(100, 100)])
+      const [only] = reach.pairs
+
+      expect(only?.stale).toBe(true)
+      expect(only?.leak).toBeNull()
+    })
+
+    it("withholds the interval where the door cannot scale the revision at all", () => {
+      const reach = funnelReachOf(WHERE, [funnel("band", "form", 40, 10)], [])
+
+      expect(reach.silence).toBe("unmeasured")
+      expect(reach.pairs[0]?.leak).toBeNull()
+    })
+
+    it("keeps the floor between nought and the ceiling across every short sequence", () => {
+      for (let reached = 0; reached <= 12; reached += 1) {
+        for (let converted = 0; converted <= reached; converted += 1) {
+          for (let drift = 0; drift <= 12; drift += 1) {
+            const reach = funnelReachOf(
+              WHERE,
+              [funnel("band", "form", reached, converted)],
+              [views(20, 20 + drift)]
+            )
+            const leak = reach.pairs[0]?.leak
+
+            if (leak === null || leak === undefined) continue
+
+            expect(leak.atLeast).toBeGreaterThanOrEqual(0)
+            expect(leak.atLeast).toBeLessThanOrEqual(leak.atMost)
+            /**
+             * They meet **exactly** where there was no straddle to have lost a
+             * conversion in, which is the property the two ends are one
+             * expression for.
+             */
+            if (drift === 0) expect(leak.atLeast).toBe(leak.atMost)
+          }
+        }
+      }
+    })
+  })
+
   describe("the two denominators", () => {
     it("takes the estimate of the appearances and the ceiling of the openings", () => {
       const reach = funnelReachOf(WHERE, [funnel("band", "form", 30, 15)], [views(40, 50)])

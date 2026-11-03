@@ -3,6 +3,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 
 import { audienceScopeOf, audiencesIn } from "./audiences.js"
+import { atDoorScale, doorOf, type PageDoor } from "./door.js"
 import { pageViewsFor, type StoredPageViews } from "./page-views.js"
 import type { PageReading } from "./parts.js"
 import type { ReachSilence } from "./reach.js"
@@ -292,6 +293,56 @@ const NOTHING_SHARED: FunnelShare = {
   atMostReaders: null,
 }
 
+/**
+ * The readers one pair loses between its two ends, on the scale its page's door
+ * counts in, as the interval the straddle leaves it in.
+ *
+ * An order of conversions ranks pages on this loss
+ * ([0333](../../decisions/0333-a-deployments-conversions-are-a-third-order-ranked-on-the-loss-between-the-two-ends.md)),
+ * and the figure it ranks on is {@link PairLeak.atMost} — which is a ceiling and
+ * not an estimate. `reached` and `converted` are both generous under a straddle
+ * and the straddle very nearly divides out of their ratio, but what does not
+ * divide out is the conversion a straddle **splits across two windows and
+ * loses** (0147): the pair reports `reached 1, converted 0` for a visit that
+ * converted, so the loss between the two ends is overstated by exactly the
+ * conversions that went missing. Scaling the subtraction by the door corrects
+ * how many page views were counted twice and cannot put back a conversion that
+ * was never counted once.
+ *
+ * So the loss has a floor as well, and both ends come off bounds this reading
+ * already publishes. The true rate is between {@link PairReach.rate} and
+ * {@link PairReach.rateAtMost}, so the readers who reached the first end — put
+ * on the door's scale once, by the one rule `door.ts` holds — are taken at each
+ * of those two rates. The ceiling is `reached − converted` on the door's scale,
+ * which is the key an order of conversions ranks on, arrived at as the same
+ * expression as the floor so that the two cannot fail to meet.
+ *
+ * The two ends meet wherever {@link FunnelReach.exact} — nobody's visit spanned
+ * two windows, so there is nothing to divide out and nothing to have been lost.
+ * They open apart as a deployment's rollup window shortens relative to how long
+ * its readers stay, which is the same fact `rateAtMost` was built to make
+ * readable (0147).
+ *
+ * **Neither end is a count of people and neither is rounded into one.** A
+ * surface that rounds them is saying how precise it thinks they are.
+ */
+export type PairLeak = {
+  /**
+   * The least it could be: the readers who reached the first end, at the most
+   * the true rate could be, on the door's scale.
+   *
+   * Never above {@link PairLeak.atMost} and never below nought. This is the
+   * figure a straddle cannot manufacture — a page carrying it is losing at
+   * least this many readers however short the deployment's rollup window is.
+   */
+  readonly atLeast: number
+  /**
+   * The most it could be: `reached − converted` on the door's scale, which is
+   * the key an order of conversions is on (0333).
+   */
+  readonly atMost: number
+}
+
 /** One pair of a revision, as stored and as a share of the readers there were. */
 export type PairReach = {
   readonly pair: FunnelPair
@@ -376,6 +427,17 @@ export type PairReach = {
    * and `null` wherever {@link PairReach.rate} is.
    */
   readonly rateAtMost: number | null
+  /**
+   * The readers this pair loses between its two ends, bounded and on the door's
+   * scale, or `null` where there is no such loss to put a scale on.
+   *
+   * `null` on the same terms as {@link PairReach.rateAtMost} — there is no
+   * question, or nobody reached its first end, or the door cannot scale this
+   * revision — and `null` too where {@link PairReach.unreconciled}, because a
+   * count above the page views there were to hold it has no sound scale even
+   * though its rate stands.
+   */
+  readonly leak: PairLeak | null
   /**
    * Of the readers who arrived, the share that got to the first end.
    *
@@ -537,22 +599,6 @@ export type FunnelReach = {
   readonly orphanedPairs: number
 }
 
-const NOTHING_MEASURED = {
-  opened: 0,
-  appearances: 0,
-  drift: 0,
-  pending: 0,
-  inflation: null,
-  updatedAt: null,
-} as const
-
-const silenceOf = (opened: number, appearances: number): ReachSilence | null => {
-  if (opened === 0) return "unopened"
-  if (appearances === 0) return "uncounted"
-
-  return null
-}
-
 const endKey = (end: FunnelPair["from"]): string => `${end.nodeId} ${end.kind}`
 
 /**
@@ -574,14 +620,7 @@ const endKey = (end: FunnelPair["from"]): string => `${end.nodeId} ${end.kind}`
 export const funnelPairKey = (pair: FunnelPair): string =>
   `${endKey(pair.from)} ${endKey(pair.to)}`
 
-type Measured = {
-  readonly opened: number
-  readonly appearances: number
-  readonly drift: number
-  readonly pending: number
-}
-
-const shareOf = (count: number, of: Measured, drawable: boolean): FunnelShare => {
+const shareOf = (count: number, of: PageDoor, drawable: boolean): FunnelShare => {
   if (!drawable) return NOTHING_SHARED
 
   return {
@@ -612,12 +651,34 @@ const shareOf = (count: number, of: Measured, drawable: boolean): FunnelShare =>
 const rateCeilingOf = (reached: number, converted: number, drift: number): number =>
   Math.min(1, (converted + drift) / Math.max(1, reached - drift))
 
+/**
+ * The readers a pair loses between its two ends, at each end of the rate's own
+ * interval, on the scale the page's door counts in.
+ *
+ * **Both ends are one expression over two rates**, which is the whole of why
+ * they can be compared: the reach is put on the door's scale once and then taken
+ * at each bound of the rate. Spelling the ceiling as the loss instead —
+ * `atDoorScale(reached − converted)`, which is the same number — is the shape
+ * that looks more direct and is wrong, because at a drift of nought
+ * `reached × (1 − converted ÷ reached)` and `reached − converted` differ in the
+ * last place for three readers out of three and one conversion. A floor four
+ * hundred-quadrillionths above its own ceiling is a floor that is not one.
+ *
+ * Only ever called where the door can scale, which is what `drawable` means at
+ * the call site.
+ */
+const leakOf = (reached: number, rate: number, rateAtMost: number, of: PageDoor): PairLeak => {
+  const atDoor = atDoorScale(reached, of)
+
+  return { atLeast: atDoor * (1 - rateAtMost), atMost: atDoor * (1 - rate) }
+}
+
 const standingIn = (parts: ReadonlySet<NodeId>, end: FunnelPair["from"]): EndStanding =>
   parts.has(end.nodeId) ? "present" : "absent"
 
 const reachOf = (
   row: StoredFunnel,
-  of: Measured,
+  of: PageDoor,
   silenced: boolean,
   ends: PairEnds
 ): PairReach => {
@@ -636,6 +697,9 @@ const reachOf = (
 
   const lost = of.appearances - reached
   const between = reached - converted
+  const rate = bothAsked && reached > 0 ? converted / reached : null
+  const rateAtMost =
+    bothAsked && !silenced && reached > 0 ? rateCeilingOf(reached, converted, of.drift) : null
 
   return {
     pair: row.pair,
@@ -645,9 +709,14 @@ const reachOf = (
     ends,
     stale: !bothAsked,
     orphaned: (!fromAsked && reached > 0) || (ends.to === "absent" && converted > 0),
-    rate: bothAsked && reached > 0 ? converted / reached : null,
-    rateAtMost:
-      bothAsked && !silenced && reached > 0 ? rateCeilingOf(reached, converted, of.drift) : null,
+    rate,
+    rateAtMost,
+    /**
+     * Under `drawable` the two rates are null together — a silence is the only
+     * thing the ceiling withholds for that the floor does not — so the second
+     * check is the narrowing and not a second case.
+     */
+    leak: drawable && rate !== null && rateAtMost !== null ? leakOf(reached, rate, rateAtMost, of) : null,
     entry: shareOf(reached, of, drawable && fromAsked),
     conversion: shareOf(converted, of, drawable && bothAsked),
     lostBefore: drawable && fromAsked ? lost / of.appearances : null,
@@ -686,12 +755,10 @@ export const funnelReachOf = (
   }
   const { measured, foreign, duplicated } = pageViewsFor(where, rows)
 
-  const { opened, appearances, drift, pending, inflation, updatedAt } = measured ?? NOTHING_MEASURED
-
-  const silence: ReachSilence | null =
-    measured === null ? "unmeasured" : silenceOf(opened, appearances)
-
-  const of: Measured = { opened, appearances, drift, pending }
+  const of = doorOf(measured)
+  const { opened, appearances, drift, pending } = of
+  const silence: ReachSilence | null = of.silence
+  const { inflation, updatedAt } = measured ?? { inflation: null, updatedAt: null }
 
   const here = funnels.filter(
     (row) => row.treeId === where.treeId && row.revision === where.revision
