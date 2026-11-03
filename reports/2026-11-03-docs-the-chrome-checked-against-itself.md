@@ -378,7 +378,15 @@ arranged locally (#709).
 
 ## The preview
 
-PREVIEW_URL
+*Taken from the `vercel[bot]` comment after the pull request was opened, not
+composed from the branch name.*
+
+https://loom-git-docs-76-the-chrome-575fc0-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the pictures are of:
+
+- https://loom-git-docs-76-the-chrome-575fc0-jpizzolato36-6341s-projects.vercel.app/docs/building-with-loom/theming#every-palette-declares-every-slot
+- https://loom-git-docs-76-the-chrome-575fc0-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-the-gate-decides
 
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,
