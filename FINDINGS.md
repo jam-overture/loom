@@ -62247,7 +62247,7 @@ is absent* survives the refactor. Both are one line.
 **closed by `signals-70-the-fix-list-off-one-window`** — the fix-list rung takes
 the whole schedule as a required argument, so the context gains no fifth field
 and the `scheduleAt(at)` shape below has no caller to need it
-([0337](decisions/0337-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)).
+([0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)).
 Original status: open — **the
 boundary [0322](decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md)
 drew, written down so the next run does not re-derive it**; nothing is broken
@@ -64431,7 +64431,7 @@ That entry drew a boundary and named the shape worth considering *if a screen
 ever wants collection health off the same context*: a function on the context,
 `scheduleAt(at)`, so that the deployment's half is held and the instant stays the
 caller's. The boundary holds and the shape was not taken
-([0337](decisions/0337-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)):
+([0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)):
 the rung takes the whole schedule as a required argument, so a context function
 would save a caller nothing and would make every caller reading regions state a
 fold window. **The context is unchanged and gains no fifth field.**
@@ -64471,7 +64471,7 @@ composition, the comment is a defect report about a missing unit.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/health.ts`) · **Status:** open — **the stated limit of
-[0337](decisions/0337-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)**;
+[0343](decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)**;
 nothing is broken and nothing is asked of anybody today
 
 `windowAgendaOf` requires a `CollectionSchedule` or an explicit `null`, and the

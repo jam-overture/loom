@@ -4354,7 +4354,7 @@ was true of two inputs;
 made it three.
 
 **Done**
-([0337](../decisions/0337-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)),
+([0343](../decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)),
 as `windowAgendaOf` in [`window-agenda.ts`](../src/signals/window-agenda.ts),
 which publishes the progress readings, the order of falls, the order of
 conversions, the health reading and the join over them.

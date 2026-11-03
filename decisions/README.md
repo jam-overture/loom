@@ -426,4 +426,10 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0334](0334-the-browsers-own-furniture-is-outside-the-tree-so-a-host-is-handed-a-root-rule-for-its-document.md) | The browser's own furniture is outside the tree, so a host is handed a `:root` rule for its document | Accepted | §4b |
 | [0335](0335-a-cache-over-a-governed-page-is-told-the-row-moved-by-the-handle-that-appended.md) | A cache over a governed page is told the row moved, by the handle that appended | Accepted | §5, §3 |
 | [0336](0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md) | A fault reaches a conversion and a fall differently, so the fix-list asks each order its own question | Accepted | §4c (reader signals) |
-| [0337](0337-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md) | A deployment's fix-list is read off one window, and states its collection schedule or says it has none | Accepted | §4c (reader signals) |
+| [0337](0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md) | A host whose page is already a tree is handed the ground alone | Accepted | §4b |
+| [0338](0338-a-not-found-boundarys-dress-is-served-because-every-page-carries-the-boundary.md) | A not-found boundary's dress is served, because every page carries the boundary | Accepted | §4 (the application shell) |
+| 0339 | *No record on this branch* | — | — |
+| 0340 | *No record on this branch* | — | — |
+| 0341 | *No record on this branch* | — | — |
+| 0342 | *No record on this branch* | — | — |
+| [0343](0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md) | A deployment's fix-list is read off one window, and states its collection schedule or says it has none | Accepted | §4c (reader signals) |

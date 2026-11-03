@@ -18,7 +18,7 @@ two row sets, with a per-page reading derived under one of them, and a caller
 writing the composition by hand out of a doc comment.
 
 `windowAgendaOf` in `src/signals/window-agenda.ts` is a third rung over it
-(0337). It publishes the progress readings, the order of falls, the order of
+(0343). It publishes the progress readings, the order of falls, the order of
 conversions, the health reading and the join over all four:
 
 ```ts
@@ -102,7 +102,7 @@ out of the fifteen.
 
 ## Records added
 
-- **0337 — A deployment's fix-list is read off one window, and states its
+- **0343 — A deployment's fix-list is read off one window, and states its
   collection schedule or says it has none.** Accepted. Nothing is superseded;
   0330's decision stands and one premise of one of its rejected alternatives has
   changed, which the record states rather than editing anything.
@@ -124,7 +124,7 @@ out of the fifteen.
   of one revision on 1 November, and this). When a doc comment shows a caller a
   multi-call composition, the comment is a defect report about a missing unit.
 - *`collectionHealthOf` keeps the optional argument the rung above it made
-  required* — open, the stated limit of 0337, recommendation to leave it.
+  required* — open, the stated limit of 0343, recommendation to leave it.
 - *the three rungs over a window are three calls and nothing composes them* —
   open, a shape named so the next run does not build a fourth rung before a
   surface exists.

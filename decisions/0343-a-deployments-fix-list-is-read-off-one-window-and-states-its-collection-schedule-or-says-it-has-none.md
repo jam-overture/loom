@@ -1,10 +1,17 @@
-# 0337 — A deployment's fix-list is read off one window, and states its collection schedule or says it has none
+# 0343 — A deployment's fix-list is read off one window, and states its collection schedule or says it has none
 
 **Status:** Accepted
 
 **Date:** 2 November 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-11-03**, from 0337, when the branch that carried it (#753)
+> was merged. `main` had meanwhile accepted a different 0337 — *a host whose page
+> is already a tree is handed the ground alone* (#752) — and two records sharing a
+> number is fatal ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> This record was written on 2 November and nothing in it changed but its number;
+> references on the branch were updated with it.
 
 ## Context
 
