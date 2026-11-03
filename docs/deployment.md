@@ -681,7 +681,14 @@ once a day it reads what readers did on each page and, when the figures
 support one, raises a change. A change it may not make alone waits on the
 project's *Waiting* tab for an approver or owner. An approver or owner can also
 press *Look now* on a page. A change is made to Loom's copy of the page, and
-your site keeps serving what it published.
+your site keeps serving what it published. When you publish a newer version of
+a page, a change still waiting on it is checked against the new version and
+marked *stale* or *conflicts*
+([0340](../decisions/0340-a-pages-copy-starts-again-from-a-newer-published-version-and-a-waiting-change-is-checked-against-it.md)),
+and a change you turn down is remembered so Loom weighs what it proposes next
+against it
+([0341](../decisions/0341-a-turned-down-change-is-remembered-and-the-ai-weighs-a-new-proposal-against-it.md)).
+Both need the tables `pnpm db:push` creates.
 
 Two things have to be in place:
 

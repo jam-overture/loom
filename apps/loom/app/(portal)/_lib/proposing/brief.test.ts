@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest"
 
-import { err, ok } from "@jam-overture/loom"
+import { err, ok, proposalIdSchema } from "@jam-overture/loom"
 import { scriptedModelClient } from "@jam-overture/loom/testing"
 
 import { pageFixture } from "@/app/_lib/pages/fixtures"
 
-import { BRIEF_SYSTEM_PROMPT, briefFor, briefFrom, MAX_REQUEST_LENGTH, requestOf } from "./brief"
+import {
+  BRIEF_SYSTEM_PROMPT,
+  briefFor,
+  briefFrom,
+  briefMessage,
+  MAX_REQUEST_LENGTH,
+  requestOf,
+} from "./brief"
 import { readEvidence } from "./evidence"
 import { NOTHING_DECLARED, readersOn } from "./fixtures"
 
@@ -19,6 +26,23 @@ describe("briefFrom", () => {
   it("reads a change, with the figure that argues for it", () => {
     expect(briefFrom(CHANGE)).toEqual(
       ok({ kind: "change", request: "Make n_home2 shorter. (Why: Only 40% of readers reach it.)" })
+    )
+  })
+
+  it("says why a change turned down before is back", () => {
+    const again = JSON.stringify({
+      outcome: "change",
+      request: "Make n_home2 shorter.",
+      evidence: "Only 20% of readers reach it.",
+      again: "Half as many readers reach it as when it was turned down.",
+    })
+
+    expect(briefFrom(again)).toEqual(
+      ok({
+        kind: "change",
+        request:
+          "Make n_home2 shorter. (Why: Only 20% of readers reach it.) (Turned down before. Proposed again because: Half as many readers reach it as when it was turned down.)",
+      })
     )
   })
 
@@ -48,6 +72,45 @@ describe("requestOf", () => {
   })
 })
 
+describe("briefMessage", () => {
+  const page = pageFixture("home", "Welcome", 2)
+  const turnedDown = [
+    {
+      proposalId: proposalIdSchema.parse("p_newer"),
+      pageId: page.treeId,
+      request: "Remove n_home2.",
+      reason: "We need the heading.",
+      by: "jonathan",
+      at: Date.UTC(2026, 10, 2),
+    },
+    {
+      proposalId: proposalIdSchema.parse("p_older"),
+      pageId: page.treeId,
+      request: "Move n_home2 lower.",
+      reason: null,
+      by: null,
+      at: Date.UTC(2026, 10, 1),
+    },
+  ]
+
+  it("reads exactly as before for a page nothing was turned down on", async () => {
+    const evidence = await readEvidence(readersOn(page, 80, 60), NOTHING_DECLARED, page)
+    if (!evidence.ok) throw new Error("expected evidence")
+
+    expect(briefMessage("Home", evidence.value, [])).not.toMatch(/turned down/u)
+  })
+
+  it("lists what was turned down after the evidence, with the reason or that none was given", async () => {
+    const evidence = await readEvidence(readersOn(page, 80, 60), NOTHING_DECLARED, page)
+    if (!evidence.ok) throw new Error("expected evidence")
+    const message = briefMessage("Home", evidence.value, turnedDown)
+
+    expect(message).toMatch(
+      /\n\nChanges a person turned down on this page before, newest first:\n- On 2 November 2026: "Remove n_home2\."\. Their reason: We need the heading\.\n- On 1 November 2026: "Move n_home2 lower\."\. No reason was given\.$/u
+    )
+  })
+})
+
 describe("briefFor", () => {
   const page = pageFixture("home", "Welcome", 2)
 
@@ -56,7 +119,7 @@ describe("briefFor", () => {
     if (!evidence.ok) throw new Error("expected evidence")
     const client = scriptedModelClient(CHANGE)
 
-    expect((await briefFor(client, "Home", evidence.value)).ok).toBe(true)
+    expect((await briefFor(client, "Home", evidence.value, [])).ok).toBe(true)
     expect(client.requests[0]?.system).toBe(BRIEF_SYSTEM_PROMPT)
     expect(client.requests[0]?.userMessage).toMatch(/^The page "Home"\.\n\n80 page views/u)
   })
@@ -66,7 +129,7 @@ describe("briefFor", () => {
     if (!evidence.ok) throw new Error("expected evidence")
     const client = scriptedModelClient(err({ code: "misconfigured", detail: "invalid x-api-key" }))
 
-    expect(await briefFor(client, "Home", evidence.value)).toEqual(
+    expect(await briefFor(client, "Home", evidence.value, [])).toEqual(
       err({ code: "model", detail: "invalid x-api-key" })
     )
   })

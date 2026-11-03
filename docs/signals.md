@@ -32,7 +32,7 @@ the portal every day.
 | Content | **none** — no text, no URLs, no typed values, nothing about the reader |
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
-| Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
+| Browser cost | **6.4 KB** minified, 2.9 KB gzipped, measured 2 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -4336,6 +4336,134 @@ statements per member and the symmetry of the two `spoiled` names was not taken
 (`spoiled` / `spoiledConversion`, deliberately, rather than a rename); and still
 **nothing draws any of it**, which is `Loom portal`'s and is now twenty-two runs
 old.
+
+### 70. The fix-list, read off one window · `Loom signals` · **done, 2 November**
+
+Three rungs were built so that every reading of a window is one call with one
+argument: the assembly turns a window into the subjects, `windowFiguresOf`
+publishes the three readings the assembly deliberately does not, and
+`windowFunnelsOf` publishes the funnel answers. **The fix-list was what was
+left** — three readings, over two row sets, with a per-page reading derived
+under one of them, and a caller writing the composition by hand.
+
+[0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)
+had rejected a home for that line on the ground that *both of its inputs are one
+call with one argument, so there is nothing here a caller can get wrong*. That
+was true of two inputs;
+[0336](../decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)
+made it three.
+
+**Done**
+([0343](../decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)),
+as `windowAgendaOf` in [`window-agenda.ts`](../src/signals/window-agenda.ts),
+which publishes the progress readings, the order of falls, the order of
+conversions, the health reading and the join over them.
+
+- **The collection schedule is required and may be `null`**, and this is the
+  whole of what the rung adds. `collectionHealthOf`'s third argument is
+  optional, rightly; the composed line omitted it, and the cost is not a missing
+  row. `collection-stalled` is never raised, and since a stalled fold reaches
+  both ranking keys, the fall and the leak it manufactured are never withdrawn
+  either. **Two readings of one window, differing by one omitted argument, say
+  the opposite thing about the same page** — `work: "page"` with both orders
+  ranked where no schedule was stated, `work: "collection"` with the page
+  `contested` where one was. The omission sends an operator to rewrite a page
+  whose numbers are an artefact of its own stopped collection, which is the
+  precise failure the fix-list exists to prevent.
+- **A reading with a published call of its own is handed in; a reading that is
+  one call over the assembly's readings is made.** That is the rule the rung is
+  built on, stated so the next reading added to it does not re-derive it. The
+  funnel answers are taken, because answering them again would put two answers
+  of one revision on one screen; the progress readings and the health reading
+  are made, because neither has a call of its own and the progress line is the
+  hazardous one — the nearest line to hand maps a side of a library and silently
+  drops a revision.
+- **All four readings are published, not only the join**, and the join's rows
+  carry the published rows by identity: `rows[0].conversion` *is*
+  `conversion.ranked[0]`.
+- **`unpaired` and `duplicated` are nought by construction**, since the three
+  readings are over one assembly's one set of readings. Both stay published and
+  are carried as they come, for the caller that assembled a reading of its own.
+- **The context is not taken, and gains no fifth field.** The schedule is half
+  per-deployment configuration and half the instant the reading is taken, and a
+  context holding a clock would answer differently on two calls over one window.
+  The 29 October boundary is closed with an answer rather than a `scheduleAt`.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes. No payload field, no column, no migration, no store
+method and no new kind.
+
+**What is left and is filed:** `collectionHealthOf` keeps its optional third
+argument, so the step below the rung can still read a deployment's health
+judging no fold at all; **nothing composes the three rungs into one call**, which
+is deliberate; and still **nothing draws any of it**, which is `Loom portal`'s
+and is now twenty-three runs old.
+
+### 71. The leak the order throws away, kept as the part a straddle cannot explain · `Loom signals` · **done, 3 November**
+
+[0336](../decisions/0336-a-fault-reaches-a-conversion-and-a-fall-differently-so-the-fix-list-asks-each-order-its-own-question.md)
+found that `counts-inflated` — a rollup window short relative to how long
+readers stay — reaches the key an order of conversions ranks on and does not
+reach the key an order of falls ranks on. A fall is a difference of two
+independent distinct counts, so the straddle divides back out; **a conversion is
+a conjunction inside one rollup window**, so a visit that met one end in one
+window and the other in the next is reported `reached 1, converted 0` and the
+conversion is *lost* (0147). A short window manufactures the very loss the order
+ranks, so the fix-list withdraws the page.
+
+The finding that day said that is the safe call and that it loses a real
+ranking, and named what was missing: a **bound** on the key, since
+`PairReach.rateAtMost` already bounds the rate, published as a reading beside
+the funnel rather than as an eighth answer in the fault vocabulary.
+
+**Done**
+([0342](../decisions/0342-a-conversion-leak-is-an-interval-and-the-key-an-order-ranks-on-is-its-ceiling.md)),
+as `PairLeak` on every `PairReach` in [`funnel.ts`](../src/signals/funnel.ts),
+and as `readersAtLeast` and `worstSecure` in
+[`conversion.ts`](../src/signals/conversion.ts).
+
+- **The key 0333 named is a ceiling, not an estimate.** `reached` and
+  `converted` are both generous under a straddle and the straddle very nearly
+  divides out of their ratio; what does not divide out is the conversion the
+  straddle split and lost. So the loss between two ends is overstated by exactly
+  the conversions that went missing, and scaling the subtraction by the door
+  corrects how many page views were counted twice while putting back nothing.
+- **The floor beside it is free.** The true rate is between `rate` and
+  `rateAtMost`, so the readers who reached the first end — on the door's scale —
+  taken at each of those two rates are the two ends of the loss. No counter, no
+  column, no payload field and no browser byte.
+- **Both ends are one expression over two rates**, and that is the one line in
+  the file a reader should not simplify. Spelling the ceiling as the loss
+  instead — `atDoorScale(reached − converted)`, the same number — makes the two
+  ends differ in the last place at a drift of nought: three readers and one
+  conversion give a floor four hundred quadrillionths **above** its own ceiling.
+  The published key moves in its last place for some rows as a result, and
+  nothing orders on a sixteenth decimal.
+- **`worstSecure` says whether the head of the order was forced.** The order is
+  on a ceiling, so two pages whose intervals overlap could be either way round.
+  It is `true` where the head's floor clears the next page's ceiling, `false`
+  where it does not, and `null` where nothing is ranked — one comparison, because
+  the rows are sorted by their ceilings and nothing below the second has a
+  higher one.
+- **Nothing is superseded.** The order still ranks on the ceiling and
+  `counts-inflated` still withdraws the page. The floor is a figure beside the
+  key, and a future order ranked on a floor would be a new record.
+- **`funnel.ts` stopped keeping its own copy of the door's per-page rule.** It
+  held a local `Measured`, a `NOTHING_MEASURED` and a `silenceOf` ordering the
+  same three states the same way as `doorOf` — which is what `door.ts` exists to
+  hold once (0265) — and now calls `doorOf`, which is also what gives the leak a
+  door to scale against.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes minified, 2,982 gzipped. No payload field, no
+column, no migration, no store method and no new kind.
+
+**What is left and is filed:** two other ranking keys still spell the door's
+scale by hand (`deployment.ts`, `deployment-change.ts`) and **must not** be
+changed to `atDoorScale` without a guard, because neither refuses a door with no
+appearances and the swap would turn a sound nought into a `NaN`; and still
+**nothing draws any of it**, which is `Loom portal`'s and is now twenty-four
+runs old.
 
 ## Still not in scope
 

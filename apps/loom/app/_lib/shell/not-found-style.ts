@@ -26,6 +26,36 @@
  * value nothing could see was wrong.
  */
 
+/**
+ * Where the two blocks are served, rather than where they are written.
+ *
+ * **The dress is fetched when the 404 renders; it is not carried on every page
+ * of the product.** Next keeps the root not-found boundary in the RSC tree of
+ * every route, and a boundary's fallback is a prop on a client component — so
+ * React renders it on the server and serialises the result into the flight
+ * payload of every response, whether or not anything 404s. Inlined, that put
+ * 7,263 bytes of CSS twice into every page of all four surfaces:
+ * `Loom marketing` measured it at 40.7% of `/docs` and the largest single item
+ * in the response on the three light surfaces. Serving it instead took `/docs`
+ * from 35,749 bytes to 20,562 and `/lessons/1` from 31,475 to 8,907 (0338).
+ *
+ * A `<link>` is ~90 bytes in the same position, and the browser fetches what it
+ * points at only when the element is in a document — which is a response that is
+ * actually a 404. **That also retires the copy count as a thing anybody has to
+ * reason about.** Measured on this build, the boundary is serialised twice on
+ * most routes, three times under a dynamic segment (`/lessons/1`) and once under
+ * `(portal)`, which supplies a not-found of its own; a per-boundary cost of 90
+ * bytes makes the difference between one and three uninteresting.
+ *
+ * Held as a constant because two files have to agree on it and only one of them
+ * can state it: a route's address is its directory name, which no import can
+ * read. `not-found.test.tsx` holds the directory against this string, so a route
+ * that is renamed or deleted fails the build rather than serving the one page
+ * outside every layout in the browser's own defaults — the defect this unit's
+ * own docblock promises cannot happen, kept true under a second way for it to.
+ */
+export const NOT_FOUND_STYLESHEET_PATH = "/not-found.css"
+
 export const NOT_FOUND_STYLE = `
 /*
  * Everything this stylesheet is allowed to do.

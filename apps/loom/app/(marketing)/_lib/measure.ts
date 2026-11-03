@@ -1,5 +1,7 @@
 import type { ElementNode, LoomNode } from "@jam-overture/loom"
 
+import { SOURCE_PANEL } from "./words"
+
 /**
  * What a page measures out to, counted rather than characterised.
  *
@@ -81,6 +83,20 @@ export const elementsIn = (node: LoomNode): readonly ElementNode[] => [
  * this module's own note at the top is about, so it moved here rather than
  * being copied.
  */
+/**
+ * How many words a visitor is asked to read, which is what every ceiling in
+ * `budget.test.ts` is stated in.
+ *
+ * **The contents of a source panel are not among them.** `SOURCE_PANEL` in
+ * `words.ts` carries the reasoning and the bound that replaces it; the short
+ * version is that this function's output is a reading-effort proxy, and a
+ * TypeScript file is scanned rather than read. Its `caption` is still counted,
+ * because a filename is prose and because it arrives through `node.props`
+ * rather than through a child.
+ *
+ * A panel that prints a command somebody pastes was never counted differently
+ * and does not need to be: `npm install …` is four words either way.
+ */
 export const wordsIn = (node: LoomNode): number => {
   if (node.kind === "text") return node.value.trim().split(/\s+/).filter(Boolean).length
 
@@ -90,7 +106,12 @@ export const wordsIn = (node: LoomNode): number => {
         .reduce((total, value) => total + value.trim().split(/\s+/).length, 0)
     : 0
 
-  return spoken + node.children.reduce((total, child) => total + wordsIn(child), 0)
+  const within =
+    isElement(node) && node.type === SOURCE_PANEL
+      ? 0
+      : node.children.reduce((total, child) => total + wordsIn(child), 0)
+
+  return spoken + within
 }
 
 /**

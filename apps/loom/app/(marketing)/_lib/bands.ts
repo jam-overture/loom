@@ -143,6 +143,15 @@ export const WHY_USE_IT_ANCHOR = {
   staysYours: "what-stays-yours",
   /** The name of every part in the starter set. */
   theSet: "what-you-build-with",
+  /**
+   * The two files a reader writes to add a component of their own.
+   *
+   * The second link of the maintainer's chain is *you tell Loom which ones it
+   * can use*, and it pointed at `theSet` above until today — a row of badges
+   * naming the parts that come with the install, which is the answer to a
+   * different question. This band is the one that shows the telling.
+   */
+  whatYouWrite: "what-you-write",
   /** A browser, with a page built out of that set inside it. */
   onAPage: "on-a-page",
   /**

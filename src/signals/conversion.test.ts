@@ -345,6 +345,102 @@ describe("the order a deployment's conversions should be looked at in", () => {
     })
   })
 
+  describe("the interval a straddle leaves the key in", () => {
+    it("ranks on the ceiling and publishes the floor beside it", () => {
+      const reading = readingOf()
+      const order = deploymentConversionOf([leaking(reading, 80, 20, 100, 125)])
+      const row = order.ranked[0]
+
+      /** The key, unchanged: sixty lost at the door's scale. */
+      expect(row?.readers).toBe(48)
+      /**
+       * And the part of it a straddle cannot have manufactured. A quarter of a
+       * straddle leaves four fifths of the readers who reached the ask
+       * possibly-converted, so eleven and a half of the forty-eight are
+       * certain.
+       */
+      expect(row?.readersAtLeast).toBeCloseTo(11.636, 3)
+      expect(row?.readersAtLeast).toBe(row?.at?.leak?.atLeast)
+      expect(row?.readers).toBe(row?.at?.leak?.atMost)
+    })
+
+    it("closes the interval where no reader's visit spanned two windows", () => {
+      const order = deploymentConversionOf([leaking(readingOf(), 80, 20, 100, 100)])
+      const row = order.ranked[0]
+
+      expect(row?.readers).toBe(60)
+      expect(row?.readersAtLeast).toBe(60)
+      expect(order.worstSecure).toBe(true)
+    })
+
+    it("calls the head secure where its floor clears the next page's ceiling", () => {
+      const order = deploymentConversionOf([
+        leaking(readingOf(TREE), 80, 20, 100, 100),
+        leaking(readingOf(OTHER_TREE), 10, 5, 100, 100),
+      ])
+
+      expect(order.ranked.map((row) => row.treeId)).toEqual([TREE, OTHER_TREE])
+      expect(order.worst?.readersAtLeast).toBe(60)
+      expect(order.ranked[1]?.readers).toBe(5)
+      expect(order.worstSecure).toBe(true)
+    })
+
+    it("refuses the head where the straddle could put the next page above it", () => {
+      /**
+       * The same two pages, except that the head's deployment folded every one
+       * of its visits twice. Its ceiling is the same sixty and its floor is
+       * nought, so the five readers the other page certainly loses could be the
+       * worse of the two — which is a sentence the order on its own cannot say.
+       */
+      const order = deploymentConversionOf([
+        leaking(readingOf(TREE), 160, 40, 100, 200),
+        leaking(readingOf(OTHER_TREE), 10, 5, 100, 100),
+      ])
+
+      expect(order.worst?.treeId).toBe(TREE)
+      expect(order.worst?.readers).toBe(60)
+      expect(order.worst?.readersAtLeast).toBe(0)
+      expect(order.worstSecure).toBe(false)
+    })
+
+    it("has nothing to overtake the head of an order of one", () => {
+      const order = deploymentConversionOf([leaking(readingOf(), 160, 40, 100, 200)])
+
+      expect(order.worst?.readersAtLeast).toBe(0)
+      expect(order.worstSecure).toBe(true)
+    })
+
+    it("withholds both ends from every page that is not ranked", () => {
+      const order = deploymentConversionOf([
+        /** Everybody who reached the ask answered it. */
+        leaking(readingOf(TREE), 2, 2),
+        /** Nothing asks this revision anything. */
+        answerOf(readingOf(OTHER_TREE), [], [views(readingOf(OTHER_TREE), 10, 10)]),
+      ])
+
+      expect(order.ranked).toEqual([])
+      expect(order.worstSecure).toBeNull()
+      expect(order.unranked.map((row) => row.standing)).toEqual(["unleaked", "unasked"])
+      expect(order.unranked.every((row) => row.readers === null)).toBe(true)
+      expect(order.unranked.every((row) => row.readersAtLeast === null)).toBe(true)
+    })
+
+    it("does not widen the interval or lose the verdict when one reading arrives twice", () => {
+      const reading = readingOf(TREE)
+      const once = [leaking(reading, 80, 20, 100, 125), leaking(readingOf(OTHER_TREE), 10, 5)]
+      const twice = [...once, leaking(reading, 80, 20, 100, 125)]
+
+      const first = deploymentConversionOf(once)
+      const again = deploymentConversionOf(twice)
+
+      expect(again.duplicated).toBe(1)
+      expect(again.ranked).toHaveLength(first.ranked.length)
+      expect(again.worst?.readers).toBe(first.worst?.readers)
+      expect(again.worst?.readersAtLeast).toBe(first.worst?.readersAtLeast)
+      expect(again.worstSecure).toBe(first.worstSecure)
+    })
+  })
+
   describe("the vocabulary", () => {
     it("answers nothing for a deployment whose pages were all handed in empty", () => {
       const order = deploymentConversionOf([])
@@ -353,6 +449,8 @@ describe("the order a deployment's conversions should be looked at in", () => {
         ranked: [],
         unranked: [],
         worst: null,
+        /** No page is ranked, so there is no head to be secure or contested. */
+        worstSecure: null,
         standings: Object.fromEntries(CONVERSION_STANDINGS.map((standing) => [standing, 0])),
         trees: 0,
         arrivals: 0,

@@ -4,7 +4,7 @@ import { editorialPalette, STARTER_PALETTES } from "../theme/library.js"
 import { createThemeRegistry } from "../theme/registry.js"
 import { paletteSchema, type ResolvedTheme, type ThemeSelection } from "../theme/theme.js"
 
-import { themeDocumentCss } from "./document-theme.js"
+import { themeDocumentCss, themeGroundCss } from "./document-theme.js"
 import { themeGround, themeStyle } from "./theme.js"
 
 /**
@@ -176,5 +176,64 @@ describe("themeDocumentCss", () => {
     expect(css).not.toContain("color-scheme")
     expect(css).toContain("  background-color: hsl(210 30% 40%);")
     expect(propertiesOf(css).length).toBeGreaterThan(2)
+  })
+})
+
+/**
+ * The other host: a page that is a tree to its edges.
+ *
+ * `themeDocumentCss` answers a host that mounts nothing of its own. A surface
+ * has already mounted every variable on its root primitive, so what it needs
+ * from the document is the three declarations no tree can reach. The assertions
+ * below are about the *difference* between the two rules rather than about the
+ * ground, which `themeGround` already holds: what matters is that one carries
+ * the variables and the other carries none, and that neither restates the
+ * palette.
+ */
+describe("themeGroundCss", () => {
+  it("declares the ground and not one variable", () => {
+    const css = themeGroundCss(resolve(editorial))
+
+    expect(css).toBeDefined()
+    expect(propertiesOf(css ?? "")).toEqual(["background-color", "color", "color-scheme"])
+    expect(css).not.toContain("--loom-")
+  })
+
+  it("is the same rule and the same declarations the whole rule ends with", () => {
+    const theme = resolve(bold)
+    const ground = themeGroundCss(theme) ?? ""
+
+    expect(ground.startsWith(":root {")).toBe(true)
+    expect(ground.endsWith("}")).toBe(true)
+
+    for (const line of ground.split("\n").slice(1, -1)) {
+      expect(themeDocumentCss(theme)).toContain(line)
+    }
+  })
+
+  /**
+   * The point of the export, stated as arithmetic: this is what a surface stops
+   * sending twice. The figure is not asserted — a re-theme moves it — but the
+   * ratio being large is the reason the second export exists at all.
+   */
+  it("is a small fraction of the whole rule", () => {
+    const theme = resolve(editorial)
+
+    expect((themeGroundCss(theme) ?? "").length * 10).toBeLessThan(themeDocumentCss(theme).length)
+  })
+
+  /**
+   * **Nothing to say is a state the caller answers, not one this renders.**
+   * `themeDocumentCss` returns its rule for such a palette because the variables
+   * are the half a host cannot write for itself and are unaffected; here there is
+   * no other half, so a rule would be an empty block. Mirrors `themeGround`,
+   * which is where the decision belongs. No registered palette reaches it — the
+   * schema refines every slot present — so the theme is built by hand.
+   */
+  it("hands back nothing when the palette has no ground", () => {
+    const groundless: ResolvedTheme = { ...resolve(editorial), palette: { ...editorialPalette, slots: {} } }
+
+    expect(themeGround(groundless)).toBeUndefined()
+    expect(themeGroundCss(groundless)).toBeUndefined()
   })
 })

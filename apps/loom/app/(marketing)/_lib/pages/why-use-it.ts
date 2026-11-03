@@ -14,9 +14,17 @@ import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
 import { FACTS } from "../copy"
 import { examplePage, rearrangedExample } from "../example"
 import { LIBRARY_PARTS } from "../library"
+import {
+  REGISTERED_TYPE,
+  THE_REGISTRATION,
+  WRITTEN_LANGUAGE,
+  YOUR_COMPONENT,
+} from "../written"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import {
   action,
+  code,
+  codeSpan,
   heading,
   inlineLink,
   prose,
@@ -407,6 +415,101 @@ const theParts = (ids: IdFactory): LoomNode =>
   )
 
 /**
+ * What a reader writes, which is the question this site asked four times and
+ * never showed.
+ *
+ * ## The claim it evidences is already on the site, in four places
+ *
+ * The maintainer's second step on the front door reads *"Register them with
+ * Loom. Tell Loom which of your components the AI is allowed to use. That is
+ * all the setup there is."* The second link of his chain says the same thing,
+ * and so do `staysYours` and `theParts` above. All four are claims about **how
+ * much code this takes**, and the only honest way to back a claim about
+ * quantity is to show the quantity.
+ *
+ * `docs/positioning.md` is what makes this the band worth building rather than
+ * a nice addition: the pitch is *"the building part and why this build is
+ * better than traditional methods"*, the reader is *"the casual web developer…
+ * junior level"*, and the first link of the chain is *React/TypeScript
+ * components*. A developer who arrived by accident, got interested, and wanted
+ * to know what they would actually type had to leave this site for the
+ * documentation. The one thing a developer audience trusts is code, and the
+ * site had none of it outside an `npm install` line.
+ *
+ * ## It is here, and the chain now points at it
+ *
+ * `theParts` above answers *what comes with it* with a row of badges, and that
+ * is what the chain's second link pointed at until today — a reader following
+ * *you tell Loom which ones it can use* landed on a list of the ones that come
+ * with the install, which is a different question answered well. The link
+ * points here now and `chain.test.ts` holds it.
+ *
+ * Placed after `theParts` and before `onAPage` because the three read as one
+ * argument in that order: here is what comes with it, here is what it costs to
+ * add your own, here is what they look like on a page.
+ *
+ * ## Both panels say `wrap: false`, which is the exception `nodes.ts` names
+ *
+ * Every other panel on this site wraps, because every other panel prints
+ * pretty-printed JSON whose long lines are single string values with no
+ * structure below the printer's. These two print **source**, where a line is a
+ * statement: a wrapped line of TypeScript reads as two of them, and an
+ * indented continuation reads as a block. `nodes.ts` wrote `wrap` first for
+ * exactly this case, so the panels say so out loud rather than inheriting it.
+ *
+ * ## Where the code comes from
+ *
+ * `written.ts`, which publishes the text, and `written/` beside it, which holds
+ * the same two files as real modules that the gate compiles and
+ * `written.test.ts` puts through the starter set. Nothing here is a snippet
+ * somebody typed. That file carries the whole argument, including why the page
+ * does not read them off disk the way the documentation's quickstart does.
+ *
+ * ## The heading was the banned shape on the first draft
+ *
+ * It read *"Two files, and your page can use your component"*, which is a
+ * headline ending in a comma and then a clause that adds no fact — the exact
+ * shape `docs/positioning.md` records the maintainer banning, and
+ * `voice.test.ts` caught it on this branch. **The fix was a rewrite and not the
+ * comma**, which that file and `docs/routines.md` both say in as many words: the
+ * heading now states what the band shows, and dropping the punctuation would
+ * have left the same sentence doing the same thing.
+ */
+const whatYouWrite = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "What you write", anchor: WHY_USE_IT_ANCHOR.whatYouWrite },
+    "Adding a component of your own takes two files",
+    [
+      prose(
+        ids,
+        "The first file is ordinary React. You have written components like it before, and Loom never edits it. The second is everything you tell Loom about it.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, YOUR_COMPONENT.source, {
+        language: WRITTEN_LANGUAGE,
+        caption: YOUR_COMPONENT.caption,
+        wrap: false,
+      }),
+      code(ids, THE_REGISTRATION.source, {
+        language: WRITTEN_LANGUAGE,
+        caption: THE_REGISTRATION.caption,
+        wrap: false,
+      }),
+      proseParts(
+        ids,
+        [
+          "That is the setup. Your page can ask for ",
+          codeSpan(ids, REGISTERED_TYPE),
+          " from here on, and so can your AI model, within the rules you set.",
+        ],
+        { tone: "muted", align: "center", measured: true }
+      ),
+    ],
+    { align: "center" }
+  )
+
+/**
  * The set at work, which is the question the band above it leaves open.
  *
  * `theParts` answers *what is in there* and cannot answer *what do they look
@@ -534,6 +637,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         staysYours(ids),
         alreadyWritten(ids),
         theParts(ids),
+        whatYouWrite(ids),
         onAPage(ids),
         forAReader(ids),
         closing(ids),
