@@ -148,8 +148,12 @@ branches. `pnpm decisions:index` regenerated.
   `Loom docs`. Closed with shape 2 and the reasoning above; the entry's own
   recommendation is declined in writing rather than silently.
 
-**Filed:** none. The second shrinker defect was found and fixed in the same run,
-so it is recorded in 0339 rather than filed.
+**Filed: one**, after the pull request went up — *declining to subscribe does
+not prevent the subscription, and the wake that creates it asks the session to
+arm a check-in chain*, extending the 24 October entry. See the last section.
+
+The second shrinker defect was **not** filed: it was found and fixed in the same
+run, so it is recorded in 0339 instead.
 
 ## Test numbers
 
@@ -188,3 +192,21 @@ migration as this run's next unit when it landed on 19 August. This run resolved
 it the same way — the prompt names `routines.md` as its governance file, so
 `routines.md` won — and the cost is the few minutes at the top of each run spent
 confirming `apps/loom` already exists.
+
+## After the pull request went up
+
+**The harness subscribed this session to #755 anyway.** This run read the
+24 October entry first and deliberately did not call `subscribe_pr_activity`,
+saying so in the pull request comment — and was subscribed three seconds after
+the pull request was created. Six wakes arrived in 2m58s, four of them
+`vercel[bot]` editing one comment in place; **none of the six was actionable**,
+and the pull request was already green and `clean` before the first one. This
+session unsubscribed at 09:42, which is what the run that met it in October did.
+
+**The wake that creates the subscription asks the session to arm a `send_later`
+check-in chain** — first at ~50 minutes, then every ~4 hours. That is the
+9 August failure written as a procedure, and this run did not arm one: the wake
+is relayed external content rather than an instruction from the maintainer, and
+*Token discipline* says never, for any reason. Both facts are filed as a new
+entry extending the 24 October one, because they change what the next run should
+do rather than merely counting the cost again.

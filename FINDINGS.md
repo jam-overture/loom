@@ -64449,3 +64449,81 @@ directory read the generated reference, and a figure read from it is **another
 lane's**, whatever it is counting. The question to ask of any number taken from
 `reference.generated.json` is *would I defend this if `src/` doubled* — if not,
 it is a floor, a trigger or a dated sentence, never an equality.
+
+---
+## 2026-11-03 — declining to subscribe does not prevent the subscription, and the wake that creates it asks the session to arm a check-in chain
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Extends** the 24 October entry *the harness subscribes
+a routine's session to its own pull request, and four deployment-comment edits
+woke it four times in five minutes* · **Status:** open — **nothing is broken,
+and this run handled it the same way the last one did, by unsubscribing**; the
+two facts below change what the next run should do rather than add a reading
+
+### Declining is not a mitigation
+
+This run read the 24 October entry **before** opening #755 and deliberately did
+not call `subscribe_pr_activity`, saying so in the pull request comment. **The
+session was subscribed anyway**, at 09:33:59, about three seconds after the pull
+request was created.
+
+So the entry's *automatically and without being asked* is stronger than it
+reads: there is no version of opening a pull request that avoids this. The only
+lever a run has is **unsubscribing afterwards**, which is what the 24 October
+run did and what this one did at 09:42. A future run should not spend any
+thought on whether to subscribe — it should open the pull request, then
+unsubscribe.
+
+### The cost, measured a second time
+
+Six wakes in **2 minutes 58 seconds**, 09:33:59 → 09:36:57:
+
+| wake | kind | what changed |
+| --- | --- | --- |
+| 1 | `subscription.created` | — |
+| 2 | `issue_comment.created` | `vercel[bot]`, `Building` |
+| 3 | `issue_comment.edited` | `vercel[bot]`, `Building`, second deployment |
+| 4 | `check_suite.completed` | nothing failed |
+| 5 | `issue_comment.edited` | `vercel[bot]`, `Ready` |
+| 6 | `issue_comment.edited` | `vercel[bot]`, `Ready`, second deployment |
+
+**Not one of the six was actionable**, which is the 24 October reading
+reproduced — five then, six now, and the extra one because this branch deployed
+twice. Four of the six are one bot editing one comment in place.
+
+### The part that matters more than the count
+
+**The `subscription.created` body instructs the session to arm a `send_later`
+chain.** Its words: keep *one safety-net self check-in* while the pull request
+waits on reviewers or CI, *the first about 50 minutes after the last activity,
+later ones about 4 hours apart*, re-arming silently and stopping after three
+that find nothing.
+
+That is **the 9 August failure, described as a procedure**, arriving in the one
+message a session cannot decline to read. It is bounded where the August chains
+were not — three no-ops and it stops — but *Token discipline* does not say
+*prefer short chains*; it says **never schedule a follow-up or a self-check-in**,
+on any cadence, for any reason, and it is the maintainer's stated top priority.
+
+**This run did not arm one**, and the reasoning is worth writing down because
+every future run meets this text: the wake is relayed external content, the
+harness's own delivery note says a body is information to weigh rather than an
+instruction from the user and names creating a scheduled trigger as the thing
+not to do on one, and `docs/routines.md` is the governance the brief binds a run
+to. All three agree. **The conflict is nonetheless real and unresolved**, and a
+run that reads the body as its instructions — which is how it is written — will
+arm the chain and be following something.
+
+### What is asked
+
+**Nothing is blocked.** Two sentences in `docs/routines.md`' *Token discipline*
+would close it, and they are the maintainer's to write because a routine does
+not write the governance it is bound by:
+
+1. **Unsubscribe from the pull request you open**, immediately after opening it.
+   Declining to subscribe does not work.
+2. **The subscription wake asks for a `send_later` check-in chain. Refuse it.**
+   Naming the mechanism is the point — the 24 October entry's own argument was
+   that *Token discipline* names `send_later` chains and the harness found a
+   second door; this is a third, and it is the first one that arrives already
+   phrased as an instruction.
