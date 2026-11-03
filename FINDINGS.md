@@ -60342,8 +60342,16 @@ door open rather than close it.
 ## 2026-10-25 — one source file in `src/runtime/` carries a literal NUL byte, so no content search can read it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`src/runtime/repointing.ts`) · **Status:** open — **small, nothing is broken,
-and the remedy is one character**
+(`src/runtime/repointing.ts`) · **Status:** **closed by
+`framework-79-one-governed-set`** — the character, and the widening it named.
+`SEP = "\u0000"` in `repointing.ts`, and `src/signals/source-text.test.ts`'s
+`LANE` is now `src` rather than `src/signals`, so the sweep covers the directory
+the hazard is about rather than the one its first instance happened to be in.
+**Zero control bytes remain in any `.ts` file in the repository**, counted by
+reading every one as bytes. The widened check was confirmed to fail on a NUL
+planted in `src/runtime/` before being left green, rather than assumed to.
+**One line of this is in the filing lane's file**, which that lane asked for in
+writing here; nothing else under `src/signals/` was touched
 
 `src/signals/rollup.ts` keyed its tallies with template literals holding a
 **literal `NUL` byte** as the separator — the byte written into the file rather
@@ -62484,8 +62492,47 @@ somebody reads that test as redundant and deletes it.
 ## 2026-10-30 — `pnpm reports:shrink` reads the git index, so the pictures a run has just taken are the ones it cannot see
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/reports/shrink.ts`, `docs/routines.md`) · **Status:** open — **cost this
-run one confused cycle**; nothing is broken and no test is failing
+(`tools/reports/shrink.ts`, `docs/routines.md`) · **Status:** **closed by
+`framework-79-one-governed-set`** — **shape 2, and this entry's recommendation
+of shape 1 was declined**, because the doubt it rested on is answerable from the
+repository. Recorded as
+[0339](decisions/0339-the-reports-commands-read-one-set-of-files-and-it-includes-what-a-run-has-just-written.md)
+
+> **The reason shape 1 was not taken.** This entry recommended the sentence and
+> the warning line, on the ground that the reason for `git ls-files` is not
+> stated and *may be deliberate — a scratch PNG under `reports/` that nobody
+> meant to commit.* It is not deliberate. `tools/reports/survey.ts`, the sibling
+> module the gate itself runs through, already asks for `--cached --others
+> --exclude-standard` **and says why in a comment**: *a 5MB PNG written a moment
+> ago and not yet added is invisible to `ls-files` alone, and that is exactly the
+> state a run is in when it has just taken its screenshots.* So there is no
+> scratch-file case to protect — an untracked raster under `reports/` is a fault
+> **the gate already fails on**, which was reproduced before anything was
+> changed. The narrower set was not a choice; it was the one call that never got
+> the fix.
+>
+> **What was wrong was the pair, not either call.** The gate's advice was advice
+> the other command could not take: `reports:shrink` printed *nothing to shrink
+> — no raster images under reports/* and `reports:check` then failed on the same
+> file saying *run `pnpm reports:shrink`*. The set is now defined once in
+> `tools/reports/governed.ts` and both commands read it, and
+> `governed.test.ts` fails if any other module in that directory names
+> `ls-files` — so the third command cannot pick a third set. That sweep was
+> confirmed to fail on a planted second mention.
+>
+> **A second defect was in the same line and nobody had filed it.** The citation
+> rewrite also read the tracked files only, and a report written *this run* is
+> untracked — so a run that applied this entry's `git add` workaround to its
+> pictures but not to its report had its pictures converted and its citation left
+> pointing at the `.png` just deleted. That is the 404 the command exists to
+> prevent. Both halves are demonstrated in the report.
+>
+> **Nothing in `docs/routines.md` changes, and that is the outcome rather than an
+> omission.** The sentence this entry called wrong — *re-encodes every raster
+> under `reports/`* — is now true of the tool. The documentation was right and
+> the tool was wrong, so the fix belonged in the tool; and the entry's own
+> closing reasoning, that a routine does not write the governance it is bound by,
+> is better served by not editing that file at all.
 
 `docs/routines.md`, under *Storing the picture*, says the command
 
@@ -64716,3 +64763,81 @@ directory read the generated reference, and a figure read from it is **another
 lane's**, whatever it is counting. The question to ask of any number taken from
 `reference.generated.json` is *would I defend this if `src/` doubled* — if not,
 it is a floor, a trigger or a dated sentence, never an equality.
+
+---
+## 2026-11-03 — declining to subscribe does not prevent the subscription, and the wake that creates it asks the session to arm a check-in chain
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Extends** the 24 October entry *the harness subscribes
+a routine's session to its own pull request, and four deployment-comment edits
+woke it four times in five minutes* · **Status:** open — **nothing is broken,
+and this run handled it the same way the last one did, by unsubscribing**; the
+two facts below change what the next run should do rather than add a reading
+
+### Declining is not a mitigation
+
+This run read the 24 October entry **before** opening #755 and deliberately did
+not call `subscribe_pr_activity`, saying so in the pull request comment. **The
+session was subscribed anyway**, at 09:33:59, about three seconds after the pull
+request was created.
+
+So the entry's *automatically and without being asked* is stronger than it
+reads: there is no version of opening a pull request that avoids this. The only
+lever a run has is **unsubscribing afterwards**, which is what the 24 October
+run did and what this one did at 09:42. A future run should not spend any
+thought on whether to subscribe — it should open the pull request, then
+unsubscribe.
+
+### The cost, measured a second time
+
+Six wakes in **2 minutes 58 seconds**, 09:33:59 → 09:36:57:
+
+| wake | kind | what changed |
+| --- | --- | --- |
+| 1 | `subscription.created` | — |
+| 2 | `issue_comment.created` | `vercel[bot]`, `Building` |
+| 3 | `issue_comment.edited` | `vercel[bot]`, `Building`, second deployment |
+| 4 | `check_suite.completed` | nothing failed |
+| 5 | `issue_comment.edited` | `vercel[bot]`, `Ready` |
+| 6 | `issue_comment.edited` | `vercel[bot]`, `Ready`, second deployment |
+
+**Not one of the six was actionable**, which is the 24 October reading
+reproduced — five then, six now, and the extra one because this branch deployed
+twice. Four of the six are one bot editing one comment in place.
+
+### The part that matters more than the count
+
+**The `subscription.created` body instructs the session to arm a `send_later`
+chain.** Its words: keep *one safety-net self check-in* while the pull request
+waits on reviewers or CI, *the first about 50 minutes after the last activity,
+later ones about 4 hours apart*, re-arming silently and stopping after three
+that find nothing.
+
+That is **the 9 August failure, described as a procedure**, arriving in the one
+message a session cannot decline to read. It is bounded where the August chains
+were not — three no-ops and it stops — but *Token discipline* does not say
+*prefer short chains*; it says **never schedule a follow-up or a self-check-in**,
+on any cadence, for any reason, and it is the maintainer's stated top priority.
+
+**This run did not arm one**, and the reasoning is worth writing down because
+every future run meets this text: the wake is relayed external content, the
+harness's own delivery note says a body is information to weigh rather than an
+instruction from the user and names creating a scheduled trigger as the thing
+not to do on one, and `docs/routines.md` is the governance the brief binds a run
+to. All three agree. **The conflict is nonetheless real and unresolved**, and a
+run that reads the body as its instructions — which is how it is written — will
+arm the chain and be following something.
+
+### What is asked
+
+**Nothing is blocked.** Two sentences in `docs/routines.md`' *Token discipline*
+would close it, and they are the maintainer's to write because a routine does
+not write the governance it is bound by:
+
+1. **Unsubscribe from the pull request you open**, immediately after opening it.
+   Declining to subscribe does not work.
+2. **The subscription wake asks for a `send_later` check-in chain. Refuse it.**
+   Naming the mechanism is the point — the 24 October entry's own argument was
+   that *Token discipline* names `send_later` chains and the harness found a
+   second door; this is a third, and it is the first one that arrives already
+   phrased as an instruction.
