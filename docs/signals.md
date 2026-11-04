@@ -4526,6 +4526,79 @@ orders, so the sweep that says which spelling is nearer the exact value is what 
 future change to it has to keep passing; and still **nothing draws any of it**,
 which is `Loom portal`'s and is now twenty-five runs old.
 
+### 73. Nothing to fix, and nothing to fix it with · `Loom signals` · **done, 4 November**
+
+`deploymentAgendaOf` is the reading a deployment's screen opens with, and its
+`first` is *the one thing to do first, or `null` where the three readings ask for
+nothing* (0330, 0336, 0343). **That `null` was two opposite sentences.** A
+deployment whose pages are read, answered and soundly collected has nothing to
+do. A deployment whose door turns every delivery away has no counters, so no
+readings, so no rows, so no first row either — and the fix-list told an operator
+*nothing to do* about the one failure a new deployment most often has.
+
+[0326](../decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)
+built the reading that answers it on 31 October and **nothing joined it to the
+fix-list**, so the one screen a person opens when their deployment reports no
+readers was the one place the answer was missing.
+
+**Done**
+([0347](../decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md)),
+as `DeploymentAgenda.subject` over a closed set of four, a required fourth
+argument to `deploymentAgendaOf`, and `WindowAgenda.arrival` off a fifth
+required parameter on the rung.
+
+- **Four members and three of them are empty fix-lists.** `pages` wherever the
+  health reading named one; then `intake` (nothing collected, deliveries
+  refused — repair the door), `silence` (nothing collected, nothing refused —
+  nothing is posting) and `unverified` (nothing collected, and nothing counted
+  refusals, so this declines to choose between the two silences).
+- **It is the contested-page rule one level up.** The join already refuses to
+  act on an order while a page in it was ranked by its own fault — *while one
+  exists, an order is not evidence*. This is the same sentence about the
+  subsystem: **while nothing is arriving, no reading is evidence**, and the
+  absence of rows is not the absence of work.
+- **Each half comes from the reading that owns it, and only `standing` is taken
+  in.** Whether anything was collected is the health reading's own pages, which
+  is what the rows are joined from — deliberately *not* `ArrivalStanding.collected`,
+  although it is the same number for a caller that read one window. A stale
+  arrival standing handed in beside a fresh empty window therefore cannot claim
+  `pages` for rows that do not exist, which is tested. The argument is
+  `Pick<ArrivalStanding, "standing">`, which keeps the join non-generic in a
+  deployment's refusal reasons and carries no copy of `refused`, `newest` or the
+  origin — the caller holds the standing it handed in.
+- **`null` and `unasked` are one answer**, both `unverified`: a caller with no
+  counter to read and a deployment with no counter to offer are the same
+  absence, and a second word for it would be a sixth member of a closed set of
+  five, said twice.
+- **The rung takes the refusal rows rather than the reading over them**, which
+  refines the 31 October finding rather than contradicting it. That finding's
+  reason was *reaching a store*, and these rows are handed in like the window's.
+  What this rung has that the figures rung did not is the other half of the
+  reading: the health reading is made here, so a caller asked for the result
+  would have to make a second copy of it. The rule, stated: **a rung that owns
+  one half of a reading takes the other half's rows; a rung that owns neither
+  takes the result.**
+- **One instant for one window.** The age on the newest refusal comes off
+  `CollectionSchedule.at`, parsed with the same `NaN` guard
+  `collection-stalled` already puts on that field. A `null` schedule or an
+  unreadable instant gives every arrival figure and no age, which is a
+  published state of that reading rather than a degraded one.
+- **Both calls gained a required argument** rather than an optional one, for the
+  third time in this lane and for the same reason: an argument a caller may omit
+  is a fix-list that type-checks, runs, and cannot tell the two answers apart
+  (0322, 0343).
+- **A refusal is still not a row, not a fifth `AgendaWork` and not an eighth
+  fault.** It names no page (0326), so it is one word about the whole list.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes minified. No payload field, no column, no migration,
+no store method and no new kind.
+
+**What is left and is filed:** `windowFiguresOf` still does not carry the
+arrival standing and should not (0327), so a surface drawing both rungs holds one
+reading twice unless it reads the agenda rung's copy; and still **nothing draws
+any of it**, which is `Loom portal`'s and is now twenty-six runs old.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
