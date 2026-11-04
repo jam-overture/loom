@@ -184,6 +184,49 @@ describe("deploymentChangeOf", () => {
       expect(reading.harmed.map((row) => row.inflation)).toEqual([0, 3])
       expect(reading.harmed.map((row) => row.opened)).toEqual([200, 1000])
     })
+
+    /**
+     * The scale is the rule published beside the counter and not a second
+     * spelling of it (0346), and this key is the one where that mattered: the
+     * figure being scaled is a share movement times a count, so it is **not a
+     * whole number**, and a page with no drift has to come out of the scale
+     * holding exactly the figure the comparison published.
+     *
+     * Ten readers reaching a band and four the next, against twenty-four and
+     * six: the comparison's own figure is 3.6000000000000005, the door has
+     * nothing to correct, and multiplying by the appearances and dividing by
+     * them again comes to 3.6. A screen printing the movement beside the band it
+     * happened at would then print two numbers for one fact, which is the thing
+     * this function's own doc comment says it exists to prevent.
+     */
+    it("leaves a page the door has nothing to correct holding the comparison's own figure", () => {
+      const change = changeOf(TREE, [10, 4], [24, 6])
+      const reading = deploymentChangeOf([change], [exact(TREE, 2, 24)])
+      const own = Math.abs(change.mostLost?.readersKept ?? 0)
+
+      expect(own).toBe(3.6000000000000005)
+      expect(reading.harmed[0]?.worsened?.readers).toBe(own)
+      expect((own * 24) / 24).not.toBe(own)
+    })
+
+    /**
+     * The door state this order never names, for the reason the order of falls
+     * never names it either: a row that has opened page views and folded none of
+     * them has no appearances to divide by, and both rungs that could reach the
+     * key refuse first. Every stop reached by anybody is above nought
+     * appearances, so the page is `inconsistent`; a page with no stop at all is
+     * `unmoved`. The published rule being total (0346) is a belt here.
+     */
+    it("never reaches its key through a door that folded nothing", () => {
+      const unfolded = door(TREE, 2, 10, 0)
+      const moved = deploymentChangeOf([changeOf(TREE, [100, 100], [100, 40])], [unfolded])
+      const still = deploymentChangeOf([changeOf(TREE, [100, 40], [100, 40])], [unfolded])
+
+      expect(moved.unranked[0]?.standing).toBe("inconsistent")
+      expect(moved.unranked[0]?.worsened?.readers).toBeNull()
+      expect(still.unranked[0]?.standing).toBe("unmoved")
+      expect(moved.harmed).toEqual([])
+    })
   })
 
   /**
