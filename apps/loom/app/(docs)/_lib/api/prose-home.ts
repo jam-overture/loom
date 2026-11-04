@@ -274,6 +274,25 @@ export const whereProseGoes = (
 }
 
 /**
+ * What the gate says when the committed reference has fallen behind.
+ *
+ * The same block the generator prints, in front of the remedy, because this is
+ * the message a run sees **before** it has run the command — and the belief the
+ * 3 October finding was built on is one a run holds at exactly that moment.
+ * Composed here rather than at the assertion for the reason `generatorSays` is:
+ * a message built inline in a test file is a message no test can read.
+ */
+export const staleReferenceMessage = (
+  committed: readonly ApiEntry[],
+  fresh: readonly ApiEntry[]
+): string =>
+  [
+    "the runtime's published surface has moved. Run `pnpm --filter @loom/app docs:api` and commit the result.",
+    "",
+    whereProseGoes(namesArrived(committed, fresh), proseHomes(fresh)),
+  ].join("\n")
+
+/**
  * Everything `docs:api` says, as one string.
  *
  * The whole of the generator's standard output lives here rather than in the

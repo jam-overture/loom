@@ -16,6 +16,7 @@ import {
   pageSourcePath,
   proseHomeFor,
   proseHomes,
+  staleReferenceMessage,
   whereProseGoes,
 } from "./prose-home"
 import { apiEntries } from "./reference"
@@ -344,6 +345,32 @@ describe("what a run that has just published a name is told", () => {
   it("says plainly when the file moved and no name is new", () => {
     expect(whereProseGoes([], [])).toContain("no name is new")
     expect(whereProseGoes([], [])).not.toContain("this is where it would go")
+  })
+})
+
+describe("what the gate says when the reference has fallen behind", () => {
+  /**
+   * The message a run sees **before** it has run the command, which is the
+   * moment the 3 October belief is held. The remedy comes first because it is
+   * what the run has to do; the correction comes next because it is what the
+   * run has got wrong.
+   */
+  it("names the remedy, then says no prose is required, then where it would go", () => {
+    const said = staleReferenceMessage(
+      [entryOf("@jam-overture/loom/telemetry", "telemetry", ["journalOf"])],
+      [entryOf("@jam-overture/loom/telemetry", "telemetry", ["journalOf", "telemetryWindow"])]
+    )
+
+    expect(said).toContain("Run `pnpm --filter @loom/app docs:api`")
+    expect(said).toContain("Nothing on this site requires prose for a published name")
+    expect(said).toContain("telemetryWindow")
+    expect(said.indexOf("docs:api")).toBeLessThan(said.indexOf("Nothing on this site requires"))
+  })
+
+  it("says the plain thing when the file moved and no name is new", () => {
+    const same = [entryOf("@jam-overture/loom", "runtime", ["ok"])]
+
+    expect(staleReferenceMessage(same, same)).toContain("no name is new")
   })
 })
 

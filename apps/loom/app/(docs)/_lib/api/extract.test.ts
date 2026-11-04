@@ -23,7 +23,7 @@ import {
 } from "./extract"
 import { MODULE_TITLES, moduleTitle } from "./groups"
 import { apiAnchorFor, apiNavLabelFor, apiSlugFor, apiSymbolCount } from "./model"
-import { namesArrived, proseHomes, whereProseGoes } from "./prose-home"
+import { staleReferenceMessage } from "./prose-home"
 import { apiEntries, apiEntryAt, apiSlugs, parseReference } from "./reference"
 
 /**
@@ -154,13 +154,9 @@ describe("the generated reference", () => {
     const committed = readFileSync(GENERATED_FILE, "utf8")
     const fresh = extractReference()
 
-    const moved = [
-      "the runtime's published surface has moved. Run `pnpm --filter @loom/app docs:api` and commit the result.",
-      "",
-      whereProseGoes(namesArrived(apiEntries, fresh.entries), proseHomes(fresh.entries)),
-    ].join("\n")
-
-    expect(serializeReference(fresh), moved).toEqual(committed)
+    expect(serializeReference(fresh), staleReferenceMessage(apiEntries, fresh.entries)).toEqual(
+      committed
+    )
   })
 
   it("describes every door the package opens", () => {
