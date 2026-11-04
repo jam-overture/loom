@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5202,7 +5202,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5672,7 +5672,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6760,7 +6760,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7337,7 +7337,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7540,7 +7540,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8346,7 +8346,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8725,7 +8725,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8953,7 +8953,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -12976,7 +12976,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13111,7 +13111,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13170,10 +13170,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 64,
+      "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -13462,13 +13462,13 @@
             {
               "name": "TelemetryReadRequest",
               "kind": "type",
-              "signature": "type TelemetryReadRequest = {\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /** A cursor from a previous page's `older`/`newer`, passed back unread. */\n    readonly cursor?: string;\n    /**\n     * Default `newer`, which with no cursor is the oldest page. `older` with no\n     * cursor is the newest page — the read a reader almost always wants first.\n     */\n    readonly direction?: PageDirection;\n    readonly limit?: number;\n};",
+              "signature": "type TelemetryReadRequest = {\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /** A cursor from a previous page's `older`/`newer`, passed back unread. */\n    readonly cursor?: string;\n    /**\n     * Default `newer`, which with no cursor is the oldest page. `older` with no\n     * cursor is the newest page — the read a reader almost always wants first.\n     */\n    readonly direction?: PageDirection;\n    readonly limit?: number;\n    /**\n     * A stretch of wall-clock time, over `recordedAt`. Absent reads the whole\n     * journal, which is what every read did before windows existed.\n     *\n     * A window and a cursor are not alternatives and compose: the window says\n     * which records the read is about and the cursor says how far through them it\n     * has got. Paging a window walks that window and stops at its end — the\n     * `beyond` probe every implementation uses to name its cursors is taken\n     * *inside* the bound, so a reader paging to the end of last week is told it\n     * has reached the end of last week rather than handed a cursor out of it.\n     *\n     * One value rather than two bounds, because the two bounds are one idea and\n     * were checked against each other when `telemetryWindow` built them. A\n     * journal cannot be handed a window that is unreadable or runs backwards,\n     * which is why `TelemetryError` still has nothing to say about one.\n     */\n    readonly window?: TelemetryWindow;\n};",
               "summary": ""
             },
             {
               "name": "TelemetryPage",
               "kind": "type",
-              "signature": "type TelemetryPage = PageEnds & {\n    /**\n     * Always ascending by `seq`, whichever end the page was taken from.\n     *\n     * The direction is a property of *which* records a page contains, never of\n     * the order they arrive in. `episodesOf` folds a stream in arrival order, and\n     * a page that sometimes came back reversed would make every consumer\n     * responsible for knowing which — and silently wrong when it guessed.\n     */\n    readonly records: readonly RecordedTelemetry[];\n};",
+              "signature": "type TelemetryPage = PageEnds & {\n    /**\n     * Always ascending by `seq`, whichever end the page was taken from.\n     *\n     * The direction is a property of *which* records a page contains, never of\n     * the order they arrive in. `episodesOf` folds a stream in arrival order, and\n     * a page that sometimes came back reversed would make every consumer\n     * responsible for knowing which — and silently wrong when it guessed.\n     */\n    readonly records: readonly RecordedTelemetry[];\n    /**\n     * The stretch this page turned out to cover, and `null` when it holds nothing.\n     *\n     * Beside the cursors rather than derived from the records by each consumer,\n     * because the two questions a paged journal is asked are *where am I* and\n     * *when is this* — and only the first had an answer. A consumer taking the\n     * ends off the first and last record gets an empty page wrong, and cannot\n     * tell *no answer* from *no time covered*.\n     *\n     * It is the page's own ends, never the window's: a window is what was asked\n     * for and may be wider at both ends than anything that landed in it, so a\n     * screen naming the window would overstate what it is describing.\n     */\n    readonly span: TelemetrySpan | null;\n};",
               "summary": ""
             },
             {
@@ -13680,6 +13680,55 @@
               "summary": ""
             }
           ]
+        },
+        {
+          "module": "telemetry/window",
+          "title": "Window",
+          "summary": "A stretch of wall-clock time a journal can be asked for, and the stretch a page turned out to cover.",
+          "symbols": [
+            {
+              "name": "TelemetryWindow",
+              "kind": "type",
+              "signature": "type TelemetryWindow = {\n    /** Inclusive. Absent is unbounded into the past, back to the journal's start. */\n    readonly since?: number;\n    /** Exclusive. Absent is unbounded toward the present. */\n    readonly until?: number;\n};",
+              "summary": "A half-open window over `recordedAt`, in epoch milliseconds."
+            },
+            {
+              "name": "TelemetrySpan",
+              "kind": "type",
+              "signature": "type TelemetrySpan = {\n    readonly from: string;\n    readonly to: string;\n};",
+              "summary": "The ends of the stretch a page covers, as the journal stamped them."
+            },
+            {
+              "name": "TelemetryWindowFault",
+              "kind": "type",
+              "signature": "type TelemetryWindowFault = {\n    readonly code: \"unreadable-bound\";\n    readonly bound: \"since\" | \"until\";\n    readonly given: string;\n} | {\n    readonly code: \"inverted\";\n    readonly since: string;\n    readonly until: string;\n};",
+              "summary": "Why a window could not be built."
+            },
+            {
+              "name": "describeTelemetryWindowFault",
+              "kind": "function",
+              "signature": "const describeTelemetryWindowFault: (fault: TelemetryWindowFault) => string",
+              "summary": ""
+            },
+            {
+              "name": "telemetryWindow",
+              "kind": "function",
+              "signature": "const telemetryWindow: (request: {\n    readonly since?: string | Date;\n    readonly until?: string | Date;\n}) => Result<TelemetryWindow, TelemetryWindowFault>",
+              "summary": "A window, or the reason there is not one."
+            },
+            {
+              "name": "withinTelemetryWindow",
+              "kind": "function",
+              "signature": "const withinTelemetryWindow: (window: TelemetryWindow | undefined, recordedAt: string) => boolean",
+              "summary": "Whether a `recordedAt` falls inside a window — the predicate every journal that keeps its records in process has to apply, and the one a journal backed by a query expresses as a `where` instead."
+            },
+            {
+              "name": "telemetrySpanOf",
+              "kind": "function",
+              "signature": "const telemetrySpanOf: (records: readonly {\n    readonly recordedAt: string;\n}[]) => TelemetrySpan | null",
+              "summary": "The stretch a page covers: the earliest and latest `recordedAt` among its records, as they were stamped."
+            }
+          ]
         }
       ]
     },
@@ -13695,10 +13744,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 42,
+      "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13765,10 +13814,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 98,
+      "files": 99,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -14187,10 +14236,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 78,
+      "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1870,
+        "packageNames": 1877,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

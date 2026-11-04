@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, inArray, lt, sql, type SQL } from "drizzle-orm"
+import { and, asc, desc, eq, gt, gte, inArray, lt, sql, type SQL } from "drizzle-orm"
 import { z } from "zod"
 
 import { treeIdSchema } from "../ids.js"
@@ -19,6 +19,7 @@ import {
   type TelemetryPage,
   type TelemetryReadRequest,
 } from "./journal.js"
+import { telemetrySpanOf } from "./window.js"
 import { splitLookup } from "./lookup.js"
 import { loomTelemetry } from "./schema.js"
 
@@ -118,6 +119,7 @@ export const postgresTelemetryJournal = (
     const limit = clampTelemetryLimit(request?.limit)
     const from = cursorPosition(request?.cursor)
     const direction = request?.direction ?? "newer"
+    const window = request?.window
 
     try {
       /**
@@ -142,7 +144,21 @@ export const postgresTelemetryJournal = (
               ? undefined
               : direction === "older"
                 ? lt(loomTelemetry.seq, from)
-                : gt(loomTelemetry.seq, from)
+                : gt(loomTelemetry.seq, from),
+            /**
+             * The window, as the two comparisons it is: `gte` on the inclusive
+             * end and `lt` on the exclusive one, so two consecutive windows
+             * tile. Both are on `recorded_at`, which the column index already
+             * orders, and both sit in the same `where` as the cursor — which is
+             * what keeps the `limit + 1` probe below a question about the window
+             * rather than about the journal.
+             */
+            window?.since === undefined
+              ? undefined
+              : gte(loomTelemetry.recordedAt, new Date(window.since)),
+            window?.until === undefined
+              ? undefined
+              : lt(loomTelemetry.recordedAt, new Date(window.until))
           )
         )
         .orderBy(direction === "older" ? desc(loomTelemetry.seq) : asc(loomTelemetry.seq))
@@ -167,6 +183,7 @@ export const postgresTelemetryJournal = (
 
       return ok<TelemetryPage>({
         records: page,
+        span: telemetrySpanOf(page),
         ...pageEnds(page.map((record) => record.seq), direction, {
           beyond: rows.length > limit,
           resumed: from !== undefined,

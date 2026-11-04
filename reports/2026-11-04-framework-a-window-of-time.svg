@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" width="880" height="620" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .ok { fill: #dcfce7; stroke: #16a34a; }
+    .bad { fill: #fee2e2; stroke: #dc2626; }
+    .box { fill: #f4f4f5; stroke: #d4d4d8; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .wire { stroke: #a1a1aa; fill: none; }
+    .rule { stroke: #d4d4d8; fill: none; }
+    text { font-size: 13px; }
+    .h { font-size: 16px; font-weight: 700; }
+    .sh { font-size: 13px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; font-weight: 700; }
+    .mono { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tiny { font-size: 10.5px; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #09090b }
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .ok { fill: #14532d; stroke: #4ade80 }
+      .bad { fill: #7f1d1d; stroke: #f87171 }
+      .box { fill: #27272a; stroke: #52525b }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 }
+      .wire { stroke: #71717a } .rule { stroke: #3f3f46 }
+    }
+  </style>
+  <rect class="bg" x="0" y="0" width="880" height="620"/>
+
+  <text class="h t" x="24" y="32">A page is two hundred entries. A week is a week.</text>
+  <text class="m" x="24" y="54">Why &#8220;has it got better since last week&#8221; could not be asked of a journal paged by arrival order.</text>
+
+  <!-- BEFORE -->
+  <text class="k badt" x="24" y="90">BEFORE &#8212; TWO PAGES</text>
+  <text class="m tiny" x="190" y="90">a page is 200 records, so its duration is whatever the deployment&#8217;s traffic made it</text>
+
+  <line class="rule" x1="24" y1="100" x2="856" y2="100"/>
+
+  <!-- quiet period: one page covers a lot of time -->
+  <rect class="bad" x="24" y="116" width="430" height="34" rx="4"/>
+  <text class="badt sh" x="36" y="138">page before this one &#8212; 200 records</text>
+  <text class="badt tiny" x="300" y="138">covers 18 days</text>
+
+  <rect class="bad" x="462" y="116" width="150" height="34" rx="4"/>
+  <text class="badt sh" x="474" y="138">newest page</text>
+  <text class="badt tiny" x="474" y="152">covers 4 days</text>
+
+  <line class="wire" x1="24" y1="178" x2="856" y2="178"/>
+  <text class="m tiny" x="24" y="196">quieter</text>
+  <text class="m tiny" x="560" y="196">busier &#8212; more records per day, so less time per page</text>
+
+  <text class="badt" x="24" y="226">The screen compares these two and every number in it is right.</text>
+  <text class="m" x="24" y="246">It is comparing 18 days against 4, and the ratio drifts as traffic grows &#8212; so the</text>
+  <text class="m" x="24" y="264">comparison silently changes meaning while nothing on the page looks wrong.</text>
+
+  <line class="rule" x1="24" y1="292" x2="856" y2="292"/>
+
+  <!-- AFTER -->
+  <text class="k okt" x="24" y="324">AFTER &#8212; TWO WINDOWS</text>
+  <text class="m tiny" x="210" y="324">read.window, a half-open interval over recordedAt</text>
+
+  <rect class="ok" x="24" y="344" width="300" height="34" rx="4"/>
+  <text class="okt sh" x="36" y="366">the week before</text>
+  <text class="okt tiny" x="200" y="366">7 days</text>
+
+  <rect class="ok" x="330" y="344" width="300" height="34" rx="4"/>
+  <text class="okt sh" x="342" y="366">last week</text>
+  <text class="okt tiny" x="506" y="366">7 days</text>
+
+  <!-- the seam -->
+  <line class="wire" x1="327" y1="334" x2="327" y2="398" stroke-dasharray="3 3"/>
+  <text class="t mono" x="246" y="414">[since, until)</text>
+  <text class="m tiny" x="340" y="414">the seam: a record stamped here belongs to exactly one side</text>
+
+  <rect class="box" x="24" y="436" width="404" height="74" rx="4"/>
+  <text class="sh t" x="38" y="458">since is in, until is out</text>
+  <text class="m tiny" x="38" y="478">Two consecutive windows tile. Inclusive ends would count a record</text>
+  <text class="m tiny" x="38" y="494">on the boundary twice &#8212; the same defect, smaller and harder to see.</text>
+
+  <rect class="box" x="444" y="436" width="412" height="74" rx="4"/>
+  <text class="sh t" x="458" y="458">recordedAt, never occurredAt</text>
+  <text class="m tiny" x="458" y="478">occurredAt is what the host said. A skewed clock or a replayed batch</text>
+  <text class="m tiny" x="458" y="494">would put records outside the window into it, in page order, silently.</text>
+
+  <rect class="box" x="24" y="524" width="404" height="74" rx="4"/>
+  <text class="sh t" x="38" y="546">page.span &#8212; the stretch it covers, or null</text>
+  <text class="m tiny" x="38" y="566">The page&#8217;s own ends, never the window&#8217;s. null on an empty page, so</text>
+  <text class="m tiny" x="38" y="582">&#8220;no answer&#8221; and &#8220;no time covered&#8221; are not the same claim.</text>
+
+  <rect class="box" x="444" y="524" width="412" height="74" rx="4"/>
+  <text class="sh t" x="458" y="546">telemetryWindow() returns a Result</text>
+  <text class="m tiny" x="458" y="566">Date.parse of a typo is NaN, and every comparison against NaN is</text>
+  <text class="m tiny" x="458" y="582">false &#8212; so an unrefused bound answers &#8220;nothing happened&#8221;.</text>
+</svg>
