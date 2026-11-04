@@ -1,5 +1,6 @@
-import { existsSync } from "node:fs"
-import { join } from "node:path"
+import { existsSync, readFileSync } from "node:fs"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
 
@@ -9,6 +10,7 @@ import { docsHref, DOCS_LANDING_SLUG, writtenDocsSections, type DocsSection } fr
 import { proseMentions, type ProseMention, type ProseMentionIndex } from "./mentions"
 import type { ApiEntry, ApiKind } from "./model"
 import {
+  generatorSays,
   namesArrived,
   namesPublishedBy,
   pageSourcePath,
@@ -38,6 +40,8 @@ import { apiEntries } from "./reference"
  * the site having to be in all three states. The second half puts it to the
  * real pages and the real package.
  */
+
+const here = dirname(fileURLToPath(import.meta.url))
 
 const symbol = (name: string, kind: ApiKind = "function") => ({
   name,
@@ -340,6 +344,66 @@ describe("what a run that has just published a name is told", () => {
   it("says plainly when the file moved and no name is new", () => {
     expect(whereProseGoes([], [])).toContain("no name is new")
     expect(whereProseGoes([], [])).not.toContain("this is where it would go")
+  })
+})
+
+describe("what the generator says", () => {
+  const fresh = [
+    entryOf("@jam-overture/loom/telemetry", "telemetry", ["journalOf", "telemetryWindow"]),
+  ]
+  const before = [entryOf("@jam-overture/loom/telemetry", "telemetry", ["journalOf"])]
+
+  /**
+   * The whole of `docs:api`'s standard output is composed here rather than in
+   * the script, and these are the tests that buys. A mutation that deleted the
+   * block from the script killed nothing — a script is the one kind of module
+   * nothing imports — so the script is now one expression and the decision is
+   * here.
+   */
+  it("says what it wrote, and then where prose goes", () => {
+    const said = generatorSays(before, fresh, 1_916)
+
+    expect(said).toContain("wrote 1 entry points and 1916 exports to reference.generated.json")
+    expect(said).toContain("Nothing on this site requires prose for a published name")
+    expect(said).toContain("telemetryWindow")
+    expect(said.endsWith("\n")).toBe(true)
+  })
+
+  it("says nothing about prose beyond the plain fact when no name is new", () => {
+    const said = generatorSays(before, before, 1_915)
+
+    expect(said).toContain("no name is new")
+    expect(said).not.toContain("this is where it would go")
+  })
+
+  /**
+   * A regeneration with nothing to compare against, which is a first run or a
+   * tree where the file has been deleted. Every name looks new there. It must
+   * not be spelled the same way as a comparison that found nothing: one means
+   * *nothing was published*, the other means *nobody knows*.
+   */
+  it("says it could not compare when there was no reference to compare against", () => {
+    const said = generatorSays(undefined, fresh, 1_916)
+
+    expect(said).toContain("no reference to compare against")
+    expect(said).not.toContain("no name is new")
+    expect(said).not.toContain("the generated reference is where")
+    expect(said).not.toContain("this is where it would go")
+  })
+
+  /**
+   * And that the script writes it. A source assertion rather than a run,
+   * because running the generator writes the committed reference — but without
+   * it the one mutation this whole arrangement exists to kill, deleting the
+   * write, is still invisible. It is the same instrument `portability.test.ts`
+   * uses on git argvs and for the same reason: the thing being checked is a
+   * line in a file nothing imports.
+   */
+  it("is what the script writes, and the script decides nothing else", () => {
+    const script = readFileSync(join(here, "generate.ts"), "utf8")
+
+    expect(script).toContain("process.stdout.write(generatorSays(")
+    expect(script.match(/process\.stdout\.write/g)).toHaveLength(1)
   })
 })
 

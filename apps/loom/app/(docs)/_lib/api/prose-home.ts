@@ -272,3 +272,33 @@ export const whereProseGoes = (
 
   return lines.join("\n")
 }
+
+/**
+ * Everything `docs:api` says, as one string.
+ *
+ * The whole of the generator's standard output lives here rather than in the
+ * script, and the reason is a mutation that survived: deleting the block from
+ * the script turned nothing red, because a script is the one kind of module
+ * nothing imports. Composed here it is an ordinary function with ordinary
+ * tests, and what is left in the script is one expression — write this.
+ *
+ * `committed` is `undefined` for a regeneration with nothing to compare
+ * against: a first run, or a tree where the file has been deleted. Every name
+ * looks new there and saying so would be noise, so the block is left off. That
+ * is a different case from a comparison that found nothing, which has its own
+ * sentence, and the two must not be spelled the same way — one means *nothing
+ * was published*, the other means *nobody knows*.
+ */
+export const generatorSays = (
+  committed: readonly ApiEntry[] | undefined,
+  fresh: readonly ApiEntry[],
+  exports: number
+): string => {
+  const wrote = `loom: wrote ${fresh.length} entry points and ${exports} exports to reference.generated.json`
+
+  if (committed === undefined) {
+    return `${wrote}\nloom: there was no reference to compare against, so nothing is said about which names are new.\n`
+  }
+
+  return `${wrote}\n${whereProseGoes(namesArrived(committed, fresh), proseHomes(fresh))}\n`
+}

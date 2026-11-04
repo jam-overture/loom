@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 
 import { extractReference, GENERATED_FILE, serializeReference } from "./extract"
 import { apiSymbolCount } from "./model"
-import { namesArrived, proseHomes, whereProseGoes } from "./prose-home"
+import { generatorSays } from "./prose-home"
 import { parseReference } from "./reference"
 
 /**
@@ -65,12 +65,4 @@ writeFileSync(GENERATED_FILE, serializeReference(reference), "utf8")
 
 const total = reference.entries.reduce((count, entry) => count + apiSymbolCount(entry), 0)
 
-process.stdout.write(
-  `loom: wrote ${reference.entries.length} entry points and ${total} exports to reference.generated.json\n`
-)
-
-if (committed !== undefined) {
-  process.stdout.write(
-    `${whereProseGoes(namesArrived(committed, reference.entries), proseHomes(reference.entries))}\n`
-  )
-}
+process.stdout.write(generatorSays(committed, reference.entries, total))
