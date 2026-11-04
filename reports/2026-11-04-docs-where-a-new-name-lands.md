@@ -447,3 +447,13 @@ arranged locally (#709).
 *Taken from the `vercel[bot]` comment after the pull request was opened, not
 composed from the branch name.*
 
+https://loom-git-docs-77-where-a-new-7f2faa-jpizzolato36-6341s-projects.vercel.app
+
+The two pages the pictures are of:
+
+- https://loom-git-docs-77-where-a-new-7f2faa-jpizzolato36-6341s-projects.vercel.app/docs/api-reference
+- https://loom-git-docs-77-where-a-new-7f2faa-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/cli
+
+Every picture above was taken against a build in this container, not fetched
+from the preview: `*.vercel.app` is denied by the environment's egress policy,
+which is the open finding of 12 October and still true.
