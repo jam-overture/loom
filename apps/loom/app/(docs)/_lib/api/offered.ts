@@ -55,13 +55,26 @@ export type Offered = ReadonlyMap<string, string>
  * Each is stated as a fact about the *reader*, because that is what decides
  * whether it matters. A reference that is merely imprecise is a smaller problem
  * than one that is wrong about whether something is there at all.
+ *
+ * **`not-listed`'s sentence was wrong about its own subject until 4 November**,
+ * and the cost of that is worth recording because it was paid by another lane.
+ * It read *"and no page on this site mentions it. Something is published that a
+ * reader has no way to find."* The page it compares the door against is the
+ * **generated** one, and the written pages are not in the comparison at all —
+ * so the sentence described a prose gap that this check has never looked for.
+ * `Loom daily build` read it on 3 October, concluded that publishing a name
+ * required a page in another lane's directory, and recorded in the finding that
+ * #501 had chosen a module boundary under that constraint rather than on merit.
+ * The constraint does not exist: the remedy is one command, it is tooling, and
+ * the sentence now names it. `prose-home.ts` carries the rest of that entry's
+ * answer.
  */
 export type DisagreementKind =
   /** The page offers it. The door hands back nothing under that name. */
   | "not-offered"
   /** The page says it is a function. The door hands back something else. */
   | "not-a-function"
-  /** The door offers it. The page does not mention it. */
+  /** The door offers it. The generated page does not list it. */
   | "not-listed"
   /** The page says it is a type. The door hands back a value under that name too. */
   | "offered-as-a-value"
@@ -159,7 +172,7 @@ export const disagreements = (entry: ApiEntry, offered: Offered): readonly Disag
       specifier: entry.specifier,
       name,
       kind: "not-listed",
-      sentence: `${entry.specifier} hands back a ${typeOf} called ${name} and no page on this site mentions it. Something is published that a reader has no way to find.`,
+      sentence: `${entry.specifier} hands back a ${typeOf} called ${name} and the generated reference for that door does not list it. Run \`pnpm --filter @loom/app docs:api\` and commit the result; if the name is still missing afterwards, the generator cannot see it in the published declarations, which is the harder half. Nothing here asks for prose.`,
     })
   }
 

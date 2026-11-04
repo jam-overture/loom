@@ -4,6 +4,7 @@ import type { EntryPoint } from "../entry-points"
 
 import { apiDoorsFor, doorwayOf } from "./doors"
 import type { ApiEntry, ApiSymbol } from "./model"
+import type { ProseHome } from "./prose-home"
 import { standingBySpecifier } from "./standing"
 
 /**
@@ -83,10 +84,35 @@ const packageOf = (
   }
 }
 
-const doorwayFor = (doors: readonly Door[]) => {
+/**
+ * A prose home per door, with however many candidate pages it is given.
+ *
+ * Written out here rather than derived from invented pages, because what this
+ * file is about is the arranging: `prose-home.test.ts` next door holds the
+ * deriving. One page per candidate, named after its index, is enough to count.
+ */
+const homesFor = (
+  doors: readonly Door[],
+  pages: Readonly<Record<string, number>> = {}
+): readonly ProseHome[] =>
+  doors.map((door) => ({
+    specifier: door.specifier,
+    slug: slugOf(door.specifier),
+    pages: Array.from({ length: pages[door.specifier] ?? 0 }, (_unused, index) => ({
+      href: `/docs/getting-started/page-${index}`,
+      title: `Page ${index}`,
+      sectionTitle: "Getting started",
+      source: `apps/loom/app/(docs)/docs/getting-started/page-${index}/page.mdx`,
+      named: 1,
+    })),
+    standing: "none" as const,
+    sentence: "",
+  }))
+
+const doorwayFor = (doors: readonly Door[], pages: Readonly<Record<string, number>> = {}) => {
   const { entries, listed } = packageOf(doors)
 
-  return doorwayOf(entries, listed)
+  return doorwayOf(entries, listed, homesFor(doors, pages))
 }
 
 describe("the doors of a package, seen together", () => {
@@ -205,7 +231,7 @@ describe("the doors of a package, seen together", () => {
   })
 
   it("refuses a reference with no doors in it at all", () => {
-    expect(() => doorwayOf([], [])).toThrow(/no doors/)
+    expect(() => doorwayOf([], [], [])).toThrow(/no doors/)
   })
 
   /**
@@ -220,7 +246,9 @@ describe("the doors of a package, seen together", () => {
       { specifier: "@invented/b", symbols: [parse] },
     ])
 
-    expect(() => doorwayOf(entries, listed.slice(0, 1))).toThrow(/never heard of/)
+    expect(() =>
+      doorwayOf(entries, listed.slice(0, 1), homesFor([{ specifier: "@invented", symbols: [send] }]))
+    ).toThrow(/never heard of/)
   })
 
   it("refuses two doors that disagree about the size of the package", () => {
@@ -236,9 +264,49 @@ describe("the doors of a package, seen together", () => {
     expect(() =>
       doorwayOf(
         [first, { ...second, standing: { ...second.standing, packageNames: 99 } }],
-        listed
+        listed,
+        homesFor([
+          { specifier: "@invented", symbols: [send] },
+          { specifier: "@invented/b", symbols: [parse] },
+        ])
       )
     ).toThrow(/publishes 99 names/)
+  })
+
+  /**
+   * How much of this site writes about a door, carried on its row — the one
+   * thing a reader choosing an import cannot see from the inside.
+   */
+  it("says how many written pages name anything behind each door", () => {
+    const doorway = doorwayFor(
+      [
+        { specifier: "@invented", symbols: [send, parse] },
+        { specifier: "@invented/b", symbols: [read] },
+      ],
+      { "@invented": 4, "@invented/b": 0 }
+    )
+
+    expect(doorway.doors.map((door) => [door.specifier, door.writtenPages])).toEqual([
+      ["@invented", 4],
+      ["@invented/b", 0],
+    ])
+  })
+
+  /**
+   * Nought is a fact about the site; no answer at all is a list that has
+   * stopped covering the doors. Drawing the second as the first would put *no
+   * written page names anything on this import* under a door a dozen pages talk
+   * about, which is the one sentence here a reader would act on.
+   */
+  it("refuses a door no prose home was worked out for", () => {
+    const { entries, listed } = packageOf([
+      { specifier: "@invented", symbols: [send] },
+      { specifier: "@invented/b", symbols: [parse] },
+    ])
+
+    expect(() =>
+      doorwayOf(entries, listed, homesFor([{ specifier: "@invented", symbols: [send] }]))
+    ).toThrow(/unknown rather than nought/)
   })
 
   it("refuses a reference where one door believes something another does not", () => {
@@ -254,7 +322,11 @@ describe("the doors of a package, seen together", () => {
     expect(() =>
       doorwayOf(
         [first, { ...second, standing: { ...second.standing, doorsSharingNothing: 0 } }],
-        listed
+        listed,
+        homesFor([
+          { specifier: "@invented", symbols: [send] },
+          { specifier: "@invented/b", symbols: [parse] },
+        ])
       )
     ).toThrow(/every such pair has two sides/)
   })

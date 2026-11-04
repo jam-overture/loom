@@ -22,6 +22,7 @@ const door = (over: Partial<ApiDoor> = {}): ApiDoor => ({
   summary: "What is behind the root import.",
   audience: "app",
   publishes: 100,
+  writtenPages: 4,
   widest: true,
   ...over,
 })
@@ -235,5 +236,35 @@ describe("the front door of the reference", () => {
     )
 
     expect(container.textContent ?? "").not.toContain("British")
+  })
+})
+
+/**
+ * Whether this site has written anything about an import, under the import.
+ *
+ * The answer that earns the line is nought, and it is only legible beside the
+ * others — so both are checked, and the nought is checked for the words a
+ * reader acts on rather than for the digit.
+ */
+describe("how much of the site writes about each import", () => {
+  const said = (writtenPages: number): string => {
+    const { container } = render(
+      <ApiDoors doorway={doorway({ doors: [door({ writtenPages })] })} spelling={spelling()} />
+    )
+
+    return container.textContent ?? ""
+  }
+
+  it("says how many written pages name anything behind a door", () => {
+    expect(said(4)).toContain("Named on 4 written pages")
+  })
+
+  it("says page rather than pages when there is one", () => {
+    expect(said(1)).toContain("Named on 1 written page")
+  })
+
+  it("says plainly when no written page names anything behind a door", () => {
+    expect(said(0)).toContain("No written page names anything published by this import.")
+    expect(said(0)).not.toContain("Named on 0")
   })
 })

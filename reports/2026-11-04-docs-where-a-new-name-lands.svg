@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 510" width="900" height="510" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .box { fill: #fafafa; stroke: #d4d4d8; }
+    .ok { fill: #f0fdf4; stroke: #86efac; }
+    .bad { fill: #fef2f2; stroke: #fca5a5; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .line { stroke: #a1a1aa; }
+    .dead { stroke: #fca5a5; }
+    text { font-size: 13px; }
+    .h { font-size: 15px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; }
+    .mono { font-size: 11.5px; font-family: "Geist Mono", ui-monospace, monospace; }
+    .sm { font-size: 11.5px; }
+    @media (prefers-color-scheme: dark) {
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .box { fill: #1c1c1f; stroke: #3f3f46 }
+      .ok { fill: #0d2017; stroke: #15803d }
+      .bad { fill: #220f0f; stroke: #b91c1c }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 }
+      .line { stroke: #52525b } .dead { stroke: #b91c1c }
+    }
+  </style>
+
+  <text class="h t" x="24" y="30">What a framework run is told when it publishes a name</text>
+
+  <!-- BEFORE -->
+  <text class="k badt" x="24" y="64">BEFORE — THREE OPTIONS, AND THE CONSTRAINT WAS NOT REAL</text>
+
+  <rect class="box" x="24" y="78" width="188" height="56" rx="6"/>
+  <text class="t" x="38" y="100">a new export</text>
+  <text class="mono m" x="38" y="120">src/telemetry/…</text>
+
+  <line class="line" x1="212" y1="106" x2="268" y2="106" stroke-width="1.5"/>
+  <polygon class="line" fill="#a1a1aa" points="268,102 278,106 268,110"/>
+
+  <rect class="bad" x="278" y="78" width="330" height="56" rx="6"/>
+  <text class="badt" x="292" y="100">“and no page on this site mentions it.</text>
+  <text class="badt" x="292" y="118">Something is published that a reader has no way to find.”</text>
+
+  <line class="dead" x1="608" y1="106" x2="664" y2="106" stroke-width="1.5"/>
+  <polygon class="dead" fill="#fca5a5" points="664,102 674,106 664,110"/>
+
+  <rect class="bad" x="674" y="78" width="202" height="56" rx="6"/>
+  <text class="badt" x="688" y="100">read as: a page is owed,</text>
+  <text class="badt" x="688" y="118">in a lane you may not edit</text>
+
+  <text class="m sm" x="24" y="158">The page in that comparison is the <tspan class="t">generated</tspan> one. The written pages were never in it. So the sentence named a gap</text>
+  <text class="m sm" x="24" y="176">this check has never looked for — and on 3 October #501 chose a module boundary rather than cross a lane it did not have to cross.</text>
+
+  <!-- AFTER -->
+  <text class="k okt" x="24" y="226">AFTER — 4 NOVEMBER</text>
+
+  <rect class="box" x="24" y="240" width="188" height="56" rx="6"/>
+  <text class="t" x="38" y="262">a new export</text>
+  <text class="mono m" x="38" y="282">src/telemetry/…</text>
+
+  <line class="line" x1="212" y1="268" x2="268" y2="268" stroke-width="1.5"/>
+  <polygon class="line" fill="#a1a1aa" points="268,264 278,268 268,272"/>
+
+  <rect class="ok" x="278" y="240" width="330" height="56" rx="6"/>
+  <text class="okt" x="292" y="262">“…the generated reference does not list it. Run</text>
+  <text class="mono okt" x="292" y="280">pnpm --filter @loom/app docs:api</text>
+
+  <line class="line" x1="608" y1="268" x2="664" y2="268" stroke-width="1.5"/>
+  <polygon class="line" fill="#a1a1aa" points="664,264 674,268 664,272"/>
+
+  <rect class="ok" x="674" y="240" width="202" height="56" rx="6"/>
+  <text class="okt" x="688" y="262">green, with no prose</text>
+  <text class="okt" x="688" y="280">anywhere. One lane.</text>
+
+  <!-- the derived answer -->
+  <rect class="box" x="24" y="320" width="852" height="124" rx="6"/>
+  <text class="k m" x="38" y="344">AND IF A SENTENCE IS WANTED, THE COMMAND SAYS WHERE IT GOES</text>
+  <text class="mono t" x="38" y="368">@jam-overture/loom/telemetry — demonstrationOnly</text>
+  <text class="mono m" x="38" y="388">2 written pages name something published by that door. The one that names the most is</text>
+  <text class="mono m" x="38" y="406">What every ask leaves behind (apps/loom/app/(docs)/docs/the-runtime/what-every-ask-leaves-behind/page.mdx);</text>
+  <text class="mono m" x="38" y="424">which of the 2 a particular name belongs on is a judgement.</text>
+
+  <text class="m sm" x="24" y="470">Derived from the pages themselves — the pages that carry a door's prose are the pages that name its exports — and said as one of</text>
+  <text class="m sm" x="24" y="488">three standings, because naming one page for a door with six hundred exports across nineteen pages would be a guess dressed as an answer.</text>
+</svg>

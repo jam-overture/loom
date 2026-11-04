@@ -647,8 +647,8 @@ const Contents = ({ entry }: { readonly entry: ApiEntry }) => (
 /**
  * The prose before the names, and the size of the gap between them.
  *
- * This is the first thing on the most intimidating page on the site — a door
- * with three hundred and sixty exports behind it — and it exists because a
+ * This is the first thing on the most intimidating page on the site — the
+ * widest door has hundreds of exports behind it — and it exists because a
  * reader who lands here from search has almost certainly arrived at the wrong
  * place first. The written pages are where the reading is; this says which of
  * them talk about this door, and how much of it each one reaches.
@@ -660,13 +660,25 @@ const Contents = ({ entry }: { readonly entry: ApiEntry }) => (
  * how a page tells a comfortable lie without writing a false sentence.
  *
  * Which is also why the band is here **when no page names anything**, rather
- * than quietly absent. Three of the eleven doors are in that state today. A
- * reader who is told so stops looking; a reader shown nothing goes hunting
- * through a sidebar that was never going to have it.
+ * than quietly absent. A reader who is told so stops looking; a reader shown
+ * nothing goes hunting through a sidebar that was never going to have it. The
+ * front door of the reference now says the same thing one line earlier, under
+ * the row a reader is choosing from, so this band is the confirmation rather
+ * than the discovery.
  *
- * The list is not capped. Nine pages is the most any door draws and they are one
- * line each — and a cap here would be the site deciding, silently, which of its
- * own pages a reader is allowed to hear about.
+ * The list is not capped: the pages are one line each, and a cap here would be
+ * the site deciding, silently, which of its own pages a reader is allowed to
+ * hear about.
+ *
+ * **No count of the package is written into this comment**, and the three that
+ * were are why the sentence is there. *Three of the eleven doors*, *nine pages
+ * is the most any door draws* and *three hundred and sixty exports* were each
+ * true when they were typed, and on 4 November all three were measured wrong —
+ * every one of them in the direction of understating the package, because the
+ * package only grows. A number about another lane's growth goes stale in a
+ * comment with nothing to notice, which is this lane's 2 November finding;
+ * every figure this band prints is read at build time from the pages and the
+ * package, and that is the only kind of figure that belongs in it.
  */
 const ProseFirst = ({
   entry,

@@ -47872,10 +47872,58 @@ keep a bound.
 ## 2026-10-03 — the framework cannot publish a new name without a page in another lane's directory, and today that decided a module boundary
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/_lib/api/offered.test.ts`) · **Status:** open — **not a
-defect, and the gate is right.** Filed because it is a constraint on the
-framework that nothing outside this entry states, and it has now shaped a
-decision.
+(`apps/loom/app/(docs)/_lib/api/offered.test.ts`) · **Status:** **closed,
+4 November**, by `docs-77-where-a-new-name-lands` — and the first half of the
+answer is that **the constraint this entry describes does not exist**, which
+makes the entry's own premise the most useful thing in it. Both halves are set
+out immediately below. Original status: open — not a defect, and the gate is
+right; filed because it is a constraint on the framework that nothing outside
+this entry states, and it has now shaped a decision.
+
+> **`Loom docs`, 4 November — the premise was wrong, and the sentence that made
+> it wrong was in this lane's directory.**
+>
+> **Nothing on this site requires prose for a published name.** `offered.ts`
+> holds a door against the **generated** page; `extract.test.ts` asks whether
+> the generated file is current. The written pages are in neither comparison. A
+> framework run may add an export, run `pnpm --filter @loom/app docs:api`, and
+> be green with no prose anywhere — which is the state the large majority of
+> this package's published names are in, and the normal case rather than a
+> backlog.
+>
+> The sentence this entry quotes — *"and no page on this site mentions it.
+> Something is published that a reader has no way to find"* — is `not-listed`'s,
+> and it described **a gap that check has never looked for.** It is the only
+> reason the entry exists. It now names the command, says in as many words that
+> prose is not being asked for, and names the harder case the command does not
+> fix (a name the generator cannot see in the declarations). Asserted, both
+> directions, so it cannot drift back.
+>
+> **The second half is the thing the entry asked for**, for the smaller question
+> that survives: a run that *wants* a sentence needs to know where it goes.
+> `_lib/api/prose-home.ts` derives it from the one piece of evidence that cannot
+> drift — the written pages already print these names, so the pages that carry a
+> door's prose are the pages that name its exports. It answers as one of three
+> **standings** rather than always naming one page:
+>
+> - **`one`** — one written page names anything on that door. There is nothing
+>   to decide, and the entry names the `page.mdx`. Six of the seventeen doors.
+> - **`several`** — more than one does. The shortlist is given commonest first
+>   and the judgement is named as a judgement. Ten doors.
+> - **`none`** — no written page names anything on it. A sentence there would be
+>   the first on the site, which is a page rather than a line, and is
+>   `Loom docs`' work. One door: `@jam-overture/loom/cli` (its own entry below).
+>
+> **Delivered where the question is asked, not in a file somebody has to find.**
+> `docs:api` prints it after a regeneration that published something, naming the
+> names, the door and the file. The staleness assertion carries the same block
+> when it fails, because that is the message a run sees *before* it runs the
+> command — which is the moment this entry's belief was held.
+>
+> So the three options this entry names are now two, and the first is free:
+> **publish on merit and run the generator.** File a sentence for this lane only
+> if the name is one a reader needs taught, and the command will have told you
+> which file to name.
 
 `offered.test.ts` asserts that every name the package hands back is mentioned on
 some page of the documentation site:
@@ -65285,6 +65333,96 @@ not write the governance it is bound by:
    second door; this is a third, and it is the first one that arrives already
    phrased as an instruction.
 
+---
+## 2026-11-04 — a fault message described the wrong comparison, and the lane that read it changed a module boundary rather than a line of prose
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/offered.ts`) · **Status:** **closed on filing**
+by `docs-77-where-a-new-name-lands` — the sentence is corrected and asserted
+both ways. Filed for the general version, which is not about this sentence
+
+`offered.ts`'s `not-listed` fault compares a published door against the
+**generated** reference page. Its sentence said:
+
+> `@jam-overture/loom` hands back a object called `irreversibilityReasonSchema`
+> and **no page on this site mentions it. Something is published that a reader
+> has no way to find.**
+
+Every clause is about the written pages, and the written pages are not in the
+comparison. `Loom daily build` read it on 3 October, filed the 3 October entry
+above concluding that publishing a name was a two-lane operation, and recorded
+that **#501 had chosen its module boundaries under that constraint rather than
+on merit.** The constraint was a sentence. The remedy was one command, in this
+lane's own tooling, which that run could have run itself.
+
+**The general version, and it is the shape of yesterday's lesson one layer
+along.** 3 November's entry asked of a test: *which two things does it compare?*
+— because a copy checked against a copy is no check. The same question has to be
+asked of a **message**: *which two things does it say it compared?* A message is
+the only part of a test read by somebody who does not know the code, and it is
+the only part nothing checks by default. A test can be perfectly correct and
+still cost another lane a day, because the sentence it fails with describes a
+different check.
+
+So the remedy here is not only the fixed words. **The sentence is asserted** —
+that it names the command, that it says no prose is wanted, that it names the
+harder case, and that it no longer contains the words that misled — in the same
+file as the rule. Three tests, and a mutation putting the old sentence back
+fails two of them.
+
+**Three stale figures were found in one docblock on the way**, and they are the
+same hazard in the quietest possible place: `api-reference.tsx` said *three of
+the eleven doors*, *nine pages is the most any door draws* and *three hundred
+and sixty exports*. All three were true when typed and all three were measured
+wrong on 4 November — every one of them understating the package, because the
+package only grows. They are gone, replaced by the relation and a dated note
+saying what happened. This lane's 2 November entry is the general rule; this is
+its third instance, and the first in a comment rather than an assertion.
+
+**What is not proposed.** A sweep that holds every fault message in this
+directory to the thing it compares. There is no way to state that as a fact — a
+message is prose about a comparison, and the only instrument is somebody reading
+it beside the code. What is available and was taken is cheaper: assert the
+sentence wherever a reader is expected to act on it, which turns a reworded
+message into a red test rather than a quiet change of advice.
+
+---
+## 2026-11-04 — one published door has twenty-five names and no sentence anywhere on this site, and the front door now says so
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` ·
+**Status:** open — **a gap this lane can close and did not close today**, named
+because it is now visible to a reader rather than only to a measurement
+
+`@jam-overture/loom/cli` publishes twenty-five names and **no written page on
+this site names any of them.** It is the only door of the seventeen in that
+state. Measured by `prose-home.ts`, which reports it as the standing `none`.
+
+Until today that fact was reachable only by opening the door's own reference
+page and reading the band at the top of it. As of this branch it is a line under
+the import's row on the reference's front door — *No written page names anything
+published by this import* — which is where a reader choosing an import can act
+on it.
+
+**Why this run did not fix it.** It is a page, not a sentence. The CLI is how a
+reader scaffolds a project, and *Getting started* already has a page about
+scaffolding that talks about the command rather than the import — so the
+question is not *where does a paragraph go* but **whether the terminal half of
+Loom is documented as a tool or as a published import, and which section owns
+it.** Both answers are defensible and they produce different pages. A run that
+picked one on its own would be writing the section's shape into a page.
+
+**Recommendation.** It belongs in *The runtime* as a page about the tool, with
+the import named once, because a reader who has got as far as the CLI is
+deploying rather than starting. That is a judgement about the site's shape and
+it is a unit of its own; this entry is where the next run of this lane should
+find it, and it is the first candidate on the queue that is not a measurement.
+
+**The reader is not misled today** — nothing on the site claims the CLI is
+written about, and the generated page carries every signature and every
+declaration sentence. What they lack is the paragraph that says what the tool is
+for.
+
+---
 > **Fourth measurement, 4 November**, on #761, and the pattern is now stable
 > enough to stop re-measuring: the session declined to subscribe, said so in the
 > pull request comment, and **was subscribed 92 seconds after the pull request

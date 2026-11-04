@@ -23,6 +23,7 @@ import {
 } from "./extract"
 import { MODULE_TITLES, moduleTitle } from "./groups"
 import { apiAnchorFor, apiNavLabelFor, apiSlugFor, apiSymbolCount } from "./model"
+import { staleReferenceMessage } from "./prose-home"
 import { apiEntries, apiEntryAt, apiSlugs, parseReference } from "./reference"
 
 /**
@@ -127,15 +128,35 @@ describe("the published entry points", () => {
 })
 
 describe("the generated reference", () => {
+  /**
+   * The staleness check, and the one place a run that has just published a name
+   * is certain to be looking.
+   *
+   * It used to say nine words: *the runtime's published surface has moved, run
+   * `docs:api` and commit the result*. True, sufficient, and silent about the
+   * question the run actually has next — **what did I add, and does any of it
+   * owe a page?** `Loom daily build` answered that question wrongly on
+   * 3 October, from a neighbouring fault message, and chose a module boundary
+   * on the strength of it. So the message now carries the answer: the names
+   * that arrived, the door each arrived on, and the sentence `prose-home.ts`
+   * derives for that door — opening with the fact that **nothing here asks for
+   * prose at all.**
+   *
+   * The block is built before the comparison because an `expect` message is an
+   * argument rather than a callback. What that costs is one walk of two
+   * reference objects this file already holds — the committed one is
+   * `apiEntries`, parsed when the module loaded, and the fresh one is the
+   * extraction the assertion is about. Nothing is read twice.
+   */
   it("is what the generator produces right now", { timeout: 120_000 }, () => {
     if (!built) throw new Error(missingBuild)
 
     const committed = readFileSync(GENERATED_FILE, "utf8")
+    const fresh = extractReference()
 
-    expect(
-      serializeReference(extractReference()),
-      "the runtime's published surface has moved. Run `pnpm --filter @loom/app docs:api` and commit the result."
-    ).toEqual(committed)
+    expect(serializeReference(fresh), staleReferenceMessage(apiEntries, fresh.entries)).toEqual(
+      committed
+    )
   })
 
   it("describes every door the package opens", () => {

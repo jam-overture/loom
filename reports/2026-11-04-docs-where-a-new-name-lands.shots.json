@@ -1,0 +1,35 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-11-04-docs-where-a-new-name-lands-wide-doors",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has-text(\"If you are building a page\")"
+    },
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-11-04-docs-where-a-new-name-lands-wide-terminal",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has-text(\"From a terminal, and from your tests\")",
+      "measure": ["text=No written page names anything published by this import."]
+    },
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-11-04-docs-where-a-new-name-lands-phone-terminal",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "do": [{ "scrollTo": "li:has-text(\"@jam-overture/loom/cli\")" }]
+    },
+    {
+      "path": "/docs/api-reference/cli",
+      "out": "2026-11-04-docs-where-a-new-name-lands-wide-cli",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["nav[aria-label=\"Written pages about this import\"]"]
+    }
+  ]
+}

@@ -73,8 +73,54 @@ const Door = ({ door }: { readonly door: ApiDoor }) => (
     </div>
 
     <p className="text-ink-muted mt-1 text-sm leading-relaxed">{door.summary}</p>
+
+    <WrittenAbout door={door} />
   </li>
 )
+
+/**
+ * Whether this site has written anything about the import, under the import.
+ *
+ * **The thing a reader cannot see from the inside.** Each reference page says
+ * how much written prose covers its own door — and by the time they are reading
+ * it the choice is made. A reader who picks the one import this site has never
+ * written a paragraph about has to open it, scroll past six hundred signatures
+ * and read a band to find out. Here it is a line under the row, before the
+ * click.
+ *
+ * **Nought is the answer that earns the line.** Sixteen rows reading *written
+ * about on four pages* would be decoration; one reading *no written page names
+ * anything published by this import* is the whole reason a reader is being
+ * shown this at all, and it is only legible beside the others.
+ *
+ * It says *names* rather than *explains*, which is the same restraint the
+ * per-door band keeps and for the same reason: what the site knows is that the
+ * page prints the name in code. Whether the page teaches the export is a
+ * judgement nobody made, and a promise of one followed by a code block is worse
+ * than the silence it replaced.
+ *
+ * **`data-search="off"`, and the budget is why it is worth arguing.** This is
+ * seventeen near-identical lines on one page, and the thing that reads them
+ * besides a reader is the prose index — which sits 338 bytes under its total cap
+ * as this ships, the open finding of 26 October. Measured both ways, indexing
+ * them costs 66 of those bytes gzipped: a fifth of the whole site's remaining
+ * headroom, spent on text nobody will ever type into the box, since *named on
+ * four written pages* is a label beside a row rather than a query. Off, the
+ * index is byte-identical to `main`. The claim a reader might actually search
+ * for is the one each reference page already makes in prose under its own door,
+ * and that one is indexed.
+ */
+const WrittenAbout = ({ door }: { readonly door: ApiDoor }) =>
+  door.writtenPages === 0 ? (
+    <p data-search="off" className="text-ink-faint mt-1 text-xs">
+      No written page names anything published by this import.
+    </p>
+  ) : (
+    <p data-search="off" className="text-ink-faint mt-1 text-xs">
+      Named on {grouped(door.writtenPages)} written{" "}
+      {door.writtenPages === 1 ? "page" : "pages"}.
+    </p>
+  )
 
 const DoorGroup = ({
   title,
