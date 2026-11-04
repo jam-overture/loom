@@ -93,10 +93,48 @@ describe("holding a page against the door it describes", () => {
     expect(faults[0]?.sentence).toContain("hands back a object")
   })
 
-  it("catches a door handing back something no page mentions", () => {
+  it("catches a door handing back something the generated page does not list", () => {
     const faults = disagreements(page("@jam-overture/loom/store", []), door({ memoryStore: "function" }))
 
     expect(faults.map((fault) => [fault.name, fault.kind])).toEqual([["memoryStore", "not-listed"]])
+  })
+
+  /**
+   * The sentence, held to what this rule actually compares.
+   *
+   * It said *"no page on this site mentions it. Something is published that a
+   * reader has no way to find"*, and the page in the comparison is the
+   * generated one — the written pages are not in it at all. `Loom daily build`
+   * read that on 3 October, concluded that publishing a name needed a page in
+   * this lane's directory, and recorded that #501 had picked a module boundary
+   * on the strength of it. So the sentence is now asserted rather than left to
+   * be read: it names the command, and it says in as many words that prose is
+   * not being asked for.
+   */
+  it("tells a run that published a name to regenerate, and that no prose is wanted", () => {
+    const [fault] = disagreements(
+      page("@jam-overture/loom/telemetry", []),
+      door({ telemetryWindow: "function" })
+    )
+
+    expect(fault?.sentence).toContain("the generated reference for that door does not list it")
+    expect(fault?.sentence).toContain("pnpm --filter @loom/app docs:api")
+    expect(fault?.sentence).toContain("Nothing here asks for prose")
+    expect(fault?.sentence).not.toContain("no page on this site mentions it")
+  })
+
+  /**
+   * And the other half of why it was worth rewording: regenerating is the
+   * remedy for the common case and not for all of it. A name the generator
+   * cannot see in the declarations survives the command, and a reader of this
+   * sentence who ran it and got the same failure needs to be told that is a
+   * different problem rather than left to run it again.
+   */
+  it("names the harder case the command does not fix", () => {
+    const [fault] = disagreements(page("@jam-overture/loom", []), door({ ok: "function" }))
+
+    expect(fault?.sentence).toContain("still missing afterwards")
+    expect(fault?.sentence).toContain("cannot see it in the published declarations")
   })
 
   /**

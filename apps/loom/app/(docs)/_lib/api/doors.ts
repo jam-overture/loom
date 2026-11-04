@@ -1,6 +1,7 @@
 import type { EntryPoint } from "../entry-points"
 
 import { apiSymbolCount, type ApiEntry } from "./model"
+import type { ProseHome } from "./prose-home"
 
 /**
  * The doors seen together, which is the one view sixteen reference pages
@@ -39,6 +40,19 @@ export type ApiDoor = {
   readonly audience: EntryPoint["audience"]
   /** How many names it publishes. */
   readonly publishes: number
+  /**
+   * How many written pages name anything published by this door.
+   *
+   * The one thing a reader choosing an import cannot see from the inside. Each
+   * reference page says it about itself, and by then the choice is made — a
+   * reader who picked the door the site has never written a paragraph about has
+   * to get all the way there to find out. Nought is a real and useful answer
+   * and is said as one.
+   *
+   * Derived from the pages rather than declared, the same way everything else
+   * about prose on this site is: see `prose-home.ts`.
+   */
+  readonly writtenPages: number
   /** Whether no other door publishes more. Ties are all widest. */
   readonly widest: boolean
   /**
@@ -101,10 +115,27 @@ export type ApiDoorway = {
 const insideOf = (entry: ApiEntry): string | undefined =>
   entry.standing.sharedWith.find((door) => door.names === apiSymbolCount(entry))?.specifier
 
-const doorOf = (entry: ApiEntry, listed: EntryPoint | undefined): ApiDoor => {
+const doorOf = (
+  entry: ApiEntry,
+  listed: EntryPoint | undefined,
+  home: ProseHome | undefined
+): ApiDoor => {
   if (listed === undefined) {
     throw new Error(
       `loom: the generated reference documents ${entry.specifier}, which entry-points.ts has never heard of`
+    )
+  }
+
+  /*
+   * A door with no answer is refused rather than drawn as a door with no
+   * prose, and the two are a long way apart: the first is a list that has
+   * stopped covering the doors, the second is a fact about the site. Printing
+   * the second in place of the first would put "no written page names anything
+   * on this import" under a door a dozen pages talk about.
+   */
+  if (home === undefined) {
+    throw new Error(
+      `loom: no prose home was worked out for ${entry.specifier}, so how much of this site writes about it is unknown rather than nought`
     )
   }
 
@@ -116,6 +147,7 @@ const doorOf = (entry: ApiEntry, listed: EntryPoint | undefined): ApiDoor => {
     summary: listed.summary,
     audience: listed.audience,
     publishes: apiSymbolCount(entry),
+    writtenPages: home.pages.length,
     widest: entry.standing.widest,
     ...(inside === undefined ? {} : { insideOf: inside }),
   }
@@ -194,16 +226,26 @@ const pairsSharingNothing = (entries: readonly ApiEntry[]): number => {
 /**
  * The doorway, from the generated reference and the site's own list of doors.
  *
- * Both are passed in rather than imported, which is what lets the tests state a
- * package's shape — a door inside another, a name meaning two things, a package
- * with one door — instead of arranging for Loom's package to take it.
+ * All three are passed in rather than imported, which is what lets the tests
+ * state a package's shape — a door inside another, a name meaning two things, a
+ * package with one door — instead of arranging for Loom's package to take it.
+ *
+ * `homes` is required rather than defaulted for the reason the 2 November lesson
+ * gives: an argument that defaults to an empty list makes every assertion over
+ * it true, and the assertion over this one is that every door says how much of
+ * the site writes about it. An empty default would have answered *nought* for
+ * all seventeen and nothing would have gone red.
  */
 export const doorwayOf = (
   entries: readonly ApiEntry[],
-  listed: readonly EntryPoint[]
+  listed: readonly EntryPoint[],
+  homes: readonly ProseHome[]
 ): ApiDoorway => {
   const summaries = new Map(listed.map((entry) => [entry.specifier, entry]))
-  const doors = entries.map((entry) => doorOf(entry, summaries.get(entry.specifier)))
+  const byDoor = new Map(homes.map((home) => [home.specifier, home]))
+  const doors = entries.map((entry) =>
+    doorOf(entry, summaries.get(entry.specifier), byDoor.get(entry.specifier))
+  )
   const [first] = entries
 
   if (first === undefined) throw new Error("loom: the generated reference has no doors")

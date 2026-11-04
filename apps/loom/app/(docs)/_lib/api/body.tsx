@@ -9,6 +9,7 @@ import { packageSpelling } from "../spelling"
 
 import { doorwayOf } from "./doors"
 import { entryProseFor } from "./mentions"
+import { proseHomes } from "./prose-home"
 import { apiEntries, apiEntryAt } from "./reference"
 
 /**
@@ -38,7 +39,18 @@ export const generatedPageBody = (sectionSlug: string, pageSlug: string): ReactN
   if (sectionSlug !== "api-reference") return undefined
 
   if (pageSlug === DOCS_LANDING_SLUG) {
-    return <ApiDoors doorway={doorwayOf(apiEntries, entryPoints)} spelling={packageSpelling()} />
+    /*
+     * The homes are resolved here for the same reason the per-door prose is
+     * resolved here: working out which written pages name a door's exports
+     * means reading every page off disk, and `doorwayOf` is pure over three
+     * lists so that its tests can state a package rather than arrange for one.
+     */
+    return (
+      <ApiDoors
+        doorway={doorwayOf(apiEntries, entryPoints, proseHomes(apiEntries))}
+        spelling={packageSpelling()}
+      />
+    )
   }
 
   const entry = apiEntryAt(pageSlug)

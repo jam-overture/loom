@@ -1,7 +1,9 @@
-import { writeFileSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 
 import { extractReference, GENERATED_FILE, serializeReference } from "./extract"
 import { apiSymbolCount } from "./model"
+import { namesArrived, proseHomes, whereProseGoes } from "./prose-home"
+import { parseReference } from "./reference"
 
 /**
  * Write the reference out.
@@ -35,6 +37,28 @@ import { apiSymbolCount } from "./model"
  * that quietly describes last week's package.
  */
 
+/**
+ * What the file said before this run, read before it is overwritten.
+ *
+ * The only reason to want it is the block below, and the block below is the
+ * whole of this lane's answer to the 3 October finding: a run reaching for this
+ * command has usually just published something, and the question it has next is
+ * *what did I add, and does any of it owe a page?* The answer is the difference
+ * between these two references, and after the write it is gone.
+ *
+ * A first run, or a run on a tree where the file has been deleted, has nothing
+ * to compare against. That is not a failure — it is a regeneration from
+ * nothing, where every name looks new and saying so would be noise — so the
+ * comparison is skipped and the block is not printed.
+ */
+const committed = (() => {
+  try {
+    return parseReference(JSON.parse(readFileSync(GENERATED_FILE, "utf8")) as unknown).entries
+  } catch {
+    return undefined
+  }
+})()
+
 const reference = extractReference()
 
 writeFileSync(GENERATED_FILE, serializeReference(reference), "utf8")
@@ -44,3 +68,9 @@ const total = reference.entries.reduce((count, entry) => count + apiSymbolCount(
 process.stdout.write(
   `loom: wrote ${reference.entries.length} entry points and ${total} exports to reference.generated.json\n`
 )
+
+if (committed !== undefined) {
+  process.stdout.write(
+    `${whereProseGoes(namesArrived(committed, reference.entries), proseHomes(reference.entries))}\n`
+  )
+}
