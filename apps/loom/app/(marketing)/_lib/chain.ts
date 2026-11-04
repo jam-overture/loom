@@ -45,8 +45,8 @@
  * anyway: the first two are yours and the rest happen without you.
  */
 
-import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "./bands"
-import { sitePath, WHAT_YOU_RUN, WHY_USE_IT } from "./site"
+import { WHY_USE_IT_ANCHOR } from "./bands"
+import { sitePath, WHY_USE_IT } from "./site"
 
 /** One link of the chain: his wording, and what a reader actually meets. */
 export type ChainLink = {
@@ -122,7 +122,19 @@ export const CHAIN: readonly ChainLink[] = [
     actor: "Your page",
     title: "Your page reports what readers do with it",
     body: "Which parts they reach, how long they stay, and what they press. Your page never reports who they are.",
-    shown: { path: WHAT_YOU_RUN.path, anchor: COUNTED_ANCHOR },
+    /**
+     * **It pointed at the disclosure band of `/what-you-run` until 4 November**,
+     * which says what *this* deployment counts about the person reading. That
+     * is the right band for a visitor wondering what is being collected about
+     * them and the wrong one for the reader `docs/positioning.md` names: a
+     * junior developer who has just been promised data wants to see the data,
+     * not a privacy notice addressed to somebody else.
+     *
+     * `reported.ts` is the band that replaces it, and the footer of every page
+     * still carries the disclosure, so nothing stopped being reachable in the
+     * move.
+     */
+    shown: { path: WHY_USE_IT.path, anchor: WHY_USE_IT_ANCHOR.whatItReports },
   },
   {
     link: "AI reacting to signals and redesigning page",

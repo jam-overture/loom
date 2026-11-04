@@ -3,10 +3,15 @@ import { describe, expect, it } from "vitest"
 import { sequentialIdFactory, treeIdSchema, type ProposalId, type TreeId } from "../ids.js"
 import type { RuntimeEvent } from "../runtime/events.js"
 import {
+  describeTelemetryWindowFault,
   MAX_ASSESSMENT_LOOKUP,
+  MAX_TELEMETRY_LIMIT,
   recordOf,
+  telemetryWindow,
   type TelemetryJournal,
   type TelemetryRecord,
+  type TelemetrySpan,
+  type TelemetryWindow,
 } from "../telemetry/index.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
@@ -136,7 +141,7 @@ export const describeTelemetryJournalContract = (
 
       expect(await journal.read({ treeId: treeIdSchema.parse("t_absent") })).toEqual({
         ok: true,
-        value: { records: [], older: null, newer: null },
+        value: { records: [], older: null, newer: null, span: null },
       })
     })
 
@@ -146,7 +151,7 @@ export const describeTelemetryJournalContract = (
       expect(await journal.record([])).toEqual({ ok: true, value: undefined })
       expect(await journal.read()).toEqual({
         ok: true,
-        value: { records: [], older: null, newer: null },
+        value: { records: [], older: null, newer: null, span: null },
       })
     })
 
@@ -271,7 +276,7 @@ export const describeTelemetryJournalContract = (
         const last = all.ok ? all.value.records.at(-1) : undefined
         const past = await journal.read({ cursor: String(last?.seq ?? 0) })
 
-        expect(past).toEqual({ ok: true, value: { records: [], older: null, newer: null } })
+        expect(past).toEqual({ ok: true, value: { records: [], older: null, newer: null, span: null } })
       })
     })
 
@@ -521,7 +526,7 @@ export const describeTelemetryJournalContract = (
         })
         expect(await journal.read()).toEqual({
           ok: true,
-          value: { records: [], older: null, newer: null },
+          value: { records: [], older: null, newer: null, span: null },
         })
       })
 
@@ -623,6 +628,200 @@ export const describeTelemetryJournalContract = (
 
         expect(page.ok && page.value.records.every((record) => record.treeId === mine)).toBe(true)
         expect(page.ok && page.value.records).toHaveLength(2)
+      })
+    })
+
+    /**
+     * The read a person actually asks for, and the one a journal paged by
+     * arrival could not answer.
+     *
+     * Every bound here is taken off the journal's own stamps rather than off the
+     * clock in this process. A journal in memory stamps from a clock it was
+     * handed; a journal in Postgres stamps from `now()` on the database server,
+     * whose reading of the hour is its own. A suite that composed a bound
+     * locally would be asserting that two machines agree about the time, which
+     * is the one thing a `recordedAt` exists because they do not.
+     */
+    describe("asking for a stretch of time", () => {
+      const spanOrThrow = async (journal: TelemetryJournal): Promise<TelemetrySpan> => {
+        const page = await journal.read({ limit: MAX_TELEMETRY_LIMIT })
+        if (!page.ok) throw new Error("the journal could not be read")
+        if (page.value.span === null) throw new Error("the journal reported no span to bound by")
+
+        return page.value.span
+      }
+
+      const windowOrThrow = (request: Parameters<typeof telemetryWindow>[0]): TelemetryWindow => {
+        const built = telemetryWindow(request)
+        if (!built.ok) throw new Error(describeTelemetryWindowFault(built.error))
+
+        return built.value
+      }
+
+      /** One millisecond past a stamp, which is the smallest exclusive upper bound that holds it. */
+      const justAfter = (stamp: string): string => new Date(Date.parse(stamp) + 1).toISOString()
+
+      it("reports the stretch a page covers, and reports nothing for a page with no records", async () => {
+        const journal = await freshJournal()
+
+        expect(await journal.read()).toMatchObject({ ok: true, value: { span: null } })
+
+        await journal.record(sampleEpisode("span"))
+        const page = await journal.read()
+
+        if (!page.ok) throw new Error("the journal could not be read")
+
+        const span = page.value.span
+        expect(span).not.toBeNull()
+        expect(
+          page.value.records.every(
+            (record) =>
+              Date.parse(record.recordedAt) >= Date.parse(span?.from ?? "") &&
+              Date.parse(record.recordedAt) <= Date.parse(span?.to ?? "")
+          )
+        ).toBe(true)
+      })
+
+      it("holds every record when the window spans the journal's own ends", async () => {
+        const journal = await freshJournal()
+        const episode = sampleEpisode("whole")
+        await journal.record(episode)
+
+        const span = await spanOrThrow(journal)
+        const page = await journal.read({
+          window: windowOrThrow({ since: span.from, until: justAfter(span.to) }),
+        })
+
+        expect(page.ok && typesOf(page.value.records)).toEqual(typesOf(episode))
+      })
+
+      /**
+       * `since` is inclusive and `until` is not, which is what lets two
+       * consecutive windows tile. The two assertions are the two ends of that
+       * one claim: the earliest stamp is in a window that begins on it, and out
+       * of a window that ends on it.
+       */
+      it("includes a record on its since and excludes one on its until", async () => {
+        const journal = await freshJournal()
+        await journal.record(sampleEpisode("ends"))
+
+        const span = await spanOrThrow(journal)
+
+        const from = await journal.read({ window: windowOrThrow({ since: span.from }) })
+        const upTo = await journal.read({ window: windowOrThrow({ until: span.from }) })
+
+        expect(from.ok && from.value.records.length).toBeGreaterThan(0)
+        expect(upTo.ok && upTo.value.records).toEqual([])
+        expect(upTo.ok && upTo.value.span).toBeNull()
+      })
+
+      /**
+       * The property the half-open shape exists for: a boundary cuts the
+       * journal in two and loses nothing and counts nothing twice. An
+       * implementation that made `until` inclusive passes every other test here
+       * and fails this one, because the record stamped exactly on the boundary
+       * turns up on both sides.
+       */
+      it("tiles: a boundary splits the journal with nothing lost and nothing counted twice", async () => {
+        const journal = await freshJournal()
+        await journal.record(sampleEpisode("tilea"))
+        await journal.record(sampleEpisode("tileb"))
+
+        const span = await spanOrThrow(journal)
+        const everything = await journal.read({ limit: MAX_TELEMETRY_LIMIT })
+
+        const before = await journal.read({
+          window: windowOrThrow({ until: span.to }),
+          limit: MAX_TELEMETRY_LIMIT,
+        })
+        const after = await journal.read({
+          window: windowOrThrow({ since: span.to }),
+          limit: MAX_TELEMETRY_LIMIT,
+        })
+
+        const seqsIn = (page: typeof everything): readonly number[] =>
+          page.ok ? page.value.records.map((record) => record.seq) : []
+
+        const split = [...seqsIn(before), ...seqsIn(after)].sort((a, b) => a - b)
+
+        expect(split).toEqual(seqsIn(everything))
+        expect(new Set(split).size).toBe(split.length)
+      })
+
+      /**
+       * A window is measured against `recordedAt` and never against
+       * `occurredAt`, and this is the test that can tell. Every record in the
+       * fixture carries an `occurredAt` months in the past, so a window bounded
+       * at the journal's own stamps holds them all — and an implementation that
+       * bounded on what the host said would answer with nothing at all.
+       */
+      it("measures the window against when it learned of a record, not against what the host said", async () => {
+        const journal = await freshJournal()
+        const episode = sampleEpisode("stamped")
+        await journal.record(episode)
+
+        const span = await spanOrThrow(journal)
+        const page = await journal.read({ window: windowOrThrow({ since: span.from }) })
+
+        expect(page.ok && page.value.records).toHaveLength(episode.length)
+        expect(page.ok && page.value.records.every((record) => record.occurredAt === FIXED_INSTANT)).toBe(true)
+        expect(Date.parse(span.from)).toBeGreaterThan(Date.parse(FIXED_INSTANT))
+      })
+
+      it("reads a window nothing landed in as an empty page rather than an error", async () => {
+        const journal = await freshJournal()
+        await journal.record(sampleEpisode("after"))
+
+        const span = await spanOrThrow(journal)
+
+        expect(
+          await journal.read({ window: windowOrThrow({ since: justAfter(span.to) }) })
+        ).toEqual({ ok: true, value: { records: [], older: null, newer: null, span: null } })
+      })
+
+      /**
+       * The cursors a windowed page names stay inside the window. A `beyond`
+       * probe that ignored the bound would hand back a cursor pointing at a
+       * record the window excludes, and a reader paging to the end of *last
+       * week* would walk out of it without being told.
+       */
+      it("pages within the window and never out of it", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_windowpage")
+        await journal.record(recordsFor(treeId, 5))
+
+        const span = await spanOrThrow(journal)
+        const bounded = windowOrThrow({ since: span.from, until: justAfter(span.to) })
+
+        const collected: number[] = []
+        let cursor: string | null | undefined
+
+        do {
+          const page = await journal.read({ window: bounded, limit: 2, ...(cursor ? { cursor } : {}) })
+          if (!page.ok) throw new Error("the journal could not be read")
+
+          collected.push(...page.value.records.map((record) => record.seq))
+          cursor = page.value.newer
+        } while (cursor)
+
+        expect(collected).toHaveLength(5)
+        expect(new Set(collected).size).toBe(5)
+      })
+
+      it("narrows by tree and by window together", async () => {
+        const journal = await freshJournal()
+        const mine = treeIdSchema.parse("t_wmine")
+        const yours = treeIdSchema.parse("t_wyours")
+        await journal.record([...recordsFor(mine, 2), ...recordsFor(yours, 3)])
+
+        const span = await spanOrThrow(journal)
+        const page = await journal.read({
+          treeId: yours,
+          window: windowOrThrow({ since: span.from, until: justAfter(span.to) }),
+        })
+
+        expect(page.ok && page.value.records).toHaveLength(3)
+        expect(page.ok && page.value.records.every((record) => record.treeId === yours)).toBe(true)
       })
     })
   })

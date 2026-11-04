@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" width="880" height="620" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .ok { fill: #dcfce7; stroke: #16a34a; }
+    .bad { fill: #fee2e2; stroke: #dc2626; }
+    .box { fill: #f4f4f5; stroke: #d4d4d8; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .wire { stroke: #a1a1aa; fill: none; }
+    .wirebad { stroke: #dc2626; fill: none; stroke-dasharray: 4 3; }
+    .wireok { stroke: #16a34a; fill: none; }
+    text { font-size: 13px; }
+    .h { font-size: 16px; font-weight: 700; }
+    .sh { font-size: 13px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; font-weight: 700; }
+    .mono { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #09090b }
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .ok { fill: #14532d; stroke: #4ade80 }
+      .bad { fill: #7f1d1d; stroke: #f87171 }
+      .box { fill: #27272a; stroke: #52525b }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 }
+      .wire { stroke: #71717a } .wirebad { stroke: #f87171 } .wireok { stroke: #4ade80 }
+    }
+  </style>
+  <rect class="bg" x="0" y="0" width="880" height="620"/>
+
+  <text class="h t" x="24" y="34">The tree as it was: what a store holds, and the half that was missing</text>
+  <text class="m" x="24" y="56">0016 keeps the head and a log from revision 1. Revision 0 is in neither — and a backward fold cannot start.</text>
+
+  <text class="k m" x="24" y="92">WHAT A STORE HOLDS</text>
+  <rect class="bad" x="24" y="104" width="150" height="54" rx="6"/>
+  <text class="sh badt" x="38" y="126">revision 0</text>
+  <text class="mono badt" x="38" y="146">stored nowhere</text>
+
+  <rect class="box" x="190" y="104" width="300" height="54" rx="6"/>
+  <text class="sh t" x="204" y="126">loom_revisions</text>
+  <text class="mono m" x="204" y="146">the log, revision 1 → head (append-only)</text>
+
+  <rect class="box" x="506" y="104" width="180" height="54" rx="6"/>
+  <text class="sh t" x="520" y="126">loom_trees</text>
+  <text class="mono m" x="520" y="146">the head, overwritten</text>
+
+  <text class="mono badt" x="700" y="128">a backward fold needs</text>
+  <text class="mono badt" x="700" y="144">the version before it</text>
+
+  <line class="wire" x1="174" y1="131" x2="190" y2="131"/>
+  <line class="wire" x1="490" y1="131" x2="506" y2="131"/>
+
+  <text class="k badt" x="24" y="200">BEFORE — 0228 published the fold and no consumer could call it</text>
+  <rect class="box" x="24" y="212" width="190" height="62" rx="6"/>
+  <text class="sh t" x="38" y="234">TreeReader</text>
+  <text class="mono m" x="38" y="254">head · revisions</text>
+
+  <rect class="box" x="300" y="212" width="250" height="62" rx="6"/>
+  <text class="sh t" x="314" y="234">treeAt(reader, target)</text>
+  <text class="mono badt" x="314" y="254">target.seed — nothing supplies it</text>
+
+  <rect class="bad" x="612" y="212" width="244" height="62" rx="6"/>
+  <text class="sh badt" x="626" y="234">each consumer invents a name</text>
+  <text class="mono badt" x="626" y="254">{ kind: "unknown-start" }</text>
+
+  <line class="wire" x1="214" y1="243" x2="300" y2="243"/>
+  <path class="wirebad" d="M550 243 H612"/>
+  <text class="mono badt" x="24" y="294">Three readings declining to answer since October: before-and-after · skipped-parts · drop-off</text>
+
+  <text class="k okt" x="24" y="344">AFTER — 0344: a history is a reader joined to the host's seeds</text>
+
+  <rect class="box" x="24" y="356" width="270" height="62" rx="6"/>
+  <text class="sh t" x="38" y="378">TreeReader</text>
+  <text class="mono m" x="38" y="398">head · revisions</text>
+
+  <rect class="ok" x="24" y="438" width="270" height="62" rx="6"/>
+  <text class="sh okt" x="38" y="460">SeedSource</text>
+  <text class="mono okt" x="38" y="480">(treeId) =&gt; LoomTree | undefined</text>
+
+  <rect class="ok" x="340" y="392" width="236" height="72" rx="6"/>
+  <text class="sh okt" x="354" y="414">historyOf(reader, seeds)</text>
+  <text class="mono okt" x="354" y="434">at(treeId, revision)</text>
+  <text class="mono okt" x="354" y="452">atEach(treeId, revisions)</text>
+
+  <path class="wireok" d="M294 387 H317 V424 H340"/>
+  <path class="wireok" d="M294 469 H317 V432 H340"/>
+
+  <rect class="ok" x="606" y="356" width="250" height="150" rx="6"/>
+  <text class="sh okt" x="620" y="378">TreeVersion</text>
+  <text class="mono okt" x="620" y="400">replayed</text>
+  <text class="mono okt" x="620" y="420">out-of-range</text>
+  <text class="mono okt" x="620" y="440">unreplayable</text>
+  <text class="mono okt" x="620" y="464">unseeded ← the new member</text>
+  <text class="mono m" x="620" y="484">about the host, not the log</text>
+
+  <path class="wireok" d="M576 428 H606"/>
+
+  <text class="mono m" x="24" y="538">Synchronous on purpose (0028): a seed is evidence because it is re-derived from source, not read back.</text>
+  <text class="mono m" x="24" y="556">Nothing is cached, nothing is stored, the schema is untouched. 0028's stored seed stays deferred.</text>
+  <text class="mono badt" x="24" y="584">Planted and failed: folding from the snapshot when the seed is unknown (2 tests) · a caching registry (1 test)</text>
+  <text class="mono m" x="24" y="602">src/store/history.ts · 15 tests · 254 files/6,113 tests → 255 files/6,128 tests · EXIT=0</text>
+</svg>

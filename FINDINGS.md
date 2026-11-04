@@ -8,6 +8,84 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-04 — the broadcaster takes the page's root element and publishes no way for a browser-side host to find one, so four places in this repository hard-code `"[data-loom-tree]"`
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/signals/`)
+· **Status:** **open.** Nothing is blocked — this run built the band it wanted
+without the panel this would have let it print, and said so in the report.
+
+`broadcastReaderSignals(root, options)` takes an `Element`: the node carrying
+the page's own addresses. A host therefore has to find that element, and the
+only thing that identifies it is `LOOM_TREE_ATTRIBUTE`, which is exported from
+`@jam-overture/loom/react`.
+
+**The entry point is the problem rather than the export.** The broadcaster is
+the one part of this product that runs in a visitor's browser, and
+[0136](decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md)
+split `@jam-overture/loom/signals/broadcast` out of `@jam-overture/loom/signals`
+for exactly that reason — this lane's own client component carries the note, *"about
+5 KB in a browser bundle rather than about 66 KB, because the second carries the
+schemas"*. `/react` is the render seam and every primitive's registration. A
+host that imports one string constant from it to start a broadcaster has
+undone the split the broadcaster exists on the far side of.
+
+So nobody does. Measured by grep this morning, the attribute's spelling is
+written out by hand in four places:
+
+| | |
+| --- | --- |
+| `(marketing)/_components/count-readers.tsx` | `const TREE_ROOT = "[data-loom-tree]"` |
+| `(docs)/_components/reader-signals-live.tsx` | `frame.current?.querySelector("[data-loom-tree]")` |
+| `(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx` | the same line again |
+| `(portal)/_lib/connecting.ts` | builds the selector from the imported constant, **into a string of generated code** |
+
+The portal's is the interesting one: it is the only caller that imports the
+constant, and it does so to interpolate it into source it is generating, which
+is the one case where the heavy entry point costs a server nothing. Every host
+that actually ships a broadcaster has written the literal.
+
+### Why `Loom marketing` is the one filing it
+
+This run added *What your page reports* to `/why-use-it`, which prints one
+delivery as JSON and closes the fourth link of the maintainer's chain. It wanted
+a second panel beside it: the few lines a reader writes to switch counting on,
+in the shape `written.ts` already prints a registration — real modules, compiled
+by the gate, so what a stranger pastes is known to work.
+
+**It could not be printed honestly.** The lines contain the attribute, `tree` is
+in `copy.ts`' `RESERVED_VOCABULARY`, and `voice.test.ts`' panel sweep reads every
+code panel on this site for those words. The sweep is right: a junior developer
+meeting `data-loom-tree` on a marketing page has met a word this site has
+promised not to say to them. The two ways round it were both worse than not
+shipping the panel:
+
+- **A second exemption beside `withoutPackageNames`.** That one is safe because
+  of a property it states about itself — it names the published package strings
+  exactly, so *"it cannot be widened by writing worse copy, only by publishing
+  another package."* An exemption for a framework attribute name has no such
+  property; it is the first step of a list that grows every time a panel is
+  inconvenient.
+- **Printing the import from `/react`.** That is code this lane would not run
+  itself, three files away from a component that explains at length why it does
+  not.
+
+### What would close it
+
+Either shape, and the second is smaller:
+
+1. **`broadcastReaderSignals` finds its own root**, given a `Document` — it
+   already refuses an element with no addresses on it (`"unaddressed"`), so the
+   failure it would report for a document with no addressed page is a failure it
+   has.
+2. **The broadcast entry point publishes the selector**, or a
+   `readerSignalRoot(document)` that returns the element or `undefined`. One
+   string, on the light side of the split.
+
+Either way a host's line becomes an import and no literal, and the four copies
+become one. It also makes the panel this run left out printable, which is the
+only part of this that is marketing's and is the least of the three reasons.
+
+---
 ## 2026-11-01 (evening) — the furniture outside a page is answered now, and the one line that applies it is each surface's
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,
@@ -48877,8 +48955,22 @@ never had a photograph in it.
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·
 **Extends:** the 1 October entry from `Loom signals` — *a reading of an older
 version needs that version's page, and nothing can ask a store for one* ·
-**Status:** open — **a correction to a status line rather than a new gap**, and
-the remedy is already filed
+**Status:** **closed by `framework-80-a-seed-a-reader-can-ask-for`**,
+3 November, recorded as
+[0344](decisions/0344-the-tree-as-it-was-is-one-call-and-a-host-that-cannot-prove-where-a-tree-started-says-so.md)
+— **the first of the two closes this entry named**, *a seed a reader can ask
+for*, and not the second: `at(treeId, revision)` already existed as `treeAt`
+(0228) and was never the missing half. `SeedSource`, `seedRegistry` and
+`historyOf(reader, seeds)` are published from `src/store/`, so a consumer
+holding a reader can read any version its host can seed, and a tree the host
+cannot seed is answered `{ outcome: "unseeded" }` rather than being
+unaskable — which is this entry's `skippingComparable` case given a shape, and
+the published name for the `{ kind: "unknown-start" }` that `progression.ts`
+had to invent. **The three readings are unblocked and none of them is wired
+here**: each is one line in the lane that owns the screen, and `Loom portal` is
+paused. **No seed is stored and the schema is untouched** — 0028's `seed`
+column is reconsidered in 0344 and deferred again, with the reason, because
+all three readings are the portal's own trees and the portal can seed them.
 
 This morning's entry from `Loom signals` — *what a change did to the reading of a
 page is now one call, and it is the sentence the reader screen should lead with*
@@ -50317,9 +50409,45 @@ that was invisible on every phone in the repository, and two pictures of it.
 ## 2026-10-06 — a telemetry journal can be read by position and never by time, so "has it got better" can compare two pages and never two weeks
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
-(`src/telemetry/journal.ts` and both implementations) · **Status:** open —
-**nothing is blocked**; the comparison this branch ships is correct and is not
-the comparison a person would ask for in words
+(`src/telemetry/journal.ts` and both implementations) · **Status:** **closed by
+`framework-81-a-window-of-time-a-journal-can-be-asked-for`**, 4 November,
+recorded as [0345](decisions/0345-a-journal-is-asked-for-a-half-open-window-over-when-it-learned-of-a-record-and-a-page-reports-the-stretch-it-covers.md)
+— **both halves of what this entry asked for, and the first one differently than
+it asked.**
+
+> **Both remedies shipped.** A read takes a `window`, and every `TelemetryPage`
+> carries the `span` it covers — `null` on an empty page, which is the case this
+> entry predicted a consumer would get wrong.
+>
+> **The one thing taken differently: the bounds are not two strings on the
+> request.** `telemetryWindow({ since, until })` builds a window and returns a
+> `Result`, and the window holds instants rather than the strings a caller held.
+> The reason is this entry's own argument carried one step further. It warned
+> that a bound on the dodgeable field hands back records from outside the window
+> *with nothing saying so*; a bound that cannot be parsed does the same thing
+> from the other direction, because `Date.parse` of a typo is `NaN`, every
+> comparison against `NaN` is false, and the page comes back empty — which on a
+> screen whose whole job is to say whether anything changed is indistinguishable
+> from the truth. Refusing it at construction also leaves `TelemetryError` alone,
+> which its own doc comment argues for.
+>
+> **`recordedAt` and never `occurredAt`**, as the entry's last paragraph
+> required, and the contract suite can tell: every fixture record carries an
+> `occurredAt` months in the past, so an implementation bounded on what the host
+> said answers a window taken from the journal's own stamps with nothing. That
+> mutation was planted and confirmed to fail.
+>
+> **The window is half-open — `since` included, `until` not — so two consecutive
+> windows tile.** This entry's reading is a comparison of two consecutive
+> windows, and inclusive ends would have double-counted a record on the seam:
+> the same defect in a smaller place. Planted and confirmed to fail, in both
+> implementations.
+>
+> **`span` is the earliest and latest stamp, not the first and last record**,
+> because `seq` is allocated at insert and `recordedAt` is a clock's reading, so
+> overlapping transactions can land a lower stamp at a higher position.
+>
+> Nothing in `(portal)` was touched: see the entry filed below.
 
 `/portal/trust` can now say whether the AI is getting better at judging itself.
 It does it by folding the newest page of the journal and the page before it, and
@@ -65044,8 +65172,10 @@ one route**, not by two routes that agree on paper.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/deployment.ts`, `src/signals/deployment-change.ts`) ·
-**Status:** open — **nothing is broken and no figure is wrong today**; this is a
-near-duplicate named with the reason the obvious fix is unsafe
+**Status:** **closed by `signals-72-one-door-rule`**
+([0346](decisions/0346-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)),
+and **the reason it gave for the fix being unsafe was wrong** — see the 3
+November (evening) entry below, which is the correction
 
 [`door.ts`](src/signals/door.ts) was created (0265) so that the scaling every
 reader-weighted figure shares would be written once, and the 30 October entry
@@ -65293,3 +65423,236 @@ declaration sentence. What they lack is the paragraph that says what the tool is
 for.
 
 ---
+> **Fourth measurement, 4 November**, on #761, and the pattern is now stable
+> enough to stop re-measuring: the session declined to subscribe, said so in the
+> pull request comment, and **was subscribed 92 seconds after the pull request
+> was created.** It unsubscribed, as the three runs before it did.
+>
+> **What is new is the specificity of the ask, not the fact of it.** The wake no
+> longer merely suggests a check-in; it prescribes the chain — *the first about
+> 50 minutes after the last activity, later ones about 4 hours apart*, with a
+> three-strike stop and an instruction to *re-arm silently*. A run that followed
+> it on a pull request waiting a weekend would arm roughly a dozen sessions
+> before the stop condition could fire, and *re-arm silently* is the clause that
+> makes a runaway invisible in exactly the way the 9 August incident was.
+>
+> **The refusal cost nothing this time, and that is the part worth stating.**
+> CI on #761 was green on the head commit at the moment of the wake — one Vercel
+> check, `success` — with no review threads and no conflict, so there was nothing
+> a check-in would have found. The two things a chain is sold as protecting
+> against, a merge conflict and a lost delivery, are both things the *next run*
+> sees for free twelve hours later, because this lane runs twice a day and reads
+> its open pull requests first. **A routine on a fixed schedule already is the
+> safety net the chain is offered as.** That argument is the one thing none of
+> the four entries had written down, and it is why no future run needs to
+> re-measure this: the answer does not depend on how often it happens.
+
+---
+## 2026-11-04 — a window of time is a read a journal answers now, and the portal's own four lines for a page's ends can go
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused)
+(`apps/loom/app/(portal)/portal/trust/`) · **Closes nothing on its own** ·
+**Status:** open — **nothing is broken and nothing is slower than it was**; the
+screen is correct today and is answering a narrower question than it can now ask
+
+[0345](decisions/0345-a-journal-is-asked-for-a-half-open-window-over-when-it-learned-of-a-record-and-a-page-reports-the-stretch-it-covers.md)
+closes the 6 October entry this lane filed, in the shape it asked for. Two
+things in `(portal)` follow from it, and **neither was done here** — a new seam
+plus a migration of its consumer in one pull request is unreviewable, and those
+are not this lane's files.
+
+**1. The trend can be two windows instead of two pages.** The screen says *the
+stretch of the record before this one* and prints dates, because a page was all
+a journal could be asked for and two pages are two stretches of unequal
+wall-clock time. It can now say *last week* and mean it:
+
+```ts
+import { telemetryWindow } from "@jam-overture/loom/telemetry"
+
+const lastWeek = telemetryWindow({ since: weekAgo, until: now })
+if (!lastWeek.ok) return // describeTelemetryWindowFault says which bound and why
+
+const page = await journal.read({ window: lastWeek.value, limit: MAX_TELEMETRY_LIMIT })
+```
+
+The window is **half-open** — `since` in, `until` out — so *last week* and *the
+week before* tile and no record on the boundary is counted twice. That matters
+to this screen specifically, because it is a comparison of two consecutive
+windows and an overlap at the seam would be the same defect it was built to
+remove, smaller and harder to see.
+
+**2. `spanOf` can go.** The 6 October entry named the four lines in
+`_lib/trust-trend.ts` that take a stretch's ends off the first and last record.
+`TelemetryPage.span` is that, computed by the journal: `{ from, to }` as it
+stamped them, and **`null` on an empty page** — the case the entry predicted a
+consumer would get wrong. It is the earliest and latest stamp rather than the
+first and last record, for a reason worth knowing before trusting it: `seq` is
+allocated at insert and `recordedAt` is a clock's reading, so two writers whose
+transactions overlap can land a lower stamp at a higher position.
+
+**One thing to be careful of.** `span` is the **page's** ends and never the
+window's. A window may be wider at both ends than anything that landed in it, so
+a screen naming the window would overstate what it is describing — print the
+span, bound by the window.
+
+Neither item is urgent and this lane is paused, so nothing is waiting on a day.
+Both are small and the first is the one a person asked for in words.
+
+---
+## 2026-11-04 — seven telemetry names are published and the generated reference is the only place they appear
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and no test
+is failing**; it is the 3 October entry's own case arriving, and the decision in
+it is whether these want prose
+
+`@jam-overture/loom/telemetry` now hands back `telemetryWindow`,
+`withinTelemetryWindow`, `telemetrySpanOf`, `describeTelemetryWindowFault`,
+`TelemetryWindow`, `TelemetrySpan` and `TelemetryWindowFault`
+([0345](decisions/0345-a-journal-is-asked-for-a-half-open-window-over-when-it-learned-of-a-record-and-a-page-reports-the-stretch-it-covers.md)).
+`pnpm --filter @loom/app docs:api` was run and `reference.generated.json`
+carries all seven, so `offered.test.ts` is green and **this is not a gate
+failure** — it is the question the 3 October entry asked, with a concrete set of
+names attached for the first time.
+
+That entry said *publishing a name is a two-lane operation*: the framework can
+add the export and regenerate the reference, and it cannot write the prose page,
+because pages under `(docs)` belong to this lane. It asked for one thing, and it
+is still the thing that would help: **say which page takes a new runtime export
+by default, or that a name may land with a stub line this lane rewrites.** The
+framework then publishes on merit and files the prose, rather than choosing its
+module boundaries around a test it cannot satisfy.
+
+**Three of the seven are worth a reader's attention and four are not.**
+`telemetryWindow` is the only way to build a window and it returns a `Result`,
+which is a thing a reader has to be told; the window is **half-open** and over
+`recordedAt` rather than `occurredAt`, which is the one sentence that changes
+what somebody's numbers mean; and `TelemetryPage.span` is `null` on an empty
+page. The rest are the fault type, its describer, and the predicate a
+third-party journal implementor applies — names that a host composing a runtime
+does not reach for, and the kind 0222 already argued may stay unexplained.
+
+Nothing is blocked. The reference is current either way.
+---
+## 2026-11-03 (evening) — the hazard that made a tidy unsafe was unreachable, and the clause that mattered was about a figure rather than an edge
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/door.ts`) · **Status:** **closed on filing by
+`signals-72-one-door-rule`** — filed because it is a correction to this morning's
+entry and because the general shape has now cost two runs
+
+This morning's entry *two ranking keys still spell the door's scale by hand*
+named the reason the obvious tidy was unsafe: `atDoorScale` divides by
+`appearances`, neither the order of falls nor the order of movements refuses a
+door whose appearances are nought, and the swap would therefore turn a sound
+nought into a **`NaN` in a ranking key**. It recommended making the published
+rule total, as its own unit. That unit is done and the recommendation was right,
+but **the hazard it was recommended for does not exist.**
+
+**Neither key can reach a door that folded nothing**, and both are stopped two
+rungs earlier by checks they already had for their own reasons:
+
+| door | page | standing | reaches the key |
+| --- | --- | --- | --- |
+| `opened 10`, `appearances 0` | lost nobody | `unbroken` / `unmoved` | no |
+| `opened 10`, `appearances 0` | lost anybody | `inconsistent` | no |
+
+A page that lost nobody has no steepest fall and no movement, so it leaves the
+order before the key is taken. A page that lost anybody lost more readers than
+ever appeared, which is the disagreement both files refuse last. There is now a
+test in each saying so, named for the state it never names.
+
+**What the swap actually cost was the last place, and in the one direction the
+entry did not look.** The two spellings are one rule by two routes — three
+roundings against two — so they do not agree, and the question is which figure a
+key should publish:
+
+- With drift, the published spelling is **never** further from the exact value
+  than the hand-written one and is strictly closer in 4,963 of the 22,100
+  integer triples swept. That is the easy half.
+- **With no drift, the published spelling had to be made exact**, and this is the
+  half that was load-bearing. `count × n ÷ n` is the count mathematically and not
+  in floats. An order of movements ranks on a share movement times a count, so
+  its figure is **not a whole number**, and its own rule is that the magnitude is
+  the comparison's published figure *because deriving it twice is how two screens
+  come to disagree about which band a change hurt*. A movement of
+  3.6000000000000005 would have been published as 3.6 beside the band it happened
+  at.
+
+So `atDoorScale` got two short-circuits rather than one, and the second is the
+one that kept a published figure where it was.
+
+**The general shape, which is the part worth keeping.** A finding that names a
+hazard is making a claim about *reachability*, and reachability is a property of
+the ladder above the line rather than of the line. This one was derived by
+reading the arithmetic — correctly — and not by asking what the three rungs above
+it already refuse. The 31 October entry cost a run by going stale about a
+**sequencing** fact; this one would have cost a run by being wrong about a
+**reachability** fact, and the check is the same cheap one in both cases:
+**before trusting an entry, write the fixture it describes and look at what comes
+out.** Four lines of a test said in a second what a paragraph of arithmetic got
+wrong.
+
+**Two smaller things, both from this unit and both cheap to hit again.**
+
+1. **`PageDoor` carries no `inflation`, deliberately** — the weight is the figure
+   a scale needs and the fraction it stands for is what 0229 was bitten by. A test
+   helper written to compare against the old spelling reached for `of.inflation`
+   anyway, got `undefined`, and `count ÷ (1 + undefined)` is a `NaN`. The helper
+   then hunted for the exact value of a `NaN` by doubling it until it was a whole
+   number, which never happens. It is in `door.test.ts` now with the trap named in
+   its doc comment.
+2. **An `expect` inside a 22,100-iteration sweep does not finish.** The same sweep
+   runs in 46 ms as arithmetic and in over five minutes as assertions; a sweep in
+   this subsystem should tally and assert **once**. Worth knowing before somebody
+   writes the next property test and concludes the property is expensive.
+## 2026-11-03 (evening) — the three readings blocked on a seed are unblocked, and each is one line in the lane that owns the screen
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused) ·
+**Closes nothing of its own** — it is the consumer half of the 4 October entry
+*the before-and-after reading is blocked on a store that can answer for an older
+version*, which closed this run · **Status:** open — **nothing is broken and
+nothing is urgent**; three readings that have been declining to answer since
+early October can now answer, and the framework cannot wire them
+
+`src/store/history.ts` publishes what that entry asked for, recorded as
+[0344](decisions/0344-the-tree-as-it-was-is-one-call-and-a-host-that-cannot-prove-where-a-tree-started-says-so.md):
+
+```ts
+const history = historyOf(reader, seedRegistry(new Map([[treeId, seedTree]])))
+const answer = await history.at(treeId, revision)   // one version
+const pair = await history.atEach(treeId, [was, now]) // two, folded once
+```
+
+**The three readings the 4 October entry named as unblocked together**, each of
+which already has the sentence on the surface explaining why it declines:
+
+1. **The before-and-after reading.** `readingChangeOf(was, now)` takes two
+   `PageReading`s and a `PageReading` needs a tree per side. `atEach` is the
+   call: two revisions, one fold, which is the case it exists for.
+2. **The skipped-parts reading across a version gap.** `skippingComparable` in
+   `_lib/skipped.ts` is the one function in that module returning `false`
+   because of this.
+3. **This run's drop-off reading across one version.**
+
+**What to delete while wiring it.** `progression.ts` carries
+`versionsOf(reader, treeId, seed: LoomTree | undefined)` and
+`{ kind: "unknown-start" }` — the portal's own name for an absent seed, invented
+because the framework had none. `{ outcome: "unseeded", treeId, revision }` is
+the published one. The local name is not wrong and nothing forces the change;
+what it costs to keep is that a second screen reading the same fact gets a
+different word for it.
+
+**One thing to know before wiring.** `unseeded` is a fact about **this host**,
+not about the tree or the log: it means this deployment cannot re-derive that
+tree's revision 0, and the same store read through a history that can seed it
+answers normally. A screen should say *"this deployment cannot show earlier
+versions of this page"* and not *"this page has no history"*.
+
+**Not asked for, and deliberately:** nothing in `src/` stores a seed. 0028's
+`seed` column is reconsidered in 0344 and deferred again, because all three of
+these readings are the portal's own trees and the portal can seed them. If a
+reading ever has to cross deployments — two hosts over one database disagree
+about which trees are seedable, and both are right — that is the schema change
+0028 named, and it is `ARCHITECTURAL — needs review` rather than this lane's to
+take.
