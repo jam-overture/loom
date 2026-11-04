@@ -94,7 +94,26 @@ report saying green, which is the one thing this section exists to prevent.
 
 *A rule naming one spelling of an act is a rule that stops working the moment
 somebody reaches for the other one* — the sentence is the 24 September
-author-flag entry's, and this is its third instance. Written here rather than in
+author-flag entry's, and this is its third instance. The **fourth** arrived on
+4 November and the remedy had moved again — not one pipe to the right, but out
+of the shell altogether:
+
+```bash
+# the gate, run as a background task
+(pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit)
+```
+
+`verify.exit` said `EXIT=1`. **The harness's own completion notice for that task
+said exit code 0**, because what a task notification reports is the status of
+the thing it was handed — here the wrapping subshell, whose last command is the
+`echo` that succeeded. The failure was real: a flaky wall-clock assertion in
+another lane's suite. It cost one gate re-run and nothing else, because the file
+was read as well as the notice.
+
+So the rule's reach is wider than a pipe. **Whatever tells you the gate passed —
+a pipe's exit code, a compound command's, a harness notification, a summary
+someone wrote — is not the gate.** The file is. Read it, in its own command,
+every time, and quote the number from it in the report. Written here rather than in
 any lane's code because it is a thing a **run** does, not a thing the repository
 contains.
 
@@ -140,7 +159,7 @@ Each routine owns one part of the repository and does not edit another's.
 | Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
 | Portal (`Loom portal`) | `apps/loom/app/(portal)/` — **paused 13 October 2026** |
 | Documentation (`Loom docs`) | `apps/loom/app/(docs)/` |
-| Marketing (`Loom marketing`) | `apps/loom/app/(marketing)/` |
+| Marketing (`Loom marketing`) | `apps/loom/app/(marketing)/` and `docs/positioning.md` |
 | Lessons (`Loom lessons`) | `apps/loom/app/(lessons)/` and `lessons/` |
 | Demo (`Loom demo`) | `apps/loom/app/(demo)/` |
 | Merge (`Loom merge`) | No directory. Merge commits on open pull requests, and landing them on `main` |
@@ -661,6 +680,42 @@ a failing test. Regenerate it in the same commit as the export.
 The one case that is a real conflict is two branches rewriting the same logic in
 the same file. That is what closed sixteen pull requests on 28 August, and step 3
 above is how a lane stops producing it.
+
+### `pnpm weigh` — where a page's bytes are
+
+A served document, its size, and what inside it is paid for more than once:
+
+```bash
+pnpm weigh http://127.0.0.1:3000/why-use-it      # or a response saved to a file
+```
+
+```
+/why-use-it  2,491,320 bytes
+    style  47,981 bytes  carried 43 times  at least 2,015,202 bytes repeated (81% of the document)
+    style  2,255 bytes  carried 4 times  at least 6,765 bytes repeated (0% of the document)
+```
+
+**It prints the number and does not judge it**, which is
+[0213](../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)
+and [0159](../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md):
+a stylesheet carried twice is sometimes right on purpose, so whether a figure
+here is a defect is the report's to say.
+
+**Not in `pnpm verify`, deliberately.** The reading needs a built application
+and a server, and a gate that starts one is a gate that can hang — 0140's rule
+pointed at the merge gate. It is a command a run invokes beside `pnpm shoot`,
+and what it finds belongs in a report or a finding.
+
+**Why it does not count copies of the string.** The defect it was written for
+reports as absent to every verbatim measurement. React 19 hoists a `<style>`
+carrying `href` and `precedence` and deduplicates it correctly, so a page's
+markup holds the library stylesheet exactly **once** — while the RSC flight
+payload holds it once per primitive that emitted it, JSON-escaped, sharing no
+long substring with the element it came from. So the unit of measurement is a
+**landmark**: the longest run of letters, digits, dots, underscores and hyphens
+that the text contains exactly once, which is what no escaping rewrites. The
+saving reported is `(copies - 1)` times the text's own length — provably under
+the truth, because escaping only ever grows a copy.
 
 ## Standards
 

@@ -116,6 +116,7 @@
     "queue": "tsx tools/queue/main.ts",
     "package:primitives": "tsx tools/package/main.ts",
     "shoot": "tsx tools/screenshot/shoot.ts",
+    "weigh": "tsx tools/weigh/main.ts",
     "specimen": "tsx tools/specimen/main.ts",
     "prepack": "pnpm build",
     "reports:check": "tsx tools/reports/main.ts",

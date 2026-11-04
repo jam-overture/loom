@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" width="900" height="460" role="img" aria-label="One page, two readings: the markup carries the library stylesheet once, the flight payload carries it forty-three times">
+  <rect width="900" height="460" fill="#fbfaf8"/>
+  <text x="40" y="46" font-family="Georgia, serif" font-size="23" fill="#1b1a18">/why-use-it — 2,491,320 bytes</text>
+  <text x="40" y="72" font-family="Georgia, serif" font-size="14" fill="#6b655d">the same response, read two ways</text>
+
+  <!-- left: the markup -->
+  <text x="40" y="118" font-family="Georgia, serif" font-size="15" fill="#1b1a18">What the markup holds</text>
+  <rect x="40" y="132" width="360" height="40" rx="3" fill="#dfe8df" stroke="#8aa88a"/>
+  <text x="54" y="157" font-family="Georgia, serif" font-size="13" fill="#2f4a2f">&#60;style href="loom-primitives"&#62; — 47,981 bytes</text>
+  <rect x="40" y="178" width="360" height="22" rx="3" fill="#eceae6" stroke="#c8c2b8"/>
+  <text x="54" y="194" font-family="Georgia, serif" font-size="12" fill="#6b655d">&#60;style&#62; document palette — 2,255 bytes</text>
+  <text x="40" y="228" font-family="Georgia, serif" font-size="13" fill="#2f4a2f">carried once. React 19 hoisted and deduplicated it,</text>
+  <text x="40" y="246" font-family="Georgia, serif" font-size="13" fill="#2f4a2f">exactly as stylesheet.ts says it does.</text>
+  <text x="40" y="276" font-family="Georgia, serif" font-size="13" fill="#8a7f70">Every verbatim measurement of this page: nothing wrong.</text>
+
+  <!-- right: the payload -->
+  <text x="470" y="118" font-family="Georgia, serif" font-size="15" fill="#1b1a18">What the flight payload holds</text>
+  <g fill="#f0d9d2" stroke="#c08a76">
+    <rect x="470" y="132" width="24" height="68" rx="2"/><rect x="498" y="132" width="24" height="68" rx="2"/>
+    <rect x="526" y="132" width="24" height="68" rx="2"/><rect x="554" y="132" width="24" height="68" rx="2"/>
+    <rect x="582" y="132" width="24" height="68" rx="2"/><rect x="610" y="132" width="24" height="68" rx="2"/>
+    <rect x="638" y="132" width="24" height="68" rx="2"/><rect x="666" y="132" width="24" height="68" rx="2"/>
+    <rect x="694" y="132" width="24" height="68" rx="2"/><rect x="722" y="132" width="24" height="68" rx="2"/>
+    <rect x="750" y="132" width="24" height="68" rx="2"/><rect x="778" y="132" width="24" height="68" rx="2"/>
+    <rect x="806" y="132" width="24" height="68" rx="2"/><rect x="834" y="132" width="24" height="68" rx="2"/>
+  </g>
+  <text x="470" y="222" font-family="Georgia, serif" font-size="13" fill="#8a4a30">43 copies, JSON-escaped: &#62; written ></text>
+  <text x="470" y="240" font-family="Georgia, serif" font-size="13" fill="#8a4a30">(14 drawn). A copy shares no long substring</text>
+  <text x="470" y="258" font-family="Georgia, serif" font-size="13" fill="#8a4a30">with the element it came from.</text>
+  <text x="470" y="288" font-family="Georgia, serif" font-size="14" fill="#1b1a18">at least 2,015,202 bytes repeated — 81% of the page</text>
+
+  <line x1="40" y1="320" x2="860" y2="320" stroke="#ddd6cb"/>
+  <text x="40" y="352" font-family="Georgia, serif" font-size="15" fill="#1b1a18">So the unit of measurement cannot be the string.</text>
+  <rect x="40" y="366" width="820" height="34" rx="3" fill="#eef1f6" stroke="#9aa8bd"/>
+  <text x="54" y="388" font-family="Georgia, serif" font-size="13" fill="#2f3d52">landmark — the longest run of letters, digits, dots, underscores and hyphens the text contains exactly once</text>
+  <text x="40" y="424" font-family="Georgia, serif" font-size="13" fill="#6b655d">`prefers-reduced-motion` survives every escaping. `.loom-trend-plot &#62; .loom-stat` does not.</text>
+  <text x="40" y="446" font-family="Georgia, serif" font-size="13" fill="#6b655d">Saving reported as (copies − 1) × the text's own length: provably under the truth, because escaping only grows a copy.</text>
+</svg>
