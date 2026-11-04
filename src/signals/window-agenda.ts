@@ -1,4 +1,9 @@
 import { deploymentAgendaOf, type DeploymentAgenda } from "./agenda.js"
+import {
+  arrivalStandingOf,
+  type ArrivalStanding,
+  type TurnedAwayTally,
+} from "./arriving.js"
 import { deploymentConversionOf, type DeploymentConversion } from "./conversion.js"
 import { deploymentReadingOf, type DeploymentReading } from "./deployment.js"
 import {
@@ -76,6 +81,37 @@ import type { ReaderWindow, WindowAssembly } from "./window.js"
  * readings, so all three counts are **nought by construction** and the fix-list
  * is of every page the window holds.
  *
+ * **Nothing told a caller that an empty fix-list is three deployments.** The
+ * join publishes `subject` for that
+ * ([0326](../../decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)),
+ * and it needs an arrival standing to say which — which a caller of this rung
+ * could not compute before calling it, because the health reading the standing
+ * is taken over is made *inside* here. So the line above reads `unverified`
+ * about a deployment whose door is refusing every delivery: the one state the
+ * arrival reading exists for, and the one the fix-list was told nothing about.
+ *
+ * ## Why this rung takes the refusal rows and not the reading over them
+ *
+ * The 31 October finding about `arrivalStandingOf` asked that a rung **take the
+ * reading's result** rather than compute it, and
+ * [0327](../../decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)
+ * upheld it for the figures rung. The reason was the scope: a refusal counter is
+ * the deployment's own table, keyed by application and reason, written on the
+ * request path and holding nothing a window holds (0309), so an assembly that
+ * went looking for it would be reaching a second store on a second scope.
+ *
+ * That reason is about **reaching a store**, and this does not: the rows are
+ * handed in, exactly as the window's rows are. What this rung has that the
+ * figures rung did not is the other half of the reading — `arrivalStandingOf`
+ * is taken over a health reading, and this is the one place in the subsystem
+ * where that reading is made. A caller asked for the *result* here would have
+ * to compute the health reading itself to get one, which is the second copy of
+ * a reading this rung exists to prevent.
+ *
+ * So the rows come in and the reading is made once, over the health reading the
+ * rows below were judged by — which is also the only way the subject can be a
+ * claim about *these* rows.
+ *
  * ## Why the funnels are taken and the other two are made
  *
  * The rule is the one the rungs under this already keep, stated so the next
@@ -104,7 +140,7 @@ import type { ReaderWindow, WindowAssembly } from "./window.js"
  */
 
 /** A deployment's fix-list and each of the readings it was joined from. */
-export type WindowAgenda = {
+export type WindowAgenda<TReason extends string = string> = {
   /**
    * Where reading stops on each page the window holds, in the readings' own
    * order.
@@ -137,14 +173,52 @@ export type WindowAgenda = {
    */
   readonly health: CollectionHealth
   /**
+   * Whether anything is arriving at this deployment, and what its door turned
+   * away.
+   *
+   * Published whole rather than summarised, because the remedy is on it and
+   * nowhere else: `newest.reason` is the deployment's own word for why a
+   * delivery was refused, `newest.origin` is the site it came from, and
+   * `newest.sinceMs` is what tells a live fault from one fixed a month ago
+   * (0326). `AgendaSubject` says what to do; this says what to type.
+   *
+   * Generic in the reason, which is what keeps that remedy the deployment's:
+   * a host hands in its own closed set and gets it back here, where its own
+   * exhaustive switch chooses its own sentence. A framework that worded those
+   * reasons would be wording a vocabulary it does not define (0311, 0326).
+   */
+  readonly arrival: ArrivalStanding<TReason>
+  /**
    * The fix-list: the two orders of pages, the measurements to repair, and the
    * one thing to do first.
    *
    * Its `unpaired` counts are nought by construction and its `duplicated` is
    * nought by construction, which is the whole of what this rung guarantees
    * beyond saving the lines.
+   *
+   * Its `subject` is judged against the refusal rows handed in, so a fix-list
+   * read through this rung can never say `unverified` about a deployment that
+   * offered a counter.
    */
   readonly agenda: DeploymentAgenda
+}
+
+/**
+ * The instant a schedule states, in epoch milliseconds, or `undefined` where it
+ * states none this can use.
+ *
+ * `Date.parse` guarded for `NaN`, which is the same guard
+ * {@link collectionHealthOf} puts on the same field — an unreadable instant
+ * judges nothing rather than judging against a `NaN`. Here that means every
+ * arrival figure and no age, which is a published state of the reading rather
+ * than a degraded one (0326).
+ */
+const instantOf = (schedule: CollectionSchedule | null): number | undefined => {
+  if (schedule === null) return undefined
+
+  const at = Date.parse(schedule.at)
+
+  return Number.isNaN(at) ? undefined : at
 }
 
 /**
@@ -153,7 +227,7 @@ export type WindowAgenda = {
  * ```ts
  * const assembly = windowAssemblyOf(window, context)
  * const funnels = windowFunnelsOf(window, assembly)
- * const { agenda } = windowAgendaOf(window, assembly, funnels, { at, foldsWithinMs })
+ * const { agenda } = windowAgendaOf(window, assembly, funnels, schedule, turnedAway)
  * ```
  *
  * The window is handed in again rather than carried on the assembly, exactly as
@@ -171,13 +245,28 @@ export type WindowAgenda = {
  * taken, or `null` where it states no schedule and nothing about a stalled fold
  * is to be judged. Required rather than optional, because the reading that is
  * lost by leaving it out is a fault going unreported.
+ *
+ * It is also where the instant the arrival reading ages its newest refusal
+ * against comes from, so that one reading of one window is taken at one
+ * instant. A schedule of `null`, or an `at` no parser can read, gives every
+ * arrival figure and no age — the shape that reading already takes for a
+ * caller that states no instant (0326), and the guard `collection-stalled`
+ * already applies to the same field.
+ *
+ * @param turnedAway What this deployment's door turned away, one row per
+ * reason, or `undefined` where it keeps no such counter or none could be read.
+ * Required rather than optional on the terms the schedule is: the reading lost
+ * by leaving it out is the difference between *nothing to fix* and *nothing to
+ * fix it with*, and `undefined` written out is a word a reviewer can read
+ * rather than a space where an argument is not (0322, 0343).
  */
-export const windowAgendaOf = (
+export const windowAgendaOf = <TReason extends string = string>(
   window: ReaderWindow,
   assembly: WindowAssembly,
   funnels: WindowFunnels,
-  schedule: CollectionSchedule | null
-): WindowAgenda => {
+  schedule: CollectionSchedule | null,
+  turnedAway: readonly TurnedAwayTally<TReason>[] | undefined
+): WindowAgenda<TReason> => {
   const progress = assembly.readings.pages.map(readingProgressOf)
 
   const order = deploymentReadingOf(progress, window.pageViews)
@@ -187,11 +276,14 @@ export const windowAgendaOf = (
       ? collectionHealthOf(assembly.readings.pages, window.pageViews)
       : collectionHealthOf(assembly.readings.pages, window.pageViews, schedule)
 
+  const arrival = arrivalStandingOf<TReason>(health, turnedAway, instantOf(schedule))
+
   return {
     progress,
     order,
     conversion,
     health,
-    agenda: deploymentAgendaOf(order, conversion, health),
+    arrival,
+    agenda: deploymentAgendaOf(order, conversion, health, arrival),
   }
 }
