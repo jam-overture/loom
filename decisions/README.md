@@ -433,5 +433,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0341](0341-a-turned-down-change-is-remembered-and-the-ai-weighs-a-new-proposal-against-it.md) | A turned-down change is remembered, and the AI weighs a new proposal against it | Accepted | §5 (portal), the reasoning plane |
 | [0342](0342-a-conversion-leak-is-an-interval-and-the-key-an-order-ranks-on-is-its-ceiling.md) | A conversion leak is an interval, and the key an order ranks on is its ceiling | Accepted | §4c (reader signals) |
 | [0343](0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md) | A deployment's fix-list is read off one window, and states its collection schedule or says it has none | Accepted | §4c (reader signals) |
-| 0344 | *No record on this branch* | — | — |
+| [0344](0344-the-tree-as-it-was-is-one-call-and-a-host-that-cannot-prove-where-a-tree-started-says-so.md) | The tree as it was is one call, and a host that cannot prove where a tree started says so | Accepted | §2 (the store) |
 | [0345](0345-a-journal-is-asked-for-a-half-open-window-over-when-it-learned-of-a-record-and-a-page-reports-the-stretch-it-covers.md) | A journal is asked for a half-open window over when it learned of a record, and a page reports the stretch it covers | Accepted | §2 (the runtime's record of itself) |
+| [0346](0346-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md) | The door's scale is total, so the three ranking keys read the one rule | Accepted | §4c (reader signals) |
