@@ -8,6 +8,84 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-04 — the broadcaster takes the page's root element and publishes no way for a browser-side host to find one, so four places in this repository hard-code `"[data-loom-tree]"`
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/signals/`)
+· **Status:** **open.** Nothing is blocked — this run built the band it wanted
+without the panel this would have let it print, and said so in the report.
+
+`broadcastReaderSignals(root, options)` takes an `Element`: the node carrying
+the page's own addresses. A host therefore has to find that element, and the
+only thing that identifies it is `LOOM_TREE_ATTRIBUTE`, which is exported from
+`@jam-overture/loom/react`.
+
+**The entry point is the problem rather than the export.** The broadcaster is
+the one part of this product that runs in a visitor's browser, and
+[0136](decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md)
+split `@jam-overture/loom/signals/broadcast` out of `@jam-overture/loom/signals`
+for exactly that reason — this lane's own client component carries the note, *"about
+5 KB in a browser bundle rather than about 66 KB, because the second carries the
+schemas"*. `/react` is the render seam and every primitive's registration. A
+host that imports one string constant from it to start a broadcaster has
+undone the split the broadcaster exists on the far side of.
+
+So nobody does. Measured by grep this morning, the attribute's spelling is
+written out by hand in four places:
+
+| | |
+| --- | --- |
+| `(marketing)/_components/count-readers.tsx` | `const TREE_ROOT = "[data-loom-tree]"` |
+| `(docs)/_components/reader-signals-live.tsx` | `frame.current?.querySelector("[data-loom-tree]")` |
+| `(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx` | the same line again |
+| `(portal)/_lib/connecting.ts` | builds the selector from the imported constant, **into a string of generated code** |
+
+The portal's is the interesting one: it is the only caller that imports the
+constant, and it does so to interpolate it into source it is generating, which
+is the one case where the heavy entry point costs a server nothing. Every host
+that actually ships a broadcaster has written the literal.
+
+### Why `Loom marketing` is the one filing it
+
+This run added *What your page reports* to `/why-use-it`, which prints one
+delivery as JSON and closes the fourth link of the maintainer's chain. It wanted
+a second panel beside it: the few lines a reader writes to switch counting on,
+in the shape `written.ts` already prints a registration — real modules, compiled
+by the gate, so what a stranger pastes is known to work.
+
+**It could not be printed honestly.** The lines contain the attribute, `tree` is
+in `copy.ts`' `RESERVED_VOCABULARY`, and `voice.test.ts`' panel sweep reads every
+code panel on this site for those words. The sweep is right: a junior developer
+meeting `data-loom-tree` on a marketing page has met a word this site has
+promised not to say to them. The two ways round it were both worse than not
+shipping the panel:
+
+- **A second exemption beside `withoutPackageNames`.** That one is safe because
+  of a property it states about itself — it names the published package strings
+  exactly, so *"it cannot be widened by writing worse copy, only by publishing
+  another package."* An exemption for a framework attribute name has no such
+  property; it is the first step of a list that grows every time a panel is
+  inconvenient.
+- **Printing the import from `/react`.** That is code this lane would not run
+  itself, three files away from a component that explains at length why it does
+  not.
+
+### What would close it
+
+Either shape, and the second is smaller:
+
+1. **`broadcastReaderSignals` finds its own root**, given a `Document` — it
+   already refuses an element with no addresses on it (`"unaddressed"`), so the
+   failure it would report for a document with no addressed page is a failure it
+   has.
+2. **The broadcast entry point publishes the selector**, or a
+   `readerSignalRoot(document)` that returns the element or `undefined`. One
+   string, on the light side of the split.
+
+Either way a host's line becomes an import and no literal, and the four copies
+become one. It also makes the panel this run left out printable, which is the
+only part of this that is marketing's and is the least of the three reasons.
+
+---
 ## 2026-11-01 (evening) — the furniture outside a page is answered now, and the one line that applies it is each surface's
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,

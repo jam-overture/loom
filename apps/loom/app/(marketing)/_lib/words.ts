@@ -85,8 +85,8 @@ export const PROSE_PROPS: readonly string[] = [
  *
  * Every rule in this lane that reads the page reads text nodes, which was
  * exactly right while the only panel on the site printed `npm install …`. As of
- * 3 November `/why-use-it` prints two TypeScript files, and the two kinds of
- * rule that read them part company:
+ * 3 November `/why-use-it` prints two TypeScript files, and as of 4 November one
+ * report in JSON, and the two kinds of rule that read them part company:
  *
  * - **What a reader is asked to understand** still covers them. A code panel
  *   can put a word in front of a stranger that they have to look up, and
@@ -105,9 +105,13 @@ export const PROSE_PROPS: readonly string[] = [
  *   nothing.
  *
  * **The exclusion is bounded rather than open**, which is the half that keeps it
- * from being a weakening: `written.test.ts` gives the two panels a budget of
- * their own, in lines and characters, so source cannot grow on this page just
- * because the prose ledger stopped counting it.
+ * from being a weakening: `written.test.ts` gives the two source panels a
+ * budget of their own, in lines and characters, and `reported.test.ts` does the
+ * same for the one panel that prints data — so neither can grow on this page
+ * just because the prose ledger stopped counting it. **A panel added without a
+ * budget is a hole**, and the pinned list in `pages/pages.test.ts` is what
+ * makes one arrive loudly: it names every panel this site serves, so a third
+ * kind cannot land unnoticed.
  *
  * A panel's `caption` is prose and stays counted. It is the filename a reader
  * reads, it is in `PROSE_PROPS`, and nothing here touches props.

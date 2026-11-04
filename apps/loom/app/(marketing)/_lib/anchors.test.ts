@@ -6,7 +6,7 @@ import { ANCHOR } from "./bands"
 import { elementsIn } from "./measure"
 import { anchorsIn as anchorsDeclaredIn } from "./naming"
 import { pageTreeFor, renderTree } from "./render"
-import { HOME, SITE_ROUTES, type SiteRoute } from "./site"
+import { HOME, SITE_PATHS, SITE_ROUTES, type SiteRoute } from "./site"
 
 /**
  * A link that stays on the page, held to the one thing that can make it fail.
@@ -70,11 +70,13 @@ const anchorsIn = (page: LoomTree): readonly string[] => anchorsDeclaredIn(page.
 /**
  * Every fragment a control on this page points at, on this page.
  *
- * Only same-page links are collected, and deliberately: a fragment on somebody
- * else's address is their page's promise to keep, and a test here that checked
- * it would be this lane asserting over another lane's chrome. A control leaving
- * for `/docs#something` is out of scope by the same rule that put the way back
- * into a finding rather than into a commit.
+ * A fragment on another surface's address — `/docs#something` — is their page's
+ * promise to keep, and a test here that checked it would be this lane asserting
+ * over another lane's chrome. That is still out of scope, by the rule that put
+ * the way back into a finding rather than into a commit.
+ *
+ * **A fragment on another page of this site is not**, and `crossPageFragments`
+ * below is the sweep that says so.
  */
 const resolved = (href: string): URL | undefined => {
   try {
@@ -96,6 +98,54 @@ const samePageFragmentsIn = (page: LoomTree, route: SiteRoute): readonly string[
     if (url.pathname !== route.path) return []
 
     return url.hash === "" ? [] : [url.hash.slice(1)]
+  })
+
+/**
+ * Every fragment a control on this page points at on **another page of this
+ * site**, with the page it is aimed at.
+ *
+ * ## The gap this closes, and it was opened by this run
+ *
+ * The sweep above is same-page by a decision of 4 October, which is right about
+ * another surface's anchors and was never right about this site's own. Three
+ * pages that link to each other's bands are three pages this lane writes, and a
+ * fragment pointing at a band on the next one is its promise in exactly the way
+ * a same-page fragment is.
+ *
+ * What covered them until today was an accident of `chain.test.ts`: the chain
+ * had destinations on two pages, so its per-destination sweep happened to
+ * assert that `/what-you-run` still declared `what-we-count`. The fourth rung
+ * moved to `/why-use-it` in this change and every destination is now on one
+ * page — so that sweep stopped reading the other page, and the footer's link to
+ * the disclosure band on every page of this site was left held by nothing.
+ *
+ * **A check that covers something by accident uncovers it by accident too.**
+ * So the property is stated for itself, over every control rather than over the
+ * chain's five, and it is the anchor half of what `routes.ts` did for paths.
+ *
+ * ## It resolves against the page that serves the address
+ *
+ * Not against a list of expected pairs. A link is a path and a fragment, and
+ * the question is whether the page at that path declares that id — which is
+ * answerable by rendering it, and is the same question the same-page sweep asks
+ * with the path held fixed.
+ */
+const crossPageFragments = (
+  page: LoomTree,
+  route: SiteRoute
+): readonly (readonly [string, string])[] =>
+  elementsIn(page.root).flatMap((element) => {
+    const href = element.props["href"]
+
+    if (typeof href !== "string") return []
+
+    const url = resolved(href)
+
+    if (url === undefined || url.origin !== ORIGIN) return []
+    if (url.pathname === route.path || url.hash === "") return []
+    if (!SITE_PATHS.includes(url.pathname)) return []
+
+    return [[url.pathname, url.hash.slice(1)] as const]
   })
 
 describe("the anchors this site links to", () => {
@@ -140,6 +190,49 @@ describe("the anchors this site links to", () => {
     const declared = anchorsIn(await pageFor(route))
 
     expect(declared).toEqual([...new Set(declared)])
+  })
+
+  /**
+   * The same question across this site's own pages. `crossPageFragments` above
+   * carries why it exists and why it is not the chain's business.
+   */
+  it.each(STATES)("%s reaches every band it points at on another page", async (_name, route) => {
+    const aimed = crossPageFragments(await pageFor(route), route)
+
+    for (const [path, fragment] of aimed) {
+      const target = SITE_ROUTES.find((candidate) => candidate.path === path)
+
+      if (target === undefined) throw new Error(`loom: ${route.path} points at ${path}, which is not a page of this site`)
+
+      const declared = anchorsIn(await pageFor(target))
+
+      expect({ from: route.path, path, fragment, declared: declared.includes(fragment) }).toEqual({
+        from: route.path,
+        path,
+        fragment,
+        declared: true,
+      })
+    }
+  })
+
+  /**
+   * And the sweep is reading something, or it would pass as three empty loops —
+   * the shape `routines.md` asks a guard for, and a failure this lane has filed
+   * once already.
+   *
+   * **A floor over the site rather than a claim about each page**, and the
+   * reason is `/what-you-run` itself: the footer's link to its disclosure band
+   * is a cross-page fragment from the other two pages and a *same*-page one
+   * there, where the sweep above already reads it. A rule requiring one on every
+   * page would be asking each page to point away from itself, which is not a
+   * property this site has or wants.
+   */
+  it("has cross-page fragments to read", async () => {
+    const aimed = await Promise.all(
+      STATES.map(async ([, route]) => crossPageFragments(await pageFor(route), route))
+    )
+
+    expect(aimed.flat().length).toBeGreaterThanOrEqual(SITE_PATHS.length - 1)
   })
 
   /**

@@ -15,6 +15,11 @@ import { FACTS } from "../copy"
 import { examplePage, rearrangedExample } from "../example"
 import { LIBRARY_PARTS } from "../library"
 import {
+  REPORT_CAPTION,
+  REPORT_LANGUAGE,
+  THE_REPORT,
+} from "../reported"
+import {
   REGISTERED_TYPE,
   THE_REGISTRATION,
   WRITTEN_LANGUAGE,
@@ -541,6 +546,73 @@ const onAPage = (ids: IdFactory): LoomNode =>
   )
 
 /**
+ * What that page tells its author, which is the fourth link of the chain.
+ *
+ * ## The hole this fills, and it is in the middle of the argument
+ *
+ * The bands of this page are the maintainer's six links in his order: *What
+ * stays yours* is the first, *What you write* the second, *On a page* the
+ * third, and *The same page arranged for someone else* the fifth. Between the
+ * third and the fifth a reader was asked to make a jump nothing on the site
+ * helped them with — here is a page, and now here is that page arranged for
+ * somebody else — with no answer to the obvious question in between, which is
+ * **how did it know**.
+ *
+ * His fourth link is the answer: *Signals broadcasting to your AI model*. It
+ * had a rung on the front door and nowhere on this site to land, so the chain
+ * sent a reader to the band on `/what-you-run` that says what this deployment
+ * counts about the person reading. `reported.ts` has the whole of why that is
+ * the wrong destination for this reader and the right one for a visitor
+ * wondering what is collected about them.
+ *
+ * ## It prints data rather than arguing about data
+ *
+ * One panel, four observations, and the claim a reader can check for
+ * themselves: every line of it names a part of the page they were looking at
+ * one band ago, and there is no line about a person. The privacy claim this
+ * site has made in prose on three pages is, in this band, the shape of the
+ * object.
+ *
+ * `reported.ts` says what the panel is checked against, which is the same
+ * schema a real delivery is validated with.
+ *
+ * ## `wrap` is true here and false two bands up
+ *
+ * *What you write* prints TypeScript and says `wrap: false`, because a wrapped
+ * line of source reads as two statements. This is pretty-printed JSON, where a
+ * wrapped line loses nothing a reader needed — `nodes.ts` wrote the prop for
+ * exactly this distinction and the panel takes the default it set.
+ */
+const whatItReports = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "What your page reports", anchor: WHY_USE_IT_ANCHOR.whatItReports },
+    "What one report looks like",
+    [
+      prose(
+        ids,
+        "Every few seconds the page above posts what it saw to your own server. This is one of those posts.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, THE_REPORT, {
+        language: REPORT_LANGUAGE,
+        caption: REPORT_CAPTION,
+      }),
+      prose(
+        ids,
+        "Every line names a part of the page and how long it was on screen. Nothing in it says who was reading, because there is no field for a person.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      prose(
+        ids,
+        "The one random key ties a few seconds of a single visit together. Your page throws it away afterwards. A press is reported the same way, against the control somebody pressed.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+    ],
+    { align: "center" }
+  )
+
+/**
  * The headline of this site, happening to a page the reader has just met.
  *
  * `onAPage` above answers *what do the parts look like together* and leaves
@@ -639,6 +711,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         theParts(ids),
         whatYouWrite(ids),
         onAPage(ids),
+        whatItReports(ids),
         forAReader(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
