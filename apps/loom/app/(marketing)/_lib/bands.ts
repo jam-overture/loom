@@ -155,6 +155,17 @@ export const WHY_USE_IT_ANCHOR = {
   /** A browser, with a page built out of that set inside it. */
   onAPage: "on-a-page",
   /**
+   * One report from the page above, as the server receives it.
+   *
+   * The fourth link of the maintainer's chain is *your page reports what
+   * readers do with it*, and it landed on the disclosure band of
+   * `/what-you-run` until today — which says what *this* deployment counts
+   * about the person reading, and is the right band for that question and the
+   * wrong one for a developer asking what they get. `reported.ts` carries the
+   * argument.
+   */
+  whatItReports: "what-your-page-reports",
+  /**
    * The same page arranged for a reader it was not built for, wiped by a
    * handle. It is the band that earns the site's headline, so it is the one an
    * outside link is most likely to want.

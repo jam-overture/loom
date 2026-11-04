@@ -684,6 +684,13 @@ describe("the panels that print source", () => {
 
     expect(panels.length).toBeGreaterThan(0)
     expect(panels.some((text) => text.includes("definePrimitive"))).toBe(true)
+    /**
+     * The second kind of panel the exclusion now covers: the report on
+     * `/why-use-it`, which is data rather than source and is read by the same
+     * rules. Named by a field of it rather than by the whole string, so this
+     * does not become a third copy of a panel `reported.ts` already holds.
+     */
+    expect(panels.some((text) => text.includes('"signals"'))).toBe(true)
   })
 
   /**

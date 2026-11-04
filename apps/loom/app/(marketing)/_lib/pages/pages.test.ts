@@ -12,6 +12,7 @@ import { DOC_PAGES } from "../docs-pages"
 import { unhonored } from "../frames"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import { asRequested } from "../requested"
+import { THE_REPORT } from "../reported"
 import { WRITTEN_FILES } from "../written"
 
 import {
@@ -584,8 +585,12 @@ describe("the panels that print data", () => {
    * publishes rather than as two more string literals, because a second copy of
    * a file this repository already holds twice is the thing that module exists
    * to stop. The install line stays written out, since nothing else holds it.
+   *
+   * **It did it again on 4 November**, naming the report *What your page
+   * reports* prints. That one is `reported.ts`', for the same reason, and the
+   * list is in the order a reader meets them down the page.
    */
-  it("is the install line and the two source panels, counted rather than assumed", async () => {
+  it("is the install line, the two source panels and the one report, counted rather than assumed", async () => {
     const panels = await everyPanel()
     const printed = panels.flatMap((panel) =>
       panel.children.flatMap((child) => (child.kind === "text" ? [child.value] : []))
@@ -594,6 +599,7 @@ describe("the panels that print data", () => {
     expect(printed).toEqual([
       "npm install @jam-overture/loom @jam-overture/loom-primitives",
       ...WRITTEN_FILES.map((file) => file.source),
+      THE_REPORT,
     ])
   })
 
