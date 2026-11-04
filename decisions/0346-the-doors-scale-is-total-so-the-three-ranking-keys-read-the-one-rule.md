@@ -1,10 +1,19 @@
-# 0344 — The door's scale is total, so the three ranking keys read the one rule
+# 0346 — The door's scale is total, so the three ranking keys read the one rule
 
 **Status:** Accepted
 
 **Date:** 3 November 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-11-04**, from 0344, when the branch that carried it (#760)
+> was merged. `main` had meanwhile accepted a different 0344 — *the tree as it was
+> is one call, and a host that cannot prove where a tree started says so* (#759) —
+> and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> 0345 is claimed on an open branch (#761), so this record takes 0346. It was
+> written on 3 November and nothing in it changed but its number; references on
+> the branch were updated with it.
 
 ## Context
 

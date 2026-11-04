@@ -37,7 +37,7 @@ import type { ReadingProgress, ReadingStop } from "./progress.js"
  * So the ranking key is the loss put **on the scale the door counts in**, by
  * `atDoorScale` off that page's own door row
  * ([0265](../../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md),
- * [0344](../../decisions/0344-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)).
+ * [0346](../../decisions/0346-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)).
  * The rule for picking the right row is published beside the counter it is a
  * rule about and is reused here rather than written a second time
  * ([0219](../../decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)).
@@ -353,7 +353,7 @@ const rowOf = (page: ReadingProgress, door: RevisionPageViews | null): RankedPag
 
   /**
    * The scale is read off the rule published beside the counter rather than
-   * spelled a second time here (0344). It was `at.lost ÷ (1 + door.inflation)`,
+   * spelled a second time here (0346). It was `at.lost ÷ (1 + door.inflation)`,
    * which is the same rule arrived at by a different route — and the two routes
    * do not agree in the last place, so the key moves there on a page with drift.
    * Nothing orders on a sixteenth decimal and the published spelling is the

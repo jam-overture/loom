@@ -97,7 +97,7 @@ export const doorOf = (row: RevisionPageViews | null): PageDoor => {
  * Three **ranking keys** then turned out to be the same rule written a sixth,
  * seventh and eighth time as `count ÷ (1 + inflation)` — the order of
  * conversions (0333), of falls (0250) and of movements (0291). All three read
- * this one now (0344).
+ * this one now (0346).
  *
  * `scaledBy` is a **second** door, for the one caller that needs one: a
  * comparison asks what one side's reading would have come to with the other
@@ -106,7 +106,7 @@ export const doorOf = (row: RevisionPageViews | null): PageDoor => {
  * is every other caller.
  *
  * **Total, and the two short-circuits are the reason three ranking keys can
- * share it** (0344). It was documented as *only ever called for a door with no
+ * share it** (0346). It was documented as *only ever called for a door with no
  * silence, where `appearances` is positive*, and that precondition is what kept
  * the orders of falls and of movements writing the rule a second time by hand as
  * `count ÷ (1 + inflation)` — a division-first spelling that is total where this

@@ -65011,7 +65011,7 @@ one route**, not by two routes that agree on paper.
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/deployment.ts`, `src/signals/deployment-change.ts`) ·
 **Status:** **closed by `signals-72-one-door-rule`**
-([0344](decisions/0344-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)),
+([0346](decisions/0346-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)),
 and **the reason it gave for the fix being unsafe was wrong** — see the 3
 November (evening) entry below, which is the correction
 

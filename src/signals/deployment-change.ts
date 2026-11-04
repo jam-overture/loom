@@ -47,7 +47,7 @@ import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./pa
  * So the key here is that figure put **on the scale the door counts in**, by
  * `atDoorScale` off that revision's own door row
  * ([0265](../../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md),
- * [0344](../../decisions/0344-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)).
+ * [0346](../../decisions/0346-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)).
  * The row is the later window's and is picked out with the rule published beside
  * the counter rather than written again
  * ([0219](../../decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)).
@@ -447,7 +447,7 @@ const pairKeyOf = (change: ReadingChange): string =>
  * counters disagree with the door row, which publishes the movement's share
  * without a headcount against it.
  *
- * The scale itself is the rule published beside the counter (0344). It was
+ * The scale itself is the rule published beside the counter (0346). It was
  * `Math.abs(at.readersKept) ÷ (1 + inflation)` here, which is the same rule by a
  * different route — and this figure is a share movement times a count, so it is
  * **not a whole number**: on a page with no drift the two routes differ in the

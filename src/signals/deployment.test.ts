@@ -251,7 +251,7 @@ describe("deploymentReadingOf", () => {
 
     /**
      * The key is the rule published beside the counter and not a second spelling
-     * of it (0344). The figures below are what it came to before the swap and
+     * of it (0346). The figures below are what it came to before the swap and
      * after it, and they are the same figures: what moves is the last place on a
      * page with drift, which no order is taken on.
      */
@@ -272,7 +272,7 @@ describe("deploymentReadingOf", () => {
      * **The key does not move at all, and not merely nearly.** The doubled
      * reading is the same quotient scaled by two above and below, so the two
      * figures agree in their last place as well. The spelling this key used until
-     * 0344 did not: thirty openings, forty appearances and sixteen readers lost
+     * 0346 did not: thirty openings, forty appearances and sixteen readers lost
      * come to twelve through both routes, and folded twice they come to twelve
      * through this one and to 11.999999999999998 through the other, which is a
      * deployment told its worst page improved by two quadrillionths of a reader
@@ -350,7 +350,7 @@ describe("deploymentReadingOf", () => {
      * would divide by nothing. **This order cannot reach its key there**, by two
      * rungs it already had: a page that lost nobody has no steepest fall and
      * leaves as `unbroken`, and a page that lost anybody lost more than appeared
-     * and leaves as `inconsistent`. So the published rule being total (0344) is a
+     * and leaves as `inconsistent`. So the published rule being total (0346) is a
      * belt here rather than a fix — which is worth a test, because the hazard was
      * filed as live and it is not.
      */

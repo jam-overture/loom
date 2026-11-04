@@ -108,13 +108,16 @@ answers something the long form would not have meant.
 
 ## Records added
 
-- **0344** — *The door's scale is total, so the three ranking keys read the one
+- **0346** — *The door's scale is total, so the three ranking keys read the one
   rule.* Accepted, §4c. Five alternatives recorded with the reason each was
   rejected, including the per-call-site guard the finding offered as its first
   shape and rounding the key, which was refused outright.
 
-**0344 is the next free number on `main`** (0343 is the highest) and there are no
-open branches to clash with.
+**The record was written as 0344** — the next free number on `main` when this
+branch was cut (0343 was the highest) — and **was renumbered to 0346 at merge
+time on 4 November**, because #759 carried a different 0344 onto `main` first and
+0345 is claimed on #761. The dated note under the record's header says so.
+Nothing it decides changed.
 
 ## Findings filed and closed
 
@@ -217,7 +220,7 @@ rather than eight.
    anywhere a customer reads.** Recommendation: no. The figures are already
    documented as not counts of people and deliberately not rounded into them, the
    orders are unchanged, and the movement is toward the exact value in every case
-   measured. I have recorded it in 0344's consequences rather than in any
+   measured. I have recorded it in 0346's consequences rather than in any
    published text.
 2. **Still nothing draws any of it**, twenty-five runs on. `Loom portal` is
    paused. This unit is the clearest case yet that the subsystem is being checked

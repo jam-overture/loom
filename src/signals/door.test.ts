@@ -45,7 +45,7 @@ const scaleOf = (opened: number, appearances: number): PageDoor =>
   )
 
 /**
- * The spelling three ranking keys wrote by hand until 0344, kept here to be
+ * The spelling three ranking keys wrote by hand until 0346, kept here to be
  * compared against.
  *
  * The straddle rate is taken off the door's own two counts rather than read from
@@ -164,7 +164,7 @@ describe("a count put on the scale its door counts in", () => {
   })
 
   /**
-   * The reason the rule could be published at all (0344). It was documented as
+   * The reason the rule could be published at all (0346). It was documented as
    * only ever called where `appearances` is positive, and that precondition is
    * what kept two ranking keys spelling the rule a second time by hand. A door
    * that folded nothing has nothing to divide out, so the count is its own
@@ -206,7 +206,7 @@ describe("a count put on the scale its door counts in", () => {
   })
 
   /**
-   * The claim 0344 rests on, and the reason the two keys that swapped onto this
+   * The claim 0346 rests on, and the reason the two keys that swapped onto this
    * rule moved in their last place rather than staying put: the two spellings are
    * one rule by two routes, and the routes do not agree. Three roundings against
    * two, so the question is not whether they differ but which is nearer, and the

@@ -187,7 +187,7 @@ describe("deploymentChangeOf", () => {
 
     /**
      * The scale is the rule published beside the counter and not a second
-     * spelling of it (0344), and this key is the one where that mattered: the
+     * spelling of it (0346), and this key is the one where that mattered: the
      * figure being scaled is a share movement times a count, so it is **not a
      * whole number**, and a page with no drift has to come out of the scale
      * holding exactly the figure the comparison published.
@@ -215,7 +215,7 @@ describe("deploymentChangeOf", () => {
      * them has no appearances to divide by, and both rungs that could reach the
      * key refuse first. Every stop reached by anybody is above nought
      * appearances, so the page is `inconsistent`; a page with no stop at all is
-     * `unmoved`. The published rule being total (0344) is a belt here.
+     * `unmoved`. The published rule being total (0346) is a belt here.
      */
     it("never reaches its key through a door that folded nothing", () => {
       const unfolded = door(TREE, 2, 10, 0)

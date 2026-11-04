@@ -4483,7 +4483,7 @@ and the order of movements
 ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)).
 
 **Done**
-([0344](../decisions/0344-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)):
+([0346](../decisions/0346-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)):
 `atDoorScale` is total, both keys read it, and the precondition is off its doc
 comment.
 
