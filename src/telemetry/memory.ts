@@ -15,6 +15,7 @@ import {
   type TelemetryReadRequest,
 } from "./journal.js"
 import { splitLookup } from "./lookup.js"
+import { telemetrySpanOf, withinTelemetryWindow } from "./window.js"
 
 /**
  * The telemetry journal that keeps its records in the process.
@@ -63,10 +64,17 @@ export const memoryTelemetryJournal = (clock: Clock = systemClock): TelemetryJou
       const from = cursorPosition(request?.cursor)
       const direction = request?.direction ?? "newer"
 
+      /**
+       * The window is applied here, before the limit, which is what makes the
+       * `beyond` probe below a statement about the window rather than about the
+       * journal. Filtering after the slice would hand back a short page and a
+       * cursor pointing at a record the window excludes.
+       */
       const matching = records.filter(
         (record) =>
           (request?.treeId === undefined || record.treeId === request.treeId) &&
-          (from === undefined || (direction === "older" ? record.seq < from : record.seq > from))
+          (from === undefined || (direction === "older" ? record.seq < from : record.seq > from)) &&
+          withinTelemetryWindow(request?.window, record.recordedAt)
       )
 
       /**
@@ -79,6 +87,7 @@ export const memoryTelemetryJournal = (clock: Clock = systemClock): TelemetryJou
       return Promise.resolve(
         ok<TelemetryPage>({
           records: page,
+          span: telemetrySpanOf(page),
           ...pageEnds(page.map((record) => record.seq), direction, {
             beyond: matching.length > page.length,
             resumed: from !== undefined,

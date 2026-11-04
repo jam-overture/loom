@@ -3,6 +3,7 @@ import { clampLimit, type PageDirection, type PageEnds } from "../paging.js"
 import type { Result } from "../result.js"
 
 import type { AssessmentSummary, TelemetryRecord } from "./event.js"
+import type { TelemetrySpan, TelemetryWindow } from "./window.js"
 
 /**
  * Where the narrated runtime goes to be read later.
@@ -64,6 +65,23 @@ export type TelemetryReadRequest = {
    */
   readonly direction?: PageDirection
   readonly limit?: number
+  /**
+   * A stretch of wall-clock time, over `recordedAt`. Absent reads the whole
+   * journal, which is what every read did before windows existed.
+   *
+   * A window and a cursor are not alternatives and compose: the window says
+   * which records the read is about and the cursor says how far through them it
+   * has got. Paging a window walks that window and stops at its end — the
+   * `beyond` probe every implementation uses to name its cursors is taken
+   * *inside* the bound, so a reader paging to the end of last week is told it
+   * has reached the end of last week rather than handed a cursor out of it.
+   *
+   * One value rather than two bounds, because the two bounds are one idea and
+   * were checked against each other when `telemetryWindow` built them. A
+   * journal cannot be handed a window that is unreadable or runs backwards,
+   * which is why `TelemetryError` still has nothing to say about one.
+   */
+  readonly window?: TelemetryWindow
 }
 
 export type TelemetryPage = PageEnds & {
@@ -76,6 +94,20 @@ export type TelemetryPage = PageEnds & {
    * responsible for knowing which — and silently wrong when it guessed.
    */
   readonly records: readonly RecordedTelemetry[]
+  /**
+   * The stretch this page turned out to cover, and `null` when it holds nothing.
+   *
+   * Beside the cursors rather than derived from the records by each consumer,
+   * because the two questions a paged journal is asked are *where am I* and
+   * *when is this* — and only the first had an answer. A consumer taking the
+   * ends off the first and last record gets an empty page wrong, and cannot
+   * tell *no answer* from *no time covered*.
+   *
+   * It is the page's own ends, never the window's: a window is what was asked
+   * for and may be wider at both ends than anything that landed in it, so a
+   * screen naming the window would overstate what it is describing.
+   */
+  readonly span: TelemetrySpan | null
 }
 
 /**

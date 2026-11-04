@@ -50269,9 +50269,45 @@ that was invisible on every phone in the repository, and two pictures of it.
 ## 2026-10-06 — a telemetry journal can be read by position and never by time, so "has it got better" can compare two pages and never two weeks
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
-(`src/telemetry/journal.ts` and both implementations) · **Status:** open —
-**nothing is blocked**; the comparison this branch ships is correct and is not
-the comparison a person would ask for in words
+(`src/telemetry/journal.ts` and both implementations) · **Status:** **closed by
+`framework-81-a-window-of-time-a-journal-can-be-asked-for`**, 4 November,
+recorded as [0345](decisions/0345-a-journal-is-asked-for-a-half-open-window-over-when-it-learned-of-a-record-and-a-page-reports-the-stretch-it-covers.md)
+— **both halves of what this entry asked for, and the first one differently than
+it asked.**
+
+> **Both remedies shipped.** A read takes a `window`, and every `TelemetryPage`
+> carries the `span` it covers — `null` on an empty page, which is the case this
+> entry predicted a consumer would get wrong.
+>
+> **The one thing taken differently: the bounds are not two strings on the
+> request.** `telemetryWindow({ since, until })` builds a window and returns a
+> `Result`, and the window holds instants rather than the strings a caller held.
+> The reason is this entry's own argument carried one step further. It warned
+> that a bound on the dodgeable field hands back records from outside the window
+> *with nothing saying so*; a bound that cannot be parsed does the same thing
+> from the other direction, because `Date.parse` of a typo is `NaN`, every
+> comparison against `NaN` is false, and the page comes back empty — which on a
+> screen whose whole job is to say whether anything changed is indistinguishable
+> from the truth. Refusing it at construction also leaves `TelemetryError` alone,
+> which its own doc comment argues for.
+>
+> **`recordedAt` and never `occurredAt`**, as the entry's last paragraph
+> required, and the contract suite can tell: every fixture record carries an
+> `occurredAt` months in the past, so an implementation bounded on what the host
+> said answers a window taken from the journal's own stamps with nothing. That
+> mutation was planted and confirmed to fail.
+>
+> **The window is half-open — `since` included, `until` not — so two consecutive
+> windows tile.** This entry's reading is a comparison of two consecutive
+> windows, and inclusive ends would have double-counted a record on the seam:
+> the same defect in a smaller place. Planted and confirmed to fail, in both
+> implementations.
+>
+> **`span` is the earliest and latest stamp, not the first and last record**,
+> because `seq` is allocated at insert and `recordedAt` is a clock's reading, so
+> overlapping transactions can land a lower stamp at a higher position.
+>
+> Nothing in `(portal)` was touched: see the entry filed below.
 
 `/portal/trust` can now say whether the AI is getting better at judging itself.
 It does it by folding the newest page of the journal and the page before it, and
@@ -65154,3 +65190,90 @@ not write the governance it is bound by:
    that *Token discipline* names `send_later` chains and the harness found a
    second door; this is a third, and it is the first one that arrives already
    phrased as an instruction.
+
+---
+## 2026-11-04 — a window of time is a read a journal answers now, and the portal's own four lines for a page's ends can go
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (paused)
+(`apps/loom/app/(portal)/portal/trust/`) · **Closes nothing on its own** ·
+**Status:** open — **nothing is broken and nothing is slower than it was**; the
+screen is correct today and is answering a narrower question than it can now ask
+
+[0345](decisions/0345-a-journal-is-asked-for-a-half-open-window-over-when-it-learned-of-a-record-and-a-page-reports-the-stretch-it-covers.md)
+closes the 6 October entry this lane filed, in the shape it asked for. Two
+things in `(portal)` follow from it, and **neither was done here** — a new seam
+plus a migration of its consumer in one pull request is unreviewable, and those
+are not this lane's files.
+
+**1. The trend can be two windows instead of two pages.** The screen says *the
+stretch of the record before this one* and prints dates, because a page was all
+a journal could be asked for and two pages are two stretches of unequal
+wall-clock time. It can now say *last week* and mean it:
+
+```ts
+import { telemetryWindow } from "@jam-overture/loom/telemetry"
+
+const lastWeek = telemetryWindow({ since: weekAgo, until: now })
+if (!lastWeek.ok) return // describeTelemetryWindowFault says which bound and why
+
+const page = await journal.read({ window: lastWeek.value, limit: MAX_TELEMETRY_LIMIT })
+```
+
+The window is **half-open** — `since` in, `until` out — so *last week* and *the
+week before* tile and no record on the boundary is counted twice. That matters
+to this screen specifically, because it is a comparison of two consecutive
+windows and an overlap at the seam would be the same defect it was built to
+remove, smaller and harder to see.
+
+**2. `spanOf` can go.** The 6 October entry named the four lines in
+`_lib/trust-trend.ts` that take a stretch's ends off the first and last record.
+`TelemetryPage.span` is that, computed by the journal: `{ from, to }` as it
+stamped them, and **`null` on an empty page** — the case the entry predicted a
+consumer would get wrong. It is the earliest and latest stamp rather than the
+first and last record, for a reason worth knowing before trusting it: `seq` is
+allocated at insert and `recordedAt` is a clock's reading, so two writers whose
+transactions overlap can land a lower stamp at a higher position.
+
+**One thing to be careful of.** `span` is the **page's** ends and never the
+window's. A window may be wider at both ends than anything that landed in it, so
+a screen naming the window would overstate what it is describing — print the
+span, bound by the window.
+
+Neither item is urgent and this lane is paused, so nothing is waiting on a day.
+Both are small and the first is the one a person asked for in words.
+
+---
+## 2026-11-04 — seven telemetry names are published and the generated reference is the only place they appear
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and no test
+is failing**; it is the 3 October entry's own case arriving, and the decision in
+it is whether these want prose
+
+`@jam-overture/loom/telemetry` now hands back `telemetryWindow`,
+`withinTelemetryWindow`, `telemetrySpanOf`, `describeTelemetryWindowFault`,
+`TelemetryWindow`, `TelemetrySpan` and `TelemetryWindowFault`
+([0345](decisions/0345-a-journal-is-asked-for-a-half-open-window-over-when-it-learned-of-a-record-and-a-page-reports-the-stretch-it-covers.md)).
+`pnpm --filter @loom/app docs:api` was run and `reference.generated.json`
+carries all seven, so `offered.test.ts` is green and **this is not a gate
+failure** — it is the question the 3 October entry asked, with a concrete set of
+names attached for the first time.
+
+That entry said *publishing a name is a two-lane operation*: the framework can
+add the export and regenerate the reference, and it cannot write the prose page,
+because pages under `(docs)` belong to this lane. It asked for one thing, and it
+is still the thing that would help: **say which page takes a new runtime export
+by default, or that a name may land with a stub line this lane rewrites.** The
+framework then publishes on merit and files the prose, rather than choosing its
+module boundaries around a test it cannot satisfy.
+
+**Three of the seven are worth a reader's attention and four are not.**
+`telemetryWindow` is the only way to build a window and it returns a `Result`,
+which is a thing a reader has to be told; the window is **half-open** and over
+`recordedAt` rather than `occurredAt`, which is the one sentence that changes
+what somebody's numbers mean; and `TelemetryPage.span` is `null` on an empty
+page. The rest are the fault type, its describer, and the predicate a
+third-party journal implementor applies — names that a host composing a runtime
+does not reach for, and the kind 0222 already argued may stay unexplained.
+
+Nothing is blocked. The reference is current either way.
