@@ -3,6 +3,7 @@ import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
 import { audienceScopeRead, readingKeyOf } from "./audiences.js"
+import { atDoorScale, doorOf } from "./door.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 import type { ReadingProgress, ReadingStop } from "./progress.js"
 
@@ -33,11 +34,12 @@ import type { ReadingProgress, ReadingStop } from "./progress.js"
  * does not. Ranking the raw losses therefore ranks partly by how long readers
  * stay, which is not the question anybody asked.
  *
- * So the ranking key is the loss put **on the scale the door counts in**:
- * `lost ÷ (1 + inflation)`, where the inflation is that page's own
- * `drift ÷ opened` off that page's own door row. The rule for picking the right
- * row is published beside the counter it is a rule about and is reused here
- * rather than written a second time
+ * So the ranking key is the loss put **on the scale the door counts in**, by
+ * `atDoorScale` off that page's own door row
+ * ([0265](../../decisions/0265-what-readers-do-inside-a-kind-of-part-is-a-share-of-the-readers-who-met-it-and-the-door-is-only-a-weight.md),
+ * [0346](../../decisions/0346-the-doors-scale-is-total-so-the-three-ranking-keys-read-the-one-rule.md)).
+ * The rule for picking the right row is published beside the counter it is a
+ * rule about and is reused here rather than written a second time
  * ([0219](../../decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)).
  *
  * The figure that comes out is not a count of people and is deliberately not
@@ -349,12 +351,20 @@ const rowOf = (page: ReadingProgress, door: RevisionPageViews | null): RankedPag
     return { ...where, standing: "inconsistent", at, lost: at.lost, readers: null, share: at.share }
   }
 
+  /**
+   * The scale is read off the rule published beside the counter rather than
+   * spelled a second time here (0346). It was `at.lost ÷ (1 + door.inflation)`,
+   * which is the same rule arrived at by a different route — and the two routes
+   * do not agree in the last place, so the key moves there on a page with drift.
+   * Nothing orders on a sixteenth decimal and the published spelling is the
+   * closer of the two to the exact value, never the further.
+   */
   return {
     ...where,
     standing: "ranked",
     at,
     lost: at.lost,
-    readers: at.lost / (1 + door.inflation),
+    readers: atDoorScale(at.lost, doorOf(door)),
     share: at.share,
   }
 }
