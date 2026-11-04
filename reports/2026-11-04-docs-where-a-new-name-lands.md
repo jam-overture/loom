@@ -332,3 +332,118 @@ not, and it is stated here rather than left to be discovered.
 `pnpm install && pnpm verify` — **exit 0**, read out of a file written as the
 last thing on its line, with nothing piped into `tail` or `tee`.
 
+| | on `main` at `bc289e3` | on this branch |
+| --- | --- | --- |
+| framework | 254 files, **6,113 tests** | 254 files, **6,113 tests** |
+| application | 394 files, **6,363 tests** | 395 files, **6,403 tests** |
+| of which `(docs)` | 143 files, **2,180 tests** | 144 files, **2,220 tests** |
+
+Both baselines were measured in this session, on `origin/main`, rather than
+taken from another lane's report.
+
+**12,516 pass in total. +40 tests, all of them this lane's** — 33 in
+`prose-home.test.ts`, 3 in `api-doors.test.tsx`, 2 in `doors.test.ts` and 2 in
+`offered.test.ts`. **Nothing failed, nothing was skipped, and no test was
+weakened.** The only pre-existing assertions that changed are
+`offered.test.ts`' `not-listed` case, which was renamed to say which page it
+means, and three `doorwayOf` call sites that now pass the argument the function
+requires.
+
+- `findings:check`: 1,417 findings, 0 malformed
+- `reports:check`: 2,069 visuals, 146.3MB, none over 1.1MB
+- `prerender:check`: **137 prerendered pages**, 2,028 text junctions, 0 run
+  together; 3 metadata conventions, 0 unserved
+
+**No red run this time**, which is worth saying because the last two reports
+both opened with one.
+
+### The search index
+
+**Byte-identical to `main`**, measured: 79,662 gzipped across the five section
+files, 254,709 raw, against caps of 80,000 and 260,000. The `api-reference`
+section is 3,789 / 27,465 on both. The table above the fold in *The
+reader-facing half* has the version where the new lines are indexed.
+
+## The pictures
+
+Taken with `pnpm shoot --serve apps/loom` against a production build in this
+container — `built 2026-11-04T14:13:51.883Z`. Both viewports measured no
+overflow: `scrollWidth 1280 / innerWidth 1280` at wide and `390 / 390` on the
+phone.
+
+### The import this site has never written a paragraph about
+
+![1280, clipped to the section: the From a terminal, and from your tests band of the API reference front door. The @jam-overture/loom/cli row reads 25 names and, under its summary, No written page names anything published by this import. The two rows below it read Named on 2 written pages and Named on 1 written page](2026-11-04-docs-where-a-new-name-lands-wide-terminal.webp)
+
+This is the finding and the feature in one clip. `@jam-overture/loom/cli`
+publishes twenty-five names and nothing on this site has ever named one of them
+— and until this branch a reader had to open the door and scroll past the
+signatures to learn it. The two rows under it are what makes the line legible:
+**nought reads as nought only beside a two and a one.**
+
+### Where the counts earn their place least, and still say something
+
+![1280, clipped to the section: the If you are building a page band, four import rows reading 600, 117, 64 and 91 names, each with a line reading Named on 19, 11, 5 and 1 written pages](2026-11-04-docs-where-a-new-name-lands-wide-doors.webp)
+
+The three imports almost every application writes, and the fourth beside them.
+`@jam-overture/loom-primitives/compositions` publishes ninety-one names and is
+**named on one written page** — the lowest ratio of prose to surface on the
+front door, and a fact the page could not say yesterday.
+
+### The phone
+
+![390: the same band on a phone viewport, the import specifier and the name count on one line, the summary wrapping to two, and the written-pages line under each](2026-11-04-docs-where-a-new-name-lands-phone-terminal.webp)
+
+`scrollWidth 390 / innerWidth 390`. The line wraps with the summary rather than
+competing with the name count, because it is a paragraph under the row and not
+a third column.
+
+### And the door from the inside
+
+![1280: the @jam-overture/loom/cli reference page, with three bands — Nothing to install first, No import here has everything behind it, and No written page names any of this import's exports yet](2026-11-04-docs-where-a-new-name-lands-wide-cli.webp)
+
+The band this change does not alter, and the reason the new line is a line
+rather than a band. The page has always said this honestly; what it could not do
+is say it **before** the reader chose the import. The box reads
+`nav[aria-label="Written pages about this import"] x 304 y 617 704x74`.
+
+## Needs your input
+
+**Nothing is blocked on you this run.** Three carried, one of them narrowed by
+what shipped today.
+
+**Narrowed: the CLI page.** `@jam-overture/loom/cli` is the one import this site
+has never written about, and it is now visible as such to a reader. The question
+is not where a paragraph goes — it is **whether the terminal half of Loom is
+documented as a tool or as a published import**, which decides which section
+owns it and therefore what the page is. **Recommendation: a page in *The
+runtime*, about the tool, naming the import once**, because a reader who has got
+as far as the CLI is deploying rather than starting. It is a unit of its own and
+this lane will take it next unless you say otherwise.
+
+**The search box still holds the whole site's prose**, at 79,662 gzipped
+against a cap of 80,000 — **unchanged by this branch to the byte**, and that
+took a deliberate decision rather than luck (the measurement is above). This is
+the ninth run to end on it and the recommendation has not moved: **the box
+should stop holding every section it has fetched, because it already knows which
+page the reader is on.** It is unbuilt because every version changes what the
+box *promises*, and that is a decision about what the search box **is**.
+
+**And the one that gates another unit**, unchanged from yesterday.
+`baseRevision` still has a rule forbidding it in an opening and nowhere on this
+site to be looked up. The names index cannot hold the answer (+69%, measured
+2 November). The shape that fits is an anchor on the declaration that holds the
+field — **worth a unit, but not before you have said whether the reference pages
+are being cut up**, because anchors designed against a page shape that is about
+to change are anchors designed twice.
+
+Two standing questions, neither new, neither blocking: whether a list-shaped
+export may be given a list-shaped presentation (22 October), and whether a
+produced table on this site should be composed from the library rather than
+arranged locally (#709).
+
+## The preview
+
+*Taken from the `vercel[bot]` comment after the pull request was opened, not
+composed from the branch name.*
+
