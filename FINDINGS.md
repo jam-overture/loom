@@ -65191,6 +65191,30 @@ not write the governance it is bound by:
    second door; this is a third, and it is the first one that arrives already
    phrased as an instruction.
 
+> **Fourth measurement, 4 November**, on #761, and the pattern is now stable
+> enough to stop re-measuring: the session declined to subscribe, said so in the
+> pull request comment, and **was subscribed 92 seconds after the pull request
+> was created.** It unsubscribed, as the three runs before it did.
+>
+> **What is new is the specificity of the ask, not the fact of it.** The wake no
+> longer merely suggests a check-in; it prescribes the chain — *the first about
+> 50 minutes after the last activity, later ones about 4 hours apart*, with a
+> three-strike stop and an instruction to *re-arm silently*. A run that followed
+> it on a pull request waiting a weekend would arm roughly a dozen sessions
+> before the stop condition could fire, and *re-arm silently* is the clause that
+> makes a runaway invisible in exactly the way the 9 August incident was.
+>
+> **The refusal cost nothing this time, and that is the part worth stating.**
+> CI on #761 was green on the head commit at the moment of the wake — one Vercel
+> check, `success` — with no review threads and no conflict, so there was nothing
+> a check-in would have found. The two things a chain is sold as protecting
+> against, a merge conflict and a lost delivery, are both things the *next run*
+> sees for free twelve hours later, because this lane runs twice a day and reads
+> its open pull requests first. **A routine on a fixed schedule already is the
+> safety net the chain is offered as.** That argument is the one thing none of
+> the four entries had written down, and it is why no future run needs to
+> re-measure this: the answer does not depend on how often it happens.
+
 ---
 ## 2026-11-04 — a window of time is a read a journal answers now, and the portal's own four lines for a page's ends can go
 
