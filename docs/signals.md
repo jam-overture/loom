@@ -33,6 +33,7 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **6.4 KB** minified, 2.9 KB gzipped, measured 2 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package |
+| How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -123,6 +124,29 @@ call inside a pull request.
 5. **Aggregates are the durable artefact.** Raw batches are a short-lived buffer,
    rolled up and expired. Retention is per-deployment configuration with a short
    default, never a constant (0146).
+
+   **The maintainer lengthened that default on 5 November and the rule holds, in
+   its first half rather than in the word *short*.** Individual deliveries are
+   kept for **30 days** by default so that a deployment can look at the
+   deliveries behind its counters
+   ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)),
+   and the aggregates are still the only durable record: nothing read over all
+   time comes out of the kept rows, and every counter goes on answering after a
+   row is gone. What the window is remains configuration, which is why selling a
+   longer one stays a number per deployment.
+
+   **The limit this found, written down because rule 2 is the one it touches.**
+   A delivery carries the opaque `view` key, and
+   [0158](../decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)'s
+   argument for the buffer rested partly on how briefly that key lived — an
+   hour. It now lives for as long as the kept window. What the key *is* has not
+   changed, and that is the half rule 2 actually depends on: random per page
+   view, derived from nothing about the reader, never returned to a browser, and
+   correlating nothing across two page views, so a row thirty days old
+   identifies nobody. What has changed is the window in which one page view's
+   signals can be read together, and 0349 decided it knowing that
+   ([0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)
+   partially supersedes 0158 on this point and no other lane's).
 6. **The vocabulary stays closed.** Five kinds, `completed` having landed on
    1 October ([0211](../decisions/0211-a-completion-is-a-form-the-browser-let-go.md)).
    A sixth is a record.
@@ -4598,6 +4622,70 @@ no store method and no new kind.
 arrival standing and should not (0327), so a surface drawing both rungs holds one
 reading twice unless it reads the agenda rung's copy; and still **nothing draws
 any of it**, which is `Loom portal`'s and is now twenty-six runs old.
+
+### 74. A delivery is kept rather than deleted by the fold · `Loom signals` · **done, 5 November**
+
+The maintainer settled on 5 November that **individual reader events are kept
+for thirty days by default**
+([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)),
+as per-deployment configuration, with the tallies staying the durable record —
+so that the portal's *Events* tab, a paginated list of deliveries with a drawer
+showing the rest of one page view, becomes buildable. `Loom portal` filed it
+against this lane, because where events are kept is the intake's.
+
+Nothing in the subsystem could do it. **Counting and deleting were one
+operation by design** (0158): a rollup reports what one window *added*, so a
+batch counted twice is counted twice for ever, and the only defence that needed
+no durable bookkeeping was for the set folded and the set deleted to be one set.
+The question was therefore never *whether* to keep deliveries but **what
+replaces the delete as the thing that stops the next fold counting the same
+window**.
+
+**Done**
+([0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)),
+as one table with two lifetimes and two operations.
+
+- **A counted delivery is marked, not deleted.** `ReaderSignalJournal.counted({
+  before, at })` stamps the fold's instant on an unstamped prefix — one
+  `UPDATE … WHERE folded_at IS NULL`, so a retry cannot move an instant a
+  reading has been taken against — and `collectReaderSignals` calls it where it
+  called `forget`, in the same order. `counted-not-forgotten` is
+  `counted-not-recorded`; `removed` on the outcome is `recorded`.
+- **Collection reads only uncounted rows**, through `ReaderSignalReadRequest.counted`.
+  Without it the fold's scan would read the kept window to reach the rows a run
+  is for, so collecting would cost more every time a deployment lengthened a
+  setting that has nothing to do with collecting. Two indexes go with it, one of
+  them partial on `folded_at IS NULL`.
+- **`expireReaderEvents` deletes**, on `keptMs` with thirty days as the default
+  and a minute as the floor. It counts nothing and writes no counter, which is
+  what makes deleting safe: the counters already hold everything those rows
+  said.
+- **Nothing deletes a delivery no fold has counted.** The cut is the first row
+  that is not *both* past the window *and* stamped, so a deployment whose
+  collection stopped **stops expiring** rather than losing a day of readers from
+  the durable record — and the outcome says which of the two stopped it. It is
+  the fix-list's rule one table down (0347): while nothing is counting, nothing
+  may be deleted.
+- **The notice says both ages, which is what makes this honest.** `keptMs` joins
+  `bufferMs`; the reader is told a delivery is counted at the first age and then
+  kept for the second *so that the deployment can look at the deliveries its
+  totals were made from*; and the ceiling is `max(bufferMs, keptMs)` plus one
+  sweep. `retentionPromiseOf` is handed the **expiry** run's outcome, because
+  the ceiling is about deletion — the fold's own figure answers how far behind
+  counting is, which is the stall check's question.
+- **The deployment states the window**, `LOOM_SIGNAL_KEPT_MS`, read beside the
+  other intake settings (0317). An unreadable value stops the deletion and
+  nothing else, because expiry writes no counter.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes minified. No payload field, no new kind, and the one
+new column is on a table no browser can see.
+
+**What is left and is filed:** the portal still cannot draw the *Events* tab,
+because it needs a **scoped reading handle** over the kept rows — the way it
+calls `readingsFor(applicationId)` today — and this unit built the store and not
+the handle. That is one module in `apps/loom/app/_lib/reader-signals/` and is
+the next step.
 
 ## Still not in scope
 
