@@ -223,3 +223,68 @@ Three rules, taken from how `docs/routines.md` handles the same problem:
   text stays, so a run can see what was believed and when.
 - **Where this file and a maintainer comment disagree, the comment wins and this
   file is wrong.** Say so in a report rather than following it.
+
+---
+
+# 5 November 2026 — he read the front door and asked for the October one back
+
+A dated note rather than an edit, on the rule directly above. **Nothing earlier
+in this file has been changed**, including the two things this note reverses, so
+a later run can see what was believed and when.
+
+He was shown the front door as it stands and said:
+
+> *"I am not sure I like the new language on the landing page. Can we go back to
+> what it was right before this?"*
+
+and then:
+
+> *"Yeah actually the whole landing page for marketing changed. I liked the
+> older version. Can we try to go back to that?"*
+
+Shown the 24 October page beside today's, he gave four instructions:
+
+> *"The small line now is fine. The headline should revert to 24 Oct. Buttons
+> should point to the docs or installing the framework. First band should revert
+> to 24 Oct."*
+
+and, separately:
+
+> *"we should move up the link to npm package and the npm install command."*
+
+## What this makes wrong above
+
+**1. The headline.** *The headline, which is settled* records him taking *A web
+page that rearranges itself around the people using it* on 24 October. It is no
+longer the headline. `HEADLINE` is *Make your web page dynamic with AI and Loom*
+again — his line of 27 September, which the October one had replaced. Both are
+his, so `MAINTAINERS_OWN` holds whichever is rendered and neither was edited.
+
+**That section is not deleted**, because what it records is true: he did pick
+the other one, on that date, for the reason quoted there. A run that finds only
+this note cannot tell that, which is exactly what the rule above is for.
+
+**2. Which page leads with the chain.** *The chain, which is the message* still
+holds in full — the six links are his, in his order, and the site says them. What
+changed is that they no longer open the front door. *"First band should revert to
+24 Oct"* puts *What is Loom?* back under the hero, and the chain moved to the top
+of `/why-use-it`, which is the page whose bands five of its six links already
+pointed at.
+
+**This was a judgement and the other reading was available.** His instruction is
+about band order on one page; it does not say the chain comes off the site. Moving
+it keeps *the message* and satisfies the instruction, and deleting it would have
+satisfied the instruction and lost the message. **If he wants it gone, that is one
+line and this note is where the choice is recorded.**
+
+## What it leaves standing
+
+Everything else in this file. The audience is unchanged, the free-framework and
+paid-portal line is unchanged, *the framework is ready* is unchanged, and the
+whole of *How it is allowed to sound* — the banned comma-clause shape, the
+headline rule, `voice.test.ts` — is untouched. He objected to a page, not to a
+register.
+
+The two standing questions he has not answered are also unchanged: whether the
+*What is Loom?* band belongs on the front door at all, and what becomes of
+`/what-you-run`.

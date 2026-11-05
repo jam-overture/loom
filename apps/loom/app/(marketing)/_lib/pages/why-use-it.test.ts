@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { FACTS } from "../copy"
+import { FACTS, MAINTAINERS_OWN } from "../copy"
 import { LIBRARY_PARTS } from "../library"
 import type { ElementNode } from "@jam-overture/loom"
 
@@ -134,15 +134,30 @@ describe("the comparison it offers", () => {
 })
 
 /**
- * **No outcome claim.** `docs/positioning.md` allows this site exactly one, and
- * it is the maintainer's own phrasing on the front door's last rung: *greater
- * user engagement and conversion.* A second page promising a result is this
- * lane inventing positioning, which is the one thing its brief says it may not
- * do, so the words a result would be written in are held off this page.
+ * **No outcome claim of this lane's own.** `docs/positioning.md` allows this
+ * site exactly one, and it is the maintainer's own phrasing on the chain's
+ * last rung: *greater user engagement and conversion.* A second page promising
+ * a result is this lane inventing positioning, which is the one thing its
+ * brief says it may not do, so the words a result would be written in are held
+ * off this page.
  *
  * It is a substring check and it is blunt on purpose, for `copy.ts`' reason
  * about the reserved vocabulary: a rule that cannot be argued with is worth
  * more here than a subtle one that erodes an exception at a time.
+ *
+ * ## His one claim is now on this page, and the rule reads around it
+ *
+ * The chain moved here from the front door on 5 November, and its last rung is
+ * that sentence. The rule was written when the two were on different pages, so
+ * *no outcome words anywhere on `/why-use-it`* and *exactly one outcome claim,
+ * and it is his* said the same thing. They do not any more.
+ *
+ * **The exemption is `MAINTAINERS_OWN` and nothing else** — the same list
+ * `voice.test.ts` reads, matched exactly rather than loosely, so it cannot be
+ * widened by writing a sentence that merely resembles his. A string this lane
+ * wrote still fails on any of the words below, which is the whole of what the
+ * rule was for: his claim is allowed because he made it, and a second one is
+ * not allowed because nobody did.
  */
 const OUTCOME_WORDS: readonly string[] = [
   "conversion",
@@ -155,14 +170,27 @@ const OUTCOME_WORDS: readonly string[] = [
 ]
 
 describe("what it promises", () => {
-  it("promises nothing but that the code exists", () => {
+  it("promises nothing of this lane's own but that the code exists", () => {
+    const his = new Set(MAINTAINERS_OWN.map((line) => line.trim()))
     const words = readerCopy(page().root)
+      .filter(({ text }) => !his.has(text.trim()))
       .map(({ text }) => text.toLowerCase())
       .join(" ")
 
     const promised = OUTCOME_WORDS.filter((word) => words.includes(word))
 
     expect(promised).toEqual([])
+  })
+
+  /**
+   * And the exemption is covering something, or it is a line nobody reads. His
+   * claim has to actually be on this page for the clause above to mean
+   * anything — the shape `routines.md` asks of every exclusion.
+   */
+  it("still carries the one claim he made himself", () => {
+    const rendered = readerCopy(page().root).map(({ text }) => text.trim())
+
+    expect(rendered).toContain("Greater user engagement and conversion")
   })
 })
 

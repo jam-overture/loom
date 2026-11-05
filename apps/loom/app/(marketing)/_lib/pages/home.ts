@@ -16,7 +16,6 @@ import {
   siteReadingBand,
   type ChromeContext,
 } from "../chrome"
-import { CHAIN, shownAt } from "../chain"
 import { FACTS, HEADLINE, INSTALL_COMMAND, RUNTIME_PACKAGE, STARTER_PACKAGE } from "../copy"
 import { costs } from "../costs"
 import { DECISION_RECORDS, INSTALLATION } from "../docs-pages"
@@ -113,7 +112,7 @@ const hero = (ids: IdFactory): LoomNode =>
        * under the hood and the build case is the pitch, and that the reader is
        * *"a junior level developer"* who builds web pages. The first words such
        * a reader meets should tell them it is for their stack, which is also
-       * the first link of the chain in the band below.
+       * the first link of the chain, which opens `/why-use-it`.
        */
       eyebrow: "A framework for React and TypeScript",
     },
@@ -143,7 +142,7 @@ const hero = (ids: IdFactory): LoomNode =>
          * and it survives the headline rule in `voice.test.ts` without
          * punctuation tricks: no trailing clause, no inversion, nothing a
          * person would not say out loud. The band directly under it is the
-         * chain, which is where the claim gets earned.
+         * chain on `/why-use-it`, which is where the claim gets earned.
          */
         /**
          * **`align` is set here because the hero's own `align` does not reach
@@ -216,21 +215,39 @@ const hero = (ids: IdFactory): LoomNode =>
         "AI already writes the components, but would you trust AI to dynamically change your web page? What your page evolves to is yet to be built. Loom and AI are how your page evolves together.",
         { size: "lead", measured: true, align: "center" }
       ),
+      /**
+       * **Both actions go to the same place a reader who wants this goes
+       * next, which is the maintainer's instruction of 5 November:**
+       * *"Buttons should point to the docs or installing the framework."*
+       *
+       * ## What they were, twice
+       *
+       * Until 31 October they were *See how a change travels* and *Try it
+       * yourself*, pointing at `/how-it-works` and `/demo` —
+       * [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+       * removed both pages, so those two labels have had nowhere to land since.
+       * They became *See what you can build* and *Read the docs*, which sent
+       * the primary press sideways into another page of this same site.
+       *
+       * The instruction resolves that: a reader who has read the headline and
+       * the paragraph under it either wants to read about it or wants to
+       * install it, and those are the two controls. Nothing on the first screen
+       * now points at another marketing page.
+       */
       buildSlot(ids, "actions", [
-        action(
-          ids,
-          "See what you can build",
-          sitePath(WHY_USE_IT.path),
-          { variant: "primary", scale: "large" }
-        ),
-        /**
-         * **The second action was the demonstration until 31 October**
-         * ([0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)),
-         * and it is the documentation now. It is the only other surface a
-         * stranger can open without an account, and it is where a reader who
-         * has decided they want this goes next.
-         */
         action(ids, "Read the docs", surfacePath(DOCS), {
+          variant: "primary",
+          scale: "large",
+        }),
+        /**
+         * The install guide rather than this page's own install band, and the
+         * difference is what a press promises. The band below prints the one
+         * command; `INSTALLATION` is the page that says what to do with it,
+         * which is what *installing the framework* means for somebody who has
+         * not done it yet. The band is three screens closer than it was and a
+         * reader scrolling finds it either way.
+         */
+        action(ids, "Install it", INSTALLATION.path, {
           variant: "secondary",
           scale: "large",
         }),
@@ -275,140 +292,6 @@ const hero = (ids: IdFactory): LoomNode =>
  * one card grid, and a second one directly under the hero would make the first
  * screen and a half read as a specification sheet.
  */
-/**
- * **The chain, which is the first thing under the hero as of 25 October.**
- *
- * `docs/positioning.md` records the maintainer's answers of 24 October, and two
- * of them are what this band is:
- *
- * > React/TypeScript components > Loom framework / Primitives > Loom designed
- * > web page > Signals broadcasting to your AI model > AI reacting to signals
- * > and redesigning page > Greater user engagement and conversion
- *
- * and *"A page that explains those six in order, in words a junior developer
- * reads once, is the site."* The six links are in `chain.ts` with his wording
- * beside each rendering, and `chain.test.ts` holds this band to his order.
- *
- * ## Why it goes above everything that argues for the product
- *
- * His other answer that day was *"Don't worry about the controls. That is the
- * stuff under the hood. The building part and why this build is better than
- * traditional methods is preferred."* So the band a visitor meets after the
- * headline is **what you can build**, and the rules, the record, the refusals
- * and the undo are what they meet after that.
- *
- * That reverses the order this page has had since August and it is the point of
- * the change. *What is Loom?* used to be the second band and opened *"A
- * governance framework for modern AI-enabled adaptive web pages"*, which is a
- * true sentence answering a question nobody has asked yet. It has not been
- * rewritten and it has not come off: it is the band after this one, which is
- * where it is right.
- *
- * ## The marker column names the actor, and that is the argument
- *
- * `loom.milestone`'s `marker` is free text, so it carries *who does this one*
- * rather than a number. Two reasons, and the second is the load-bearing one.
- *
- * It makes the shape of the chain readable at a glance: **You, You, Loom, Your
- * page, Your AI model, Your readers.** The work stops at the second rung, which
- * is the sell and is the same shape `usingIt` carries two bands down.
- *
- * And **a number here would break the one thing `journey.ts` exists to hold.**
- * This page says *Four steps* in the band about what you do, and the page one
- * press away says *five steps* about what happens to one change. Those two are
- * different things and the distinction is fragile; a visitor who reads a third
- * count on the first screen has been shown that this site cannot count the
- * thing it offers to count for them. So nothing here is numbered and no
- * sentence on this site says how long the chain is.
- *
- * ## The lead, and the one claim
- *
- * The lead says the two-and-four split in words, because the marker column says
- * it to somebody who is reading and not to somebody who is scanning.
- *
- * The last rung is his phrasing, verbatim, and it is the only outcome this site
- * promises. `docs/positioning.md`: *"Greater user engagement and conversion is
- * the maintainer's own phrasing and is the payoff the site is allowed to
- * promise."* Writing a better-sounding version of it is exactly the thing this
- * lane may not do, so it is quoted and sits in `MAINTAINERS_OWN`.
- *
- * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
- *
- * ## Each rung is the way to the band that shows it, as of 30 October
- *
- * The chain was six claims and six dead ends. Five of the six are demonstrated
- * somewhere on this site already, and a visitor reading the first band under
- * the headline had no way to find out — the paths existed, nothing pointed
- * along them. `shownAt` says where each one goes and `chain.test.ts` holds
- * every destination to being served and to still declaring the anchor.
- *
- * It costs no copy, which is the reason it is this rather than a band arguing
- * the same thing. The press is the argument.
- *
- * The sixth is unlinked and `chain.ts` says why at length: it happens on the
- * reader's page rather than on ours, so the shape of the band is *the work
- * stops at the second rung, the showing stops at the fifth, and the last one
- * is what the other five are for.*
- */
-const chain = (ids: IdFactory): LoomNode =>
-  section(
-    ids,
-    { width: "wide", eyebrow: BAND.chain },
-    "What happens between your components and your readers",
-    [
-      prose(
-        ids,
-        "You do the first two. Loom and your AI model do the rest, every time somebody opens your page.",
-        { size: "lead", measured: true }
-      ),
-      /**
-       * **The hint, and it is here because the library cannot draw the
-       * affordance it stands in for.**
-       *
-       * A `loom.milestone` carrying an `href` renders `.loom-underline`, whose
-       * rest state is `background-size: 0% 2px` — so a rung that is a link is
-       * pixel-identical to a rung that is not until a pointer touches it. On a
-       * phone nothing ever does ([0236](../../../../../decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)
-       * made the harness honest about `hover: none`, and the phone shot of this
-       * band shows five links a reader cannot find). `loom.card` already
-       * answers this for itself by defaulting `elevation` to `raised` when it
-       * is linked; the rail primitives have no equivalent, and that is filed
-       * for `Loom primitives` rather than worked around in `src/`.
-       *
-       * So the composition says in words what the library cannot say in paint.
-       * **When that finding is met this line comes off** — it is scaffolding,
-       * and it is marked as such here so the run that removes the gap knows to
-       * remove the sentence with it.
-       *
-       * *A step* rather than *any step* or *every step*: the last rung has
-       * nowhere to go and never will, and a universal would be a promise this
-       * band breaks once. It also says no number, which is the one thing this
-       * band may not do — see the note above on why nothing here is counted.
-       */
-      prose(ids, "Press a step to see that part of it working on this site.", {
-        size: "small",
-        tone: "muted",
-      }),
-      buildElement(ids, {
-        type: "loom.milestone-list",
-        props: { rail: "line", density: "loose" },
-        children: CHAIN.map((rung) => {
-          const shown = shownAt(rung)
-
-          return buildElement(ids, {
-            type: "loom.milestone",
-            props: {
-              marker: rung.actor,
-              title: rung.title,
-              body: rung.body,
-              ...(shown === undefined ? {} : { href: shown }),
-            },
-          })
-        }),
-      }),
-    ]
-  )
-
 const vocabulary = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.section",
@@ -558,8 +441,13 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  * because the maintainer said so.*
  *
  * So what is fixed here is the half that is plainly a writing defect and was
- * named as one. Whether a page that leads with the chain still wants a band
- * defining Loom as governance three screens down is his.
+ * named as one.
+ *
+ * **It is the first band again as of 5 November**, which is where it was
+ * before the chain led the page and is what he asked for that morning:
+ * *"first band should revert to 24 Oct."* The standing question about whether
+ * this band belongs on the front door at all is still his and is unchanged by
+ * the move.
  */
 const whatIsIt = (ids: IdFactory): LoomNode =>
   section(
@@ -1316,42 +1204,56 @@ export const homePageTree = (context: PageContext): LoomTree => {
         siteHeader(ids, chrome),
         hero(ids),
         /**
-         * The chain, then what it is, then what you do about it.
+         * **The running order of 24 October, restored on 5 November**, with
+         * the install band moved up into it.
          *
-         * `chain(ids)` is new on 25 October and the two bands after it have not
-         * moved relative to each other. What moved is the four plain words,
-         * which were the third band and are now the sixth: see the note on
-         * `vocabulary` below.
+         * The maintainer read the front door that morning, said he preferred
+         * the version of 24 October, and asked for three things by name: the
+         * headline back, the buttons pointed at the documentation or the
+         * install, and *"first band should revert to 24 Oct"*. Then: *"we
+         * should move up the link to npm package and the npm install
+         * command."*
+         *
+         * So the order is what it was before the chain led the page — what it
+         * is, the four words, what you do — and the install band is lifted out
+         * of the bottom third to sit directly after it.
+         *
+         * **The chain is not deleted. It opens `/why-use-it` now**, which is
+         * the page whose bands its five links already pointed at.
+         * `docs/positioning.md` records him calling the six links *the
+         * message* on 24 October, and the instruction above is about which
+         * page leads with them rather than about whether the site says them.
+         * Moving it keeps both true and is one line to undo in either
+         * direction.
          */
-        chain(ids),
         whatIsIt(ids),
+        vocabulary(ids),
         usingIt(ids),
         /**
-         * Third band, and deliberately before anything that argues for the
-         * product. The hero has made the claim and the four words have named
-         * the steps; the next thing a visitor meets should be the claim being
-         * true, not four features explaining why it would be.
+         * **Moved up from the bottom third on 5 November**, at his
+         * instruction, and `costs` comes with it.
+         *
+         * It sat after `questions`, which put the one command this site asks
+         * anybody to run about four screens below the fold. A reader who has
+         * just been told what Loom is, what happens to every change, and what
+         * the four steps are is the likeliest reader this page has to want the
+         * command, and until today they had to scroll past the argument, the
+         * numbers and the questions to reach it.
+         *
+         * `costs` stays directly under it for the reason `costs.ts` gives:
+         * *what will this cost me* is the question that follows a command a
+         * reader is meant to run, and separating the two would put that
+         * question three bands away from the thing that raises it.
+         */
+        install(ids),
+        costs(ids),
+        /**
+         * Third band of the argument, and deliberately after the install
+         * rather than before it. The hero has made the claim, the four words
+         * have named the steps, and a reader who wanted the command has it;
+         * what is left is why the claim is worth anything.
          */
         problems(ids),
-        /**
-         * **The four plain words, moved down from the third band on 25 October.**
-         *
-         * They are the governance story — *Ask · Check · Record · Undo* — and
-         * `docs/positioning.md` names them as the first of the two things on
-         * this page that are *"wrong as of today"*: not wrong in what they say,
-         * wrong in being the third thing a stranger meets. The same file is
-         * explicit that **rewriting is not deleting and neither is authorised
-         * here**, so the band is unchanged, every word of it, and it reads
-         * where it belongs: after the chain has said what Loom builds, after
-         * the band that says what you do, and beside the band about what is
-         * hard. Nothing points at it, so no address broke in the move.
-         *
-         * The second of the two is `problems` above, whose heading argues the
-         * audit case. It has not been rewritten either, and it no longer meets
-         * a reader who has not been told what Loom builds, which is what
-         * `positioning.md` says is wrong with it.
-         */
-        vocabulary(ids),
         /**
          * A rule rather than the diamond this band wants: `loom.divider`'s
          * `diamond` and `dots` ornaments collapse to a mark at the start of the
@@ -1361,18 +1263,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
         facts(ids),
         questions(ids),
-        install(ids),
-        /**
-         * What it costs, new on 29 October and the first thing this site has
-         * ever said about money.
-         *
-         * It is here rather than anywhere else because the band above ends on
-         * a command a reader is meant to run, and *what will this cost me* is
-         * the question that follows one. `costs.ts` carries where the
-         * permission to say it comes from, which is the part of this band that
-         * matters more than its placing.
-         */
-        costs(ids),
         waysIn(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),

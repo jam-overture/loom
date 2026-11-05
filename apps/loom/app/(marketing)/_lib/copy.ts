@@ -322,26 +322,33 @@ export const RESERVED_VOCABULARY: readonly string[] = [
  * cannot sit here going on exempting nothing.
  */
 /**
- * The headline, and it is his of 24 October.
+ * The headline, and it is his of 27 September — **restored on 5 November**.
  *
- * Three were put to him and he took this one: *"I like the second headline.
- * Simplest but gets to the point."* `docs/positioning.md` records the exchange
- * and marks it settled.
+ * ## It has been both of his lines, in this order
  *
- * **It replaces a line of his own**, which is the first time an entry of
- * `MAINTAINERS_OWN` has come off rather than been added to. *Make your web page
- * dynamic with AI and Loom* was his of 27 September and sat here from the day
- * the list was written. The list holds his lines verbatim, so a line he has
- * moved on from leaves with the page rather than staying here as a sentence
- * nobody renders. The old one survives in `reports/` and in the record of the
- * conversation; nothing about it was edited.
+ * *Make your web page dynamic with AI and Loom* is his of 27 September and was
+ * the headline for four weeks. On 24 October three alternatives were put to him
+ * and he took the second: *"I like the second headline. Simplest but gets to
+ * the point."* — *A web page that rearranges itself around the people using
+ * it*, which `docs/positioning.md` recorded as settled.
+ *
+ * On **5 November** he read the front door as it had become, said he preferred
+ * the version of 24 October, and asked for the headline to go back. So it is
+ * back, and the sentence he picked in October is the one that now survives only
+ * in `reports/` and in this note.
+ *
+ * **Neither line was ever this lane's**, which is the only reason the swap is
+ * cheap in both directions: the list below holds his words verbatim, so moving
+ * between two of them changes which one is rendered and edits neither.
+ * `docs/positioning.md` carries the dated note, because a direction that
+ * changes is a note rather than an edit.
  *
  * Exported rather than written into the hero because the page and this list are
  * the two readers of it, and a literal spelled in both places is a literal that
  * gets changed in one of them. The test below only proves the entries are still
  * rendered; it cannot prove they were not both rewritten together.
  */
-export const HEADLINE = "A web page that rearranges itself around the people using it"
+export const HEADLINE = "Make your web page dynamic with AI and Loom"
 
 export const MAINTAINERS_OWN: readonly string[] = [
   HEADLINE,

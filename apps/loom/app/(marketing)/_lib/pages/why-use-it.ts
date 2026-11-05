@@ -10,7 +10,8 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
+import { BAND, COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
+import { CHAIN, shownAt } from "../chain"
 import { FACTS } from "../copy"
 import { examplePage, rearrangedExample } from "../example"
 import { LIBRARY_PARTS } from "../library"
@@ -235,6 +236,103 @@ const jobRow = (ids: IdFactory, job: Job): LoomNode =>
     props: { heading: job.heading, note: job.note },
     children: [answer(ids, job.onYourOwn), answer(ids, job.withLoom)],
   })
+
+/**
+ * **The chain, and it opens this page as of 5 November.**
+ *
+ * `docs/positioning.md` records the maintainer's answers of 24 October, and two
+ * of them are what this band is:
+ *
+ * > React/TypeScript components > Loom framework / Primitives > Loom designed
+ * > web page > Signals broadcasting to your AI model > AI reacting to signals
+ * > and redesigning page > Greater user engagement and conversion
+ *
+ * and *"A page that explains those six in order, in words a junior developer
+ * reads once, is the site."* The six links are in `chain.ts` with his wording
+ * beside each rendering, and `chain.test.ts` holds this band to his order.
+ *
+ * ## It led the front door from 25 October to 5 November
+ *
+ * On 5 November he read the front door, said he preferred the version of
+ * 24 October, and asked for the band under the hero to go back to what it was
+ * — which is *What is Loom?*. That is an instruction about **which page leads
+ * with the chain**, not about whether the site says it, so the band moved here
+ * rather than coming off.
+ *
+ * **This is the page it was always describing.** Five of the six links already
+ * pointed at bands of `/why-use-it`; the sixth is the outcome and points
+ * nowhere. On the front door each press was a journey to another page, and a
+ * reader who took one arrived three screens above the thing they pressed for.
+ * Here the band is a contents page for the five bands under it, and every
+ * press is a scroll on the page the reader is already on.
+ *
+ * **If he wants it off the site rather than moved, this is one line.** That is
+ * recorded because the two readings of his instruction are a sentence apart
+ * and only one of them was taken.
+ *
+ * ## The marker column names the actor, and nothing here is counted
+ *
+ * `chain.ts` carries both: who does each link, and why this band may not say
+ * how long it is.
+ */
+const chain = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: BAND.chain },
+    "What happens between your components and your readers",
+    [
+      prose(
+        ids,
+        "You do the first two. Loom and your AI model do the rest, every time somebody opens your page.",
+        { size: "lead", measured: true }
+      ),
+      /**
+       * **The hint, and it is here because the library cannot draw the
+       * affordance it stands in for.**
+       *
+       * A `loom.milestone` carrying an `href` renders `.loom-underline`, whose
+       * rest state is `background-size: 0% 2px` — so a rung that is a link is
+       * pixel-identical to a rung that is not until a pointer touches it. On a
+       * phone nothing ever does ([0236](../../../../../decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)
+       * made the harness honest about `hover: none`, and the phone shot of this
+       * band shows five links a reader cannot find). `loom.card` already
+       * answers this for itself by defaulting `elevation` to `raised` when it
+       * is linked; the rail primitives have no equivalent, and that is filed
+       * for `Loom primitives` rather than worked around in `src/`.
+       *
+       * So the composition says in words what the library cannot say in paint.
+       * **When that finding is met this line comes off** — it is scaffolding,
+       * and it is marked as such here so the run that removes the gap knows to
+       * remove the sentence with it.
+       *
+       * *A step* rather than *any step* or *every step*: the last rung has
+       * nowhere to go and never will, and a universal would be a promise this
+       * band breaks once. It also says no number, which is the one thing this
+       * band may not do — see the note above on why nothing here is counted.
+       */
+      prose(ids, "Press a step to see that part of it working on this site.", {
+        size: "small",
+        tone: "muted",
+      }),
+      buildElement(ids, {
+        type: "loom.milestone-list",
+        props: { rail: "line", density: "loose" },
+        children: CHAIN.map((rung) => {
+          const shown = shownAt(rung)
+
+          return buildElement(ids, {
+            type: "loom.milestone",
+            props: {
+              marker: rung.actor,
+              title: rung.title,
+              body: rung.body,
+              ...(shown === undefined ? {} : { href: shown }),
+            },
+          })
+        }),
+      }),
+    ]
+  )
 
 /**
  * The table, and the one prop on it that is a position rather than a value.
@@ -697,6 +795,12 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
       children: [
         siteHeader(ids, chrome),
         hero(ids),
+        /**
+         * **The chain, moved here from the front door on 5 November.** It is
+         * a contents page for the five bands under it, which is what it was
+         * describing all along.
+         */
+        chain(ids),
         /**
          * The scan, then what it means, then what it does not claim.
          *

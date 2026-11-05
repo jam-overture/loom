@@ -100,7 +100,17 @@ describe("the addresses it rewrites", () => {
    */
   it("leaves a link that names its own palette alone", () => {
     const worn = asRequested(treeFor(WHY_USE_IT, STORED), { theme: "bold" })
-    const offered = hrefsIn(worn).filter((href) => href.startsWith(`${WHY_USE_IT.path}?theme=`))
+    /**
+     * **No fragment**, which is what tells a switcher link from a band link.
+     * The chain moved onto this page on 5 November and its five rungs point at
+     * bands of it, so they are same-page links that legitimately pick up the
+     * reader's palette and arrive here as `…?theme=bold#what-you-write`. They
+     * are not palette offers and counting them as such would make this
+     * assertion fail every time a rung is added.
+     */
+    const offered = hrefsIn(worn).filter(
+      (href) => href.startsWith(`${WHY_USE_IT.path}?theme=`) && !href.includes("#")
+    )
 
     /*
      * The distinct palettes offered, not the list — a link to the page the

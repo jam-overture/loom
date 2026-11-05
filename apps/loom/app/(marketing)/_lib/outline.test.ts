@@ -40,7 +40,12 @@ describe("the front door's outline", () => {
     expect(names[0]).toBe("The menu")
     expect(names[1]).toBe("The opening")
     expect(names[names.length - 1]).toBe("The foot of the page, and the way out")
-    expect(names).toContain(BAND.chain)
+    /**
+     * `BAND.chain` was the third name here until 5 November, when the band
+     * moved to `/why-use-it`. `BAND.whatIsIt` is what a visitor meets after
+     * the opening now, which is where it was before 25 October.
+     */
+    expect(names).toContain(BAND.whatIsIt)
     expect(names).toContain(BAND.install)
   })
 

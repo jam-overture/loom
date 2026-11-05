@@ -7,7 +7,7 @@ import { type ChainLink, CHAIN, CHAIN_LINKS, rendersLinkVerbatim, shownAt } from
 import { MAINTAINERS_OWN } from "./copy"
 import { pageTreeFor, renderTree, treeFor } from "./render"
 import { servedBy } from "./routes"
-import { DEFAULT_THEME, HOME, SITE_ROUTES } from "./site"
+import { DEFAULT_THEME, HOME, SITE_ROUTES, WHY_USE_IT } from "./site"
 
 /** Any host: these assertions are about paths and fragments, never about an origin. */
 const ORIGIN = "https://loom.example"
@@ -17,9 +17,13 @@ const ORIGIN = "https://loom.example"
  *
  * `docs/positioning.md` carries the maintainer's own chain of 24 October and
  * calls it the message. What a test can hold is the part a reader cannot check
- * and a run can quietly lose: that the band on the front door still has **one
- * rung per link, in his order**, and that the one link published in his words
- * still is.
+ * and a run can quietly lose: that the band still has **one rung per link, in
+ * his order**, and that the one link published in his words still is.
+ *
+ * **The band is on `/why-use-it` as of 5 November**, having led the front door
+ * from 25 October. `pages/why-use-it.ts` carries why it moved; what matters
+ * here is that every assertion below reads the page the band is actually on,
+ * so the move is a change of one constant rather than a rewrite of the file.
  *
  * It reads the built tree and not `chain.ts`, for the reason `journey.test.ts`
  * gives at length: a test that compares a list to itself passes however the
@@ -27,12 +31,17 @@ const ORIGIN = "https://loom.example"
  * this site.
  */
 
+/** The page the band is on. One constant, so moving it again is one edit. */
+const CARRIES_THE_CHAIN = WHY_USE_IT
+
 const bandOf = (eyebrow: string): ElementNode => {
-  const band = treeFor(HOME, { theme: DEFAULT_THEME }).root.children.find(
+  const band = treeFor(CARRIES_THE_CHAIN, { theme: DEFAULT_THEME }).root.children.find(
     (child): child is ElementNode => child.kind === "element" && child.props["eyebrow"] === eyebrow
   )
 
-  if (band === undefined) throw new Error(`loom: the front door has no ${eyebrow} band`)
+  if (band === undefined) {
+    throw new Error(`loom: ${CARRIES_THE_CHAIN.path} has no ${eyebrow} band`)
+  }
 
   return band
 }
@@ -50,7 +59,7 @@ const rungsOf = (band: ElementNode): readonly ElementNode[] => {
 /** The rungs as the page builds them, read once and asserted against in two places. */
 const rungs = rungsOf(bandOf(BAND.chain))
 
-describe("the chain on the front door", () => {
+describe("the chain", () => {
   it("has one rung for each link the maintainer wrote, in his order", () => {
     expect(rungs.map((rung) => rung.props["title"])).toEqual(CHAIN.map(({ title }) => title))
     expect(CHAIN).toHaveLength(CHAIN_LINKS.length)
@@ -102,7 +111,7 @@ describe("the chain on the front door", () => {
   })
 
   it("keeps the rest of his wording off the page", () => {
-    const words = JSON.stringify(treeFor(HOME, { theme: DEFAULT_THEME }).root)
+    const words = JSON.stringify(treeFor(CARRIES_THE_CHAIN, { theme: DEFAULT_THEME }).root)
 
     for (const { link } of CHAIN.filter((rung) => !rendersLinkVerbatim(rung))) {
       expect(words).not.toContain(link)
@@ -110,9 +119,9 @@ describe("the chain on the front door", () => {
   })
 
   /**
-   * It is the first band under the opening, which is the whole of what changed
-   * on 25 October. The governance bands are all still on this page and all of
-   * them are below it.
+   * It is the first band under the opening of the page it is on, which is what
+   * makes it a contents page rather than an aside. The five bands it points at
+   * are all below it.
    */
   it("is the first thing a visitor meets after the headline", () => {
     /**
@@ -121,26 +130,19 @@ describe("the chain on the front door", () => {
      * and the hero are what come before the first section, and nothing else
      * may.
      */
-    const sections = treeFor(HOME, { theme: DEFAULT_THEME })
+    const sections = treeFor(CARRIES_THE_CHAIN, { theme: DEFAULT_THEME })
       .root.children.filter(
         (child): child is ElementNode => child.kind === "element" && child.type === "loom.section"
       )
       .map((band) => band.props["eyebrow"])
 
     expect(sections[0]).toBe(BAND.chain)
-
-    /** And the governance bands are all still here, below it. */
-    const governance = [BAND.whatIsIt, BAND.problems]
-
-    for (const band of governance) {
-      expect(sections.indexOf(band)).toBeGreaterThan(sections.indexOf(BAND.chain))
-    }
   })
 })
 
 /** And the band is reachable at all: a page that lost it would fail above. */
 describe("the band that carries it", () => {
-  it("is a section of the front door with a heading of its own", () => {
+  it("is a section with a heading of its own", () => {
     const band = bandOf(BAND.chain)
     const heading = band.children.find((child) => child.kind === "slot" && child.name === "heading")
 
@@ -226,15 +228,24 @@ describe("every rung is the way to the band that shows it", () => {
   )
 
   /**
-   * The front door does not grow a copy of a band it points at, which is
-   * `reaching.test.ts`' limit applied to the other four destinations: a later
-   * run reading *the chain should reach these* as *the front door should have
-   * them* would be this lane moving bands their pages own.
+   * **The front door kept no copy of any of it**, which is the half of the
+   * 5 November move that nothing else would report.
+   *
+   * A band moved by adding it in one place and forgetting to take it out of
+   * the other renders two of everything and passes every assertion above, so
+   * the page it left is checked for both the band and the five anchors it
+   * points at. It is the old *the front door does not grow a copy of a band it
+   * points at* rule, now reading in the direction the move made useful.
    */
-  it("declares none of those anchors itself", () => {
-    const markup = renderToStaticMarkup(
-      renderTree(treeFor(HOME, { theme: DEFAULT_THEME }), { origin: ORIGIN }).element
+  it("left nothing of itself on the front door", () => {
+    const front = treeFor(HOME, { theme: DEFAULT_THEME })
+    const markup = renderToStaticMarkup(renderTree(front, { origin: ORIGIN }).element)
+
+    const eyebrows = front.root.children.flatMap((child) =>
+      child.kind === "element" && child.type === "loom.section" ? [child.props["eyebrow"]] : []
     )
+
+    expect(eyebrows).not.toContain(BAND.chain)
 
     for (const { shown } of linked) {
       expect(markup).not.toContain(`id="${shown?.anchor}"`)
