@@ -41,6 +41,8 @@ export const passedSentence = (passed: Passed): string => {
       return `Loom's copy has an accepted change your site does not serve yet (version ${passed.copy}). Until it does, what readers do says nothing about that change.`
     case "apart":
       return "This deployment's own site serves Loom's copy of this page, so a different version sent for it is not followed."
+    case "no-goal":
+      return "No goal is on this page, so Loom proposes nothing for it. A goal says what a change should get readers to do: set one under Goals, on every page or on this one."
     case "silent":
       return silenceSentence(passed.silence)
     case "nothing":
@@ -85,14 +87,17 @@ export const proposedReport = (
   run: Result<Proposed, ProposeError>,
   weighedAgainst: WeighedAgainst,
   application: ApplicationId
-): WriteReport & { readonly request?: string } => {
+): WriteReport & { readonly request?: string; readonly goal?: string } => {
   if (!run.ok) {
     return run.error.code === "model"
       ? notice(
           "The model did not answer",
           "Check the project's model key in Settings, then try again. Nothing was proposed."
         )
-      : notice("The store did not answer", "Nothing was proposed. Try again in a moment.")
+      : notice(
+          "The store did not answer",
+          "Nothing was proposed. Try again in a moment. If it keeps happening, whoever runs this deployment may have new tables to add with pnpm db:push."
+        )
   }
 
   if (run.value.kind === "passed") {
@@ -102,5 +107,6 @@ export const proposedReport = (
   return {
     ...siteReport(reportOf(run.value.outcome, weighedAgainst), application),
     request: run.value.request,
+    goal: run.value.goal.name,
   }
 }

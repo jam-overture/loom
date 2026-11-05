@@ -66077,3 +66077,61 @@ that has also skipped the arrival standing, so narrowing `collectionHealthOf`
 alone would close the smaller of two holes and make the shape look safe. If a
 second surface ever reads a reading below the rung, the thing to narrow is
 whichever rung it skipped, not the leaf.
+
+---
+## 2026-11-05 — a markdown link posted to GitHub from a routine session can arrive with backticks wrapping its URL, and re-posting it does not fix it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` (run
+mechanics; nothing in the repository causes it) · **Status:** **open, and the
+remedy is to stop rather than to fix** — it is cosmetic, it is not any lane's
+doing, and two attempts at correcting it are two more than it is worth
+
+A link written `[0348](https://github.com/…md)` can arrive on GitHub as:
+
+```
+[0348](``https://github.com/…md)``
+```
+
+which renders as literal backticks and a dead link. It happens somewhere
+between a session and GitHub, **not in the text a run composes.**
+
+**Measured rather than assumed, because the obvious culprit was innocent.** The
+first guess on #765 was that `Loom merge` had done it while renumbering a record,
+since both edits touched the same two lines. It had not:
+
+| | |
+| --- | --- |
+| #765 body, after a clean local repair and a `PATCH` | still mangled |
+| the same `PATCH` repeated, response read directly | still mangled |
+| the payload actually sent, checked both as a file and as JSON | **0 mangled** |
+| #764, another lane's pull request, untouched by this lane | **1 mangled** |
+| a comment on #761 from a previous run of this lane | mangled the same way |
+
+So the text leaving the session is correct, the text arriving is not, and it
+reaches at least two lanes and both pull-request bodies and comments. **Re-posting
+cannot win**: the repair is mangled again in transit, which is how a run can
+spend a quarter of an hour discovering that its own editing works perfectly.
+
+**What to do when you meet it.** Nothing, beyond knowing. Write the link
+normally, check it once if you like, and if it arrives wrapped, leave it — the
+URL inside is intact and a reader can still follow it. **Do not re-`PATCH` the
+body, do not rewrite the link as a bare URL to dodge it, and above all do not
+push a commit over it**, which re-runs the merge gate for four surfaces to
+straighten a pair of backticks.
+
+**This entry nearly did not survive, and that is the second half of it.** It was
+written and committed onto `framework-82-where-a-pages-bytes-are` while that
+branch's pull request was being merged — #765 merged at 01:32:31Z, the commit
+landed after — so it sat on a branch whose pull request was closed and would have
+been lost. **A merged pull request cannot carry follow-up work.** The check that
+catches it is one call: read `state` and `merged` on the pull request *again*
+before pushing to its branch, not only at the start of the pass. A
+`mergeable_state` of `unknown` that will not settle is the tell, and the reason it
+will not settle is that there is nothing left to merge.
+
+**What would actually close the mangling** is outside the repository: it is a
+question about the path between a routine session and the GitHub API, and the
+maintainer is the only one who can ask it. Worth raising only if it ever mangles
+something load-bearing — a URL inside a code fence a reader is meant to copy, or
+a `decisions/` link in a record. So far it has only ever hit prose links, where
+the cost is one ugly line.

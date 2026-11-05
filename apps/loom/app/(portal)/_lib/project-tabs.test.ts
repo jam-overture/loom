@@ -11,6 +11,7 @@ describe("a project's tabs", () => {
       "/portal/prj_shop/signals",
       "/portal/prj_shop/pages",
       "/portal/prj_shop/review",
+      "/portal/prj_shop/goals",
       "/portal/prj_shop/connect",
       "/portal/prj_shop/settings",
     ])
