@@ -8,6 +8,8 @@ import {
 } from "@jam-overture/loom/signals"
 import { DEFAULT_AUDIENCE_ID } from "@jam-overture/loom/store"
 
+import { goalIdSchema, type Goal } from "../goals/goal"
+
 /**
  * Readers on a page, for the proposing tests: counters for the nodes of a tree
  * and the door's page-view row, shaped as the stores return them.
@@ -84,3 +86,16 @@ export const readersOn = (
     elementIdsOf(tree).map((node) => tallyOf(tree, node, { views: reached, reached })),
     [pageViewsOf(tree, opened)]
   )
+
+/** A goal counting presses of one part, on every page that has it, primary since 1. */
+export const goalOn = (node: NodeId, overrides: Partial<Goal> = {}): Goal => ({
+  goalId: goalIdSchema.parse(`g_${"a".repeat(32)}`),
+  name: "Starts a trial",
+  kind: "activated",
+  nodeId: node,
+  pages: null,
+  primarySince: 1,
+  createdAt: 1,
+  createdBy: null,
+  ...overrides,
+})

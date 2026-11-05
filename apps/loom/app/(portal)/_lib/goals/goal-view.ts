@@ -33,7 +33,7 @@ export type PageChoice = {
  * The parts of a page a reader can do something to: its elements, which are
  * what a signal is filed against. Text and slots are inside one, never it.
  */
-const partsOf = (tree: LoomTree): readonly PartChoice[] =>
+export const partsOf = (tree: LoomTree): readonly PartChoice[] =>
   Array.from(walkTree(tree.root))
     .filter((node) => node.kind === "element" && node.id !== tree.root.id)
     .map(partNameOf)

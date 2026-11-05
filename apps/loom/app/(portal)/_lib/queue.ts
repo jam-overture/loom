@@ -1,6 +1,8 @@
+import type { IntentId } from "@jam-overture/loom"
 import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { mayAccept, roleThatCanAccept, type Role } from "./auth/roles"
+import type { ProposalGoal } from "./goals/serving"
 import { pageOfCopy, type PageCopy } from "./proposing/copies"
 import { holdStandingOf, type HoldStanding } from "./proposing/following"
 import { ruleSentence, STAKES, type PlainState } from "./vocabulary"
@@ -15,10 +17,13 @@ import { plainMoment } from "./when"
  * vocabulary, so a rule or a stake is said the same way everywhere.
  *
  * A change proposed for an older version of its page says so, and whether it
- * still fits the version the site serves now (0340).
+ * still fits the version the site serves now (0340). It leads with the goal it
+ * serves (0352), or says it names none, as a change raised before goals did.
  */
 export type QueueRow = {
   readonly proposalId: string
+  /** The goal's name as it was when the change was raised, `null` where none was recorded. */
+  readonly goal: string | null
   /** The page it is for, whichever copy of the page it waits on. */
   readonly pageId: string
   /** The page by the name it published under, or its id where it named itself nothing. */
@@ -47,11 +52,17 @@ export const standingSentenceOf = (standing: HoldStanding): string | null => {
   }
 }
 
+/** What a row is read against: the project's pages, copies and goals, and who is looking. */
+export type QueueContext = {
+  readonly names: ReadonlyMap<string, string>
+  readonly role: Role
+  readonly copies: readonly PageCopy[]
+  readonly goals: ReadonlyMap<IntentId, ProposalGoal>
+}
+
 export const queueRowOf = (
   held: HeldProposal,
-  names: ReadonlyMap<string, string>,
-  role: Role,
-  copies: readonly PageCopy[]
+  { names, role, copies, goals }: QueueContext
 ): QueueRow => {
   const stake = held.disposition.stakes
   const pageId = pageOfCopy(copies, held.treeId)
@@ -59,6 +70,7 @@ export const queueRowOf = (
 
   return {
     proposalId: held.proposalId,
+    goal: goals.get(held.intent.intentId)?.name ?? null,
     pageId,
     page: names.get(pageId) ?? pageId,
     asked: held.intent.utterance,
