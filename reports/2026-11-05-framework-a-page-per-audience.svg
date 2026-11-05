@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" width="900" height="470" role="img" aria-label="One published revision, two readers: the base tree plus the delta an audience earned, and both forms report revision 7">
+  <rect width="900" height="470" fill="#fbfaf8"/>
+  <text x="40" y="46" font-family="Georgia, serif" font-size="23" fill="#1b1a18">One revision, two forms, one number</text>
+  <text x="40" y="72" font-family="Georgia, serif" font-size="14" fill="#6b655d">what each reader is served, composed in their own process, per request</text>
+
+  <!-- the base -->
+  <rect x="40" y="104" width="200" height="88" rx="4" fill="#eceae6" stroke="#c8c2b8"/>
+  <text x="56" y="130" font-family="Georgia, serif" font-size="14" fill="#1b1a18">the published page</text>
+  <text x="56" y="152" font-family="Georgia, serif" font-size="12" fill="#6b655d">tre_home · revision 7</text>
+  <text x="56" y="174" font-family="Georgia, serif" font-size="12" fill="#6b655d">one base tree, in the store</text>
+
+  <!-- rules -->
+  <rect x="40" y="212" width="200" height="104" rx="4" fill="#eceae6" stroke="#c8c2b8"/>
+  <text x="56" y="238" font-family="Georgia, serif" font-size="14" fill="#1b1a18">the rules beside it</text>
+  <text x="56" y="260" font-family="Georgia, serif" font-size="11.5" fill="#6b655d">aud_eu &#8592; region in {eu}</text>
+  <text x="56" y="278" font-family="Georgia, serif" font-size="11.5" fill="#6b655d">aud_beta &#8592; region in {eu}</text>
+  <text x="68" y="294" font-family="Georgia, serif" font-size="11.5" fill="#6b655d">and cohort in {beta}</text>
+  <text x="56" y="310" font-family="Georgia, serif" font-size="11" fill="#8a7f70">authored there, evaluated here</text>
+
+  <path d="M244 160 L300 160" stroke="#c8c2b8" stroke-width="1.4" fill="none"/>
+  <path d="M244 264 L300 264" stroke="#c8c2b8" stroke-width="1.4" fill="none"/>
+
+  <!-- reader one -->
+  <text x="316" y="118" font-family="Georgia, serif" font-size="13" fill="#8a7f70">a reader from Ohio</text>
+  <rect x="316" y="130" width="236" height="26" rx="3" fill="#f4f2ee" stroke="#c8c2b8"/>
+  <text x="328" y="148" font-family="Georgia, serif" font-size="11.5" fill="#6b655d">context { region: "us" }</text>
+  <text x="328" y="178" font-family="Georgia, serif" font-size="12" fill="#6b655d">no rule matches &#8594; no audience</text>
+  <rect x="316" y="192" width="236" height="34" rx="3" fill="#eceae6" stroke="#c8c2b8"/>
+  <text x="328" y="214" font-family="Georgia, serif" font-size="12" fill="#2f2d29">the base tree, unchanged</text>
+
+  <!-- reader two -->
+  <text x="316" y="268" font-family="Georgia, serif" font-size="13" fill="#8a7f70">a reader from Berlin, in the beta</text>
+  <rect x="316" y="280" width="236" height="26" rx="3" fill="#f4f2ee" stroke="#c8c2b8"/>
+  <text x="328" y="298" font-family="Georgia, serif" font-size="11.5" fill="#6b655d">context { region: "eu", cohort: "beta" }</text>
+  <text x="328" y="328" font-family="Georgia, serif" font-size="12" fill="#2f4a2f">aud_eu, then aud_beta &#8212; in rule order</text>
+  <rect x="316" y="342" width="236" height="34" rx="3" fill="#dfe8df" stroke="#8aa88a"/>
+  <text x="328" y="364" font-family="Georgia, serif" font-size="12" fill="#2f4a2f">base + two deltas, applied in that order</text>
+
+  <path d="M556 209 L612 209" stroke="#c8c2b8" stroke-width="1.4" fill="none"/>
+  <path d="M556 359 L612 359" stroke="#8aa88a" stroke-width="1.4" fill="none"/>
+
+  <!-- what the signal says -->
+  <text x="628" y="118" font-family="Georgia, serif" font-size="15" fill="#1b1a18">What each one's signals name</text>
+  <rect x="628" y="132" width="232" height="96" rx="4" fill="#f4f2ee" stroke="#c8c2b8"/>
+  <text x="642" y="156" font-family="Georgia, serif" font-size="12" fill="#6b655d">tree  tre_home</text>
+  <text x="642" y="176" font-family="Georgia, serif" font-size="12" fill="#6b655d">revision  7</text>
+  <text x="642" y="196" font-family="Georgia, serif" font-size="12" fill="#6b655d">audience  aud_everyone</text>
+  <text x="642" y="218" font-family="Georgia, serif" font-size="11" fill="#8a7f70">the default, for a reader in none</text>
+
+  <rect x="628" y="282" width="232" height="96" rx="4" fill="#dfe8df" stroke="#8aa88a"/>
+  <text x="642" y="306" font-family="Georgia, serif" font-size="12" fill="#2f4a2f">tree  tre_home</text>
+  <text x="642" y="326" font-family="Georgia, serif" font-size="12" fill="#2f4a2f">revision  7</text>
+  <text x="642" y="346" font-family="Georgia, serif" font-size="12" fill="#2f4a2f">audience  aud_beta</text>
+  <text x="642" y="368" font-family="Georgia, serif" font-size="11" fill="#5d7a5d">a different form of the same page</text>
+
+  <text x="40" y="414" font-family="Georgia, serif" font-size="13" fill="#1b1a18">The revision is the same on both, and that is the decision.</text>
+  <text x="40" y="436" font-family="Georgia, serif" font-size="12.5" fill="#6b655d">A composition is a projection of a revision, not a revision of its own — so the audience column is the only thing</text>
+  <text x="40" y="454" font-family="Georgia, serif" font-size="12.5" fill="#6b655d">that moves between two forms, which is what makes them comparable at all.</text>
+</svg>

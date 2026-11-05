@@ -8,6 +8,73 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-05 (evening) — a page can be served per audience now, and the two halves that would let the portal offer it are a schema change and a screen
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (the screen) and
+`Loom framework` (the store dimension) · **Status:** open — **nothing is
+broken and nothing is blocked today**; filed because unit 9 now has its record
+and the remaining work is nameable
+
+[0355](decisions/0355-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
+built 0263 clauses 1 to 4: `audiencesFor` sorts a reader by rules over
+`RenderRequest.context`, `composeTreeForContext` lays the matched deltas onto
+the base, and `composingTreeSourceFromStore` is the sibling 0263 said
+`treeSourceFromStore` would gain. All published through `./store`.
+
+**What `docs/portal.md` unit 9 still needs, and neither half is in that record:**
+
+| half | whose | what it is |
+| --- | --- | --- |
+| the store dimension | `Loom framework` | audience-scoped deltas and their rules, persisted. A schema change on top of 0260's, which is why 0355 took a seam (`AudienceOverlaySource`) instead and said so |
+| a rule editor | `Loom portal` | an owner naming an audience, writing its clauses, and **ordering the rules**, because the last matching rule wins a contested node |
+
+**The one thing a screen has to teach**, and it is the only part of 0355 a
+person must understand: rules are an ordered list, general to specific, and the
+order is what resolves two deltas reaching one node. A screen that presents
+rules as an unordered set would be presenting a different model from the one
+that runs.
+
+**And a reading that will be wanted the first time a base moves.** A base edit
+stales every audience delta authored against the revision it left, and 0355
+refuses the render rather than quietly serving the base — so a deployment
+serving three audiences cannot publish a base change without rebasing three
+deltas. That is the same shape 0340 gave a waiting proposal, and the *stale /
+conflicts* reading that screen already has is the one audience deltas will need.
+
+---
+## 2026-11-05 (evening) — a defensive invariant check in new code was unreachable, and the thing that makes it unreachable is one line in `insert`
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework` · **Status:**
+open — **no defect and no edit outstanding**; filed for the same reason the
+8 October entry on types printed whole was: the constraint is real, it is not
+written where a run would meet it, and the next thing that composes operations
+from two sources will have the same fear
+
+`composeTreeForContext` is the first place in this repository where
+**operations authored by two separate deltas, each judged against the same base,
+are applied to one tree**. The obvious fear is a pair that each insert the same
+node id: each is fine alone, and together they would make a tree with two of one
+id, which every downstream address resolves to the wrong half of.
+
+So it shipped with `validateTreeInvariants` over the composed root and a
+`collides` error beside it. **A planted mutation that removed the check changed
+nothing** — `insert` already refuses a node whose id the tree holds, so the
+second insert fails as `duplicate-node-id` long before a tree exists to
+invalidate, and duplicate ids are the only invariant that function has. The
+check and its error code were deleted rather than kept, and the reason is now a
+comment where the check was.
+
+**Why it is filed rather than just removed.** The reasoning took a mutation to
+settle and it is not written anywhere a future run would find it: nothing says
+*the only structural invariant a tree has is unique ids*, and nothing says
+*`insert` is where that is enforced*. Both are true, both are one grep away
+from being forgotten, and the next composer — the store dimension above, a
+merge of two proposals, anything that replays two logs — will write the same
+defensive branch. Cheapest fix is a sentence in `src/tree/apply.ts`'s own
+comment; it was not taken here because this branch had no other reason to touch
+that file and the claim deserves its own diff.
+
+---
 ## 2026-11-05 — the comparison band tells a reader to look right, and on a phone there is no right
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`

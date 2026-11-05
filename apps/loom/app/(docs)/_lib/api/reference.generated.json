@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5200,7 +5200,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5275,7 +5275,7 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5745,7 +5745,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -6833,7 +6833,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7410,7 +7410,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7610,10 +7610,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 40,
+      "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7748,6 +7748,98 @@
               "kind": "value",
               "signature": "const DEFAULT_AUDIENCE_ID: AudienceId",
               "summary": "The audience that matches every reader."
+            }
+          ]
+        },
+        {
+          "module": "audience/compose",
+          "title": "Compose",
+          "summary": "A page as the reader in front of it gets it: the base tree, plus the deltas the audiences they are in have earned.",
+          "symbols": [
+            {
+              "name": "AudienceForm",
+              "kind": "type",
+              "signature": "type AudienceForm = {\n    readonly audienceId: AudienceId;\n    readonly delta: TreeDelta;\n};",
+              "summary": "The delta one audience earns, against the base it was authored on."
+            },
+            {
+              "name": "AudienceOverlay",
+              "kind": "type",
+              "signature": "type AudienceOverlay = {\n    readonly rules: readonly AudienceRule[];\n    readonly forms: readonly AudienceForm[];\n};",
+              "summary": "Everything a deployment needs to serve one page to more than one audience: the rules that sort readers, and the delta each audience earns."
+            },
+            {
+              "name": "ComposeError",
+              "kind": "type",
+              "signature": "type ComposeError = \n/** A rule matched an audience the overlay has no delta for. */\n{\n    readonly code: \"no-form\";\n    readonly audienceId: AudienceId;\n}\n/** The base moved and this delta was authored against an older revision. */\n | {\n    readonly code: \"stale-form\";\n    readonly audienceId: AudienceId;\n    readonly expected: number;\n    readonly actual: number;\n}\n/** The delta is for another page. */\n | {\n    readonly code: \"form-mismatch\";\n    readonly audienceId: AudienceId;\n    readonly treeId: string;\n}\n/** The operations did not apply, or what they produced is not a tree. */\n | {\n    readonly code: \"unapplicable\";\n    readonly audienceId: AudienceId;\n    readonly detail: string;\n};",
+              "summary": ""
+            },
+            {
+              "name": "ComposedTree",
+              "kind": "type",
+              "signature": "type ComposedTree = {\n    readonly tree: LoomTree;\n    /**\n     * In the order the rules gave them, which is the order the deltas were\n     * applied in. A caller names this on the signals the page sends, so that what\n     * was measured and what was served are the same claim.\n     */\n    readonly audiences: readonly AudienceId[];\n};",
+              "summary": "The tree this reader gets, and the audiences that made it that."
+            },
+            {
+              "name": "describeComposeError",
+              "kind": "function",
+              "signature": "const describeComposeError: (error: ComposeError) => string",
+              "summary": ""
+            },
+            {
+              "name": "composeTreeForContext",
+              "kind": "function",
+              "signature": "const composeTreeForContext: (base: LoomTree, overlay: AudienceOverlay, context: JsonObject | undefined) => Result<ComposedTree, ComposeError>",
+              "summary": "The page this context earns, or why it cannot be served."
+            }
+          ]
+        },
+        {
+          "module": "audience/rule",
+          "title": "Rule",
+          "summary": "Which audiences a reader is in, decided in the customer's own process.",
+          "symbols": [
+            {
+              "name": "AudienceValue",
+              "kind": "type",
+              "signature": "type AudienceValue = string | number | boolean | null;",
+              "summary": "The values a clause may compare against."
+            },
+            {
+              "name": "AudienceClause",
+              "kind": "type",
+              "signature": "type AudienceClause = {\n    readonly key: string;\n    /** Non-empty: a clause accepting nothing is a rule that can never match. */\n    readonly anyOf: readonly AudienceValue[];\n};",
+              "summary": "One context key, and the values of it this clause accepts."
+            },
+            {
+              "name": "audienceClauseSchema",
+              "kind": "schema",
+              "signature": "const audienceClauseSchema: z.ZodObject<…>",
+              "summary": ""
+            },
+            {
+              "name": "AudienceRule",
+              "kind": "type",
+              "signature": "type AudienceRule = {\n    readonly audienceId: AudienceId;\n    readonly clauses: readonly AudienceClause[];\n};",
+              "summary": "An audience, and what puts a reader in it."
+            },
+            {
+              "name": "audienceRuleSchema",
+              "kind": "schema",
+              "signature": "const audienceRuleSchema: z.ZodObject<…>",
+              "summary": ""
+            },
+            {
+              "name": "ruleMatches",
+              "kind": "function",
+              "signature": "const ruleMatches: (rule: AudienceRule, context: JsonObject) => boolean",
+              "summary": ""
+            },
+            {
+              "name": "audiencesFor",
+              "kind": "function",
+              "signature": "const audiencesFor: (rules: readonly AudienceRule[], context: JsonObject | undefined) => readonly AudienceId[]",
+              "summary": "Every audience this reader is in, in the order the rules were given."
             }
           ]
         },
@@ -8272,6 +8364,18 @@
               "kind": "function",
               "signature": "const treeSourceFromStore: (store: TreeReader) => TreeSource",
               "summary": "The store, as the renderer's `TreeSource`."
+            },
+            {
+              "name": "AudienceOverlaySource",
+              "kind": "interface",
+              "signature": "interface AudienceOverlaySource {\n    readonly load: (treeId: TreeId) => Promise<Result<AudienceOverlay, TreeSourceError>>;\n}",
+              "summary": "Where a deployment's audience rules and audience-scoped deltas come from."
+            },
+            {
+              "name": "composingTreeSourceFromStore",
+              "kind": "function",
+              "signature": "const composingTreeSourceFromStore: (store: TreeReader, overlays: AudienceOverlaySource) => TreeSource",
+              "summary": "The composing sibling of `treeSourceFromStore` — one tree per id stays the right answer for a deployment that wants it, so this is a second function rather than an option on the first."
             }
           ]
         },
@@ -8419,7 +8523,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -8798,7 +8902,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -9026,7 +9130,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 15,
         "widest": true,
@@ -13170,7 +13274,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13305,7 +13409,7 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13367,7 +13471,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13941,7 +14045,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14011,7 +14115,7 @@
       "files": 99,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14433,7 +14537,7 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1912,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
