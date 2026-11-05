@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .box { fill: #fafafa; stroke: #d4d4d8; }
+    .spent { fill: #e4e4e7; stroke: #d4d4d8; }
+    .ok { fill: #f0fdf4; stroke: #86efac; }
+    .bad { fill: #fef2f2; stroke: #fca5a5; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .page { fill: #e4e4e7; stroke: #d4d4d8; }
+    .line { stroke: #a1a1aa; stroke-dasharray: 3 3; }
+    text { font-size: 13px; }
+    .h { font-size: 15px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; font-weight: 600; }
+    .mono { font-size: 11.5px; font-family: "Geist Mono", ui-monospace, monospace; }
+    .sm { font-size: 11.5px; }
+    @media (prefers-color-scheme: dark) {
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .box { fill: #1c1c1f; stroke: #3f3f46 }
+      .spent { fill: #2a2a2e; stroke: #3f3f46 }
+      .ok { fill: #0d2017; stroke: #15803d }
+      .bad { fill: #220f0f; stroke: #b91c1c }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 }
+      .page { fill: #2a2a2e; stroke: #3f3f46 }
+      .line { stroke: #52525b }
+    }
+  </style>
+
+  <text class="h t" x="24" y="30">What this site has room to say next</text>
+  <text class="sm m" x="24" y="50">The search box sends a reader the sentences of every page here. There is a ceiling on that, and it is nearly reached.</text>
+
+  <!-- THE BUDGET -->
+  <text class="k m" x="24" y="88">THE BILL A READER PAYS WHEN THEY OPEN THE SEARCH BOX — COMPRESSED BYTES</text>
+  <rect class="spent" x="24" y="98" width="820" height="26" rx="3"/>
+  <rect class="bad" x="838" y="98" width="6" height="26" rx="2"/>
+  <text class="mono t" x="34" y="116">79,414 spent</text>
+  <text class="mono badt" x="760" y="140">586 left</text>
+  <text class="mono m" x="24" y="140">cap 80,000</text>
+  <line class="line" x1="838" y1="94" x2="838" y2="146"/>
+
+  <!-- CONVERTED -->
+  <text class="k m" x="24" y="186">THOSE 586 BYTES, AS PROSE — AND THE PAGES THIS SITE ALREADY HAS</text>
+  <text class="sm m" x="24" y="206">Derived, not typed: each section's own measured compression, and this site's own measured 5.32 bytes a word.</text>
+
+  <rect class="bad" x="300" y="222" width="46" height="20" rx="3"/>
+  <text class="sm t" x="24" y="236">room for another page</text>
+  <text class="mono badt" x="356" y="236">331 words — nothing fits</text>
+
+  <rect class="page" x="300" y="252" width="48" height="20" rx="3"/>
+  <text class="sm t" x="24" y="266">shortest page here</text>
+  <text class="mono m" x="358" y="266">346 words · Decision records</text>
+
+  <rect class="page" x="300" y="282" width="167" height="20" rx="3"/>
+  <text class="sm t" x="24" y="296">the median page here</text>
+  <text class="mono m" x="477" y="296">about 1,199 words</text>
+
+  <rect class="page" x="300" y="312" width="420" height="20" rx="3"/>
+  <text class="sm t" x="24" y="326">longest page here</text>
+  <text class="mono m" x="730" y="326">3,021 words</text>
+
+  <!-- CANDIDATES -->
+  <text class="k m" x="24" y="376">AND WHAT EACH REMEDY BUYS — 0353, PROPOSED, THE MAINTAINER'S TO SETTLE</text>
+
+  <rect class="box" x="24" y="388" width="820" height="26" rx="3"/>
+  <text class="sm t" x="34" y="406">Raise the cap, or shard the words further</text>
+  <text class="mono badt" x="560" y="406">refused · sharding makes the bill larger</text>
+
+  <rect class="box" x="24" y="420" width="820" height="26" rx="3"/>
+  <text class="sm t" x="34" y="438">A. One file again</text>
+  <text class="mono m" x="360" y="438">76,628</text>
+  <text class="mono m" x="440" y="438">1,909 words</text>
+  <text class="sm m" x="560" y="438">loses the reader's own section first</text>
+
+  <rect class="box" x="24" y="452" width="820" height="26" rx="3"/>
+  <text class="sm t" x="34" y="470">B. Two files: your section, and the rest</text>
+  <text class="mono m" x="360" y="470">77,890</text>
+  <text class="mono m" x="440" y="470">1,194 words</text>
+  <text class="sm m" x="560" y="470">a second section costs the lot again</text>
+
+  <rect class="ok" x="24" y="484" width="820" height="26" rx="3"/>
+  <text class="sm t" x="34" y="502">C. Your section's sentences; the rest by title</text>
+  <text class="mono okt" x="360" y="502">35,928</text>
+  <text class="mono okt" x="440" y="502">2,305 words</text>
+  <text class="sm okt" x="560" y="502">recommended · per section, so it scales</text>
+
+  <text class="sm m" x="24" y="540">Under C every page is still found by title, section and summary, from the 9,970-byte file every reader already waits for.</text>
+</svg>
