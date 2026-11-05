@@ -78,6 +78,18 @@ const ROWS: readonly string[] = [
    * twelve this file allows.
    */
   "loom.comparison-row",
+  /**
+   * One row of a table, which is `loom.comparison-row` again and for the
+   * identical reason: its cells really are `<td>`s in a `<table>`, so their
+   * widths are the table's columns and their heights are the row's, and a cell
+   * two lines taller than the one beside it draws the hole this rule is about.
+   *
+   * It arrived on 5 November with the band on `/why-use-it` that lists what
+   * Loom changed. The widest spread there is two words against the twelve this
+   * file allows, which is what a verb and a few words of the fictional
+   * product's copy come to.
+   */
+  "loom.table-row",
 ]
 
 /**
@@ -97,6 +109,13 @@ const NOT_ROWS: Readonly<Record<string, string>> = {
   /** A rail read downward. Each rung is the full width of the band, so no rung
    * is stretched to match another. */
   "loom.milestone-list": "read down, one rung per row",
+  /**
+   * The table itself, as against its rows. Its children are the rows, each the
+   * full width of the table and each as tall as its own cells want, so nothing
+   * here is stretched to match a sibling. The row is where the rule bites, and
+   * it is in `ROWS` above.
+   */
+  "loom.table": "read down, one row at a time",
   /** None of these lays its children out in tracks of a common height: they
    * flow, wrap, or size to their own content. */
   "loom.nav": "flows and wraps",
