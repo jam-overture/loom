@@ -1,0 +1,281 @@
+import { describe, expect, it } from "vitest"
+
+import type { NodeId, TreeId } from "@jam-overture/loom"
+import type { ReaderSignal, ReceivedBatch } from "@jam-overture/loom/signals"
+
+import { pageFixture } from "@/app/_lib/pages/fixtures"
+
+import {
+  eventKeyOf,
+  eventPagesOf,
+  eventQueryOf,
+  eventSentence,
+  eventsHref,
+  eventsOf,
+  goalsCountedBy,
+  happenedOf,
+  isOlderThan,
+  matchesFilter,
+  namingOf,
+  pageViewOf,
+  parseEventKey,
+  type ReaderEvent,
+} from "./events"
+import { goalIdSchema, type Goal } from "./goals/goal"
+import { elementIdsOf } from "./proposing/fixtures"
+
+const home = pageFixture("home", "Welcome", 3)
+const [, heading] = elementIdsOf(home)
+
+if (heading === undefined) throw new Error("the fixture has a heading")
+
+const VIEW_A = "a".repeat(32)
+const VIEW_B = "b".repeat(32)
+
+const pressed = (nodeId: string = heading): ReaderSignal =>
+  ({
+    kind: "activated",
+    nodeId,
+    type: "loom.heading",
+    at: Date.UTC(2026, 10, 5, 9, 30),
+  }) as ReaderSignal
+
+const batch = (
+  seq: number,
+  signals: readonly ReaderSignal[],
+  overrides: Partial<ReceivedBatch> = {}
+): ReceivedBatch =>
+  ({
+    seq,
+    treeId: home.treeId,
+    revision: 3,
+    sentAt: 0,
+    receivedAt: `2026-11-05T09:${String(seq).padStart(2, "0")}:00.000Z`,
+    audienceId: "aud_everyone",
+    view: VIEW_A,
+    signals,
+    ...overrides,
+  }) as ReceivedBatch
+
+const eventOf = (signal: ReaderSignal, overrides: Partial<ReceivedBatch> = {}): ReaderEvent => {
+  const [event] = eventsOf([batch(1, [signal], overrides)])
+
+  if (event === undefined) throw new Error("one signal is one event")
+
+  return event
+}
+
+const goal = (overrides: Partial<Goal>): Goal => ({
+  goalId: goalIdSchema.parse(`g_${"1".repeat(32)}`),
+  name: "Starts",
+  kind: "activated",
+  nodeId: heading,
+  pages: null,
+  primarySince: null,
+  createdAt: 0,
+  createdBy: null,
+  ...overrides,
+})
+
+describe("an event's address", () => {
+  it("names a delivery and a signal in it, and reads back what it wrote", () => {
+    expect(eventKeyOf({ seq: 12, index: 3 })).toBe("12.3")
+    expect(parseEventKey("12.3")).toEqual({ seq: 12, index: 3 })
+  })
+
+  it("reads nothing from an address that is not one", () => {
+    expect(parseEventKey(undefined)).toBeUndefined()
+    expect(parseEventKey("12")).toBeUndefined()
+    expect(parseEventKey("-1.0")).toBeUndefined()
+    expect(parseEventKey("1.0.0")).toBeUndefined()
+  })
+})
+
+describe("events from deliveries", () => {
+  it("are newest first: the later delivery, and within one the later signal", () => {
+    const events = eventsOf([batch(1, [pressed(), pressed()]), batch(2, [pressed()])])
+
+    expect(events.map((event) => event.key)).toEqual(["2.0", "1.1", "1.0"])
+  })
+
+  it("carry what the delivery says about where they came from", () => {
+    const event = eventOf(pressed(), {
+      audienceId: "aud_pro",
+      view: VIEW_B,
+    } as Partial<ReceivedBatch>)
+
+    expect(event).toMatchObject({
+      treeId: home.treeId,
+      revision: 3,
+      audienceId: "aud_pro",
+      view: VIEW_B,
+      receivedAt: "2026-11-05T09:01:00.000Z",
+    })
+  })
+
+  it("know which are older than a position", () => {
+    const older = isOlderThan({ seq: 2, index: 1 })
+
+    expect(older({ seq: 2, index: 0 })).toBe(true)
+    expect(older({ seq: 1, index: 9 })).toBe(true)
+    expect(older({ seq: 2, index: 1 })).toBe(false)
+    expect(older({ seq: 3, index: 0 })).toBe(false)
+  })
+})
+
+describe("the filter", () => {
+  it("is read off the address, and a value that does not parse narrows nothing", () => {
+    expect(
+      eventQueryOf({
+        kind: "activated",
+        on: home.treeId,
+        view: VIEW_A,
+        before: "4.1",
+        event: "3.0",
+      })
+    ).toEqual({
+      kind: "activated",
+      page: home.treeId,
+      view: VIEW_A,
+      before: { seq: 4, index: 1 },
+      open: { seq: 3, index: 0 },
+    })
+    expect(
+      eventQueryOf({ kind: "clicked", on: "not a page", view: "short", before: ["1.0", "2.0"] })
+    ).toEqual({
+      kind: undefined,
+      page: undefined,
+      view: undefined,
+      before: undefined,
+      open: undefined,
+    })
+  })
+
+  it("keeps an event only when it matches every part of the filter", () => {
+    const event = eventOf(pressed())
+
+    expect(matchesFilter({ kind: undefined, page: undefined, view: undefined })(event)).toBe(true)
+    expect(matchesFilter({ kind: "activated", page: home.treeId, view: VIEW_A })(event)).toBe(true)
+    expect(matchesFilter({ kind: "viewed", page: undefined, view: undefined })(event)).toBe(false)
+    expect(
+      matchesFilter({ kind: undefined, page: "t_other" as TreeId, view: undefined })(event)
+    ).toBe(false)
+    expect(matchesFilter({ kind: undefined, page: undefined, view: VIEW_B })(event)).toBe(false)
+  })
+
+  it("writes an address that keeps the filter and names what changes", () => {
+    const filter = { kind: "activated", page: home.treeId, view: undefined } as const
+
+    expect(eventsHref("/portal/prj_a/signals", filter, { before: "4.1", event: "3.0" })).toBe(
+      `/portal/prj_a/signals?kind=activated&on=${home.treeId}&before=4.1&event=3.0`
+    )
+    expect(
+      eventsHref("/portal/prj_a/signals", { kind: undefined, page: undefined, view: undefined })
+    ).toBe("/portal/prj_a/signals")
+  })
+})
+
+describe("what an event says", () => {
+  const naming = namingOf([{ tree: home, receivedAt: 0 }])
+
+  it("names the page and the part by what the site published", () => {
+    expect(eventSentence(eventOf(pressed()), naming)).toBe(
+      "A reader pressed the heading “Welcome” on Welcome."
+    )
+  })
+
+  it("says each kind in its own words", () => {
+    const at = 0
+    const on = { nodeId: heading, type: "loom.heading" }
+
+    expect(eventSentence(eventOf({ kind: "viewed", ...on, at } as ReaderSignal), naming)).toBe(
+      "A reader opened Welcome."
+    )
+    expect(
+      eventSentence(eventOf({ kind: "dwelled", ...on, ms: 4_200 } as ReaderSignal), naming)
+    ).toBe("A reader had the heading “Welcome” on screen for 4.2 seconds on Welcome.")
+    expect(
+      eventSentence(eventOf({ kind: "disclosed", ...on, open: false, at } as ReaderSignal), naming)
+    ).toBe("A reader closed the heading “Welcome” on Welcome.")
+    expect(eventSentence(eventOf({ kind: "completed", ...on, at } as ReaderSignal), naming)).toBe(
+      "A reader sent the heading “Welcome” on Welcome."
+    )
+  })
+
+  it("says what kind of part it was where the site has not published the page", () => {
+    expect(eventSentence(eventOf(pressed("n_gone")), namingOf([]))).toBe(
+      "A reader pressed a heading on a page the site has not published to Loom."
+    )
+  })
+
+  it("gives a moment by the reader's clock, and a dwell its length instead", () => {
+    expect(happenedOf(pressed())).toEqual({ at: "2026-11-05T09:30:00.000Z" })
+    expect(
+      happenedOf({
+        kind: "dwelled",
+        nodeId: heading,
+        type: "loom.heading",
+        ms: 1_000,
+      } as ReaderSignal)
+    ).toEqual({ lasted: "1 second" })
+  })
+})
+
+describe("the goals an event counts toward", () => {
+  it("are those on its kind, its part and its page", () => {
+    const event = eventOf(pressed())
+    const everywhere = goal({ name: "Everywhere" })
+    const here = goal({ name: "Here", pages: [home.treeId] })
+    const elsewhere = goal({ name: "Elsewhere", pages: ["t_other" as TreeId] })
+    const otherPart = goal({ name: "Other part", nodeId: "n_other" as NodeId })
+    const otherKind = goal({ name: "Sends", kind: "completed" })
+
+    expect(
+      goalsCountedBy(event, [everywhere, here, elsewhere, otherPart, otherKind]).map(
+        (each) => each.name
+      )
+    ).toEqual(["Everywhere", "Here"])
+  })
+
+  it("count an opening and not a closing, as *Opens it* is read", () => {
+    const opens = goal({ kind: "disclosed" })
+    const on = { kind: "disclosed", nodeId: heading, type: "loom.heading", at: 0 }
+
+    expect(goalsCountedBy(eventOf({ ...on, open: true } as ReaderSignal), [opens])).toHaveLength(1)
+    expect(goalsCountedBy(eventOf({ ...on, open: false } as ReaderSignal), [opens])).toHaveLength(0)
+  })
+})
+
+describe("the rest of a page view", () => {
+  it("is every event sharing its view key, in the order they happened", () => {
+    const around = [
+      batch(1, [pressed(), pressed()]),
+      batch(2, [pressed()], { view: VIEW_B } as Partial<ReceivedBatch>),
+      batch(3, [pressed()]),
+    ]
+    const [event] = eventsOf([batch(3, [pressed()])])
+
+    if (event === undefined) throw new Error("one event")
+
+    expect(pageViewOf(event, around).map((each) => each.key)).toEqual(["1.0", "1.1", "3.0"])
+  })
+
+  it("is nothing where the site named no page view", () => {
+    const event = eventOf(pressed(), { view: undefined } as Partial<ReceivedBatch>)
+
+    expect(pageViewOf(event, [batch(2, [pressed()])])).toEqual([])
+  })
+})
+
+describe("the page picker", () => {
+  it("offers every page opened or published once, named pages first", () => {
+    const naming = namingOf([{ tree: home, receivedAt: 0 }])
+
+    expect(
+      eventPagesOf(["t_bare", home.treeId, "t_bare"], [{ tree: home, receivedAt: 0 }], naming)
+    ).toEqual([
+      { treeId: home.treeId, name: "Welcome" },
+      { treeId: "t_bare", name: undefined },
+    ])
+  })
+})

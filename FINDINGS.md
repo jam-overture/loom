@@ -170,9 +170,14 @@ overload is worth an argument that can be two things is this lane's call.
 ## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
-`apps/loom/app/api/reader-signals/`) · **Status:** **open.** Nothing in the
-portal is blocked: *Signals · By page* shipped on the tallies, and the *Events*
-tab waits for this.
+`apps/loom/app/api/reader-signals/`) · **Status:** **closed, 5 November 2026.**
+\#775 (0351) keeps each counted delivery for the window, thirty days by
+default and set by `LOOM_SIGNAL_KEPT_MS`, sweeps what is older, and states both
+ages on the reader-facing notice: points 1 to 3. Point 4 needed nothing new.
+The handle the portal already held, `readingsFor(application).journal`, is
+scoped to the application and its `read` pages kept deliveries newest first
+by cursor and narrows to one page, so `Loom portal` built *Signals · Events*
+on it without touching `src/signals/`.
 
 The maintainer settled on 5 November that individual reader events are kept for
 **30 days** by default, as per-deployment configuration, with the tallies

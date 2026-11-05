@@ -225,9 +225,14 @@ export const PageDrawerPanel = ({
         </Link>
       )}
 
-      <Link href={`/portal/${projectId}/pages/${drawer.row.treeId}`} className="text-ink text-xs">
-        Open the page
-      </Link>
+      <div className="flex gap-4 text-xs">
+        <Link href={`/portal/${projectId}/pages/${drawer.row.treeId}`} className="text-ink">
+          Open the page
+        </Link>
+        <Link href={`/portal/${projectId}/signals?on=${drawer.row.treeId}`} className="text-ink">
+          Events on this page
+        </Link>
+      </div>
     </div>
   </aside>
 )

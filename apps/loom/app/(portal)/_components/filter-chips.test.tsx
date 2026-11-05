@@ -27,4 +27,16 @@ describe("FilterChips", () => {
     expect(stale.getAttribute("aria-current")).toBe("true")
     expect(within(nav).getByRole("link", { name: "All 3" }).getAttribute("aria-current")).toBeNull()
   })
+  it("leaves the count off a choice that has none", () => {
+    render(
+      <FilterChips
+        label="Kind"
+        choices={[{ label: "All kinds", href: "/portal/prj_a/signals", selected: true }]}
+      />
+    )
+
+    expect(screen.getByRole("link", { name: "All kinds" }).getAttribute("aria-current")).toBe(
+      "true"
+    )
+  })
 })
