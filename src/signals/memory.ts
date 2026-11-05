@@ -83,6 +83,7 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
           (request?.treeId === undefined || batch.treeId === request.treeId) &&
           (request?.counted === undefined ||
             request.counted === (batch.foldedAt !== undefined)) &&
+          (request?.view === undefined || batch.view === request.view) &&
           (from === undefined || (direction === "older" ? batch.seq < from : batch.seq > from))
       )
 

@@ -235,7 +235,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0143 | *No record on this branch* | — | — |
 | 0144 | *No record on this branch* | — | — |
 | [0145](0145-a-light-that-marks-one-of-several-is-a-wrapper-and-it-is-carried-by-distance.md) | A light that marks one of several is a wrapper, and it is carried by distance rather than by colour | Accepted | §4b |
-| [0146](0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md) | A reader signal stays anonymous, and a funnel is correlated inside one page view | Accepted | §4c (reader signals), §6 (telemetry) |
+| [0146](0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md) | A reader signal stays anonymous, and a funnel is correlated inside one page view | Accepted — partially superseded by [0355](0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md) | §4c (reader signals), §6 (telemetry) |
 | [0147](0147-a-rollup-is-added-to-what-is-stored-and-a-distinct-view-count-is-therefore-approximate.md) | A rollup is added to what is stored, and a distinct-view count is therefore approximate | Accepted | §4c (reader signals), §6 (telemetry) |
 | 0148 | *No record on this branch* | — | — |
 | 0149 | *No record on this branch* | — | — |
@@ -444,3 +444,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0352](0352-every-proposal-serves-one-goal-and-a-page-no-goal-is-on-gets-none.md) | Every proposal serves one goal, and a page no goal is on gets none | Accepted | §5 (portal), the reasoning plane |
 | 0353 | *No record on this branch* | — | — |
 | [0354](0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md) | The names a render writes on a published page are published on the light side of the split | Accepted | §3 |
+| [0355](0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md) | The events a screen lists are one row per signal, and one page view is read on a key the caller already holds | Accepted — partially supersedes [0146](0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md) | §4c (reader signals), §5 (portal) |

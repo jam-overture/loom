@@ -1,8 +1,27 @@
 # 0146 — A reader signal stays anonymous, and a funnel is correlated inside one page view
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by [0355](0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)
 **Date:** 2026-09-13
 **Section:** §4c (reader signals), §6 (telemetry)
+
+> **Partially superseded on 5 November 2026 by
+> [0355](0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md).**
+> One clause of *the view key is aggregation input, not a stored field* no
+> longer holds: **the portal reads the key and joins on it**, once, to list the
+> deliveries of the page view a row belongs to. It stopped holding because
+> [0349](0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)
+> keeps individual deliveries for thirty days so that an operator can look at
+> the ones their totals were made from, and the drawer showing *the rest of this
+> page view* is the screen the maintainer took that decision for. 0355 says
+> which clause it overturns and which four stand — and the four that stand are
+> the ones carrying this record's argument, **including that correlation is
+> scoped to one page view**, which the narrowing 0355 adds enforces rather than
+> relaxes: one key in, one page view out, with no way to ask which keys exist or
+> what a row shares a key with.
+>
+> The key's *lifetime* was already addressed by
+> [0351](0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md),
+> which left this record unmarked; 0355 is where it is written at this end.
 
 ## Context
 
