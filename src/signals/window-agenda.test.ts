@@ -14,6 +14,7 @@ import {
   deploymentReadingOf,
   readingProgressOf,
   treesIn,
+  arrivalStandingOf,
   windowAgendaOf,
   windowAssemblyOf,
   windowFunnelsOf,
@@ -25,6 +26,7 @@ import {
   type StoredFunnel,
   type StoredPageViews,
   type StoredTally,
+  type TurnedAwayTally,
 } from "./index.js"
 
 /**
@@ -68,6 +70,7 @@ const DECLARED: PartDeclarations = {
 const AT = "2026-11-01T09:00:00.000Z"
 const THREE_HOURS_EARLIER = "2026-11-01T06:00:00.000Z"
 const AN_HOUR = 60 * 60 * 1000
+const THREE_HOURS = 3 * AN_HOUR
 
 /** A fold is expected within seventy minutes, which three hours is past. */
 const SCHEDULE: CollectionSchedule = { at: AT, foldsWithinMs: AN_HOUR + 10 * 60 * 1000 }
@@ -149,12 +152,31 @@ const CONTEXT: DeploymentReadingContext = {
   placings: { placingFor: () => undefined },
 }
 
-const agendaOf = (held: Partial<ReaderWindow>, schedule: CollectionSchedule | null = SCHEDULE) => {
+/** One reason this deployment's door turned deliveries away, as its counter holds it. */
+const refusal = (
+  reason: Reason,
+  refused: number,
+  lastAt = Date.parse(THREE_HOURS_EARLIER)
+): TurnedAwayTally<Reason> => ({ reason, refused, lastAt, lastOrigin: "https://loomjs.org" })
+
+/** A deployment's own closed set, which the framework never names (0311, 0326). */
+type Reason = "wrong-site" | "closed" | "unreadable"
+
+const agendaOf = (
+  held: Partial<ReaderWindow>,
+  schedule: CollectionSchedule | null = SCHEDULE,
+  turnedAway: readonly TurnedAwayTally<Reason>[] | undefined = undefined
+) => {
   const window = windowOf(held)
   const assembly = windowAssemblyOf(window, CONTEXT)
   const funnels = windowFunnelsOf(window, assembly)
 
-  return { window, assembly, funnels, read: windowAgendaOf(window, assembly, funnels, schedule) }
+  return {
+    window,
+    assembly,
+    funnels,
+    read: windowAgendaOf(window, assembly, funnels, schedule, turnedAway),
+  }
 }
 
 /** One page whose readers stop between its two parts and whose ask leaks. */
@@ -367,5 +389,85 @@ describe("a deployment's fix-list, read off one window", () => {
       expect(read.agenda.work.page + read.agenda.work.both).toBe(1)
       expect(read.agenda.rows).toHaveLength(1)
     })
+  })
+})
+
+describe("the fix-list's subject, off the refusal rows the rung is handed", () => {
+  it("sends an operator to the intake where a window is empty and the door refused deliveries", () => {
+    const { read } = agendaOf({}, SCHEDULE, [refusal("wrong-site", 12)])
+
+    expect(read.agenda.subject).toBe("intake")
+    expect(read.agenda.first).toBeNull()
+    expect(read.arrival.standing).toBe("turned-away")
+    expect(read.arrival.refused).toBe(12)
+  })
+
+  it("says nothing is posting where a window is empty and the counter holds no refusal", () => {
+    const { read } = agendaOf({}, SCHEDULE, [])
+
+    expect(read.agenda.subject).toBe("silence")
+    expect(read.arrival.standing).toBe("silent")
+    expect(read.arrival.refused).toBe(0)
+  })
+
+  it("refuses to choose between the two silences where the deployment keeps no counter", () => {
+    const { read } = agendaOf({}, SCHEDULE, undefined)
+
+    expect(read.agenda.subject).toBe("unverified")
+    expect(read.arrival.standing).toBe("unasked")
+    expect(read.arrival.refused).toBeNull()
+  })
+
+  it("says pages about a window that holds one, with the refusal named beside it", () => {
+    const { read } = agendaOf(FALLING, SCHEDULE, [refusal("closed", 3)])
+
+    expect(read.agenda.subject).toBe("pages")
+    expect(read.arrival.standing).toBe("mixed")
+    expect(read.agenda.first?.work).toBe("page")
+  })
+
+  it("carries the deployment's own reason through to the remedy, unworded", () => {
+    const { read } = agendaOf({}, SCHEDULE, [refusal("unreadable", 4)])
+
+    /** Typed in the host's set, not the framework's, so this switch is exhaustive. */
+    const reason: Reason | undefined = read.arrival.newest?.reason
+
+    expect(reason).toBe("unreadable")
+    expect(read.arrival.newest?.origin).toBe("https://loomjs.org")
+  })
+
+  it("ages the newest refusal against the schedule's instant rather than a clock", () => {
+    const { read } = agendaOf({}, SCHEDULE, [refusal("wrong-site", 1)])
+
+    expect(read.arrival.newest?.sinceMs).toBe(THREE_HOURS)
+  })
+
+  it("gives every arrival figure and no age where the schedule is null or its instant unreadable", () => {
+    const none = agendaOf({}, null, [refusal("wrong-site", 1)]).read
+    const unreadable = agendaOf({}, { at: "not a date", foldsWithinMs: AN_HOUR }, [
+      refusal("wrong-site", 1),
+    ]).read
+
+    expect([none.arrival.newest?.sinceMs, unreadable.arrival.newest?.sinceMs]).toEqual([null, null])
+    expect([none.arrival.refused, unreadable.arrival.refused]).toEqual([1, 1])
+    expect([none.agenda.subject, unreadable.agenda.subject]).toEqual(["intake", "intake"])
+  })
+
+  it("is the reading arrivalStandingOf gives over the health reading the rows were judged by", () => {
+    const refusals = [refusal("wrong-site", 2), refusal("closed", 5)]
+    const { read } = agendaOf(FALLING, SCHEDULE, refusals)
+
+    expect(read.arrival).toEqual(
+      arrivalStandingOf<Reason>(read.health, refusals, Date.parse(AT))
+    )
+  })
+
+  it("adds the refusals once where a caller handed one reason in twice", () => {
+    const once = agendaOf({}, SCHEDULE, [refusal("wrong-site", 7)]).read
+    const twice = agendaOf({}, SCHEDULE, [refusal("wrong-site", 7), refusal("wrong-site", 7)]).read
+
+    expect(twice.arrival.refused).toBe(once.arrival.refused)
+    expect(twice.arrival.duplicated).toBe(1)
+    expect(twice.agenda.subject).toBe("intake")
   })
 })

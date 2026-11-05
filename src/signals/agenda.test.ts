@@ -14,16 +14,20 @@ import type { ElementNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
 import {
+  AGENDA_SUBJECTS,
   AGENDA_WORK,
+  arrivalStandingOf,
   collectionHealthOf,
   COUNTS_INFLATED_ABOVE,
   deploymentAgendaOf,
   deploymentConversionOf,
   deploymentReadingOf,
+  describeAgendaSubject,
   describeAgendaWork,
   funnelReachOf,
   readingProgressOf,
   pageReadingOf,
+  type ArrivalStanding,
   type CollectionSchedule,
   type DeploymentAgenda,
   type FunnelPair,
@@ -32,6 +36,7 @@ import {
   type ReaderTally,
   type StoredFunnel,
   type StoredPageViews,
+  type TurnedAwayTally,
 } from "./index.js"
 
 /**
@@ -199,7 +204,8 @@ const agendaOf = (
   readings: readonly PageReading[],
   rows: readonly StoredPageViews[],
   over?: CollectionSchedule,
-  funnels: readonly StoredFunnel[] = []
+  funnels: readonly StoredFunnel[] = [],
+  arrival: Pick<ArrivalStanding, "standing"> | null = null
 ): DeploymentAgenda =>
   deploymentAgendaOf(
     deploymentReadingOf(
@@ -207,7 +213,8 @@ const agendaOf = (
       rows
     ),
     deploymentConversionOf(readings.map((page) => funnelReachOf(page, funnels, rows))),
-    collectionHealthOf(readings, rows, over)
+    collectionHealthOf(readings, rows, over),
+    arrival
   )
 
 /** The order of conversions a caller gets for a deployment that asks nothing. */
@@ -216,6 +223,26 @@ const asksNothing = (
   rows: readonly StoredPageViews[]
 ): ReturnType<typeof deploymentConversionOf> =>
   deploymentConversionOf(readings.map((page) => funnelReachOf(page, [], rows)))
+
+/** One reason this deployment's door turned deliveries away, as its counter holds it. */
+const refusal = (reason: string, refused: number): TurnedAwayTally => ({
+  reason,
+  refused,
+  lastAt: Date.parse(NOW) - 5 * 60 * 1000,
+  lastOrigin: "https://loomjs.org",
+})
+
+/**
+ * An arrival standing built by the published reading over a real health
+ * reading, never written by hand: what the subject is a claim about is what
+ * that reading published, and a hand-written standing would let this file agree
+ * with itself about a deployment the reading could never have produced.
+ */
+const arrivingAt = (
+  readings: readonly PageReading[],
+  rows: readonly StoredPageViews[],
+  turnedAway: readonly TurnedAwayTally[] | undefined
+): ArrivalStanding => arrivalStandingOf(collectionHealthOf(readings, rows), turnedAway)
 
 const named = (row: { readonly treeId: TreeId; readonly revision: number }): string =>
   `${row.treeId}@${String(row.revision)}`
@@ -226,6 +253,131 @@ describe("describeAgendaWork", () => {
 
     expect(new Set(said).size).toBe(AGENDA_WORK.length)
     expect(said.every((line) => line.length > 0)).toBe(true)
+  })
+})
+
+describe("describeAgendaSubject", () => {
+  it("says one distinct thing about each member", () => {
+    const said = AGENDA_SUBJECTS.map(describeAgendaSubject)
+
+    expect(new Set(said).size).toBe(AGENDA_SUBJECTS.length)
+    expect(said.every((line) => line.length > 0)).toBe(true)
+  })
+})
+
+describe("deploymentAgendaOf — what an empty fix-list is about", () => {
+  it("sends an operator to the intake where nothing was collected and the door refused deliveries", () => {
+    const agenda = agendaOf([], [], undefined, [], arrivingAt([], [], [refusal("wrong-site", 12)]))
+
+    expect(agenda.subject).toBe("intake")
+    expect(agenda.first).toBeNull()
+    expect(agenda.rows).toEqual([])
+  })
+
+  it("says nothing is posting where nothing was collected and the door refused nothing", () => {
+    expect(agendaOf([], [], undefined, [], arrivingAt([], [], [])).subject).toBe("silence")
+  })
+
+  it("refuses to choose between the two silences where nothing counted refusals", () => {
+    expect(agendaOf([], [], undefined, [], arrivingAt([], [], undefined)).subject).toBe("unverified")
+  })
+
+  it("reads a caller with no arrival reading to hand in exactly as it reads a deployment with no counter", () => {
+    expect(agendaOf([], [], undefined, [], null).subject).toBe("unverified")
+    expect(agendaOf([], [], undefined, [], arrivingAt([], [], undefined)).subject).toBe(
+      agendaOf([], [], undefined, [], null).subject
+    )
+  })
+
+  it("names a subject for every state the arrival reading can be in, and never nothing", () => {
+    const subjects = [
+      agendaOf([], [], undefined, [], null),
+      agendaOf([], [], undefined, [], arrivingAt([], [], undefined)),
+      agendaOf([], [], undefined, [], arrivingAt([], [], [])),
+      agendaOf([], [], undefined, [], arrivingAt([], [], [refusal("wrong-site", 1)])),
+      agendaOf([leaky(TREE)], [exact(TREE, 1, 100)], undefined, [], arrivingAt([], [], [])),
+    ].map((agenda) => agenda.subject)
+
+    expect(subjects).toEqual(["unverified", "unverified", "silence", "intake", "pages"])
+    expect(subjects.every((subject) => AGENDA_SUBJECTS.includes(subject))).toBe(true)
+  })
+
+  it("has no row, no list and no first thing to do on every subject but pages", () => {
+    for (const agenda of [
+      agendaOf([], [], undefined, [], null),
+      agendaOf([], [], undefined, [], arrivingAt([], [], [])),
+      agendaOf([], [], undefined, [], arrivingAt([], [], [refusal("closed", 4)])),
+    ]) {
+      expect(agenda.subject).not.toBe("pages")
+      expect(agenda.first).toBeNull()
+      expect([agenda.rows, agenda.page, agenda.converting, agenda.collection]).toEqual([
+        [],
+        [],
+        [],
+        [],
+      ])
+    }
+  })
+})
+
+describe("deploymentAgendaOf — the subject is a claim about these rows", () => {
+  it("says pages wherever the health reading named one, whatever the door was doing", () => {
+    const rows = [exact(TREE, 1, 100)]
+
+    expect(agendaOf([leaky(TREE)], rows, undefined, [], null).subject).toBe("pages")
+    expect(
+      agendaOf([leaky(TREE)], rows, undefined, [], arrivingAt([leaky(TREE)], rows, [])).subject
+    ).toBe("pages")
+    expect(
+      agendaOf([leaky(TREE)], rows, undefined, [], arrivingAt([leaky(TREE)], rows, [refusal("wrong-site", 3)]))
+        .subject
+    ).toBe("pages")
+  })
+
+  it("does not let a stale arrival reading claim pages for a window that holds none", () => {
+    const collecting = arrivingAt([leaky(TREE)], [exact(TREE, 1, 100)], [])
+    const alsoRefusing = arrivingAt(
+      [leaky(TREE)],
+      [exact(TREE, 1, 100)],
+      [refusal("wrong-site", 2)]
+    )
+
+    expect([collecting.standing, alsoRefusing.standing]).toEqual(["collecting", "mixed"])
+    expect([collecting.collected, alsoRefusing.collected]).toEqual([1, 1])
+
+    expect(agendaOf([], [], undefined, [], collecting).subject).toBe("silence")
+    expect(agendaOf([], [], undefined, [], alsoRefusing).subject).toBe("intake")
+  })
+
+  it("says pages off the health reading even where neither order named one", () => {
+    const rows = [exact(TREE, 1, 100)]
+    const agenda = deploymentAgendaOf(
+      deploymentReadingOf([], rows),
+      asksNothing([], rows),
+      collectionHealthOf([leaky(TREE)], rows),
+      arrivingAt([], [], [refusal("wrong-site", 9)])
+    )
+
+    expect(agenda.subject).toBe("pages")
+    expect(agenda.rows).toEqual([])
+    expect(agenda.unpaired.health).toBe(1)
+  })
+
+  it("is unmoved by a caller that handed one page in twice, which is the count it is not made of", () => {
+    const rows = [exact(TREE, 1, 100)]
+    const health = collectionHealthOf([leaky(TREE)], rows)
+    const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], rows)
+    const once = deploymentAgendaOf(order, asksNothing([leaky(TREE)], rows), health, null)
+    const twice = deploymentAgendaOf(
+      order,
+      asksNothing([leaky(TREE)], rows),
+      { ...health, pages: [...health.pages, ...health.pages] },
+      null
+    )
+
+    expect(twice.duplicated).toBe(1)
+    expect(twice.subject).toBe(once.subject)
+    expect(twice.subject).toBe("pages")
   })
 })
 
@@ -379,16 +531,20 @@ describe("deploymentAgendaOf", () => {
     const doubledOrder = deploymentAgendaOf(
       { ...order, ranked: [...order.ranked, ...order.ranked] },
       leaking,
-      health
+      health,
+      null
     )
-    const doubledHealth = deploymentAgendaOf(order, leaking, {
-      ...health,
-      pages: [...health.pages, ...health.pages],
-    })
+    const doubledHealth = deploymentAgendaOf(
+      order,
+      leaking,
+      { ...health, pages: [...health.pages, ...health.pages] },
+      null
+    )
     const doubledConversion = deploymentAgendaOf(
       order,
       { ...leaking, unranked: [...leaking.unranked, ...leaking.unranked] },
-      health
+      health,
+      null
     )
 
     expect(doubledOrder.rows.length).toBe(1)
@@ -410,7 +566,8 @@ describe("deploymentAgendaOf", () => {
     const agenda = deploymentAgendaOf(
       { ...order, ranked: [...order.ranked, ...order.ranked] },
       asksNothing([leaky(TREE)], [exact(TREE, 1, 100)]),
-      collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)])
+      collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)]),
+      null
     )
 
     expect(agenda.page.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
@@ -426,12 +583,14 @@ describe("deploymentAgendaOf", () => {
         rows
       ),
       asksNothing(both, rows),
-      collectionHealthOf([leaky(TREE)], rows)
+      collectionHealthOf([leaky(TREE)], rows),
+      null
     )
     const shortOrder = deploymentAgendaOf(
       deploymentReadingOf([readingProgressOf(leaky(TREE))], rows),
       asksNothing(both, rows),
-      collectionHealthOf(both, rows)
+      collectionHealthOf(both, rows),
+      null
     )
     const shortConversion = deploymentAgendaOf(
       deploymentReadingOf(
@@ -439,7 +598,8 @@ describe("deploymentAgendaOf", () => {
         rows
       ),
       asksNothing([leaky(TREE)], rows),
-      collectionHealthOf(both, rows)
+      collectionHealthOf(both, rows),
+      null
     )
 
     expect(shortHealth.unpaired).toEqual({ order: 1, health: 0, conversion: 1 })
@@ -498,10 +658,11 @@ describe("deploymentAgendaOf", () => {
     expect(agenda.rows.length).toBe(2)
   })
 
-  it("answers an empty deployment with two empty orders and nothing to do", () => {
+  it("answers an empty deployment with two empty orders and a subject rather than nothing to do", () => {
     const agenda = agendaOf([], [])
 
     expect(agenda).toEqual({
+      subject: "unverified",
       rows: [],
       page: [],
       converting: [],
@@ -672,7 +833,8 @@ describe("the conversions a deployment's fix-list was silent about", () => {
     const agenda = deploymentAgendaOf(
       deploymentReadingOf([readingProgressOf(leaky(TREE))], rows),
       { ...conversion, ranked: [...conversion.ranked, ...conversion.ranked] },
-      collectionHealthOf([leaky(TREE)], rows)
+      collectionHealthOf([leaky(TREE)], rows),
+      null
     )
 
     expect(agenda.converting.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])

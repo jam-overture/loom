@@ -2,6 +2,7 @@ import type { AudienceId } from "../audience/audience.js"
 import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 
+import type { ArrivalStanding, ArrivalStandingName } from "./arriving.js"
 import { readingKeyOf, type ReadingOfAudience } from "./audiences.js"
 import type { DeploymentConversion, LeakingPage } from "./conversion.js"
 import type { DeploymentReading, RankedPage } from "./deployment.js"
@@ -142,6 +143,43 @@ import {
  * deployment that asks nothing of its readers hands in the order it gets, in
  * which every page is `unasked`, and reads exactly as it did before 0336.
  *
+ * ## Nothing to fix and nothing to fix it with are two answers
+ *
+ * {@link DeploymentAgenda.first} is `null` where the three readings ask for
+ * nothing, and that was **two opposite sentences in one value.** A deployment
+ * whose pages are read, answered and soundly collected has nothing to do. A
+ * deployment whose door turns every delivery away has no counters, so no
+ * readings, so no rows, so no first row either — and the fix-list told an
+ * operator *nothing to do* about the one state it was built to catch
+ * ([0326](../../decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)).
+ *
+ * So {@link DeploymentAgenda.subject} says **what this fix-list is about**
+ * before any row of it is read: the pages, or the intake that would have to
+ * work before any page could be judged. It is the generalisation of the rule
+ * this reading already keeps about a contested page — *while one exists, an
+ * order is not evidence* — one level up: **while nothing is arriving, no
+ * reading is evidence**, and the absence of rows is not the absence of work.
+ *
+ * **It is a claim about the rows and takes each half from the reading that owns
+ * it.** Whether anything was collected is the health reading's pages, which is
+ * what the rows are joined from and the same number
+ * {@link ArrivalStanding.collected} is computed from (0326). Whether anything
+ * was turned away is the arrival standing's, and only that — so what is taken
+ * in is {@link ArrivalStanding.standing} and nothing else. A second copy of the
+ * collected count, read off the standing handed in, is how a caller holding two
+ * windows gets a verdict about one of them and rows from the other, and the
+ * count that is right about *these rows* is the one beside them.
+ *
+ * Nothing about a refusal is re-spelled here either: the standing is handed in,
+ * so the caller already holds `refused`, `newest` and the origin to print, and
+ * carrying a copy of them is how two figures come to disagree (0327).
+ *
+ * **A refusal is still not a row and still not a fault.** It names no page
+ * (0326), so it is not an {@link AgendaRow}, not a fifth
+ * {@link AgendaWork} and not an eighth `CollectionFault`. It is one word about
+ * the whole list, which is the only shape a deployment-wide subject can take
+ * beside a per-page vocabulary (0240).
+ *
  * Pure, linear in the three readings, and reaches no store, clock or DOM.
  */
 
@@ -209,6 +247,87 @@ export const describeAgendaWork = (work: AgendaWork): string => {
   }
 }
 
+/**
+ * What a deployment's fix-list is about: its pages, or the intake under them.
+ *
+ * Four members over one question — **can the rows below be acted on, and if
+ * there are none, why not.** A fix-list with no rows is three different
+ * deployments and the rows cannot say which (0326), so this says it in one word
+ * above them.
+ *
+ * It is not a fifth {@link AgendaWork}: that vocabulary is per page and answers
+ * *whose hand*, and a refusal names no page at all.
+ */
+export type AgendaSubject =
+  /**
+   * The rows are the answer.
+   *
+   * Something was collected about at least one page, so the two orders and the
+   * faults below are readings of real counters. `first` being `null` from here
+   * is the honest *nothing to do*.
+   *
+   * **Also where a door was turning some deliveries away** while others
+   * arrived. The arrival standing calls that `mixed` and deliberately declines
+   * to judge it — a second sender with a stale key, one page of several
+   * carrying the wrong snippet, or a misconfiguration since fixed are the same
+   * rows (0326) — so this declines too rather than second-guessing the reading
+   * it was handed. What the caller holds beside this is the standing itself,
+   * which names the refusal and when it last happened.
+   */
+  | "pages"
+  /**
+   * **Repair the intake.** Nothing was collected and the door turned deliveries
+   * away.
+   *
+   * The state this exists for. A page is posting on every view, the door is
+   * refusing it before it reads which tree it was about, and every reading in
+   * the subsystem is reporting that nobody read anything. The remedy is
+   * usually one line in a settings field (0311, 0326), and no row below is
+   * evidence of anything because there are none.
+   */
+  | "intake"
+  /**
+   * Nothing was collected and the door turned nothing away.
+   *
+   * No page is posting to this deployment at all: the snippet is absent, the
+   * broadcaster was never called, or the signals never left the browser. Work,
+   * and not this reading's to name — but a different instruction from
+   * {@link AgendaSubject.intake}, which is why the two are not one word.
+   */
+  | "silence"
+  /**
+   * Nothing was collected, and nothing offered a count of what the door turned
+   * away.
+   *
+   * So this cannot say which of the two silences above it is. The refusal
+   * rather than the gap, on the rule that an absent store is not an empty map
+   * (0240): guessing `silence` here publishes the more comforting of two
+   * states, and guessing `intake` sends an operator after a gate nothing says
+   * is shut.
+   */
+  | "unverified"
+
+export const AGENDA_SUBJECTS: readonly AgendaSubject[] = everyMemberOf<AgendaSubject>()([
+  "pages",
+  "intake",
+  "silence",
+  "unverified",
+])
+
+/** One line per member, for a surface saying what a fix-list is about. */
+export const describeAgendaSubject = (subject: AgendaSubject): string => {
+  switch (subject) {
+    case "pages":
+      return "these are this deployment's pages, and the rows below can be acted on"
+    case "intake":
+      return "nothing has been collected and deliveries are being turned away: repair the intake"
+    case "silence":
+      return "nothing has been collected and nothing has been turned away: no page is posting"
+    case "unverified":
+      return "nothing has been collected, and nothing says whether anything was turned away"
+  }
+}
+
 /** One page of a deployment, as both readings have it. */
 export type AgendaRow = {
   readonly treeId: TreeId
@@ -261,6 +380,20 @@ export type AgendaRow = {
 /** A deployment's pages, in the two orders that say what to do about them. */
 export type DeploymentAgenda = {
   /**
+   * What this fix-list is about, read before any row of it.
+   *
+   * `pages` wherever the health reading named one, whatever else is true. The
+   * other three are the three deployments whose fix-list is empty, and they
+   * are three different instructions.
+   *
+   * **Every member but `pages` has no rows and a `null`
+   * {@link DeploymentAgenda.first} by construction** — the rows are joined from
+   * the health reading's pages, so no page there is no row here. That is the
+   * whole point: `first === null` is now two sentences and this is the one that
+   * says which.
+   */
+  readonly subject: AgendaSubject
+  /**
    * Every page all three readings named, by tree id and newest revision first.
    *
    * The same order `CollectionHealth.pages` and an order's `unranked` are in, so
@@ -312,6 +445,10 @@ export type DeploymentAgenda = {
   /**
    * The one thing to do first, or `null` where the three readings ask for
    * nothing.
+   *
+   * **`null` is not *nothing to do*** — {@link DeploymentAgenda.subject} is
+   * where that is said. On any subject but `pages` there are no rows to be
+   * first, and the work is the intake rather than a page.
    *
    * A contested page before a ranked one, because while one exists an order is
    * not evidence; then the head of the order of falls, which is that order's own
@@ -439,16 +576,63 @@ const asksForCollection = (row: AgendaRow): boolean =>
   row.work === "collection" || row.work === "both"
 
 /**
+ * Whether a door turned anything away, as an arrival standing says it, or
+ * `null` where nothing can say.
+ *
+ * Exhaustive over the standing rather than a test for one member, so that a
+ * sixth arrival standing cannot be added without this file being asked what it
+ * means here. Two of the five are the same answer for opposite reasons — a
+ * deployment that collected nothing and one that collected everything both
+ * turned nothing away — and collapsing them is correct, because the other half
+ * of the subject is taken from the rows.
+ */
+const turnedAnythingAway = (standing: ArrivalStandingName): boolean | null => {
+  switch (standing) {
+    case "unasked":
+      return null
+    case "silent":
+    case "collecting":
+      return false
+    case "turned-away":
+    case "mixed":
+      return true
+  }
+}
+
+/**
+ * What a fix-list is about, out of whether it has pages and whether a door
+ * refused anything.
+ *
+ * `collected` is the health reading's own pages, counted once — the rows are
+ * joined from them, so this is a claim about the rows rather than about a
+ * number carried in from somewhere else.
+ */
+const subjectOf = (
+  collected: boolean,
+  arrival: Pick<ArrivalStanding, "standing"> | null
+): AgendaSubject => {
+  if (collected) return "pages"
+
+  const refused = arrival === null ? null : turnedAnythingAway(arrival.standing)
+
+  if (refused === null) return "unverified"
+
+  return refused ? "intake" : "silence"
+}
+
+/**
  * Join an order of a deployment's pages to the health of its collection, and
  * publish the two orders that come out.
  *
  * ```ts
  * const assembly = windowAssemblyOf(window, context)
  * const progress = assembly.readings.pages.map(readingProgressOf)
+ * const health = collectionHealthOf(assembly.readings.pages, window.pageViews, schedule)
  * const agenda = deploymentAgendaOf(
  *   deploymentReadingOf(progress, window.pageViews),
  *   deploymentConversionOf(windowFunnelsOf(window, assembly).pages),
- *   collectionHealthOf(assembly.readings.pages, window.pageViews, schedule)
+ *   health,
+ *   arrivalStandingOf(health, turnedAway, at)
  * )
  * ```
  *
@@ -456,11 +640,31 @@ const asksForCollection = (row: AgendaRow): boolean =>
  * the reason every derived reading in this subsystem takes readings: each is
  * separately useful and separately drawn, and deriving any of them a second time
  * is how two screens come to disagree about one deployment.
+ *
+ * @param arrival Whether anything is arriving at this deployment, as
+ * `arrivalStandingOf` answered it, or `null` where the caller read no refusal
+ * counter and has no answer to hand in. **Required rather than optional**, on
+ * the terms the schedule above it is required
+ * ([0322](../../decisions/0322-a-window-is-read-off-one-deployment-context-and-the-region-floor-is-not-optional.md),
+ * [0343](../../decisions/0343-a-deployments-fix-list-is-read-off-one-window-and-states-its-collection-schedule-or-says-it-has-none.md)):
+ * an argument a caller may omit is a fix-list that type-checks, runs, and
+ * cannot tell *nothing to fix* from *nothing to fix it with*, which is the
+ * state this subsystem's commonest setup failure puts a deployment in.
+ *
+ * `null` and a standing of `unasked` are **one answer** and both read
+ * `unverified`: a caller with no counter to read and a deployment with no
+ * counter to offer are the same absence, and inventing a second word for it
+ * would be a sixth member of a closed set of five, said twice.
+ *
+ * Only {@link ArrivalStanding.standing} is taken. Nothing else on it is needed
+ * and a copy of its collected count would be a second answer to a question the
+ * rows already answer.
  */
 export const deploymentAgendaOf = (
   order: DeploymentReading,
   conversion: DeploymentConversion,
-  health: CollectionHealth
+  health: CollectionHealth,
+  arrival: Pick<ArrivalStanding, "standing"> | null
 ): DeploymentAgenda => {
   const ranked = byKey<RankedPage>([...order.ranked, ...order.unranked])
   const leaks = byKey<LeakingPage>([...conversion.ranked, ...conversion.unranked])
@@ -549,6 +753,7 @@ export const deploymentAgendaOf = (
   )
 
   return {
+    subject: subjectOf(states.first.size > 0, arrival),
     rows,
     page,
     converting,
