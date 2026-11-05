@@ -27,7 +27,7 @@ import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { AnswerControls } from "./_components/answer-controls"
-import { FilterChips } from "./_components/filter-chips"
+import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 
 /**
  * *For review* (formerly *Waiting*): the changes proposed for this project's pages that the Gate

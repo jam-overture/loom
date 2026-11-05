@@ -21,7 +21,7 @@ const row = (treeId: string, overrides: Partial<ByPageRow> = {}): ByPageRow => (
   ...overrides,
 })
 
-const address = { base: "/portal/prj_a/signals", from: undefined }
+const address = { base: "/portal/prj_a/signals/pages", from: undefined }
 
 describe("By page", () => {
   it("shows each page by its published name with its id, and by its id alone otherwise", () => {
@@ -34,7 +34,7 @@ describe("By page", () => {
     )
 
     expect(screen.getByRole("link", { name: /Welcome/ }).getAttribute("href")).toBe(
-      "/portal/prj_a/signals?page=t_home"
+      "/portal/prj_a/signals/pages?page=t_home"
     )
     expect(screen.getByText("t_home")).toBeTruthy()
     expect(screen.getByRole("link", { name: "t_bare" })).toBeTruthy()
@@ -90,7 +90,7 @@ describe("By page", () => {
     expect(screen.getByText("1–50 of 60")).toBeTruthy()
     expect(screen.getByText("Newer").getAttribute("aria-disabled")).toBe("true")
     expect(screen.getByRole("link", { name: "Older" }).getAttribute("href")).toBe(
-      `/portal/prj_a/signals?from=${cursorOf(rows[50] as ByPageRow)}`
+      `/portal/prj_a/signals/pages?from=${cursorOf(rows[50] as ByPageRow)}`
     )
   })
 })
@@ -123,7 +123,7 @@ describe("the drawer for one page", () => {
     )
   })
 
-  it("links to what waits for the page, to the page itself, and closes back to the list", () => {
+  it("links to what waits for the page, to the page and its events, and closes back to the list", () => {
     render(<PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />)
 
     expect(
@@ -134,8 +134,11 @@ describe("the drawer for one page", () => {
     expect(screen.getByRole("link", { name: "Open the page" }).getAttribute("href")).toBe(
       "/portal/prj_a/pages/t_home"
     )
+    expect(screen.getByRole("link", { name: "Events on this page" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?on=t_home"
+    )
     expect(screen.getByRole("link", { name: "Close" }).getAttribute("href")).toBe(
-      "/portal/prj_a/signals"
+      "/portal/prj_a/signals/pages"
     )
   })
 })
