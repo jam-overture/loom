@@ -6,7 +6,7 @@ import { pageFixture } from "@/app/_lib/pages/fixtures"
 
 import { elementIdsOf, goalOn } from "../proposing/fixtures"
 import { goalIdSchema } from "./goal"
-import { goalForPage, proposalGoalOf } from "./serving"
+import { goalForPage, proposalGoalOf, waitingByGoalOf } from "./serving"
 
 const HOME = pageFixture("home", "Welcome home")
 const PRICING = treeIdSchema.parse("t_pricing")
@@ -75,5 +75,29 @@ describe("proposalGoalOf", () => {
       nodeId: HEADING,
       at: 42,
     })
+  })
+})
+
+describe("waitingByGoalOf", () => {
+  const intent = (n: number) => intentIdSchema.parse(`i_${n}`)
+  const served = new Map([
+    [intent(1), proposalGoalOf(primary, intent(1), 1)],
+    [intent(2), proposalGoalOf(primary, intent(2), 2)],
+    [intent(3), proposalGoalOf(own, intent(3), 3)],
+    [intent(9), proposalGoalOf(older, intent(9), 9)],
+  ])
+
+  it("counts the waiting changes each goal is served by, and only the waiting ones", () => {
+    expect(waitingByGoalOf([intent(1), intent(2), intent(3)], served)).toEqual(
+      new Map([
+        [primary.goalId, 2],
+        [own.goalId, 1],
+      ])
+    )
+  })
+
+  it("counts a change no goal was recorded for towards none", () => {
+    expect(waitingByGoalOf([intent(4)], served)).toEqual(new Map())
+    expect(waitingByGoalOf([], served)).toEqual(new Map())
   })
 })

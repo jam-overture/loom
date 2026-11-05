@@ -7,7 +7,7 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
-import type { Goal } from "@/app/(portal)/_lib/goals/goal"
+import type { Goal, GoalId } from "@/app/(portal)/_lib/goals/goal"
 import {
   countsWhen,
   goalReadingOf,
@@ -17,9 +17,12 @@ import {
   whereSentence,
   type PageChoice,
 } from "@/app/(portal)/_lib/goals/goal-view"
-import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
+import { waitingByGoalOf } from "@/app/(portal)/_lib/goals/serving"
+import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
+import { EVERY_CHANGE, reviewHrefOf } from "@/app/(portal)/_lib/review-filter"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { plainMoment } from "@/app/(portal)/_lib/when"
+import { holdsFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { boundedReaderTallyStore, readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
@@ -39,17 +42,47 @@ import { GoalForm } from "./_components/goal-form"
  * began, read off the tallies `Signals` reads. `?goal=new` opens the drawer
  * an owner adds one in; everybody else reads the list.
  *
+ * **Changes for it** counts the changes waiting on *For review* that were
+ * raised for each goal (0352), and links to them there.
+ *
  * **What it does not say yet**, because the data is not there: a 7-day rate
- * and its trend (the tallies keep no time; 0349's kept events will), and the
- * changes made for each goal (proposals name no goal until the proposer reads
- * them, the second half of 8b). The screen says the second in a sentence
- * rather than drawing an empty column.
+ * and its trend (the tallies keep no time; 0349's kept events will), and how
+ * many changes for a goal were shipped, which waits for an accepted change to
+ * become a pull request the site publishes (unit 8). The screen says the
+ * second in a sentence rather than drawing a figure it cannot count.
  */
 
 type Readings = {
   readonly goals: readonly Goal[]
   readonly pages: readonly PageChoice[]
   readonly reading: (goal: Goal) => string
+  /** Changes waiting for each goal, `undefined` where they could not be read. */
+  readonly waiting: ReadonlyMap<GoalId, number> | undefined
+}
+
+const ChangesFor = ({
+  goal,
+  readings,
+  projectId,
+}: {
+  goal: Goal
+  readings: Readings
+  projectId: string
+}) => {
+  if (readings.waiting === undefined) return <>Cannot be read just now.</>
+
+  const count = readings.waiting.get(goal.goalId) ?? 0
+
+  return count === 0 ? (
+    <>None waiting</>
+  ) : (
+    <Link
+      href={reviewHrefOf(projectId, { ...EVERY_CHANGE, goal: goal.goalId })}
+      className="text-ink"
+    >
+      {count} waiting
+    </Link>
+  )
 }
 
 const GoalRow = ({
@@ -81,6 +114,9 @@ const GoalRow = ({
     </td>
     <td className="py-2 pr-3 text-xs">{whereSentence(goal, readings.pages)}</td>
     <td className="py-2 pr-3 text-xs">{readings.reading(goal)}</td>
+    <td className="py-2 pr-3 text-xs">
+      <ChangesFor goal={goal} readings={readings} projectId={projectId} />
+    </td>
     {owner && (
       <td className="py-2 text-right">
         <GoalControls
@@ -115,6 +151,7 @@ const GoalList = ({
           <th className="py-1.5 font-normal">What counts</th>
           <th className="py-1.5 font-normal">Where</th>
           <th className="py-1.5 font-normal">Since counting began</th>
+          <th className="py-1.5 font-normal">Changes for it</th>
           {owner && <th className="py-1.5 font-normal" />}
         </tr>
       </thead>
@@ -202,9 +239,9 @@ const GoalsPage = async ({
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
   const signals = application === undefined ? undefined : readingsFor(application.applicationId)
 
-  const [goals, published, pageViews, tallies] =
+  const [goals, published, pageViews, tallies, held] =
     application === undefined || signals === undefined
-      ? [undefined, undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => goalsFor(application.applicationId).list(),
@@ -218,7 +255,19 @@ const GoalsPage = async ({
           ),
           boundedReaderTallyStore(signals.tallies).pageViews(),
           boundedReaderTallyStore(signals.tallies).tallies(),
+          holdsFor(application.applicationId).waiting(),
         ])
+
+  const waitingIntents =
+    held?.ok === true ? held.value.held.map((change) => change.intent.intentId) : undefined
+  const served =
+    application === undefined || waitingIntents === undefined
+      ? undefined
+      : await readWithin(
+          () => proposalGoalsFor(application.applicationId).forIntents(waitingIntents),
+          unavailable,
+          PORTAL_READ_BUDGET_MS
+        )
 
   const closed =
     project.ok && (project.value.closedAt !== undefined || application?.closedAt !== undefined)
@@ -269,6 +318,10 @@ const GoalsPage = async ({
         counted === undefined
           ? "The signals could not be read just now."
           : readingSentence(goal.kind, goalReadingOf(goal, counted)),
+      waiting:
+        waitingIntents !== undefined && served?.ok === true
+          ? waitingByGoalOf(waitingIntents, served.value)
+          : undefined,
     }
 
     return (
@@ -277,8 +330,9 @@ const GoalsPage = async ({
           <GoalList readings={readings} projectId={projectId} owner={owner} />
           <p className="text-ink-muted m-0 text-xs">
             Each figure counts what readers did since this project&rsquo;s pages were first counted,
-            across every version. Loom does not yet propose changes toward a goal; until it does,
-            proposals are made as before and name no goal.
+            across every version. Loom proposes each change toward one goal, and the changes counted
+            here are those waiting for review; how many were shipped follows once an accepted change
+            opens a pull request on your site.
           </p>
         </div>
         {adding && (

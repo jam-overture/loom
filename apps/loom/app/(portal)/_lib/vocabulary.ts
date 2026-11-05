@@ -32,6 +32,7 @@ import { capitalised, partReading, type PartName } from "./part-name"
 
 import { screenName } from "./screen-names"
 import type { GoalKind } from "./goals/goal"
+import type { HoldStanding } from "./proposing/following"
 
 /*
  * The demo moved out of this route group to `app/(demo)` on 21 August, and this
@@ -1426,5 +1427,27 @@ export const GOAL_KIND_WORDS: Readonly<Record<GoalKind, GoalKindWord>> = {
     does: "opens",
     one: "opening",
     many: "openings",
+  },
+}
+
+/**
+ * A waiting change's standing against the version of its page the site serves
+ * now (0340), one word each, as the filter on *For review* names them.
+ */
+export const HOLD_STANDINGS: Readonly<Record<HoldStanding, PlainWord>> = {
+  current: {
+    label: "Fits the live page",
+    meaning: "Proposed for the version of the page the site serves now.",
+    technical: "current",
+  },
+  stale: {
+    label: "Stale",
+    meaning: "Proposed for an older version of the page, and it still fits the newer one.",
+    technical: "stale",
+  },
+  conflicts: {
+    label: "Conflicts",
+    meaning: "Proposed for an older version of the page, and it no longer fits the newer one.",
+    technical: "conflicts",
   },
 }
