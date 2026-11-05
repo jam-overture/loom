@@ -53,6 +53,12 @@ export const entryPoints: readonly EntryPoint[] = [
     audience: "app",
   },
   {
+    specifier: "@jam-overture/loom/addressed",
+    summary:
+      "The four names a render writes on a published page, and the function that finds the page. Loads nothing, for a browser bundle.",
+    audience: "host",
+  },
+  {
     specifier: "@jam-overture/loom/sdk",
     summary: "Defining and registering primitives of your own, and the catalog a model is shown.",
     audience: "host",

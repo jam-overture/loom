@@ -494,23 +494,50 @@ describe("which door a reader should have gone through instead", () => {
 })
 
 describe("how much of the package is behind one door", () => {
-  it("says the root door is the widest and still has less than half of it", () => {
+  /**
+   * **The property, not which door happens to hold it.** This asserted that
+   * `@jam-overture/loom` was the widest door until 5 November, when
+   * `@jam-overture/loom/signals` passed it — 610 names against 600 — and the
+   * assertion went red on a branch in another lane that had added a module to
+   * `src/signals/`.
+   *
+   * That is *this lane's number about somebody else's growth*, which is the
+   * shape the 2 November finding against `fields.test.ts` wrote down and asked
+   * every check in this directory to stop taking: a figure read from
+   * `reference.generated.json` is another lane's, whatever it is counting, so
+   * the question to ask of it is *would I defend this if `src/` doubled*.
+   * Which door is biggest would not survive that and the band never depended on
+   * it — `api-reference.tsx` reads `standing.widest` per door and prints *not
+   * even this one* on whichever door has it.
+   *
+   * **What the band does depend on is the half kept here**: the widest door,
+   * whichever it is, still has less than half the package, and so does the root
+   * door that a reader arriving from search assumes has all of it. The figures
+   * are in the report that changed this, where they carry a date.
+   */
+  it("says the widest door, and the root door, still have less than half of the package", () => {
+    const widest = apiEntries.filter((entry) => entry.standing.widest)
     const runtime = apiEntryAt("runtime")
     const published = runtime === undefined ? 0 : apiSymbolCount(runtime)
 
-    expect(runtime?.standing.widest).toBe(true)
+    expect(widest.length).toBeGreaterThan(0)
+
+    for (const door of widest) {
+      expect(apiSymbolCount(door) * 2).toBeLessThan(door.standing.packageNames)
+    }
+
     expect(published * 2).toBeLessThan(runtime?.standing.packageNames ?? 0)
   })
 
   /**
-   * The belief this band exists to correct, stated as a number. Fourteen of
-   * the sixteen other doors publish not one name the root door publishes, so a
+   * The belief this band exists to correct, stated as a number. Fifteen of
+   * the seventeen other doors publish not one name the root door publishes, so a
    * reader who reads `@jam-overture/loom` as the door with everything behind it is
    * wrong about almost the whole package.
    */
-  it("finds that fourteen of the other sixteen doors share nothing with the root door", () => {
-    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(14)
-    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(16)
+  it("finds that fifteen of the other seventeen doors share nothing with the root door", () => {
+    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(15)
+    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(17)
   })
 
   it("counts a shared name once, so the package publishes fewer names than its doors do slots", () => {

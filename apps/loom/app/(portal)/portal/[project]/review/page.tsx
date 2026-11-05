@@ -3,9 +3,11 @@ import { notFound } from "next/navigation"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import { queueRowOf } from "@/app/(portal)/_lib/queue"
@@ -25,6 +27,8 @@ import { AnswerControls } from "./_components/answer-controls"
  * Each says what was proposed and why, of which page, by whom, why it stopped and how
  * much is at stake, whether it was proposed for an older version of the page (0340), and offers *Accept* and *Turn down* to a person whose
  * role may accept a change of that stake. Anybody else is told which role can.
+ *
+ * Each card leads with the goal the change serves (0352).
  *
  * Oldest first, as the store lists them, so whatever has waited longest is
  * read first. A change the store could not read is counted rather than
@@ -67,6 +71,17 @@ const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> 
         ])
 
   const names = published?.ok === true ? pageNamesOf(published.value) : new Map<string, string>()
+  const goals =
+    application === undefined || waiting?.ok !== true
+      ? undefined
+      : await readWithin(
+          () =>
+            proposalGoalsFor(application.applicationId).forIntents(
+              waiting.value.held.map((held) => held.intent.intentId)
+            ),
+          unavailable,
+          PORTAL_READ_BUDGET_MS
+        )
 
   const body = (() => {
     if (
@@ -118,13 +133,28 @@ const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> 
               : `${unreadable.length} changes for review could not be read, so they are not shown.`}
           </p>
         )}
+        {goals?.ok === true ? null : (
+          <p className="text-ink-muted text-xs">
+            Which goal each change serves cannot be read here. If goals are new to this deployment,
+            whoever runs it has to run <code>pnpm db:push</code> once; otherwise try again in a
+            moment.
+          </p>
+        )}
         {held
-          .map((change) => queueRowOf(change, names, role, copies.value))
+          .map((change) =>
+            queueRowOf(change, {
+              names,
+              role,
+              copies: copies.value,
+              goals: goals?.ok === true ? goals.value : new Map(),
+            })
+          )
           .map((row) => (
             <section
               key={row.proposalId}
               className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-lg border p-4"
             >
+              {goals?.ok === true && <GoalChip goal={row.goal} />}
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link
                   href={`/portal/${projectId}/pages/${row.pageId}`}

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import {
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  DEFAULT_READER_EVENT_RETENTION_MS,
   DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
   memoryReaderRegionStore,
@@ -71,6 +72,7 @@ const settingsOf = (over: Partial<IntakeSettings> = {}): IntakeSettings => ({
     floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
   },
   window: { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS },
+  kept: { state: "default", keptMs: DEFAULT_READER_EVENT_RETENTION_MS },
   sweep: { state: "unstated" },
   ...over,
 })

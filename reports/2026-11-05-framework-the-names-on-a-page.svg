@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 560" width="880" height="560" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .ok { fill: #dcfce7; stroke: #16a34a; }
+    .bad { fill: #fee2e2; stroke: #dc2626; }
+    .box { fill: #f4f4f5; stroke: #d4d4d8; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .wire { stroke: #a1a1aa; fill: none; }
+    .wirebad { stroke: #dc2626; fill: none; }
+    .rule { stroke: #d4d4d8; fill: none; }
+    text { font-size: 13px; }
+    .h { font-size: 16px; font-weight: 700; }
+    .sh { font-size: 13px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; font-weight: 700; }
+    .mono { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tiny { font-size: 10.5px; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #09090b }
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .ok { fill: #14532d; stroke: #4ade80 }
+      .bad { fill: #7f1d1d; stroke: #f87171 }
+      .box { fill: #27272a; stroke: #52525b }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 }
+      .wire { stroke: #71717a } .wirebad { stroke: #f87171 }
+      .rule { stroke: #3f3f46 }
+    }
+  </style>
+  <rect class="bg" x="0" y="0" width="880" height="560"/>
+
+  <text class="h t" x="32" y="40">One string on the markup, and the door a browser had to open for it</text>
+  <text class="m" x="32" y="62">The attribute data-loom-tree is written by the renderer. Until today the only published way to know its name was the heaviest door.</text>
+
+  <line class="rule" x1="32" y1="82" x2="848" y2="82"/>
+
+  <!-- BEFORE -->
+  <text class="k m" x="32" y="110">BEFORE</text>
+
+  <rect class="bad" x="32" y="126" width="250" height="56" rx="6"/>
+  <text class="mono badt" x="48" y="150">@jam-overture/loom/react</text>
+  <text class="tiny badt" x="48" y="168">the render seam + every registration</text>
+
+  <path class="wirebad" d="M282 154 H 360" stroke-dasharray="4 3"/>
+  <text class="tiny badt" x="300" y="146">1 string</text>
+
+  <rect class="box" x="360" y="126" width="210" height="56" rx="6"/>
+  <text class="sh t" x="376" y="150">spotlight-scroll.tsx</text>
+  <text class="tiny m" x="376" y="168">"use client" — a browser bundle</text>
+
+  <text class="m" x="600" y="148">The mistake 0136 recorded,</text>
+  <text class="m" x="600" y="166">in a client component.</text>
+
+  <rect class="bad" x="32" y="202" width="250" height="40" rx="6"/>
+  <text class="mono badt" x="48" y="227">"[data-loom-tree]"</text>
+
+  <path class="wirebad" d="M282 222 H 360" stroke-dasharray="4 3"/>
+  <text class="tiny badt" x="296" y="214">written out</text>
+
+  <rect class="box" x="360" y="192" width="210" height="60" rx="6"/>
+  <text class="tiny t" x="376" y="212">count-readers.tsx</text>
+  <text class="tiny t" x="376" y="228">reader-signals-live.tsx</text>
+  <text class="tiny t" x="376" y="244">the-runtime--what-your-readers-do</text>
+
+  <text class="m" x="600" y="214">Three files. And a word</text>
+  <text class="m" x="600" y="232">marketing promised</text>
+  <text class="m" x="600" y="250">not to say.</text>
+
+  <line class="rule" x1="32" y1="282" x2="848" y2="282"/>
+
+  <!-- AFTER -->
+  <text class="k m" x="32" y="310">AFTER</text>
+
+  <rect class="ok" x="32" y="326" width="250" height="88" rx="6"/>
+  <text class="mono okt" x="48" y="350">@jam-overture/loom/addressed</text>
+  <text class="tiny okt" x="48" y="370">4 names + addressedRootIn(scope)</text>
+  <text class="tiny okt" x="48" y="388">loads no package — held by a walk</text>
+  <text class="tiny okt" x="48" y="406">src/render/addressed.ts · 2 modules</text>
+
+  <path class="wire" d="M282 370 H 360"/>
+
+  <rect class="box" x="360" y="326" width="250" height="88" rx="6"/>
+  <text class="mono t" x="376" y="350">const page =</text>
+  <text class="mono t" x="376" y="368">  addressedRootIn(document)</text>
+  <text class="tiny m" x="376" y="392">undefined when there is none, so a ref</text>
+  <text class="tiny m" x="376" y="408">has one empty value instead of two</text>
+
+  <text class="m" x="636" y="350">Six adoptions,</text>
+  <text class="m" x="636" y="368">each one line,</text>
+  <text class="m" x="636" y="386">each another</text>
+  <text class="m" x="636" y="404">lane's to make.</text>
+
+  <line class="rule" x1="32" y1="442" x2="848" y2="442"/>
+
+  <text class="k m" x="32" y="470">WHAT THE DOOR DECIDES</text>
+  <text class="t" x="32" y="494">The scope counts as its own answer, so feeding it its own result returns that result.</text>
+  <text class="t" x="32" y="514">The first in document order when a scope holds two trees — querySelector's own rule.</text>
+  <text class="t" x="32" y="534">It reads; it never writes. The builder stays on the render seam, with the tree types it needs.</text>
+</svg>

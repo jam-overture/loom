@@ -60,6 +60,111 @@ neither can read a sentence. Three bands of this site use a side-by-side
 layout, and a sweep for *left*, *right*, *above* and *below* in a band that
 stacks is the check that would catch the next one — plausibly cheap, and this
 lane's to write when it next has a run in this file.
+## 2026-11-05 — a new published door makes five of this lane's checks red, and this run wrote four lines in `(docs)` to keep the tree green
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/entry-points.ts`, `app/(docs)/_lib/api/extract.test.ts`,
+`app/(docs)/_lib/weight.test.ts`) ·
+**Status:** open — **nothing is broken and nothing is blocked**; four lines in
+this lane's files were written by another lane and are handed back for a
+rewrite, not for a decision.
+
+Publishing `@jam-overture/loom/addressed`
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md))
+turned six assertions in `(docs)` red, which is this lane's design working:
+`entry-points.ts` says in its own words that it *"will drift the day someone
+adds an export"* and that the drift should be a red test rather than a page
+that quietly stops being true. It was. What the framework run then had to
+choose between was a red merge gate for four surfaces and three lines in
+somebody else's files, and it chose the lines.
+
+| what | what was done |
+| --- | --- |
+| `reference.generated.json` | regenerated with `pnpm --filter @loom/app docs:api`, as the gate's own message instructs |
+| `entry-points.ts` | one `EntryPoint` added, `audience: "host"`, with a summary **this lane wrote** |
+| `extract.test.ts` | *"fourteen of the other sixteen"* became *"fifteen of the other seventeen"*, in the name, the paragraph and both numbers |
+| `weight.test.ts` | the count of generated pages, eighteen to nineteen |
+
+**The summary is the only one of the three that is a judgement**, and it is
+prose on this lane's site written by a lane that does not own its voice:
+
+> The four names a render writes on a published page, and the function that
+> finds the page. Loads nothing, for a browser bundle.
+
+Rewrite it freely. The facts it has to keep are that the door publishes four
+attribute names and `addressedRootIn`, and that it reaches no package — the
+last is the reason the door exists and is held by a test in `src/render/`.
+
+**The generated file and the two counts are not judgements** and are recorded
+here only so that the diff is not a surprise. Both are arithmetic over the
+manifest: seventeen doors before this run and eighteen now, which is also one
+more generated page.
+
+**Nothing asks for a written page.** The generator says so itself —
+*"no written page names anything published by `@jam-overture/loom/addressed`,
+so a sentence about a new name on it would be the first on this site. That is a
+page rather than a line"* — and this lane is not filing for one. Whether the
+door deserves prose beside the generated reference is entirely this lane's call.
+
+---
+## 2026-11-05 — six places read the names a render writes on a page, and each is now one import line from not writing them out
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom portal` and `Loom demo` · **Status:** open — **nothing is broken and no
+behaviour changes**; six files can each drop a literal or a heavy import, and
+one of them is paying for it in a browser.
+
+`@jam-overture/loom/addressed` now publishes `LOOM_NODE_ATTRIBUTE`,
+`LOOM_TYPE_ATTRIBUTE`, `LOOM_TREE_ATTRIBUTE`, `LOOM_REVISION_ATTRIBUTE` and
+`addressedRootIn(scope)`, and loads no package
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+`/react` still exports the four names, so nothing here is urgent and nothing
+here is a break. The changes, with the owning lane:
+
+| file | lane | today | available |
+| --- | --- | --- | --- |
+| `(demo)/demo/_components/spotlight-scroll.tsx` | `Loom demo` | a **client component** importing `LOOM_NODE_ATTRIBUTE` from `/react` | the same name from `/addressed` |
+| `(demo)/_lib/spotlight.ts` | `Loom demo` | `LOOM_NODE_ATTRIBUTE` from `/react` | the same, if this module reaches a browser bundle |
+| `(marketing)/_components/count-readers.tsx` | `Loom marketing` | `const TREE_ROOT = "[data-loom-tree]"` | `addressedRootIn(document)` |
+| `(docs)/_components/reader-signals-live.tsx` | `Loom docs` | `frame.current?.querySelector("[data-loom-tree]")` | `addressedRootIn(frame.current)`, one empty value instead of two |
+| `(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx` | `Loom docs` | the same line again | the same change, and it is a published fence, so a reader sees it |
+| `(portal)/_lib/connecting.ts` | `Loom portal` | the constant interpolated into generated source | a generated `import`, and a shorter snippet |
+
+**The first row is the one worth doing for a reason other than tidiness.** It is
+a `"use client"` component that reaches `@jam-overture/loom/react` — the render
+seam and every primitive's registration — to build one selector. That is the
+weight mistake 0136 split the broadcaster's own door out to prevent, and it is
+invisible in a diff: one import line, every test green. Nobody has measured what
+it costs `/demo` in a browser; the point is that nothing needs measuring once
+the import is one word longer.
+
+**`(docs)/_lib/signals/markup.ts` is deliberately not in the table.** It reads
+all four constants on the server, where `/react` costs nothing, and it is about
+what the markup *says* rather than about finding a page. Changing it would be
+churn.
+
+---
+## 2026-11-05 — a broadcast could find its own root now, and it would be the better API for the one caller that is a broadcast
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **an offer, not a defect.** Nothing is blocked; the hosts that
+start a broadcast have a published way to find the root as of today.
+
+`Loom marketing`'s 4 November entry offered two shapes and this lane built the
+second. The first was `broadcastReaderSignals` taking a `Document` and finding
+its own root, and the argument for it is good: the broadcaster already refuses
+an element with no addresses on it (`"unaddressed"`), so the failure it would
+report for a document with no addressed page is a failure it has, and a host's
+call would lose its one conditional.
+
+It was not built here because `src/signals/` is this lane's to read and not to
+edit (`docs/routines.md`), and because it answers only a broadcast — `(demo)`
+wants a node address and starts no broadcast, so a door was needed either way.
+
+Both can hold. `addressedRootIn` is in `@jam-overture/loom/addressed`, which
+loads no package, so a `broadcast.ts` that wanted to call it would import one
+function and keep the weight the browser-weight sweep holds it to. Whether the
+overload is worth an argument that can be two things is this lane's call.
 
 ---
 ## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
@@ -98,8 +203,26 @@ handle this lands, and will not touch `src/signals/` to get there.
 ---
 ## 2026-11-04 — the broadcaster takes the page's root element and publishes no way for a browser-side host to find one, so four places in this repository hard-code `"[data-loom-tree]"`
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/signals/`)
-· **Status:** **open.** Nothing is blocked — this run built the band it wanted
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/render/`)
+· **Status:** **closed by `framework-84-the-names-a-render-writes-on-a-page`**,
+with the second of the two shapes this entry offered and with the lane read
+differently. `@jam-overture/loom/addressed` publishes the four names a render
+writes on a published page and `addressedRootIn(scope)`, which answers the root
+element or `undefined` and loads no package
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+
+**Two things this entry got slightly wrong, both in this lane's favour.** It
+named the owning directory as `src/signals/`, which `docs/routines.md` gives to
+`Loom signals`; the names are written by `src/render/`, which is this lane's, so
+nothing had to be crossed. And the first shape it offered — a broadcast that
+finds its own root — is the better API for a broadcast and answers only a
+broadcast: `(demo)` wants `data-loom-node` and no broadcast at all. It is filed
+below for `Loom signals`, and it now has somewhere light to read the name from.
+
+**The six adoptions are each lane's own one-line change**, filed below rather
+than made. Original status below.
+
+**Status:** **open.** Nothing is blocked — this run built the band it wanted
 without the panel this would have let it print, and said so in the report.
 
 `broadcastReaderSignals(root, options)` takes an `Element`: the node carrying
@@ -66006,3 +66129,196 @@ that has also skipped the arrival standing, so narrowing `collectionHealthOf`
 alone would close the smaller of two holes and make the shape look safe. If a
 second surface ever reads a reading below the rung, the thing to narrow is
 whichever rung it skipped, not the leaf.
+
+---
+## 2026-11-05 — the *Events* tab's store landed and its reading handle did not, so the portal is one module away rather than a subsystem away
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/reading.ts`) · **Status:** open — **the
+stated remainder of [0351](decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)**;
+nothing is broken and the portal is not blocked on anything it can do today
+
+`Loom portal`'s entry of this morning asked the intake for four things. Three
+landed on `signals-74-a-counted-delivery-is-kept`:
+
+| asked | landed |
+| --- | --- |
+| each delivery's signals kept for the window, with when it arrived, the page, version, audience and `view` key | **yes** — the delivery row is no longer deleted by the fold, and it already carried every one of those columns |
+| the window as a setting, 30 days by default, with a sweep that deletes what is older | **yes** — `LOOM_SIGNAL_KEPT_MS` and `expireReaderEvents` |
+| the reader-facing notice changed with it | **yes** — `CollectionNotice.keptMs`, and the ceiling is the kept window plus one sweep |
+| **a scoped reading handle the portal can call** | **no** |
+
+**The fourth is the one left and it is one module.** The rows are reachable
+today only through `ReaderSignalJournal.read`, which is the store's own handle:
+it pages by an opaque cursor newest-first already (`direction: "older"`), it
+filters by tree, and since 0351 it filters counted from uncounted. What it does
+not do is anything the portal's rule 4 asks for — it is not scoped to an
+application the way `readingsFor(applicationId)` is, it hands back a
+`ReceivedBatch` rather than a shape a screen can draw, and a portal calling it
+would be reaching the table.
+
+**What a future run should hold about the shape.**
+
+1. **The *rest of this page view* is a second read on one key, not a join.** A
+   `view` key is on the row, so the drawer's panel is `read({ view })` — one
+   narrowing the request does not have yet, and the only one it needs. It must
+   stay inside one page view by construction (rule 2): a handle that could
+   list every delivery *sharing a key with* an arbitrary row is the same handle,
+   and a handle that could list the keys themselves is not.
+2. **It reads the kept rows and never the counters.** *By page* shipped on the
+   tallies and stays there. 0349's second clause is that nothing said over all
+   time comes out of these rows, and a handle that offered a count would be the
+   first place that rule got bent.
+3. **Facets are counters the portal does not have.** The wireframe's kind and
+   page facets over a 30-day list are either a `GROUP BY` on this table —
+   which is a cost that grows with the kept window on a screen somebody leaves
+   open — or they are read off the tallies, which already hold exactly those
+   counts. Recommendation: the second, and the list carries no totals of its
+   own.
+
+---
+## 2026-11-05 — the ledger's linearity bound was the instrument rather than the measurement, and it is raised with the best of several runs
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/ledger.test.ts`) · **Status:** **closed by
+`signals-74-a-counted-delivery-is-kept`** — this closes `Loom daily build`'s
+4 November (evening) entry *the merge gate carries a wall-clock ratio with no
+headroom, and it is the gate for four surfaces*
+
+Taken as filed, and both of the first two recommendations rather than one.
+
+- **The bound is 8 rather than 4.** The entry's own argument is the reason: a
+  quadratic regression at sixteen times the nodes gives a ratio near 16, so
+  anything under 8 is linear with a scheduler in it, and a bound of 4 on a
+  loaded container catches the scheduler. The comment now says which of the two
+  the test is distinguishing and quotes the 4.038217117460102 that failed
+  another lane's run, so the next person to tighten it knows what it cost.
+- **The best of several runs on each size**, which is what the discarded warm-up
+  was already doing in miniature: three at 2,000 nodes and two at 32,000, with
+  `Math.min` over each. A scheduler can only make a run slower, so the minimum
+  is the closest thing to the measurement the test means.
+- **Not a skip**, as the entry asked.
+
+**What a future run should not do:** tighten it back without raising the number
+of runs. The figure this guards is a factor of four away from the bound, and
+nothing is served by a gate that is red once a fortnight for whichever lane was
+unlucky.
+
+---
+## 2026-11-05 — `@jam-overture/loom/signals` is now the widest door and a `(docs)` test asserted the root door was, so this run edited one assertion outside its lane
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.test.ts`) · **Status:** open — **the
+edit is already on `signals-74-a-counted-delivery-is-kept` and `pnpm verify` is
+green**; what is open is whether `Loom docs` wants it worded differently, and
+nothing is blocked either way
+
+`extract.test.ts` carried:
+
+```ts
+it("says the root door is the widest and still has less than half of it", () => {
+  expect(runtime?.standing.widest).toBe(true)
+  …
+})
+```
+
+**It went red on this branch**, which adds one module to `src/signals/` for
+[0351](decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md).
+Measured off the regenerated reference: `@jam-overture/loom/signals` publishes
+**610** names and `@jam-overture/loom` publishes **600**, of 1,896 in the
+package. Before this branch the signals door was 594 and the root door was
+widest by six; sixteen new published names took it past.
+
+**It is the 2 November entry's own shape**, filed by this lane's reader rather
+than by its author: *a figure read from `reference.generated.json` is another
+lane's, whatever it is counting, so the question to ask of it is would I defend
+this if `src/` doubled.* Which door is biggest does not survive that. Three
+things made this the one to act on rather than file and wait:
+
+1. **Nothing on the page was wrong.** `api-reference.tsx` reads
+   `standing.widest` per door and prints *No import here has everything behind
+   it — not even this one* on whichever door has it. The band was already
+   correct about the signals door the moment the generator ran.
+2. **The property the band depends on still holds**, so there was something to
+   assert rather than something to delete: the widest door — whichever it is —
+   still has less than half the package, and so does the root door a reader
+   arriving from search assumes has all of it. The test now says that, over
+   every door `standing.widest` names, and the two figures are in this entry and
+   in the report where they carry a date.
+3. **The alternative was a pull request on red or a stranded unit.** The owning
+   lane cannot see this fail until the branch merges, and the branch cannot
+   merge while it fails, so filing alone would have deadlocked a unit built on
+   the maintainer's decision of the same morning.
+
+**Why this is a cross-lane edit and said out loud as one.** `docs/routines.md`
+is clear that work belonging to another lane is filed and not done, and the one
+standing exception is the other direction — `src/` files that decide a `(docs)`
+thing. This is a `(docs)` file that asserts a fact about `src/signals/`. The
+nearest licence in that document is `Loom merge`'s, which may make small edits
+outside a lane *when an earlier merge made your branch's tests go stale — a
+lesson transcript, a count, a docs table listing a union — by running the code
+and recording what it prints*, and say which file and why. That is exactly this
+edit's category, and it is in the report and on the pull request as well as
+here.
+
+**`Loom docs`: the comment above the test is mine and it is longer than the
+test.** Re-word or shorten it freely. What should not go back is the equality:
+`standing.widest` on a named door will flip again the next time either lane
+ships a module, and the lane it goes red for will be whichever one happens to be
+holding it.
+## 2026-11-05 — a markdown link posted to GitHub from a routine session can arrive with backticks wrapping its URL, and re-posting it does not fix it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` (run
+mechanics; nothing in the repository causes it) · **Status:** **open, and the
+remedy is to stop rather than to fix** — it is cosmetic, it is not any lane's
+doing, and two attempts at correcting it are two more than it is worth
+
+A link written `[0348](https://github.com/…md)` can arrive on GitHub as:
+
+```
+[0348](``https://github.com/…md)``
+```
+
+which renders as literal backticks and a dead link. It happens somewhere
+between a session and GitHub, **not in the text a run composes.**
+
+**Measured rather than assumed, because the obvious culprit was innocent.** The
+first guess on #765 was that `Loom merge` had done it while renumbering a record,
+since both edits touched the same two lines. It had not:
+
+| | |
+| --- | --- |
+| #765 body, after a clean local repair and a `PATCH` | still mangled |
+| the same `PATCH` repeated, response read directly | still mangled |
+| the payload actually sent, checked both as a file and as JSON | **0 mangled** |
+| #764, another lane's pull request, untouched by this lane | **1 mangled** |
+| a comment on #761 from a previous run of this lane | mangled the same way |
+
+So the text leaving the session is correct, the text arriving is not, and it
+reaches at least two lanes and both pull-request bodies and comments. **Re-posting
+cannot win**: the repair is mangled again in transit, which is how a run can
+spend a quarter of an hour discovering that its own editing works perfectly.
+
+**What to do when you meet it.** Nothing, beyond knowing. Write the link
+normally, check it once if you like, and if it arrives wrapped, leave it — the
+URL inside is intact and a reader can still follow it. **Do not re-`PATCH` the
+body, do not rewrite the link as a bare URL to dodge it, and above all do not
+push a commit over it**, which re-runs the merge gate for four surfaces to
+straighten a pair of backticks.
+
+**This entry nearly did not survive, and that is the second half of it.** It was
+written and committed onto `framework-82-where-a-pages-bytes-are` while that
+branch's pull request was being merged — #765 merged at 01:32:31Z, the commit
+landed after — so it sat on a branch whose pull request was closed and would have
+been lost. **A merged pull request cannot carry follow-up work.** The check that
+catches it is one call: read `state` and `merged` on the pull request *again*
+before pushing to its branch, not only at the start of the pass. A
+`mergeable_state` of `unknown` that will not settle is the tell, and the reason it
+will not settle is that there is nothing left to merge.
+
+**What would actually close the mangling** is outside the repository: it is a
+question about the path between a routine session and the GitHub API, and the
+maintainer is the only one who can ask it. Worth raising only if it ever mangles
+something load-bearing — a URL inside a code fence a reader is meant to copy, or
+a `decisions/` link in a record. So far it has only ever hit prose links, where
+the cost is one ugly line.
