@@ -61,7 +61,7 @@ it (0213, 0159), and it is deliberately **not** in `pnpm verify` — the reading
 needs a server, and a gate that starts one is a gate that can hang.
 
 Recorded as
-[0347](../decisions/0347-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md).
+[0348](../decisions/0348-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md).
 Documented in `docs/routines.md` beside `pnpm shoot`.
 
 ## Decisions taken that were not specified
@@ -82,7 +82,7 @@ built and both over-reported:
 What ships is `(copies - 1)` times the text's own length. An encoded copy is
 never smaller than the text it encodes, so it is provably under the truth. **A
 number somebody is going to act on should be one they can check; this one is
-multiplication.** Both wrong versions are written into 0347 rather than deleted,
+multiplication.** Both wrong versions are written into 0348 rather than deleted,
 because the second looked right and the arithmetic is what found it.
 
 **2. A text with no unique landmark is reported as unmeasurable rather than
@@ -93,7 +93,7 @@ division is where an off-by-one becomes a number somebody believes.
 page whose content is both large and expected to appear once, and it is where the
 reported defect lives. A script, a data URI and an inlined font have the same
 shape; adding one should have a case like this one behind it rather than a guess.
-Stated in 0347 rather than left as scope.
+Stated in 0348 rather than left as scope.
 
 **4. The remedy was not taken, and that is a lane boundary rather than a
 judgement about the fix.** The fix is to stop carrying the CSS as a prop —
@@ -108,13 +108,14 @@ remedy, and raised on the pull request.
 ## Records added or superseded
 
 **One added, none superseded.**
-[0347](../decisions/0347-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md)
+[0348](../decisions/0348-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md)
 — *a repeated payload is measured by a landmark that escaping cannot rewrite*,
 Accepted. It extends 0213 and 0159 (an instrument reports and never judges) and
 applies 0140's ceiling argument to the merge gate rather than to a render; it
 contradicts nothing.
 
-`0347` was the next free number after re-reading `main`. `0346` is claimed on a
+`0347` was the next free number after re-reading `main`; another record took
+`0347` on `main` before this merged, so this one is renumbered `0348`. `0346` is claimed on a
 branch that has not merged, as are `0152`–`0154`; `pnpm decisions:index` says so
 as notes and the index is regenerated.
 

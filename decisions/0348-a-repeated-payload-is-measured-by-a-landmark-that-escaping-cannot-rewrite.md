@@ -1,4 +1,4 @@
-# 0347. A repeated payload is measured by a landmark that escaping cannot rewrite
+# 0348. A repeated payload is measured by a landmark that escaping cannot rewrite
 
 **Status:** Accepted
 **Date:** 2026-11-04

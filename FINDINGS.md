@@ -65675,7 +65675,7 @@ The maintainer reported `/why-use-it` as slow. Two framework runs named the caus
 as *"93% of 2.4MB is one 47KB stylesheet carried 42 times"* and asked for a
 scheduling call. **The cause was right and the figure was wrong, and the reason
 nobody caught that is that the measurement could not be reproduced.** It can now:
-`pnpm weigh` exists ([0347](decisions/0347-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md)),
+`pnpm weigh` exists ([0348](decisions/0348-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md)),
 and against a response captured from a real `next start` it says:
 
 ```
@@ -65798,3 +65798,123 @@ red. This run took the first.
 3. **Not a skip**, and `docs/routines.md` says why in another context: a test
    that silently does not run is how the next regression goes unnoticed for a
    month.
+## 2026-11-04 — the fix-list said *nothing to do* about a door refusing every delivery, and the reading that knew had existed for four days
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`, `src/signals/window-agenda.ts`) · **Status:**
+**closed on filing by `signals-73-the-fix-list-when-nothing-arrived`**
+
+`DeploymentAgenda.first` is *the one thing to do first, or `null` where the three
+readings ask for nothing* (0330, 0336, 0343). **That `null` was two opposite
+sentences in one value**, and nothing in the join distinguished them:
+
+| deployment | rows | `first` |
+| --- | --- | --- |
+| read, answered, soundly collected | every page | `null` |
+| door turning every delivery away | none | `null` |
+
+The second is the commonest failure a new deployment has — a snippet on
+`loomjs.org` behind a project that names `www.loomjs.org` — and the fix-list,
+which is the screen a person opens *because* their deployment reports no
+readers, was the one place in the subsystem that could not say so.
+[0326](decisions/0326-a-quiet-window-and-a-refusing-door-are-two-states-and-a-refusal-names-no-page.md)
+built `arrivalStandingOf` on 31 October and nothing joined it to anything.
+
+**Done** as
+[0347](decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md):
+`DeploymentAgenda.subject` over four members, a required fourth argument to
+`deploymentAgendaOf`, and `WindowAgenda.arrival` off a fifth required parameter
+on the rung.
+
+**Two things a future run should hold, both of them about where a fact comes
+from.**
+
+1. **The subject's two halves come from two different readings, and taking both
+   from one would have been the quiet bug.** Whether anything was collected is
+   the health reading's own pages — the rows are joined from them, so the
+   subject is a claim about *these rows*. `ArrivalStanding.collected` is the same
+   number for a caller that read one window and is computed from the same
+   `health.pages.length`, which is exactly why reaching for it is the natural
+   mistake: a caller holding a stale standing beside a fresh empty window would
+   have got `pages` as a verdict with no rows under it. There is a test that
+   hands in a `collecting` standing and an empty window and asserts `silence`.
+2. **The 31 October entry's last sentence is refined and not contradicted.** It
+   said a rung *should take this reading's result as an argument if it wants it,
+   and must not try to compute it*, and 0327 upheld that for `windowFiguresOf`.
+   Its reason was **reaching a store** — a refusal counter is the deployment's
+   own table on its own scope (0309, 0311) — and the agenda rung does not reach
+   one: the rows are handed in like the window's. What it has that the figures
+   rung did not is the *other half* of the reading, since the health reading is
+   made inside it, so a caller asked for a result would have to make a second
+   copy of that reading to produce one. The general rule, which is the part
+   worth keeping: **a rung that owns one half of a reading takes the other
+   half's rows; a rung that owns neither takes the result.**
+
+**What is left, and it is one sentence in the report as well:** `windowFiguresOf`
+still does not carry the arrival standing and should not (0327), so a surface
+drawing both rungs reads the agenda rung's copy rather than taking the reading a
+second time.
+
+---
+## 2026-11-04 — a fix-list over a deployment some of whose senders are refused is an order over some of its pages, and `mixed` is the only sign
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** open — **the stated limit of
+[0347](decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md)**;
+nothing is broken and nothing is asked of anybody today
+
+`AgendaSubject` is `pages` wherever the health reading named one, **including
+where the door was also turning deliveries away** — the arrival standing's
+`mixed`. 0347 declined to judge that, because 0326 says the arrival reading
+declines to: a second sender with a stale key, one page of several carrying the
+wrong snippet, and a misconfiguration fixed a month ago are the same rows, and a
+subject that guessed between them would be the join second-guessing the reading
+it was handed.
+
+**What that leaves unsaid is not about the rows that are there.** It is about the
+ones that are not. A deployment with ten pages where one carries a snippet the
+door refuses has **nine** pages in its fix-list, every figure on them sound, and
+nothing anywhere saying the list is short — which is the hazard
+[0327](decisions/0327-the-figures-a-window-holds-about-itself-are-a-second-rung-and-a-region-row-set-is-deduplicated-once.md)
+named about a library side dropping forms: *an order over some of the
+deployment's pages with nothing saying which.* The refusal names no page (0326),
+so the missing page cannot be named — but the *fact that the list may be short*
+can be, and today only `arrival.standing === "mixed"` carries it, on a value a
+surface has to think to read.
+
+**Two shapes, neither of them a fifth subject.**
+
+1. **A boolean beside the subject** — *this list may not be every page* — true
+   exactly where the door refused anything and something was collected. One
+   expression, no new vocabulary, and it says the one thing that is knowable.
+2. **Leave it, and have the surface read `arrival.standing`.** It is one word
+   away and the whole standing is published on the rung for the remedy anyway.
+
+**Recommendation: the first, when a surface exists to draw it**, and not before
+— because what makes it worth a field rather than a sentence on a screen is
+whether the screen has somewhere to put it, and `Loom portal` is paused. What a
+future run must not do is make it a fifth `AgendaSubject` member: the subject
+answers *what is this list about*, and a short list of real pages is still about
+pages.
+
+---
+## 2026-11-04 — `collectionHealthOf`'s optional third argument is now two required arguments away from the rung above it, and the recommendation is unchanged
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`) · **Status:** open — **the 2 November (evening) entry
+restated rather than a new one**; nothing is broken and nothing is asked of
+anybody today
+
+The 2 November entry *`collectionHealthOf` keeps the optional argument the rung
+above it made required* recommended leaving it and having the one surface that
+will exist read the rung. `windowAgendaOf` now makes **two** arguments required
+that the readings under it take loosely — the collection schedule (0343) and the
+refusal rows (0347) — so the gap between the safe route and the short one has
+widened by one, in the same direction, for the same reason.
+
+**The recommendation does not change**, and it is now better supported rather
+than merely cheaper: a surface reading health a step below the rung is a surface
+that has also skipped the arrival standing, so narrowing `collectionHealthOf`
+alone would close the smaller of two holes and make the shape look safe. If a
+second surface ever reads a reading below the rung, the thing to narrow is
+whichever rung it skipped, not the leaf.
