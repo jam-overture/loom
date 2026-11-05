@@ -49,7 +49,7 @@ for it.
 **`@jam-overture/loom/addressed` now publishes the four names and
 `addressedRootIn(scope)`**, which answers the root element or `undefined` and
 loads no package. Recorded as
-[0350](../decisions/0350-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md).
+[0354](../decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md).
 `/react` still exports the four names, so this is additive and no consumer
 breaks.
 
@@ -174,7 +174,7 @@ prose and a counted claim. The first three are this lane's. The last two are not
 ## Records
 
 **Added:**
-[0350](../decisions/0350-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)
+[0354](../decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)
 — *The names a render writes on a published page are published on the light side
 of the split.* It records five rejected alternatives, including the finding's own
 first choice and why it is still available.
@@ -182,10 +182,14 @@ first choice and why it is still available.
 **Superseded:** none. Nothing here contradicts an `Accepted` record, nothing
 touches the tree schema or the delta model, and no built code migrates.
 
-**Numbering: 0350.** `main` holds up to 0349. The one open pull request, #766,
-is a `FINDINGS.md` entry with no record in it, confirmed by listing `decisions/`
-on that branch rather than by reading its title. `pnpm decisions:index`
-regenerated.
+**Numbering: 0354.** Written as 0350, when `main` held up to 0349 and the one
+open pull request, #766, was a `FINDINGS.md` entry with no record in it —
+confirmed by listing `decisions/` on that branch rather than by reading its
+title. `Loom portal` then took 0350 for a record of its own, which reached
+`main` as #774, so `Loom merge` renumbered this one to the next free number on
+5 November: the record already on `main` keeps the number (0097), and 0351 and
+0353 are claimed on other open branches. The note under the record's header says
+so. `pnpm decisions:index` regenerated.
 
 ## Findings
 

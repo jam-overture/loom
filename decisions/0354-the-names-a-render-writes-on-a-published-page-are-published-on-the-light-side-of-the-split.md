@@ -1,8 +1,17 @@
-# 0350. The names a render writes on a published page are published on the light side of the split
+# 0354. The names a render writes on a published page are published on the light side of the split
 
 **Status:** Accepted
 **Date:** 2026-11-05
 **Section:** §3 — Rendering
+
+> **Renumbered from 0350 on 5 November 2026** by `Loom merge`, mechanically and
+> with nothing it decides changed. `Loom portal` took 0350 the same morning for
+> *a project sets goals from signals already collected*, which reached `main` as
+> #774 while this branch was being built; the record already on `main` keeps the
+> number (0097), and 0351 and 0353 are claimed on other open branches, so this
+> one takes the next number free. Links and citations that mean *this* record
+> were updated with it; the bare `(0350)` citations in `app/(portal)/` mean the
+> other record and were left alone.
 
 ## Context
 

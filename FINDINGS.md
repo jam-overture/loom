@@ -18,7 +18,7 @@ this lane's files were written by another lane and are handed back for a
 rewrite, not for a decision.
 
 Publishing `@jam-overture/loom/addressed`
-([0350](decisions/0350-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md))
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md))
 turned six assertions in `(docs)` red, which is this lane's design working:
 `entry-points.ts` says in its own words that it *"will drift the day someone
 adds an export"* and that the drift should be a red test rather than a page
@@ -65,7 +65,7 @@ one of them is paying for it in a browser.
 `@jam-overture/loom/addressed` now publishes `LOOM_NODE_ATTRIBUTE`,
 `LOOM_TYPE_ATTRIBUTE`, `LOOM_TREE_ATTRIBUTE`, `LOOM_REVISION_ATTRIBUTE` and
 `addressedRootIn(scope)`, and loads no package
-([0350](decisions/0350-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
 `/react` still exports the four names, so nothing here is urgent and nothing
 here is a break. The changes, with the owning lane:
 
@@ -157,7 +157,7 @@ with the second of the two shapes this entry offered and with the lane read
 differently. `@jam-overture/loom/addressed` publishes the four names a render
 writes on a published page and `addressedRootIn(scope)`, which answers the root
 element or `undefined` and loads no package
-([0350](decisions/0350-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
 
 **Two things this entry got slightly wrong, both in this lane's favour.** It
 named the owning directory as `src/signals/`, which `docs/routines.md` gives to

@@ -439,4 +439,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0347](0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md) | An empty fix-list names its subject, so *nothing to fix* and *nothing to fix it with* are two answers | Accepted | §4c (reader signals) |
 | [0348](0348-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md) | A repeated payload is measured by a landmark that escaping cannot rewrite | Accepted | §1 (process) |
 | [0349](0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md) | A project's reader events are kept thirty days by default, and the tallies stay the durable record | Accepted | §5 (portal), the observation plane |
-| [0350](0350-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md) | The names a render writes on a published page are published on the light side of the split | Accepted | §3 |
+| [0350](0350-a-project-sets-goals-from-signals-already-collected-and-one-of-them-is-primary.md) | A project sets goals from signals already collected, and one of them is primary | Accepted | §5 (portal), the reasoning plane |
+| 0351 | *No record on this branch* | — | — |
+| [0352](0352-every-proposal-serves-one-goal-and-a-page-no-goal-is-on-gets-none.md) | Every proposal serves one goal, and a page no goal is on gets none | Accepted | §5 (portal), the reasoning plane |
+| 0353 | *No record on this branch* | — | — |
+| [0354](0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md) | The names a render writes on a published page are published on the light side of the split | Accepted | §3 |
