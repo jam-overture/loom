@@ -549,6 +549,26 @@ describe("what the index contains", () => {
   })
 
   /**
+   * And putting the prefix back is something that happens once.
+   *
+   * A parsed file's keys are whole addresses, so it says it is under nothing —
+   * and that is the field, rather than a convention, which makes the round trip
+   * safe to do twice. Every test in this directory serialises what it parsed;
+   * one that kept the prefix on the way out would hand the next parse
+   * `/docs/the-runtime/docs/the-runtime/…` and be caught nowhere, because the
+   * addresses would still be strings and the bodies would still be bodies.
+   *
+   * A mutation that kept it survived the whole suite until this was written.
+   */
+  it("puts a section back onto its addresses once and not twice", () => {
+    const once = parseSearchProse(JSON.parse(JSON.stringify(searchProseFor("the-runtime"))))
+    const twice = parseSearchProse(JSON.parse(JSON.stringify(once)))
+
+    expect(once.under).toBe("")
+    expect(twice).toEqual(once)
+  })
+
+  /**
    * And what the cut costs, measured.
    *
    * Compression works on one file at a time, so the same words in five files
