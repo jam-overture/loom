@@ -31,6 +31,7 @@ import {
 import { capitalised, partReading, type PartName } from "./part-name"
 
 import { screenName } from "./screen-names"
+import type { GoalKind } from "./goals/goal"
 
 /*
  * The demo moved out of this route group to `app/(demo)` on 21 August, and this
@@ -1386,5 +1387,44 @@ export const SIGNAL_KINDS: Readonly<Record<ReaderSignalKind, PlainWord>> = {
     label: "Sent a form",
     meaning: "A reader sent a form and the browser let it go.",
     technical: "completed",
+  },
+}
+
+/** The words a goal is read in: what the reader does, and what one of them is called. */
+export type GoalKindWord = PlainWord & {
+  /** *A reader `presses` the button.* */
+  readonly does: string
+  readonly one: string
+  readonly many: string
+}
+
+/**
+ * What a goal counts, one word per signal kind a goal can be built on (0350).
+ * The label is what a person picks on *New goal*.
+ */
+export const GOAL_KIND_WORDS: Readonly<Record<GoalKind, GoalKindWord>> = {
+  activated: {
+    label: "Presses it",
+    meaning: "Counts each time a reader presses the part: a link, a button, or a field they use.",
+    technical: "activated",
+    does: "presses",
+    one: "press",
+    many: "presses",
+  },
+  completed: {
+    label: "Sends it",
+    meaning: "Counts each time a reader sends the form and the browser lets it go.",
+    technical: "completed",
+    does: "sends",
+    one: "form sent",
+    many: "forms sent",
+  },
+  disclosed: {
+    label: "Opens it",
+    meaning: "Counts each time a reader opens the part where it folds away.",
+    technical: "disclosed",
+    does: "opens",
+    one: "opening",
+    many: "openings",
   },
 }

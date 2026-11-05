@@ -31,6 +31,7 @@ import { ensureModelKeysSchema } from "../app/_lib/models/model-keys-postgres"
 import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-postgres"
 import { ensurePageCopiesSchema } from "../app/(portal)/_lib/proposing/copies-postgres"
 import { ensureTurnedDownSchema } from "../app/(portal)/_lib/proposing/turned-down-postgres"
+import { ensureGoalsSchema } from "../app/(portal)/_lib/goals/goals-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
 /**
@@ -169,6 +170,11 @@ try {
   await ensurePageCopiesSchema(db)
   await ensureTurnedDownSchema(db)
   /**
+   * Each project's goals (0350). A deployment that has not run this shows
+   * *Goals* saying they cannot be read, and nothing else changes.
+   */
+  await ensureGoalsSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -198,7 +204,7 @@ try {
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
       "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys, " +
       "loom_reader_refusals, loom_publish_keys, loom_published_pages, loom_model_keys, " +
-      "loom_page_copies and loom_turned_down " +
+      "loom_page_copies, loom_turned_down and loom_goals " +
       "are present, and this deployment's pages are in them"
   )
 } finally {
