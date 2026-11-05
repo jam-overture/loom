@@ -10,11 +10,12 @@ import {
   briefFor,
   briefFrom,
   briefMessage,
+  goalText,
   MAX_REQUEST_LENGTH,
   requestOf,
 } from "./brief"
 import { readEvidence } from "./evidence"
-import { NOTHING_DECLARED, readersOn } from "./fixtures"
+import { elementIdsOf, goalOn, NOTHING_DECLARED, readersOn } from "./fixtures"
 
 const CHANGE = JSON.stringify({
   outcome: "change",
@@ -25,7 +26,10 @@ const CHANGE = JSON.stringify({
 describe("briefFrom", () => {
   it("reads a change, with the figure that argues for it", () => {
     expect(briefFrom(CHANGE)).toEqual(
-      ok({ kind: "change", request: "Make n_home2 shorter. (Why: Only 40% of readers reach it.)" })
+      ok({
+        kind: "change",
+        request: "Make n_home2 shorter. (Why: Only 40% of readers reach it.)",
+      })
     )
   })
 
@@ -58,7 +62,10 @@ describe("briefFrom", () => {
     ["another outcome", JSON.stringify({ outcome: "maybe" })],
   ])("refuses %s", (_name, text) => {
     expect(briefFrom(text)).toEqual(
-      err({ code: "unreadable", detail: "the model's answer was not one this could read" })
+      err({
+        code: "unreadable",
+        detail: "the model's answer was not one this could read",
+      })
     )
   })
 })
@@ -72,8 +79,24 @@ describe("requestOf", () => {
   })
 })
 
+const PAGE = pageFixture("home", "Welcome", 2)
+const [, HEADING] = elementIdsOf(PAGE)
+
+if (HEADING === undefined) throw new Error("the fixture has a heading")
+
+const GOAL = goalOn(HEADING, { name: "Reads the welcome" })
+
+describe("goalText", () => {
+  it("names the goal and what it counts, by the part's id", () => {
+    expect(goalText(GOAL)).toBe(
+      `The goal, "Reads the welcome", counts each time a reader presses ${HEADING}.`
+    )
+    expect(goalText({ ...GOAL, kind: "completed" })).toMatch(/a reader sends /u)
+  })
+})
+
 describe("briefMessage", () => {
-  const page = pageFixture("home", "Welcome", 2)
+  const page = PAGE
   const turnedDown = [
     {
       proposalId: proposalIdSchema.parse("p_newer"),
@@ -97,13 +120,25 @@ describe("briefMessage", () => {
     const evidence = await readEvidence(readersOn(page, 80, 60), NOTHING_DECLARED, page)
     if (!evidence.ok) throw new Error("expected evidence")
 
-    expect(briefMessage("Home", evidence.value, [])).not.toMatch(/turned down/u)
+    expect(
+      briefMessage({
+        pageName: "Home",
+        goal: GOAL,
+        evidence: evidence.value,
+        turnedDown: [],
+      })
+    ).not.toMatch(/turned down/u)
   })
 
   it("lists what was turned down after the evidence, with the reason or that none was given", async () => {
     const evidence = await readEvidence(readersOn(page, 80, 60), NOTHING_DECLARED, page)
     if (!evidence.ok) throw new Error("expected evidence")
-    const message = briefMessage("Home", evidence.value, turnedDown)
+    const message = briefMessage({
+      pageName: "Home",
+      goal: GOAL,
+      evidence: evidence.value,
+      turnedDown,
+    })
 
     expect(message).toMatch(
       /\n\nChanges a person turned down on this page before, newest first:\n- On 2 November 2026: "Remove n_home2\."\. Their reason: We need the heading\.\n- On 1 November 2026: "Move n_home2 lower\."\. No reason was given\.$/u
@@ -112,16 +147,27 @@ describe("briefMessage", () => {
 })
 
 describe("briefFor", () => {
-  const page = pageFixture("home", "Welcome", 2)
+  const page = PAGE
 
-  it("tells the model the page by name and what readers did on it", async () => {
+  it("tells the model the page by name, its goal, and what readers did on it", async () => {
     const evidence = await readEvidence(readersOn(page, 80, 60), NOTHING_DECLARED, page)
     if (!evidence.ok) throw new Error("expected evidence")
     const client = scriptedModelClient(CHANGE)
 
-    expect((await briefFor(client, "Home", evidence.value, [])).ok).toBe(true)
+    expect(
+      (
+        await briefFor(client, {
+          pageName: "Home",
+          goal: GOAL,
+          evidence: evidence.value,
+          turnedDown: [],
+        })
+      ).ok
+    ).toBe(true)
     expect(client.requests[0]?.system).toBe(BRIEF_SYSTEM_PROMPT)
-    expect(client.requests[0]?.userMessage).toMatch(/^The page "Home"\.\n\n80 page views/u)
+    expect(client.requests[0]?.userMessage).toMatch(
+      /^The page "Home"\.\n\nThe goal, "Reads the welcome", counts [^\n]+\n\n80 page views/u
+    )
   })
 
   it("passes on what went wrong with the model", async () => {
@@ -129,8 +175,13 @@ describe("briefFor", () => {
     if (!evidence.ok) throw new Error("expected evidence")
     const client = scriptedModelClient(err({ code: "misconfigured", detail: "invalid x-api-key" }))
 
-    expect(await briefFor(client, "Home", evidence.value, [])).toEqual(
-      err({ code: "model", detail: "invalid x-api-key" })
-    )
+    expect(
+      await briefFor(client, {
+        pageName: "Home",
+        goal: GOAL,
+        evidence: evidence.value,
+        turnedDown: [],
+      })
+    ).toEqual(err({ code: "model", detail: "invalid x-api-key" }))
   })
 })

@@ -530,14 +530,14 @@ describe("how much of the package is behind one door", () => {
   })
 
   /**
-   * The belief this band exists to correct, stated as a number. Fourteen of
-   * the sixteen other doors publish not one name the root door publishes, so a
+   * The belief this band exists to correct, stated as a number. Fifteen of
+   * the seventeen other doors publish not one name the root door publishes, so a
    * reader who reads `@jam-overture/loom` as the door with everything behind it is
    * wrong about almost the whole package.
    */
-  it("finds that fourteen of the other sixteen doors share nothing with the root door", () => {
-    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(14)
-    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(16)
+  it("finds that fifteen of the other seventeen doors share nothing with the root door", () => {
+    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(15)
+    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(17)
   })
 
   it("counts a shared name once, so the package publishes fewer names than its doors do slots", () => {

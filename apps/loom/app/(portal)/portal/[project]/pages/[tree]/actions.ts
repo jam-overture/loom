@@ -16,7 +16,10 @@ import { siteFor } from "../../_lib/owned-site"
 /** What looking says back: what the AI proposed and what became of it, or why nothing was. */
 export type LookReport = {
   readonly refusal?: string
-  readonly report?: WriteReport & { readonly request?: string }
+  readonly report?: WriteReport & {
+    readonly request?: string
+    readonly goal?: string
+  }
 }
 
 /**
@@ -33,7 +36,10 @@ export const lookAction = async (
 ): Promise<LookReport> => {
   const site = await siteFor(form, mayPropose)
 
-  if (!site.ok) return { refusal: site.report.detail ?? "That is not a project you can change." }
+  if (!site.ok)
+    return {
+      refusal: site.report.detail ?? "That is not a project you can change.",
+    }
 
   const application = site.application.applicationId
   const key = await modelKeyOf(application)

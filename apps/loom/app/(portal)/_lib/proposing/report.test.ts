@@ -23,6 +23,7 @@ describe("passedSentence", () => {
     ["a change is waiting", { kind: "waiting" }, /already under For review/u],
     ["the copy is ahead", { kind: "unshipped", copy: 4 }, /does not serve yet \(version 4\)/u],
     ["this deployment serves its copy", { kind: "apart" }, /serves Loom's copy of this page/u],
+    ["no goal is on the page", { kind: "no-goal" }, /No goal is on this page.*under Goals/u],
     [
       "too few read it",
       { kind: "silent", silence: { kind: "too-few", opened: 3 } },
@@ -39,7 +40,12 @@ describe("passedSentence", () => {
 })
 
 describe("siteReport", () => {
-  const applied = { tone: "applied", headline: "Applied", meaning: "general", detail: "d" } as const
+  const applied = {
+    tone: "applied",
+    headline: "Applied",
+    meaning: "general",
+    detail: "d",
+  } as const
 
   it("says a customer's site keeps serving what it published", () => {
     expect(siteReport(applied, SHOP).meaning).toMatch(/keeps serving what it published/u)
@@ -62,10 +68,11 @@ describe("proposedReport", () => {
     expect(report.meaning).toMatch(/model key in Settings/u)
   })
 
-  it("says a store failure as a store failure", () => {
-    expect(proposedReport(err({ code: "store", detail: "x" }), nobody, SHOP).headline).toBe(
-      "The store did not answer"
-    )
+  it("says a store failure as a store failure, and that new tables may be missing", () => {
+    const report = proposedReport(err({ code: "store", detail: "x" }), nobody, SHOP)
+
+    expect(report.headline).toBe("The store did not answer")
+    expect(report.meaning).toMatch(/pnpm db:push/u)
   })
 
   it("says why nothing was proposed", () => {

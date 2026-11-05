@@ -32,6 +32,7 @@ import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-
 import { ensurePageCopiesSchema } from "../app/(portal)/_lib/proposing/copies-postgres"
 import { ensureTurnedDownSchema } from "../app/(portal)/_lib/proposing/turned-down-postgres"
 import { ensureGoalsSchema } from "../app/(portal)/_lib/goals/goals-postgres"
+import { ensureProposalGoalsSchema } from "../app/(portal)/_lib/goals/proposal-goals-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
 
 /**
@@ -175,6 +176,11 @@ try {
    */
   await ensureGoalsSchema(db)
   /**
+   * Which goal each proposal serves (0352). A deployment that has not run this
+   * proposes nothing, and says so, because a proposal must name its goal.
+   */
+  await ensureProposalGoalsSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -204,7 +210,7 @@ try {
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
       "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys, " +
       "loom_reader_refusals, loom_publish_keys, loom_published_pages, loom_model_keys, " +
-      "loom_page_copies, loom_turned_down and loom_goals " +
+      "loom_page_copies, loom_turned_down, loom_goals and loom_proposal_goals " +
       "are present, and this deployment's pages are in them"
   )
 } finally {

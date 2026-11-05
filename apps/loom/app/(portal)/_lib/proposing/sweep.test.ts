@@ -21,7 +21,10 @@ const pages = (prefix: string, count: number): readonly PublishedPage[] =>
     receivedAt: 1,
   }))
 
-const PASSED: Result<Proposed, ProposeError> = ok({ kind: "passed", passed: { kind: "waiting" } })
+const PASSED: Result<Proposed, ProposeError> = ok({
+  kind: "passed",
+  passed: { kind: "waiting" },
+})
 
 const depsWith = (overrides: Partial<SweepDeps> = {}): SweepDeps & { readonly ran: string[] } => {
   const ran: string[] = []
@@ -88,7 +91,12 @@ describe("sweep", () => {
   it("counts a proposal, a failed run and a project whose pages could not be read", async () => {
     const results: Result<Proposed, ProposeError>[] = [
       err({ code: "model", detail: "401" }),
-      ok({ kind: "proposed", request: "r", outcome: {} as never }),
+      ok({
+        kind: "proposed",
+        request: "r",
+        goal: {} as never,
+        outcome: {} as never,
+      }),
     ]
     const deps = depsWith({
       keyOf: () => Promise.resolve(ok({ kind: "set", key: KEY, hint: "wxyz", setAt: 1 })),
@@ -96,7 +104,11 @@ describe("sweep", () => {
         Promise.resolve(
           application === BLOG ? err({ code: "unavailable" }) : ok(pages(application, 2))
         ),
-      run: () => Promise.resolve({ run: results.shift() ?? PASSED, weighedAgainst: () => [] }),
+      run: () =>
+        Promise.resolve({
+          run: results.shift() ?? PASSED,
+          weighedAgainst: () => [],
+        }),
     })
 
     expect(await sweep(deps)).toEqual({
