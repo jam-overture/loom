@@ -5,6 +5,7 @@ import { systemClock, type Clock } from "../runtime/events.js"
 
 import {
   clampReaderSignalLimit,
+  type CountedOutcome,
   type ForgetOutcome,
   type ReaderSignalJournal,
   type ReaderSignalPage,
@@ -38,6 +39,13 @@ import type {
  */
 
 export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSignalJournal => {
+  /**
+   * Mutable rows rather than a frozen list, because one field on a stored
+   * delivery changes after it is written: the fold's instant (0350). The array
+   * is still replaced wholesale on a delete, so the only in-place write in this
+   * store is the stamp — which is the same single-column `UPDATE` Postgres
+   * makes.
+   */
   let batches: ReceivedBatch[] = []
   let nextSeq = 1
 
@@ -73,6 +81,8 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
       const matching = batches.filter(
         (batch) =>
           (request?.treeId === undefined || batch.treeId === request.treeId) &&
+          (request?.counted === undefined ||
+            request.counted === (batch.foldedAt !== undefined)) &&
           (from === undefined || (direction === "older" ? batch.seq < from : batch.seq > from))
       )
 
@@ -88,6 +98,29 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
           }),
         })
       )
+    },
+
+    /**
+     * Stamp the fold's instant on an unstamped prefix (0350).
+     *
+     * `foldedAt !== undefined` is the guard rather than a position comparison,
+     * so the second call over one prefix moves nothing — the property Postgres
+     * gets from `folded_at IS NULL` in its `WHERE`, written here so the two
+     * implementations are the same operation rather than two that happen to
+     * agree on the first call.
+     */
+    counted: ({ before, at }) => {
+      let counted = 0
+
+      batches = batches.map((batch) => {
+        if (batch.seq >= before || batch.foldedAt !== undefined) return batch
+
+        counted += 1
+
+        return { ...batch, foldedAt: at }
+      })
+
+      return Promise.resolve(ok<CountedOutcome>({ counted }))
     },
 
     /** `nextSeq` is not rewound, so a cursor held across a prune never resumes inside what it has seen. */

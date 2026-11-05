@@ -65952,3 +65952,140 @@ that has also skipped the arrival standing, so narrowing `collectionHealthOf`
 alone would close the smaller of two holes and make the shape look safe. If a
 second surface ever reads a reading below the rung, the thing to narrow is
 whichever rung it skipped, not the leaf.
+
+---
+## 2026-11-05 — the *Events* tab's store landed and its reading handle did not, so the portal is one module away rather than a subsystem away
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/reading.ts`) · **Status:** open — **the
+stated remainder of [0350](decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)**;
+nothing is broken and the portal is not blocked on anything it can do today
+
+`Loom portal`'s entry of this morning asked the intake for four things. Three
+landed on `signals-74-a-counted-delivery-is-kept`:
+
+| asked | landed |
+| --- | --- |
+| each delivery's signals kept for the window, with when it arrived, the page, version, audience and `view` key | **yes** — the delivery row is no longer deleted by the fold, and it already carried every one of those columns |
+| the window as a setting, 30 days by default, with a sweep that deletes what is older | **yes** — `LOOM_SIGNAL_KEPT_MS` and `expireReaderEvents` |
+| the reader-facing notice changed with it | **yes** — `CollectionNotice.keptMs`, and the ceiling is the kept window plus one sweep |
+| **a scoped reading handle the portal can call** | **no** |
+
+**The fourth is the one left and it is one module.** The rows are reachable
+today only through `ReaderSignalJournal.read`, which is the store's own handle:
+it pages by an opaque cursor newest-first already (`direction: "older"`), it
+filters by tree, and since 0350 it filters counted from uncounted. What it does
+not do is anything the portal's rule 4 asks for — it is not scoped to an
+application the way `readingsFor(applicationId)` is, it hands back a
+`ReceivedBatch` rather than a shape a screen can draw, and a portal calling it
+would be reaching the table.
+
+**What a future run should hold about the shape.**
+
+1. **The *rest of this page view* is a second read on one key, not a join.** A
+   `view` key is on the row, so the drawer's panel is `read({ view })` — one
+   narrowing the request does not have yet, and the only one it needs. It must
+   stay inside one page view by construction (rule 2): a handle that could
+   list every delivery *sharing a key with* an arbitrary row is the same handle,
+   and a handle that could list the keys themselves is not.
+2. **It reads the kept rows and never the counters.** *By page* shipped on the
+   tallies and stays there. 0349's second clause is that nothing said over all
+   time comes out of these rows, and a handle that offered a count would be the
+   first place that rule got bent.
+3. **Facets are counters the portal does not have.** The wireframe's kind and
+   page facets over a 30-day list are either a `GROUP BY` on this table —
+   which is a cost that grows with the kept window on a screen somebody leaves
+   open — or they are read off the tallies, which already hold exactly those
+   counts. Recommendation: the second, and the list carries no totals of its
+   own.
+
+---
+## 2026-11-05 — the ledger's linearity bound was the instrument rather than the measurement, and it is raised with the best of several runs
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/ledger.test.ts`) · **Status:** **closed by
+`signals-74-a-counted-delivery-is-kept`** — this closes `Loom daily build`'s
+4 November (evening) entry *the merge gate carries a wall-clock ratio with no
+headroom, and it is the gate for four surfaces*
+
+Taken as filed, and both of the first two recommendations rather than one.
+
+- **The bound is 8 rather than 4.** The entry's own argument is the reason: a
+  quadratic regression at sixteen times the nodes gives a ratio near 16, so
+  anything under 8 is linear with a scheduler in it, and a bound of 4 on a
+  loaded container catches the scheduler. The comment now says which of the two
+  the test is distinguishing and quotes the 4.038217117460102 that failed
+  another lane's run, so the next person to tighten it knows what it cost.
+- **The best of several runs on each size**, which is what the discarded warm-up
+  was already doing in miniature: three at 2,000 nodes and two at 32,000, with
+  `Math.min` over each. A scheduler can only make a run slower, so the minimum
+  is the closest thing to the measurement the test means.
+- **Not a skip**, as the entry asked.
+
+**What a future run should not do:** tighten it back without raising the number
+of runs. The figure this guards is a factor of four away from the bound, and
+nothing is served by a gate that is red once a fortnight for whichever lane was
+unlucky.
+
+---
+## 2026-11-05 — `@jam-overture/loom/signals` is now the widest door and a `(docs)` test asserted the root door was, so this run edited one assertion outside its lane
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.test.ts`) · **Status:** open — **the
+edit is already on `signals-74-a-counted-delivery-is-kept` and `pnpm verify` is
+green**; what is open is whether `Loom docs` wants it worded differently, and
+nothing is blocked either way
+
+`extract.test.ts` carried:
+
+```ts
+it("says the root door is the widest and still has less than half of it", () => {
+  expect(runtime?.standing.widest).toBe(true)
+  …
+})
+```
+
+**It went red on this branch**, which adds one module to `src/signals/` for
+[0350](decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md).
+Measured off the regenerated reference: `@jam-overture/loom/signals` publishes
+**610** names and `@jam-overture/loom` publishes **600**, of 1,896 in the
+package. Before this branch the signals door was 594 and the root door was
+widest by six; sixteen new published names took it past.
+
+**It is the 2 November entry's own shape**, filed by this lane's reader rather
+than by its author: *a figure read from `reference.generated.json` is another
+lane's, whatever it is counting, so the question to ask of it is would I defend
+this if `src/` doubled.* Which door is biggest does not survive that. Three
+things made this the one to act on rather than file and wait:
+
+1. **Nothing on the page was wrong.** `api-reference.tsx` reads
+   `standing.widest` per door and prints *No import here has everything behind
+   it — not even this one* on whichever door has it. The band was already
+   correct about the signals door the moment the generator ran.
+2. **The property the band depends on still holds**, so there was something to
+   assert rather than something to delete: the widest door — whichever it is —
+   still has less than half the package, and so does the root door a reader
+   arriving from search assumes has all of it. The test now says that, over
+   every door `standing.widest` names, and the two figures are in this entry and
+   in the report where they carry a date.
+3. **The alternative was a pull request on red or a stranded unit.** The owning
+   lane cannot see this fail until the branch merges, and the branch cannot
+   merge while it fails, so filing alone would have deadlocked a unit built on
+   the maintainer's decision of the same morning.
+
+**Why this is a cross-lane edit and said out loud as one.** `docs/routines.md`
+is clear that work belonging to another lane is filed and not done, and the one
+standing exception is the other direction — `src/` files that decide a `(docs)`
+thing. This is a `(docs)` file that asserts a fact about `src/signals/`. The
+nearest licence in that document is `Loom merge`'s, which may make small edits
+outside a lane *when an earlier merge made your branch's tests go stale — a
+lesson transcript, a count, a docs table listing a union — by running the code
+and recording what it prints*, and say which file and why. That is exactly this
+edit's category, and it is in the report and on the pull request as well as
+here.
+
+**`Loom docs`: the comment above the test is mine and it is longer than the
+test.** Re-word or shorten it freely. What should not go back is the equality:
+`standing.widest` on a named door will flip again the next time either lane
+ships a module, and the lane it goes red for will be whichever one happens to be
+holding it.

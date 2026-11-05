@@ -2,6 +2,7 @@ import { everyMemberOf } from "../closed-set.js"
 
 import type { ReaderSignalOptions } from "./broadcast.js"
 import { DEFAULT_READER_SIGNAL_WINDOW_MS } from "./collect.js"
+import { DEFAULT_READER_EVENT_RETENTION_MS } from "./expire.js"
 import { regionFloorOf } from "./region.js"
 import {
   READER_SIGNAL_KINDS,
@@ -333,15 +334,24 @@ export type SweepNotice =
       /** The longest the deployment lets pass between sweeps, as it stated it. */
       readonly everyMs: number
       /**
-       * The longest a delivery can live: its ripeness window plus one sweep
-       * interval.
+       * The longest a delivery can live: the later of its two windows, plus one
+       * sweep interval.
        *
-       * The two add because a delivery is not counted until it ripens and then
-       * not until the next sweep runs, which is the arithmetic
+       * A sweep adds because a delivery does not go the instant it is eligible
+       * but at the next run, which is the arithmetic
        * `CollectionSchedule.foldsWithinMs` spells out for the operator's half
-       * of this question (0274) — so **this is the number to hand the stall
-       * check**, and a deployment states the interval once rather than keeping
-       * a reader's ceiling and an operator's threshold in step by hand.
+       * of this question (0274) — so **this is the number the retention check
+       * is given**, and a deployment states the interval once rather than
+       * keeping a reader's ceiling and an operator's threshold in step by hand.
+       *
+       * **The later of the two windows rather than their sum** (0350). A
+       * delivery is counted once it is `bufferMs` old and deleted once it is
+       * `keptMs` old, and both are measured from the same instant — the moment
+       * it arrived — so the second condition is met at the later of the two
+       * ages, not after one window has elapsed and then the other. Where the
+       * kept window is the shorter of the two, which is an odd but legal
+       * configuration, the delivery still has to be counted before it may go,
+       * and the maximum says exactly that.
        */
       readonly goneWithinMs: number
     }
@@ -359,26 +369,49 @@ export type CollectionNotice = {
   /** Where readers are counted from, or that they are not. */
   readonly region: RegionNotice
   /**
-   * How long a delivery itself lives before it is counted and dropped, in
+   * How long a delivery waits before it is counted into the totals, in
    * milliseconds.
    *
-   * The deployment's own number (`collect.ts`), and the honest bound on the
-   * life of the page-view key, since the key exists in the buffer and nowhere
-   * else. **The framework cannot promise the moment it is swept**, because a
-   * host schedules the sweep: this is the age at which a delivery becomes ripe,
-   * not a guarantee about when the next run happens. What the deployment itself
-   * promises about that is {@link CollectionNotice.sweep}, and
-   * {@link describeBuffer} says the two together.
+   * The deployment's own number (`collect.ts`). **It was the bound on the life
+   * of the page-view key and is not any more** (0350): a counted delivery used
+   * to be deleted in the same operation, and is now kept for
+   * {@link CollectionNotice.keptMs}. **The framework cannot promise the moment
+   * either sweep runs**, because a host schedules them: this is the age at
+   * which a delivery becomes ripe, not a guarantee about when the next run
+   * happens. What the deployment itself promises about that is
+   * {@link CollectionNotice.sweep}, and {@link describeBuffer} says all three
+   * together.
    */
   readonly bufferMs: number
   /**
-   * How often this deployment sweeps a ripe delivery away, where it has stated
-   * it.
+   * How long a delivery itself is kept, measured from when it arrived, in
+   * milliseconds.
+   *
+   * The honest bound on the life of the page-view key, and the number that
+   * makes this notice true since 5 November: individual deliveries are kept —
+   * thirty days by default — so that a deployment can look at them rather than
+   * only at counters (0349), and a notice that went on saying a delivery was
+   * deleted an hour after it arrived would be telling every reader of a privacy
+   * page something the deployment had stopped doing.
+   *
+   * Longer than {@link CollectionNotice.bufferMs} on any ordinary
+   * configuration, and the ceiling is taken over both rather than off this one,
+   * because a delivery is never deleted before it is counted whichever of the
+   * two windows is shorter (`expire.ts`).
+   */
+  readonly keptMs: number
+  /**
+   * How often this deployment sweeps, where it has stated it.
    *
    * The half of retention that is not the framework's to promise, and the half
-   * a reader of `bufferMs` alone would assume. {@link describeBuffer} takes the
-   * two together for that reason: an age with no sweep beside it is a sentence
-   * that reads like a deletion and is not one.
+   * a reader of the two windows alone would assume. {@link describeBuffer}
+   * takes them together for that reason: an age with no sweep beside it is a
+   * sentence that reads like a deletion and is not one.
+   *
+   * **One stated interval covers both sweeps**, because a deployment runs them
+   * from one place — counting and then expiring, in that order, in one cron
+   * route (0350). A deployment that ran them on two schedules would be stating
+   * the longer of the two here, which is what the ceiling needs.
    */
   readonly sweep: SweepNotice
 }
@@ -405,9 +438,17 @@ const OBSERVES: Readonly<Record<ReaderSignalKind, string>> = {
  * A length of time as a notice says it.
  *
  * Minutes above a minute and seconds below it, because the one number here a
- * deployment can set low is the buffer and `collect.ts` floors it at a minute
+ * deployment could set low is the buffer and `collect.ts` floors it at a minute
  * — so a notice reading *0 minutes* would be reporting a window the collector
  * would refuse to run on.
+ *
+ * **Days above a day**, which the kept window asked for (0350): thirty days is
+ * the default a deployment keeps individual deliveries for, and *43200 minutes*
+ * is a number no reader of a privacy page can hold. The break is at a day
+ * rather than at an hour so that every figure a notice published before the
+ * kept window existed still reads exactly as it did — an hour is *60 minutes*
+ * here, as it has been, and the one new figure is the one that needed a bigger
+ * unit.
  */
 const inWords = (ms: number): string => {
   if (ms < 60_000) {
@@ -415,37 +456,51 @@ const inWords = (ms: number): string => {
     return seconds === 1 ? "a second" : `${seconds} seconds`
   }
 
-  const minutes = Math.round(ms / 60_000)
-  return minutes === 1 ? "a minute" : `${minutes} minutes`
+  if (ms < 24 * 60 * 60_000) {
+    const minutes = Math.round(ms / 60_000)
+    return minutes === 1 ? "a minute" : `${minutes} minutes`
+  }
+
+  const days = Math.round(ms / (24 * 60 * 60_000))
+  return days === 1 ? "a day" : `${days} days`
 }
 
 /**
- * Both halves of how long a delivery lives: the age it ripens at, and how often
- * the deployment takes the ripe ones away.
+ * Every part of how long a delivery lives: the age it is counted at, the age it
+ * is deleted at, and how often the deployment's sweep runs.
  *
- * A `Pick` of the notice rather than two arguments, so that the sentence cannot
- * be built from one of them. The age alone reads as a deletion and is not one.
+ * A `Pick` of the notice rather than three arguments, so that the sentence
+ * cannot be built from some of them. The ripeness age alone reads as a deletion
+ * and is not one — and since 5 November it is not even the deletion's age
+ * (0350).
  */
-export type DeliveryRetention = Pick<CollectionNotice, "bufferMs" | "sweep">
+export type DeliveryRetention = Pick<CollectionNotice, "bufferMs" | "keptMs" | "sweep">
 
 /**
  * How long a delivery lives, addressed to the reader.
  *
- * It takes the retention whole, because the age is the half the framework knows
- * and the sweep is the half it cannot promise, and a notice that published the
- * first without the second said *a delivery is kept until it is 60 minutes old*
- * to a reader who had no way of hearing *…or for ever, if nobody runs the
- * sweep*. Where a schedule was stated the sentence ends on a ceiling a reader
- * can hold the deployment to; where none was, it says that in as many words
- * rather than leaving the age to be read as a promise.
+ * It takes the retention whole, because the two ages are the halves the
+ * framework knows and the sweep is the half it cannot promise, and a notice
+ * that published an age without the sweep said *a delivery is kept until it is
+ * 60 minutes old* to a reader who had no way of hearing *…or for ever, if
+ * nobody runs the sweep*. Where a schedule was stated the sentence ends on a
+ * ceiling a reader can hold the deployment to; where none was, it says that in
+ * as many words rather than leaving the ages to be read as a promise.
+ *
+ * **Two ages since 5 November, and saying one of them would be the lie** (0349,
+ * 0350). A delivery is counted at the first age and deleted at the second, and
+ * the sentence is explicit about what the gap is for: so that the deployment
+ * can look at the deliveries behind its totals. A reader told only *counted
+ * into totals* would reasonably assume the delivery was gone.
  */
 export const describeBuffer = (retention: DeliveryRetention): string => {
-  const ripens = `a delivery is kept until it is ${inWords(retention.bufferMs)} old, and this deployment's own sweep is what then counts it into totals and deletes it`
+  const counts = `a delivery is counted into this deployment's totals once it is ${inWords(retention.bufferMs)} old`
+  const kept = `it is then kept for ${inWords(retention.keptMs)} from when it arrived, so that this deployment can look at the deliveries its totals were made from, and its own sweep is what deletes it`
   const totals = "the totals it leaves behind have nobody in them, and they are kept"
 
   return retention.sweep.state === "stated"
-    ? `${ripens}; that sweep runs at least every ${inWords(retention.sweep.everyMs)}, so a delivery is gone within ${inWords(retention.sweep.goneWithinMs)} of arriving — the key tying one visit together exists until then and nowhere else; ${totals}`
-    : `${ripens}; this deployment has not said how often that sweep runs, so nothing here promises when a ripe delivery actually goes — the key tying one visit together exists until the sweep takes it and nowhere else; ${totals}`
+    ? `${counts}; ${kept}; that sweep runs at least every ${inWords(retention.sweep.everyMs)}, so a delivery is gone within ${inWords(retention.sweep.goneWithinMs)} of arriving — the key tying one visit together exists until then and nowhere else; ${totals}`
+    : `${counts}; ${kept}; this deployment has not said how often that sweep runs, so nothing here promises when a kept delivery actually goes — the key tying one visit together exists until the sweep takes it and nowhere else; ${totals}`
 }
 
 /**
@@ -462,10 +517,14 @@ export const describeBuffer = (retention: DeliveryRetention): string => {
  * standing rule is that it may overstate what is collected and may never
  * overstate what is deleted.
  */
-const sweepNoticeOf = (everyMs: number | undefined, bufferMs: number): SweepNotice =>
+const sweepNoticeOf = (
+  everyMs: number | undefined,
+  bufferMs: number,
+  keptMs: number
+): SweepNotice =>
   everyMs === undefined || !Number.isFinite(everyMs) || everyMs <= 0
     ? { state: "unstated" }
-    : { state: "stated", everyMs, goneWithinMs: bufferMs + everyMs }
+    : { state: "stated", everyMs, goneWithinMs: Math.max(bufferMs, keptMs) + everyMs }
 
 /** The configuration a notice is of. */
 export type NoticeRequest = {
@@ -507,6 +566,21 @@ export type NoticeRequest = {
    * out loud, is a deployment's own settings (0317).
    */
   readonly sweep?: { readonly everyMs: number }
+  /**
+   * The window this deployment keeps individual deliveries for, from its own
+   * `ExpiryRequest` (`expire.ts`). The default when absent.
+   *
+   * Reported as given rather than clamped, as the collection window is and for
+   * the same reason: `expire.ts` is what refuses a window below its minimum.
+   *
+   * **Absent is the default rather than *nothing is kept*,** which is the one
+   * place this field differs in spirit from the sweep beside it. A deployment
+   * that calls the expiry sweep with no window gets thirty days (0349), so a
+   * notice that read an absent setting as *deleted the moment it is counted*
+   * would understate what is kept — and this module's standing rule is that it
+   * may overstate what is collected and may never overstate what is deleted.
+   */
+  readonly keptMs?: number
 }
 
 /**
@@ -523,6 +597,7 @@ export type NoticeRequest = {
 export const collectionNoticeOf = (request: NoticeRequest = {}): CollectionNotice => {
   const asked = request.page?.kinds
   const bufferMs = request.windowMs ?? DEFAULT_READER_SIGNAL_WINDOW_MS
+  const keptMs = request.keptMs ?? DEFAULT_READER_EVENT_RETENTION_MS
 
   const collects = READER_SIGNAL_KINDS.filter(
     (kind) => asked === undefined || asked.includes(kind)
@@ -540,6 +615,7 @@ export const collectionNoticeOf = (request: NoticeRequest = {}): CollectionNotic
     refuses: REFUSALS,
     region: { floor: request.region === undefined ? null : regionFloorOf(request.region.floor) },
     bufferMs,
-    sweep: sweepNoticeOf(request.sweep?.everyMs, bufferMs),
+    keptMs,
+    sweep: sweepNoticeOf(request.sweep?.everyMs, bufferMs, keptMs),
   }
 }

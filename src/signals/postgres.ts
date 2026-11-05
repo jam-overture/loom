@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, lt, sql } from "drizzle-orm"
+import { and, asc, desc, eq, gt, isNotNull, isNull, lt, sql } from "drizzle-orm"
 import type { PgColumn } from "drizzle-orm/pg-core"
 import { z } from "zod"
 
@@ -27,6 +27,7 @@ import {
 } from "./counters.js"
 import {
   clampReaderSignalLimit,
+  type CountedOutcome,
   type ForgetOutcome,
   type ReaderSignalJournal,
   type ReaderSignalPage,
@@ -118,6 +119,14 @@ const receivedSchema = z.object({
   view: viewKeySchema.nullable().transform((value) => value ?? undefined),
   signals: z.array(readerSignalSchema).min(1),
   receivedAt: instantSchema,
+  /**
+   * `null` in the column, absent on the row — a delivery no fold has counted
+   * (0350). The same nullable-to-absent transform `view` takes, for the same
+   * reason: an optional field is how the rest of the subsystem spells *there is
+   * nothing here*, and two spellings of that is how a `null` comes to be read
+   * as a value.
+   */
+  foldedAt: instantSchema.nullable().transform((value) => value ?? undefined),
 })
 
 /**
@@ -259,12 +268,23 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
           view: loomReaderSignals.view,
           signals: loomReaderSignals.signals,
           receivedAt: loomReaderSignals.receivedAt,
+          foldedAt: loomReaderSignals.foldedAt,
         })
         .from(loomReaderSignals)
         .where(
           and(
             eq(loomReaderSignals.applicationId, application),
             request?.treeId === undefined ? undefined : eq(loomReaderSignals.treeId, request.treeId),
+            /**
+             * Served by the partial index where it is `false`, which is the
+             * fold's read and the one that would otherwise scan the kept window
+             * (0350).
+             */
+            request?.counted === undefined
+              ? undefined
+              : request.counted
+                ? isNotNull(loomReaderSignals.foldedAt)
+                : isNull(loomReaderSignals.foldedAt),
             from === undefined
               ? undefined
               : direction === "older"
@@ -301,6 +321,39 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
       })
     } catch (cause) {
       return err(failure(cause, "could not read reader signals"))
+    }
+  },
+
+  /**
+   * One `UPDATE`, carrying its own idempotence in the `WHERE` (0350).
+   *
+   * `folded_at IS NULL` is what makes a repeat of this statement a no-op rather
+   * than a rewrite: the caller has already made the counters durable before it
+   * gets here, so a retry must not move an instant that a reading has been
+   * taken against. It is also what makes the reported count honest — rows this
+   * call stamped, not rows below the position.
+   *
+   * Scoped to the application like every other statement in this journal: `seq`
+   * is database-wide, so an unscoped `UPDATE` would stamp another deployment's
+   * uncounted deliveries and make them eligible for its retention sweep.
+   */
+  counted: async ({ before, at }) => {
+    try {
+      const stamped = await db
+        .update(loomReaderSignals)
+        .set({ foldedAt: new Date(at) })
+        .where(
+          and(
+            eq(loomReaderSignals.applicationId, application),
+            lt(loomReaderSignals.seq, before),
+            isNull(loomReaderSignals.foldedAt)
+          )
+        )
+        .returning({ seq: loomReaderSignals.seq })
+
+      return ok<CountedOutcome>({ counted: stamped.length })
+    } catch (cause) {
+      return err(failure(cause, `could not record the fold of reader signals below ${before}`))
     }
   },
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  DEFAULT_READER_EVENT_RETENTION_MS,
   DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
   describeBuffer,
@@ -10,6 +11,7 @@ import {
 import { deploymentNoticeOf } from "./notice"
 import {
   INTAKE_KEY,
+  KEPT_KEY,
   readIntakeSettings,
   REGION_FLOOR_KEY,
   REGION_KEY,
@@ -58,6 +60,29 @@ describe("deploymentNoticeOf", () => {
     it("falls back to the default where the window could not be read", () => {
       expect(noticeOf({ [WINDOW_KEY]: "60" }).bufferMs).toBe(DEFAULT_READER_SIGNAL_WINDOW_MS)
     })
+
+    /**
+     * The second age, which is the one a reader is promised a deletion at
+     * (0349, 0350). Thirty days where the deployment set nothing, because that
+     * is what the expiry sweep would use, and the deployment's own number where
+     * it set one.
+     */
+    it("publishes the window this deployment keeps a counted delivery for", () => {
+      expect(noticeOf({}).keptMs).toBe(DEFAULT_READER_EVENT_RETENTION_MS)
+      expect(noticeOf({ [KEPT_KEY]: "604800000" }).keptMs).toBe(604_800_000)
+      expect(describeBuffer(noticeOf({ [KEPT_KEY]: "604800000" }))).toContain("kept for 7 days")
+    })
+
+    /**
+     * A kept window that could not be read publishes the default, which is the
+     * one place in this file where the notice may be stating something the
+     * deployment is not doing — the expiry sweep refuses to run on the value at
+     * all, so nothing is deleted. It is the louder failure and it is
+     * `describeKeptWindow`'s to say to the operator who can close it.
+     */
+    it("falls back to the default where the kept window could not be read", () => {
+      expect(noticeOf({ [KEPT_KEY]: "30" }).keptMs).toBe(DEFAULT_READER_EVENT_RETENTION_MS)
+    })
   })
 
   describe("how often it is swept", () => {
@@ -72,12 +97,17 @@ describe("deploymentNoticeOf", () => {
     })
 
     /**
-     * The ceiling is over **this deployment's** window and not the framework's
-     * default: fifteen minutes to ripen and a ten-minute cron is twenty-five,
-     * where the default would have published seventy.
+     * The ceiling is over **this deployment's** windows and not the framework's
+     * defaults, and it is over the one that governs deletion (0350): fifteen
+     * minutes kept and a ten-minute cron is twenty-five, where the default kept
+     * window would have published a month.
      */
-    it("publishes a ceiling over this deployment's own window", () => {
-      const notice = noticeOf({ [WINDOW_KEY]: "900000", [SWEEP_KEY]: "600000" })
+    it("publishes a ceiling over this deployment's own kept window", () => {
+      const notice = noticeOf({
+        [WINDOW_KEY]: "300000",
+        [KEPT_KEY]: "900000",
+        [SWEEP_KEY]: "600000",
+      })
 
       expect(notice.sweep).toEqual({
         state: "stated",
@@ -87,11 +117,11 @@ describe("deploymentNoticeOf", () => {
       expect(describeBuffer(notice)).toContain("gone within 25 minutes of arriving")
     })
 
-    it("adds the interval to the default where no window was set", () => {
+    it("adds the interval to the default kept window where none was set", () => {
       expect(noticeOf({ [SWEEP_KEY]: "600000" }).sweep).toEqual({
         state: "stated",
         everyMs: 600_000,
-        goneWithinMs: DEFAULT_READER_SIGNAL_WINDOW_MS + 600_000,
+        goneWithinMs: DEFAULT_READER_EVENT_RETENTION_MS + 600_000,
       })
     })
 
@@ -143,9 +173,14 @@ describe("deploymentNoticeOf", () => {
    * the deployment's own join: a notice derived from a real environment names
    * nothing the environment configured about anybody.
    */
-  it("carries nothing out of the environment but three numbers", () => {
+  it("carries nothing out of the environment but four numbers", () => {
     const printed = JSON.stringify(
-      noticeOf({ [REGION_FLOOR_KEY]: "100", [WINDOW_KEY]: "900000", [SWEEP_KEY]: "600000" })
+      noticeOf({
+        [REGION_FLOOR_KEY]: "100",
+        [WINDOW_KEY]: "900000",
+        [KEPT_KEY]: "604800000",
+        [SWEEP_KEY]: "600000",
+      })
     )
 
     expect(printed).not.toContain("x-vercel-ip-country")

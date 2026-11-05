@@ -4,9 +4,12 @@ import {
   collectReaderSignals,
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  DEFAULT_READER_EVENT_RETENTION_MS,
   DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
   describeCollection,
+  describeExpiry,
+  expireReaderEvents,
   memoryReaderRegionStore,
   memoryReaderSignalJournal,
   memoryReaderTallyStore,
@@ -59,6 +62,8 @@ const SETTINGS = {
    * through a minute rather than through this deployment's hour.
    */
   window: { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS },
+  /** Nor this one, for the same reason: the kept window is passed by hand too. */
+  kept: { state: "default", keptMs: DEFAULT_READER_EVENT_RETENTION_MS },
   sweep: { state: "unstated" },
 } as const
 
@@ -114,7 +119,7 @@ const intakeOf = (filing: Filing, settings: Intake["settings"] = SETTINGS): Inta
 })
 
 describe("a batch a browser posts becomes a number the portal can read", () => {
-  it("arrives, is counted, and is forgotten", async () => {
+  it("arrives, is counted, is kept for the window, and is then deleted", async () => {
     const journal = memoryReaderSignalJournal(at(0))
     const store = memoryReaderTallyStore()
 
@@ -154,9 +159,44 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     expect(row?.views).toBe(1)
     expect(row?.dwellMs).toBe(11_300)
 
-    /** And the buffer let go of exactly what the counters took. */
+    /**
+     * **And the delivery is still there, marked counted** (0349, 0350). It used
+     * to be deleted in the same operation; it is now kept for the window this
+     * deployment states, so that an operator can look at the deliveries behind
+     * the row above.
+     */
+    const kept = await journal.read()
+
+    expect(kept.ok && kept.value.batches).toHaveLength(2)
+    expect(kept.ok && kept.value.batches.every((one) => one.foldedAt !== undefined)).toBe(true)
+    expect(kept.ok && (await journal.read({ counted: false })).ok).toBe(true)
+
+    /**
+     * Nothing is deleted until it is past the kept window, and then it is. Both
+     * runs are taken at one instant and differ only in the window, because what
+     * is under test is the deployment's setting rather than the clock.
+     */
+    const young = await expireReaderEvents(journal, { keptMs: 300_000, clock: at(180_000) })
+
+    expect(young).toMatchObject({ outcome: "nothing-expired", waiting: 2 })
+
+    const swept = await expireReaderEvents(journal, { keptMs: 60_000, clock: at(180_000) })
+
+    expect(swept).toMatchObject({ outcome: "expired", removed: 2 })
+    expect(describeExpiry(swept)).toContain("deleted 2 deliveries")
+
     const left = await journal.read()
+
     expect(left.ok && left.value.batches).toHaveLength(0)
+
+    /**
+     * The counters are untouched by the deletion, which is the whole of 0349's
+     * second clause: the tallies are the durable record and the deliveries were
+     * a window of inspection over them.
+     */
+    const after = await store.tallies({ treeId: "t_landing" as TreeId })
+
+    expect(after.ok && after.value.find((tally) => tally.nodeId === "n_hero")?.dwellMs).toBe(11_300)
   })
 
   /**

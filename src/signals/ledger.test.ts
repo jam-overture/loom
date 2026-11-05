@@ -144,15 +144,29 @@ describe("the signal ledger", () => {
     }
 
     scroll(2_000)
-    const small = scroll(2_000)
-    const large = scroll(32_000)
+    const small = Math.min(scroll(2_000), scroll(2_000), scroll(2_000))
+    const large = Math.min(scroll(32_000), scroll(32_000))
 
     /**
-     * Linear work gives a ratio near 1; the bound is loose so a busy machine does
-     * not fail it. The copying ledger this replaced grew with the square of the
-     * page, which at sixteen times the nodes is far past it.
+     * Linear work gives a ratio near 1 and quadratic work gives one near 16 —
+     * sixteen times the nodes — so **what this is testing is which of those two
+     * it is**, and anything under 8 is linear with a scheduler in it.
+     *
+     * The bound was 4 and it failed another lane's run on 4 November at
+     * 4.038217117460102, on a diff with no runtime code in it, inside the
+     * 258-file suite on a container that had just finished a `next build`. It
+     * passed three times out of three on its own immediately afterwards. A bound
+     * of 4 on a loaded machine catches the scheduler, and `pnpm verify` green is
+     * now the merge gate for four surfaces — so the lane it fails is whichever
+     * one happens to be running when the container is busy, and that lane cannot
+     * fix it because this file is not theirs.
+     *
+     * Raised, and the best of several runs taken on each size, which is what
+     * `scroll`'s discarded warm-up was already doing in miniature. A quadratic
+     * regression blows 8 by a factor of two, which is the thing worth failing
+     * for.
      */
-    expect(large / small).toBeLessThan(4)
+    expect(large / small).toBeLessThan(8)
   })
 })
 

@@ -227,15 +227,17 @@ export const boundedTelemetryJournal = (
  * The reader-signal buffer the readers screen reads one row of to say whether
  * anything is waiting to be collected.
  *
- * `receive` is the intake endpoint writing what a reader's browser sent, and
- * `forget` is the collector pruning what it has folded in. Neither is a screen
- * waiting for a page.
+ * `receive` is the intake endpoint writing what a reader's browser sent,
+ * `counted` is the collector recording the window it folded, and `forget` is
+ * the expiry sweep deleting what this deployment no longer keeps (0350). None
+ * of the three is a screen waiting for a page.
  */
 export const boundedReaderSignalJournal = (
   journal: ReaderSignalJournal,
   budgetMs: number = PORTAL_READ_BUDGET_MS
 ): ReaderSignalJournal => ({
   receive: (batches) => journal.receive(batches),
+  counted: (request) => journal.counted(request),
   forget: (request) => journal.forget(request),
   read: (request) => readWithin(() => journal.read(request), unavailable, budgetMs),
 })

@@ -4,8 +4,10 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 import {
+  DEFAULT_READER_EVENT_RETENTION_MS,
   DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
+  MIN_READER_EVENT_RETENTION_MS,
   MIN_READER_SIGNAL_WINDOW_MS,
 } from "@jam-overture/loom/signals"
 
@@ -13,10 +15,13 @@ import {
   DEFAULT_REGION_HEADER,
   describeCollectionWindow,
   describeIntakeSwitch,
+  describeKeptWindow,
   describeRegionSettings,
   describeSweepSchedule,
   INTAKE_KEY,
+  KEPT_KEY,
   readCollectionWindow,
+  readKeptWindow,
   readIntakeSettings,
   readIntakeSwitch,
   readRegionFloor,
@@ -76,6 +81,22 @@ describe("readIntakeSettings", () => {
 
     expect(settings.chosen).toEqual({ state: "on" })
     expect(settings.hops).toBe(2)
+  })
+
+  /**
+   * Both windows come off the environment in one read, which is the point of
+   * this file: the facts about a deployment's collection are read where the
+   * facts about a deployment's collection are read (0317).
+   */
+  it("reads both of the windows a delivery lives by", () => {
+    const settings = readIntakeSettings({
+      [INTAKE_KEY]: "on",
+      [WINDOW_KEY]: "900000",
+      [KEPT_KEY]: "604800000",
+    })
+
+    expect(settings.window).toEqual({ state: "set", windowMs: 900_000 })
+    expect(settings.kept).toEqual({ state: "set", keptMs: 604_800_000 })
   })
 
   /** One deployment cannot have two different numbers of proxies in front of it. */
@@ -234,6 +255,80 @@ describe("readCollectionWindow", () => {
     expect(refused.windowMs).toBe(DEFAULT_READER_SIGNAL_WINDOW_MS)
     expect(refused.state).not.toBe("default")
     expect(refused.state).not.toBe("set")
+  })
+})
+
+describe("readKeptWindow", () => {
+  /**
+   * The maintainer's thirty days, taken off the runtime rather than spelled
+   * again (0349): the argument for the number — including that a page view's
+   * signals stay correlatable for as long as it lasts — is in the runtime's own
+   * doc comment, and a second copy of it here is the fault this unit exists not
+   * to repeat (0218, 0235).
+   */
+  it("is the runtime's own default when nothing is set", () => {
+    expect(readKeptWindow(undefined)).toEqual({
+      state: "default",
+      keptMs: DEFAULT_READER_EVENT_RETENTION_MS,
+    })
+    expect(readKeptWindow("   ")).toEqual({
+      state: "default",
+      keptMs: DEFAULT_READER_EVENT_RETENTION_MS,
+    })
+  })
+
+  it("takes a window an operator set, and says it was set", () => {
+    expect(readKeptWindow("604800000")).toEqual({ state: "set", keptMs: 604_800_000 })
+    expect(readKeptWindow(String(MIN_READER_EVENT_RETENTION_MS))).toEqual({
+      state: "set",
+      keptMs: MIN_READER_EVENT_RETENTION_MS,
+    })
+  })
+
+  /**
+   * `30` is the units mistake this setting is written wrongly by: it reads as
+   * thirty days and means thirty milliseconds. The runtime's own schema is what
+   * refuses it, which is why there is no second rule about it here.
+   */
+  it("refuses a value that is not a window this runtime would keep deliveries for", () => {
+    for (const given of ["30", "0", "-1", "nonsense", "90000.5", "a month"]) {
+      expect(readKeptWindow(given)).toEqual({
+        state: "unusable",
+        given,
+        keptMs: DEFAULT_READER_EVENT_RETENTION_MS,
+      })
+    }
+  })
+
+  /**
+   * The state is what carries the refusal, not the number: the notice publishes
+   * `keptMs` whatever the state, and the sweep reads the state and declines to
+   * delete. A caller reading only the number would delete on a window the
+   * operator never asked for.
+   */
+  it("carries the default beside a refused value, so a notice has a number to publish", () => {
+    const refused = readKeptWindow("30")
+
+    expect(refused.keptMs).toBe(DEFAULT_READER_EVENT_RETENTION_MS)
+    expect(refused.state).not.toBe("default")
+    expect(refused.state).not.toBe("set")
+  })
+})
+
+describe("describeKeptWindow", () => {
+  it("quotes what was typed and names the units it wanted", () => {
+    const described = describeKeptWindow(readKeptWindow("30"))
+
+    expect(described).toContain('"30"')
+    expect(described).toContain(KEPT_KEY)
+    expect(described).toContain(String(MIN_READER_EVENT_RETENTION_MS))
+    expect(described).toContain("nothing is being deleted")
+  })
+
+  it("tells an operator how to change a default, and does not nag about one they set", () => {
+    expect(describeKeptWindow(readKeptWindow(undefined))).toContain(`set ${KEPT_KEY}`)
+    expect(describeKeptWindow(readKeptWindow("604800000"))).not.toContain(`set ${KEPT_KEY}`)
+    expect(describeKeptWindow(readKeptWindow("604800000"))).toContain("604800000ms")
   })
 })
 

@@ -13,8 +13,9 @@ import type { LoomDatabase } from "../store/database.js"
  * Nothing in these tables identifies a reader — that is 0146's whole argument —
  * but the buffer holds view keys, and a view key plus another deployment's rows
  * is the only combination in Loom that could correlate anything across a
- * tenancy boundary. It expires within hours; the policy does not depend on
- * that.
+ * tenancy boundary. It used to expire within hours and now expires within the
+ * window the deployment states, thirty days by default (0349, 0350); the policy
+ * never depended on that and now carries more of the weight.
  *
  * Every table is led by `application_id` (0269). The backfill is the column
  * default rather than an `UPDATE`: these five never carried `project_id`, so
@@ -50,8 +51,20 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     sent_at bigint NOT NULL,
     view text,
     signals jsonb NOT NULL,
-    received_at timestamptz NOT NULL DEFAULT now()
+    received_at timestamptz NOT NULL DEFAULT now(),
+    folded_at timestamptz
   )`,
+  /**
+   * **When the fold counted the delivery**, for a deployment whose buffer
+   * predates the kept window (0350).
+   *
+   * Additive, nullable and undefaulted, and the absence is a state the readings
+   * publish: *not yet counted*. There is no backfill and none is wanted — a row
+   * still in this table on a deployment that upgrades was, by the old rule, one
+   * no fold had reached, and a backfill that guessed otherwise would make
+   * retention eligible to delete a delivery the counters never saw.
+   */
+  `ALTER TABLE loom_reader_signals ADD COLUMN IF NOT EXISTS folded_at timestamptz`,
   /**
    * **The application, for a database that predates it (0269).** The same
    * shape the store's tables take: the column is additive and defaulted, and
@@ -83,6 +96,28 @@ export const READER_SIGNALS_DDL: readonly string[] = [
   `ALTER TABLE loom_reader_signals ADD COLUMN IF NOT EXISTS audience_id text NOT NULL DEFAULT 'aud_everyone'`,
   `DROP INDEX IF EXISTS loom_reader_signals_tree_seq_idx`,
   `CREATE INDEX IF NOT EXISTS loom_reader_signals_tree_seq_idx ON loom_reader_signals (application_id, tree_id, seq)`,
+  /**
+   * **The oldest end across every tree** (0350), which is where both sweeps
+   * start: the fold scans for the oldest uncounted delivery and retention for
+   * the oldest kept one.
+   *
+   * Created rather than inherited because the table's lifetime changed. An hour
+   * of deliveries is a cheap scan however it is served; thirty days of them,
+   * with a deployment invited to state more, is not.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_seq_idx ON loom_reader_signals (application_id, seq)`,
+  /**
+   * **The uncounted prefix** (0350), which is the fold's own read and the one
+   * index here that is partial.
+   *
+   * It is partial because the set it serves is bounded by the collection window
+   * and the rest of the table is not: on a deployment folding every hour and
+   * keeping thirty days, this covers about a seven-hundredth of the rows, and
+   * it shrinks to nothing every time the sweep runs. An index on `folded_at`
+   * across the whole table would be one entry per kept delivery to answer a
+   * question only ever asked about the newest few.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_uncounted_idx ON loom_reader_signals (application_id, seq) WHERE folded_at IS NULL`,
   `ALTER TABLE loom_reader_signals ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_tallies (
     application_id text NOT NULL DEFAULT 'app_default',

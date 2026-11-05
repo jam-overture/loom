@@ -1,8 +1,21 @@
 # 0158 — Counting a window of reader signals and forgetting it are one operation
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by [0350](0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)
 **Date:** 2026-09-14
 **Section:** §4c (reader signals)
+
+> **Partially superseded on 5 November 2026 by
+> [0350](0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md).**
+> Counting a window and *forgetting* it are no longer one operation: a counted
+> delivery is **marked** and then deleted by a second sweep on a second window,
+> because
+> [0349](0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)
+> keeps individual deliveries for thirty days by default. The alternative this
+> record rejected — *mark batches as counted rather than deleting them* — is the
+> shape 0350 takes, and 0350 says which of this record's clauses it overturns and
+> which still stand. **The invariant this record exists for is one of the ones
+> that stands**: the set a run counts and the set it marks are one set, decided
+> once, in one place.
 
 ## Context
 

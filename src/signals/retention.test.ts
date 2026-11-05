@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import type { CollectionOutcome, CollectionSummary } from "./collect.js"
+import type { ExpiryOutcome, ExpiryStop } from "./expire.js"
 import { collectionNoticeOf, type DeliveryRetention } from "./notice.js"
 import { describeRetentionPromise, retentionPromiseOf } from "./retention.js"
 
@@ -14,78 +14,98 @@ const MINUTE = 60 * 1000
  * one a reader is shown, so a fixture that spelled `goneWithinMs` itself would
  * be testing a second derivation and could not catch the two drifting apart.
  */
-const retention = (windowMs: number, everyMs?: number): DeliveryRetention => {
-  const { bufferMs, sweep } = collectionNoticeOf({
-    windowMs,
+const retention = (keptMs: number, everyMs?: number): DeliveryRetention => {
+  const { bufferMs, keptMs: kept, sweep } = collectionNoticeOf({
+    windowMs: COUNTS,
+    keptMs,
     ...(everyMs === undefined ? {} : { sweep: { everyMs } }),
   })
 
-  return { bufferMs, sweep }
+  return { bufferMs, keptMs: kept, sweep }
 }
 
 /**
- * Three deliberately different lengths, because every way this reading could be
- * wrong is an addition with one term counted twice.
+ * Four deliberately different lengths, because every way this reading could be
+ * wrong is an addition with one term counted twice or the wrong window read.
  *
- * Fifteen minutes to ripen, a five-minute cron, fifty minutes in the buffer: a
- * ceiling of twenty and a gap of thirty. Doubling the window gives a gap of
- * fifteen, doubling the interval gives twenty-five, doubling the ceiling gives
- * ten, and dropping the window gives forty-five — four plausible minute figures
- * and no two of them equal.
+ * Five minutes to be counted, fifteen minutes kept, a five-minute cron, fifty
+ * minutes in the table: a ceiling of twenty and a gap of thirty. Reading the
+ * collection window instead of the kept one gives a ceiling of ten; summing the
+ * two windows rather than taking the later gives twenty-five; doubling the
+ * ceiling gives ten and dropping the sweep gives thirty-five — five plausible
+ * minute figures and no two of them equal.
  */
-const RIPENS = 15 * MINUTE
+const COUNTS = 5 * MINUTE
+const KEPT = 15 * MINUTE
 const SWEEPS = 5 * MINUTE
 const CEILING = 20 * MINUTE
 const OLDEST = 50 * MINUTE
 const PAST = 30 * MINUTE
 
-const summaryOf = (oldestMs: number): CollectionSummary => ({
-  counted: 3,
-  tallies: 2,
-  funnels: 0,
-  views: 3,
-  uncorrelated: 0,
-  redelivered: 0,
-  oldestMs,
-})
-
-const collected = (oldestMs: number): CollectionOutcome => ({
-  outcome: "collected",
-  summary: summaryOf(oldestMs),
+const expired = (oldestMs: number, stopped: ExpiryStop = "young"): ExpiryOutcome => ({
+  outcome: "expired",
   removed: 3,
+  oldestMs,
+  stopped,
   more: false,
 })
 
 describe("retentionPromiseOf", () => {
   it("names the gap when the oldest delivery outlived the ceiling readers are promised", () => {
-    expect(retentionPromiseOf(collected(OLDEST), retention(RIPENS, SWEEPS))).toEqual({
+    expect(retentionPromiseOf(expired(OLDEST), retention(KEPT, SWEEPS))).toEqual({
       state: "broken",
       oldestMs: OLDEST,
       goneWithinMs: CEILING,
       byMs: PAST,
+      uncounted: false,
     })
   })
 
   /**
-   * The ceiling is the ripeness window plus one sweep, so a delivery exactly on
-   * it is a sweep that ran on time and not one that is late. The boundary is
-   * tested from both sides because a deployment sweeping on the interval it
-   * stated sits on it: a reading that faulted at the boundary would cry wolf on
-   * every healthy run, which is the one way it could be made useless.
+   * The ceiling is the later of the two windows plus one sweep, so a delivery
+   * exactly on it is a sweep that ran on time and not one that is late. The
+   * boundary is tested from both sides because a deployment sweeping on the
+   * interval it stated sits on it: a reading that faulted at the boundary would
+   * cry wolf on every healthy run, which is the one way it could be made
+   * useless.
    */
   it("keeps the promise at the ceiling and breaks it one millisecond past", () => {
-    expect(retentionPromiseOf(collected(CEILING), retention(RIPENS, SWEEPS))).toMatchObject({
+    expect(retentionPromiseOf(expired(CEILING), retention(KEPT, SWEEPS))).toMatchObject({
       state: "kept",
       oldestMs: CEILING,
     })
-    expect(retentionPromiseOf(collected(CEILING + 1), retention(RIPENS, SWEEPS))).toMatchObject({
+    expect(retentionPromiseOf(expired(CEILING + 1), retention(KEPT, SWEEPS))).toMatchObject({
       state: "broken",
       byMs: 1,
     })
   })
 
+  /**
+   * The ceiling is taken off the kept window and not the collection window
+   * (0350), which is the one substitution that would read *kept* on a
+   * deployment keeping deliveries three times longer than it says.
+   */
+  it("judges against the window a delivery is deleted at, not the one it is counted at", () => {
+    expect(retentionPromiseOf(expired(12 * MINUTE), retention(KEPT, SWEEPS))).toMatchObject({
+      state: "kept",
+      goneWithinMs: CEILING,
+    })
+  })
+
+  /**
+   * Where the kept window is the shorter of the two, a delivery still has to be
+   * counted before anything may delete it, so the ceiling is the collection
+   * window plus a sweep rather than the shorter promise.
+   */
+  it("takes the later of the two windows where the kept one is shorter", () => {
+    expect(retentionPromiseOf(expired(MINUTE), retention(MINUTE, SWEEPS))).toMatchObject({
+      state: "kept",
+      goneWithinMs: COUNTS + SWEEPS,
+    })
+  })
+
   it("carries both figures when the promise is being kept, because the sentence is the comparison", () => {
-    expect(retentionPromiseOf(collected(16 * MINUTE), retention(RIPENS, SWEEPS))).toEqual({
+    expect(retentionPromiseOf(expired(16 * MINUTE), retention(KEPT, SWEEPS))).toEqual({
       state: "kept",
       oldestMs: 16 * MINUTE,
       goneWithinMs: CEILING,
@@ -93,29 +113,47 @@ describe("retentionPromiseOf", () => {
   })
 
   /**
-   * A buffer months behind is still a deployment that promised nothing, so
+   * A table months behind is still a deployment that promised nothing, so
    * there is no claim of its own to hold it to. The remedy is a stated
    * interval, and the operator hears about that from the setting.
    */
-  it("judges nothing where the deployment stated no interval, however old the buffer is", () => {
-    expect(retentionPromiseOf(collected(40 * 24 * 60 * MINUTE), retention(RIPENS))).toEqual({
+  it("judges nothing where the deployment stated no interval, however old the table is", () => {
+    expect(retentionPromiseOf(expired(40 * 24 * 60 * MINUTE), retention(KEPT))).toEqual({
       state: "unpromised",
     })
   })
 
   /**
-   * Nothing ripe is the one quiet answer that is a proof: the scan runs from the
-   * oldest end, so every delivery is younger than the ripeness window, and the
-   * ceiling is that window plus a sweep.
+   * Nothing expirable is the one quiet answer that is a proof: the scan runs
+   * from the oldest end, so every delivery is younger than the kept window, and
+   * the ceiling is that window plus a sweep.
    */
-  it("reads a run that found nothing ripe as nothing being past the ceiling", () => {
+  it("reads a run that found nothing old enough as nothing being past the ceiling", () => {
     expect(
-      retentionPromiseOf({ outcome: "nothing-ripe", waiting: 4 }, retention(RIPENS, SWEEPS))
+      retentionPromiseOf(
+        { outcome: "nothing-expired", waiting: 4, oldestMs: MINUTE, stopped: "young" },
+        retention(KEPT, SWEEPS)
+      )
+    ).toEqual({ state: "kept", oldestMs: MINUTE, goneWithinMs: CEILING })
+  })
+
+  /**
+   * A run that read no row at all saw no delivery, which is a table with
+   * nothing in it. It is the same answer a young oldest row gives and for a
+   * stronger reason, so it is `unripe` rather than a figure of nought — which
+   * would say *a delivery that arrived this instant*.
+   */
+  it("reads a table with nothing in it as nothing being past the ceiling", () => {
+    expect(
+      retentionPromiseOf(
+        { outcome: "nothing-expired", waiting: 0, oldestMs: null, stopped: "end" },
+        retention(KEPT, SWEEPS)
+      )
     ).toEqual({ state: "unripe" })
   })
 
-  it("says nothing about a run that never reached the buffer", () => {
-    const configured = retention(RIPENS, SWEEPS)
+  it("says nothing about a run that never reached the table", () => {
+    const configured = retention(KEPT, SWEEPS)
 
     expect(
       retentionPromiseOf({ outcome: "refused", reason: 'the clock read "later"' }, configured)
@@ -132,10 +170,10 @@ describe("retentionPromiseOf", () => {
    * The age reaches here already subtracted, so the one way it can arrive
    * unusable is a stored instant that would not parse. Answering `kept` on it
    * would be the reading's single worst failure — a false *all is well* over a
-   * buffer nothing could measure.
+   * table nothing could measure.
    */
   it("says nothing where the age is not a number, rather than keeping the promise", () => {
-    expect(retentionPromiseOf(collected(Number.NaN), retention(RIPENS, SWEEPS))).toEqual({
+    expect(retentionPromiseOf(expired(Number.NaN), retention(KEPT, SWEEPS))).toEqual({
       state: "unread",
     })
   })
@@ -146,35 +184,42 @@ describe("retentionPromiseOf", () => {
    * age is never longer than a positive ceiling (0274).
    */
   it("keeps the promise on a delivery received in the future", () => {
-    expect(retentionPromiseOf(collected(-MINUTE), retention(RIPENS, SWEEPS))).toMatchObject({
+    expect(retentionPromiseOf(expired(-MINUTE), retention(KEPT, SWEEPS))).toMatchObject({
       state: "kept",
       oldestMs: -MINUTE,
     })
   })
 
   /**
-   * The counters took the window and the buffer still holds it, so the
-   * deliveries that were judged are the deliveries still there. The outcome is
-   * loud about its own failure; this reading answers the question it was asked.
+   * The gap is real whichever sweep is at fault, and the one case where the
+   * remedy is not the expiry run's is named rather than softened: nothing may
+   * delete a delivery no fold has counted, so a deployment whose collection has
+   * stopped breaks this promise by not counting (0350).
    */
-  it("judges a run whose buffer would not forget what it counted", () => {
+  it("says when the oldest delivery is held by a fold that has not run", () => {
     expect(
       retentionPromiseOf(
         {
-          outcome: "counted-not-forgotten",
-          summary: summaryOf(OLDEST),
-          before: 41,
-          error: { code: "unavailable", detail: "gone" },
+          outcome: "nothing-expired",
+          waiting: 9,
+          oldestMs: OLDEST,
+          stopped: "uncounted",
         },
-        retention(RIPENS, SWEEPS)
+        retention(KEPT, SWEEPS)
       )
-    ).toMatchObject({ state: "broken", byMs: PAST })
+    ).toEqual({
+      state: "broken",
+      oldestMs: OLDEST,
+      goneWithinMs: CEILING,
+      byMs: PAST,
+      uncounted: true,
+    })
   })
 
   /** One configuration, one answer, however often it is asked. */
   it("answers the same on two calls over one run", () => {
-    const run = collected(OLDEST)
-    const configured = retention(RIPENS, SWEEPS)
+    const run = expired(OLDEST)
+    const configured = retention(KEPT, SWEEPS)
 
     expect(retentionPromiseOf(run, configured)).toEqual(retentionPromiseOf(run, configured))
   })
@@ -182,18 +227,26 @@ describe("retentionPromiseOf", () => {
 
 describe("describeRetentionPromise", () => {
   const line = (oldestMs: number, everyMs?: number): string =>
-    describeRetentionPromise(retentionPromiseOf(collected(oldestMs), retention(RIPENS, everyMs)))
+    describeRetentionPromise(retentionPromiseOf(expired(oldestMs), retention(KEPT, everyMs)))
 
   it("gives the operator both numbers and how far apart they are", () => {
     expect(line(OLDEST, SWEEPS)).toBe(
-      "the oldest delivery waiting is 3000000ms old and readers are promised one is gone within 1200000ms of arriving, " +
+      "the oldest delivery kept is 3000000ms old and readers are promised one is gone within 1200000ms of arriving, " +
         "so that promise has been false for 1800000ms: this deployment is sweeping less often than it stated, or not at all"
     )
   })
 
+  it("names the fold rather than the sweep where an uncounted delivery is what is left", () => {
+    expect(
+      describeRetentionPromise(
+        retentionPromiseOf(expired(OLDEST, "uncounted"), retention(KEPT, SWEEPS))
+      )
+    ).toContain("the remedy is to run collection")
+  })
+
   it("names the comparison rather than a verdict where the promise is being kept", () => {
     expect(line(16 * MINUTE, SWEEPS)).toBe(
-      "the oldest delivery waiting is 960000ms old, and readers are promised one is gone within 1200000ms of arriving"
+      "the oldest delivery kept is 960000ms old, and readers are promised one is gone within 1200000ms of arriving"
     )
   })
 
@@ -202,9 +255,12 @@ describe("describeRetentionPromise", () => {
     expect(line(OLDEST)).toContain("promised no ceiling")
     expect(
       describeRetentionPromise(
-        retentionPromiseOf({ outcome: "nothing-ripe", waiting: 0 }, retention(RIPENS, SWEEPS))
+        retentionPromiseOf(
+          { outcome: "nothing-expired", waiting: 0, oldestMs: null, stopped: "end" },
+          retention(KEPT, SWEEPS)
+        )
       )
-    ).toContain("old enough to count")
+    ).toContain("old enough to delete")
     expect(describeRetentionPromise({ state: "unread" })).toContain("no delivery was read")
   })
 })

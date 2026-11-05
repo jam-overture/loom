@@ -86,6 +86,21 @@ export const loomReaderSignals = pgTable(
     receivedAt: timestamp("received_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),
+    /**
+     * When a fold counted this delivery into the counters (0350).
+     *
+     * Nullable and undefaulted, and null is a state rather than a gap: *not yet
+     * counted*. It is the only column on this table a second statement ever
+     * writes, and the only writer is the collection run — which is why the
+     * `UPDATE` that sets it carries `folded_at IS NULL`, so a repeat of that
+     * statement cannot move an instant a reading has been taken against.
+     *
+     * A row written before the column existed reads as uncounted, which is
+     * conservative in the one direction that matters: retention will not delete
+     * what nothing says was counted, so the first fold after the migration
+     * stamps it and the second sweep takes it.
+     */
+    foldedAt: timestamp("folded_at", { withTimezone: true }),
   },
   (table) => [
     /**
@@ -100,6 +115,18 @@ export const loomReaderSignals = pgTable(
      * serve a filter no caller expresses.
      */
     index("loom_reader_signals_tree_seq_idx").on(table.applicationId, table.treeId, table.seq),
+    /**
+     * The oldest end of the whole application, which both sweeps start from
+     * (0350).
+     *
+     * It did not exist while the table held an hour of deliveries, because a
+     * scan of an hour is cheap however it is served. The kept window makes it
+     * thirty days by default and invites a deployment to lengthen it, so the
+     * two reads that run from the oldest end across every tree — the fold's
+     * scan and retention's — are the two reads whose cost would have grown with
+     * the setting.
+     */
+    index("loom_reader_signals_seq_idx").on(table.applicationId, table.seq),
   ]
 )
 

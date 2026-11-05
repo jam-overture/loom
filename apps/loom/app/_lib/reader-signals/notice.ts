@@ -12,11 +12,11 @@ import type { IntakeSettings } from "./settings"
  * hands it **this deployment's own configuration**, read from the environment in
  * [`settings.ts`](./settings.ts) rather than described in prose.
  *
- * Three numbers in a notice are a deployment's rather than the framework's —
- * how long a delivery takes to ripen, the floor under a published country, and
- * how often the sweep that deletes a ripe one runs — and the window was the
- * one of those that lived in a sweep script. A privacy page cannot be derived
- * from a `const` in `scripts/`.
+ * Four numbers in a notice are a deployment's rather than the framework's —
+ * how long a delivery takes to ripen, how long it is then kept, the floor under
+ * a published country, and how often the sweep runs — and the first of them was
+ * the one that lived in a sweep script. A privacy page cannot be derived from a
+ * `const` in `scripts/`.
  *
  * ## What it reads, and what it deliberately does not
  *
@@ -55,6 +55,17 @@ import type { IntakeSettings } from "./settings"
 export const deploymentNoticeOf = (settings: IntakeSettings): CollectionNotice =>
   collectionNoticeOf({
     windowMs: settings.window.windowMs,
+    /**
+     * The window this deployment keeps a counted delivery for, which is the one
+     * of the two ages a reader is promised a deletion at (0349, 0350).
+     *
+     * Read as configured rather than as clamped, for the collection window's
+     * reason — and a value that could not be read publishes the default, which
+     * is what the expiry sweep would have used had it been willing to run at
+     * all. That gap is the loudest failure in this file and it is
+     * `describeKeptWindow`'s to say to the operator who can close it.
+     */
+    keptMs: settings.kept.keptMs,
     /**
      * Spread rather than handed `undefined`, which is the same shape
      * `receive.ts` reads the switch with: under `exactOptionalPropertyTypes` an

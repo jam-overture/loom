@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm"
 import { describe, expect, it, vi } from "vitest"
 
 import { pgliteTemplate } from "../../tools/pglite/template.js"
+import { applicationIdSchema } from "../application/application.js"
 import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import {
   batchOf,
@@ -19,6 +20,7 @@ import {
 import { rowSecurityOn } from "../testing/row-security.js"
 
 import { describeWindowApplyContract } from "./applied-window.contract.js"
+import { describeKeptDeliveryContract } from "./kept.contract.js"
 import { ensureReaderSignalsSchema } from "./migrate.js"
 import {
   postgresReaderRegionStore,
@@ -33,6 +35,8 @@ import type { ReaderTally } from "./rollup.js"
  * `pnpm verify` stays green offline.
  */
 vi.setConfig({ testTimeout: 30_000 })
+
+const APPLICATION = applicationIdSchema.parse("app_ours")
 
 const freshDatabase = pgliteTemplate(ensureReaderSignalsSchema)
 const emptyDatabase = pgliteTemplate()
@@ -51,6 +55,10 @@ describeReaderRegionStoreContract("postgresReaderRegionStore", async () =>
 
 describeWindowApplyContract("postgresReaderTallyStore", async () =>
   postgresReaderTallyStore(await freshDatabase())
+)
+
+describeKeptDeliveryContract("postgresReaderSignalJournal", async () =>
+  postgresReaderSignalJournal(await freshDatabase())
 )
 
 const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
@@ -271,6 +279,89 @@ describe("the reader signal tables — Postgres specifics", () => {
     const after = await store.pageViews()
 
     expect(after.ok && after.value[0]).toMatchObject({ appearances: 15, foldedAt: AT })
+  })
+
+  /**
+   * The migration the kept window needs (0350).
+   *
+   * A deployment counting readers today has a `loom_reader_signals` with no
+   * `folded_at` in it, and the rows in it are — by the rule that was in force
+   * when they were written — deliveries no fold had reached. So the column
+   * arrives nullable and undefaulted and **nothing is backfilled**: a backfill
+   * that guessed *counted* would make retention eligible to delete a delivery
+   * the counters never saw, which is the one loss in this subsystem that cannot
+   * be undone.
+   *
+   * The partial index is asserted beside it, because an index that silently did
+   * not exist would leave the fold's scan reading the whole kept window and
+   * nothing would fail.
+   */
+  it("adds the fold's mark to a buffer that predates it, counting none of its rows", async () => {
+    const db = await emptyDatabase()
+
+    await db.execute(
+      sql.raw(`CREATE TABLE loom_reader_signals (
+        seq bigserial PRIMARY KEY,
+        tree_id text NOT NULL,
+        revision integer NOT NULL,
+        sent_at bigint NOT NULL,
+        view text,
+        signals jsonb NOT NULL,
+        received_at timestamptz NOT NULL DEFAULT now()
+      )`)
+    )
+    await db.execute(
+      sql.raw(`INSERT INTO loom_reader_signals (tree_id, revision, sent_at, view, signals)
+        VALUES ('${TREE}', 1, 1000, NULL, '[{"kind":"viewed","nodeId":"${nodeId("hero")}","type":"loom.section","at":1000}]'::jsonb)`)
+    )
+    await ensureReaderSignalsSchema(db)
+
+    const journal = postgresReaderSignalJournal(db)
+    const kept = await journal.read()
+
+    expect(kept.ok && kept.value.batches).toHaveLength(1)
+    expect(kept.ok && kept.value.batches[0]?.foldedAt).toBeUndefined()
+
+    /** It reads as uncounted, which is what the fold's own scan has to see. */
+    const uncounted = await journal.read({ counted: false })
+
+    expect(uncounted.ok && uncounted.value.batches).toHaveLength(1)
+
+    const indexes = await db.execute(
+      sql.raw(
+        `SELECT indexname FROM pg_indexes WHERE tablename = 'loom_reader_signals' ORDER BY indexname`
+      )
+    )
+    const names = (indexes as unknown as { readonly rows: readonly { indexname: string }[] }).rows.map(
+      (row) => row.indexname
+    )
+
+    expect(names).toContain("loom_reader_signals_uncounted_idx")
+    expect(names).toContain("loom_reader_signals_seq_idx")
+  })
+
+  /**
+   * The mark is a second write to a row the request path wrote, and it is
+   * scoped like every other statement in this journal: `seq` is database-wide,
+   * so an unscoped `UPDATE` would stamp another deployment's uncounted
+   * deliveries and make them eligible for its retention sweep.
+   */
+  it("marks only the application's own deliveries as counted", async () => {
+    const db = await freshDatabase()
+    const ours = postgresReaderSignalJournal(db, { application: APPLICATION })
+    const theirs = postgresReaderSignalJournal(db)
+
+    await theirs.receive([batchOf([viewed("hero")])])
+    await ours.receive([batchOf([viewed("pricing")])])
+
+    const mine = await ours.read()
+    const seq = mine.ok ? (mine.value.batches[0]?.seq ?? 0) : 0
+
+    expect((await ours.counted({ before: seq + 1, at: AT })).ok).toBe(true)
+
+    const left = await theirs.read({ counted: false })
+
+    expect(left.ok && left.value.batches).toHaveLength(1)
   })
 
   /**
