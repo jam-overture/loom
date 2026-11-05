@@ -28,7 +28,7 @@ its unit serves.
 | # | Step | Screen | Today |
 | --- | --- | --- | --- |
 | 1 | Readers act: views, dwells, presses, opens, completions arrive with the project key | Signals | built (tallies, buffer, by page) |
-| 2 | A goal says which signals count | Goals | new |
+| 2 | A goal says which signals count | Goals | partly (goals kept and measured, 0350; proposals do not read them yet) |
 | 3 | Loom proposes one change toward a goal | For review | partly (proposals exist, no goal) |
 | 4 | A person accepts or turns it down | For review | partly (the queue exists, as *Waiting*) |
 | 5 | An accepted change becomes a pull request on the site | Unit 8 | new |
