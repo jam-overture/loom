@@ -27,7 +27,7 @@ const batch = (seq: number, treeId: string, receivedAt: string, signals = 2): Re
 
 describe("what has arrived for a project", () => {
   it("is nothing at all for a project nothing has reached", () => {
-    expect(arrivalsOf([], [])).toEqual({ opened: 0, pages: [], recent: [], latest: undefined })
+    expect(arrivalsOf([], [])).toEqual({ opened: 0, recent: [], latest: undefined })
   })
 
   /** `opened` is the one figure that adds across versions and months (0219). */
@@ -38,43 +38,6 @@ describe("what has arrived for a project", () => {
     )
 
     expect(arrivals.opened).toBe(7)
-  })
-
-  /** Whether readers arrived is a question about the page, so its audiences are one row here. */
-  it("puts a page's audiences together into one row", () => {
-    const arrivals = arrivalsOf(
-      [
-        row("t_a", 1, 3, "2026-10-20T10:00:00.000Z", "aud_everyone"),
-        row("t_a", 1, 2, "2026-10-20T12:00:00.000Z", "aud_trial"),
-      ],
-      []
-    )
-
-    expect(arrivals.pages).toEqual([
-      { treeId: "t_a", revision: 1, opened: 5, lastMoved: "2026-10-20T12:00:00.000Z" },
-    ])
-  })
-
-  it("keeps two versions of one page apart", () => {
-    const arrivals = arrivalsOf(
-      [row("t_a", 1, 3, "2026-10-20T10:00:00.000Z"), row("t_a", 2, 1, "2026-10-20T11:00:00.000Z")],
-      []
-    )
-
-    expect(arrivals.pages.map((page) => page.revision)).toEqual([1, 2])
-  })
-
-  it("lists the busiest page first, and the most recent of two equally busy", () => {
-    const arrivals = arrivalsOf(
-      [
-        row("t_quiet", 1, 1, "2026-10-20T12:00:00.000Z"),
-        row("t_old", 1, 5, "2026-10-20T09:00:00.000Z"),
-        row("t_new", 1, 5, "2026-10-20T10:00:00.000Z"),
-      ],
-      []
-    )
-
-    expect(arrivals.pages.map((page) => page.treeId)).toEqual(["t_new", "t_old", "t_quiet"])
   })
 
   /** The batch somebody just sent is the one they are looking for. */

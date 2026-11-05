@@ -26,16 +26,6 @@ import type { ReceivedBatch, StoredPageViews } from "@jam-overture/loom/signals"
  * wrong by however long collection waited.
  */
 
-/** One page at one version, with every audience it was served under added together. */
-export type PageArrivals = {
-  readonly treeId: string
-  readonly revision: number
-  /** Page views that began on this version, exact (0219). */
-  readonly opened: number
-  /** When the row last moved: an arrival or a collection, whichever was later. */
-  readonly lastMoved: string
-}
-
 /** One batch the buffer is still holding. */
 export type RecentArrival = {
   readonly treeId: string
@@ -52,8 +42,6 @@ export type Latest =
 export type Arrivals = {
   /** Page views counted across every page and version. */
   readonly opened: number
-  /** Busiest first, then most recently moved, so the page a person just tested is near the top. */
-  readonly pages: readonly PageArrivals[]
   /** Newest first. */
   readonly recent: readonly RecentArrival[]
   /** `undefined` where nothing has ever arrived. */
@@ -61,44 +49,6 @@ export type Arrivals = {
 }
 
 const later = (a: string, b: string): string => (a >= b ? a : b)
-
-/**
- * The rows the page-view store keeps, one per page, version and audience,
- * folded to one per page and version.
- *
- * Summing across audiences is right here and would be wrong on a reading
- * screen. This screen asks *did readers arrive*, which is a question about the
- * page; a reading that compares two forms of it is 0263's, and keeps them
- * apart.
- */
-const byPage = (rows: readonly StoredPageViews[]): readonly PageArrivals[] => {
-  const pages = new Map<string, PageArrivals>()
-
-  for (const row of rows) {
-    const at = `${row.treeId}\u0000${row.revision}`
-    const held = pages.get(at)
-
-    pages.set(
-      at,
-      held === undefined
-        ? {
-            treeId: row.treeId,
-            revision: row.revision,
-            opened: row.opened,
-            lastMoved: row.updatedAt,
-          }
-        : {
-            ...held,
-            opened: held.opened + row.opened,
-            lastMoved: later(held.lastMoved, row.updatedAt),
-          }
-    )
-  }
-
-  return [...pages.values()].sort(
-    (a, b) => b.opened - a.opened || b.lastMoved.localeCompare(a.lastMoved)
-  )
-}
 
 /**
  * Everything the screen says, from the page-view rows and the newest page of
@@ -112,8 +62,6 @@ export const arrivalsOf = (
   rows: readonly StoredPageViews[],
   newest: readonly ReceivedBatch[]
 ): Arrivals => {
-  const pages = byPage(rows)
-
   const recent = [...newest]
     .sort((a, b) => b.seq - a.seq)
     .map((batch) => ({
@@ -124,14 +72,13 @@ export const arrivalsOf = (
     }))
 
   const arrived = recent[0]?.receivedAt
-  const counted = pages.reduce<string | undefined>(
-    (latest, page) => (latest === undefined ? page.lastMoved : later(latest, page.lastMoved)),
+  const counted = rows.reduce<string | undefined>(
+    (latest, row) => (latest === undefined ? row.updatedAt : later(latest, row.updatedAt)),
     undefined
   )
 
   return {
-    opened: pages.reduce((sum, page) => sum + page.opened, 0),
-    pages,
+    opened: rows.reduce((sum, row) => sum + row.opened, 0),
     recent,
     latest:
       arrived !== undefined

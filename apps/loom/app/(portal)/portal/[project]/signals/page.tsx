@@ -1,4 +1,5 @@
 import Link from "next/link"
+import type { ReactNode } from "react"
 import { notFound } from "next/navigation"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
@@ -6,16 +7,30 @@ import { projectIdSchema } from "@jam-overture/loom/store"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
+import {
+  byPageListOf,
+  byPageRowsOf,
+  openRowOf,
+  pageDrawerOf,
+  parseCursor,
+  waitingByPage,
+  type ByPageReadings,
+} from "@/app/(portal)/_lib/by-page"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import { turnedAwayOf, type TurnedAway } from "@/app/(portal)/_lib/turned-away"
 import { plainMoment } from "@/app/(portal)/_lib/when"
+import { holdsFor } from "@/app/(portal)/_lib/write"
+import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { boundedReaderSignalJournal, boundedReaderTallyStore } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
-import { readWithin } from "@/app/_lib/app/bounded-store"
+import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 import { readingsFor } from "@/app/_lib/reader-signals/intake"
+
+import { ByPageTable, PageDrawerPanel } from "./_components/by-page"
 
 /**
  * *Signals*: what has arrived for one project — unit 5 of `docs/portal.md`,
@@ -40,6 +55,13 @@ import { readingsFor } from "@/app/_lib/reader-signals/intake"
  * this project's published pages alone, never from a store that would be the
  * wrong project's, and a failure to read them costs the names and nothing
  * else.
+ *
+ * **By page** (8a) is one row per page, newest first and fifty to a page,
+ * added up across versions and audiences from the tallies, with the part
+ * pressed most and how many changes wait on it; `?page=` opens the drawer on
+ * one. `_lib/by-page.ts` holds what it says. The changes waiting are a
+ * figure the list can do without, so a failure to read them costs the badge
+ * alone.
  */
 
 /** Enough to see a batch you just sent land, and no more than one bounded read returns. */
@@ -56,7 +78,10 @@ const Figure = ({ label, value, note }: { label: string; value: string; note: st
 /** `undefined` where the refusals could not be read, which is said rather than drawn as a nought. */
 const refusedFigure = (turnedAway: TurnedAway | undefined) =>
   turnedAway === undefined
-    ? { value: "Not available", note: "This deployment could not read what it turned away." }
+    ? {
+        value: "Not available",
+        note: "This deployment could not read what it turned away.",
+      }
     : {
         value: turnedAway.refused.toLocaleString("en-GB"),
         note:
@@ -95,10 +120,12 @@ const Received = ({
   arrivals,
   turnedAway,
   names,
+  byPage,
 }: {
   arrivals: Arrivals
   turnedAway: TurnedAway | undefined
   names: ReadonlyMap<string, string>
+  byPage: ReactNode
 }) => (
   <div className="flex flex-col gap-6">
     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -153,36 +180,58 @@ const Received = ({
 
     <section className="flex flex-col gap-2">
       <h2 className="text-sm font-medium tracking-tight">By page</h2>
-      {arrivals.pages.length === 0 ? (
-        <p className="text-ink-muted text-xs">No page view has been counted yet.</p>
-      ) : (
-        <table className="w-full text-left text-xs">
-          <thead className="text-ink-muted">
-            <tr>
-              <th className="py-1.5 font-normal">Page</th>
-              <th className="py-1.5 font-normal">Version</th>
-              <th className="py-1.5 text-right font-normal">Page views</th>
-              <th className="py-1.5 text-right font-normal">Last moved</th>
-            </tr>
-          </thead>
-          <tbody>
-            {arrivals.pages.map((page) => (
-              <tr key={`${page.treeId}-${page.revision}`} className="border-edge-subtle border-t">
-                <PageCell treeId={page.treeId} names={names} />
-                <td className="py-1.5">{page.revision}</td>
-                <td className="py-1.5 text-right">{page.opened.toLocaleString("en-GB")}</td>
-                <td className="py-1.5 text-right">{plainMoment(page.lastMoved)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {byPage}
     </section>
   </div>
 )
 
-const SignalsPage = async ({ params }: { params: Promise<{ project: string }> }) => {
+/** A query value as one string, or `undefined` for none or for a repeated key. */
+const single = (value: string | readonly string[] | undefined): string | undefined =>
+  typeof value === "string" ? value : undefined
+
+const ByPage = ({
+  readings,
+  from,
+  open,
+  projectId,
+}: {
+  readings: ByPageReadings
+  from: string | undefined
+  open: string | undefined
+  projectId: string
+}) => {
+  const rows = byPageRowsOf(readings)
+  const list = byPageListOf(rows, parseCursor(from))
+  const address = { base: `/portal/${projectId}/signals`, from }
+  const opened = openRowOf(rows, open)
+
+  if (rows.length === 0) {
+    return <p className="text-ink-muted text-xs">No page view has been counted yet.</p>
+  }
+
+  return (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+      <ByPageTable list={list} address={address} open={opened?.treeId} />
+      {opened === undefined ? null : (
+        <PageDrawerPanel
+          drawer={pageDrawerOf(opened, readings.tallies, readings.published)}
+          address={address}
+          projectId={projectId}
+        />
+      )}
+    </div>
+  )
+}
+
+const SignalsPage = async ({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ project: string }>
+  searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>
+}) => {
   const asked = projectIdSchema.safeParse((await params).project)
+  const query = await searchParams
 
   if (!asked.success) notFound()
 
@@ -207,12 +256,16 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
    */
   const readings = application === undefined ? undefined : readingsFor(application.applicationId)
 
-  const [rows, newest, refusals, published] =
+  const [rows, tallies, newest, refusals, published, waiting, copies] =
     readings === undefined || application === undefined
-      ? [undefined, undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined, undefined, undefined, undefined]
       : await Promise.all([
           boundedReaderTallyStore(readings.tallies).pageViews(),
-          boundedReaderSignalJournal(readings.journal).read({ direction: "older", limit: RECENT }),
+          boundedReaderTallyStore(readings.tallies).tallies(),
+          boundedReaderSignalJournal(readings.journal).read({
+            direction: "older",
+            limit: RECENT,
+          }),
           readWithin(
             () => readings.refusals.read(),
             (detail) => ({ code: "unavailable" as const, detail })
@@ -221,10 +274,20 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
             () => publishedPagesFor(application.applicationId).list(),
             (detail) => ({ code: "unavailable" as const, detail })
           ),
+          holdsFor(application.applicationId).waiting(),
+          readWithin(
+            () => pageCopiesFor(application.applicationId).list(),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
         ])
 
   const turnedAway = refusals?.ok === true ? turnedAwayOf(refusals.value) : undefined
   const names = published?.ok === true ? pageNamesOf(published.value) : new Map<string, string>()
+  const waitingByPageOf =
+    waiting?.ok === true && copies?.ok === true
+      ? waitingByPage(waiting.value.held, copies.value)
+      : undefined
 
   const connect = `/portal/${projectId}/connect`
 
@@ -233,6 +296,7 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
       !project.ok ||
       !applications.ok ||
       (rows !== undefined && !rows.ok) ||
+      (tallies !== undefined && !tallies.ok) ||
       (newest !== undefined && !newest.ok)
     ) {
       return (
@@ -242,7 +306,12 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
       )
     }
 
-    if (application === undefined || rows === undefined || newest === undefined) {
+    if (
+      application === undefined ||
+      rows === undefined ||
+      tallies === undefined ||
+      newest === undefined
+    ) {
       return (
         <StateNotice tone="failure" title="There is no single site to read">
           This project does not hold exactly one site, so nothing can be filed under it. Tell
@@ -273,7 +342,26 @@ const SignalsPage = async ({ params }: { params: Promise<{ project: string }> })
       )
     }
 
-    return <Received arrivals={arrivals} turnedAway={turnedAway} names={names} />
+    return (
+      <Received
+        arrivals={arrivals}
+        turnedAway={turnedAway}
+        names={names}
+        byPage={
+          <ByPage
+            readings={{
+              pageViews: rows.value,
+              tallies: tallies.value,
+              published: published?.ok === true ? published.value : [],
+              waiting: waitingByPageOf,
+            }}
+            from={single(query.from)}
+            open={single(query.page)}
+            projectId={projectId}
+          />
+        }
+      />
+    )
   })()
 
   return (
