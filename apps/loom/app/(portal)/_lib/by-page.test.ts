@@ -1,0 +1,302 @@
+import { describe, expect, it } from "vitest"
+
+import type { TreeId } from "@jam-overture/loom"
+import type { StoredPageViews } from "@jam-overture/loom/signals"
+import type { HeldProposal } from "@jam-overture/loom/write"
+
+import { pageFixture } from "@/app/_lib/pages/fixtures"
+
+import {
+  byPageListOf,
+  byPageRowsOf,
+  cursorOf,
+  openRowOf,
+  pageDrawerOf,
+  parseCursor,
+  waitingByPage,
+  type ByPageRow,
+} from "./by-page"
+import { elementIdsOf, tallyOf } from "./proposing/fixtures"
+
+const home = pageFixture("home", "Welcome", 3)
+const [, heading] = elementIdsOf(home)
+
+if (heading === undefined) throw new Error("the fixture has a heading")
+
+const views = (
+  treeId: string,
+  revision: number,
+  opened: number,
+  updatedAt: string,
+  audienceId = "aud_everyone"
+): StoredPageViews =>
+  ({
+    treeId,
+    revision,
+    opened,
+    appearances: opened,
+    audienceId,
+    updatedAt,
+  }) as StoredPageViews
+
+const nothingElse = {
+  tallies: [],
+  published: [],
+  waiting: new Map<string, number>(),
+}
+
+const rowAt = (treeId: string, lastMoved: string): ByPageRow => ({
+  treeId,
+  name: undefined,
+  liveVersion: 1,
+  opened: 1,
+  lastMoved,
+  mostPressed: undefined,
+  waiting: 0,
+})
+
+/** Rows `t_00` to `t_<n-1>`, each a minute older than the last, so the list's order is their names'. */
+const rowsOf = (n: number): readonly ByPageRow[] =>
+  Array.from({ length: n }, (_, index) =>
+    rowAt(
+      `t_${String(index).padStart(2, "0")}`,
+      new Date(Date.UTC(2026, 10, 5, 12, 0) - index * 60_000).toISOString()
+    )
+  )
+
+describe("a project's pages, one row each", () => {
+  it("is empty for a project no page view has reached", () => {
+    expect(byPageRowsOf({ pageViews: [], ...nothingElse })).toEqual([])
+  })
+
+  /** *By page* asks what readers did on the page, so its versions and audiences are one row. */
+  it("adds a page's versions and audiences into one row, and keeps the latest move", () => {
+    const [row] = byPageRowsOf({
+      pageViews: [
+        views("t_a", 1, 3, "2026-11-05T10:00:00.000Z"),
+        views("t_a", 2, 4, "2026-11-05T12:00:00.000Z", "aud_trial"),
+      ],
+      ...nothingElse,
+    })
+
+    expect(row).toMatchObject({
+      treeId: "t_a",
+      name: undefined,
+      liveVersion: 2,
+      opened: 7,
+      lastMoved: "2026-11-05T12:00:00.000Z",
+      waiting: 0,
+    })
+  })
+
+  it("lists the page that moved last first", () => {
+    const rows = byPageRowsOf({
+      pageViews: [
+        views("t_old", 1, 9, "2026-11-05T09:00:00.000Z"),
+        views("t_new", 1, 1, "2026-11-05T11:00:00.000Z"),
+      ],
+      ...nothingElse,
+    })
+
+    expect(rows.map((row) => row.treeId)).toEqual(["t_new", "t_old"])
+  })
+
+  it("names a page and its parts from what the site published, and its live version too", () => {
+    const [row] = byPageRowsOf({
+      pageViews: [views(home.treeId, 1, 5, "2026-11-05T10:00:00.000Z")],
+      tallies: [tallyOf(home, heading, { activations: 4 })],
+      published: [{ tree: home, receivedAt: 0 }],
+      waiting: new Map(),
+    })
+
+    expect(row).toMatchObject({
+      name: "Welcome",
+      liveVersion: 3,
+      mostPressed: {
+        nodeId: heading,
+        name: "the heading “Welcome”",
+        presses: 4,
+      },
+    })
+  })
+
+  it("says nothing was pressed rather than naming a part nobody pressed", () => {
+    const [row] = byPageRowsOf({
+      pageViews: [views(home.treeId, 3, 5, "2026-11-05T10:00:00.000Z")],
+      tallies: [tallyOf(home, heading, { reached: 5 })],
+      published: [],
+      waiting: new Map(),
+    })
+
+    expect(row?.mostPressed).toBeUndefined()
+  })
+
+  it("counts the changes waiting on each page, and leaves the count out when it could not be read", () => {
+    const pageViews = [views("t_a", 1, 1, "2026-11-05T10:00:00.000Z")]
+
+    expect(
+      byPageRowsOf({
+        pageViews,
+        tallies: [],
+        published: [],
+        waiting: new Map([["t_a", 2]]),
+      })[0]?.waiting
+    ).toBe(2)
+    expect(
+      byPageRowsOf({
+        pageViews,
+        tallies: [],
+        published: [],
+        waiting: undefined,
+      })[0]?.waiting
+    ).toBeUndefined()
+  })
+})
+
+describe("the changes waiting, by page", () => {
+  /** A change is made to the page's copy, and the copy answers for the page (0329). */
+  it("files a change made to a copy under the page the copy started from", () => {
+    const held = [
+      { treeId: "t_copy" },
+      { treeId: "t_copy" },
+      { treeId: "t_b" },
+    ] as unknown as readonly HeldProposal[]
+    const copies = [{ pageId: "t_a" as TreeId, copyId: "t_copy" as TreeId, startedAt: 0 }]
+
+    expect(waitingByPage(held, copies)).toEqual(
+      new Map([
+        ["t_a", 2],
+        ["t_b", 1],
+      ])
+    )
+  })
+})
+
+describe("the list, fifty to a page", () => {
+  it("opens on the newest fifty, with the way to the older ones", () => {
+    const rows = rowsOf(120)
+    const list = byPageListOf(rows, undefined)
+
+    expect(list).toMatchObject({
+      first: 1,
+      last: 50,
+      total: 120,
+      newer: undefined,
+    })
+    expect(list.older).toBe(cursorOf(rows[50] as ByPageRow))
+  })
+
+  it("follows a cursor to the next page and back", () => {
+    const rows = rowsOf(120)
+    const second = byPageListOf(rows, parseCursor(byPageListOf(rows, undefined).older))
+
+    expect(second).toMatchObject({ first: 51, last: 100 })
+    expect(second.newer).toBe(cursorOf(rows[0] as ByPageRow))
+
+    const third = byPageListOf(rows, parseCursor(second.older))
+
+    expect(third).toMatchObject({ first: 101, last: 120, older: undefined })
+  })
+
+  /** A row that moves to the top between two reads must not shift the page a link opens on. */
+  it("opens where the cursor's row was when that row has since moved", () => {
+    const rows = rowsOf(4)
+    const cursor = parseCursor(cursorOf(rows[2] as ByPageRow))
+    const moved = [
+      rowAt("t_02", "2026-11-05T13:00:00.000Z"),
+      ...rows.filter((row) => row.treeId !== "t_02"),
+    ]
+
+    expect(byPageListOf(moved, cursor, 2).rows.map((row) => row.treeId)).toEqual(["t_03"])
+  })
+
+  it("opens the first page for anything that is not a cursor it wrote", () => {
+    expect(parseCursor("not-a-cursor")).toBeUndefined()
+    expect(parseCursor(Buffer.from('["only one"]').toString("base64url"))).toBeUndefined()
+    expect(parseCursor(undefined)).toBeUndefined()
+  })
+
+  it("is an empty page for an empty list", () => {
+    expect(byPageListOf([], undefined)).toEqual({
+      rows: [],
+      first: 0,
+      last: 0,
+      total: 0,
+      newer: undefined,
+      older: undefined,
+    })
+  })
+})
+
+describe("the drawer for one page", () => {
+  const [row] = byPageRowsOf({
+    pageViews: [views(home.treeId, 3, 10, "2026-11-05T10:00:00.000Z")],
+    tallies: [],
+    published: [],
+    waiting: new Map(),
+  })
+
+  if (row === undefined) throw new Error("one page was counted")
+
+  it("opens on the page the address names, and on none for one it does not list", () => {
+    expect(openRowOf([row], home.treeId)).toBe(row)
+    expect(openRowOf([row], "t_elsewhere")).toBeUndefined()
+    expect(openRowOf([row], undefined)).toBeUndefined()
+  })
+
+  it("draws a bar for each kind of thing readers did, against the longest", () => {
+    const drawer = pageDrawerOf(
+      row,
+      [
+        tallyOf(home, heading, {
+          activations: 5,
+          opens: 1,
+          closes: 1,
+          completions: 0,
+        }),
+      ],
+      [{ tree: home, receivedAt: 0 }]
+    )
+
+    expect(drawer.bars.map(({ technical, count, share }) => [technical, count, share])).toEqual([
+      ["viewed", 10, 1],
+      ["activated", 5, 0.5],
+      ["disclosed", 2, 0.2],
+      ["completed", 0, 0],
+    ])
+  })
+
+  it("names the parts pressed most, at most three, and the one kept on screen longest", () => {
+    const [root] = elementIdsOf(home)
+
+    if (root === undefined) throw new Error("the fixture has a root")
+
+    const drawer = pageDrawerOf(
+      row,
+      [
+        tallyOf(home, heading, { activations: 2, reached: 4, dwellMs: 6_000 }),
+        tallyOf(home, root, { activations: 7, reached: 10, dwellMs: 9_000 }),
+        tallyOf({ ...home, revision: 2 }, heading, { activations: 1 }),
+      ],
+      [{ tree: home, receivedAt: 0 }]
+    )
+
+    expect(drawer.pressed.map((part) => [part.nodeId, part.presses])).toEqual([
+      [root, 7],
+      [heading, 3],
+    ])
+    expect(drawer.longest).toEqual({
+      nodeId: heading,
+      name: "the heading “Welcome”",
+      seconds: 1.5,
+    })
+  })
+
+  it("draws empty bars and names no part for a page readers only opened", () => {
+    const quiet = pageDrawerOf({ ...row, opened: 0 }, [], [])
+
+    expect(quiet.bars.every((bar) => bar.share === 0)).toBe(true)
+    expect(quiet.pressed).toEqual([])
+    expect(quiet.longest).toBeUndefined()
+  })
+})

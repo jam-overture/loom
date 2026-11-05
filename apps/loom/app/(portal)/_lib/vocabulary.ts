@@ -16,7 +16,12 @@ import type {
   EpisodeResolutionKind,
   FailureStage,
 } from "@jam-overture/loom/telemetry"
-import type { PaceSilence, PaceStanding, PartStanding } from "@jam-overture/loom/signals"
+import type {
+  PaceSilence,
+  PaceStanding,
+  PartStanding,
+  ReaderSignalKind,
+} from "@jam-overture/loom/signals"
 import {
   describeAddressing,
   type Addressing,
@@ -1349,4 +1354,37 @@ export const plainWriteChecks = (checks: readonly WriteCheck[]): string => {
   return canonical.length === 0
     ? "nothing beyond your rules"
     : namedList(canonical.map((check) => WRITE_CHECKS_PLAIN[check].label))
+}
+
+/**
+ * What readers did, one word per signal kind, for the screens that count them
+ * (8a of `docs/portal.md`). The label is what a reader did, never the kind's
+ * own name, which stays as the technical record.
+ */
+export const SIGNAL_KINDS: Readonly<Record<ReaderSignalKind, PlainWord>> = {
+  viewed: {
+    label: "Opened the page",
+    meaning: "A reader opened this page. Each page view is counted once.",
+    technical: "viewed",
+  },
+  dwelled: {
+    label: "Spent time on a part",
+    meaning: "How long a part of the page was on a reader's screen.",
+    technical: "dwelled",
+  },
+  activated: {
+    label: "Pressed something",
+    meaning: "A reader pressed a link or a button, or used a field.",
+    technical: "activated",
+  },
+  disclosed: {
+    label: "Opened or closed a section",
+    meaning: "A reader opened or closed something that folds away.",
+    technical: "disclosed",
+  },
+  completed: {
+    label: "Sent a form",
+    meaning: "A reader sent a form and the browser let it go.",
+    technical: "completed",
+  },
 }
