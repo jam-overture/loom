@@ -679,7 +679,7 @@ changes to it by itself
 ([0329](../decisions/0329-loom-proposes-changes-to-a-published-page-from-what-its-readers-did-on-a-copy-that-starts-as-that-page.md)):
 once a day it reads what readers did on each page and, when the figures
 support one, raises a change. A change it may not make alone waits on the
-project's *Waiting* tab for an approver or owner. An approver or owner can also
+project's *For review* tab for an approver or owner. An approver or owner can also
 press *Look now* on a page. A change is made to Loom's copy of the page, and
 your site keeps serving what it published. When you publish a newer version of
 a page, a change still waiting on it is checked against the new version and

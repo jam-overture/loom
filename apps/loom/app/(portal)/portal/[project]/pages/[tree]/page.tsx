@@ -160,7 +160,7 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
       <div className="flex flex-col gap-3">
         <p className="text-ink-muted text-xs">
           Once a day Loom reads what readers did on this page and, when the figures support it,
-          proposes one change. A change it may not make alone waits under Waiting.
+          proposes one change. A change it may not make alone waits under For review.
         </p>
         {mayPropose(role) ? (
           <LookForm projectId={projectId} treeId={row.treeId} />

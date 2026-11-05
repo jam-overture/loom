@@ -10,7 +10,7 @@ import { STAKES } from "./vocabulary"
 /** The fixture's change is held at `medium`, which an approver may accept and nothing lower may. */
 const held = heldProposalFixture({ actor: "jonathan", heldAt: "2026-11-01T09:30:00.000Z" })
 
-describe("a waiting change, as the Waiting tab shows it", () => {
+describe("a waiting change, as the For review tab shows it", () => {
   it("says what was asked, by whom, when, why it stopped and what is at stake", () => {
     const row = queueRowOf(held, new Map([[held.treeId, "Welcome"]]), "owner", [])
 

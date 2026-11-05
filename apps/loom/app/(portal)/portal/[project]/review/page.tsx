@@ -19,7 +19,7 @@ import { publishedPagesFor } from "@/app/_lib/pages/store"
 import { AnswerControls } from "./_components/answer-controls"
 
 /**
- * *Waiting*: the changes proposed for this project's pages that the Gate
+ * *For review* (formerly *Waiting*): the changes proposed for this project's pages that the Gate
  * would not make alone (0329) — unit 7's queue.
  *
  * Each says what was proposed and why, of which page, by whom, why it stopped and how
@@ -30,7 +30,7 @@ import { AnswerControls } from "./_components/answer-controls"
  * read first. A change the store could not read is counted rather than
  * skipped, so the list never claims to be complete when it is not.
  */
-const WaitingPage = async ({ params }: { params: Promise<{ project: string }> }) => {
+const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> }) => {
   const asked = projectIdSchema.safeParse((await params).project)
 
   if (!asked.success) notFound()
@@ -38,7 +38,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
   const projectId = asked.data
 
   /** Signed in first, with this address to come back to — the Connect screen's reason. */
-  await requireActor(`/portal/${projectId}/waiting`)
+  await requireActor(`/portal/${projectId}/review`)
 
   const role = await requireRole(projectId)
 
@@ -77,7 +77,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
     ) {
       return (
         <StateNotice tone="failure" title="The store did not answer">
-          Nothing here is a statement about what is waiting. Try again in a moment.
+          Nothing here is a statement about what needs review. Try again in a moment.
         </StateNotice>
       )
     }
@@ -97,7 +97,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
       return (
         <StateNotice
           tone="empty"
-          title="Nothing is waiting"
+          title="Nothing needs review"
           action={
             <Link href={`/portal/${projectId}/pages`} className="text-ink underline">
               Pages
@@ -114,8 +114,8 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
         {unreadable.length === 0 ? null : (
           <p className="text-refuse-ink text-xs">
             {unreadable.length === 1
-              ? "1 waiting change could not be read, so it is not shown."
-              : `${unreadable.length} waiting changes could not be read, so they are not shown.`}
+              ? "1 change for review could not be read, so it is not shown."
+              : `${unreadable.length} changes for review could not be read, so they are not shown.`}
           </p>
         )}
         {held
@@ -167,7 +167,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
   return (
     <Screen>
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl tracking-tight">Waiting</h1>
+        <h1 className="text-2xl tracking-tight">For review</h1>
         {project.ok && <p className="text-ink-muted text-sm">{project.value.name}</p>}
       </div>
 
@@ -176,4 +176,4 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
   )
 }
 
-export default WaitingPage
+export default ForReviewPage
