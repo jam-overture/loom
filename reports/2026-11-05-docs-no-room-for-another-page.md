@@ -306,7 +306,67 @@ test was silent:
 
 ### The gate
 
-PLACEHOLDER_GATE
+**`pnpm install && pnpm verify` — exit 0**, read out of a file written as the
+last thing on its line, with nothing piped into `tail` or `tee`.
+
+**The first run of it was red, and the harness said it was green.** The
+background task's own completion notice reported exit code 0; `verify.exit`
+said `EXIT=1`. That is the fourth instance of the pattern `docs/routines.md`
+names — *whatever tells you the gate passed is not the gate; the file is* — and
+the second time it has been the harness's notice rather than a pipe. It cost one
+gate re-run and nothing else, because the file was read as well as the notice.
+
+The failure was real and it was this branch's. `0353` laid its alternatives out
+as a table and then prose leading with a bare `**A**`, and the *Architecture*
+section reads the **Alternatives considered** section out of every record to
+show what each ruling turned down. It expects a bold lead that names the
+alternative, so it read `A` as the name of one and the length assertion said so
+— `0353: expected 1 to be greater than 3`. **The record was rewritten in the
+house shape rather than the test being touched**: the table moved up into the
+context, where a person reads it and a parser does not, and the section is five
+bullets. That is the check doing exactly its job on the first record this lane
+has added in a while, and it is the reason the costs page cannot show a short
+list of roads not taken and look complete.
+
+| | on `main` at `f44fa58` | on this branch |
+| --- | --- | --- |
+| framework | 258 files, **6,215 tests** | 258 files, **6,215 tests** |
+| application | 406 files, **6,561 tests** | 407 files, **6,577 tests** |
+| of which `(docs)` | 144 files, **2,220 tests** | 145 files, **2,236 tests** |
+
+The application baselines were measured in this session, on `origin/main`,
+rather than taken from another lane's report. The framework figure is the
+branch's and is identical by construction rather than by measurement: nothing
+under `src/` changed, which `git diff origin/main -- src/` confirms is empty.
+
+**12,792 pass in total. +16 tests, all of them this lane's** — 14 in
+`room.test.ts` and 2 in `build.test.ts`. **Nothing failed in the green run,
+nothing was skipped, and no test was weakened.** The only pre-existing
+assertions that changed are *cuts the words up without losing or repeating one*,
+which now measures through the serialise-and-parse round trip rather than over
+the builder's own values, and the four prose caps, which read their numbers from
+`room.ts` and carry its sentence as their message. The numbers themselves are
+unchanged.
+
+- `findings:check`: **1,431 findings, 0 malformed**
+- `reports:check`: **2,085 visuals, 147.0MB**, none over 1.1MB
+- `prerender:check`: **137 prerendered pages**, 2,030 text junctions, 0 run
+  together; 3 metadata conventions, 0 unserved
+- `decisions:index`: regenerated, exit 0
+
+### The search index, measured
+
+| | raw | compressed | the cap |
+| --- | --- | --- | --- |
+| all five sections, `origin/main` | 254,709 | 79,665 | 260,000 / 80,000 |
+| all five sections, this branch | **249,486** | **79,414** | 260,000 / 80,000 |
+| *The runtime* alone, this branch | 108,299 | 35,928 | 120,000 / 40,000 |
+
+**The cap that binds is the compressed bill for all five**, in every section —
+*The runtime*'s own file has 4,072 compressed bytes of headroom and none of it
+is reachable. Room, derived: 303 words in *Getting started*, 326 in *Building
+with Loom*, 331 in *The runtime*, 289 in *Architecture*. Shortest page here:
+346.
 
 ## Needs your input
 
