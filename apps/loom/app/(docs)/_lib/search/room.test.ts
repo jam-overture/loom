@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { docsSections } from "../nav"
+import { DOCS_LANDING_SLUG, docsHref, docsSections, writtenDocsSections } from "../nav"
 
-import { searchProseFor } from "./build"
+import { searchProse, searchProseFor } from "./build"
 import {
   bytesPerWord,
   capsOver,
@@ -34,6 +34,13 @@ import {
  * the next run spends a day shortening a page that was never going to fit.
  */
 describe("the room this site has for another page", () => {
+  /** Every word on a page, read the way `room.ts` reads it rather than from it. */
+  const proseOn = (href: string): string =>
+    searchProse()
+      .bodies.filter(([at]) => at === href || at.startsWith(`${href}#`))
+      .map(([, words]) => words)
+      .join(" ")
+
   const caps = capsOver("the-runtime")
   const cap = (what: string, measure: ProseCap["measure"]): ProseCap => {
     const found = caps.find((candidate) => candidate.what === what && candidate.measure === measure)
@@ -140,6 +147,23 @@ describe("the room this site has for another page", () => {
     const written = docsSections.filter((section) => section.source === "written")
 
     expect(written.map((section) => `/docs/${section.slug}`)).not.toContain(shortest?.href)
+
+    /*
+     * **And that it really is the shortest**, which the four assertions above
+     * do not say: the *longest* page on this site satisfies every one of them.
+     * A mutation that reversed the comparison survived until this was written,
+     * with the sentence still reading *the shortest page already written here
+     * is …* and naming a three-thousand-word page.
+     */
+    const pages = writtenDocsSections.flatMap((section) =>
+      section.pages
+        .filter((page) => page.slug !== DOCS_LANDING_SLUG)
+        .map((page) => wordsIn(proseOn(docsHref(section.slug, page.slug))))
+        .filter((words) => words > 0)
+    )
+
+    expect(Math.min(...pages)).toBe(shortest?.words)
+    expect(pages.filter((words) => words < (shortest?.words ?? 0))).toHaveLength(0)
   })
 
   /**
