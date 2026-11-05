@@ -289,6 +289,13 @@ drawer, For review, Goals, unit 8's pull request timeline, page history with
 before and after, and Segments later. A screen from it still needs a line in
 the table above before it is built.
 
+**The target shape for everything after unit 7** is
+[`portal-wireframes.md`](portal-wireframes.md), the concept wireframes the
+maintainer set as the goal on 5 November: Signals with paginated events and a
+drawer, For review, Goals, unit 8's pull request timeline, page history with
+before and after, and Segments later. A screen from it still needs a line in
+the table above before it is built.
+
 **Units 1–5 and unit 6 are independent of each other**, so the read path may run
 in parallel with the signal work if seeing a real tree sooner is worth more than
 finishing one thread.
