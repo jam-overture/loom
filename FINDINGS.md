@@ -8,6 +8,60 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-05 — the comparison band tells a reader to look right, and on a phone there is no right
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/pages/why-use-it.ts`, the `forAReader` band) ·
+**Status:** open — **nothing is broken, no test is failing, and the band is
+right in every photograph this lane has taken of it.** Found while writing the
+band underneath it, which had the identical sentence and no longer does.
+
+*Who is reading it* opens with:
+
+> *"The page on the left is the one above. On the right is what a visitor who
+> came looking for a gift gets."*
+
+That sentence is doing real work and the band needs something like it: without
+it a reader shown two frames reads two examples rather than one page twice,
+which is what the band's own note says at length.
+
+**It is false at 390.** `loom.split` stacks on a narrow screen with the order
+kept — correctly, and it is the reason the band works on a phone at all — so
+there is no left and no right, there is a first and a second. A reader on a
+phone is told to compare two things against positions the layout does not have.
+
+### Why it is filed rather than fixed in the run that found it
+
+The band below it, shipped today, had the same sentence shape and was changed
+to *"The two pages above are one page. Loom turned the first into the second
+with three edits"*, which is true at every width. Doing the same to this one is
+a two-line diff and it was deliberately not taken:
+
+- The sentence is **load-bearing for a different band**, and the argument for
+  its exact wording is twelve lines of note above it. Rewriting another band's
+  central line inside a pull request about the band under it is the shape that
+  makes a marketing diff unreviewable, which is the one rule this lane's brief
+  is hardest about.
+- The **captions inside the frames** say who each arrangement is for, and
+  whether the prose should name a position at all or lean on those instead is a
+  judgement about that band rather than a correction to it.
+
+### What would close it
+
+One sentence, in the register the band below now uses: name the order rather
+than the side. *"The first is the page above. The second is what a visitor who
+came looking for a gift gets."* It needs no new mechanism and no primitive.
+
+**The general version is worth more than the instance**, and it is why this is
+an entry rather than a to-do: **copy that names a position is copy that is
+wrong at one of the two widths this site is photographed at.** Nothing checks
+it. `pages.test.ts` holds the stacking, `balance.test.ts` holds the cells, and
+neither can read a sentence. Three bands of this site use a side-by-side
+layout, and a sweep for *left*, *right*, *above* and *below* in a band that
+stacks is the check that would catch the next one — plausibly cheap, and this
+lane's to write when it next has a run in this file.
+
+---
 ## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,

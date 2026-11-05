@@ -116,6 +116,32 @@ export const ANCHOR = {
 export const COUNTED_ANCHOR = "what-we-count"
 
 /**
+ * The band that says what allowed a change, which is the one anchor on this
+ * site that nothing links to.
+ *
+ * **Declared anyway, and the reason is the opposite of the usual one.** Every
+ * other anchor here exists because a control points at it;
+ * `anchors.test.ts` is written about the press that lands nowhere. This band
+ * is the last one before the closing band of `/why-use-it`, six thousand
+ * pixels down a page, and the chain's fifth rung already has its destination
+ * one band above it — so there is no press to serve and there is not going to
+ * be one until somebody decides this band is worth a rung of its own.
+ *
+ * What an anchor buys instead is that the band is **addressable**: a report
+ * can send the maintainer to it, a pull request comment can, and
+ * `pnpm shoot` can photograph it by name rather than by a selector guessed off
+ * the markup. A band this site cannot link to is a band nobody can be asked to
+ * look at, and this is the surface the maintainer judges by eye.
+ *
+ * Its own constant rather than an entry in `WHY_USE_IT_ANCHOR` below, because
+ * that map says what it is for in its first line — *the bands of `/why-use-it`
+ * that the chain points at* — and this is not one. Same reasoning as
+ * `COUNTED_ANCHOR` above, one layer in: a key that means two things is a key a
+ * later run reads wrongly.
+ */
+export const ALLOWED_ANCHOR = "what-allowed-it"
+
+/**
  * The bands of `/why-use-it` that the chain points at.
  *
  * **The chain is the site's map as of today**, and that is what these exist

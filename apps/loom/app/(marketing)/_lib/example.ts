@@ -99,7 +99,7 @@ type Offer = {
  * asserted: `example.test.ts` holds the pair to the same number of tiles and
  * to a line neither of them changes.
  */
-type Arrangement = {
+export type Arrangement = {
   readonly heading: string
   /**
    * The line under the heading, and **it is the same string in both
@@ -251,8 +251,24 @@ const offers = (ids: IdFactory, arrangement: Arrangement): LoomNode =>
     ),
   })
 
-/** The screen itself, without the chrome: what goes in a surface or a region. */
-const screen = (
+/**
+ * The screen itself, without the chrome: what goes in a surface or a region.
+ *
+ * **Exported as of 5 November, for `allowed.ts`**, which builds this same
+ * screen as a standalone page and turns the first arrangement into the second
+ * one with the framework's own operations. That band's whole claim is that the
+ * right-hand frame is the left-hand frame after three edits, and a claim about
+ * *these* two frames cannot be made by a second builder that happens to agree
+ * with this one: the two would drift the first time somebody edited a tile
+ * here, and the page would go on saying three edits over a pair it no longer
+ * describes.
+ *
+ * So there is one builder for the arrangements and both bands call it. The
+ * `level` parameter is why it is a function rather than a pair of constants,
+ * and it stays: a page within a page is a level three here and a tree of its
+ * own elsewhere.
+ */
+export const arrangementScreen = (
   ids: IdFactory,
   arrangement: Arrangement,
   level: number
@@ -277,7 +293,7 @@ export const examplePage = (ids: IdFactory): LoomNode =>
     type: "loom.frame",
     props: { chrome: "browser", label: ADDRESS },
     children: [
-      buildSlot(ids, "surface", screen(ids, AS_BUILT, 3)),
+      buildSlot(ids, "surface", arrangementScreen(ids, AS_BUILT, 3)),
       ...MARKS.map((entry, index) => mark(ids, entry, index)),
     ],
   })
@@ -339,7 +355,7 @@ export const rearrangedExample = (ids: IdFactory): LoomNode => {
     buildElement(ids, {
       type: "loom.frame",
       props: { chrome: "browser", label: ADDRESS },
-      children: [buildSlot(ids, "surface", screen(ids, arrangement, 3))],
+      children: [buildSlot(ids, "surface", arrangementScreen(ids, arrangement, 3))],
     }),
   ]
 

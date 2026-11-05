@@ -10,7 +10,16 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
+import {
+  EDIT_COLUMNS,
+  EDITS,
+  EDITS_CAPTION,
+  THE_CLAIM,
+  THE_WAY_BACK,
+  WHAT_ALLOWED_IT,
+  WHEN_IT_ASKS,
+} from "../allowed"
+import { ALLOWED_ANCHOR, COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
 import { FACTS } from "../copy"
 import { examplePage, rearrangedExample } from "../example"
 import { LIBRARY_PARTS } from "../library"
@@ -657,6 +666,110 @@ const forAReader = (ids: IdFactory): LoomNode =>
     { align: "center" }
   )
 
+/**
+ * What stood between the two frames, which is the second sentence of the
+ * chain's fifth link and the one nothing on this site has ever shown.
+ *
+ * `allowed.ts` carries the whole argument for the band and for where it sits.
+ * The short version: the rung says *"Loom checks that against your rules
+ * before anything moves"*, the band above shows the moving, and a reader had
+ * nothing at all for the checking. Every number and every verdict below comes
+ * back from the framework judging this exact change.
+ *
+ * **It is the last band before the closing one on purpose.**
+ * `docs/positioning.md` keeps the governance under the hood and off the pitch,
+ * and keeps it *"worth saying on a page somebody reads after they want the
+ * product."* This is the furthest point on the second page of a three-page
+ * site, one screen under a page the reader has watched rearrange itself. A
+ * stranger who reaches it has asked the question it answers.
+ */
+const whatAllowedIt = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    /**
+     * `readable` rather than the `wide` every other band on this page takes,
+     * and it is the table that asks for it.
+     *
+     * At the page's full width the two columns sit 1,078px apart with four
+     * words in each, so a reader tracking *A Feature was added* across to
+     * *Send it as a gift* crosses most of a screen of nothing. A table reads
+     * as a table when its columns are near enough to be one line; past that it
+     * reads as two lists that happen to share a rule. The prose in the band is
+     * `measured` already, so this brings the one element that was not into the
+     * same measure as the rest.
+     */
+    { width: "readable", eyebrow: "What allowed it", anchor: ALLOWED_ANCHOR },
+    "What changed and what let it through",
+    [
+      prose(ids, THE_CLAIM, { tone: "muted", align: "center", measured: true }),
+      /**
+       * A table rather than a list, and the two columns are why.
+       *
+       * Each edit is a verb and a piece of the fictional product's copy, and
+       * the copy is the half a reader recognises: they have just read *Send it
+       * as a gift* on the frame above. In one column those two run together
+       * into three sentences a reader has to parse; in two they read as three
+       * of one kind of thing, which is what they are.
+       *
+       * `prose: false` by omission, because these cells are a few words each
+       * rather than sentences. `loom.table`'s own note has the measurement
+       * behind that prop and the case it is for, which is a cell holding a
+       * paragraph.
+       */
+      buildElement(ids, {
+        type: "loom.table",
+        props: { caption: EDITS_CAPTION, tone: "panel", rules: "rows", density: "comfortable" },
+        children: [
+          buildSlot(ids, "columns", [
+            buildElement(ids, {
+              type: "loom.table-row",
+              props: {},
+              children: EDIT_COLUMNS.map((name) =>
+                buildElement(ids, {
+                  type: "loom.table-cell",
+                  props: { role: "column" },
+                  children: [buildText(ids, name)],
+                })
+              ),
+            }),
+          ]),
+          ...EDITS.map((edit) =>
+            buildElement(ids, {
+              type: "loom.table-row",
+              props: {},
+              children: [
+                buildElement(ids, {
+                  type: "loom.table-cell",
+                  props: { role: "row" },
+                  children: [buildText(ids, edit.did)],
+                }),
+                buildElement(ids, {
+                  type: "loom.table-cell",
+                  props: {},
+                  children: [buildText(ids, edit.words)],
+                }),
+              ],
+            })
+          ),
+        ],
+      }),
+      prose(ids, WHAT_ALLOWED_IT, { tone: "muted", align: "center", measured: true }),
+      prose(ids, THE_WAY_BACK, { tone: "muted", align: "center", measured: true }),
+      /**
+       * The refusal, as two sentences rather than one.
+       *
+       * One sentence carrying both halves came to 32 words, and the site holds
+       * every sentence a reader meets to 30. Splitting it is the better
+       * writing anyway: the first line is the surprise and the second is the
+       * reason, and a reader who stops after the first has still got the point.
+       */
+      ...WHEN_IT_ASKS.map((sentence) =>
+        prose(ids, sentence, { tone: "muted", align: "center", measured: true })
+      ),
+    ],
+    { align: "center" }
+  )
+
 const closing = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Try it on a page of your own", [
     /**
@@ -713,6 +826,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         onAPage(ids),
         whatItReports(ids),
         forAReader(ids),
+        whatAllowedIt(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
