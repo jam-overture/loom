@@ -1,0 +1,315 @@
+import { z } from "zod"
+
+import type { StoredPageViews, StoredTally } from "@jam-overture/loom/signals"
+import type { HeldProposal } from "@jam-overture/loom/write"
+
+import type { PublishedPage } from "@/app/_lib/pages/published"
+
+import { pageNameOf } from "./page-name"
+import { namesInTree, type PartName } from "./part-name"
+import { pageOfCopy, type PageCopy } from "./proposing/copies"
+import { SIGNAL_KINDS } from "./vocabulary"
+
+/**
+ * *Signals · By page* (8a of `docs/portal.md`): one row per page, read off the
+ * tallies this deployment already keeps, and the drawer that opens on one of
+ * them.
+ *
+ * Every figure here is a durable counter (`docs/signals.md` rule 5), added up
+ * across every version and audience since the page was first counted. None of
+ * them has a time range, because the tallies keep none; the screen says *since
+ * counting began* rather than drawing a range picker it cannot honour. The
+ * range arrives with the events kept for 30 days, which is the *Events* tab's
+ * data and not this one's.
+ */
+
+/** Rows a page of the list holds, the wireframes' 50. */
+export const BY_PAGE_SIZE = 50
+
+/** One part of a page, named from what the site published, by its id otherwise. */
+export type NamedPart = {
+  readonly nodeId: string
+  /** `undefined` where the site has not published a tree that holds the part. */
+  readonly name: string | undefined
+}
+
+export type PressedPart = NamedPart & { readonly presses: number }
+
+export type ByPageRow = {
+  readonly treeId: string
+  /** The heading the published page gives it, `undefined` where it published none. */
+  readonly name: string | undefined
+  /** The version the site last published, else the newest version readers were counted on. */
+  readonly liveVersion: number
+  /** Page views that began on any version of it (0219). */
+  readonly opened: number
+  /** When any of its page-view rows last moved, which is the order the list keeps. */
+  readonly lastMoved: string
+  /** The part with the most presses, `undefined` where nothing on it was pressed. */
+  readonly mostPressed: PressedPart | undefined
+  /** Changes waiting on a person for this page, `undefined` where they could not be read. */
+  readonly waiting: number | undefined
+}
+
+/** What readers did on one page, as one bar per signal kind that counts occurrences. */
+export type KindBar = {
+  readonly label: string
+  readonly meaning: string
+  readonly technical: string
+  readonly count: number
+  /** Its length against the longest bar, from 0 to 1. */
+  readonly share: number
+}
+
+/** The part readers kept on screen longest, on average over the page views that reached it. */
+export type LongestLooked = NamedPart & { readonly seconds: number }
+
+export type PageDrawer = {
+  readonly row: ByPageRow
+  readonly bars: readonly KindBar[]
+  /** The three parts pressed most, most first. Empty where nothing was pressed. */
+  readonly pressed: readonly PressedPart[]
+  readonly longest: LongestLooked | undefined
+}
+
+export type ByPageReadings = {
+  readonly pageViews: readonly StoredPageViews[]
+  readonly tallies: readonly StoredTally[]
+  readonly published: readonly PublishedPage[]
+  /** `undefined` where the changes waiting could not be read. */
+  readonly waiting: ReadonlyMap<string, number> | undefined
+}
+
+/** Changes waiting on a person, by the page they would change rather than the copy they were made to. */
+export const waitingByPage = (
+  held: readonly HeldProposal[],
+  copies: readonly PageCopy[]
+): ReadonlyMap<string, number> =>
+  held.reduce((counts, change) => {
+    const page = pageOfCopy(copies, change.treeId)
+
+    return new Map(counts).set(page, (counts.get(page) ?? 0) + 1)
+  }, new Map<string, number>())
+
+type PartTotals = {
+  readonly presses: number
+  readonly dwellMs: number
+  readonly reached: number
+}
+
+const NO_PART: PartTotals = { presses: 0, dwellMs: 0, reached: 0 }
+
+/** Every part of one page, its counters added across versions and audiences. */
+const partsOf = (tallies: readonly StoredTally[]): ReadonlyMap<string, PartTotals> =>
+  tallies.reduce((parts, tally) => {
+    const held = parts.get(tally.nodeId) ?? NO_PART
+
+    return new Map(parts).set(tally.nodeId, {
+      presses: held.presses + tally.activations,
+      dwellMs: held.dwellMs + tally.dwellMs,
+      reached: held.reached + tally.reached,
+    })
+  }, new Map<string, PartTotals>())
+
+const partNamer =
+  (names: ReadonlyMap<string, PartName>) =>
+  (nodeId: string): NamedPart => ({ nodeId, name: names.get(nodeId)?.name })
+
+/** Most first; a tie goes to the id, so the order does not move between two reads of the same rows. */
+const pressedParts = (
+  parts: ReadonlyMap<string, PartTotals>,
+  named: (nodeId: string) => NamedPart
+): readonly PressedPart[] =>
+  [...parts.entries()]
+    .filter(([, totals]) => totals.presses > 0)
+    .sort(([a, x], [b, y]) => y.presses - x.presses || a.localeCompare(b))
+    .map(([nodeId, totals]) => ({ ...named(nodeId), presses: totals.presses }))
+
+const groupBy = <T>(
+  rows: readonly T[],
+  keyOf: (row: T) => string
+): ReadonlyMap<string, readonly T[]> =>
+  rows.reduce(
+    (groups, row) => new Map(groups).set(keyOf(row), [...(groups.get(keyOf(row)) ?? []), row]),
+    new Map<string, readonly T[]>()
+  )
+
+const later = (a: string, b: string): string => (a >= b ? a : b)
+
+/** Where a row sits in the list: when it last moved, then its id. */
+type Position = readonly [lastMoved: string, treeId: string]
+
+const positionOf = (row: ByPageRow): Position => [row.lastMoved, row.treeId]
+
+/** Newest first; a tie goes to the id, which is what makes a cursor land on one row. */
+const byPosition = (a: Position, b: Position): number =>
+  b[0].localeCompare(a[0]) || a[1].localeCompare(b[1])
+
+const newestFirst = (a: ByPageRow, b: ByPageRow): number => byPosition(positionOf(a), positionOf(b))
+
+/**
+ * One row per page readers were counted on, newest first.
+ *
+ * A page is listed only once a page view of it has been counted: a published
+ * page nobody has opened is on *Pages*, and listing it here would be a row of
+ * noughts on a screen that answers *what did readers do*.
+ */
+export const byPageRowsOf = ({
+  pageViews,
+  tallies,
+  published,
+  waiting,
+}: ByPageReadings): readonly ByPageRow[] => {
+  const trees = new Map(published.map(({ tree }) => [tree.treeId as string, tree] as const))
+  const talliesByPage = groupBy(tallies, (tally) => tally.treeId)
+
+  return [...groupBy(pageViews, (row) => row.treeId).entries()]
+    .map(([treeId, rows]): ByPageRow => {
+      const tree = trees.get(treeId)
+      const heading = tree === undefined ? undefined : pageNameOf(tree)
+      const named = partNamer(tree === undefined ? new Map() : namesInTree(tree))
+
+      return {
+        treeId,
+        name: heading?.derived === true ? heading.name : undefined,
+        liveVersion: tree?.revision ?? Math.max(...rows.map((row) => row.revision)),
+        opened: rows.reduce((sum, row) => sum + row.opened, 0),
+        lastMoved: rows.map((row) => row.updatedAt).reduce(later),
+        mostPressed: pressedParts(partsOf(talliesByPage.get(treeId) ?? []), named)[0],
+        waiting: waiting === undefined ? undefined : (waiting.get(treeId) ?? 0),
+      }
+    })
+    .sort(newestFirst)
+}
+
+/**
+ * Where a page of the list starts: the row it opens on, by when it last moved
+ * and its id. Kept in the URL as `from`, so a link to the second page is the
+ * second page, and a row that moves to the top between two reads does not
+ * shift every row after it.
+ */
+const cursorSchema = z.tuple([z.string().min(1), z.string().min(1)])
+
+export type ByPageCursor = z.infer<typeof cursorSchema>
+
+export const cursorOf = (row: ByPageRow): string =>
+  Buffer.from(JSON.stringify(positionOf(row))).toString("base64url")
+
+/** `undefined` for anything that is not a cursor this screen wrote, which opens the first page. */
+export const parseCursor = (from: string | undefined): ByPageCursor | undefined => {
+  if (from === undefined) return undefined
+
+  try {
+    const parsed = cursorSchema.safeParse(JSON.parse(Buffer.from(from, "base64url").toString()))
+
+    return parsed.success ? parsed.data : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export type ByPageList = {
+  readonly rows: readonly ByPageRow[]
+  /** 1-based, and 0 for an empty list. */
+  readonly first: number
+  readonly last: number
+  readonly total: number
+  /** The page before this one, `undefined` on the first. */
+  readonly newer: string | undefined
+  /** The page after this one, `undefined` on the last. */
+  readonly older: string | undefined
+}
+
+/**
+ * The page of rows that starts at the cursor: the first row at or after it in
+ * the list's own order, so a cursor whose row has since moved still opens
+ * where that row was.
+ */
+export const byPageListOf = (
+  rows: readonly ByPageRow[],
+  cursor: ByPageCursor | undefined,
+  size: number = BY_PAGE_SIZE
+): ByPageList => {
+  const found =
+    cursor === undefined ? 0 : rows.findIndex((row) => byPosition(cursor, positionOf(row)) <= 0)
+  const start = found === -1 ? Math.max(rows.length - size, 0) : found
+  const shown = rows.slice(start, start + size)
+  const before = rows[Math.max(start - size, 0)]
+  const after = rows[start + size]
+
+  return {
+    rows: shown,
+    first: shown.length === 0 ? 0 : start + 1,
+    last: start + shown.length,
+    total: rows.length,
+    newer: start === 0 || before === undefined ? undefined : cursorOf(before),
+    older: after === undefined ? undefined : cursorOf(after),
+  }
+}
+
+/**
+ * The drawer for one page: what readers did on it, the parts they pressed
+ * most and the part they kept on screen longest.
+ *
+ * The bars are the kinds that count things readers did, each in its own
+ * unit (page views, presses, sections opened or closed, forms sent), so
+ * their lengths say which happened most and nothing finer. Time on a part is
+ * not a count and is said in seconds instead: the part with the longest
+ * average over the page views that reached it, because a total would favour
+ * whatever sits at the top of every page.
+ */
+export const pageDrawerOf = (
+  row: ByPageRow,
+  tallies: readonly StoredTally[],
+  published: readonly PublishedPage[]
+): PageDrawer => {
+  const own = tallies.filter((tally) => tally.treeId === row.treeId)
+  const tree = published.find((page) => page.tree.treeId === row.treeId)?.tree
+  const named = partNamer(tree === undefined ? new Map() : namesInTree(tree))
+  const parts = partsOf(own)
+  const sum = (count: (tally: StoredTally) => number) =>
+    own.reduce((total, tally) => total + count(tally), 0)
+
+  const counts = [
+    { word: SIGNAL_KINDS.viewed, count: row.opened },
+    { word: SIGNAL_KINDS.activated, count: sum((tally) => tally.activations) },
+    {
+      word: SIGNAL_KINDS.disclosed,
+      count: sum((tally) => tally.opens + tally.closes),
+    },
+    { word: SIGNAL_KINDS.completed, count: sum((tally) => tally.completions) },
+  ]
+  const longestBar = Math.max(...counts.map(({ count }) => count))
+
+  const longest = [...parts.entries()]
+    .filter(([, totals]) => totals.reached > 0 && totals.dwellMs > 0)
+    .map(([nodeId, totals]) => ({
+      nodeId,
+      seconds: totals.dwellMs / totals.reached / 1000,
+    }))
+    .sort((a, b) => b.seconds - a.seconds || a.nodeId.localeCompare(b.nodeId))[0]
+
+  return {
+    row,
+    bars: counts.map(({ word, count }) => ({
+      ...word,
+      count,
+      share: longestBar === 0 ? 0 : count / longestBar,
+    })),
+    pressed: pressedParts(parts, named).slice(0, 3),
+    longest:
+      longest === undefined
+        ? undefined
+        : {
+            ...named(longest.nodeId),
+            seconds: Math.round(longest.seconds * 10) / 10,
+          },
+  }
+}
+
+/** The page the drawer is open on, `undefined` where the URL names none of the rows. */
+export const openRowOf = (
+  rows: readonly ByPageRow[],
+  asked: string | undefined
+): ByPageRow | undefined =>
+  asked === undefined ? undefined : rows.find((row) => row.treeId === asked)

@@ -3,9 +3,11 @@ import { notFound } from "next/navigation"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import { queueRowOf } from "@/app/(portal)/_lib/queue"
@@ -19,18 +21,20 @@ import { publishedPagesFor } from "@/app/_lib/pages/store"
 import { AnswerControls } from "./_components/answer-controls"
 
 /**
- * *Waiting*: the changes proposed for this project's pages that the Gate
+ * *For review* (formerly *Waiting*): the changes proposed for this project's pages that the Gate
  * would not make alone (0329) — unit 7's queue.
  *
  * Each says what was proposed and why, of which page, by whom, why it stopped and how
  * much is at stake, whether it was proposed for an older version of the page (0340), and offers *Accept* and *Turn down* to a person whose
  * role may accept a change of that stake. Anybody else is told which role can.
  *
+ * Each card leads with the goal the change serves (0352).
+ *
  * Oldest first, as the store lists them, so whatever has waited longest is
  * read first. A change the store could not read is counted rather than
  * skipped, so the list never claims to be complete when it is not.
  */
-const WaitingPage = async ({ params }: { params: Promise<{ project: string }> }) => {
+const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> }) => {
   const asked = projectIdSchema.safeParse((await params).project)
 
   if (!asked.success) notFound()
@@ -38,7 +42,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
   const projectId = asked.data
 
   /** Signed in first, with this address to come back to — the Connect screen's reason. */
-  await requireActor(`/portal/${projectId}/waiting`)
+  await requireActor(`/portal/${projectId}/review`)
 
   const role = await requireRole(projectId)
 
@@ -67,6 +71,17 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
         ])
 
   const names = published?.ok === true ? pageNamesOf(published.value) : new Map<string, string>()
+  const goals =
+    application === undefined || waiting?.ok !== true
+      ? undefined
+      : await readWithin(
+          () =>
+            proposalGoalsFor(application.applicationId).forIntents(
+              waiting.value.held.map((held) => held.intent.intentId)
+            ),
+          unavailable,
+          PORTAL_READ_BUDGET_MS
+        )
 
   const body = (() => {
     if (
@@ -77,7 +92,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
     ) {
       return (
         <StateNotice tone="failure" title="The store did not answer">
-          Nothing here is a statement about what is waiting. Try again in a moment.
+          Nothing here is a statement about what needs review. Try again in a moment.
         </StateNotice>
       )
     }
@@ -97,7 +112,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
       return (
         <StateNotice
           tone="empty"
-          title="Nothing is waiting"
+          title="Nothing needs review"
           action={
             <Link href={`/portal/${projectId}/pages`} className="text-ink underline">
               Pages
@@ -114,17 +129,32 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
         {unreadable.length === 0 ? null : (
           <p className="text-refuse-ink text-xs">
             {unreadable.length === 1
-              ? "1 waiting change could not be read, so it is not shown."
-              : `${unreadable.length} waiting changes could not be read, so they are not shown.`}
+              ? "1 change for review could not be read, so it is not shown."
+              : `${unreadable.length} changes for review could not be read, so they are not shown.`}
+          </p>
+        )}
+        {goals?.ok === true ? null : (
+          <p className="text-ink-muted text-xs">
+            Which goal each change serves cannot be read here. If goals are new to this deployment,
+            whoever runs it has to run <code>pnpm db:push</code> once; otherwise try again in a
+            moment.
           </p>
         )}
         {held
-          .map((change) => queueRowOf(change, names, role, copies.value))
+          .map((change) =>
+            queueRowOf(change, {
+              names,
+              role,
+              copies: copies.value,
+              goals: goals?.ok === true ? goals.value : new Map(),
+            })
+          )
           .map((row) => (
             <section
               key={row.proposalId}
               className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-lg border p-4"
             >
+              {goals?.ok === true && <GoalChip goal={row.goal} />}
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link
                   href={`/portal/${projectId}/pages/${row.pageId}`}
@@ -167,7 +197,7 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
   return (
     <Screen>
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl tracking-tight">Waiting</h1>
+        <h1 className="text-2xl tracking-tight">For review</h1>
         {project.ok && <p className="text-ink-muted text-sm">{project.value.name}</p>}
       </div>
 
@@ -176,4 +206,4 @@ const WaitingPage = async ({ params }: { params: Promise<{ project: string }> })
   )
 }
 
-export default WaitingPage
+export default ForReviewPage

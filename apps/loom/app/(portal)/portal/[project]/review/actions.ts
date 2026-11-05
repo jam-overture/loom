@@ -43,7 +43,7 @@ const ALREADY = plainState("already-answered")
  * Nothing is revalidated. The answer is shown where the change was, and a
  * revalidation re-renders the screen it was given on, which would take the
  * change and its answer off it together. Every screen these change reads
- * per request, so the next visit to *Waiting* or to the page is current.
+ * per request, so the next visit to *For review* or to the page is current.
  */
 export const answerAction = async (
   _previous: AnswerReport | null,

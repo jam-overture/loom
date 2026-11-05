@@ -6,6 +6,7 @@ import {
   ok,
   proposalIdSchema,
   sequentialIdFactory,
+  treeIdSchema,
   type IntentId,
 } from "@jam-overture/loom"
 import { memoryTreeStore } from "@jam-overture/loom/store"
@@ -22,7 +23,9 @@ import { pageFixture } from "@/app/_lib/pages/fixtures"
 
 import { reportOf } from "../outcome"
 import { portalPolicy } from "../policy"
-import { elementIdsOf, NOTHING_DECLARED, readersOn } from "./fixtures"
+import { memoryProposalGoalStore } from "../goals/proposal-goals-memory"
+import type { ProposalGoalStore } from "../goals/serving"
+import { elementIdsOf, goalOn, NOTHING_DECLARED, readersOn } from "./fixtures"
 import { memoryPageCopyStore } from "./copies-memory"
 import { holdStandingOf } from "./following"
 import { intentFor, PROPOSER, proposeFor, type ProposeFor } from "./propose"
@@ -34,6 +37,8 @@ const PUBLISHED = pageFixture("home", "Welcome", 3)
 const [, HEADING] = elementIdsOf(PUBLISHED)
 
 if (HEADING === undefined) throw new Error("the fixture has a heading")
+
+const GOAL = goalOn(HEADING)
 
 const NOTHING = JSON.stringify({ outcome: "nothing", reason: "All read." })
 
@@ -62,7 +67,14 @@ const pathFor = (confidence = 0.9): WritePath => {
                   deltaId: ids.deltaId(),
                   treeId: intent.treeId,
                   baseRevision: intent.baseRevision,
-                  operations: [{ op: "configure", nodeId: HEADING, set: { level: 2 }, unset: [] }],
+                  operations: [
+                    {
+                      op: "configure",
+                      nodeId: HEADING,
+                      set: { level: 2 },
+                      unset: [],
+                    },
+                  ],
                 },
               })
             )
@@ -80,6 +92,8 @@ const given = (path: WritePath, overrides: Partial<ProposeFor> = {}): ProposeFor
   path,
   copies: memoryPageCopyStore(),
   turnedDown: memoryTurnedDownStore(),
+  goals: [GOAL],
+  proposalGoals: memoryProposalGoalStore(),
   follows: true,
   client: scriptedModelClient(CHANGE),
   sources: readersOn(PUBLISHED, 100, 50),
@@ -156,7 +170,10 @@ describe("proposeFor", () => {
   it("follows a newer published version, carrying a waiting change that still fits it", async () => {
     const path = pathFor(0.5)
     const copies = memoryPageCopyStore()
-    const newer = { ...pageFixture("home", "Welcome back", 5), treeId: PUBLISHED.treeId }
+    const newer = {
+      ...pageFixture("home", "Welcome back", 5),
+      treeId: PUBLISHED.treeId,
+    }
 
     await proposeFor(given(path, { copies }))
 
@@ -168,7 +185,10 @@ describe("proposeFor", () => {
     if (!listed.ok) throw new Error("expected copies")
     const [copy] = listed.value
 
-    expect(copy).toMatchObject({ pageId: PUBLISHED.treeId, startedAt: LATER.getTime() })
+    expect(copy).toMatchObject({
+      pageId: PUBLISHED.treeId,
+      startedAt: LATER.getTime(),
+    })
     if (copy === undefined) return
 
     const carried = await path.holds.forTree(copy.copyId)
@@ -180,7 +200,10 @@ describe("proposeFor", () => {
 
   it("leaves the copy where it is when this deployment's own site serves it", async () => {
     const path = pathFor()
-    const newer = { ...pageFixture("home", "Welcome back", 5), treeId: PUBLISHED.treeId }
+    const newer = {
+      ...pageFixture("home", "Welcome back", 5),
+      treeId: PUBLISHED.treeId,
+    }
 
     await proposeFor(given(path, { client: scriptedModelClient(NOTHING) }))
 
@@ -213,7 +236,10 @@ describe("proposeFor", () => {
     const run = await proposeFor(given(pathFor(), { client, sources: readersOn(PUBLISHED, 10) }))
 
     expect(run).toEqual(
-      ok({ kind: "passed", passed: { kind: "silent", silence: { kind: "too-few", opened: 10 } } })
+      ok({
+        kind: "passed",
+        passed: { kind: "silent", silence: { kind: "too-few", opened: 10 } },
+      })
     )
     expect(client.requests).toHaveLength(0)
   })
@@ -224,6 +250,68 @@ describe("proposeFor", () => {
 
     expect(await proposeFor(given(path, { client }))).toEqual(
       ok({ kind: "passed", passed: { kind: "nothing", reason: "All read." } })
+    )
+    expect(await path.store.head(PUBLISHED.treeId)).toMatchObject({
+      ok: true,
+      value: { revision: 3 },
+    })
+  })
+
+  it("records the goal a change serves, by its intent, and names it", async () => {
+    const path = pathFor(0.5)
+    const proposalGoals = memoryProposalGoalStore()
+    const run = await proposeFor(given(path, { proposalGoals }))
+
+    expect(run.ok && run.value.kind === "proposed" && run.value.goal).toEqual(GOAL)
+
+    const waiting = await path.holds.waiting()
+    if (!waiting.ok) throw new Error("expected holds")
+    const intentIds = waiting.value.held.map((held) => held.intent.intentId)
+
+    expect(intentIds).toHaveLength(1)
+    expect(await proposalGoals.forIntents(intentIds)).toEqual(
+      ok(
+        new Map(
+          intentIds.map((intentId) => [
+            intentId,
+            {
+              intentId,
+              goalId: GOAL.goalId,
+              name: GOAL.name,
+              kind: GOAL.kind,
+              nodeId: HEADING,
+              at: AT.getTime(),
+            },
+          ])
+        )
+      )
+    )
+  })
+
+  it("asks no model for a page no goal is on", async () => {
+    const client = scriptedModelClient(CHANGE)
+    const elsewhere = goalOn(HEADING, {
+      pages: [treeIdSchema.parse("t_pricing")],
+    })
+
+    expect(await proposeFor(given(pathFor(), { client, goals: [] }))).toEqual(
+      ok({ kind: "passed", passed: { kind: "no-goal" } })
+    )
+    expect(await proposeFor(given(pathFor(), { client, goals: [elsewhere] }))).toEqual(
+      ok({ kind: "passed", passed: { kind: "no-goal" } })
+    )
+    expect(client.requests).toHaveLength(0)
+  })
+
+  it("proposes nothing when which goal it serves cannot be recorded", async () => {
+    const path = pathFor()
+    const proposalGoals: Pick<ProposalGoalStore, "record"> = {
+      record: () =>
+        Promise.resolve(err({ code: "unavailable", detail: "no table loom_proposal_goals" })),
+    }
+
+    expect(await proposeFor(given(path, { proposalGoals }))).toEqual(
+      err({ code: "store", detail: "no table loom_proposal_goals" })
     )
     expect(await path.store.head(PUBLISHED.treeId)).toMatchObject({
       ok: true,

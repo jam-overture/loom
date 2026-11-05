@@ -10,6 +10,8 @@ import {
   type Result,
 } from "@jam-overture/loom"
 
+import type { Goal } from "../goals/goal"
+import { GOAL_KIND_WORDS } from "../vocabulary"
 import { evidenceText, type Evidence } from "./evidence"
 import type { TurnedDown } from "./turned-down"
 
@@ -21,7 +23,10 @@ import type { TurnedDown } from "./turned-down"
  * The interpreter then turns that request into a change and the Gate weighs it,
  * exactly as it would weigh anybody's, so nothing the model says here reaches a
  * page without passing the same rules. Its reason travels with the request, so
- * whoever answers the change on *Waiting* reads why it was raised.
+ * whoever answers the change on *For review* reads why it was raised.
+ *
+ * It aims at one goal (0352): the model is told what the goal counts, and
+ * proposes the change most likely to get more readers to do it.
  */
 
 /** Long enough for a request and its reason, short enough to be one change. */
@@ -32,9 +37,10 @@ const MAX_TOKENS = 4_000
 
 export const BRIEF_SYSTEM_PROMPT = [
   "You improve one page of a website from what its readers did on it.",
+  "You are given the page's goal: what the site wants readers to do, on which part of the page.",
   "You are given the page's parts in reading order with how many readers reached each one",
   "and, for parts with things inside them, how many of those readers did something there.",
-  "Propose at most one change: the single change most likely to help readers get further or act more,",
+  "Propose at most one change: the single change most likely to get more readers to do what the goal counts,",
   "that the evidence actually supports. Name the part by its id and say what to change about it,",
   "in one or two plain sentences an editor could carry out. Prefer changing words, order or emphasis",
   "over adding new sections. Do not propose a change the figures do not support:",
@@ -61,9 +67,18 @@ const REPLY_JSON_SCHEMA: JsonObject = {
   required: ["outcome"],
   properties: {
     outcome: { type: "string", enum: ["change", "nothing"] },
-    request: { type: "string", description: "The change to make, naming the part by its id." },
-    evidence: { type: "string", description: "The figure that supports it, in one sentence." },
-    reason: { type: "string", description: "Why nothing should change, when outcome is nothing." },
+    request: {
+      type: "string",
+      description: "The change to make, naming the part by its id.",
+    },
+    evidence: {
+      type: "string",
+      description: "The figure that supports it, in one sentence.",
+    },
+    reason: {
+      type: "string",
+      description: "Why nothing should change, when outcome is nothing.",
+    },
     again: {
       type: "string",
       description:
@@ -77,7 +92,10 @@ export type Brief =
   | { readonly kind: "change"; readonly request: string }
   | { readonly kind: "nothing"; readonly reason: string }
 
-export type BriefError = { readonly code: "model" | "unreadable"; readonly detail: string }
+export type BriefError = {
+  readonly code: "model" | "unreadable"
+  readonly detail: string
+}
 
 /**
  * The request the interpreter is handed: the change, then the figure that
@@ -104,7 +122,10 @@ export const briefFrom = (text: string): Result<Brief, BriefError> => {
   })()
 
   if (parsed?.success !== true) {
-    return err({ code: "unreadable", detail: "the model's answer was not one this could read" })
+    return err({
+      code: "unreadable",
+      detail: "the model's answer was not one this could read",
+    })
   }
 
   return parsed.data.outcome === "change"
@@ -139,26 +160,36 @@ export const turnedDownText = (turnedDown: readonly TurnedDown[]): string =>
         ),
       ].join("\n")
 
-/** The message the model is given: the page, its evidence, and what was turned down on it. Pure. */
-export const briefMessage = (
-  pageName: string,
-  evidence: Evidence,
-  turnedDown: readonly TurnedDown[]
-): string =>
-  [`The page "${pageName}".`, evidenceText(evidence), turnedDownText(turnedDown)]
+/** The goal as the model reads it: what readers do, to which part. Pure. */
+export const goalText = (goal: Goal): string =>
+  `The goal, "${goal.name}", counts each time a reader ${GOAL_KIND_WORDS[goal.kind].does} ${goal.nodeId}.`
+
+/** Everything one brief is written from. */
+export type BriefInput = {
+  readonly pageName: string
+  readonly goal: Goal
+  readonly evidence: Evidence
+  readonly turnedDown: readonly TurnedDown[]
+}
+
+/** The message the model is given: the page, its goal, its evidence, and what was turned down on it. Pure. */
+export const briefMessage = ({ pageName, goal, evidence, turnedDown }: BriefInput): string =>
+  [`The page "${pageName}".`, goalText(goal), evidenceText(evidence), turnedDownText(turnedDown)]
     .filter((part) => part !== "")
     .join("\n\n")
 
-/** Ask the project's model what to change about a page, with its evidence and its history. */
+/** Ask the project's model what to change about a page, toward its goal, with its evidence and history. */
 export const briefFor = async (
   client: ModelClient,
-  pageName: string,
-  evidence: Evidence,
-  turnedDown: readonly TurnedDown[]
+  input: BriefInput
 ): Promise<Result<Brief, BriefError>> => {
   const completion = await withCeiling(
     CEILING_MS,
-    () => err({ code: "unavailable" as const, detail: "the model did not answer in time" }),
+    () =>
+      err({
+        code: "unavailable" as const,
+        detail: "the model did not answer in time",
+      }),
     (signal) =>
       client.complete(
         {
@@ -166,7 +197,7 @@ export const briefFor = async (
           maxTokens: MAX_TOKENS,
           effort: "medium",
           system: BRIEF_SYSTEM_PROMPT,
-          userMessage: briefMessage(pageName, evidence, turnedDown),
+          userMessage: briefMessage(input),
           outputSchema: REPLY_JSON_SCHEMA,
         },
         { signal }

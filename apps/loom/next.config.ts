@@ -22,6 +22,15 @@ import { docsRehypePlugins, docsRemarkPlugins } from "./app/(docs)/_lib/mdx"
  */
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
+  /** The portal's *Waiting* tab became *For review*; an old link still lands on it. */
+  redirects: () =>
+    Promise.resolve([
+      {
+        source: "/portal/:project/waiting",
+        destination: "/portal/:project/review",
+        permanent: true,
+      },
+    ]),
 }
 
 export default createMDX({

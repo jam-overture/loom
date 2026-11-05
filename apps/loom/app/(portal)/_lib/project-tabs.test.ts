@@ -10,7 +10,8 @@ describe("a project's tabs", () => {
     expect(tabs.map((tab) => tab.href)).toEqual([
       "/portal/prj_shop/signals",
       "/portal/prj_shop/pages",
-      "/portal/prj_shop/waiting",
+      "/portal/prj_shop/review",
+      "/portal/prj_shop/goals",
       "/portal/prj_shop/connect",
       "/portal/prj_shop/settings",
     ])

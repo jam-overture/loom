@@ -8,6 +8,40 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
+`apps/loom/app/api/reader-signals/`) · **Status:** **open.** Nothing in the
+portal is blocked: *Signals · By page* shipped on the tallies, and the *Events*
+tab waits for this.
+
+The maintainer settled on 5 November that individual reader events are kept for
+**30 days** by default, as per-deployment configuration, with the tallies
+staying the durable record
+([0349](decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md),
+`docs/portal-wireframes.md` *1 · Signals*). Today a delivery waits in the
+buffer until collection folds it and is then deleted, so there is nothing for
+a paginated event list to read.
+
+What the portal needs from the intake, and nothing more:
+
+1. **Each delivery's signals kept for the window**, per application, with when
+   the deployment received it, the page, version, audience and `view` key, so
+   the portal can list them newest first by a cursor and show *the rest of
+   this page view* (the signals sharing one `view` key).
+2. **The window as a setting** with 30 days as its default, never a constant
+   (`docs/signals.md` rule 5), and a sweep that deletes what is older.
+3. **The reader-facing notice changed with it.** 0313 and 0320 publish to
+   readers when a delivery is gone, and `retentionPromiseOf` checks the sweep
+   keeps that promise. Once events are kept, the ceiling readers are told has
+   to be the kept window; otherwise every privacy page states a lie.
+4. **A scoped reading handle** the portal can call the way it calls
+   `readingsFor(applicationId)` today, so the portal never reaches the table.
+
+The portal will build the *Events* tab, its facets and its drawer on whatever
+handle this lands, and will not touch `src/signals/` to get there.
+
+---
 ## 2026-11-04 — the broadcaster takes the page's root element and publishes no way for a browser-side host to find one, so four places in this repository hard-code `"[data-loom-tree]"`
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/signals/`)
