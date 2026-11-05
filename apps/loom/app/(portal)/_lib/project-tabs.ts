@@ -14,14 +14,14 @@ import type { NavItem } from "./nav"
  *   lands them.
  * - **Pages**, what the site last published (0312), and what Loom proposes
  *   for each page (0329).
- * - **Waiting**, the changes Loom proposed that need a person to say yes (0329).
+ * - **For review**, the changes Loom proposed that need a person to say yes (0329).
  * - **Connect your site**, the key and the snippet.
  * - **Settings**, everything an owner changes about the project.
  */
 export const projectTabs = (projectId: string): readonly NavItem[] => [
   { label: "Signals", href: `/portal/${projectId}/signals` },
   { label: "Pages", href: `/portal/${projectId}/pages` },
-  { label: "Waiting", href: `/portal/${projectId}/waiting` },
+  { label: "For review", href: `/portal/${projectId}/review` },
   { label: "Connect your site", href: `/portal/${projectId}/connect` },
   { label: "Settings", href: `/portal/${projectId}/settings` },
 ]

@@ -21,7 +21,7 @@ import type { TurnedDown } from "./turned-down"
  * The interpreter then turns that request into a change and the Gate weighs it,
  * exactly as it would weigh anybody's, so nothing the model says here reaches a
  * page without passing the same rules. Its reason travels with the request, so
- * whoever answers the change on *Waiting* reads why it was raised.
+ * whoever answers the change on *For review* reads why it was raised.
  */
 
 /** Long enough for a request and its reason, short enough to be one change. */
