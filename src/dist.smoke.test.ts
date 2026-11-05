@@ -67,6 +67,7 @@ const NAMED_EXPORT: Readonly<Record<string, string>> = {
   ".": "createTree",
   "./anthropic": "anthropicModelClient",
   "./react": "renderRequest",
+  "./addressed": "addressedRootIn",
   "./primitives": "STARTER_PRIMITIVES",
   "./primitives/compositions": "heroBand",
   "./sdk": "definePrimitive",

@@ -8,9 +8,9 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 14,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 15,
         "widest": true,
         "sharedWith": [
           {
@@ -4252,9 +4252,9 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -4296,8 +4296,8 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
         "doorsSharingNothing": 15,
         "widest": false,
         "sharedWith": [
@@ -4305,6 +4305,11 @@
             "specifier": "@jam-overture/loom",
             "slug": "runtime",
             "names": 5
+          },
+          {
+            "specifier": "@jam-overture/loom/addressed",
+            "slug": "addressed",
+            "names": 4
           }
         ],
         "collisions": []
@@ -5188,6 +5193,74 @@
       ]
     },
     {
+      "specifier": "@jam-overture/loom/addressed",
+      "slug": "addressed",
+      "types": "./dist/render/addressed.d.ts",
+      "requires": [],
+      "files": 2,
+      "narrower": [],
+      "standing": {
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 16,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@jam-overture/loom/react",
+            "slug": "react",
+            "names": 4
+          }
+        ],
+        "collisions": []
+      },
+      "groups": [
+        {
+          "module": "render/addressed",
+          "title": "Addressed",
+          "summary": "The names a render writes onto a published page, and how to find the page.",
+          "symbols": [
+            {
+              "name": "addressedRootIn",
+              "kind": "function",
+              "signature": "const addressedRootIn: (scope: ParentNode) => Element | undefined",
+              "summary": "The root of an addressed page within `scope`, or `undefined` if there is none."
+            }
+          ]
+        },
+        {
+          "module": "render/editable",
+          "title": "Editable",
+          "summary": "Edit mode decorates; it never restructures.",
+          "symbols": [
+            {
+              "name": "LOOM_NODE_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_NODE_ATTRIBUTE = \"data-loom-node\"",
+              "summary": ""
+            },
+            {
+              "name": "LOOM_TYPE_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_TYPE_ATTRIBUTE = \"data-loom-type\"",
+              "summary": ""
+            },
+            {
+              "name": "LOOM_TREE_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_TREE_ATTRIBUTE = \"data-loom-tree\"",
+              "summary": ""
+            },
+            {
+              "name": "LOOM_REVISION_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_REVISION_ATTRIBUTE = \"data-loom-revision\"",
+              "summary": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
       "specifier": "@jam-overture/loom-primitives",
       "slug": "primitives",
       "types": "./dist/primitives/index.d.ts",
@@ -5202,9 +5275,9 @@
       "files": 218,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 15,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [
           {
@@ -5672,9 +5745,9 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 15,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [
           {
@@ -6760,9 +6833,9 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 15,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [
           {
@@ -7337,9 +7410,9 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -7540,9 +7613,9 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -8346,9 +8419,9 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -8725,9 +8798,9 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -8953,9 +9026,9 @@
         }
       ],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 14,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 15,
         "widest": false,
         "sharedWith": [
           {
@@ -12994,9 +13067,9 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 15,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [
           {
@@ -13129,9 +13202,9 @@
       "files": 19,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -13191,9 +13264,9 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 15,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [
           {
@@ -13765,9 +13838,9 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -13835,9 +13908,9 @@
       "files": 99,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -14257,9 +14330,9 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1880,
-        "otherDoors": 16,
-        "doorsSharingNothing": 16,
+        "packageNames": 1881,
+        "otherDoors": 17,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [],
         "collisions": []
