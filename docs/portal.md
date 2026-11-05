@@ -275,7 +275,7 @@ started until the five above are on `main`:
 | 8a | **Signals you can open.** *Signals* is paginated, newest first, with a right drawer for one event or one page, and a *By page* tab ([wireframes](portal-wireframes.md)). *By page* reads the tallies already kept. *Events* needs individual events kept for a window: **30 days**, the maintainer's choice on 5 November | observation | unit 5 |
 | 8b | **Goals.** One outcome per project, built from a signal kind on a part on some or all pages, one of them primary. Every proposal names the goal it serves, and *For review* leads with it | reasoning | unit 7 |
 | 8 | **The pull request.** An accepted revision becomes a PR against their repository, followed on one timeline to the published version. The loop closes here | connection | unit 7 |
-| 8c | **Page history.** Versions on a timeline, each with before and after on its goal and a plain verdict | observation | units 8b and 8 |
+| 8c | **Page history.** Versions on a timeline, each with before and after on its goal and a plain verdict, using the measuring window and minimum page views [`portal-wireframes.md`](portal-wireframes.md) records | observation | units 8b and 8 |
 | 9 | **Audiences, then the model seam.** Segments are the audiences of 0263; a record before any build | governance, reasoning | unit 8 |
 
 **The rows from 8a down are in the order the maintainer agreed on 5 November
@@ -357,8 +357,10 @@ unit 0.
    settled both choices: on 19 October, that every delivery carries a key,
    the marketing site included; on 20 October, that the key is stored
    readable, because it is printed in every page that sends one.
-6. **How long individual reader events are kept.** Unit 8a's *Events* tab needs
-   them; *By page* does not.
+6. ~~**How long individual reader events are kept.**~~ **30 days**, decided on
+   5 November with how long a change is measured before a result is shown, and
+   how many page views that needs: the recommendations in
+   [`portal-wireframes.md`](portal-wireframes.md).
 
 ## Not in scope, and one of them deserves naming
 
