@@ -407,7 +407,17 @@ this site should be composed from the library rather than arranged locally
 *Taken from the `vercel[bot]` comment after the pull request was opened, not
 composed from the branch name.*
 
-PLACEHOLDER_PREVIEW
+https://loom-git-docs-78-no-room-for-da0609-jpizzolato36-6341s-projects.vercel.app
+
+Nothing on it looks different, which is the point — the two pages the search
+box is reached from are unchanged:
+
+- https://loom-git-docs-78-no-room-for-da0609-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime
+- https://loom-git-docs-78-no-room-for-da0609-jpizzolato36-6341s-projects.vercel.app/docs/search-index/prose/the-runtime
+
+The second is the file this branch changed, served. Its keys are what is left
+of each address once `/docs/the-runtime` is taken off the front, and `under`
+at the top of it is that prefix.
 
 **There is no screenshot in this report and there should not be.** Nothing a
 reader can see changed: the relative keys are invisible by construction — the
